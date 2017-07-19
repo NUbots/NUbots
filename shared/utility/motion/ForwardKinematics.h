@@ -448,12 +448,12 @@ namespace motion {
             float number_of_feet_down = 0;
             if (sensors.leftFootDown) {
                 CoP += fsrCentreInBodyCoords(
-                    model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG].centre), true);
+                    model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG - 1].centre), true);
                 number_of_feet_down += 1.0f;
             }
             if (sensors.rightFootDown) {
                 CoP += fsrCentreInBodyCoords(
-                    model, sensors, convert<double, 2>(sensors.fsr[LimbID::RIGHT_LEG].centre), false);
+                    model, sensors, convert<double, 2>(sensors.fsr[LimbID::RIGHT_LEG - 1].centre), false);
                 number_of_feet_down += 1.0f;
             }
             if (number_of_feet_down == 2) {

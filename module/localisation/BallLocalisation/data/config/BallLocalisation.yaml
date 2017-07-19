@@ -1,0 +1,10 @@
+process_noise_diagonal: [0.01,0.01]
+n_rogues: 1
+
+reset_range: [2,2]
+n_particles: 30
+
+start_state: [5,0]
+start_variance: [1,1]
+
+ball_pos_log: false

@@ -21,7 +21,7 @@ NUCLEAR_ROLE(
     vision::BallDetector
 
     #Localisation
-    localisation::RobotFieldLocalisation
+    localisation::RobotParticleLocalisation
     localisation::BallLocalisation
 
     support::configuration::SoccerConfig

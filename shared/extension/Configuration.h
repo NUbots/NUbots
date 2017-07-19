@@ -130,8 +130,8 @@ struct Configuration {
                     case YAML::NodeType::Null:
                     case YAML::NodeType::Undefined:
                     default: {
-                        std::cout << "Unsetting key '" << key
-                                  << "' in YAML file 'Right.yaml'. Is this what you intended?" << std::endl;
+                        NUClear::log<NUClear::WARN>(
+                            "Unsetting key", "'" + key + "'", "in YAML file. Is this what you intended?");
                         ret[key] = it->second;
                         break;
                     }

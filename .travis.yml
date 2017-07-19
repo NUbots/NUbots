@@ -12,28 +12,6 @@ notifications:
   slack:
     secure: BNNFwBsGwKxamyxH6OTtZLfOH9541zr3keNQ0U1rdE2eJpOL11h5gFCd2DHc4OhK596cHFmZrg6mryLXapqHEFCcrfx4CpLyJVxwXc/16rjE838sa4AoBV14ZzMoRiFsNdBOQOVBRu+0SR3kiJMRtJxOTPELnrHWOKmSuVGHjVg=
 
-# Build for each of our platforms
-env:
-  # Build for native
-  - PLATFORM=native
-    INSTALL_COMMAND=".travis/install_toolchain.sh"
-    SCRIPT_COMMAND=".travis/build_code.sh"
-
-  # Build for nuc7i7bnh
-  - PLATFORM=nuc7i7bnh
-    INSTALL_COMMAND=".travis/install_toolchain.sh"
-    SCRIPT_COMMAND=".travis/build_code.sh"
-
-  # Build for fitpc2i
-  - PLATFORM=fitpc2i
-    INSTALL_COMMAND=".travis/install_toolchain.sh"
-    SCRIPT_COMMAND=".travis/build_code.sh"
-
-  # Test with clang-format
-  - PLATFORM=clang-format
-    INSTALL_COMMAND=".travis/install_clang-format.sh"
-    SCRIPT_COMMAND=".travis/validate_format.sh"
-
 # Most modern travis image
 group: edge
 
@@ -49,10 +27,23 @@ branches:
   only:
     - 'master'
 
-install:
-  # Run the install command
-  - (eval "$INSTALL_COMMAND")
+jobs:
+  include:
+    # As a first stage try to format the code since this is fast
+    - stage: Clang Format
+      install: .travis/install_clang-format.sh
+      script: .travis/validate_format.sh
 
-script:
-  # Run our script command
-  - (eval "$SCRIPT_COMMAND")
+    # If that passes, then we can try building the three build targets
+    - stage: Build
+      env: PLATFORM=native
+      install: .travis/install_toolchain.sh
+      script: .travis/build_code.sh
+
+    - env: PLATFORM=nuc7i7bnh
+      install: .travis/install_toolchain.sh
+      script: .travis/build_code.sh
+
+    - env: PLATFORM=fitpc2i
+      install: .travis/install_toolchain.sh
+      script: .travis/build_code.sh

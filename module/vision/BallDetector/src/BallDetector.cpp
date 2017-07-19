@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "BallDetector.h"
@@ -36,6 +36,7 @@
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
@@ -173,6 +174,8 @@ namespace vision {
             green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
             green_radial_samples  = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
+
+            ball_angular_cov = config["ball_angular_cov"].as<arma::vec>();
 
             kmeansClusterer.configure(config["clustering"]);
 
@@ -324,27 +327,15 @@ namespace vision {
                         Transform3D Hwc = Hcw.i();
 
                         // Work out how far away the ball must be to be at the distance it is from the camera
-                        arma::vec3 width_rBWw = Hwc.transformPoint(ballCentreRay * widthDistance);
-
-                        // Put our ball centre projection into the same space
-                        arma::vec3 proj_rBWw = Hwc.transformPoint(ballCentreGroundProj);
+                        arma::vec3 width_rBCc = ballCentreRay * widthDistance;
 
                         // Average our two centroids
-                        arma::vec3 rBWw = (width_rBWw);
+                        arma::vec3 rBCc = (width_rBCc);
 
-                        // Attach the position to the object
-                        b.position = convert<double, 3>(rBWw);
-
-                        Transform3D Hgc       = camToGround;
-                        arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
-                        arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
-                        b.torsoSpacePosition  = convert<double, 3>(width_rBGg);
-                        // log("ball pos1 =", b.position);
-                        // log("ball pos2 =", b.torsoSpacePosition);
-                        // log("width_rBGg =", width_rBGg.t());
-                        // log("proj_rBGg =", proj_rBGg.t());
-                        // log("ballCentreRay =",ballCentreRay.t());
-                        // log("camToGround =\n",camToGround);
+                        // Attach the measurement to the object
+                        b.measurements.push_back(Ball::Measurement());
+                        b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
+                        b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
 
                         // On screen visual shape
                         b.circle.radius = result.model.radius;
@@ -361,6 +352,7 @@ namespace vision {
                             b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(
                                 imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.focalLengthPixels)));
                         }
+                        b.visObject.timestamp = NUClear::clock::now();
 
                         balls->push_back(std::move(b));
                     }
@@ -395,5 +387,6 @@ namespace vision {
                     lastFrame.time = sensors.timestamp;
                 });
     }
+
 }  // namespace vision
 }  // namespace module

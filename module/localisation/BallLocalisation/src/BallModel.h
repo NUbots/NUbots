@@ -49,18 +49,26 @@ namespace localisation {
 
         arma::vec3 predictedObservation(const arma::vec::fixed<size>& state,
                                         const message::support::FieldDescription& field,
-                                        const message::input::Sensors& sensors,
-                                        const MeasurementType::BALL&) const;
+                                        const message::input::Sensors& sensors) const;
 
-        arma::vec observationDifference(const arma::vec& measurement,
-                                        const arma::vec3& rBCc,
-                                        const message::support::FieldDescription& field,
-                                        const message::input::Sensors& sensors,
-                                        const MeasurementType::BALL&) const;
+        arma::vec observationDifference(const arma::vec& measurement, const arma::vec3& rBCc) const;
 
         arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
 
         arma::mat::fixed<size, size> processNoise() const;
+
+
+        // number and range of reset particles
+        int n_rogues          = 10;
+        arma::vec2 resetRange = {10, 10};
+
+        // Getters
+        int getRogueCount() const {
+            return n_rogues;
+        }
+        arma::vec getRogueRange() const {
+            return resetRange;
+        }
     };
 }  // namespace localisation
 }  // namespace module

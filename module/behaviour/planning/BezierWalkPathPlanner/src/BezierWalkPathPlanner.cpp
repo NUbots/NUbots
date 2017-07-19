@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "BezierWalkPathPlanner.h"
@@ -259,7 +259,6 @@ namespace behaviour {
                                 }
                             }
 
-
                             d1 = std::min(float(2.0), std::max(d1, float(0.1)));
 
                             d2 = std::min(float(2.0), std::max(d2, float(0.1)));
@@ -302,7 +301,6 @@ namespace behaviour {
 
 
                             arma::fvec2 next_robot_position = arma::mean(bez_matrix).t();
-
 
                             // log("Robot next position = ", next_robot_position);
 
@@ -355,9 +353,6 @@ namespace behaviour {
                             // emit(graph("scale", scale));
                             // emit(graph("distanceToBall", distanceToBall));
                             // emit(graph("forwardSpeed2", finalForwardSpeed));
-
-
-                            emit(std::make_unique<KickPlan>(KickPlan{kick_target, KickType::SCRIPTED}));
 
                             std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
                                 subsumptionId, Transform2D({finalForwardSpeed, 0, angle}));

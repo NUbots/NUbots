@@ -46,6 +46,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
+#include "message/support/FieldDescription.h"
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -82,7 +83,8 @@ namespace behaviour {
         using message::motion::DisableWalkEngineCommand;
 
         using message::localisation::Self;
-        using message::vision::Ball;
+        using message::localisation::Ball;
+        using message::support::FieldDescription;
 
 
         SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
@@ -157,17 +159,19 @@ namespace behaviour {
             // });
 
             on<Every<20, Per<std::chrono::seconds>>,
-               With<std::vector<Ball>>,
+               With<Ball>,
                With<std::vector<Self>>,
                With<Sensors>,
                With<WantsToKick>,
                With<KickPlan>,
+               With<FieldDescription>,
                Sync<SimpleWalkPathPlanner>>()
-                .then([this](const std::vector<Ball>& ball,
+                .then([this](const Ball& ball,
                              const std::vector<Self>& selfs,
                              const Sensors& sensors,
                              const WantsToKick& wantsTo,
-                             const KickPlan& kickPlan) {
+                             const KickPlan& kickPlan,
+                             const FieldDescription& field) {
                     if (wantsTo.kick) {
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
@@ -193,37 +197,16 @@ namespace behaviour {
                     Transform3D Htw = convert<double, 4, 4>(sensors.world);
                     auto now        = NUClear::clock::now();
                     float timeSinceBallSeen =
-                        std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
+                        std::chrono::duration_cast<std::chrono::nanoseconds>(now - ball.locObject.last_measurement_time)
+                            .count()
                         * (1 / std::nano::den);
 
-                    // TODO: support non-ball targets
-                    if (!robot_ground_space) {
-                        if (ball.size() > 0) {
-                            arma::vec2 rBWw_vec2 = convert<double, 2>(ball[0].position.head<2>());
-                            rBWw[0]              = rBWw_vec2[0];
-                            rBWw[1]              = rBWw_vec2[1];
 
-                            timeBallLastSeen = now;
-                            // log("ball seen");
-                        }
-                        else {
-                            rBWw = timeSinceBallSeen < search_timeout ? rBWw :  // Place last seen
-                                       Htw.x() + Htw.translation();             // In front of the robot
-                        }
-                        arma::vec3 position3d = Htw.transformPoint(rBWw);
-                        position[0]           = position3d[0];
-                        position[1]           = position3d[1];
-                    }
-                    else {
-                        if (ball.size() > 0) {
-                            position         = convert<double, 3>(ball[0].torsoSpacePosition);
-                            timeBallLastSeen = now;
-                        }
-                        else {
-                            position = timeSinceBallSeen < search_timeout ? position :  // Place last seen
-                                           arma::vec2({1, 0});                          // In front of the robot
-                        }
-                    }
+                    arma::vec3 rBWw_temp = {ball.locObject.position[0], ball.locObject.position[1], field.ball_radius};
+                    rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
+                               Htw.x() + Htw.translation();                                  // In front of the robot
+                    arma::vec3 pos = Htw.transformPoint(rBWw);
+                    position       = arma::vec2{pos[0], pos[1]};
 
                     // Hack Planner:
                     float headingChange = 0;
@@ -279,25 +262,9 @@ namespace behaviour {
                         std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
 
-                    // TODO: delete this?!?!?
-                    arma::vec2 ball_world_position =
-                        RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position),
-                                              convert<double, 2>(selfs.front().heading),
-                                              position.rows(0, 1));
-                    arma::vec2 kick_target =
-                        2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
-                    emit(drawSphere("kick_target",
-                                    arma::vec3({kick_target[0], kick_target[1], 0.0}),
-                                    0.1,
-                                    arma::vec3({1, 0, 0}),
-                                    0));
-                    // log("kick_target", kick_target[0], kick_target[1]);
-
-                    emit(std::make_unique<KickPlan>(
-                        KickPlan(convert<double, 2>(kick_target), KickPlan::KickType::SCRIPTED)));
-
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
+
                 });
 
             on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this](const MotionCommand& cmd) {

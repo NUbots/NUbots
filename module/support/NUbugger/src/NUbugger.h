@@ -119,10 +119,6 @@ namespace support {
                 emit<Scope::NETWORK>(msg, "nusight", reliable);
             }
         }
-
-        void EmitLocalisationModels(const std::unique_ptr<message::localisation::FieldObject>& robot_model,
-                                    const std::unique_ptr<message::localisation::FieldObject>& ball_model);
-
         // message::support::nubugger::Message::Type getMessageTypeFromString(std::string type_name);
         // std::string getStringFromMessageType(message::support::nubugger::Message::Type type);
     public:
