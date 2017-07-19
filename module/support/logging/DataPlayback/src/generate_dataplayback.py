@@ -47,9 +47,6 @@ if __name__ == "__main__":
     source = dedent("""\
         #include "DataPlayback.h"
 
-
-        #include "DataPlayback.h"
-
         #include "extension/Configuration.h"
         #include "read_packet.h"
 
@@ -105,6 +102,7 @@ if __name__ == "__main__":
 
                                     // If we are looping go back to the start of the file and reset our timecode
                                     if (loop_playback) {{
+                                        input_file.clear();
                                         input_file.seekg(0);
                                         first_timecode = std::chrono::microseconds(0);
 
@@ -112,9 +110,14 @@ if __name__ == "__main__":
                                     }}
                                     // Otherwise disable this reaction and stop
                                     else {{
+                                        input_file.clear();
                                         playback_handle.disable();
                                         buffered = true;
                                     }}
+                                }}
+                                // We tried to read something funny (possibly tried to read too many bytes)
+                                else if (input_file.bad() || input_file.fail()) {{
+                                    input_file.clear();
                                 }}
                                 else {{
                                     // We don't know what's up, throw the exception again
