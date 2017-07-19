@@ -11,9 +11,9 @@ format:
   #pixel: RGB8
 
 lens:
-  radiansPerPixel: 0.001
+  radiansPerPixel: 0.00245
   centreOffset: [0,0]
-  FOV: 2.0
+  FOV: 3.14
 
 settings:
   exposure: 33333             # The shutter time in microseconds (1/fps).
