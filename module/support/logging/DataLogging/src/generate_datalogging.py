@@ -142,9 +142,9 @@ if __name__ == "__main__":
                             if ((logging && !output_file.is_open())
                                 || (logging && output_file.is_open() && log_dir != config["directory"].as<std::string>())) {{
                                 // Close our existing file if it is open
-                                if (output_file.is_open()) {
+                                if (output_file.is_open()) {{
                                     output_file.close();
-                                }
+                                }}
 
                                 log_dir = config["directory"].as<std::string>();
 
