@@ -116,8 +116,7 @@ namespace pose {
         // Calculate the ankle roll (singularity with multiple solutions if hipInAnkleFrame y = z = 0)
         ankleRoll = std::atan2(hipInAnkleFrame.y(), hipInAnkleFrame.z());
 
-        // Calculate the ankle pitch (singularity with multiple solutions if legLength = 0) // TODO: And if legLength =
-        // 0?
+        // Calculate the ankle pitch (singularity with multiple solutions if legLength = 0)
         double legAxisPitch = std::asin(utility::math::clamp(-1.0, -hipInAnkleFrame.x() / legLength, 1.0));
         anklePitch          = legAxisPitch - alpha;
 
