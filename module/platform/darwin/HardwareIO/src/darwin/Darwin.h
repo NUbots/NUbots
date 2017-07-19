@@ -79,6 +79,9 @@ class Darwin {
 private:
     /// Our UART class that we will communicate through
     UART uart;
+    /// Which servos we should be building for
+    std::vector<uint8_t> enabledServoIds;
+
     /// Our Prebuilt bulk read command
     std::vector<uint8_t> bulkReadCommand;
 
@@ -88,9 +91,7 @@ private:
     void buildBulkReadPacket();
 
 public:
-    inline void setConfig(const extension::Configuration& config) {
-        uart.setConfig(config);
-    }
+    void setConfig(const extension::Configuration& config);
 
     /// The CM730
     CM730 cm730;

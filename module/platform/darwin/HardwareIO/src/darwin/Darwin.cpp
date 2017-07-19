@@ -31,6 +31,7 @@ using ServoID = utility::input::ServoID;
 // Initialize all of the sensor handler objects using the passed uart
 Darwin::Darwin(const char* name)
     : uart(name)
+    , enabledServoIds(20, true)
     , bulkReadCommand()
     , cm730(uart, ID::CM730)
     , rShoulderPitch(uart, ID::R_SHOULDER_PITCH)
@@ -71,6 +72,20 @@ Darwin::Darwin(const char* name)
 
     // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
     uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_LEVEL, 1));
+}
+
+void Darwin::setConfig(const extension::Configuration& config) {
+
+    // Set servos to be enabled if they are not simulated
+    for (size_t i = 0; i < config["servos"].config.size(); ++i) {
+        enabledServoIds[i] = !config["servos"][i]["servo_direction"].as<bool>();
+    }
+
+    // Rebuild our bulk read packet
+    buildBulkReadPacket();
+
+    // Set the baud rate on the uart
+    uart.setConfig(config);
 }
 
 std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
@@ -138,8 +153,11 @@ void Darwin::buildBulkReadPacket() {
 
             // Otherwise we assume that it's a servo
             default:
-                request.push_back(
-                    std::make_tuple(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data)));
+                // Only add this servo if we aren't simulating it
+                if (enabledServoIds[sensor.first - 1]) {
+                    request.push_back(
+                        std::make_tuple(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data)));
+                }
                 break;
         }
     }
