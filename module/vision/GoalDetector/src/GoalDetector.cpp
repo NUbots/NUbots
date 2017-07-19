@@ -42,6 +42,7 @@
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
 
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -70,6 +71,7 @@ namespace vision {
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getImageFromCam;
     using utility::math::vision::getImageFromCamCts;
+    using utility::nubugger::drawVisionLines;
 
     using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
@@ -169,7 +171,7 @@ namespace vision {
 
                 auto split = std::partition(
                     std::begin(segments), std::end(segments), [image](const RansacGoalModel::GoalSegment& segment) {
-                        return arma::dot(convert<double, 3>(image.horizon_normal), segment.left + segment.right / 2)
+                        return arma::dot(convert<double, 3>(image.horizon_normal), (segment.left + segment.right) / 2)
                                > 0;
                     });
 
@@ -184,13 +186,45 @@ namespace vision {
                                                                          MAXIMUM_FITTED_MODELS,
                                                                          CONSENSUS_ERROR_THRESHOLD);
 
+                std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                            Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+                    debug;
                 // Look at our results
                 for (auto& result : models) {
+
 
                     // Get our left, right and midlines
                     Plane& left  = result.model.leftPlane;
                     Plane& right = result.model.rightPlane;
                     Plane mid;
+
+                    arma::vec3 debugLeftt = left.orthogonalProjection(arma::vec3({1, 0, 1}));
+                    arma::vec3 debugLeftb = left.orthogonalProjection(arma::vec3({1, 0, -1}));
+
+                    arma::vec3 debugRightt = right.orthogonalProjection(arma::vec3({1, 0, 1}));
+                    arma::vec3 debugRightb = right.orthogonalProjection(arma::vec3({1, 0, -1}));
+                    // DEBUG!
+                    float N = 100;
+                    for (int i = 0; i < 100; i++) {
+                        float alpha              = i / N;
+                        float alphaNext          = (i + 1) / N;
+                        arma::vec3 debugRightPt1 = debugRightt * alpha + (1 - alpha) * debugRightb;
+                        arma::vec3 debugRightPt2 = debugRightt * alphaNext + (1 - alphaNext) * debugRightb;
+
+                        arma::vec3 debugLeftPt1 = debugLeftt * alpha + (1 - alpha) * debugLeftb;
+                        arma::vec3 debugLeftPt2 = debugLeftt * alphaNext + (1 - alphaNext) * debugLeftb;
+
+                        debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugRightPt1, cam)),
+                                                        convert<int, 2>(getImageFromCam(debugRightPt2, cam)),
+                                                        Eigen::Vector4d(1, 0, 0, 1)));
+
+                        debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugLeftPt1, cam)),
+                                                        convert<int, 2>(getImageFromCam(debugLeftPt2, cam)),
+                                                        Eigen::Vector4d(0, 0, 1, 1)));
+                    }
+
+                    log("left normal = ", left.normal);
+                    log("right normal = ", right.normal);
 
                     // Normals in same direction
                     if (arma::dot(left.normal, right.normal) > 0) {
@@ -219,7 +253,7 @@ namespace vision {
                     direction *= cam.imageSizePixels[1] / cam.FOV[1];
 
                     // Classify until we reach green
-                    arma::vec3 basePoint({0, 0, 0});
+                    arma::vec3 basePoint({1, 0, 0});
                     int notWhiteLen        = 0;
                     arma::vec3 point       = arma::normalise(mid.orthogonalProjection(midpoint));
                     arma::ivec2 imagePoint = getImageFromCam(point, cam);
@@ -259,11 +293,11 @@ namespace vision {
                     float min = 1, max = -1;
                     arma::vec3 minPt, maxPt;
                     // Look through our segments to find endpoints
-
+                    arma::vec3 horizon_normal = convert<double, 3>(image.horizon_normal);
                     for (auto& segment : result) {
                         // Project left and right onto midpoint keep top and bottom
-                        auto leftDot  = arma::dot(convert<double, 3>(image.horizon_normal), segment.left);
-                        auto rightDot = arma::dot(convert<double, 3>(image.horizon_normal), segment.right);
+                        auto leftDot  = arma::dot(horizon_normal, segment.left);
+                        auto rightDot = arma::dot(horizon_normal, segment.right);
 
                         if (leftDot < min) {
                             min   = leftDot;
@@ -284,8 +318,14 @@ namespace vision {
                     }
 
                     // Get our endpoints from the min and max points on the line
-                    arma::vec3 midP1 = maxPt - minPt;  // TODO: Check calculation
-                    arma::vec3 midP2 = mid.orthogonalProjection(basePoint);
+                    arma::vec3 midP1 = arma::normalise(maxPt + minPt);  // TODO: Check calculation
+                    arma::vec3 midP2 = arma::normalise(mid.orthogonalProjection(basePoint));
+
+                    log("maxPt:\n", maxPt);
+                    log("minPt:\n", minPt);
+                    log("midP1:\n", midP1);
+                    log("midP2:\n", midP2);
+                    log("mid.normal:\n", mid.normal);
 
                     // Project those points outward onto the quad
                     arma::vec3 p1 =
@@ -318,8 +358,10 @@ namespace vision {
                     goal.quad.tr = convert<double, 2>(getImageFromCamCts(tr, cam));
                     goal.quad.br = convert<double, 2>(getImageFromCamCts(br, cam));
 
+
                     goals->push_back(std::move(goal));
                 }
+                emit(drawVisionLines(debug));
 
 
                 // Throwout invalid quads
@@ -433,11 +475,15 @@ namespace vision {
                     arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
                     // Get vectors for TL TR BL BR;
-                    arma::vec3 ctl       = getCamFromScreen(tl, cam);
-                    arma::vec3 ctr       = getCamFromScreen(tr, cam);
-                    arma::vec3 cbl       = getCamFromScreen(bl, cam);
-                    arma::vec3 cbr       = getCamFromScreen(br, cam);
+                    arma::vec3 ctl       = convert<double, 3>(it->frustum.tl);
+                    arma::vec3 ctr       = convert<double, 3>(it->frustum.tr);
+                    arma::vec3 cbl       = convert<double, 3>(it->frustum.bl);
+                    arma::vec3 cbr       = convert<double, 3>(it->frustum.br);
                     arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
+
+                    log("Goal:");
+                    log("\n", tl.t(), tr.t(), bl.t(), br.t());
+                    log("\n", ctl.t(), ctr.t(), cbl.t(), cbr.t());
 
 
                     // TODO: NORMALS not used currently - delete?
@@ -500,7 +546,7 @@ namespace vision {
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                     }
 
-                    // Angular positions from the camera
+                    // TODO FIX for Igus Angular positions from the camera
                     arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor);
                     it->visObject.screenAngular =
                         convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
