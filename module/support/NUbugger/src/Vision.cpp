@@ -46,9 +46,10 @@ namespace support {
     using message::input::CameraParameters;
 
     void NUbugger::provideVision() {
-        handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then([this](const CameraParameters& cameraParameters){
-            send(cameraParameters, 1, false, NUClear::clock::now());
-        }));
+        handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then(
+            [this](const CameraParameters& cameraParameters) {
+                send(cameraParameters, 1, false, NUClear::clock::now());
+            }));
 
         handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
 
