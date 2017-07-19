@@ -143,7 +143,7 @@ namespace vision {
                    const LookUpTable& lut,
                    const FieldDescription& fd) {
 
-                log("Detecting goals");
+                // log("Detecting goals");
 
                 const auto& image = *rawImage;
                 // Our segments that may be a part of a goal
