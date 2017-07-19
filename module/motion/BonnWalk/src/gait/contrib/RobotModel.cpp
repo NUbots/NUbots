@@ -5,7 +5,7 @@
 // Includes
 #include "RobotModel.h"
 
-// Namespaces
+#include "utility/math/angle.h"
 
 //
 // RobotModel class
@@ -26,7 +26,9 @@ namespace contrib {
     // Reset function (if resetModel is true this resets everything, otherwise it just resets the odometry)
     void RobotModel::reset(bool resetModel) {
         // Reset the entire kinematic model if required
-        if (resetModel) initKinematicModel();
+        if (resetModel) {
+            initKinematicModel();
+        }
 
         // Update the robot specifications
         robotSpecCallback();
@@ -49,21 +51,21 @@ namespace contrib {
         // Initialise the base frame
         base.setReferenceFrame(nullptr);
         base.setTranslation(0, 0, 0);  // Updated further down in this function
-        base.setRotation(0, 0, 0, 1);
+        base.setRotation(1, 0, 0, 0);
 
         // Initialise the left and right footstep frames
         leftFootstep.setReferenceFrame(nullptr);
         leftFootstep.setTranslation(0, 0, 0);  // Updated further down in this function
-        leftFootstep.setRotation(0, 0, 0, 1);  // Updated further down in this function
+        leftFootstep.setRotation(1, 0, 0, 0);  // Updated further down in this function
         rightFootstep.setReferenceFrame(nullptr);
         rightFootstep.setTranslation(0, 0, 0);  // Updated further down in this function
-        rightFootstep.setRotation(0, 0, 0, 1);  // Updated further down in this function
+        rightFootstep.setRotation(1, 0, 0, 0);  // Updated further down in this function
 
         // Initialise the support and free footstep frames
         suppFootstep.setTranslation(0, 0, 0);
-        suppFootstep.setRotation(0, 0, 0, 1);
+        suppFootstep.setRotation(1, 0, 0, 0);
         freeFootstep.setTranslation(0, 0, 0);
-        freeFootstep.setRotation(0, 0, 0, 1);
+        freeFootstep.setRotation(1, 0, 0, 0);
         updateSuppFreeFootstep();  // Sets the reference frames of the support and free footstep frames
 
         // Initialise the kinematic chain hierarchy (reference frames)
@@ -80,10 +82,10 @@ namespace contrib {
 
         // Set the translation of the base frame so that the CoM is at (0,0), and the support foot floor point is on the
         // floor (z = 0)
-        Vec comPos = com.position();
-        Vec suppFootFloorPointPos =
+        Eigen::Vector3d comPos = com.position();
+        Eigen::Vector3d suppFootFloorPointPos =
             (supportLegSign == RIGHT_LEG ? rFootFloorPoint.position() : lFootFloorPoint.position());
-        base.setTranslation(-comPos.x, -comPos.y, -suppFootFloorPointPos.z);
+        base.setTranslation(-comPos.x(), -comPos.y(), -suppFootFloorPointPos.z());
 
         // Update the left and right footstep frames
         updateLeftRightFootstep();
@@ -158,34 +160,34 @@ namespace contrib {
     // Initialise the rotations of the frames in the kinematic chain
     void RobotModel::initKinematicRotations() {
         // Trunk
-        com.setRotation(0, 0, 0, 1);
-        trunkLink.setRotation(0, 0, 0, 1);
+        com.setRotation(1, 0, 0, 0);
+        trunkLink.setRotation(1, 0, 0, 0);
 
         // Head
-        neck.setRotation(0, 0, 0, 1);
-        head.setRotation(0, 0, 0, 1);
+        neck.setRotation(1, 0, 0, 0);
+        head.setRotation(1, 0, 0, 0);
 
         // Left arm
-        lShoulder.setRotation(0, 0, 0, 1);
-        lElbow.setRotation(0, 0, 0, 1);
-        lHand.setRotation(0, 0, 0, 1);
+        lShoulder.setRotation(1, 0, 0, 0);
+        lElbow.setRotation(1, 0, 0, 0);
+        lHand.setRotation(1, 0, 0, 0);
 
         // Right arm
-        rShoulder.setRotation(0, 0, 0, 1);
-        rElbow.setRotation(0, 0, 0, 1);
-        rHand.setRotation(0, 0, 0, 1);
+        rShoulder.setRotation(1, 0, 0, 0);
+        rElbow.setRotation(1, 0, 0, 0);
+        rHand.setRotation(1, 0, 0, 0);
 
         // Left leg
-        lHip.setRotation(0, 0, 0, 1);
-        lKnee.setRotation(0, 0, 0, 1);
-        lAnkle.setRotation(0, 0, 0, 1);
-        lFootFloorPoint.setRotation(0, 0, 0, 1);
+        lHip.setRotation(1, 0, 0, 0);
+        lKnee.setRotation(1, 0, 0, 0);
+        lAnkle.setRotation(1, 0, 0, 0);
+        lFootFloorPoint.setRotation(1, 0, 0, 0);
 
         // Right leg
-        rHip.setRotation(0, 0, 0, 1);
-        rKnee.setRotation(0, 0, 0, 1);
-        rAnkle.setRotation(0, 0, 0, 1);
-        rFootFloorPoint.setRotation(0, 0, 0, 1);
+        rHip.setRotation(1, 0, 0, 0);
+        rKnee.setRotation(1, 0, 0, 0);
+        rAnkle.setRotation(1, 0, 0, 0);
+        rFootFloorPoint.setRotation(1, 0, 0, 0);
     }
 
     //
@@ -196,9 +198,11 @@ namespace contrib {
     void RobotModel::updateLeftRightFootstep() {
         // Set the translations of the left and right footstep frames
         leftFootstep.setTranslation(lFootFloorPoint.position());
-        leftFootstep.setRotation(Quaternion(Vec(0, 0, 1), fusedYaw(lFootFloorPoint.orientation())));
+        leftFootstep.setRotation(
+            Eigen::Quaterniond(Eigen::AngleAxisd(fusedYaw(lFootFloorPoint.orientation()), Eigen::Vector3d(0, 0, 1))));
         rightFootstep.setTranslation(rFootFloorPoint.position());
-        rightFootstep.setRotation(Quaternion(Vec(0, 0, 1), fusedYaw(rFootFloorPoint.orientation())));
+        rightFootstep.setRotation(
+            Eigen::Quaterniond(Eigen::AngleAxisd(fusedYaw(rFootFloorPoint.orientation()), Eigen::Vector3d(0, 0, 1))));
     }
 
     // Update the support and free footstep frames
@@ -227,16 +231,16 @@ namespace contrib {
     // Sets the internal CoM odometry to a particular position and fused yaw heading
     void RobotModel::setOdom(double comX, double comY, double fYaw) {
         // Retrieve the current CoM frame position and orientation
-        Vec comPos           = com.position();
-        Quaternion comOrient = com.orientation();
+        Eigen::Vector3d comPos       = com.position();
+        Eigen::Quaterniond comOrient = com.orientation();
 
         // Retrieve the translations of the global frames (same as their global positions by definition)
-        Vec baseTrans          = base.translation();
-        Vec leftFootstepTrans  = leftFootstep.translation();
-        Vec rightFootstepTrans = rightFootstep.translation();
+        Eigen::Vector3d baseTrans          = base.translation();
+        Eigen::Vector3d leftFootstepTrans  = leftFootstep.translation();
+        Eigen::Vector3d rightFootstepTrans = rightFootstep.translation();
 
         // Work out the pure yaw quaternion rotation required so that the fused yaw of the CoM frame matches fYaw
-        Quaternion rot(Vec(0, 0, 1), fYaw - fusedYaw(comOrient));
+        Eigen::Quaterniond rot(Eigen::AngleAxisd(fYaw - fusedYaw(comOrient), Eigen::Vector3d(0, 0, 1)));
 
         // Rotate all the global frames by the required yaw rotation
         base.setRotation(rot * base.rotation());
@@ -244,12 +248,12 @@ namespace contrib {
         rightFootstep.setRotation(rot * rightFootstep.rotation());
 
         // Update the translations of all the global frames
-        Vec baseV          = rot * (baseTrans - comPos);
-        Vec leftFootstepV  = rot * (leftFootstepTrans - comPos);
-        Vec rightFootstepV = rot * (rightFootstepTrans - comPos);
-        base.setTranslation(comX + baseV.x, comY + baseV.y, baseTrans.z);
-        leftFootstep.setTranslation(comX + leftFootstepV.x, comY + leftFootstepV.y, leftFootstepTrans.z);
-        rightFootstep.setTranslation(comX + rightFootstepV.x, comY + rightFootstepV.y, rightFootstepTrans.z);
+        Eigen::Vector3d baseV          = rot * (baseTrans - comPos);
+        Eigen::Vector3d leftFootstepV  = rot * (leftFootstepTrans - comPos);
+        Eigen::Vector3d rightFootstepV = rot * (rightFootstepTrans - comPos);
+        base.setTranslation(comX + baseV.x(), comY + baseV.y(), baseTrans.z());
+        leftFootstep.setTranslation(comX + leftFootstepV.x(), comY + leftFootstepV.y(), leftFootstepTrans.z());
+        rightFootstep.setTranslation(comX + rightFootstepV.x(), comY + rightFootstepV.y(), rightFootstepTrans.z());
     }
 
     //
@@ -260,18 +264,19 @@ namespace contrib {
     void RobotModel::update(const Pose& pose, double fusedX, double fusedY) {
         // Update the robot model with the new data
         setPose(pose);  // Applies the measured joint angles to the kinematic chain
-        alignModel(fusedX,
-                   fusedY);  // Updates the base transform based on the current support foot location and the measured
-                             // fused angles
+
+        // Updates the base transform based on the current support foot location and the measured fused angles
+        alignModel(fusedX, fusedY);
 
         // Calculate the lower of the two feet
-        double footHeightDiff = rFootFloorPoint.position().z
-                                - lFootFloorPoint.position().z;  // Positive if the right foot is higher than the left
-        int lowestFoot = (footHeightDiff > 0 ? LEFT_LEG : RIGHT_LEG);
+        // Positive if the right foot is higher than the left
+        double footHeightDiff = rFootFloorPoint.position().z() - lFootFloorPoint.position().z();
+        int lowestFoot        = (footHeightDiff > 0 ? LEFT_LEG : RIGHT_LEG);
 
         // Allow a support exchange if the vertical foot separation has exceeded a configured threshold
-        if (supportExchangeLock && (fabs(footHeightDiff) >= config->footHeightHysteresis()))
+        if (supportExchangeLock && (fabs(footHeightDiff) >= config->footHeightHysteresis())) {
             supportExchangeLock = false;
+        }
 
         // Perform a support exchange if needed
         supportExchange = false;
@@ -291,44 +296,47 @@ namespace contrib {
         // Neck:     z -> y
 
         // Head
-        neck.setRotation(Quaternion(Vec(0, 0, 1), pose.headPose.neck.z)
-                         * Quaternion(Vec(0, 1, 0), pose.headPose.neck.y));
+        neck.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.headPose.neck.z, Eigen::Vector3d(0, 0, 1)))
+                         * Eigen::Quaterniond(Eigen::AngleAxisd(pose.headPose.neck.y, Eigen::Vector3d(0, 1, 0))));
 
         // Left arm
-        lShoulder.setRotation(Quaternion(Vec(0, 1, 0), pose.leftArmPose.shoulder.y)
-                              * Quaternion(Vec(1, 0, 0), pose.leftArmPose.shoulder.x)
-                              * Quaternion(Vec(0, 0, 1), pose.leftArmPose.shoulder.z));
-        lElbow.setRotation(Quaternion(Vec(0, 1, 0), pose.leftArmPose.elbow.y));
+        lShoulder.setRotation(
+            Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftArmPose.shoulder.y, Eigen::Vector3d(0, 1, 0)))
+            * Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftArmPose.shoulder.x, Eigen::Vector3d(1, 0, 0)))
+            * Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftArmPose.shoulder.z, Eigen::Vector3d(0, 0, 1))));
+        lElbow.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftArmPose.elbow.y, Eigen::Vector3d(0, 1, 0))));
 
         // Right arm
-        rShoulder.setRotation(Quaternion(Vec(0, 1, 0), pose.rightArmPose.shoulder.y)
-                              * Quaternion(Vec(1, 0, 0), pose.rightArmPose.shoulder.x)
-                              * Quaternion(Vec(0, 0, 1), pose.rightArmPose.shoulder.z));
-        rElbow.setRotation(Quaternion(Vec(0, 1, 0), pose.rightArmPose.elbow.y));
+        rShoulder.setRotation(
+            Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightArmPose.shoulder.y, Eigen::Vector3d(0, 1, 0)))
+            * Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightArmPose.shoulder.x, Eigen::Vector3d(1, 0, 0)))
+            * Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightArmPose.shoulder.z, Eigen::Vector3d(0, 0, 1))));
+        rElbow.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightArmPose.elbow.y, Eigen::Vector3d(0, 1, 0))));
 
         // Left leg
-        lHip.setRotation(Quaternion(Vec(0, 0, 1), pose.leftLegPose.hip.z)
-                         * Quaternion(Vec(1, 0, 0), pose.leftLegPose.hip.x)
-                         * Quaternion(Vec(0, 1, 0), pose.leftLegPose.hip.y));
-        lKnee.setRotation(Quaternion(Vec(0, 1, 0), pose.leftLegPose.knee.y));
-        lAnkle.setRotation(Quaternion(Vec(0, 1, 0), pose.leftLegPose.ankle.y)
-                           * Quaternion(Vec(1, 0, 0), pose.leftLegPose.ankle.x));
+        lHip.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftLegPose.hip.z, Eigen::Vector3d(0, 0, 1)))
+                         * Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftLegPose.hip.x, Eigen::Vector3d(1, 0, 0)))
+                         * Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftLegPose.hip.y, Eigen::Vector3d(0, 1, 0))));
+        lKnee.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftLegPose.knee.y, Eigen::Vector3d(0, 1, 0))));
+        lAnkle.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftLegPose.ankle.y, Eigen::Vector3d(0, 1, 0)))
+                           * Eigen::Quaterniond(Eigen::AngleAxisd(pose.leftLegPose.ankle.x, Eigen::Vector3d(1, 0, 0))));
 
         // Right leg
-        rHip.setRotation(Quaternion(Vec(0, 0, 1), pose.rightLegPose.hip.z)
-                         * Quaternion(Vec(1, 0, 0), pose.rightLegPose.hip.x)
-                         * Quaternion(Vec(0, 1, 0), pose.rightLegPose.hip.y));
-        rKnee.setRotation(Quaternion(Vec(0, 1, 0), pose.rightLegPose.knee.y));
-        rAnkle.setRotation(Quaternion(Vec(0, 1, 0), pose.rightLegPose.ankle.y)
-                           * Quaternion(Vec(1, 0, 0), pose.rightLegPose.ankle.x));
+        rHip.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightLegPose.hip.z, Eigen::Vector3d(0, 0, 1)))
+                         * Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightLegPose.hip.x, Eigen::Vector3d(1, 0, 0)))
+                         * Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightLegPose.hip.y, Eigen::Vector3d(0, 1, 0))));
+        rKnee.setRotation(Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightLegPose.knee.y, Eigen::Vector3d(0, 1, 0))));
+        rAnkle.setRotation(
+            Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightLegPose.ankle.y, Eigen::Vector3d(0, 1, 0)))
+            * Eigen::Quaterniond(Eigen::AngleAxisd(pose.rightLegPose.ankle.x, Eigen::Vector3d(1, 0, 0))));
     }
 
     // Align the model to the given fused roll/pitch, add yaw to ensure the fused yaw of the support foot hasn't
     // changed, and translate the model to ensure that the support foot floor point is preserved
     void RobotModel::alignModel(double fusedX, double fusedY) {
         // Get pointers to the required frames
-        Frame *suppFloorPoint, *otherFloorPoint, *supportFootstep,
-            *otherFootstep;  // It is assumed that the footstep frames are global
+        // It is assumed that the footstep frames are global
+        utility::math::geometry::Frame *suppFloorPoint, *otherFloorPoint, *supportFootstep, *otherFootstep;
         if (supportLegSign == RIGHT_LEG) {
             suppFloorPoint  = &rFootFloorPoint;
             otherFloorPoint = &lFootFloorPoint;
@@ -348,7 +356,8 @@ namespace contrib {
         // Calculate the difference in fused yaw (CCW) from the support foot floor point frame to the current support
         // footstep frame, and yaw the base frame by this value
         double yawDelta = fusedYaw(supportFootstep->rotation()) - fusedYaw(suppFloorPoint->orientation());
-        base.setRotation(Quaternion(0.0, 0.0, sin(0.5 * yawDelta), cos(0.5 * yawDelta)) * base.rotation());
+        base.setRotation(Eigen::Quaterniond(cos(0.5 * yawDelta), 0.0, 0.0, sin(0.5 * yawDelta)) * base.rotation());
+
 
         // Translate the model (base frame) so that the support foot floor point and support footstep frames coincide in
         // terms of position
@@ -356,7 +365,8 @@ namespace contrib {
 
         // Update the free footstep frame (the support footstep frame by construction has not changed)
         otherFootstep->setTranslation(otherFloorPoint->position());
-        otherFootstep->setRotation(Quaternion(Vec(0, 0, 1), fusedYaw(otherFloorPoint->orientation())));
+        otherFootstep->setRotation(
+            Eigen::Quaterniond(Eigen::AngleAxisd(fusedYaw(otherFloorPoint->orientation()), Eigen::Vector3d(0, 0, 1))));
     }
 
     // Sets the support leg sign of the model and updates the required associated frames
@@ -366,12 +376,13 @@ namespace contrib {
         updateSuppFreeFootstep();
 
         // Retrieve the position of the new support foot
-        Vec footPos = (supportLegSign == RIGHT_LEG ? rFootFloorPoint.position() : lFootFloorPoint.position());
+        Eigen::Vector3d footPos =
+            (supportLegSign == RIGHT_LEG ? rFootFloorPoint.position() : lFootFloorPoint.position());
 
         // Shift the model vertically so that the support foot is exactly on the ground
-        base.translate(0.0, 0.0, -footPos.z);
-        leftFootstep.translate(0.0, 0.0, -footPos.z);
-        rightFootstep.translate(0.0, 0.0, -footPos.z);
+        base.translate(0.0, 0.0, -footPos.z());
+        leftFootstep.translate(0.0, 0.0, -footPos.z());
+        rightFootstep.translate(0.0, 0.0, -footPos.z());
     }
 
     //
@@ -379,93 +390,105 @@ namespace contrib {
     //
 
     // Support footstep CoM vector
-    Vec RobotModel::suppComVector() const {
+    Eigen::Vector3d RobotModel::suppComVector() const {
         // Return the required vector
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return rightFootstep.coordinatesOf(com.position());
-        else
+        }
+        else {
             return leftFootstep.coordinatesOf(com.position());
+        }
     }
 
     // Free footstep CoM vector
-    Vec RobotModel::freeComVector() const {
+    Eigen::Vector3d RobotModel::freeComVector() const {
         // Return the required vector
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return leftFootstep.coordinatesOf(com.position());
-        else
+        }
+        else {
             return rightFootstep.coordinatesOf(com.position());
+        }
     }
 
     // Left footstep CoM vector
-    Vec RobotModel::leftComVector() const {
+    Eigen::Vector3d RobotModel::leftComVector() const {
         // Return the required vector
         return leftFootstep.coordinatesOf(com.position());
     }
 
     // Right footstep CoM vector
-    Vec RobotModel::rightComVector() const {
+    Eigen::Vector3d RobotModel::rightComVector() const {
         // Return the required vector
         return rightFootstep.coordinatesOf(com.position());
     }
 
     // Support footstep step vector
-    Vec RobotModel::suppStepVector() const {
+    Eigen::Vector3d RobotModel::suppStepVector() const {
         // Return the required vector
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return rightFootstep.coordinatesOf(leftFootstep.translation());
-        else
+        }
+        else {
             return leftFootstep.coordinatesOf(rightFootstep.translation());
+        }
     }
 
     // Free footstep step vector
-    Vec RobotModel::freeStepVector() const {
+    Eigen::Vector3d RobotModel::freeStepVector() const {
         // Return the required vector
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return leftFootstep.coordinatesOf(rightFootstep.translation());
-        else
+        }
+        else {
             return rightFootstep.coordinatesOf(leftFootstep.translation());
+        }
     }
 
     // Left footstep step vector
-    Vec RobotModel::leftStepVector() const {
+    Eigen::Vector3d RobotModel::leftStepVector() const {
         // Return the required vector
         return leftFootstep.coordinatesOf(rightFootstep.translation());
     }
 
     // Right footstep step vector
-    Vec RobotModel::rightStepVector() const {
+    Eigen::Vector3d RobotModel::rightStepVector() const {
         // Return the required vector
         return rightFootstep.coordinatesOf(leftFootstep.translation());
     }
 
     // Support footstep swing vector
-    Vec RobotModel::suppSwingVector() const {
+    Eigen::Vector3d RobotModel::suppSwingVector() const {
         // Return the required vector
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return rightFootstep.coordinatesOf(leftFootstep.translation())
                    - rightFootstep.coordinatesOf(com.position());
-        else
+        }
+        else {
             return leftFootstep.coordinatesOf(rightFootstep.translation()) - leftFootstep.coordinatesOf(com.position());
+        }
     }
 
     // Free footstep swing vector
-    Vec RobotModel::freeSwingVector() const {
+    Eigen::Vector3d RobotModel::freeSwingVector() const {
         // Return the required vector
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return leftFootstep.coordinatesOf(rightFootstep.translation()) - leftFootstep.coordinatesOf(com.position());
-        else
+        }
+        else {
             return rightFootstep.coordinatesOf(leftFootstep.translation())
                    - rightFootstep.coordinatesOf(com.position());
+        }
     }
 
     // Left footstep swing vector
-    Vec RobotModel::leftSwingVector() const {
+    Eigen::Vector3d RobotModel::leftSwingVector() const {
         // Return the required vector
         return leftFootstep.coordinatesOf(rightFootstep.translation()) - leftFootstep.coordinatesOf(com.position());
     }
 
     // Right footstep swing vector
-    Vec RobotModel::rightSwingVector() const {
+    Eigen::Vector3d RobotModel::rightSwingVector() const {
         // Return the required vector
         return rightFootstep.coordinatesOf(leftFootstep.translation()) - rightFootstep.coordinatesOf(com.position());
     }
@@ -473,19 +496,23 @@ namespace contrib {
     // Support footstep step yaw
     double RobotModel::suppStepYaw() const {
         // Return the required yaw
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return getStepYaw(rightFootstep, leftFootstep);
-        else
+        }
+        else {
             return getStepYaw(leftFootstep, rightFootstep);
+        }
     }
 
     // Free footstep step yaw
     double RobotModel::freeStepYaw() const {
         // Return the required yaw
-        if (supportLegSign == RIGHT_LEG)
+        if (supportLegSign == RIGHT_LEG) {
             return getStepYaw(leftFootstep, rightFootstep);
-        else
+        }
+        else {
             return getStepYaw(rightFootstep, leftFootstep);
+        }
     }
 
     // Left footstep step yaw
@@ -501,14 +528,11 @@ namespace contrib {
     }
 
     // Calculate a particular step yaw (the passed frames must be global!)
-    double RobotModel::getStepYaw(const Frame& fromFootstep, const Frame& toFootstep) const {
+    double RobotModel::getStepYaw(const utility::math::geometry::Frame& fromFootstep,
+                                  const utility::math::geometry::Frame& toFootstep) const {
         // Calculate the fused yaw difference between the footstep frames
-        double fyaw = fusedYaw(toFootstep.rotation()) - fusedYaw(fromFootstep.rotation());  // Result is in [-2*pi,2*pi]
-        if (fyaw > M_PI) fyaw -= 2.0 * M_PI;    // Value is now in [-2*pi,pi]
-        if (fyaw <= -M_PI) fyaw += 2.0 * M_PI;  // Value is now in (-pi,pi]
-
-        // Return the required fused yaw
-        return fyaw;
+        return utility::math::angle::normalizeAngle(fusedYaw(toFootstep.rotation())
+                                                    - fusedYaw(fromFootstep.rotation()));
     }
 
     //
@@ -516,20 +540,15 @@ namespace contrib {
     //
 
     // Returns the fused yaw of a quaternion orientation in the range (-pi,pi]
-    double RobotModel::fusedYaw(const Quaternion& q) {
+    double RobotModel::fusedYaw(const Eigen::Quaterniond& q) {
         // Calculate the fused yaw
-        double fyaw =
-            2.0 * atan2(q[2], q[3]);          // Output of atan2(z,w) is [-pi,pi], so this expression is in [-2*pi,2*pi]
-        if (fyaw > M_PI) fyaw -= 2.0 * M_PI;  // Fyaw is now in [-2*pi,pi]
-        if (fyaw <= -M_PI) fyaw += 2.0 * M_PI;  // Fyaw is now in (-pi,pi]
-        return fyaw;
+        // Output of atan2(z,w) is [-pi,pi], so this expression is in [-2*pi,2*pi]
+        return utility::math::angle::normalizeAngle(2.0 * atan2(q.z(), q.w()));
     }
 
     // Converts a pure fused pitch/roll rotation to a quaternion
-    Quaternion RobotModel::quatFromFusedPR(
-        double fusedX,
-        double fusedY)  // Note: It is assumed that the missing fusedZ = 0 and hemi = 1
-    {
+    // Note: It is assumed that the missing fusedZ = 0 and hemi = 1
+    Eigen::Quaterniond RobotModel::quatFromFusedPR(double fusedX, double fusedY) {
         // Precalculate the sin values
         double sth  = sin(fusedY);
         double sphi = sin(fusedX);
@@ -549,7 +568,7 @@ namespace contrib {
         double sgamma = sin(gamma);
 
         // Return the required quaternion orientation (a rotation about (cgamma, sgamma, 0) by angle alpha)
-        return Quaternion(cgamma * shalpha, sgamma * shalpha, 0.0, chalpha);  // Order: x, y, z, w!
+        return Eigen::Quaterniond(chalpha, cgamma * shalpha, sgamma * shalpha, 0.0);  // Order: w, x, y, z!
     }
 
 }  // namespace contrib
