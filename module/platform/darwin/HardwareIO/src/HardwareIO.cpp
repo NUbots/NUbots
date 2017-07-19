@@ -247,16 +247,16 @@ namespace platform {
                 }
 
                 // Write our data (if we need to)
-                if (command.size() > 7) {
-                    // Calculate our length
-                    command[Darwin::Packet::LENGTH] = command.size() - 3;
+                // if (command.size() > 7) {
+                // Calculate our length
+                command[Darwin::Packet::LENGTH] = command.size() - 3;
 
-                    // Do a checksum
-                    command.push_back(0);
-                    command.back() = Darwin::calculateChecksum(command.data());
+                // Do a checksum
+                command.push_back(0);
+                command.back() = Darwin::calculateChecksum(command.data());
 
-                    darwin.sendRawCommand(command);
-                }
+                darwin.sendRawCommand(command);
+                //}
 
                 // Read our data
                 Darwin::BulkReadResults data = darwin.bulkRead();
@@ -274,7 +274,6 @@ namespace platform {
 
                 // Loop through each of our commands
                 for (const auto& command : commands) {
-
                     float diff = utility::math::angle::difference(
                         command.position,
                         utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);

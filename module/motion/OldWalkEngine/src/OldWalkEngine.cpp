@@ -456,7 +456,6 @@ namespace motion {
         // 0, 0 }})); // TODO: config
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());
-        emit(std::make_unique<std::vector<ServoCommand>>());
     }
     void OldWalkEngine::update(const Sensors& sensors) {
         double now = getTime();
