@@ -213,10 +213,10 @@ if __name__ == "__main__":
         buffer_time: 1500
 
         messages:
-        {{}}messages}}
+        {messages}
     """)
 
-    yaml_keys = ['  {{}}}}: false'.format(m) for m in sorted(messages)]
+    yaml_keys = ['  {}: false'.format(m) for m in sorted(messages)]
 
     # and write it out
     with open(yaml_file, 'w') as f:
