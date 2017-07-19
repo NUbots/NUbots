@@ -119,17 +119,19 @@ namespace support {
                 [this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
 
                     // Retrieve the first ball and self in the vector.
-                    LocalisationBall ball = balls.front();
-                    Self self             = selfs.front();
+                    if (balls.size() > 0) {
+                        LocalisationBall ball = balls.front();
+                        Self self             = selfs.front();
 
-                    // Set local ball position.
-                    overview.ball_position = ball.locObject.position;
+                        // Set local ball position.
+                        overview.ball_position = ball.locObject.position;
 
-                    // Set world ball position.
-                    overview.ball_world_position =
-                        convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position),
-                                                                 convert<double, 2>(self.heading),
-                                                                 convert<double, 2>(ball.locObject.position)));
+                        // Set world ball position.
+                        overview.ball_world_position =
+                            convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position),
+                                                                     convert<double, 2>(self.heading),
+                                                                     convert<double, 2>(ball.locObject.position)));
+                    }
                 }));
 
         handles["overview"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then(
