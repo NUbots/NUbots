@@ -86,8 +86,6 @@ namespace localisation {
             // rGCc = vector from camera to goal post expected position
             arma::vec3 rGCc     = Hcf.transformPoint(actual_position);
             arma::vec3 rGCc_sph = cartesianToSpherical(rGCc);  // in r,theta,phi
-            // std::cout << "actual_position = " << actual_position.t() << std::endl;
-            // std::cout << "rGCc_sph = " << rGCc_sph.t() << std::endl;
             return rGCc_sph;
         }
 
@@ -128,12 +126,6 @@ namespace localisation {
     }
 
     arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
-        arma::mat noise = arma::eye(size, size);
-        // TODO: this
-        // noise(kX, kX) *= cfg_.processNoisePositionFactor;
-        // noise(kY, kY) *= cfg_.processNoisePositionFactor;
-        // noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
-        // std::cout << "process noise = \n" << noise << std::endl;
         return arma::diagmat(processNoiseDiagonal);
     }
 
