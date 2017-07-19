@@ -207,16 +207,8 @@ namespace math {
                 return particles.col(0);
             }
 
-            StateVec getBest() const {
-                return particles.row(0).t();
-            }
-
             StateMat getCovariance() const {
                 return arma::cov(particles.t());
-            }
-
-            ParticleList getParticles() const {
-                return particles;
             }
 
             ParticleList getParticles() const {
