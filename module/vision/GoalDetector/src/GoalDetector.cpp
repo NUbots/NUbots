@@ -308,8 +308,7 @@ namespace vision {
 
                     // Check if we are within the aspect ratio range
                     bool valid =
-                        quad.aspectRatio() > MINIMUM_ASPECT_RATIO
-                        && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
+                        quad.aspectRatio() > MINIMUM_ASPECT_RATIO && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
 
                         // Check if we are close enough to the visual horizon
                         && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0])
