@@ -6,6 +6,7 @@
 #include <string>
 
 #include "message/input/Image.h"
+#include "utility/strutil/ansi.h"
 
 #include "utility/vision/fourcc.h"
 
@@ -56,6 +57,16 @@ namespace input {
                                  static_cast<uint8_t*>(image->GetData()) + image->GetBufferSize());
 
                 reactor.emit(msg);
+            }
+
+            if (image->GetWidth() > 10000 || image->GetHeight() > 10000) {
+                NUClear::log<NUClear::ERROR>("Spinnaker Camera ",
+                                             __FILE__,
+                                             " (Line ",
+                                             __LINE__,
+                                             ")",
+                                             "BAD IMAGE INITIALISATION - SHUTTING DOWN (TODO: handle better)");
+                reactor.powerplant.shutdown();
             }
 
             image->Release();
