@@ -21,7 +21,7 @@ NUCLEAR_ROLE(
 
     #Vision
     vision::LUTClassifier
-    vision::GoalDetector
+    #vision::GoalDetector
     vision::BallDetector
     #vision::ObstacleDetector
 
