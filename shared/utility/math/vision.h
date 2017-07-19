@@ -72,13 +72,10 @@ namespace math {
             return (separation / 2) / std::tan(parallaxAngle / 2);
         }
 
-<<<<<<< HEAD
-=======
         /*! @brief returns an estimate of the distance to two points which have a known separation.
             @param separation - Known distance between points in camera space
             @param cam1,cam2 - Measured camera space unit vectors point toward the points
         */
->>>>>>> master
         inline double distanceToEquidistantCamPoints(const double& separation,
                                                      const arma::vec3& cam1,
                                                      const arma::vec3& cam2) {
