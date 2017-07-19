@@ -143,6 +143,8 @@ namespace vision {
                    const LookUpTable& lut,
                    const FieldDescription& fd) {
 
+                log("Detecting goals");
+
                 const auto& image = *rawImage;
                 // Our segments that may be a part of a goal
                 std::vector<RansacGoalModel::GoalSegment> segments;
@@ -223,8 +225,6 @@ namespace vision {
                                                         Eigen::Vector4d(0, 0, 1, 1)));
                     }
 
-                    log("left normal = ", left.normal);
-                    log("right normal = ", right.normal);
 
                     // Normals in same direction
                     if (arma::dot(left.normal, right.normal) > 0) {
@@ -244,13 +244,16 @@ namespace vision {
                         i += 2;
                     }
                     midpoint /= i;
+                    midpoint = arma::normalise(midpoint);
 
                     // Work out which direction to go
                     arma::vec3 direction = arma::normalise(arma::cross(mid.normal, arma::vec3({1, 0, 0})));
                     // Rectify if pointing up
                     direction *= direction[2] < 0 ? 1 : -1;
-                    // TODO: does this work?
-                    direction *= cam.imageSizePixels[1] / cam.FOV[1];
+                    // Move this direction
+                    // TODO: configure
+                    direction *= 0.01;
+
 
                     // Classify until we reach green
                     arma::vec3 basePoint({1, 0, 0});
@@ -318,35 +321,20 @@ namespace vision {
                     }
 
                     // Get our endpoints from the min and max points on the line
-                    arma::vec3 midP1 = arma::normalise(maxPt + minPt);  // TODO: Check calculation
-                    arma::vec3 midP2 = arma::normalise(mid.orthogonalProjection(basePoint));
-
-                    log("maxPt:\n", maxPt);
-                    log("minPt:\n", minPt);
-                    log("midP1:\n", midP1);
-                    log("midP2:\n", midP2);
-                    log("mid.normal:\n", mid.normal);
-
-                    // Project those points outward onto the quad
-                    arma::vec3 p1 =
-                        midP1 - left.distanceToPoint(midP1) * arma::dot(left.normal, mid.normal) * mid.normal;
-                    arma::vec3 p2 =
-                        midP2 - left.distanceToPoint(midP2) * arma::dot(left.normal, mid.normal) * mid.normal;
-                    arma::vec3 p3 =
-                        midP1 - right.distanceToPoint(midP1) * arma::dot(right.normal, mid.normal) * mid.normal;
-                    arma::vec3 p4 =
-                        midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
+                    arma::vec3 midTop  = arma::normalise(mid.orthogonalProjection(maxPt));
+                    arma::vec3 midBase = arma::normalise(mid.orthogonalProjection(basePoint));
 
                     // Make a quad
                     Goal goal;
                     goal.visObject.sensors = image.sensors;
                     goal.side              = Goal::Side::UNKNOWN_SIDE;
 
-                    // Seperate tl and bl
-                    arma::vec3 tl = p1[1] > p2[1] ? p2 : p1;
-                    arma::vec3 bl = p1[1] > p2[1] ? p1 : p2;
-                    arma::vec3 tr = p3[1] > p4[1] ? p4 : p3;
-                    arma::vec3 br = p3[1] > p4[1] ? p3 : p4;
+                    // Project those points outward onto the quad
+                    // TODO: directional projection?
+                    arma::vec3 tl = left.orthogonalProjection(midTop);
+                    arma::vec3 tr = right.orthogonalProjection(midTop);
+                    arma::vec3 bl = left.orthogonalProjection(midBase);
+                    arma::vec3 br = right.orthogonalProjection(midBase);
 
                     goal.frustum.bl = convert<double, 3>(bl);
                     goal.frustum.tl = convert<double, 3>(tl);
@@ -480,11 +468,6 @@ namespace vision {
                     arma::vec3 cbl       = convert<double, 3>(it->frustum.bl);
                     arma::vec3 cbr       = convert<double, 3>(it->frustum.br);
                     arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
-
-                    log("Goal:");
-                    log("\n", tl.t(), tr.t(), bl.t(), br.t());
-                    log("\n", ctl.t(), ctr.t(), cbl.t(), cbr.t());
-
 
                     // TODO: NORMALS not used currently - delete?
                     // Get our four normals for each edge

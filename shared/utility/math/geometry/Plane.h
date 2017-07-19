@@ -77,7 +77,7 @@ namespace math {
             }
 
             Vector orthogonalProjection(const Vector& p) const {
-                return p - distanceToPoint(p) * normal;
+                return p - arma::dot(p - point, normal) * normal;
             }
 
             Vector directionalProjection(const Vector& p, const Vector& dir) const {
