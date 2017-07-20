@@ -12,5 +12,6 @@ export interface NUClearNetClient {
   onJoin(cb: NUClearEventListener): () => void
   onLeave(cb: NUClearEventListener): () => void
   on(event: string, cb: NUClearPacketListener): () => void
+  onPacket(cb: NUClearPacketListener): () => void
   send(options: NUClearNetSend): void
 }

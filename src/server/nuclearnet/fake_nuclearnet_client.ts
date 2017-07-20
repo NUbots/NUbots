@@ -7,6 +7,7 @@ import { NUClearEventListener } from '../../shared/nuclearnet/nuclearnet_client'
 import { NUClearPacketListener } from '../../shared/nuclearnet/nuclearnet_client'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { FakeNUClearNetServer } from './fake_nuclearnet_server'
+import { hashType } from './fake_nuclearnet_server'
 
 /**
  * A fake NUClearNetClient, which collaborates with FakeNUClearNetServer. Designed to allow completely offline
@@ -70,13 +71,24 @@ export class FakeNUClearNetClient implements NUClearNetClient {
   }
 
   public on(event: string, cb: NUClearPacketListener): () => void {
+    const hash = hashType(event).toString('hex')
     const listener = (packet: NUClearNetPacket) => {
       if (this.connected) {
         cb(packet)
       }
     }
-    this.events.on(event, listener)
-    return () => this.events.removeListener(event, listener)
+    this.events.on(hash, listener)
+    return () => this.events.removeListener(hash, listener)
+  }
+
+  public onPacket(cb: NUClearPacketListener): () => void {
+    const listener = (packet: NUClearNetPacket) => {
+      if (this.connected) {
+        cb(packet)
+      }
+    }
+    this.events.on('nuclear_packet', listener)
+    return () => this.events.removeListener('nuclear_packet', listener)
   }
 
   public send(options: NUClearNetSend): void {
@@ -92,7 +104,8 @@ export class FakeNUClearNetClient implements NUClearNetClient {
     this.events.emit('nuclear_leave', peer)
   }
 
-  public fakePacket(event: string, packet: NUClearNetPacket) {
-    this.events.emit(event, packet)
+  public fakePacket(hash: string, packet: NUClearNetPacket) {
+    this.events.emit(hash, packet)
+    this.events.emit('nuclear_packet', packet)
   }
 }

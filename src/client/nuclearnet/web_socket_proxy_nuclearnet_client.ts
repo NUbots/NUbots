@@ -1,11 +1,10 @@
 import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetSend } from 'nuclearnet.js'
+import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearPacketListener } from '../../shared/nuclearnet/nuclearnet_client'
 import { NUClearEventListener } from '../../shared/nuclearnet/nuclearnet_client'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { WebSocketClient } from './web_socket_client'
-import SocketIOSocket = SocketIOClient.Socket
-import { NUClearNetPacket } from 'nuclearnet.js'
 
 type PacketListener = (packet: NUClearNetPacket, ack?: () => void) => void
 
@@ -109,6 +108,10 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
         packetListeners.delete(packetListener)
       }
     }
+  }
+
+  public onPacket(cb: NUClearPacketListener): () => void {
+    return this.on('nuclear_packet', cb)
   }
 
   public send(options: NUClearNetSend): void {

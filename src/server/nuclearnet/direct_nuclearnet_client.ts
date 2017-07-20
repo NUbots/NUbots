@@ -38,6 +38,10 @@ export class DirectNUClearNetClient implements NUClearNetClient {
     return () => this.nuclearNetwork.removeListener(event, cb)
   }
 
+  public onPacket(cb: NUClearPacketListener): () => void {
+    return this.on('nuclear_packet', cb)
+  }
+
   public send(options: NUClearNetSend): void {
     this.nuclearNetwork.send(options)
   }

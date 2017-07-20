@@ -4475,9 +4475,9 @@ nth-check@~1.0.1:
   dependencies:
     boolbase "~1.0.0"
 
-nuclearnet.js@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/nuclearnet.js/-/nuclearnet.js-1.2.0.tgz#a26c83d7495974c87dff1817a4eade8d8e012abe"
+nuclearnet.js@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/nuclearnet.js/-/nuclearnet.js-1.4.2.tgz#9a25ea04ac84d866e92bf1851b1754229c6e173c"
   dependencies:
     bindings "^1.2.1"
     nan "^2.0.0"
