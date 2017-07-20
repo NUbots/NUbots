@@ -25,6 +25,7 @@
 
 #include "message/input/Sensors.h"
 #include "utility/input/ServoID.h"
+#include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/support/eigen_armadillo.h"
@@ -40,6 +41,7 @@ namespace localisation {
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Transform3D;
     using message::support::FieldDescription;
+    using utility::localisation::fieldStateToTransform3D;
 
 
     using utility::math::matrix::Transform3D;
@@ -64,9 +66,7 @@ namespace localisation {
         Transform3D Hcw        = Htc.i() * Htw;
 
 
-        Transform3D Hfw;
-        Hfw.translation() = arma::vec3{state[kX], state[kY], 0};
-        Hfw               = Hfw.rotateZ(state[kAngle]);
+        Transform3D Hfw = fieldStateToTransform3D(state);
 
         Transform3D Hcf = Hcw * Hfw.i();
         Transform3D Htf = Htw * Hfw.i();

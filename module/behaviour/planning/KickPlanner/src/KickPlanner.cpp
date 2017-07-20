@@ -32,12 +32,14 @@
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
+#include "utility/localisation/transform.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
+
 
 namespace module {
 namespace behaviour {
@@ -66,6 +68,7 @@ namespace behaviour {
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::legPoseValid;
         using utility::nubugger::graph;
+        using utility::localisation::fieldStateToTransform3D;
 
         KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -105,13 +108,13 @@ namespace behaviour {
                     // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
                     // TODO: The heading seems to judder here!!
                     // TODO: use sensors.world instead
-                    arma::vec2 kickTarget =
-                        Rotation2D::createRotation(-field.position[2])
-                        * convert<double, 2>(kickPlan.target - Eigen::Vector2d(field.position[0], field.position[1]));
+                    Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
 
                     Transform3D Htw         = convert<double, 4, 4>(sensors.world);
                     arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});
 
+                    arma::vec3 kickTarget =
+                        (Htw * Hfw.i()).transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
                     float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
                     // log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
