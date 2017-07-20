@@ -21,7 +21,7 @@ namespace contrib {
     class RobotModel {
     public:
         // Constructor
-        explicit RobotModel(const gait::WalkConfig& capConfig);
+        explicit RobotModel(const gait::WalkConfig& config);
 
         // Configuration variables
         const gait::WalkConfig& getConfig() const {
@@ -131,7 +131,7 @@ namespace contrib {
                           const utility::math::geometry::Frame& toFootstep) const;
 
         // Configuration variables
-        const gait::WalkConfig& config;
+        gait::WalkConfig config;
         void robotSpecCallback() {
             initKinematicTranslations();
         }

@@ -17,7 +17,7 @@ namespace contrib {
     // Default constructor
     RobotModel::RobotModel(const gait::WalkConfig& config) : config(config) {
         // Set up the robot spec callback
-        config->addRobotSpecCallback(boost::bind(&RobotModel::robotSpecCallback, this));
+        this->config.addRobotSpecCallback(std::bind(&RobotModel::robotSpecCallback, this));
 
         // Reset the robot model object
         reset(true);
@@ -127,34 +127,34 @@ namespace contrib {
     // Initialise the (fixed) translations of the frames in the kinematic chain
     void RobotModel::initKinematicTranslations() {
         // Trunk
-        com.setTranslation(config->comOffsetX(), 0, config->comOffsetZ());
-        trunkLink.setTranslation(config->trunkLinkOffsetX(), config->trunkLinkOffsetY(), config->trunkLinkOffsetZ());
+        com.setTranslation(config.comOffsetX, 0, config.comOffsetZ);
+        trunkLink.setTranslation(config.trunkLinkOffsetX, config.trunkLinkOffsetY, config.trunkLinkOffsetZ);
 
         // Head
-        neck.setTranslation(0, 0, config->trunkHeight() + config->neckHeight());
-        head.setTranslation(config->headOffsetX(), 0, config->headOffsetZ());
+        neck.setTranslation(0, 0, config.trunkHeight + config.neckHeight);
+        head.setTranslation(config.headOffsetX, 0, config.headOffsetZ);
 
         // Left arm
-        lShoulder.setTranslation(0, 0.5 * config->shoulderWidth(), config->trunkHeight());
-        lElbow.setTranslation(0, 0, -config->armLinkLength());
-        lHand.setTranslation(0, 0, -config->armLinkLength());
+        lShoulder.setTranslation(0, 0.5 * config.shoulderWidth, config.trunkHeight);
+        lElbow.setTranslation(0, 0, -config.armLinkLength);
+        lHand.setTranslation(0, 0, -config.armLinkLength);
 
         // Right arm
-        rShoulder.setTranslation(0, -0.5 * config->shoulderWidth(), config->trunkHeight());
-        rElbow.setTranslation(0, 0, -config->armLinkLength());
-        rHand.setTranslation(0, 0, -config->armLinkLength());
+        rShoulder.setTranslation(0, -0.5 * config.shoulderWidth, config.trunkHeight);
+        rElbow.setTranslation(0, 0, -config.armLinkLength);
+        rHand.setTranslation(0, 0, -config.armLinkLength);
 
         // Left leg
-        lHip.setTranslation(0, 0.5 * config->hipWidth(), 0);
-        lKnee.setTranslation(0, 0, -config->legLinkLength());
-        lAnkle.setTranslation(0, 0, -config->legLinkLength());
-        lFootFloorPoint.setTranslation(0, 0, -config->footOffsetZ());
+        lHip.setTranslation(0, 0.5 * config.hipWidth, 0);
+        lKnee.setTranslation(0, 0, -config.legLinkLength);
+        lAnkle.setTranslation(0, 0, -config.legLinkLength);
+        lFootFloorPoint.setTranslation(0, 0, -config.footOffsetZ);
 
         // Right leg
-        rHip.setTranslation(0, -0.5 * config->hipWidth(), 0);
-        rKnee.setTranslation(0, 0, -config->legLinkLength());
-        rAnkle.setTranslation(0, 0, -config->legLinkLength());
-        rFootFloorPoint.setTranslation(0, 0, -config->footOffsetZ());
+        rHip.setTranslation(0, -0.5 * config.hipWidth, 0);
+        rKnee.setTranslation(0, 0, -config.legLinkLength);
+        rAnkle.setTranslation(0, 0, -config.legLinkLength);
+        rFootFloorPoint.setTranslation(0, 0, -config.footOffsetZ);
     }
 
     // Initialise the rotations of the frames in the kinematic chain
@@ -274,7 +274,7 @@ namespace contrib {
         int lowestFoot        = (footHeightDiff > 0 ? LEFT_LEG : RIGHT_LEG);
 
         // Allow a support exchange if the vertical foot separation has exceeded a configured threshold
-        if (supportExchangeLock && (fabs(footHeightDiff) >= config->footHeightHysteresis())) {
+        if (supportExchangeLock && (fabs(footHeightDiff) >= config.footHeightHysteresis)) {
             supportExchangeLock = false;
         }
 

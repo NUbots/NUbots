@@ -10,6 +10,9 @@
 #include "utility/input/ServoID.h"
 
 namespace gait {
+//! Enumeration of motion stances that can be commanded to a gait engine
+enum MotionStance { STANCE_DEFAULT, STANCE_KICK, STANCE_COUNT };
+
 /**
  * @brief Data struct for passing gait engine input data from the
  * generic gait motion module to the gait engine that it manages.
@@ -52,6 +55,8 @@ struct GaitEngineInput {
     // Motion parameters
     //! @brief Boolean flag whether a motion is pending.
     bool motionPending;
+    //!< @brief The stopping stance required for the playing of the pending motion.
+    MotionStance motionStance;
     //! @brief Boolean flag whether the left foot should be used to adjust the stopping stance.
     bool motionAdjustLeftFoot;
     //! @brief Boolean flag whether the right foot should be used to adjust the stopping stance.

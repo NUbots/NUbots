@@ -6,6 +6,9 @@
 #include "GaitEngine.h"
 
 #include <functional>
+
+#include "utility/input/ServoID.h"
+#include "utility/math/angle.h"
 #include "utility/math/comparison.h"
 #include "utility/math/filter/LinSinFillet.h"
 #include "utility/math/filter/SlopeLimiter.h"
@@ -19,6 +22,7 @@
 // GaitEngine class
 //
 namespace gait {
+using ServoID = utility::input::ServoID;
 
 GaitEngine::GaitEngine()
     : model(nullptr)
@@ -33,14 +37,14 @@ GaitEngine::GaitEngine()
     , m_gcvAccSmoothX(9)
     , m_gcvAccSmoothY(9)
     , m_gcvAccSmoothZ(9)
-    , m_resetIntegrators(CONFIG_PARAM_PATH + "resetIntegrators", false)
-    , m_saveIFeedToHaltPose(CONFIG_PARAM_PATH + "saveIFeedToHaltPose", false)
+    , m_resetIntegrators(false)
+    , m_saveIFeedToHaltPose(false)
     , rxRobotModel(config)
     , rxModel(config)
     , mxModel(config)
     , txModel(config)
-    , m_gcvZeroTime("/gait/gcv/gcvZeroTime", 0.0, 0.05, 2.0, 0.0)
-    , m_plotData(CONFIG_PARAM_PATH + "plotData", false) {
+    , m_gcvZeroTime(0.0)
+    , m_plotData(false) {
 
     in.reset();
     out.reset();
@@ -55,19 +59,20 @@ GaitEngine::GaitEngine()
     m_lastJointPose = m_jointHaltPose;
 
     // Set up callbacks for the basic feedback config parameters
-    config.basicFusedFilterN.setCallback(std::bind(&GaitEngine::resizeFusedFilters, this, std::placeholders::_1));
-    config.basicDFusedFilterN.setCallback(std::bind(&GaitEngine::resizeDFusedFilters, this, std::placeholders::_1));
-    config.basicIFusedFilterN.setCallback(std::bind(&GaitEngine::resizeIFusedFilters, this, std::placeholders::_1));
-    config.basicGyroFilterN.setCallback(std::bind(&GaitEngine::resizeGyroFilters, this, std::placeholders::_1));
+    config.addParamCallback(std::bind(&GaitEngine::resizeFusedFilters, this, std::ref(config.basicFusedFilterN)));
+    config.addParamCallback(std::bind(&GaitEngine::resizeDFusedFilters, this, std::ref(config.basicDFusedFilterN)));
+    config.addParamCallback(std::bind(&GaitEngine::resizeIFusedFilters, this, std::ref(config.basicIFusedFilterN)));
+    config.addParamCallback(std::bind(&GaitEngine::resizeGyroFilters, this, std::ref(config.basicGyroFilterN)));
     resizeFusedFilters(config.basicFusedFilterN);
     resizeDFusedFilters(config.basicDFusedFilterN);
     resizeIFusedFilters(config.basicIFusedFilterN);
     resizeGyroFilters(config.basicGyroFilterN);
 
+    // TODO: How to do this crap?
     // Set up callbacks for the local config parameters
-    m_resetIntegrators.setCallback(std::bind(&GaitEngine::resetIntegrators, this));
-    m_showRxVis.setCallback(std::bind(&GaitEngine::callbackShowRxVis, this));
-    m_plotData.setCallback(std::bind(&GaitEngine::callbackPlotData, this));
+    // m_resetIntegrators.setCallback(std::bind(&GaitEngine::resetIntegrators, this));
+    // m_showRxVis.setCallback(std::bind(&GaitEngine::callbackShowRxVis, this));
+    // m_plotData.setCallback(std::bind(&GaitEngine::callbackPlotData, this));
     resetIntegrators();
     callbackShowRxVis();
     callbackPlotData();
@@ -229,8 +234,8 @@ void GaitEngine::step() {
     updateOutputs();
 
     // Reset the integrators if their offsets were saved to the halt pose
-    if (m_saveIFeedToHaltPose()) {
-        m_saveIFeedToHaltPose.set(false);
+    if (m_saveIFeedToHaltPose) {
+        m_saveIFeedToHaltPose = false;
         resetIntegrators();
     }
 
@@ -275,10 +280,12 @@ void GaitEngine::updateHaltPose() {
     m_abstractHaltPose.rightLeg.angleX += config.haltLegAngleXBias;
     m_abstractHaltPose.leftLeg.footAngleX += config.haltFootAngleXBias;
     m_abstractHaltPose.rightLeg.footAngleX += config.haltFootAngleXBias;
-    if (config.haltLegExtensionBias >= 0.0)
+    if (config.haltLegExtensionBias >= 0.0) {
         m_abstractHaltPose.leftLeg.extension += config.haltLegExtensionBias;
-    else
+    }
+    else {
         m_abstractHaltPose.rightLeg.extension -= config.haltLegExtensionBias;
+    }
     m_abstractHaltPose.leftArm.angleX += config.haltArmAngleXBias;
     m_abstractHaltPose.rightArm.angleX += config.haltArmAngleXBias;
 
@@ -309,13 +316,13 @@ void GaitEngine::updateHaltPose() {
 
     // Convert the clamped halt pose into the joint representation (abstract poses derived from m_abstractHaltPose are
     // clamped later, always right before they are converted into another space, i.e. joint/inverse)
-    AbstractPose clampedAbstractHaltPose = m_abstractHaltPose;
+    pose::AbstractPose clampedAbstractHaltPose = m_abstractHaltPose;
     clampAbstractPose(clampedAbstractHaltPose);
     m_jointHaltPose.setFromAbstractPose(clampedAbstractHaltPose);
 
     // Transcribe the joint halt pose to the required halt pose arrays
-    m_jointHaltPose.writeJointPosArray(haltJointCmd);
-    m_jointHaltPose.writeJointEffortArray(haltJointEffort);
+    haltJointCmd    = m_jointHaltPose.writeJointPosArray();
+    haltJointEffort = m_jointHaltPose.writeJointEffortArray();
 }
 
 // Set the robot's odometry
@@ -328,19 +335,18 @@ void GaitEngine::setOdometry(double posX, double posY, double rotZ) {
 // Update the robot's odometry
 void GaitEngine::updateOdometry() {
     // Transcribe the position odometry information
-    Vec trunkPos        = rxRobotModel.trunkLink.position();
-    out.odomPosition[0] = trunkPos.x;
-    out.odomPosition[1] = trunkPos.y;
-    out.odomPosition[2] = trunkPos.z;
+    Eigen::Vector3d trunkPos = rxRobotModel.trunkLink.position();
+    out.odomPosition[0]      = trunkPos.x();
+    out.odomPosition[1]      = trunkPos.y();
+    out.odomPosition[2]      = trunkPos.z();
 
     // Transcribe the orientation odometry information
-    Quaternion trunkRot    = rxRobotModel.trunkLink.orientation();
-    out.odomOrientation[0] = trunkRot[3];
-    out.odomOrientation[1] = trunkRot[0];
-    out.odomOrientation[2] = trunkRot[1];
-    out.odomOrientation[3] = trunkRot[2];
+    Eigen::Quaterniond trunkRot = rxRobotModel.trunkLink.orientation();
+    out.odomOrientation[0]      = trunkRot.w();
+    out.odomOrientation[1]      = trunkRot.x();
+    out.odomOrientation[2]      = trunkRot.y();
+    out.odomOrientation[3]      = trunkRot.z();
 }
-
 
 // Reset function for the integrators
 void GaitEngine::resetIntegrators() {
@@ -357,15 +363,15 @@ void GaitEngine::resetIntegrators() {
     usedIFusedY     = false;
 
     // Reset the triggering config parameter if it is set
-    if (m_resetIntegrators()) {
-        m_resetIntegrators.set(false);
+    if (m_resetIntegrators) {
+        m_resetIntegrators = false;
     }
 }
 
 // Reset function for the config parameter(s) that save the integrated feedback values
 void GaitEngine::resetSaveIntegrals() {
     // Reset the required config parameter(s) to false
-    m_saveIFeedToHaltPose.set(false);
+    m_saveIFeedToHaltPose = false;
 }
 
 // Reset function for capture steps functionality
@@ -416,20 +422,22 @@ void GaitEngine::resetCaptureSteps(bool resetRobotModel) {
     m_comFilter.reset(in.nominaldT);
 
     // Reset capture step variables
-    adaptation.x           = 1.0;
-    adaptation.y           = 1.0;
+    adaptation.x()         = 1.0;
+    adaptation.y()         = 1.0;
     lastSupportOrientation = 0.0;
     oldGcvTargetY          = 0.0;
     virtualSlope           = 0.0;
     stepTimeCount          = 0.0;
     lastStepDuration       = 0.0;
     stepCounter            = 0;
-    noCLStepsCounter       = std::max((int) (m_gcvZeroTime() / in.nominaldT + 0.5), 1);
+    noCLStepsCounter       = std::max((int) (m_gcvZeroTime / in.nominaldT + 0.5), 1);
     resetCounter           = 100;  // Force Mx to match Rx completely for the next/first few cycles
     cycleNumber            = 0;
 
     // Reset the motion stance variables
-    if (resetRobotModel) resetMotionStance();
+    if (resetRobotModel) {
+        resetMotionStance();
+    }
 
     // Reset save integral feedback config parameter
     resetSaveIntegrals();
@@ -486,7 +494,7 @@ void GaitEngine::processInputs() {
     }
 
     // Plot data
-    if (m_PM.getEnabled()) {
+    if (m_PM.getEnabled) {
         m_PM.plotVec3d(m_gcv, PM_GCV);
         m_PM.plotVec3d(m_gcvAcc, PM_GCV_ACC);
         m_PM.plotScalar(m_gaitPhase, PM_GAIT_PHASE);
@@ -507,7 +515,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     cycleNumber++;
 
     // Transcribe the gcv input
-    Eigen::Vector3f gcvInput(m_gcvInput.x(), m_gcvInput.y(), m_gcvInput.z());
+    Eigen::Vector3f gcvInput = m_gcvInput.cast<float>();
 
     // Calculate the current unbiased gait command vector
     Eigen::Vector3d gcvUnbiased = m_gcv - gcvBias;  // Should only be used for checking the proximity of gcv to a
@@ -546,28 +554,37 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Retrieve the robot's current measured pose in terms of joint angles and populate a Pose struct with it
     // Note: We only need to populate the x, y, z fields for each joint, as this is all that our rxRobotModel needs.
-    margait_contrib::Pose measuredPose;
+    contrib::Pose measuredPose;
     measuredPose.headPose.neck.setPos(0.0, 0.0, 0.0);
     measuredPose.trunkPose.spine.setPos(0.0, 0.0, 0.0);
-    measuredPose.leftArmPose.shoulder.setPos(in.jointPos[L_SHOULDER_ROLL], in.jointPos[L_SHOULDER_PITCH], 0.0);
-    measuredPose.leftArmPose.elbow.setPos(0.0, in.jointPos[L_ELBOW_PITCH], 0.0);
-    measuredPose.leftLegPose.hip.setPos(in.jointPos[L_HIP_ROLL], in.jointPos[L_HIP_PITCH], in.jointPos[L_HIP_YAW]);
-    measuredPose.leftLegPose.knee.setPos(0.0, in.jointPos[L_KNEE_PITCH], 0.0);
-    measuredPose.leftLegPose.ankle.setPos(in.jointPos[L_ANKLE_ROLL], in.jointPos[L_ANKLE_PITCH], 0.0);
-    measuredPose.rightArmPose.shoulder.setPos(in.jointPos[R_SHOULDER_ROLL], in.jointPos[R_SHOULDER_PITCH], 0.0);
-    measuredPose.rightArmPose.elbow.setPos(0.0, in.jointPos[R_ELBOW_PITCH], 0.0);
-    measuredPose.rightLegPose.hip.setPos(in.jointPos[R_HIP_ROLL], in.jointPos[R_HIP_PITCH], in.jointPos[R_HIP_YAW]);
-    measuredPose.rightLegPose.knee.setPos(0.0, in.jointPos[R_KNEE_PITCH], 0.0);
-    measuredPose.rightLegPose.ankle.setPos(in.jointPos[R_ANKLE_ROLL], in.jointPos[R_ANKLE_PITCH], 0.0);
+    measuredPose.leftArmPose.shoulder.setPos(
+        in.jointPos[ServoID::L_SHOULDER_ROLL], in.jointPos[ServoID::L_SHOULDER_PITCH], 0.0);
+    measuredPose.leftArmPose.elbow.setPos(0.0, in.jointPos[ServoID::L_ELBOW], 0.0);
+    measuredPose.leftLegPose.hip.setPos(
+        in.jointPos[ServoID::L_HIP_ROLL], in.jointPos[ServoID::L_HIP_PITCH], in.jointPos[ServoID::L_HIP_YAW]);
+    measuredPose.leftLegPose.knee.setPos(0.0, in.jointPos[ServoID::L_KNEE], 0.0);
+    measuredPose.leftLegPose.ankle.setPos(in.jointPos[ServoID::L_ANKLE_ROLL], in.jointPos[ServoID::L_ANKLE_PITCH], 0.0);
+    measuredPose.rightArmPose.shoulder.setPos(
+        in.jointPos[ServoID::R_SHOULDER_ROLL], in.jointPos[ServoID::R_SHOULDER_PITCH], 0.0);
+    measuredPose.rightArmPose.elbow.setPos(0.0, in.jointPos[ServoID::R_ELBOW], 0.0);
+    measuredPose.rightLegPose.hip.setPos(
+        in.jointPos[ServoID::R_HIP_ROLL], in.jointPos[ServoID::R_HIP_PITCH], in.jointPos[ServoID::R_HIP_YAW]);
+    measuredPose.rightLegPose.knee.setPos(0.0, in.jointPos[ServoID::R_KNEE], 0.0);
+    measuredPose.rightLegPose.ankle.setPos(
+        in.jointPos[ServoID::R_ANKLE_ROLL], in.jointPos[ServoID::R_ANKLE_PITCH], 0.0);
 
     // Update the rx robot model and filtered CoM state
     rxRobotModel.update(measuredPose, fusedX, fusedY);
-    Vec suppComVector = rxRobotModel.suppComVector();
-    if (cycleNumber == 1) m_comFilter.reset(systemIterationTime, suppComVector.x, suppComVector.y, 0.0, 0.0);
-    m_comFilter.update(suppComVector.x, suppComVector.y);
+    Eigen::Vector3d suppComVector = rxRobotModel.suppComVector();
+    if (cycleNumber == 1) {
+        m_comFilter.reset(systemIterationTime, suppComVector.x(), suppComVector.y(), 0.0, 0.0);
+    }
+    m_comFilter.update(suppComVector.x(), suppComVector.y());
 
     // If this is the first cycle then reset the odometry properly as we are now in pose
-    if (cycleNumber == 1) rxRobotModel.setOdom(0.0, 0.0, 0.0);
+    if (cycleNumber == 1) {
+        rxRobotModel.setOdom(0.0, 0.0, 0.0);
+    }
 
     // Update the rx model timing
     rxModel.timeSinceStep += systemIterationTime;
@@ -575,13 +592,23 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Handle rx robot model support exchange
     if (rxRobotModel.supportExchange) {
-        double supportOrientation        = rxRobotModel.fusedYaw(rxRobotModel.suppFootstep.orientation());
-        double angleFromLastToNewSupport = picut(supportOrientation - lastSupportOrientation);
-        lastSupportOrientation           = supportOrientation;
+        double supportOrientation = rxRobotModel.fusedYaw(rxRobotModel.suppFootstep.orientation());
+        double angleFromLastToNewSupport =
+            utility::math::angle::normalizeAngle(supportOrientation - lastSupportOrientation);
+        lastSupportOrientation = supportOrientation;
+
+        // To maintain continuous velocity in the world frame, rotate the CoM velocity vector into the new support
+        // frame.
+        Eigen::Matrix2f rot;
+        // clang-format off
+        // 2D rotation by (-angleFromLastToNewSupport)
+        rot <<  std::cos(angleFromLastToNewSupport), std::sin(angleFromLastToNewSupport)
+               -std::sin(angleFromLastToNewSupport), std::cos(angleFromLastToNewSupport);
+        // clang-format on
         Eigen::Vector2f v(rxModel.vx, rxModel.vy);
-        v.rotate(-angleFromLastToNewSupport);  // To maintain continuous velocity in the world frame, rotate the CoM
-                                               // velocity vector into the new support frame.
-        m_comFilter.reset(systemIterationTime, suppComVector.x, suppComVector.y, v.x, v.y);
+        v = rot * v;
+
+        m_comFilter.reset(systemIterationTime, suppComVector.x(), suppComVector.y(), v.x(), v.y());
         rxModel.timeSinceStep     = 0;
         rxModel.nominalTimeToStep = 2.0 * rxModel.nominalFootStepTHalf;
         stepCounter++;
@@ -590,7 +617,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     }
 
     // Add CoM offsets
-    LimpState ms(m_comFilter.x(), m_comFilter.y(), m_comFilter.vx(), m_comFilter.vy(), 0.0, 0.0);
+    contrib::LimpState ms(m_comFilter.x(), m_comFilter.y(), m_comFilter.vx(), m_comFilter.vy(), 0.0, 0.0);
     ms.supportLegSign = rxRobotModel.supportLegSign;
     ms.x += config.mgComOffsetX;
     ms.y += ms.supportLegSign * config.mgComOffsetY + config.mgComOffsetYBias;
@@ -611,11 +638,11 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Forward and update the mxModel
     mxModel.forwardThroughStep(systemIterationTime);
-    LimpState mx  = mxModel.getMotionState();
-    LimpState rx  = rxModel.getMotionState();
-    LimpState ls  = mx;
-    double adaptx = utility::math::clamp(0.0, adaptation.x, 1.0);
-    double adapty = utility::math::clamp(0.0, adaptation.y, 1.0);
+    contrib::LimpState mx = mxModel.getMotionState();
+    contrib::LimpState rx = rxModel.getMotionState();
+    contrib::LimpState ls = mx;
+    double adaptx         = utility::math::clamp(0.0f, adaptation.x(), 1.0f);
+    double adapty         = utility::math::clamp(0.0f, adaptation.y(), 1.0f);
     if (rxModel.supportLegSign * mxModel.supportLegSign > 0) {
         ls.x  = (1.0 - adaptx) * mx.x + adaptx * rx.x;
         ls.vx = (1.0 - adaptx) * mx.vx + adaptx * rx.vx;
@@ -628,8 +655,9 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // calculations!)
     txModel        = mxModel;
     double latency = config.mgLatency;
-    if (mxModel.timeToStep > latency)
+    if (mxModel.timeToStep > latency) {
         txModel.forward(latency);
+    }
     else {
         txModel.forward(mxModel.timeToStep);
         txModel.step();
@@ -656,18 +684,19 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Calculate step noise suppression factor
     double phase = std::max(std::min(txModel.timeToStep, std::min(mxModel.timeToStep, mxModel.timeSinceStep)), 0.0);
-    double stepNoiseSuppression = 1.0 - exp(-(phase * phase) / (2.0 * config.nsStepNoiseTime * config.nsStepNoiseTime));
+    double stepNoiseSuppression =
+        1.0 - std::exp(-(phase * phase) / (2.0 * config.nsStepNoiseTime * config.nsStepNoiseTime));
     adaptationX *= stepNoiseSuppression;
     adaptationY *= stepNoiseSuppression;
 
     // If we are near the expected state, there is no need for adaptation.
     Eigen::Vector2f expectationDeviation;
-    expectationDeviation.x =
+    expectationDeviation.x() =
         config.nsGain * (Eigen::Vector2f(rxModel.x, rxModel.vx) - Eigen::Vector2f(mxModel.x, mxModel.vx)).norm();
-    expectationDeviation.y =
+    expectationDeviation.y() =
         config.nsGain * (Eigen::Vector2f(rxModel.y, rxModel.vy) - Eigen::Vector2f(mxModel.y, mxModel.vy)).norm();
-    adaptationX *= expectationDeviation.x;
-    adaptationY *= expectationDeviation.y;
+    adaptationX *= expectationDeviation.x();
+    adaptationY *= expectationDeviation.y();
 
     //  // If our fused angle is within a certain nominal range then don't adapt
     //  Eigen::Vector2f fusedAngleAdaptation;
@@ -688,13 +717,13 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     //  fusedAngleAdaptation.y = (absFusedX > config.nsMinDeviation ? config.nsGain * absFusedX : 0.0);
 
     // Calculate the required adaptation (0.0 => Completely trust Mx, 1.0 => Completely trust Rx)
-    adaptation.x = utility::math::clamp(0.0, adaptationX, config.nsMaxAdaptation);
-    adaptation.y = utility::math::clamp(0.0, adaptationY, config.nsMaxAdaptation);
+    adaptation.x() = utility::math::clamp(0.0, adaptationX, double(config.nsMaxAdaptation));
+    adaptation.y() = utility::math::clamp(0.0, adaptationY, double(config.nsMaxAdaptation));
 
     // Adaptation resetting (force complete trust in Rx)
     if (resetCounter > 0) {
-        adaptation.x = 1.0;
-        adaptation.y = 1.0;
+        adaptation.x() = 1.0;
+        adaptation.y() = 1.0;
         resetCounter--;
     }
 
@@ -703,10 +732,10 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     //
 
     // Calculate the fused angle deviation from expected
-    double expectedFusedX =
-        config.basicFusedExpXSinOffset + config.basicFusedExpXSinMag * sin(m_gaitPhase - config.basicFusedExpXSinPhase);
-    double expectedFusedY =
-        config.basicFusedExpYSinOffset + config.basicFusedExpYSinMag * sin(m_gaitPhase - config.basicFusedExpYSinPhase);
+    double expectedFusedX = config.basicFusedExpXSinOffset
+                            + config.basicFusedExpXSinMag * std::sin(m_gaitPhase - config.basicFusedExpXSinPhase);
+    double expectedFusedY = config.basicFusedExpYSinOffset
+                            + config.basicFusedExpYSinMag * std::sin(m_gaitPhase - config.basicFusedExpYSinPhase);
     double deviationFusedX = fusedX - expectedFusedX;
     double deviationFusedY = fusedY - expectedFusedY;
 
@@ -731,12 +760,10 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     }
 
     // Calculate basic fused angle deviation derivative feedback values
-    dFusedXFeedFilter.addXYW(in.timestamp,
-                             deviationFusedX,
-                             1.0);  // TODO: Modify the weighting based on gait phase to reject known fused angle bumps
-    dFusedYFeedFilter.addXYW(in.timestamp,
-                             deviationFusedY,
-                             1.0);  // TODO: Modify the weighting based on gait phase to reject known fused angle bumps
+    // TODO: Modify the weighting based on gait phase to reject known fused angle bumps
+    dFusedXFeedFilter.addXYW(in.timestamp, deviationFusedX, 1.0);
+    // TODO: Modify the weighting based on gait phase to reject known fused angle bumps
+    dFusedYFeedFilter.addXYW(in.timestamp, deviationFusedY, 1.0);
     dFusedXFeed = config.basicDFusedGainAllLat * utility::math::filter::SmoothDeadband::eval(
                                                      dFusedXFeedFilter.deriv(), config.basicDFusedDeadRadiusX);
     dFusedYFeed = config.basicDFusedGainAllSag * utility::math::filter::SmoothDeadband::eval(
@@ -821,8 +848,9 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
         double dev    = fusedY - config.virtualSlopeMidAngle;
         double absdev = fabs(dev);
         if (absdev > config.virtualSlopeMinAngle) {
-            virtualSlope += sign(dev) * (dev * config.gcvPrescalerLinVelX * m_gcv.x() > 0 ? config.virtualSlopeGainAsc
-                                                                                          : config.virtualSlopeGainDsc)
+            virtualSlope += utility::math::sign(dev)
+                            * (dev * config.gcvPrescalerLinVelX * m_gcv.x() > 0 ? config.virtualSlopeGainAsc
+                                                                                : config.virtualSlopeGainDsc)
                             * (absdev - config.virtualSlopeMinAngle);
         }
     }
@@ -835,7 +863,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     double oldGaitPhase = m_gaitPhase;
 
     // Get the support leg sign according to the current gait phase
-    int gaitPhaseLegSign = sign(m_gaitPhase);
+    int gaitPhaseLegSign = utility::math::sign(m_gaitPhase);
 
     // By default use the nominal gait frequency for timing (these variables tell us on what leg we should be standing,
     // for how much gait phase to come, traversing the gait phase with what frequency)
@@ -871,15 +899,15 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     }
 
     // Coerce the gait frequency to the allowed range
-    gaitFrequency = utility::math::clamp(1e-8, gaitFrequency, config.gaitFrequencyMax);
+    gaitFrequency = utility::math::clamp(1e-8, gaitFrequency, double(config.gaitFrequencyMax));
 
     // Calculate the time to step based on how much gait phase we have to cover and how fast we intend to cover it
     double timeToStep = remainingGaitPhase / (M_PI * gaitFrequency);  // Note: Always in the range (0,Inf)
 
     // Update the gait phase with the appropriate phase increment
     double gaitPhaseIncrement = gaitFrequency * M_PI * systemIterationTime;
-    m_gaitPhase               = picut(
-        m_gaitPhase + gaitPhaseIncrement);  // The gait phase must be in the range (-pi,pi], and thus must be wrapped!
+    // The gait phase must be in the range (-pi,pi], and thus must be wrapped!
+    m_gaitPhase = utility::math::angle::normalizeAngle(m_gaitPhase + gaitPhaseIncrement);
 
     // Increment the blending phase if we are in the process of blending
     if (m_blending) {
@@ -899,8 +927,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     }
 
     // Clamp the step size to a maximal radius
-    stepSize.x = utility::math::clamp(-config.mgMaxStepRadiusX, stepSize.x, config.mgMaxStepRadiusX);
-    stepSize.y = utility::math::clamp(-config.mgMaxStepRadiusY, stepSize.y, config.mgMaxStepRadiusY);
+    stepSize.x() = utility::math::clamp(-config.mgMaxStepRadiusX, stepSize.x(), config.mgMaxStepRadiusX);
+    stepSize.y() = utility::math::clamp(-config.mgMaxStepRadiusY, stepSize.y(), config.mgMaxStepRadiusY);
 
     // Step size to GCV conversion.
     // To dodge the fact that the gait engine can only take symmetrical steps, while the limp model may produce
@@ -909,15 +937,15 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     Eigen::Vector3d gcvTarget;
     Eigen::Vector3f sex = 0.5 * stepSize;
     limp.set(0.0, sigma, C);
-    limp.update(Limp(alpha, 0, C).tLoc(delta));
-    gcvTarget.x() = sex.x / limp.x0;
-    if (supportLegSign * gcvInput.y >= 0) {
-        gcvTarget.y() = supportLegSign * utility::math::clamp(-1.0, (std::abs(sex.y) - delta) / (omega - delta), 1.0);
+    limp.update(contrib::Limp(alpha, 0, C).tLoc(delta));
+    gcvTarget.x() = sex.x() / limp.x0;
+    if (supportLegSign * gcvInput.y() >= 0) {
+        gcvTarget.y() = supportLegSign * utility::math::clamp(-1.0, (std::abs(sex.y()) - delta) / (omega - delta), 1.0);
     }
     else {
         gcvTarget.y() = oldGcvTargetY;  // TODO: This looks relatively unsafe
     }
-    gcvTarget.z() = sex.z;
+    gcvTarget.z() = sex.z();
     oldGcvTargetY = gcvTarget.y();
     if (!config.cmdAllowCLStepSizeX) {
         gcvTarget.x() = 0.0;
@@ -964,7 +992,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // Open loop step sizes...
     else {
         // Zero out the step size to show that we are OL
-        stepSize.x = stepSize.y = stepSize.z = 0.0;
+        stepSize = Eigen::Vector3f::Zero();
 
         // Update the internal gcv based on the gcv input using a slope-limiting approach
         double D = config.gcvDecToAccRatio;
@@ -1023,10 +1051,11 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     }
 
     // Update the motion stance factors, taking into consideration which legs we are allowed to adjust
-    if (!haveMotionStance || (gcvUnbiased.norm() <= config.stanceAdjustGcvMax
-                              && ((in.motionAdjustLeftFoot && rxRobotModel.supportLegSign == RobotModel::RIGHT_LEG)
-                                  || (in.motionAdjustRightFoot && rxRobotModel.supportLegSign == RobotModel::LEFT_LEG)
-                                  || (!in.motionAdjustLeftFoot && !in.motionAdjustRightFoot)))) {
+    if (!haveMotionStance
+        || (gcvUnbiased.norm() <= config.stanceAdjustGcvMax
+            && ((in.motionAdjustLeftFoot && rxRobotModel.supportLegSign == contrib::RobotModel::RIGHT_LEG)
+                || (in.motionAdjustRightFoot && rxRobotModel.supportLegSign == contrib::RobotModel::LEFT_LEG)
+                || (!in.motionAdjustLeftFoot && !in.motionAdjustRightFoot)))) {
         m_motionLegAngleXFact = utility::math::filter::SlopeLimiter::eval(
             targetLegAngleXFact, m_motionLegAngleXFact, config.stanceAdjustRate * systemIterationTime);
     }
@@ -1061,7 +1090,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Plot update function variables
     if (m_PM.getEnabled()) {
-        Vec tmp;
+        Eigen::Vector3d tmp;
         tmp = rxRobotModel.suppComVector();
         m_PM.plotScalar(tmp.x, PM_RXRMODEL_SUPPVEC_X);
         m_PM.plotScalar(tmp.y, PM_RXRMODEL_SUPPVEC_Y);
@@ -1152,9 +1181,10 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
     // Set the gait phase variables
     CMD.gaitPhase = m_gaitPhase;  // gaitPhase: Starts at 0 at the beginning of walking, and has the swing phase of the
                                   // first leg in [0,pi] (left or right depending on m_leftLegFirst)
-    CMD.oppGaitPhase = picut(CMD.gaitPhase + M_PI);  // oppGaitPhase: Is in exact antiphase to gaitPhase, and has the
-                                                     // support phase of the first leg in [0,pi] (left or right
-                                                     // depending on m_leftLegFirst)
+    CMD.oppGaitPhase = utility::math::angle::normalizeAngle(
+        CMD.gaitPhase + M_PI);  // oppGaitPhase: Is in exact antiphase to gaitPhase, and has the
+                                // support phase of the first leg in [0,pi] (left or right
+                                // depending on m_leftLegFirst)
     CMD.limbPhase = (isFirst ? CMD.gaitPhase : CMD.oppGaitPhase);  // limbPhase: Is in exact phase or antiphase to
                                                                    // m_gaitPhase, and always has the swing phase of
                                                                    // 'this' limb in [0,pi]
@@ -1209,10 +1239,10 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
     CMD.suppPhaseLen = M_PI - CMD.suppTransStartPhase + CMD.suppTransStopPhase;  // Length of the support phase (phase
                                                                                  // length for which a support
                                                                                  // coefficient is non-zero at a time)
-    CMD.nonSuppPhaseLen = M_2PI - CMD.suppPhaseLen;  // Length of the non-support phase (phase length for which a
-                                                     // support coefficient is zero at a time)
+    CMD.nonSuppPhaseLen = (2.0 * M_PI) - CMD.suppPhaseLen;  // Length of the non-support phase (phase length for which a
+                                                            // support coefficient is zero at a time)
     CMD.sinusoidPhaseLen = CMD.swingStopPhase - CMD.swingStartPhase;  // Length of the sinusoidal forwards swing phase
-    CMD.linearPhaseLen   = M_2PI - CMD.sinusoidPhaseLen;              // Length of the linear backwards swing phase
+    CMD.linearPhaseLen   = (2.0 * M_PI) - CMD.sinusoidPhaseLen;       // Length of the linear backwards swing phase
 
     // Calculate the gait phase dependent dimensionless swing angle (ranging from -1 to 1)
     if (CMD.limbPhase >= CMD.swingStartPhase && CMD.limbPhase <= CMD.swingStopPhase) {
@@ -1229,12 +1259,13 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
                                                                                       // pi)
     }
     else {
-        CMD.swingAngle =
-            1.0 - (2.0 / CMD.linearPhaseLen) * (CMD.limbPhase - CMD.swingStopPhase + M_2PI);  // Linear backwards swing
-                                                                                              // from dimensionless
-                                                                                              // angle C to -1 (section
-                                                                                              // from phase -pi to phase
-                                                                                              // swingStartPhase)
+        CMD.swingAngle = 1.0
+                         - (2.0 / CMD.linearPhaseLen)
+                               * (CMD.limbPhase - CMD.swingStopPhase + (2.0 * M_PI));  // Linear backwards swing
+                                                                                       // from dimensionless
+                                                                                       // angle C to -1 (section
+                                                                                       // from phase -pi to phase
+                                                                                       // swingStartPhase)
     }
 
     // Return the common motion data
@@ -1294,7 +1325,7 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
         // Precalculate parameters and phases for the following calculation
         double sinAngFreq     = M_PI / CMD.liftingPhaseLen;
         double stepStartPhase = CMD.limbPhase - CMD.doubleSupportPhase;
-        double stepStopPhase  = -picut(CMD.limbPhase - M_PI);
+        double stepStopPhase  = -utility::math::angle::normalizeAngle(CMD.limbPhase - M_PI);
         double pushStartPhase = stepStartPhase + M_PI;
         double pushStopPhase  = -CMD.limbPhase;
 
@@ -1312,13 +1343,13 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
         }
 
         // Add fillets to the waveforms to avoid overly large acceleration/torque jumps
-        legExtensionOffset += utility::filter::LinSinFillet::eval(
+        legExtensionOffset += utility::math::filter::LinSinFillet::eval(
             stepStartPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen, config.doubleSupportPhaseLen);
-        legExtensionOffset += utility::filter::LinSinFillet::eval(
+        legExtensionOffset += utility::math::filter::LinSinFillet::eval(
             stepStopPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen, config.doubleSupportPhaseLen);
-        legExtensionOffset += utility::filter::LinSinFillet::eval(
+        legExtensionOffset += utility::math::filter::LinSinFillet::eval(
             pushStartPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen, config.doubleSupportPhaseLen);
-        legExtensionOffset += utility::filter::LinSinFillet::eval(
+        legExtensionOffset += utility::math::filter::LinSinFillet::eval(
             pushStopPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen, config.doubleSupportPhaseLen);
 
         // Update the leg extension
@@ -1378,17 +1409,17 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     // Perform phase calculations for the left and right halves (sinusoids) of the hip swing motion
     double hipSwingStartL = CMD.suppTransStartPhase + M_PI;  // The start phase of the period of support of the left leg
     double hipSwingStartR = CMD.suppTransStartPhase;  // The start phase of the period of support of the right leg
-    double hipSwingPhaseL = (CMD.absPhase < hipSwingStartL ? CMD.absPhase + M_2PI : CMD.absPhase)
+    double hipSwingPhaseL = (CMD.absPhase < hipSwingStartL ? CMD.absPhase + (2.0 * M_PI) : CMD.absPhase)
                             - hipSwingStartL;  // The current phase relative to the start of the transition to the left
                                                // leg as the support leg, in the range [0,2*pi]
-    double hipSwingPhaseR = (CMD.absPhase < hipSwingStartR ? CMD.absPhase + M_2PI : CMD.absPhase)
+    double hipSwingPhaseR = (CMD.absPhase < hipSwingStartR ? CMD.absPhase + (2.0 * M_PI) : CMD.absPhase)
                             - hipSwingStartR;  // The current phase relative to the start of the transition to the right
                                                // leg as the support leg, in the range [0,2*pi]
 
     // Calculate the dimensionless hip swing angle (range -1 to 1) by summing up the two zero-clamped sinusoid
     // sub-waveforms
-    double hipSwingAngleL = -std::max(sin(M_PI * hipSwingPhaseL / CMD.suppPhaseLen), 0.0);
-    double hipSwingAngleR = std::max(sin(M_PI * hipSwingPhaseR / CMD.suppPhaseLen), 0.0);
+    double hipSwingAngleL = -std::max(std::sin(M_PI * hipSwingPhaseL / CMD.suppPhaseLen), 0.0);
+    double hipSwingAngleR = std::max(std::sin(M_PI * hipSwingPhaseR / CMD.suppPhaseLen), 0.0);
     double hipSwingAngle  = hipSwingAngleL + hipSwingAngleR;  // The hip swing angle is in the range -1 to 1
 
     // Apply the lateral hip swing to the abstract leg pose
@@ -1454,7 +1485,7 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     double footAngleCtsYFeedback = 0.0;
     if (!config.tuningNoLegFeedback) {
         // Compute the phase waveform over which to apply the foot feedback
-        double footPhaseLen = utility::math::clamp(0.05, config.basicFootAnglePhaseLen, M_PI_2);
+        double footPhaseLen = utility::math::clamp(0.05, double(config.basicFootAnglePhaseLen), M_PI_2);
         double footFeedbackSlope =
             1.0 / footPhaseLen;  // This can't go uncontrolled because the footPhaseLen is clamped to a reasonable range
         double footFeedbackScaler = 0.0;
@@ -1518,15 +1549,15 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
         leg.footAngleY += footAngleYFeedback + footAngleCtsYFeedback;
 
         // Handle saving of the current integral feedback values as halt pose offsets
-        if (m_saveIFeedToHaltPose() && !m_savedLegIFeed) {
+        if (m_saveIFeedToHaltPose && !m_savedLegIFeed) {
             // Note: The calculations of these offsets should match up with how the hip angle is added to the abstract
             // pose further down in this function!
-            config.haltLegAngleXBias.set(config.haltLegAngleXBias + hipAngleXIFeed);
-            config.haltLegAngleY.set(config.haltLegAngleY + hipAngleYIFeed);
-            config.haltFootAngleXBias.set(config.haltFootAngleXBias + footAngleCtsXIFeed + hipAngleXIFeed);
-            config.haltFootAngleY.set(config.haltFootAngleY + footAngleCtsYIFeed + hipAngleYIFeed);
-            config.haltLegExtensionBias.set(config.haltLegExtensionBias
-                                            + config.legHipAngleXLegExtGain * std::sin(hipAngleXIFeed));
+            config.haltLegAngleXBias  = config.haltLegAngleXBias + hipAngleXIFeed;
+            config.haltLegAngleY      = config.haltLegAngleY + hipAngleYIFeed;
+            config.haltFootAngleXBias = config.haltFootAngleXBias + footAngleCtsXIFeed + hipAngleXIFeed;
+            config.haltFootAngleY     = config.haltFootAngleY + footAngleCtsYIFeed + hipAngleYIFeed;
+            config.haltLegExtensionBias =
+                config.haltLegExtensionBias + config.legHipAngleXLegExtGain * std::sin(hipAngleXIFeed);
             NUClear::log("Saved the current integrated leg feedback offsets as modifications to the halt pose");
             m_savedLegIFeed = true;
         }
@@ -1698,9 +1729,9 @@ void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
         arm.angleY += armAngleYFeedback;
 
         // Handle saving of the current integral feedback values as halt pose offsets
-        if (m_saveIFeedToHaltPose() && !m_savedArmIFeed) {
-            config.haltArmAngleXBias.set(config.haltArmAngleXBias + armAngleXIFeed);
-            config.haltArmAngleY.set(config.haltArmAngleY + armAngleYIFeed);
+        if (m_saveIFeedToHaltPose && !m_savedArmIFeed) {
+            config.haltArmAngleXBias = config.haltArmAngleXBias + armAngleXIFeed;
+            config.haltArmAngleY     = config.haltArmAngleY + armAngleYIFeed;
             NUClear::log("Saved the current integrated arm feedback offsets as modifications to the halt pose");
             m_savedArmIFeed = true;
         }
@@ -1738,7 +1769,7 @@ void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
 
 // Generate the inverse leg motion
 // 'leg' is assumed to contain the desired abstract motion
-void GaitEngine::inverseLegMotion(gait::contrib::InverseLegPose& leg) {
+void GaitEngine::inverseLegMotion(pose::InverseLegPose& leg) {
     //
     // Common motion data
     //
@@ -1767,12 +1798,16 @@ void GaitEngine::inverseLegMotion(gait::contrib::InverseLegPose& leg) {
 
         // Apply the required limits if enabled
         if (config.basicComShiftXUseLimits) {
-            comShiftXFeedback = utility::math::clampSoft(
-                config.basicComShiftXMin, comShiftXFeedback, config.basicComShiftXMax, config.basicComShiftXBuf);
+            comShiftXFeedback = utility::math::clampSoft(double(config.basicComShiftXMin),
+                                                         comShiftXFeedback,
+                                                         double(config.basicComShiftXMax),
+                                                         double(config.basicComShiftXBuf));
         }
         if (config.basicComShiftYUseLimits) {
-            comShiftYFeedback = utility::math::clampSoft(
-                config.basicComShiftYMin, comShiftYFeedback, config.basicComShiftYMax, config.basicComShiftYBuf);
+            comShiftYFeedback = utility::math::clampSoft(double(config.basicComShiftYMin),
+                                                         comShiftYFeedback,
+                                                         double(config.basicComShiftYMax),
+                                                         double(config.basicComShiftYBuf));
         }
 
         // Disable the CoM shifting feedback if required
@@ -1890,15 +1925,15 @@ void GaitEngine::clampAbstractLegPose(pose::AbstractLegPose& leg) {
             config.limFootAngleYMin, leg.footAngleY, config.limFootAngleYMax, config.limFootAngleYBuf);
     }
     if (config.limLegExtUseLimits) {
-        leg.extension = utility::math::clampSoftMin(config.limLegExtMin, leg.extension, config.limLegExtBuf);
+        leg.extension = utility::math::clampSoftMin(config.limLegExtMin, float(leg.extension), config.limLegExtBuf);
     }
 }
 
 // Update outputs function
 void GaitEngine::updateOutputs() {
     // Transcribe the joint commands
-    out.jointCmd        = writeJointPosArray();
-    out.jointEffort     = writeJointEffortArray();
+    out.jointCmd        = m_jointPose.writeJointPosArray();
+    out.jointEffort     = m_jointPose.writeJointEffortArray();
     out.useRawJointCmds = haltUseRawJointCmds;
 
     // Transcribe the walking flag

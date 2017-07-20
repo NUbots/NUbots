@@ -56,13 +56,13 @@ namespace math {
 
             // Put function
             double put(double newValue) {
-                m_value += coerceAbs(newValue - m_value, m_maxDelta);
+                m_value += utility::math::clamp(-m_maxDelta, newValue - m_value, m_maxDelta);
                 return m_value;
             }
 
             // Static evaluation function
             static double eval(double newValue, double oldValue, double maxDelta) {
-                return oldValue + coerceAbs(newValue - oldValue, fabs(maxDelta));
+                return oldValue + utility::math::clamp(-std::abs(maxDelta), newValue - oldValue, std::abs(maxDelta));
             }
 
         private:

@@ -243,15 +243,15 @@ private:
     static constexpr double USE_CALC_POSE = 0.0;
 
     // Gait configuration struct
-    const WalkConfig& config;
+    gait::WalkConfig config;
 
     // Pose variables
-    pose::JointPose m_jointPose;               // Joint representation of the pose to command in a step
-    pose::JointPose m_jointHaltPose;           // Joint representation of the gait halt pose
-    pose::JointPose m_lastJointPose;           // The last joint pose to have been commanded during walking
-    contrib::InversePose m_inversePose;        // Inverse representation of the pose to command in a step
-    contrib::AbstractPose m_abstractPose;      // Abstract representation of the pose to command in a step
-    contrib::AbstractPose m_abstractHaltPose;  // Abstract representation of the gait halt pose
+    pose::JointPose m_jointPose;            // Joint representation of the pose to command in a step
+    pose::JointPose m_jointHaltPose;        // Joint representation of the gait halt pose
+    pose::JointPose m_lastJointPose;        // The last joint pose to have been commanded during walking
+    pose::InversePose m_inversePose;        // Inverse representation of the pose to command in a step
+    pose::AbstractPose m_abstractPose;      // Abstract representation of the pose to command in a step
+    pose::AbstractPose m_abstractHaltPose;  // Abstract representation of the gait halt pose
 
     // Gait command vector variables
     // Gait command velocity vector (slope-limited command velocities actually followed by the gait engine)
@@ -302,12 +302,12 @@ private:
     // Integrators
     utility::math::filter::EWIntegrator iFusedXFeedIntegrator;
     utility::math::filter::EWIntegrator iFusedYFeedIntegrator;
-    config_server::Parameter<bool> m_resetIntegrators;  // Rising edge triggered flag to reset any integrated or learned
-                                                        // values in the gait that are not necessarily reset during
-                                                        // start/stop of walking
-    config_server::Parameter<bool> m_saveIFeedToHaltPose;  // Rising edge triggered flag to save the current integrated
-                                                           // feedback values as offsets to the halt pose (only the ones
-                                                           // in current use)
+    bool m_resetIntegrators;     // Rising edge triggered flag to reset any integrated or learned
+                                 // values in the gait that are not necessarily reset during
+                                 // start/stop of walking
+    bool m_saveIFeedToHaltPose;  // Rising edge triggered flag to save the current integrated
+                                 // feedback values as offsets to the halt pose (only the ones
+                                 // in current use)
     bool m_savedLegIFeed;    // Flag that specifies within a cycle whether the integrated leg feedback has already been
                              // saved
     bool m_savedArmIFeed;    // Flag that specifies within a cycle whether the integrated arm feedback has already been
@@ -366,7 +366,7 @@ private:
 
     // Capture step robot model
     contrib::RobotModel rxRobotModel;
-    config_server::Parameter<bool> m_showRxVis;
+    bool m_showRxVis;
     void callbackShowRxVis();
 
     // Linear inverted pendulum robot models
@@ -381,7 +381,7 @@ private:
     ComFilter<5> m_comFilter;
 
     // Miscellaneous
-    config_server::Parameter<float> m_gcvZeroTime;
+    float m_gcvZeroTime;
     Eigen::Vector2f adaptation;
     double lastSupportOrientation;
     double oldGcvTargetY;

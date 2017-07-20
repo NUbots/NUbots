@@ -123,25 +123,27 @@ namespace math {
     //! the soft range given by within @p buffer of the limits
     template <typename T, typename U, typename V, typename W>
     inline constexpr std::enable_if_t<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value
-                                          && std::is_arithmetic<V>::value && std::is_arithmetic<W>::value,
+                                          && std::is_arithmetic<V>::value
+                                          && std::is_arithmetic<W>::value,
                                       U>
     clampSoft(const T& min, const U& x, const V& max, const W& buffer) {
 
         // Error checking on the buffer range
-        W maxBuf = 0.5 * (max - min);
+        W maxBuf     = 0.5 * (max - min);
+        W tempBuffer = buffer;
 
-        if (buffer > maxBuf) {
-            buffer = maxBuf;
+        if (tempBuffer > maxBuf) {
+            tempBuffer = maxBuf;
         }
 
-        if (buffer <= 0.0) {
+        if (tempBuffer <= 0.0) {
             return clamp(min, x, max);
         }
-        else if (x > max - buffer) {
-            return max - buffer * std::exp(-(x - (max - buffer)) / buffer);
+        else if (x > max - tempBuffer) {
+            return max - tempBuffer * std::exp(-(x - (max - tempBuffer)) / tempBuffer);
         }
-        else if (x < min + buffer) {
-            return min + buffer * std::exp((x - (min + buffer)) / buffer);
+        else if (x < min + tempBuffer) {
+            return min + tempBuffer * std::exp((x - (min + tempBuffer)) / tempBuffer);
         }
         else {
             return x;
