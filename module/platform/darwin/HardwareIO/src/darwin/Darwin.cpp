@@ -78,7 +78,7 @@ void Darwin::setConfig(const extension::Configuration& config) {
 
     // Set servos to be enabled if they are not simulated
     for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-        enabledServoIds[i] = !config["servos"][i]["servo_direction"].as<bool>();
+        enabledServoIds[i] = !config["servos"][i]["simulated"].as<bool>();
     }
 
     // Rebuild our bulk read packet
