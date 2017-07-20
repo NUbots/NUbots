@@ -18,6 +18,7 @@
  */
 
 #include "SoccerSimulator.h"
+
 #include <nuclear>
 #include <sstream>
 
@@ -27,11 +28,11 @@
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/Ball.h"
+#include "message/localisation/Field.h"
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"
 
-#include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -68,9 +69,6 @@ namespace support {
     using utility::math::angle::bearingToUnitVector;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::motion::kinematics::calculateRobotToIMU;
-    using utility::localisation::transform::SphericalRobotObservation;
-    using utility::localisation::transform::WorldToRobotTransform;
-    using utility::localisation::transform::RobotToWorldTransform;
     using utility::nubugger::graph;
     using utility::math::matrix::Transform2D;
     using utility::support::Expression;
@@ -312,14 +310,12 @@ namespace support {
                           emit(std::move(goals));
                       }
                       else {
-                          // Emit current self exactly
-                          auto r = std::make_unique<std::vector<message::localisation::Self>>();
-                          r->push_back(message::localisation::Self());
-                          r->back().locObject.position = convert<double, 2>(world.robotPose.xy());
-                          r->back().heading  = convert<double, 2>(bearingToUnitVector(world.robotPose.angle()));
-                          r->back().velocity = convert<double, 2>(world.robotVelocity.rows(0, 1));
-                          r->back().locObject.position_cov          = convert<double, 2, 2>(0.00001 * arma::eye(2, 2));
-                          r->back().locObject.last_measurement_time = NUClear::clock::now();
+                          // Emit current field exactly
+                          auto r = std::make_unique<std::vector<message::localisation::Field>>();
+                          r->push_back(message::localisation::Field());
+                          r->back().position =
+                              Eigen::Vector3d(world.robotPose.x(), world.robotPose.y(), world.robotPose.angle());
+                          r->back().covariance = Eigen::Matrix3d::Identity() * 0.00001;
                           emit(std::move(r));
                       }
 
@@ -342,18 +338,13 @@ namespace support {
                       }
                       else {
                           // Emit current ball exactly
-                          auto b = std::make_unique<message::localisation::Ball>();
-                          b->locObject.position =
-                              convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
-                          b->velocity =
-                              convert<double, 2>(world.robotPose.rotation().t() * world.ball.velocity.rows(0, 1));
-                          b->locObject.position_cov          = convert<double, 2, 2>(0.00001 * arma::eye(2, 2));
-                          b->locObject.last_measurement_time = NUClear::clock::now();
-                          emit(std::make_unique<std::vector<message::localisation::Ball>>(
-                              std::vector<message::localisation::Ball>(1, *b)));
+                          auto b        = std::make_unique<message::localisation::Ball>();
+                          b->position   = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
+                          b->covariance = Eigen::Matrix2d::Identity() * 0.00001;
+
+                          emit(std::make_unique<std::vector<message::localisation::Ball>>(1, *b));
                           emit(std::move(b));
                       }
-
                   });
 
 
