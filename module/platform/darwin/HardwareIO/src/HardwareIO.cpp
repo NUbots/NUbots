@@ -166,8 +166,9 @@ namespace platform {
                     }
                     // We have to move towards our destination at moving speed
                     else {
-                        servoState[i].presentPosition = present + movingSpeed * goal > present ? 1 : -1;
-                        servoState[i].presentSpeed    = servoState[i].movingSpeed;
+                        servoState[i].presentPosition = utility::math::angle::normalizeAngle(
+                            (present + movingSpeed * goal > present ? 1 : -1) + offset);
+                        servoState[i].presentSpeed = servoState[i].movingSpeed;
                     }
 
                     // Store our simulated values
