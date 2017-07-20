@@ -218,8 +218,8 @@ namespace platform {
                 darwin.setConfig(config);
 
                 for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                    Convert::SERVO_OFFSET[i]    = config["servos"][i]["servo_offset"].as<Expression>();
-                    Convert::SERVO_DIRECTION[i] = config["servos"][i]["servo_direction"].as<Expression>();
+                    Convert::SERVO_OFFSET[i]    = config["servos"][i]["offset"].as<Expression>();
+                    Convert::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
                     servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
                 }
             });
