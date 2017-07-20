@@ -47,6 +47,7 @@ namespace localisation {
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Transform3D;
     using message::support::FieldDescription;
+    using utility::localisation::transform::LocalisationStateToMatrix;
 
 
     using utility::math::matrix::Transform3D;

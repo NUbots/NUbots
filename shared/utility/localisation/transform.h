@@ -31,14 +31,14 @@ namespace localisation {
     namespace transform {
 
         inline utility::math::matrix::Transform3D LocalisationStateToMatrix(const arma::vec3& state) {
-            Transform3D Hfw;
+            utility::math::matrix::Transform3D Hfw;
             Hfw.translation() = arma::vec3{state[0], state[1], 0};
             Hfw               = Hfw.rotateZ(state[2]);
             return Hfw;
         }
 
         inline arma::vec3 MatrixToLocalisationState(const utility::math::matrix::Transform3D& m) {
-            utility::math::matrix::Rotation3D::AxisAngle ax = m.rotation().axisAngle();
+            utility::math::matrix::AxisAngle ax = m.rotation().axisAngle();
             if (!(arma::approx_equal(ax.first, arma::vec3({0, 0, 1}), "absdiff", 0.00001)
                   || arma::approx_equal(ax.first, arma::vec3({0, 0, -1}), "absdiff", 0.00001))) {
                 throw std::runtime_error("transform.h MatrixToLocalisationState - matrix must be a z rotation");

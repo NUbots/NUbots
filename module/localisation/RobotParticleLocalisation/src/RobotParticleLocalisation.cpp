@@ -6,6 +6,7 @@
 
 #include "message/behaviour/Nod.h"
 #include "message/platform/darwin/DarwinSensors.h"
+#include "utility/localisation/transform.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
@@ -34,6 +35,8 @@ namespace localisation {
     using message::support::FieldDescription;
     using message::vision::Goal;
     using message::localisation::LocalisationReset;
+    using utility::localisation::transform::LocalisationStateToMatrix;
+    using utility::localisation::transform::MatrixToLocalisationState;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -139,23 +142,21 @@ namespace localisation {
             });
 
         // Do I need to use sync??
-        on<Trigger<LocalisationReset>>, With<Sensors>,
-            Sync<RobotParticleLocalisation>> ().then("Localisation Reset",
-                                                     [this](const LocalisationReset& locReset, const Sensors& sensors) {
-                                                         const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                                                         std::vector<arma::vec3> states;
-                                                         std::vector<arma::mat33> cov;
-                                                         for (auto& s : locReset.self) {
-                                                             arma::vec3 rTFf = {s.locObject.position[0],
-                                                                                s.locObject.position[1],
-                                                                                std::atan2(s.heading[1], s.heading[0])};
-                                                             const Transform3D& Hft = LocalisationStateToMatrix(rTFf);
-                                                             const Transform3D& Hfw = Hft * Htw;
-                                                             states.push_back(MatrixToLocalisationState(Hfw));
-                                                             cov.push_back(s.covariance);
-                                                         }
-                                                         filter.ambiguousReset(states, cov, n_particles);
-                                                     });
+        on<Trigger<LocalisationReset>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
+            "Localisation Reset", [this](const LocalisationReset& locReset, const Sensors& sensors) {
+                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                std::vector<arma::vec3> states;
+                std::vector<arma::mat33> cov;
+                for (auto& s : locReset.self) {
+                    arma::vec3 rTFf = {
+                        s.locObject.position[0], s.locObject.position[1], std::atan2(s.heading[1], s.heading[0])};
+                    const Transform3D& Hft = LocalisationStateToMatrix(rTFf);
+                    const Transform3D& Hfw = Hft * Htw;
+                    states.push_back(MatrixToLocalisationState(Hfw));
+                    cov.push_back(convert<double, 3, 3>(s.covariance));
+                }
+                filter.resetAmbiguous(states, cov, n_particles);
+            });
     }
 
     std::vector<arma::vec> RobotParticleLocalisation::getPossibleFieldPositions(
