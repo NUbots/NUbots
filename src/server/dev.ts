@@ -47,17 +47,21 @@ server.listen(port, () => {
   console.log(`NUsight server started at http://localhost:${port}`)
 })
 
-if (withSimulators) {
-  const virtualRobots = VirtualRobots.of({
-    fakeNetworking: true,
-    numRobots: 3,
-    simulators: [
-      SensorDataSimulator.of(),
-    ],
+function init() {
+  if (withSimulators) {
+    const virtualRobots = VirtualRobots.of({
+      fakeNetworking: true,
+      numRobots: 3,
+      simulators: [
+        SensorDataSimulator.of(),
+      ],
+    })
+    virtualRobots.simulateWithFrequency(60)
+  }
+
+  WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
+    fakeNetworking: withSimulators,
   })
-  virtualRobots.simulateWithFrequency(60)
 }
 
-WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
-  fakeNetworking: withSimulators,
-})
+devMiddleware.waitUntilValid(init)
