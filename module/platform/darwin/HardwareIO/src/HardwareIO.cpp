@@ -161,13 +161,13 @@ namespace platform {
 
                     // We have reached our destination
                     if (std::abs(present - goal) < movingSpeed) {
-                        servo.presentPosition = servo.goalPosition;
-                        servo.presentSpeed    = 0;
+                        servoState[i].presentPosition = servoState[i].goalPosition;
+                        servoState[i].presentSpeed    = 0;
                     }
                     // We have to move towards our destination at moving speed
                     else {
                         servoState[i].presentPosition = utility::math::angle::normalizeAngle(
-                            (present + movingSpeed * goal > present ? 1 : -1) + offset);
+                            (present + movingSpeed * (goal > present ? 1 : -1)) + offset);
                         servoState[i].presentSpeed = servoState[i].movingSpeed;
                     }
 
