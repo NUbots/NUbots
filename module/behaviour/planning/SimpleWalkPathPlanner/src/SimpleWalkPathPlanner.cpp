@@ -213,9 +213,11 @@ namespace behaviour {
                     float speedFactor   = 1;
                     if (useLocalisation) {
 
+                        // Transform kick target to torso space
                         Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+                        Transform3D Htf = (Htw * Hfw.i());
                         arma::vec3 kickTarget =
-                            (Htw * Hfw.i()).transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
+                            Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
 
                         // //approach point:
                         arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);

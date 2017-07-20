@@ -29,8 +29,8 @@ namespace localisation {
     // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
     inline utility::math::matrix::Transform3D fieldStateToTransform3D(const arma::vec3& state) {
         utility::math::matrix::Transform3D Hfw;
-        Hfw.translation() = arma::vec3{state[kX], state[kY], 0};
-        Hfw               = Hfw.rotateZ(state[kAngle]);
+        Hfw.translation() = arma::vec3{state[0], state[1], 0};
+        Hfw               = Hfw.rotateZ(state[2]);
         return Hfw;
     }
 

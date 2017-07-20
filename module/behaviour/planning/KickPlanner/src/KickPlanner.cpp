@@ -113,9 +113,10 @@ namespace behaviour {
                     Transform3D Htw         = convert<double, 4, 4>(sensors.world);
                     arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});
 
-                    arma::vec3 kickTarget =
-                        (Htw * Hfw.i()).transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
-                    float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
+                    // Transform target from field to torso space
+                    Transform3D Htf       = (Htw * Hfw.i());
+                    arma::vec3 kickTarget = Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
+                    float KickAngle       = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
                     // log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
                     // log("Target of Kick",kickTarget.t());
