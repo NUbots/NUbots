@@ -227,7 +227,7 @@ namespace input {
 
         while (fd < 0 && resetCount < 10) {
             std::cout << "Toggling GPIO" << std::endl;
-            system("/home/nubots/gpio_toggle.sh");
+            system("/bin/bash /home/nubots/gpio_toggle.sh");
             fd = open(deviceID.c_str(), O_RDWR);
             resetCount++;
         }

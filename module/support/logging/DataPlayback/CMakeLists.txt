@@ -1,8 +1,8 @@
 # Generate our data logging module to handle all the message types
 FIND_PACKAGE(PythonInterp 3 REQUIRED)
 
-SET(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/DataLogging.cpp")
-SET(config_file "${CMAKE_CURRENT_BINARY_DIR}/data/config/DataLogging.yaml")
+SET(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/DataPlayback.cpp")
+SET(config_file "${CMAKE_CURRENT_BINARY_DIR}/data/config/DataPlayback.yaml")
 
 # Copy across the files
 ADD_CUSTOM_COMMAND(
@@ -10,13 +10,13 @@ ADD_CUSTOM_COMMAND(
     OUTPUT "${source_file}"
            "${config_file}"
     COMMAND ${PYTHON_EXECUTABLE}
-    ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
+    ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
          "${PROJECT_BINARY_DIR}/shared"
          "${source_file}"
          "${config_file}"
     DEPENDS ${NUCLEAR_MESSAGE_LIBRARIES}
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
-    COMMENT "Generating DataLogging system for current messages"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
+    COMMENT "Generating DataPlayback system for current messages"
 )
 
 # Build our NUClear module
