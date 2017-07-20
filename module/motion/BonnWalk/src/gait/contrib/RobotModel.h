@@ -9,6 +9,7 @@
 // Includes
 #include <Eigen/Core>
 
+#include "../WalkConfig.h"
 #include "Action.h"
 
 #include "utility/math/geometry/Frame.h"
@@ -20,10 +21,10 @@ namespace contrib {
     class RobotModel {
     public:
         // Constructor
-        explicit RobotModel(cap_gait::CapConfig* capConfig);
+        explicit RobotModel(const gait::WalkConfig& capConfig);
 
         // Configuration variables
-        const cap_gait::CapConfig* getConfig() const {
+        const gait::WalkConfig& getConfig() const {
             return config;
         }
 
@@ -31,10 +32,10 @@ namespace contrib {
         void reset(bool resetModel = true);
 
         // Robot odometry
-        void resetOdom();  // Resets the CoM odometry to a zero position in the world frame
-        void setOdom(double comX,
-                     double comY,
-                     double fYaw);  // Set the CoM odometry to a particular position and fused yaw in the world frame
+        // Resets the CoM odometry to a zero position in the world frame
+        void resetOdom();
+        // Set the CoM odometry to a particular position and fused yaw in the world frame
+        void setOdom(double comX, double comY, double fYaw);
 
         // Update the robot model with new pose and fused angle data
         void update(const Pose& pose, double fusedX, double fusedY);
@@ -91,11 +92,10 @@ namespace contrib {
         double rightStepYaw() const;
 
         // Static conversion functions
-        static double fusedYaw(
-            const Eigen::Quaterniond& q);  // Returns the fused yaw of a quaternion orientation in the range (-pi,pi]
-        static Eigen::Quaterniond quatFromFusedPR(
-            double fusedX,
-            double fusedY);  // Converts a pure fused pitch/roll rotation to a quaternion
+        // Returns the fused yaw of a quaternion orientation in the range (-pi,pi]
+        static double fusedYaw(const Eigen::Quaterniond& q);
+        // Converts a pure fused pitch/roll rotation to a quaternion
+        static Eigen::Quaterniond quatFromFusedPR(double fusedX, double fusedY);
 
     protected:
         // Initialisation of kinematic model
@@ -131,7 +131,7 @@ namespace contrib {
                           const utility::math::geometry::Frame& toFootstep) const;
 
         // Configuration variables
-        cap_gait::CapConfig* config;
+        const gait::WalkConfig& config;
         void robotSpecCallback() {
             initKinematicTranslations();
         }

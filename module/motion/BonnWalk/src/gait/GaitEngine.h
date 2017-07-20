@@ -243,7 +243,7 @@ private:
     static constexpr double USE_CALC_POSE = 0.0;
 
     // Gait configuration struct
-    CapConfig config;
+    const WalkConfig& config;
 
     // Pose variables
     pose::JointPose m_jointPose;               // Joint representation of the pose to command in a step

@@ -35,10 +35,10 @@ GaitEngine::GaitEngine()
     , m_gcvAccSmoothZ(9)
     , m_resetIntegrators(CONFIG_PARAM_PATH + "resetIntegrators", false)
     , m_saveIFeedToHaltPose(CONFIG_PARAM_PATH + "saveIFeedToHaltPose", false)
-    , rxRobotModel(&config)
-    , rxModel(&config)
-    , mxModel(&config)
-    , txModel(&config)
+    , rxRobotModel(config)
+    , rxModel(config)
+    , mxModel(config)
+    , txModel(config)
     , m_gcvZeroTime("/gait/gcv/gcvZeroTime", 0.0, 0.05, 2.0, 0.0)
     , m_plotData(CONFIG_PARAM_PATH + "plotData", false) {
 
@@ -59,10 +59,10 @@ GaitEngine::GaitEngine()
     config.basicDFusedFilterN.setCallback(std::bind(&GaitEngine::resizeDFusedFilters, this, std::placeholders::_1));
     config.basicIFusedFilterN.setCallback(std::bind(&GaitEngine::resizeIFusedFilters, this, std::placeholders::_1));
     config.basicGyroFilterN.setCallback(std::bind(&GaitEngine::resizeGyroFilters, this, std::placeholders::_1));
-    resizeFusedFilters(config.basicFusedFilterN());
-    resizeDFusedFilters(config.basicDFusedFilterN());
-    resizeIFusedFilters(config.basicIFusedFilterN());
-    resizeGyroFilters(config.basicGyroFilterN());
+    resizeFusedFilters(config.basicFusedFilterN);
+    resizeDFusedFilters(config.basicDFusedFilterN);
+    resizeIFusedFilters(config.basicIFusedFilterN);
+    resizeGyroFilters(config.basicGyroFilterN);
 
     // Set up callbacks for the local config parameters
     m_resetIntegrators.setCallback(std::bind(&GaitEngine::resetIntegrators, this));
@@ -129,7 +129,7 @@ void GaitEngine::step() {
 
     // Update the visualisation for a new cycle
     m_rxVis.clear();
-    m_rxVis.setVisOffset(config.visOffsetX(), config.visOffsetY(), config.visOffsetZ());
+    m_rxVis.setVisOffset(config.visOffsetX, config.visOffsetY, config.visOffsetZ);
 
     // Reset integrator flags
     haveIFusedXFeed = false;
@@ -155,7 +155,7 @@ void GaitEngine::step() {
         m_abstractPose = m_abstractHaltPose;
 
         // Leg motions
-        if (config.tuningNoLegs()) {
+        if (config.tuningNoLegs) {
             // Coerce the abstract leg poses
             clampAbstractLegPose(m_abstractPose.leftLeg);
             clampAbstractLegPose(m_abstractPose.rightLeg);
@@ -184,7 +184,7 @@ void GaitEngine::step() {
         }
 
         // Arm motions
-        if (config.tuningNoArms()) {
+        if (config.tuningNoArms) {
             // Coerce the abstract arm poses
             clampAbstractArmPose(m_abstractPose.leftArm);
             clampAbstractArmPose(m_abstractPose.rightArm);
@@ -252,62 +252,60 @@ void GaitEngine::step() {
 // Update the robot's halt pose
 void GaitEngine::updateHaltPose() {
     // Calculate the required legAngleX with regard for motion stances
-    double legAngleXFact = (config.enableMotionStances() ? m_motionLegAngleXFact : 1.0);
-    double legAngleX = legAngleXFact * config.haltLegAngleX() + (1.0 - legAngleXFact) * config.haltLegAngleXNarrow();
+    double legAngleXFact = (config.enableMotionStances ? m_motionLegAngleXFact : 1.0);
+    double legAngleX     = legAngleXFact * config.haltLegAngleX + (1.0 - legAngleXFact) * config.haltLegAngleXNarrow;
 
     // Set whether to use raw joint commands
-    haltUseRawJointCmds = !config.useServoModel();
+    haltUseRawJointCmds = !config.useServoModel;
 
     // Set the halt pose for the legs
     m_abstractHaltPose.leftLeg.setPoseMirrored(
-        config.haltLegExtension(), legAngleX, config.haltLegAngleY(), config.haltLegAngleZ());
+        config.haltLegExtension, legAngleX, config.haltLegAngleY, config.haltLegAngleZ);
     m_abstractHaltPose.rightLeg.setPoseMirrored(
-        config.haltLegExtension(), legAngleX, config.haltLegAngleY(), config.haltLegAngleZ());
-    m_abstractHaltPose.leftLeg.setFootPoseMirrored(config.haltFootAngleX(), config.haltFootAngleY());
-    m_abstractHaltPose.rightLeg.setFootPoseMirrored(config.haltFootAngleX(), config.haltFootAngleY());
+        config.haltLegExtension, legAngleX, config.haltLegAngleY, config.haltLegAngleZ);
+    m_abstractHaltPose.leftLeg.setFootPoseMirrored(config.haltFootAngleX, config.haltFootAngleY);
+    m_abstractHaltPose.rightLeg.setFootPoseMirrored(config.haltFootAngleX, config.haltFootAngleY);
 
     // Set the halt pose for the arms
-    m_abstractHaltPose.leftArm.setPoseMirrored(
-        config.haltArmExtension(), config.haltArmAngleX(), config.haltArmAngleY());
-    m_abstractHaltPose.rightArm.setPoseMirrored(
-        config.haltArmExtension(), config.haltArmAngleX(), config.haltArmAngleY());
+    m_abstractHaltPose.leftArm.setPoseMirrored(config.haltArmExtension, config.haltArmAngleX, config.haltArmAngleY);
+    m_abstractHaltPose.rightArm.setPoseMirrored(config.haltArmExtension, config.haltArmAngleX, config.haltArmAngleY);
 
     // Apply the non-mirrored halt pose biases
-    m_abstractHaltPose.leftLeg.angleX += config.haltLegAngleXBias();
-    m_abstractHaltPose.rightLeg.angleX += config.haltLegAngleXBias();
-    m_abstractHaltPose.leftLeg.footAngleX += config.haltFootAngleXBias();
-    m_abstractHaltPose.rightLeg.footAngleX += config.haltFootAngleXBias();
-    if (config.haltLegExtensionBias() >= 0.0)
-        m_abstractHaltPose.leftLeg.extension += config.haltLegExtensionBias();
+    m_abstractHaltPose.leftLeg.angleX += config.haltLegAngleXBias;
+    m_abstractHaltPose.rightLeg.angleX += config.haltLegAngleXBias;
+    m_abstractHaltPose.leftLeg.footAngleX += config.haltFootAngleXBias;
+    m_abstractHaltPose.rightLeg.footAngleX += config.haltFootAngleXBias;
+    if (config.haltLegExtensionBias >= 0.0)
+        m_abstractHaltPose.leftLeg.extension += config.haltLegExtensionBias;
     else
-        m_abstractHaltPose.rightLeg.extension -= config.haltLegExtensionBias();
-    m_abstractHaltPose.leftArm.angleX += config.haltArmAngleXBias();
-    m_abstractHaltPose.rightArm.angleX += config.haltArmAngleXBias();
+        m_abstractHaltPose.rightLeg.extension -= config.haltLegExtensionBias;
+    m_abstractHaltPose.leftArm.angleX += config.haltArmAngleXBias;
+    m_abstractHaltPose.rightArm.angleX += config.haltArmAngleXBias;
 
     // Set the halt joint efforts for the arms
-    m_abstractHaltPose.leftArm.cad.setEffort(config.haltEffortArm());
-    m_abstractHaltPose.rightArm.cad.setEffort(config.haltEffortArm());
+    m_abstractHaltPose.leftArm.cad.setEffort(config.haltEffortArm);
+    m_abstractHaltPose.rightArm.cad.setEffort(config.haltEffortArm);
 
     // Set the halt joint efforts for the legs
-    m_abstractHaltPose.leftLeg.cld.setEffort(config.haltEffortHipYaw(),
-                                             config.haltEffortHipRoll(),
-                                             config.haltEffortHipPitch(),
-                                             config.haltEffortKneePitch(),
-                                             config.haltEffortAnklePitch(),
-                                             config.haltEffortAnkleRoll());
-    m_abstractHaltPose.rightLeg.cld.setEffort(config.haltEffortHipYaw(),
-                                              config.haltEffortHipRoll(),
-                                              config.haltEffortHipPitch(),
-                                              config.haltEffortKneePitch(),
-                                              config.haltEffortAnklePitch(),
-                                              config.haltEffortAnkleRoll());
+    m_abstractHaltPose.leftLeg.cld.setEffort(config.haltEffortHipYaw,
+                                             config.haltEffortHipRoll,
+                                             config.haltEffortHipPitch,
+                                             config.haltEffortKneePitch,
+                                             config.haltEffortAnklePitch,
+                                             config.haltEffortAnkleRoll);
+    m_abstractHaltPose.rightLeg.cld.setEffort(config.haltEffortHipYaw,
+                                              config.haltEffortHipRoll,
+                                              config.haltEffortHipPitch,
+                                              config.haltEffortKneePitch,
+                                              config.haltEffortAnklePitch,
+                                              config.haltEffortAnkleRoll);
 
     // Set the halt pose support coefficients
     m_abstractHaltPose.leftLeg.cld.setSupportCoeff(0.5);
     m_abstractHaltPose.rightLeg.cld.setSupportCoeff(0.5);
 
     // Set the link lengths
-    m_abstractHaltPose.setLinkLengths(config.legLinkLength(), config.armLinkLength());
+    m_abstractHaltPose.setLinkLengths(config.legLinkLength, config.armLinkLength);
 
     // Convert the clamped halt pose into the joint representation (abstract poses derived from m_abstractHaltPose are
     // clamped later, always right before they are converted into another space, i.e. joint/inverse)
@@ -403,7 +401,7 @@ void GaitEngine::resetCaptureSteps(bool resetRobotModel) {
 
     // Reset capture step objects
     m_rxVis.init();
-    m_rxVis.setVisOffset(config.visOffsetX(), config.visOffsetY(), config.visOffsetZ());
+    m_rxVis.setVisOffset(config.visOffsetX, config.visOffsetY, config.visOffsetZ);
     if (resetRobotModel) {
         rxRobotModel.reset(resetRobotModel);
         rxRobotModel.setSupportLeg(m_leftLegFirst ? 1 : -1);  // Left leg first in the air means that the first support
@@ -443,15 +441,16 @@ void GaitEngine::resetWalking(bool walking, const Eigen::Vector3d& gcvBias) {
     m_walking      = walking;
     m_gcv          = gcvBias;
     m_gaitPhase    = 0.0;
-    m_leftLegFirst = config.leftLegFirst();
+    m_leftLegFirst = config.leftLegFirst;
 
     // Initialise the blending
     if (m_walking) {
         resetBlending(USE_HALT_POSE);
-        setBlendTarget(USE_CALC_POSE, config.startBlendPhaseLen());
+        setBlendTarget(USE_CALC_POSE, config.startBlendPhaseLen);
     }
-    else
-        setBlendTarget(USE_HALT_POSE, config.stopBlendPhaseLen());
+    else {
+        setBlendTarget(USE_HALT_POSE, config.stopBlendPhaseLen);
+    }
 
     // Reset the capture step variables
     resetCaptureSteps(walking);
@@ -463,22 +462,28 @@ void GaitEngine::processInputs() {
     m_walk = in.gaitCmd.walk;
 
     // Transcribe and bias the desired gait velocity
-    Eigen::Vector3d gcvBias(config.gcvBiasLinVelX(), config.gcvBiasLinVelY(), config.gcvBiasAngVelZ());
-    if (m_walk)
+    Eigen::Vector3d gcvBias(config.gcvBiasLinVelX, config.gcvBiasLinVelY, config.gcvBiasAngVelZ);
+    if (m_walk) {
         m_gcvInput = gcvBias + Eigen::Vector3d(in.gaitCmd.linVelX, in.gaitCmd.linVelY, in.gaitCmd.angVelZ);
-    else
+    }
+    else {
         m_gcvInput = gcvBias;
+    }
 
     // Check whether we should start walking
-    if (m_walk && !m_walking) resetWalking(true, gcvBias);
+    if (m_walk && !m_walking) {
+        resetWalking(true, gcvBias);
+    }
 
     // Perform update tasks if walking is active
-    if (m_walking)
+    if (m_walking) {
         updateRobot(gcvBias);
-    else if (m_blending)
-        m_blendPhase += config.gaitFrequency() * M_PI * in.nominaldT;  // Increment the blend phase by the nominal gait
-                                                                       // frequency (blend phase updates usually happen
-                                                                       // inside updateRobot())
+    }
+    else if (m_blending) {
+        m_blendPhase += config.gaitFrequency * M_PI * in.nominaldT;  // Increment the blend phase by the nominal gait
+                                                                     // frequency (blend phase updates usually happen
+                                                                     // inside updateRobot())
+    }
 
     // Plot data
     if (m_PM.getEnabled()) {
@@ -515,8 +520,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     stepTimeCount += truedT;
 
     // Retrieve the robot's fused angle
-    const double fusedX = model->robotFRollPR() + config.mgFusedOffsetX();
-    const double fusedY = model->robotFPitchPR() + config.mgFusedOffsetY();
+    const double fusedX = model->robotFRollPR() + config.mgFusedOffsetX;
+    const double fusedY = model->robotFPitchPR() + config.mgFusedOffsetY;
 
     // Update the required input data for the limp models
     rxModel.updateInputData(systemIterationTime, fusedX, fusedY);
@@ -524,11 +529,11 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     txModel.updateInputData(systemIterationTime, fusedX, fusedY);
 
     // Make local aliases of frequently used config variables
-    const double C     = config.mgC();
-    const double alpha = config.mgAlpha();  // Lateral step apex size.
-    const double delta = config.mgDelta();  // Minimum lateral support exchange location.
-    const double omega = config.mgOmega();  // Maximum lateral support exchange location.
-    const double sigma = config.mgSigma();  // Maximum sagittal apex velocity.
+    const double C     = config.mgC;
+    const double alpha = config.mgAlpha;  // Lateral step apex size.
+    const double delta = config.mgDelta;  // Minimum lateral support exchange location.
+    const double omega = config.mgOmega;  // Maximum lateral support exchange location.
+    const double sigma = config.mgSigma;  // Maximum sagittal apex velocity.
 
     //
     // State estimation
@@ -587,8 +592,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // Add CoM offsets
     LimpState ms(m_comFilter.x(), m_comFilter.y(), m_comFilter.vx(), m_comFilter.vy(), 0.0, 0.0);
     ms.supportLegSign = rxRobotModel.supportLegSign;
-    ms.x += config.mgComOffsetX();
-    ms.y += ms.supportLegSign * config.mgComOffsetY() + config.mgComOffsetYBias();
+    ms.x += config.mgComOffsetX;
+    ms.y += ms.supportLegSign * config.mgComOffsetY + config.mgComOffsetYBias;
 
     // The LimpState ms concludes the estimation of the "CoM" state using direct sensor input and the kinematic model.
     // Let's set the rx limp model.
@@ -619,10 +624,10 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     }
     mxModel.setState(ls, gcvInput);  // TODO: Should this be gcvInput or m_gcv?
 
-    // Latency preview (beyond here we are working config.mgLatency() seconds into the future with all our
+    // Latency preview (beyond here we are working config.mgLatency seconds into the future with all our
     // calculations!)
     txModel        = mxModel;
-    double latency = config.mgLatency();
+    double latency = config.mgLatency;
     if (mxModel.timeToStep > latency)
         txModel.forward(latency);
     else {
@@ -643,49 +648,48 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // adaptation when we are near the "optimal" nominal state.
 
     // Determine whether the loop should be closed
-    bool loopClosed = config.cmdUseRXFeedback() && (rxModel.supportLegSign == mxModel.supportLegSign);
+    bool loopClosed = config.cmdUseRXFeedback && (rxModel.supportLegSign == mxModel.supportLegSign);
 
     // Initialise the adaptation terms (Note: The initial value is an implicit scale of the entire adaptation term)
-    double adaptationX = (loopClosed ? config.nsAdaptationGain() : 0.0);
-    double adaptationY = (loopClosed ? config.nsAdaptationGain() : 0.0);
+    double adaptationX = (loopClosed ? config.nsAdaptationGain : 0.0);
+    double adaptationY = (loopClosed ? config.nsAdaptationGain : 0.0);
 
     // Calculate step noise suppression factor
     double phase = std::max(std::min(txModel.timeToStep, std::min(mxModel.timeToStep, mxModel.timeSinceStep)), 0.0);
-    double stepNoiseSuppression =
-        1.0 - exp(-(phase * phase) / (2.0 * config.nsStepNoiseTime() * config.nsStepNoiseTime()));
+    double stepNoiseSuppression = 1.0 - exp(-(phase * phase) / (2.0 * config.nsStepNoiseTime * config.nsStepNoiseTime));
     adaptationX *= stepNoiseSuppression;
     adaptationY *= stepNoiseSuppression;
 
     // If we are near the expected state, there is no need for adaptation.
     Eigen::Vector2f expectationDeviation;
     expectationDeviation.x =
-        config.nsGain() * (Eigen::Vector2f(rxModel.x, rxModel.vx) - Eigen::Vector2f(mxModel.x, mxModel.vx)).norm();
+        config.nsGain * (Eigen::Vector2f(rxModel.x, rxModel.vx) - Eigen::Vector2f(mxModel.x, mxModel.vx)).norm();
     expectationDeviation.y =
-        config.nsGain() * (Eigen::Vector2f(rxModel.y, rxModel.vy) - Eigen::Vector2f(mxModel.y, mxModel.vy)).norm();
+        config.nsGain * (Eigen::Vector2f(rxModel.y, rxModel.vy) - Eigen::Vector2f(mxModel.y, mxModel.vy)).norm();
     adaptationX *= expectationDeviation.x;
     adaptationY *= expectationDeviation.y;
 
     //  // If our fused angle is within a certain nominal range then don't adapt
     //  Eigen::Vector2f fusedAngleAdaptation;
-    //  fusedAngleAdaptation.x = ((fusedY <= config.nsFusedYRangeLBnd() || fusedY >= config.nsFusedYRangeUBnd()) ? 1.0 :
-    //  0.0); fusedAngleAdaptation.y = ((fusedX <= config.nsFusedXRangeLBnd() || fusedX >= config.nsFusedXRangeUBnd())
+    //  fusedAngleAdaptation.x = ((fusedY <= config.nsFusedYRangeLBnd || fusedY >= config.nsFusedYRangeUBnd) ? 1.0 :
+    //  0.0); fusedAngleAdaptation.y = ((fusedX <= config.nsFusedXRangeLBnd || fusedX >= config.nsFusedXRangeUBnd)
     //  ? 1.0 : 0.0); adaptationX *= fusedAngleAdaptation.x; adaptationY *= fusedAngleAdaptation.y;
 
     //  // If we are near the nominal state, there is no need for adaptation.
     //  Eigen::Vector2f nominalAdaptation;
-    //  nominalAdaptation.x = (qAbs(rxModel.energyX - rxModel.nominalState.energyX) > config.nsMinDeviation() ?
-    //  config.nsGain() * qAbs(rxModel.energyX - rxModel.nominalState.energyX) : 0.0); nominalAdaptation.y =
-    //  (qAbs(rxModel.energyY - rxModel.nominalState.energyY) > config.nsMinDeviation() ? config.nsGain() *
+    //  nominalAdaptation.x = (qAbs(rxModel.energyX - rxModel.nominalState.energyX) > config.nsMinDeviation ?
+    //  config.nsGain * qAbs(rxModel.energyX - rxModel.nominalState.energyX) : 0.0); nominalAdaptation.y =
+    //  (qAbs(rxModel.energyY - rxModel.nominalState.energyY) > config.nsMinDeviation ? config.nsGain *
     //  qAbs(rxModel.energyY - rxModel.nominalState.energyY) : 0.0);
 
     //  // If the fused angle is near zero, there is no need for adaptation.
     //  Eigen::Vector2f fusedAngleAdaptation;
-    //  fusedAngleAdaptation.x = (absFusedY > config.nsMinDeviation() ? config.nsGain() * absFusedY : 0.0);
-    //  fusedAngleAdaptation.y = (absFusedX > config.nsMinDeviation() ? config.nsGain() * absFusedX : 0.0);
+    //  fusedAngleAdaptation.x = (absFusedY > config.nsMinDeviation ? config.nsGain * absFusedY : 0.0);
+    //  fusedAngleAdaptation.y = (absFusedX > config.nsMinDeviation ? config.nsGain * absFusedX : 0.0);
 
     // Calculate the required adaptation (0.0 => Completely trust Mx, 1.0 => Completely trust Rx)
-    adaptation.x = utility::math::clamp(0.0, adaptationX, config.nsMaxAdaptation());
-    adaptation.y = utility::math::clamp(0.0, adaptationY, config.nsMaxAdaptation());
+    adaptation.x = utility::math::clamp(0.0, adaptationX, config.nsMaxAdaptation);
+    adaptation.y = utility::math::clamp(0.0, adaptationY, config.nsMaxAdaptation);
 
     // Adaptation resetting (force complete trust in Rx)
     if (resetCounter > 0) {
@@ -699,30 +703,32 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     //
 
     // Calculate the fused angle deviation from expected
-    double expectedFusedX = config.basicFusedExpXSinOffset()
-                            + config.basicFusedExpXSinMag() * sin(m_gaitPhase - config.basicFusedExpXSinPhase());
-    double expectedFusedY = config.basicFusedExpYSinOffset()
-                            + config.basicFusedExpYSinMag() * sin(m_gaitPhase - config.basicFusedExpYSinPhase());
+    double expectedFusedX =
+        config.basicFusedExpXSinOffset + config.basicFusedExpXSinMag * sin(m_gaitPhase - config.basicFusedExpXSinPhase);
+    double expectedFusedY =
+        config.basicFusedExpYSinOffset + config.basicFusedExpYSinMag * sin(m_gaitPhase - config.basicFusedExpYSinPhase);
     double deviationFusedX = fusedX - expectedFusedX;
     double deviationFusedY = fusedY - expectedFusedY;
 
     // Calculate the gyro deviation from expected
-    double expectedGyroX  = config.basicGyroExpX();
-    double expectedGyroY  = config.basicGyroExpY();
+    double expectedGyroX  = config.basicGyroExpX;
+    double expectedGyroY  = config.basicGyroExpY;
     double deviationGyroX = model->robotAngularVelocity().x() - expectedGyroX;
     double deviationGyroY = model->robotAngularVelocity().y() - expectedGyroY;
 
     // Calculate basic fused angle deviation feedback values
     fusedXFeedFilter.put(deviationFusedX);
     fusedYFeedFilter.put(deviationFusedY);
-    fusedXFeed =
-        config.basicFusedGainAllLat()
-        * utility::math::filter::SmoothDeadband::eval(fusedXFeedFilter.value(), config.basicFusedDeadRadiusX());
-    fusedYFeed =
-        config.basicFusedGainAllSag()
-        * utility::math::filter::SmoothDeadband::eval(fusedYFeedFilter.value(), config.basicFusedDeadRadiusY());
-    if (!config.basicFusedEnabledLat()) fusedXFeed = 0.0;
-    if (!config.basicFusedEnabledSag()) fusedYFeed = 0.0;
+    fusedXFeed = config.basicFusedGainAllLat
+                 * utility::math::filter::SmoothDeadband::eval(fusedXFeedFilter.value(), config.basicFusedDeadRadiusX);
+    fusedYFeed = config.basicFusedGainAllSag
+                 * utility::math::filter::SmoothDeadband::eval(fusedYFeedFilter.value(), config.basicFusedDeadRadiusY);
+    if (!config.basicFusedEnabledLat) {
+        fusedXFeed = 0.0;
+    }
+    if (!config.basicFusedEnabledSag) {
+        fusedYFeed = 0.0;
+    }
 
     // Calculate basic fused angle deviation derivative feedback values
     dFusedXFeedFilter.addXYW(in.timestamp,
@@ -731,80 +737,94 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     dFusedYFeedFilter.addXYW(in.timestamp,
                              deviationFusedY,
                              1.0);  // TODO: Modify the weighting based on gait phase to reject known fused angle bumps
-    dFusedXFeed =
-        config.basicDFusedGainAllLat()
-        * utility::math::filter::SmoothDeadband::eval(dFusedXFeedFilter.deriv(), config.basicDFusedDeadRadiusX());
-    dFusedYFeed =
-        config.basicDFusedGainAllSag()
-        * utility::math::filter::SmoothDeadband::eval(dFusedYFeedFilter.deriv(), config.basicDFusedDeadRadiusY());
-    if (!config.basicDFusedEnabledLat()) dFusedXFeed = 0.0;
-    if (!config.basicDFusedEnabledSag()) dFusedYFeed = 0.0;
+    dFusedXFeed = config.basicDFusedGainAllLat * utility::math::filter::SmoothDeadband::eval(
+                                                     dFusedXFeedFilter.deriv(), config.basicDFusedDeadRadiusX);
+    dFusedYFeed = config.basicDFusedGainAllSag * utility::math::filter::SmoothDeadband::eval(
+                                                     dFusedYFeedFilter.deriv(), config.basicDFusedDeadRadiusY);
+    if (!config.basicDFusedEnabledLat) {
+        dFusedXFeed = 0.0;
+    }
+    if (!config.basicDFusedEnabledSag) {
+        dFusedYFeed = 0.0;
+    }
 
     // Update the half life time of the fused angle deviation integrators
-    double halfLifeCycles = config.basicIFusedHalfLifeTime() / systemIterationTime;
+    double halfLifeCycles = config.basicIFusedHalfLifeTime / systemIterationTime;
     iFusedXFeedIntegrator.setHalfLife(halfLifeCycles);
     iFusedYFeedIntegrator.setHalfLife(halfLifeCycles);
 
     // Integrate up the deviation in the fused angle X
     double timeSinceIFusedXFeedback = in.timestamp - iFusedXLastTime;
-    if (timeSinceIFusedXFeedback < config.basicIFusedTimeToFreeze())  // Integrate normally
+    if (timeSinceIFusedXFeedback < config.basicIFusedTimeToFreeze) {  // Integrate normally
         iFusedXFeedIntegrator.integrate(deviationFusedX);
-    else if (timeSinceIFusedXFeedback > config.basicIFusedTimeToDecay())  // Decay the value of the integral to zero
+    }
+    else if (timeSinceIFusedXFeedback > config.basicIFusedTimeToDecay) {  // Decay the value of the integral to zero
                                                                           // (integral is exponentially weighted)
         iFusedXFeedIntegrator.integrate(0.0);
+    }
 
     // Integrate up the deviation in the fused angle Y
     double timeSinceIFusedYFeedback = in.timestamp - iFusedYLastTime;
-    if (timeSinceIFusedYFeedback < config.basicIFusedTimeToFreeze())  // Integrate normally
+    if (timeSinceIFusedYFeedback < config.basicIFusedTimeToFreeze) {  // Integrate normally
         iFusedYFeedIntegrator.integrate(deviationFusedY);
-    else if (timeSinceIFusedYFeedback > config.basicIFusedTimeToDecay())  // Decay the value of the integral to zero
+    }
+    else if (timeSinceIFusedYFeedback > config.basicIFusedTimeToDecay) {  // Decay the value of the integral to zero
                                                                           // (integral is exponentially weighted)
         iFusedYFeedIntegrator.integrate(0.0);
+    }
 
     // Calculate a basic fused angle deviation integral feedback value
     iFusedXFeedFilter.put(iFusedXFeedIntegrator.integral());
     iFusedYFeedFilter.put(iFusedYFeedIntegrator.integral());
-    iFusedXFeed = 1e-3 * config.basicIFusedGainAllLat() * iFusedXFeedFilter.value();
-    iFusedYFeed = 1e-3 * config.basicIFusedGainAllSag() * iFusedYFeedFilter.value();
-    if (!config.basicIFusedEnabledLat()) iFusedXFeed= 0.0;
-    if (!config.basicIFusedEnabledSag()) iFusedYFeed = 0.0;
-    haveIFusedXFeed = (config.basicIFusedGainAllLat() != 0.0 && config.basicIFusedEnabledLat());
-    haveIFusedYFeed = (config.basicIFusedGainAllSag() != 0.0 && config.basicIFusedEnabledSag());
+    iFusedXFeed = 1e-3 * config.basicIFusedGainAllLat * iFusedXFeedFilter.value();
+    iFusedYFeed = 1e-3 * config.basicIFusedGainAllSag * iFusedYFeedFilter.value();
+    if (!config.basicIFusedEnabledLat) {
+        iFusedXFeed = 0.0;
+    }
+    if (!config.basicIFusedEnabledSag) {
+        iFusedYFeed = 0.0;
+    }
+    haveIFusedXFeed = (config.basicIFusedGainAllLat != 0.0 && config.basicIFusedEnabledLat);
+    haveIFusedYFeed = (config.basicIFusedGainAllSag != 0.0 && config.basicIFusedEnabledSag);
 
     // Calculate basic gyro deviation feedback values
-    gyroXFeedFilter.addXYW(in.timestamp,
-                           deviationGyroX,
-                           1.0);  // TODO: Modify the weighting based on gait phase to reject known gyro bumps
-    gyroYFeedFilter.addXYW(in.timestamp,
-                           deviationGyroY,
-                           1.0);  // TODO: Modify the weighting based on gait phase to reject known gyro bumps
-    gyroXFeed = config.basicGyroGainAllLat()
-                * utility::math::filter::SmoothDeadband::eval(gyroXFeedFilter.value(), config.basicGyroDeadRadiusX());
-    gyroYFeed = config.basicGyroGainAllSag()
-                * utility::math::filter::SmoothDeadband::eval(gyroYFeedFilter.value(), config.basicGyroDeadRadiusY());
-    if (!config.basicGyroEnabledLat()) gyroXFeed = 0.0;
-    if (!config.basicGyroEnabledSag()) gyroYFeed = 0.0;
+    // TODO: Modify the weighting based on gait phase to reject known gyro bumps
+    gyroXFeedFilter.addXYW(in.timestamp, deviationGyroX, 1.0);
+    // TODO: Modify the weighting based on gait phase to reject known gyro bumps
+    gyroYFeedFilter.addXYW(in.timestamp, deviationGyroY, 1.0);
+    gyroXFeed = config.basicGyroGainAllLat
+                * utility::math::filter::SmoothDeadband::eval(gyroXFeedFilter.value(), config.basicGyroDeadRadiusX);
+    gyroYFeed = config.basicGyroGainAllSag
+                * utility::math::filter::SmoothDeadband::eval(gyroYFeedFilter.value(), config.basicGyroDeadRadiusY);
+    if (!config.basicGyroEnabledLat) {
+        gyroXFeed = 0.0;
+    }
+    if (!config.basicGyroEnabledSag) {
+        gyroYFeed = 0.0;
+    }
 
     // Calculate a modification to the gait phase frequency based on basic feedback terms
     double timingFeedWeight = utility::math::clamp(
-        -1.0, -config.basicTimingWeightFactor() * sin(m_gaitPhase - 0.5 * config.doubleSupportPhaseLen()), 1.0);
-    double timingFeed      = utility::math::filter::SmoothDeadband::eval(fusedXFeedFilter.value() * timingFeedWeight,
-                                                                    config.basicTimingFeedDeadRad());
-    double timingFreqDelta = (timingFeed >= 0.0 ? config.basicTimingGainSpeedUp() * timingFeed
-                                                : config.basicTimingGainSlowDown() * timingFeed);
-    if (!(config.basicEnableTiming() && config.basicGlobalEnable())) timingFreqDelta= 0.0;
+        -1.0, -config.basicTimingWeightFactor * sin(m_gaitPhase - 0.5 * config.doubleSupportPhaseLen), 1.0);
+    double timingFeed = utility::math::filter::SmoothDeadband::eval(fusedXFeedFilter.value() * timingFeedWeight,
+                                                                    config.basicTimingFeedDeadRad);
+    double timingFreqDelta =
+        (timingFeed >= 0.0 ? config.basicTimingGainSpeedUp * timingFeed : config.basicTimingGainSlowDown * timingFeed);
+    if (!(config.basicEnableTiming && config.basicGlobalEnable)) {
+        timingFreqDelta = 0.0;
+    }
 
     // Virtual slope
     virtualSlope = 0.0;
-    if (config.basicEnableVirtualSlope() && config.basicGlobalEnable()) {
-        virtualSlope  = config.virtualSlopeOffset();
-        double dev    = fusedY - config.virtualSlopeMidAngle();
+    if (config.basicEnableVirtualSlope && config.basicGlobalEnable) {
+        virtualSlope  = config.virtualSlopeOffset;
+        double dev    = fusedY - config.virtualSlopeMidAngle;
         double absdev = fabs(dev);
-        if (absdev > config.virtualSlopeMinAngle())
-            virtualSlope += sign(dev)
-                            * (dev * config.gcvPrescalerLinVelX() * m_gcv.x() > 0 ? config.virtualSlopeGainAsc()
-                                                                                  : config.virtualSlopeGainDsc())
-                            * (absdev - config.virtualSlopeMinAngle());
+        if (absdev > config.virtualSlopeMinAngle) {
+            virtualSlope += sign(dev) * (dev * config.gcvPrescalerLinVelX * m_gcv.x() > 0 ? config.virtualSlopeGainAsc
+                                                                                          : config.virtualSlopeGainDsc)
+                            * (absdev - config.virtualSlopeMinAngle);
+        }
     }
 
     //
@@ -820,31 +840,38 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // By default use the nominal gait frequency for timing (these variables tell us on what leg we should be standing,
     // for how much gait phase to come, traversing the gait phase with what frequency)
     int supportLegSign        = gaitPhaseLegSign;
-    double gaitFrequency      = config.gaitFrequency();
+    double gaitFrequency      = config.gaitFrequency;
     double remainingGaitPhase = (m_gaitPhase > 0.0 ? M_PI - m_gaitPhase : 0.0 - m_gaitPhase);
-    if (remainingGaitPhase < 1e-8) remainingGaitPhase= 1e-8;
+    if (remainingGaitPhase < 1e-8) {
+        remainingGaitPhase = 1e-8;
+    }
 
     // Handle the case of closed loop timing feedback
-    if (config.cmdUseCLTiming()) {
+    if (config.cmdUseCLTiming) {
         // If desired, use the TX model timing
-        if (config.cmdUseTXTiming()) {
+        if (config.cmdUseTXTiming) {
             supportLegSign = txModel.supportLegSign;
-            if (supportLegSign != gaitPhaseLegSign)  // Premature step case - happens even to the best of us...
+            if (supportLegSign != gaitPhaseLegSign) {  // Premature step case - happens even to the best of us...
                 remainingGaitPhase += M_PI;  // The txModel.timeToStep variable tells us how much time we should take
                                              // until the end of the step *after* the one we're currently taking, so
                                              // that's an extra PI radians to cover
-            if (txModel.timeToStep > 1e-8)
+            }
+            if (txModel.timeToStep > 1e-8) {
                 gaitFrequency = remainingGaitPhase / (M_PI * txModel.timeToStep);  // Note: Always in the range (0,Inf)
-            else
+            }
+            else {
                 gaitFrequency = 1e8;  // Big enough to max out the gait frequency in any case
+            }
         }
 
         // If desired, add basic timing feedback
-        if (config.basicEnableTiming() && config.basicGlobalEnable()) gaitFrequency += timingFreqDelta;
+        if (config.basicEnableTiming && config.basicGlobalEnable) {
+            gaitFrequency += timingFreqDelta;
+        }
     }
 
     // Coerce the gait frequency to the allowed range
-    gaitFrequency = utility::math::clamp(1e-8, gaitFrequency, config.gaitFrequencyMax());
+    gaitFrequency = utility::math::clamp(1e-8, gaitFrequency, config.gaitFrequencyMax);
 
     // Calculate the time to step based on how much gait phase we have to cover and how fast we intend to cover it
     double timeToStep = remainingGaitPhase / (M_PI * gaitFrequency);  // Note: Always in the range (0,Inf)
@@ -855,21 +882,25 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
         m_gaitPhase + gaitPhaseIncrement);  // The gait phase must be in the range (-pi,pi], and thus must be wrapped!
 
     // Increment the blending phase if we are in the process of blending
-    if (m_blending) m_blendPhase += gaitPhaseIncrement;
+    if (m_blending) {
+        m_blendPhase += gaitPhaseIncrement;
+    }
 
     //
     // Gait command vector update
     //
 
     // By default use a nominal CL step size (this should approximately emulate walking OL with zero GCV)
-    Eigen::Vector3f stepSize(0.0, 2.0 * supportLegSign * config.hipWidth(), 0.0);
+    Eigen::Vector3f stepSize(0.0, 2.0 * supportLegSign * config.hipWidth, 0.0);
 
     // If desired, use the TX model step size instead
-    if (config.cmdUseTXStepSize()) stepSize = txModel.stepSize;
+    if (config.cmdUseTXStepSize) {
+        stepSize = txModel.stepSize;
+    }
 
     // Clamp the step size to a maximal radius
-    stepSize.x = utility::math::clamp(-config.mgMaxStepRadiusX(), stepSize.x, config.mgMaxStepRadiusX());
-    stepSize.y = utility::math::clamp(-config.mgMaxStepRadiusY(), stepSize.y, config.mgMaxStepRadiusY());
+    stepSize.x = utility::math::clamp(-config.mgMaxStepRadiusX, stepSize.x, config.mgMaxStepRadiusX);
+    stepSize.y = utility::math::clamp(-config.mgMaxStepRadiusY, stepSize.y, config.mgMaxStepRadiusY);
 
     // Step size to GCV conversion.
     // To dodge the fact that the gait engine can only take symmetrical steps, while the limp model may produce
@@ -880,13 +911,17 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     limp.set(0.0, sigma, C);
     limp.update(Limp(alpha, 0, C).tLoc(delta));
     gcvTarget.x() = sex.x / limp.x0;
-    if (supportLegSign * gcvInput.y >= 0)
+    if (supportLegSign * gcvInput.y >= 0) {
         gcvTarget.y() = supportLegSign * utility::math::clamp(-1.0, (std::abs(sex.y) - delta) / (omega - delta), 1.0);
-    else
+    }
+    else {
         gcvTarget.y() = oldGcvTargetY;  // TODO: This looks relatively unsafe
+    }
     gcvTarget.z() = sex.z;
     oldGcvTargetY = gcvTarget.y();
-    if (!config.cmdAllowCLStepSizeX()) gcvTarget.x()= 0.0;
+    if (!config.cmdAllowCLStepSizeX) {
+        gcvTarget.x() = 0.0;
+    }
 
     // Move the current gcv smoothly to the target gcv in timeToStep amount of time
     Eigen::Vector3d CLGcv = gcvTarget;
@@ -899,25 +934,28 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Handle the situation differently depending on whether we are using CL step sizes or not
     // Closed loop step sizes...
-    if (config.cmdUseCLStepSize()) {
+    if (config.cmdUseCLStepSize) {
         // Set the calculated closed loop GCV
         if (noCLStepsCounter > 0) {
             m_gcv.setZero();
             noCLStepsCounter--;
         }
         else {
-            if (config.cmdAllowCLStepSizeX())
+            if (config.cmdAllowCLStepSizeX) {
                 m_gcv.x() = CLGcv.x();
+            }
             else {
-                double D = config.gcvDecToAccRatio();
-                if (gcvUnbiased.x() >= 0.0)
-                    m_gcv.x() += utility::math::clamp(-truedT * config.gcvAccForwards() * D,
+                double D = config.gcvDecToAccRatio;
+                if (gcvUnbiased.x() >= 0.0) {
+                    m_gcv.x() += utility::math::clamp(-truedT * config.gcvAccForwards * D,
                                                       m_gcvInput.x() - m_gcv.x(),
-                                                      truedT * config.gcvAccForwards());
-                else
-                    m_gcv.x() += utility::math::clamp(-truedT * config.gcvAccBackwards(),
+                                                      truedT * config.gcvAccForwards);
+                }
+                else {
+                    m_gcv.x() += utility::math::clamp(-truedT * config.gcvAccBackwards,
                                                       m_gcvInput.x() - m_gcv.x(),
-                                                      truedT * config.gcvAccBackwards() * D);
+                                                      truedT * config.gcvAccBackwards * D);
+                }
             }
             m_gcv.y() = CLGcv.y();
             m_gcv.z() = CLGcv.z();
@@ -929,32 +967,30 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
         stepSize.x = stepSize.y = stepSize.z = 0.0;
 
         // Update the internal gcv based on the gcv input using a slope-limiting approach
-        double D = config.gcvDecToAccRatio();
+        double D = config.gcvDecToAccRatio;
         if (gcvUnbiased.x() >= 0.0) {
             m_gcv.x() += utility::math::clamp(
-                -truedT * config.gcvAccForwards() * D, m_gcvInput.x() - m_gcv.x(), truedT * config.gcvAccForwards());
+                -truedT * config.gcvAccForwards * D, m_gcvInput.x() - m_gcv.x(), truedT * config.gcvAccForwards);
         }
         else {
             m_gcv.x() += utility::math::clamp(
-                -truedT * config.gcvAccBackwards(), m_gcvInput.x() - m_gcv.x(), truedT * config.gcvAccBackwards() * D);
+                -truedT * config.gcvAccBackwards, m_gcvInput.x() - m_gcv.x(), truedT * config.gcvAccBackwards * D);
         }
         if (gcvUnbiased.y() >= 0.0) {
             m_gcv.y() += utility::math::clamp(
-                -truedT * config.gcvAccSidewards() * D, m_gcvInput.y() - m_gcv.y(), truedT * config.gcvAccSidewards());
+                -truedT * config.gcvAccSidewards * D, m_gcvInput.y() - m_gcv.y(), truedT * config.gcvAccSidewards);
         }
         else {
             m_gcv.y() += utility::math::clamp(
-                -truedT * config.gcvAccSidewards(), m_gcvInput.y() - m_gcv.y(), truedT * config.gcvAccSidewards() * D);
+                -truedT * config.gcvAccSidewards, m_gcvInput.y() - m_gcv.y(), truedT * config.gcvAccSidewards * D);
         }
         if (gcvUnbiased.z() >= 0.0) {
-            m_gcv.z() += utility::math::clamp(-truedT * config.gcvAccRotational() * D,
-                                              m_gcvInput.z() - m_gcv.z(),
-                                              truedT * config.gcvAccRotational());
+            m_gcv.z() += utility::math::clamp(
+                -truedT * config.gcvAccRotational * D, m_gcvInput.z() - m_gcv.z(), truedT * config.gcvAccRotational);
         }
         else {
-            m_gcv.z() += utility::math::clamp(-truedT * config.gcvAccRotational(),
-                                              m_gcvInput.z() - m_gcv.z(),
-                                              truedT * config.gcvAccRotational() * D);
+            m_gcv.z() += utility::math::clamp(
+                -truedT * config.gcvAccRotational, m_gcvInput.z() - m_gcv.z(), truedT * config.gcvAccRotational * D);
         }
     }
 
@@ -962,11 +998,11 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     m_gcvDeriv.put(m_gcv);
     Eigen::Vector3d gcvAccRaw = m_gcvDeriv.value() / systemIterationTime;
     m_gcvAccSmoothX.put(utility::math::filter::SlopeLimiter::eval(
-        gcvAccRaw.x(), m_gcvAcc.x(), config.gcvAccJerkLimitX() * systemIterationTime));
+        gcvAccRaw.x(), m_gcvAcc.x(), config.gcvAccJerkLimitX * systemIterationTime));
     m_gcvAccSmoothY.put(utility::math::filter::SlopeLimiter::eval(
-        gcvAccRaw.y(), m_gcvAcc.y(), config.gcvAccJerkLimitY() * systemIterationTime));
+        gcvAccRaw.y(), m_gcvAcc.y(), config.gcvAccJerkLimitY * systemIterationTime));
     m_gcvAccSmoothZ.put(utility::math::filter::SlopeLimiter::eval(
-        gcvAccRaw.z(), m_gcvAcc.z(), config.gcvAccJerkLimitZ() * systemIterationTime));
+        gcvAccRaw.z(), m_gcvAcc.z(), config.gcvAccJerkLimitZ * systemIterationTime));
     m_gcvAcc.x() = m_gcvAccSmoothX.value();
     m_gcvAcc.y() = m_gcvAccSmoothY.value();
     m_gcvAcc.z() = m_gcvAccSmoothZ.value();
@@ -977,23 +1013,22 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Calculate the current target motion stance factor
     double targetLegAngleXFact = 1.0;
-    bool haveMotionStance      = (config.enableMotionStances() && in.motionPending);
+    bool haveMotionStance      = (config.enableMotionStances && in.motionPending);
     if (haveMotionStance) {
         switch (in.motionStance) {
             case STANCE_DEFAULT: targetLegAngleXFact = 1.0; break;
-            case STANCE_KICK: targetLegAngleXFact = 0.0; break;
-            default: targetLegAngleXFact = 1.0; break;
+            case STANCE_KICK: targetLegAngleXFact    = 0.0; break;
+            default: targetLegAngleXFact             = 1.0; break;
         }
     }
 
     // Update the motion stance factors, taking into consideration which legs we are allowed to adjust
-    if (!haveMotionStance
-        || (gcvUnbiased.norm() <= config.stanceAdjustGcvMax()
-            && ((in.motionAdjustLeftFoot && rxRobotModel.supportLegSign == RobotModel::RIGHT_LEG)
-                || (in.motionAdjustRightFoot && rxRobotModel.supportLegSign == RobotModel::LEFT_LEG)
-                || (!in.motionAdjustLeftFoot && !in.motionAdjustRightFoot)))) {
+    if (!haveMotionStance || (gcvUnbiased.norm() <= config.stanceAdjustGcvMax
+                              && ((in.motionAdjustLeftFoot && rxRobotModel.supportLegSign == RobotModel::RIGHT_LEG)
+                                  || (in.motionAdjustRightFoot && rxRobotModel.supportLegSign == RobotModel::LEFT_LEG)
+                                  || (!in.motionAdjustLeftFoot && !in.motionAdjustRightFoot)))) {
         m_motionLegAngleXFact = utility::math::filter::SlopeLimiter::eval(
-            targetLegAngleXFact, m_motionLegAngleXFact, config.stanceAdjustRate() * systemIterationTime);
+            targetLegAngleXFact, m_motionLegAngleXFact, config.stanceAdjustRate * systemIterationTime);
     }
 
     // Determine whether the motion stance adjustment is still ongoing
@@ -1004,16 +1039,16 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     //
 
     // Check whether we should stop walking
-    double nominalGaitPhaseInc = M_PI * systemIterationTime * config.gaitFrequency();
-    double LB = nominalGaitPhaseInc * config.stoppingPhaseTolLB();  // Lower bound tolerance config variable is in the
-                                                                    // units of nominal phase increments, calculated
-                                                                    // using nominalStepTime (also a config variable)
-    double UB = nominalGaitPhaseInc * config.stoppingPhaseTolUB();  // Upper bound tolerance config variable is in the
-                                                                    // units of nominal phase increments, calculated
-                                                                    // using nominalStepTime (also a config variable)
-    if (!m_walk && gcvUnbiased.norm() <= config.stoppingGcvMag()
+    double nominalGaitPhaseInc = M_PI * systemIterationTime * config.gaitFrequency;
+    double LB = nominalGaitPhaseInc * config.stoppingPhaseTolLB;  // Lower bound tolerance config variable is in the
+                                                                  // units of nominal phase increments, calculated
+                                                                  // using nominalStepTime (also a config variable)
+    double UB = nominalGaitPhaseInc * config.stoppingPhaseTolUB;  // Upper bound tolerance config variable is in the
+                                                                  // units of nominal phase increments, calculated
+                                                                  // using nominalStepTime (also a config variable)
+    if (!m_walk && gcvUnbiased.norm() <= config.stoppingGcvMag
         &&  // Note that this is intentionally checking the gcv (unbiased) from the last cycle, not the new and
-            // unexecuted modified one from the current call to this update function
+        // unexecuted modified one from the current call to this update function
         ((m_gaitPhase >= 0.0 && oldGaitPhase <= 0.0 && (m_gaitPhase <= UB || oldGaitPhase >= -LB))
          || (m_gaitPhase <= 0.0 && oldGaitPhase >= 0.0 && (m_gaitPhase <= UB - M_PI || oldGaitPhase >= M_PI - LB)))
         && (!motionStanceOngoing)) {
@@ -1101,18 +1136,18 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
     CommonMotionData CMD;
 
     // Set the gcv and absolute gcv
-    CMD.gcvX = config.gcvPrescalerLinVelX() * m_gcv.x();  // The raw commanded gcv x prescaled by a preconfigured scaler
-                                                          // to adjust the dynamic range of the gait for inputs in the
-                                                          // range [0,1]
-    CMD.gcvY = config.gcvPrescalerLinVelY() * m_gcv.y();  // The raw commanded gcv y prescaled by a preconfigured scaler
-                                                          // to adjust the dynamic range of the gait for inputs in the
-                                                          // range [0,1]
-    CMD.gcvZ = config.gcvPrescalerAngVelZ() * m_gcv.z();  // The raw commanded gcv z prescaled by a preconfigured scaler
-                                                          // to adjust the dynamic range of the gait for inputs in the
-                                                          // range [0,1]
-    CMD.absGcvX = fabs(CMD.gcvX);                         // Absolute commanded gcv x
-    CMD.absGcvY = fabs(CMD.gcvY);                         // Absolute commanded gcv y
-    CMD.absGcvZ = fabs(CMD.gcvZ);                         // Absolute commanded gcv z
+    CMD.gcvX = config.gcvPrescalerLinVelX * m_gcv.x();  // The raw commanded gcv x prescaled by a preconfigured scaler
+                                                        // to adjust the dynamic range of the gait for inputs in the
+                                                        // range [0,1]
+    CMD.gcvY = config.gcvPrescalerLinVelY * m_gcv.y();  // The raw commanded gcv y prescaled by a preconfigured scaler
+                                                        // to adjust the dynamic range of the gait for inputs in the
+                                                        // range [0,1]
+    CMD.gcvZ = config.gcvPrescalerAngVelZ * m_gcv.z();  // The raw commanded gcv z prescaled by a preconfigured scaler
+                                                        // to adjust the dynamic range of the gait for inputs in the
+                                                        // range [0,1]
+    CMD.absGcvX = fabs(CMD.gcvX);                       // Absolute commanded gcv x
+    CMD.absGcvY = fabs(CMD.gcvY);                       // Absolute commanded gcv y
+    CMD.absGcvZ = fabs(CMD.gcvZ);                       // Absolute commanded gcv z
 
     // Set the gait phase variables
     CMD.gaitPhase = m_gaitPhase;  // gaitPhase: Starts at 0 at the beginning of walking, and has the swing phase of the
@@ -1128,42 +1163,42 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
                                                                          // of the left leg in [0,pi]
 
     // Set the first collection of phase marks
-    CMD.doubleSupportPhase = config.doubleSupportPhaseLen();  // The length of the double support phase (from gait phase
-                                                              // zero to this value), in the range [0,pi/2]
+    CMD.doubleSupportPhase = config.doubleSupportPhaseLen;  // The length of the double support phase (from gait phase
+                                                            // zero to this value), in the range [0,pi/2]
     CMD.swingStartPhase =
         CMD.doubleSupportPhase
-        + config.swingStartPhaseOffset();  // Limb phase mark at which the swing starts, in the range [0,pi]
+        + config.swingStartPhaseOffset;  // Limb phase mark at which the swing starts, in the range [0,pi]
     CMD.swingStopPhase =
-        M_PI - config.swingStopPhaseOffset();  // Limb phase mark at which the swing stops, in the range [0,pi]
+        M_PI - config.swingStopPhaseOffset;  // Limb phase mark at which the swing stops, in the range [0,pi]
 
     // Check for violation of the minimum allowed swing phase length and automatically rescale the swing phase offsets
     // if required
-    if (CMD.swingStopPhase - CMD.swingStartPhase < config.swingMinPhaseLen())  // The config parameter swingMinPhaseLen
-                                                                               // specifies the minimum allowed value of
-                                                                               // sinusoidPhaseLen, in the range [0.1,1]
+    if (CMD.swingStopPhase - CMD.swingStartPhase < config.swingMinPhaseLen)  // The config parameter swingMinPhaseLen
+                                                                             // specifies the minimum allowed value of
+                                                                             // sinusoidPhaseLen, in the range [0.1,1]
     {
         double resize =
-            (M_PI - CMD.doubleSupportPhase - config.swingMinPhaseLen())
-            / (config.swingStartPhaseOffset() + config.swingStopPhaseOffset());  // The denominator of this should never
-                                                                                 // be <= 0 due to the permitted ranges
-                                                                                 // on the various config variables
-        CMD.swingStartPhase = CMD.doubleSupportPhase + resize * config.swingStartPhaseOffset();
-        CMD.swingStopPhase  = M_PI - resize * config.swingStopPhaseOffset();
-        ROS_WARN_THROTTLE(3.0,
-                          "Invalid configuration for cap_gait swing phase (in violation of minimum swing phase length) "
-                          "=> Automatically fixing");
+            (M_PI - CMD.doubleSupportPhase - config.swingMinPhaseLen)
+            / (config.swingStartPhaseOffset + config.swingStopPhaseOffset);  // The denominator of this should never
+                                                                             // be <= 0 due to the permitted ranges
+                                                                             // on the various config variables
+        CMD.swingStartPhase = CMD.doubleSupportPhase + resize * config.swingStartPhaseOffset;
+        CMD.swingStopPhase  = M_PI - resize * config.swingStopPhaseOffset;
+        NUClear::log(3.0,
+                     "Invalid configuration for cap_gait swing phase (in violation of minimum swing phase length) "
+                     "=> Automatically fixing");
     }
 
     // Set the remaining phase marks
     CMD.suppTransStartPhase =
-        -config.suppTransStartRatio() * (M_PI - CMD.swingStopPhase);  // Phase mark at which the support transition
-                                                                      // starts (small negative number, i.e. backwards
-                                                                      // from zero/pi, the ratio interpolates between
-                                                                      // the beginning of the double support phase
-                                                                      // (zero) and the first negative swing stop phase)
+        -config.suppTransStartRatio * (M_PI - CMD.swingStopPhase);  // Phase mark at which the support transition
+                                                                    // starts (small negative number, i.e. backwards
+                                                                    // from zero/pi, the ratio interpolates between
+                                                                    // the beginning of the double support phase
+                                                                    // (zero) and the first negative swing stop phase)
     CMD.suppTransStopPhase =
         CMD.doubleSupportPhase
-        + config.suppTransStopRatio()
+        + config.suppTransStopRatio
               * (CMD.swingStartPhase - CMD.doubleSupportPhase);  // Phase mark at which the support transition stops, in
                                                                  // the range [0,pi] (the ratio interpolates between the
                                                                  // end of the double support phase and the first
@@ -1180,24 +1215,27 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
     CMD.linearPhaseLen   = M_2PI - CMD.sinusoidPhaseLen;              // Length of the linear backwards swing phase
 
     // Calculate the gait phase dependent dimensionless swing angle (ranging from -1 to 1)
-    if (CMD.limbPhase >= CMD.swingStartPhase && CMD.limbPhase <= CMD.swingStopPhase)
+    if (CMD.limbPhase >= CMD.swingStartPhase && CMD.limbPhase <= CMD.swingStopPhase) {
         CMD.swingAngle = -cos(M_PI * (CMD.limbPhase - CMD.swingStartPhase)
                               / CMD.sinusoidPhaseLen);  // Sinusoid forwards swing from dimensionless angle -1 to +1
                                                         // (section from phase swingStartPhase to phase swingStopPhase)
-    else if (CMD.limbPhase > CMD.swingStopPhase)
+    }
+    else if (CMD.limbPhase > CMD.swingStopPhase) {
         CMD.swingAngle =
             1.0 - (2.0 / CMD.linearPhaseLen) * (CMD.limbPhase - CMD.swingStopPhase);  // Linear backwards swing from
                                                                                       // dimensionless angle +1 to a
                                                                                       // mid-way point C (section from
                                                                                       // phase swingStopPhase to phase
                                                                                       // pi)
-    else
+    }
+    else {
         CMD.swingAngle =
             1.0 - (2.0 / CMD.linearPhaseLen) * (CMD.limbPhase - CMD.swingStopPhase + M_2PI);  // Linear backwards swing
                                                                                               // from dimensionless
                                                                                               // angle C to -1 (section
                                                                                               // from phase -pi to phase
                                                                                               // swingStartPhase)
+    }
 
     // Return the common motion data
     return CMD;
@@ -1227,7 +1265,9 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     CommonMotionData CMD = calcCommonMotionData(leg.cld.isLeft == m_leftLegFirst);
 
     // Disable the leg swing if required
-    if (config.tuningNoLegSwing()) CMD.swingAngle = 0.0;
+    if (config.tuningNoLegSwing) {
+        CMD.swingAngle = 0.0;
+    }
 
     // Initialise the additive hip angles
     double hipAngleX = 0.0;
@@ -1245,11 +1285,11 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
 
     // Apply leg stepping and pushing to the abstract leg pose
     double legExtensionOffset = 0.0;
-    if (!config.tuningNoLegLifting()) {
+    if (!config.tuningNoLegLifting) {
         // Calculate the desired step and push height from the current gcv
-        double stepHeight = config.legStepHeight() + CMD.absGcvX * config.legStepHeightGradX()
-                            + CMD.absGcvY * config.legStepHeightGradY();
-        double pushHeight = config.legPushHeight() + CMD.absGcvX * config.legPushHeightGradX();
+        double stepHeight =
+            config.legStepHeight + CMD.absGcvX * config.legStepHeightGradX + CMD.absGcvY * config.legStepHeightGradY;
+        double pushHeight = config.legPushHeight + CMD.absGcvX * config.legPushHeightGradX;
 
         // Precalculate parameters and phases for the following calculation
         double sinAngFreq     = M_PI / CMD.liftingPhaseLen;
@@ -1259,31 +1299,34 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
         double pushStopPhase  = -CMD.limbPhase;
 
         // Calculate the basic sinusoid step and push waveforms
-        if (stepStartPhase >= 0.0)
+        if (stepStartPhase >= 0.0) {
             legExtensionOffset =
                 stepHeight * sin(sinAngFreq * stepStartPhase);  // Leg stepping phase => Limb phase in the positive half
-        else if (pushStartPhase >= 0.0 && CMD.limbPhase <= 0.0)
+        }
+        else if (pushStartPhase >= 0.0 && CMD.limbPhase <= 0.0) {
             legExtensionOffset =
                 -pushHeight * sin(sinAngFreq * pushStartPhase);  // Leg pushing phase => Limb phase in the negative half
-        else
+        }
+        else {
             legExtensionOffset = 0.0;  // Double support phase
+        }
 
         // Add fillets to the waveforms to avoid overly large acceleration/torque jumps
         legExtensionOffset += utility::filter::LinSinFillet::eval(
-            stepStartPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen(), config.doubleSupportPhaseLen());
+            stepStartPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen, config.doubleSupportPhaseLen);
         legExtensionOffset += utility::filter::LinSinFillet::eval(
-            stepStopPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen(), config.doubleSupportPhaseLen());
+            stepStopPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen, config.doubleSupportPhaseLen);
         legExtensionOffset += utility::filter::LinSinFillet::eval(
-            pushStartPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen(), config.doubleSupportPhaseLen());
+            pushStartPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen, config.doubleSupportPhaseLen);
         legExtensionOffset += utility::filter::LinSinFillet::eval(
-            pushStopPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen(), config.doubleSupportPhaseLen());
+            pushStopPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen, config.doubleSupportPhaseLen);
 
         // Update the leg extension
         leg.extension += legExtensionOffset;
-        leg.angleY += config.legExtToAngleYGain() * legExtensionOffset;  // This trims the lift angle of the feet, which
-                                                                         // can be used to trim walking on the spot, but
-                                                                         // this also has very positive effects on the
-                                                                         // remainder of OL walking
+        leg.angleY += config.legExtToAngleYGain * legExtensionOffset;  // This trims the lift angle of the feet, which
+                                                                       // can be used to trim walking on the spot, but
+                                                                       // this also has very positive effects on the
+                                                                       // remainder of OL walking
     }
 
     //
@@ -1293,7 +1336,7 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     // Apply the sagittal leg swing to the abstract leg pose (responsible for fulfilling the gcv x-velocity)
     // We use a different sagittal leg swing gradient depending on whether we're walking forwards or backwards.
     double legSagSwingMag =
-        CMD.gcvX * (CMD.gcvX >= 0.0 ? config.legSagSwingMagGradXFwd() : config.legSagSwingMagGradXBwd());
+        CMD.gcvX * (CMD.gcvX >= 0.0 ? config.legSagSwingMagGradXFwd : config.legSagSwingMagGradXBwd);
     double legSagSwing = -CMD.swingAngle * legSagSwingMag;
     leg.angleY += legSagSwing;
 
@@ -1307,14 +1350,15 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     // velocity components (e.g. forwards velocity coupled with a rotational velocity). This term seeks to prevent foot
     // to foot self-collisions, and should more be seen as a bias to the halt pose, as opposed to a dynamic motion
     // component of the gait. This is because for constant walking velocity command, this term is constant.
-    double legLatPushoutMag = CMD.absGcvX * config.legLatPushoutMagGradX()
-                              + CMD.absGcvY * config.legLatPushoutMagGradY()
-                              + CMD.absGcvZ * config.legLatPushoutMagGradZ();
-    if (!config.tuningNoLegPushout()) leg.angleX += leg.cld.limbSign * legLatPushoutMag;
+    double legLatPushoutMag = CMD.absGcvX * config.legLatPushoutMagGradX + CMD.absGcvY * config.legLatPushoutMagGradY
+                              + CMD.absGcvZ * config.legLatPushoutMagGradZ;
+    if (!config.tuningNoLegPushout) {
+        leg.angleX += leg.cld.limbSign * legLatPushoutMag;
+    }
 
     // Apply the lateral leg swing to the abstract leg pose
     // This is responsible for fulfilling the gcv y-velocity.
-    double legLatSwingMag = CMD.gcvY * config.legLatSwingMagGradY();
+    double legLatSwingMag = CMD.gcvY * config.legLatSwingMagGradY;
     double legLatSwing    = CMD.swingAngle * legLatSwingMag;
     leg.angleX += legLatSwing;
 
@@ -1348,10 +1392,12 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     double hipSwingAngle  = hipSwingAngleL + hipSwingAngleR;  // The hip swing angle is in the range -1 to 1
 
     // Apply the lateral hip swing to the abstract leg pose
-    double legLatHipSwingMag = config.legLatHipSwingMag() + CMD.absGcvX * config.legLatHipSwingMagGradX()
-                               + CMD.absGcvY * config.legLatHipSwingMagGradY();
-    double legLatHipSwing = config.legLatHipSwingBias() + legLatHipSwingMag * hipSwingAngle;
-    if (!config.tuningNoLegHipSwing()) leg.angleX += legLatHipSwing;
+    double legLatHipSwingMag = config.legLatHipSwingMag + CMD.absGcvX * config.legLatHipSwingMagGradX
+                               + CMD.absGcvY * config.legLatHipSwingMagGradY;
+    double legLatHipSwing = config.legLatHipSwingBias + legLatHipSwingMag * hipSwingAngle;
+    if (!config.tuningNoLegHipSwing) {
+        leg.angleX += legLatHipSwing;
+    }
 
     //
     // Rotational leg V pushout and rotational leg swing (angleZ)
@@ -1362,12 +1408,14 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     // robot to turn. This is referred to as rotational V pushout, and has the effect of attempting to avoid toe to toe
     // self-collisions. For a constant walking velocity command, this term is constant, and hence should be considered
     // to be more of a bias to the halt pose, rather than a dynamic motion component of the gait.
-    double legRotVPushoutMag = CMD.absGcvZ * config.legRotVPushoutMagGradZ();
-    if (!config.tuningNoLegPushout()) leg.angleZ += leg.cld.limbSign * legRotVPushoutMag;
+    double legRotVPushoutMag = CMD.absGcvZ * config.legRotVPushoutMagGradZ;
+    if (!config.tuningNoLegPushout) {
+        leg.angleZ += leg.cld.limbSign * legRotVPushoutMag;
+    }
 
     // Apply the rotational leg swing to the abstract leg pose
     // This is responsible for fulfilling the gcv z-velocity.
-    double legRotSwingMag = CMD.gcvZ * config.legRotSwingMagGradZ();
+    double legRotSwingMag = CMD.gcvZ * config.legRotSwingMagGradZ;
     double legRotSwing    = CMD.swingAngle * legRotSwingMag;
     leg.angleZ += legRotSwing;
 
@@ -1380,17 +1428,16 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     // leaning is chosen over acceleration-based leaning in the interest of producing continuous abstract pose outputs.
     double legSagLean = 0.0;
     double legLatLean = 0.0;
-    if (!config.tuningNoLegLeaning()) {
+    if (!config.tuningNoLegLeaning) {
         // Lean forwards and backwards based on the sagittal walking velocity
-        legSagLean = CMD.gcvX * (CMD.gcvX >= 0.0 ? config.legSagLeanGradVelXFwd() : config.legSagLeanGradVelXBwd())
-                     + CMD.absGcvZ * config.legSagLeanGradVelZAbs();
+        legSagLean = CMD.gcvX * (CMD.gcvX >= 0.0 ? config.legSagLeanGradVelXFwd : config.legSagLeanGradVelXBwd)
+                     + CMD.absGcvZ * config.legSagLeanGradVelZAbs;
         legSagLean +=
-            m_gcvAcc.x() * (m_gcvAcc.x() >= 0.0 ? config.legSagLeanGradAccXFwd() : config.legSagLeanGradAccXBwd());
+            m_gcvAcc.x() * (m_gcvAcc.x() >= 0.0 ? config.legSagLeanGradAccXFwd : config.legSagLeanGradAccXBwd);
         hipAngleY += -legSagLean;
 
         // Lean laterally into curves (based on the rotational walking velocity)
-        legLatLean =
-            CMD.gcvX * CMD.gcvZ * (CMD.gcvX >= 0.0 ? config.legLatLeanGradXZFwd() : config.legLatLeanGradXZBwd());
+        legLatLean = CMD.gcvX * CMD.gcvZ * (CMD.gcvX >= 0.0 ? config.legLatLeanGradXZFwd : config.legLatLeanGradXZBwd);
         hipAngleX += legLatLean;
     }
 
@@ -1405,9 +1452,9 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     double footAngleYFeedback    = 0.0;
     double footAngleCtsXFeedback = 0.0;
     double footAngleCtsYFeedback = 0.0;
-    if (!config.tuningNoLegFeedback()) {
+    if (!config.tuningNoLegFeedback) {
         // Compute the phase waveform over which to apply the foot feedback
-        double footPhaseLen = utility::math::clamp(0.05, config.basicFootAnglePhaseLen(), M_PI_2);
+        double footPhaseLen = utility::math::clamp(0.05, config.basicFootAnglePhaseLen, M_PI_2);
         double footFeedbackSlope =
             1.0 / footPhaseLen;  // This can't go uncontrolled because the footPhaseLen is clamped to a reasonable range
         double footFeedbackScaler = 0.0;
@@ -1421,46 +1468,46 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
         }
 
         // Compute the integrated foot and hip angle feedback
-        double hipAngleXIFeed     = config.basicIFusedHipAngleX() * iFusedXFeed;
-        double hipAngleYIFeed     = config.basicIFusedHipAngleY() * iFusedYFeed;
-        double footAngleCtsXIFeed = config.basicIFusedFootAngleCX() * iFusedXFeed;
-        double footAngleCtsYIFeed = config.basicIFusedFootAngleCY() * iFusedYFeed;
+        double hipAngleXIFeed     = config.basicIFusedHipAngleX * iFusedXFeed;
+        double hipAngleYIFeed     = config.basicIFusedHipAngleY * iFusedYFeed;
+        double footAngleCtsXIFeed = config.basicIFusedFootAngleCX * iFusedXFeed;
+        double footAngleCtsYIFeed = config.basicIFusedFootAngleCY * iFusedYFeed;
 
         // Compute the total foot and hip angle feedback
-        hipAngleXFeedback = config.basicFeedBiasHipAngleX() + config.basicFusedHipAngleX() * fusedXFeed
-                            + config.basicDFusedHipAngleX() * dFusedXFeed + hipAngleXIFeed
-                            + config.basicGyroHipAngleX() * gyroXFeed;
-        hipAngleYFeedback = config.basicFeedBiasHipAngleY() + config.basicFusedHipAngleY() * fusedYFeed
-                            + config.basicDFusedHipAngleY() * dFusedYFeed + hipAngleYIFeed
-                            + config.basicGyroHipAngleY() * gyroYFeed;
-        footAngleXFeedback = config.basicFeedBiasFootAngleX() + config.basicFusedFootAngleX() * fusedXFeed
-                             + config.basicDFusedFootAngleX() * dFusedXFeed
-                             + config.basicIFusedFootAngleX() * iFusedXFeed + config.basicGyroFootAngleX() * gyroXFeed;
-        footAngleYFeedback = config.basicFeedBiasFootAngleY() + config.basicFusedFootAngleY() * fusedYFeed
-                             + config.basicDFusedFootAngleY() * dFusedYFeed
-                             + config.basicIFusedFootAngleY() * iFusedYFeed + config.basicGyroFootAngleY() * gyroYFeed;
+        hipAngleXFeedback = config.basicFeedBiasHipAngleX + config.basicFusedHipAngleX * fusedXFeed
+                            + config.basicDFusedHipAngleX * dFusedXFeed + hipAngleXIFeed
+                            + config.basicGyroHipAngleX * gyroXFeed;
+        hipAngleYFeedback = config.basicFeedBiasHipAngleY + config.basicFusedHipAngleY * fusedYFeed
+                            + config.basicDFusedHipAngleY * dFusedYFeed + hipAngleYIFeed
+                            + config.basicGyroHipAngleY * gyroYFeed;
+        footAngleXFeedback = config.basicFeedBiasFootAngleX + config.basicFusedFootAngleX * fusedXFeed
+                             + config.basicDFusedFootAngleX * dFusedXFeed + config.basicIFusedFootAngleX * iFusedXFeed
+                             + config.basicGyroFootAngleX * gyroXFeed;
+        footAngleYFeedback = config.basicFeedBiasFootAngleY + config.basicFusedFootAngleY * fusedYFeed
+                             + config.basicDFusedFootAngleY * dFusedYFeed + config.basicIFusedFootAngleY * iFusedYFeed
+                             + config.basicGyroFootAngleY * gyroYFeed;
         footAngleXFeedback *= footFeedbackScaler;
         footAngleYFeedback *= footFeedbackScaler;
-        footAngleCtsXFeedback = config.basicFeedBiasFootAngCX() + footAngleCtsXIFeed;
-        footAngleCtsYFeedback = config.basicFeedBiasFootAngCY() + footAngleCtsYIFeed;
+        footAngleCtsXFeedback = config.basicFeedBiasFootAngCX + footAngleCtsXIFeed;
+        footAngleCtsYFeedback = config.basicFeedBiasFootAngCY + footAngleCtsYIFeed;
 
         // Disable the foot and hip angle feedback if required
-        if (!(config.basicEnableHipAngleX() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableHipAngleX && config.basicGlobalEnable)) {
             hipAngleXFeedback = hipAngleXIFeed = 0.0;
         }
-        if (!(config.basicEnableHipAngleY() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableHipAngleY && config.basicGlobalEnable)) {
             hipAngleYFeedback = hipAngleYIFeed = 0.0;
         }
-        if (!(config.basicEnableFootAngleX() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableFootAngleX && config.basicGlobalEnable)) {
             footAngleXFeedback = 0.0;
         }
-        if (!(config.basicEnableFootAngleY() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableFootAngleY && config.basicGlobalEnable)) {
             footAngleYFeedback = 0.0;
         }
-        if (!(config.basicEnableFootAngleCX() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableFootAngleCX && config.basicGlobalEnable)) {
             footAngleCtsXFeedback = footAngleCtsXIFeed = 0.0;
         }
-        if (!(config.basicEnableFootAngleCY() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableFootAngleCY && config.basicGlobalEnable)) {
             footAngleCtsYFeedback = footAngleCtsYIFeed = 0.0;
         }
 
@@ -1474,30 +1521,30 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
         if (m_saveIFeedToHaltPose() && !m_savedLegIFeed) {
             // Note: The calculations of these offsets should match up with how the hip angle is added to the abstract
             // pose further down in this function!
-            config.haltLegAngleXBias.set(config.haltLegAngleXBias() + hipAngleXIFeed);
-            config.haltLegAngleY.set(config.haltLegAngleY() + hipAngleYIFeed);
-            config.haltFootAngleXBias.set(config.haltFootAngleXBias() + footAngleCtsXIFeed + hipAngleXIFeed);
-            config.haltFootAngleY.set(config.haltFootAngleY() + footAngleCtsYIFeed + hipAngleYIFeed);
-            config.haltLegExtensionBias.set(config.haltLegExtensionBias()
-                                            + config.legHipAngleXLegExtGain() * sin(hipAngleXIFeed));
-            ROS_INFO("Saved the current integrated leg feedback offsets as modifications to the halt pose");
+            config.haltLegAngleXBias.set(config.haltLegAngleXBias + hipAngleXIFeed);
+            config.haltLegAngleY.set(config.haltLegAngleY + hipAngleYIFeed);
+            config.haltFootAngleXBias.set(config.haltFootAngleXBias + footAngleCtsXIFeed + hipAngleXIFeed);
+            config.haltFootAngleY.set(config.haltFootAngleY + footAngleCtsYIFeed + hipAngleYIFeed);
+            config.haltLegExtensionBias.set(config.haltLegExtensionBias
+                                            + config.legHipAngleXLegExtGain * std::sin(hipAngleXIFeed));
+            NUClear::log("Saved the current integrated leg feedback offsets as modifications to the halt pose");
             m_savedLegIFeed = true;
         }
 
         // Work out whether iFusedX contributed anything to the CPG gait
-        if (haveIFusedXFeed && config.basicGlobalEnable()
-            && ((config.basicIFusedHipAngleX() != 0.0 && config.basicEnableHipAngleX())
-                || (config.basicIFusedFootAngleX() != 0.0 && config.basicEnableFootAngleX())
-                || (config.basicIFusedFootAngleCX() != 0.0 && config.basicEnableFootAngleCX()))) {
+        if (haveIFusedXFeed && config.basicGlobalEnable
+            && ((config.basicIFusedHipAngleX != 0.0 && config.basicEnableHipAngleX)
+                || (config.basicIFusedFootAngleX != 0.0 && config.basicEnableFootAngleX)
+                || (config.basicIFusedFootAngleCX != 0.0 && config.basicEnableFootAngleCX))) {
             iFusedXLastTime = in.timestamp;
             usedIFusedX     = true;
         }
 
         // Work out whether iFusedY contributed anything to the CPG gait
-        if (haveIFusedYFeed && config.basicGlobalEnable()
-            && ((config.basicIFusedHipAngleY() != 0.0 && config.basicEnableHipAngleY())
-                || (config.basicIFusedFootAngleY() != 0.0 && config.basicEnableFootAngleY())
-                || (config.basicIFusedFootAngleCY() != 0.0 && config.basicEnableFootAngleCY()))) {
+        if (haveIFusedYFeed && config.basicGlobalEnable
+            && ((config.basicIFusedHipAngleY != 0.0 && config.basicEnableHipAngleY)
+                || (config.basicIFusedFootAngleY != 0.0 && config.basicEnableFootAngleY)
+                || (config.basicIFusedFootAngleCY != 0.0 && config.basicEnableFootAngleCY))) {
             iFusedYLastTime = in.timestamp;
             usedIFusedY     = true;
         }
@@ -1510,7 +1557,9 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     // Add the required hip angle X to the abstract pose
     leg.angleX += hipAngleX;
     leg.footAngleX += hipAngleX;
-    if (sign0(hipAngleX) == leg.cld.limbSign) leg.extension += config.legHipAngleXLegExtGain() * fabs(sin(hipAngleX));
+    if (utility::math::sign0(hipAngleX) == leg.cld.limbSign) {
+        leg.extension += config.legHipAngleXLegExtGain * std::abs(std::sin(hipAngleX));
+    }
 
     // Add the required hip angle Y to the abstract pose
     leg.angleY += hipAngleY;
@@ -1530,7 +1579,9 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     // Calculate the phase length over which the support coefficient transition should take place
     double supportTransitionPhaseLen = CMD.suppTransStopPhase - CMD.suppTransStartPhase;
     double supportTransitionSlope    = 1e10;
-    if (supportTransitionPhaseLen > 1e-10) supportTransitionSlope= 1.0 / supportTransitionPhaseLen;
+    if (supportTransitionPhaseLen > 1e-10) {
+        supportTransitionSlope = 1.0 / supportTransitionPhaseLen;
+    }
 
     // Calculate the required support coefficient of this leg
     if (CMD.limbPhase <= CMD.suppTransStopPhase - M_PI) {
@@ -1553,10 +1604,10 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     }
 
     // Rescale the support coefficients to the required range
-    leg.cld.supportCoeff = config.supportCoeffRange() * (leg.cld.supportCoeff - 0.5) + 0.5;
+    leg.cld.supportCoeff = config.supportCoeffRange * (leg.cld.supportCoeff - 0.5) + 0.5;
 
     // Disable variations in the support coefficients if required
-    if (config.tuningNoLegSuppCoeff()) leg.cld.supportCoeff = 0.5;
+    if (config.tuningNoLegSuppCoeff) leg.cld.supportCoeff = 0.5;
 
     //
     // Plotting
@@ -1601,14 +1652,16 @@ void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
     CommonMotionData CMD = calcCommonMotionData(arm.cad.isLeft != m_leftLegFirst);
 
     // Disable the arm swing if required
-    if (config.tuningNoArmSwing()) CMD.swingAngle = 0.0;
+    if (config.tuningNoArmSwing) {
+        CMD.swingAngle = 0.0;
+    }
 
     //
     // Sagittal arm swing (angleY)
     //
 
     // Apply the sagittal arm swing to the abstract arm pose
-    double armSagSwingMag = config.armSagSwingMag() + CMD.gcvX * config.armSagSwingMagGradX();
+    double armSagSwingMag = config.armSagSwingMag + CMD.gcvX * config.armSagSwingMagGradX;
     double armSagSwing    = -CMD.swingAngle * armSagSwingMag;
     arm.angleY += armSagSwing;
 
@@ -1619,22 +1672,26 @@ void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
     // Apply fused angle and gyro feedback to the arms
     double armAngleXFeedback = 0.0;
     double armAngleYFeedback = 0.0;
-    if (!config.tuningNoArmFeedback()) {
+    if (!config.tuningNoArmFeedback) {
         // Compute the integrated arm angle feedback
-        double armAngleXIFeed = config.basicIFusedArmAngleX() * iFusedXFeed;
-        double armAngleYIFeed = config.basicIFusedArmAngleY() * iFusedYFeed;
+        double armAngleXIFeed = config.basicIFusedArmAngleX * iFusedXFeed;
+        double armAngleYIFeed = config.basicIFusedArmAngleY * iFusedYFeed;
 
         // Compute the total arm angle feedback
-        armAngleXFeedback = config.basicFeedBiasArmAngleX() + config.basicFusedArmAngleX() * fusedXFeed
-                            + config.basicDFusedArmAngleX() * dFusedXFeed + armAngleXIFeed
-                            + config.basicGyroArmAngleX() * gyroXFeed;
-        armAngleYFeedback = config.basicFeedBiasArmAngleY() + config.basicFusedArmAngleY() * fusedYFeed
-                            + config.basicDFusedArmAngleY() * dFusedYFeed + armAngleYIFeed
-                            + config.basicGyroArmAngleY() * gyroYFeed;
+        armAngleXFeedback = config.basicFeedBiasArmAngleX + config.basicFusedArmAngleX * fusedXFeed
+                            + config.basicDFusedArmAngleX * dFusedXFeed + armAngleXIFeed
+                            + config.basicGyroArmAngleX * gyroXFeed;
+        armAngleYFeedback = config.basicFeedBiasArmAngleY + config.basicFusedArmAngleY * fusedYFeed
+                            + config.basicDFusedArmAngleY * dFusedYFeed + armAngleYIFeed
+                            + config.basicGyroArmAngleY * gyroYFeed;
 
         // Disable the arm angle feedback if required
-        if (!(config.basicEnableArmAngleX() && config.basicGlobalEnable())) armAngleXFeedback = armAngleXIFeed = 0.0;
-        if (!(config.basicEnableArmAngleY() && config.basicGlobalEnable())) armAngleYFeedback = armAngleYIFeed = 0.0;
+        if (!(config.basicEnableArmAngleX && config.basicGlobalEnable)) {
+            armAngleXFeedback = armAngleXIFeed = 0.0;
+        }
+        if (!(config.basicEnableArmAngleY && config.basicGlobalEnable)) {
+            armAngleYFeedback = armAngleYIFeed = 0.0;
+        }
 
         // Apply the arm angle feedback
         arm.angleX += armAngleXFeedback;
@@ -1642,22 +1699,22 @@ void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
 
         // Handle saving of the current integral feedback values as halt pose offsets
         if (m_saveIFeedToHaltPose() && !m_savedArmIFeed) {
-            config.haltArmAngleXBias.set(config.haltArmAngleXBias() + armAngleXIFeed);
-            config.haltArmAngleY.set(config.haltArmAngleY() + armAngleYIFeed);
-            ROS_INFO("Saved the current integrated arm feedback offsets as modifications to the halt pose");
+            config.haltArmAngleXBias.set(config.haltArmAngleXBias + armAngleXIFeed);
+            config.haltArmAngleY.set(config.haltArmAngleY + armAngleYIFeed);
+            NUClear::log("Saved the current integrated arm feedback offsets as modifications to the halt pose");
             m_savedArmIFeed = true;
         }
 
         // Work out whether iFusedX contributed anything to the CPG gait
-        if (haveIFusedXFeed && config.basicIFusedArmAngleX() != 0.0 && config.basicEnableArmAngleX()
-            && config.basicGlobalEnable()) {
+        if (haveIFusedXFeed && config.basicIFusedArmAngleX != 0.0 && config.basicEnableArmAngleX
+            && config.basicGlobalEnable) {
             iFusedXLastTime = in.timestamp;
             usedIFusedX     = true;
         }
 
         // Work out whether iFusedY contributed anything to the CPG gait
-        if (haveIFusedYFeed && config.basicIFusedArmAngleY() != 0.0 && config.basicEnableArmAngleY()
-            && config.basicGlobalEnable()) {
+        if (haveIFusedYFeed && config.basicIFusedArmAngleY != 0.0 && config.basicEnableArmAngleY
+            && config.basicGlobalEnable) {
             iFusedYLastTime = in.timestamp;
             usedIFusedY     = true;
         }
@@ -1698,30 +1755,31 @@ void GaitEngine::inverseLegMotion(gait::contrib::InverseLegPose& leg) {
     // Apply fused angle and gyro feedback
     double comShiftXFeedback = 0.0;
     double comShiftYFeedback = 0.0;
-    if (!config.tuningNoLegFeedback()) {
+    if (!config.tuningNoLegFeedback) {
         // Compute the CoM shifting feedback
-        comShiftXFeedback = config.basicFeedBiasComShiftX() + config.basicFusedComShiftX() * fusedYFeed
-                            + config.basicDFusedComShiftX() * dFusedYFeed + config.basicIFusedComShiftX() * iFusedYFeed
-                            + config.basicGyroComShiftX() * gyroYFeed;
-        comShiftYFeedback = -(config.basicFeedBiasComShiftY() + config.basicFusedComShiftY() * fusedXFeed
-                              + config.basicDFusedComShiftY() * dFusedXFeed
-                              + config.basicIFusedComShiftY() * iFusedXFeed + config.basicGyroComShiftY() * gyroXFeed);
+        comShiftXFeedback = config.basicFeedBiasComShiftX + config.basicFusedComShiftX * fusedYFeed
+                            + config.basicDFusedComShiftX * dFusedYFeed + config.basicIFusedComShiftX * iFusedYFeed
+                            + config.basicGyroComShiftX * gyroYFeed;
+        comShiftYFeedback = -(config.basicFeedBiasComShiftY + config.basicFusedComShiftY * fusedXFeed
+                              + config.basicDFusedComShiftY * dFusedXFeed
+                              + config.basicIFusedComShiftY * iFusedXFeed
+                              + config.basicGyroComShiftY * gyroXFeed);
 
         // Apply the required limits if enabled
-        if (config.basicComShiftXUseLimits()) {
+        if (config.basicComShiftXUseLimits) {
             comShiftXFeedback = utility::math::clampSoft(
-                config.basicComShiftXMin(), comShiftXFeedback, config.basicComShiftXMax(), config.basicComShiftXBuf());
+                config.basicComShiftXMin, comShiftXFeedback, config.basicComShiftXMax, config.basicComShiftXBuf);
         }
-        if (config.basicComShiftYUseLimits()) {
+        if (config.basicComShiftYUseLimits) {
             comShiftYFeedback = utility::math::clampSoft(
-                config.basicComShiftYMin(), comShiftYFeedback, config.basicComShiftYMax(), config.basicComShiftYBuf());
+                config.basicComShiftYMin, comShiftYFeedback, config.basicComShiftYMax, config.basicComShiftYBuf);
         }
 
         // Disable the CoM shifting feedback if required
-        if (!(config.basicEnableComShiftX() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableComShiftX && config.basicGlobalEnable)) {
             comShiftXFeedback = 0.0;
         }
-        if (!(config.basicEnableComShiftY() && config.basicGlobalEnable())) {
+        if (!(config.basicEnableComShiftY && config.basicGlobalEnable)) {
             comShiftYFeedback = 0.0;
         }
 
@@ -1730,15 +1788,19 @@ void GaitEngine::inverseLegMotion(gait::contrib::InverseLegPose& leg) {
         leg.footPos.y() += comShiftYFeedback;
 
         // Work out whether iFusedX contributed anything to the CPG gait
-        if (haveIFusedXFeed && config.basicIFusedComShiftY() != 0.0 && config.basicComShiftYMin() < 0.0
-            && config.basicComShiftYMax() > 0.0 && config.basicEnableComShiftY() && config.basicGlobalEnable()) {
+        if (haveIFusedXFeed && config.basicIFusedComShiftY != 0.0 && config.basicComShiftYMin < 0.0
+            && config.basicComShiftYMax > 0.0
+            && config.basicEnableComShiftY
+            && config.basicGlobalEnable) {
             iFusedXLastTime = in.timestamp;
             usedIFusedX     = true;
         }
 
         // Work out whether iFusedY contributed anything to the CPG gait
-        if (haveIFusedYFeed && config.basicIFusedComShiftX() != 0.0 && config.basicComShiftXMin() < 0.0
-            && config.basicComShiftXMax() > 0.0 && config.basicEnableComShiftX() && config.basicGlobalEnable()) {
+        if (haveIFusedYFeed && config.basicIFusedComShiftX != 0.0 && config.basicComShiftXMin < 0.0
+            && config.basicComShiftXMax > 0.0
+            && config.basicEnableComShiftX
+            && config.basicGlobalEnable) {
             iFusedYLastTime = in.timestamp;
             usedIFusedY     = true;
         }
@@ -1752,12 +1814,14 @@ void GaitEngine::inverseLegMotion(gait::contrib::InverseLegPose& leg) {
     // a configured offset). This has the qualitative effect that the robot lifts its feet more when it is falling
     // forwards.
     double virtualComponent = 0.0;
-    if (config.basicEnableVirtualSlope() && config.basicGlobalEnable() && !config.tuningNoLegVirtual()) {
+    if (config.basicEnableVirtualSlope && config.basicGlobalEnable && !config.tuningNoLegVirtual) {
         double endVirtualSlope = virtualSlope * CMD.gcvX;
-        if (endVirtualSlope >= 0.0)
+        if (endVirtualSlope >= 0.0) {
             virtualComponent = 0.5 * (CMD.swingAngle + 1.0) * endVirtualSlope;
-        else
+        }
+        else {
             virtualComponent = 0.5 * (CMD.swingAngle - 1.0) * endVirtualSlope;
+        }
         leg.footPos.z() += virtualComponent;
     }
 
@@ -1786,47 +1850,47 @@ void GaitEngine::clampAbstractPose(pose::AbstractPose& pose) {
 // Abstract arm pose coercion function
 void GaitEngine::clampAbstractArmPose(pose::AbstractArmPose& arm) {
     // Apply the required limits if enabled
-    if (config.limArmAngleXUseLimits()) {
+    if (config.limArmAngleXUseLimits) {
         arm.angleX = arm.cad.limbSign
                      // Minimum is negative towards inside, maximum is positive towards outside
-                     * utility::math::clampSoft(config.limArmAngleXMin(),
+                     * utility::math::clampSoft(config.limArmAngleXMin,
                                                 arm.angleX / arm.cad.limbSign,
-                                                config.limArmAngleXMax(),
-                                                config.limArmAngleXBuf());
+                                                config.limArmAngleXMax,
+                                                config.limArmAngleXBuf);
     }
-    if (config.limArmAngleYUseLimits()) {
+    if (config.limArmAngleYUseLimits) {
         arm.angleY = utility::math::clampSoft(
-            config.limArmAngleYMin(), arm.angleY, config.limArmAngleYMax(), config.limArmAngleYBuf());
+            config.limArmAngleYMin, arm.angleY, config.limArmAngleYMax, config.limArmAngleYBuf);
     }
 }
 
 // Abstract leg pose coercion function
 void GaitEngine::clampAbstractLegPose(pose::AbstractLegPose& leg) {
     // Apply the required limits if enabled
-    if (config.limLegAngleXUseLimits())
+    if (config.limLegAngleXUseLimits)
         leg.angleX =
             leg.cld.limbSign
-            * utility::math::clampSoft(config.limLegAngleXMin(),
+            * utility::math::clampSoft(config.limLegAngleXMin,
                                        leg.angleX / leg.cld.limbSign,
-                                       config.limLegAngleXMax(),
+                                       config.limLegAngleXMax,
                                        4);  // Minimum is negative towards inside, maximum is positive towards outside
-    if (config.limLegAngleYUseLimits()) {
-        leg.angleY = utility::math::clampSoft(config.limLegAngleYMin(), leg.angleY, config.limLegAngleYMax(), 4);
+    if (config.limLegAngleYUseLimits) {
+        leg.angleY = utility::math::clampSoft(config.limLegAngleYMin, leg.angleY, config.limLegAngleYMax, 4);
     }
-    if (config.limFootAngleXUseLimits()) {
+    if (config.limFootAngleXUseLimits) {
         leg.footAngleX = leg.cld.limbSign
                          // Minimum is negative towards inside, maximum is positive towards outside
-                         * utility::math::clampSoft(config.limFootAngleXMin(),
+                         * utility::math::clampSoft(config.limFootAngleXMin,
                                                     leg.footAngleX / leg.cld.limbSign,
-                                                    config.limFootAngleXMax(),
-                                                    config.limFootAngleXBuf());
+                                                    config.limFootAngleXMax,
+                                                    config.limFootAngleXBuf);
     }
-    if (config.limFootAngleYUseLimits()) {
+    if (config.limFootAngleYUseLimits) {
         leg.footAngleY = utility::math::clampSoft(
-            config.limFootAngleYMin(), leg.footAngleY, config.limFootAngleYMax(), config.limFootAngleYBuf());
+            config.limFootAngleYMin, leg.footAngleY, config.limFootAngleYMax, config.limFootAngleYBuf);
     }
-    if (config.limLegExtUseLimits()) {
-        leg.extension = utility::math::clampSoftMin(config.limLegExtMin(), leg.extension, config.limLegExtBuf());
+    if (config.limLegExtUseLimits) {
+        leg.extension = utility::math::clampSoftMin(config.limLegExtMin, leg.extension, config.limLegExtBuf);
     }
 }
 

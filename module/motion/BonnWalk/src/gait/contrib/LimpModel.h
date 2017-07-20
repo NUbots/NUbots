@@ -1,10 +1,12 @@
 #ifndef LIMPMODEL_H_
 #define LIMPMODEL_H_
 
+#include <Eigen/Core>
+
 #include "Limp.h"
 #include "LimpState.h"
 
-#include <Eigen/Core>
+#include "../WalkConfig.h"
 
 namespace gait {
 namespace contrib {
@@ -51,16 +53,22 @@ namespace contrib {
     private:
         Limp limp;
 
+        const gait::WalkConfig& config;
+
     public:
-        explicit LimpModel();
+        explicit LimpModel(const gait::WalkConfig& config);
 
         void reset() {
             LimpState ms;
-            ms.reset();  // Just to be safe
-            setState(ms,
-                     Eigen::Vector3f::Zero());  // TODO: This is probably not such a good idea as a zero LimpState is
-                                                // actually highly atypical and a situation that is in unstable
-                                                // equilibrium, leading to possibly weird timeToStep's and so on.
+
+            // Just to be safe
+            ms.reset();
+
+            // TODO: This is probably not such a good idea as a zero LimpState is
+            // actually highly atypical and a situation that is in unstable
+            // equilibrium, leading to possibly weird timeToStep's and so on.
+            setState(ms, Eigen::Vector3f::Zero());
+
             updateInputData(systemIterationTime, 0.0, 0.0);
         }
 

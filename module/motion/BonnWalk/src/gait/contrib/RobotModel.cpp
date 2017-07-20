@@ -15,7 +15,7 @@ namespace gait {
 namespace contrib {
 
     // Default constructor
-    RobotModel::RobotModel(cap_gait::CapConfig* capConfig) : config(capConfig) {
+    RobotModel::RobotModel(const gait::WalkConfig& config) : config(config) {
         // Set up the robot spec callback
         config->addRobotSpecCallback(boost::bind(&RobotModel::robotSpecCallback, this));
 

@@ -5,7 +5,7 @@
 namespace gait {
 namespace contrib {
 
-    LimpModel::LimpModel() {
+    LimpModel::LimpModel(const WalkConfig& config) : config(config) {
         systemIterationTime = 0;
         fusedAngleX         = 0;
         fusedAngleY         = 0;
@@ -31,13 +31,13 @@ namespace contrib {
     // Sets the state of the limp model.
     // It sets the current motion state, it computes the nominal state, the Z,T,F parameters, and the end of step state.
     void LimpModel::setState(LimpState ms, Eigen::Vector3f ggcv) {
-        double C     = config->mgC();
-        double sC    = sqrt(C);
-        double alpha = config->mgAlpha();  // Lateral step apex size.
-        double delta = config->mgDelta();  // Minimum lateral support exchange location.
-        double omega = config->mgOmega();  // Maximum lateral support exchange location.
-        double sigma = config->mgSigma();  // Maximum sagittal apex velocity.
-        double gamma = config->mgGamma();  // Maximum rotational step angle.
+        double C     = config.mgC();
+        double sC    = std::sqrt(C);
+        double alpha = config.mgAlpha();  // Lateral step apex size.
+        double delta = config.mgDelta();  // Minimum lateral support exchange location.
+        double omega = config.mgOmega();  // Maximum lateral support exchange location.
+        double sigma = config.mgSigma();  // Maximum sagittal apex velocity.
+        double gamma = config.mgGamma();  // Maximum rotational step angle.
 
         gcv = ggcv;  // Input
 
@@ -59,10 +59,12 @@ namespace contrib {
 
         // Compute the nominal state.
         double nominalSex = delta;  // The optimal abbreviation for "nominal support exchange location"!
-        if (supportLegSign * gcv.y() > 0)
+        if (supportLegSign * gcv.y() > 0) {
             nominalSex = delta + std::abs(gcv.y()) * (omega - delta);  // long step case between delta and omega
-        else
+        }
+        else {
             nominalSex = delta;  // - std::abs(gcv.y)*(delta - alpha); // short step case between alpha and delta
+        }
         limp.set(alpha, 0, C);
         nominalFootStepTHalf = limp.tLoc(nominalSex);  // The time measured from alpha to sex...
         // nominalFootStepTHalf = limp.tLoc(delta); // The time measured from alpha to delta. Tau (6) in the RoboCup
@@ -70,7 +72,7 @@ namespace contrib {
 
         nominalState.supportLegSign = supportLegSign;
         nominalState.y              = supportLegSign * nominalSex;
-        nominalState.vy             = supportLegSign * sC * sqrt(nominalSex * nominalSex - alpha * alpha);
+        nominalState.vy             = supportLegSign * sC * std::sqrt(nominalSex * nominalSex - alpha * alpha);
 
         limp.set(0, gcv.x() * sigma, C);
         limp.update(nominalFootStepTHalf);  // Tau is used to calculate the sagittal sex.
@@ -98,11 +100,15 @@ namespace contrib {
         // approaches zero, so it must be inhibited near the support exchange.
         limp.set(y, vy, C);
         double zy = limp.z(nominalState.y, nominalTimeToStep);
-        if (supportLegSign == 1)
-            zmp.y() = utility::math::clamp((double) config->mgZmpYMin(), zy, (double) config->mgZmpYMax());
-        else
-            zmp.y() = utility::math::clamp((double) -config->mgZmpYMax(), zy, (double) -config->mgZmpYMin());
-        if (!config->cmdUseNonZeroZMP()) zmp.y() = 0;
+        if (supportLegSign == 1) {
+            zmp.y() = utility::math::clamp((double) config.mgZmpYMin(), zy, (double) config.mgZmpYMax());
+        }
+        else {
+            zmp.y() = utility::math::clamp((double) -config.mgZmpYMax(), zy, (double) -config.mgZmpYMin());
+        }
+        if (!config.cmdUseNonZeroZMP()) {
+            zmp.y() = 0;
+        }
 
         // The energy must be computed after the zmp.
         energyY = Limp::energy(y - zmp.y(), vy, C);  // with zmp!
@@ -110,8 +116,8 @@ namespace contrib {
 
         // Crossing means traveling towards the support leg with energy > 0 in lateral direction.
         // When crossing, torso balancing could be of great help.
-        crossing = (supportLegSign * vy < 0 and energyY > 0) or (supportLegSign * vy < 0 and supportLegSign * y < 0)
-                   or (supportLegSign * y < 0 and energyY < 0);
+        crossing = (supportLegSign * vy < 0 && energyY > 0) || (supportLegSign * vy < 0 && supportLegSign * y < 0)
+                   || (supportLegSign * y < 0 && energyY < 0);
 
         // Stalling is when the limp never crosses the sex, i.e. is "inside" the sex.
         stalling = (energyY < Limp::energy(nominalState.y - zmp.y(), 0, C));
@@ -133,13 +139,15 @@ namespace contrib {
         }
 
         // If the step time could be clearly determined, then there you go.
-        else if (tts > 0)
+        else if (tts > 0) {
             timeToStep = tts;
+        }
 
         // In stalling cases (the bad kind of returning trajectory), we accept a positive time to apex as step time
         // approximation. Better than nothing.
-        else if (stalling and tta > 0)
+        else if (stalling && tta > 0) {
             timeToStep = tta;
+        }
 
         // One problem with this is that if a push puts us on a stall trajectory after the apex, the step time would
         // (and should) be zero. In theory, we should step as quickly as we possibly can! In practice I found that this
@@ -148,19 +156,20 @@ namespace contrib {
 
         // In other cases the step time cannot be properly determined and we just decay. The floor is always coming
         // closer.
-        else
+        else {
             timeToStep -= systemIterationTime;
+        }
 
 
         // On the other hand, if the step time we computed based only on lateral considerations results in an extreme
         // sagittal position at the end of the step, we overwrite the step time with the time of reaching the sagittal
         // boundary.
         limp.set(x, vx, C);
-        double t1 = limp.tLoc(config->mgMaxComPositionX());
-        double t2 = limp.tLoc(-config->mgMaxComPositionX());
-        if (t2 > 0 and t2 < timeToStep) timeToStep= t2;
-        if (t1 > 0 and t1 < timeToStep) timeToStep = t1;
-        if (x > config->mgMaxComPositionX() or x < -config->mgMaxComPositionX()) timeToStep = 0;
+        double t1                                 = limp.tLoc(config.mgMaxComPositionX());
+        double t2                                 = limp.tLoc(-config.mgMaxComPositionX());
+        if (t2 > 0 && t2 < timeToStep) timeToStep = t2;
+        if (t1 > 0 && t1 < timeToStep) timeToStep = t1;
+        if (x > config.mgMaxComPositionX() || x < -config.mgMaxComPositionX()) timeToStep = 0;
 
 
         // 3. Sagittal ZMP.
@@ -178,9 +187,11 @@ namespace contrib {
         // the capture point.
         limp.set(x, vx, C);
         double zx = limp.z(nominalState.x, timeToStep);
-        zmp.x()   = utility::math::clamp((double) config->mgZmpXMin(), zx, (double) config->mgZmpXMax());
+        zmp.x()   = utility::math::clamp((double) config.mgZmpXMin(), zx, (double) config.mgZmpXMax());
 
-        if (!config->cmdUseNonZeroZMP()) zmp.x() = 0;
+        if (!config.cmdUseNonZeroZMP()) {
+            zmp.x() = 0;
+        }
 
         energyX = Limp::energy(x - zmp.x(), vx, C);  // with zmp!
 
@@ -208,15 +219,15 @@ namespace contrib {
         // footStep.x() = endOfStepState.x; // Simply step size = 2 * com. Matches the end of step position. This means
         // all steps are symmetrical and the CoM is in the middle. Worked best on the real robot, doesn't work with the
         // limp model.
-        footStep.x() = endOfStepState.vx * tanh(sC * nominalFootStepTHalf) / sC;  // Humanoids 2013 version. Matches the
-                                                                                  // end of step velocities. Works with
-                                                                                  // the limp model and the robot.
+        // Humanoids 2013 version. Matches the
+        // end of step velocities. Works with
+        // the limp model and the robot.
+        footStep.x() = endOfStepState.vx * std::tanh(sC * nominalFootStepTHalf) / sC;
         // Match the end of step capture point?
         // Match the end of step energy?
 
-
         // 6. Rotational step size.
-        footStep.z() = nominalFootStep.z;
+        footStep.z() = nominalFootStep.z();
 
         stepSize.x() = endOfStepState.x + footStep.x();
         stepSize.y() = endOfStepState.y + footStep.y();
@@ -242,7 +253,7 @@ namespace contrib {
 
     // Simulates the pendulum model for dt amount of time. No step is induced.
     void LimpModel::forward(double dt) {
-        double C = config->mgC();
+        double C = config.mgC();
 
         limp.set(x - zmp.x(), vx, C);  // update with zmp
         limp.update(dt);
@@ -277,15 +288,15 @@ namespace contrib {
 
     // Induces a step to the current footStep location.
     void LimpModel::step() {
-        double C = config->mgC();
+        double C = config.mgC();
 
         // Post step prediction correction.
         // The larger the torso angle at support exchange, the less precise the limp step prediction becomes.
         // We try to fix it a little with this hack.
         double postStepCorrectionFactor =
-            config->cmdUseRXFeedback()
-            * utility::math::clamp(0.0, std::abs(fusedAngleY) / config->mgPostStepStateCorrAng(), 1.0);
-        if (config->mgPostStepStateCorrAng() <= 0) {
+            config.cmdUseRXFeedback()
+            * utility::math::clamp(0.0, std::abs(fusedAngleY) / config.mgPostStepStateCorrAng(), 1.0);
+        if (config.mgPostStepStateCorrAng() <= 0) {
             postStepCorrectionFactor = 0;
         }
 
@@ -306,7 +317,7 @@ namespace contrib {
 
     // Returns the current motion state.
     LimpState LimpModel::getMotionState() {
-        double C = config->mgC();
+        double C = config.mgC();
 
         LimpState ms;
         ms.x              = x;
@@ -325,7 +336,7 @@ namespace contrib {
     // Returns the estimated time to the support exchange location.
     // Takes the currently set zmp into account. The sel is given in pendulum coordinates relative to the foot center.
     double LimpModel::timeToLoc(double sel) {
-        double C = config->mgC();
+        double C = config.mgC();
 
         limp.set(y - zmp.y(), vy, C);
         return limp.tLoc(sel - zmp.y());
@@ -333,7 +344,7 @@ namespace contrib {
 
     // Returns the estimated time to the support exchange location.
     double LimpModel::timeToSel() {
-        double C = config->mgC();
+        double C = config.mgC();
 
         limp.set(y - zmp.y(), vy, C);
         return limp.tLoc(nominalState.y - zmp.y());
@@ -342,7 +353,7 @@ namespace contrib {
     // Returns the estimated time to the apex.
     // Takes the currently set zmp into account.
     double LimpModel::timeToApex() {
-        double C = config->mgC();
+        double C = config.mgC();
 
         limp.set(y - zmp.y(), vy, C);
         return limp.tVel(0);
@@ -370,7 +381,7 @@ namespace contrib {
 
     // Returns the capture point in pendulum coordinates (relative to support foot middle).
     Eigen::Vector2f LimpModel::getCapturePoint() {
-        double C = config->mgC();
+        double C = config.mgC();
 
         Eigen::Vector2f capturePoint;
         capturePoint.x() = x + Limp(x, vx, C).origin(0, 0);
