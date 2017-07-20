@@ -1,3 +1,4 @@
+import { range } from '../shared/base/range'
 import { Simulator } from './simulator'
 import { VirtualRobot } from './virtual_robot'
 
@@ -35,12 +36,4 @@ export class VirtualRobots {
   public connect(): void {
     this.robots.forEach(robot => robot.connect())
   }
-}
-
-function range(n: number): number[] {
-  const arr = []
-  for (let i = 0; i < n; i++) {
-    arr.push(i)
-  }
-  return arr
 }
