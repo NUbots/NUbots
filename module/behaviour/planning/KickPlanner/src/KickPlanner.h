@@ -38,7 +38,7 @@ namespace behaviour {
         private:
             bool kickValid(const arma::vec3& ballPos);
             message::motion::KickPlannerConfig cfg;
-            NUClear::clock::time_point ball_last_measurement_time;
+            NUClear::clock::time_point ballLastSeen;
             NUClear::clock::time_point lastTimeValid;
         };
     }  // namespace planning

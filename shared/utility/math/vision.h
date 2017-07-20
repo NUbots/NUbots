@@ -23,7 +23,6 @@
 #include <cmath>
 #include <nuclear>
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "message/support/FieldDescription.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
@@ -202,9 +201,7 @@ namespace math {
                                                                 // f = field
                                                                 // t = torso
                                                                 // c = camera
-                                                                const utility::math::matrix::Transform3D& Htc
-
-                                                                ) {
+                                                                const utility::math::matrix::Transform3D& Htc) {
 
             // arma::vec3 rWFf;
             // rWFf.rows(0,1) = -Twf.rows(0,1);

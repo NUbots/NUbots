@@ -23,10 +23,11 @@
 #include "message/behaviour/WalkPath.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
+#include "message/localisation/Ball.h"
+#include "message/localisation/Field.h"
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"
 
-#include "utility/localisation/transform.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
 
@@ -43,14 +44,12 @@ namespace support {
     using message::input::Image;
     using message::input::Sensors;
     using message::input::GameState;
-    using message::localisation::Self;
+    using message::localisation::Field;
     using LocalisationBall = message::localisation::Ball;
     using VisionBall       = message::vision::Ball;
     using VisionGoal       = message::vision::Goal;
     using VisionObstacle   = message::vision::Obstacle;
     using message::motion::WalkCommand;
-
-    using utility::localisation::transform::RobotToWorldTransform;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview
@@ -98,39 +97,24 @@ namespace support {
 
             }));
 
+        handles["overview"].push_back(on<Trigger<Field>, Single, Priority::LOW>().then([this](const Field& field) {
+
+            // Set robot position.
+            overview.robot_position = Eigen::Vector2d(field.position.x(), field.position.y());
+
+            // Set robot position covariance.
+            overview.robot_position_covariance = field.covariance.block<2, 2>(0, 0);
+
+            // Set robot heading.
+            overview.robot_heading = Eigen::Vector2d(std::cos(field.position[2]), std::sin(field.position[2]));
+        }));
+
         handles["overview"].push_back(
-            on<Trigger<std::vector<Self>>, Single, Priority::LOW>().then([this](const std::vector<Self>& selfs) {
+            on<Trigger<LocalisationBall>, Single, Priority::LOW>().then([this](const LocalisationBall& ball) {
 
-                // Retrieve the first self in the vector.
-                Self self = selfs.front();
-
-                // Set robot position.
-                overview.robot_position = self.locObject.position;
-
-                // Set robot position covariance.
-                overview.robot_position_covariance = self.locObject.position_cov;
-
-                // Set robot heading.
-                overview.robot_heading = self.heading;
+                // Set local ball position.
+                overview.ball_position = ball.position;
             }));
-
-        handles["overview"].push_back(
-            on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Single, Priority::LOW>().then(
-                [this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
-
-                    // Retrieve the first ball and self in the vector.
-                    LocalisationBall ball = balls.front();
-                    Self self             = selfs.front();
-
-                    // Set local ball position.
-                    overview.ball_position = ball.locObject.position;
-
-                    // Set world ball position.
-                    overview.ball_world_position =
-                        convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position),
-                                                                 convert<double, 2>(self.heading),
-                                                                 convert<double, 2>(ball.locObject.position)));
-                }));
 
         handles["overview"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then(
             [this] { overview.last_camera_image = NUClear::clock::now(); }));

@@ -1,18 +1,14 @@
 #include "RobotParticleLocalisation.h"
+
 #include "extension/Configuration.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
-#include "stdio.h"
+#include "message/localisation/Field.h"
 
-#include "message/behaviour/Nod.h"
-#include "message/platform/darwin/DarwinSensors.h"
 #include "utility/math/geometry/Circle.h"
-#include "utility/math/matrix/Transform3D.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/time/time.h"
-
-#include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace localisation {
@@ -20,12 +16,9 @@ namespace localisation {
     using extension::Configuration;
 
     using message::input::Sensors;
-    using message::localisation::Self;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::behaviour::Nod;
+    using message::localisation::Field;
 
     using utility::math::matrix::Transform2D;
-    using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
     using utility::nubugger::drawCircle;
     using utility::math::geometry::Circle;
@@ -68,9 +61,9 @@ namespace localisation {
         on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
             "Particle Debug", [this]() {
                 arma::mat particles = filter.getParticles();
-                for (int i = 0; i < std::min(draw_particles, int(particles.n_rows)); i++) {
+                for (int i = 0; i < std::min(draw_particles, int(particles.n_cols)); i++) {
                     emit(drawCircle("particle" + std::to_string(i),
-                                    Circle(0.01, particles.submat(i, 0, i, 1).t()),
+                                    Circle(0.01, particles.submat(0, i, 1, i)),
                                     0.05,
                                     {0, 0, 0},
                                     PARTICLE_UPDATE_FREQUENCY));
@@ -86,22 +79,18 @@ namespace localisation {
 
                 filter.timeUpdate(seconds);
 
-                // Emit state
-                auto selfs = std::make_unique<std::vector<Self>>();
-                selfs->push_back(Self());
-
                 // Get filter state and transform
-                arma::vec3 state                 = filter.get();
-                selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX], state[RobotModel::kY]);
-                selfs->back().heading =
-                    Eigen::Vector2d(std::cos(state[RobotModel::kAngle]), std::sin(state[RobotModel::kAngle]));
-                selfs->back().covariance = convert<double, 3, 3>(filter.getCovariance());
+                arma::vec3 state = filter.get();
                 emit(graph("robot filter state = ", state[0], state[1], state[2]));
 
-                auto self = std::make_unique<Self>((*selfs)[0]);
-                emit(self);
-                emit(selfs);
+                // Emit state
+                auto field = std::make_unique<Field>();
+                field->position =
+                    Eigen::Vector3d(state[RobotModel::kX], state[RobotModel::kY], state[RobotModel::kAngle]);
+                field->covariance = convert<double, 3, 3>(filter.getCovariance());
 
+                emit(std::make_unique<std::vector<Field>>(1, *field));
+                emit(field);
             });
 
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(

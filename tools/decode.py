@@ -51,9 +51,7 @@ def run(file, **kwargs):
     for message in google.protobuf.message.Message.__subclasses__():
 
         # Work out our original protobuf type
-        pb_type = message.__module__.split('.')[:-1]
-        pb_type.append(message.__name__)
-        pb_type = '.'.join(pb_type)
+        pb_type = '.'.join(message.DESCRIPTOR.full_name.split('.')[1:])
         # Reverse to little endian
         pb_hash = bytes(reversed(xxhash.xxh64(pb_type, seed=0x4e55436c).digest()))
         decoders[pb_hash] = (pb_type, message)

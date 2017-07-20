@@ -14,27 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2017 NUbots <nubots@nubots.net>
  */
-#ifndef UTILITY_LOCALISATION_TRANSFORM_H
-#define UTILITY_LOCALISATION_TRANSFORM_H
+syntax = "proto3";
 
-#include <armadillo>
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/matrix/Transform3D.h"
+package message.localisation;
 
-namespace utility {
-namespace localisation {
+import "Vector.proto";
+import "Matrix.proto";
 
-    // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
-    inline utility::math::matrix::Transform3D fieldStateToTransform3D(const arma::vec3& state) {
-        utility::math::matrix::Transform3D Hfw;
-        Hfw.translation() = arma::vec3{state[0], state[1], 0};
-        Hfw               = Hfw.rotateZ(state[2]);
-        return Hfw;
-    }
-
-}  // namespace localisation
-}  // namespace utility
-
-#endif
+message Ball {
+    // The ball measured in world space (rBWw)
+    vec2  position = 1;
+    // Covariance in the balls measurement
+    mat22 covariance = 2;
+}
