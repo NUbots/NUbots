@@ -1,1 +1,7 @@
 max_error_count: 40
+
+# Settings for the GPIO reset functionality
+gpio:
+  path: /sys/class/gpio/gpio8/value
+  on_state: true
+  wait_time: 3000

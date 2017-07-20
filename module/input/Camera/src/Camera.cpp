@@ -16,10 +16,6 @@ namespace input {
         , SpinnakerCamList()
         , SpinnakerCameras() {
 
-        on<Configuration>("Camera.yaml").then("Camera system configuration", [this](const Configuration& /*config*/) {
-            // Use configuration here from file Camera.yaml
-        });
-
         on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
             // Monitor camera config directory for files.
             // Each file MUST define a "driver", we use this driver to load the appropriate handler for the camera.
