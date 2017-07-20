@@ -40,13 +40,11 @@ namespace support {
 
     void NUbugger::provideLocalisation() {
 
-        handles["localisation"].push_back(on<Trigger<Self>>, Single, Priority::LOW > ().then([this](const Self& self) {
-            if (self) send(*self, 0, false, NUClear::clock::now());
-        }));
+        handles["localisation"].push_back(on<Trigger<Self>, Single, Priority::LOW>().then(
+            [this](const Self& self) { send(self, 0, false, NUClear::clock::now()); }));
 
-        handles["localisation"].push_back(on<Trigger<Ball>>, Single, Priority::LOW > ().then([this](const Ball& ball) {
-            if (ball) send(*ball, 0, false, NUClear::clock::now());
-        }));
+        handles["localisation"].push_back(on<Trigger<Ball>, Single, Priority::LOW>().then(
+            [this](const Ball& ball) { send(ball, 0, false, NUClear::clock::now()); }));
     }
 }  // namespace support
 }  // namespace module

@@ -70,9 +70,7 @@ namespace localisation {
         const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
         Transform3D Hcw        = Htc.i() * Htw;
 
-
         Transform3D Hfw = LocalisationStateToMatrix(state);
-
         Transform3D Hcf = Hcw * Hfw.i();
         Transform3D Htf = Htw * Hfw.i();
 

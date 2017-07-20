@@ -23,6 +23,7 @@ Vagrant.configure("2") do |config|
     # Use custom box because official Ubuntu one is shit.
     override.vm.box = "bidski/xenial64"
 
+    override.vm.boot_timeout = 360
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     v.customize ["modifyvm", :id, "--cpus", `if [ "x$(uname)" = "xDarwin" ]; then sysctl -n hw.physicalcpu_max; else lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l; fi`.chomp ]
