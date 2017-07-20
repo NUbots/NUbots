@@ -16,10 +16,10 @@ export class SensorDataSimulator implements Simulator {
     const messageType = 'message.input.Sensors'
 
     // Simulate a walk
-    const t = time * 5E-3 + index
+    const t = time * 5 + index
 
-    const angle = index * (2 * Math.PI) / numRobots + time / 4E4
-    const distance = Math.cos(time / 1E3 + 4 * index) * 0.3 + 1
+    const angle = index * (2 * Math.PI) / numRobots + time / 40
+    const distance = Math.cos(time + 4 * index) * 0.3 + 1
     const x = distance * Math.cos(angle)
     const y = distance * Math.sin(angle)
     const heading = -angle - Math.PI / 2

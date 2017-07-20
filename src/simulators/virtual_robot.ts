@@ -32,7 +32,7 @@ export class VirtualRobot {
   public simulateWithFrequency(frequency: number, index: number, numRobots: number) {
     const disconnect = this.connect()
 
-    const period = 1000 / frequency
+    const period = 1 / frequency
     const cancelLoop = this.clock.setInterval(() => this.simulate(index, numRobots), period)
 
     return () => {
