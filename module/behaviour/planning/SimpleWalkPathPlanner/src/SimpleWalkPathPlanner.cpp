@@ -38,6 +38,7 @@
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
+#include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -64,6 +65,7 @@ namespace behaviour {
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Rotation2D;
+        using utility::localisation::fieldStateToTransform3D;
         using utility::nubugger::graph;
         using utility::nubugger::drawSphere;
 
@@ -203,20 +205,22 @@ namespace behaviour {
                     rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
                                Htw.x() + Htw.translation();                                  // In front of the robot
                     arma::vec3 pos = Htw.transformPoint(rBWw);
-                    position       = arma::vec2{pos[0], pos[1]};
+                    position       = pos.rows(0, 1);
 
                     // Hack Planner:
                     float headingChange = 0;
                     float sideStep      = 0;
                     float speedFactor   = 1;
                     if (useLocalisation) {
-                        arma::vec2 kick_target =
-                            Rotation2D::createRotation(-field.position[2])
-                            * convert<double, 2>(kickPlan.target
-                                                 - Eigen::Vector2d(field.position[0], field.position[1]));
+
+                        // Transform kick target to torso space
+                        Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+                        Transform3D Htf = (Htw * Hfw.i());
+                        arma::vec3 kickTarget =
+                            Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
 
                         // //approach point:
-                        arma::vec2 ballToTarget = arma::normalise(kick_target - position);
+                        arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);
                         arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
 
                         if (arma::norm(position) > slowdown_distance) {
