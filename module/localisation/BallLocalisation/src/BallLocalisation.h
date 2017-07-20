@@ -22,7 +22,7 @@ namespace localisation {
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.
         explicit BallLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 
 #endif  // MODULE_LOCALISATION_BALLLOCALISATION_H

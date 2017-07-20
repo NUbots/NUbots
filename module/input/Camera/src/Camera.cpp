@@ -28,7 +28,8 @@ namespace input {
                 auto cam = V4L2Cameras.find(deviceID);
 
                 if (cam == V4L2Cameras.end()) {
-                    V4L2Cameras.insert(std::make_pair(deviceID, std::move(initiateV4L2Camera(config))));
+                    cam = V4L2Cameras.insert(std::make_pair(deviceID, std::move(initiateV4L2Camera(config)))).first;
+                    cam->second.setConfig(config);
                     cameraCount++;
                 }
 

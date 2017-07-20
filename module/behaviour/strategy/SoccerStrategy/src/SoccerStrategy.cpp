@@ -26,15 +26,14 @@
 #include "message/behaviour/Nod.h"
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "message/localisation/ResetRobotHypotheses.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/GetupCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
 
 #include "utility/behaviour/MotionCommand.h"
-#include "utility/localisation/transform.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -66,8 +65,10 @@ namespace behaviour {
         using Unpenalisation = message::input::GameEvents::Unpenalisation;
         using GameMode       = message::input::GameState::Data::Mode;
         using message::input::Sensors;
+        using VisionBall = message::vision::Ball;
+        using message::vision::Goal;
         using message::localisation::Ball;
-        using message::localisation::Self;
+        using message::localisation::Field;
         using message::localisation::ResetRobotHypotheses;
         using message::motion::DiveCommand;
         using message::motion::DiveFinished;
@@ -77,7 +78,6 @@ namespace behaviour {
         using message::platform::darwin::ButtonLeftDown;
         using message::support::FieldDescription;
 
-        using utility::localisation::transform::RobotToWorldTransform;
         using utility::time::durationFromSeconds;
         using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
@@ -91,7 +91,7 @@ namespace behaviour {
             , lookTarget()
             , kickType()
             , ballSearchStartTime()
-            , selfLastMeasured() {
+            , goalLastMeasured() {
 
             on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
 
@@ -125,15 +125,15 @@ namespace behaviour {
 
 
             // For checking last seen times
-            on<Trigger<std::vector<Ball>>>().then([this](const std::vector<Ball>& balls) {
+            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
                 if (!balls.empty()) {
-                    ballLastMeasured = balls[0].locObject.last_measurement_time;
+                    ballLastMeasured = NUClear::clock::now();
                 }
             });
 
-            on<Trigger<std::vector<Self>>>().then([this](const std::vector<Self>& selfs) {
-                if (!selfs.empty()) {
-                    selfLastMeasured = selfs[0].locObject.last_measurement_time;
+            on<Trigger<std::vector<Goal>>>().then([this](const std::vector<Goal>& goals) {
+                if (!goals.empty()) {
+                    goalLastMeasured = NUClear::clock::now();
                 }
             });
 
@@ -195,15 +195,15 @@ namespace behaviour {
                With<GameState>,
                With<Phase>,
                With<FieldDescription>,
-               With<std::vector<Self>>,
-               With<std::vector<Ball>>,
+               With<Field>,
+               With<Ball>,
                Single>()
                 .then([this](const Sensors& sensors,
                              const GameState& gameState,
                              const Phase& phase,
                              const FieldDescription& fieldDescription,
-                             const std::vector<Self>& selfs,
-                             const std::vector<Ball>& balls) {
+                             const Field& field,
+                             const Ball& ball) {
 
                     try {
 
@@ -219,7 +219,7 @@ namespace behaviour {
                         // KickType::IK_KICK;
 
                         if (cfg_.forcePlaying) {
-                            play(selfs, balls, fieldDescription, mode);
+                            play(field, ball, fieldDescription, mode);
                         }
                         else if (pickedUp(sensors)) {
                             // TODO: stand, no moving
@@ -267,7 +267,7 @@ namespace behaviour {
                                     currentState = Behaviour::State::FINISHED;
                                 }
                                 else if (phase == Phase::PLAYING) {
-                                    play(selfs, balls, fieldDescription, mode);
+                                    play(field, ball, fieldDescription, mode);
                                 }
                             }
                         }
@@ -282,17 +282,17 @@ namespace behaviour {
                     }
                 });
 
-            on<Trigger<std::vector<Self>>, With<FieldDescription>>().then(
-                [this](const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
-                    auto kickTarget = convert<double, 2>(getKickPlan(selfs, fieldDescription));
+            on<Trigger<Field>, With<FieldDescription>>().then(
+                [this](const Field& field, const FieldDescription& fieldDescription) {
+                    auto kickTarget = convert<double, 2>(getKickPlan(field, fieldDescription));
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
                     emit(utility::nubugger::drawCircle(
-                        "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.123, {0.8, 0.8, 0}));
+                        "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.3, {0, 0, 0}));
                 });
         }
 
-        void SoccerStrategy::play(const std::vector<Self>& selfs,
-                                  const std::vector<Ball>& balls,
+        void SoccerStrategy::play(const Field& field,
+                                  const Ball& ball,
                                   const FieldDescription& fieldDescription,
                                   const GameMode& mode) {
             if (penalised() && !cfg_.forcePlaying) {  // penalised
@@ -302,7 +302,7 @@ namespace behaviour {
             }
             else if (cfg_.is_goalie) {  // goalie
                 find({FieldTarget(FieldTarget::Target::BALL)});
-                goalieWalk(selfs, balls);
+                goalieWalk(field, ball);
                 currentState = Behaviour::State::GOALIE_WALK;
             }
             else {
@@ -322,7 +322,8 @@ namespace behaviour {
                 }
                 else {  // ball has not been seen recently
                     if (mode != GameMode::PENALTY_SHOOTOUT
-                        && (selfs[0].locObject.position.norm() > 1)) {  // a long way away from centre
+                        && (Eigen::Vector2d(field.position[0], field.position[1]).norm()
+                            > 1)) {  // a long way away from centre
                         // walk to centre of field
                         find({FieldTarget(FieldTarget::Target::BALL)});
                         walkTo(fieldDescription, arma::vec2({0, 0}));
@@ -461,7 +462,7 @@ namespace behaviour {
         }
 
         bool SoccerStrategy::ballDistance(const Ball& ball) {
-            return ball.locObject.position.norm();
+            return ball.position.norm();
         }
 
         void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
@@ -494,8 +495,7 @@ namespace behaviour {
             emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 1})));
         }
 
-        arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs,
-                                               const message::support::FieldDescription& fieldDescription) {
+        arma::vec2 SoccerStrategy::getKickPlan(const Field& field, const FieldDescription& fieldDescription) {
 
             // Defines the box within in which the kick target is changed from the centre
             // of the oppposition goal to the perpendicular distance from the robot to the goal
@@ -506,73 +506,54 @@ namespace behaviour {
             size_t error       = 0.05;
             size_t buffer      = error + 2 * fieldDescription.ball_radius;             // 15cm
             float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-            float xRobot       = selfs.front().locObject.position[0];
-            float yRobot       = selfs.front().locObject.position[1];
+            float xRobot       = field.position[0];
+            float yRobot       = field.position[1];
             arma::vec2 newTarget;
 
-            if (!selfs.empty()) {
-
-                if ((fieldDescription.dimensions.field_length / 2) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
-                    && yRobot < yTakeOverBox) {
-                    // Aims for behind the point that gives the shortest distance
-                    newTarget[0] =
-                        fieldDescription.dimensions.field_length / 2 + fieldDescription.dimensions.goal_depth / 2;
-                    newTarget[1] = yRobot;
-                }
-                else {
-
-                    // Aims for the centre of the goal
-                    newTarget[0] = fieldDescription.dimensions.field_length / 2;
-                    newTarget[1] = 0;
-                }
+            if ((fieldDescription.dimensions.field_length / 2) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
+                && yRobot < yTakeOverBox) {
+                // Aims for behind the point that gives the shortest distance
+                newTarget[0] =
+                    fieldDescription.dimensions.field_length / 2 + fieldDescription.dimensions.goal_depth / 2;
+                newTarget[1] = yRobot;
             }
             else {
-
-                // Return default
+                // Aims for the centre of the goal
                 newTarget[0] = fieldDescription.dimensions.field_length / 2;
                 newTarget[1] = 0;
             }
             return newTarget;
         }
 
-        void SoccerStrategy::goalieWalk(const std::vector<Self>& selfs, const std::vector<Ball>& balls) {
-            if (!(balls.empty() || selfs.empty())) {
-                std::unique_ptr<MotionCommand> motionCommand;
+        void SoccerStrategy::goalieWalk(const Field& field, const Ball& ball) {
+            std::unique_ptr<MotionCommand> motionCommand;
 
-                float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::microseconds>(
-                                              NUClear::clock::now() - balls[0].locObject.last_measurement_time)
-                                              .count()
-                                          * 1e-6;
-                if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
-                    auto& ball = balls[0];
-                    auto& self = selfs[0];
+            float timeSinceBallSeen =
+                std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - ballLastMeasured).count()
+                * 1e-6;
+            if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                    float selfBearing = std::atan2(self.heading[1], self.heading[0]);
-                    int signBearing   = selfBearing > 0 ? 1 : -1;
-                    float rotationSpeed =
-                        -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * selfBearing),
-                                                 cfg_.goalie_max_rotation_speed);
+                float fieldBearing = field.position[2];
+                int signBearing    = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed =
+                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                             cfg_.goalie_max_rotation_speed);
 
-                    int signTranslation = ball.locObject.position[1] > 0 ? 1 : -1;
-                    float translationSpeed =
-                        signTranslation
-                        * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.locObject.position[1]),
-                                    cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed =
+                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                cfg_.goalie_max_translation_speed);
 
-                    motionCommand =
-                        std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));
-                    if (std::fabs(selfBearing) < cfg_.goalie_side_walk_angle_threshold) {
-                        motionCommand->walkCommand.y() = translationSpeed;
-                    }
+                motionCommand =
+                    std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));
+                if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
+                    motionCommand->walkCommand.y() = translationSpeed;
                 }
-                else {
-                    motionCommand = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 0}));
-                }
-                emit(std::move(motionCommand));
             }
             else {
-                emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 1})));
+                motionCommand = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 0}));
             }
+            emit(std::move(motionCommand));
         }
 
     }  // namespace strategy

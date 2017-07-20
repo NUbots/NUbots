@@ -71,7 +71,6 @@ namespace motion {
         , supportCompensationEnabled(false)
         , balanceOptimiserEnabled(false)
         , pushRecoveryEnabled(false)
-        , emitLocalisation(false)
         , emitFootPosition(false)
         , armMotionEnabled(false)
         , updateHandle()
@@ -394,11 +393,6 @@ namespace motion {
             updateUpperBody(sensors);
         }
 
-        // DEBUGGING: Emit relative torso position with respect to world model...
-        if (emitLocalisation) {
-            localise(getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0}));
-        }
-
         // DEBUGGING: Emit relative feet position with respect to robot torso model...
         if (emitFootPosition) {
             emit(graph("Right foot position", getRightFootPosition2D()));
@@ -464,21 +458,6 @@ namespace motion {
             arma::vec3({getLArmPosition()[0], std::max(leftMinValue, getLArmPosition()[1]), getLArmPosition()[2]}));
         setRArmPosition(
             arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
-    }
-    /*=======================================================================================================*/
-    //      NAME: localise
-    /*=======================================================================================================*/
-    void BalanceKinematicResponse::localise(Transform2D position) {
-        // emit position as a fake localisation
-        auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
-        message::localisation::Self self;
-        self.locObject.position     = {position.x(), position.y()};
-        self.locObject.position_cov = Eigen::Matrix<double, 2, 2, Eigen::DontAlign>::Identity() * 0.1;  // made up
-        self.heading << std::cos(position.angle()), std::sin(position.angle());  // convert to cartesian coordinates
-        self.velocity.setZero();                                                 // not used
-        self.robot_to_world_rotation.setZero();                                  // not used
-        localisation->push_back(self);
-        emit(std::move(localisation));
     }
     /*=======================================================================================================*/
     //      METHOD: getFootPhase
@@ -744,10 +723,8 @@ namespace motion {
         auto& wlk = config["walk_engine"];
         auto& bkr = config["balance_kinematic_response"];
 
-        auto& debug      = bkr["debugging"];
-        DEBUG            = debug["enabled"].as<bool>();
-        emitLocalisation = debug["emit_localisation"].as<bool>();
-
+        auto& debug = bkr["debugging"];
+        DEBUG       = debug["enabled"].as<bool>();
 
         auto& sensors      = wlk["sensors"];
         auto& sensors_gyro = sensors["gyro"];

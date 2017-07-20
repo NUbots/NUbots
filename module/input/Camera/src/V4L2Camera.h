@@ -57,6 +57,16 @@ namespace input {
      * @author Matthew Amos
      */
     struct V4L2Camera {
+    public:
+        /// @brief file path to the GPIO
+        std::string gpio_path;
+
+        /// @brief the amount of time to sleep for
+        NUClear::clock::duration gpio_wait_time;
+
+        /// @brief state to set the GPIO to be considered on
+        bool gpio_on_state;
+
     private:
         /// @brief Our two arrays of data that will be populated
         std::array<std::vector<uint8_t>, NUM_BUFFERS> buffers;
@@ -76,15 +86,6 @@ namespace input {
         /// @brief the format that we are reading in from the camera
         std::string format;
         FOURCC fourcc;
-
-        /// @brief file path to the GPIO
-        std::string gpio_path;
-
-        /// @brief the amount of time to sleep for
-        NUClear::clock::duration gpio_wait_time;
-
-        /// @brief state to set the GPIO to be considered on
-        bool gpio_on_state;
 
         /// @brief Whether the camera is currently in streaming mode
         bool streaming;

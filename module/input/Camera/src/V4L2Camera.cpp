@@ -43,6 +43,10 @@ namespace input {
         std::string deviceID = config["deviceID"];
         V4L2Camera camera    = V4L2Camera(config, deviceID);
 
+        camera.gpio_path      = config["gpio"]["path"].as<std::string>();
+        camera.gpio_on_state  = config["gpio"]["on_state"].as<bool>();
+        camera.gpio_wait_time = std::chrono::milliseconds(config["gpio"]["wait_time"].as<uint64_t>());
+
         V4L2SettingsHandle =
             on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this, config] {
 
@@ -230,10 +234,10 @@ namespace input {
             int toggleCount = 0;
 
             while (fd < 0 && toggleCount < 10) {
-                NUClear::log<NUClear::ERROR>("Toggling GPIO");
+                NUClear::log<NUClear::INFO>("Toggling GPIO");
 
                 // Open our GPIO file
-                int gpio = ::open(gpio_path.c_str(), O_RDWR);
+                int gpio = ::open(gpio_path.c_str(), O_WRONLY);
 
                 if (gpio < 0) {
 

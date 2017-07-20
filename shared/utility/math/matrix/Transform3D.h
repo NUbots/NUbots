@@ -173,8 +173,8 @@ namespace math {
              */
             Transform3D localToWorld(const Transform3D& reference) const;
 
-            arma::vec3 transformPoint(const arma::vec3& p);
-            arma::vec3 transformVector(const arma::vec3& p);
+            arma::vec3 transformPoint(const arma::vec3& p) const;
+            arma::vec3 transformVector(const arma::vec3& p) const;
 
             /**
              * @brief Performs an orthonormal inverse and returns a new copy

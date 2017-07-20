@@ -23,7 +23,6 @@
 #include <cmath>
 #include <nuclear>
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "message/support/FieldDescription.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
@@ -72,9 +71,20 @@ namespace math {
             return (separation / 2) / std::tan(parallaxAngle / 2);
         }
 
+        /*! @brief returns an estimate of the distance to two points which have a known separation.
+            @param separation - Known distance between points in camera space
+            @param cam1,cam2 - Measured camera space unit vectors point toward the points
+        */
+        inline double distanceToEquidistantCamPoints(const double& separation,
+                                                     const arma::vec3& cam1,
+                                                     const arma::vec3& cam2) {
+            double parallaxAngle = utility::math::angle::acos_clamped(arma::norm_dot(cam1, cam2));
+            return (separation / 2) / std::tan(parallaxAngle / 2);
+        }
+
         /*! @brief
-            @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z coordinate
-           pixels)
+            @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z
+           coordinate pixels)
             @return im - coordinates on the screen in image space measured x across, y down, zero at top left
         */
         inline arma::ivec2 screenToImage(const arma::vec2& screen, const arma::uvec2& imageSize) {
@@ -191,9 +201,7 @@ namespace math {
                                                                 // f = field
                                                                 // t = torso
                                                                 // c = camera
-                                                                const utility::math::matrix::Transform3D& Htc
-
-                                                                ) {
+                                                                const utility::math::matrix::Transform3D& Htc) {
 
             // arma::vec3 rWFf;
             // rWFf.rows(0,1) = -Twf.rows(0,1);
@@ -222,9 +230,10 @@ namespace math {
             arma::mat goalBaseCorners(4, 4);
             goalBaseCorners.row(3).fill(1.0);
             goalBaseCorners.submat(0, 0, 2, 3).each_col() = goalLocation;
-            goalBaseCorners.submat(0, 0, 1, 3) -= 0.5 * field.dimensions.goalpost_diameter;
-            goalBaseCorners.submat(0, 0, 1, 0) += field.dimensions.goalpost_diameter;
-            goalBaseCorners.submat(1, 1, 2, 1) += field.dimensions.goalpost_diameter;
+            goalBaseCorners.submat(0, 0, 1, 3) -= 0.5 * field.dimensions.goalpost_width;
+            goalBaseCorners.submat(0, 0, 1, 0) += field.dimensions.goalpost_width;
+            goalBaseCorners.submat(1, 1, 2, 1) += field.dimensions.goalpost_width;
+
             // make the top corner points
             arma::mat goalTopCorners = goalBaseCorners;
 

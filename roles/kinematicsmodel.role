@@ -9,9 +9,5 @@ NUCLEAR_ROLE(
 
     motion::KinematicsConfiguration
 
-	motion::FootMotionPlanner
-    motion::FootPlacementPlanner
-    motion::TorsoMotionPlanner
-    motion::BalanceKinematicResponse
     motion::OldWalkEngine
 )

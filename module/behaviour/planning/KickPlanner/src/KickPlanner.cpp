@@ -23,7 +23,8 @@
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/Ball.h"
+#include "message/localisation/Field.h"
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
@@ -39,6 +40,7 @@
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
+
 namespace module {
 namespace behaviour {
     namespace planning {
@@ -49,8 +51,9 @@ namespace behaviour {
         using KickType = message::behaviour::KickPlan::KickType;
         using message::behaviour::WantsToKick;
         using message::localisation::Ball;
-        using message::localisation::Self;
+        using message::localisation::Field;
         using message::input::Sensors;
+        using VisionBall = message::vision::Ball;
         using message::motion::IKKickParams;
         using message::motion::KickCommand;
         using KickCommandType = message::motion::KickCommandType;
@@ -60,17 +63,17 @@ namespace behaviour {
         using message::support::FieldDescription;
 
         using LimbID = utility::input::LimbID;
-        using utility::localisation::transform::RobotToWorldTransform;
-        using utility::localisation::transform::WorldToRobotTransform;
         using utility::math::matrix::Transform3D;
+        using utility::math::matrix::Rotation2D;
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::legPoseValid;
         using utility::nubugger::graph;
+        using utility::localisation::fieldStateToTransform3D;
 
         KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , cfg()
-            , ball_last_measurement_time(NUClear::clock::now())
+            , ballLastSeen(std::chrono::seconds(0))
             , lastTimeValid(NUClear::clock::now()) {
 
 
@@ -83,9 +86,15 @@ namespace behaviour {
                 emit(std::make_unique<WantsToKick>(false));
             });
 
-            on<Trigger<Ball>, With<std::vector<Self>>, With<FieldDescription>, With<KickPlan>, With<Sensors>>().then(
+            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
+                if (!balls.empty()) {
+                    ballLastSeen = NUClear::clock::now();
+                }
+            });
+
+            on<Trigger<Ball>, With<Field>, With<FieldDescription>, With<KickPlan>, With<Sensors>>().then(
                 [this](const Ball& ball,
-                       const std::vector<Self>& selfs,
+                       const Field& field,
                        const FieldDescription& fd,
                        const KickPlan& kickPlan,
                        const Sensors& sensors) {
@@ -93,24 +102,21 @@ namespace behaviour {
                     // Get time since last seen ball
                     auto now = NUClear::clock::now();
                     double secondsSinceLastSeen =
-                        std::chrono::duration_cast<std::chrono::microseconds>(now - ball_last_measurement_time).count()
-                        * 1e-6;
+                        std::chrono::duration_cast<std::chrono::microseconds>(now - ballLastSeen).count() * 1e-6;
 
                     // Compute target in robot coords
-                    auto self = selfs[0];
                     // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
                     // TODO: The heading seems to judder here!!
                     // TODO: use sensors.world instead
-                    arma::vec2 kickTarget = WorldToRobotTransform(convert<double, 2>(self.locObject.position),
-                                                                  convert<double, 2>(self.heading),
-                                                                  convert<double, 2>(kickPlan.target));
+                    Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
 
-                    Transform3D Htw = convert<double, 4, 4>(sensors.world);
-                    arma::vec3 ballPosition =
-                        Htw.transformPoint({ball.locObject.position[0], ball.locObject.position[1], fd.ball_radius});
-                    ball_last_measurement_time = ball.locObject.last_measurement_time;
+                    Transform3D Htw         = convert<double, 4, 4>(sensors.world);
+                    arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});
 
-                    float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
+                    // Transform target from field to torso space
+                    Transform3D Htf       = (Htw * Hfw.i());
+                    arma::vec3 kickTarget = Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
+                    float KickAngle       = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
                     // log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
                     // log("Target of Kick",kickTarget.t());
@@ -180,6 +186,6 @@ namespace behaviour {
             return (ballPos[0] > 0) && (ballPos[0] < cfg.max_ball_distance)
                    && (std::fabs(ballPos[1]) < cfg.kick_corridor_width / 2.0);
         }
-    }
-}
-}
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module

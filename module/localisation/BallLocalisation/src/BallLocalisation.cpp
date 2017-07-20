@@ -1,21 +1,21 @@
 #include "BallLocalisation.h"
+
 #include <chrono>
+
 #include "extension/Configuration.h"
-#include "utility/time/time.h"
 
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/Ball.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
-
-
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
+#include "utility/time/time.h"
 
 namespace module {
 namespace localisation {
@@ -34,16 +34,27 @@ namespace localisation {
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), filter() {
 
-        last_measurement_update_time = NUClear::clock::now();
-        last_time_update_time        = NUClear::clock::now();
+        on<Startup>().then([this] {
+            last_measurement_update_time = NUClear::clock::now();
+            last_time_update_time        = NUClear::clock::now();
+        });
 
-        on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration, Sync<BallLocalisation>>("BallLocalisation.yaml").then([this](const Configuration& config) {
             auto message = std::make_unique<std::vector<Ball>>();
             emit(message);
             emit(std::make_unique<Ball>());
 
+            ball_pos_log = config["ball_pos_log"].as<bool>();
+            // Use configuration here from file RobotParticleLocalisation.yaml
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
-            ball_pos_log                      = config["ball_pos_log"].as<bool>();
+            filter.model.n_rogues             = config["n_rogues"].as<int>();
+            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
+            int n_particles                   = config["n_particles"].as<int>();
+
+            arma::vec2 start_state    = config["start_state"].as<arma::vec>();
+            arma::vec2 start_variance = config["start_variance"].as<arma::vec>();
+
+            filter.reset(start_state, arma::diagmat(start_variance), n_particles);
 
             // Use configuration here from file BallLocalisation.yaml
         });
@@ -59,24 +70,24 @@ namespace localisation {
 
                 /* Creating ball state vector and covariance matrix for emission */
                 // std::unique_ptr ball;
-                auto ball                             = std::make_unique<Ball>();
-                ball->locObject.position              = convert<double, 2>(filter.get());
-                ball->locObject.position_cov          = convert<double, 2, 2>(filter.getCovariance());
-                ball->locObject.last_measurement_time = last_measurement_update_time;
+                auto ball        = std::make_unique<Ball>();
+                ball->position   = convert<double, 2>(filter.get());
+                ball->covariance = convert<double, 2, 2>(filter.getCovariance());
 
                 /* For graphing purposes */
-                arma::vec3 rBWw = {ball->locObject.position[0], ball->locObject.position[1], field.ball_radius};
+                arma::vec3 rBWw = {ball->position[0], ball->position[1], field.ball_radius};
                 // Get our transform to world coordinates
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
                 const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
                 Transform3D Hcw        = Htc.i() * Htw;
                 arma::vec3 rBCc_cart   = Hcw.transformPoint(rBWw);
                 arma::vec3 rBCc_sph1   = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
-                arma::vec3 rBCc_sph2   = {
-                    rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};  // in roe, theta, phi, where roe is 1/r
+                // in roe, theta, phi, where roe is 1/r
+                arma::vec3 rBCc_sph2 = {rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};
                 if (ball_pos_log) {
                     emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
                     log("localisation ball pos = ", filter.get()[0], filter.get()[1]);
+                    log("localisation seconds elapsed = ", seconds);
                 }
                 emit(ball);
             });
@@ -94,10 +105,11 @@ namespace localisation {
                     last_time_update_time = curr_time;
                     filter.timeUpdate(seconds);
 
-                    /* Now call Measurement Update. Supports multiple measurement methods and will treat them as
+                    /* Now call Measurement Update. Supports multiple measurement methods
+                     * and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls[0].measurements) {
-                        filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),
+                        filter.measurementUpdate(cartesianToSpherical(convert<double, 3, 1>(measurement.rBCc)),
                                                  convert<double, 3, 3>(measurement.covariance),
                                                  field,
                                                  sensors);
@@ -106,5 +118,5 @@ namespace localisation {
                 }
             });
     }
-}
-}
+}  // namespace localisation
+}  // namespace module
