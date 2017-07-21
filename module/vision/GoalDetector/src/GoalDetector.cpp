@@ -291,6 +291,7 @@ namespace vision {
                         imagePoint = getImageFromCam(point, cam);
                     }
 
+
                     arma::running_stat<double> stat;
 
                     float min = 1, max = -1;
@@ -477,16 +478,19 @@ namespace vision {
                     Eigen::Vector2d left_Angles(std::atan2(left[1], left[0]),
                                                 std::atan2(left[2], std::sqrt(left[0] * left[0] + left[1] * left[1])));
                     Eigen::Matrix2d left_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
+
                     it->measurement.push_back(Goal::Measurement(
                         Goal::MeasurementType::LEFT_NORMAL, left, left_vecCov, left_Angles, left_AngCov));
 
                     // TR BR cross product gives right side
-                    auto right                   = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
+                    auto right = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
+
                     Eigen::Matrix3d right_vecCov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
                     Eigen::Vector2d right_Angles(
                         std::atan2(right[1], right[0]),
                         std::atan2(right[2], std::sqrt(right[0] * right[0] + right[1] * right[1])));
                     Eigen::Matrix2d right_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
+
                     it->measurement.push_back(Goal::Measurement(
                         Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
@@ -514,6 +518,7 @@ namespace vision {
                         arma::vec3 covariance_amplifier({distance, 1, 1});
                         Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
                             VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
+
                         it->measurement.push_back(
                             Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
                     }
@@ -531,6 +536,7 @@ namespace vision {
 
                     // TODO FIX for Igus Angular positions from the camera
                     arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor);
+
                     it->visObject.screenAngular =
                         convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
                     arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);

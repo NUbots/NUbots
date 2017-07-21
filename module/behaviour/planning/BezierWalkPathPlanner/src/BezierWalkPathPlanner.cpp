@@ -25,7 +25,6 @@
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
-#include "message/localisation/FieldObject.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"

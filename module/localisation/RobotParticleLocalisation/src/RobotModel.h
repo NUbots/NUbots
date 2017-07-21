@@ -22,7 +22,6 @@
 
 #include <armadillo>
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
 #include "utility/math/matrix/Rotation3D.h"

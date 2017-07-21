@@ -103,7 +103,7 @@ message DarwinSensors {
         float  presentSpeed    = 10;
         float  load            = 11;
         float  voltage         = 12;
-        uint32 temperature     = 13;
+        float temperature      = 13;
     };
 
     message Servos {

@@ -1,11 +1,12 @@
 #include "OdometryLocalisation.h"
 
 #include "extension/Configuration.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 
 #include "message/behaviour/Nod.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/Field.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
@@ -16,7 +17,7 @@ namespace localisation {
 
     using extension::Configuration;
     using message::input::Sensors;
-    using message::localisation::Self;
+    using message::localisation::Field;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using message::platform::darwin::ButtonLeftDown;
@@ -47,12 +48,13 @@ namespace localisation {
 
             Transform2D state = localisationOffset.localToWorld(Twr);
 
-            auto selfs = std::make_unique<std::vector<Self>>();
-            selfs->push_back(Self());
-            selfs->back().locObject.position = convert<double, 2, 1>(state.xy());
-            selfs->back().heading            = Eigen::Vector2d(std::cos(state.angle()), std::sin(state.angle()));
-            emit(selfs);
+            auto field        = std::make_unique<Field>();
+            field->position   = Eigen::Vector3d(state.x(), state.y(), state.angle());
+            field->covariance = Eigen::Matrix3d::Identity();
+
+            emit(std::make_unique<std::vector<Field>>(1, *field));
+            emit(field);
         });
     }
-}
-}
+}  // namespace localisation
+}  // namespace module

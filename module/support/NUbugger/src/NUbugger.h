@@ -29,7 +29,6 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
-#include "message/localisation/FieldObject.h"
 #include "message/support/nubugger/Overview.h"
 
 namespace module {

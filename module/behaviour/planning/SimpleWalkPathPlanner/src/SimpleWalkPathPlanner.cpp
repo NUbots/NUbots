@@ -17,22 +17,21 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include <cmath>
-
 #include "SimpleWalkPathPlanner.h"
 
+#include <cmath>
 
 #include "extension/Configuration.h"
-
-#include <cmath>
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/Ball.h"
+#include "message/localisation/Field.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/WalkCommand.h"
+#include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
 
 #include "utility/behaviour/Action.h"
@@ -42,14 +41,8 @@
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
-
-#include "message/support/FieldDescription.h"
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
 
 
 namespace module {
@@ -68,10 +61,11 @@ namespace behaviour {
         using message::motion::KickFinished;
         using message::motion::StopCommand;
         using message::behaviour::WantsToKick;
-        using utility::localisation::transform::RobotToWorldTransform;
-        using utility::localisation::transform::WorldToRobotTransform;
+        using VisionBall = message::vision::Ball;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
+        using utility::math::matrix::Rotation2D;
+        using utility::localisation::fieldStateToTransform3D;
         using utility::nubugger::graph;
         using utility::nubugger::drawSphere;
 
@@ -82,7 +76,7 @@ namespace behaviour {
         using message::motion::EnableWalkEngineCommand;
         using message::motion::DisableWalkEngineCommand;
 
-        using message::localisation::Self;
+        using message::localisation::Field;
         using message::localisation::Ball;
         using message::support::FieldDescription;
 
@@ -158,20 +152,26 @@ namespace behaviour {
             //     log("Sensors");
             // });
 
+            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
+                if (!balls.empty()) {
+                    timeBallLastSeen = NUClear::clock::now();
+                }
+            });
+
             on<Every<20, Per<std::chrono::seconds>>,
                With<Ball>,
-               With<std::vector<Self>>,
+               With<Field>,
                With<Sensors>,
                With<WantsToKick>,
                With<KickPlan>,
                With<FieldDescription>,
                Sync<SimpleWalkPathPlanner>>()
                 .then([this](const Ball& ball,
-                             const std::vector<Self>& selfs,
+                             const Field& field,
                              const Sensors& sensors,
                              const WantsToKick& wantsTo,
                              const KickPlan& kickPlan,
-                             const FieldDescription& field) {
+                             const FieldDescription& fieldDescription) {
                     if (wantsTo.kick) {
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
@@ -197,28 +197,30 @@ namespace behaviour {
                     Transform3D Htw = convert<double, 4, 4>(sensors.world);
                     auto now        = NUClear::clock::now();
                     float timeSinceBallSeen =
-                        std::chrono::duration_cast<std::chrono::nanoseconds>(now - ball.locObject.last_measurement_time)
-                            .count()
+                        std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
                         * (1 / std::nano::den);
 
 
-                    arma::vec3 rBWw_temp = {ball.locObject.position[0], ball.locObject.position[1], field.ball_radius};
+                    arma::vec3 rBWw_temp = {ball.position[0], ball.position[1], fieldDescription.ball_radius};
                     rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
                                Htw.x() + Htw.translation();                                  // In front of the robot
                     arma::vec3 pos = Htw.transformPoint(rBWw);
-                    position       = arma::vec2{pos[0], pos[1]};
+                    position       = pos.rows(0, 1);
 
                     // Hack Planner:
                     float headingChange = 0;
                     float sideStep      = 0;
                     float speedFactor   = 1;
                     if (useLocalisation) {
-                        arma::vec2 kick_target =
-                            WorldToRobotTransform(convert<double, 2>(selfs.front().locObject.position),
-                                                  convert<double, 2>(selfs.front().heading),
-                                                  convert<double, 2>(kickPlan.target));
+
+                        // Transform kick target to torso space
+                        Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+                        Transform3D Htf = (Htw * Hfw.i());
+                        arma::vec3 kickTarget =
+                            Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
+
                         // //approach point:
-                        arma::vec2 ballToTarget = arma::normalise(kick_target - position);
+                        arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);
                         arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
 
                         if (arma::norm(position) > slowdown_distance) {

@@ -19,10 +19,8 @@
 
 #include "NUbugger.h"
 
-#include "message/localisation/FieldObject.h"
-#include "message/localisation/Localisation.h"
-
-#include "utility/localisation/transform.h"
+#include "message/localisation/Ball.h"
+#include "message/localisation/Field.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
@@ -32,16 +30,13 @@ namespace support {
 
     using utility::nubugger::graph;
     using utility::time::getUtcTimestamp;
-    using message::localisation::FieldObject;
     using message::localisation::Ball;
-    using message::localisation::Self;
-    using message::localisation::Localisation;
-    using message::localisation::Model;
+    using message::localisation::Field;
 
     void NUbugger::provideLocalisation() {
 
-        handles["localisation"].push_back(on<Trigger<Self>, Single, Priority::LOW>().then(
-            [this](const Self& self) { send(self, 0, false, NUClear::clock::now()); }));
+        handles["localisation"].push_back(on<Trigger<Field>, Single, Priority::LOW>().then(
+            [this](const Field& self) { send(self, 0, false, NUClear::clock::now()); }));
 
         handles["localisation"].push_back(on<Trigger<Ball>, Single, Priority::LOW>().then(
             [this](const Ball& ball) { send(ball, 0, false, NUClear::clock::now()); }));
