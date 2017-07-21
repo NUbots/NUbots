@@ -73,7 +73,7 @@ namespace math {
                 }
                 for (; i < m_xBuf.size(); ++i)
                     m_xBuf[i] = 0.0;
-                m_changed = true;
+                m_changed     = true;
             }
             template <typename Iterator>
             void setYBuf(Iterator first, Iterator last) {
@@ -85,7 +85,7 @@ namespace math {
                 }
                 for (; i < m_yBuf.size(); ++i)
                     m_yBuf[i] = 0.0;
-                m_changed = true;
+                m_changed     = true;
             }
             template <typename Iterator>
             void setWBuf(
@@ -100,7 +100,7 @@ namespace math {
                 }
                 for (; i < m_wBuf.size(); ++i)
                     m_wBuf[i] = 0.0;
-                m_changed = true;
+                m_changed     = true;
             }
 
             // Reset the contents of a buffer to all zero

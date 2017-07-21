@@ -9,6 +9,7 @@
 // Includes
 #include <Eigen/Core>
 #include <array>
+#include <nuclear>
 #include "ComFilter.h"
 #include "GaitInterface.h"
 #include "contrib/Action.h"
@@ -37,7 +38,7 @@ class Gait;
 class GaitEngine {
 public:
     //! Default constructor
-    GaitEngine();
+    GaitEngine(NUClear::Reactor& reactor);
 
     /**
      * @brief Reset the gait engine.
@@ -105,6 +106,9 @@ public:
     GaitEngineInput in;    //!< Gait engine input data struct.
     GaitEngineOutput out;  //!< Gait engine output data struct.
 
+    // True if we should plot data to NUsight
+    bool plot = false;
+
 protected:
     /**
      * @brief Pointer to the RobotModel object to use for retrieving state information in each step.
@@ -132,6 +136,7 @@ protected:
     bool haltUseRawJointCmds;
 
 private:
+    NUClear::Reactor& reactor;
     // Internal variables
     double m_posX;
     double m_posY;
@@ -238,7 +243,6 @@ private:
     //
 
     // Constants
-    const std::string CONFIG_PARAM_PATH;
     static constexpr double USE_HALT_POSE = 1.0;
     static constexpr double USE_CALC_POSE = 0.0;
 
@@ -302,9 +306,6 @@ private:
     // Integrators
     utility::math::filter::EWIntegrator iFusedXFeedIntegrator;
     utility::math::filter::EWIntegrator iFusedYFeedIntegrator;
-    bool m_resetIntegrators;     // Rising edge triggered flag to reset any integrated or learned
-                                 // values in the gait that are not necessarily reset during
-                                 // start/stop of walking
     bool m_saveIFeedToHaltPose;  // Rising edge triggered flag to save the current integrated
                                  // feedback values as offsets to the halt pose (only the ones
                                  // in current use)
@@ -366,8 +367,6 @@ private:
 
     // Capture step robot model
     contrib::RobotModel rxRobotModel;
-    bool m_showRxVis;
-    void callbackShowRxVis();
 
     // Linear inverted pendulum robot models
     contrib::LimpModel rxModel;

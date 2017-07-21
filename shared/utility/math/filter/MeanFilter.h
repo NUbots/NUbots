@@ -73,7 +73,7 @@ namespace math {
                 }
                 for (; i < m_buf.size(); ++i)
                     m_buf[i] = 0.0;
-                m_changed = true;
+                m_changed    = true;
             }
 
             // Reset the contents of the buffer to zero or a particular value

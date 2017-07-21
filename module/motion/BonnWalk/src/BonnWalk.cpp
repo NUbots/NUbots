@@ -18,7 +18,8 @@ namespace motion {
     using message::motion::WalkStarted;
     using message::motion::WalkStopped;
 
-    BonnWalk::BonnWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    BonnWalk::BonnWalk(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)), engine(*this) {
 
         using namespace std::chrono;
 

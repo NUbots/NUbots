@@ -13,38 +13,35 @@
 #include "utility/math/filter/LinSinFillet.h"
 #include "utility/math/filter/SlopeLimiter.h"
 #include "utility/math/filter/SmoothDeadband.h"
-
-// Defines
-#define DEFAULT_HALT_EFFORT_ARMS 0.25  // Default joint effort to use in the halt pose for all the arm joints
-#define DEFAULT_HALT_EFFORT_LEGS 0.50  // Default joint effort to use in the halt pose for all the leg joints
+#include "utility/nubugger/NUhelpers.h"
 
 //
 // GaitEngine class
 //
 namespace gait {
-using ServoID = utility::input::ServoID;
 
-GaitEngine::GaitEngine()
+using ServoID = utility::input::ServoID;
+using utility::nubugger::graph;
+
+GaitEngine::GaitEngine(NUClear::Reactor& reactor)
     : model(nullptr)
     , haltJointCmd()
     , haltJointEffort()
     , haltUseRawJointCmds(false)
+    , reactor(reactor)
     , m_posX(0.0)
     , m_posY(0.0)
     , m_rotZ(0.0)
-    , CONFIG_PARAM_PATH("/cap_gait/")
     , config()
     , m_gcvAccSmoothX(9)
     , m_gcvAccSmoothY(9)
     , m_gcvAccSmoothZ(9)
-    , m_resetIntegrators(false)
     , m_saveIFeedToHaltPose(false)
     , rxRobotModel(config)
     , rxModel(config)
     , mxModel(config)
     , txModel(config)
-    , m_gcvZeroTime(0.0)
-    , m_plotData(false) {
+    , m_gcvZeroTime(0.0) {
 
     in.reset();
     out.reset();
@@ -69,13 +66,7 @@ GaitEngine::GaitEngine()
     resizeGyroFilters(config.basicGyroFilterN);
 
     // Set up callbacks for the local config parameters
-    // TODO: How to do this crap?
-    m_resetIntegrators.setCallback(std::bind(&GaitEngine::resetIntegrators, this));
-    m_showRxVis.setCallback(std::bind(&GaitEngine::callbackShowRxVis, this));
-    m_plotData.setCallback(std::bind(&GaitEngine::callbackPlotData, this));
     resetIntegrators();
-    callbackShowRxVis();
-    callbackPlotData();
 
     // Reset save integral feedback config parameter(s)
     resetSaveIntegrals();
@@ -129,12 +120,6 @@ void GaitEngine::resetBase() {
 
 // Step function
 void GaitEngine::step() {
-    // Clear the plot manager for a new cycle
-    m_PM.clear();
-
-    // Update the visualisation for a new cycle
-    m_rxVis.clear();
-    m_rxVis.setVisOffset(config.visOffsetX, config.visOffsetY, config.visOffsetZ);
 
     // Reset integrator flags
     haveIFusedXFeed = false;
@@ -240,18 +225,11 @@ void GaitEngine::step() {
     }
 
     // Plotting
-    if (m_PM.getEnabled()) {
-        m_PM.plotScalar(usedIFusedX, PM_USED_IFUSEDX);
-        m_PM.plotScalar(usedIFusedY, PM_USED_IFUSEDY);
-        m_PM.plotScalar(factor, PM_HALT_BLEND_FACTOR);
+    if (plot) {
+        reactor.emit(graph("bonn/used_ifusedx", usedIFusedX));
+        reactor.emit(graph("bonn/used_ifusedy", usedIFusedY));
+        reactor.emit(graph("bonn/halt_blend_factor", factor));
     }
-
-    // Update visualisation markers
-    if (m_rxVis.willPublish()) m_rxVis.updateMarkers();
-
-    // Publish the plot data
-    m_PM.publish();
-    m_rxVis.publish();
 }
 
 // Update the robot's halt pose
@@ -361,11 +339,6 @@ void GaitEngine::resetIntegrators() {
     haveIFusedYFeed = false;
     usedIFusedX     = false;
     usedIFusedY     = false;
-
-    // Reset the triggering config parameter if it is set
-    if (m_resetIntegrators) {
-        m_resetIntegrators = false;
-    }
 }
 
 // Reset function for the config parameter(s) that save the integrated feedback values
@@ -406,8 +379,6 @@ void GaitEngine::resetCaptureSteps(bool resetRobotModel) {
     gyroYFeed   = 0.0;
 
     // Reset capture step objects
-    m_rxVis.init();
-    m_rxVis.setVisOffset(config.visOffsetX, config.visOffsetY, config.visOffsetZ);
     if (resetRobotModel) {
         rxRobotModel.reset(resetRobotModel);
         rxRobotModel.setSupportLeg(m_leftLegFirst ? 1 : -1);  // Left leg first in the air means that the first support
@@ -494,10 +465,10 @@ void GaitEngine::processInputs() {
     }
 
     // Plot data
-    if (m_PM.getEnabled) {
-        m_PM.plotVec3d(m_gcv, PM_GCV);
-        m_PM.plotVec3d(m_gcvAcc, PM_GCV_ACC);
-        m_PM.plotScalar(m_gaitPhase, PM_GAIT_PHASE);
+    if (plot) {
+        reactor.emit(graph("bonn/gcv", m_gcv.x(), m_gcv.y(), m_gcv.z()));
+        reactor.emit(graph("bonn/gcv_acc", m_gcvAcc.x(), m_gcvAcc.y(), m_gcvAcc.z()));
+        reactor.emit(graph("bonn/gcv_phase", m_gaitPhase));
     }
 }
 
@@ -1089,72 +1060,71 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     //
 
     // Plot update function variables
-    if (m_PM.getEnabled()) {
-        Eigen::Vector3d tmp;
-        tmp = rxRobotModel.suppComVector();
-        m_PM.plotScalar(tmp.x, PM_RXRMODEL_SUPPVEC_X);
-        m_PM.plotScalar(tmp.y, PM_RXRMODEL_SUPPVEC_Y);
-        m_PM.plotScalar(tmp.z, PM_RXRMODEL_SUPPVEC_Z);
-        tmp = rxRobotModel.suppStepVector();
-        m_PM.plotScalar(tmp.x, PM_RXRMODEL_STEPVEC_X);
-        m_PM.plotScalar(tmp.y, PM_RXRMODEL_STEPVEC_Y);
-        m_PM.plotScalar(tmp.z, PM_RXRMODEL_STEPVEC_Z);
-        m_PM.plotScalar(rxRobotModel.suppStepYaw(), PM_RXRMODEL_STEPVEC_FYAW);
-        m_PM.plotScalar(fusedX, PM_FUSED_X);
-        m_PM.plotScalar(fusedY, PM_FUSED_Y);
-        m_PM.plotScalar(m_comFilter.x(), PM_COMFILTER_X);
-        m_PM.plotScalar(m_comFilter.y(), PM_COMFILTER_Y);
-        m_PM.plotScalar(m_comFilter.vx(), PM_COMFILTER_VX);
-        m_PM.plotScalar(m_comFilter.vy(), PM_COMFILTER_VY);
-        m_PM.plotScalar(rxModel.x, PM_RXMODEL_X);
-        m_PM.plotScalar(rxModel.y, PM_RXMODEL_Y);
-        m_PM.plotScalar(rxModel.vx, PM_RXMODEL_VX);
-        m_PM.plotScalar(rxModel.vy, PM_RXMODEL_VY);
-        m_PM.plotScalar(rxModel.supportLegSign, PM_RXMODEL_SUPPLEG);
-        m_PM.plotScalar(rxModel.timeToStep, PM_RXMODEL_TIMETOSTEP);
-        m_PM.plotScalar(mxModel.x, PM_MXMODEL_X);
-        m_PM.plotScalar(mxModel.y, PM_MXMODEL_Y);
-        m_PM.plotScalar(mxModel.vx, PM_MXMODEL_VX);
-        m_PM.plotScalar(mxModel.vy, PM_MXMODEL_VY);
-        m_PM.plotScalar(mxModel.supportLegSign, PM_MXMODEL_SUPPLEG);
-        m_PM.plotScalar(mxModel.timeToStep, PM_MXMODEL_TIMETOSTEP);
-        m_PM.plotScalar(mxModel.zmp.x, PM_MXMODEL_ZMP_X);
-        m_PM.plotScalar(mxModel.zmp.y, PM_MXMODEL_ZMP_Y);
-        m_PM.plotScalar(txModel.x, PM_TXMODEL_X);
-        m_PM.plotScalar(txModel.y, PM_TXMODEL_Y);
-        m_PM.plotScalar(txModel.vx, PM_TXMODEL_VX);
-        m_PM.plotScalar(txModel.vy, PM_TXMODEL_VY);
-        m_PM.plotScalar(txModel.supportLegSign, PM_TXMODEL_SUPPLEG);
-        m_PM.plotScalar(txModel.timeToStep, PM_TXMODEL_TIMETOSTEP);
-        m_PM.plotScalar(txModel.stepSize.x, PM_TXMODEL_STEPSIZEX);
-        m_PM.plotScalar(txModel.stepSize.y, PM_TXMODEL_STEPSIZEY);
-        m_PM.plotScalar(txModel.stepSize.z, PM_TXMODEL_STEPSIZEZ);
-        m_PM.plotScalar(adaptx, PM_ADAPTATION_X);
-        m_PM.plotScalar(adapty, PM_ADAPTATION_Y);
-        m_PM.plotScalar(expectedFusedX, PM_EXP_FUSED_X);
-        m_PM.plotScalar(expectedFusedY, PM_EXP_FUSED_Y);
-        m_PM.plotScalar(deviationFusedX, PM_DEV_FUSED_X);
-        m_PM.plotScalar(deviationFusedY, PM_DEV_FUSED_Y);
-        m_PM.plotScalar(fusedXFeed, PM_FEEDBACK_FUSED_X);
-        m_PM.plotScalar(fusedYFeed, PM_FEEDBACK_FUSED_Y);
-        m_PM.plotScalar(dFusedXFeed, PM_FEEDBACK_DFUSED_X);
-        m_PM.plotScalar(dFusedYFeed, PM_FEEDBACK_DFUSED_Y);
-        m_PM.plotScalar(iFusedXFeed, PM_FEEDBACK_IFUSED_X);
-        m_PM.plotScalar(iFusedYFeed, PM_FEEDBACK_IFUSED_Y);
-        m_PM.plotScalar(gyroXFeed, PM_FEEDBACK_GYRO_X);
-        m_PM.plotScalar(gyroYFeed, PM_FEEDBACK_GYRO_Y);
-        m_PM.plotScalar(timingFeedWeight, PM_TIMING_FEED_WEIGHT);
-        m_PM.plotScalar(timingFreqDelta, PM_TIMING_FREQ_DELTA);
-        m_PM.plotScalar(gaitFrequency, PM_GAIT_FREQUENCY);
-        m_PM.plotScalar(remainingGaitPhase, PM_REM_GAIT_PHASE);
-        m_PM.plotScalar(timeToStep, PM_TIMETOSTEP);
-        m_PM.plotScalar(stepSize.x, PM_STEPSIZE_X);
-        m_PM.plotScalar(stepSize.y, PM_STEPSIZE_Y);
-        m_PM.plotScalar(stepSize.z, PM_STEPSIZE_Z);
-        m_PM.plotScalar(gcvTarget.x(), PM_GCVTARGET_X);
-        m_PM.plotScalar(gcvTarget.y(), PM_GCVTARGET_Y);
-        m_PM.plotScalar(gcvTarget.z(), PM_GCVTARGET_Z);
-        m_PM.plotScalar(lastStepDuration, PM_LAST_STEP_DURATION);
+    if (plot) {
+        reactor.emit(graph("bonn/rxrmodel_suppvec",
+                           rxRobotModel.suppComVector().x(),
+                           rxRobotModel.suppComVector().y(),
+                           rxRobotModel.suppComVector().z()));
+        reactor.emit(graph("bonn/rxrmodel_stepvec",
+                           rxRobotModel.suppStepVector().x(),
+                           rxRobotModel.suppStepVector().y(),
+                           rxRobotModel.suppStepVector().z()));
+        reactor.emit(graph("bonn/rxrmodel_stepvec_fyaw", rxRobotModel.suppStepYaw()));
+        reactor.emit(graph("bonn/fused_x", fusedX));
+        reactor.emit(graph("bonn/fused_y", fusedY));
+        reactor.emit(graph("bonn/comfilter_x", m_comFilter.x()));
+        reactor.emit(graph("bonn/comfilter_y", m_comFilter.y()));
+        reactor.emit(graph("bonn/comfilter_vx", m_comFilter.vx()));
+        reactor.emit(graph("bonn/comfilter_vy", m_comFilter.vy()));
+        reactor.emit(graph("bonn/rxmodel_x", rxModel.x));
+        reactor.emit(graph("bonn/rxmodel_y", rxModel.y));
+        reactor.emit(graph("bonn/rxmodel_vx", rxModel.vx));
+        reactor.emit(graph("bonn/rxmodel_vy", rxModel.vy));
+        reactor.emit(graph("bonn/rxmodel_suppleg", rxModel.supportLegSign));
+        reactor.emit(graph("bonn/rxmodel_timetostep", rxModel.timeToStep));
+        reactor.emit(graph("bonn/mxmodel_x", mxModel.x));
+        reactor.emit(graph("bonn/mxmodel_y", mxModel.y));
+        reactor.emit(graph("bonn/mxmodel_vx", mxModel.vx));
+        reactor.emit(graph("bonn/mxmodel_vy", mxModel.vy));
+        reactor.emit(graph("bonn/mxmodel_suppleg", mxModel.supportLegSign));
+        reactor.emit(graph("bonn/mxmodel_timetostep", mxModel.timeToStep));
+        reactor.emit(graph("bonn/mxmodel_zmp_x", mxModel.zmp.x()));
+        reactor.emit(graph("bonn/mxmodel_zmp_y", mxModel.zmp.y()));
+        reactor.emit(graph("bonn/txmodel_x", txModel.x));
+        reactor.emit(graph("bonn/txmodel_y", txModel.y));
+        reactor.emit(graph("bonn/txmodel_vx", txModel.vx));
+        reactor.emit(graph("bonn/txmodel_vy", txModel.vy));
+        reactor.emit(graph("bonn/txmodel_suppleg", txModel.supportLegSign));
+        reactor.emit(graph("bonn/txmodel_timetostep", txModel.timeToStep));
+        reactor.emit(graph("bonn/txmodel_stepsizex", txModel.stepSize.x()));
+        reactor.emit(graph("bonn/txmodel_stepsizey", txModel.stepSize.y()));
+        reactor.emit(graph("bonn/txmodel_stepsizez", txModel.stepSize.z()));
+        reactor.emit(graph("bonn/adaptation_x", adaptx));
+        reactor.emit(graph("bonn/adaptation_y", adapty));
+        reactor.emit(graph("bonn/exp_fused_x", expectedFusedX));
+        reactor.emit(graph("bonn/exp_fused_y", expectedFusedY));
+        reactor.emit(graph("bonn/dev_fused_x", deviationFusedX));
+        reactor.emit(graph("bonn/dev_fused_y", deviationFusedY));
+        reactor.emit(graph("bonn/feedback_fused_x", fusedXFeed));
+        reactor.emit(graph("bonn/feedback_fused_y", fusedYFeed));
+        reactor.emit(graph("bonn/feedback_dfused_x", dFusedXFeed));
+        reactor.emit(graph("bonn/feedback_dfused_y", dFusedYFeed));
+        reactor.emit(graph("bonn/feedback_ifused_x", iFusedXFeed));
+        reactor.emit(graph("bonn/feedback_ifused_y", iFusedYFeed));
+        reactor.emit(graph("bonn/feedback_gyro_x", gyroXFeed));
+        reactor.emit(graph("bonn/feedback_gyro_y", gyroYFeed));
+        reactor.emit(graph("bonn/timing_feed_weight", timingFeedWeight));
+        reactor.emit(graph("bonn/timing_freq_delta", timingFreqDelta));
+        reactor.emit(graph("bonn/gait_frequency", gaitFrequency));
+        reactor.emit(graph("bonn/rem_gait_phase", remainingGaitPhase));
+        reactor.emit(graph("bonn/timetostep", timeToStep));
+        reactor.emit(graph("bonn/stepsize_x", stepSize.x()));
+        reactor.emit(graph("bonn/stepsize_y", stepSize.y()));
+        reactor.emit(graph("bonn/stepsize_z", stepSize.z()));
+        reactor.emit(graph("bonn/gcvtarget_x", gcvTarget.x()));
+        reactor.emit(graph("bonn/gcvtarget_y", gcvTarget.y()));
+        reactor.emit(graph("bonn/gcvtarget_z", gcvTarget.z()));
+        reactor.emit(graph("bonn/last_step_duration", lastStepDuration));
     }
 }
 
@@ -1645,27 +1615,29 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     //
 
     // Plot the leg motion components
-    if (m_PM.getEnabled()) {
-        m_PM.plotScalar(legExtensionOffset, PM_LEG_EXTENSION_R + leg.cld.isLeft);
-        m_PM.plotScalar(CMD.swingAngle, PM_LEG_SWING_ANGLE_R + leg.cld.isLeft);
-        m_PM.plotScalar(legSagSwing, PM_LEG_SAG_SWING_R + leg.cld.isLeft);
-        m_PM.plotScalar(legLatSwing, PM_LEG_LAT_SWING_R + leg.cld.isLeft);
-        m_PM.plotScalar(legRotSwing, PM_LEG_ROT_SWING_R + leg.cld.isLeft);
-        m_PM.plotScalar(legLatHipSwing, PM_LEG_LAT_HIP_SWING_R + leg.cld.isLeft);
-        m_PM.plotScalar(legSagLean, PM_LEG_SAG_LEAN_R + leg.cld.isLeft);
-        m_PM.plotScalar(legLatLean, PM_LEG_LAT_LEAN_R + leg.cld.isLeft);
-        m_PM.plotScalar(hipAngleXFeedback, PM_LEG_FEED_HIPANGLEX_R + leg.cld.isLeft);
-        m_PM.plotScalar(hipAngleYFeedback, PM_LEG_FEED_HIPANGLEY_R + leg.cld.isLeft);
-        m_PM.plotScalar(footAngleXFeedback, PM_LEG_FEED_FOOTANGLEX_R + leg.cld.isLeft);
-        m_PM.plotScalar(footAngleYFeedback, PM_LEG_FEED_FOOTANGLEY_R + leg.cld.isLeft);
-        m_PM.plotScalar(footAngleCtsXFeedback, PM_LEG_FEED_FOOTANGLECX_R + leg.cld.isLeft);
-        m_PM.plotScalar(footAngleCtsYFeedback, PM_LEG_FEED_FOOTANGLECY_R + leg.cld.isLeft);
-        m_PM.plotScalar(leg.extension, PM_LEG_ABS_LEGEXT_R + leg.cld.isLeft);
-        m_PM.plotScalar(leg.angleX, PM_LEG_ABS_LEGANGLEX_R + leg.cld.isLeft);
-        m_PM.plotScalar(leg.angleY, PM_LEG_ABS_LEGANGLEY_R + leg.cld.isLeft);
-        m_PM.plotScalar(leg.angleZ, PM_LEG_ABS_LEGANGLEZ_R + leg.cld.isLeft);
-        m_PM.plotScalar(leg.footAngleX, PM_LEG_ABS_FOOTANGLEX_R + leg.cld.isLeft);
-        m_PM.plotScalar(leg.footAngleY, PM_LEG_ABS_FOOTANGLEY_R + leg.cld.isLeft);
+    if (plot) {
+        // clang-format off
+        reactor.emit(graph(std::string("bonn/leg_extension_")        + (leg.cld.isLeft ? "L" : "R"), legExtensionOffset));
+        reactor.emit(graph(std::string("bonn/leg_swing_angle_")      + (leg.cld.isLeft ? "L" : "R"), CMD.swingAngle));
+        reactor.emit(graph(std::string("bonn/leg_sag_swing_")        + (leg.cld.isLeft ? "L" : "R"), legSagSwing));
+        reactor.emit(graph(std::string("bonn/leg_lat_swing_")        + (leg.cld.isLeft ? "L" : "R"), legLatSwing));
+        reactor.emit(graph(std::string("bonn/leg_rot_swing_")        + (leg.cld.isLeft ? "L" : "R"), legRotSwing));
+        reactor.emit(graph(std::string("bonn/leg_lat_hip_swing_")    + (leg.cld.isLeft ? "L" : "R"), legLatHipSwing));
+        reactor.emit(graph(std::string("bonn/leg_sag_lean_")         + (leg.cld.isLeft ? "L" : "R"), legSagLean));
+        reactor.emit(graph(std::string("bonn/leg_lat_lean_")         + (leg.cld.isLeft ? "L" : "R"), legLatLean));
+        reactor.emit(graph(std::string("bonn/leg_feed_hipanglex_")   + (leg.cld.isLeft ? "L" : "R"), hipAngleXFeedback));
+        reactor.emit(graph(std::string("bonn/leg_feed_hipangley_")   + (leg.cld.isLeft ? "L" : "R"), hipAngleYFeedback));
+        reactor.emit(graph(std::string("bonn/leg_feed_footanglex_")  + (leg.cld.isLeft ? "L" : "R"), footAngleXFeedback));
+        reactor.emit(graph(std::string("bonn/leg_feed_footangley_")  + (leg.cld.isLeft ? "L" : "R"), footAngleYFeedback));
+        reactor.emit(graph(std::string("bonn/leg_feed_footanglecx_") + (leg.cld.isLeft ? "L" : "R"), footAngleCtsXFeedback));
+        reactor.emit(graph(std::string("bonn/leg_feed_footanglecy_") + (leg.cld.isLeft ? "L" : "R"), footAngleCtsYFeedback));
+        reactor.emit(graph(std::string("bonn/leg_abs_legext_")       + (leg.cld.isLeft ? "L" : "R"), leg.extension));
+        reactor.emit(graph(std::string("bonn/leg_abs_leganglex_")    + (leg.cld.isLeft ? "L" : "R"), leg.angleX));
+        reactor.emit(graph(std::string("bonn/leg_abs_legangley_")    + (leg.cld.isLeft ? "L" : "R"), leg.angleY));
+        reactor.emit(graph(std::string("bonn/leg_abs_leganglez_")    + (leg.cld.isLeft ? "L" : "R"), leg.angleZ));
+        reactor.emit(graph(std::string("bonn/leg_abs_footanglex_")   + (leg.cld.isLeft ? "L" : "R"), leg.footAngleX));
+        reactor.emit(graph(std::string("bonn/leg_abs_footangley_")   + (leg.cld.isLeft ? "L" : "R"), leg.footAngleY));
+        // clang-format on
     }
 }
 
@@ -1756,14 +1728,16 @@ void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
     //
 
     // Plot the arm motion components
-    if (m_PM.getEnabled()) {
-        m_PM.plotScalar(CMD.swingAngle, PM_ARM_SWING_ANGLE_R + arm.cad.isLeft);
-        m_PM.plotScalar(armSagSwing, PM_ARM_SAG_SWING_R + arm.cad.isLeft);
-        m_PM.plotScalar(armAngleXFeedback, PM_ARM_FEED_ARMANGLEX_R + arm.cad.isLeft);
-        m_PM.plotScalar(armAngleYFeedback, PM_ARM_FEED_ARMANGLEY_R + arm.cad.isLeft);
-        m_PM.plotScalar(arm.extension, PM_ARM_ABS_ARMEXT_R + arm.cad.isLeft);
-        m_PM.plotScalar(arm.angleX, PM_ARM_ABS_ARMANGLEX_R + arm.cad.isLeft);
-        m_PM.plotScalar(arm.angleY, PM_ARM_ABS_ARMANGLEY_R + arm.cad.isLeft);
+    if (plot) {
+        // clang-format off
+        reactor.emit(graph(std::string("bonn/arm_swing_angle_")    + (arm.cad.isLeft ? "L" : "R"), CMD.swingAngle));
+        reactor.emit(graph(std::string("bonn/arm_sag_swing_")      + (arm.cad.isLeft ? "L" : "R"), armSagSwing));
+        reactor.emit(graph(std::string("bonn/arm_feed_armanglex_") + (arm.cad.isLeft ? "L" : "R"), armAngleXFeedback));
+        reactor.emit(graph(std::string("bonn/arm_feed_armangley_") + (arm.cad.isLeft ? "L" : "R"), armAngleYFeedback));
+        reactor.emit(graph(std::string("bonn/arm_abs_armext_")     + (arm.cad.isLeft ? "L" : "R"), arm.extension));
+        reactor.emit(graph(std::string("bonn/arm_abs_armanglex_")  + (arm.cad.isLeft ? "L" : "R"), arm.angleX));
+        reactor.emit(graph(std::string("bonn/arm_abs_armangley_")  + (arm.cad.isLeft ? "L" : "R"), arm.angleY));
+        //clang-format on
     }
 }
 
@@ -1792,8 +1766,7 @@ void GaitEngine::inverseLegMotion(pose::InverseLegPose& leg) {
                             + config.basicDFusedComShiftX * dFusedYFeed + config.basicIFusedComShiftX * iFusedYFeed
                             + config.basicGyroComShiftX * gyroYFeed;
         comShiftYFeedback = -(config.basicFeedBiasComShiftY + config.basicFusedComShiftY * fusedXFeed
-                              + config.basicDFusedComShiftY * dFusedXFeed
-                              + config.basicIFusedComShiftY * iFusedXFeed
+                              + config.basicDFusedComShiftY * dFusedXFeed + config.basicIFusedComShiftY * iFusedXFeed
                               + config.basicGyroComShiftY * gyroXFeed);
 
         // Apply the required limits if enabled
@@ -1824,18 +1797,14 @@ void GaitEngine::inverseLegMotion(pose::InverseLegPose& leg) {
 
         // Work out whether iFusedX contributed anything to the CPG gait
         if (haveIFusedXFeed && config.basicIFusedComShiftY != 0.0 && config.basicComShiftYMin < 0.0
-            && config.basicComShiftYMax > 0.0
-            && config.basicEnableComShiftY
-            && config.basicGlobalEnable) {
+            && config.basicComShiftYMax > 0.0 && config.basicEnableComShiftY && config.basicGlobalEnable) {
             iFusedXLastTime = in.timestamp;
             usedIFusedX     = true;
         }
 
         // Work out whether iFusedY contributed anything to the CPG gait
         if (haveIFusedYFeed && config.basicIFusedComShiftX != 0.0 && config.basicComShiftXMin < 0.0
-            && config.basicComShiftXMax > 0.0
-            && config.basicEnableComShiftX
-            && config.basicGlobalEnable) {
+            && config.basicComShiftXMax > 0.0 && config.basicEnableComShiftX && config.basicGlobalEnable) {
             iFusedYLastTime = in.timestamp;
             usedIFusedY     = true;
         }
@@ -1865,11 +1834,13 @@ void GaitEngine::inverseLegMotion(pose::InverseLegPose& leg) {
     //
 
     // Plot the inverse leg motion components
-    if (m_PM.getEnabled()) {
-        m_PM.plotScalar(comShiftXFeedback, PM_LEG_FEED_COMSHIFTX_R + leg.cld.isLeft);
-        m_PM.plotScalar(comShiftYFeedback, PM_LEG_FEED_COMSHIFTY_R + leg.cld.isLeft);
-        m_PM.plotScalar(virtualSlope, PM_LEG_VIRTUAL_SLOPE_R + leg.cld.isLeft);
-        m_PM.plotScalar(virtualComponent, PM_LEG_VIRTUAL_COMP_R + leg.cld.isLeft);
+    if (plot) {
+        //clang-format off
+        reactor.emit(graph(std::string("bonn/leg_feed_comshiftx_") + (leg.cld.isLeft ? "L" : "R"), comShiftXFeedback));
+        reactor.emit(graph(std::string("bonn/leg_feed_comshifty_") + (leg.cld.isLeft ? "L" : "R"), comShiftYFeedback));
+        reactor.emit(graph(std::string("bonn/leg_virtual_slope_")  + (leg.cld.isLeft ? "L" : "R"), virtualSlope));
+        reactor.emit(graph(std::string("bonn/leg_virtual_comp_")   + (leg.cld.isLeft ? "L" : "R"), virtualComponent));
+        //clang-format on
     }
 }
 
@@ -1904,20 +1875,21 @@ void GaitEngine::clampAbstractLegPose(pose::AbstractLegPose& leg) {
     // Apply the required limits if enabled
     if (config.limLegAngleXUseLimits)
         // Minimum is negative towards inside, maximum is positive towards outside
-        leg.angleX = leg.cld.limbSign * utility::math::clampSoft(double(config.limLegAngleXMin),
-                                                                 leg.angleX / leg.cld.limbSign,
-                                                                 double(config.limLegAngleXMax),
-                                                                 4.0);
+        leg.angleX =
+            leg.cld.limbSign
+            * utility::math::clampSoft(
+                  double(config.limLegAngleXMin), leg.angleX / leg.cld.limbSign, double(config.limLegAngleXMax), 4.0);
     if (config.limLegAngleYUseLimits) {
         leg.angleY =
             utility::math::clampSoft(double(config.limLegAngleYMin), leg.angleY, double(config.limLegAngleYMax), 4.0);
     }
     if (config.limFootAngleXUseLimits) {
         // Minimum is negative towards inside, maximum is positive towards outside
-        leg.footAngleX = leg.cld.limbSign * utility::math::clampSoft(double(config.limFootAngleXMin),
-                                                                     leg.footAngleX / leg.cld.limbSign,
-                                                                     double(config.limFootAngleXMax),
-                                                                     double(config.limFootAngleXBuf));
+        leg.footAngleX = leg.cld.limbSign
+                         * utility::math::clampSoft(double(config.limFootAngleXMin),
+                                                    leg.footAngleX / leg.cld.limbSign,
+                                                    double(config.limFootAngleXMax),
+                                                    double(config.limFootAngleXBuf));
     }
     if (config.limFootAngleYUseLimits) {
         leg.footAngleY = utility::math::clampSoft(double(config.limFootAngleYMin),
@@ -1947,17 +1919,6 @@ void GaitEngine::updateOutputs() {
 
     // Update the odometry
     updateOdometry();
-}
-
-// Callback for when the plotData parameter is updated
-void GaitEngine::callbackPlotData() {
-    // Enable or disable plotting as required
-    if (m_plotData()) {
-        m_PM.enable();
-    }
-    else {
-        m_PM.disable();
-    }
 }
 
 // Reset the blending variables

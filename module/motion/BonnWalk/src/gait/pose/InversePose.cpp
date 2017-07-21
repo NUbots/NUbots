@@ -48,9 +48,8 @@ namespace pose {
         footRot                    = shinRot * ankleRot;
 
         // Calculate the foot position
-        footPos = -cld.linkLength
-                  * (hipRot * Eigen::Vector3d::UnitZ()
-                     + shinRot * Eigen::Vector3d::UnitZ());  // = hipRot*(0,0,-L) + shinRot*(0,0,-L)
+        footPos = -cld.linkLength * (hipRot * Eigen::Vector3d::UnitZ()
+                                     + shinRot * Eigen::Vector3d::UnitZ());  // = hipRot*(0,0,-L) + shinRot*(0,0,-L)
         footPos.z() += 2.0 * cld.linkLength;
     }
 
