@@ -28,6 +28,7 @@
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
+#include "utility/vision/ImageMask.h"
 #include "utility/vision/LookUpTable.h"
 
 
@@ -41,6 +42,7 @@ namespace vision {
     using message::input::CameraParameters;
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
+    using message::vision::ImageMask;
     using message::vision::ClassifiedImage;
     using message::support::SaveConfiguration;
     using utility::support::Expression;
@@ -206,53 +208,65 @@ namespace vision {
                 FOCAL_LENGTH_PIXELS = cam.pinhole.focalLengthPixels;
             });
 
-        on<Trigger<Image>, With<LookUpTable>, With<Sensors>, With<CameraParameters>, Single, Priority::LOW>().then(
-            "Classify Image",
-            [this](const Image& rawImage, const LookUpTable& lut, const Sensors& sensors, const CameraParameters& cam) {
+        on<Trigger<Image>,
+           With<LookUpTable>,
+           With<Sensors>,
+           With<CameraParameters>,
+           With<Optional<ImageMask>>,
+           Single,
+           Priority::LOW>()
+            .then("Classify Image",
+                  [this](const Image& rawImage,
+                         const LookUpTable& lut,
+                         const Sensors& sensors,
+                         const CameraParameters& cam,
+                         std::shared_ptr<const ImageMask> mask) {
 
-                // TODO
-                // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) +
-                // std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
+                      // TODO
+                      // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) +
+                      // std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
 
-                // Our classified image
-                auto classifiedImage = std::make_unique<ClassifiedImage>();
-
-
-                // Set our width and height
-                classifiedImage->dimensions = rawImage.dimensions;
+                      // Our classified image
+                      auto classifiedImage = std::make_unique<ClassifiedImage>();
 
 
-                // Attach our sensors
-                // std::cout << "sensor-vision latency = " <<
-                // std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() -
-                // sensors->timestamp).count() << std::endl;
-                classifiedImage->sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
+                      // Set our width and height
+                      classifiedImage->dimensions = rawImage.dimensions;
+
+                      // Attach our sensors
+                      // std::cout << "sensor-vision latency = " <<
+                      // std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() -
+                      // sensors->timestamp).count() << std::endl;
+                      classifiedImage->sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
 
 
-                // Attach the image
-                classifiedImage->image = const_cast<Image*>(&rawImage)->shared_from_this();
+                      // Attach the image
+                      classifiedImage->image = const_cast<Image*>(&rawImage)->shared_from_this();
 
-                // Find our horizon
-                findHorizon(rawImage, lut, *classifiedImage);
+                      // Attach mask (or null if no mask)
+                      classifiedImage->mask = mask;
 
-                // Find our visual horizon
-                findVisualHorizon(rawImage, lut, *classifiedImage, cam);
+                      // Find our horizon
+                      findHorizon(rawImage, lut, *classifiedImage);
 
-                // Find our goals
-                findGoals(rawImage, lut, *classifiedImage);
+                      // Find our visual horizon
+                      findVisualHorizon(rawImage, lut, *classifiedImage, cam);
 
-                // Enhance our goals
-                enhanceGoals(rawImage, lut, *classifiedImage);
+                      // Find our goals
+                      findGoals(rawImage, lut, *classifiedImage);
 
-                // Find our ball (also helps with the bottom of goals)
-                findBall(rawImage, lut, *classifiedImage, cam);
+                      // Enhance our goals
+                      enhanceGoals(rawImage, lut, *classifiedImage);
 
-                // Enhance our ball
-                enhanceBall(rawImage, lut, *classifiedImage, cam);
+                      // Find our ball (also helps with the bottom of goals)
+                      findBall(rawImage, lut, *classifiedImage, cam);
 
-                // Emit our classified image
-                emit(std::move(classifiedImage));
-            });
+                      // Enhance our ball
+                      enhanceBall(rawImage, lut, *classifiedImage, cam);
+
+                      // Emit our classified image
+                      emit(std::move(classifiedImage));
+                  });
     }
 }  // namespace vision
 }  // namespace module
