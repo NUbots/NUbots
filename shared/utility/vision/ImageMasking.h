@@ -22,7 +22,9 @@
 namespace utility {
 namespace vision {
 
-    inline bool pixelIsMasked(const int& x, const int& y, const ImageMask& mask) {
+
+    inline bool pixelIsMasked(const int& x, const int& y, std::shared_ptr<const message::vision::ImageMask> mask) {
+        // return mask &&;
         return false;
     }
 

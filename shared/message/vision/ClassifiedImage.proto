@@ -83,7 +83,5 @@ message ClassifiedImage {
 
     //Old horizon TODO: phase out
     Line                      horizon            = 10;
-
-    ImageMask                 mask               = 11 [(pointer) = SHARED];
 }
 

@@ -30,7 +30,10 @@ namespace vision {
 
     using utility::math::geometry::Line;
 
-    void LUTClassifier::findGoals(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
+    void LUTClassifier::findGoals(const Image& image,
+                                  const LookUpTable& lut,
+                                  std::shared_ptr<const message::vision::ImageMask> mask,
+                                  ClassifiedImage& classifiedImage) {
 
         /*
            Here we cast classification lines to attempt to locate the general area of the goals.

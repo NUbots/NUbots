@@ -42,6 +42,7 @@ namespace vision {
 
     void LUTClassifier::findBall(const Image& image,
                                  const LookUpTable& lut,
+                                 std::shared_ptr<const message::vision::ImageMask> mask,
                                  ClassifiedImage& classifiedImage,
                                  const CameraParameters& cam) {
 

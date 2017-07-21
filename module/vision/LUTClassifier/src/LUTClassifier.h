@@ -93,29 +93,35 @@ namespace vision {
 
         void findHorizon(const message::input::Image& image,
                          const message::vision::LookUpTable& lut,
+                         std::shared_ptr<const message::vision::ImageMask> mask,
                          message::vision::ClassifiedImage& classifiedImage);
 
         void findVisualHorizon(const message::input::Image& image,
                                const message::vision::LookUpTable& lut,
+                               std::shared_ptr<const message::vision::ImageMask> mask,
                                message::vision::ClassifiedImage& classifiedImage,
                                const message::input::CameraParameters& cam);
 
         void findBall(const message::input::Image& image,
                       const message::vision::LookUpTable& lut,
+                      std::shared_ptr<const message::vision::ImageMask> mask,
                       message::vision::ClassifiedImage& classifiedImage,
                       const message::input::CameraParameters& cam);
 
         void findGoals(const message::input::Image& image,
                        const message::vision::LookUpTable& lut,
+                       std::shared_ptr<const message::vision::ImageMask> mask,
                        message::vision::ClassifiedImage& classifiedImage);
 
         void enhanceBall(const message::input::Image& image,
                          const message::vision::LookUpTable& lut,
+                         std::shared_ptr<const message::vision::ImageMask> mask,
                          message::vision::ClassifiedImage& classifiedImage,
                          const message::input::CameraParameters& cam);
 
         void enhanceGoals(const message::input::Image& image,
                           const message::vision::LookUpTable& lut,
+                          std::shared_ptr<const message::vision::ImageMask> mask,
                           message::vision::ClassifiedImage& classifiedImage);
 
     public:

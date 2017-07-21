@@ -37,11 +37,13 @@ namespace vision {
 
     QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1), tknNumber(lexer.token_p()->number) {}
 
-    std::vector<ClassifiedImage::Segment> QuexClassifier::classify(const Image& image,
-                                                                   const LookUpTable& lut,
-                                                                   const arma::ivec2& start,
-                                                                   const arma::ivec2& end,
-                                                                   const uint& subsample) {
+    std::vector<ClassifiedImage::Segment> QuexClassifier::classify(
+        const Image& image,
+        const LookUpTable& lut,
+        std::shared_ptr<const message::vision::ImageMask> mask,
+        const arma::ivec2& start,
+        const arma::ivec2& end,
+        const uint& subsample) {
 
         // Start reading data
         lexer.buffer_fill_region_prepare();
@@ -52,14 +54,21 @@ namespace vision {
             size_t length = end[1] - start[1] + 1;
 
             for (uint i = 0; i < length / subsample; ++i) {
-                buffer[i + 1] =
-                    utility::vision::getPixelColour(lut,
-                                                    utility::vision::getPixel(start[0],
-                                                                              start[1] + (i * subsample),
-                                                                              image.dimensions[0],
-                                                                              image.dimensions[1],
-                                                                              image.data,
-                                                                              static_cast<FOURCC>(image.format)));
+                const int& x = start[0];
+                const int& y = start[1] + (i * subsample);
+                if (pixelMasked(x, y, mask)) {
+                    buffer[i + 1] =
+                }
+                else {
+                    buffer[i + 1] =
+                        utility::vision::getPixelColour(lut,
+                                                        utility::vision::getPixel(x,
+                                                                                  y,
+                                                                                  image.dimensions[0],
+                                                                                  image.dimensions[1],
+                                                                                  image.data,
+                                                                                  static_cast<FOURCC>(image.format)));
+                }
             }
 
             lexer.buffer_fill_region_finish(length / subsample);
@@ -71,14 +80,19 @@ namespace vision {
             size_t length = end[0] - start[0] + 1;
 
             for (uint i = 0; i < length / subsample; ++i) {
-                buffer[i + 1] =
-                    utility::vision::getPixelColour(lut,
-                                                    utility::vision::getPixel(start[0] + (i * subsample),
-                                                                              start[1],
-                                                                              image.dimensions[0],
-                                                                              image.dimensions[1],
-                                                                              image.data,
-                                                                              static_cast<FOURCC>(image.format)));
+                if (pixelMasked(x, y, mask)) {
+                    buffer[i + 1] =
+                }
+                else {
+                    buffer[i + 1] =
+                        utility::vision::getPixelColour(lut,
+                                                        utility::vision::getPixel(start[0] + (i * subsample),
+                                                                                  start[1],
+                                                                                  image.dimensions[0],
+                                                                                  image.dimensions[1],
+                                                                                  image.data,
+                                                                                  static_cast<FOURCC>(image.format)));
+                }
             }
 
             lexer.buffer_fill_region_finish(length / subsample);

@@ -247,22 +247,22 @@ namespace vision {
                       classifiedImage->mask = mask;
 
                       // Find our horizon
-                      findHorizon(rawImage, lut, *classifiedImage);
+                      findHorizon(rawImage, lut, mask, *classifiedImage);
 
                       // Find our visual horizon
-                      findVisualHorizon(rawImage, lut, *classifiedImage, cam);
+                      findVisualHorizon(rawImage, lut, mask, *classifiedImage, cam);
 
                       // Find our goals
-                      findGoals(rawImage, lut, *classifiedImage);
+                      findGoals(rawImage, lut, mask, *classifiedImage);
 
                       // Enhance our goals
-                      enhanceGoals(rawImage, lut, *classifiedImage);
+                      enhanceGoals(rawImage, lut, mask, *classifiedImage);
 
                       // Find our ball (also helps with the bottom of goals)
-                      findBall(rawImage, lut, *classifiedImage, cam);
+                      findBall(rawImage, lut, mask, *classifiedImage, cam);
 
                       // Enhance our ball
-                      enhanceBall(rawImage, lut, *classifiedImage, cam);
+                      enhanceBall(rawImage, lut, mask, *classifiedImage, cam);
 
                       // Emit our classified image
                       emit(std::move(classifiedImage));

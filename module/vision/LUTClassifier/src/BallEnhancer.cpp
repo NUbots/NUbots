@@ -198,9 +198,10 @@ namespace vision {
         // Find out how green each pixel is!
         std::array<float, 24> greenness;
         for (int i = 0; i < int(greenness.size()); ++i) {
-            greenness[i] = (greenCentroid - Eigen::Vector3f(float(pixels[i].components.y * 2),
-                                                            float(pixels[i].components.cb),
-                                                            float(pixels[i].components.cr)))
+            greenness[i] = (greenCentroid
+                            - Eigen::Vector3f(float(pixels[i].components.y * 2),
+                                              float(pixels[i].components.cb),
+                                              float(pixels[i].components.cr)))
                                .norm();
         }
 
@@ -241,6 +242,7 @@ namespace vision {
 
     void LUTClassifier::enhanceBall(const Image& image,
                                     const LookUpTable& lut,
+                                    std::shared_ptr<const message::vision::ImageMask> mask,
                                     ClassifiedImage& classifiedImage,
                                     const CameraParameters& cam) {
 

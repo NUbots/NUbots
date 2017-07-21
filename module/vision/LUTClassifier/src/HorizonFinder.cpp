@@ -35,7 +35,10 @@ namespace vision {
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
 
-    void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage& classifiedImage) {
+    void LUTClassifier::findHorizon(const Image& image,
+                                    const LookUpTable&,
+                                    std::shared_ptr<const message::vision::ImageMask> mask,
+                                    ClassifiedImage& classifiedImage) {
 
         auto& sensors = *classifiedImage.sensors;
 

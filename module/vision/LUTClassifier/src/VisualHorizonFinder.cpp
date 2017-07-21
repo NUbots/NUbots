@@ -44,6 +44,7 @@ namespace vision {
 
     void LUTClassifier::findVisualHorizon(const Image& image,
                                           const LookUpTable& lut,
+                                          std::shared_ptr<const message::vision::ImageMask> mask,
                                           ClassifiedImage& classifiedImage,
                                           const CameraParameters& cam) {
 

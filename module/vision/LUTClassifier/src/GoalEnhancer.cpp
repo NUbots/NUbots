@@ -79,7 +79,10 @@ namespace vision {
         void refineModel(Iterator& /*begin*/, Iterator& /*end*/, const double& /*threshold*/) {}
     };
 
-    void LUTClassifier::enhanceGoals(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
+    void LUTClassifier::enhanceGoals(const Image& image,
+                                     const LookUpTable& lut,
+                                     std::shared_ptr<const message::vision::ImageMask> mask,
+                                     ClassifiedImage& classifiedImage) {
 
         /*
             Here we improve the classification of goals.

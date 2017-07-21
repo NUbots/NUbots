@@ -47,11 +47,13 @@ namespace vision {
     public:
         QuexClassifier();
 
-        std::vector<message::vision::ClassifiedImage::Segment> classify(const message::input::Image& image,
-                                                                        const message::vision::LookUpTable& lut,
-                                                                        const arma::ivec2& start,
-                                                                        const arma::ivec2& end,
-                                                                        const uint& stratification = 1);
+        std::vector<message::vision::ClassifiedImage::Segment> classify(
+            const message::input::Image& image,
+            const message::vision::LookUpTable& lut,
+            std::shared_ptr<const message::vision::ImageMask> mask,
+            const arma::ivec2& start,
+            const arma::ivec2& end,
+            const uint& stratification = 1);
     };
 }  // namespace vision
 }  // namespace module
