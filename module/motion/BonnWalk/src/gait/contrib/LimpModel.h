@@ -53,7 +53,7 @@ namespace contrib {
     private:
         Limp limp;
 
-        const gait::WalkConfig& config;
+        gait::WalkConfig config;
 
     public:
         explicit LimpModel(const gait::WalkConfig& config);

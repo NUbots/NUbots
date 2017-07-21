@@ -68,11 +68,11 @@ GaitEngine::GaitEngine()
     resizeIFusedFilters(config.basicIFusedFilterN);
     resizeGyroFilters(config.basicGyroFilterN);
 
-    // TODO: How to do this crap?
     // Set up callbacks for the local config parameters
-    // m_resetIntegrators.setCallback(std::bind(&GaitEngine::resetIntegrators, this));
-    // m_showRxVis.setCallback(std::bind(&GaitEngine::callbackShowRxVis, this));
-    // m_plotData.setCallback(std::bind(&GaitEngine::callbackPlotData, this));
+    // TODO: How to do this crap?
+    m_resetIntegrators.setCallback(std::bind(&GaitEngine::resetIntegrators, this));
+    m_showRxVis.setCallback(std::bind(&GaitEngine::callbackShowRxVis, this));
+    m_plotData.setCallback(std::bind(&GaitEngine::callbackPlotData, this));
     resetIntegrators();
     callbackShowRxVis();
     callbackPlotData();
@@ -1888,14 +1888,14 @@ void GaitEngine::clampAbstractArmPose(pose::AbstractArmPose& arm) {
     if (config.limArmAngleXUseLimits) {
         arm.angleX = arm.cad.limbSign
                      // Minimum is negative towards inside, maximum is positive towards outside
-                     * utility::math::clampSoft(config.limArmAngleXMin,
+                     * utility::math::clampSoft(double(config.limArmAngleXMin),
                                                 arm.angleX / arm.cad.limbSign,
-                                                config.limArmAngleXMax,
-                                                config.limArmAngleXBuf);
+                                                double(config.limArmAngleXMax),
+                                                double(config.limArmAngleXBuf));
     }
     if (config.limArmAngleYUseLimits) {
         arm.angleY = utility::math::clampSoft(
-            config.limArmAngleYMin, arm.angleY, config.limArmAngleYMax, config.limArmAngleYBuf);
+            double(config.limArmAngleYMin), arm.angleY, double(config.limArmAngleYMax), double(config.limArmAngleYBuf));
     }
 }
 
@@ -1903,29 +1903,31 @@ void GaitEngine::clampAbstractArmPose(pose::AbstractArmPose& arm) {
 void GaitEngine::clampAbstractLegPose(pose::AbstractLegPose& leg) {
     // Apply the required limits if enabled
     if (config.limLegAngleXUseLimits)
-        leg.angleX =
-            leg.cld.limbSign
-            * utility::math::clampSoft(config.limLegAngleXMin,
-                                       leg.angleX / leg.cld.limbSign,
-                                       config.limLegAngleXMax,
-                                       4);  // Minimum is negative towards inside, maximum is positive towards outside
+        // Minimum is negative towards inside, maximum is positive towards outside
+        leg.angleX = leg.cld.limbSign * utility::math::clampSoft(double(config.limLegAngleXMin),
+                                                                 leg.angleX / leg.cld.limbSign,
+                                                                 double(config.limLegAngleXMax),
+                                                                 4.0);
     if (config.limLegAngleYUseLimits) {
-        leg.angleY = utility::math::clampSoft(config.limLegAngleYMin, leg.angleY, config.limLegAngleYMax, 4);
+        leg.angleY =
+            utility::math::clampSoft(double(config.limLegAngleYMin), leg.angleY, double(config.limLegAngleYMax), 4.0);
     }
     if (config.limFootAngleXUseLimits) {
-        leg.footAngleX = leg.cld.limbSign
-                         // Minimum is negative towards inside, maximum is positive towards outside
-                         * utility::math::clampSoft(config.limFootAngleXMin,
-                                                    leg.footAngleX / leg.cld.limbSign,
-                                                    config.limFootAngleXMax,
-                                                    config.limFootAngleXBuf);
+        // Minimum is negative towards inside, maximum is positive towards outside
+        leg.footAngleX = leg.cld.limbSign * utility::math::clampSoft(double(config.limFootAngleXMin),
+                                                                     leg.footAngleX / leg.cld.limbSign,
+                                                                     double(config.limFootAngleXMax),
+                                                                     double(config.limFootAngleXBuf));
     }
     if (config.limFootAngleYUseLimits) {
-        leg.footAngleY = utility::math::clampSoft(
-            config.limFootAngleYMin, leg.footAngleY, config.limFootAngleYMax, config.limFootAngleYBuf);
+        leg.footAngleY = utility::math::clampSoft(double(config.limFootAngleYMin),
+                                                  leg.footAngleY,
+                                                  double(config.limFootAngleYMax),
+                                                  double(config.limFootAngleYBuf));
     }
     if (config.limLegExtUseLimits) {
-        leg.extension = utility::math::clampSoftMin(config.limLegExtMin, float(leg.extension), config.limLegExtBuf);
+        leg.extension =
+            utility::math::clampSoftMin(double(config.limLegExtMin), leg.extension, double(config.limLegExtBuf));
     }
 }
 
