@@ -32,6 +32,7 @@ namespace vision {
             YELLOW       = 'y',
             CYAN         = 'c',
             MAGENTA      = 'm',
+            MASKED       = 'x',
 
             // Ambiguous Classifications
             WHITE_GREEN = 'f'
@@ -60,6 +61,8 @@ namespace vision {
                 value = Value::CYAN;
             else if (str == "MAGENTA")
                 value = Value::MAGENTA;
+            else if (str == "MASKED")
+                value = Value::MASKED;
             else if (str == "WHITE_GREEN")
                 value = Value::WHITE_GREEN;
             else
@@ -128,6 +131,7 @@ namespace vision {
                 case Value::YELLOW: return "YELLOW";
                 case Value::CYAN: return "CYAN";
                 case Value::MAGENTA: return "MAGENTA";
+                case Value::MASKED: return "MASKED";
                 case Value::WHITE_GREEN: return "WHITE_GREEN";
                 default:
                     throw std::runtime_error("enum Colour's value is corrupt, unknown value stored"
