@@ -131,6 +131,11 @@ namespace vision {
                 MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
                 MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
 
+                ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL =
+                    config["angular_width_disagreement_threshold_vertical"].as<double>();
+                ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL =
+                    config["angular_width_disagreement_threshold_horizontal"].as<double>();
+
                 VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
                 ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
 
@@ -332,10 +337,12 @@ namespace vision {
 
                     // Project those points outward onto the quad
                     // TODO: directional projection?
-                    arma::vec3 tl = left.orthogonalProjection(midTop);
-                    arma::vec3 tr = right.orthogonalProjection(midTop);
-                    arma::vec3 bl = left.orthogonalProjection(midBase);
-                    arma::vec3 br = right.orthogonalProjection(midBase);
+                    arma::vec3 horizonScreenDir = arma::normalise(
+                        arma::cross(convert<double, 3, 1>(image.horizon_normal), arma::vec3({1, 0, 0})));
+                    arma::vec3 tl = left.directionalProjection(midTop, horizonScreenDir);
+                    arma::vec3 tr = right.directionalProjection(midTop, horizonScreenDir);
+                    arma::vec3 bl = left.directionalProjection(midBase, horizonScreenDir);
+                    arma::vec3 br = right.directionalProjection(midBase, horizonScreenDir);
 
                     goal.frustum.bl = convert<double, 3>(bl);
                     goal.frustum.tl = convert<double, 3>(tl);
@@ -356,10 +363,10 @@ namespace vision {
                 // Throwout invalid quads
                 for (auto it = goals->begin(); it != goals->end();) {
 
-                    arma::vec3 cbl = arma::convert<double, 3>(goal.frustum.bl);
-                    arma::vec3 ctl = arma::convert<double, 3>(goal.frustum.tl);
-                    arma::vec3 ctr = arma::convert<double, 3>(goal.frustum.tr);
-                    arma::vec3 cbr = arma::convert<double, 3>(goal.frustum.br);
+                    arma::vec3 cbl = convert<double, 3>(it->frustum.bl);
+                    arma::vec3 ctl = convert<double, 3>(it->frustum.tl);
+                    arma::vec3 ctr = convert<double, 3>(it->frustum.tr);
+                    arma::vec3 cbr = convert<double, 3>(it->frustum.br);
 
 
                     float leftAngle   = std::acos(arma::norm_dot(cbl, ctl));
@@ -378,48 +385,47 @@ namespace vision {
 
                     // Check if we are within the aspect ratio range
 
-                    > MINIMUM_ASPECT_RATIO&& quad.aspectRatio()<
-                          MAXIMUM_ASPECT_RATIO
+                    bool aspectRatioGood = aspectRatio > MINIMUM_ASPECT_RATIO && aspectRatio < MAXIMUM_ASPECT_RATIO;
 
-                          // Check if we are close enough to the visual horizon
-                          && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0])
-                                  < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
-                              || utility::vision::visualHorizonAtPoint(image, quad.getBottomRight()[0])
-                                     < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
+                    bool shapeConsistent =
+                        std::fabs(leftAngle - rightAngle) < ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL
+                        && std::fabs(topAngle - bottomAngle) < ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL;
 
-                          // Check we finish above the kinematics horizon or kinematics horizon is off the screen
-                          && (arma::dot(convert<double, 3>(image.horizon_normal),
-                                        getCamFromImage(arma::ivec2({int(tl[0]), int(tl[1])}), cam))
-                              > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
-                          && (arma::dot(convert<double, 3>(image.horizon_normal),
-                                        getCamFromImage(arma::ivec2({int(tr[0]), int(tr[1])}), cam))
-                              > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
+                    // Check if we are close enough to the visual horizon
 
-                          // TODO: Check that this can be removed
-                          // Check that our two goal lines are perpendicular with the horizon must use greater than
-                          // rather then less than because of the cos
-                          && std::abs(arma::dot(getCamFromImage(, cam), image.horizon_normal))>
-                            MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE&& std::abs(
-                                arma::dot(getCamFromImage(, cam), image.horizon_normal))
-                        > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                    bool closeToVisualHorizon = utility::vision::visualHorizonAtPoint(image, it->quad.bl[0])
+                                                    < it->quad.bl[1] + VISUAL_HORIZON_BUFFER
+                                                || utility::vision::visualHorizonAtPoint(image, it->quad.br[0])
+                                                       < it->quad.br[1] + VISUAL_HORIZON_BUFFER;
 
-                              // Check that our two goal lines are approximatly parallel
-                              && std::abs(arma::dot(lhs, rhs))
-                        > MAXIMUM_ANGLE_BETWEEN_GOALS;
+                    // TODO NEEDED?: Check we finish above the kinematics horizon or kinematics
+                    // horizon is off the screen
 
-                    // Check that our goals
-                    //          don't form too much of an upward cup (not really possible for us) && lhs.at(0) * rhs.at(
-                                    1)
-                            - lhs.at(1) * rhs.at(0)
-                        > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+                    bool a = (arma::dot(convert<double, 3>(image.horizon_normal), ctr) > 0);
+
+                    bool a = (arma::dot(convert<double, 3>(image.horizon_normal), ctl) > 0);
+
+                    // Check that our two goal lines are perpendicular with the horizon must use greater
+                    // than rather then less than because of the cos
+
+                    bool a = std::abs(arma::dot(arma::cross(cbr, ctr), convert<double, 3>(image.horizon_normal)));
+                    < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+
+                        bool a = std::abs(arma::dot(arma::cross(cbl, ctl), convert<double, 3>(image.horizon_normal)));
+                    < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+
+                        // Check that our two goal lines are approximatly parallel
+
+                        bool a = std::abs(arma::dot(arma::cross(cbr, ctr), arma::cross(cbl, ctl)));
+                    > MAXIMUM_ANGLE_BETWEEN_GOALS;
 
 
-                                    if (!valid) {
-                                        it = goals->erase(it);
-                                    }
-                                    else {
-                                        ++it;
-                                    }
+                    if (!valid) {
+                        if () it = goals->erase(it);
+                    }
+                    else {
+                        ++it;
+                    }
                 }
 
                 // Merge close goals

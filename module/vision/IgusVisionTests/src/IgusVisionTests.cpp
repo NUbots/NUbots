@@ -53,6 +53,7 @@ namespace vision {
             }
         });
         on<Trigger<std::vector<message::vision::Goal>>>().then([this](const std::vector<message::vision::Goal>& goals) {
+            log("Goals: ", goals.size());
             for (auto& goal : goals) {
                 for (auto& m : goal.measurement) {
                     if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
