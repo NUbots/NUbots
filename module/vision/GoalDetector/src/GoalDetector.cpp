@@ -356,55 +356,70 @@ namespace vision {
                 // Throwout invalid quads
                 for (auto it = goals->begin(); it != goals->end();) {
 
-                    utility::math::geometry::Quad quad(convert<double, 2>(it->quad.bl),
-                                                       convert<double, 2>(it->quad.tl),
-                                                       convert<double, 2>(it->quad.tr),
-                                                       convert<double, 2>(it->quad.br));
+                    arma::vec3 cbl = arma::convert<double, 3>(goal.frustum.bl);
+                    arma::vec3 ctl = arma::convert<double, 3>(goal.frustum.tl);
+                    arma::vec3 ctr = arma::convert<double, 3>(goal.frustum.tr);
+                    arma::vec3 cbr = arma::convert<double, 3>(goal.frustum.br);
 
-                    arma::vec2 lhs = arma::normalise(quad.getTopLeft() - quad.getBottomLeft());
-                    arma::vec2 rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
-                    arma::vec2 tl  = convert<double, 2>(it->quad.tl);
-                    arma::vec2 tr  = convert<double, 2>(it->quad.tr);
+
+                    float leftAngle   = std::acos(arma::norm_dot(cbl, ctl));
+                    float rightAngle  = std::acos(arma::norm_dot(cbr, ctr));
+                    float topAngle    = std::acos(arma::norm_dot(ctr, ctl));
+                    float bottomAngle = std::acos(arma::norm_dot(cbr, cbl));
+
+                    float dAngleVertical   = std::fabs(leftAngle - rightAngle);
+                    float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
+
+                    float vertAngle = (leftAngle + rightAngle) / 2;
+                    float horAngle  = (topAngle + bottomAngle) / 2;
+
+                    bool valid        = vertAngle > 0;
+                    float aspectRatio = horAngle / vertAngle;
+
                     // Check if we are within the aspect ratio range
-                    bool valid = true;
-                    // quad.aspectRatio() > MINIMUM_ASPECT_RATIO && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
 
-                    // // Check if we are close enough to the visual horizon
-                    // && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0])
-                    //         < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
-                    //     || utility::vision::visualHorizonAtPoint(image, quad.getBottomRight()[0])
-                    //            < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
+                    > MINIMUM_ASPECT_RATIO&& quad.aspectRatio()<
+                          MAXIMUM_ASPECT_RATIO
 
-                    // // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
-                    // && (arma::dot(convert<double, 3>(image.horizon_normal),
-                    //               getCamFromImage(arma::ivec2({int(tl[0]), int(tl[1])}), cam))
-                    //     > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
-                    // && (arma::dot(convert<double, 3>(image.horizon_normal),
-                    //               getCamFromImage(arma::ivec2({int(tr[0]), int(tr[1])}), cam))
-                    //     > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
+                          // Check if we are close enough to the visual horizon
+                          && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0])
+                                  < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
+                              || utility::vision::visualHorizonAtPoint(image, quad.getBottomRight()[0])
+                                     < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
 
-                    // // TODO: Check that this can be removed
-                    // // Check that our two goal lines are perpendicular with the horizon must use greater than
-                    // rather
-                    // // then less than because of the cos
-                    // // && std::abs(arma::dot(getCamFromImage(, cam), image.horizon_normal))
-                    // //        > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
-                    // // && std::abs(arma::dot(getCamFromImage(, cam), image.horizon_normal))
-                    // //        > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                          // Check we finish above the kinematics horizon or kinematics horizon is off the screen
+                          && (arma::dot(convert<double, 3>(image.horizon_normal),
+                                        getCamFromImage(arma::ivec2({int(tl[0]), int(tl[1])}), cam))
+                              > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
+                          && (arma::dot(convert<double, 3>(image.horizon_normal),
+                                        getCamFromImage(arma::ivec2({int(tr[0]), int(tr[1])}), cam))
+                              > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
 
-                    // // Check that our two goal lines are approximatly parallel
-                    // && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
+                          // TODO: Check that this can be removed
+                          // Check that our two goal lines are perpendicular with the horizon must use greater than
+                          // rather then less than because of the cos
+                          && std::abs(arma::dot(getCamFromImage(, cam), image.horizon_normal))>
+                            MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE&& std::abs(
+                                arma::dot(getCamFromImage(, cam), image.horizon_normal))
+                        > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
 
-                    // Check that our goals don't form too much of an upward cup (not really possible for us)
-                    //&& lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+                              // Check that our two goal lines are approximatly parallel
+                              && std::abs(arma::dot(lhs, rhs))
+                        > MAXIMUM_ANGLE_BETWEEN_GOALS;
+
+                    // Check that our goals
+                    //          don't form too much of an upward cup (not really possible for us) && lhs.at(0) * rhs.at(
+                                    1)
+                            - lhs.at(1) * rhs.at(0)
+                        > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
 
 
-                    if (!valid) {
-                        it = goals->erase(it);
-                    }
-                    else {
-                        ++it;
-                    }
+                                    if (!valid) {
+                                        it = goals->erase(it);
+                                    }
+                                    else {
+                                        ++it;
+                                    }
                 }
 
                 // Merge close goals
