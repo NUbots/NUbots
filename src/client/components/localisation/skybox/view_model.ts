@@ -5,9 +5,9 @@ import { Mesh } from 'three'
 import { SphereBufferGeometry } from 'three'
 import { MeshBasicMaterial } from 'three'
 import { Object3D } from 'three'
-import { PlaneBufferGeometry } from 'three'
 import { ShaderMaterial } from 'three'
 import { Vector3 } from 'three'
+import { PlaneBufferGeometry } from 'three'
 import { SkyboxModel } from './model'
 import * as SkyboxFrag from './skybox.frag'
 import * as SkyboxVert from './skybox.vert'
@@ -61,15 +61,15 @@ export class SkyboxViewModel {
 
   @computed
   private get ground() {
-    const groundGeo = new PlaneBufferGeometry(40, 40)
-    const groundMat = new MeshBasicMaterial({ color: 0x613610 })
+    const groundGeo = new PlaneBufferGeometry(27, 18)
+    const groundMat = new MeshBasicMaterial({ color: '#3d7926' })
     const ground = new Mesh(groundGeo, groundMat)
     ground.name = 'skyboxGround'
-    ground.position.y = -0.01
-    ground.rotation.x = -Math.PI / 2
+    ground.position.z = -0.01
 
     return ground
   }
+
 
   @computed
   private get sun() {

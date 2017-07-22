@@ -36,7 +36,6 @@ export class FieldViewModel {
       this.model.dimensions.fieldLength + this.model.dimensions.borderStripMinWidth * 2,
       this.model.dimensions.fieldWidth + this.model.dimensions.borderStripMinWidth * 2,
     )
-    geometry.applyMatrix(new Matrix4().makeRotationX(-Math.PI / 2))
     return geometry
   }
 
@@ -48,7 +47,7 @@ export class FieldViewModel {
   @computed
   private get fieldLines() {
     const fieldLines = new Mesh(this.fieldLinesGeometry, this.fieldLinesMaterial)
-    fieldLines.position.y = 0.001
+    fieldLines.position.z = 0.001
     return fieldLines
   }
 
@@ -71,8 +70,6 @@ export class FieldViewModel {
     geometry.merge(centerCircle, identity)
     geometry.merge(blueHalf, identity)
     geometry.merge(yellowHalf, identity)
-
-    geometry.applyMatrix(new Matrix4().makeRotationX(-Math.PI / 2))
 
     return geometry
   }

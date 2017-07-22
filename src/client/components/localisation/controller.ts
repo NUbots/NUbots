@@ -7,6 +7,7 @@ import { KeyCode } from './keycodes'
 import { LocalisationModel } from './model'
 import { Vector3 } from './model'
 import { ViewMode } from './model'
+import { Matrix4 } from 'three'
 
 interface KeyModifiers {
   shiftKey: boolean
@@ -43,8 +44,8 @@ export class LocalisationController {
   @action
   public onHawkEyeClick(model: LocalisationModel) {
     model.controls.pitch = -Math.PI / 2
-    model.controls.yaw = 0
-    model.camera.position.set(0, 5, 0)
+    model.controls.yaw = Math.PI / 2
+    model.camera.position.set(0, 0, 5)
     model.viewMode = ViewMode.FreeCamera
     this.updatePosition(model)
   }
@@ -67,7 +68,7 @@ export class LocalisationController {
 
   @action
   public onWheel(model: LocalisationModel, deltaY: number): void {
-    const newDistance = model.camera.distance + deltaY / 200
+    const newDistance = model.camera.distance + deltaY / 1000
     model.camera.distance = Math.min(10, Math.max(0.1, newDistance))
   }
 
@@ -162,44 +163,45 @@ export class LocalisationController {
 
   private updatePositionNoClip(model: LocalisationModel) {
     const delta = model.time.timeSinceLastRender
-    const movement = Vector3.of()
+    // TODO (Annable): remove THREE dependency from controller.
+    const movement = new THREE.Vector3()
     const movementSpeed = 1
     const actualSpeed = delta * movementSpeed
 
     if (model.controls.forward) {
-      movement.z = movement.z - actualSpeed
+      movement.x += 1
     }
 
     if (model.controls.back) {
-      movement.z = movement.z + actualSpeed
+      movement.x -= 1
     }
 
     if (model.controls.left) {
-      movement.x = movement.x - actualSpeed
+      movement.y += 1
     }
 
     if (model.controls.right) {
-      movement.x = movement.x + actualSpeed
+      movement.y -= 1
     }
 
-    // TODO (Annable): remove THREE dependency from controller.
-    const temp = new THREE.Vector3(movement.x, movement.y, movement.z)
-    temp.applyEuler(new THREE.Euler(model.controls.pitch, model.controls.yaw, 0, 'YXZ'))
-    movement.set(temp.x, temp.y, temp.z)
+    movement.applyEuler(new THREE.Euler(0, -model.controls.pitch, model.controls.yaw, 'ZXY'))
 
     // Apply up/down after rotation to keep movement vertical.
     if (model.controls.up) {
-      movement.y = movement.y + actualSpeed
+      movement.z += 1
     }
 
     if (model.controls.down) {
-      movement.y = movement.y - actualSpeed
+      movement.z -= 1
     }
 
     model.camera.pitch = model.controls.pitch
     model.camera.yaw = model.controls.yaw
 
-    model.camera.position.add(movement)
+    movement.normalize()
+    movement.multiplyScalar(actualSpeed)
+
+    model.camera.position.add(new Vector3(movement.x, movement.y, movement.z))
   }
 
   private updatePositionFirstPerson(model: LocalisationModel) {
@@ -216,10 +218,10 @@ export class LocalisationController {
 
     // This camera position hack will not work with orientation/head movement.
     // TODO (Annable): Sync camera position/rotation properly using kinematic chain.
-    model.camera.position.set(target.rWTt.x - 0.001, target.rWTt.y + 0.4, target.rWTt.z)
+    model.camera.position.set(target.rWTt.x, target.rWTt.y, target.rWTt.z + 0.15)
     const Rwt = new Quaternion(target.Rwt.x, target.Rwt.y, target.Rwt.z, target.Rwt.w)
-    const heading = new Euler().setFromQuaternion(Rwt).y
-    model.camera.yaw = heading + Math.PI // TODO (Annable): Find why offset by PI is needed.
+    const heading = new Euler().setFromQuaternion(Rwt).z
+    model.camera.yaw = heading// - Math.PI // TODO (Annable): Find why offset by PI is needed.
     model.camera.pitch = 0
   }
 
@@ -237,20 +239,20 @@ export class LocalisationController {
 
     const distance = model.camera.distance
 
-    const targetPosition = new Vector3(target.rWTt.x, target.rWTt.y + HIP_TO_FOOT, target.rWTt.z)
+    const targetPosition = new Vector3(target.rWTt.x, target.rWTt.y, target.rWTt.z)
 
-    const yaw = model.controls.yaw
+    const yaw = -model.controls.yaw
     const pitch = -model.controls.pitch + Math.PI / 2
     const offset = new Vector3(
       Math.sin(pitch) * Math.cos(yaw),
-      Math.cos(pitch),
       Math.sin(pitch) * Math.sin(yaw),
+      Math.cos(pitch),
     ).multiplyScalar(distance)
     const cameraPosition = targetPosition.clone().add(offset)
 
     model.camera.position.copy(cameraPosition)
     model.camera.pitch = pitch - Math.PI / 2
-    model.camera.yaw = -yaw + Math.PI / 2
+    model.camera.yaw = yaw + Math.PI
   }
 
   private getNextViewMode(model: LocalisationModel) {

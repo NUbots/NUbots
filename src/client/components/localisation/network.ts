@@ -31,8 +31,8 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel)
 
     const { translation: rWTt, rotation: Rwt } = decompose(new Matrix4().getInverse(fromProtoMat44(sensors.world!)))
-    robot.rWTt.set(rWTt.x, rWTt.z, rWTt.y)
-    robot.Rwt.set(Rwt.x, Rwt.z, Rwt.y, Rwt.w)
+    robot.rWTt.set(rWTt.x, rWTt.y, rWTt.z)
+    robot.Rwt.set(Rwt.x, Rwt.y, Rwt.z, Rwt.w)
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!
     robot.motors.leftShoulderPitch.angle = sensors.servo[1].presentPosition!

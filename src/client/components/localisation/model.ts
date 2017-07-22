@@ -79,9 +79,9 @@ class CameraModel {
 
   public static of() {
     return new CameraModel({
-      position: new Vector3(0, 1, 1),
+      position: new Vector3(-1, 0, 1),
       yaw: 0,
-      pitch: 0.5,
+      pitch: -Math.PI / 4,
       distance: 0.5,
     })
   }

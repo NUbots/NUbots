@@ -19,7 +19,7 @@ export class RobotViewModel {
   public get robot(): Object3D {
     const robot = new Object3D()
     robot.position.x = this.model.rWTt.x
-    robot.position.y = this.model.rWTt.y + HIP_TO_FOOT
+    robot.position.y = this.model.rWTt.y
     robot.position.z = this.model.rWTt.z
     const rotation = new Quaternion(this.model.Rwt.x, this.model.Rwt.y, this.model.Rwt.z, this.model.Rwt.w)
     robot.setRotationFromQuaternion(rotation)

@@ -7,6 +7,8 @@ import { Simulator } from './simulator'
 import { Message } from './simulator'
 import Sensors = message.input.Sensors
 
+export const HIP_TO_FOOT = 0.2465
+
 export class SensorDataSimulator implements Simulator {
   public static of() {
     return new SensorDataSimulator()
@@ -22,8 +24,8 @@ export class SensorDataSimulator implements Simulator {
     const distance = Math.cos(time + 4 * index) * 0.3 + 1
     const x = distance * Math.cos(angle)
     const y = distance * Math.sin(angle)
-    const heading = -angle - Math.PI / 2
-    const Htw = toHtw(x, y, heading)
+    const heading = angle + Math.PI
+    const Htw = toHtw(x, y, HIP_TO_FOOT, heading)
 
     const buffer = Sensors.encode({
       world: toProtoMat44(Htw),
@@ -57,8 +59,8 @@ export class SensorDataSimulator implements Simulator {
   }
 }
 
-function toHtw(x: number, y: number, heading: number): Matrix4 {
-  const translation = new Vector3(x, y, 0)
+function toHtw(x: number, y: number, z: number, heading: number): Matrix4 {
+  const translation = new Vector3(x, y, z)
   const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), heading)
   const scale = new Vector3(1, 1, 1)
   return new Matrix4().getInverse(new Matrix4().compose(translation, rotation, scale))
