@@ -243,7 +243,7 @@ namespace input {
         image.serialNumber = deviceID;
         image.timestamp    = timestamp;
         image.data         = std::move(data);
-        image.position     = Hcw;
+        image.Hcw          = Hcw;
         return image;
     }
 

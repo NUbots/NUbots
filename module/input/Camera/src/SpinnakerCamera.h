@@ -101,7 +101,7 @@ namespace input {
                     Hcw.setIdentity();
                 }
 
-                msg->position = Hcw;
+                msg->Hcw = Hcw;
 
                 reactor.emit(msg);
             }
