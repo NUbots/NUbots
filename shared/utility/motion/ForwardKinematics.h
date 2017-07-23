@@ -312,6 +312,8 @@ namespace motion {
                                                                                            const Sensors& sensors) {
             std::map<ServoID, utility::math::matrix::Transform3D> result =
                 calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL);
+            std::map<ServoID, utility::math::matrix::Transform3D> leftLegPositions =
+                calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL);
             std::map<ServoID, utility::math::matrix::Transform3D> rightLegPositions =
                 calculatePosition(model, sensors, ServoID::R_ANKLE_ROLL);
             std::map<ServoID, utility::math::matrix::Transform3D> headPositions =
@@ -322,6 +324,7 @@ namespace motion {
                 calculatePosition(model, sensors, ServoID::R_ELBOW);
             result.insert(leftArm.begin(), leftArm.end());
             result.insert(rightArm.begin(), rightArm.end());
+            result.insert(leftLegPositions.begin(), leftLegPositions.end());
             result.insert(rightLegPositions.begin(), rightLegPositions.end());
             result.insert(headPositions.begin(), headPositions.end());
             return result;
@@ -331,24 +334,25 @@ namespace motion {
         */
         inline arma::vec4 calculateCentreOfMass(
             const message::motion::KinematicsModel& model,
-            const std::map<uint32_t, Eigen::Matrix<double, 4, 4, Eigen::DontAlign>>& jointPositions,
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& jointPositions,
             bool includeTorso) {
             arma::vec4 totalMassVector = arma::zeros(4);
 
-            for (auto& joint : jointPositions) {
+            for (size_t j = 0; j < 20; j++) {
+                const auto& joint = jointPositions[j];
                 arma::vec4 massVector;
                 for (size_t i = 0; i < 4; i++) {
-                    massVector[i] = model.massModel.masses[joint.first][i];
+                    massVector[i] = model.massModel.masses[j][i];
                 }
                 // NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ",
-                // message::input::stringFromId(joint.first), massVector);
+                // message::input::stringFromId(j), massVector);
                 double jointMass = massVector[3];
 
                 utility::math::matrix::Transform3D massScaler;
                 massScaler.submat(0, 0, 2, 2) *= jointMass;
 
-                totalMassVector += convert<double, 4, 4>(joint.second) * massScaler
-                                   * massVector;  // = m * local centre of mass in global robot coords
+                // = m * local centre of mass in global robot coords
+                totalMassVector += convert<double, 4, 4>(joint) * massScaler * massVector;
             }
 
             if (includeTorso) {
@@ -439,8 +443,8 @@ namespace motion {
             arma::vec4 centerFoot =
                 arma::vec4({position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1});
 
-            return ((left) ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)) * centerFoot
-                           : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)) * centerFoot);
+            return ((left) ? convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]) * centerFoot
+                           : convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]) * centerFoot);
         }
 
         inline arma::vec3 calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {

@@ -89,10 +89,11 @@ namespace motion {
     void KinematicsConfiguration::configureHead(KinematicsModel& model, const YAML::Node& objHead) {
         model.head.CAMERA_DECLINATION_ANGLE_OFFSET = objHead["camera_declination_angle_offset"].as<float>();
 
-        arma::vec3 head_neckToCamera = objHead["neck_to_camera"].as<arma::vec3>();
-        model.head.NECK_TO_CAMERA_X  = head_neckToCamera[0];
-        model.head.NECK_TO_CAMERA_Y  = head_neckToCamera[1];
-        model.head.NECK_TO_CAMERA_Z  = head_neckToCamera[2];
+        arma::vec3 head_neckToCamera       = objHead["neck_to_camera"].as<arma::vec3>();
+        model.head.NECK_TO_CAMERA_X        = head_neckToCamera[0];
+        model.head.NECK_TO_CAMERA_Y        = head_neckToCamera[1];
+        model.head.NECK_TO_CAMERA_Z        = head_neckToCamera[2];
+        model.head.INTERPUPILLARY_DISTANCE = objHead["ipd"].as<float>();
 
         auto& objNeck = objHead["neck"];
 

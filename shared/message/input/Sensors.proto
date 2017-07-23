@@ -22,8 +22,9 @@ syntax = "proto3";
 package message.input;
 
 import "google/protobuf/timestamp.proto";
-import "Vector.proto";
 import "Matrix.proto";
+import "Neutron.proto";
+import "Vector.proto";
 
 message Sensors {
 
@@ -78,7 +79,7 @@ message Sensors {
     bool                          rightFootDown           = 14;
 
     // Because you can't have a enum type as the key in a map.
-    map<uint32, mat44>            forwardKinematics       = 15;
+    repeated mat44                forwardKinematics       = 15 [(array_size) = 20];
     float                         bodyCentreHeight        = 16;
     vec4                          centreOfMass            = 17;
     mat44                         bodyToGround            = 18;

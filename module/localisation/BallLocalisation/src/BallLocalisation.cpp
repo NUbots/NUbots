@@ -78,7 +78,7 @@ namespace localisation {
                 arma::vec3 rBWw = {ball->position[0], ball->position[1], field.ball_radius};
                 // Get our transform to world coordinates
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
                 Transform3D Hcw        = Htc.i() * Htw;
                 arma::vec3 rBCc_cart   = Hcw.transformPoint(rBWw);
                 arma::vec3 rBCc_sph1   = cartesianToSpherical(rBCc_cart);  // in r,theta,phi

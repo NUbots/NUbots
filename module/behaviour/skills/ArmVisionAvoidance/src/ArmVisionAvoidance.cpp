@@ -66,7 +66,7 @@ namespace behaviour {
                     // Check to see if we are looking over one of our shoulders.
                     // If we are then we need to add an offset to the arms shoulder and elbow pitches
                     // so that the arm is not obscuring our vision.
-                    auto headTransform = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+                    auto headTransform = sensors.forwardKinematics[ServoID::HEAD_PITCH];
                     auto headSpherical = utility::math::coordinates::cartesianToSpherical(
                         {headTransform(0, 0), headTransform(1, 0), headTransform(2, 0)});
 

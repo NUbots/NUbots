@@ -552,14 +552,13 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootTorso = rightFootTorso.rotateZLocal(
-                -hipRollCompensation * phaseComp,
-                convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
+            rightFootTorso =
+                rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp,
+                                            convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_HIP_ROLL]));
         }
         else {
             leftFootTorso = leftFootTorso.rotateZLocal(
-                hipRollCompensation * phaseComp,
-                convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
+                hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {

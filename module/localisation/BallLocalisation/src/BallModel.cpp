@@ -49,7 +49,7 @@ namespace localisation {
 
         // Get our transform to world coordinates
         const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-        const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+        const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
         Transform3D Hcw        = Htc.i() * Htw;
 
         arma::vec3 rBWw      = {state[PX], state[PY], field.ball_radius};
