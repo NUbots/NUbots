@@ -10,6 +10,10 @@ import { AppNetwork } from './components/app/network'
 import { AppView } from './components/app/view'
 import { Chart } from './components/chart/view'
 import { Classifier } from './components/classifier/view'
+import { Field } from './components/dashboard/field/view'
+import { FieldController } from './components/dashboard/field/controller'
+import { DashboardModel } from './components/dashboard/model'
+import { DashboardNetwork } from './components/dashboard/network'
 import { Dashboard } from './components/dashboard/view'
 import { GameState } from './components/game_state/view'
 import { LocalisationController } from './components/localisation/controller'
@@ -31,6 +35,7 @@ const nusightNetwork = NUsightNetwork.of(appModel)
 nusightNetwork.connect({ name: 'nusight' })
 
 const localisationModel = LocalisationModel.of(appModel)
+const dashboardModel = DashboardModel.of(appModel.robots)
 
 const appController = AppController.of()
 AppNetwork.of(nusightNetwork, appModel)
@@ -40,7 +45,12 @@ ReactDOM.render(
   <BrowserRouter>
     <AppView>
       <Switch>
-        <Route exact path='/' component={Dashboard}/>
+        <Route exact path='/' render={() => {
+          const model = dashboardModel
+          const field = () => <Field controller={FieldController.of()} model={model.field} />
+          const network = DashboardNetwork.of(nusightNetwork)
+          return <Dashboard Field={field} menu={menu} model={model} network={network} />
+        }}/>
         <Route path='/localisation' render={() => {
           const model = localisationModel
           const controller = LocalisationController.of()

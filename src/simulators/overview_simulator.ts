@@ -1,5 +1,6 @@
 import { message } from '../../src/shared/proto/messages'
 import { Vector2 } from '../client/math/vector2'
+import { SeededRandom } from '../shared/base/random/seeded_random'
 import { FieldDimensions } from '../shared/field/dimensions'
 import { vec2$Properties } from '../shared/proto/messages'
 import { Simulator } from './simulator'
@@ -9,7 +10,6 @@ import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason
 import Phase = message.input.GameState.Data.Phase
 import Overview = message.support.nubugger.Overview
-import { SeededRandom } from '../shared/base/random/seeded_random'
 
 export class OverviewSimulator implements Simulator {
   constructor(private field: FieldDimensions,
@@ -33,15 +33,20 @@ export class OverviewSimulator implements Simulator {
 
     const robotPosition = this.figureEight(t, fieldLength / 2, fieldWidth / 2)
 
-    const ballWorldPosition = this.figureEight(time / 10, fieldLength / 4, fieldWidth / 4)
+    const ballWorldPosition = this.figureEight(t, fieldLength / 4, fieldWidth / 4)
 
     const robotHeading = ballWorldPosition.clone().subtract(robotPosition).normalize()
+
+    const states = getEnumValues<State>(State)
+    const modes = getEnumValues<Mode>(Mode)
+    const phases = getEnumValues<Phase>(Phase)
+    const penaltyReasons = getEnumValues<PenaltyReason>(PenaltyReason)
 
     const buffer = Overview.encode({
       roleName: 'Overview Simulator',
       voltage: this.randomFloat(10, 13),
       battery: this.random.float(),
-      behaviourState: State.INIT,
+      behaviourState: this.random.choice(states),
       robotPosition,
       robotPositionCovariance: {
         x: { x: this.random.float(), y: this.random.float() },
@@ -49,13 +54,12 @@ export class OverviewSimulator implements Simulator {
       },
       robotHeading,
       ballWorldPosition,
-      gameMode: Mode.NORMAL,
-      gamePhase: Phase.INITIAL,
-      penaltyReason: PenaltyReason.UNPENALISED,
-      lastCameraImage: { seconds: this.randomSeconds(t, -6) },
-      lastSeenBall: { seconds: this.randomSeconds(t, -6) },
-      lastSeenGoal: { seconds: this.randomSeconds(t, -6) },
-      lastSeenObstacle: { seconds: this.randomSeconds(t, -6) },
+      gameMode: this.random.choice(modes),
+      gamePhase: this.random.choice(phases),
+      penaltyReason: this.random.choice(penaltyReasons),
+      lastCameraImage: { seconds: this.randomSeconds(time, -5) },
+      lastSeenBall: { seconds: this.randomSeconds(time, -30) },
+      lastSeenGoal: { seconds: this.randomSeconds(time, -30) },
       pathPlan: [
         robotPosition,
         this.randomFieldPosition(),
@@ -94,4 +98,8 @@ export class OverviewSimulator implements Simulator {
       scaleY * Math.sin(2 * t),
     )
   }
+}
+
+function getEnumValues<T>(enumObject: any): T[] {
+  return Object.keys(enumObject).map(key => enumObject[key]) as T[]
 }

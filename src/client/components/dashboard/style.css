@@ -1,0 +1,33 @@
+.dashboard {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.field {
+  flex: 1;
+  position: relative;
+}
+
+.panel {
+  border-radius: 0.1em;
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.18);
+  flex: 1;
+  margin-left: 0.85em;
+  overflow: hidden;
+}
+
+.panel:first-child {
+  margin-left: 0;
+}
+
+.panels {
+  display: flex;
+  padding: 0.85em;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

@@ -69,7 +69,11 @@ export class Vector2 {
 
   @action
   public normalize(): Vector2 {
-    return this.divideScalar(this.length)
+    // We should not use the computed property 'length' as mobx can throw out the following error when called in a 
+    // computed context for what should be a new, unobserved vector: Computed values are not allowed to cause side 
+    // effects by changing observables that are already being observed.
+    const length = Math.sqrt(this.x * this.x + this.y * this.y)
+    return this.divideScalar(length)
   }
 
   @action
