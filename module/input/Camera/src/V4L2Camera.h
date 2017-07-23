@@ -85,6 +85,8 @@ namespace input {
         /// @brief Configuration information for this camera.
         ::extension::Configuration config;
 
+        NUClear::Reactor& reactor;
+
     public:
         /// @brief this file descriptor points to the camera object
         int fd;
@@ -100,7 +102,7 @@ namespace input {
          *
          * @param device the path to the video device to use (e.g. /dev/video0)
          */
-        V4L2Camera(const ::extension::Configuration& config, const std::string& deviceID)
+        V4L2Camera(const ::extension::Configuration& config, const std::string& deviceID, NUClear::Reactor& reactor)
             : buffers()
             , width(0)
             , height(0)
@@ -112,6 +114,7 @@ namespace input {
             , cameraHandle()
             , settingsHandle()
             , config(config)
+            , reactor(reactor)
             , fd(-1) {}
 
         /**

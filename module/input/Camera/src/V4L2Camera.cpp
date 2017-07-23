@@ -1,7 +1,15 @@
 #include "V4L2Camera.h"
 #include "Camera.h"
 
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <nuclear>
+
 #include "extension/FileWatch.h"
+
+#include "message/input/Image.h"
+#include "message/input/Sensors.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace module {
 namespace input {
@@ -41,7 +49,7 @@ namespace input {
             });
 
         std::string deviceID = config["deviceID"];
-        V4L2Camera camera    = V4L2Camera(config, deviceID);
+        V4L2Camera camera    = V4L2Camera(config, deviceID, *this);
 
         V4L2SettingsHandle =
             on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this, config] {
@@ -191,6 +199,43 @@ namespace input {
             throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
         };
 
+        // Calculate the world to camera transformation.
+        Eigen::Matrix4d Hcw;
+        double ipd;
+
+        std::shared_ptr<const message::motion::KinematicsModel> model =
+            NUClear::dsl::store::DataStore<message::motion::KinematicsModel>::get();
+
+        if (model) {
+            ipd = model->head.INTERPUPILLARY_DISTANCE * 0.5f * ((config["isLeft"].as<bool>()) ? 1.0f : -1.0f);
+        }
+
+        else {
+            ipd = 0.0;
+        }
+
+        std::shared_ptr<const message::input::Sensors> sensors =
+            NUClear::dsl::store::DataStore<message::input::Sensors>::get();
+
+        if (sensors) {
+            // Get the transformation from the torso to the camera (or the middle of the face between the eyes if there
+            // are 2 cameras)
+            auto Htc = sensors->forwardKinematics[utility::input::ServoID::HEAD_PITCH];
+
+            // Add half the interpupillary distance to the y-coordinate of the translation.
+            Hcw(1, 3) += ipd;
+
+            // Calculate the world to camera transformation.
+            // Hcw = Htc.inverse() * Htw
+            // Hct is the transform from torso to camera
+            // Htw is the transform from world to torso
+            Hcw = Htc.inverse() * sensors->world;
+        }
+
+        else {
+            Hcw.setIdentity();
+        }
+
         // Move this data into the image
         Image image;
         image.dimensions << width, height;
@@ -198,6 +243,7 @@ namespace input {
         image.serialNumber = deviceID;
         image.timestamp    = timestamp;
         image.data         = std::move(data);
+        image.position     = Hcw;
         return image;
     }
 

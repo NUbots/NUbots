@@ -22,6 +22,7 @@ syntax = "proto3";
 package message.input;
 
 import "google/protobuf/timestamp.proto";
+import "Matrix.proto";
 import "Vector.proto";
 
 message Image {
@@ -31,4 +32,5 @@ message Image {
     uint32                    camera_id    = 4;
     string                    serialNumber = 5;
     google.protobuf.Timestamp timestamp    = 6;
+    mat44                     Hcw          = 7;
 }

@@ -44,12 +44,17 @@ namespace input {
                     // Add camera to list.
                     FOURCC fourcc =
                         utility::vision::getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
-                    camera = SpinnakerCameras
-                                 .insert(std::make_pair(
-                                     deviceID,
-                                     std::make_unique<SpinnakerImageEvent>(
-                                         config.fileName, deviceID, std::move(newCamera), *this, fourcc, cameraCount)))
-                                 .first;
+                    camera =
+                        SpinnakerCameras
+                            .insert(std::make_pair(deviceID,
+                                                   std::make_unique<SpinnakerImageEvent>(config.fileName,
+                                                                                         deviceID,
+                                                                                         std::move(newCamera),
+                                                                                         *this,
+                                                                                         fourcc,
+                                                                                         cameraCount,
+                                                                                         config["isLeft"].as<bool>())))
+                            .first;
                 }
 
                 else {
