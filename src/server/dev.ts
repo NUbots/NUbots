@@ -24,6 +24,11 @@ const app = express()
 const server = http.createServer(app)
 const sioNetwork = sio(server)
 
+// Initialize socket.io namespace immediately to catch reconnections.
+WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
+  fakeNetworking: withSimulators,
+})
+
 const devMiddleware = webpackDevMiddleware(compiler, {
   publicPath: '/',
   index: 'index.html',
@@ -60,10 +65,6 @@ function init() {
     })
     virtualRobots.simulateWithFrequency(60)
   }
-
-  WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
-    fakeNetworking: withSimulators,
-  })
 }
 
 devMiddleware.waitUntilValid(init)
