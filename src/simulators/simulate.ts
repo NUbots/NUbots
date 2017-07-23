@@ -1,7 +1,8 @@
 import * as minimist from 'minimist'
-import { VirtualRobots } from './virtual_robots'
+import { OverviewSimulator } from './overview_simulator'
 import { SensorDataSimulator } from './sensor_data_simulator'
 import { Simulator } from './simulator'
+import { VirtualRobots } from './virtual_robots'
 
 function main() {
   const args = minimist(process.argv.slice(2))
@@ -19,6 +20,9 @@ function getSimulators(args: minimist.ParsedArgs): Simulator[] {
   const simulators = []
   if (args.sensors || args.all) {
     simulators.push(SensorDataSimulator.of())
+  }
+  if (args.overview || args.all) {
+    simulators.push(OverviewSimulator.of())
   }
   if (simulators.length === 0) {
     // If no simulators given, enable them all.

@@ -9,8 +9,9 @@ import * as webpack from 'webpack'
 import * as webpackDevMiddleware from 'webpack-dev-middleware'
 import * as webpackHotMiddleware from 'webpack-hot-middleware'
 import webpackConfig from '../../webpack.config'
-import { VirtualRobots } from '../simulators/virtual_robots'
+import { OverviewSimulator } from '../simulators/overview_simulator'
 import { SensorDataSimulator } from '../simulators/sensor_data_simulator'
+import { VirtualRobots } from '../simulators/virtual_robots'
 import { WebSocketProxyNUClearNetServer } from './nuclearnet/web_socket_proxy_nuclearnet_server'
 import { WebSocketServer } from './nuclearnet/web_socket_server'
 
@@ -53,6 +54,7 @@ function init() {
       fakeNetworking: true,
       numRobots: 3,
       simulators: [
+        OverviewSimulator.of(),
         SensorDataSimulator.of(),
       ],
     })

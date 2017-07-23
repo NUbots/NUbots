@@ -1,8 +1,8 @@
 import { observable } from 'mobx'
 import { computed } from 'mobx'
 import { memoize } from '../../../base/memoize'
+import { Vector3 } from '../../../math/vector3'
 import { RobotModel } from '../../robot/model'
-import { Vector3 } from '../model'
 import { Quaternion } from '../model'
 
 export class LocalisationRobotModel {
