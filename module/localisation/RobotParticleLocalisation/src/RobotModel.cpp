@@ -56,15 +56,9 @@ namespace localisation {
     /// Return the predicted observation of an object at the given position
     arma::vec RobotModel::predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
                                                const arma::vec& actual_position,
-                                               const Sensors& sensors,
+                                               const utility::math::matrix::Transform3D& Hcw,
                                                const Goal::MeasurementType& type,
                                                const FieldDescription& fd) {
-
-        // Get our transform to world coordinates
-        const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-        const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
-        Transform3D Hcw        = Htc.i() * Htw;
-
 
         Transform3D Hfw = fieldStateToTransform3D(state);
 

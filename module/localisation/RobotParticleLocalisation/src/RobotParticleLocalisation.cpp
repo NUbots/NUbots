@@ -97,8 +97,6 @@ namespace localisation {
             "Measurement Update", [this](const std::vector<Goal>& goals, const FieldDescription& fd) {
 
                 if (!goals.empty()) {
-                    // First debug particles
-                    const auto& sensors = *goals[0].visObject.sensors;
                     /* Perform time update */
                     auto curr_time        = NUClear::clock::now();
                     double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
@@ -113,12 +111,13 @@ namespace localisation {
 
                         for (auto& m : goal.measurement) {
                             if (m.type == Goal::MeasurementType::CENTRE) {
-                                filter.ambiguousMeasurementUpdate(convert<double, 3>(m.position),
-                                                                  convert<double, 3, 3>(m.covariance),
-                                                                  poss,
-                                                                  sensors,
-                                                                  m.type,
-                                                                  fd);
+                                filter.ambiguousMeasurementUpdate(
+                                    convert<double, 3>(m.position),
+                                    convert<double, 3, 3>(m.covariance),
+                                    poss,
+                                    convert<double, 4, 4>(goals[0].visObject.classifiedImage->image.Hcw),
+                                    m.type,
+                                    fd);
                             }
                         }
                     }

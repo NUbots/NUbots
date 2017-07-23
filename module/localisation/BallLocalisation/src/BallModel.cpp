@@ -45,12 +45,7 @@ namespace localisation {
 
     arma::vec3 BallModel::predictedObservation(const arma::vec::fixed<size>& state,
                                                const FieldDescription& field,
-                                               const Sensors& sensors) const {
-
-        // Get our transform to world coordinates
-        const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-        const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
-        Transform3D Hcw        = Htc.i() * Htw;
+                                               const Transform3D& Hcw) const {
 
         arma::vec3 rBWw      = {state[PX], state[PY], field.ball_radius};
         arma::vec3 rBCc_cart = Hcw.transformPoint(rBWw);

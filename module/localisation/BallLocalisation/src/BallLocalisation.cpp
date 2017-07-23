@@ -69,21 +69,10 @@ namespace localisation {
                 filter.timeUpdate(seconds);
 
                 /* Creating ball state vector and covariance matrix for emission */
-                // std::unique_ptr ball;
                 auto ball        = std::make_unique<Ball>();
                 ball->position   = convert<double, 2>(filter.get());
                 ball->covariance = convert<double, 2, 2>(filter.getCovariance());
 
-                /* For graphing purposes */
-                arma::vec3 rBWw = {ball->position[0], ball->position[1], field.ball_radius};
-                // Get our transform to world coordinates
-                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
-                Transform3D Hcw        = Htc.i() * Htw;
-                arma::vec3 rBCc_cart   = Hcw.transformPoint(rBWw);
-                arma::vec3 rBCc_sph1   = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
-                // in roe, theta, phi, where roe is 1/r
-                arma::vec3 rBCc_sph2 = {rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};
                 if (ball_pos_log) {
                     emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
                     log("localisation ball pos = ", filter.get()[0], filter.get()[1]);
@@ -97,8 +86,6 @@ namespace localisation {
             [this](const std::vector<message::vision::Ball>& balls, const FieldDescription& field) {
 
                 if (balls.size() > 0) {
-                    const auto& sensors = *balls[0].visObject.sensors;
-
                     /* Call Time Update first */
                     auto curr_time        = NUClear::clock::now();
                     double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
@@ -112,7 +99,7 @@ namespace localisation {
                         filter.measurementUpdate(cartesianToSpherical(convert<double, 3, 1>(measurement.rBCc)),
                                                  convert<double, 3, 3>(measurement.covariance),
                                                  field,
-                                                 sensors);
+                                                 convert<double, 4, 4>(balls[0].visObject.classifiedImage->image->Hcw));
                     }
                     last_measurement_update_time = curr_time;
                 }
