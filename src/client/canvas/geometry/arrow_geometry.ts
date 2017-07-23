@@ -24,7 +24,7 @@ export class ArrowGeometry {
     headLength = 0.2 * length,
     headWidth = 0.04 * length,
     origin = Vector2.of(),
-    width = 1
+    width = 1,
   }: Partial<ArrowGeometry> = {}): ArrowGeometry {
     return new ArrowGeometry({
       direction,

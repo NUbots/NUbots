@@ -15,7 +15,7 @@ export class Transform {
     return new Transform({
       rotate: opts.rotate || 0,
       scale: opts.scale || { x: 1, y: 1 },
-      translate: opts.translate || { x: 0, y: 0 }
+      translate: opts.translate || { x: 0, y: 0 },
     })
   }
 }

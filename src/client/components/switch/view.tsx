@@ -14,11 +14,11 @@ export const Switch: StatelessComponent<SwitchProps> = (props: SwitchProps) => {
   const { disabled, on } = props
   const trackClassName = classNames(style.track, {
     [style.trackOff]: !on,
-    [style.trackOn]: on
+    [style.trackOn]: on,
   })
   const thumbClassName = classNames(style.thumb, {
     [style.thumbOff]: !on,
-    [style.thumbOn]: on
+    [style.thumbOn]: on,
   })
   return (
     <span className={style.switch}>

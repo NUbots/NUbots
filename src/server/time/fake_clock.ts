@@ -1,10 +1,10 @@
 import { Clock } from './clock'
 
 type Task = {
-  id: number,
-  nextTime: number,
-  period?: number,
-  fn(): void,
+  id: number
+  nextTime: number
+  period?: number
+  fn(): void
 }
 
 export class FakeClock implements Clock {

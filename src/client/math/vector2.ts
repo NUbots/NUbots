@@ -36,7 +36,7 @@ export class Vector2 {
 
     const rotationMatrix = [
       cosTheta, -sinTheta,
-      sinTheta, cosTheta
+      sinTheta, cosTheta,
     ]
 
     const x = this.x

@@ -37,7 +37,7 @@ describe('Vector2', () => {
     const transform = Transform.of({
       rotate: Math.PI,
       scale: Vector2.of(2, 2),
-      translate: { x: 1, y: 1 }
+      translate: { x: 1, y: 1 },
     })
 
     const actual = vec2.applyTransform(transform)

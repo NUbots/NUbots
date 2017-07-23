@@ -13,7 +13,7 @@ export type DropdownContainerProps = {
 }
 
 enum KeyCode {
-  Escape = 27
+  Escape = 27,
 }
 
 export const dropdownContainer = (WrappedComponent: ComponentType<DropdownProps> = Dropdown) => {

@@ -14,12 +14,12 @@ export class BasicAppearance {
   public static of({
     fillStyle = '#000',
     lineWidth = 1,
-    strokeStyle = '#000'
+    strokeStyle = '#000',
   }: Partial<BasicAppearance> = {}): BasicAppearance {
     return new BasicAppearance({
       fillStyle,
       lineWidth,
-      strokeStyle
+      strokeStyle,
     })
   }
 }

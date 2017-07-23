@@ -20,14 +20,14 @@ export class LineAppearance {
     lineDashOffset = 0,
     lineJoin = 'miter',
     lineWidth = 1,
-    strokeStyle = '#000'
+    strokeStyle = '#000',
   }: Partial<LineAppearance> = {}): LineAppearance {
     return new LineAppearance({
       lineCap,
       lineDashOffset,
       lineJoin,
       lineWidth,
-      strokeStyle
+      strokeStyle,
     })
   }
 }

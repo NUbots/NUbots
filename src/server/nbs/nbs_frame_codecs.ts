@@ -5,11 +5,11 @@ import { NUClearNetPacket } from 'nuclearnet.js'
 
 export type NbsFrame = {
   // Omitted redundant header information.
-  // header: Buffer,
-  // size: number,
-  timestampInMicroseconds: number,
-  hash: Buffer,
-  payload: Buffer,
+  // header: Buffer
+  // size: number
+  timestampInMicroseconds: number
+  hash: Buffer
+  payload: Buffer
 }
 
 // NBS frame format:

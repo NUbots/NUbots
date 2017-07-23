@@ -74,7 +74,21 @@
       true,
       120
     ],
-    "ter-prefer-arrow-callback": true
+    "ter-prefer-arrow-callback": true,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": {
+          "arrays": "always",
+          "exports": "always",
+          "functions": "always",
+          "imports": "always",
+          "objects": "always",
+          "typeLiterals": "never"
+        },
+        "singleline": "never"
+      }
+    ]
   },
   "rulesDirectory": []
 }
