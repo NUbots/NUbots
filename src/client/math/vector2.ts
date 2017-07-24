@@ -28,7 +28,7 @@ export class Vector2 {
   }
 
   @action
-  public applyTransform(transform: Transform): Vector2 {
+  public transform(transform: Transform): Vector2 {
     const { rotate: theta, scale, translate } = transform
 
     const cosTheta = Math.cos(theta)
@@ -69,8 +69,8 @@ export class Vector2 {
 
   @action
   public normalize(): Vector2 {
-    // We should not use the computed property 'length' as mobx can throw out the following error when called in a 
-    // computed context for what should be a new, unobserved vector: Computed values are not allowed to cause side 
+    // We should not use the computed property 'length' as mobx can throw out the following error when called in a
+    // computed context for what should be a new, unobserved vector: Computed values are not allowed to cause side
     // effects by changing observables that are already being observed.
     const length = Math.sqrt(this.x * this.x + this.y * this.y)
     return this.divideScalar(length)

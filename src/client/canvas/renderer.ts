@@ -9,10 +9,9 @@ import { LineGeometry } from './geometry/line_geometry'
 import { MarkerGeometry } from './geometry/marker_geometry'
 import { PolygonGeometry } from './geometry/polygon_geometry'
 import { TextGeometry } from './geometry/text_geometry'
+import { Object2d } from './object/object2d'
+import { Group } from './object/group'
 import { Shape } from './object/shape'
-
-// TODO Monica fix typing here
-export type Scene = Array<any>
 
 export class CanvasRenderer {
   constructor(private context: CanvasRenderingContext2D) {
@@ -22,69 +21,60 @@ export class CanvasRenderer {
     return new CanvasRenderer(context)
   }
 
-  public render(scene: Scene, camera: Transform): void {
+  public render(scene: Group, camera: Transform): void {
     const canvas = this.context.canvas
-    const translateDash = Vector2.from(camera.translate).applyTransform({
-      rotate: -camera.rotate,
-      scale: {
-        x: 1 / camera.scale.x,
-        y: 1 / camera.scale.y,
-      },
-      translate: {
-        x: 0,
-        y: 0,
-      },
-    })
-
     this.context.clearRect(0, 0, canvas.width, canvas.height)
+    this.renderObjects(scene.children, camera)
+  }
 
-    this.context.save()
-    this.context.scale(camera.scale.x, camera.scale.y)
-    this.context.rotate(-camera.rotate)
-    this.context.translate(translateDash.x, translateDash.y)
+  private applyTransform(transform: Transform): void {
+    const inverseRotationAndScale = transform.inverse.setTranslate(0, 0)
+    const translationDash = Vector2.from(transform.translate).transform(inverseRotationAndScale)
 
-    const renderObjects = (objects: Scene) => {
-      for (const obj of objects) {
-        if (Array.isArray(obj)) {
-          renderObjects(obj)
-          continue
-        }
-        if (obj.geometry instanceof ArrowGeometry) {
-          this.renderArrow(obj)
-          continue
-        }
-        if (obj.geometry instanceof CircleGeometry) {
-          this.renderCircle(obj)
-          continue
-        }
-        if (obj.geometry instanceof LineGeometry) {
-          this.renderLine(obj)
-          continue
-        }
-        if (obj.geometry instanceof MarkerGeometry) {
-          this.renderMarker(obj)
-          continue
-        }
-        if (obj.geometry instanceof PolygonGeometry) {
-          this.renderPolygon(obj)
-          continue
-        }
-        if (obj.geometry instanceof TextGeometry) {
-          this.renderText(obj, camera)
-          continue
-        }
+    this.context.scale(transform.scale.x, transform.scale.y)
+    this.context.rotate(-transform.rotate)
+    this.context.translate(translationDash.x, translationDash.y)
+  }
+
+  private renderObjects(objects: Object2d[], worldTransform: Transform): void {
+    for (const obj of objects) {
+      if (obj instanceof Group) {
+        this.renderObjects(obj.children, worldTransform.clone().then(obj.transform))
+      } else if (obj instanceof Shape) {
+        this.context.save()
+        this.applyTransform(worldTransform.clone().then(obj.transform))
+        this.renderShape(obj, worldTransform)
+        this.context.restore()
       }
     }
-    renderObjects(scene)
-    this.context.restore()
+  }
+
+  private renderShape(shape: Shape, worldTransform: Transform): void {
+    const { appearance, geometry } = shape
+    if (geometry instanceof ArrowGeometry) {
+      this.renderArrow({ appearance, geometry })
+    } else if (geometry instanceof CircleGeometry) {
+      this.renderCircle({ appearance, geometry })
+    } else if (geometry instanceof LineGeometry) {
+      this.renderLine({ appearance, geometry })
+    } else if (geometry instanceof MarkerGeometry) {
+      this.renderMarker({ appearance, geometry })
+    } else if (geometry instanceof PolygonGeometry) {
+      this.renderPolygon({ appearance, geometry })
+    } else if (geometry instanceof TextGeometry) {
+      this.renderText({ appearance, geometry, worldTransform })
+    } else {
+      throw new Error(`Unsupported geometry type: ${geometry}`)
+    }
   }
 
   private applyAppearance(appearance: Appearance): void {
     if (appearance instanceof BasicAppearance) {
       this.applyBasicAppearance(appearance)
-    }
-    if (appearance instanceof LineAppearance) {
+    } else if (appearance instanceof LineAppearance) {
       this.applyLineAppearance(appearance)
+    } else {
+      throw new Error(`Unsupported appearance type: ${appearance}`)
     }
   }
 
@@ -102,8 +92,8 @@ export class CanvasRenderer {
     this.context.strokeStyle = appearance.strokeStyle
   }
 
-  private renderArrow(shape: Shape<ArrowGeometry>): void {
-    const { geometry, appearance } = shape
+  private renderArrow(opts: { appearance: Appearance, geometry: ArrowGeometry }): void {
+    const { appearance, geometry } = opts
     const width = geometry.width * 0.5
     const headLength = geometry.headLength * 0.5
     const headWidth = geometry.headWidth * 0.5
@@ -130,8 +120,8 @@ export class CanvasRenderer {
     this.context.restore()
   }
 
-  private renderCircle(shape: Shape<CircleGeometry>): void {
-    const { geometry, appearance } = shape
+  private renderCircle(opts: { appearance: Appearance, geometry: CircleGeometry }): void {
+    const { appearance, geometry } = opts
 
     this.context.beginPath()
     this.context.arc(
@@ -147,8 +137,8 @@ export class CanvasRenderer {
     this.context.stroke()
   }
 
-  private renderLine(shape: Shape<LineGeometry>): void {
-    const { geometry, appearance } = shape
+  private renderLine(opts: { appearance: Appearance, geometry: LineGeometry }): void {
+    const { appearance, geometry } = opts
 
     this.context.beginPath()
     this.context.moveTo(geometry.origin.x, geometry.origin.y)
@@ -158,8 +148,8 @@ export class CanvasRenderer {
     this.context.stroke()
   }
 
-  private renderMarker(shape: Shape<MarkerGeometry>): void {
-    const { geometry, appearance } = shape
+  private renderMarker(opts: { appearance: Appearance, geometry: MarkerGeometry }): void {
+    const { appearance, geometry } = opts
     const position = Vector2.of(geometry.x, geometry.y)
 
     const headingAngle = Math.atan2(geometry.heading.y, geometry.heading.x)
@@ -192,8 +182,8 @@ export class CanvasRenderer {
     this.context.stroke()
   }
 
-  private renderPolygon(shape: Shape<PolygonGeometry>): void {
-    const { geometry, appearance } = shape
+  private renderPolygon(opts: { appearance: Appearance, geometry: PolygonGeometry }): void {
+    const { appearance, geometry } = opts
 
     this.context.beginPath()
     this.context.moveTo(geometry.points[0].x, geometry.points[0].y)
@@ -207,8 +197,8 @@ export class CanvasRenderer {
     this.context.stroke()
   }
 
-  private renderText(shape: Shape<TextGeometry>, camera: Transform): void {
-    const { geometry, appearance } = shape
+  private renderText(opts: { appearance: Appearance, geometry: TextGeometry, worldTransform: Transform }): void {
+    const { appearance, geometry, worldTransform } = opts
     const position = Vector2.from(geometry)
     const maxWidth = geometry.maxWidth === -1 ? undefined : geometry.maxWidth
 
@@ -217,18 +207,17 @@ export class CanvasRenderer {
     this.context.textBaseline = geometry.textBaseline
 
     const textWidth = this.context.measureText(geometry.text).width
-    const scale = maxWidth ? (maxWidth / textWidth) : geometry.scale.x
+    const scale = maxWidth ? (maxWidth / textWidth) : geometry.transform.scale.x
     this.context.font = `${scale}em ${geometry.fontFamily}`
 
     if (geometry.alignToView) {
       // Ensure the text is always rendered without rotation such that it is aligned with the screen.
       this.context.save()
-      this.context.scale(Math.sign(camera.scale.x), Math.sign(camera.scale.y))
-      this.context.rotate(-camera.rotate)
-      position.applyTransform(new Transform({
-        rotate: -camera.rotate,
-        scale: { x: Math.sign(camera.scale.x), y: Math.sign(camera.scale.y) },
-        translate: { x: 0, y: 0 },
+      this.context.scale(Math.sign(worldTransform.scale.x), Math.sign(worldTransform.scale.y))
+      this.context.rotate(-worldTransform.rotate)
+      position.transform(Transform.of({
+        rotate: -worldTransform.rotate,
+        scale: { x: Math.sign(worldTransform.scale.x), y: Math.sign(worldTransform.scale.y) },
       }))
     }
     this.context.translate(position.x, position.y)

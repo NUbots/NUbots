@@ -5,6 +5,7 @@ import { LineAppearance } from '../../../canvas/appearance/line_appearance'
 import { CircleGeometry } from '../../../canvas/geometry/circle_geometry'
 import { LineGeometry } from '../../../canvas/geometry/line_geometry'
 import { PolygonGeometry } from '../../../canvas/geometry/polygon_geometry'
+import { Group } from '../../../canvas/object/group'
 import { Shape } from '../../../canvas/object/shape'
 import { Vector2 } from '../../../math/vector2'
 import { GroundModel } from './model'
@@ -18,12 +19,14 @@ export class GroundViewModel {
   })
 
   @computed
-  public get ground() {
-    return [
-      this.grass,
-      this.goals,
-      this.fieldLines,
-    ]
+  public get ground(): Group {
+    return Group.of({
+      children: [
+        this.grass,
+        this.goals,
+        this.fieldLines,
+      ],
+    })
   }
 
   @computed
@@ -58,22 +61,26 @@ export class GroundViewModel {
         strokeStyle,
       }),
     )
-    return [
-      goal(dimensions.fieldLength * 0.5, this.model.topGoalColor),
-      goal((-dimensions.fieldLength * 0.5) - height, this.model.bottomGoalColor),
-    ]
+    return Group.of({
+      children: [
+        goal(dimensions.fieldLength * 0.5, this.model.topGoalColor),
+        goal((-dimensions.fieldLength * 0.5) - height, this.model.bottomGoalColor),
+      ],
+    })
   }
 
   @computed
   private get fieldLines() {
-    return [
-      this.centerCircle,
-      this.centerMark,
-      this.halfwayLine,
-      this.fieldBorder,
-      this.goalAreas,
-      this.penaltyMarkers,
-    ]
+    return Group.of({
+      children: [
+        this.centerCircle,
+        this.centerMark,
+        this.halfwayLine,
+        this.fieldBorder,
+        this.goalAreas,
+        this.penaltyMarkers,
+      ],
+    })
   }
 
   @computed
@@ -92,22 +99,24 @@ export class GroundViewModel {
   private get centerMark() {
     const lineWidth = this.model.dimensions.lineWidth * 2
     const strokeStyle = this.model.lineColor
-    return [
-      Shape.of(
-        LineGeometry.of({
-          origin: Vector2.of(0, lineWidth),
-          target: Vector2.of(0, -lineWidth),
-        }),
-        LineAppearance.of({ lineWidth, strokeStyle }),
-      ),
-      Shape.of(
-        LineGeometry.of({
-          origin: Vector2.of(lineWidth, 0),
-          target: Vector2.of(-lineWidth, 0),
-        }),
-        LineAppearance.of({ lineWidth, strokeStyle }),
-      ),
-    ]
+    return Group.of({
+      children: [
+        Shape.of(
+          LineGeometry.of({
+            origin: Vector2.of(0, lineWidth),
+            target: Vector2.of(0, -lineWidth),
+          }),
+          LineAppearance.of({ lineWidth, strokeStyle }),
+        ),
+        Shape.of(
+          LineGeometry.of({
+            origin: Vector2.of(lineWidth, 0),
+            target: Vector2.of(-lineWidth, 0),
+          }),
+          LineAppearance.of({ lineWidth, strokeStyle }),
+        ),
+      ],
+    })
   }
 
   @computed
@@ -155,10 +164,12 @@ export class GroundViewModel {
         strokeStyle: this.model.lineColor,
       }),
     )
-    return [
-      goalArea((fieldLength * 0.5) - height),
-      goalArea(-fieldLength * 0.5),
-    ]
+    return Group.of({
+      children: [
+        goalArea((fieldLength * 0.5) - height),
+        goalArea(-fieldLength * 0.5),
+      ],
+    })
   }
 
   @computed
@@ -166,32 +177,36 @@ export class GroundViewModel {
     const fieldLength = this.model.dimensions.fieldLength
     const penaltyMarkDistance = this.model.dimensions.penaltyMarkDistance
     const lineWidth = this.model.dimensions.lineWidth
-    const marker = (x: number) => [
-      Shape.of(
-        LineGeometry.of({
-          origin: Vector2.of(x + lineWidth, 0),
-          target: Vector2.of(x - lineWidth, 0),
-        }),
-        LineAppearance.of({
-          lineWidth,
-          strokeStyle: this.model.lineColor,
-        }),
-      ),
-      Shape.of(
-        LineGeometry.of({
-          origin: Vector2.of(x, lineWidth),
-          target: Vector2.of(x, -lineWidth),
-        }),
-        LineAppearance.of({
-          lineWidth,
-          strokeStyle: this.model.lineColor,
-        }),
-      ),
-    ]
-    return [
-      marker((fieldLength * 0.5) - penaltyMarkDistance),
-      marker(-(fieldLength * 0.5) + penaltyMarkDistance),
-    ]
+    const marker = (x: number) => Group.of({
+      children: [
+        Shape.of(
+          LineGeometry.of({
+            origin: Vector2.of(x + lineWidth, 0),
+            target: Vector2.of(x - lineWidth, 0),
+          }),
+          LineAppearance.of({
+            lineWidth,
+            strokeStyle: this.model.lineColor,
+          }),
+        ),
+        Shape.of(
+          LineGeometry.of({
+            origin: Vector2.of(x, lineWidth),
+            target: Vector2.of(x, -lineWidth),
+          }),
+          LineAppearance.of({
+            lineWidth,
+            strokeStyle: this.model.lineColor,
+          }),
+        ),
+      ],
+    })
+    return Group.of({
+      children: [
+        marker((fieldLength * 0.5) - penaltyMarkDistance),
+        marker(-(fieldLength * 0.5) + penaltyMarkDistance),
+      ],
+    })
   }
 
   private getRectanglePolygon(opts: { x: number, y: number, width: number, height: number }): PolygonGeometry {

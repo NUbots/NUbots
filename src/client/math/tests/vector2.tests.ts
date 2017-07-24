@@ -6,7 +6,7 @@ describe('Vector2', () => {
     const vec2 = Vector2.of(2, 3)
     const transform = Transform.of({ rotate: Math.PI })
 
-    const actual = vec2.applyTransform(transform)
+    const actual = vec2.transform(transform)
     const expected = Vector2.of(-2, -3)
     expect(actual.x).toBeCloseTo(expected.x)
     expect(actual.y).toBeCloseTo(expected.y)
@@ -16,7 +16,7 @@ describe('Vector2', () => {
     const vec2 = Vector2.of(2, 3)
     const transform = Transform.of({ scale: Vector2.of(2, 2) })
 
-    const actual = vec2.applyTransform(transform)
+    const actual = vec2.transform(transform)
     const expected = Vector2.of(4, 6)
     expect(actual.x).toBeCloseTo(expected.x)
     expect(actual.y).toBeCloseTo(expected.y)
@@ -26,7 +26,7 @@ describe('Vector2', () => {
     const vec2 = Vector2.of(2, 3)
     const transform = Transform.of({ translate: { x: 1, y: 1 } })
 
-    const actual = vec2.applyTransform(transform)
+    const actual = vec2.transform(transform)
     const expected = Vector2.of(3, 4)
     expect(actual.x).toBeCloseTo(expected.x)
     expect(actual.y).toBeCloseTo(expected.y)
@@ -40,7 +40,7 @@ describe('Vector2', () => {
       translate: { x: 1, y: 1 },
     })
 
-    const actual = vec2.applyTransform(transform)
+    const actual = vec2.transform(transform)
     const expected = Vector2.of(-3, -5)
     expect(actual.x).toBeCloseTo(expected.x)
     expect(actual.y).toBeCloseTo(expected.y)

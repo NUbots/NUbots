@@ -7,7 +7,9 @@ import { CircleGeometry } from '../../../canvas/geometry/circle_geometry'
 import { LineGeometry } from '../../../canvas/geometry/line_geometry'
 import { MarkerGeometry } from '../../../canvas/geometry/marker_geometry'
 import { TextGeometry } from '../../../canvas/geometry/text_geometry'
+import { Group } from '../../../canvas/object/group'
 import { Shape } from '../../../canvas/object/shape'
+import { Transform } from '../../../math/transform'
 import { DashboardRobotModel } from './model'
 
 export class DashboardRobotViewModel {
@@ -19,13 +21,15 @@ export class DashboardRobotViewModel {
   })
 
   @computed
-  public get robot() {
-    return [
-      this.ballSight,
-      this.kickTarget,
-      this.ball,
-      this.robotMarker,
-    ]
+  public get robot(): Group {
+    return Group.of({
+      children: [
+        this.ballSight,
+        this.kickTarget,
+        this.ball,
+        this.robotMarker,
+      ],
+    })
   }
 
   @computed
@@ -81,34 +85,42 @@ export class DashboardRobotViewModel {
   @computed
   private get robotMarker() {
     const radius = 0.15
-    return [
-      Shape.of(
-        MarkerGeometry.of({
-          heading: this.model.robotHeading.clone(),
-          radius,
+    return Group.of({
+      children: [
+        Shape.of(
+          MarkerGeometry.of({
+            heading: this.model.robotHeading.clone(),
+            radius,
+            x: 0,
+            y: 0,
+          }),
+          BasicAppearance.of({
+            fillStyle: this.model.robotColor,
+            lineWidth: 0.01,
+            strokeStyle: this.model.robotBorderColor,
+          }),
+        ),
+        Shape.of(
+          TextGeometry.of({
+            text: this.model.id.toString(),
+            textAlign: 'center',
+            textBaseline: 'middle',
+            maxWidth: radius,
+            x: 0,
+            y: 0,
+          }),
+          BasicAppearance.of({
+            fillStyle: this.model.textColor,
+            strokeStyle: 'transparent',
+          }),
+        ),
+      ],
+      transform: Transform.of({
+        translate: {
           x: this.model.robotPosition.x,
           y: this.model.robotPosition.y,
-        }),
-        BasicAppearance.of({
-          fillStyle: this.model.robotColor,
-          lineWidth: 0.01,
-          strokeStyle: this.model.robotBorderColor,
-        }),
-      ),
-      Shape.of(
-        TextGeometry.of({
-          text: this.model.id.toString(),
-          textAlign: 'center',
-          textBaseline: 'middle',
-          maxWidth: radius,
-          x: this.model.robotPosition.x,
-          y: this.model.robotPosition.y,
-        }),
-        BasicAppearance.of({
-          fillStyle: this.model.textColor,
-          strokeStyle: 'transparent',
-        }),
-      ),
-    ]
+        },
+      }),
+    })
   }
 }
