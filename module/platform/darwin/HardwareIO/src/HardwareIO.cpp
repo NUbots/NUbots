@@ -71,6 +71,43 @@ namespace platform {
             // Voltage (in volts)
             sensors.voltage = Convert::voltage(data.cm730.voltage);
 
+            if (sensors.voltage <= maxVoltage) {
+                sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+            }
+
+            if (sensors.voltage <= minVoltage) {
+                servoTargetHandle.disable();
+
+                log<NUClear::FATAL>("CRITICALLY LOW VOLTAGE KILLING SERVOS");
+
+                std::vector<uint8_t> command = {0xFF,
+                                                0xFF,
+                                                Darwin::ID::BROADCAST,
+                                                0x00,  // The size, fill this in later
+                                                Darwin::DarwinDevice::Instruction::SYNC_WRITE,
+                                                Darwin::MX28::Address::P_GAIN,
+                                                0x01};
+
+                for (size_t i = 0; i < 20; i++) {
+                    command.insert(command.end(),
+                                   {
+                                       uint8_t(i + 1),
+                                       5  // P Gain
+                                   });
+                }
+
+                // Calculate our length
+                command[Darwin::Packet::LENGTH] = command.size() - 3;
+
+                // Do a checksum
+                command.push_back(0);
+                command.back() = Darwin::calculateChecksum(command.data());
+
+                for (size_t i = 0; i < 10; i++) {
+                    darwin.sendRawCommand(command);
+                }
+            }
+
             // Accelerometer (in m/s^2)
             sensors.accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
             sensors.accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
@@ -147,7 +184,6 @@ namespace platform {
 
                 // If we are faking this hardware, simulate its motion
                 if (servoState[i].simulated) {
-
                     // Work out how fast we should be moving
                     // 5.236 == 50 rpm which is similar to the max speed of the servos
                     float movingSpeed =
@@ -191,17 +227,27 @@ namespace platform {
                     servo.presentSpeed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
                     servo.load            = Convert::servoLoad(i, data.servos[i].load);
 
+
                     // Diagnostic Information
                     servo.voltage     = Convert::voltage(data.servos[i].voltage);
                     servo.temperature = Convert::temperature(data.servos[i].temperature);
+
+                    if (servo.voltage <= maxVoltage) {
+                        servo.errorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+                    }
                 }
             }
-
             return sensors;
         }
 
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState() {
+            : Reactor(std::move(environment))
+            , darwin("/dev/CM730")
+            , cm730State()
+            , servoState()
+            , maxVoltage(0.0f)
+            , minVoltage(0.0f)
+            , servoTargetHandle() {
 
             on<Startup>().then("HardwareIO Startup", [this] {
                 uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
@@ -223,6 +269,9 @@ namespace platform {
                     Convert::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
                     servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
                 }
+
+                maxVoltage = config["battery"]["max"].as<float>();
+                minVoltage = config["battery"]["min"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
@@ -308,7 +357,7 @@ namespace platform {
                 });
 
             // This trigger writes the servo positions to the hardware
-            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
+            servoTargetHandle = on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
                 const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
 
                 // Loop through each of our commands

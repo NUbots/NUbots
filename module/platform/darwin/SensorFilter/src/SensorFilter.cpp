@@ -74,6 +74,7 @@ namespace platform {
             s << src;
             s << ":";
 
+
             if (errorCode & DarwinSensors::Error::INPUT_VOLTAGE) {
                 s << " Input Voltage ";
             }
@@ -116,6 +117,7 @@ namespace platform {
 
                 // Battery config
                 this->config.battery.chargedVoltage = config["battery"]["charged_voltage"].as<float>();
+                this->config.battery.nominalVoltage = config["battery"]["nominal_voltage"].as<float>();
                 this->config.battery.flatVoltage    = config["battery"]["flat_voltage"].as<float>();
 
                 // Foot load sensor config
@@ -299,7 +301,7 @@ namespace platform {
 
                     // Work out a battery charged percentage
                     sensors->battery = std::max(0.0f,
-                                                (input.voltage - config.battery.chargedVoltage)
+                                                (input.voltage - config.battery.flatVoltage)
                                                     / (config.battery.chargedVoltage - config.battery.flatVoltage));
 
                     // This checks for an error on the CM730 and reports it
