@@ -115,7 +115,7 @@ namespace localisation {
                                     convert<double, 3>(m.position),
                                     convert<double, 3, 3>(m.covariance),
                                     poss,
-                                    convert<double, 4, 4>(goals[0].visObject.classifiedImage->image.Hcw),
+                                    convert<double, 4, 4>(goals[0].visObject.classifiedImage->image->Hcw),
                                     m.type,
                                     fd);
                             }

@@ -25,7 +25,7 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KickCommand.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
 
@@ -267,5 +267,5 @@ namespace motion {
     }
 
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module

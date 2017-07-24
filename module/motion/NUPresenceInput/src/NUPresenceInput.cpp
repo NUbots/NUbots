@@ -25,7 +25,7 @@
 #include "message/input/MotionCapture.h"
 #include "message/input/PresenceUserState.h"
 #include "message/input/Sensors.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"

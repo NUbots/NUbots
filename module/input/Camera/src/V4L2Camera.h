@@ -27,13 +27,12 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/Image.h"
+#include "ImageData.h"
 
 #include "utility/vision/fourcc.h"
 
 namespace module {
 namespace input {
-    using message::input::Image;
 
     using FOURCC = utility::vision::FOURCC;
 
@@ -128,7 +127,7 @@ namespace input {
          *
          * @return a pointer to the latest image from the camera
          */
-        message::input::Image getImage();
+        ImageData getImage();
 
         /**
          * @brief Sets up the camera at a given resolution
@@ -254,6 +253,7 @@ namespace input {
 
         bool setSetting(unsigned int id, int32_t value);
     };
+
 }  // namespace input
 }  // namespace module
 

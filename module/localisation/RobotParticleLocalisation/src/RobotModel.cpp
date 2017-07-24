@@ -61,9 +61,7 @@ namespace localisation {
                                                const FieldDescription& fd) {
 
         Transform3D Hfw = fieldStateToTransform3D(state);
-
         Transform3D Hcf = Hcw * Hfw.i();
-        Transform3D Htf = Htw * Hfw.i();
 
         // rZFf = vector from field origin to zenith high in the sky
         arma::vec3 rZFf = {0, 0, 1};

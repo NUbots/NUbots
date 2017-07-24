@@ -7,9 +7,8 @@
 
 #include "extension/FileWatch.h"
 
-#include "message/input/Image.h"
 #include "message/input/Sensors.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 
 namespace module {
 namespace input {
@@ -17,7 +16,6 @@ namespace input {
     using extension::FileWatch;
 
     using message::input::CameraParameters;
-    using message::input::Image;
 
     using FOURCC = utility::vision::FOURCC;
 
@@ -31,7 +29,7 @@ namespace input {
                     try {
                         // If the camera is ready, get an image and emit it
                         if (camera.second.isStreaming()) {
-                            emit(std::make_unique<Image>(camera.second.getImage()));
+                            emit<Scope::DIRECT>(std::make_unique<ImageData>(camera.second.getImage()));
                         }
                     }
                     catch (std::system_error& e) {
@@ -158,7 +156,7 @@ namespace input {
         }
     }
 
-    message::input::Image V4L2Camera::getImage() {
+    ImageData V4L2Camera::getImage() {
         if (!streaming) {
             throw std::runtime_error("The camera is currently not streaming");
         }
@@ -197,53 +195,16 @@ namespace input {
 
         if (ioctl(fd, VIDIOC_QBUF, &requeue) == -1) {
             throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
-        };
-
-        // Calculate the world to camera transformation.
-        Eigen::Matrix4d Hcw;
-        double ipd;
-
-        std::shared_ptr<const message::motion::KinematicsModel> model =
-            NUClear::dsl::store::DataStore<message::motion::KinematicsModel>::get();
-
-        if (model) {
-            ipd = model->head.INTERPUPILLARY_DISTANCE * 0.5f * ((config["isLeft"].as<bool>()) ? 1.0f : -1.0f);
-        }
-
-        else {
-            ipd = 0.0;
-        }
-
-        std::shared_ptr<const message::input::Sensors> sensors =
-            NUClear::dsl::store::DataStore<message::input::Sensors>::get();
-
-        if (sensors) {
-            // Get the transformation from the torso to the camera (or the middle of the face between the eyes if there
-            // are 2 cameras)
-            auto Htc = sensors->forwardKinematics[utility::input::ServoID::HEAD_PITCH];
-
-            // Add half the interpupillary distance to the y-coordinate of the translation.
-            Hcw(1, 3) += ipd;
-
-            // Calculate the world to camera transformation.
-            // Hcw = Htc.inverse() * Htw
-            // Hct is the transform from torso to camera
-            // Htw is the transform from world to torso
-            Hcw = Htc.inverse() * sensors->world;
-        }
-
-        else {
-            Hcw.setIdentity();
         }
 
         // Move this data into the image
-        Image image;
+        ImageData image;
         image.dimensions << width, height;
-        image.format       = fourcc;
-        image.serialNumber = deviceID;
-        image.timestamp    = timestamp;
-        image.data         = std::move(data);
-        image.Hcw          = Hcw;
+        image.format        = fourcc;
+        image.serial_number = deviceID;
+        image.timestamp     = timestamp;
+        image.data          = std::move(data);
+        image.isLeft        = false;  // Sorry future person... too lazy
         return image;
     }
 

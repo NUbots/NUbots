@@ -9,6 +9,7 @@
 
 namespace module {
 namespace input {
+
     using extension::Configuration;
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
@@ -336,6 +337,50 @@ namespace input {
         camera->second->camera->BeginAcquisition();
 
         log("Camera", camera->first, "with local id", camera->second->cameraID, "image acquisition started.");
+    }
+
+    SpinnakerImageEvent::SpinnakerImageEvent(const std::string& name,
+                                             const std::string& serialNumber,
+                                             Spinnaker::CameraPtr&& camera,
+                                             NUClear::Reactor& reactor,
+                                             const utility::vision::FOURCC& fourcc,
+                                             int cameraID,
+                                             bool isLeft)
+        : name(name)
+        , serialNumber(serialNumber)
+        , camera(std::move(camera))
+        , reactor(reactor)
+        , fourcc(fourcc)
+        , cameraID(cameraID)
+        , isLeft(isLeft) {}
+
+    SpinnakerImageEvent::~SpinnakerImageEvent() {
+        if (camera) {
+            if (camera->IsStreaming()) {
+                camera->EndAcquisition();
+            }
+
+            camera->UnregisterEvent(*this);
+            camera->DeInit();
+        }
+    }
+
+    void SpinnakerImageEvent::OnImageEvent(Spinnaker::ImagePtr image) {
+        // We have a complete image, emit it.
+        if (!image->IsIncomplete()) {
+            auto msg           = std::make_unique<ImageData>();
+            msg->timestamp     = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
+            msg->format        = static_cast<uint32_t>(fourcc);
+            msg->serial_number = serialNumber;
+            msg->camera_id     = cameraID;
+            msg->dimensions << image->GetWidth(), image->GetHeight();
+            msg->data.insert(msg->data.end(),
+                             static_cast<uint8_t*>(image->GetData()),
+                             static_cast<uint8_t*>(image->GetData()) + image->GetBufferSize());
+            msg->isLeft = isLeft;
+
+            reactor.emit<NUClear::dsl::word::emit::Direct>(msg);
+        }
     }
 
     void Camera::ShutdownSpinnakerCamera() {
