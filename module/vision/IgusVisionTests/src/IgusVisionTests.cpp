@@ -36,6 +36,8 @@ namespace vision {
 
             goal_position  = config["goal_position"].as<arma::vec>();
             goal_direction = arma::normalise(config["goal_direction"].as<arma::vec>());
+
+            visual_horizon_height = config["visual_horizon_height"].as<float>();
         });
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls) {
@@ -143,9 +145,10 @@ namespace vision {
         classifiedImage->horizontalSegments = getGoalSegments(cam, fd);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
-        classifiedImage->visualHorizon.push_back(Eigen::Vector2i(0, 3 * image->dimensions[1] / 4));
         classifiedImage->visualHorizon.push_back(
-            Eigen::Vector2i(image->dimensions[0] - 1, 3 * image->dimensions[1] / 4));
+            Eigen::Vector2i(0, visual_horizon_height * (image->dimensions[1] - 1)));
+        classifiedImage->visualHorizon.push_back(
+            Eigen::Vector2i(image->dimensions[0] - 1, visual_horizon_height * (image->dimensions[1] - 1)));
 
         emit(drawVisionLines(lines, Eigen::Vector4d({1, 1, 1, 1})));
         emit(classifiedImage);

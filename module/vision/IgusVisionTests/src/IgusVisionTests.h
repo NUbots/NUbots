@@ -22,7 +22,7 @@ namespace vision {
         arma::vec3 ballCentre = arma::vec3({2, 0, 0});
         float theta_count     = 100;
 
-        arma::vec3 horizon_normal = {0,0,1};
+        arma::vec3 horizon_normal = {0, 0, 1};
 
         arma::vec3 goal_position  = arma::vec3({2, 1, -0.9});
         arma::vec3 goal_direction = arma::vec3({2, 1, -0.9});
@@ -31,10 +31,10 @@ namespace vision {
         arma::vec2 offset = arma::vec2({0, 0});
 
         arma::vec2 test_point_screen;
+        float visual_horizon_height = 0.5;
 
         std::shared_ptr<const message::input::Image> image;
         std::shared_ptr<const message::input::Sensors> sensors;
-
 
     public:
         /// @brief Called by the powerplant to build and setup the IgusVisionTests reactor.
