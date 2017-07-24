@@ -445,8 +445,8 @@ namespace behaviour {
         }
 
         void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec2 position, double theta) {
-            auto walkPlan  = std::make_unique<WalkPlan>();
-            walkPlan->type = 1;
+            auto walkPlan       = std::make_unique<WalkPlan>();
+            walkPlan->type      = 1;
             walkPlan->fieldPose = arma::vec3({position[0], position[1], theta});
 
             emit(walkPlan);
