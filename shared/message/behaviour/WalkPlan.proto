@@ -20,7 +20,6 @@ syntax = "proto3";
 
 package message.behaviour;
 
-import "message/behaviour/MotionCommand.proto";
 import "Vector.proto";
 
 message WalkPlan {
