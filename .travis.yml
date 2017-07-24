@@ -1,19 +1,16 @@
 language: node_js
 dist: trusty
 node_js:
-  - '4'
-  - '5'
-  - '6'
-  - '7'
   - '8'
 
 # Cache yarn to speed up the build
-cache:
-  yarn: true
+cache: yarn
 
 # We need to set this so our compiler is g++-4.9 for NUClearNet.js
 env:
-  - CXX=g++-4.9
+  - CXX=g++-4.9 YARN_COMMAND=build
+  - CXX=g++-4.9 YARN_COMMAND=tslint
+  - CXX=g++-4.9 YARN_COMMAND=test:ci
 addons:
   apt:
     sources:
@@ -32,6 +29,4 @@ notifications:
   slack:
     secure: NNfB0Gp16izdMuEgZ134D9fTWHnPlT4JaWNEz1eWqmGjzHXUusY0GjKHoRA4Rh1OHukgfP4oUdyyBMhiI5MycQpTQfaZSGfNkFhsQ6tQ7Ism0JKK9qcsUBWWh/kxeauRo6DY3y1Zyw3Z87DMokY4FUZPlgOtwfFQuyW5TPlJMAjjFs1JixQrFFAcB9tpR4VjcRle9KrWkH8fJ271QvE9+sWSQ3962ebCXZfi2TMGwGkJ4s1pDIsJUxfpDhRYaomQ/PAEL57RfWt3gPzt+2SQ8cfMFSGis7iAqGZk/WE1emkGSXDyl2XyDaFiaSRdhuo1s4p0R5rRHZI/jkf839kXO1/10oflSlRi98U7OVdaRbqbPnJaXQZx3oPH8AW7yC/S5NHZ4uPhTWNx5A1VMS664wdJiD73fTOyxY6zkZjeMSs6L6jFW5qtgZvefw0Oq+LkEjeIG9m/cBjmYXWDLXC4ZHV3BPq1ImL+Ag3rBRkougB7fPng66zuDbdfDsTypmXoj8fD6Tgc/cX5pJsDQm9kRMK9yeo7BoOeWH3ow6zJLIhL5XmqzSdYlITtHDtb9atmkbPTnVcEzihGFlWGHLID0zVEQPXbi2L1CtSFK7aXRQ9m2uu/2fmkulgDW4pS7i9R5j+hb6aMgBGizX0m9VQHjAGd+r5HE7dAAnAlVLCdZVE=
 script:
-    - yarn tslint
-    - yarn build
-    - yarn coverage:ci
+    - yarn $YARN_COMMAND
