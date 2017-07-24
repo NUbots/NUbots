@@ -16,8 +16,8 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#ifndef UTILITY_VISION_VISION_H
-#define UTILITY_VISION_VISION_H
+#ifndef UTILITY_VISION_IMAGE_MASKING_H
+#define UTILITY_VISION_IMAGE_MASKING_H
 
 namespace utility {
 namespace vision {
