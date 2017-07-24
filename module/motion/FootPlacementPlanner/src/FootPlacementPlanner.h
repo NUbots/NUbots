@@ -31,7 +31,6 @@
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "message/motion/FootMotionCommand.h"
 #include "message/motion/FootPlacementCommand.h"
 #include "message/motion/KinematicsModels.h"

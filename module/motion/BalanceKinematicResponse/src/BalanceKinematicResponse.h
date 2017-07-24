@@ -30,10 +30,8 @@
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
-
 #include "message/input/PostureRecognition.h"
 #include "message/input/Sensors.h"
-
 #include "message/motion/BalanceCommand.h"
 #include "message/motion/FootMotionCommand.h"
 #include "message/motion/HeadCommand.h"
@@ -42,25 +40,18 @@
 #include "message/motion/TorsoMotionCommand.h"
 #include "message/motion/WalkCommand.h"
 
-#include "message/localisation/FieldObject.h"
-
 #include "utility/behaviour/Action.h"
-
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-
 #include "utility/math/angle.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
-
 #include "utility/nubugger/NUhelpers.h"
-
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -113,7 +104,6 @@ namespace motion {
         bool supportCompensationEnabled;      //
         bool balanceOptimiserEnabled;         //
         bool pushRecoveryEnabled;             //
-        bool emitLocalisation;                //
         bool emitFootPosition;                //
         bool armMotionEnabled;                // Determines if the upper body can move the arms throughout motion.
 
@@ -278,13 +268,6 @@ namespace motion {
          * @param config [description]
          */
         void configure(const YAML::Node& config);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         *
-         * @param inTorsoPosition [description]
-         */
-        void localise(Transform2D position);
         /**
          * @brief [brief description]
          * @details [long description]
