@@ -470,8 +470,8 @@ namespace behaviour {
         }
 
         void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects,
-                                  const Field locField,
-                                  const Ball locBall) {
+                                  const Field& locField,
+                                  const Ball& locBall) {
             // Create the soccer object priority pointer and initialise each value to 0.
             auto soccerObjectPriority  = std::make_unique<SoccerObjectPriority>();
             soccerObjectPriority->ball = 0;
@@ -498,16 +498,16 @@ namespace behaviour {
                 // Check field message and localisation ball message
                 // Check trace of their covariances are bigger than configurable threshold
                 // If the ball covariance track is larger, always look at ball
-                if (locBall.covariance.trace() > localisation_ball_covariance_threshold) {
+                if (locBall.covariance.trace() > cfg_.localisation_ball_covariance_threshold) {
                     //      If within certain distance, focus on ball
-                    soccerObjectPriority->ball  = 1;
-                    soccerObjectPriority->field = 0;
+                    soccerObjectPriority->ball = 1;
+                    soccerObjectPriority->goal = 0;
                 }
                 // If covariance ball is below certain threshold and not too close
                 //  and covariance on self is above certain threshold, look for goals
-                else if (locField.covariance.trace() > localisation_field_covariance_threshold) {
-                    soccerObjectPriority->ball  = 0;
-                    soccerObjectPriority->field = 1;
+                else if (locField.covariance.trace() > cfg_.localisation_field_covariance_threshold) {
+                    soccerObjectPriority->ball = 0;
+                    soccerObjectPriority->goal = 1;
                 }
             }
             emit(std::move(soccerObjectPriority));

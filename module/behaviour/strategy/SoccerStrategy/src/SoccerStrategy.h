@@ -57,8 +57,8 @@ namespace behaviour {
                     , goalie_side_walk_angle_threshold(0.0f)
                     , localisation_interval()
                     , localisation_duration()
-                    , localisation_field_covariance_threshold(0.1)
-                    , localisation_ball_covariance_threshold(0.1)
+                    , localisation_field_covariance_threshold(0.0f)
+                    , localisation_ball_covariance_threshold(0.0f)
                     , alwaysPowerKick(false)
                     , forcePlaying(false)
                     , forcePenaltyShootout(false) {}
@@ -81,6 +81,8 @@ namespace behaviour {
                 float goalie_side_walk_angle_threshold;
                 NUClear::clock::duration localisation_interval;
                 NUClear::clock::duration localisation_duration;
+                float localisation_field_covariance_threshold;
+                float localisation_ball_covariance_threshold;
                 bool alwaysPowerKick;
                 bool forcePlaying         = false;
                 bool forcePenaltyShootout = false;
