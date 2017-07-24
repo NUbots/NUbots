@@ -165,13 +165,15 @@ namespace behaviour {
                With<WantsToKick>,
                With<KickPlan>,
                With<FieldDescription>,
+               Optional<With<WalkPlan>>,
                Sync<SimpleWalkPathPlanner>>()
                 .then([this](const Ball& ball,
                              const Field& field,
                              const Sensors& sensors,
                              const WantsToKick& wantsTo,
                              const KickPlan& kickPlan,
-                             const FieldDescription& fieldDescription) {
+                             const FieldDescription& fieldDescription,
+                             std::shared_ptr<const WalkPlan> walkPlan) {
                     if (wantsTo.kick) {
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
@@ -207,34 +209,50 @@ namespace behaviour {
                     arma::vec3 pos = Htw.transformPoint(rBWw);
                     position       = pos.rows(0, 1);
 
-                    // Hack Planner:
+                    //Planner:
                     float headingChange = 0;
                     float sideStep      = 0;
                     float speedFactor   = 1;
                     if (useLocalisation) {
-
                         // Transform kick target to torso space
                         Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
                         Transform3D Htf = (Htw * Hfw.i());
-                        arma::vec3 kickTarget =
-                            Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
 
-                        // //approach point:
-                        arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);
-                        arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
+                        if(walkPlan){
+                            if(walkPlan->type == BALL){
+                                arma::vec3 kickTarget =
+                                    Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
 
-                        if (arma::norm(position) > slowdown_distance) {
-                            position = kick_point;
-                        }
-                        else {
-                            speedFactor   = slow_approach_factor;
-                            headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
-                            sideStep      = 1;
+                                // //approach point:
+                                arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);
+                                arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
+
+                                if (arma::norm(position) > slowdown_distance) {
+                                    position = kick_point;
+                                }
+                                else {
+                                    speedFactor   = slow_approach_factor;
+                                    headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
+                                    sideStep      = 1;
+                                }
+                            }
+                            else if(walkPlan->type == FIELD){
+                                utility::math::matrix::Transform3D Hfp;
+                                Hfp.translation() = arma::vec3{walkPlan->fieldPose[0], walkPlan->fieldPose[1], 0};
+                                Hfp               = Hfp.rotateZ(walkPlan->fieldPose[2]);
+
+                                utility::math::matrix::Transform3D Htp = Htf * Hfp;
+
+                                arma::vec3 forward = Htp.transformVector(arma::vec3{1,0,0});
+                                arma::vec3 goalPosition = Htp.translation();
+
+                                position = goalPosition.rows(0,1);
+                                headingChange = std::atan2(forward[1], forward[0]);
+                            }
                         }
                     }
                     // arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position,
                     // selfs.front().heading, position);
-
 
                     float angle = std::atan2(position[1], position[0]) + headingChange;
                     // log("ball bearing", angle);

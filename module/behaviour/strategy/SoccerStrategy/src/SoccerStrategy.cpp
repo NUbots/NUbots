@@ -25,6 +25,7 @@
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/Nod.h"
 #include "message/behaviour/SoccerObjectPriority.h"
+#include "message/behaviour/WalkPlan.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/ResetRobotHypotheses.h"
 #include "message/motion/DiveCommand.h"
@@ -57,6 +58,7 @@ namespace behaviour {
         using message::behaviour::MotionCommand;
         using message::behaviour::Nod;
         using message::behaviour::SoccerObjectPriority;
+        using message::behaviour::WalkPlan;
         using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
         using message::input::GameEvents;
         using message::input::GameState;
@@ -442,12 +444,12 @@ namespace behaviour {
             emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemyGoal)));
         }
 
-        void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
+        void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec2 position, double theta) {
+            auto walkPlan  = std::make_unique<WalkPlan>();
+            walkPlan->type = 1;
+            walkPlan->fieldPose = arma::vec3({position[0], position[1], theta});
 
-            arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
-
-            auto goalState = Transform2D::lookAt(position, enemyGoal);
-            emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(goalState)));
+            emit(walkPlan);
         }
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
