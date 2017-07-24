@@ -29,7 +29,7 @@ message SoccerObjectPriority {
         GOAL_RIGHT = 4;
         GROUND_LEFT = 5;
         GROUND_RIGHT = 6;
-        OTHE = 7;
+        OTHER = 7;
     }
 
     int32 ball = 1;
