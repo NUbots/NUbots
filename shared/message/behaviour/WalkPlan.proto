@@ -28,9 +28,9 @@ message WalkPlan {
         BALL    = 0;
         FIELD   = 1;
     }
-    // Pose of desired position and orientation
+    // Pose of desired position [0,1] and orientation [2]
     vec3 fieldPose = 1;
 
-    // Enum for ball or point
+    // Enum for ball or point on field
     WalkType type = 0;
 }

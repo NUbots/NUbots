@@ -219,6 +219,7 @@ namespace behaviour {
                         Transform3D Htf = (Htw * Hfw.i());
 
                         if (walkPlan) {
+                            // If walking towards kicking the ball
                             if (walkPlan->type == WalkPlan::WalkType::BALL) {
                                 arma::vec3 kickTarget =
                                     Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
@@ -236,6 +237,7 @@ namespace behaviour {
                                     sideStep      = 1;
                                 }
                             }
+                            // If walking to a point on the field
                             else if (walkPlan->type == WalkPlan::WalkType::FIELD) {
                                 utility::math::matrix::Transform3D Hfp;
                                 Hfp.translation() = arma::vec3{walkPlan->fieldPose[0], walkPlan->fieldPose[1], 0};
