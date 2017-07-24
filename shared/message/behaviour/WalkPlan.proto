@@ -32,5 +32,5 @@ message WalkPlan {
     vec3 fieldPose = 1;
 
     // Enum for ball or point on field
-    WalkType type = 0;
+    WalkType type = 2;
 }
