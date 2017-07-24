@@ -108,6 +108,8 @@ namespace behaviour {
 
                 cfg_.is_goalie = config["goalie"].as<bool>();
 
+                cfg_.max_kick_range = config["max_kick_range"].as<float>();
+
                 // Use configuration here from file GoalieWalkPlanner.yaml
                 cfg_.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
                 cfg_.goalie_rotation_speed_factor     = config["goalie_rotation_speed_factor"].as<float>();
@@ -510,10 +512,14 @@ namespace behaviour {
             float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
             float xRobot       = field.position[0];
             float yRobot       = field.position[1];
+            float xProximity = max_kick_range;
+            float yProximity = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
             arma::vec2 newTarget;
 
             if ((fieldDescription.dimensions.field_length / 2) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
                 && yRobot < yTakeOverBox) {
+            if ((fieldDescription.dimensions.field_length / 2) - xProximity < xRobot && -yProximity < yRobot
+                && yRobot < yProximity) {
                 // Aims for behind the point that gives the shortest distance
                 newTarget[0] =
                     fieldDescription.dimensions.field_length / 2 + fieldDescription.dimensions.goal_depth / 2;
