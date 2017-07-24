@@ -52,6 +52,7 @@ namespace behaviour {
         using message::behaviour::WantsToKick;
         using message::localisation::Ball;
         using message::localisation::Field;
+        using message::input::GameState;
         using message::input::Sensors;
         using VisionBall = message::vision::Ball;
         using message::motion::IKKickParams;
@@ -92,12 +93,13 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<Ball>, With<Field>, With<FieldDescription>, With<KickPlan>, With<Sensors>>().then(
-                [this](const Ball& ball,
-                       const Field& field,
-                       const FieldDescription& fd,
-                       const KickPlan& kickPlan,
-                       const Sensors& sensors) {
+            on<Trigger<Ball>, With<Field>, With<FieldDescription>, With<KickPlan>, With<GameState> With<Sensors>>()
+                .then([this](const Ball& ball,
+                             const Field& field,
+                             const FieldDescription& fd,
+                             const KickPlan& kickPlan,
+                             const GameState gameState,
+                             const Sensors& sensors) {
 
                     // Get time since last seen ball
                     auto now = NUClear::clock::now();
@@ -127,6 +129,9 @@ namespace behaviour {
                     // log("KickAngle",KickAngle);
                     // log("ballPosition",ballPosition);
                     // log("secondsSinceLastSeen",secondsSinceLastSeen);
+                    bool correctState =
+                        gameState.phase == Phase::PLAYING && gameState.penaltyReason == PenaltyReason::UNPENALISED;
+
                     bool kickIsValid = kickValid(ballPosition);
                     if (kickIsValid) {
                         lastTimeValid = now;
@@ -136,7 +141,7 @@ namespace behaviour {
                     // log("kick checks",secondsSinceLastSeen < cfg.seconds_not_seen_limit
                     //     , kickIsValid
                     //     , KickAngle < cfg.kick_forward_angle_limit);
-                    if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid
+                    if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid && correctState
                         && KickAngle < cfg.kick_forward_angle_limit) {
 
                         switch (kickPlan.kickType.value) {
