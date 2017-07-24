@@ -1,3 +1,7 @@
+battery:
+  max: 16.8
+  min: 14.1
+
 bus_reset_wait_time_us: 0
 byte_wait: 1200
 packet_wait: 100000
