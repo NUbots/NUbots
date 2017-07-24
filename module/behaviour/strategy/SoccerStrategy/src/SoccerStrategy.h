@@ -57,6 +57,8 @@ namespace behaviour {
                     , goalie_side_walk_angle_threshold(0.0f)
                     , localisation_interval()
                     , localisation_duration()
+                    , localisation_field_covariance_threshold(0.1)
+                    , localisation_ball_covariance_threshold(0.1)
                     , alwaysPowerKick(false)
                     , forcePlaying(false)
                     , forcePenaltyShootout(false) {}
@@ -112,7 +114,9 @@ namespace behaviour {
             void walkTo(const message::support::FieldDescription& fieldDescription,
                         const message::behaviour::FieldTarget::Target& object);
             void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
-            void find(const std::vector<message::behaviour::FieldTarget>& objects);
+            void find(const std::vector<message::behaviour::FieldTarget>& objects,
+                      const message::localisation::Field& field,
+                      const message::localisation::Ball& ball);
             void spinWalk();
             bool pickedUp(const message::input::Sensors& sensors);
             bool penalised();

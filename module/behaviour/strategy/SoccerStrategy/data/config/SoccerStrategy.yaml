@@ -17,6 +17,8 @@ goalie_side_walk_angle_threshold: 0.1
 
 localisation_interval: 30
 localisation_duration: 5
+localisation_field_covariance_threshold: 0.1
+localisation_ball_covariance_threshold: 0.1
 
 force_playing: false
 force_penalty_shootout: false
