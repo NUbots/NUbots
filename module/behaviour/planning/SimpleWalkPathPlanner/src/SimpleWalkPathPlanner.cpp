@@ -209,7 +209,7 @@ namespace behaviour {
                     arma::vec3 pos = Htw.transformPoint(rBWw);
                     position       = pos.rows(0, 1);
 
-                    //Planner:
+                    // Planner:
                     float headingChange = 0;
                     float sideStep      = 0;
                     float speedFactor   = 1;
@@ -218,8 +218,8 @@ namespace behaviour {
                         Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
                         Transform3D Htf = (Htw * Hfw.i());
 
-                        if(walkPlan){
-                            if(walkPlan->type == BALL){
+                        if (walkPlan) {
+                            if (walkPlan->type == WalkPlan::WalkType::BALL) {
                                 arma::vec3 kickTarget =
                                     Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
 
@@ -236,17 +236,17 @@ namespace behaviour {
                                     sideStep      = 1;
                                 }
                             }
-                            else if(walkPlan->type == FIELD){
+                            else if (walkPlan->type == WalkPlan::WalkType::FIELD) {
                                 utility::math::matrix::Transform3D Hfp;
                                 Hfp.translation() = arma::vec3{walkPlan->fieldPose[0], walkPlan->fieldPose[1], 0};
                                 Hfp               = Hfp.rotateZ(walkPlan->fieldPose[2]);
 
                                 utility::math::matrix::Transform3D Htp = Htf * Hfp;
 
-                                arma::vec3 forward = Htp.transformVector(arma::vec3{1,0,0});
+                                arma::vec3 forward      = Htp.transformVector(arma::vec3{1, 0, 0});
                                 arma::vec3 goalPosition = Htp.translation();
 
-                                position = goalPosition.rows(0,1);
+                                position      = goalPosition.rows(0, 1);
                                 headingChange = std::atan2(forward[1], forward[0]);
                             }
                         }
