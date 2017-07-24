@@ -51,5 +51,9 @@ message CameraParameters {
     LensType lens                 = 6;
 
     //Camera name
-    string name                   = 7;
+    string cameraName             = 7;
+}
+
+message CameraParameterSet{
+    map<string,CameraParameters> cams = 1;
 }

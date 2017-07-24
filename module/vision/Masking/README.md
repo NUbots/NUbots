@@ -1,4 +1,4 @@
-ImageMask
+Masking
 =========
 
 ## Description

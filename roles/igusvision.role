@@ -20,7 +20,7 @@ NUCLEAR_ROLE(
     vision::IgusVisionTests
     vision::BallDetector
     vision::GoalDetector
-    vision::ImageMask
+    vision::Masking
 
     #Sensors
     platform::darwin::SensorFilter

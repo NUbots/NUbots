@@ -22,7 +22,7 @@
 namespace utility {
 namespace vision {
 
-    struct MaskType {
+    struct MaskClass {
         enum Value : char {
             // Main classifications
             UNMASKED = 'u',
@@ -31,49 +31,49 @@ namespace vision {
         Value value;
 
         // Constructors
-        MaskType() : value(Value::UNMASKED) {}
-        MaskType(int const& value) : value(static_cast<Value>(value)) {}
-        MaskType(uint8_t const& value) : value(static_cast<Value>(value)) {}
-        MaskType(uint32_t const& value) : value(static_cast<Value>(value)) {}
-        MaskType(char const& value) : value(static_cast<Value>(value)) {}
-        MaskType(Value const& value) : value(value) {}
+        MaskClass() : value(Value::UNMASKED) {}
+        MaskClass(int const& value) : value(static_cast<Value>(value)) {}
+        MaskClass(uint8_t const& value) : value(static_cast<Value>(value)) {}
+        MaskClass(uint32_t const& value) : value(static_cast<Value>(value)) {}
+        MaskClass(char const& value) : value(static_cast<Value>(value)) {}
+        MaskClass(Value const& value) : value(value) {}
 
 
         // Operators
-        bool operator<(MaskType const& other) const {
+        bool operator<(MaskClass const& other) const {
             return value < other.value;
         }
-        bool operator>(MaskType const& other) const {
+        bool operator>(MaskClass const& other) const {
             return value > other.value;
         }
-        bool operator<=(MaskType const& other) const {
+        bool operator<=(MaskClass const& other) const {
             return value <= other.value;
         }
-        bool operator>=(MaskType const& other) const {
+        bool operator>=(MaskClass const& other) const {
             return value >= other.value;
         }
-        bool operator==(MaskType const& other) const {
+        bool operator==(MaskClass const& other) const {
             return value == other.value;
         }
-        bool operator!=(MaskType const& other) const {
+        bool operator!=(MaskClass const& other) const {
             return value != other.value;
         }
-        bool operator<(MaskType::Value const& other) const {
+        bool operator<(MaskClass::Value const& other) const {
             return value < other;
         }
-        bool operator>(MaskType::Value const& other) const {
+        bool operator>(MaskClass::Value const& other) const {
             return value > other;
         }
-        bool operator<=(MaskType::Value const& other) const {
+        bool operator<=(MaskClass::Value const& other) const {
             return value <= other;
         }
-        bool operator>=(MaskType::Value const& other) const {
+        bool operator>=(MaskClass::Value const& other) const {
             return value >= other;
         }
-        bool operator==(MaskType::Value const& other) const {
+        bool operator==(MaskClass::Value const& other) const {
             return value == other;
         }
-        bool operator!=(MaskType::Value const& other) const {
+        bool operator!=(MaskClass::Value const& other) const {
             return value != other;
         }
     };
@@ -82,8 +82,8 @@ namespace vision {
                               const int& y,
                               const Eigen::Vector2i& dim,
                               std::shared_ptr<const message::vision::ImageMask> mask) {
-        return mask && mask->type.rows() == dim[0] && mask->type.cols() == dim[1]
-               && mask->type[x, y] == MaskType::MASKED;
+        return mask && mask->values.rows() == dim[0] && mask->values.cols() == dim[1]
+               && mask->values(x, y) == MaskClass::MASKED;
     }
 
 }  // namespace vision

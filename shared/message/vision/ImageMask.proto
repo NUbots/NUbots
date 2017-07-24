@@ -23,11 +23,11 @@ package message.vision;
 import "Neutron.proto";
 import "Matrix.proto";
 
-message ImageMask{
-    //Mask size:
-    cmat type = 1;
+message ImageMask {
+    //Mask values:
+    cmat values = 1;
 
     //Name of camera
-    string name = 2;
+    string cameraName = 2;
 }
 

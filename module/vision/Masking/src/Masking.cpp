@@ -1,39 +1,40 @@
-#include "ImageMask.h"
+#include "Masking.h"
 
 #include "extension/Configuration.h"
-#include "message/input/CameraParameters.h"
-#include "message/vision/ImageMask.h"
+#include "utility/vision/ImageMasking.h"
 
 namespace module {
 namespace vision {
 
     using extension::Configuration;
 
-    using message::vision::ImageMask;
     using message::input::CameraParameters;
+    using message::input::CameraParameterSet;
+    using utility::vision::MaskClass;
+    using message::vision::ImageMask;
 
-    ImageMask::ImageMask(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    Masking::Masking(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("ImageMask.yaml").then([this](const Configuration& config) {
+        on<Configuration>("Masking.yaml").then([this](const Configuration& config) {
             image_extension = config["image_extension"].as<std::string>();
         });
 
-        on<std::vector<CameraParameters>>().then([this](const std::vector<CameraParameters>& cams)) {
+        on<Trigger<CameraParameterSet>>().then([this](const CameraParameterSet& set) {
             // Use configuration here from file ImageMask.yaml
-            auto masks = std::make_unique<std::vector<ImageMask>>();
-            for (auto& c : cams) {
-                bool success          = false;
-                const ImageMask& mask = createMaskForCamera(c, success);
+            auto masks = std::make_unique<std::map<std::string, ImageMask>>();
+            for (auto& c : set.cams) {
+                bool success   = false;
+                ImageMask mask = createMaskForCamera(c.second, success);
                 if (success) {
-                    masks.push_back(mask);
+                    (*masks)[mask.cameraName] = mask;
                 }
             }
             emit(masks);
-        }
+        });
     }
 
-    const ImageMask& ImageMask::createMaskForCameraName(const CameraParameters& cam, bool& success) {
-        std::string filename = "config/" + cam.name + "Mask." + image_extension;
+    ImageMask Masking::createMaskForCamera(const CameraParameters& cam, bool& success) {
+        std::string filename = "config/" + cam.cameraName + "Mask." + image_extension;
         log("Loading camera mask from file", filename);
 
         ImageMask mask;
@@ -41,7 +42,7 @@ namespace vision {
 
         // Open and check file
         std::ifstream file(filename);
-        if (file.open()) {
+        if (file.is_open()) {
             std::string buff;
             std::getline(file, buff);
             if (buff.compare("P1") != 0) {
@@ -50,8 +51,8 @@ namespace vision {
             }
             // Load data
             std::getline(file, buff);
-            int width << file;
-            int height << file;
+            int width, height;
+            file >> width >> height;
             // If wrong size
             if (width != cam.imageSizePixels[0] || width != cam.imageSizePixels[0]) {
                 log<NUClear::ERROR>("Mask ",
@@ -62,19 +63,21 @@ namespace vision {
                                     " but camera settings are ",
                                     cam.imageSizePixels[0],
                                     cam.imageSizePixels[1]);
-                return;
+                return mask;
             }
-            mask->valid = Eigen<char, width, height>();
+            mask.values.resize(width, height);
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
-                    int valid << file;
-                    mask->valid = file == 1 ?
+                    int valid;
+                    file >> valid;
+                    mask.values(i, j) = char(valid > 0 ? MaskClass::UNMASKED : MaskClass::MASKED);
                 }
             }
         }
         else {
             return mask;
         }
+        mask.cameraName = cam.cameraName;
 
         log("Loading succeeded!");
         success = true;
