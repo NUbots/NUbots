@@ -53,6 +53,7 @@ namespace vision {
         arma::vec2 ANGLE_COVARIANCE;
 
         bool DEBUG_GOAL_THROWOUTS;
+        bool DEBUG_GOAL_RANSAC;
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.

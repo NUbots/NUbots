@@ -23,3 +23,4 @@ vector3_covariance: [0.1,0.001,0.001]
 angle_covariance: [0.001,0.01]
 
 debug_goal_throwouts: false
+debug_goal_ransac: false

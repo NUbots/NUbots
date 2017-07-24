@@ -140,6 +140,7 @@ namespace vision {
                 ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
 
                 DEBUG_GOAL_THROWOUTS = config["debug_goal_throwouts"].as<bool>();
+                DEBUG_GOAL_RANSAC    = config["debug_goal_ransac"].as<bool>();
             });
 
         on<Trigger<ClassifiedImage>, With<CameraParameters>, With<LookUpTable>, With<FieldDescription>, Single>().then(
@@ -199,38 +200,38 @@ namespace vision {
                     debug;
                 // Look at our results
                 for (auto& result : models) {
-
-
                     // Get our left, right and midlines
                     Plane& left  = result.model.leftPlane;
                     Plane& right = result.model.rightPlane;
                     Plane mid;
 
-                    arma::vec3 debugLeftt = left.orthogonalProjection(arma::vec3({1, 0, 1}));
-                    arma::vec3 debugLeftb = left.orthogonalProjection(arma::vec3({1, 0, -1}));
+                    if (DEBUG_GOAL_RANSAC) {
 
-                    arma::vec3 debugRightt = right.orthogonalProjection(arma::vec3({1, 0, 1}));
-                    arma::vec3 debugRightb = right.orthogonalProjection(arma::vec3({1, 0, -1}));
-                    // DEBUG!
-                    float N = 100;
-                    for (int i = 0; i < 100; i++) {
-                        float alpha              = i / N;
-                        float alphaNext          = (i + 1) / N;
-                        arma::vec3 debugRightPt1 = debugRightt * alpha + (1 - alpha) * debugRightb;
-                        arma::vec3 debugRightPt2 = debugRightt * alphaNext + (1 - alphaNext) * debugRightb;
+                        arma::vec3 debugLeftt = left.orthogonalProjection(arma::vec3({1, 0, 1}));
+                        arma::vec3 debugLeftb = left.orthogonalProjection(arma::vec3({1, 0, -1}));
 
-                        arma::vec3 debugLeftPt1 = debugLeftt * alpha + (1 - alpha) * debugLeftb;
-                        arma::vec3 debugLeftPt2 = debugLeftt * alphaNext + (1 - alphaNext) * debugLeftb;
+                        arma::vec3 debugRightt = right.orthogonalProjection(arma::vec3({1, 0, 1}));
+                        arma::vec3 debugRightb = right.orthogonalProjection(arma::vec3({1, 0, -1}));
+                        // DEBUG!
+                        float N = 100;
+                        for (int i = 0; i < 100; i++) {
+                            float alpha              = i / N;
+                            float alphaNext          = (i + 1) / N;
+                            arma::vec3 debugRightPt1 = debugRightt * alpha + (1 - alpha) * debugRightb;
+                            arma::vec3 debugRightPt2 = debugRightt * alphaNext + (1 - alphaNext) * debugRightb;
 
-                        debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugRightPt1, cam)),
-                                                        convert<int, 2>(getImageFromCam(debugRightPt2, cam)),
-                                                        Eigen::Vector4d(1, 0, 0, 1)));
+                            arma::vec3 debugLeftPt1 = debugLeftt * alpha + (1 - alpha) * debugLeftb;
+                            arma::vec3 debugLeftPt2 = debugLeftt * alphaNext + (1 - alphaNext) * debugLeftb;
 
-                        debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugLeftPt1, cam)),
-                                                        convert<int, 2>(getImageFromCam(debugLeftPt2, cam)),
-                                                        Eigen::Vector4d(0, 0, 1, 1)));
+                            debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugRightPt1, cam)),
+                                                            convert<int, 2>(getImageFromCam(debugRightPt2, cam)),
+                                                            Eigen::Vector4d(1, 0, 0, 1)));
+
+                            debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugLeftPt1, cam)),
+                                                            convert<int, 2>(getImageFromCam(debugLeftPt2, cam)),
+                                                            Eigen::Vector4d(0, 0, 1, 1)));
+                        }
                     }
-
 
                     // Normals in same direction
                     if (arma::dot(left.normal, right.normal) > 0) {
@@ -278,14 +279,7 @@ namespace vision {
                                                       image.image->dimensions[1],
                                                       image.image->data,
                                                       static_cast<utility::vision::FOURCC>(image.image->format))));
-                        // HACK FOR testing in simulation do not leave in
-                        log("image point ", imagePoint[0], imagePoint[1]);
-                        if (imagePoint[1] > utility::vision::visualHorizonAtPoint(image, imagePoint[0])) {
-                            c = 'g';
-                        }
-                        else {
-                            c = 'y';
-                        };
+
                         if (c != 'y') {
                             ++notWhiteLen;
                             if (notWhiteLen > 4) {
@@ -300,10 +294,12 @@ namespace vision {
                         else if (c == 'y') {
                             notWhiteLen = 0;
                         }
-                        debug.push_back(std::make_tuple(convert<int, 2>(imagePoint),
-                                                        convert<int, 2>(imagePoint + arma::ivec({1, 1})),
-                                                        Eigen::Vector4d(color_intensity, 0, color_intensity, 1)));
-                        color_intensity = std::fmin(1, color_intensity + 0.5);
+                        if (DEBUG_GOAL_RANSAC) {
+                            debug.push_back(std::make_tuple(convert<int, 2>(imagePoint),
+                                                            convert<int, 2>(imagePoint + arma::ivec({1, 1})),
+                                                            Eigen::Vector4d(color_intensity, 0, color_intensity, 1)));
+                            color_intensity = std::fmin(1, color_intensity + 0.5);
+                        }
                         point += direction;
                         imagePoint = getImageFromCam(point, cam);
                     }
@@ -369,7 +365,9 @@ namespace vision {
 
                     goals->push_back(std::move(goal));
                 }
-                emit(drawVisionLines(debug));
+                if (DEBUG_GOAL_RANSAC) {
+                    emit(drawVisionLines(debug));
+                }
 
 
                 // Throwout invalid quads
