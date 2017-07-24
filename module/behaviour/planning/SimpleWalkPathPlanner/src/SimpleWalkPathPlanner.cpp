@@ -26,6 +26,7 @@
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/Subsumption.h"
+#include "message/behaviour/WalkPlan.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
@@ -57,6 +58,7 @@ namespace behaviour {
 
         using message::motion::WalkCommand;
         using message::behaviour::KickPlan;
+        using message::behaviour::WalkPlan;
         using message::behaviour::MotionCommand;
         using message::motion::KickFinished;
         using message::motion::StopCommand;

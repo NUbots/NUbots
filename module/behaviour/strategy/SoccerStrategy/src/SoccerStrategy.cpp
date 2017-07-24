@@ -35,6 +35,7 @@
 #include "message/vision/VisionObjects.h"
 
 #include "utility/behaviour/MotionCommand.h"
+#include "utility/localisation/transform.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -81,6 +82,7 @@ namespace behaviour {
         using message::support::FieldDescription;
 
         using utility::time::durationFromSeconds;
+        using utility::localisation::fieldStateToTransform3D;
         using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform2D;
@@ -100,6 +102,8 @@ namespace behaviour {
                 cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
                 cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
 
+                cfg_.max_kick_range = config["max_kick_range"].as<float>();
+
                 cfg_.localisation_interval = durationFromSeconds(config["localisation_interval"].as<double>());
                 cfg_.localisation_duration = durationFromSeconds(config["localisation_duration"].as<double>());
 
@@ -107,8 +111,6 @@ namespace behaviour {
                 cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
 
                 cfg_.is_goalie = config["goalie"].as<bool>();
-
-                cfg_.max_kick_range = config["max_kick_range"].as<float>();
 
                 // Use configuration here from file GoalieWalkPlanner.yaml
                 cfg_.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
@@ -241,10 +243,10 @@ namespace behaviour {
                                 }
                                 else if (phase == Phase::READY) {
                                     if (gameState.data.our_kick_off) {
-                                        walkTo(fieldDescription, cfg_.start_position_offensive);
+                                        walkTo(cfg_.start_position_offensive, 0.0);
                                     }
                                     else {
-                                        walkTo(fieldDescription, cfg_.start_position_defensive);
+                                        walkTo(cfg_.start_position_defensive, 0.0);
                                     }
                                     find({FieldTarget(FieldTarget::Target::SELF)});
                                     currentState = Behaviour::State::READY;
@@ -286,7 +288,7 @@ namespace behaviour {
                     }
                 });
 
-            on<Trigger<Field>, With<FieldDescription, With<Sensors>>>().then(
+            on<Trigger<Field>, With<FieldDescription>, With<Sensors>>().then(
                 [this](const Field& field, const FieldDescription& fieldDescription, const Sensors& sensors) {
                     auto kickTarget = convert<double, 2>(getKickPlan(field, fieldDescription, sensors));
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
@@ -330,7 +332,7 @@ namespace behaviour {
                             > 1)) {  // a long way away from centre
                         // walk to centre of field
                         find({FieldTarget(FieldTarget::Target::BALL)});
-                        walkTo(fieldDescription, arma::vec2({0, 0}));
+                        walkTo(arma::vec2({0, 0}), 0.0);  // TODO: Correct orientation
                         currentState = Behaviour::State::MOVE_TO_CENTRE;
                     }
                     else {
@@ -446,10 +448,10 @@ namespace behaviour {
             emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemyGoal)));
         }
 
-        void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec2 position, double theta) {
+        void SoccerStrategy::walkTo(const arma::vec2& position, const double& theta) {
             auto walkPlan       = std::make_unique<WalkPlan>();
             walkPlan->type      = 1;
-            walkPlan->fieldPose = arma::vec3({position[0], position[1], theta});
+            walkPlan->fieldPose = convert<double, 3>(arma::vec3({position[0], position[1], theta}));
 
             emit(walkPlan);
         }
@@ -506,12 +508,13 @@ namespace behaviour {
             // Defines the box within in which the kick target is changed from the centre
             // of the oppposition goal to the perpendicular distance from the robot to the goal
 
+            Transform3D Htw = convert<double, 4, 4>(sensors.world);
             Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
             Transform3D Hft = (Hfw * Htw.i());
 
             auto robotFieldPos = Hft.translation();
 
-            float xProximity = max_kick_range;
+            float xProximity = cfg_.max_kick_range;
             size_t error     = 0.05;
             size_t buffer    = error + 2 * fieldDescription.ball_radius;             // 15cm
             float yProximity = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm

@@ -114,7 +114,7 @@ namespace behaviour {
             void searchWalk();
             void walkTo(const message::support::FieldDescription& fieldDescription,
                         const message::behaviour::FieldTarget::Target& object);
-            void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
+            void walkTo(const arma::vec2& position, const double& theta);
             void find(const std::vector<message::behaviour::FieldTarget>& objects);
             void spinWalk();
             bool pickedUp(const message::input::Sensors& sensors);
@@ -122,7 +122,8 @@ namespace behaviour {
             bool ballDistance(const message::localisation::Ball& ball);
             void goalieWalk(const message::localisation::Field& field, const message::localisation::Ball& ball);
             arma::vec2 getKickPlan(const message::localisation::Field& field,
-                                   const message::support::FieldDescription& fieldDescription);
+                                   const message::support::FieldDescription& fieldDescription,
+                                   const message::input::Sensors& sensors);
             void play(const message::localisation::Field& field,
                       const message::localisation::Ball& ball,
                       const message::support::FieldDescription& fieldDescription,
