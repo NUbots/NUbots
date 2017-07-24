@@ -78,7 +78,7 @@ namespace platform {
             if (sensors.voltage <= minVoltage) {
                 servoTargetHandle.disable();
 
-                log<NUClear::FATAL>("CRITICALLY LOW VOLTAGE KILLING SERVOS");
+                log<NUClear::FATAL>("CRITICALLY LOW VOLTAGE: KILLING SERVOS");
 
                 std::vector<uint8_t> command = {0xFF,
                                                 0xFF,
@@ -227,11 +227,11 @@ namespace platform {
                     servo.presentSpeed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
                     servo.load            = Convert::servoLoad(i, data.servos[i].load);
 
-
                     // Diagnostic Information
                     servo.voltage     = Convert::voltage(data.servos[i].voltage);
                     servo.temperature = Convert::temperature(data.servos[i].temperature);
 
+                    // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                     if (servo.voltage <= maxVoltage) {
                         servo.errorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
                     }
