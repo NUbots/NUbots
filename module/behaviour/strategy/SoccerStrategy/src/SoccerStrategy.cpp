@@ -498,14 +498,14 @@ namespace behaviour {
                 // Check field message and localisation ball message
                 // Check trace of their covariances are bigger than configurable threshold
                 // If the ball covariance track is larger, always look at ball
-                if (locBall > localisation_ball_covariance_threshold) {
+                if (locBall.covariance.trace() > localisation_ball_covariance_threshold) {
                     //      If within certain distance, focus on ball
                     soccerObjectPriority->ball  = 1;
                     soccerObjectPriority->field = 0;
                 }
                 // If covariance ball is below certain threshold and not too close
                 //  and covariance on self is above certain threshold, look for goals
-                else if (locField > localisation_field_covariance_threshold) {
+                else if (locField.covariance.trace() > localisation_field_covariance_threshold) {
                     soccerObjectPriority->ball  = 0;
                     soccerObjectPriority->field = 1;
                 }
