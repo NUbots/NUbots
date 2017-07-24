@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
@@ -104,7 +104,7 @@ message DarwinSensors {
         float  presentSpeed    = 10;
         float  load            = 11;
         float  voltage         = 12;
-        uint32 temperature     = 13;
+        float temperature      = 13;
     };
 
     message Servos {

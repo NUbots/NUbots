@@ -14,12 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUBots <nubots@nubots.net>
+ * Copyright 2017 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.input;
+package message.localisation;
 
-message PushDetection {
-	bool forward = 1;
+import "Vector.proto";
+import "Matrix.proto";
+
+message Ball {
+    // The ball measured in world space (rBWw)
+    vec2  position = 1;
+    // Covariance in the balls measurement
+    mat22 covariance = 2;
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
@@ -24,13 +24,13 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message ResetRobotHypotheses {
-	message Self {
-	    vec2   position     = 1;
-	    mat22  position_cov = 2;
-	    double heading      = 3;
-	    double heading_var  = 4;
-	    bool   absoluteYaw  = 5;
-	}
+    message Self {
+        vec2   position     = 1;
+        mat22  position_cov = 2;
+        double heading      = 3;
+        double heading_var  = 4;
+        bool   absoluteYaw  = 5;
+    }
 
     repeated Self hypotheses = 1;
 }

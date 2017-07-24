@@ -14,10 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUBots <nubots@nubots.net>
+ * Copyright 2017 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
 package message.localisation;
 
-message SideCheckingComplete {}
+import "Vector.proto";
+import "Matrix.proto";
+
+message Field {
+    // Measures the position of the field centre in world space position[0,1] = (rFWw)
+    // and measures the orientation of the field from the world position[2] = (thetafw)
+    vec3  position = 1;
+    // Covariance of the measurement
+    mat33 covariance = 2;
+}
