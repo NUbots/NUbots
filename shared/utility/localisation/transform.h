@@ -34,6 +34,16 @@ namespace localisation {
         return Hfw;
     }
 
+    // Transforms the transform
+    inline arma::vec3 transform3DToFieldState(const utility::math::matrix::Transform3D& m) {
+        utility::math::matrix::AxisAngle ax = m.rotation().axisAngle();
+        if (!(arma::approx_equal(ax.first, arma::vec3({0, 0, 1}), "absdiff", 0.00001)
+              || arma::approx_equal(ax.first, arma::vec3({0, 0, -1}), "absdiff", 0.00001))) {
+            throw std::runtime_error("transform.h MatrixToLocalisationState - matrix must be a z rotation");
+        }
+        return arma::vec3({m.translation()[0], m.translation()[1], ax.second});
+    }
+
 }  // namespace localisation
 }  // namespace utility
 

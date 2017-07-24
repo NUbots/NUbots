@@ -3,6 +3,8 @@
 #include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
+#include "message/localisation/ResetRobotHypotheses.h"
+#include "utility/localisation/transform.h"
 
 #include "utility/math/geometry/Circle.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -19,6 +21,7 @@ namespace localisation {
     using message::localisation::Field;
 
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
     using utility::nubugger::drawCircle;
     using utility::math::geometry::Circle;
@@ -26,9 +29,8 @@ namespace localisation {
 
     using message::support::FieldDescription;
     using message::vision::Goal;
-    using message::localisation::LocalisationReset;
-    using utility::localisation::transform::LocalisationStateToMatrix;
-    using utility::localisation::transform::MatrixToLocalisationState;
+    using message::localisation::ResetRobotHypotheses;
+    using utility::localisation::transform3DToFieldState;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -129,19 +131,33 @@ namespace localisation {
                 }
             });
 
-        // Do I need to use sync??
-        on<Trigger<LocalisationReset>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
-            "Localisation Reset", [this](const LocalisationReset& locReset, const Sensors& sensors) {
+        on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
+            "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
+
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                arma::vec3 rTFf;
+                arma::mat22 Hfw_xy;
+                arma::mat22 pos_cov;
+                arma::mat33 state_cov;
                 std::vector<arma::vec3> states;
                 std::vector<arma::mat33> cov;
-                for (auto& s : locReset.self) {
-                    arma::vec3 rTFf = {
-                        s.locObject.position[0], s.locObject.position[1], std::atan2(s.heading[1], s.heading[0])};
-                    const Transform3D& Hft = LocalisationStateToMatrix(rTFf);
-                    const Transform3D& Hfw = Hft * Htw;
-                    states.push_back(MatrixToLocalisationState(Hfw));
-                    cov.push_back(convert<double, 3, 3>(s.covariance));
+
+                for (auto& s : locReset.hypotheses) {
+                    Transform3D Hft;
+                    Transform3D Hfw;
+
+                    rTFf              = {s.position[0], s.position[1], 0};
+                    Hft.translation() = -rTFf;
+                    Hft.rotateZ(s.heading);
+                    Hfw = Hft * Htw;
+                    states.push_back(transform3DToFieldState(Hfw));
+
+                    Hfw_xy    = Hfw.submat(0, 0, 1, 1);
+                    pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
+                    state_cov = arma::zeros(3, 3);
+                    state_cov.submat(0, 0, 1, 1) = pos_cov;
+                    state_cov(2, 2) = s.heading_var;
+                    cov.push_back(state_cov);
                 }
                 filter.resetAmbiguous(states, cov, n_particles);
             });

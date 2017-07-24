@@ -29,7 +29,3 @@ message Ball {
     // Covariance in the balls measurement
     mat22 covariance = 2;
 }
-
-message LocalisationReset {
-    repeated Self   self   = 1;
-}
