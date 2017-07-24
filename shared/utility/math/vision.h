@@ -76,27 +76,12 @@ namespace math {
 
             inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const message::input::CameraParameters& cam) {
                 const double& camFocalLengthPixels = cam.pinhole.focalLengthPixels;
-                return arma::vec3{camFocalLengthPixels, screen[0], screen[1]};
+                return arma::normalise(arma::vec3{camFocalLengthPixels, screen[0], screen[1]});
             }
         }  // namespace pinhole
 
         // Radial methods
         namespace radial {
-
-            inline arma::vec3 getCamFromScreen(const arma::vec2& p, const message::input::CameraParameters& cam) {
-                arma::vec2 px = p - arma::vec2({double(cam.centreOffset[0]), double(cam.centreOffset[1])});
-                float r       = std::sqrt(std::pow(px[0], 2) + std::pow(px[1], 2));
-                if (r == 0) {
-                    return {1, 0, 0};
-                }
-                float sx = (std::cos(cam.radial.radiansPerPixel * r));
-                float sy = std::sin(cam.radial.radiansPerPixel * r) * (float(px[0]) / r);
-                float sz = std::sin(cam.radial.radiansPerPixel * r) * (float(px[1]) / r);
-
-                // Swizzle components so x is out of camera, y is to the left, z is up
-                // Matches input of pointToPixel
-                return arma::vec3({sx, sy, sz});
-            }
 
             inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point,
                                                       const message::input::CameraParameters& cam) {
@@ -111,6 +96,21 @@ namespace math {
                 float py        = r * p[2] / (sin_theta);
 
                 return arma::vec2({px, py}) + arma::vec2({double(cam.centreOffset[0]), double(cam.centreOffset[1])});
+            }
+
+            inline arma::vec3 getCamFromScreen(const arma::vec2& p, const message::input::CameraParameters& cam) {
+                arma::vec2 px = p - arma::vec2({double(cam.centreOffset[0]), double(cam.centreOffset[1])});
+                float r       = std::sqrt(std::pow(px[0], 2) + std::pow(px[1], 2));
+                if (r == 0) {
+                    return {1, 0, 0};
+                }
+                float sx = (std::cos(cam.radial.radiansPerPixel * r));
+                float sy = std::sin(cam.radial.radiansPerPixel * r) * (float(px[0]) / r);
+                float sz = std::sin(cam.radial.radiansPerPixel * r) * (float(px[1]) / r);
+
+                // Swizzle components so x is out of camera, y is to the left, z is up
+                // Matches input of pointToPixel
+                return arma::normalise(arma::vec3({sx, sy, sz}));
             }
 
         }  // namespace radial
