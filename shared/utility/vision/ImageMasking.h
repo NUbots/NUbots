@@ -22,10 +22,29 @@
 namespace utility {
 namespace vision {
 
+    struct MaskType {
+        enum Value : char {
+            // Main classifications
+            UNMASKED = 'u',
+            MASKED   = 'm'
+        };
+        Value value;
 
-    inline bool pixelIsMasked(const int& x, const int& y, std::shared_ptr<const message::vision::ImageMask> mask) {
-        // return mask &&;
-        return false;
+        // Constructors
+        MaskType() : value(Value::UNMASKED) {}
+        MaskType(int const& value) : value(static_cast<Value>(value)) {}
+        MaskType(uint8_t const& value) : value(static_cast<Value>(value)) {}
+        MaskType(uint32_t const& value) : value(static_cast<Value>(value)) {}
+        MaskType(char const& value) : value(static_cast<Value>(value)) {}
+        MaskType(Value const& value) : value(value) {}
+    };
+
+    inline bool pixelIsMasked(const int& x,
+                              const int& y,
+                              const Eigen::Vector2i& dim,
+                              std::shared_ptr<const message::vision::ImageMask> mask) {
+        return mask && mask->type.rows() == dim[0] && mask->type.cols() == dim[1]
+               && mask->type[x, y] == MaskType::MASKED;
     }
 
 }  // namespace vision

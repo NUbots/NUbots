@@ -26,7 +26,6 @@ import "Vector.proto";
 import "message/Geometry.proto";
 import "message/input/Sensors.proto";
 import "message/input/Image.proto";
-import "message/vision/ImageMask.proto";
 
 message ClassifiedImage {
     enum SegmentClass {

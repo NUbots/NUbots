@@ -22,6 +22,7 @@
 #include "utility/math/geometry/Line.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/vision/ImageMasking.h"
 
 namespace module {
 namespace vision {
@@ -31,6 +32,8 @@ namespace vision {
     using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
 
+
+    using utility::vision::pixelMasked;
     using utility::math::geometry::Line;
     using utility::math::geometry::Plane;
     using utility::math::vision::getCamFromImage;
@@ -278,14 +281,20 @@ namespace vision {
             int minY = int(std::max(3.0, double(horizon_Y)));
 
             for (int y = point[1]; y > minY; --y) {
-
-                auto colour = utility::vision::getPixelColour(lut,
-                                                              getPixel(point[0],
-                                                                       y,
-                                                                       image.dimensions[0],
-                                                                       image.dimensions[1],
-                                                                       image.data,
-                                                                       static_cast<FOURCC>(image.format)));
+                const int& x = point[0];
+                utility::vision::Colour colour;
+                if (pixelMasked(x, y, mask)) {
+                    colour = utility::vision::Colour::MASKED;
+                }
+                else {
+                    colour = utility::vision::getPixelColour(lut,
+                                                             getPixel(x,
+                                                                      y,
+                                                                      image.dimensions[0],
+                                                                      image.dimensions[1],
+                                                                      image.data,
+                                                                      static_cast<FOURCC>(image.format)));
+                }
 
                 if (colour == Colour::GREEN) {
                     auto p = Eigen::Vector2i(point[0], y - 1);
@@ -301,14 +310,20 @@ namespace vision {
         for (auto& point : points) {
 
             for (int x = point[0]; x > 3; --x) {
-
-                auto colour = utility::vision::getPixelColour(lut,
-                                                              getPixel(x,
-                                                                       point[1],
-                                                                       image.dimensions[0],
-                                                                       image.dimensions[1],
-                                                                       image.data,
-                                                                       static_cast<FOURCC>(image.format)));
+                const int& y = point[1];
+                utility::vision::Colour colour;
+                if (pixelMasked(x, y, mask)) {
+                    colour = utility::vision::Colour::MASKED;
+                }
+                else {
+                    colour utility::vision::getPixelColour(lut,
+                                                           getPixel(x,
+                                                                    y,
+                                                                    image.dimensions[0],
+                                                                    image.dimensions[1],
+                                                                    image.data,
+                                                                    static_cast<FOURCC>(image.format)));
+                }
 
                 if (colour == Colour::GREEN) {
                     auto p = Eigen::Vector2i(x + 1, point[1]);
@@ -324,20 +339,26 @@ namespace vision {
         for (auto& point : points) {
 
             for (int x = point[0]; x < int(image.dimensions[0]) - 3; ++x) {
-
-                auto colour = utility::vision::getPixelColour(lut,
-                                                              getPixel(x,
-                                                                       point[1],
-                                                                       image.dimensions[0],
-                                                                       image.dimensions[1],
-                                                                       image.data,
-                                                                       static_cast<FOURCC>(image.format)));
-
+                const int& y = point[1];
+                utility::vision::Colour colour;
+                if (pixelMasked(x, y, mask)) {
+                    colour = utility::vision::Colour::MASKED;
+                }
+                else {
+                    colour = utility::vision::getPixelColour(lut,
+                                                             getPixel(x,
+                                                                      y,
+                                                                      image.dimensions[0],
+                                                                      image.dimensions[1],
+                                                                      image.data,
+                                                                      static_cast<FOURCC>(image.format)));
+                }
                 if (colour == Colour::GREEN) {
                     auto p = Eigen::Vector2i(x - 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[2].points.push_back(p);
-                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0,1,1,1))); // DEBUG LINE
+                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0,1,1,1))); // DEBUG
+                    // LINE
                     break;
                 }
             }

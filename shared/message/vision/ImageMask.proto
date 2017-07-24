@@ -21,11 +21,10 @@ syntax = "proto3";
 package message.vision;
 
 import "Neutron.proto";
+import "Vector.proto";
 
 message ImageMask{
-    //Raw
-    repeated bool valid = 1;
-    //Valid segments
-    repeated Segment segments = 2;
+    //Mask size:
+    cmat type = 1;
 }
 

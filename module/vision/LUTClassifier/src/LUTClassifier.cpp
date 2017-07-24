@@ -243,9 +243,6 @@ namespace vision {
                       // Attach the image
                       classifiedImage->image = const_cast<Image*>(&rawImage)->shared_from_this();
 
-                      // Attach mask (or null if no mask)
-                      classifiedImage->mask = mask;
-
                       // Find our horizon
                       findHorizon(rawImage, lut, mask, *classifiedImage);
 
