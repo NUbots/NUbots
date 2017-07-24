@@ -12,6 +12,7 @@ namespace vision {
     using message::input::CameraParameterSet;
     using utility::vision::MaskClass;
     using message::vision::ImageMask;
+    using message::vision::ImageMaskSet;
 
     Masking::Masking(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -21,12 +22,12 @@ namespace vision {
 
         on<Trigger<CameraParameterSet>>().then([this](const CameraParameterSet& set) {
             // Use configuration here from file ImageMask.yaml
-            auto masks = std::make_unique<std::map<std::string, ImageMask>>();
+            auto masks = std::make_unique<ImageMaskSet>();
             for (auto& c : set.cams) {
                 bool success   = false;
                 ImageMask mask = createMaskForCamera(c.second, success);
                 if (success) {
-                    (*masks)[mask.cameraName] = mask;
+                    masks->masks[mask.cameraName] = mask;
                 }
             }
             emit(masks);

@@ -31,3 +31,7 @@ message ImageMask {
     string cameraName = 2;
 }
 
+message ImageMaskSet {
+    map<string,ImageMask> masks = 1;
+}
+
