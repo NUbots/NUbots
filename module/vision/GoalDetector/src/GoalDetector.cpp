@@ -93,7 +93,7 @@ namespace vision {
         , MINIMUM_ASPECT_RATIO(0.0)
         , VISUAL_HORIZON_BUFFER(0.0)
         , MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE(0.0)
-        , MAXIMUM_ANGLE_BETWEEN_GOALS(0.0)
+        , MAXIMUM_ANGLE_BETWEEN_SIDES(0.0)
         , MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE(0.0)
         , MEASUREMENT_LIMITS_LEFT(10)
         , MEASUREMENT_LIMITS_RIGHT(10)
@@ -122,7 +122,7 @@ namespace vision {
                 MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE =
                     std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
 
-                MAXIMUM_ANGLE_BETWEEN_GOALS = std::cos(config["maximum_angle_between_goals"].as<double>());
+                MAXIMUM_ANGLE_BETWEEN_SIDES = std::cos(config["maximum_angle_between_sides"].as<double>());
                 MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE =
                     std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
 
@@ -139,6 +139,7 @@ namespace vision {
                 VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
                 ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
 
+                DEBUG_GOAL_THROWOUTS = config["debug_goal_throwouts"].as<bool>();
             });
 
         on<Trigger<ClassifiedImage>, With<CameraParameters>, With<LookUpTable>, With<FieldDescription>, Single>().then(
@@ -265,6 +266,7 @@ namespace vision {
                     int notWhiteLen        = 0;
                     arma::vec3 point       = arma::normalise(mid.orthogonalProjection(midpoint));
                     arma::ivec2 imagePoint = getImageFromCam(point, cam);
+                    float color_intensity  = 0;
                     while ((imagePoint[0] < image.dimensions[0]) && (imagePoint[0] > 0)
                            && (imagePoint[1] < image.dimensions[1])) {
 
@@ -276,7 +278,14 @@ namespace vision {
                                                       image.image->dimensions[1],
                                                       image.image->data,
                                                       static_cast<utility::vision::FOURCC>(image.image->format))));
-
+                        // HACK FOR testing in simulation do not leave in
+                        log("image point ", imagePoint[0], imagePoint[1]);
+                        if (imagePoint[1] > utility::vision::visualHorizonAtPoint(image, imagePoint[0])) {
+                            c = 'g';
+                        }
+                        else {
+                            c = 'y';
+                        };
                         if (c != 'y') {
                             ++notWhiteLen;
                             if (notWhiteLen > 4) {
@@ -291,7 +300,10 @@ namespace vision {
                         else if (c == 'y') {
                             notWhiteLen = 0;
                         }
-
+                        debug.push_back(std::make_tuple(convert<int, 2>(imagePoint),
+                                                        convert<int, 2>(imagePoint + arma::ivec({1, 1})),
+                                                        Eigen::Vector4d(color_intensity, 0, color_intensity, 1)));
+                        color_intensity = std::fmin(1, color_intensity + 0.5);
                         point += direction;
                         imagePoint = getImageFromCam(point, cam);
                     }
@@ -336,7 +348,6 @@ namespace vision {
                     goal.side              = Goal::Side::UNKNOWN_SIDE;
 
                     // Project those points outward onto the quad
-                    // TODO: directional projection?
                     arma::vec3 horizonScreenDir = arma::normalise(
                         arma::cross(convert<double, 3, 1>(image.horizon_normal), arma::vec3({1, 0, 0})));
                     arma::vec3 tl = left.directionalProjection(midTop, horizonScreenDir);
@@ -349,6 +360,7 @@ namespace vision {
                     goal.frustum.tr = convert<double, 3>(tr);
                     goal.frustum.br = convert<double, 3>(br);
 
+                    // In image coords
                     goal.quad.bl = convert<double, 2>(getImageFromCamCts(bl, cam));
                     goal.quad.tl = convert<double, 2>(getImageFromCamCts(tl, cam));
                     goal.quad.tr = convert<double, 2>(getImageFromCamCts(tr, cam));
@@ -381,7 +393,7 @@ namespace vision {
                     float horAngle  = (topAngle + bottomAngle) / 2;
 
                     bool valid        = vertAngle > 0;
-                    float aspectRatio = horAngle / vertAngle;
+                    float aspectRatio = vertAngle / horAngle;
 
                     // Check if we are within the aspect ratio range
 
@@ -401,27 +413,75 @@ namespace vision {
                     // TODO NEEDED?: Check we finish above the kinematics horizon or kinematics
                     // horizon is off the screen
 
-                    bool a = (arma::dot(convert<double, 3>(image.horizon_normal), ctr) > 0);
-
-                    bool a = (arma::dot(convert<double, 3>(image.horizon_normal), ctl) > 0);
+                    bool aboveHorizon = (arma::dot(convert<double, 3>(image.horizon_normal), ctr) > 0)
+                                        || (arma::dot(convert<double, 3>(image.horizon_normal), ctl) > 0);
 
                     // Check that our two goal lines are perpendicular with the horizon must use greater
                     // than rather then less than because of the cos
 
-                    bool a = std::abs(arma::dot(arma::cross(cbr, ctr), convert<double, 3>(image.horizon_normal)));
-                    < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                    bool goalsOrthogonalToHorizon =
+                        std::abs(arma::norm_dot(arma::cross(cbr, ctr), convert<double, 3>(image.horizon_normal)))
+                            < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                        && std::abs(arma::norm_dot(arma::cross(cbl, ctl), convert<double, 3>(image.horizon_normal)))
+                               < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE;
 
-                        bool a = std::abs(arma::dot(arma::cross(cbl, ctl), convert<double, 3>(image.horizon_normal)));
-                    < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                    // Check that our two goal lines are approximatly parallel
+                    bool goalsParallel =
+                        std::abs(arma::dot(arma::cross(cbr, ctr), arma::cross(cbl, ctl))) < MAXIMUM_ANGLE_BETWEEN_SIDES;
 
-                        // Check that our two goal lines are approximatly parallel
-
-                        bool a = std::abs(arma::dot(arma::cross(cbr, ctr), arma::cross(cbl, ctl)));
-                    > MAXIMUM_ANGLE_BETWEEN_GOALS;
-
+                    valid = valid && aspectRatioGood && shapeConsistent && closeToVisualHorizon && aboveHorizon
+                            && goalsOrthogonalToHorizon && goalsParallel;
 
                     if (!valid) {
-                        if () it = goals->erase(it);
+                        if (DEBUG_GOAL_THROWOUTS) {
+                            log("GOAL DISCARDED");
+                            if (!aspectRatioGood) {
+                                log("NOT TRUE : aspectRatioGood");
+                                log("aspectRatio = ", aspectRatio);
+                            }
+                            if (!shapeConsistent) {
+                                log("NOT TRUE : shapeConsistent");
+                                log("vertical shape =", leftAngle, rightAngle);
+                                log("horizontal shape =", topAngle, bottomAngle);
+                            }
+                            if (!closeToVisualHorizon) {
+                                log("NOT TRUE : closeToVisualHorizon");
+                                log("left base point",
+                                    it->quad.bl[1],
+                                    " !> hor - buffer (= ",
+                                    utility::vision::visualHorizonAtPoint(image, it->quad.bl[0])
+                                        - VISUAL_HORIZON_BUFFER,
+                                    ")");
+                                log("right base point",
+                                    it->quad.br[1],
+                                    " !> hor - buffer (= ",
+                                    utility::vision::visualHorizonAtPoint(image, it->quad.br[0])
+                                        - VISUAL_HORIZON_BUFFER,
+                                    ")");
+                            }
+                            if (!aboveHorizon) {
+                                log("NOT TRUE : aboveHorizon");
+                                log("horizon_normal = ", convert<double, 3>(image.horizon_normal).t());
+                                log("ctr = ", ctr);
+                                log("ctl = ", ctl);
+                            }
+                            if (!goalsOrthogonalToHorizon) {
+                                log("NOT TRUE : goalsOrthogonalToHorizon");
+                                log("angle right = ",
+                                    std::abs(arma::norm_dot(arma::cross(cbr, ctr),
+                                                            convert<double, 3>(image.horizon_normal))));
+                                log("angle left = ",
+                                    std::abs(arma::norm_dot(arma::cross(cbl, ctl),
+                                                            convert<double, 3>(image.horizon_normal))));
+                            }
+                            if (!goalsParallel) {
+                                log("NOT TRUE : goalsParallel");
+                                log("angle between sides = ",
+                                    std::abs(arma::dot(arma::cross(cbr, ctr), arma::cross(cbl, ctl))));
+                                // log();
+                            }
+                        }
+                        it = goals->erase(it);
                     }
                     else {
                         ++it;

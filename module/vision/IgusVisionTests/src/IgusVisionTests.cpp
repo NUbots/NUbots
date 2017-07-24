@@ -143,6 +143,9 @@ namespace vision {
         classifiedImage->horizontalSegments = getGoalSegments(cam, fd);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
+        classifiedImage->visualHorizon.push_back(Eigen::Vector2i(0, 3 * image->dimensions[1] / 4));
+        classifiedImage->visualHorizon.push_back(
+            Eigen::Vector2i(image->dimensions[0] - 1, 3 * image->dimensions[1] / 4));
 
         emit(drawVisionLines(lines, Eigen::Vector4d({1, 1, 1, 1})));
         emit(classifiedImage);
