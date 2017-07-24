@@ -26,5 +26,8 @@ import "Matrix.proto";
 message ImageMask{
     //Mask size:
     cmat type = 1;
+
+    //Name of camera
+    string name = 2;
 }
 

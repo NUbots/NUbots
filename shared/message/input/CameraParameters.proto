@@ -43,10 +43,13 @@ message CameraParameters {
     //Common
     uvec2  imageSizePixels        = 1;
     vec2   FOV                    = 2;
-    ivec2 centreOffset             = 3;
+    ivec2 centreOffset            = 3;
     //Lens specific
     Pinhole pinhole               = 4;
     Radial radial                 = 5;
     //Lens type
     LensType lens                 = 6;
+
+    //Camera name
+    string name                   = 7;
 }
