@@ -211,7 +211,7 @@ namespace vision {
         on<Trigger<Image>,
            With<LookUpTable>,
            With<Sensors>,
-           With<CameraParameters>,
+           With<CameraParameter>,
            With<Optional<ImageMask>>,
            Single,
            Priority::LOW>()
@@ -219,8 +219,12 @@ namespace vision {
                   [this](const Image& rawImage,
                          const LookUpTable& lut,
                          const Sensors& sensors,
-                         const CameraParameters& cam,
-                         std::shared_ptr<const ImageMask> mask) {
+                         const CameraParameter& cam,
+                         std::shared_ptr<const ImageMaskSet> masks) {
+                      auto mask = std::make_shared<ImageMask>(NULL);
+                      if (masks && masks->mask.count(cam.cameraName) > 0) {
+                          mask = std::make_shared<ImageMask>(masks->mask[cam.cameraName]);
+                      }
 
                       // TODO
                       // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) +
