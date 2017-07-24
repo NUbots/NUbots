@@ -286,9 +286,9 @@ namespace behaviour {
                     }
                 });
 
-            on<Trigger<Field>, With<FieldDescription>>().then(
-                [this](const Field& field, const FieldDescription& fieldDescription) {
-                    auto kickTarget = convert<double, 2>(getKickPlan(field, fieldDescription));
+            on<Trigger<Field>, With<FieldDescription, With<Sensors>>>().then(
+                [this](const Field& field, const FieldDescription& fieldDescription, const Sensors& sensors) {
+                    auto kickTarget = convert<double, 2>(getKickPlan(field, fieldDescription, sensors));
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
                     emit(utility::nubugger::drawCircle(
                         "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.3, {0, 0, 0}));
@@ -499,25 +499,26 @@ namespace behaviour {
             emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 1})));
         }
 
-        arma::vec2 SoccerStrategy::getKickPlan(const Field& field, const FieldDescription& fieldDescription) {
+        arma::vec2 SoccerStrategy::getKickPlan(const Field& field,
+                                               const FieldDescription& fieldDescription,
+                                               const Sensors& sensors) {
 
             // Defines the box within in which the kick target is changed from the centre
             // of the oppposition goal to the perpendicular distance from the robot to the goal
 
-            float maxKickRange =
-                0.6;  // TODO: make configurable, only want to change at the last kick to avoid smart goalies
-            float xTakeOverBox = maxKickRange;
-            size_t error       = 0.05;
-            size_t buffer      = error + 2 * fieldDescription.ball_radius;             // 15cm
-            float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-            float xRobot       = field.position[0];
-            float yRobot       = field.position[1];
+            Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+            Transform3D Hft = (Hfw * Htw.i());
+
+            auto robotFieldPos = Hft.translation();
+
             float xProximity = max_kick_range;
+            size_t error     = 0.05;
+            size_t buffer    = error + 2 * fieldDescription.ball_radius;             // 15cm
             float yProximity = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
+            float xRobot     = robotFieldPos[0];
+            float yRobot     = robotFieldPos[1];
             arma::vec2 newTarget;
 
-            if ((fieldDescription.dimensions.field_length / 2) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
-                && yRobot < yTakeOverBox) {
             if ((fieldDescription.dimensions.field_length / 2) - xProximity < xRobot && -yProximity < yRobot
                 && yRobot < yProximity) {
                 // Aims for behind the point that gives the shortest distance
