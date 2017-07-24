@@ -37,6 +37,45 @@ namespace vision {
         MaskType(uint32_t const& value) : value(static_cast<Value>(value)) {}
         MaskType(char const& value) : value(static_cast<Value>(value)) {}
         MaskType(Value const& value) : value(value) {}
+
+
+        // Operators
+        bool operator<(MaskType const& other) const {
+            return value < other.value;
+        }
+        bool operator>(MaskType const& other) const {
+            return value > other.value;
+        }
+        bool operator<=(MaskType const& other) const {
+            return value <= other.value;
+        }
+        bool operator>=(MaskType const& other) const {
+            return value >= other.value;
+        }
+        bool operator==(MaskType const& other) const {
+            return value == other.value;
+        }
+        bool operator!=(MaskType const& other) const {
+            return value != other.value;
+        }
+        bool operator<(MaskType::Value const& other) const {
+            return value < other;
+        }
+        bool operator>(MaskType::Value const& other) const {
+            return value > other;
+        }
+        bool operator<=(MaskType::Value const& other) const {
+            return value <= other;
+        }
+        bool operator>=(MaskType::Value const& other) const {
+            return value >= other;
+        }
+        bool operator==(MaskType::Value const& other) const {
+            return value == other;
+        }
+        bool operator!=(MaskType::Value const& other) const {
+            return value != other;
+        }
     };
 
     inline bool pixelIsMasked(const int& x,

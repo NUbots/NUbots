@@ -21,7 +21,7 @@ syntax = "proto3";
 package message.vision;
 
 import "Neutron.proto";
-import "Vector.proto";
+import "Matrix.proto";
 
 message ImageMask{
     //Mask size:
