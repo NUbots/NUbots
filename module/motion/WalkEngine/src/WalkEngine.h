@@ -39,7 +39,7 @@
 #include "message/motion/BalanceCommand.h"
 #include "message/motion/FootMotionCommand.h"
 #include "message/motion/FootPlacementCommand.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/TorsoMotionCommand.h"
 #include "message/motion/WalkCommand.h"

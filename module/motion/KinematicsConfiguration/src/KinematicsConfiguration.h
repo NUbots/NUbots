@@ -25,7 +25,7 @@
 #include <nuclear>
 
 #include "extension/Configuration.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 
 namespace module {
 namespace motion {

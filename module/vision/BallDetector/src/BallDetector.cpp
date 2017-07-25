@@ -319,13 +319,6 @@ namespace vision {
                         Ball b;
                         b.visObject.sensors = image.sensors;
 
-                        // Get our transform to world coordinates
-                        const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                        const Transform3D& Htc =
-                            convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-                        Transform3D Hcw = Htc.i() * Htw;
-                        Transform3D Hwc = Hcw.i();
-
                         // Work out how far away the ball must be to be at the distance it is from the camera
                         arma::vec3 width_rBCc = ballCentreRay * widthDistance;
 

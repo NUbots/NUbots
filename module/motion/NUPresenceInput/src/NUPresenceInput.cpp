@@ -25,7 +25,7 @@
 #include "message/input/MotionCapture.h"
 #include "message/input/PresenceUserState.h"
 #include "message/input/Sensors.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -195,15 +195,15 @@ namespace motion {
 
                 // Record current arm position:
                 // arma::vec3 prevArmJointsL = {
-                // 							sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,
-                // 							sensors.servos[int(ServoID::L_SHOULDER_ROLL)].presentPosition,
-                // 							sensors.servos[int(ServoID::L_ELBOW)].presentPosition,
-                // 							};
+                //                          sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,
+                //                          sensors.servos[int(ServoID::L_SHOULDER_ROLL)].presentPosition,
+                //                          sensors.servos[int(ServoID::L_ELBOW)].presentPosition,
+                //                          };
                 // arma::vec3 prevArmJointsR = {
-                // 							sensors.servos[int(ServoID::R_SHOULDER_PITCH)].presentPosition,
-                // 							sensors.servos[int(ServoID::R_SHOULDER_ROLL)].presentPosition,
-                // 							sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
-                // 							};
+                //                          sensors.servos[int(ServoID::R_SHOULDER_PITCH)].presentPosition,
+                //                          sensors.servos[int(ServoID::R_SHOULDER_ROLL)].presentPosition,
+                //                          sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
+                //                          };
 
 
                 currentCamPose = Transform3D::interpolate(currentCamPose, robot_to_head * goalCamPose, smoothing_alpha);
@@ -227,7 +227,7 @@ namespace motion {
 
                 // Adjust arm position
                 // int max_number_of_iterations = 20;
-                Transform3D camToBody = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+                Transform3D camToBody = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
                 arma::vec3 kneckPos   = {kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                        kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                        kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Z};
@@ -251,12 +251,12 @@ namespace motion {
                 }
                 emit(waypoints);
 
-                // Transform3D R_shoulder_pitch = sensors.forwardKinematics.at(ServoID::R_SHOULDER_PITCH);
-                // Transform3D R_shoulder_roll = sensors.forwardKinematics.at(ServoID::R_SHOULDER_ROLL);
-                // Transform3D R_arm = sensors.forwardKinematics.at(ServoID::R_ELBOW);
-                // Transform3D L_shoulder_pitch = sensors.forwardKinematics.at(ServoID::L_SHOULDER_PITCH);
-                // Transform3D L_shoulder_roll = sensors.forwardKinematics.at(ServoID::L_SHOULDER_ROLL);
-                // Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
+                // Transform3D R_shoulder_pitch = sensors.forwardKinematics[ServoID::R_SHOULDER_PITCH];
+                // Transform3D R_shoulder_roll = sensors.forwardKinematics[ServoID::R_SHOULDER_ROLL];
+                // Transform3D R_arm = sensors.forwardKinematics[ServoID::R_ELBOW];
+                // Transform3D L_shoulder_pitch = sensors.forwardKinematics[ServoID::L_SHOULDER_PITCH];
+                // Transform3D L_shoulder_roll = sensors.forwardKinematics[ServoID::L_SHOULDER_ROLL];
+                // Transform3D L_arm = sensors.forwardKinematics[ServoID::L_ELBOW];
 
                 // arma::vec3 zeros = arma::zeros(3);
                 // arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition(kinematicsModel, zeros,

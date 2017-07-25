@@ -25,7 +25,7 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KickCommand.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
 
@@ -125,8 +125,8 @@ namespace motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
-                Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+                Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -267,5 +267,5 @@ namespace motion {
     }
 
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
