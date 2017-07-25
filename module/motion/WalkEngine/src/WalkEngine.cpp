@@ -417,19 +417,19 @@ namespace motion {
         gainRLeg          = servos_gain["right_leg"].as<Expression>();
         gainHead          = servos_gain["head"].as<Expression>();
 
-        for (auto i = ServoID::begin(); i != ServoID::end(); i++) {
-            if (int(*i) < 6) {
-                jointGains[*i] = gainRArm;
-                i++;
-                jointGains[*i] = gainLArm;
+        for (int i = 0; i < ServoID::NUMBER_OF_SERVOS;) {
+            if (i < 6) {
+                jointGains[i] = gainRArm;
+                ++i;
+                jointGains[i] = gainLArm;
             }
-            else if (int(*i) < 18) {
-                jointGains[*i] = gainRLeg;
-                i++;
-                jointGains[*i] = gainLLeg;
+            else if (i < 18) {
+                jointGains[i] = gainRLeg;
+                ++i;
+                jointGains[i] = gainLLeg;
             }
             else {
-                jointGains[*i] = gainHead;
+                jointGains[i] = gainHead;
             }
         }
 

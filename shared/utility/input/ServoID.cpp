@@ -23,11 +23,6 @@
 namespace utility {
 namespace input {
 
-    const std::set<ServoID> ServoID::values = {
-        R_SHOULDER_PITCH, L_SHOULDER_PITCH, R_SHOULDER_ROLL, L_SHOULDER_ROLL, R_ELBOW,     L_ELBOW,   R_HIP_YAW,
-        L_HIP_YAW,        R_HIP_ROLL,       L_HIP_ROLL,      R_HIP_PITCH,     L_HIP_PITCH, R_KNEE,    L_KNEE,
-        R_ANKLE_PITCH,    L_ANKLE_PITCH,    R_ANKLE_ROLL,    L_ANKLE_ROLL,    HEAD_YAW,    HEAD_PITCH};
-
     ServoID::ServoID(std::string const& str) : value(Value::R_SHOULDER_PITCH) {
         if (str == "R_SHOULDER_PITCH")
             value = Value::R_SHOULDER_PITCH;

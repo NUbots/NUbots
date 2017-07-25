@@ -12,19 +12,19 @@ ENDMACRO()
 
 #Collect CXX files
 MACRO(GET_CXX_FILES file_list dir)
-	FILE(GLOB file_list 
-				"${dir}*.cpp" 
-				"${dir}*.c" 
-				"${dir}/*.cpp" 
+	FILE(GLOB file_list
+				"${dir}*.cpp"
+				"${dir}*.c"
+				"${dir}/*.cpp"
 				"${dir}/*.c")
 ENDMACRO(GET_CXX_FILES)
 
 #Collect CXX files recursively
 MACRO(GET_CXX_FILES_RECURSE file_list dir)
-	FILE(GLOB_RECURSE file_list 
-				"${dir}*.cpp" 
-				"${dir}*.c" 
-				"${dir}/*.cpp" 
+	FILE(GLOB_RECURSE file_list
+				"${dir}*.cpp"
+				"${dir}*.c"
+				"${dir}/*.cpp"
 				"${dir}/*.c")
 ENDMACRO(GET_CXX_FILES_RECURSE)
 
@@ -52,8 +52,8 @@ MACRO(ADD_UTILITY_LIBRARY directory)
 	SET(current_library nutilities-${current_utility})
 
 	IF(NOT missing_dependencies)
-		#Get file list: if we have no cxx files we dont need to link	
-		MESSAGE("Building Utility Library ${current_library}")
+		#Get file list: if we have no cxx files we dont need to link
+		MESSAGE(STATUS "Building Utility Library ${current_library}")
 		GET_CXX_FILES_RECURSE(file_list ${directory})
 		IF(file_list)
 			# ADD_LIBRARY(${current_library} ${file_list})
@@ -63,7 +63,7 @@ MACRO(ADD_UTILITY_LIBRARY directory)
 			# MESSAGE("")
 		ENDIF()
 	ELSE()
-		MESSAGE("NOT Building ${current_library}. Missing dependencies: " ${missing_dependencies})
+		MESSAGE(STATUS "NOT Building ${current_library}. Missing dependencies: " ${missing_dependencies})
 	ENDIF()
 
 ENDMACRO(ADD_UTILITY_LIBRARY)

@@ -121,8 +121,8 @@ namespace vision {
                 MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
                 MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
 
-                VECTOR3_COVARIANCE = config["VECTOR3_COVARIANCE"].as<arma::vec>();
-                ANGLE_COVARIANCE   = config["ANGLE_COVARIANCE"].as<arma::vec>();
+                VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
+                ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
 
             });
 
@@ -249,6 +249,7 @@ namespace vision {
                             notWhiteLen = 0;
                         }
                     }
+
 
                     arma::running_stat<double> stat;
 
@@ -412,16 +413,19 @@ namespace vision {
                     Eigen::Vector2d left_Angles(std::atan2(left[1], left[0]),
                                                 std::atan2(left[2], std::sqrt(left[0] * left[0] + left[1] * left[1])));
                     Eigen::Matrix2d left_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
+
                     it->measurement.push_back(Goal::Measurement(
                         Goal::MeasurementType::LEFT_NORMAL, left, left_vecCov, left_Angles, left_AngCov));
 
                     // TR BR cross product gives right side
-                    auto right                   = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
+                    auto right = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
+
                     Eigen::Matrix3d right_vecCov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
                     Eigen::Vector2d right_Angles(
                         std::atan2(right[1], right[0]),
                         std::atan2(right[2], std::sqrt(right[0] * right[0] + right[1] * right[1])));
                     Eigen::Matrix2d right_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
+
                     it->measurement.push_back(Goal::Measurement(
                         Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
@@ -449,6 +453,7 @@ namespace vision {
                         arma::vec3 covariance_amplifier({distance, 1, 1});
                         Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
                             VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
+
                         it->measurement.push_back(
                             Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
                     }
@@ -463,6 +468,7 @@ namespace vision {
                         auto top = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                     }
+
 
                     // Angular positions from the camera
                     arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
