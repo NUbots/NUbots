@@ -70,7 +70,9 @@ namespace support {
                 auto cameraParameters = std::make_unique<CameraParameters>();
                 double tanHalfFOV[2], imageCentre[2];
 
-                cameraParameters->cameraName = "VirtualCamera";
+                std::size_t pos              = config.fileName.find(".");
+                cameraParameters->cameraName = config.fileName.substr(0, pos);
+
                 // Generic camera parameters
                 cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
                 cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
@@ -111,8 +113,8 @@ namespace support {
                 std::cout << "Emitting camera parameters from VirtualCamera" << std::endl;
 
                 // TODO: only emit vector of camera params
-                auto params                             = std::make_unique<CameraParameterSet>();
-                (*params)[cameraParameters->cameraName] = (*cameraParameters);
+                auto params                                = std::make_unique<CameraParameterSet>();
+                params->cams[cameraParameters->cameraName] = (*cameraParameters);
                 emit<Scope::DIRECT>(std::move(params));
 
                 emit<Scope::DIRECT>(std::move(cameraParameters));

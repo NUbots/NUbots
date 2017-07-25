@@ -20,7 +20,7 @@ namespace vision {
             image_extension = config["image_extension"].as<std::string>();
         });
 
-        on<Trigger<CameraParameterSet>>().then([this](const CameraParameterSet& set) {
+        on<Trigger<Startup>, With<CameraParameterSet>>().then([this](const CameraParameterSet& set) {
             // Use configuration here from file ImageMask.yaml
             auto masks = std::make_unique<ImageMaskSet>();
             for (auto& c : set.cams) {
@@ -69,9 +69,9 @@ namespace vision {
             mask.values.resize(width, height);
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
-                    int valid;
-                    file >> valid;
-                    mask.values(i, j) = char(valid > 0 ? MaskClass::UNMASKED : MaskClass::MASKED);
+                    char val = file.get();
+                    // The file seems to be ACTIVE LOW
+                    mask.values(i, j) = char(val == '0' ? MaskClass::UNMASKED : MaskClass::MASKED);
                 }
             }
         }
@@ -79,8 +79,6 @@ namespace vision {
             return mask;
         }
         mask.cameraName = cam.cameraName;
-
-        log(mask.values);
 
         log("Loading succeeded!");
         success = true;

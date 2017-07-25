@@ -16,6 +16,7 @@ namespace input {
     using extension::FileWatch;
 
     using message::input::CameraParameters;
+    using message::input::CameraParameterSet;
 
     using FOURCC = utility::vision::FOURCC;
 
@@ -97,6 +98,9 @@ namespace input {
         auto cameraParameters = std::make_unique<CameraParameters>();
         double tanHalfFOV[2], imageCentre[2];
 
+        std::size_t pos              = config.fileName.find(".");
+        cameraParameters->cameraName = config.fileName.substr(0, pos);
+
         // Generic camera parameters
         cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
         cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
@@ -114,9 +118,10 @@ namespace input {
             (tanHalfFOV[1] / imageCentre[1]);
         cameraParameters->pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
+
         // TODO: only emit vector of camera params
-        auto params = std::make_unique<std::vector<CameraParameters>>();
-        params.push_back(*cameraParameters);
+        auto params                                = std::make_unique<CameraParameterSet>();
+        params->cams[cameraParameters->cameraName] = (*cameraParameters);
         emit<Scope::DIRECT>(std::move(params));
 
         emit<Scope::DIRECT>(std::move(cameraParameters));

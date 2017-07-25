@@ -82,6 +82,9 @@ namespace input {
 
         auto cameraParameters = std::make_unique<CameraParameters>();
 
+        std::size_t pos              = config.fileName.find(".");
+        cameraParameters->cameraName = config.fileName.substr(0, pos);
+
         // Generic camera parameters
         cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
             config["format"]["height"].as<uint>();
@@ -93,8 +96,8 @@ namespace input {
         cameraParameters->centreOffset           = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
 
         // TODO: only emit vector of camera params
-        auto params                             = std::make_unique<CameraParameterSet>();
-        (*params)[cameraParameters->cameraName] = (*cameraParameters);
+        auto params                                = std::make_unique<CameraParameterSet>();
+        params->cams[cameraParameters->cameraName] = (*cameraParameters);
         emit<Scope::DIRECT>(std::move(params));
 
 
