@@ -80,6 +80,8 @@ namespace vision {
         }
         mask.cameraName = cam.cameraName;
 
+        log(mask.values);
+
         log("Loading succeeded!");
         success = true;
         return mask;

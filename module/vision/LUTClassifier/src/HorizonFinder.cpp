@@ -45,7 +45,7 @@ namespace vision {
         // Get our transform to world coordinates
         const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
         const Rotation3D& Rtc =
-            Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
+            Transform3D(convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH])).rotation();
         Rotation3D Rcw = Rtc.i() * Rtw;
 
         // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;

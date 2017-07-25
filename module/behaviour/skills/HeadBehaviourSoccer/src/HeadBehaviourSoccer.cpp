@@ -225,8 +225,8 @@ namespace behaviour {
                             if (ballMaxPriority) {
                                 headToBodyRotation =
                                     Transform3D(convert<double, 4, 4>(
-                                                    ballFixationObjects[0].visObject.sensors->forwardKinematics.at(
-                                                        ServoID::HEAD_PITCH)))
+                                                    ballFixationObjects[0]
+                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
                                     Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->world))
@@ -236,8 +236,8 @@ namespace behaviour {
                             else {
                                 headToBodyRotation =
                                     Transform3D(convert<double, 4, 4>(
-                                                    goalFixationObjects[0].visObject.sensors->forwardKinematics.at(
-                                                        ServoID::HEAD_PITCH)))
+                                                    goalFixationObjects[0]
+                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
                                     Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->world))
@@ -247,7 +247,7 @@ namespace behaviour {
                         }
                         else {
                             headToBodyRotation =
-                                Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)))
+                                Transform3D(convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]))
                                     .rotation();
                             orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
                         }

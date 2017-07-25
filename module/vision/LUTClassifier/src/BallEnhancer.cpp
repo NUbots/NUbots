@@ -45,6 +45,7 @@ namespace vision {
 
     std::pair<float, Eigen::Vector2i> fieldEdgeDirection(const Eigen::Vector2i& base,
                                                          const Image& image,
+                                                         std::shared_ptr<const message::vision::ImageMask> mask,
                                                          const Eigen::Vector3f& greenCentroid) {
 
         // Get our relevant pixels

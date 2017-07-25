@@ -22,7 +22,6 @@
 #include <iostream>
 
 #include "utility/support/eigen_armadillo.h"
-#include "utility/vision/ImageMasking.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
