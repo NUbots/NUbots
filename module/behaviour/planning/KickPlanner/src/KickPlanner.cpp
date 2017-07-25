@@ -28,6 +28,7 @@
 #include "message/localisation/Field.h"
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
+#include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
 
@@ -60,6 +61,7 @@ namespace behaviour {
         using VisionBall = message::vision::Ball;
         using message::motion::IKKickParams;
         using message::motion::KickCommand;
+        using message::platform::darwin::ButtonMiddleDown;
         using KickCommandType = message::motion::KickCommandType;
         using message::motion::KickScriptCommand;
         using message::motion::KickPlannerConfig;
@@ -96,18 +98,20 @@ namespace behaviour {
                 }
             });
 
+            on<Trigger<ButtonMiddleDown>, Single>().then([this] { forcePlaying = true; });
+
             on<Trigger<Ball>,
                With<Field>,
                With<FieldDescription>,
                With<KickPlan>,
-               Optional<With<GameState>>,
-               With<Sensors>>()
+               With<Sensors>,
+               Optional<With<GameState>>>()
                 .then([this](const Ball& ball,
                              const Field& field,
                              const FieldDescription& fd,
                              const KickPlan& kickPlan,
-                             std::shared_ptr<const GameState> gameState,
-                             const Sensors& sensors) {
+                             const Sensors& sensors,
+                             std::shared_ptr<const GameState> gameState) {
 
                     // Get time since last seen ball
                     auto now = NUClear::clock::now();
@@ -151,7 +155,8 @@ namespace behaviour {
                     // log("kick checks",secondsSinceLastSeen < cfg.seconds_not_seen_limit
                     //     , kickIsValid
                     //     , KickAngle < cfg.kick_forward_angle_limit);
-                    if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid && correctState
+                    if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid
+                        && (correctState || forcePlaying)
                         && KickAngle < cfg.kick_forward_angle_limit) {
 
                         switch (kickPlan.kickType.value) {
