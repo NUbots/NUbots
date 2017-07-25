@@ -14,35 +14,17 @@ namespace input {
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
 
-#ifndef NDEBUG
-    class SpinnakerLogCallback : Spinnaker::LoggingEvent {
-        void OnLogEvent(Spinnaker::LoggingEventDataPtr loggingEventDataPtr) {
-            NUClear::log<NUClear::DEBUG>("--------Log Event Received----------");
-            NUClear::log<NUClear::DEBUG>("Category......: ", loggingEventDataPtr->GetCategoryName());
-            NUClear::log<NUClear::DEBUG>("Priority Value: ", loggingEventDataPtr->GetPriority());
-            NUClear::log<NUClear::DEBUG>("Priority Name.: ", loggingEventDataPtr->GetPriorityName());
-            NUClear::log<NUClear::DEBUG>("Timestmap.....: ", loggingEventDataPtr->GetTimestamp());
-            NUClear::log<NUClear::DEBUG>("NDC...........: ", loggingEventDataPtr->GetNDC());
-            NUClear::log<NUClear::DEBUG>("Thread........: ", loggingEventDataPtr->GetThreadName());
-            NUClear::log<NUClear::DEBUG>("Message.......: ", loggingEventDataPtr->GetLogMessage());
-            NUClear::log<NUClear::DEBUG>("------------------------------------");
-        }
-    };
-#endif
 
     void Camera::initiateSpinnakerCamera(const Configuration& config) {
         if (!SpinnakerSystem) {
             SpinnakerSystem = Spinnaker::System::GetInstance();
         }
 
-#ifndef NDEBUG
         // Register logging callback class
-        SpinnakerLogCallback callBackClass;
-        SpinnakerSystem->RegisterLoggingEvent((Spinnaker::LoggingEvent&) callBackClass);
+        SpinnakerSystem->RegisterLoggingEvent((Spinnaker::LoggingEvent&) (SpinnakerLoggingCallback));
 
         // Set callback priority level
         SpinnakerSystem->SetLoggingEventPriorityLevel(Spinnaker::LOG_LEVEL_DEBUG);
-#endif
 
         SpinnakerCamList = SpinnakerSystem->GetCameras(true, true);
         log<NUClear::DEBUG>("Found ", SpinnakerCamList.GetSize(), " cameras.");
@@ -453,6 +435,7 @@ namespace input {
         SpinnakerCamList.Clear();
 
         if (SpinnakerSystem) {
+            SpinnakerSystem->UnregisterLoggingEvent((Spinnaker::LoggingEvent&) (SpinnakerLoggingCallback));
             SpinnakerSystem->ReleaseInstance();
         }
     }

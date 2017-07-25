@@ -58,6 +58,7 @@ namespace input {
 
         Spinnaker::SystemPtr SpinnakerSystem;
         Spinnaker::CameraList SpinnakerCamList;
+        module::input::SpinnakerLogCallback SpinnakerLoggingCallback;
         std::map<std::string, std::unique_ptr<SpinnakerImageEvent>> SpinnakerCameras;
 
         static uint cameraCount;
