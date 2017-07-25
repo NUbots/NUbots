@@ -23,7 +23,6 @@
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
@@ -54,11 +53,9 @@ namespace behaviour {
         using message::behaviour::WantsToKick;
         using message::localisation::Ball;
         using message::localisation::Field;
-        using message::input::GameEvents;
         using message::input::GameState;
-        using Phase          = message::input::GameState::Data::Phase;
-        using PenaltyReason  = message::input::GameState::Data::PenaltyReason;
-        using Unpenalisation = message::input::GameEvents::Unpenalisation;
+        using Phase         = message::input::GameState::Data::Phase;
+        using PenaltyReason = message::input::GameState::Data::PenaltyReason;
         using message::input::Sensors;
         using VisionBall = message::vision::Ball;
         using message::motion::IKKickParams;
@@ -99,12 +96,17 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<Ball>, With<Field>, With<FieldDescription>, With<KickPlan>, With<GameState>, With<Sensors>>()
+            on<Trigger<Ball>,
+               With<Field>,
+               With<FieldDescription>,
+               With<KickPlan>,
+               Optional<With<GameState>>,
+               With<Sensors>>()
                 .then([this](const Ball& ball,
                              const Field& field,
                              const FieldDescription& fd,
                              const KickPlan& kickPlan,
-                             const GameState gameState,
+                             std::shared_ptr<const GameState> gameState,
                              const Sensors& sensors) {
 
                     // Get time since last seen ball
@@ -135,9 +137,11 @@ namespace behaviour {
                     // log("KickAngle",KickAngle);
                     // log("ballPosition",ballPosition);
                     // log("secondsSinceLastSeen",secondsSinceLastSeen);
-                    bool correctState = gameState.data.phase == Phase::PLAYING
-                                        && gameState.data.self.penalty_reason == PenaltyReason::UNPENALISED;
-
+                    bool correctState = true;
+                    if (gameState) {
+                        correctState = gameState->data.phase == Phase::PLAYING
+                                       && gameState->data.self.penalty_reason == PenaltyReason::UNPENALISED;
+                    }
                     bool kickIsValid = kickValid(ballPosition);
                     if (kickIsValid) {
                         lastTimeValid = now;
