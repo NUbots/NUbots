@@ -117,6 +117,10 @@ namespace math {
           constraint() into account.
 
           See also rotate(const Eigen::Quaterniond&). Emits the modified() signal. */
+        void Frame::translate(Eigen::Vector3d& t) {
+            t_ += t;
+        }
+
         void Frame::translate(const Eigen::Vector3d& t) {
             Eigen::Vector3d tbis = t;
             translate(tbis);
@@ -146,6 +150,11 @@ namespace math {
           into account.
 
           See also translate(const Eigen::Vector3d&). Emits the modified() signal. */
+        void Frame::rotate(Eigen::Quaterniond& q) {
+            q_ *= q;
+            q_.normalize();
+        }
+
         void Frame::rotate(const Eigen::Quaterniond& q) {
             Eigen::Quaterniond qbis = q;
             rotate(qbis);

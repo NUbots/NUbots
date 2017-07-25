@@ -99,17 +99,19 @@ namespace math {
     template <typename T>
     inline constexpr std::enable_if_t<std::is_floating_point<T>::value, T> roundUp(const T& number,
                                                                                    const T& fixedBase) {
-        if ((fixedBase != 0.0) && (number != 0.0)) {
-            T sign = sgn(number);
-            number *= sign;
-            number /= fixedBase;
+        T num = number;
 
-            int fixedPoint = static_cast<int>(std::ceil(number));
-            number         = fixedPoint * fixedBase;
-            number *= sign;
+        if ((fixedBase != 0.0) && (num != 0.0)) {
+            T sign = sign0(num);
+            num *= sign;
+            num /= fixedBase;
+
+            int fixedPoint = static_cast<int>(std::ceil(num));
+            num            = fixedPoint * fixedBase;
+            num *= sign;
         }
 
-        return (number);
+        return (num);
     }
 
     template <typename T, typename U, typename V>

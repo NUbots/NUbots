@@ -117,10 +117,13 @@ namespace math {
             T value() const {
                 T val = InitValue<T>::init();
 
-                if (m_buf.size() != WindowSize) return val;
+                if (m_buf.size() != WindowSize) {
+                    return val;
+                }
 
-                for (size_t i = 0; i < WindowSize; ++i)
+                for (size_t i = 0; i < WindowSize; ++i) {
                     val += GolayCoeff<DerivGrade, WindowSize>::Coefficients[i] * m_buf[i];
+                }
 
                 return val / GolayCoeff<DerivGrade, WindowSize>::Normalization;
             };
