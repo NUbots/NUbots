@@ -20,10 +20,10 @@
 #ifndef UTILITY_SUPPORT_yaml_expression_H
 #define UTILITY_SUPPORT_yaml_expression_H
 
-#include <muparserx/mpParser.h>
 #include <yaml-cpp/yaml.h>
-#include <iostream>
 #include <limits>
+
+#include "math_string.h"
 
 namespace utility {
 namespace support {
@@ -57,18 +57,9 @@ struct convert<utility::support::Expression> {
 
     static bool decode(const Node& node, utility::support::Expression& rhs) {
 
-        try {
-            // Parse the expression using muParser
-            mup::ParserX parser(mup::pckALL_NON_COMPLEX);
-            parser.DefineConst("auto", std::numeric_limits<double>::infinity());
-            parser.SetExpr(node.as<std::string>());
-            rhs = parser.Eval().GetFloat();
-
-            return true;
-        }
-        catch (mup::ParserError& e) {
-            return false;
-        }
+        // Parse the node as a string into a math expression
+        rhs = utility::support::parse_math_string(node.as<std::string>());
+        return true;
     }
 };
 }  // namespace YAML

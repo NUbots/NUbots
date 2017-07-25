@@ -125,8 +125,6 @@ node nubotsvmbuild {
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
                                           'nuc7i7bnh' => [ '', ], },
                        'method'      => 'autotools',},
-    'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.7.tar.gz',
-                       'method'      => 'cmake',},
     'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
                        'method'      => 'cmake',},
