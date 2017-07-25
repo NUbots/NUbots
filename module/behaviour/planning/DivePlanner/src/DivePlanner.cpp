@@ -22,7 +22,6 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/localisation/FieldObject.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"

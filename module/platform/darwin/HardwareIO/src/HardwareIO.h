@@ -40,6 +40,9 @@ namespace platform {
          */
         class HardwareIO : public NUClear::Reactor {
         private:
+            // How often we read the servos
+            static constexpr int UPDATE_FREQUENCY = 90;
+
             /// @brief Our internal darwin class that is used for interacting with the hardware
             Darwin::Darwin darwin;
             message::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
@@ -56,16 +59,29 @@ namespace platform {
             };
 
             struct ServoState {
+                // True if we need to write new values to the hardware
                 bool dirty = false;
+
+                // True if we simulate where we think the servos should be
+                // Note that we still write the commands to hardware
+                bool simulated = false;
 
                 bool torqueEnabled = true;
 
+                // Cached values that are never read
                 float pGain        = 32.0 / 255.0;
                 float iGain        = 0;
                 float dGain        = 0;
-                float torque       = 0;  // 0.0 to 1.0
                 float movingSpeed  = 0;
                 float goalPosition = 0;
+                float torque       = 0;  // 0.0 to 1.0
+
+                // Values that are either simulated or read
+                float presentPosition = 0;
+                float presentSpeed    = 0;
+                float load            = 0;
+                float voltage         = 10;
+                float temperature     = 40;
             };
 
             /// @brief Our state for our CM730 for variables we send to it

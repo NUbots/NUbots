@@ -24,7 +24,6 @@
 #include <nuclear>
 
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "utility/input/ServoID.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
@@ -38,15 +37,11 @@ namespace localisation {
     using message::input::Sensors;
     using message::vision::Goal;
     using utility::input::ServoID;
-    using utility::localisation::transform::SphericalRobotObservation;
-    using utility::localisation::transform::WorldToRobotTransform;
-    using utility::localisation::transform::RobotToWorldTransform;
-    using utility::localisation::transform::ImuToWorldHeadingTransform;
-    using utility::math::coordinates::cartesianToRadial;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Transform3D;
     using message::support::FieldDescription;
+    using utility::localisation::fieldStateToTransform3D;
 
 
     using utility::math::matrix::Transform3D;
@@ -61,22 +56,12 @@ namespace localisation {
     /// Return the predicted observation of an object at the given position
     arma::vec RobotModel::predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
                                                const arma::vec& actual_position,
-                                               const Sensors& sensors,
+                                               const utility::math::matrix::Transform3D& Hcw,
                                                const Goal::MeasurementType& type,
                                                const FieldDescription& fd) {
 
-        // Get our transform to world coordinates
-        const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-        const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-        Transform3D Hcw        = Htc.i() * Htw;
-
-
-        Transform3D Hfw;
-        Hfw.translation() = arma::vec3{state[kX], state[kY], 0};
-        Hfw               = Hfw.rotateZ(state[kAngle]);
-
+        Transform3D Hfw = fieldStateToTransform3D(state);
         Transform3D Hcf = Hcw * Hfw.i();
-        Transform3D Htf = Htw * Hfw.i();
 
         // rZFf = vector from field origin to zenith high in the sky
         arma::vec3 rZFf = {0, 0, 1};
