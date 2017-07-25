@@ -31,7 +31,7 @@
 
 #include "message/motion/FootMotionCommand.h"
 #include "message/motion/FootPlacementCommand.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 
 #include "utility/input/LimbID.h"
 

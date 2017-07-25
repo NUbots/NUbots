@@ -31,7 +31,7 @@
 #include "message/input/Sensors.h"
 #include "message/localisation/Ball.h"
 #include "message/motion/HeadCommand.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "message/vision/VisionObjects.h"
 
 #include "utility/math/geometry/Quad.h"
