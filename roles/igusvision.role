@@ -21,6 +21,9 @@ NUCLEAR_ROLE(
     vision::BallDetector
     vision::GoalDetector
 
+    localisation::BallLocalisation
+    localisation::RobotParticleLocalisation
+
     #Sensors
     platform::darwin::SensorFilter
 )
