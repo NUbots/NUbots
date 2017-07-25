@@ -84,11 +84,11 @@ namespace behaviour {
                 // Check with side we're getting up from
                 if (sensors.world(0, 2) < 0.0) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"GetupFront.yaml", "Stand.yaml"})));
+                        id, std::vector<std::string>({"GetUpFront.yaml", "Stand.yaml"})));
                 }
                 else {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"GetupBack.yaml", "Stand.yaml"})));
+                        id, std::vector<std::string>({"GetUpBack.yaml", "Stand.yaml"})));
                 }
                 updatePriority(EXECUTION_PRIORITY);
             });
