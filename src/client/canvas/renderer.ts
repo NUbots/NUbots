@@ -98,7 +98,6 @@ export class CanvasRenderer {
     const headLength = geometry.headLength * 0.5
     const headWidth = geometry.headWidth * 0.5
 
-    this.context.save()
     this.context.translate(geometry.origin.x, geometry.origin.y)
     this.context.rotate(Math.atan2(geometry.direction.y, geometry.direction.x))
 
@@ -117,7 +116,6 @@ export class CanvasRenderer {
 
     this.context.stroke()
     this.context.fill()
-    this.context.restore()
   }
 
   private renderCircle(opts: { appearance: Appearance, geometry: CircleGeometry }): void {
@@ -210,7 +208,6 @@ export class CanvasRenderer {
 
     if (geometry.alignToView) {
       // Ensure the text is always rendered without rotation such that it is aligned with the screen.
-      this.context.save()
       this.context.scale(Math.sign(worldTransform.scale.x), Math.sign(worldTransform.scale.y))
       this.context.rotate(-worldTransform.rotate)
       position.transform(Transform.of({
@@ -224,9 +221,5 @@ export class CanvasRenderer {
 
     this.applyAppearance(appearance)
     this.context.fillText(geometry.text, 0, 0)
-
-    if (geometry.alignToView) {
-      this.context.restore()
-    }
   }
 }
