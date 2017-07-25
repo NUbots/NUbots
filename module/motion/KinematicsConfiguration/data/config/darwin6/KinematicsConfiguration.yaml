@@ -5,7 +5,6 @@ leg:
     lower_leg_length: 0.093
     heel_length: 0.0451 # measured
     foot_centre_to_ankle_centre: 0.011 # rough
-    # length_between_legs: hip_offset[1] * 2
     foot:
         width: 0.066 # rough
         height: 0.0335
@@ -24,7 +23,7 @@ head:
 # rough measurements
 arm:
     distance_between_shoulders: 0.114 # distance between shoulders
-    shoulder: 
+    shoulder:
         length: 0.0
         width: 0.0245
         height: 0.017
