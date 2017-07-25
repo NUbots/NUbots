@@ -120,23 +120,6 @@ namespace input {
         }
         operator std::string() const;
 
-        // Iterators
-        static std::set<ServoID>::const_iterator begin() {
-            return values.begin();
-        }
-
-        static std::set<ServoID>::const_iterator end() {
-            return values.end();
-        }
-
-        static std::set<ServoID>::const_iterator cbegin() {
-            return values.cbegin();
-        }
-
-        static std::set<ServoID>::const_iterator cend() {
-            return values.cend();
-        }
-
         friend std::ostream& operator<<(std::ostream& out, const ServoID& val);
 
     private:
