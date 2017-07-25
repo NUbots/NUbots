@@ -28,7 +28,7 @@
 
 #include "DarwinVirtualLoadSensor.h"
 #include "MotionModel.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "utility/math/matrix/Rotation3D.h"
 
 

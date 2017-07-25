@@ -45,12 +45,17 @@ namespace input {
                     // Add camera to list.
                     FOURCC fourcc =
                         utility::vision::getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
-                    camera = SpinnakerCameras
-                                 .insert(std::make_pair(
-                                     deviceID,
-                                     std::make_unique<SpinnakerImageEvent>(
-                                         config.fileName, deviceID, std::move(newCamera), *this, fourcc, cameraCount)))
-                                 .first;
+                    camera =
+                        SpinnakerCameras
+                            .insert(std::make_pair(deviceID,
+                                                   std::make_unique<SpinnakerImageEvent>(config.fileName,
+                                                                                         deviceID,
+                                                                                         std::move(newCamera),
+                                                                                         *this,
+                                                                                         fourcc,
+                                                                                         cameraCount,
+                                                                                         config["isLeft"].as<bool>())))
+                            .first;
                 }
 
                 else {
@@ -348,6 +353,62 @@ namespace input {
         camera->second->camera->BeginAcquisition();
 
         log("Camera", camera->first, "with local id", camera->second->cameraID, "image acquisition started.");
+    }
+
+    SpinnakerImageEvent::SpinnakerImageEvent(const std::string& name,
+                                             const std::string& serialNumber,
+                                             Spinnaker::CameraPtr&& camera,
+                                             NUClear::Reactor& reactor,
+                                             const utility::vision::FOURCC& fourcc,
+                                             int cameraID,
+                                             bool isLeft)
+        : name(name)
+        , serialNumber(serialNumber)
+        , camera(std::move(camera))
+        , reactor(reactor)
+        , fourcc(fourcc)
+        , cameraID(cameraID)
+        , isLeft(isLeft) {}
+
+    SpinnakerImageEvent::~SpinnakerImageEvent() {
+        if (camera) {
+            if (camera->IsStreaming()) {
+                camera->EndAcquisition();
+            }
+
+            camera->UnregisterEvent(*this);
+            camera->DeInit();
+        }
+    }
+
+    void SpinnakerImageEvent::OnImageEvent(Spinnaker::ImagePtr image) {
+        // We have a complete image, emit it.
+        if (!image->IsIncomplete()) {
+            auto msg           = std::make_unique<ImageData>();
+            msg->timestamp     = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
+            msg->format        = static_cast<uint32_t>(fourcc);
+            msg->serial_number = serialNumber;
+            msg->camera_id     = cameraID;
+            msg->dimensions << image->GetWidth(), image->GetHeight();
+            msg->data.insert(msg->data.end(),
+                             static_cast<uint8_t*>(image->GetData()),
+                             static_cast<uint8_t*>(image->GetData()) + image->GetBufferSize());
+            msg->isLeft = isLeft;
+
+            reactor.emit<NUClear::dsl::word::emit::Direct>(msg);
+        }
+
+        if (image->GetWidth() > 10000 || image->GetHeight() > 10000) {
+            NUClear::log<NUClear::ERROR>("Spinnaker Camera ",
+                                         __FILE__,
+                                         " (Line ",
+                                         __LINE__,
+                                         ")",
+                                         "BAD IMAGE INITIALISATION - SHUTTING DOWN (TODO: handle better)");
+            reactor.powerplant.shutdown();
+        }
+
+        image->Release();
     }
 
     void Camera::ShutdownSpinnakerCamera() {
