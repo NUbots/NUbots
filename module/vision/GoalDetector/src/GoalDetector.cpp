@@ -624,6 +624,8 @@ namespace vision {
                     arma::vec2 tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
                     Quad angularQuad(blAngular, tlAngular, trAngular, brAngular);
                     it->visObject.angularSize = convert<double, 2>(angularQuad.getSize());
+                    // Add classified image corresponding to this message
+                    it->visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
                 }
 
 
