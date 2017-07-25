@@ -19,6 +19,8 @@
 #ifndef UTILITY_VISION_IMAGE_MASKING_H
 #define UTILITY_VISION_IMAGE_MASKING_H
 
+#include "message/vision/ImageMask.h"
+
 namespace utility {
 namespace vision {
 
@@ -78,12 +80,8 @@ namespace vision {
         }
     };
 
-    inline bool pixelIsMasked(const int& x,
-                              const int& y,
-                              const Eigen::Vector2i& dim,
-                              std::shared_ptr<const message::vision::ImageMask> mask) {
-        return mask && mask->values.rows() == dim[0] && mask->values.cols() == dim[1]
-               && mask->values(x, y) == MaskClass::MASKED;
+    inline bool pixelIsMasked(const int& x, const int& y, std::shared_ptr<const message::vision::ImageMask> mask) {
+        return mask && mask->values(x, y) == MaskClass::MASKED;
     }
 
 }  // namespace vision

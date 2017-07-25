@@ -114,6 +114,11 @@ namespace input {
             (tanHalfFOV[1] / imageCentre[1]);
         cameraParameters->pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
+        // TODO: only emit vector of camera params
+        auto params = std::make_unique<std::vector<CameraParameters>>();
+        params.push_back(*cameraParameters);
+        emit<Scope::DIRECT>(std::move(params));
+
         emit<Scope::DIRECT>(std::move(cameraParameters));
 
         log("Emitted pinhole camera parameters for camera", config["deviceID"].as<std::string>());

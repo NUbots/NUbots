@@ -177,7 +177,7 @@ namespace vision {
             // Our Y is now our next y
             y = nextY;
 
-            auto segments = quex->classify(image, lut, start, end, subsample);
+            auto segments = quex->classify(image, lut, mask, start, end, subsample);
             insertSegments(classifiedImage, segments, false);
         }
     }

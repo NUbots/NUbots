@@ -28,7 +28,7 @@
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
-#include "utility/vision/ImageMask.h"
+#include "utility/vision/ImageMasking.h"
 #include "utility/vision/LookUpTable.h"
 
 
@@ -43,6 +43,7 @@ namespace vision {
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
     using message::vision::ImageMask;
+    using message::vision::ImageMaskSet;
     using message::vision::ClassifiedImage;
     using message::support::SaveConfiguration;
     using utility::support::Expression;
@@ -211,19 +212,20 @@ namespace vision {
         on<Trigger<Image>,
            With<LookUpTable>,
            With<Sensors>,
-           With<CameraParameter>,
-           With<Optional<ImageMask>>,
+           With<CameraParameters>,
+           Optional<With<ImageMaskSet>>,
            Single,
            Priority::LOW>()
             .then("Classify Image",
                   [this](const Image& rawImage,
                          const LookUpTable& lut,
                          const Sensors& sensors,
-                         const CameraParameter& cam,
+                         const CameraParameters& cam,
                          std::shared_ptr<const ImageMaskSet> masks) {
-                      auto mask = std::make_shared<ImageMask>(NULL);
-                      if (masks && masks->mask.count(cam.cameraName) > 0) {
-                          mask = std::make_shared<ImageMask>(masks->mask[cam.cameraName]);
+
+                      std::shared_ptr<ImageMask> mask;
+                      if (masks && masks->masks.count(cam.cameraName) > 0) {
+                          mask = std::make_shared<ImageMask>(masks->masks.at(cam.cameraName));
                       }
 
                       // TODO

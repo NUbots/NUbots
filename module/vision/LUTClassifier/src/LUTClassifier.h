@@ -28,6 +28,7 @@
 
 #include "message/input/Image.h"
 #include "message/vision/ClassifiedImage.h"
+#include "message/vision/ImageMask.h"
 #include "message/vision/LookUpTable.h"
 
 #include "message/input/CameraParameters.h"

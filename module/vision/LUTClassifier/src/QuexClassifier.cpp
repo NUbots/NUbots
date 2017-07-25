@@ -31,7 +31,7 @@ namespace vision {
     using message::input::Image;
     using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
-    using utility::vision::pixelMasked;
+    using utility::vision::pixelIsMasked;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
     using quex::Token;
     using FOURCC = utility::vision::FOURCC;
@@ -57,7 +57,7 @@ namespace vision {
             for (uint i = 0; i < length / subsample; ++i) {
                 const int& x = start[0];
                 const int& y = start[1] + (i * subsample);
-                if (pixelMasked(x, y, mask)) {
+                if (pixelIsMasked(x, y, mask)) {
                     buffer[i + 1] = utility::vision::Colour::MASKED;
                 }
                 else {
@@ -83,7 +83,7 @@ namespace vision {
             for (uint i = 0; i < length / subsample; ++i) {
                 const int& x = start[0] + (i * subsample);
                 const int& y = start[1];
-                if (pixelMasked(x, y, mask)) {
+                if (pixelIsMasked(x, y, mask)) {
                     buffer[i + 1] = utility::vision::Colour::MASKED;
                 }
                 else {

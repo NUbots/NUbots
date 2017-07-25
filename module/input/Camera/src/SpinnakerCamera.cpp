@@ -11,6 +11,7 @@ namespace module {
 namespace input {
 
     using message::input::CameraParameters;
+    using message::input::CameraParameterSet;
     using extension::Configuration;
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
@@ -90,6 +91,12 @@ namespace input {
         cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
         cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
         cameraParameters->centreOffset           = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
+
+        // TODO: only emit vector of camera params
+        auto params                             = std::make_unique<CameraParameterSet>();
+        (*params)[cameraParameters->cameraName] = (*cameraParameters);
+        emit<Scope::DIRECT>(std::move(params));
+
 
         emit<Scope::DIRECT>(std::move(cameraParameters));
 

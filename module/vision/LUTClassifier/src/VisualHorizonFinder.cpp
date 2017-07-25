@@ -66,7 +66,7 @@ namespace vision {
 
             // Classify our segments
             auto segments = quex->classify(
-                image, lut, {int(x), top}, {int(x), int(image.dimensions[1] - 1)}, VISUAL_HORIZON_SUBSAMPLING);
+                image, lut, mask, {int(x), top}, {int(x), int(image.dimensions[1] - 1)}, VISUAL_HORIZON_SUBSAMPLING);
 
             // Our default green point is the bottom of the screen
             arma::ivec2 greenPoint = {int(x), int(image.dimensions[1])};
@@ -113,7 +113,7 @@ namespace vision {
             arma::ivec2 end   = {int(image.dimensions[0] - 1), int(image.dimensions[1] - 1)};
 
             // Classify our segments
-            auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
+            auto segments = quex->classify(image, lut, mask, start, end, VISUAL_HORIZON_SUBSAMPLING);
 
             // Our default green point is the bottom of the screen
             arma::ivec2 greenPoint = {int(image.dimensions[0] - 1), int(image.dimensions[1])};

@@ -53,7 +53,7 @@ namespace vision {
             arma::ivec2 end   = {int(image.dimensions[0] - 1), y};
 
             // Insert our segments
-            auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);
+            auto segments = quex->classify(image, lut, mask, start, end, GOAL_SUBSAMPLING);
             insertSegments(classifiedImage, segments, false);
         }
     }

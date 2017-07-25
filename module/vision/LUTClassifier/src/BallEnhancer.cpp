@@ -33,7 +33,7 @@ namespace vision {
     using message::vision::ClassifiedImage;
 
 
-    using utility::vision::pixelMasked;
+    using utility::vision::pixelIsMasked;
     using utility::math::geometry::Line;
     using utility::math::geometry::Plane;
     using utility::math::vision::getCamFromImage;
@@ -45,7 +45,6 @@ namespace vision {
 
     std::pair<float, Eigen::Vector2i> fieldEdgeDirection(const Eigen::Vector2i& base,
                                                          const Image& image,
-                                                         std::shared_ptr<const message::vision::ImageMask> mask,
                                                          const Eigen::Vector3f& greenCentroid) {
 
         // Get our relevant pixels
@@ -284,7 +283,7 @@ namespace vision {
             for (int y = point[1]; y > minY; --y) {
                 const int& x = point[0];
                 utility::vision::Colour colour;
-                if (pixelMasked(x, y, mask)) {
+                if (pixelIsMasked(x, y, mask)) {
                     colour = utility::vision::Colour::MASKED;
                 }
                 else {
@@ -313,17 +312,17 @@ namespace vision {
             for (int x = point[0]; x > 3; --x) {
                 const int& y = point[1];
                 utility::vision::Colour colour;
-                if (pixelMasked(x, y, mask)) {
+                if (pixelIsMasked(x, y, mask)) {
                     colour = utility::vision::Colour::MASKED;
                 }
                 else {
-                    colour utility::vision::getPixelColour(lut,
-                                                           getPixel(x,
-                                                                    y,
-                                                                    image.dimensions[0],
-                                                                    image.dimensions[1],
-                                                                    image.data,
-                                                                    static_cast<FOURCC>(image.format)));
+                    colour = utility::vision::getPixelColour(lut,
+                                                             getPixel(x,
+                                                                      y,
+                                                                      image.dimensions[0],
+                                                                      image.dimensions[1],
+                                                                      image.data,
+                                                                      static_cast<FOURCC>(image.format)));
                 }
 
                 if (colour == Colour::GREEN) {
@@ -342,7 +341,7 @@ namespace vision {
             for (int x = point[0]; x < int(image.dimensions[0]) - 3; ++x) {
                 const int& y = point[1];
                 utility::vision::Colour colour;
-                if (pixelMasked(x, y, mask)) {
+                if (pixelIsMasked(x, y, mask)) {
                     colour = utility::vision::Colour::MASKED;
                 }
                 else {

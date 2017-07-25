@@ -37,6 +37,7 @@ namespace support {
     using extension::Configuration;
 
     using message::input::CameraParameters;
+    using message::input::CameraParameterSet;
     using message::input::Image;
     using message::vision::LookUpTable;
 
@@ -69,6 +70,7 @@ namespace support {
                 auto cameraParameters = std::make_unique<CameraParameters>();
                 double tanHalfFOV[2], imageCentre[2];
 
+                cameraParameters->cameraName = "VirtualCamera";
                 // Generic camera parameters
                 cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
                 cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
@@ -107,6 +109,11 @@ namespace support {
                     emitImageHandle.disable();
                 }
                 std::cout << "Emitting camera parameters from VirtualCamera" << std::endl;
+
+                // TODO: only emit vector of camera params
+                auto params                             = std::make_unique<CameraParameterSet>();
+                (*params)[cameraParameters->cameraName] = (*cameraParameters);
+                emit<Scope::DIRECT>(std::move(params));
 
                 emit<Scope::DIRECT>(std::move(cameraParameters));
 
