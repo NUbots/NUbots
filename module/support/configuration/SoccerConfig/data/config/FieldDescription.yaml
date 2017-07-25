@@ -22,7 +22,7 @@ GoalCrossbarWidth: 0.10
 GoalCrossbarDepth: 0.10
 GoalNetHeight: 1.0
 # Measured from the goal line.
-PenaltyMarkDistance: 2.1
+PenaltyMarkDistance: 2.05 # to the middle of the penalty mark
 CenterCircleDiameter: 1.56
 BorderStripMinWidth: 0.7
 PenaltyRobotStart: 1.0
