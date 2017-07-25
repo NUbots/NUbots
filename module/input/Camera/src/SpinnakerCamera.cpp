@@ -14,10 +14,35 @@ namespace input {
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
 
+#ifndef NDEBUG
+    class SpinnakerLogCallback : Spinnaker::LoggingEvent {
+        void OnLogEvent(Spinnaker::LoggingEventDataPtr loggingEventDataPtr) {
+            NUClear::log<NUClear::DEBUG>("--------Log Event Received----------");
+            NUClear::log<NUClear::DEBUG>("Category......: ", loggingEventDataPtr->GetCategoryName());
+            NUClear::log<NUClear::DEBUG>("Priority Value: ", loggingEventDataPtr->GetPriority());
+            NUClear::log<NUClear::DEBUG>("Priority Name.: ", loggingEventDataPtr->GetPriorityName());
+            NUClear::log<NUClear::DEBUG>("Timestmap.....: ", loggingEventDataPtr->GetTimestamp());
+            NUClear::log<NUClear::DEBUG>("NDC...........: ", loggingEventDataPtr->GetNDC());
+            NUClear::log<NUClear::DEBUG>("Thread........: ", loggingEventDataPtr->GetThreadName());
+            NUClear::log<NUClear::DEBUG>("Message.......: ", loggingEventDataPtr->GetLogMessage());
+            NUClear::log<NUClear::DEBUG>("------------------------------------");
+        }
+    };
+#endif
+
     void Camera::initiateSpinnakerCamera(const Configuration& config) {
         if (!SpinnakerSystem) {
             SpinnakerSystem = Spinnaker::System::GetInstance();
         }
+
+#ifndef NDEBUG
+        // Register logging callback class
+        SpinnakerLogCallback callBackClass;
+        SpinnakerSystem->RegisterLoggingEvent((Spinnaker::LoggingEvent&) callBackClass);
+
+        // Set callback priority level
+        SpinnakerSystem->SetLoggingEventPriorityLevel(Spinnaker::LOG_LEVEL_DEBUG);
+#endif
 
         SpinnakerCamList = SpinnakerSystem->GetCameras(true, true);
         log<NUClear::DEBUG>("Found ", SpinnakerCamList.GetSize(), " cameras.");
@@ -76,23 +101,35 @@ namespace input {
             }
         }
 
-        resetSpinnakerCamera(camera, config);
+        try {
+            resetSpinnakerCamera(camera, config);
 
-        auto cameraParameters = std::make_unique<CameraParameters>();
+            auto cameraParameters = std::make_unique<CameraParameters>();
 
-        // Generic camera parameters
-        cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
-            config["format"]["height"].as<uint>();
-        cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
+            // Generic camera parameters
+            cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
+                config["format"]["height"].as<uint>();
+            cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
 
-        // Radial specific
-        cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
-        cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
-        cameraParameters->centreOffset           = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
+            // Radial specific
+            cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
+            cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
+            cameraParameters->centreOffset           = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
 
-        emit<Scope::DIRECT>(std::move(cameraParameters));
+            emit<Scope::DIRECT>(std::move(cameraParameters));
 
-        log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
+            log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
+        }
+
+        catch (Spinnaker::Exception& ex) {
+            log<NUClear::WARN>(ex.what());
+            log<NUClear::WARN>(ex.GetFullErrorMessage());
+            log<NUClear::WARN>(ex.GetFileName());
+            log<NUClear::WARN>(ex.GetFunctionName());
+            log<NUClear::WARN>(ex.GetBuildDate());
+            log<NUClear::WARN>(ex.GetBuildTime());
+            log<NUClear::WARN>(ex.GetLineNumber());
+        }
     }
 
     void Camera::resetSpinnakerCamera(std::map<std::string, std::unique_ptr<SpinnakerImageEvent>>::iterator& camera,
