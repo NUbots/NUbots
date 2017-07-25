@@ -21,9 +21,9 @@
 #define UTILITY_SUPPORT_yaml_expression_H
 
 #include <yaml-cpp/yaml.h>
-#include <iostream>
 #include <limits>
-#include "exprtk.hpp"
+
+#include "math_string.h"
 
 namespace utility {
 namespace support {
@@ -57,20 +57,8 @@ struct convert<utility::support::Expression> {
 
     static bool decode(const Node& node, utility::support::Expression& rhs) {
 
-        // Add constants to the symbol table
-        exprtk::symbol_table<double> table;
-        table.add_constants();
-        table.add_constant("auto", std::numeric_limits<double>::infinity());
-
-        // Add table to expression
-        exprtk::expression<double> expression;
-        expression.register_symbol_table(table);
-
-        // Add expression to parser and parse
-        exprtk::parser<double> parser;
-        parser.compile(node.as<std::string>(), expression);
-
-        rhs = expression.value();
+        // Parse the node as a string into a math expression
+        rhs = utility::support::parse_math_string(node.as<std::string>());
         return true;
     }
 };
