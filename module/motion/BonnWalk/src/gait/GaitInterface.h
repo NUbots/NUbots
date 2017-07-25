@@ -7,6 +7,9 @@
 #define GAIT_INTERFACE_H
 
 #include "GaitCommand.h"
+
+#include <Eigen/Geometry>
+
 #include "utility/input/ServoID.h"
 
 namespace gait {
@@ -61,6 +64,11 @@ struct GaitEngineInput {
     bool motionAdjustLeftFoot;
     //! @brief Boolean flag whether the right foot should be used to adjust the stopping stance.
     bool motionAdjustRightFoot;
+
+    //! @brief world to torso transformation.
+    Eigen::Affine3d Htw;
+    //! @brief gyroscope sensor value.
+    Eigen::Vector3d gyroscope;
 };
 
 /**

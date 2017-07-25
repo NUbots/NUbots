@@ -12,6 +12,8 @@
 #include "../WalkConfig.h"
 #include "Action.h"
 
+#include "extension/Configuration.h"
+
 #include "utility/math/geometry/Frame.h"
 
 namespace gait {
@@ -21,10 +23,12 @@ namespace contrib {
     class RobotModel {
     public:
         // Constructor
-        explicit RobotModel(const gait::WalkConfig& config);
+        explicit RobotModel() {}
+
+        void updateConfig(const ::extension::Configuration& config);
 
         // Configuration variables
-        const gait::WalkConfig& getConfig() const {
+        const ::extension::Configuration& getConfig() const {
             return config;
         }
 
@@ -131,10 +135,7 @@ namespace contrib {
                           const utility::math::geometry::Frame& toFootstep) const;
 
         // Configuration variables
-        gait::WalkConfig config;
-        void robotSpecCallback() {
-            initKinematicTranslations();
-        }
+        ::extension::Configuration config;
 
         // Robot pose (encapsulates the currently set joint angles, applied to the kinematic frames by the applyPose()
         // function)

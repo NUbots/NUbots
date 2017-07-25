@@ -6,6 +6,7 @@
 #include "RobotModel.h"
 
 #include "utility/math/angle.h"
+#include "utility/support/yaml_expression.h"
 
 //
 // RobotModel class
@@ -14,10 +15,12 @@
 namespace gait {
 namespace contrib {
 
-    // Default constructor
-    RobotModel::RobotModel(const gait::WalkConfig& config) : config(config) {
-        // Set up the robot spec callback
-        this->config.addRobotSpecCallback(std::bind(&RobotModel::robotSpecCallback, this));
+    using extension::Configuration;
+
+    using utility::support::Expression;
+
+    void RobotModel::updateConfig(const Configuration& config) {
+        this->config = config;
 
         // Reset the robot model object
         reset(true);
@@ -31,7 +34,7 @@ namespace contrib {
         }
 
         // Update the robot specifications
-        robotSpecCallback();
+        initKinematicTranslations();
 
         // Reset the odometry
         resetOdom();
@@ -127,34 +130,38 @@ namespace contrib {
     // Initialise the (fixed) translations of the frames in the kinematic chain
     void RobotModel::initKinematicTranslations() {
         // Trunk
-        com.setTranslation(config.comOffsetX, 0, config.comOffsetZ);
-        trunkLink.setTranslation(config.trunkLinkOffsetX, config.trunkLinkOffsetY, config.trunkLinkOffsetZ);
+        com.setTranslation(config["comOffsetX"].as<Expression>(), 0, config["comOffsetZ"].as<Expression>());
+        trunkLink.setTranslation(config["trunkLinkOffsetX"].as<Expression>(),
+                                 config["trunkLinkOffsetY"].as<Expression>(),
+                                 config["trunkLinkOffsetZ"].as<Expression>());
 
         // Head
-        neck.setTranslation(0, 0, config.trunkHeight + config.neckHeight);
-        head.setTranslation(config.headOffsetX, 0, config.headOffsetZ);
+        neck.setTranslation(0, 0, config["trunkHeight"].as<Expression>() + config["neckHeight"].as<Expression>());
+        head.setTranslation(config["headOffsetX"].as<Expression>(), 0, config["headOffsetZ"].as<Expression>());
 
         // Left arm
-        lShoulder.setTranslation(0, 0.5 * config.shoulderWidth, config.trunkHeight);
-        lElbow.setTranslation(0, 0, -config.armLinkLength);
-        lHand.setTranslation(0, 0, -config.armLinkLength);
+        lShoulder.setTranslation(
+            0, 0.5 * config["shoulderWidth"].as<Expression>(), config["trunkHeight"].as<Expression>());
+        lElbow.setTranslation(0, 0, -config["armLinkLength"].as<Expression>());
+        lHand.setTranslation(0, 0, -config["armLinkLength"].as<Expression>());
 
         // Right arm
-        rShoulder.setTranslation(0, -0.5 * config.shoulderWidth, config.trunkHeight);
-        rElbow.setTranslation(0, 0, -config.armLinkLength);
-        rHand.setTranslation(0, 0, -config.armLinkLength);
+        rShoulder.setTranslation(
+            0, -0.5 * config["shoulderWidth"].as<Expression>(), config["trunkHeight"].as<Expression>());
+        rElbow.setTranslation(0, 0, -config["armLinkLength"].as<Expression>());
+        rHand.setTranslation(0, 0, -config["armLinkLength"].as<Expression>());
 
         // Left leg
-        lHip.setTranslation(0, 0.5 * config.hipWidth, 0);
-        lKnee.setTranslation(0, 0, -config.legLinkLength);
-        lAnkle.setTranslation(0, 0, -config.legLinkLength);
-        lFootFloorPoint.setTranslation(0, 0, -config.footOffsetZ);
+        lHip.setTranslation(0, 0.5 * config["hipWidth"].as<Expression>(), 0);
+        lKnee.setTranslation(0, 0, -config["legLinkLength"].as<Expression>());
+        lAnkle.setTranslation(0, 0, -config["legLinkLength"].as<Expression>());
+        lFootFloorPoint.setTranslation(0, 0, -config["footOffsetZ"].as<Expression>());
 
         // Right leg
-        rHip.setTranslation(0, -0.5 * config.hipWidth, 0);
-        rKnee.setTranslation(0, 0, -config.legLinkLength);
-        rAnkle.setTranslation(0, 0, -config.legLinkLength);
-        rFootFloorPoint.setTranslation(0, 0, -config.footOffsetZ);
+        rHip.setTranslation(0, -0.5 * config["hipWidth"].as<Expression>(), 0);
+        rKnee.setTranslation(0, 0, -config["legLinkLength"].as<Expression>());
+        rAnkle.setTranslation(0, 0, -config["legLinkLength"].as<Expression>());
+        rFootFloorPoint.setTranslation(0, 0, -config["footOffsetZ"].as<Expression>());
     }
 
     // Initialise the rotations of the frames in the kinematic chain
@@ -274,7 +281,7 @@ namespace contrib {
         int lowestFoot        = (footHeightDiff > 0 ? LEFT_LEG : RIGHT_LEG);
 
         // Allow a support exchange if the vertical foot separation has exceeded a configured threshold
-        if (supportExchangeLock && (fabs(footHeightDiff) >= config.footHeightHysteresis)) {
+        if (supportExchangeLock && (std::abs(footHeightDiff) >= config["footHeightHysteresis"].as<Expression>())) {
             supportExchangeLock = false;
         }
 
@@ -356,7 +363,8 @@ namespace contrib {
         // Calculate the difference in fused yaw (CCW) from the support foot floor point frame to the current support
         // footstep frame, and yaw the base frame by this value
         double yawDelta = fusedYaw(supportFootstep->rotation()) - fusedYaw(suppFloorPoint->orientation());
-        base.setRotation(Eigen::Quaterniond(cos(0.5 * yawDelta), 0.0, 0.0, sin(0.5 * yawDelta)) * base.rotation());
+        base.setRotation(Eigen::Quaterniond(std::cos(0.5 * yawDelta), 0.0, 0.0, std::sin(0.5 * yawDelta))
+                         * base.rotation());
 
 
         // Translate the model (base frame) so that the support foot floor point and support footstep frames coincide in
@@ -549,23 +557,23 @@ namespace contrib {
     // Converts a pure fused pitch/roll rotation to a quaternion
     // Note: It is assumed that the missing fusedZ = 0 and hemi = 1
     Eigen::Quaterniond RobotModel::quatFromFusedPR(double fusedX, double fusedY) {
-        // Precalculate the sin values
-        double sth  = sin(fusedY);
-        double sphi = sin(fusedX);
+        // Precalculate the std::sin values
+        double sth  = std::sin(fusedY);
+        double sphi = std::sin(fusedX);
 
         // Calculate the sine sum criterion
         double crit = sth * sth + sphi * sphi;
 
         // Calculate the tilt angle alpha
-        double alpha   = (crit >= 1.0 ? M_PI_2 : acos(sqrt(1.0 - crit)));
+        double alpha   = (crit >= 1.0 ? M_PI_2 : std::acos(std::sqrt(1.0 - crit)));
         double halpha  = 0.5 * alpha;
-        double chalpha = cos(halpha);
-        double shalpha = sin(halpha);
+        double chalpha = std::cos(halpha);
+        double shalpha = std::sin(halpha);
 
         // Calculate the tilt axis gamma
-        double gamma  = atan2(sth, sphi);
-        double cgamma = cos(gamma);
-        double sgamma = sin(gamma);
+        double gamma  = std::atan2(sth, sphi);
+        double cgamma = std::cos(gamma);
+        double sgamma = std::sin(gamma);
 
         // Return the required quaternion orientation (a rotation about (cgamma, sgamma, 0) by angle alpha)
         return Eigen::Quaterniond(chalpha, cgamma * shalpha, sgamma * shalpha, 0.0);  // Order: w, x, y, z!

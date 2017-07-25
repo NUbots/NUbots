@@ -10,6 +10,7 @@
 #include <Eigen/Core>
 #include <array>
 #include <nuclear>
+
 #include "ComFilter.h"
 #include "GaitInterface.h"
 #include "contrib/Action.h"
@@ -19,6 +20,9 @@
 #include "pose/AbstractPose.h"
 #include "pose/InversePose.h"
 #include "pose/JointPose.h"
+
+#include "extension/Configuration.h"
+
 #include "utility/math/filter/EWIntegrator.h"
 #include "utility/math/filter/GolayDerivative.h"
 #include "utility/math/filter/MeanFilter.h"
@@ -39,6 +43,13 @@ class GaitEngine {
 public:
     //! Default constructor
     GaitEngine(NUClear::Reactor& reactor);
+
+    /**
+     * @brief Updates all configuration values.
+     *
+     * Calls any necessary "callback" functions.
+     **/
+    void updateConfig(const ::extension::Configuration& config);
 
     /**
      * @brief Reset the gait engine.
@@ -110,14 +121,6 @@ public:
     bool plot = false;
 
 protected:
-    /**
-     * @brief Pointer to the RobotModel object to use for retrieving state information in each step.
-     *
-     * This parameter is guaranteed to be set by the `Gait` class prior to any other function being
-     * called. For obvious reasons it is heavily discouraged for a gait engine to write to this variable.
-     **/
-    const robotcontrol::RobotModel* model;
-
     /**
      * @brief Reset the GaitEngine base class.
      *
@@ -247,7 +250,7 @@ private:
     static constexpr double USE_CALC_POSE = 0.0;
 
     // Gait configuration struct
-    gait::WalkConfig config;
+    ::extension::Configuration config;
 
     // Pose variables
     pose::JointPose m_jointPose;            // Joint representation of the pose to command in a step

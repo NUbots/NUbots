@@ -6,6 +6,8 @@
 #include "Limp.h"
 #include "LimpState.h"
 
+#include "extension/Configuration.h"
+
 #include "../WalkConfig.h"
 
 namespace gait {
@@ -53,10 +55,12 @@ namespace contrib {
     private:
         Limp limp;
 
-        gait::WalkConfig config;
+        ::extension::Configuration config;
 
     public:
-        explicit LimpModel(const gait::WalkConfig& config);
+        explicit LimpModel();
+
+        void updateConfig(const ::extension::Configuration& config);
 
         void reset() {
             LimpState ms;

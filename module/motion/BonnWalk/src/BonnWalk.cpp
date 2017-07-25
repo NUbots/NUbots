@@ -1,9 +1,12 @@
 #include "BonnWalk.h"
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/WalkCommand.h"
+
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace motion {
@@ -23,9 +26,7 @@ namespace motion {
 
         using namespace std::chrono;
 
-        on<Configuration>("BonnWalk.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file BonnWalk.yaml
-        });
+        on<Configuration>("BonnWalk.yaml").then([this](const Configuration& config) { engine.updateConfig(config); });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& cmd) {
             engine.reset();
@@ -51,6 +52,8 @@ namespace motion {
                 engine.in.truedT    = timestamp - engine.in.timestamp;
                 engine.in.timestamp = timestamp;
                 engine.in.nominaldT = duration_cast<duration<double>>(updateRate).count();
+                engine.in.Htw       = sensors.world;
+                engine.in.gyroscope = sensors.gyroscope;
 
                 // See if we finished walking
                 bool walking = engine.out.walking;

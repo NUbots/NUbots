@@ -1,11 +1,16 @@
 #include "LimpModel.h"
 
 #include "utility/math/comparison.h"
+#include "utility/support/yaml_expression.h"
 
 namespace gait {
 namespace contrib {
 
-    LimpModel::LimpModel(const WalkConfig& config) : config(config) {
+    using extension::Configuration;
+
+    using utility::support::Expression;
+
+    LimpModel::LimpModel() {
         systemIterationTime = 0;
         fusedAngleX         = 0;
         fusedAngleY         = 0;
@@ -28,16 +33,20 @@ namespace contrib {
         nominalFootStepTHalf = 0;
     }
 
+    void LimpModel::updateConfig(const Configuration& config) {
+        this->config = config;
+    }
+
     // Sets the state of the limp model.
     // It sets the current motion state, it computes the nominal state, the Z,T,F parameters, and the end of step state.
     void LimpModel::setState(LimpState ms, Eigen::Vector3f ggcv) {
-        double C     = config.mgC;
+        double C     = config["mgC"].as<Expression>();
         double sC    = std::sqrt(C);
-        double alpha = config.mgAlpha;  // Lateral step apex size.
-        double delta = config.mgDelta;  // Minimum lateral support exchange location.
-        double omega = config.mgOmega;  // Maximum lateral support exchange location.
-        double sigma = config.mgSigma;  // Maximum sagittal apex velocity.
-        double gamma = config.mgGamma;  // Maximum rotational step angle.
+        double alpha = config["mgAlpha"].as<Expression>();  // Lateral step apex size.
+        double delta = config["mgDelta"].as<Expression>();  // Minimum lateral support exchange location.
+        double omega = config["mgOmega"].as<Expression>();  // Maximum lateral support exchange location.
+        double sigma = config["mgSigma"].as<Expression>();  // Maximum sagittal apex velocity.
+        double gamma = config["mgGamma"].as<Expression>();  // Maximum rotational step angle.
 
         gcv = ggcv;  // Input
 
@@ -101,12 +110,15 @@ namespace contrib {
         limp.set(y, vy, C);
         double zy = limp.z(nominalState.y, nominalTimeToStep);
         if (supportLegSign == 1) {
-            zmp.y() = utility::math::clamp((double) config.mgZmpYMin, zy, (double) config.mgZmpYMax);
+            zmp.y() = utility::math::clamp(
+                double(config["mgZmpYMin"].as<Expression>()), zy, double(config["mgZmpYMax"].as<Expression>()));
         }
         else {
-            zmp.y() = utility::math::clamp((double) -config.mgZmpYMax, zy, (double) -config.mgZmpYMin);
+            zmp.y() = utility::math::clamp(
+                double(-config["mgZmpYMax"].as<Expression>()), zy, double(-config["mgZmpYMin"].as<Expression>()));
         }
-        if (!config.cmdUseNonZeroZMP) {
+
+        if (!config["cmdUseNonZeroZMP"].as<bool>()) {
             zmp.y() = 0;
         }
 
@@ -165,11 +177,11 @@ namespace contrib {
         // sagittal position at the end of the step, we overwrite the step time with the time of reaching the sagittal
         // boundary.
         limp.set(x, vx, C);
-        double t1                                 = limp.tLoc(config.mgMaxComPositionX);
-        double t2                                 = limp.tLoc(-config.mgMaxComPositionX);
+        double t1                                 = limp.tLoc(config["mgMaxComPositionX"].as<Expression>());
+        double t2                                 = limp.tLoc(-config["mgMaxComPositionX"].as<Expression>());
         if (t2 > 0 && t2 < timeToStep) timeToStep = t2;
         if (t1 > 0 && t1 < timeToStep) timeToStep = t1;
-        if (x > config.mgMaxComPositionX || x < -config.mgMaxComPositionX) {
+        if (x > config["mgMaxComPositionX"].as<Expression>() || x < -config["mgMaxComPositionX"].as<Expression>()) {
             timeToStep = 0;
         }
 
@@ -182,16 +194,18 @@ namespace contrib {
         // point matches the desired capture point at a given time T, which is the end of the footstep in this case.
         //  Vec2f capturePoint = getCapturePoint();
         //  double b = exp(sqrt(C)*timeToStep);
-        //  zmp.x() = utility::math::clamp(config.zmpXMin, (nominalCapturePoint.x() - b*capturePoint.x)/(1 - b),
-        //  config.zmpXMax);
+        //  zmp.x() = utility::math::clamp(config["zmpXMin"].as<Expression>(), (nominalCapturePoint.x() -
+        //  b*capturePoint.x)/(1 - b),
+        //  config["zmpXMax"].as<Expression>());
 
         // New zmp method. It tries to match the CoM location with the nominal state at the end of the step, instead of
         // the capture point.
         limp.set(x, vx, C);
         double zx = limp.z(nominalState.x, timeToStep);
-        zmp.x()   = utility::math::clamp((double) config.mgZmpXMin, zx, (double) config.mgZmpXMax);
+        zmp.x()   = utility::math::clamp(
+            double(config["mgZmpXMin"].as<Expression>()), zx, double(config["mgZmpXMax"].as<Expression>()));
 
-        if (!config.cmdUseNonZeroZMP) {
+        if (!config["cmdUseNonZeroZMP"].as<bool>()) {
             zmp.x() = 0;
         }
 
@@ -255,7 +269,7 @@ namespace contrib {
 
     // Simulates the pendulum model for dt amount of time. No step is induced.
     void LimpModel::forward(double dt) {
-        double C = config.mgC;
+        double C = config["mgC"].as<Expression>();
 
         limp.set(x - zmp.x(), vx, C);  // update with zmp
         limp.update(dt);
@@ -290,15 +304,15 @@ namespace contrib {
 
     // Induces a step to the current footStep location.
     void LimpModel::step() {
-        double C = config.mgC;
+        double C = config["mgC"].as<Expression>();
 
         // Post step prediction correction.
         // The larger the torso angle at support exchange, the less precise the limp step prediction becomes.
         // We try to fix it a little with this hack.
         double postStepCorrectionFactor =
-            config.cmdUseRXFeedback
-            * utility::math::clamp(0.0, std::abs(fusedAngleY) / config.mgPostStepStateCorrAng, 1.0);
-        if (config.mgPostStepStateCorrAng <= 0) {
+            config["cmdUseRXFeedback"].as<Expression>()
+            * utility::math::clamp(0.0, std::abs(fusedAngleY) / config["mgPostStepStateCorrAng"].as<Expression>(), 1.0);
+        if (config["mgPostStepStateCorrAng"].as<Expression>() <= 0) {
             postStepCorrectionFactor = 0;
         }
 
@@ -319,7 +333,7 @@ namespace contrib {
 
     // Returns the current motion state.
     LimpState LimpModel::getMotionState() {
-        double C = config.mgC;
+        double C = config["mgC"].as<Expression>();
 
         LimpState ms;
         ms.x              = x;
@@ -338,7 +352,7 @@ namespace contrib {
     // Returns the estimated time to the support exchange location.
     // Takes the currently set zmp into account. The sel is given in pendulum coordinates relative to the foot center.
     double LimpModel::timeToLoc(double sel) {
-        double C = config.mgC;
+        double C = config["mgC"].as<Expression>();
 
         limp.set(y - zmp.y(), vy, C);
         return limp.tLoc(sel - zmp.y());
@@ -346,7 +360,7 @@ namespace contrib {
 
     // Returns the estimated time to the support exchange location.
     double LimpModel::timeToSel() {
-        double C = config.mgC;
+        double C = config["mgC"].as<Expression>();
 
         limp.set(y - zmp.y(), vy, C);
         return limp.tLoc(nominalState.y - zmp.y());
@@ -355,7 +369,7 @@ namespace contrib {
     // Returns the estimated time to the apex.
     // Takes the currently set zmp into account.
     double LimpModel::timeToApex() {
-        double C = config.mgC;
+        double C = config["mgC"].as<Expression>();
 
         limp.set(y - zmp.y(), vy, C);
         return limp.tVel(0);
@@ -383,7 +397,7 @@ namespace contrib {
 
     // Returns the capture point in pendulum coordinates (relative to support foot middle).
     Eigen::Vector2f LimpModel::getCapturePoint() {
-        double C = config.mgC;
+        double C = config["mgC"].as<Expression>();
 
         Eigen::Vector2f capturePoint;
         capturePoint.x() = x + Limp(x, vx, C).origin(0, 0);
