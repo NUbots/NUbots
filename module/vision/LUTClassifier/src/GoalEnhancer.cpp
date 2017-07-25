@@ -21,6 +21,7 @@
 
 #include "utility/math/geometry/Line.h"
 #include "utility/math/ransac/NPartiteRansac.h"
+#include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -33,6 +34,7 @@ namespace vision {
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
     using utility::math::ransac::NPartiteRansac;
     using utility::math::geometry::Line;
+    using utility::math::geometry::Plane;
 
     using utility::nubugger::drawVisionLines;
 
@@ -87,6 +89,7 @@ namespace vision {
          */
 
         Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+        // Plane<3> horizon;
 
         // Get our goal segments
         std::vector<GoalPOI> points;
