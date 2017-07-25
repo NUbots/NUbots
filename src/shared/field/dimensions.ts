@@ -71,8 +71,8 @@ export class FieldDimensions {
 
   public static postYear2017() {
     return new FieldDimensions({
-      lineWidth: 0.05,
-      markWidth: 0.05,
+      lineWidth: 0.06,
+      markWidth: 0.1,
       fieldLength: 9,
       fieldWidth: 6,
       goalDepth: 0.6,
@@ -82,8 +82,8 @@ export class FieldDimensions {
       goalCrossbarHeight: 1.8,
       goalPostDiameter: 0.1,
       goalNetHeight: 1,
-      penaltyMarkDistance: 2.1,
-      centerCircleDiameter: 1.50,
+      penaltyMarkDistance: 2.05,
+      centerCircleDiameter: 1.56,
       borderStripMinWidth: 0.7,
     })
   }
