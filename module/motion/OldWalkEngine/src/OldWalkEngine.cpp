@@ -271,7 +271,7 @@ namespace motion {
         gainArms    = gains["arms"].as<Expression>();
         gainLegs    = gains["legs"].as<Expression>();
 
-        for (const auto& i : ServoID()) {
+        for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; ++i) {
             if (int(i) < 6) {
                 jointGains[i] = gainArms;
             }

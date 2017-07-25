@@ -371,7 +371,8 @@ namespace vision {
                             b.edgePoints.push_back(convert<double, 3>(
                                 getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam)));
                         }
-                        b.visObject.timestamp = NUClear::clock::now();
+                        b.visObject.timestamp       = NUClear::clock::now();
+                        b.visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
 
                         balls->push_back(std::move(b));
                     }

@@ -61,7 +61,7 @@ namespace input {
                                                                                          *this,
                                                                                          fourcc,
                                                                                          cameraCount,
-                                                                                         config["isLeft"].as<bool>())))
+                                                                                         config["is_left"].as<bool>())))
                             .first;
                 }
 
