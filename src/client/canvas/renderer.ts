@@ -200,15 +200,13 @@ export class CanvasRenderer {
   private renderText(opts: { appearance: Appearance, geometry: TextGeometry, worldTransform: Transform }): void {
     const { appearance, geometry, worldTransform } = opts
     const position = Vector2.from(geometry)
-    const maxWidth = geometry.maxWidth === -1 ? undefined : geometry.maxWidth
 
     this.context.font = `1em ${geometry.fontFamily}`
     this.context.textAlign = geometry.textAlign
     this.context.textBaseline = geometry.textBaseline
 
     const textWidth = this.context.measureText(geometry.text).width
-    const scale = maxWidth ? (maxWidth / textWidth) : geometry.transform.scale.x
-    this.context.font = `${scale}em ${geometry.fontFamily}`
+    const scale = geometry.maxWidth / textWidth
 
     if (geometry.alignToView) {
       // Ensure the text is always rendered without rotation such that it is aligned with the screen.
@@ -220,7 +218,9 @@ export class CanvasRenderer {
         scale: { x: Math.sign(worldTransform.scale.x), y: Math.sign(worldTransform.scale.y) },
       }))
     }
-    this.context.translate(position.x, position.y)
+
+    this.context.scale(scale, scale)
+    this.context.translate(position.x / scale, position.y / scale)
 
     this.applyAppearance(appearance)
     this.context.fillText(geometry.text, 0, 0)
