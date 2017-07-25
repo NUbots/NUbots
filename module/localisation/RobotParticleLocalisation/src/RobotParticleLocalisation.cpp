@@ -134,6 +134,8 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
 
+                Transform3D Hft;
+                Transform3D Hfw;
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
                 arma::vec3 rTFf;
                 arma::mat22 Hfw_xy;
@@ -143,9 +145,6 @@ namespace localisation {
                 std::vector<arma::mat33> cov;
 
                 for (auto& s : locReset.hypotheses) {
-                    Transform3D Hft;
-                    Transform3D Hfw;
-
                     rTFf              = {s.position[0], s.position[1], 0};
                     Hft.translation() = -rTFf;
                     Hft.rotateZ(s.heading);
