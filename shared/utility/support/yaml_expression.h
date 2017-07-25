@@ -20,10 +20,10 @@
 #ifndef UTILITY_SUPPORT_yaml_expression_H
 #define UTILITY_SUPPORT_yaml_expression_H
 
-#include <muparserx/mpParser.h>
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <limits>
+#include "exprtk.hpp"
 
 namespace utility {
 namespace support {
@@ -57,18 +57,21 @@ struct convert<utility::support::Expression> {
 
     static bool decode(const Node& node, utility::support::Expression& rhs) {
 
-        try {
-            // Parse the expression using muParser
-            mup::ParserX parser(mup::pckALL_NON_COMPLEX);
-            parser.DefineConst("auto", std::numeric_limits<double>::infinity());
-            parser.SetExpr(node.as<std::string>());
-            rhs = parser.Eval().GetFloat();
+        // Add constants to the symbol table
+        exprtk::symbol_table<double> table;
+        table.add_constants();
+        table.add_constant("auto", std::numeric_limits<double>::infinity());
 
-            return true;
-        }
-        catch (mup::ParserError& e) {
-            return false;
-        }
+        // Add table to expression
+        exprtk::expression<double> expression;
+        expression.register_symbol_table(table);
+
+        // Add expression to parser and parse
+        exprtk::parser<double> parser;
+        parser.compile(node.as<std::string>(), expression);
+
+        rhs = expression.value();
+        return true;
     }
 };
 }  // namespace YAML
