@@ -87,7 +87,7 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureHead(KinematicsModel& model, const YAML::Node& objHead) {
-        model.head.CAMERA_DECLINATION_ANGLE_OFFSET = objHead["camera_declination_angle_offset"].as<float>();
+        model.head.CAMERA_DECLINATION_ANGLE_OFFSET = objHead["camera_declination_angle_offset"].as<Expression>();
 
         arma::vec3 head_neckToCamera       = objHead["neck_to_camera"].as<arma::vec3>();
         model.head.NECK_TO_CAMERA_X        = head_neckToCamera[0];
