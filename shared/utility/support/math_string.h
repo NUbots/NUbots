@@ -14,23 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2017 NUbots <nubots@nubots.net>
  */
 
-syntax = "proto3";
+#ifndef UTILITY_SUPPORT_MATH_STRING_H
+#define UTILITY_SUPPORT_MATH_STRING_H
 
-package message.input;
+#include <string>
 
-import "google/protobuf/timestamp.proto";
-import "Matrix.proto";
-import "Vector.proto";
+namespace utility {
+namespace support {
 
-message Image {
-    uint32                    format        = 1;
-    uvec2                     dimensions    = 2;
-    bytes                     data          = 3;
-    uint32                    camera_id     = 4;
-    string                    serial_number = 5;
-    google.protobuf.Timestamp timestamp     = 6;
-    mat44                     Hcw           = 7;
-}
+    /**
+     * @brief Take a math expression as a string and convert it to a double.
+     *
+     * @param str the string that represents the mathematical expression
+     *
+     * @return the double that this expression resolves to
+     */
+    double parse_math_string(const std::string& str);
+
+}  // namespace support
+}  // namespace utility
+
+#endif  // UTILITY_SUPPORT_MATH_STRING_H

@@ -121,8 +121,8 @@ namespace vision {
                 MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
                 MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
 
-                VECTOR3_COVARIANCE = config["VECTOR3_COVARIANCE"].as<arma::vec>();
-                ANGLE_COVARIANCE   = config["ANGLE_COVARIANCE"].as<arma::vec>();
+                VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
+                ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
 
             });
 

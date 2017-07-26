@@ -25,6 +25,8 @@
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 
+#include "utility/math/matrix/Transform3D.h"
+
 namespace module {
 namespace localisation {
 
@@ -49,7 +51,7 @@ namespace localisation {
 
         arma::vec3 predictedObservation(const arma::vec::fixed<size>& state,
                                         const message::support::FieldDescription& field,
-                                        const message::input::Sensors& sensors) const;
+                                        const utility::math::matrix::Transform3D& Hcw) const;
 
         arma::vec observationDifference(const arma::vec& measurement, const arma::vec3& rBCc) const;
 

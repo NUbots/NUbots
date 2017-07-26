@@ -541,7 +541,7 @@ namespace platform {
                                                            : false;
 
                             if (footDown) {
-                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics.at(servoid));
+                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics[servoid]);
                                 Transform3D Hft = Htf.i();
 
                                 Rotation3D Rtf  = Htf.rotation();
@@ -636,7 +636,7 @@ namespace platform {
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
                     sensors->bodyToGround    = convert<double, 4, 4>(Transform3D(oBodyToGround));
-                    auto headPitchKinematics = sensors->forwardKinematics.at(ServoID::HEAD_PITCH);
+                    auto headPitchKinematics = sensors->forwardKinematics[ServoID::HEAD_PITCH];
 
                     // Get torso to world transform
                     Transform3D worldInv = world.i();

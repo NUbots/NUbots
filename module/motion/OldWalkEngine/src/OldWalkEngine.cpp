@@ -29,7 +29,7 @@
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/SaveConfiguration.h"
@@ -271,7 +271,7 @@ namespace motion {
         gainArms    = gains["arms"].as<Expression>();
         gainLegs    = gains["legs"].as<Expression>();
 
-        for (const auto& i : ServoID()) {
+        for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; ++i) {
             if (int(i) < 6) {
                 jointGains[i] = gainArms;
             }
@@ -552,14 +552,13 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootTorso = rightFootTorso.rotateZLocal(
-                -hipRollCompensation * phaseComp,
-                convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
+            rightFootTorso =
+                rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp,
+                                            convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_HIP_ROLL]));
         }
         else {
             leftFootTorso = leftFootTorso.rotateZLocal(
-                hipRollCompensation * phaseComp,
-                convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
+                hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {
