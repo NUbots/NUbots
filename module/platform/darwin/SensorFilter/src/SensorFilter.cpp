@@ -464,17 +464,21 @@ namespace platform {
                         // confirm accel and foot vector are close
                         // weight CM730 higher
 
-                        Transform3D Htl = convert<double, 4, 4>(sensors->forwardKinematics[servoid::L_ANKLE_ROLL]);
-                        Transform3D Htr = convert<double, 4, 4>(sensors->forwardKinematics[servoid::R_ANKLE_ROLL]);
-
+                        Transform3D Htl = convert<double, 4, 4>(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        Transform3D Htr = convert<double, 4, 4>(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL]);
                         Transform3D Htw = convert<double, 4, 4>(sensors->world);
+
                         Transform3D Hlw = Htl.i() * Htw;
                         Transform3D Hrw = Htr.i() * Htw;
 
-                        float nominal_z_threshold = 0.02;
+                        auto zCompR = (Hrw).i().cols(3, 2);
+                        auto zCompL = (Hlw).i().cols(3, 2);
 
-                        auto zCompL = Hlw.translation().row(0, 2);
+                        log(zCompL, zCompR);
+
+                        /*
                         auto zCompR = Hrw.translation().row(0, 2);
+                        auto zCompL = Hlw.translation().row(0, 2);
                         if (std::max(zComp[0], zComp[1]) > nominal_z_threshold) {
                             auto lowestFoot = zComp[0] > zComp[1] ? 0 : 1;
                         }
@@ -482,7 +486,7 @@ namespace platform {
                         }
                         else {
                             log("Both feet on ground, hopefully!");
-                        }
+                        }*/
                     }
                     else {
                         sensors->leftFootDown  = false;
