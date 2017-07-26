@@ -1,5 +1,8 @@
 driver: Spinnaker
 deviceID: "15211412"        # 00E81B94
+usb:
+  bus: 2
+  device: 2
 
 buffer_count: 4             # The number of software buffers to use.
 

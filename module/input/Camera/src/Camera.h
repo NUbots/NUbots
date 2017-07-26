@@ -40,6 +40,8 @@ namespace input {
         explicit Camera(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        bool resetUSBDevice(int bus, int device);
+
         // V4L2 Camera details
         V4L2Camera initiateV4L2Camera(const ::extension::Configuration& config);
         void ShutdownV4L2Camera();

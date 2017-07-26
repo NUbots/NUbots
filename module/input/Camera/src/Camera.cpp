@@ -1,6 +1,7 @@
-#include "Camera.h"
+#include <libusb-1.0/libusb.h>
 
-#include <Eigen/Geometry>
+
+#include "Camera.h"
 
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
@@ -23,6 +24,7 @@ namespace input {
         , V4L2Cameras()
         , SpinnakerSystem()
         , SpinnakerCamList()
+        , SpinnakerLoggingCallback(*this)
         , SpinnakerCameras() {
 
         on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
@@ -105,6 +107,73 @@ namespace input {
             ShutdownV4L2Camera();
             ShutdownSpinnakerCamera();
         });
+    }
+
+    bool Camera::resetUSBDevice(int bus, int device) {
+        libusb_device_handle* devh = NULL;
+        libusb_device* dev         = NULL;
+        libusb_device** devs       = NULL;
+
+        int ret;
+
+        ret = libusb_init(NULL);
+
+        if (ret < 0) {
+            log<NUClear::WARN>("Failed to initalise libusb.");
+            return false;
+        }
+
+        ret = libusb_get_device_list(NULL, &devs);
+
+        if (ret < 0) {
+            log<NUClear::WARN>("Failed to get device list from libusb.");
+            return false;
+        }
+
+        for (int i = 0; devs[i - 1] != NULL; i++) {
+            dev = devs[i];
+
+            int busNum = (int) libusb_get_bus_number(dev);
+            int devNum = (int) libusb_get_device_address(dev);
+
+            if ((busNum == bus) && (devNum == device)) {
+                break;
+            }
+        }
+
+        if (dev == NULL) {
+            log<NUClear::WARN>("Failed to find usb device", device, "on bus", bus);
+            return false;
+        }
+
+        ret = libusb_open(dev, &devh);
+
+        if (ret != 0) {
+            log<NUClear::WARN>("Failed to open usb device", device, "on bus", bus);
+            return false;
+        }
+
+        bool success = true;
+
+        for (int i = 0; i < 100; i++) {
+            success = libusb_reset_device(devh);
+
+            if (i > 98) {
+                success = false;
+                break;
+            }
+        }
+
+        // free the device list
+        libusb_free_device_list(devs, 1);
+        libusb_exit(NULL);
+
+        if (!success) {
+            log<NUClear::WARN>("Failed to reset usb device", device, "on bus", bus);
+            return false;
+        }
+
+        return true;
     }
 
     // When we shutdown, we must tell our camera class to close (stop streaming)

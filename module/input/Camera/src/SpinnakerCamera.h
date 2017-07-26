@@ -40,21 +40,12 @@ namespace input {
         bool isLeft;
     };
 
-    class SpinnakerLogCallback : Spinnaker::LoggingEvent {
-        void OnLogEvent(Spinnaker::LoggingEventDataPtr loggingEventDataPtr) {
-#ifndef NDEBUG
-            NUClear::log<NUClear::DEBUG>("--------Log Event Received----------");
-            NUClear::log<NUClear::DEBUG>("Category......: ", loggingEventDataPtr->GetCategoryName());
-            NUClear::log<NUClear::DEBUG>("Priority Value: ", loggingEventDataPtr->GetPriority());
-            NUClear::log<NUClear::DEBUG>("Priority Name.: ", loggingEventDataPtr->GetPriorityName());
-            NUClear::log<NUClear::DEBUG>("Timestmap.....: ", loggingEventDataPtr->GetTimestamp());
-            NUClear::log<NUClear::DEBUG>("NDC...........: ", loggingEventDataPtr->GetNDC());
-            NUClear::log<NUClear::DEBUG>("Thread........: ", loggingEventDataPtr->GetThreadName());
-            NUClear::log<NUClear::DEBUG>("Message.......: ", loggingEventDataPtr->GetLogMessage());
-            NUClear::log<NUClear::DEBUG>("------------------------------------");
-#endif
-            return;
-        }
+    struct SpinnakerLogCallback : public Spinnaker::LoggingEvent {
+        SpinnakerLogCallback(NUClear::Reactor& reactor) : reactor(reactor) {}
+
+        NUClear::Reactor& reactor;
+
+        void OnLogEvent(Spinnaker::LoggingEventDataPtr loggingEventDataPtr);
     };
 
 }  // namespace input
