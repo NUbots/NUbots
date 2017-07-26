@@ -26,12 +26,8 @@ namespace vision {
 
         if (pts.size() == REQUIRED_POINTS && !arma::all(pts[0].left == pts[1].left)
             && !arma::all(pts[0].right == pts[1].right)) {
-            NUClear::log(__FILE__, __LINE__, pts[0].left.t());
-            NUClear::log(__FILE__, __LINE__, pts[1].left.t());
             leftPlane.setFrom3Points(pts[0].left, pts[1].left, arma::vec3({0, 0, 0}));
             rightPlane.setFrom3Points(pts[0].right, pts[1].right, arma::vec3({0, 0, 0}));
-            NUClear::log(__FILE__, __LINE__, leftPlane.normal.t());
-            NUClear::log(__FILE__, __LINE__, rightPlane.normal.t());
 
             return true;
         }
