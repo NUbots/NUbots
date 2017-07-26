@@ -118,6 +118,8 @@ namespace behaviour {
                 cfg_.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<float>();
                 cfg_.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
 
+                cfg_.ball_proximity_threshold = config["ball_proximity_threshold"].as<float>();
+
                 cfg_.alwaysPowerKick      = config["always_power_kick"].as<bool>();
                 cfg_.forcePlaying         = config["force_playing"].as<bool>();
                 cfg_.forcePenaltyShootout = config["force_penalty_shootout"].as<bool>();
@@ -223,7 +225,7 @@ namespace behaviour {
                         // KickType::IK_KICK;
 
                         if (cfg_.forcePlaying) {
-                            play(field, ball, fieldDescription, mode);
+                            play(field, ball, fieldDescription, mode, sensors);
                         }
                         else if (pickedUp(sensors)) {
                             // TODO: stand, no moving
@@ -235,7 +237,7 @@ namespace behaviour {
                                 || mode == GameMode::PENALTY_SHOOTOUT) {
                                 if (phase == Phase::INITIAL) {
                                     standStill();
-                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball);
+                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball, sensors);
                                     initialLocalisationReset(fieldDescription);
                                     currentState = Behaviour::State::INITIAL;
                                 }
@@ -246,12 +248,12 @@ namespace behaviour {
                                     else {
                                         walkTo(fieldDescription, cfg_.start_position_defensive);
                                     }
-                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball);
+                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball, sensors);
                                     currentState = Behaviour::State::READY;
                                 }
                                 else if (phase == Phase::SET) {
                                     standStill();
-                                    find({FieldTarget(FieldTarget::Target::BALL)}, field, ball);
+                                    find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
                                     if (mode == GameMode::PENALTY_SHOOTOUT) {
                                         penaltyLocalisationReset();
                                     }
@@ -262,16 +264,16 @@ namespace behaviour {
                                 }
                                 else if (phase == Phase::TIMEOUT) {
                                     standStill();
-                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball);
+                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball, sensors);
                                     currentState = Behaviour::State::TIMEOUT;
                                 }
                                 else if (phase == Phase::FINISHED) {
                                     standStill();
-                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball);
+                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball, sensors);
                                     currentState = Behaviour::State::FINISHED;
                                 }
                                 else if (phase == Phase::PLAYING) {
-                                    play(field, ball, fieldDescription, mode);
+                                    play(field, ball, fieldDescription, mode, sensors);
                                 }
                             }
                         }
@@ -298,21 +300,22 @@ namespace behaviour {
         void SoccerStrategy::play(const Field& field,
                                   const Ball& ball,
                                   const FieldDescription& fieldDescription,
-                                  const GameMode& mode) {
+                                  const GameMode& mode,
+                                  const Sensors& sensors) {
             if (penalised() && !cfg_.forcePlaying) {  // penalised
                 standStill();
-                find({FieldTarget(FieldTarget::Target::SELF)}, field, ball);
+                find({FieldTarget(FieldTarget::Target::SELF)}, field, ball, sensors);
                 currentState = Behaviour::State::PENALISED;
             }
             else if (cfg_.is_goalie) {  // goalie
-                find({FieldTarget(FieldTarget::Target::BALL)}, field, ball);
+                find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
                 goalieWalk(field, ball);
                 currentState = Behaviour::State::GOALIE_WALK;
             }
             else {
                 /*if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
                 standStill();
-                find({FieldTarget(FieldTarget::Target::BALL)});
+                find({FieldTarget(FieldTarget::Target::BALL)}, sensors);
                 if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration) {
                     lastLocalised = NUClear::clock::now();
                 }
@@ -320,7 +323,7 @@ namespace behaviour {
             }
             else*/ if (NUClear::clock::now() - ballLastMeasured
                        < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                    find({FieldTarget(FieldTarget::Target::BALL)}, field, ball);
+                    find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
                     currentState = Behaviour::State::WALK_TO_BALL;
                 }
@@ -329,12 +332,12 @@ namespace behaviour {
                         && (Eigen::Vector2d(field.position[0], field.position[1]).norm()
                             > 1)) {  // a long way away from centre
                         // walk to centre of field
-                        find({FieldTarget(FieldTarget::Target::BALL)}, field, ball);
+                        find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
                         walkTo(fieldDescription, arma::vec2({0, 0}));
                         currentState = Behaviour::State::MOVE_TO_CENTRE;
                     }
                     else {
-                        find({FieldTarget(FieldTarget::Target::BALL)}, field, ball);
+                        find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
                         walkTo(fieldDescription, FieldTarget::Target::BALL);
                         // spinWalk();
 
@@ -471,7 +474,8 @@ namespace behaviour {
 
         void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects,
                                   const Field& locField,
-                                  const Ball& locBall) {
+                                  const Ball& locBall,
+                                  const Sensors& sensors) {
             // Create the soccer object priority pointer and initialise each value to 0.
             auto soccerObjectPriority  = std::make_unique<SoccerObjectPriority>();
             soccerObjectPriority->ball = 0;
@@ -494,6 +498,12 @@ namespace behaviour {
             }
 
             // When weve seen both field targets
+            Transform3D Htw = convert<double, 4, 4>(sensors.world);
+            if (arma::norm(Htw.transformPoint(arma::vec3{locBall.position[0], locBall.position[1], 0.0}).cols(0, 1))
+                < cfg_.ball_proximity_threshold) {
+                soccerObjectPriority->ball = 1;
+                soccerObjectPriority->goal = 0;
+            }
             if (soccerObjectPriority->ball && soccerObjectPriority->goal) {
                 // Check field message and localisation ball message
                 // Check trace of their covariances are bigger than configurable threshold

@@ -46,6 +46,7 @@ namespace behaviour {
                     , ball_search_walk_start_speed(0.0f)
                     , ball_search_walk_stop_speed(0.0f)
                     , ball_search_walk_slow_time(0.0f)
+                    , ball_proximity_threshold(0.0f)
                     , start_position_offensive(arma::fill::zeros)
                     , start_position_defensive(arma::fill::zeros)
                     , is_goalie(false)
@@ -68,6 +69,7 @@ namespace behaviour {
                 float ball_search_walk_start_speed;
                 float ball_search_walk_stop_speed;
                 float ball_search_walk_slow_time;
+                float ball_proximity_threshold;
 
                 arma::vec2 start_position_offensive;
                 arma::vec2 start_position_defensive;
@@ -118,7 +120,8 @@ namespace behaviour {
             void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
             void find(const std::vector<message::behaviour::FieldTarget>& objects,
                       const message::localisation::Field& field,
-                      const message::localisation::Ball& ball);
+                      const message::localisation::Ball& ball,
+                      const message::input::Sensors& sensors);
             void spinWalk();
             bool pickedUp(const message::input::Sensors& sensors);
             bool penalised();
@@ -129,7 +132,8 @@ namespace behaviour {
             void play(const message::localisation::Field& field,
                       const message::localisation::Ball& ball,
                       const message::support::FieldDescription& fieldDescription,
-                      const message::input::GameState::Data::Mode& mode);
+                      const message::input::GameState::Data::Mode& mode,
+                      const message::input::Sensors& sensors);
 
         public:
             explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
