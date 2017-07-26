@@ -29,7 +29,7 @@ namespace platform {
         using ServoID = utility::input::ServoID;
         using message::platform::darwin::DarwinSensors;
 
-        const DarwinSensors::Servo& getDarwinServo(ServoID servoId, const DarwinSensors& sensors) {
+        inline const DarwinSensors::Servo& getDarwinServo(ServoID servoId, const DarwinSensors& sensors) {
 
             switch (servoId.value) {
                 case ServoID::R_SHOULDER_PITCH: return sensors.servo.rShoulderPitch;
@@ -57,7 +57,7 @@ namespace platform {
             }
         }
 
-        DarwinSensors::Servo& getDarwinServo(ServoID servoId, DarwinSensors& sensors) {
+        inline DarwinSensors::Servo& getDarwinServo(ServoID servoId, DarwinSensors& sensors) {
 
             switch (servoId.value) {
                 case ServoID::R_SHOULDER_PITCH: return sensors.servo.rShoulderPitch;

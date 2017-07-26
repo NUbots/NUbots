@@ -26,7 +26,7 @@
 #include "extension/Configuration.h"
 
 #include "message/input/Sensors.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -180,8 +180,8 @@ namespace motion {
         utility::math::matrix::Transform3D getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? convert<double, 4, 4>(sensors.forwardKinematics.at(utility::input::ServoID::L_ANKLE_ROLL))
-                        : convert<double, 4, 4>(sensors.forwardKinematics.at(utility::input::ServoID::R_ANKLE_ROLL)));
+                        ? convert<double, 4, 4>(sensors.forwardKinematics[utility::input::ServoID::L_ANKLE_ROLL])
+                        : convert<double, 4, 4>(sensors.forwardKinematics[utility::input::ServoID::R_ANKLE_ROLL]));
         }
 
         utility::math::matrix::Transform3D getFootPose(const message::input::Sensors& sensors) {

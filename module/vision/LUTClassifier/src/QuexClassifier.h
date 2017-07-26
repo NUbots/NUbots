@@ -39,7 +39,7 @@ namespace module {
 namespace vision {
     class QuexClassifier {
     private:
-        static constexpr size_t BUFFER_SIZE = 2000;
+        static constexpr size_t BUFFER_SIZE = 1280 * 1024;
         uint8_t buffer[BUFFER_SIZE]         = {0};  // This should be big enough for now
         quex::Lexer lexer;
         size_t& tknNumber;

@@ -27,13 +27,12 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/Image.h"
+#include "ImageData.h"
 
 #include "utility/vision/fourcc.h"
 
 namespace module {
 namespace input {
-    using message::input::Image;
 
     using FOURCC = utility::vision::FOURCC;
 
@@ -85,6 +84,8 @@ namespace input {
         /// @brief Configuration information for this camera.
         ::extension::Configuration config;
 
+        NUClear::Reactor& reactor;
+
     public:
         /// @brief this file descriptor points to the camera object
         int fd;
@@ -100,7 +101,7 @@ namespace input {
          *
          * @param device the path to the video device to use (e.g. /dev/video0)
          */
-        V4L2Camera(const ::extension::Configuration& config, const std::string& deviceID)
+        V4L2Camera(const ::extension::Configuration& config, const std::string& deviceID, NUClear::Reactor& reactor)
             : buffers()
             , width(0)
             , height(0)
@@ -112,6 +113,7 @@ namespace input {
             , cameraHandle()
             , settingsHandle()
             , config(config)
+            , reactor(reactor)
             , fd(-1) {}
 
         /**
@@ -125,7 +127,7 @@ namespace input {
          *
          * @return a pointer to the latest image from the camera
          */
-        message::input::Image getImage();
+        ImageData getImage();
 
         /**
          * @brief Sets up the camera at a given resolution
@@ -251,6 +253,7 @@ namespace input {
 
         bool setSetting(unsigned int id, int32_t value);
     };
+
 }  // namespace input
 }  // namespace module
 

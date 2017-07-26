@@ -50,7 +50,7 @@ namespace localisation {
 
         arma::vec predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
                                        const arma::vec& actual_position,
-                                       const message::input::Sensors& sensors,
+                                       const utility::math::matrix::Transform3D& Hcw,
                                        const message::vision::Goal::MeasurementType& type,
                                        const message::support::FieldDescription& fd);
 
