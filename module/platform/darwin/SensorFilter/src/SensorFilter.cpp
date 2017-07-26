@@ -457,35 +457,32 @@ namespace platform {
                      ************************************************/
                     if (previousSensors) {
                         // Use our virtual load sensor class to work out if our foot is down
-                        arma::vec leftFootFeatureVec = {
-                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_HIP_PITCH].load,
-                            sensors->servo[ServoID::L_KNEE].presentVelocity,
-                            sensors->servo[ServoID::L_KNEE].presentVelocity
-                                - previousSensors->servo[ServoID::L_KNEE].presentVelocity,
-                            sensors->servo[ServoID::L_KNEE].load,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].load};
-                        sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
-                        arma::vec rightFootFeatureVec = {
-                            sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_HIP_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_HIP_PITCH].load,
-                            sensors->servo[ServoID::R_KNEE].presentVelocity,
-                            sensors->servo[ServoID::R_KNEE].presentVelocity
-                                - previousSensors->servo[ServoID::R_KNEE].presentVelocity,
-                            sensors->servo[ServoID::R_KNEE].load,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].load};
-                        sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
+                        // line 542
+                        // want Hwf
+                        // get lowest z
+                        // confirm accel and foot vector are close
+                        // weight CM730 higher
+
+                        Transform3D Htl = convert<double, 4, 4>(sensors->forwardKinematics[servoid::L_ANKLE_ROLL]);
+                        Transform3D Htr = convert<double, 4, 4>(sensors->forwardKinematics[servoid::R_ANKLE_ROLL]);
+
+                        Transform3D Htw = convert<double, 4, 4>(sensors->world);
+                        Transform3D Hlw = Htl.i() * Htw;
+                        Transform3D Hrw = Htr.i() * Htw;
+
+                        float nominal_z_threshold = 0.02;
+
+                        auto zCompL = Hlw.translation().row(0, 2);
+                        auto zCompR = Hrw.translation().row(0, 2);
+                        if (std::max(zComp[0], zComp[1]) > nominal_z_threshold) {
+                            auto lowestFoot = zComp[0] > zComp[1] ? 0 : 1;
+                        }
+                        else if (SOME WEIRD GYRO STUFF) {
+                        }
+                        else {
+                            log("Both feet on ground, hopefully!");
+                        }
                     }
                     else {
                         sensors->leftFootDown  = false;
