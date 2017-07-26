@@ -75,39 +75,6 @@ namespace platform {
                 sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
             }
 
-            if (sensors.voltage <= minVoltage) {
-                servoTargetHandle.disable();
-
-                log<NUClear::FATAL>("CRITICALLY LOW VOLTAGE: KILLING SERVOS");
-
-                std::vector<uint8_t> command = {0xFF,
-                                                0xFF,
-                                                Darwin::ID::BROADCAST,
-                                                0x00,  // The size, fill this in later
-                                                Darwin::DarwinDevice::Instruction::SYNC_WRITE,
-                                                Darwin::MX28::Address::P_GAIN,
-                                                0x01};
-
-                for (size_t i = 0; i < 20; i++) {
-                    command.insert(command.end(),
-                                   {
-                                       uint8_t(i + 1),
-                                       5  // P Gain
-                                   });
-                }
-
-                // Calculate our length
-                command[Darwin::Packet::LENGTH] = command.size() - 3;
-
-                // Do a checksum
-                command.push_back(0);
-                command.back() = Darwin::calculateChecksum(command.data());
-
-                for (size_t i = 0; i < 10; i++) {
-                    darwin.sendRawCommand(command);
-                }
-            }
-
             // Accelerometer (in m/s^2)
             sensors.accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
             sensors.accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
@@ -246,8 +213,7 @@ namespace platform {
             , cm730State()
             , servoState()
             , maxVoltage(0.0f)
-            , minVoltage(0.0f)
-            , servoTargetHandle() {
+            , minVoltage(0.0f) {
 
             on<Startup>().then("HardwareIO Startup", [this] {
                 uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
@@ -357,7 +323,7 @@ namespace platform {
                 });
 
             // This trigger writes the servo positions to the hardware
-            servoTargetHandle = on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
+            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
                 const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
 
                 // Loop through each of our commands

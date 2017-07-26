@@ -92,7 +92,6 @@ namespace platform {
 
             float maxVoltage;
             float minVoltage;
-            ReactionHandle servoTargetHandle;
 
         public:
             /// @brief called by a Powerplant to construct this reactor
