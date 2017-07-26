@@ -49,3 +49,15 @@ message Quad {
 message Polygon {
     vec2 point = 1;
 }
+
+message Frustum {
+    vec3 tl = 1;
+    vec3 tr = 2;
+    vec3 bl = 3;
+    vec3 br = 4;
+}
+
+message Cone {
+    vec3 axis = 1;
+    double gradient = 2;
+}

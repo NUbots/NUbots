@@ -40,7 +40,6 @@ message DarwinSensors {
         INSTRUCTION     = 64;
         CORRUPT_DATA    = 128;
         TIMEOUT         = 256;
-        TIMEOUT_VICTIM  = 512;
     }
 
     message LEDPanel {

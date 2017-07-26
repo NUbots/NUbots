@@ -5,7 +5,6 @@ leg:
     lower_leg_length: 0.093
     heel_length: 0.0451 # measured
     foot_centre_to_ankle_centre: 0.011 # rough
-    length_between_legs: 0.074
     foot:
         width: 0.066 # rough
         height: 0.0335
@@ -21,6 +20,7 @@ leg:
 head:
     camera_declination_angle_offset: -0.0 # TODO - fix 1's head pitch motor offset
     neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
+    ipd: 0.0 # Interpupillary distance - y axis
     neck:
         length: 0.042
         base_position_from_origin: [0.013, 0, 0.11] # [x, y, z]
