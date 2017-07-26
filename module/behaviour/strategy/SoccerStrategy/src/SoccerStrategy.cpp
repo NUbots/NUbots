@@ -237,7 +237,11 @@ namespace behaviour {
                                 || mode == GameMode::PENALTY_SHOOTOUT) {
                                 if (phase == Phase::INITIAL) {
                                     standStill();
-                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball, sensors);
+                                    find({FieldTarget(FieldTarget::Target::BALL),
+                                          FieldTarget(FieldTarget::Target::GOAL)},
+                                         field,
+                                         ball,
+                                         sensors);
                                     initialLocalisationReset(fieldDescription);
                                     currentState = Behaviour::State::INITIAL;
                                 }
@@ -248,12 +252,20 @@ namespace behaviour {
                                     else {
                                         walkTo(fieldDescription, cfg_.start_position_defensive);
                                     }
-                                    find({FieldTarget(FieldTarget::Target::SELF)}, field, ball, sensors);
+                                    find({FieldTarget(FieldTarget::Target::BALL),
+                                          FieldTarget(FieldTarget::Target::GOAL)},
+                                         field,
+                                         ball,
+                                         sensors);
                                     currentState = Behaviour::State::READY;
                                 }
                                 else if (phase == Phase::SET) {
                                     standStill();
-                                    find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
+                                    find({FieldTarget(FieldTarget::Target::BALL),
+                                          FieldTarget(FieldTarget::Target::GOAL)},
+                                         field,
+                                         ball,
+                                         sensors);
                                     if (mode == GameMode::PENALTY_SHOOTOUT) {
                                         penaltyLocalisationReset();
                                     }
@@ -323,7 +335,10 @@ namespace behaviour {
             }
             else*/ if (NUClear::clock::now() - ballLastMeasured
                        < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                    find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
+                    find({FieldTarget(FieldTarget::Target::BALL), FieldTarget(FieldTarget::Target::GOAL)},
+                         field,
+                         ball,
+                         sensors);
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
                     currentState = Behaviour::State::WALK_TO_BALL;
                 }
@@ -332,12 +347,18 @@ namespace behaviour {
                         && (Eigen::Vector2d(field.position[0], field.position[1]).norm()
                             > 1)) {  // a long way away from centre
                         // walk to centre of field
-                        find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
+                        find({FieldTarget(FieldTarget::Target::BALL), FieldTarget(FieldTarget::Target::GOAL)},
+                             field,
+                             ball,
+                             sensors);
                         walkTo(fieldDescription, arma::vec2({0, 0}));
                         currentState = Behaviour::State::MOVE_TO_CENTRE;
                     }
                     else {
-                        find({FieldTarget(FieldTarget::Target::BALL)}, field, ball, sensors);
+                        find({FieldTarget(FieldTarget::Target::BALL), FieldTarget(FieldTarget::Target::GOAL)},
+                             field,
+                             ball,
+                             sensors);
                         walkTo(fieldDescription, FieldTarget::Target::BALL);
                         // spinWalk();
 
