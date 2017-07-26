@@ -9,6 +9,7 @@ import { MarkerGeometry } from '../../../canvas/geometry/marker_geometry'
 import { TextGeometry } from '../../../canvas/geometry/text_geometry'
 import { Group } from '../../../canvas/object/group'
 import { Shape } from '../../../canvas/object/shape'
+import { Vector2 } from '../../../math/vector2'
 import { Transform } from '../../../math/transform'
 import { DashboardRobotModel } from './model'
 
@@ -37,8 +38,8 @@ export class DashboardRobotViewModel {
     return Shape.of(
       CircleGeometry.of({
         radius: 0.1,
-        x: this.model.ballWorldPosition.x,
-        y: this.model.ballWorldPosition.y,
+        x: this.model.ballPosition.x,
+        y: this.model.ballPosition.y,
       }),
       BasicAppearance.of({
         fillStyle: this.model.ballColor,
@@ -51,8 +52,8 @@ export class DashboardRobotViewModel {
   private get ballSight() {
     return Shape.of(
       LineGeometry.of({
-        origin: this.model.robotPosition.clone(),
-        target: this.model.ballWorldPosition.clone(),
+        origin: Vector2.from(this.model.robotPosition),
+        target: this.model.ballPosition.clone(),
       }),
       LineAppearance.of({
         lineWidth: 0.025,
@@ -63,7 +64,7 @@ export class DashboardRobotViewModel {
 
   @computed
   private get kickTarget() {
-    const origin = this.model.ballWorldPosition
+    const origin = this.model.ballPosition
     const difference = this.model.kickTarget.clone().subtract(origin)
     return Shape.of(
       ArrowGeometry.of({
@@ -89,7 +90,8 @@ export class DashboardRobotViewModel {
       children: [
         Shape.of(
           MarkerGeometry.of({
-            heading: this.model.robotHeading.clone(),
+            // TODO (Annable): Add helper method for converting an angle to a unit vector.
+            heading: new Vector2(Math.cos(this.model.robotPosition.z), Math.sin(this.model.robotPosition.z)),
             radius,
             x: 0,
             y: 0,

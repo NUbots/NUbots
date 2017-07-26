@@ -1,7 +1,11 @@
 import { action } from 'mobx'
+import { observable } from 'mobx'
 import { google } from '../../../shared/proto/messages'
 import { message } from '../../../shared/proto/messages'
 import { Vector2 } from '../../math/vector2'
+import { Vector3 } from '../../math/vector3'
+import { Matrix2 } from '../../math/matrix2'
+import { Matrix3 } from '../../math/matrix3'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
@@ -26,22 +30,50 @@ export class DashboardNetwork {
   @action
   private onOverview = (robotModel: RobotModel, overview: Overview) => {
     const robot = DashboardRobotModel.of(robotModel)
+
+    // Timestamp this message was sent (for comparison with last seen)
+    robot.time = toSeconds(overview.timestamp)
+
+    // The id number of the robot
+    robot.id = overview.robotId
+
+    // Name of the executing binary
+    robot.roleName = overview.roleName
+
+    // Battery as a value between 0 and 1 (percentage)
     robot.battery = overview.battery
-    robot.ballPosition = Vector2.from(overview.ballPosition)
-    robot.ballWorldPosition = Vector2.from(overview.ballWorldPosition)
+
+    // Voltage (in volts!)
+    robot.voltage = overview.voltage
+
+    // The current behaviour state as an enum
     robot.behaviourState = overview.behaviourState
+
+    // The position of the robot on the field in field coordinates
+    // overview.robotPosition is a 3 sized vector (x,y,heading)
+    robot.robotPosition = Vector3.from(overview.robotPosition)
+    robot.robotPositionCovariance = Matrix3.from(overview.robotPositionCovariance)
+
+    // The position of the ball in field coordinates
+    robot.ballPosition = Vector2.from(overview.ballPosition)
+    robot.ballCovariance = Matrix2.from(overview.ballPositionCovariance)
+
+    // The location on the field the robot wants to kick in field coordinates
+    robot.kickTarget = Vector2.from(overview.kickTarget)
+
+    // The game mode the robot thinks it is
     robot.gameMode = overview.gameMode
     robot.gamePhase = overview.gamePhase
-    robot.kickTarget = Vector2.from(overview.kickTarget)
+    robot.penaltyReason = overview.penaltyReason
+
+    // The last time we had a camera image, saw a ball/goal
     robot.lastCameraImage = toSeconds(overview.lastCameraImage)
     robot.lastSeenBall = toSeconds(overview.lastSeenBall)
     robot.lastSeenGoal = toSeconds(overview.lastSeenGoal)
-    robot.lastSeenObstacle = toSeconds(overview.lastSeenObstacle)
-    robot.penaltyReason = overview.penaltyReason
-    robot.robotHeading = Vector2.from(overview.robotHeading)
-    robot.robotPosition = Vector2.from(overview.robotPosition)
-    robot.time = Date.now() / 1000 // TODO Olejniczak: Replace with overview protocol buffer timestamp when added
-    robot.voltage = overview.voltage
+
+    // The walk command and
+    robot.walkCommand = Vector3.from(overview.walkCommand)
+    robot.walkPathPlan = overview.walkPathPlan.map(Vector2.from)
   }
 }
 
