@@ -42,6 +42,7 @@
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
 
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -55,7 +56,6 @@ namespace vision {
 
     using utility::math::coordinates::cartesianToSpherical;
 
-    using utility::math::geometry::Line;
     using Plane = utility::math::geometry::Plane<3>;
     using utility::math::geometry::Quad;
 
@@ -68,6 +68,10 @@ namespace vision {
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::distanceToVerticalObject;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getImageFromCam;
+    using utility::math::vision::getImageFromCamCts;
+    using utility::nubugger::drawVisionLines;
 
     using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
@@ -89,7 +93,7 @@ namespace vision {
         , MINIMUM_ASPECT_RATIO(0.0)
         , VISUAL_HORIZON_BUFFER(0.0)
         , MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE(0.0)
-        , MAXIMUM_ANGLE_BETWEEN_GOALS(0.0)
+        , MAXIMUM_ANGLE_BETWEEN_SIDES(0.0)
         , MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE(0.0)
         , MEASUREMENT_LIMITS_LEFT(10)
         , MEASUREMENT_LIMITS_RIGHT(10)
@@ -108,11 +112,16 @@ namespace vision {
 
                 MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
                 MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
+
+                arma::vec3 horizon_buffer_height = {1, 0, tan(config["visual_horizon_buffer"].as<double>())};
                 VISUAL_HORIZON_BUFFER =
-                    std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon_buffer"].as<double>())));
+                    std::max(1,
+                             int(projectCamSpaceToScreen(
+                                 horizon_buffer_height, cam)[1]));  // Max of 1 and y coordinate of cam space projection
                 MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE =
                     std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
-                MAXIMUM_ANGLE_BETWEEN_GOALS = std::cos(config["maximum_angle_between_goals"].as<double>());
+
+                MAXIMUM_ANGLE_BETWEEN_SIDES = std::cos(config["maximum_angle_between_sides"].as<double>());
                 MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE =
                     std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
 
@@ -121,9 +130,16 @@ namespace vision {
                 MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
                 MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
 
+                ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL =
+                    config["angular_width_disagreement_threshold_vertical"].as<double>();
+                ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL =
+                    config["angular_width_disagreement_threshold_horizontal"].as<double>();
+
                 VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
                 ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
 
+                DEBUG_GOAL_THROWOUTS = config["debug_goal_throwouts"].as<bool>();
+                DEBUG_GOAL_RANSAC    = config["debug_goal_ransac"].as<bool>();
             });
 
         on<Trigger<ClassifiedImage>, With<CameraParameters>, With<LookUpTable>, With<FieldDescription>, Single>().then(
@@ -133,11 +149,12 @@ namespace vision {
                    const LookUpTable& lut,
                    const FieldDescription& fd) {
 
+                // log("Detecting goals");
+
                 const auto& image = *rawImage;
                 // Our segments that may be a part of a goal
                 std::vector<RansacGoalModel::GoalSegment> segments;
                 auto goals = std::make_unique<std::vector<Goal>>();
-
                 // Get our goal segments
                 for (const auto& segment : image.horizontalSegments) {
 
@@ -147,18 +164,20 @@ namespace vision {
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
                         && (segment.previous > -1)
                         && (segment.next > -1)) {
-                        segments.push_back({{double(segment.start[0]), double(segment.start[1])},
-                                            {double(segment.end[0]), double(segment.end[1])}});
+                        segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
+                                                                           convert<uint, 2>(cam.imageSizePixels)),
+                                                             cam),
+                                            getCamFromScreen(imageToScreen(convert<int, 2>(segment.end),
+                                                                           convert<uint, 2>(cam.imageSizePixels)),
+                                                             cam)});
                     }
                 }
-
+                // Is the midpoint above or below the horizon?
                 // Partition our segments so that they are split between above and below the horizon
                 auto split = std::partition(
                     std::begin(segments), std::end(segments), [image](const RansacGoalModel::GoalSegment& segment) {
-                        // Is the midpoint above or below the horizon?
-                        utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal),
-                                                              image.horizon.distance);
-                        return horizon.distanceToPoint(segment.left + segment.right / 2) > 0;
+                        return arma::dot(convert<double, 3>(image.horizon_normal), (segment.left + segment.right) / 2)
+                               > 0;
                     });
 
                 // Make an array of our partitions
@@ -172,31 +191,56 @@ namespace vision {
                                                                          MAXIMUM_FITTED_MODELS,
                                                                          CONSENSUS_ERROR_THRESHOLD);
 
+                std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                            Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+                    debug;
                 // Look at our results
                 for (auto& result : models) {
-
                     // Get our left, right and midlines
-                    Line& left  = result.model.left;
-                    Line& right = result.model.right;
-                    Line mid;
+                    Plane& left  = result.model.leftPlane;
+                    Plane& right = result.model.rightPlane;
+
+                    if (DEBUG_GOAL_RANSAC) {
+
+                        arma::vec3 debugLeftt = left.orthogonalProjection(arma::vec3({1, 0, 1}));
+                        arma::vec3 debugLeftb = left.orthogonalProjection(arma::vec3({1, 0, -1}));
+
+                        arma::vec3 debugRightt = right.orthogonalProjection(arma::vec3({1, 0, 1}));
+                        arma::vec3 debugRightb = right.orthogonalProjection(arma::vec3({1, 0, -1}));
+                        // DEBUG!
+                        float N = 100;
+                        for (int i = 0; i < 100; i++) {
+                            float alpha              = i / N;
+                            float alphaNext          = (i + 1) / N;
+                            arma::vec3 debugRightPt1 = debugRightt * alpha + (1 - alpha) * debugRightb;
+                            arma::vec3 debugRightPt2 = debugRightt * alphaNext + (1 - alphaNext) * debugRightb;
+
+                            arma::vec3 debugLeftPt1 = debugLeftt * alpha + (1 - alpha) * debugLeftb;
+                            arma::vec3 debugLeftPt2 = debugLeftt * alphaNext + (1 - alphaNext) * debugLeftb;
+
+                            debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugRightPt1, cam)),
+                                                            convert<int, 2>(getImageFromCam(debugRightPt2, cam)),
+                                                            Eigen::Vector4d(1, 0, 0, 1)));
+
+                            debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugLeftPt1, cam)),
+                                                            convert<int, 2>(getImageFromCam(debugLeftPt2, cam)),
+                                                            Eigen::Vector4d(0, 0, 1, 1)));
+                        }
+                    }
+
+                    Plane mid;
 
                     // Normals in same direction
                     if (arma::dot(left.normal, right.normal) > 0) {
-                        mid.normal   = arma::normalise(right.normal + left.normal);
-                        mid.distance = ((right.distance / arma::dot(right.normal, mid.normal))
-                                        + (left.distance / arma::dot(left.normal, mid.normal)))
-                                       * 0.5;
+                        mid.normal = arma::normalise(right.normal + left.normal);
                     }
                     // Normals opposed
                     else {
-                        mid.normal   = arma::normalise(right.normal - left.normal);
-                        mid.distance = ((right.distance / arma::dot(right.normal, mid.normal))
-                                        - (left.distance / arma::dot(left.normal, mid.normal)))
-                                       * 0.5;
+                        mid.normal = arma::normalise(right.normal - left.normal);
                     }
 
                     // Find a point that should work to start searching down
-                    arma::vec2 midpoint({0, 0});
+                    arma::vec3 midpoint({0, 0, 0});
                     int i = 0;
                     for (auto& m : result) {
                         midpoint += m.left;
@@ -204,31 +248,30 @@ namespace vision {
                         i += 2;
                     }
                     midpoint /= i;
+                    midpoint = arma::normalise(midpoint);
 
                     // Work out which direction to go
-                    arma::vec2 direction = mid.tangent();
-                    direction *= direction[1] > 0 ? 1 : -1;
-                    double theta = std::acos(direction[0]);
-                    if (std::abs(theta) < M_PI_4) {
-                        direction[0] = 1;
-                        direction[1] = -std::tan(theta);
-                    }
-                    else {
-                        direction[0] = std::tan(M_PI_2 - std::abs(theta));
-                        direction[1] = 1;
-                    }
+                    arma::vec3 direction = arma::normalise(arma::cross(mid.normal, arma::vec3({1, 0, 0})));
+                    // Rectify if pointing up
+                    direction *= direction[2] < 0 ? 1 : -1;
+                    // Move this direction
+                    // TODO: configure
+                    direction *= 0.01;
+
 
                     // Classify until we reach green
-                    arma::vec2 basePoint({0, 0});
-                    int notWhiteLen = 0;
-                    for (arma::vec2 point = mid.orthogonalProjection(midpoint);
-                         (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
-                         point += direction) {
+                    arma::vec3 basePoint({1, 0, 0});
+                    int notWhiteLen        = 0;
+                    arma::vec3 point       = arma::normalise(mid.orthogonalProjection(midpoint));
+                    arma::ivec2 imagePoint = getImageFromCam(point, cam);
+                    float color_intensity  = 0;
+                    while ((imagePoint[0] < image.dimensions[0]) && (imagePoint[0] > 0)
+                           && (imagePoint[1] < image.dimensions[1])) {
 
                         char c = static_cast<char>(utility::vision::getPixelColour(
                             lut,
-                            utility::vision::getPixel(int(point[0]),
-                                                      int(point[1]),
+                            utility::vision::getPixel(imagePoint[0],
+                                                      imagePoint[1],
                                                       image.image->dimensions[0],
                                                       image.image->dimensions[1],
                                                       image.image->data,
@@ -248,93 +291,190 @@ namespace vision {
                         else if (c == 'y') {
                             notWhiteLen = 0;
                         }
+                        if (DEBUG_GOAL_RANSAC) {
+                            debug.push_back(std::make_tuple(convert<int, 2>(imagePoint),
+                                                            convert<int, 2>(imagePoint + arma::ivec({1, 1})),
+                                                            Eigen::Vector4d(color_intensity, 0, color_intensity, 1)));
+                            color_intensity = std::fmin(1, color_intensity + 0.5);
+                        }
+                        point += direction;
+                        imagePoint = getImageFromCam(point, cam);
                     }
 
 
                     arma::running_stat<double> stat;
 
+                    float min = 1, max = -1;
+                    arma::vec3 minPt, maxPt;
                     // Look through our segments to find endpoints
-                    for (auto& point : result) {
+                    arma::vec3 horizon_normal = convert<double, 3>(image.horizon_normal);
+                    for (auto& segment : result) {
                         // Project left and right onto midpoint keep top and bottom
-                        stat(mid.tangentialDistanceToPoint(point.left));
-                        stat(mid.tangentialDistanceToPoint(point.right));
+                        auto leftDot  = arma::dot(horizon_normal, segment.left);
+                        auto rightDot = arma::dot(horizon_normal, segment.right);
+
+                        if (leftDot < min) {
+                            min   = leftDot;
+                            minPt = segment.left;
+                        }
+                        if (rightDot < min) {
+                            min   = rightDot;
+                            minPt = segment.right;
+                        }
+                        if (leftDot > max) {
+                            max   = leftDot;
+                            maxPt = segment.left;
+                        }
+                        if (rightDot > max) {
+                            max   = rightDot;
+                            maxPt = segment.right;
+                        }
                     }
 
                     // Get our endpoints from the min and max points on the line
-                    arma::vec2 midP1 = mid.pointFromTangentialDistance(stat.min());
-                    arma::vec2 midP2 = mid.orthogonalProjection(basePoint);
-
-                    // Project those points outward onto the quad
-                    arma::vec2 p1 =
-                        midP1 - left.distanceToPoint(midP1) * arma::dot(left.normal, mid.normal) * mid.normal;
-                    arma::vec2 p2 =
-                        midP2 - left.distanceToPoint(midP2) * arma::dot(left.normal, mid.normal) * mid.normal;
-                    arma::vec2 p3 =
-                        midP1 - right.distanceToPoint(midP1) * arma::dot(right.normal, mid.normal) * mid.normal;
-                    arma::vec2 p4 =
-                        midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
+                    arma::vec3 midTop  = arma::normalise(mid.orthogonalProjection(maxPt));
+                    arma::vec3 midBase = arma::normalise(mid.orthogonalProjection(basePoint));
 
                     // Make a quad
                     Goal goal;
                     goal.visObject.sensors = image.sensors;
                     goal.side              = Goal::Side::UNKNOWN_SIDE;
 
-                    // Seperate tl and bl
-                    arma::vec2 tl = p1[1] > p2[1] ? p2 : p1;
-                    arma::vec2 bl = p1[1] > p2[1] ? p1 : p2;
-                    arma::vec2 tr = p3[1] > p4[1] ? p4 : p3;
-                    arma::vec2 br = p3[1] > p4[1] ? p3 : p4;
+                    // Project those points outward onto the quad
+                    arma::vec3 horizonScreenDir = arma::normalise(
+                        arma::cross(convert<double, 3, 1>(image.horizon_normal), arma::vec3({1, 0, 0})));
+                    arma::vec3 tl = left.directionalProjection(midTop, horizonScreenDir);
+                    arma::vec3 tr = right.directionalProjection(midTop, horizonScreenDir);
+                    arma::vec3 bl = left.directionalProjection(midBase, horizonScreenDir);
+                    arma::vec3 br = right.directionalProjection(midBase, horizonScreenDir);
 
-                    goal.quad.bl = convert<double, 2>(bl);
-                    goal.quad.tl = convert<double, 2>(tl);
-                    goal.quad.tr = convert<double, 2>(tr);
-                    goal.quad.br = convert<double, 2>(br);
+                    goal.frustum.bl = convert<double, 3>(bl);
+                    goal.frustum.tl = convert<double, 3>(tl);
+                    goal.frustum.tr = convert<double, 3>(tr);
+                    goal.frustum.br = convert<double, 3>(br);
+
+                    // In image coords
+                    goal.quad.bl = convert<double, 2>(getImageFromCamCts(bl, cam));
+                    goal.quad.tl = convert<double, 2>(getImageFromCamCts(tl, cam));
+                    goal.quad.tr = convert<double, 2>(getImageFromCamCts(tr, cam));
+                    goal.quad.br = convert<double, 2>(getImageFromCamCts(br, cam));
+
 
                     goals->push_back(std::move(goal));
                 }
+                if (DEBUG_GOAL_RANSAC) {
+                    emit(drawVisionLines(debug));
+                }
 
-                utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
                 // Throwout invalid quads
                 for (auto it = goals->begin(); it != goals->end();) {
 
-                    utility::math::geometry::Quad quad(convert<double, 2>(it->quad.bl),
-                                                       convert<double, 2>(it->quad.tl),
-                                                       convert<double, 2>(it->quad.tr),
-                                                       convert<double, 2>(it->quad.br));
+                    arma::vec3 cbl = convert<double, 3>(it->frustum.bl);
+                    arma::vec3 ctl = convert<double, 3>(it->frustum.tl);
+                    arma::vec3 ctr = convert<double, 3>(it->frustum.tr);
+                    arma::vec3 cbr = convert<double, 3>(it->frustum.br);
 
-                    arma::vec2 lhs = arma::normalise(quad.getTopLeft() - quad.getBottomLeft());
-                    arma::vec2 rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
+
+                    float leftAngle   = std::acos(arma::norm_dot(cbl, ctl));
+                    float rightAngle  = std::acos(arma::norm_dot(cbr, ctr));
+                    float topAngle    = std::acos(arma::norm_dot(ctr, ctl));
+                    float bottomAngle = std::acos(arma::norm_dot(cbr, cbl));
+
+                    float dAngleVertical   = std::fabs(leftAngle - rightAngle);
+                    float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
+
+                    float vertAngle           = (leftAngle + rightAngle) / 2;
+                    float horAngle            = (topAngle + bottomAngle) / 2;
+                    it->visObject.angularSize = Eigen::Vector2d(horAngle, vertAngle);
+
+                    bool valid        = vertAngle > 0;
+                    float aspectRatio = vertAngle / horAngle;
 
                     // Check if we are within the aspect ratio range
-                    bool valid =
-                        quad.aspectRatio() > MINIMUM_ASPECT_RATIO && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
 
-                        // Check if we are close enough to the visual horizon
-                        && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0])
-                                < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
-                            || utility::vision::visualHorizonAtPoint(image, quad.getBottomRight()[0])
-                                   < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
+                    bool aspectRatioGood = aspectRatio > MINIMUM_ASPECT_RATIO && aspectRatio < MAXIMUM_ASPECT_RATIO;
 
-                        // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
-                        && (horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1]
-                            || horizon.y(quad.getTopLeft()[0]) < 0)
-                        && (horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1]
-                            || horizon.y(quad.getTopRight()[0]) < 0)
+                    bool shapeConsistent =
+                        std::fabs(leftAngle - rightAngle) < ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL
+                        && std::fabs(topAngle - bottomAngle) < ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL;
 
-                        // Check that our two goal lines are perpendicular with the horizon must use greater than rather
-                        // then less than because of the cos
-                        && std::abs(arma::dot(rhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
-                        && std::abs(arma::dot(lhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                    // Check if we are close enough to the visual horizon
 
-                        // Check that our two goal lines are approximatly parallel
-                        && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
+                    bool closeToVisualHorizon = utility::vision::visualHorizonAtPoint(image, it->quad.bl[0])
+                                                    < it->quad.bl[1] + VISUAL_HORIZON_BUFFER
+                                                || utility::vision::visualHorizonAtPoint(image, it->quad.br[0])
+                                                       < it->quad.br[1] + VISUAL_HORIZON_BUFFER;
 
-                    // Check that our goals don't form too much of an upward cup (not really possible for us)
-                    //&& lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+                    // horizon is off the screen
 
+                    bool aboveHorizon = (arma::dot(convert<double, 3>(image.horizon_normal), ctr) > 0)
+                                        || (arma::dot(convert<double, 3>(image.horizon_normal), ctl) > 0);
+
+                    // Check that our two goal lines are perpendicular with the horizon must use greater than rather
+                    // then less than because of the cos
+                    bool goalsOrthogonalToHorizon =
+                        std::abs(arma::norm_dot(arma::cross(cbr, ctr), convert<double, 3>(image.horizon_normal)))
+                            < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                        && std::abs(arma::norm_dot(arma::cross(cbl, ctl), convert<double, 3>(image.horizon_normal)))
+                               < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE;
+
+                    // Check that our two goal lines are approximatly parallel
+                    bool goalsParallel =
+                        std::abs(arma::dot(arma::cross(cbr, ctr), arma::cross(cbl, ctl))) < MAXIMUM_ANGLE_BETWEEN_SIDES;
+
+                    valid = valid && aspectRatioGood && shapeConsistent && closeToVisualHorizon && aboveHorizon
+                            && goalsOrthogonalToHorizon && goalsParallel;
 
                     if (!valid) {
+                        if (DEBUG_GOAL_THROWOUTS) {
+                            log("GOAL DISCARDED");
+                            if (!aspectRatioGood) {
+                                log("NOT TRUE : aspectRatioGood");
+                                log("aspectRatio = ", aspectRatio);
+                            }
+                            if (!shapeConsistent) {
+                                log("NOT TRUE : shapeConsistent");
+                                log("vertical shape =", leftAngle, rightAngle);
+                                log("horizontal shape =", topAngle, bottomAngle);
+                            }
+                            if (!closeToVisualHorizon) {
+                                log("NOT TRUE : closeToVisualHorizon");
+                                log("left base point",
+                                    it->quad.bl[1],
+                                    " !> hor - buffer (= ",
+                                    utility::vision::visualHorizonAtPoint(image, it->quad.bl[0])
+                                        - VISUAL_HORIZON_BUFFER,
+                                    ")");
+                                log("right base point",
+                                    it->quad.br[1],
+                                    " !> hor - buffer (= ",
+                                    utility::vision::visualHorizonAtPoint(image, it->quad.br[0])
+                                        - VISUAL_HORIZON_BUFFER,
+                                    ")");
+                            }
+                            if (!aboveHorizon) {
+                                log("NOT TRUE : aboveHorizon");
+                                log("horizon_normal = ", convert<double, 3>(image.horizon_normal).t());
+                                log("ctr = ", ctr);
+                                log("ctl = ", ctl);
+                            }
+                            if (!goalsOrthogonalToHorizon) {
+                                log("NOT TRUE : goalsOrthogonalToHorizon");
+                                log("angle right = ",
+                                    std::abs(arma::norm_dot(arma::cross(cbr, ctr),
+                                                            convert<double, 3>(image.horizon_normal))));
+                                log("angle left = ",
+                                    std::abs(arma::norm_dot(arma::cross(cbl, ctl),
+                                                            convert<double, 3>(image.horizon_normal))));
+                            }
+                            if (!goalsParallel) {
+                                log("NOT TRUE : goalsParallel");
+                                log("angle between sides = ",
+                                    std::abs(arma::dot(arma::cross(cbr, ctr), arma::cross(cbl, ctl))));
+                                // log();
+                            }
+                        }
                         it = goals->erase(it);
                     }
                     else {
@@ -398,14 +538,13 @@ namespace vision {
                     arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
                     arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
-                    // Get vectors for TL TR BL BR goal;
-                    arma::vec3 ctl       = getCamFromScreen(tl, cam.focalLengthPixels);
-                    arma::vec3 ctr       = getCamFromScreen(tr, cam.focalLengthPixels);
-                    arma::vec3 cbl       = getCamFromScreen(bl, cam.focalLengthPixels);
-                    arma::vec3 cbr       = getCamFromScreen(br, cam.focalLengthPixels);
+                    // Get vectors for TL TR BL BR;
+                    arma::vec3 ctl       = convert<double, 3>(it->frustum.tl);
+                    arma::vec3 ctr       = convert<double, 3>(it->frustum.tr);
+                    arma::vec3 cbl       = convert<double, 3>(it->frustum.bl);
+                    arma::vec3 cbr       = convert<double, 3>(it->frustum.br);
                     arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
 
-                    // TODO: NORMALS not used currently - delete?
                     // Get our four normals for each edge
                     // BL TL cross product gives left side
                     auto left                   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
@@ -470,16 +609,8 @@ namespace vision {
                     }
 
 
-                    // Angular positions from the camera
-                    arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
-                    it->visObject.screenAngular =
-                        convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
-                    arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);
-                    arma::vec2 trAngular = arma::atan(pixelsToTanThetaFactor % tr);
-                    arma::vec2 blAngular = arma::atan(pixelsToTanThetaFactor % bl);
-                    arma::vec2 tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
-                    Quad angularQuad(blAngular, tlAngular, trAngular, brAngular);
-                    it->visObject.angularSize = convert<double, 2>(angularQuad.getSize());
+                    // Add classified image corresponding to this message
+                    it->visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
                 }
 
 

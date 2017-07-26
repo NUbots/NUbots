@@ -30,10 +30,12 @@
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 
+#include "message/input/CameraParameters.h"
 #include "utility/input/ServoID.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
+
 #include "utility/vision/fourcc.h"
 
 namespace module {
@@ -72,15 +74,13 @@ namespace vision {
         double GOAL_WIDTH_HEIGHT_RATIO                  = 3;
         int GOAL_LINE_INTERSECTIONS                     = 30;
 
-        double BALL_MINIMUM_INTERSECTIONS_COARSE     = 1;
-        double BALL_MINIMUM_INTERSECTIONS_FINE       = 1;
-        double BALL_SEARCH_CIRCLE_SCALE              = 2;
-        double BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = 1;
-        double BALL_HORIZONTAL_SUBSAMPLE_FACTOR      = 1;
-        double BALL_RADIUS                           = 0.05;
+        double BALL_MINIMUM_INTERSECTIONS_COARSE = 1;
+        double BALL_MINIMUM_INTERSECTIONS_FINE   = 1;
+        double BALL_SEARCH_CIRCLE_SCALE          = 2;
+        double BALL_HORIZONTAL_SUBSAMPLE_FACTOR  = 1;
+        double BALL_RADIUS                       = 0.05;
 
         double FOCAL_LENGTH_PIXELS = 2.0;
-        double ALPHA               = 2.0;
 
         int MAXIMUM_LIGHTNING_BOLT_LENGTH   = 10;
         int MINIMUM_LIGHTNING_BOLT_STRENGTH = 10;
@@ -97,11 +97,13 @@ namespace vision {
 
         void findVisualHorizon(const message::input::Image& image,
                                const message::vision::LookUpTable& lut,
-                               message::vision::ClassifiedImage& classifiedImage);
+                               message::vision::ClassifiedImage& classifiedImage,
+                               const message::input::CameraParameters& cam);
 
         void findBall(const message::input::Image& image,
                       const message::vision::LookUpTable& lut,
-                      message::vision::ClassifiedImage& classifiedImage);
+                      message::vision::ClassifiedImage& classifiedImage,
+                      const message::input::CameraParameters& cam);
 
         void findGoals(const message::input::Image& image,
                        const message::vision::LookUpTable& lut,
@@ -109,7 +111,8 @@ namespace vision {
 
         void enhanceBall(const message::input::Image& image,
                          const message::vision::LookUpTable& lut,
-                         message::vision::ClassifiedImage& classifiedImage);
+                         message::vision::ClassifiedImage& classifiedImage,
+                         const message::input::CameraParameters& cam);
 
         void enhanceGoals(const message::input::Image& image,
                           const message::vision::LookUpTable& lut,

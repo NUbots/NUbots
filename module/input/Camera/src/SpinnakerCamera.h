@@ -9,6 +9,8 @@
 #include <string>
 
 #include "ImageData.h"
+#include "message/input/Image.h"
+#include "utility/strutil/ansi.h"
 
 #include "utility/input/ServoID.h"
 #include "utility/vision/fourcc.h"
@@ -36,6 +38,23 @@ namespace input {
         utility::vision::FOURCC fourcc;
         int cameraID;
         bool isLeft;
+    };
+
+    class SpinnakerLogCallback : Spinnaker::LoggingEvent {
+        void OnLogEvent(Spinnaker::LoggingEventDataPtr loggingEventDataPtr) {
+#ifndef NDEBUG
+            NUClear::log<NUClear::DEBUG>("--------Log Event Received----------");
+            NUClear::log<NUClear::DEBUG>("Category......: ", loggingEventDataPtr->GetCategoryName());
+            NUClear::log<NUClear::DEBUG>("Priority Value: ", loggingEventDataPtr->GetPriority());
+            NUClear::log<NUClear::DEBUG>("Priority Name.: ", loggingEventDataPtr->GetPriorityName());
+            NUClear::log<NUClear::DEBUG>("Timestmap.....: ", loggingEventDataPtr->GetTimestamp());
+            NUClear::log<NUClear::DEBUG>("NDC...........: ", loggingEventDataPtr->GetNDC());
+            NUClear::log<NUClear::DEBUG>("Thread........: ", loggingEventDataPtr->GetThreadName());
+            NUClear::log<NUClear::DEBUG>("Message.......: ", loggingEventDataPtr->GetLogMessage());
+            NUClear::log<NUClear::DEBUG>("------------------------------------");
+#endif
+            return;
+        }
     };
 
 }  // namespace input

@@ -74,6 +74,9 @@ namespace file {
     std::vector<std::string> listFiles(const std::string& directory, bool recursive = false);
 
     bool makeDirectory(const std::string& directory, bool parent = false);
+
+    void touch(const std::string& file);
+
 }  // namespace file
 }  // namespace utility
 #endif

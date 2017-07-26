@@ -65,7 +65,7 @@ message Ball {
     VisionObject  visObject             = 1;
     repeated Measurement measurements   = 2;
     repeated vec3 edgePoints            = 3;
-    Circle        circle                = 4;
+    Cone        cone                    = 4;
 }
 
 message Goal {
@@ -103,8 +103,9 @@ message Goal {
     VisionObject         visObject   = 1;
     Side                 side        = 2;
     Team                 team        = 3;
-    Quad                 quad        = 4;
-    repeated Measurement measurement = 5;
+    Frustum              frustum     = 4;
+    Quad                 quad        = 5;
+    repeated Measurement measurement = 6;
 }
 
 message Obstacle {

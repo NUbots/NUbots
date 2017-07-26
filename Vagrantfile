@@ -23,7 +23,6 @@ Vagrant.configure("2") do |config|
     # Use custom box because official Ubuntu one is shit.
     override.vm.box = "bidski/xenial64"
 
-
     override.vm.boot_timeout = 360
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
