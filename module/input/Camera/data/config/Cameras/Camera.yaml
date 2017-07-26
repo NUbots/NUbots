@@ -1,2 +1,8 @@
 max_error_count: 40
 is_left: false
+
+# Settings for the GPIO reset functionality
+gpio:
+  enabled: true  #Enabled if robot has GPIO functionality
+  path: /sys/class/gpio/gpio8/value
+  wait_time: 2000
