@@ -9,15 +9,22 @@
 
 namespace module {
 namespace input {
-
+    using message::input::CameraParameters;
     using extension::Configuration;
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
+
 
     void Camera::initiateSpinnakerCamera(const Configuration& config) {
         if (!SpinnakerSystem) {
             SpinnakerSystem = Spinnaker::System::GetInstance();
         }
+
+        // Register logging callback class
+        SpinnakerSystem->RegisterLoggingEvent((Spinnaker::LoggingEvent&) (SpinnakerLoggingCallback));
+
+        // Set callback priority level
+        SpinnakerSystem->SetLoggingEventPriorityLevel(Spinnaker::LOG_LEVEL_DEBUG);
 
         SpinnakerCamList = SpinnakerSystem->GetCameras(true, true);
         log<NUClear::DEBUG>("Found ", SpinnakerCamList.GetSize(), " cameras.");
@@ -76,7 +83,35 @@ namespace input {
             }
         }
 
-        resetSpinnakerCamera(camera, config);
+        try {
+            resetSpinnakerCamera(camera, config);
+
+            auto cameraParameters = std::make_unique<CameraParameters>();
+
+            // Generic camera parameters
+            cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
+                config["format"]["height"].as<uint>();
+            cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
+
+            // Radial specific
+            cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
+            cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
+            cameraParameters->centreOffset           = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
+
+            emit<Scope::DIRECT>(std::move(cameraParameters));
+
+            log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
+        }
+
+        catch (Spinnaker::Exception& ex) {
+            log<NUClear::WARN>(ex.what());
+            log<NUClear::WARN>(ex.GetFullErrorMessage());
+            log<NUClear::WARN>(ex.GetFileName());
+            log<NUClear::WARN>(ex.GetFunctionName());
+            log<NUClear::WARN>(ex.GetBuildDate());
+            log<NUClear::WARN>(ex.GetBuildTime());
+            log<NUClear::WARN>(ex.GetLineNumber());
+        }
     }
 
     void Camera::resetSpinnakerCamera(std::map<std::string, std::unique_ptr<SpinnakerImageEvent>>::iterator& camera,
@@ -193,11 +228,11 @@ namespace input {
         // Set sharpness.
         auto sharpness = config["settings"]["sharpness"].as<Expression>();
 
-        if (!utility::vision::setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(sharpness.value) ? "Off" :
-        "Continuous")))
+    if (!utility::vision::setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(sharpness.value) ? "Off" :
+    "Continuous")))
         {
-            log("Failed to set auto sharpness for camera", camera->first, "to", (std::isfinite(sharpness.value) ?
-        "'Off'" : "'Continuous'"));
+        log("Failed to set auto sharpness for camera", camera->first, "to", (std::isfinite(sharpness.value) ?
+    "'Off'" : "'Continuous'"));
         }
 
         if (std::isfinite(sharpness.value))
@@ -213,8 +248,8 @@ namespace input {
 
         if (!utility::vision::setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(hue.value) ? "Off" : "Continuous")))
         {
-            log("Failed to set auto hue for camera", camera->first, "to", (std::isfinite(hue.value) ? "'Off'" :
-        "'Continuous'"));
+        log("Failed to set auto hue for camera", camera->first, "to", (std::isfinite(hue.value) ? "'Off'" :
+    "'Continuous'"));
         }
 
         if (std::isfinite(hue.value))
@@ -230,11 +265,11 @@ namespace input {
         // Set saturation.
         auto saturation = config["settings"]["saturation"].as<Expression>();
 
-        if (!utility::vision::setEnumParam(nodeMap, "SaturationAuto", (std::isfinite(saturation.value) ? "Off" :
-        "Continuous")))
+    if (!utility::vision::setEnumParam(nodeMap, "SaturationAuto", (std::isfinite(saturation.value) ? "Off" :
+    "Continuous")))
         {
-            log("Failed to set auto saturation for camera", camera->first, "to", (std::isfinite(saturation.value) ?
-        "'Off'" : "'Continuous'"));
+        log("Failed to set auto saturation for camera", camera->first, "to", (std::isfinite(saturation.value) ?
+    "'Off'" : "'Continuous'"));
 
             Spinnaker::GenApi::CEnumerationPtr enumName = nodeMap.GetNode("SaturationAuto");
 
@@ -269,11 +304,11 @@ namespace input {
         // int64_t to be (trivially) type compatible with Spinnaker libray.
         arma::Col<int64_t> whiteBalance = config["settings"]["white_balance"].as<arma::Col<int64_t>>();
 
-        if (!utility::vision::setEnumParam(nodeMap, "BalanceWhiteAuto", (arma::all(whiteBalance) ? "Off" :
-        "Continuous")))
+    if (!utility::vision::setEnumParam(nodeMap, "BalanceWhiteAuto", (arma::all(whiteBalance) ? "Off" :
+    "Continuous")))
         {
-            log("Failed to set auto white balance for camera", camera->first, "to", (arma::all(whiteBalance) ? "'Off'" :
-        "'Continuous'"));
+        log("Failed to set auto white balance for camera", camera->first, "to", (arma::all(whiteBalance) ? "'Off'" :
+    "'Continuous'"));
 
             Spinnaker::GenApi::CEnumerationPtr enumName = nodeMap.GetNode("BalanceWhiteAuto");
 
@@ -381,12 +416,26 @@ namespace input {
 
             reactor.emit<NUClear::dsl::word::emit::Direct>(msg);
         }
+
+        if (image->GetWidth() > 10000 || image->GetHeight() > 10000) {
+            NUClear::log<NUClear::ERROR>("Spinnaker Camera ",
+                                         __FILE__,
+                                         " (Line ",
+                                         __LINE__,
+                                         ")",
+                                         "BAD IMAGE INITIALISATION - SHUTTING DOWN (TODO: handle better)");
+            reactor.powerplant.shutdown();
+        }
+
+        image->Release();
     }
 
     void Camera::ShutdownSpinnakerCamera() {
         SpinnakerCameras.clear();
+        SpinnakerCamList.Clear();
 
         if (SpinnakerSystem) {
+            SpinnakerSystem->UnregisterLoggingEvent((Spinnaker::LoggingEvent&) (SpinnakerLoggingCallback));
             SpinnakerSystem->ReleaseInstance();
         }
     }

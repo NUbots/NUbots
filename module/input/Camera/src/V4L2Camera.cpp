@@ -97,19 +97,26 @@ namespace input {
         auto cameraParameters = std::make_unique<CameraParameters>();
         double tanHalfFOV[2], imageCentre[2];
 
+        // Generic camera parameters
         cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
         cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
-        cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
-        tanHalfFOV[0]                      = std::tan(cameraParameters->FOV[0] * 0.5);
-        tanHalfFOV[1]                      = std::tan(cameraParameters->FOV[1] * 0.5);
-        imageCentre[0]                     = cameraParameters->imageSizePixels[0] * 0.5;
-        imageCentre[1]                     = cameraParameters->imageSizePixels[1] * 0.5;
-        cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), (tanHalfFOV[1] / imageCentre[1]);
-        cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+        // TODO: configure the offset? probably not necessary for pinhole
+        cameraParameters->centreOffset = Eigen::Vector2i::Zero();
+
+        // Pinhole specific
+        cameraParameters->lens                     = CameraParameters::LensType::PINHOLE;
+        tanHalfFOV[0]                              = std::tan(cameraParameters->FOV[0] * 0.5);
+        tanHalfFOV[1]                              = std::tan(cameraParameters->FOV[1] * 0.5);
+        imageCentre[0]                             = cameraParameters->imageSizePixels[0] * 0.5;
+        imageCentre[1]                             = cameraParameters->imageSizePixels[1] * 0.5;
+        cameraParameters->pinhole.distortionFactor = config["DISTORTION_FACTOR"].as<double>();
+        cameraParameters->pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]),
+            (tanHalfFOV[1] / imageCentre[1]);
+        cameraParameters->pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
         emit<Scope::DIRECT>(std::move(cameraParameters));
 
-        log("Emitted camera parameters for camera", config["deviceID"].as<std::string>());
+        log("Emitted pinhole camera parameters for camera", config["deviceID"].as<std::string>());
 
         try {
             // Recreate the camera device at the required resolution
@@ -235,6 +242,7 @@ namespace input {
         while (fd < 0 && resetCount < 10) {
             std::cout << "Toggling GPIO" << std::endl;
             system("/bin/bash /home/nubots/gpio_toggle.sh");
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
             fd = open(deviceID.c_str(), O_RDWR);
             resetCount++;
         }

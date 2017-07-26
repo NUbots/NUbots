@@ -328,7 +328,6 @@ namespace platform {
 
                 // Loop through each of our commands
                 for (const auto& command : commands) {
-
                     float diff = utility::math::angle::difference(
                         command.position,
                         utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
