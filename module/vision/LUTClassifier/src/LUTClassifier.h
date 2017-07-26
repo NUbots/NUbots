@@ -116,7 +116,8 @@ namespace vision {
 
         void enhanceGoals(const message::input::Image& image,
                           const message::vision::LookUpTable& lut,
-                          message::vision::ClassifiedImage& classifiedImage);
+                          message::vision::ClassifiedImage& classifiedImage,
+                          const message::input::CameraParameters& cam);
 
     public:
         explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
