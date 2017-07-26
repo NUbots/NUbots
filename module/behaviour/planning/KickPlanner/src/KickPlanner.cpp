@@ -26,7 +26,7 @@
 #include "message/input/GameState.h"
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"

@@ -77,7 +77,9 @@ namespace math {
                 const int remainder        = number_of_particles_ % initialMeans.size();
                 // Generate remainder using first hypotheses
                 // Cols are accessed cols(first,last_inclusive)
-                particles.cols(0, remainder - 1) = getParticles(initialMeans[0], initialCovariances[0], remainder);
+                if (remainder > 0) {
+                    particles.cols(0, remainder - 1) = getParticles(initialMeans[0], initialCovariances[0], remainder);
+                }
                 // Generate the rest equally
                 for (unsigned int i = 0, currentStart = remainder; currentStart < particles.n_cols;
                      ++i, currentStart += particlesPerInit) {
@@ -161,7 +163,7 @@ namespace math {
                         particles.col(i) + (model.getRogueRange() % (0.5 - arma::randu(Model::size)));
                 }
                 // Repeat each particle for each possibility
-                ParticleList repCandidateParticles = arma::repmat(candidateParticles, possibilities.size(), 0);
+                ParticleList repCandidateParticles = arma::repmat(candidateParticles, 1, possibilities.size());
 
                 // Compute weights
                 arma::mat observationDifferences = arma::mat(measurement.n_elem, repCandidateParticles.n_cols);

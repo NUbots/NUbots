@@ -151,6 +151,28 @@ void Darwin::buildBulkReadPacket() {
                 // request.push_back(std::make_tuple(FSR::Address::FSR1_L, sensor.first, sizeof(Types::FSRData)));
                 break;
 
+            // case ID::L_SHOULDER_PITCH:
+            // case ID::L_SHOULDER_ROLL:
+            // case ID::L_ELBOW:
+            // case ID::R_SHOULDER_PITCH:
+            // case ID::R_SHOULDER_ROLL:
+            // case ID::R_ELBOW:
+            // case ID::L_HIP_PITCH:
+            // case ID::R_HIP_YAW:
+            // case ID::R_HIP_ROLL:
+            // case ID::R_ANKLE_ROLL:
+            // case ID::R_HIP_PITCH:
+            // case ID::R_KNEE:
+            // case ID::R_ANKLE_PITCH:
+            // case ID::L_HIP_YAW:
+            // case ID::L_HIP_ROLL:
+            // case ID::L_KNEE:
+            // case ID::L_ANKLE_PITCH:
+            // case ID::HEAD_YAW:
+            // case ID::HEAD_PITCH:
+            // case ID::L_ANKLE_ROLL:
+            //     break;
+
             // Otherwise we assume that it's a servo
             default:
                 // Only add this servo if we aren't simulating it

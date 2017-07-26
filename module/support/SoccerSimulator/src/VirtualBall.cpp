@@ -87,21 +87,21 @@ namespace support {
         double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
 
         // Project the centre to the screen and work out the radius as if it was in the centre
-        arma::ivec2 centre =
-            screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), convert<uint, 2>(cam.imageSizePixels));
-        double radius = cam.focalLengthPixels * std::tan(angle * 0.5);
+        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam), convert<uint, 2>(cam.imageSizePixels));
+        // TODO actually project this
+        double radius = 100 * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
         if (centre[0] > 0 && centre[0] < int(cam.imageSizePixels[0]) && centre[1] > 0
             && centre[1] < int(cam.imageSizePixels[1])) {
 
             // Set our circle parameters for simulating the ball
-            result.circle.centre = convert<double, 2>(arma::conv_to<arma::vec>::from(centre));
-            result.circle.radius = radius;
+            result.cone.axis     = convert<double, 3>(arma::normalise(rBCc));
+            result.cone.gradient = std::tan(angle * 0.5);
 
             // Get our transform to world coordinates
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
             Transform3D Hcw        = Htc.i() * Htw;
             Transform3D Hwc        = Hcw.i();
 
