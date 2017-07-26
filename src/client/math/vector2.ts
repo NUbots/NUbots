@@ -16,11 +16,11 @@ export class Vector2 {
     return new Vector2(x || 0, y || 0)
   }
 
-  public static from(vec2?: { x?: number, y?: number } | null): Vector2 {
-    if (!vec2) {
-      vec2 = { x: 0, y: 0 }
+  public static from(vec?: { x?: number, y?: number } | null): Vector2 {
+    if (!vec) {
+      return Vector2.of()
     }
-    return new Vector2(vec2.x || 0, vec2.y || 0)
+    return new Vector2(vec.x || 0, vec.y || 0)
   }
 
   @computed get length(): number {
@@ -103,16 +103,16 @@ export class Vector2 {
   }
 
   @action
-  public add(movement: Vector2): Vector2 {
-    this.x += movement.x
-    this.y += movement.y
+  public add(v: Vector2): Vector2 {
+    this.x += v.x
+    this.y += v.y
     return this
   }
 
   @action
-  public subtract(movement: Vector2): Vector2 {
-    this.x -= movement.x
-    this.y -= movement.y
+  public subtract(v: Vector2): Vector2 {
+    this.x -= v.x
+    this.y -= v.y
     return this
   }
 }
