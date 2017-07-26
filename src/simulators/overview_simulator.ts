@@ -27,7 +27,7 @@ export class OverviewSimulator implements Simulator {
   public simulate(time: number, index: number, numRobots: number): Message[] {
     const messageType = 'message.support.nubugger.Overview'
 
-    const t = time / 10 + index
+    const t = time / 10 - index
 
     const fieldLength = this.field.fieldLength
     const fieldWidth = this.field.fieldWidth
@@ -46,10 +46,11 @@ export class OverviewSimulator implements Simulator {
     const penaltyReasons = getEnumValues<PenaltyReason>(PenaltyReason)
 
     const buffer = Overview.encode({
-      roleName: 'Overview Simulator',
+      timestamp: { seconds: time },
       robotId: index + 1,
-      voltage: this.randomFloat(10, 13),
+      roleName: 'Overview Simulator',
       battery: this.random.float(),
+      voltage: this.randomFloat(10, 13),
       behaviourState: this.random.choice(states),
       robotPosition: new Vector3(robotPosition.x, robotPosition.y, robotAngle),
       robotPositionCovariance: {
@@ -62,6 +63,7 @@ export class OverviewSimulator implements Simulator {
         x: { x: this.random.float(), y: this.random.float() },
         y: { x: this.random.float(), y: this.random.float() },
       },
+      kickTarget: this.figureEight(-t).add(ballPosition),
       gameMode: this.random.choice(modes),
       gamePhase: this.random.choice(phases),
       penaltyReason: this.random.choice(penaltyReasons),
@@ -75,7 +77,6 @@ export class OverviewSimulator implements Simulator {
         this.randomFieldPosition(),
         ballPosition,
       ],
-      kickTarget: this.figureEight(-t).add(ballPosition),
     }).finish()
 
     const message = { messageType, buffer }
