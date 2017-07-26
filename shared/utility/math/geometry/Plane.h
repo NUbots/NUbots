@@ -67,7 +67,8 @@ namespace math {
                 double tIntersection = arma::dot(point - l.point, normal) / lDotN;
                 if (!l.tValid(tIntersection)) {
                     throw std::domain_error(
-                        "Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
+                        "Plane::intersect - Plane does not meet line segment (intersection falls off segment)! t = "
+                        + std::to_string(tIntersection));
                 }
                 return tIntersection * l.direction + l.point;
             }
