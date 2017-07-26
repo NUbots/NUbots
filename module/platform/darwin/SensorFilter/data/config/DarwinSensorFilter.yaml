@@ -1,3 +1,5 @@
+nominal_z: 0.01
+
 battery:
   charged_voltage: 10.7
   flat_voltage: 12.9

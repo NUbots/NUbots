@@ -111,6 +111,8 @@ namespace platform {
 
             on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config) {
 
+                this->config.nominal_z = config["nominal_z"].as<float>();
+
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
@@ -464,34 +466,41 @@ namespace platform {
                         // confirm accel and foot vector are close
                         // weight CM730 higher
 
-                        Transform3D Htl = convert<double, 4, 4>(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                        Transform3D Htr = convert<double, 4, 4>(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                        Transform3D Htw = convert<double, 4, 4>(sensors->world);
+                        Transform3D Hwt = convert<double, 4, 4>(previousSensors->world).i();
+                        Transform3D Htl =
+                            convert<double, 4, 4>(previousSensors->forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        Transform3D Htr =
+                            convert<double, 4, 4>(previousSensors->forwardKinematics[ServoID::R_ANKLE_ROLL]);
 
-                        Transform3D Hlw = Htl.i() * Htw;
-                        Transform3D Hrw = Htr.i() * Htw;
+                        // log("\n", Htl, "\n", Htr, "\n", Hwt);
 
-                        auto zCompR = (Hrw).i().cols(3, 2);
-                        auto zCompL = (Hlw).i().cols(3, 2);
+                        Transform3D Hwl = Hwt * Htl;
+                        Transform3D Hwr = Hwt * Htr;
 
-                        log(zCompL, zCompR);
+                        auto zCompL = Htl(2, 3);
+                        auto zCompR = Htr(2, 3);
 
-                        /*
-                        auto zCompR = Hrw.translation().row(0, 2);
-                        auto zCompL = Hlw.translation().row(0, 2);
-                        if (std::max(zComp[0], zComp[1]) > nominal_z_threshold) {
-                            auto lowestFoot = zComp[0] > zComp[1] ? 0 : 1;
-                        }
-                        else if (SOME WEIRD GYRO STUFF) {
+                        if (std::fabs(zCompL - zCompR) > config.nominal_z) {
+                            if (zCompL > zCompR) {
+                                sensors->rightFootDown = true;
+                                sensors->leftFootDown  = false;
+                            }
+                            else {
+                                sensors->rightFootDown = false;
+                                sensors->leftFootDown  = true;
+                            }
                         }
                         else {
-                            log("Both feet on ground, hopefully!");
-                        }*/
+                            sensors->rightFootDown = true;
+                            sensors->leftFootDown  = true;
+                        }
                     }
                     else {
-                        sensors->leftFootDown  = false;
                         sensors->rightFootDown = false;
+                        sensors->leftFootDown  = false;
                     }
+
+                    emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -612,6 +621,7 @@ namespace platform {
                     world.eye();
                     world.rotation()    = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     world.translation() = -(world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+
                     // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
                     sensors->world = convert<double, 4, 4>(world);
 
