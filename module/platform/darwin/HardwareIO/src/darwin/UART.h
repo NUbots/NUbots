@@ -41,28 +41,28 @@ namespace Packet {
 
 namespace ErrorCode {
     enum {
-        NO_RESPONSE   = 0x00FF,
-        NONE          = 0x0000,
-        INPUT_VOLTAGE = 0x0001,
-        ANGLE_LIMIT   = 0x0002,
-        OVERHEATING   = 0x0004,
-        RANGE         = 0x0008,
-        CHECKSUM      = 0x0010,
-        OVERLOAD      = 0x0020,
-        INSTRUCTION   = 0x0040,
-        CORRUPT_DATA  = 0x0080
+        NONE          = 0x00,
+        INPUT_VOLTAGE = 0x01,
+        ANGLE_LIMIT   = 0x02,
+        OVERHEATING   = 0x04,
+        RANGE         = 0x08,
+        CHECKSUM      = 0x10,
+        OVERLOAD      = 0x20,
+        INSTRUCTION   = 0x40,
+        CORRUPT_DATA  = 0x80,
+        NO_RESPONSE   = 0xFF
     };
 }  // namespace ErrorCode
 
 // This is the header that is contained in the CommandResult
-#pragma pack(push, 1)  // Make sure that this struct is not cache alligned
+#pragma pack(push, 1)  // Make sure that this struct is not cache aligned
 struct Header {
     Header() {}
     uint8_t id        = -1;
     uint8_t length    = 0;
     uint8_t errorcode = -1;
 };
-// Check that this struct is not cache alligned
+// Check that this struct is not cache aligned
 static_assert(sizeof(Header) == 3, "The compiler is adding padding to this struct, Bad compiler!");
 #pragma pack(pop)
 

@@ -14,7 +14,7 @@ node default {
   }
 
   # Get and install our toolchain
-  $toolchain_version = '2.1.2'
+  $toolchain_version = '2.1.3'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain-${toolchain_version}.deb",
     source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
@@ -125,8 +125,6 @@ node nubotsvmbuild {
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
                                           'nuc7i7bnh' => [ '', ], },
                        'method'      => 'autotools',},
-    'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.7.tar.gz',
-                       'method'      => 'cmake',},
     'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
                        'method'      => 'cmake',},

@@ -1,4 +1,5 @@
 max_error_count: 40
+is_left: false
 
 # Settings for the GPIO reset functionality
 gpio:

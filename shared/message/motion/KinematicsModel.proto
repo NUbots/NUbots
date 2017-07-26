@@ -59,6 +59,7 @@ message KinematicsModel {
         float NECK_TO_CAMERA_Y                = 6;
         float NECK_TO_CAMERA_Z                = 7;
         float CAMERA_DECLINATION_ANGLE_OFFSET = 8;
+        float INTERPUPILLARY_DISTANCE         = 13;
 
         //Head movement limits
         float MAX_YAW                         = 9;

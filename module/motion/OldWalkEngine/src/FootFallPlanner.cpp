@@ -19,7 +19,7 @@
 
 #include "OldWalkEngine.h"
 
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "utility/nubugger/NUhelpers.h"
 
 namespace module {

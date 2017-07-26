@@ -23,7 +23,9 @@ def register(command):
 
     init_command.add_argument('platform', metavar='platform', choices=toolchains, help='the platform to select as the primary workspace')
 
-def run(workspace_command, **kwargs):
+    init_command.add_argument('-s', '--static', dest='static', action='store_true', help='perform a static build to get maximum performance')
+
+def run(workspace_command, static, **kwargs):
     if workspace_command == 'select':
         platform = kwargs['platform']
 
@@ -52,8 +54,15 @@ def run(workspace_command, **kwargs):
         # Change to that directory
         os.chdir(path)
 
+        # Build our default args
+        args = ['cmake', b.project_dir, '-GNinja', '-DCMAKE_TOOLCHAIN_FILE=/nubots/toolchain/{}.cmake'.format(platform)]
+
+        if static:
+            args.append('-DSTATIC_LIBRARIES=ON')
+            args.append('-DNUCLEAR_SHARED_BUILD=OFF')
+
         # Run cmake
-        call(['cmake', b.project_dir, '-GNinja', '-DCMAKE_TOOLCHAIN_FILE=/nubots/toolchain/{}.cmake'.format(platform)])
+        call(args)
 
         # Yell at windows users for having a crappy OS
         if not symlink_success:

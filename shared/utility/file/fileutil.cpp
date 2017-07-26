@@ -21,6 +21,7 @@
 
 extern "C" {
 #include <dirent.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 }
 
@@ -223,5 +224,25 @@ namespace file {
 
         return true;
     }
+
+    // http://chris-sharpe.blogspot.com.au/2013/05/better-than-systemtouch.html
+    void touch(const std::string& file) {
+        int fd = open(file.c_str(), O_WRONLY | O_CREAT | O_NOCTTY | O_NONBLOCK, 0666);
+
+        // Couldn't open that path.
+        if (fd < 0) {
+            throw std::runtime_error("Cannot open/create '" + file + "' with mode 0666.");
+            return;
+        }
+
+        int rc = utimensat(AT_FDCWD, file.c_str(), nullptr, 0);
+
+        // Failed to update timestamp.
+        if (rc) {
+            throw std::runtime_error("Cannot update timestamp for '" + file + "'.");
+            return;
+        }
+    }
+
 }  // namespace file
 }  // namespace utility

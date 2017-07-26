@@ -48,10 +48,15 @@ namespace math {
                 return point + tLimits[1] * direction;
             }
 
+            bool tValid(const double& t) {
+                return t >= tLimits[0] && t <= tLimits[1];
+            }
+
             void setFromDirection(const Vector& direction_,
                                   const Vector& point_,
                                   const arma::vec2& tLimits_ = {-std::numeric_limits<double>::infinity(),
                                                                 std::numeric_limits<double>::infinity()}) {
+
                 if (arma::norm(direction_, 1) <= 0) {
                     throw std::domain_error("ParametricLine::setFromDirection - Direction is zero vector!");
                 }
