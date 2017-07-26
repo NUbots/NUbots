@@ -20,6 +20,7 @@ namespace localisation {
     using message::input::Sensors;
     using message::localisation::Field;
 
+    using utility::math::matrix::Rotation2D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
@@ -133,26 +134,22 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
 
-                Transform3D Hft;
                 Transform3D Hfw;
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                arma::vec3 rTFf;
-                arma::mat22 Hfw_xy;
-                arma::mat22 pos_cov;
-                arma::mat33 state_cov;
                 std::vector<arma::vec3> states;
                 std::vector<arma::mat33> cov;
 
                 for (auto& s : locReset.hypotheses) {
-                    rTFf              = {s.position[0], s.position[1], 0};
-                    Hft.translation() = -rTFf;
+                    Transform3D Hft;
+                    arma::vec3 rTFf   = {s.position[0], s.position[1], 0};
+                    Hft.translation() = rTFf;
                     Hft.rotateZ(s.heading);
                     Hfw = Hft * Htw;
                     states.push_back(transform3DToFieldState(Hfw));
 
-                    Hfw_xy    = Hfw.submat(0, 0, 1, 1);
-                    pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
-                    state_cov = arma::zeros(3, 3);
+                    Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3(0, 0, 1), arma::vec3(1, 0, 0)).rotation();
+                    arma::mat22 pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
+                    arma::mat33 state_cov = arma::eye(3, 3);
                     state_cov.submat(0, 0, 1, 1) = pos_cov;
                     state_cov(2, 2) = s.heading_var;
                     cov.push_back(state_cov);
