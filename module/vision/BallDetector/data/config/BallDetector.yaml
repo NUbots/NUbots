@@ -1,7 +1,7 @@
 ransac:
   minimum_points_for_consensus: 10
   maximum_iterations_per_fitting: 100
-  maximum_fitted_models: 10
+  maximum_fitted_models: 3
   consensus_error_threshold: 0.0001
 maximum_disagreement_ratio: 1.2
 maximum_relative_seed_point_distance: 0.1
@@ -27,16 +27,16 @@ clustering:
 
   variance_floor: 5 # the variance floor (smallest allowed value) for the diagonal covariances
 
-  print_status: false # either true or false; enable or disable printing of progress during the k-me$
+  print_status: false # either true or false; enable or disable printing of progress during the k-means algorithm
 
-  dist_mode: eucl_dist # specifies the distance used during the seeding of initial means and k-means$
+  dist_mode: eucl_dist # specifies the distance used during the seeding of initial means and k-means
     # Parameters for dist_mode:
     # eucl_dist         Euclidean distance
-    # maha_dist         Mahalanobis distance, which uses a global diagonal covariance matrix estimat$
+    # maha_dist         Mahalanobis distance, which uses a global diagonal covariance matrix estimated
 
-  seed_mode: random_spread # specifies how the initial means are seeded prior to running k-means and$
+  seed_mode: random_spread # specifies how the initial means are seeded prior to running k-means
     # Parameters for seed_mode:
-    # keep_existing             keep the existing model (do not modify the means, covariances and he$
+    # keep_existing             keep the existing model (do not modify the means, covariances and he
     # static_subset             a subset of the training samples (repeatable)
     # random_subset             a subset of the training samples (random)
     # static_spread             a maximally spread subset of training samples (repeatable)

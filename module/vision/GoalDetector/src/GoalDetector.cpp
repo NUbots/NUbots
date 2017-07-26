@@ -113,7 +113,6 @@ namespace vision {
                 MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
                 MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
 
-                // TODO: use this parameter
                 arma::vec3 horizon_buffer_height = {1, 0, tan(config["visual_horizon_buffer"].as<double>())};
                 VISUAL_HORIZON_BUFFER =
                     std::max(1,
@@ -156,7 +155,7 @@ namespace vision {
                 // Our segments that may be a part of a goal
                 std::vector<RansacGoalModel::GoalSegment> segments;
                 auto goals = std::make_unique<std::vector<Goal>>();
-
+                // Is the midpoint above or below the horizon?
                 // Get our goal segments
                 for (const auto& segment : image.horizontalSegments) {
 
@@ -203,7 +202,6 @@ namespace vision {
                     // Get our left, right and midlines
                     Plane& left  = result.model.leftPlane;
                     Plane& right = result.model.rightPlane;
-                    Plane mid;
 
                     if (DEBUG_GOAL_RANSAC) {
 
@@ -232,6 +230,8 @@ namespace vision {
                                                             Eigen::Vector4d(0, 0, 1, 1)));
                         }
                     }
+
+                    Plane mid;
 
                     // Normals in same direction
                     if (arma::dot(left.normal, right.normal) > 0) {
@@ -387,8 +387,9 @@ namespace vision {
                     float dAngleVertical   = std::fabs(leftAngle - rightAngle);
                     float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
 
-                    float vertAngle = (leftAngle + rightAngle) / 2;
-                    float horAngle  = (topAngle + bottomAngle) / 2;
+                    float vertAngle           = (leftAngle + rightAngle) / 2;
+                    float horAngle            = (topAngle + bottomAngle) / 2;
+                    it->visObject.angularSize = Eigen::Vector2d(horAngle, vertAngle);
 
                     bool valid        = vertAngle > 0;
                     float aspectRatio = vertAngle / horAngle;
@@ -408,15 +409,13 @@ namespace vision {
                                                 || utility::vision::visualHorizonAtPoint(image, it->quad.br[0])
                                                        < it->quad.br[1] + VISUAL_HORIZON_BUFFER;
 
-                    // TODO NEEDED?: Check we finish above the kinematics horizon or kinematics
                     // horizon is off the screen
 
                     bool aboveHorizon = (arma::dot(convert<double, 3>(image.horizon_normal), ctr) > 0)
                                         || (arma::dot(convert<double, 3>(image.horizon_normal), ctl) > 0);
 
-                    // Check that our two goal lines are perpendicular with the horizon must use greater
-                    // than rather then less than because of the cos
-
+                    // Check that our two goal lines are perpendicular with the horizon must use greater than rather
+                    // then less than because of the cos
                     bool goalsOrthogonalToHorizon =
                         std::abs(arma::norm_dot(arma::cross(cbr, ctr), convert<double, 3>(image.horizon_normal)))
                             < MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
@@ -549,7 +548,6 @@ namespace vision {
                     arma::vec3 cbr       = convert<double, 3>(it->frustum.br);
                     arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
 
-                    // TODO: NORMALS not used currently - delete?
                     // Get our four normals for each edge
                     // BL TL cross product gives left side
                     auto left                   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
@@ -613,17 +611,7 @@ namespace vision {
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                     }
 
-                    // TODO FIX for Igus Angular positions from the camera
-                    arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor);
 
-                    it->visObject.screenAngular =
-                        convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
-                    arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);
-                    arma::vec2 trAngular = arma::atan(pixelsToTanThetaFactor % tr);
-                    arma::vec2 blAngular = arma::atan(pixelsToTanThetaFactor % bl);
-                    arma::vec2 tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
-                    Quad angularQuad(blAngular, tlAngular, trAngular, brAngular);
-                    it->visObject.angularSize = convert<double, 2>(angularQuad.getSize());
                     // Add classified image corresponding to this message
                     it->visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
                 }

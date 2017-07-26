@@ -48,7 +48,6 @@ namespace vision {
                                           const CameraParameters& cam) {
 
         // Get some local references to class variables to make text shorter
-        // Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
         Plane<3> horizon(convert<double, 3>(classifiedImage.horizon_normal));
         auto& visualHorizon = classifiedImage.visualHorizon;
 

@@ -233,8 +233,8 @@ namespace vision {
                     auto balls = std::make_unique<std::vector<Ball>>();
                     balls->reserve(ransacResults.size());
 
-                    // if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results (MAX = ",
-                    // MAXIMUM_FITTED_MODELS, ")");
+                    if (print_throwout_logs)
+                        log("Ransac : ", ransacResults.size(), "results (MAX = ", MAXIMUM_FITTED_MODELS, ")");
 
                     arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
 
@@ -254,40 +254,33 @@ namespace vision {
                         // Get a unit vector pointing to the centre of the ball
                         arma::vec3 ballCentreRay = axis;
 
-                        // Get the centre of our ball in screen space
-                        arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam);
-                        arma::ivec2 ballCentreImage =
-                            screenToImage(ballCentreScreen, convert<uint, 2>(cam.imageSizePixels));
-                        float ballRadiusScreen = arma::norm(top - base) / 4 + arma::norm(left - right) / 4;
-
                         /************************************************
                          *                  THROWOUTS                   *
                          ************************************************/
 
                         if (print_throwout_logs) {
-                            // log("Ball model: g =  ", result.model.gradient, " axis =   ",
-                            // result.model.unit_axis.t()); log("Ball screen: r = ", ballRadiusScreen,      " centre =
-                            // ",  ballCentreScreen.t());
+                            log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t()); log("Ball screen: r = ", ballRadiusScreen,      " centre =
+                            ",  ballCentreScreen.t());
                         }
 
                         // CENTRE OF BALL IS ABOVE THE HORIZON
                         if (arma::dot(convert<double, 3>(image.horizon_normal), ballCentreRay) > 0) {
                             if (print_throwout_logs) {
                                 log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
-                                // log("Horizon normal = ", image.horizon_normal.transpose());
-                                // log("Ball centre ray = ", ballCentreRay.t());
+                                log("Horizon normal = ", image.horizon_normal.transpose());
+                                log("Ball centre ray = ", ballCentreRay.t());
                             }
                             continue;
                         }
 
-                        // //DOES HAVE INTERNAL GREEN
+                        // DOES HAVE INTERNAL GREEN
                         float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut, cam);
                         if (greenRatio > green_ratio_threshold) {
                             if (print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
                             continue;
                         }
 
-                        // // DOES NOT TOUCH 3 SEED POINTS
+                        // DOES NOT TOUCH 3 SEED POINTS
                         arma::vec3 sDist({std::numeric_limits<double>::max(),
                                           std::numeric_limits<double>::max(),
                                           std::numeric_limits<double>::max()});
@@ -310,12 +303,15 @@ namespace vision {
                             if (print_throwout_logs)
                                 log("Ball discarded: arma::max(sDist) / result.model.radius > "
                                     "maximum_relative_seed_point_distance");
-                            // if(print_throwout_logs) log("arma::max(sDist) = ", arma::max(sDist), " > ",
-                            // maximum_relative_seed_point_distance);
+                            if (print_throwout_logs)
+                                log("arma::max(sDist) = ",
+                                    arma::max(sDist),
+                                    " > ",
+                                    maximum_relative_seed_point_distance);
                             continue;
                         }
 
-                        // // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
+                        // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
                         double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
 
                         if (widthDistance < cameraHeight * 0.5) {
@@ -323,8 +319,8 @@ namespace vision {
                             continue;
                         }
 
-                        // // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                        // // Project this vector to a plane midway through the ball
+                        // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
+                        // Project this vector to a plane midway through the ball
                         Plane ballBisectorPlane({0, 0, 1}, {0, 0, field.ball_radius});
                         arma::vec3 ballCentreGroundProj =
                             projectCamToPlane(ballCentreRay, camToGround, ballBisectorPlane);
@@ -403,7 +399,6 @@ namespace vision {
                             }
                         }
                     }
-                    // log("Final result: ", balls->size(), "balls");
                     emit(std::move(balls));
                     lastFrame.time = sensors.timestamp;
                 });

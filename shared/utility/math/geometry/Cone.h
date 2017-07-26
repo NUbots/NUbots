@@ -109,6 +109,7 @@ namespace math {
                 return arma::norm(p_orth);
             }
 
+            // Returns the dot product of p with the projection of p onto the cone
             float dotDistanceToPoint(const Vector& p) const {
                 Vector p_cone = projectPoint(p);
                 // Compute size of orth component

@@ -23,7 +23,6 @@ Vagrant.configure("2") do |config|
     # Use custom box because official Ubuntu one is shit.
     override.vm.box = "bidski/xenial64"
 
-
     override.vm.boot_timeout = 360
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
@@ -92,7 +91,7 @@ Vagrant.configure("2") do |config|
     nubots.vm.synced_folder ".", "/home/vagrant/NUbots"
 
     # Private network for NUsight's benifit
-    nubots.vm.network "public_network", type: "dhcp"
+    #nubots.vm.network "public_network", type: "dhcp"
 
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
