@@ -99,9 +99,10 @@ namespace math {
                     }
 
                     for (auto it = first; it != last; ++it) {
-                        if (model.calculateError(*it) < consensusErrorThreshold) {
+                        float this_error = model.calculateError(*it);
+                        if (this_error < consensusErrorThreshold) {
                             ++consensusSize;
-                            error += consensusErrorThreshold;
+                            error += this_error;
                         }
                     }
 
@@ -115,14 +116,13 @@ namespace math {
 
                 if (largestConsensus >= minimumPointsForConsensus) {
 
-                    model.refineModel(first, last, consensusErrorThreshold);
+                    bestModel.refineModel(first, last, consensusErrorThreshold);
 
                     auto newFirst =
                         std::partition(first, last, [consensusErrorThreshold, bestModel](const DataPoint& point) {
                             return consensusErrorThreshold
                                    > bestModel.calculateError(std::forward<const DataPoint&>(point));
                         });
-
                     first = newFirst;
 
                     return std::make_pair(true, RansacResult<Iterator, Model>(bestModel, first, newFirst));

@@ -17,8 +17,6 @@ ball:
   intersections_fine: 10
   # The multiplier for the search for the ball
   search_circle_scale: 3
-  # When clustering goals on the X axis, if a gap of at least this amount is detected it will be a new cluster
-  maximum_vertical_cluster_spacing: 0.1
   # A multiplier for spacing between ball finder lines (based on the closeness)
   horizontal_subsample_factor: 0.5
   # The longest pixel count we can strike a lighitng bolt around things

@@ -423,7 +423,7 @@ namespace input {
                 log<NUClear::ERROR>("An unrecognized request was made to the NatNet server");
                 break;
 
-            case Packet::Type::MESSAGE_STRING: processString(packet);
+            case Packet::Type::MESSAGE_STRING: processString(packet); break;
 
             default: log<NUClear::ERROR>("The NatNet server sent an unexpected packet type"); break;
         }

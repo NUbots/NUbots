@@ -21,6 +21,7 @@
 
 #include "utility/math/geometry/Line.h"
 #include "utility/math/ransac/NPartiteRansac.h"
+#include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -33,6 +34,9 @@ namespace vision {
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
     using utility::math::ransac::NPartiteRansac;
     using utility::math::geometry::Line;
+    using message::input::CameraParameters;
+    using utility::math::geometry::Plane;
+    using utility::math::vision::getCamFromImage;
 
     using utility::nubugger::drawVisionLines;
 
@@ -77,7 +81,10 @@ namespace vision {
         void refineModel(Iterator& /*begin*/, Iterator& /*end*/, const double& /*threshold*/) {}
     };
 
-    void LUTClassifier::enhanceGoals(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
+    void LUTClassifier::enhanceGoals(const Image& image,
+                                     const LookUpTable& lut,
+                                     ClassifiedImage& classifiedImage,
+                                     const CameraParameters& cam) {
 
         /*
             Here we improve the classification of goals.
@@ -87,6 +94,7 @@ namespace vision {
          */
 
         Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+        arma::vec3 horizon_normal = convert<double, 3>(classifiedImage.horizon_normal);
 
         // Get our goal segments
         std::vector<GoalPOI> points;
@@ -103,7 +111,8 @@ namespace vision {
         // Partition our segments so that they are split between above and below the horizon
         auto split = std::partition(std::begin(points), std::end(points), [&](const GoalPOI& point) {
             // Is the midpoint above or below the horizon?
-            return horizon.distanceToPoint(point.midpoint) > 0;
+            arma::vec3 camPoint = getCamFromImage(arma::ivec({point.midpoint[0], point.midpoint[1]}), cam);
+            return arma::dot(horizon_normal, camPoint) > 0;
         });
 
         // Make an array of our partitions

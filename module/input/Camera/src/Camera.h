@@ -23,6 +23,8 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 
+#include "utility/support/eigen_armadillo.h"
+
 #include "utility/vision/fourcc.h"
 
 #include "SpinnakerCamera.h"
@@ -56,6 +58,7 @@ namespace input {
 
         Spinnaker::SystemPtr SpinnakerSystem;
         Spinnaker::CameraList SpinnakerCamList;
+        module::input::SpinnakerLogCallback SpinnakerLoggingCallback;
         std::map<std::string, std::unique_ptr<SpinnakerImageEvent>> SpinnakerCameras;
 
         static uint cameraCount;

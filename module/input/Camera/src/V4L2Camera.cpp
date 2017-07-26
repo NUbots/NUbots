@@ -1,7 +1,14 @@
 #include "V4L2Camera.h"
 #include "Camera.h"
 
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <nuclear>
+
 #include "extension/FileWatch.h"
+
+#include "message/input/Sensors.h"
+#include "message/motion/KinematicsModel.h"
 
 namespace module {
 namespace input {
@@ -9,7 +16,6 @@ namespace input {
     using extension::FileWatch;
 
     using message::input::CameraParameters;
-    using message::input::Image;
 
     using FOURCC = utility::vision::FOURCC;
 
@@ -23,7 +29,7 @@ namespace input {
                     try {
                         // If the camera is ready, get an image and emit it
                         if (camera.second.isStreaming()) {
-                            emit(std::make_unique<Image>(camera.second.getImage()));
+                            emit<Scope::DIRECT>(std::make_unique<ImageData>(camera.second.getImage()));
                         }
                     }
                     catch (std::system_error& e) {
@@ -41,7 +47,7 @@ namespace input {
             });
 
         std::string deviceID = config["deviceID"];
-        V4L2Camera camera    = V4L2Camera(config, deviceID);
+        V4L2Camera camera    = V4L2Camera(config, deviceID, *this);
 
         V4L2SettingsHandle =
             on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this, config] {
@@ -91,19 +97,26 @@ namespace input {
         auto cameraParameters = std::make_unique<CameraParameters>();
         double tanHalfFOV[2], imageCentre[2];
 
+        // Generic camera parameters
         cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
         cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
-        cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
-        tanHalfFOV[0]                      = std::tan(cameraParameters->FOV[0] * 0.5);
-        tanHalfFOV[1]                      = std::tan(cameraParameters->FOV[1] * 0.5);
-        imageCentre[0]                     = cameraParameters->imageSizePixels[0] * 0.5;
-        imageCentre[1]                     = cameraParameters->imageSizePixels[1] * 0.5;
-        cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), (tanHalfFOV[1] / imageCentre[1]);
-        cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+        // TODO: configure the offset? probably not necessary for pinhole
+        cameraParameters->centreOffset = Eigen::Vector2i::Zero();
+
+        // Pinhole specific
+        cameraParameters->lens                     = CameraParameters::LensType::PINHOLE;
+        tanHalfFOV[0]                              = std::tan(cameraParameters->FOV[0] * 0.5);
+        tanHalfFOV[1]                              = std::tan(cameraParameters->FOV[1] * 0.5);
+        imageCentre[0]                             = cameraParameters->imageSizePixels[0] * 0.5;
+        imageCentre[1]                             = cameraParameters->imageSizePixels[1] * 0.5;
+        cameraParameters->pinhole.distortionFactor = config["DISTORTION_FACTOR"].as<double>();
+        cameraParameters->pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]),
+            (tanHalfFOV[1] / imageCentre[1]);
+        cameraParameters->pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
         emit<Scope::DIRECT>(std::move(cameraParameters));
 
-        log("Emitted camera parameters for camera", config["deviceID"].as<std::string>());
+        log("Emitted pinhole camera parameters for camera", config["deviceID"].as<std::string>());
 
         try {
             // Recreate the camera device at the required resolution
@@ -150,7 +163,7 @@ namespace input {
         }
     }
 
-    message::input::Image V4L2Camera::getImage() {
+    ImageData V4L2Camera::getImage() {
         if (!streaming) {
             throw std::runtime_error("The camera is currently not streaming");
         }
@@ -189,15 +202,16 @@ namespace input {
 
         if (ioctl(fd, VIDIOC_QBUF, &requeue) == -1) {
             throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
-        };
+        }
 
         // Move this data into the image
-        Image image;
+        ImageData image;
         image.dimensions << width, height;
-        image.format       = fourcc;
-        image.serialNumber = deviceID;
-        image.timestamp    = timestamp;
-        image.data         = std::move(data);
+        image.format        = fourcc;
+        image.serial_number = deviceID;
+        image.timestamp     = timestamp;
+        image.data          = std::move(data);
+        image.isLeft        = false;  // Sorry future person... too lazy
         return image;
     }
 
