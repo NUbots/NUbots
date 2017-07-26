@@ -3,6 +3,6 @@ is_left: false
 
 # Settings for the GPIO reset functionality
 gpio:
+  enabled: true  #Enabled if robot has GPIO functionality
   path: /sys/class/gpio/gpio8/value
-  on_state: true
-  wait_time: 3000
+  wait_time: 2000

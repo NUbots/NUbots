@@ -22,7 +22,6 @@
 
 #include <map>
 #include <memory>
-#include <mutex>
 #include <nuclear>
 #include <string>
 
@@ -57,14 +56,14 @@ namespace input {
      */
     struct V4L2Camera {
     public:
-        /// @brief file path to the GPIO
+        /// @brief file path to the GPIO toggle script
         std::string gpio_path;
 
-        /// @brief the amount of time to sleep for
+        /// @brief the amount of time to wait for the camera to appear
         NUClear::clock::duration gpio_wait_time;
 
-        /// @brief state to set the GPIO to be considered on
-        bool gpio_on_state;
+        /// @brief GPIO toggling will be used if this is true
+        bool gpio_enabled;
 
     private:
         /// @brief Our two arrays of data that will be populated

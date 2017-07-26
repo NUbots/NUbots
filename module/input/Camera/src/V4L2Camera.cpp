@@ -50,7 +50,7 @@ namespace input {
         V4L2Camera camera    = V4L2Camera(config, deviceID, *this);
 
         camera.gpio_path      = config["gpio"]["path"].as<std::string>();
-        camera.gpio_on_state  = config["gpio"]["on_state"].as<bool>();
+        camera.enabled        = config["gpio"]["enabled"].as<bool>();
         camera.gpio_wait_time = std::chrono::milliseconds(config["gpio"]["wait_time"].as<uint64_t>());
 
         V4L2SettingsHandle =
@@ -243,40 +243,21 @@ namespace input {
             if (fd >= 0) {
                 NUClear::log<NUClear::INFO>("Reopened Camera");
             }
+            else if (!gpio_enabled) {
+                throw std::runtime_error("Camera failed to open");
+            }
 
             // Check if we managed to open our file descriptor
             int toggleCount = 0;
 
             while (fd < 0 && toggleCount < 10) {
                 NUClear::log<NUClear::INFO>("Toggling GPIO");
-
-                // Open our GPIO file
-                int gpio = ::open(gpio_path.c_str(), O_WRONLY);
-
-                if (gpio < 0) {
-
-                    // GPIO toggle off
-                    bool off   = !gpio_on_state;
-                    auto bytes = ::write(gpio, &off, sizeof(off));
-
-                    // Wait a bit
-                    std::this_thread::sleep_for(gpio_wait_time);
-
-                    // GPIO toggle on
-                    bool on = gpio_on_state;
-                    bytes   = ::write(gpio, &on, sizeof(on));
-
-                    (void) bytes;
-
-                    // Close the GPIO
-                    ::close(gpio);
-
-                    fd = open(deviceID.c_str(), O_RDWR);
-                    resetCount++;
+                if (!system("/bin/bash /home/nubots/gpio_toggle.sh")) {
+                    NUClear::log<NUClear::ERROR>("Error running GPIO script");
                 }
-                else {
-                    throw std::system_error(errno, std::system_category(), "Could not open the GPIO to toggle");
-                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                fd = open(deviceID.c_str(), O_RDWR);
+                resetCount++;
             }
 
             if (fd < 0) {
