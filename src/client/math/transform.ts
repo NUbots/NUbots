@@ -7,28 +7,33 @@ export type Scale = { x: number, y: number }
 export type Translate = { x: number, y: number }
 
 export type TransformOpts = {
+  anticlockwise: boolean
   rotate: Rotate
   scale: Scale
   translate: Translate
 }
 
 export class Transform {
+  @observable public anticlockwise: boolean
   @observable public rotate: Rotate
   @observable public scale: Scale
   @observable public translate: Translate
 
   public constructor(opts: TransformOpts) {
+    this.anticlockwise = opts.anticlockwise
     this.rotate = opts.rotate
     this.scale = opts.scale
     this.translate = opts.translate
   }
 
   public static of({
-    rotate = 0,
-    scale = { x: 1, y: 1 },
-    translate = { x: 0, y: 0 },
-  }: Partial<Transform> = {}): Transform {
+                     anticlockwise = true,
+                     rotate = 0,
+                     scale = { x: 1, y: 1 },
+                     translate = { x: 0, y: 0 },
+                   }: Partial<Transform> = {}): Transform {
     return new Transform({
+      anticlockwise,
       rotate,
       scale,
       translate,
@@ -37,11 +42,11 @@ export class Transform {
 
   @action
   public then(transform: Transform): Transform {
-    const { rotate, scale, translate } = transform
+    const { anticlockwise, rotate, scale, translate } = transform
 
     const scaleX = this.scale.x
     const scaleY = this.scale.y
-    const theta = this.rotate
+    const theta = this.rotate * (this.anticlockwise ? 1 : -1)
 
     const cosTheta = Math.cos(theta)
     const sinTheta = Math.sin(theta)
@@ -53,7 +58,7 @@ export class Transform {
 
     this.scale.x *= scale.x
     this.scale.y *= scale.y
-    this.rotate += rotate
+    this.rotate += rotate * (anticlockwise === this.anticlockwise ? 1 : -1)
 
     const x = translate.x
     const y = translate.y
@@ -67,6 +72,7 @@ export class Transform {
   @computed
   public get inverse(): Transform {
     return new Transform({
+      anticlockwise: this.anticlockwise,
       scale: { x: 1 / this.scale.x, y: 1 / this.scale.y },
       rotate: -this.rotate,
       translate: { x: this.translate.x, y: this.translate.y },
@@ -75,6 +81,7 @@ export class Transform {
 
   public clone(): Transform {
     return new Transform({
+      anticlockwise: this.anticlockwise,
       rotate: this.rotate,
       scale: {
         x: this.scale.x,

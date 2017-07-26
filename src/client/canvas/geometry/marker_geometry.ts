@@ -15,7 +15,7 @@ export class MarkerGeometry {
   }
 
   public static of({
-    heading = Vector2.of(1, 1),
+    heading = Vector2.of(1, 0),
     radius = 1,
     x = 0,
     y = 0,

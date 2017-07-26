@@ -24,15 +24,17 @@ export class CanvasRenderer {
   public render(scene: Group, camera: Transform): void {
     const canvas = this.context.canvas
     this.context.clearRect(0, 0, canvas.width, canvas.height)
-    this.renderObjects(scene.children, camera)
+    this.renderObjects(scene.children, camera.clone().then(scene.transform))
   }
 
   private applyTransform(transform: Transform): void {
-    const inverseRotationAndScale = transform.inverse.setTranslate(0, 0)
-    const translationDash = Vector2.from(transform.translate).transform(inverseRotationAndScale)
+    const translationDash = Vector2.from(transform.translate).transform(Transform.of({
+      rotate: transform.rotate * (transform.anticlockwise ? 1 : -1),
+      scale: { x: 1 / transform.scale.x, y: 1 / transform.scale.y },
+    }))
 
     this.context.scale(transform.scale.x, transform.scale.y)
-    this.context.rotate(-transform.rotate)
+    this.context.rotate(transform.rotate * (transform.anticlockwise ? 1 : -1))
     this.context.translate(translationDash.x, translationDash.y)
   }
 

@@ -24,7 +24,7 @@ export class FieldModel {
 
   public static of = memoize((robots: DashboardRobotModel[]): FieldModel => {
     return new FieldModel({
-      camera: Transform.of(),
+      camera: Transform.of({ anticlockwise: false }),
       ground: GroundModel.of(),
       robots,
     })

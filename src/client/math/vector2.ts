@@ -29,7 +29,9 @@ export class Vector2 {
 
   @action
   public transform(transform: Transform): Vector2 {
-    const { rotate: theta, scale, translate } = transform
+    const { rotate, scale, translate } = transform
+
+    const theta = rotate * (transform.anticlockwise ? 1 : -1)
 
     const cosTheta = Math.cos(theta)
     const sinTheta = Math.sin(theta)
