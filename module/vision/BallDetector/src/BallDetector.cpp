@@ -259,8 +259,7 @@ namespace vision {
                          ************************************************/
 
                         if (print_throwout_logs) {
-                            log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t()); log("Ball screen: r = ", ballRadiusScreen,      " centre =
-                            ",  ballCentreScreen.t());
+                            log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t());
                         }
 
                         // CENTRE OF BALL IS ABOVE THE HORIZON

@@ -155,7 +155,6 @@ namespace vision {
                 // Our segments that may be a part of a goal
                 std::vector<RansacGoalModel::GoalSegment> segments;
                 auto goals = std::make_unique<std::vector<Goal>>();
-                // Is the midpoint above or below the horizon?
                 // Get our goal segments
                 for (const auto& segment : image.horizontalSegments) {
 
@@ -173,10 +172,8 @@ namespace vision {
                                                              cam)});
                     }
                 }
-
+                // Is the midpoint above or below the horizon?
                 // Partition our segments so that they are split between above and below the horizon
-
-
                 auto split = std::partition(
                     std::begin(segments), std::end(segments), [image](const RansacGoalModel::GoalSegment& segment) {
                         return arma::dot(convert<double, 3>(image.horizon_normal), (segment.left + segment.right) / 2)

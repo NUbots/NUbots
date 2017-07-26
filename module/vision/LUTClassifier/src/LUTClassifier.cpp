@@ -242,7 +242,7 @@ namespace vision {
                 findGoals(rawImage, lut, *classifiedImage);
 
                 // Enhance our goals
-                enhanceGoals(rawImage, lut, *classifiedImage);
+                enhanceGoals(rawImage, lut, *classifiedImage, cam);
 
                 // Find our ball (also helps with the bottom of goals)
                 findBall(rawImage, lut, *classifiedImage, cam);
