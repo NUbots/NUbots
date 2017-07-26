@@ -50,7 +50,7 @@ namespace input {
         V4L2Camera camera    = V4L2Camera(config, deviceID, *this);
 
         camera.gpio_path      = config["gpio"]["path"].as<std::string>();
-        camera.enabled        = config["gpio"]["enabled"].as<bool>();
+        camera.gpio_enabled   = config["gpio"]["enabled"].as<bool>();
         camera.gpio_wait_time = std::chrono::milliseconds(config["gpio"]["wait_time"].as<uint64_t>());
 
         V4L2SettingsHandle =
@@ -422,7 +422,7 @@ namespace input {
         config = _config;
 
         gpio_path      = config["gpio"]["path"].as<std::string>();
-        gpio_on_state  = config["gpio"]["on_state"].as<bool>();
+        gpio_enabled   = config["gpio"]["enabled"].as<bool>();
         gpio_wait_time = std::chrono::milliseconds(config["gpio"]["wait_time"].as<uint64_t>());
 
         int w           = config["imageWidth"].as<uint>();
