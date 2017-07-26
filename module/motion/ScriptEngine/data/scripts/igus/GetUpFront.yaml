@@ -1,0 +1,132 @@
+- duration: 2000
+  targets:
+  - {gain: 50, id: L_ELBOW, position: -2.45, torque: 100}
+  - {gain: 40, id: R_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 40, id: L_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 20, id: R_KNEE, position: 0.45, torque: 100}
+  - {gain: 40, id: R_HIP_ROLL, position: -0.02, torque: 100}
+  - {gain: 50, id: R_SHOULDER_PITCH, position: 2.8707963267948964, torque: 100}
+  - {gain: 20, id: L_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 50, id: R_SHOULDER_ROLL, position: 0.12, torque: 100}
+  - {gain: 20, id: R_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 50, id: L_SHOULDER_ROLL, position: -0.12, torque: 100}
+  - {gain: 20, id: R_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 20, id: L_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 50, id: R_ELBOW, position: -2.45, torque: 100}
+  - {gain: 40, id: R_HIP_YAW, position: 0, torque: 100}
+  - {gain: 20, id: HEAD_YAW, position: 0, torque: 100}
+  - {gain: 20, id: L_KNEE, position: 0.45, torque: 100}
+  - {gain: 50, id: L_SHOULDER_PITCH, position: 2.8707963267948964, torque: 100}
+  - {gain: 20, id: HEAD_PITCH, position: -0.20730091830127584, torque: 100}
+  - {gain: 40, id: L_HIP_ROLL, position: 0.02, torque: 100}
+  - {gain: 40, id: L_HIP_YAW, position: 0, torque: 100}
+- duration: 2000
+  targets:
+  - {gain: 50, id: L_ELBOW, position: -2.45, torque: 100}
+  - {gain: 40, id: R_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 40, id: L_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 20, id: R_KNEE, position: 0.45, torque: 100}
+  - {gain: 40, id: R_HIP_ROLL, position: -0.02, torque: 100}
+  - {gain: 50, id: R_SHOULDER_PITCH, position: 2.8707963267948964, torque: 100}
+  - {gain: 20, id: L_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 50, id: R_SHOULDER_ROLL, position: 0.12, torque: 100}
+  - {gain: 20, id: R_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 50, id: L_SHOULDER_ROLL, position: -0.12, torque: 100}
+  - {gain: 20, id: R_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 20, id: L_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 50, id: R_ELBOW, position: -2.45, torque: 100}
+  - {gain: 40, id: R_HIP_YAW, position: 0, torque: 100}
+  - {gain: 20, id: HEAD_YAW, position: 0, torque: 100}
+  - {gain: 20, id: L_KNEE, position: 0.45, torque: 100}
+  - {gain: 50, id: L_SHOULDER_PITCH, position: 2.8707963267948964, torque: 100}
+  - {gain: 20, id: HEAD_PITCH, position: -0.20730091830127584, torque: 100}
+  - {gain: 40, id: L_HIP_ROLL, position: 0.02, torque: 100}
+  - {gain: 40, id: L_HIP_YAW, position: 0, torque: 100}
+- duration: 500
+  targets:
+  - {gain: 50, id: L_ELBOW, position: -2.45, torque: 100}
+  - {gain: 40, id: R_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 40, id: L_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 20, id: R_KNEE, position: 0.45, torque: 100}
+  - {gain: 40, id: R_HIP_ROLL, position: -0.02, torque: 100}
+  - {gain: 50, id: R_SHOULDER_PITCH, position: 2.8707963267948964, torque: 100}
+  - {gain: 20, id: L_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 50, id: R_SHOULDER_ROLL, position: 0.12, torque: 100}
+  - {gain: 20, id: R_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 50, id: L_SHOULDER_ROLL, position: -0.12, torque: 100}
+  - {gain: 20, id: R_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 20, id: L_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 50, id: R_ELBOW, position: -2.45, torque: 100}
+  - {gain: 40, id: R_HIP_YAW, position: 0, torque: 100}
+  - {gain: 20, id: HEAD_YAW, position: 0, torque: 100}
+  - {gain: 20, id: L_KNEE, position: 0.45, torque: 100}
+  - {gain: 50, id: L_SHOULDER_PITCH, position: 2.8707963267948964, torque: 100}
+  - {gain: 20, id: HEAD_PITCH, position: -0.20730091830127584, torque: 100}
+  - {gain: 40, id: L_HIP_ROLL, position: 0.02, torque: 100}
+  - {gain: 40, id: L_HIP_YAW, position: 0, torque: 100}
+- duration: 300
+  targets:
+  - {gain: 80, id: L_ELBOW, position: -2.45, torque: 100}
+  - {gain: 80, id: R_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 80, id: L_HIP_PITCH, position: 0.06, torque: 100}
+  - {gain: 80, id: R_KNEE, position: 0.2, torque: 100}
+  - {gain: 80, id: R_HIP_ROLL, position: -0.02, torque: 100}
+  - {gain: 80, id: R_SHOULDER_PITCH, position: 2.7207963267948965, torque: 100}
+  - {gain: 80, id: L_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 80, id: R_SHOULDER_ROLL, position: 0.12, torque: 100}
+  - {gain: 80, id: R_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 80, id: L_SHOULDER_ROLL, position: -0.12, torque: 100}
+  - {gain: 80, id: R_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 80, id: L_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 80, id: R_ELBOW, position: -2.45, torque: 100}
+  - {gain: 80, id: R_HIP_YAW, position: 0, torque: 100}
+  - {gain: 80, id: HEAD_YAW, position: 0, torque: 100}
+  - {gain: 80, id: L_KNEE, position: 0.2, torque: 100}
+  - {gain: 80, id: L_SHOULDER_PITCH, position: 2.7207963267948965, torque: 100}
+  - {gain: 80, id: HEAD_PITCH, position: -0.20730091830127584, torque: 100}
+  - {gain: 80, id: L_HIP_ROLL, position: 0.02, torque: 100}
+  - {gain: 80, id: L_HIP_YAW, position: 0, torque: 100}
+- duration: 700
+  targets:
+  - {gain: 80, id: L_ELBOW, position: -1.82, torque: 100}
+  - {gain: 80, id: R_HIP_PITCH, position: -2, torque: 100}
+  - {gain: 80, id: L_HIP_PITCH, position: -2, torque: 100}
+  - {gain: 80, id: R_KNEE, position: 2.6, torque: 100}
+  - {gain: 80, id: R_HIP_ROLL, position: -0.02, torque: 100}
+  - {gain: 80, id: R_SHOULDER_PITCH, position: 0.8907963267948965, torque: 100}
+  - {gain: 80, id: L_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 80, id: R_SHOULDER_ROLL, position: -0.04, torque: 100}
+  - {gain: 80, id: R_ANKLE_PITCH, position: -1.54, torque: 100}
+  - {gain: 80, id: L_SHOULDER_ROLL, position: 0.04, torque: 100}
+  - {gain: 80, id: R_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 80, id: L_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 80, id: R_ELBOW, position: -1.82, torque: 100}
+  - {gain: 80, id: R_HIP_YAW, position: 0, torque: 100}
+  - {gain: 80, id: HEAD_YAW, position: 0, torque: 100}
+  - {gain: 80, id: L_KNEE, position: 2.6, torque: 100}
+  - {gain: 80, id: L_SHOULDER_PITCH, position: 0.8907963267948965, torque: 100}
+  - {gain: 80, id: HEAD_PITCH, position: -0.20730091830127584, torque: 100}
+  - {gain: 80, id: L_HIP_ROLL, position: 0.02, torque: 100}
+  - {gain: 80, id: L_HIP_YAW, position: 0, torque: 100}
+- duration: 800
+  targets:
+  - {gain: 80, id: L_ELBOW, position: -0.45, torque: 100}
+  - {gain: 80, id: R_HIP_PITCH, position: -1.4, torque: 100}
+  - {gain: 80, id: L_HIP_PITCH, position: -1.4, torque: 100}
+  - {gain: 80, id: R_KNEE, position: 2.6, torque: 100}
+  - {gain: 80, id: R_HIP_ROLL, position: -0.02, torque: 100}
+  - {gain: 80, id: R_SHOULDER_PITCH, position: 1.0507963267948965, torque: 100}
+  - {gain: 80, id: L_ANKLE_PITCH, position: -1.3, torque: 100}
+  - {gain: 80, id: R_SHOULDER_ROLL, position: -0.13, torque: 100}
+  - {gain: 80, id: R_ANKLE_PITCH, position: -1.3, torque: 100}
+  - {gain: 80, id: L_SHOULDER_ROLL, position: 0.13, torque: 100}
+  - {gain: 80, id: R_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 80, id: L_ANKLE_ROLL, position: 0, torque: 100}
+  - {gain: 80, id: R_ELBOW, position: -0.45, torque: 100}
+  - {gain: 80, id: R_HIP_YAW, position: 0, torque: 100}
+  - {gain: 80, id: HEAD_YAW, position: 0, torque: 100}
+  - {gain: 80, id: L_KNEE, position: 2.6, torque: 100}
+  - {gain: 80, id: L_SHOULDER_PITCH, position: 1.0507963267948965, torque: 100}
+  - {gain: 80, id: HEAD_PITCH, position: 0.04269908169872416, torque: 100}
+  - {gain: 80, id: L_HIP_ROLL, position: 0.02, torque: 100}
+  - {gain: 80, id: L_HIP_YAW, position: 0, torque: 100}
