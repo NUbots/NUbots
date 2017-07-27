@@ -90,6 +90,9 @@ namespace platform {
             /// @brief Our state for or MX28s for variables we send to it
             std::array<ServoState, 20> servoState;
 
+            float maxVoltage;
+            float minVoltage;
+
         public:
             /// @brief called by a Powerplant to construct this reactor
             explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);

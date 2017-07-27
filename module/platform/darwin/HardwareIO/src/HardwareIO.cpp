@@ -71,6 +71,10 @@ namespace platform {
             // Voltage (in volts)
             sensors.voltage = Convert::voltage(data.cm730.voltage);
 
+            if (sensors.voltage <= maxVoltage) {
+                sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+            }
+
             // Accelerometer (in m/s^2)
             sensors.accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
             sensors.accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
@@ -147,7 +151,6 @@ namespace platform {
 
                 // If we are faking this hardware, simulate its motion
                 if (servoState[i].simulated) {
-
                     // Work out how fast we should be moving
                     // 5.236 == 50 rpm which is similar to the max speed of the servos
                     float movingSpeed =
@@ -194,14 +197,23 @@ namespace platform {
                     // Diagnostic Information
                     servo.voltage     = Convert::voltage(data.servos[i].voltage);
                     servo.temperature = Convert::temperature(data.servos[i].temperature);
+
+                    // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
+                    if (servo.voltage <= maxVoltage) {
+                        servo.errorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+                    }
                 }
             }
-
             return sensors;
         }
 
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState() {
+            : Reactor(std::move(environment))
+            , darwin("/dev/CM730")
+            , cm730State()
+            , servoState()
+            , maxVoltage(0.0f)
+            , minVoltage(0.0f) {
 
             on<Startup>().then("HardwareIO Startup", [this] {
                 uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
@@ -223,6 +235,9 @@ namespace platform {
                     Convert::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
                     servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
                 }
+
+                maxVoltage = config["battery"]["max"].as<float>();
+                minVoltage = config["battery"]["min"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
