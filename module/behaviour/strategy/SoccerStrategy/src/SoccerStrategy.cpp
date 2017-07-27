@@ -336,7 +336,7 @@ namespace behaviour {
             // Start on goal line
             leftSide.position << -fieldDescription.dimensions.field_length * 0.5,
                 fieldDescription.dimensions.field_width / 2;
-            leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            leftSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             leftSide.heading      = 0;
             leftSide.heading_var  = 0.005;
 
@@ -345,7 +345,7 @@ namespace behaviour {
             // Start on goal line
             rightSide.position << -fieldDescription.dimensions.field_length * 0.5,
                 -fieldDescription.dimensions.field_width / 2;
-            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            rightSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             rightSide.heading      = 0;
             rightSide.heading_var  = 0.005;
 
@@ -359,7 +359,7 @@ namespace behaviour {
 
             ResetRobotHypotheses::Self selfSideBaseLine;
             selfSideBaseLine.position << 2.0, 0.0;
-            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
+            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             selfSideBaseLine.heading      = 0;
             selfSideBaseLine.heading_var  = 0.005;
             reset->hypotheses.push_back(selfSideBaseLine);
@@ -372,14 +372,14 @@ namespace behaviour {
             auto reset = std::make_unique<ResetRobotHypotheses>();
             ResetRobotHypotheses::Self left;
             left.position << -fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5;
-            left.position_cov = Eigen::Vector2d(1, 0.1).asDiagonal();
+            left.position_cov = Eigen::Vector2d(1, 0.01).asDiagonal();
             left.heading      = -M_PI_2;
             left.heading_var  = 0.005;
             reset->hypotheses.push_back(left);
 
             ResetRobotHypotheses::Self right;
             right.position << -fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5;
-            right.position_cov = Eigen::Vector2d(1, 0.1).asDiagonal();
+            right.position_cov = Eigen::Vector2d(1, 0.01).asDiagonal();
             right.heading      = M_PI_2;
             right.heading_var  = 0.005;
             reset->hypotheses.push_back(right);
