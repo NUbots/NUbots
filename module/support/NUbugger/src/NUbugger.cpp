@@ -58,7 +58,6 @@ namespace support {
         , max_classified_image_duration()
         , handles()
         , dataPointFilterIds()
-        , overview()
         , actionRegisters()
         , outputFile()
         , networkMutex()
