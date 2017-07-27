@@ -557,7 +557,6 @@ namespace vision {
                         Goal::MeasurementType::LEFT_NORMAL, left, left_vecCov, left_Angles, left_AngCov));
 
                     // TR BR cross product gives right side
-
                     auto right = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
 
                     Eigen::Matrix3d right_vecCov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));

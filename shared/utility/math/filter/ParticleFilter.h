@@ -91,7 +91,6 @@ namespace math {
             ParticleList getParticles(const StateVec& initialMean,
                                       const StateMat& initialCovariance,
                                       const int& n_particles) const {
-
                 // Sample single gaussian (represented by a gaussian mixture model of size 1)
                 ParticleList new_particles = arma::zeros(n_particles, Model::size);
 
