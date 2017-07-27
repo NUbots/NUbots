@@ -242,9 +242,6 @@ namespace behaviour {
                                     if (mode == GameMode::PENALTY_SHOOTOUT) {
                                         penaltyShootoutLocalisationReset(fieldDescription);
                                     }
-                                    else {
-                                        initialLocalisationReset(fieldDescription);
-                                    }
                                     currentState = Behaviour::State::SET;
                                 }
                                 else if (phase == Phase::TIMEOUT) {

@@ -50,17 +50,24 @@ namespace localisation {
             arma::vec3 start_state    = config["start_state"].as<arma::vec>();
             arma::vec3 start_variance = config["start_variance"].as<arma::vec>();
 
-            std::vector<arma::vec3> possible_states;
-            std::vector<arma::mat33> possible_var;
+            auto reset = std::make_unique<ResetRobotHypotheses>();
+            ResetRobotHypotheses::Self leftSide;
+            // Start on goal line
+            leftSide.position     = Eigen::Vector2d(start_state[0], start_state[1]);
+            leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            leftSide.heading      = start_state[2];
+            leftSide.heading_var  = 0.005;
 
-            possible_states.push_back(start_state);
-            // Reflected position
-            possible_states.push_back(arma::vec3{start_state[0], -start_state[1], -start_state[2]});
+            reset->hypotheses.push_back(leftSide);
+            ResetRobotHypotheses::Self rightSide;
+            // Start on goal line
+            rightSide.position     = Eigen::Vector2d(start_state[0], -start_state[1]);
+            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            rightSide.heading      = -start_state[2];
+            rightSide.heading_var  = 0.005;
 
-            possible_var.push_back(arma::diagmat(start_variance));
-            possible_var.push_back(arma::diagmat(start_variance));
-
-            filter.resetAmbiguous(possible_states, possible_var, n_particles);
+            reset->hypotheses.push_back(rightSide);
+            emit(std::move(reset));
 
         });
 
