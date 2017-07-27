@@ -82,7 +82,12 @@ namespace behaviour {
                 bool alwaysPowerKick;
                 bool forcePlaying         = false;
                 bool forcePenaltyShootout = false;
+
+                float stationary_goal_search_time = 1;
             } cfg_;
+
+            bool stationaryGoalSearch                                = false;
+            NUclear::clock::time_point stationaryGoalSearchStartTime = NUClear::clock::now();
 
             message::behaviour::FieldTarget walkTarget;
 
@@ -116,6 +121,7 @@ namespace behaviour {
             void spinWalk();
             bool pickedUp(const message::input::Sensors& sensors);
             bool penalised();
+            void startStationaryGoalSearch();
             bool ballDistance(const message::localisation::Ball& ball);
             void goalieWalk(const message::localisation::Field& field, const message::localisation::Ball& ball);
             arma::vec2 getKickPlan(const message::localisation::Field& field,
