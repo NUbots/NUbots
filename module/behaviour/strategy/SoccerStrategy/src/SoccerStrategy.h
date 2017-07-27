@@ -104,7 +104,7 @@ namespace behaviour {
             NUClear::clock::time_point ballSearchStartTime;
             NUClear::clock::time_point goalLastMeasured;
             void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
-            void penaltyShootoutLocalisationReset(const FieldDescription& fieldDescription);
+            void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
             void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
 
             void standStill();

@@ -343,7 +343,7 @@ namespace behaviour {
             leftSide.heading      = 0;
             leftSide.heading_var  = 0.005;
 
-            reset->hypotheses.push_back(selfSideBaseLine);
+            reset->hypotheses.push_back(leftSide);
             ResetRobotHypotheses::Self rightSide;
             // Start on goal line
             rightSide.position << -fieldDescription.dimensions.field_length * 0.5,
@@ -352,7 +352,7 @@ namespace behaviour {
             rightSide.heading      = 0;
             rightSide.heading_var  = 0.005;
 
-            reset->hypotheses.push_back(selfSideBaseLine);
+            reset->hypotheses.push_back(rightSide);
             emit(std::move(reset));
         }
 
@@ -386,8 +386,6 @@ namespace behaviour {
             right.heading      = M_PI_2;
             right.heading_var  = 0.005;
             reset->hypotheses.push_back(right);
-
-            reset->hypotheses.push_back(selfSideBaseLine);
 
             emit(std::move(reset));
         }
@@ -499,16 +497,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position[2];
-                int signBearing     = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed = -signBearing
-                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                                  cfg_.goalie_max_rotation_speed);
+                float fieldBearing = field.position[2];
+                int signBearing    = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed =
+                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                             cfg_.goalie_max_rotation_speed);
 
-                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed = signTranslation
-                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                     cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed =
+                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));

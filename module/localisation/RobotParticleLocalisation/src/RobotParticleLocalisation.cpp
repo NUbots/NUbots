@@ -147,7 +147,7 @@ namespace localisation {
                     Hfw = Hft * Htw;
                     states.push_back(transform3DToFieldState(Hfw));
 
-                    Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3(0, 0, 1), arma::vec3(1, 0, 0)).rotation();
+                    Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0})).rotation();
                     arma::mat22 pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
                     arma::mat33 state_cov = arma::eye(3, 3);
                     state_cov.submat(0, 0, 1, 1) = pos_cov;
