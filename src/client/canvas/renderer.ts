@@ -12,6 +12,7 @@ import { TextGeometry } from './geometry/text_geometry'
 import { Object2d } from './object/object2d'
 import { Group } from './object/group'
 import { Shape } from './object/shape'
+import { ArcGeometry } from './geometry/arc_geometry'
 
 export class CanvasRenderer {
   constructor(private context: CanvasRenderingContext2D) {
@@ -53,7 +54,9 @@ export class CanvasRenderer {
 
   private renderShape(shape: Shape, worldTransform: Transform): void {
     const { appearance, geometry } = shape
-    if (geometry instanceof ArrowGeometry) {
+    if (geometry instanceof ArcGeometry) {
+      this.renderArc({ appearance, geometry })
+    } else if (geometry instanceof ArrowGeometry) {
       this.renderArrow({ appearance, geometry })
     } else if (geometry instanceof CircleGeometry) {
       this.renderCircle({ appearance, geometry })
@@ -92,6 +95,19 @@ export class CanvasRenderer {
     this.context.lineJoin = appearance.lineJoin
     this.context.lineWidth = appearance.lineWidth
     this.context.strokeStyle = appearance.strokeStyle
+  }
+
+  private renderArc(opts: { appearance: Appearance, geometry: ArcGeometry }): void {
+    const { geometry, appearance } = opts
+    const { origin, radius, startAngle, endAngle, anticlockwise } = geometry
+
+    this.context.beginPath()
+    this.context.arc(origin.x, origin.y, radius, startAngle, endAngle, anticlockwise)
+
+    this.applyAppearance(appearance)
+
+    this.context.stroke()
+    this.context.fill()
   }
 
   private renderArrow(opts: { appearance: Appearance, geometry: ArrowGeometry }): void {

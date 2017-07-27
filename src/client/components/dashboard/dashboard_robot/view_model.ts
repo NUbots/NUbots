@@ -2,6 +2,7 @@ import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
 import { BasicAppearance } from '../../../canvas/appearance/basic_appearance'
 import { LineAppearance } from '../../../canvas/appearance/line_appearance'
+import { ArcGeometry } from '../../../canvas/geometry/arc_geometry'
 import { ArrowGeometry } from '../../../canvas/geometry/arrow_geometry'
 import { CircleGeometry } from '../../../canvas/geometry/circle_geometry'
 import { LineGeometry } from '../../../canvas/geometry/line_geometry'
@@ -9,8 +10,8 @@ import { MarkerGeometry } from '../../../canvas/geometry/marker_geometry'
 import { TextGeometry } from '../../../canvas/geometry/text_geometry'
 import { Group } from '../../../canvas/object/group'
 import { Shape } from '../../../canvas/object/shape'
-import { Vector2 } from '../../../math/vector2'
 import { Transform } from '../../../math/transform'
+import { Vector2 } from '../../../math/vector2'
 import { DashboardRobotModel } from './model'
 
 export class DashboardRobotViewModel {
@@ -25,12 +26,67 @@ export class DashboardRobotViewModel {
   public get robot(): Group {
     return Group.of({
       children: [
+        this.fieldSpaceGroup,
+        this.robotSpaceGroup,
+      ],
+    })
+  }
+
+  @computed
+  get fieldSpaceGroup() {
+    return Group.of({
+      children: [
         this.ballSight,
         this.kickTarget,
         this.ball,
-        this.robotMarker,
       ],
     })
+  }
+
+  @computed
+  get robotSpaceGroup() {
+    return Group.of({
+      children: [
+        this.walkCommand,
+        this.robotMarker,
+      ],
+      transform: Transform.of({
+        rotate: this.model.robotPosition.z,
+        translate: {
+          x: this.model.robotPosition.x,
+          y: this.model.robotPosition.y,
+        },
+      }),
+    })
+  }
+
+  @computed
+  private get walkCommand() {
+    const t = 2
+    const translation = Vector2.from(this.model.walkCommand)
+    const rotation = this.model.walkCommand.z
+    const radius = translation.length / Math.abs(rotation)
+    const origin = Vector2.of(-translation.y, translation.x).divideScalar(rotation)
+    const arcLength = rotation * t
+    const angle = Math.atan2(translation.y / rotation, translation.x / rotation) - Math.PI / 2
+
+    const startAngle = angle
+    const endAngle = startAngle + arcLength
+
+    return Shape.of(
+      ArcGeometry.of({
+        origin,
+        radius,
+        startAngle,
+        endAngle,
+        anticlockwise: rotation < 0,
+      }),
+      BasicAppearance.of({
+        lineWidth: 0.025,
+        fillStyle: 'transparent',
+        strokeStyle: '#000',
+      }),
+    )
   }
 
   @computed
@@ -115,13 +171,6 @@ export class DashboardRobotViewModel {
           }),
         ),
       ],
-      transform: Transform.of({
-        rotate: this.model.robotPosition.z,
-        translate: {
-          x: this.model.robotPosition.x,
-          y: this.model.robotPosition.y,
-        },
-      }),
     })
   }
 }

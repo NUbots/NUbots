@@ -49,7 +49,9 @@ export class Dashboard extends Component<DashboardProps> {
                     penalised={model.penalised}
                     penalty={model.penalty}
                     phase={model.phase}
-                    title={model.title}/>
+                    title={model.title}
+                    walkCommand={model.walkCommand}
+                  />
                 </div>
               )
             })}

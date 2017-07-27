@@ -2,11 +2,11 @@ import { computed } from 'mobx'
 import { observable } from 'mobx'
 import { message } from '../../../../shared/proto/messages'
 import { memoize } from '../../../base/memoize'
+import { Matrix2 } from '../../../math/matrix2'
+import { Matrix3 } from '../../../math/matrix3'
 import { Transform } from '../../../math/transform'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
-import { Matrix2 } from '../../../math/matrix2'
-import { Matrix3 } from '../../../math/matrix3'
 import { RobotModel } from '../../robot/model'
 import State = message.behaviour.Behaviour.State
 

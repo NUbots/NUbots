@@ -2,23 +2,25 @@ import { action } from 'mobx'
 import { computed } from 'mobx'
 import { observable } from 'mobx'
 import { Transform } from '../../math/transform'
+import { Appearance } from '../appearance/appearance'
+import { BasicAppearance } from '../appearance/basic_appearance'
+import { ArcGeometry } from '../geometry/arc_geometry'
 import { ArrowGeometry } from '../geometry/arrow_geometry'
 import { CircleGeometry } from '../geometry/circle_geometry'
 import { LineGeometry } from '../geometry/line_geometry'
 import { PolygonGeometry } from '../geometry/polygon_geometry'
 import { TextGeometry } from '../geometry/text_geometry'
-import { Appearance } from '../appearance/appearance'
-import { BasicAppearance } from '../appearance/basic_appearance'
 import { Group } from './group'
 import { GroupOpts } from './group'
 import { Object2d } from './object2d'
 
 export type Geometry =
-  ArrowGeometry
-    | CircleGeometry
-    | LineGeometry
-    | PolygonGeometry
-    | TextGeometry
+  ArcGeometry
+  | ArrowGeometry
+  | CircleGeometry
+  | LineGeometry
+  | PolygonGeometry
+  | TextGeometry
 
 export type ShapeOpts = {
   appearance: Appearance
