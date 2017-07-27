@@ -17,7 +17,7 @@ namespace input {
 
 
     void Camera::initiateSpinnakerCamera(const Configuration& config) {
-        if (resetUSBDevice(config["usb"]["bus"].as<int>(), config["usb"]["device"].as<int>())) {
+        if (!resetUSBDevice(config["usb"]["bus"].as<int>(), config["usb"]["device"].as<int>())) {
             log<NUClear::FATAL>("Failed to reset Spinnaker camera with serial number",
                                 config["deviceID"].as<std::string>());
             return;
@@ -32,7 +32,7 @@ namespace input {
             SpinnakerSystem->RegisterLoggingEvent((Spinnaker::LoggingEvent&) (SpinnakerLoggingCallback));
 
             // Set callback priority level
-            SpinnakerSystem->SetLoggingEventPriorityLevel(Spinnaker::LOG_LEVEL_INFO);
+            SpinnakerSystem->SetLoggingEventPriorityLevel(Spinnaker::LOG_LEVEL_ERROR);
 
             SpinnakerCamList = SpinnakerSystem->GetCameras(true, true);
             log<NUClear::DEBUG>("Found ", SpinnakerCamList.GetSize(), " cameras.");
