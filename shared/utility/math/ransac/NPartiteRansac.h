@@ -113,7 +113,7 @@ namespace math {
                 if (largestConsensus >= minimumPointsForConsensus) {
 
                     // If we can, refine the model using the points in the consensus
-                    model.refineModel(iterators.front(), iterators.back(), consensusErrorThreshold);
+                    bestModel.refineModel(iterators.front(), iterators.back(), consensusErrorThreshold);
 
                     // Split off the valid points in each part to the start of it
                     std::array<uint, Model::REQUIRED_POINTS> offsets;
