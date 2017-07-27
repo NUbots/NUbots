@@ -149,7 +149,7 @@ namespace vision {
                    const LookUpTable& lut,
                    const FieldDescription& fd) {
 
-                // log("Detecting goals");
+                if (DEBUG_GOAL_RANSAC) log("Detecting goals");
 
                 const auto& image = *rawImage;
                 // Our segments that may be a part of a goal
@@ -191,6 +191,7 @@ namespace vision {
                                                                          MAXIMUM_FITTED_MODELS,
                                                                          CONSENSUS_ERROR_THRESHOLD);
 
+                if (DEBUG_GOAL_RANSAC) log("Ransac results ", models.size(), "from ", segments.size());
                 std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
                             Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
                     debug;
@@ -565,6 +566,7 @@ namespace vision {
                         std::atan2(right[2], std::sqrt(right[0] * right[0] + right[1] * right[1])));
                     Eigen::Matrix2d right_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
 
+
                     it->measurement.push_back(Goal::Measurement(
                         Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
@@ -592,6 +594,7 @@ namespace vision {
                         arma::vec3 covariance_amplifier({distance, 1, 1});
                         Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
                             VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
+
 
                         it->measurement.push_back(
                             Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));

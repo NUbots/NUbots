@@ -29,7 +29,6 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
-#include "message/support/nubugger/Overview.h"
 
 namespace module {
 namespace support {
@@ -75,7 +74,6 @@ namespace support {
         bool networkEnabled = false;
         bool fileEnabled    = false;
 
-        message::support::nubugger::Overview overview;
         std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
 
         std::ofstream outputFile;
@@ -83,6 +81,9 @@ namespace support {
         std::mutex networkMutex;
         std::mutex fileMutex;
 
+        NUClear::clock::time_point last_camera_image = NUClear::clock::now();
+        NUClear::clock::time_point last_seen_ball    = NUClear::clock::now();
+        NUClear::clock::time_point last_seen_goal    = NUClear::clock::now();
 
         void provideOverview();
         void provideDataPoints();

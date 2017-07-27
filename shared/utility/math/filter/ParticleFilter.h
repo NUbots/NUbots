@@ -96,6 +96,7 @@ namespace math {
 
                 arma::gmm_diag gaussian;
                 gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()), arma::ones(1));
+
                 return gaussian.generate(n_particles);
             }
 
@@ -108,6 +109,7 @@ namespace math {
                 gaussian.set_params(arma::mat(arma::zeros(Model::size)),
                                     arma::mat(model.processNoise().diag() * deltaT),
                                     arma::ones(1));
+
                 for (unsigned int i = 0; i < particles.n_cols; ++i) {
                     particles.col(i) = model.timeUpdate(particles.col(i), deltaT, additionalParameters...);
                 }

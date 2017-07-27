@@ -20,6 +20,7 @@ namespace localisation {
         static constexpr int TIME_UPDATE_FREQUENCY     = 10;
         static constexpr int PARTICLE_UPDATE_FREQUENCY = 1;
         int draw_particles                             = 10;
+        int n_particles;
 
         std::vector<arma::vec> getPossibleFieldPositions(const message::vision::Goal& goal,
                                                          const message::support::FieldDescription& fd) const;
