@@ -125,7 +125,7 @@ namespace support {
                             if (loc_ball) {
                                 // Get our ball in field space
                                 arma::vec2 rBWw_2d = convert<double, 2>(loc_ball->position);
-                                arma::vec4 rBWw    = {rBWw[0], rBWw[1], 0, 1};
+                                arma::vec4 rBWw    = {rBWw_2d[0], rBWw_2d[1], 0, 1};
                                 arma::vec4 rBFf    = Hfw * rBWw;
 
                                 // Store our position from field to ball
