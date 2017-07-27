@@ -76,7 +76,7 @@ namespace vision {
 
     LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , quex(new QuexClassifier)
+        , classifier()
         , greenCentroid(Eigen::Vector3f::Zero())
         , LUT_PATH("")
         , LUT_HOST("") {

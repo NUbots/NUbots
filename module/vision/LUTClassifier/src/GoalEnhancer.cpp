@@ -175,7 +175,7 @@ namespace vision {
                                int(std::round(p[1]))});
 
                 if (e[0] > 0) {
-                    auto segments = quex->classify(image, lut, s, e);
+                    auto segments = classifier->classify(image, lut, s, e);
                     newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                 }
             }
