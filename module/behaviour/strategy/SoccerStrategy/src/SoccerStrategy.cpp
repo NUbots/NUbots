@@ -78,6 +78,7 @@ namespace behaviour {
         using message::platform::darwin::ButtonLeftDown;
         using message::support::FieldDescription;
 
+        using utility::time::TimeDifferenceSeconds;
         using utility::time::durationFromSeconds;
         using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
@@ -93,17 +94,18 @@ namespace behaviour {
             , ballSearchStartTime()
             , goalLastMeasured() {
 
+            lookingAtGoal                   = false;
+            previousHeadBehaviourSwitchTime = NUClear::clock::now();
+
             on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
 
                 cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
                 cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
 
-                cfg_.localisation_interval = durationFromSeconds(config["localisation_interval"].as<double>());
-                cfg_.localisation_duration = durationFromSeconds(config["localisation_duration"].as<double>());
-                cfg_.localisation_ball_covariance_threshold =
-                    config["localisation_ball_covariance_threshold"].as<double>();
-                cfg_.localisation_field_covariance_threshold =
-                    config["localisation_field_covariance_threshold"].as<double>();
+                cfg_.localisation_interval     = durationFromSeconds(config["localisation_interval"].as<double>());
+                cfg_.localisation_duration     = durationFromSeconds(config["localisation_duration"].as<double>());
+                cfg_.head_beh_switch_time_goal = config["head_beh_switch_time_goal"].as<double>();
+                cfg_.head_beh_switch_time_ball = config["head_beh_switch_time_ball"].as<double>();
 
                 cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
                 cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
@@ -493,8 +495,24 @@ namespace behaviour {
                 // Check field message and localisation ball message
                 // Check trace of their covariances are bigger than configurable threshold
                 // If the ball covariance track is larger, always look at ball
-                if (locBall.covariance.trace() > cfg_.localisation_ball_covariance_threshold
-                    || locField.covariance.trace() < cfg_.localisation_field_covariance_threshold) {
+                auto now          = NUClear::clock::now();
+                float timeElapsed = TimeDifferenceSeconds(now, previousHeadBehaviourSwitchTime);
+                if (lookingAtGoal) {
+                    if (timeElapsed > cfg_.head_beh_switch_time_goal) {
+                        lookingAtGoal                   = !lookingAtGoal;
+                        previousHeadBehaviourSwitchTime = now;
+                        log("now looking at ball");
+                    }
+                }
+                else {
+                    if (timeElapsed > cfg_.head_beh_switch_time_ball) {
+                        lookingAtGoal                   = !lookingAtGoal;
+                        previousHeadBehaviourSwitchTime = now;
+                        log("now looking at goal");
+                    }
+                }
+
+                if (!lookingAtGoal) {
                     //      If within certain distance, focus on ball
                     soccerObjectPriority->ball = 1;
                     soccerObjectPriority->goal = 0;

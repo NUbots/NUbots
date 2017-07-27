@@ -58,8 +58,8 @@ namespace behaviour {
                     , goalie_side_walk_angle_threshold(0.0f)
                     , localisation_interval()
                     , localisation_duration()
-                    , localisation_field_covariance_threshold(0.0f)
-                    , localisation_ball_covariance_threshold(0.0f)
+                    , head_beh_switch_time_goal(0.0f)
+                    , head_beh_switch_time_ball(0.0f)
                     , alwaysPowerKick(false)
                     , forcePlaying(false)
                     , forcePenaltyShootout(false) {}
@@ -83,12 +83,15 @@ namespace behaviour {
                 float goalie_side_walk_angle_threshold;
                 NUClear::clock::duration localisation_interval;
                 NUClear::clock::duration localisation_duration;
-                float localisation_field_covariance_threshold;
-                float localisation_ball_covariance_threshold;
+                float head_beh_switch_time_goal;
+                float head_beh_switch_time_ball;
                 bool alwaysPowerKick;
                 bool forcePlaying         = false;
                 bool forcePenaltyShootout = false;
             } cfg_;
+
+            bool lookingAtGoal = false;
+            NUClear::clock::time_point previousHeadBehaviourSwitchTime;
 
             message::behaviour::FieldTarget walkTarget;
 
