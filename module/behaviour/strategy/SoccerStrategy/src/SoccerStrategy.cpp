@@ -494,16 +494,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position[2];
-                int signBearing     = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed = -signBearing
-                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                                  cfg_.goalie_max_rotation_speed);
+                float fieldBearing = field.position[2];
+                int signBearing    = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed =
+                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                             cfg_.goalie_max_rotation_speed);
 
-                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed = signTranslation
-                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                     cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed =
+                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));
