@@ -1,14 +1,14 @@
 ransac:
-  minimum_points_for_consensus: 10
+  minimum_points_for_consensus: 15
   maximum_iterations_per_fitting: 100
   maximum_fitted_models: 3
-  consensus_error_threshold: 0.0001
-maximum_disagreement_ratio: 1.2
+  consensus_error_threshold: 0.00005
+maximum_disagreement_ratio: 0.8
 maximum_relative_seed_point_distance: 0.1
 measurement_distance_variance_factor: 0.1
 measurement_bearing_variance: 0.2
 measurement_elevation_variance: 0.2
-green_ratio_threshold: 0.2
+green_ratio_threshold: 0.1
 green_radial_samples: 12
 green_angular_samples: 12
 ball_screen_covariance: [0.1, 0.01, 0.01]
