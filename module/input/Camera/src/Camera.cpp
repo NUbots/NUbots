@@ -109,6 +109,7 @@ namespace input {
         });
     }
 
+    // http://www.roman10.net/2011/06/14/how-to-reset-usb-device-in-linuxusing-libusb/
     bool Camera::resetUSBDevice(int bus, int device) {
         libusb_device_handle* devh = NULL;
         libusb_device* dev         = NULL;
@@ -154,9 +155,10 @@ namespace input {
         }
 
         bool success = true;
+        ret          = -1;
 
-        for (int i = 0; i < 100; i++) {
-            success = libusb_reset_device(devh);
+        for (int i = 0; (i < 100) && (ret < 0); i++) {
+            ret = libusb_reset_device(devh);
 
             if (i > 98) {
                 success = false;
