@@ -459,6 +459,9 @@ namespace platform {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
+                    sensors->rightFootDown = false;
+                    sensors->leftFootDown  = false;
+
                     if (previousSensors) {
                         // Use our virtual load sensor class to work out if our foot is down
 
@@ -474,32 +477,21 @@ namespace platform {
                         Transform3D Htr =
                             convert<double, 4, 4>(previousSensors->forwardKinematics[ServoID::R_ANKLE_ROLL]);
 
-                        // log("\n", Htl, "\n", Htr, "\n", Hwt);
+                        double zCompL = Htl(2, 3);
+                        double zCompR = Htr(2, 3);
 
-                        Transform3D Hwl = Hwt * Htl;
-                        Transform3D Hwr = Hwt * Htr;
-
-                        auto zCompL = Htl(2, 3);
-                        auto zCompR = Htr(2, 3);
-
-                        if (std::fabs(zCompL - zCompR) > config.nominal_z) {
+                        if (std::abs(zCompL - zCompR) > config.nominal_z) {
                             if (zCompL > zCompR) {
                                 sensors->rightFootDown = true;
-                                sensors->leftFootDown  = false;
                             }
                             else {
-                                sensors->rightFootDown = false;
-                                sensors->leftFootDown  = true;
+                                sensors->leftFootDown = true;
                             }
                         }
                         else {
                             sensors->rightFootDown = true;
                             sensors->leftFootDown  = true;
                         }
-                    }
-                    else {
-                        sensors->rightFootDown = false;
-                        sensors->leftFootDown  = false;
                     }
 
                     emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
