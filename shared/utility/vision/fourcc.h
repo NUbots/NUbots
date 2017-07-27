@@ -396,7 +396,7 @@ namespace vision {
         }
 
         else if (code.compare("BayerRG8") == 0) {
-            return (fourcc("GBRG"));
+            return (fourcc("RGGB"));
         }
 
         else if (code.compare("BayerGB8") == 0) {
