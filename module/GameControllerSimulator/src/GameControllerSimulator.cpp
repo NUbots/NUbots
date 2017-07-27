@@ -14,17 +14,17 @@ GameControllerSimulator::GameControllerSimulator(std::unique_ptr<NUClear::Enviro
     on<Configuration>("GameControllerSimulator.yaml").then([this](const Configuration& config) {
         // Use configuration here from file GameControllerSimulator.yaml
 
-        Phase phase                               = 1;
-        Mode mode                                 = 2;
-        bool first_half                           = 3;
-        bool kicked_out_by_us                     = 4;
-        google.protobuf.Timestamp kicked_out_time = 5;
-        bool our_kick_off                         = 6;
-        google.protobuf.Timestamp primary_time    = 7;
-        google.protobuf.Timestamp secondary_time  = 8;
-        Team team                                 = 9;
-        Team opponent                             = 10;
-        Robot self                                = 11;
+        // Phase message->phase                               = config["phase"].as<
+        // Mode message->mode                                 = config["mode"].as<
+        // bool message->first_half                           = config["first_half"].as<
+        // bool message->kicked_out_by_us                     = config["kicked_out_by_us"].as<
+        // google.protobuf.Timestamp message->kicked_out_time = config["kicked_out_time"].as<
+        // bool message->our_kick_off                         = config["our_kick_off"].as<
+        // google.protobuf.Timestamp message->primary_time    = config["primary_time"].as<
+        // google.protobuf.Timestamp message->secondary_time  = config["secondary_time"].as<
+        // Team message->team                                 = config["team"].as<
+        // Team message->opponent                              = config["opponent"].as<
+        // Robot message->self                                 = config["self"].as<
     });
 }
-}
+}  // namespace module
