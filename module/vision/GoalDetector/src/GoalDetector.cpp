@@ -149,7 +149,7 @@ namespace vision {
                    const LookUpTable& lut,
                    const FieldDescription& fd) {
 
-                // log("Detecting goals");
+                if (DEBUG_GOAL_RANSAC) log("Detecting goals");
 
                 const auto& image = *rawImage;
                 // Our segments that may be a part of a goal
@@ -191,6 +191,7 @@ namespace vision {
                                                                          MAXIMUM_FITTED_MODELS,
                                                                          CONSENSUS_ERROR_THRESHOLD);
 
+                if (DEBUG_GOAL_RANSAC) log("Ransac results ", models.size(), "from ", segments.size());
                 std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
                             Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
                     debug;
