@@ -22,8 +22,8 @@ namespace input {
         , V4L2FrameRateHandle()
         , V4L2SettingsHandle()
         , V4L2Cameras()
-        , SpinnakerSystem()
-        , SpinnakerCamList()
+        , SpinnakerSystem(Spinnaker::System::GetInstance())
+        , SpinnakerCamList(SpinnakerSystem->GetCameras(true, true))
         , SpinnakerLoggingCallback(*this)
         , SpinnakerCameras() {
 
@@ -111,71 +111,230 @@ namespace input {
 
     // http://www.roman10.net/2011/06/14/how-to-reset-usb-device-in-linuxusing-libusb/
     bool Camera::resetUSBDevice(int bus, int device) {
-        libusb_device_handle* devh = NULL;
-        libusb_device* dev         = NULL;
-        libusb_device** devs       = NULL;
+        //     libusb_device_handle* devh = NULL;
+        //     libusb_device* dev         = NULL;
+        //     libusb_device** devs       = NULL;
 
-        int ret;
+        //     int ret;
 
-        ret = libusb_init(NULL);
+        //     ret = libusb_init(NULL);
 
-        if (ret < 0) {
-            log<NUClear::WARN>("Failed to initalise libusb.");
-            return false;
+        //     if (ret < 0) {
+        //         log<NUClear::WARN>("Failed to initalise libusb.");
+        //         return false;
+        //     }
+
+        //     ret = libusb_get_device_list(NULL, &devs);
+
+        //     if (ret < 0) {
+        //         log<NUClear::WARN>("Failed to get device list from libusb.");
+        //         return false;
+        //     }
+
+        //     for (int i = 0; devs[i - 1] != NULL; i++) {
+        //         dev = devs[i];
+
+        //         int busNum = (int) libusb_get_bus_number(dev);
+        //         int devNum = (int) libusb_get_device_address(dev);
+
+        //         if ((busNum == bus) && (devNum == device)) {
+        //             break;
+        //         }
+        //     }
+
+        //     if (dev == NULL) {
+        //         log<NUClear::WARN>("Failed to find usb device", device, "on bus", bus);
+        //         return false;
+        //     }
+
+        //     ret = libusb_open(dev, &devh);
+
+        //     if (ret != 0) {
+        //         log<NUClear::WARN>("Failed to open usb device", device, "on bus", bus);
+        //         return false;
+        //     }
+
+        //     bool success = true;
+        //     ret          = -1;
+
+        //     for (int i = 0; (i < 100) && (ret < 0); i++) {
+        //         ret = libusb_reset_device(devh);
+
+        //         if (i > 98) {
+        //             success = false;
+        //             break;
+        //         }
+        //     }
+
+        //     // free the device list
+        //     libusb_free_device_list(devs, 1);
+        //     libusb_exit(NULL);
+
+        //     if (!success) {
+        //         log<NUClear::WARN>("Failed to reset usb device", device, "on bus", bus);
+        //         return false;
+        //     }
+
+        //     return true;
+    }
+
+    void Camera::initiateSpinnakerCamera(const Configuration& config) {
+        log<NUClear::DEBUG>("Found ", SpinnakerCamList.GetSize(), " cameras.");
+
+        if (SpinnakerCamList.GetSize() < 1) {
+            return;
         }
 
-        ret = libusb_get_device_list(NULL, &devs);
+        std::string serialNumber = config["deviceID"].as<std::string>();
 
-        if (ret < 0) {
-            log<NUClear::WARN>("Failed to get device list from libusb.");
-            return false;
-        }
+        log<NUClear::DEBUG>("Processing camera", config.fileName, "with serial number", serialNumber);
 
-        for (int i = 0; devs[i - 1] != NULL; i++) {
-            dev = devs[i];
+        // See if we already have this camera
+        auto camera = SpinnakerCameras.find(serialNumber);
 
-            int busNum = (int) libusb_get_bus_number(dev);
-            int devNum = (int) libusb_get_device_address(dev);
+        if (camera == SpinnakerCameras.end()) {
+            try {
+                Spinnaker::CameraPtr newCamera = SpinnakerCamList.GetBySerial(serialNumber);
 
-            if ((busNum == bus) && (devNum == device)) {
-                break;
+                // Ensure we found the camera.
+                if (newCamera) {
+                    // Initlise the camera.
+                    newCamera->Init();
+
+                    // Add camera to list.
+                    FOURCC fourcc =
+                        utility::vision::getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
+                    camera =
+                        SpinnakerCameras
+                            .insert(std::make_pair(serialNumber,
+                                                   std::make_unique<SpinnakerImageEvent>(config.fileName,
+                                                                                         serialNumber,
+                                                                                         std::move(newCamera),
+                                                                                         *this,
+                                                                                         fourcc,
+                                                                                         cameraCount,
+                                                                                         config["is_left"].as<bool>())))
+                            .first;
+                    log("Camera ", serialNumber, " added to map with local id", cameraCount);
+                }
+
+                else {
+                    log<NUClear::WARN>("Failed to find camera", config.fileName, " with serial number: ", serialNumber);
+                    return;
+                }
+            }
+            catch (const Spinnaker::Exception& ex) {
+                log<NUClear::WARN>("Failed to find camera", config.fileName, " with serial number: ", serialNumber);
+                return;
             }
         }
 
-        if (dev == NULL) {
-            log<NUClear::WARN>("Failed to find usb device", device, "on bus", bus);
-            return false;
+        else {
+            camera->second->camera->EndAcquisition();
         }
 
-        ret = libusb_open(dev, &devh);
+        // Get device node map.
+        auto& nodeMap = camera->second->camera->GetNodeMap();
 
-        if (ret != 0) {
-            log<NUClear::WARN>("Failed to open usb device", device, "on bus", bus);
-            return false;
-        }
+        // Set the pixel format.
+        Spinnaker::GenApi::CEnumerationPtr ptrPixelFormat = nodeMap.GetNode("PixelFormat");
 
-        bool success = true;
-        ret          = -1;
+        if (IsAvailable(ptrPixelFormat) && IsWritable(ptrPixelFormat)) {
+            // Retrieve the desired entry node from the enumeration node
+            std::string format                              = config["format"]["pixel"].as<std::string>();
+            Spinnaker::GenApi::CEnumEntryPtr newPixelFormat = ptrPixelFormat->GetEntryByName(format.c_str());
 
-        for (int i = 0; (i < 100) && (ret < 0); i++) {
-            ret = libusb_reset_device(devh);
+            if (IsAvailable(newPixelFormat) && IsReadable(newPixelFormat)) {
+                ptrPixelFormat->SetIntValue(newPixelFormat->GetValue());
 
-            if (i > 98) {
-                success = false;
-                break;
+                log("Pixel format for camera ", camera->first, " set to ", format);
+            }
+
+            else {
+                log("Failed to set pixel format to ", format, " for camera ", camera->first);
+                log("PixelFormat enum entry is '", format, "' available? ", IsAvailable(newPixelFormat) ? "yes" : "no");
+                log("PixelFormat enum entry is '", format, "' writable? ", IsWritable(newPixelFormat) ? "yes" : "no");
             }
         }
 
-        // free the device list
-        libusb_free_device_list(devs, 1);
-        libusb_exit(NULL);
-
-        if (!success) {
-            log<NUClear::WARN>("Failed to reset usb device", device, "on bus", bus);
-            return false;
+        else {
+            log("Failed to retrieve pixel format for camera ", camera->first);
+            log("PixelFormat enum entry is available? ", IsAvailable(ptrPixelFormat) ? "yes" : "no");
+            log("PixelFormat enum entry is writable? ", IsWritable(ptrPixelFormat) ? "yes" : "no");
         }
 
-        return true;
+        // Set the width and height of the image.
+        Spinnaker::GenApi::CIntegerPtr ptrWidth = nodeMap.GetNode("Width");
+
+        if (IsAvailable(ptrWidth) && IsWritable(ptrWidth)) {
+            int64_t width = config["format"]["width"].as<int>();
+
+            // Ensure the width is a multiple of the increment.
+            if ((width % ptrWidth->GetInc()) != 0) {
+                width =
+                    std::min(ptrWidth->GetMax(), std::max(ptrWidth->GetMin(), width - (width % ptrWidth->GetInc())));
+            }
+
+            ptrWidth->SetValue(width);
+            log("Image width for camera ", camera->first, " set to ", width);
+        }
+
+        else {
+            log("Failed to retrieve image width for camera ", camera->first);
+            log("Width entry is available? ", IsAvailable(ptrWidth) ? "yes" : "no");
+            log("Width entry is writable? ", IsWritable(ptrWidth) ? "yes" : "no");
+        }
+
+        Spinnaker::GenApi::CIntegerPtr ptrHeight = nodeMap.GetNode("Height");
+
+        if (IsAvailable(ptrHeight) && IsWritable(ptrHeight)) {
+            int64_t height = config["format"]["height"].as<int>();
+
+            // Ensure the height is a multiple of the increment.
+            if ((height % ptrHeight->GetInc()) != 0) {
+                height = std::min(ptrHeight->GetMax(),
+                                  std::max(ptrHeight->GetMin(), height - (height % ptrHeight->GetInc())));
+            }
+
+            ptrHeight->SetValue(height);
+            log("Image height for camera ", camera->first, " set to ", height);
+        }
+
+        else {
+            log("Failed to retrieve image height for camera ", camera->first);
+            log("Height entry is available? ", IsAvailable(ptrHeight) ? "yes" : "no");
+            log("Height entry is writable? ", IsWritable(ptrHeight) ? "yes" : "no");
+        }
+
+        // Set acquisition mode to continuous
+        Spinnaker::GenApi::CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
+
+        if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode)) {
+            log("Failed to retrieve acquisition mode for camera ", camera->first);
+            return;
+        }
+
+        Spinnaker::GenApi::CEnumEntryPtr ptrAcquisitionModeContinuous =
+            ptrAcquisitionMode->GetEntryByName("Continuous");
+
+        if (!IsAvailable(ptrAcquisitionModeContinuous) || !IsReadable(ptrAcquisitionModeContinuous)) {
+            log("Failed to retrieve continuous acquisition mode entry for camera ", camera->first);
+            return;
+        }
+
+        ptrAcquisitionMode->SetIntValue(ptrAcquisitionModeContinuous->GetValue());
+
+        log("Camera ", camera->first, " set to continuous acquisition mode.");
+
+        // Setup the event handler for image acquisition.
+        camera->second->camera->RegisterEvent(*camera->second);
+
+        log("Camera ", camera->first, " image event handler registered.");
+
+        // Begin acquisition.
+        camera->second->camera->BeginAcquisition();
+
+        log("Camera ", camera->first, " image acquisition started.");
     }
 
     // When we shutdown, we must tell our camera class to close (stop streaming)
