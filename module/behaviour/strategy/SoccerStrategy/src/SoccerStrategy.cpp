@@ -333,12 +333,15 @@ namespace behaviour {
                 }
                 currentState = Behaviour::State::LOCALISING;
             }
-            else*/ if (NUClear::clock::now() - ballLastMeasured
-                       < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                    find({FieldTarget(FieldTarget::Target::BALL), FieldTarget(FieldTarget::Target::GOAL)},
-                         field,
-                         ball,
-                         sensors);
+            else*/
+                find({FieldTarget(FieldTarget::Target::BALL), FieldTarget(FieldTarget::Target::GOAL)},
+                     field,
+                     ball,
+                     sensors);
+
+                if (NUClear::clock::now() - ballLastMeasured
+                    < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
+
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
                     currentState = Behaviour::State::WALK_TO_BALL;
                 }
@@ -347,18 +350,12 @@ namespace behaviour {
                         && (Eigen::Vector2d(field.position[0], field.position[1]).norm()
                             > 1)) {  // a long way away from centre
                         // walk to centre of field
-                        find({FieldTarget(FieldTarget::Target::BALL), FieldTarget(FieldTarget::Target::GOAL)},
-                             field,
-                             ball,
-                             sensors);
+
                         walkTo(fieldDescription, arma::vec2({0, 0}));
                         currentState = Behaviour::State::MOVE_TO_CENTRE;
                     }
                     else {
-                        find({FieldTarget(FieldTarget::Target::BALL), FieldTarget(FieldTarget::Target::GOAL)},
-                             field,
-                             ball,
-                             sensors);
+
                         walkTo(fieldDescription, FieldTarget::Target::BALL);
                         // spinWalk();
 
@@ -509,34 +506,41 @@ namespace behaviour {
                         soccerObjectPriority->searchType = SearchType::GOAL_SEARCH;
                         break;
                     }
+                    case FieldTarget::Target::GOAL: {
+                        soccerObjectPriority->goal       = 1;
+                        soccerObjectPriority->searchType = SearchType::GOAL_SEARCH;
+                        break;
+                    }
                     case FieldTarget::Target::BALL: {
                         soccerObjectPriority->ball       = 1;
                         soccerObjectPriority->searchType = SearchType::LOST;
                         break;
                     }
-                    default: throw std::runtime_error("Soccer strategy attempted to find a bad object");
+                    default: { throw std::runtime_error("Soccer strategy attempted to find a bad object"); }
                 }
             }
 
             // When weve seen both field targets
             Transform3D Htw = convert<double, 4, 4>(sensors.world);
-            if (arma::norm(Htw.transformPoint(arma::vec3{locBall.position[0], locBall.position[1], 0.0}).cols(0, 1))
-                < cfg_.ball_proximity_threshold) {
+            arma::vec2 pt   = Htw.transformPoint(arma::vec3{locBall.position[0], locBall.position[1], 0.0}).cols(0, 1);
+            // ARMA WHY DONT YOU CALCULATE THE NORM CORRECTLY
+            if (std::sqrt(pt[0] * pt[0] + pt[1] * pt[1]) < cfg_.ball_proximity_threshold) {
                 soccerObjectPriority->ball = 1;
                 soccerObjectPriority->goal = 0;
             }
-            if (soccerObjectPriority->ball && soccerObjectPriority->goal) {
+            else if (soccerObjectPriority->ball && soccerObjectPriority->goal) {
                 // Check field message and localisation ball message
                 // Check trace of their covariances are bigger than configurable threshold
                 // If the ball covariance track is larger, always look at ball
-                if (locBall.covariance.trace() > cfg_.localisation_ball_covariance_threshold) {
+                if (locBall.covariance.trace() > cfg_.localisation_ball_covariance_threshold
+                    || locField.covariance.trace() < cfg_.localisation_field_covariance_threshold) {
                     //      If within certain distance, focus on ball
                     soccerObjectPriority->ball = 1;
                     soccerObjectPriority->goal = 0;
                 }
                 // If covariance ball is below certain threshold and not too close
                 //  and covariance on self is above certain threshold, look for goals
-                else if (locField.covariance.trace() > cfg_.localisation_field_covariance_threshold) {
+                else {
                     soccerObjectPriority->ball = 0;
                     soccerObjectPriority->goal = 1;
                 }
@@ -586,16 +590,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing = field.position[2];
-                int signBearing    = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed =
-                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                             cfg_.goalie_max_rotation_speed);
+                float fieldBearing  = field.position[2];
+                int signBearing     = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed = -signBearing
+                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                                  cfg_.goalie_max_rotation_speed);
 
-                int signTranslation = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed =
-                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                cfg_.goalie_max_translation_speed);
+                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed = signTranslation
+                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                     cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));
