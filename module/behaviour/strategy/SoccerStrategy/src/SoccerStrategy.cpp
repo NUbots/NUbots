@@ -29,6 +29,7 @@
 #include "message/localisation/ResetRobotHypotheses.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/GetupCommand.h"
+#include "message/motion/KickCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
@@ -77,6 +78,7 @@ namespace behaviour {
         using message::platform::darwin::ButtonMiddleDown;
         using message::platform::darwin::ButtonLeftDown;
         using message::support::FieldDescription;
+        using message::motion::KickFinished;
 
         using utility::time::durationFromSeconds;
         using utility::math::geometry::Circle;
@@ -106,7 +108,8 @@ namespace behaviour {
 
                 cfg_.is_goalie = config["goalie"].as<bool>();
 
-                cfg_.stationary_goal_search_time = config["stationary_goal_search_time"].as<bool>();
+                cfg_.stationary_goal_search_time =
+                    durationFromSeconds(config["stationary_goal_search_time"].as<double>());
 
                 // Use configuration here from file GoalieWalkPlanner.yaml
                 cfg_.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
@@ -180,6 +183,9 @@ namespace behaviour {
                 }
 
             });
+
+            // When done kicking, look around
+            on<Trigger<KickFinished>, Single>().then([this] { startStationaryGoalSearch(); });
 
             // Main Loop
             // TODO: ensure a reasonable state is emitted even if gamecontroller is not running

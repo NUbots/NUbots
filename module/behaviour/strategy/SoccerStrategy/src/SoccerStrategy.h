@@ -83,11 +83,11 @@ namespace behaviour {
                 bool forcePlaying         = false;
                 bool forcePenaltyShootout = false;
 
-                float stationary_goal_search_time = 1;
+                NUClear::clock::duration stationary_goal_search_time;
             } cfg_;
 
             bool stationaryGoalSearch                                = false;
-            NUclear::clock::time_point stationaryGoalSearchStartTime = NUClear::clock::now();
+            NUClear::clock::time_point stationaryGoalSearchStartTime = NUClear::clock::now();
 
             message::behaviour::FieldTarget walkTarget;
 
