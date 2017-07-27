@@ -114,11 +114,12 @@ namespace support {
                             // Get our torso in field space
                             Transform3D Hft = Hfw * Htw.i();
                             arma::vec3 rTFf = Hft.translation();
-                            Rotation3D Rft  = Hft.rotation();
-                            Rotation3D Rtf  = Rft.i();
+
+                            // Get the rotation
+                            Rotation3D Rft = Hft.rotation();
 
                             // Store our position from field to torso
-                            msg.robot_position            = Eigen::Vector3f(rTFf[0], rTFf[1], Rtf.yaw());
+                            msg.robot_position            = Eigen::Vector3f(rTFf[0], rTFf[1], Rft.yaw());
                             msg.robot_position_covariance = field->covariance.cast<float>();
 
                             if (loc_ball) {
@@ -144,11 +145,9 @@ namespace support {
                         // }
                     }
 
-                    // Make the robot position in field space if we can
-
-                    // Make the ball position in field space if we can
-
-                    // Make our kick target in field space if we can
+                    if (kick_plan) {
+                        msg.kick_target = kick_plan->target.cast<float>();
+                    }
 
                     // Set our game mode properties
                     msg.game_mode  = game_state ? game_state->data.mode : GameState::Data::Mode(0);
@@ -164,6 +163,9 @@ namespace support {
                     // Set our walk command
                     if (walk_command) {
                         msg.walk_command = walk_command->command.cast<float>();
+                    }
+                    else {
+                        msg.walk_command = Eigen::Vector3f::Zero();
                     }
 
                     send(msg, 0, false, NUClear::clock::now());
