@@ -11,6 +11,7 @@ import { Vector3 } from '../../../math/vector3'
 export type LastStatus = 'okay' | 'warning' | 'danger'
 
 export type RobotPanelProps = {
+  connected: boolean,
   batteryValue?: string
   behaviour: string
   lastCameraImage: LastStatus
@@ -25,6 +26,10 @@ export type RobotPanelProps = {
 }
 
 export const RobotPanel = (props: RobotPanelProps) => {
+  const connectionStatusClassName = classNames(style.connectionStatus, {
+    [style.connectedStatus]: props.connected,
+    [style.disconnectedStatus]: !props.connected,
+  })
   const cameraClassName = classNames(style.icon, style.cameraIcon, {
     [style.iconWarningStatus]: props.lastCameraImage === 'warning',
     [style.iconDangerStatus]: props.lastCameraImage === 'danger',
@@ -41,6 +46,7 @@ export const RobotPanel = (props: RobotPanelProps) => {
     <div>
       <header className={style.header}>
         <div className={style.statusBar}>
+          <span className={connectionStatusClassName} title={props.connected ? 'Connected' : 'Disconnected'}/>
           <span className={style.title}>
             {props.title}
           </span>

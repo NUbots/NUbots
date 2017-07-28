@@ -14,9 +14,13 @@ export class RobotPanelViewModel {
   public constructor(private model: DashboardRobotModel) {
   }
 
-  public static of = createTransformer((model: DashboardRobotModel) => {
+  public static of = createTransformer((model: DashboardRobotModel): RobotPanelViewModel => {
     return new RobotPanelViewModel(model)
   })
+
+  @computed get connected(): boolean {
+    return this.model.connected
+  }
 
   @computed
   public get batteryValue(): string {

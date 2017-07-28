@@ -37,7 +37,7 @@ export class FieldViewModel {
   private get robots() {
     return Group.of({
       children: this.model.robots
-        .filter(robot => robot.visible)
+        .filter(robot => robot.enabled && robot.connected)
         .map(robot => DashboardRobotViewModel.of(robot).robot),
     })
   }

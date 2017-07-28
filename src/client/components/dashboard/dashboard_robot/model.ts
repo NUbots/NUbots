@@ -108,12 +108,17 @@ export class DashboardRobotModel {
   })
 
   @computed
+  public get connected(): boolean {
+    return this.robot.connected
+  }
+
+  @computed
   public get name(): string {
     return this.robot.name
   }
 
   @computed
-  public get visible(): boolean {
+  public get enabled(): boolean {
     return this.robot.enabled
   }
 }

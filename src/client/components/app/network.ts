@@ -38,6 +38,7 @@ export class AppNetwork {
     }
   }
 
+  @action
   private onLeave = (peer: NUClearNetPeer) => {
     if (peer.name === 'nusight') {
       return

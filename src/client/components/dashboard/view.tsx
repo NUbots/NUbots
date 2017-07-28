@@ -25,7 +25,7 @@ export class Dashboard extends Component<DashboardProps> {
 
   public render() {
     const { menu: Menu, model } = this.props
-    const showPanels = model.robots.some(robot => robot.visible)
+    const showPanels = model.robots.some(robot => robot.enabled)
     const Field = this.props.Field
     return (
       <div className={style.page}>
@@ -45,9 +45,10 @@ export class Dashboard extends Component<DashboardProps> {
             {model.robots.map(robot => {
               const model = RobotPanelViewModel.of(robot)
               return (
-                robot.visible &&
+                robot.enabled &&
                 <div className={style.panel} key={robot.name}>
                   <RobotPanel
+                    connected={model.connected}
                     batteryValue={model.batteryValue}
                     behaviour={model.behaviour}
                     lastCameraImage={model.lastCameraImage}
