@@ -179,15 +179,6 @@ namespace behaviour {
 
             });
 
-            on<Trigger<ButtonLeftDown>, Single, With<Sensors>>().then([this](const Sensors& sensors) {
-                NUClear::log("Localisation Orientation reset. Localisation resets will now orient this as forwards.");
-                manualOrientationReset = true;
-                emit(std::make_unique<Nod>(true));
-                manualOrientation = Rotation3D(Transform3D(convert<double, 4, 4>(-sensors.world)).rotation()).yaw();
-
-
-            });
-
             // Main Loop
             // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
             on<Every<30, Per<std::chrono::seconds>>,
@@ -249,10 +240,7 @@ namespace behaviour {
                                     standStill();
                                     find({FieldTarget(FieldTarget::Target::BALL)});
                                     if (mode == GameMode::PENALTY_SHOOTOUT) {
-                                        penaltyLocalisationReset();
-                                    }
-                                    else {
-                                        initialLocalisationReset(fieldDescription);
+                                        penaltyShootoutLocalisationReset(fieldDescription);
                                     }
                                     currentState = Behaviour::State::SET;
                                 }
@@ -344,37 +332,36 @@ namespace behaviour {
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
-            ResetRobotHypotheses::Self selfSideBaseLine;
-            selfSideBaseLine.position << -fieldDescription.dimensions.field_length * 0.5
-                                             + fieldDescription.dimensions.goal_area_length,
-                0;
-            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
-            selfSideBaseLine.heading      = 0;
-            selfSideBaseLine.heading_var  = 0.005;
-            if (manualOrientationReset) {
-                selfSideBaseLine.heading     = manualOrientation;
-                selfSideBaseLine.heading_var = 0.00005;
-                selfSideBaseLine.absoluteYaw = true;
-            }
+            ResetRobotHypotheses::Self leftSide;
+            // Start on goal line
+            leftSide.position << -fieldDescription.dimensions.field_length * 0.5,
+                fieldDescription.dimensions.field_width / 2;
+            leftSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
+            leftSide.heading      = 0;
+            leftSide.heading_var  = 0.005;
 
-            reset->hypotheses.push_back(selfSideBaseLine);
+            reset->hypotheses.push_back(leftSide);
+            ResetRobotHypotheses::Self rightSide;
+            // Start on goal line
+            rightSide.position << -fieldDescription.dimensions.field_length * 0.5,
+                -fieldDescription.dimensions.field_width / 2;
+            rightSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
+            rightSide.heading      = 0;
+            rightSide.heading_var  = 0.005;
+
+            reset->hypotheses.push_back(rightSide);
             emit(std::move(reset));
         }
 
-        void SoccerStrategy::penaltyLocalisationReset() {
+        void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fieldDescription) {
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
             ResetRobotHypotheses::Self selfSideBaseLine;
             selfSideBaseLine.position << 2.0, 0.0;
-            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
+            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             selfSideBaseLine.heading      = 0;
             selfSideBaseLine.heading_var  = 0.005;
-            if (manualOrientationReset) {
-                selfSideBaseLine.heading     = manualOrientation;
-                selfSideBaseLine.heading_var = 0.00005;
-                selfSideBaseLine.absoluteYaw = true;
-            }
             reset->hypotheses.push_back(selfSideBaseLine);
 
             emit(std::move(reset));
@@ -383,45 +370,19 @@ namespace behaviour {
         void SoccerStrategy::unpenalisedLocalisationReset(const FieldDescription& fieldDescription) {
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
-            ResetRobotHypotheses::Self selfSideLeft;
-            selfSideLeft.position << -fieldDescription.penalty_robot_start,
-                fieldDescription.dimensions.field_width * 0.5;
-            selfSideLeft.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
-            selfSideLeft.heading      = -M_PI_2;
-            selfSideLeft.heading_var  = 0.005;
-            if (manualOrientationReset) {
-                selfSideLeft.heading     = manualOrientation;
-                selfSideLeft.heading_var = 0.00005;
-                selfSideLeft.absoluteYaw = true;
-            }
-            reset->hypotheses.push_back(selfSideLeft);
+            ResetRobotHypotheses::Self left;
+            left.position << -fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5;
+            left.position_cov = Eigen::Vector2d(1, 0.01).asDiagonal();
+            left.heading      = -M_PI_2;
+            left.heading_var  = 0.005;
+            reset->hypotheses.push_back(left);
 
-            ResetRobotHypotheses::Self selfSideRight;
-            selfSideRight.position << -fieldDescription.penalty_robot_start,
-                -fieldDescription.dimensions.field_width * 0.5;
-            selfSideRight.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
-            selfSideRight.heading      = M_PI_2;
-            selfSideRight.heading_var  = 0.005;
-            if (manualOrientationReset) {
-                selfSideRight.heading     = manualOrientation;
-                selfSideRight.heading_var = 0.00005;
-                selfSideRight.absoluteYaw = true;
-            }
-            reset->hypotheses.push_back(selfSideRight);
-
-            ResetRobotHypotheses::Self selfSideBaseLine;
-            selfSideBaseLine.position << -fieldDescription.dimensions.field_length * 0.5
-                                             + fieldDescription.dimensions.goal_area_length,
-                0;
-            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
-            selfSideBaseLine.heading      = 0;
-            selfSideBaseLine.heading_var  = 0.005;
-            if (manualOrientationReset) {
-                selfSideBaseLine.heading     = manualOrientation;
-                selfSideBaseLine.heading_var = 0.00005;
-                selfSideBaseLine.absoluteYaw = true;
-            }
-            reset->hypotheses.push_back(selfSideBaseLine);
+            ResetRobotHypotheses::Self right;
+            right.position << -fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5;
+            right.position_cov = Eigen::Vector2d(1, 0.01).asDiagonal();
+            right.heading      = M_PI_2;
+            right.heading_var  = 0.005;
+            reset->hypotheses.push_back(right);
 
             emit(std::move(reset));
         }
