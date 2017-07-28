@@ -36,7 +36,7 @@
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace vision {

@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#include <fmt/format.h>
 #include <armadillo>
 #include <cmath>
 #include <exception>

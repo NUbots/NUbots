@@ -40,7 +40,6 @@
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
-#include "utility/vision/fourcc.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"

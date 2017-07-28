@@ -1,11 +1,12 @@
 #include <libusb-1.0/libusb.h>
 
-
 #include "Camera.h"
 
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace input {
@@ -16,9 +17,11 @@ namespace input {
     using message::input::Image;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
+    using message::input::CameraParameters;
 
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
+        , dumpImages(false)
         , V4L2FrameRateHandle()
         , V4L2SettingsHandle()
         , V4L2Cameras()
@@ -26,6 +29,10 @@ namespace input {
         , SpinnakerCamList(SpinnakerSystem->GetCameras(true, true))
         , SpinnakerLoggingCallback(*this)
         , SpinnakerCameras() {
+
+        on<Configuration>("Camera.yaml").then("Camera Module Configuration", [this](const Configuration& config) {
+            dumpImages = config["dump_images"].as<bool>();
+        });
 
         on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
             // Monitor camera config directory for files.
@@ -73,6 +80,8 @@ namespace input {
             [this](const ImageData& image_data,
                    std::shared_ptr<const Sensors> sensors,
                    std::shared_ptr<const KinematicsModel> model) {
+                static uint8_t count = 0;
+
 
                 // NOTE: we only emit direct the ImageData messages and steal their data
                 // Make sure you do not trigger on them anywhere else
@@ -99,6 +108,9 @@ namespace input {
                     msg->Hcw.setIdentity();
                 }
 
+                if (dumpImages) {
+                    utility::vision::saveImage(fmt::format("image-{}.ppm", count++), *msg);
+                }
 
                 emit(msg);
             });
@@ -335,6 +347,22 @@ namespace input {
         camera->second->camera->BeginAcquisition();
 
         log("Camera ", camera->first, " image acquisition started.");
+
+        auto cameraParameters = std::make_unique<CameraParameters>();
+
+        // Generic camera parameters
+        cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
+            config["format"]["height"].as<uint>();
+        cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
+
+        // Radial specific
+        cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
+        cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
+        cameraParameters->centreOffset           = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
+
+        emit<Scope::DIRECT>(std::move(cameraParameters));
+
+        log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
     }
 
     // When we shutdown, we must tell our camera class to close (stop streaming)

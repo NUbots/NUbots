@@ -25,7 +25,7 @@
 
 #include "utility/support/eigen_armadillo.h"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 #include "SpinnakerCamera.h"
 #include "V4L2Camera.h"
@@ -41,6 +41,8 @@ namespace input {
 
     private:
         bool resetUSBDevice(int bus, int device);
+
+        bool dumpImages;
 
         // V4L2 Camera details
         V4L2Camera initiateV4L2Camera(const ::extension::Configuration& config);
