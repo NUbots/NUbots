@@ -473,29 +473,23 @@ namespace behaviour {
             emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 1})));
         }
 
-        arma::vec2 SoccerStrategy::getKickPlan(const Field& field,
-                                               const FieldDescription& fieldDescription,
-                                               const Sensors& sensors) {
+        arma::vec2 SoccerStrategy::getKickPlan(const Field& field, const FieldDescription& fieldDescription) {
 
             // Defines the box within in which the kick target is changed from the centre
             // of the oppposition goal to the perpendicular distance from the robot to the goal
 
-            Transform3D Htw = convert<double, 4, 4>(sensors.world);
-            Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
-            Transform3D Hft = (Hfw * Htw.i());
-
-            auto robotFieldPos = Hft.translation();
-
-            float xProximity = cfg_.max_kick_range;
-            size_t error     = 0.05;
-            size_t buffer    = error + 2 * fieldDescription.ball_radius;             // 15cm
-            float yProximity = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-            float xRobot     = robotFieldPos[0];
-            float yRobot     = robotFieldPos[1];
+            float maxKickRange =
+                0.6;  // TODO: make configurable, only want to change at the last kick to avoid smart goalies
+            float xTakeOverBox = maxKickRange;
+            size_t error       = 0.05;
+            size_t buffer      = error + 2 * fieldDescription.ball_radius;             // 15cm
+            float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
+            float xRobot       = field.position[0];
+            float yRobot       = field.position[1];
             arma::vec2 newTarget;
 
-            if ((fieldDescription.dimensions.field_length / 2) - xProximity < xRobot && -yProximity < yRobot
-                && yRobot < yProximity) {
+            if ((fieldDescription.dimensions.field_length / 2) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
+                && yRobot < yTakeOverBox) {
                 // Aims for behind the point that gives the shortest distance
                 newTarget[0] =
                     fieldDescription.dimensions.field_length / 2 + fieldDescription.dimensions.goal_depth / 2;
@@ -508,6 +502,42 @@ namespace behaviour {
             }
             return newTarget;
         }
+
+        // arma::vec2 SoccerStrategy::getKickPlan(const Field& field,
+        //                                        const FieldDescription& fieldDescription,
+        //                                        const Sensors& sensors) {
+
+        //     // Defines the box within in which the kick target is changed from the centre
+        //     // of the oppposition goal to the perpendicular distance from the robot to the goal
+
+        //     Transform3D Htw = convert<double, 4, 4>(sensors.world);
+        //     Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+        //     Transform3D Hft = (Hfw * Htw.i());
+
+        //     auto robotFieldPos = Hft.translation();
+
+        //     float xProximity = cfg_.max_kick_range;
+        //     size_t error     = 0.05;
+        //     size_t buffer    = error + 2 * fieldDescription.ball_radius;             // 15cm
+        //     float yProximity = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
+        //     float xRobot     = robotFieldPos[0];
+        //     float yRobot     = robotFieldPos[1];
+        //     arma::vec2 newTarget;
+
+        //     if ((fieldDescription.dimensions.field_length / 2) - xProximity < xRobot && -yProximity < yRobot
+        //         && yRobot < yProximity) {
+        //         // Aims for behind the point that gives the shortest distance
+        //         newTarget[0] =
+        //             fieldDescription.dimensions.field_length / 2 + fieldDescription.dimensions.goal_depth / 2;
+        //         newTarget[1] = yRobot;
+        //     }
+        //     else {
+        //         // Aims for the centre of the goal
+        //         newTarget[0] = fieldDescription.dimensions.field_length / 2;
+        //         newTarget[1] = 0;
+        //     }
+        //     return newTarget;
+        // }
 
         void SoccerStrategy::goalieWalk(const Field& field, const Ball& ball) {
             std::unique_ptr<MotionCommand> motionCommand;

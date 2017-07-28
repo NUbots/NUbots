@@ -125,8 +125,8 @@ namespace behaviour {
             bool ballDistance(const message::localisation::Ball& ball);
             void goalieWalk(const message::localisation::Field& field, const message::localisation::Ball& ball);
             arma::vec2 getKickPlan(const message::localisation::Field& field,
-                                   const message::support::FieldDescription& fieldDescription,
-                                   const message::input::Sensors& sensors);
+                                   const message::support::FieldDescription& fieldDescription);
+            // const message::input::Sensors& sensors);
             void play(const message::localisation::Field& field,
                       const message::localisation::Ball& ball,
                       const message::support::FieldDescription& fieldDescription,
