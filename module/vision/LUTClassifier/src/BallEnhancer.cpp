@@ -376,9 +376,9 @@ namespace vision {
                     break;
                 }
 
+                std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;  // DEBUG LINE
                 if (DRAW_LIGHTNING) {
-                    std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;  // DEBUG LINE
-                    std::get<0>(d) = point;                                           // DEBUG LINE
+                    std::get<0>(d) = point;  // DEBUG LINE
                 }
 
                 float strength;
@@ -419,9 +419,9 @@ namespace vision {
                     break;
                 }
 
+                std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;  // DEBUG LINE
                 if (DRAW_LIGHTNING) {
-                    std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;  // DEBUG LINE
-                    std::get<0>(d) = point;                                           // DEBUG LINE
+                    std::get<0>(d) = point;  // DEBUG LINE
                 }
 
                 float strength;
