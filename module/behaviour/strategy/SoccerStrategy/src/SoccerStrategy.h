@@ -46,7 +46,6 @@ namespace behaviour {
                     , ball_search_walk_start_speed(0.0f)
                     , ball_search_walk_stop_speed(0.0f)
                     , ball_search_walk_slow_time(0.0f)
-                    , max_kick_range(0.0f)
                     , start_position_offensive(arma::fill::zeros)
                     , start_position_defensive(arma::fill::zeros)
                     , is_goalie(false)
@@ -67,8 +66,6 @@ namespace behaviour {
                 float ball_search_walk_start_speed;
                 float ball_search_walk_stop_speed;
                 float ball_search_walk_slow_time;
-
-                float max_kick_range;
 
                 arma::vec2 start_position_offensive;
                 arma::vec2 start_position_defensive;
@@ -119,7 +116,7 @@ namespace behaviour {
             void searchWalk();
             void walkTo(const message::support::FieldDescription& fieldDescription,
                         const message::behaviour::FieldTarget::Target& object);
-            void walkTo(const arma::vec2& position, const double& theta);
+            void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
             void find(const std::vector<message::behaviour::FieldTarget>& objects);
             void spinWalk();
             bool pickedUp(const message::input::Sensors& sensors);
