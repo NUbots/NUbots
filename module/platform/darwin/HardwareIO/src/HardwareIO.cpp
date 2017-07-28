@@ -71,7 +71,7 @@ namespace platform {
             // Voltage (in volts)
             sensors.voltage = Convert::voltage(data.cm730.voltage);
 
-            if (sensors.voltage <= maxVoltage) {
+            if (sensors.voltage <= chargedVoltage) {
                 sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
             }
 
@@ -199,7 +199,7 @@ namespace platform {
                     servo.temperature = Convert::temperature(data.servos[i].temperature);
 
                     // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
-                    if (servo.voltage <= maxVoltage) {
+                    if (servo.voltage <= chargedVoltage) {
                         servo.errorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
                     }
                 }
@@ -212,8 +212,8 @@ namespace platform {
             , darwin("/dev/CM730")
             , cm730State()
             , servoState()
-            , maxVoltage(0.0f)
-            , minVoltage(0.0f) {
+            , chargedVoltage(0.0f)
+            , flatVoltage(0.0f) {
 
             on<Startup>().then("HardwareIO Startup", [this] {
                 uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
@@ -236,8 +236,8 @@ namespace platform {
                     servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
                 }
 
-                maxVoltage = config["battery"]["max"].as<float>();
-                minVoltage = config["battery"]["min"].as<float>();
+                chargedVoltage = config["battery"]["charged_voltage"].as<float>();
+                flatVoltage    = config["battery"]["flat_voltage"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
@@ -317,6 +317,30 @@ namespace platform {
 
                     // Parse our data
                     *sensors = parseSensors(data);
+
+                    // Set our voltage and battery
+                    sensors->voltage = input.voltage;
+
+                    // Work out a battery charged percentage
+                    sensors->battery = std::max(0.0f,
+                                                (input.voltage - config.battery.flatVoltage)
+                                                    / (config.battery.chargedVoltage - config.battery.flatVoltage));
+
+                    // TODO use cm730 leds to display battery voltage
+                    if (sensors->battery > 75) {
+                        // sensors.ledPanel = {false, 0xFF, false};
+                    }
+                    else if (sensors->battery > 50) {
+                        // sensors.ledPanel = {}
+                    }
+                    else if (sensors->battery > 25) {
+                        // sensors.ledPanel = {}
+                    }
+                    else if (sensors->battery > 10) {
+                        // sensors.ledPanel = {}
+                    }
+                    else {
+                    }
 
                     // Send our nicely computed sensor data out to the world
                     emit(std::move(sensors));
