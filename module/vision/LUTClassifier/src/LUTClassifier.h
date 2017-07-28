@@ -85,7 +85,10 @@ namespace vision {
         int MAXIMUM_LIGHTNING_BOLT_LENGTH   = 10;
         int MINIMUM_LIGHTNING_BOLT_STRENGTH = 10;
 
-        std::string LUT_PATH, LUT_HOST;
+        std::string LUT_PATH;
+        std::string LUT_HOST;
+
+        bool DRAW_LIGHTNING = false;
 
         void insertSegments(message::vision::ClassifiedImage& image,
                             std::vector<message::vision::ClassifiedImage::Segment>& segments,

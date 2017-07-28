@@ -60,6 +60,8 @@ namespace vision {
 
         arma::vec3 ball_angular_cov;
 
+        int max_group_distance = 1;
+
         utility::learning::KMeans kmeansClusterer;
 
         struct Frame {

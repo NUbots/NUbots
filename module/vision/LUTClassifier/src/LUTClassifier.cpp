@@ -204,6 +204,9 @@ namespace vision {
 
                 // Camera settings
                 FOCAL_LENGTH_PIXELS = cam.pinhole.focalLengthPixels;
+
+                // Debug drawing
+                DRAW_LIGHTNING = config["ball"]["draw_lightning"];
             });
 
         on<Trigger<Image>, With<LookUpTable>, With<Sensors>, With<CameraParameters>, Single, Priority::LOW>().then(

@@ -194,6 +194,8 @@ namespace vision {
 
             print_throwout_logs = config["print_throwout_logs"].as<bool>();
 
+            max_group_distance = config["max_group_distance"].as<int>();
+
             lastFrame.time = NUClear::clock::now();
         });
 
@@ -203,8 +205,7 @@ namespace vision {
            With<LookUpTable>,
            Single,
            Priority::LOW>()
-            .then(
-                "Ball Detector",
+            .then("Ball Detector",
                 [this](std::shared_ptr<const ClassifiedImage> rawImage,
                        const CameraParameters& cam,
                        const FieldDescription& field,
@@ -213,14 +214,66 @@ namespace vision {
                     const auto& image   = *rawImage;
                     const auto& sensors = *image.sensors;
 
+                      // Copy our image across so we can do a check
+                      auto imagePoints = image.ballPoints;
 
+                      // Build a list of point groups
+                      std::vector<std::vector<message::conversion::math::ivec2>> screenPointGroups;
+
+                      // Look through the points for connectivity tests
+                      while (!imagePoints.empty()) {
+
+                          // Start a new group
+                          screenPointGroups.emplace_back();
+                          auto& group = screenPointGroups.back();
+
+                          // Add the point at the end of our group to the list of seed points
+                          group.emplace_back(imagePoints.back());
+                          imagePoints.pop_back();
+
+                          // Go until we have exhausted all our points
+                          for (auto i = 0; i < group.size(); ++i) {
+
+                              // If a point is touching this point add it to our list
+                              for (auto it2 = imagePoints.begin(); it2 != imagePoints.end();) {
+
+                                  // Get the difference between our two points
+                                  message::conversion::math::ivec2 diff = (*it2) - group[i];
+
+                                  // If the difference is less than or equal to +- 1 this point is added
+                                  if (std::abs(diff[0]) <= max_group_distance
+                                      && std::abs(diff[1]) <= max_group_distance) {
+                                      group.push_back(*it2);
+                                      it2 = imagePoints.erase(it2);
+                                  }
+                                  else {
+                                      ++it2;
+                                  }
+                              }
+                          }
+                      }
+
+                      log("Groups: ", screenPointGroups.size());
+                      // Create result message
+                      auto balls = std::make_unique<std::vector<Ball>>();
+                      int i      = 1;
+                      // Loop through the groups and perform ransac on each
+                      for (const auto& group : screenPointGroups) {
+                          if (group.size() < MINIMUM_POINTS_FOR_CONSENSUS) {
+                              continue;
+                          }
                     // This holds our points that may be a part of the ball
                     std::vector<arma::vec3> ballPoints;
-                    ballPoints.reserve(image.ballPoints.size());
 
-                    for (const auto& point : image.ballPoints) {
-                        arma::vec2 pt = imageToScreen(convert<int, 2>(point), convert<uint, 2>(cam.imageSizePixels));
-                        ballPoints.push_back(getCamFromScreen(pt, cam));
+                          log("group: ", i++, " size = ", group.size());
+
+                          // Loop through points in group and transform to camera space
+                          for (const auto& point : group) {
+                              // Check not below the visual horizon
+                              if (utility::vision::visualHorizonAtPoint(image, point[0]) > point[1]) {
+                                  continue;
+                              }
+                              ballPoints.push_back(getCamFromImage(convert<int, 2>(point), cam));
                     }
 
                     // Use ransac to find the ball
@@ -230,9 +283,8 @@ namespace vision {
                                                                             MAXIMUM_ITERATIONS_PER_FITTING,
                                                                             MAXIMUM_FITTED_MODELS,
                                                                             CONSENSUS_ERROR_THRESHOLD);
+                          // TODO: reserve more space balls->reserve(ransacResults.size());
 
-                    auto balls = std::make_unique<std::vector<Ball>>();
-                    balls->reserve(ransacResults.size());
 
                     if (print_throwout_logs)
                         log("Ransac : ", ransacResults.size(), "results (MAX = ", MAXIMUM_FITTED_MODELS, ")");
@@ -260,7 +312,10 @@ namespace vision {
                          ************************************************/
 
                         if (print_throwout_logs) {
-                            log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t());
+                                  log("Ball model: g =  ",
+                                      result.model.gradient,
+                                      " axis =   ",
+                                      result.model.unit_axis.t());
                         }
 
                         // CENTRE OF BALL IS ABOVE THE HORIZON
@@ -361,20 +416,25 @@ namespace vision {
                         b.cone.gradient = result.model.gradient;
 
                         // Angular positions from the camera
-                        b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(ballCentreRay).rows(1, 2));
-                        b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
+                              b.visObject.screenAngular =
+                                  convert<double, 2>(cartesianToSpherical(ballCentreRay).rows(1, 2));
+                              b.visObject.angularSize << getParallaxAngle(left, right, cam),
+                                  getParallaxAngle(top, base, cam);
 
                         // Add our points
                         for (auto& point : result) {
                             b.edgePoints.push_back(convert<double, 3>(
                                 getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam)));
                         }
-                        b.visObject.timestamp       = NUClear::clock::now();
-                        b.visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
+                              b.visObject.timestamp = NUClear::clock::now();
+                              b.visObject.classifiedImage =
+                                  const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
 
                         balls->push_back(std::move(b));
+                      }
                     }
 
+                      // Merge balls which overlap
                     for (auto a = balls->begin(); a != balls->end(); ++a) {
                         Cone<3> acone(convert<double, 3>(a->cone.axis), a->cone.gradient);
 
