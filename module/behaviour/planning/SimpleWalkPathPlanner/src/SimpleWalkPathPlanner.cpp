@@ -26,7 +26,6 @@
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/Subsumption.h"
-#include "message/behaviour/WalkPlan.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
@@ -58,7 +57,6 @@ namespace behaviour {
 
         using message::motion::WalkCommand;
         using message::behaviour::KickPlan;
-        using message::behaviour::WalkPlan;
         using message::behaviour::MotionCommand;
         using message::motion::KickFinished;
         using message::motion::StopCommand;
@@ -167,15 +165,13 @@ namespace behaviour {
                With<WantsToKick>,
                With<KickPlan>,
                With<FieldDescription>,
-               Optional<With<WalkPlan>>,
                Sync<SimpleWalkPathPlanner>>()
                 .then([this](const Ball& ball,
                              const Field& field,
                              const Sensors& sensors,
                              const WantsToKick& wantsTo,
                              const KickPlan& kickPlan,
-                             const FieldDescription& fieldDescription,
-                             std::shared_ptr<const WalkPlan> walkPlan) {
+                             const FieldDescription& fieldDescription) {
                     if (wantsTo.kick) {
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
@@ -220,39 +216,39 @@ namespace behaviour {
                         Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
                         Transform3D Htf = (Htw * Hfw.i());
 
-                        if (walkPlan) {
-                            // If walking towards kicking the ball
-                            if (walkPlan->type == WalkPlan::WalkType::BALL) {
-                                arma::vec3 kickTarget =
-                                    Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
+                        // If walking towards kicking the ball
+                        if (latestCommand.type == message::behaviour::MotionCommand::Type::BallApproach) {
+                            arma::vec3 kickTarget =
+                                Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
 
-                                // //approach point:
-                                arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);
-                                arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
+                            // //approach point:
+                            arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);
+                            arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
 
-                                if (arma::norm(position) > slowdown_distance) {
-                                    position = kick_point;
-                                }
-                                else {
-                                    speedFactor   = slow_approach_factor;
-                                    headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
-                                    sideStep      = 1;
-                                }
+                            if (arma::norm(position) > slowdown_distance) {
+                                position = kick_point;
                             }
-                            // If walking to a point on the field
-                            else if (walkPlan->type == WalkPlan::WalkType::FIELD) {
-                                utility::math::matrix::Transform3D Hfp;
-                                Hfp.translation() = arma::vec3{walkPlan->fieldPose[0], walkPlan->fieldPose[1], 0};
-                                Hfp               = Hfp.rotateZ(walkPlan->fieldPose[2]);
-
-                                utility::math::matrix::Transform3D Htp = Htf * Hfp;
-
-                                arma::vec3 forward      = Htp.transformVector(arma::vec3{1, 0, 0});
-                                arma::vec3 goalPosition = Htp.translation();
-
-                                position      = goalPosition.rows(0, 1);
-                                headingChange = std::atan2(forward[1], forward[0]);
+                            else {
+                                speedFactor   = slow_approach_factor;
+                                headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
+                                sideStep      = 1;
                             }
+                        }
+                        // If walking to a point on the field
+                        else if (latestCommand.type == message::behaviour::MotionCommand::Type::WalkToState) {
+                            utility::math::matrix::Transform3D Hfp;
+                            Hfp.translation() = arma::vec3{latestCommand->goalState, latestCommand->goalState[1], 0};
+                            Hfp               = Hfp.rotateZ(latestCommand->goalState[2]);
+
+                            utility::math::matrix::Transform3D Htp = Htf * Hfp;
+
+                            arma::vec3 forward      = Htp.transformVector(arma::vec3{1, 0, 0});
+                            arma::vec3 goalPosition = Htp.translation();
+
+                            position = goalPosition.rows(0, 1);
+                            // change heading when close enough
+                            headingChange =
+                                arma::norm(position) > slowdown_distance ? 0 : std::atan2(forward[1], forward[0]);
                         }
                     }
                     // arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position,
