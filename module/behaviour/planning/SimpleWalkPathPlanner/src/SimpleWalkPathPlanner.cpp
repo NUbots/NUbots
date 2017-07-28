@@ -237,7 +237,7 @@ namespace behaviour {
                         // If walking to a point on the field
                         else if (latestCommand.type == message::behaviour::MotionCommand::Type::WalkToState) {
                             utility::math::matrix::Transform3D Hfp;
-                            Hfp.translation() = arma::vec3{latestCommand.goalState, latestCommand.goalState[1], 0};
+                            Hfp.translation() = arma::vec3({latestCommand.goalState[0], latestCommand.goalState[1], 0});
                             Hfp               = Hfp.rotateZ(latestCommand.goalState[2]);
 
                             utility::math::matrix::Transform3D Htp = Htf * Hfp;
