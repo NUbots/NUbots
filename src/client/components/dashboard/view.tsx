@@ -7,8 +7,10 @@ import { DashboardNetwork } from './network'
 import { RobotPanel } from './robot_panel/view'
 import { RobotPanelViewModel } from './robot_panel/view_model'
 import * as style from './style.css'
+import { DashboardController } from './controller'
 
 export type DashboardProps = {
+  controller: DashboardController
   Field: ComponentType<{}>
   menu: ComponentType<{}>
   model: DashboardModel
@@ -27,7 +29,13 @@ export class Dashboard extends Component<DashboardProps> {
     const Field = this.props.Field
     return (
       <div className={style.page}>
-        <Menu/>
+        <Menu>
+          <ul className={style.menu}>
+              <li className={style.menuItem}>
+                <button className={style.menuButton} onClick={this.onToggleOrientationClick}>Flip Orientation</button>
+              </li>
+          </ul>
+        </Menu>
         <div className={style.dashboard}>
           <div className={style.field}>
             <Field/>
@@ -60,5 +68,10 @@ export class Dashboard extends Component<DashboardProps> {
         </div>
       </div>
     )
+  }
+
+  private onToggleOrientationClick = () => {
+    const { controller, model } = this.props
+    controller.toggleOrientation(model)
   }
 }

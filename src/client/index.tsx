@@ -26,6 +26,7 @@ import { Scatter } from './components/scatter_plot/view'
 import { Subsumption } from './components/subsumption/view'
 import { Vision } from './components/vision/view'
 import { NUsightNetwork } from './network/nusight_network'
+import { DashboardController } from './components/dashboard/controller'
 
 // enable MobX strict mode
 useStrict(true)
@@ -49,7 +50,8 @@ ReactDOM.render(
           const model = dashboardModel
           const field = () => <Field controller={FieldController.of()} model={model.field} />
           const network = DashboardNetwork.of(nusightNetwork)
-          return <Dashboard Field={field} menu={menu} model={model} network={network} />
+          const controller = DashboardController.of()
+          return <Dashboard controller={controller} Field={field} menu={menu} model={model} network={network} />
         }}/>
         <Route path='/localisation' render={() => {
           const model = localisationModel
