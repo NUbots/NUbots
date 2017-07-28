@@ -245,10 +245,15 @@ namespace behaviour {
                             arma::vec3 forward      = Htp.transformVector(arma::vec3{1, 0, 0});
                             arma::vec3 goalPosition = Htp.translation();
 
-                            position = goalPosition.rows(0, 1);
                             // change heading when close enough
-                            headingChange =
-                                arma::norm(position) > slowdown_distance ? 0 : std::atan2(forward[1], forward[0]);
+                            if (arma::norm(position) > slowdown_distance) {
+                                position = goalPosition.rows(0, 1);
+                            }
+                            else {
+                                speedFactor   = slow_approach_factor;
+                                headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
+                                sideStep      = 1;
+                            }
                         }
                     }
                     // arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position,
