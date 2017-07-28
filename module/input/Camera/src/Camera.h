@@ -40,6 +40,8 @@ namespace input {
         explicit Camera(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        void setExposure(Spinnaker::GenApi::INodeMap& nodeMap, double exposure);
+        void setGain(Spinnaker::GenApi::INodeMap& nodeMap, double gain);
         bool resetUSBDevice(int bus, int device);
 
         bool dumpImages;

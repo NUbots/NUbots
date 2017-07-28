@@ -318,7 +318,31 @@ namespace input {
             log("Height entry is writable? ", IsWritable(ptrHeight) ? "yes" : "no");
         }
 
-        // Set acquisition mode to continuous
+        // Set exposure to auto/continuous
+        Spinnaker::GenApi::CEnumerationPtr ptrExposureAuto = nodeMap.GetNode("ExposureAuto");
+
+        if (IsAvailable(ptrExposureAuto) || IsWritable(ptrExposureAuto)) {
+            Spinnaker::GenApi::CEnumEntryPtr ptrExposureAutoContinuous = ptrExposureAuto->GetEntryByName("Continuous");
+
+            if (IsAvailable(ptrExposureAutoContinuous) || IsReadable(ptrExposureAutoContinuous)) {
+                ptrExposureAuto->SetIntValue(ptrExposureAutoContinuous->GetValue());
+                log(camera->first, " set to continuous auto exposure.");
+            }
+
+            else {
+                log("Unable to enable automatic exposure (enum entry retrieval). Non-fatal error...");
+                return;
+            }
+        }
+
+        else {
+            log("Unable to enable automatic exposure (node retrieval). Non-fatal error...");
+            return;
+        }
+
+        setExposure(nodeMap, config["settings"]["exposure"].as<double>());
+        setGain(nodeMap, config["settings"]["gain"].as<double>());
+
         Spinnaker::GenApi::CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
 
         if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode)) {
@@ -363,6 +387,87 @@ namespace input {
         emit<Scope::DIRECT>(std::move(cameraParameters));
 
         log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
+    }
+
+    void Camera::setExposure(Spinnaker::GenApi::INodeMap& nodeMap, double exposure) {
+        Spinnaker::GenApi::CEnumerationPtr ptrExposureAuto = nodeMap.GetNode("ExposureAuto");
+        if (!IsAvailable(ptrExposureAuto) || !IsWritable(ptrExposureAuto)) {
+            log("Unable to disable automatic exposure (node retrieval). Aborting...");
+            return;
+        }
+
+        Spinnaker::GenApi::CEnumEntryPtr ptrExposureAutoOff = ptrExposureAuto->GetEntryByName("Off");
+        if (!IsAvailable(ptrExposureAutoOff) || !IsReadable(ptrExposureAutoOff)) {
+            log("Unable to disable automatic exposure (enum entry retrieval). Aborting...");
+            return;
+        }
+
+        ptrExposureAuto->SetIntValue(ptrExposureAutoOff->GetValue());
+
+        log("Automatic exposure disabled...");
+
+        //
+        // Set exposure time manually; exposure time recorded in microseconds
+        //
+        // *** NOTES ***
+        // The node is checked for availability and writability prior to the
+        // setting of the node. Further, it is ensured that the desired exposure
+        // time does not exceed the maximum. Exposure time is counted in
+        // microseconds. This information can be found out either by
+        // retrieving the unit with the GetUnit() method or by checking SpinView.
+        //
+        Spinnaker::GenApi::CFloatPtr ptrExposureTime = nodeMap.GetNode("ExposureTime");
+        if (!IsAvailable(ptrExposureTime) || !IsWritable(ptrExposureTime)) {
+            log("Unable to set exposure time. Aborting...");
+            return;
+        }
+
+        // Ensure desired exposure time does not exceed the maximum
+        const double exposureTimeMax = ptrExposureTime->GetMax();
+        double exposureTimeToSet     = exposure;
+
+        if (exposureTimeToSet > exposureTimeMax) {
+            exposureTimeToSet = exposureTimeMax;
+        }
+
+        ptrExposureTime->SetValue(exposureTimeToSet);
+
+        log("Exposure set to ", ptrExposureTime->GetValue());
+    }
+
+    void Camera::setGain(Spinnaker::GenApi::INodeMap& nodeMap, double gain) {
+        Spinnaker::GenApi::CEnumerationPtr ptrGainAuto = nodeMap.GetNode("GainAuto");
+        if (!IsAvailable(ptrGainAuto) || !IsWritable(ptrGainAuto)) {
+            log("Unable to disable automatic gain (node retrieval). Aborting...");
+            return;
+        }
+
+        Spinnaker::GenApi::CEnumEntryPtr ptrGainAutoOff = ptrGainAuto->GetEntryByName("Off");
+        if (!IsAvailable(ptrGainAutoOff) || !IsReadable(ptrGainAutoOff)) {
+            log("Unable to disable automatic gain (enum entry retrieval). Aborting...");
+            return;
+        }
+
+        ptrGainAuto->SetIntValue(static_cast<int64_t>(ptrGainAutoOff->GetValue()));
+
+        log("Automatic gain disabled...");
+
+        // Set gain; gain recorded in decibels
+        Spinnaker::GenApi::CFloatPtr ptrGain = nodeMap.GetNode("Gain");
+        if (!IsAvailable(ptrGain) || !IsWritable(ptrGain)) {
+            log("Unable to set gain (node retrieval). Aborting...");
+            return;
+        }
+
+        double gainMax = ptrGain->GetMax();
+
+        if (gain > gainMax) {
+            gain = gainMax;
+        }
+
+        ptrGain->SetValue(gain);
+
+        log("Gain set to ", ptrGain->GetValue());
     }
 
     // When we shutdown, we must tell our camera class to close (stop streaming)
