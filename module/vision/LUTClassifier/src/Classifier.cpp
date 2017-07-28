@@ -21,7 +21,7 @@
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/vision/LookUpTable.h"
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace vision {
@@ -39,19 +39,19 @@ namespace vision {
 
         utility::vision::Colour colour;
         uint16_t segmentLength = 0;
+        uint i                 = 0;
+        size_t length          = 0;
 
         std::vector<ClassifiedImage::Segment> output;
         output.reserve(64);
         arma::ivec2 position = start;
 
-        // A reference to the relevant movement direction
-        int& movement = start[1] == end[1] ? position[0] : position[1];
 
         // For vertical runs
         if (start[0] == end[0]) {
-            size_t length = end[1] - start[1] + 1;
+            length = end[1] - start[1] + 1;
 
-            for (uint i = 0; i < length / subsample; ++i) {
+            for (i = 0; i < length / subsample; ++i) {
                 utility::vision::Colour currentColour =
                     utility::vision::getPixelColour(lut,
                                                     utility::vision::getPixel(start[0],
@@ -61,12 +61,13 @@ namespace vision {
                                                                               image.data,
                                                                               static_cast<FOURCC>(image.format)));
 
+                segmentLength += subsample;
                 if (currentColour != colour) {
                     if (segmentLength > 0) {
                         // Update our position
-                        const arma::ivec2& s = position;
-                        movement += segmentLength;
-                        const arma::ivec2& m = (s + position) / 2;
+                        arma::ivec2 s = position;
+                        position[1] += segmentLength;
+                        arma::ivec2 m = (s + position) / 2;
 
                         output.push_back(ClassifiedImage::Segment(classifySegment(colour),
                                                                   segmentLength,
@@ -81,17 +82,13 @@ namespace vision {
                     segmentLength = 0;
                     colour        = currentColour;
                 }
-
-                else {
-                    segmentLength++;
-                }
             }
         }
 
         // For horizontal runs
         else if (start[1] == end[1]) {
-            size_t length = end[0] - start[0] + 1;
-            for (uint i = 0; i < length / subsample; ++i) {
+            length = end[0] - start[0] + 1;
+            for (i = 0; i < length / subsample; ++i) {
                 utility::vision::Colour currentColour =
                     utility::vision::getPixelColour(lut,
                                                     utility::vision::getPixel(start[0] + (i * subsample),
@@ -101,12 +98,13 @@ namespace vision {
                                                                               image.data,
                                                                               static_cast<FOURCC>(image.format)));
 
+                segmentLength += subsample;
                 if (currentColour != colour) {
                     if (segmentLength > 0) {
                         // Update our position
-                        const arma::ivec2& s = position;
-                        movement += segmentLength;
-                        const arma::ivec2& m = (s + position) / 2;
+                        arma::ivec2 s = position;
+                        position[0] += segmentLength;
+                        arma::ivec2 m = (s + position) / 2;
 
                         output.push_back(ClassifiedImage::Segment(classifySegment(colour),
                                                                   segmentLength,
@@ -121,12 +119,46 @@ namespace vision {
                     segmentLength = 0;
                     colour        = currentColour;
                 }
-
-                else {
-                    segmentLength++;
-                }
             }
         }
+
+        // Update position for the final segment
+        segmentLength = segmentLength + length % subsample;
+
+        // Add final segment for vertical runs
+        if (start[0] == end[0]) {
+
+            // Update our position
+            arma::ivec2 s = position;
+            position[1] += segmentLength;
+            arma::ivec2 m = (s + position) / 2;
+
+            output.push_back(ClassifiedImage::Segment(classifySegment(colour),
+                                                      segmentLength,
+                                                      subsample,
+                                                      convert<int, 2>(s),
+                                                      convert<int, 2>(position),
+                                                      convert<int, 2>(m),
+                                                      -1,
+                                                      -1));
+        }
+        // Add final segment for horizontal runs
+        else if (start[1] == end[1]) {
+            // Update our position
+            arma::ivec2 s = position;
+            position[0] += segmentLength;
+            arma::ivec2 m = (s + position) / 2;
+
+            output.push_back(ClassifiedImage::Segment(classifySegment(colour),
+                                                      segmentLength,
+                                                      subsample,
+                                                      convert<int, 2>(s),
+                                                      convert<int, 2>(position),
+                                                      convert<int, 2>(m),
+                                                      -1,
+                                                      -1));
+        }
+
 
         return output;
     }
