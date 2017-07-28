@@ -85,7 +85,12 @@ namespace behaviour {
                 bool alwaysPowerKick;
                 bool forcePlaying         = false;
                 bool forcePenaltyShootout = false;
+
+                NUClear::clock::duration stationary_goal_search_time;
             } cfg_;
+
+            bool stationaryGoalSearch                                = false;
+            NUClear::clock::time_point stationaryGoalSearchStartTime = NUClear::clock::now();
 
             message::behaviour::FieldTarget walkTarget;
 
@@ -107,7 +112,7 @@ namespace behaviour {
             NUClear::clock::time_point ballSearchStartTime;
             NUClear::clock::time_point goalLastMeasured;
             void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
-            void penaltyLocalisationReset();
+            void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
             void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
 
             void standStill();
@@ -119,6 +124,7 @@ namespace behaviour {
             void spinWalk();
             bool pickedUp(const message::input::Sensors& sensors);
             bool penalised();
+            void startStationaryGoalSearch();
             bool ballDistance(const message::localisation::Ball& ball);
             void goalieWalk(const message::localisation::Field& field, const message::localisation::Ball& ball);
             arma::vec2 getKickPlan(const message::localisation::Field& field,

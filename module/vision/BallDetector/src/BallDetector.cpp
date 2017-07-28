@@ -38,6 +38,7 @@
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
+#include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
 
@@ -263,7 +264,9 @@ namespace vision {
                         }
 
                         // CENTRE OF BALL IS ABOVE THE HORIZON
-                        if (arma::dot(convert<double, 3>(image.horizon_normal), ballCentreRay) > 0) {
+                        arma::ivec2 centre_im = getImageFromCam(axis, cam);
+                        if (utility::vision::visualHorizonAtPoint(image, centre_im[0]) > centre_im[1]
+                            || arma::dot(convert<double, 3>(image.horizon_normal), ballCentreRay) > 0) {
                             if (print_throwout_logs) {
                                 log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
                                 log("Horizon normal = ", image.horizon_normal.transpose());

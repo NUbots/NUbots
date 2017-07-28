@@ -24,3 +24,5 @@ force_playing: false
 force_penalty_shootout: false
 
 always_power_kick: true
+
+stationary_goal_search_time: 1.0
