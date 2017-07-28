@@ -29,7 +29,6 @@
 #include "message/localisation/ResetRobotHypotheses.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/GetupCommand.h"
-#include "message/motion/KickCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
@@ -78,7 +77,6 @@ namespace behaviour {
         using message::platform::darwin::ButtonMiddleDown;
         using message::platform::darwin::ButtonLeftDown;
         using message::support::FieldDescription;
-        using message::motion::KickFinished;
 
         using utility::time::durationFromSeconds;
         using utility::math::geometry::Circle;
@@ -107,9 +105,6 @@ namespace behaviour {
                 cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
 
                 cfg_.is_goalie = config["goalie"].as<bool>();
-
-                cfg_.stationary_goal_search_time =
-                    durationFromSeconds(config["stationary_goal_search_time"].as<double>());
 
                 // Use configuration here from file GoalieWalkPlanner.yaml
                 cfg_.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
@@ -183,9 +178,6 @@ namespace behaviour {
                 }
 
             });
-
-            // When done kicking, look around
-            on<Trigger<KickFinished>, Single>().then([this] { startStationaryGoalSearch(); });
 
             // Main Loop
             // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
@@ -291,7 +283,6 @@ namespace behaviour {
                                   const Ball& ball,
                                   const FieldDescription& fieldDescription,
                                   const GameMode& mode) {
-
             if (penalised() && !cfg_.forcePlaying) {  // penalised
                 standStill();
                 find({FieldTarget(FieldTarget::Target::SELF)});
@@ -302,14 +293,7 @@ namespace behaviour {
                 goalieWalk(field, ball);
                 currentState = Behaviour::State::GOALIE_WALK;
             }
-            // Stationary goal search
-            else if (stationaryGoalSearch
-                     && NUClear::clock::now() - stationaryGoalSearchStartTime < cfg_.stationary_goal_search_time) {
-                find({FieldTarget(FieldTarget::Target::SELF)});
-                standStill();
-            }
             else {
-                stationaryGoalSearch = false;
                 /*if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
                 standStill();
                 find({FieldTarget(FieldTarget::Target::BALL)});
@@ -318,9 +302,8 @@ namespace behaviour {
                 }
                 currentState = Behaviour::State::LOCALISING;
             }
-            else*/
-                if (NUClear::clock::now() - ballLastMeasured
-                    < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
+            else*/ if (NUClear::clock::now() - ballLastMeasured
+                       < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
                     currentState = Behaviour::State::WALK_TO_BALL;
@@ -511,16 +494,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position[2];
-                int signBearing     = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed = -signBearing
-                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                                  cfg_.goalie_max_rotation_speed);
+                float fieldBearing = field.position[2];
+                int signBearing    = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed =
+                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                             cfg_.goalie_max_rotation_speed);
 
-                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed = signTranslation
-                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                     cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed =
+                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));
@@ -533,12 +516,6 @@ namespace behaviour {
             }
             emit(std::move(motionCommand));
         }
-
-        void SoccerStrategy::startStationaryGoalSearch() {
-            stationaryGoalSearchStartTime = NUClear::clock::now();
-            stationaryGoalSearch          = true;
-        }
-
 
     }  // namespace strategy
 }  // namespace behaviour
