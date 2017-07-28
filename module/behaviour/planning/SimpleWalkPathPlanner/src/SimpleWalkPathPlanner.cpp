@@ -251,7 +251,7 @@ namespace behaviour {
                             }
                             else {
                                 speedFactor   = slow_approach_factor;
-                                headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
+                                headingChange = std::atan2(forward[1], forward[0]);
                                 sideStep      = 1;
                             }
                         }
