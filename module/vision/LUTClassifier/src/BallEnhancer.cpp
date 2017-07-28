@@ -246,7 +246,6 @@ namespace vision {
 
         // Loop through all of our possible ball segments
         std::vector<Eigen::Vector2i> points;
-        // NUClear::log("hSegments size = ", std::distance(hSegments.first,hSegments.second));
         for (auto it = classifiedImage.horizontalSegments.begin(); it != classifiedImage.horizontalSegments.end();
              ++it) {
 

@@ -253,7 +253,6 @@ namespace vision {
                           }
                       }
 
-                      log("Groups: ", screenPointGroups.size());
                       // Create result message
                       auto balls = std::make_unique<std::vector<Ball>>();
                       int i      = 1;
@@ -264,8 +263,6 @@ namespace vision {
                           }
                           // This holds our points that may be a part of the ball
                           std::vector<arma::vec3> ballPoints;
-
-                          log("group: ", i++, " size = ", group.size());
 
                           // Loop through points in group and transform to camera space
                           for (const auto& point : group) {
@@ -286,8 +283,9 @@ namespace vision {
                           // TODO: reserve more space balls->reserve(ransacResults.size());
 
 
-                          if (print_throwout_logs)
+                          if (print_throwout_logs) {
                               log("Ransac : ", ransacResults.size(), "results (MAX = ", MAXIMUM_FITTED_MODELS, ")");
+                          }
 
                           arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
 
@@ -333,7 +331,9 @@ namespace vision {
                               // DOES HAVE INTERNAL GREEN
                               float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut, cam);
                               if (greenRatio > green_ratio_threshold) {
-                                  if (print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
+                                  if (print_throwout_logs) {
+                                      log("Ball discarded: greenRatio > green_ratio_threshold");
+                                  }
                                   continue;
                               }
 
@@ -357,14 +357,15 @@ namespace vision {
                               }
                               // Check if our largest one is too far away
                               if (arma::max(sDist) > maximum_relative_seed_point_distance) {
-                                  if (print_throwout_logs)
+                                  if (print_throwout_logs) {
                                       log("Ball discarded: arma::max(sDist) / result.model.radius > "
                                           "maximum_relative_seed_point_distance");
-                                  if (print_throwout_logs)
+
                                       log("arma::max(sDist) = ",
                                           arma::max(sDist),
                                           " > ",
                                           maximum_relative_seed_point_distance);
+                                  }
                                   continue;
                               }
 
@@ -372,7 +373,9 @@ namespace vision {
                               double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
 
                               if (widthDistance < cameraHeight * 0.5) {
-                                  if (print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                                  if (print_throwout_logs) {
+                                      log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                                  }
                                   continue;
                               }
 
@@ -386,11 +389,12 @@ namespace vision {
                               if (std::abs((widthDistance - ballCentreGroundProjDistance)
                                            / std::max(ballCentreGroundProjDistance, widthDistance))
                                   > MAXIMUM_DISAGREEMENT_RATIO) {
-                                  if (print_throwout_logs)
+                                  if (print_throwout_logs) {
                                       log("Ball discarded: Width and proj distance disagree too much: width =",
                                           widthDistance,
                                           "proj =",
                                           ballCentreGroundProjDistance);
+                                  }
                                   continue;
                               }
 
