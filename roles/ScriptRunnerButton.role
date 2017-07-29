@@ -9,7 +9,7 @@ NUCLEAR_ROLE(
     behaviour::Controller
     platform::darwin::SensorFilter
     motion::ScriptEngine
-    behaviour::tools::Jump
+    behaviour::tools::ScriptRunnerButton
     support::configuration::NetworkConfiguration
     support::NUbugger
 )

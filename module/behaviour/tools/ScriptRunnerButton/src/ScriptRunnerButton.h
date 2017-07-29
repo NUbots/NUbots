@@ -17,11 +17,23 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-// Uncomment this line when other test files are added
-//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-//#include <catch.hpp>
+#ifndef MODULE_BEHAVIOUR_TOOLS_SCRIPTRUNNERBUTTON_H
+#define MODULE_BEHAVIOUR_TOOLS_SCRIPTRUNNERBUTTON_H
 
-// Remove this line when test files are added
-int main() {
-    return 0;
+#include <nuclear>
+
+namespace module {
+namespace behaviour {
+    namespace tools {
+
+        class ScriptRunnerButton : public NUClear::Reactor {
+
+        public:
+            /// @brief Called by the powerplant to build and setup the ScriptRunnerButton reactor.
+            explicit ScriptRunnerButton(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }
 }
+}
+
+#endif  // MODULE_BEHAVIOUR_TOOLS_SCRIPTRUNNERBUTTON_H

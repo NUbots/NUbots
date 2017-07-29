@@ -1,23 +1,4 @@
-/*
- * This file is part of NUbots Codebase.
- *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2015 NUbots <nubots@nubots.net>
- */
-
-#include "Jump.h"
+#include "ScriptRunnerButton.h"
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
@@ -44,7 +25,12 @@ namespace behaviour {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
-        Jump::Jump(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        ScriptRunnerButton::ScriptRunnerButton(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)) {
+
+            on<Configuration>("ScriptRunnerButton.yaml").then([this](const Configuration& config) {
+                // Use configuration here from file ScriptRunnerButton.yaml
+            });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
                 RegisterAction{2,
@@ -61,6 +47,7 @@ namespace behaviour {
                 emit(std::make_unique<ExecuteScriptByName>(2, std::vector<std::string>({"Jump.yaml"})));
             });
         }
+
     }  // namespace tools
 }  // namespace behaviour
 }  // namespace module
