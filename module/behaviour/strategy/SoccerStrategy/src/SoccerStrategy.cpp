@@ -169,15 +169,17 @@ namespace behaviour {
                 });
 
 
-            on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+            on<Trigger<ButtonMiddleDown>, With<FieldDescription>, Single>().then(
+                [this](const FieldDescription& fieldDescription) {
 
-                if (!cfg_.forcePlaying) {
-                    NUClear::log("Force playing started.");
-                    emit(std::make_unique<Nod>(true));
-                    cfg_.forcePlaying = true;
-                }
+                    if (!cfg_.forcePlaying) {
+                        NUClear::log("Force playing started.");
+                        emit(std::make_unique<Nod>(true));
+                        cfg_.forcePlaying = true;
+                        penaltyShootoutLocalisationReset(fieldDescription);
+                    }
 
-            });
+                });
 
             // Main Loop
             // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
