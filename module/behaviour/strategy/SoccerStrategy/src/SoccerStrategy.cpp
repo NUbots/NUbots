@@ -178,7 +178,6 @@ namespace behaviour {
                     }
                     emit(std::make_unique<Nod>(true));
                     penaltyShootoutLocalisationReset(fieldDescription);
-
                 });
 
             // Main Loop
