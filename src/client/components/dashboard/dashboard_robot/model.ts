@@ -7,9 +7,9 @@ import { Matrix3 } from '../../../math/matrix3'
 import { Transform } from '../../../math/transform'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
+import { BrowserSystemClock } from '../../../time/browser_clock'
 import { RobotModel } from '../../robot/model'
 import State = message.behaviour.Behaviour.State
-
 import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason
 import Phase = message.input.GameState.Data.Phase
@@ -100,7 +100,7 @@ export class DashboardRobotModel {
       robotPositionCovariance: Matrix3.of(),
       roleName: '',
       textColor: '#fff',
-      time: Date.now() / 1000,
+      time: BrowserSystemClock.now(),
       voltage: -1,
       walkCommand: Vector3.of(),
       walkPathPlan: [],

@@ -1,4 +1,5 @@
 import { Clock } from './clock'
+import { CancelTimer } from './clock'
 
 type Task = {
   id: number
@@ -30,19 +31,19 @@ export class FakeClock implements Clock {
     return this.time
   }
 
-  public setTimeout(fn: () => void, seconds: number): () => void {
+  public setTimeout(fn: () => void, seconds: number): CancelTimer {
     const id = this.nextId++
     this.addTask({ id, nextTime: this.now() + seconds, fn })
     return () => this.removeTask(id)
   }
 
-  public setInterval(fn: () => void, seconds: number): () => void {
+  public setInterval(fn: () => void, seconds: number): CancelTimer {
     const id = this.nextId++
     this.addTask({ id, nextTime: this.now() + seconds, period: seconds, fn })
     return () => this.removeTask(id)
   }
 
-  public setImmediate(fn: () => void): () => void {
+  public setImmediate(fn: () => void): CancelTimer {
     const id = this.nextId++
     this.addTask({ id, nextTime: this.now() + Number.MIN_VALUE, fn })
     return () => this.removeTask(id)

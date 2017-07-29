@@ -1,4 +1,4 @@
-import { FakeClock } from '../fake_clock'
+import { FakeClock } from '../../../shared/time/fake_clock'
 
 describe('FakeClock', () => {
   let clock: FakeClock

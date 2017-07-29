@@ -1,7 +1,7 @@
 import { FakeNUClearNetClient } from '../../nuclearnet/fake_nuclearnet_client'
 import { FakeNUClearNetServer } from '../../nuclearnet/fake_nuclearnet_server'
 import { hashType } from '../../nuclearnet/fake_nuclearnet_server'
-import { FakeClock } from '../../time/fake_clock'
+import { FakeClock } from '../../../shared/time/fake_clock'
 import { NbsFrame } from '../nbs_frame_codecs'
 import { NbsNUClearPlayback } from '../nbs_nuclear_playback'
 

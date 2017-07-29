@@ -7,7 +7,7 @@ import { FakeNUClearNetClient } from './fake_nuclearnet_client'
 import { WebSocketServer } from './web_socket_server'
 import { WebSocket } from './web_socket_server'
 import { NodeSystemClock } from '../time/node_clock'
-import { Clock } from '../time/clock'
+import { Clock } from '../../shared/time/clock'
 
 type Opts = {
   fakeNetworking: boolean

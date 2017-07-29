@@ -1,6 +1,6 @@
 import { Simulator } from './simulator'
 import { NUClearNetClient } from '../shared/nuclearnet/nuclearnet_client'
-import { Clock } from '../server/time/clock'
+import { Clock } from '../shared/time/clock'
 import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_client'
 import { DirectNUClearNetClient } from '../server/nuclearnet/direct_nuclearnet_client'
 import { NodeSystemClock } from '../server/time/node_clock'
