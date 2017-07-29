@@ -318,29 +318,29 @@ namespace platform {
                     // Parse our data
                     *sensors = parseSensors(data);
 
-                    // Set our voltage and battery
-                    sensors->voltage = input.voltage;
-
                     // Work out a battery charged percentage
                     sensors->battery = std::max(0.0f,
-                                                (input.voltage - config.battery.flatVoltage)
+                                                (sensors->voltage - config.battery.flatVoltage)
                                                     / (config.battery.chargedVoltage - config.battery.flatVoltage));
 
-                    // TODO use cm730 leds to display battery voltage
-                    if (sensors->battery > 75) {
-                        // sensors.ledPanel = {false, 0xFF, false};
+                    // cm730 leds to display battery voltage
+                    uint32_t ledl = 0;
+                    uint32_t ledr = 0;
+
+                    if (sensors->battery > 0.6) {
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                     }
-                    else if (sensors->battery > 50) {
-                        // sensors.ledPanel = {}
-                    }
-                    else if (sensors->battery > 25) {
-                        // sensors.ledPanel = {}
-                    }
-                    else if (sensors->battery > 10) {
-                        // sensors.ledPanel = {}
+                    else if (sensors->battery > 0.3) {
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
                     }
                     else {
+                        ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
                     }
+                    emit(std::make_unique<DarwinSensors::EyeLED>(ledl));
+                    emit(std::make_unique<DarwinSensors::HeadLED>(ledr));
 
                     // Send our nicely computed sensor data out to the world
                     emit(std::move(sensors));
