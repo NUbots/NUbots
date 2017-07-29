@@ -360,8 +360,8 @@ namespace behaviour {
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
             ResetRobotHypotheses::Self selfSideBaseLine;
-            selfSideBaseLine.position << 2.0, 0.0;
-            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
+            selfSideBaseLine.position << 1, 0.0;
+            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
             selfSideBaseLine.heading      = 0;
             selfSideBaseLine.heading_var  = 0.005;
             reset->hypotheses.push_back(selfSideBaseLine);
