@@ -164,7 +164,6 @@ namespace vision {
         , green_ratio_threshold(0.0)
         , green_radial_samples(0.0)
         , green_angular_samples(0.0)
-        , kmeansClusterer()
         , lastFrame()
         , print_throwout_logs(false) {
 
@@ -189,8 +188,6 @@ namespace vision {
             green_angular_samples = config["green_angular_samples"].as<Expression>();
 
             ball_angular_cov = config["ball_angular_cov"].as<arma::vec>();
-
-            kmeansClusterer.configure(config["clustering"]);
 
             print_throwout_logs = config["print_throwout_logs"].as<bool>();
 

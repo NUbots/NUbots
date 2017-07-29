@@ -27,7 +27,6 @@
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"
 
-#include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/vision/LookUpTable.h"
@@ -61,8 +60,6 @@ namespace vision {
         arma::vec3 ball_angular_cov;
 
         int max_group_distance = 1;
-
-        utility::learning::KMeans kmeansClusterer;
 
         struct Frame {
             Frame() : time(), widthBall(arma::fill::zeros), projBall(arma::fill::zeros) {}
