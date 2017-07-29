@@ -1,9 +1,9 @@
 export interface Clock {
   now(): number
   performanceNow(): number
-  setTimeout(cb: (...args: any[]) => void, seconds: number): CancelTimer
-  setInterval(cb: (...args: any[]) => void, seconds: number): CancelTimer
-  setImmediate(cb: (...args: any[]) => void): CancelTimer
+  setTimeout(cb: () => void, seconds: number): CancelTimer
+  setInterval(cb: () => void, seconds: number): CancelTimer
+  nextTick(cb: () => void): void
 }
 
 export type CancelTimer = () => void

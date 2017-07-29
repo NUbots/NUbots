@@ -5,22 +5,21 @@ const SecondsToMilliseconds = 1e3
 const MillisecondsToSeconds = 1e-3
 const NanosecondsToSeconds = 1e-9
 
-function setTimeout(cb: (...args: any[]) => void, seconds: number): CancelTimer {
+function setTimeout(cb: () => void, seconds: number): CancelTimer {
   const handle = global.setTimeout(cb, seconds * SecondsToMilliseconds)
   return global.clearTimeout.bind(undefined, handle)
 }
 
-function setInterval(cb: (...args: any[]) => void, seconds: number): CancelTimer {
+function setInterval(cb: () => void, seconds: number): CancelTimer {
   const handle = global.setInterval(cb, seconds * SecondsToMilliseconds)
   return global.clearInterval.bind(undefined, handle)
 }
 
-function setImmediate(cb: (...args: any[]) => void): CancelTimer {
-  const handle = global.setImmediate(cb)
-  return global.clearImmediate.bind(undefined, handle)
+function nextTick(cb: () => void): void {
+  process.nextTick(cb)
 }
 
-function performanceNow() {
+function performanceNow(): number {
   const t = process.hrtime()
   return t[0] + t[1] * NanosecondsToSeconds
 }
@@ -30,5 +29,5 @@ export const NodeSystemClock: Clock = {
   performanceNow,
   setTimeout,
   setInterval,
-  setImmediate,
+  nextTick,
 }

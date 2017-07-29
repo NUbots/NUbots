@@ -88,16 +88,16 @@ describe('FakeClock', () => {
     })
   })
 
-  describe('#setImmediate', () => {
+  describe('#nextTick', () => {
     it('does not invoke callback synchronously', () => {
       const spy = jest.fn()
-      clock.setImmediate(spy)
+      clock.nextTick(spy)
       expect(spy).not.toHaveBeenCalled()
     })
 
     it('invokes callback after any tick', () => {
       const spy = jest.fn()
-      clock.setImmediate(spy)
+      clock.nextTick(spy)
 
       clock.tick(0.1)
       expect(spy).toHaveBeenCalled()
@@ -105,7 +105,7 @@ describe('FakeClock', () => {
 
     it('does not invoke callback when cancelled', () => {
       const spy = jest.fn()
-      const cancel = clock.setImmediate(spy)
+      const cancel = clock.nextTick(spy)
 
       cancel()
       clock.tick(100)

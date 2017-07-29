@@ -43,7 +43,7 @@ export class FakeClock implements Clock {
     return () => this.removeTask(id)
   }
 
-  public setImmediate(fn: () => void): CancelTimer {
+  public nextTick(fn: () => void): CancelTimer {
     const id = this.nextId++
     this.addTask({ id, nextTime: this.now() + Number.MIN_VALUE, fn })
     return () => this.removeTask(id)
