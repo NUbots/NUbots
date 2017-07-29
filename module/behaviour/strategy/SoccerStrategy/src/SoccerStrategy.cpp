@@ -174,9 +174,9 @@ namespace behaviour {
 
                     if (!cfg_.forcePlaying) {
                         NUClear::log("Force playing started.");
-                        emit(std::make_unique<Nod>(true));
                         cfg_.forcePlaying = true;
                     }
+                    emit(std::make_unique<Nod>(true));
                     penaltyShootoutLocalisationReset(fieldDescription);
 
                 });
