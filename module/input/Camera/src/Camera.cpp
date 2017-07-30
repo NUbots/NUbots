@@ -122,7 +122,7 @@ namespace input {
     }
 
     // http://www.roman10.net/2011/06/14/how-to-reset-usb-device-in-linuxusing-libusb/
-    bool Camera::resetUSBDevice(int bus, int device) {
+    bool Camera::resetUSBDevice(int, int) {
         //     libusb_device_handle* devh = NULL;
         //     libusb_device* dev         = NULL;
         //     libusb_device** devs       = NULL;
@@ -187,7 +187,7 @@ namespace input {
         //         return false;
         //     }
 
-        //     return true;
+        return true;
     }
 
     void Camera::initiateSpinnakerCamera(const Configuration& config) {
@@ -468,6 +468,69 @@ namespace input {
         ptrGain->SetValue(gain);
 
         log("Gain set to ", ptrGain->GetValue());
+    }
+
+    void Camera::resetParameters(Spinnaker::GenApi::INodeMap& nodeMap) {
+        //
+        // Turn automatic exposure back on
+        //
+        // *** NOTES ***
+        // Automatic exposure is turned on in order to return the camera to its
+        // default state.
+        //
+        Spinnaker::GenApi::CEnumerationPtr ptrExposureAuto = nodeMap.GetNode("ExposureAuto");
+        if (!IsAvailable(ptrExposureAuto) || !IsWritable(ptrExposureAuto)) {
+            log("Unable to enable automatic exposure (node retrieval). Non-fatal error...");
+            return;
+        }
+
+        Spinnaker::GenApi::CEnumEntryPtr ptrExposureAutoContinuous = ptrExposureAuto->GetEntryByName("Continuous");
+        if (!IsAvailable(ptrExposureAutoContinuous) || !IsReadable(ptrExposureAutoContinuous)) {
+            log("Unable to enable automatic exposure (enum entry retrieval). Non-fatal error...");
+            return;
+        }
+
+        ptrExposureAuto->SetIntValue(ptrExposureAutoContinuous->GetValue());
+
+        log("Automatic exposure enabled...");
+
+        //
+        // Turn automatic gain back on
+        //
+        // *** NOTES ***
+        // Automatic gain is turned on in order to return the camera to its
+        // default state.
+        //
+        Spinnaker::GenApi::CEnumerationPtr ptrGainAuto = nodeMap.GetNode("GainAuto");
+        if (IsAvailable(ptrGainAuto) && IsWritable(ptrGainAuto)) {
+            Spinnaker::GenApi::CEnumEntryPtr ptrGainAutoContinuous = ptrGainAuto->GetEntryByName("Continuous");
+            if (IsAvailable(ptrGainAutoContinuous) && IsReadable(ptrGainAutoContinuous)) {
+                ptrGainAuto->SetIntValue(static_cast<int64_t>(ptrGainAutoContinuous->GetValue()));
+                log("Turning automatic gain mode back on...");
+            }
+        }
+    }
+
+    void Camera::ShutdownSpinnakerCamera() {
+        for (auto& camera : SpinnakerCameras) {
+            camera.second->camera->EndAcquisition();
+            camera.second->camera->UnregisterEvent(*(camera.second));
+
+            while (camera.second->camera->GetNumImagesInUse() > 0) {
+                std::this_thread::sleep_for(std::chrono::microseconds(10));
+            }
+
+            camera.second->camera->DeInit();
+            resetParameters(camera.second->camera->GetNodeMap());
+        }
+
+        SpinnakerCameras.clear();
+        SpinnakerCamList.Clear();
+
+        if (SpinnakerSystem) {
+            // SpinnakerSystem->UnregisterLoggingEvent((Spinnaker::LoggingEvent&) (SpinnakerLoggingCallback));
+            SpinnakerSystem->ReleaseInstance();
+        }
     }
 
     // When we shutdown, we must tell our camera class to close (stop streaming)

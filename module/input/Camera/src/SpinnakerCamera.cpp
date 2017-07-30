@@ -271,21 +271,6 @@ namespace input {
         , cameraID(cameraID)
         , isLeft(isLeft) {}
 
-    SpinnakerImageEvent::~SpinnakerImageEvent() {
-        if (camera) {
-            if (camera->IsStreaming()) {
-                camera->EndAcquisition();
-            }
-
-            while (camera->GetNumImagesInUse() > 0) {
-                std::this_thread::sleep_for(std::chrono::microseconds(10));
-            }
-
-            camera->UnregisterEvent(*this);
-            camera->DeInit();
-        }
-    }
-
     void SpinnakerImageEvent::OnImageEvent(Spinnaker::ImagePtr image) {
         // We have a complete image, emit it.
         if (!image->IsIncomplete()) {
@@ -339,15 +324,5 @@ namespace input {
         }
     }
 
-
-    void Camera::ShutdownSpinnakerCamera() {
-        SpinnakerCameras.clear();
-        SpinnakerCamList.Clear();
-
-        if (SpinnakerSystem) {
-            SpinnakerSystem->UnregisterLoggingEvent((Spinnaker::LoggingEvent&) (SpinnakerLoggingCallback));
-            SpinnakerSystem->ReleaseInstance();
-        }
-    }
 }  // namespace input
 }  // namespace module

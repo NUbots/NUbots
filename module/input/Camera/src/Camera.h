@@ -42,6 +42,7 @@ namespace input {
     private:
         void setExposure(Spinnaker::GenApi::INodeMap& nodeMap, double exposure);
         void setGain(Spinnaker::GenApi::INodeMap& nodeMap, double gain);
+        void resetParameters(Spinnaker::GenApi::INodeMap& nodeMap);
         bool resetUSBDevice(int bus, int device);
 
         bool dumpImages;

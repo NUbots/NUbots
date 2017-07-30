@@ -27,8 +27,6 @@ namespace input {
                             int cameraID,
                             bool isLeft);
 
-        ~SpinnakerImageEvent();
-
         void OnImageEvent(Spinnaker::ImagePtr image);
 
         std::string name;

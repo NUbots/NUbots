@@ -111,7 +111,7 @@ namespace vision {
         // Partition our segments so that they are split between above and below the horizon
         auto split = std::partition(std::begin(points), std::end(points), [&](const GoalPOI& point) {
             // Is the midpoint above or below the horizon?
-            arma::vec3 camPoint = getCamFromImage(arma::ivec({point.midpoint[0], point.midpoint[1]}), cam);
+            arma::vec3 camPoint = getCamFromImage(arma::ivec({int(point.midpoint[0]), int(point.midpoint[1])}), cam);
             return arma::dot(horizon_normal, camPoint) > 0;
         });
 
