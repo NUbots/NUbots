@@ -65,14 +65,24 @@ namespace behaviour {
             , id(size_t(this) * size_t(this) - size_t(this)) {
 
             // Get the scripts to run from the command line
-            on<Trigger<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
-                NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
+            on<Configuration>,
+                With<Trigger<CommandLineArguments>>().then(
+                    [this](const Configuration& config, const CommandLineArguments& args) {
+                        Script_Delay = config["Script_Delay"].as<uint>();
 
-                for (size_t i = 1; i < args.size(); ++i) {
-                    NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
-                    scripts.push(args[i]);
-                }
-            });
+                        NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
+
+                        if (args.size() < 1) {
+
+                            for (size_t i = 1; i < args.size(); ++i) {
+                                NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
+                                scripts.push(args[i]);
+                            }
+                        }
+                        else {
+                            // TODO Execute scripts in config file
+                        }
+                    });
 
             sensorHandle = on<Trigger<DarwinSensors>, Single>().then([this] {
                 executeNextScript();
@@ -91,9 +101,15 @@ namespace behaviour {
                 [this](const std::set<LimbID>&) {
                     // We should always be the only running thing
                 },
-                [this](const std::set<ServoID>&) { emit(std::make_unique<ExecuteNextScript>()); }}));
+                [this](const std::set<ServoID>&) {
+                    on<Trigger<ButtonMiddleDown>>().then([this] {
+                        std::this_thread::sleep_for(std::chrono::seconds(Script_Delay));
+
+                        emit(std::make_unique<ExecuteNextScript>());
+                    });
+                }}));
         }
 
     }  // namespace tools
 }  // namespace behaviour
-}  // namespace module
+}  // namespace modulefwi

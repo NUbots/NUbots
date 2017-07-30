@@ -28,6 +28,18 @@ namespace behaviour {
 
         class ScriptRunnerButton : public NUClear::Reactor {
 
+        private:
+            ReactionHandle sensorHandle;
+
+            /// The scripts to be executed
+            std::queue<std::string> scripts;
+
+            /// Our ID for subsumption
+            const size_t id;
+
+            /// Execute the next script in the list
+            void executeNextScript();
+
         public:
             /// @brief Called by the powerplant to build and setup the ScriptRunnerButton reactor.
             explicit ScriptRunnerButton(std::unique_ptr<NUClear::Environment> environment);
