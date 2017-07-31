@@ -43,7 +43,11 @@ namespace behaviour {
             const size_t id;
 
             // Script delay
-            uint Script_Delay;
+            uint script_delay;
+
+            // Default scripts
+
+            // TODO
 
             /// Execute the next script in the list
             void executeNextScript();

@@ -74,19 +74,31 @@ namespace behaviour {
             // Get the scripts to run from the command line
             on<Configuration, With<CommandLineArguments>>("ScriptRunner.yaml")
                 .then([this](const Configuration& config, const CommandLineArguments& args) {
-                    Script_Delay = config["Script_Delay"].as<uint>();
+                    script_delay = config["script_delay"].as<uint>();
+                    // scripts = config["scripts"].as<std::vector<std::string>>();
 
-                    NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
+                    // for (const auto& script : config["scripts"]) {
+                    //     scripts.push(scripts)
+                    // }
 
-                    if (args.size() < 1) {
-
+                    if (args.size() > 1) {
+                        NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
                         for (size_t i = 1; i < args.size(); ++i) {
                             NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
                             scripts.push(args[i]);
                         }
                     }
+
+                    else if (scripts.size() > 0) {
+                        NUClear::log<NUClear::INFO>("Executing: ", scripts.size(), " scripts");
+                        for (size_t i = 1; i < scripts.size(); ++i) {
+                            NUClear::log<NUClear::INFO>("Queueing script ");  // TODO Add list for scripts being queued
+                            scripts.push(config["scripts"]);
+                        }
+                    }
+
                     else {
-                        // TODO Execute scripts in config file
+                        NUClear::log<NUClear::WARN>("No scripts loaded");
                     }
                 });
 
@@ -109,7 +121,7 @@ namespace behaviour {
                 },
                 [this](const std::set<ServoID>&) {
                     on<Trigger<ButtonMiddleDown>>().then([this] {
-                        std::this_thread::sleep_for(std::chrono::seconds(Script_Delay));
+                        std::this_thread::sleep_for(std::chrono::seconds(script_delay));
 
                         emit(std::make_unique<ExecuteNextScript>());
                     });
