@@ -1,1 +1,9 @@
 Script_Delay: 2
+
+# TODO Add list of scripts to execute/ check this
+
+Scripts:
+  - Stand.yaml
+  - Nod.yaml
+  - Bow.yaml
+  - Stand.yaml

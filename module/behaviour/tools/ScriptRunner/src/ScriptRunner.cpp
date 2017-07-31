@@ -19,22 +19,29 @@
 
 #include "ScriptRunner.h"
 
+#include "message/platform/darwin/DarwinSensors.h"
+
+#include "extension/Configuration.h"
 #include "extension/Script.h"
+
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
-#include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
 namespace behaviour {
     namespace tools {
 
+        using extension::Configuration;
+
         using extension::ExecuteScriptByName;
 
         using NUClear::message::CommandLineArguments;
         using message::platform::darwin::DarwinSensors;
+
+        using message::platform::darwin::ButtonMiddleDown;
 
         using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
@@ -65,24 +72,23 @@ namespace behaviour {
             , id(size_t(this) * size_t(this) - size_t(this)) {
 
             // Get the scripts to run from the command line
-            on<Configuration>,
-                With<Trigger<CommandLineArguments>>().then(
-                    [this](const Configuration& config, const CommandLineArguments& args) {
-                        Script_Delay = config["Script_Delay"].as<uint>();
+            on<Configuration, With<CommandLineArguments>>("ScriptRunner.yaml")
+                .then([this](const Configuration& config, const CommandLineArguments& args) {
+                    Script_Delay = config["Script_Delay"].as<uint>();
 
-                        NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
+                    NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
 
-                        if (args.size() < 1) {
+                    if (args.size() < 1) {
 
-                            for (size_t i = 1; i < args.size(); ++i) {
-                                NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
-                                scripts.push(args[i]);
-                            }
+                        for (size_t i = 1; i < args.size(); ++i) {
+                            NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
+                            scripts.push(args[i]);
                         }
-                        else {
-                            // TODO Execute scripts in config file
-                        }
-                    });
+                    }
+                    else {
+                        // TODO Execute scripts in config file
+                    }
+                });
 
             sensorHandle = on<Trigger<DarwinSensors>, Single>().then([this] {
                 executeNextScript();

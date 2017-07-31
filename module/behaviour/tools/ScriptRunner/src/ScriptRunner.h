@@ -42,6 +42,9 @@ namespace behaviour {
             /// Our ID for subsumption
             const size_t id;
 
+            // Script delay
+            uint Script_Delay;
+
             /// Execute the next script in the list
             void executeNextScript();
 
