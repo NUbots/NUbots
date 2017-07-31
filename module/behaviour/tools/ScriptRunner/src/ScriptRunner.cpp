@@ -81,6 +81,7 @@ namespace behaviour {
                     //     scripts.push(scripts)
                     // }
 
+                    // Check for scripts entered in the command line
                     if (args.size() > 1) {
                         NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
                         for (size_t i = 1; i < args.size(); ++i) {
@@ -89,6 +90,7 @@ namespace behaviour {
                         }
                     }
 
+                    // If scripts are in the config file
                     else if (scripts.size() > 0) {
                         NUClear::log<NUClear::INFO>("Executing: ", scripts.size(), " scripts");
                         for (size_t i = 1; i < scripts.size(); ++i) {
@@ -97,6 +99,7 @@ namespace behaviour {
                         }
                     }
 
+                    // No default scripts or commandline scripts
                     else {
                         NUClear::log<NUClear::WARN>("No scripts loaded");
                     }
