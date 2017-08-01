@@ -21,7 +21,7 @@
 #define MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
 
 #include <nuclear>
-#include <queue>
+#include <vector>
 
 namespace module {
 namespace behaviour {
@@ -37,7 +37,7 @@ namespace behaviour {
             ReactionHandle sensorHandle;
 
             /// The scripts to be executed
-            std::queue<std::string> scripts;
+            std::vector<std::string> scripts;
 
             /// Our ID for subsumption
             const size_t id;

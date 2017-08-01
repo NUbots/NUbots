@@ -53,15 +53,11 @@ namespace behaviour {
 
             // If we have a script to execute
             if (!scripts.empty()) {
-
                 // Get it and emit it
-                auto script = scripts.front();
-                emit(std::make_unique<ExecuteScriptByName>(id, script));
-                scripts.pop();
+                emit(std::make_unique<ExecuteScriptByName>(id, scripts));
             }
             // Otherwise we are done, shutdown
             else {
-                powerplant.shutdown();
             }
         }
 
@@ -75,28 +71,18 @@ namespace behaviour {
             on<Configuration, With<CommandLineArguments>>("ScriptRunner.yaml")
                 .then([this](const Configuration& config, const CommandLineArguments& args) {
                     script_delay = config["script_delay"].as<uint>();
-                    // scripts = config["scripts"].as<std::vector<std::string>>();
-
-                    // for (const auto& script : config["scripts"]) {
-                    //     scripts.push(scripts)
-                    // }
 
                     // Check for scripts entered in the command line
                     if (args.size() > 1) {
                         NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
-                        for (size_t i = 1; i < args.size(); ++i) {
-                            NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
-                            scripts.push(args[i]);
-                        }
+                        std::copy(std::next(args.begin(), 1), args.end(), scripts.begin());
+                        script_delay = 0;
                     }
 
                     // If scripts are in the config file
                     else if (scripts.size() > 0) {
                         NUClear::log<NUClear::INFO>("Executing: ", scripts.size(), " scripts");
-                        for (size_t i = 1; i < scripts.size(); ++i) {
-                            NUClear::log<NUClear::INFO>("Queueing script ");  // TODO Add list for scripts being queued
-                            scripts.push(config["scripts"]);
-                        }
+                        scripts = config["scripts"].as<std::vector<std::string>>();
                     }
 
                     // No default scripts or commandline scripts
@@ -125,7 +111,6 @@ namespace behaviour {
                 [this](const std::set<ServoID>&) {
                     on<Trigger<ButtonMiddleDown>>().then([this] {
                         std::this_thread::sleep_for(std::chrono::seconds(script_delay));
-
                         emit(std::make_unique<ExecuteNextScript>());
                     });
                 }}));
@@ -133,4 +118,4 @@ namespace behaviour {
 
     }  // namespace tools
 }  // namespace behaviour
-}  // namespace modulefwi
+}  // namespace

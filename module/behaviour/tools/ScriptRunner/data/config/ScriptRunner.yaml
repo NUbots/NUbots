@@ -1,5 +1,3 @@
 script_delay: 2
 
-# TODO Add list of scripts to execute/ check this
-
 scripts: ["Stand.yaml", "Nod.yaml", "Bow.yaml", "Stand.yaml"]
