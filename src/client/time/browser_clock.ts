@@ -26,6 +26,7 @@ function performanceNow(): number {
 
 export const BrowserSystemClock: Clock = {
   now: () => Date.now() * MillisecondsToSeconds,
+  date: () => new Date(),
   performanceNow,
   setTimeout,
   setInterval,

@@ -1,6 +1,8 @@
 import { Clock } from './clock'
 import { CancelTimer } from './clock'
 
+const SecondsToMilliseconds = 1e3
+
 type Task = {
   id: number
   nextTime: number
@@ -13,18 +15,22 @@ export class FakeClock implements Clock {
   private time: number
   private tasks: Task[]
 
-  constructor() {
+  constructor(time: number) {
     this.nextId = 0
-    this.time = 0
+    this.time = time
     this.tasks = []
   }
 
-  public static of() {
-    return new FakeClock()
+  public static of(time: number = 0) {
+    return new FakeClock(time)
   }
 
   public now(): number {
     return this.time
+  }
+
+  public date(): Date {
+    return new Date(this.now() * SecondsToMilliseconds)
   }
 
   public performanceNow(): number {
