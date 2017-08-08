@@ -566,6 +566,7 @@ namespace vision {
                         std::atan2(right[2], std::sqrt(right[0] * right[0] + right[1] * right[1])));
                     Eigen::Matrix2d right_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
 
+
                     it->measurement.push_back(Goal::Measurement(
                         Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
@@ -593,6 +594,7 @@ namespace vision {
                         arma::vec3 covariance_amplifier({distance, 1, 1});
                         Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
                             VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
+
 
                         it->measurement.push_back(
                             Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));

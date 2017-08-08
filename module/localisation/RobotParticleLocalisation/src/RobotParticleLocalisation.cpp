@@ -3,6 +3,8 @@
 #include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
+#include "message/localisation/ResetRobotHypotheses.h"
+#include "utility/localisation/transform.h"
 
 #include "utility/math/geometry/Circle.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -18,7 +20,9 @@ namespace localisation {
     using message::input::Sensors;
     using message::localisation::Field;
 
+    using utility::math::matrix::Rotation2D;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
     using utility::nubugger::drawCircle;
     using utility::math::geometry::Circle;
@@ -26,6 +30,8 @@ namespace localisation {
 
     using message::support::FieldDescription;
     using message::vision::Goal;
+    using message::localisation::ResetRobotHypotheses;
+    using utility::localisation::transform3DToFieldState;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -38,29 +44,37 @@ namespace localisation {
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
             filter.model.n_rogues             = config["n_rogues"].as<int>();
             filter.model.resetRange           = config["reset_range"].as<arma::vec>();
-            int n_particles                   = config["n_particles"].as<int>();
+            n_particles                       = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();
 
             arma::vec3 start_state    = config["start_state"].as<arma::vec>();
             arma::vec3 start_variance = config["start_variance"].as<arma::vec>();
 
-            std::vector<arma::vec3> possible_states;
-            std::vector<arma::mat33> possible_var;
+            auto reset = std::make_unique<ResetRobotHypotheses>();
+            ResetRobotHypotheses::Self leftSide;
+            // Start on goal line
+            leftSide.position     = Eigen::Vector2d(start_state[0], start_state[1]);
+            leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            leftSide.heading      = start_state[2];
+            leftSide.heading_var  = 0.005;
 
-            possible_states.push_back(start_state);
-            // Reflected position
-            possible_states.push_back(arma::vec3{start_state[0], -start_state[1], -start_state[2]});
+            reset->hypotheses.push_back(leftSide);
+            ResetRobotHypotheses::Self rightSide;
+            // Start on goal line
+            rightSide.position     = Eigen::Vector2d(start_state[0], -start_state[1]);
+            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            rightSide.heading      = -start_state[2];
+            rightSide.heading_var  = 0.005;
 
-            possible_var.push_back(arma::diagmat(start_variance));
-            possible_var.push_back(arma::diagmat(start_variance));
-
-            filter.resetAmbiguous(possible_states, possible_var, n_particles);
+            reset->hypotheses.push_back(rightSide);
+            emit(std::move(reset));
 
         });
 
         on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
             "Particle Debug", [this]() {
                 arma::mat particles = filter.getParticles();
+
                 for (int i = 0; i < std::min(draw_particles, int(particles.n_cols)); i++) {
                     emit(drawCircle("particle" + std::to_string(i),
                                     Circle(0.01, particles.submat(0, i, 1, i)),
@@ -122,6 +136,32 @@ namespace localisation {
                         }
                     }
                 }
+            });
+
+        on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
+            "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
+
+                Transform3D Hfw;
+                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                std::vector<arma::vec3> states;
+                std::vector<arma::mat33> cov;
+
+                for (auto& s : locReset.hypotheses) {
+                    Transform3D Hft;
+                    arma::vec3 rTFf   = {s.position[0], s.position[1], 0};
+                    Hft.translation() = rTFf;
+                    Hft.rotateZ(s.heading);
+                    Hfw = Hft * Htw;
+                    states.push_back(transform3DToFieldState(Hfw));
+
+                    Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0})).rotation();
+                    arma::mat22 pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
+                    arma::mat33 state_cov = arma::eye(3, 3);
+                    state_cov.submat(0, 0, 1, 1) = pos_cov;
+                    state_cov(2, 2) = s.heading_var;
+                    cov.push_back(state_cov);
+                }
+                filter.resetAmbiguous(states, cov, n_particles);
             });
     }
 
