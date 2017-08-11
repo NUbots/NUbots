@@ -30,8 +30,8 @@ export class DashboardRobotModel {
   // The timestamp of the last message from the robot (in seconds since an arbitrary time)
   @observable public time: number
 
-  // The id number of the robot
-  @observable public id: number
+  // The player id of the robot, typically 1 through N
+  @observable public playerId: number
 
   // The name of the role the robot is executing
   @observable public roleName: string
@@ -87,7 +87,7 @@ export class DashboardRobotModel {
       camera: Transform.of(),
       gameMode: Mode.UNKNOWN_MODE,
       gamePhase: Phase.UNKNOWN_PHASE,
-      id: -1,
+      playerId: -1,
       kickTarget: Vector2.of(),
       kickTargetColor: '#00796B',
       lastCameraImage: 0,
@@ -113,6 +113,11 @@ export class DashboardRobotModel {
   }
 
   @computed
+  public get id(): string {
+    return this.robot.id
+  }
+
+  @computed
   public get name(): string {
     return this.robot.name
   }
@@ -132,7 +137,6 @@ interface DashboardRobotModelOpts {
   robotColor: string
   textColor: string
   time: number
-  id: number
   roleName: string
   battery: number
   voltage: number
@@ -145,6 +149,7 @@ interface DashboardRobotModelOpts {
   gameMode: Mode
   gamePhase: Phase
   penaltyReason: PenaltyReason
+  playerId: number
   lastCameraImage: number
   lastSeenBall: number
   lastSeenGoal: number

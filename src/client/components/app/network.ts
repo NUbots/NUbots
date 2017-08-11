@@ -5,8 +5,11 @@ import { RobotModel } from '../robot/model'
 import { AppModel } from './model'
 
 export class AppNetwork {
+  private nextRobotId: number
   public constructor(private nusightNetwork: NUsightNetwork,
                      private model: AppModel) {
+    this.nextRobotId = 0
+
     nusightNetwork.onNUClearJoin(this.onJoin)
     nusightNetwork.onNUClearLeave(this.onLeave)
   }
@@ -28,7 +31,9 @@ export class AppNetwork {
       // Keep this in sync, since the port will likely change per connection.
       robot.port = peer.port
     } else {
+      const robotId = String(this.nextRobotId++)
       this.model.robots.push(RobotModel.of({
+        id: robotId,
         name: peer.name,
         address: peer.address,
         port: peer.port,

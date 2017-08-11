@@ -35,7 +35,7 @@ export class DashboardNetwork {
     robot.time = toSeconds(overview.timestamp)
 
     // The id number of the robot
-    robot.id = overview.robotId
+    robot.playerId = overview.robotId
 
     // Name of the executing binary
     robot.roleName = overview.roleName

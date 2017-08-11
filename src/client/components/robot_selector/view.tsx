@@ -42,7 +42,7 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
           }
           {robots.map(robot => {
             return (
-              <label key={robot.name} className={style.robot}>
+              <label key={robot.id} className={style.robot}>
                 <span className={style.robotLabel}>{robot.name}</span>
                 <Switch on={robot.enabled} onChange={onChange(robot)} />
               </label>
