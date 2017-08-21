@@ -38,6 +38,9 @@ class build_tools {
   package { 'automake': ensure => latest, }
   package { 'autoconf': ensure => latest, }
   package { 'libtool': ensure => latest, }
+  package { 'intltool': ensure => latest, }
+  package { 'gtk-doc-tools': ensure => latest, }
+  package { 'texinfo': ensure => latest, }
   package { 'pkg-config': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'rsync': ensure => latest, }

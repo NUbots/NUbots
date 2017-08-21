@@ -121,7 +121,7 @@ define installer (
     }
 
     if has_key($params['environment'], 'PKG_CONFIG_PATH') {
-      $pkgconfig = "PKG_CONFIG_PATH=${params['environment']['PKG_CONFIG_PATH']}"
+      $pkgconfig = "PKG_CONFIG_PATH=${params['environment']['PKG_CONFIG_PATH']}:${prefix}/${arch}/lib/pkgconfig"
       $env6 = delete($env5, 'PKG_CONFIG_PATH')
     }
 
@@ -170,11 +170,10 @@ define installer (
       $env10 = $env9
     }
 
-
     $environment = [$cflags, $cxxflags, $common_opt, $fcommon_opt,
                     $ldflags, $ccas, $ccasflags, $pkgconfig, $cmake_prefix,
                     $ltsyslibpath, $ldlibrarypath,
-                    $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env9, "=")
+                    $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env10, "=")
 
     # Reduce the args array to a space separated list of arguments.
     if $args {
