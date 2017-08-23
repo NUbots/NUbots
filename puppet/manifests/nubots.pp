@@ -31,15 +31,15 @@ node nubotsvmbuild {
   $archs = {
     'native'    => {'flags'       => ['', ],
                     'params'      => ['-m64', ],
-                    'environment' => {'TARGET' => 'GENERIC', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', },
+                    'environment' => {'TARGET' => 'GENERIC', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', 'CCAS' => 'gcc', 'CCASFLAGS' => '-m64', },
                    },
     'fitpc2i'   => {'flags'       => ['-march=bonnell', '-mtune=bonnell', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
                     'params'      => ['-m32', '--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],
-                    'environment' => {'TARGET' => 'YONAH', 'USE_THREAD' => '1', 'BINARY' => '32', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m32', 'PKG_CONFIG_PATH' => '/usr/lib/i386-linux-gnu/pkgconfig', },
+                    'environment' => {'TARGET' => 'YONAH', 'USE_THREAD' => '1', 'BINARY' => '32', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m32', 'PKG_CONFIG_PATH' => '/usr/lib/i386-linux-gnu/pkgconfig', 'CCAS' => 'gcc', 'CCASFLAGS' => '-m32', },
                    },
     'nuc7i7bnh' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2', '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes', '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4', '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2', '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase', '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt', '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf', '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq', '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi', '-mno-clwb', '-mno-mwaitx', ],
                     'params'      => ['-m64', '--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
-                    'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', },
+                    'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', 'CCAS' => 'gcc', 'CCASFLAGS' => '-m64', },
                    },
   }
 
@@ -80,7 +80,7 @@ node nubotsvmbuild {
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
                                           'nuc7i7bnh' => [ '--with-zlib=ZLIB_PATH', '--without-python', ], },
                        'method'      => 'autotools',},
-    'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/release/1.0.tar.gz',
+    'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/master.tar.gz',
                        'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', ],
                                           'fitpc2i' => [ '-DBUILD_TESTS=OFF', ],
                                           'nuc7i7bnh' => [ '-DBUILD_TESTS=OFF', ], },
@@ -146,22 +146,27 @@ node nubotsvmbuild {
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
                                           'nuc7i7bnh' => [ '', ], },
                        'method'      => 'autotools', },
-    'libffi'       => {'url'         => 'https://github.com/libffi/libffi/archive/v3.2.1.tar.gz',
+    'ffi'          => {'url'         => 'https://github.com/libffi/libffi/archive/v3.2.1.tar.gz',
                        'args'        => { 'native'   => [ '', ],
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '', ],
                                           'nuc7i7bnh' => [ '', ], },
+                       'postbuild'   => 'if [ -e PREFIX/lib32/libffi.a ]; then cp PREFIX/lib32/libffi* PREFIX/lib/; fi',
                        'method'      => 'autotools', },
     'glib'         => {'url'         => 'ftp://ftp.gnome.org/pub/gnome/sources/glib/2.52/glib-2.52.3.tar.xz',
-                       'args'        => { 'native'   => [ '--with-threads', '--enable-regex', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-threads', '--enable-regex', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
-                                          'nuc7i7bnh' => [ '--with-threads', '--enable-regex', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ], },
-                       'require'     => [ Installer['libffi'], ],
+                       'args'        => { 'native'   => [ '--cache-file=PREFIX/src/glib.config', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
+                                          'fitpc2i' => [ '--cache-file=PREFIX/src/glib.config', '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
+                                          'nuc7i7bnh' => [ '--cache-file=PREFIX/src/glib.config', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ], },
+                       'prebuild'    => 'chmod a-w PREFIX/src/glib.config',
+                       'postbuild'   => 'cp glib/glibconfig.h PREFIX/include/glibconfig.h'
+                       'require'     => [ Installer['ffi'], ],
+                       'creates'     => 'lib/libglib-2.0.so',
                        'method'      => 'autotools', },
     'aravis'       => {'url'         => 'https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_9.tar.gz',
                        'args'        => { 'native'   => [ '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', ],
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', ],
                                           'nuc7i7bnh' => [ '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', ], },
                        'require'     => [ Installer['xml2'], Installer['zlib'], Installer['glib'], ],
+                       'creates'     => 'lib/libaravis-0.6.so',
                        'method'      => 'autotools', },
   }
 
@@ -348,8 +353,19 @@ node nubotsvmbuild {
   Installer <| |> ~> class { 'toolchain_deb': }
 
   $archs.each |String $arch, Hash $params| {
+    $prefix = '/nubots/toolchain'
+
+    file { "${arch}_glib.config":
+      content =>
+"glib_cv_stack_grows=no
+glib_cv_uscore=no
+",
+      ensure  => present,
+      path    => "${prefix}/${arch}/src/glib.config",
+      before  => [ Installer['glib'], ],
+    }
+
     # Create CMake toolchain files.
-    $prefix          = '/nubots/toolchain'
     $compile_options = join(prefix(suffix($params['flags'], ')'), 'add_compile_options('), "\n")
     $compile_params  = join($params['params'], " ")
 

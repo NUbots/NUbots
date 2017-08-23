@@ -41,6 +41,10 @@ class build_tools {
   package { 'intltool': ensure => latest, }
   package { 'gtk-doc-tools': ensure => latest, }
   package { 'texinfo': ensure => latest, }
+  package { 'libmount-dev:amd64': ensure => latest, }
+  package { 'libpcre3-dev:amd64': ensure => latest, }
+  package { 'libmount-dev:i386': ensure => latest, }
+  package { 'libpcre3-dev:i386': ensure => latest, }
   package { 'pkg-config': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'rsync': ensure => latest, }

@@ -183,6 +183,7 @@ define installer (
       $args_str = $arg2.reduce |$args_str, $value| { "${args_str} ${value}" }
     }
 
+    $prebuild_cmd = regsubst($prebuild, 'PREFIX', "${prefix}/${arch}", 'G')
     $postbuild_cmd = regsubst($postbuild, 'PREFIX', "${prefix}/${arch}", 'G')
 
     case $extension {
@@ -210,7 +211,7 @@ define installer (
         exec { "autotools_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"autotools\" ",
-          command     => "${prebuild} &&
+          command     => "${prebuild_cmd} &&
                           if [ -e \"autogen.sh\" ]; then ./autogen.sh ; fi &&
                           ./configure ${args_str} --prefix=\"${prefix}/${arch}\" &&
                           make -j\$(nproc) &&
@@ -228,7 +229,7 @@ define installer (
         exec { "cmake_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"cmake\" ",
-          command     => "${prebuild} &&
+          command     => "${prebuild_cmd} &&
                           if [ -d \"build\" ]; then rm -rf build; fi &&
                           mkdir build ; cd build &&
                           cmake .. ${args_str} -DCMAKE_BUILD_TYPE=\"Release\" -DCMAKE_C_FLAGS_RELEASE=\"${flags}\" -DCMAKE_CXX_FLAGS_RELEASE=\"${flags}\" -DCMAKE_INSTALL_PREFIX:PATH=\"${prefix}/${arch}\" &&
@@ -247,7 +248,7 @@ define installer (
         exec { "boost_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"boost\" ",
-          command     => "${prebuild} &&
+          command     => "${prebuild_cmd} &&
                           ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --without-libraries=python &&
                           ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q \\
                                 cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
@@ -265,7 +266,7 @@ define installer (
         exec { "make_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"make\" ",
-          command     => "${prebuild} &&
+          command     => "${prebuild_cmd} &&
                           make ${args_str} -j\$(nproc) &&
                           make ${args_str} PREFIX=\"${prefix}/${arch}\" install &&
                           ${postbuild_cmd}",
