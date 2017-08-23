@@ -15,9 +15,9 @@
 
 #include <SpinGenApi/SpinnakerGenApi.h>
 #include <Spinnaker.h>
+#include <aravis-0.6/arv.h>
 
 #include <nuclear>
-
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
@@ -32,6 +32,14 @@
 
 namespace module {
 namespace input {
+
+    typedef struct {
+        uint32_t fourcc;
+        std::string deviceID;
+        uint cameraID;
+        int payload;
+        bool isLeft;
+    } ImageContext;
 
     class Camera : public NUClear::Reactor {
 
@@ -67,6 +75,18 @@ namespace input {
         Spinnaker::CameraList SpinnakerCamList;
         module::input::SpinnakerLogCallback SpinnakerLoggingCallback;
         std::map<std::string, std::unique_ptr<SpinnakerImageEvent>> SpinnakerCameras;
+
+
+        // Aravis Camera details
+        void initiateAravisCamera(const ::extension::Configuration& config);
+        void EmitAravisImage(ArvStream* stream, ImageContext* context);
+        void resetAravisCamera(
+            std::map<std::string, std::tuple<uint, std::unique_ptr<ArvCamera>, std::unique_ptr<ArvStream>>>::iterator&
+                camera,
+            const ::extension::Configuration& config);
+        void ShutdownAravisCamera();
+
+        std::map<std::string, std::tuple<uint, std::unique_ptr<ArvCamera>, std::unique_ptr<ArvStream>>> AravisCameras;
 
         static uint cameraCount;
     };

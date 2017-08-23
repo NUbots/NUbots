@@ -1,5 +1,6 @@
-SET(dependencies 
+SET(dependencies
 	ARMADILLO
+    Aravis
 	NUbots_PROJECT
 	)
 

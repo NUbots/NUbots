@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 
+#include <aravis-0.6/arv.h>
+
 #include "message/input/Image.h"
 
 namespace utility {
@@ -275,6 +277,7 @@ namespace vision {
     Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc);
     constexpr FOURCC fourcc(const char (&code)[5]);
     FOURCC getFourCCFromDescription(const std::string& code);
+    uint32_t getAravisPixelFormat(const std::string& code);
 
 
 }  // namespace vision

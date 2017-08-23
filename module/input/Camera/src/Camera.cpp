@@ -30,6 +30,9 @@ namespace input {
         , SpinnakerLoggingCallback(*this)
         , SpinnakerCameras() {
 
+        // Needed for Aravis cameras.
+        arv_g_type_init();
+
         on<Configuration>("Camera.yaml").then("Camera Module Configuration", [this](const Configuration& config) {
             dumpImages = config["dump_images"].as<bool>();
         });
@@ -67,6 +70,19 @@ namespace input {
 
                     else {
                         resetSpinnakerCamera(cam, config);
+                    }
+                }
+
+                else if (driver == "Aravis") {
+                    auto cam = AravisCameras.find(deviceID);
+
+                    if (cam == AravisCameras.end()) {
+                        initiateAravisCamera(config);
+                        cameraCount++;
+                    }
+
+                    else {
+                        resetAravisCamera(cam, config);
                     }
                 }
 
@@ -118,6 +134,7 @@ namespace input {
         on<Shutdown>().then([this] {
             ShutdownV4L2Camera();
             ShutdownSpinnakerCamera();
+            ShutdownAravisCamera();
         });
     }
 
