@@ -1,0 +1,3 @@
+
+FIND_PACKAGE(PkgConfig)
+PKG_CHECK_MODULES(Aravis REQUIRED aravis-0.6)
