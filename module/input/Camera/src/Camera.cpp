@@ -28,7 +28,8 @@ namespace input {
         , SpinnakerSystem(Spinnaker::System::GetInstance())
         , SpinnakerCamList(SpinnakerSystem->GetCameras(true, true))
         , SpinnakerLoggingCallback(*this)
-        , SpinnakerCameras() {
+        , SpinnakerCameras()
+        , AravisCameras() {
 
         // Needed for Aravis cameras.
         arv_g_type_init();

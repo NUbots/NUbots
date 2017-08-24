@@ -133,7 +133,6 @@ namespace input {
                                     config["format"]["pixel"].as<std::string>())),
                                 camera->first,
                                 std::get<0>(camera->second),
-                                payload,
                                 config["is_left"].as<bool>()};
 
         arv_camera_start_acquisition(std::get<1>(camera->second).get());
@@ -174,7 +173,10 @@ namespace input {
 
             // Stop emitting signals.
             arv_stream_set_emit_signals(std::get<2>(camera.second).get(), FALSE);
+
+            // Unreference our stream and our camera.
             g_object_unref(std::get<2>(camera.second).get());
+            g_object_unref(std::get<1>(camera.second).get());
         }
     }
 

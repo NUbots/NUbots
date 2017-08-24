@@ -13,11 +13,16 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include <nuclear>
+
+// clang-format off
+#include <arvconfig.h>
+#include <arv.h>
+// clang-format on
+
 #include <SpinGenApi/SpinnakerGenApi.h>
 #include <Spinnaker.h>
-#include <aravis-0.6/arv.h>
 
-#include <nuclear>
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
@@ -37,7 +42,6 @@ namespace input {
         uint32_t fourcc;
         std::string deviceID;
         uint cameraID;
-        int payload;
         bool isLeft;
     } ImageContext;
 
