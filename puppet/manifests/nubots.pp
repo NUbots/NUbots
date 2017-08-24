@@ -167,6 +167,8 @@ node nubotsvmbuild {
                                           'nuc7i7bnh' => [ '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ], },
                        'require'     => [ Installer['xml2'], Installer['zlib'], Installer['glib'], ],
                        'creates'     => 'lib/libaravis-0.6.so',
+                       'prebuild'    => 'sed "s/return\s(entry->schema\s>>\s10)\s\&\s0x0000001f;/return ((entry->schema >> 10) \& 0x0000001f) ? ARV_UVCP_SCHEMA_ZIP : ARV_UVCP_SCHEMA_RAW;/" -i src/arvuvcp.h',
+                       'postbuild'   => 'cp src/arvconfig.h PREFIX/include/arvconfig.h',
                        'method'      => 'autotools', },
   }
 
