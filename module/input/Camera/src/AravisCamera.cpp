@@ -36,24 +36,37 @@ namespace input {
                 auto camera = AravisCameras.find(deviceID);
 
                 if (camera == AravisCameras.end()) {
-                    std::unique_ptr<ArvCamera> newCamera(arv_camera_new(arv_get_device_id(device)));
+                    ArvDevice* newDevice = reinterpret_cast<ArvDevice*>(arv_open_device(arv_get_device_id(device)));
+
+                    if (!ARV_IS_DEVICE(newDevice)) {
+                        log<NUClear::WARN>("Failed to open Aravis device with deviceID", deviceID);
+                        return;
+                    }
+
+                    ArvCamera* newCamera =
+                        reinterpret_cast<ArvCamera*>(g_object_new(ARV_TYPE_CAMERA, "device", newDevice, NULL));
 
                     // Ensure we found the camera.
-                    if (newCamera) {
-                        /* Create a new stream object */
-                        std::unique_ptr<ArvStream> stream(arv_camera_create_stream(newCamera.get(), NULL, NULL));
-
-                        // Add camera to list.
-                        camera =
-                            AravisCameras
-                                .insert(std::make_pair(
-                                    deviceID, std::make_tuple(cameraCount, std::move(newCamera), std::move(stream))))
-                                .first;
+                    // ArvCamera* newCamera = arv_camera_new(arv_get_device_id(device));
+                    if (!ARV_IS_CAMERA(newCamera)) {
+                        log<NUClear::WARN>("Failed to create camera with config",
+                                           config.fileName,
+                                           "and with serial number:",
+                                           deviceID);
+                        return;
                     }
 
                     else {
-                        log<NUClear::WARN>("Failed to find camera", config.fileName, " with serial number:", deviceID);
-                        return;
+                        /* Create a new stream object */
+                        ArvStream* stream = arv_camera_create_stream(newCamera, NULL, NULL);
+
+                        // Add camera to list.
+                        camera = AravisCameras
+                                     .insert(std::make_pair(deviceID,
+                                                            std::make_tuple(cameraCount,
+                                                                            std::unique_ptr<ArvCamera>(newCamera),
+                                                                            std::unique_ptr<ArvStream>(stream))))
+                                     .first;
                     }
                 }
 
@@ -178,6 +191,9 @@ namespace input {
             g_object_unref(std::get<2>(camera.second).get());
             g_object_unref(std::get<1>(camera.second).get());
         }
+
+        arv_debug_shutdown();
+        arv_shutdown();
     }
 
 }  // namespace input

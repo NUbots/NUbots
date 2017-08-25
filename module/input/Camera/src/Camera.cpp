@@ -33,6 +33,7 @@ namespace input {
 
         // Needed for Aravis cameras.
         arv_g_type_init();
+        arv_debug_enable("all");
 
         on<Configuration>("Camera.yaml").then("Camera Module Configuration", [this](const Configuration& config) {
             dumpImages = config["dump_images"].as<bool>();
