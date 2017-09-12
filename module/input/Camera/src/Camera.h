@@ -43,6 +43,7 @@ namespace input {
         std::string deviceID;
         uint cameraID;
         bool isLeft;
+        std::tuple<uint, std::unique_ptr<ArvCamera>, std::unique_ptr<ArvStream>>& camera;
     } ImageContext;
 
     class Camera : public NUClear::Reactor {
