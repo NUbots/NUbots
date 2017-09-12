@@ -146,7 +146,8 @@ namespace input {
                                     config["format"]["pixel"].as<std::string>())),
                                 camera->first,
                                 std::get<0>(camera->second),
-                                config["is_left"].as<bool>()};
+                                config["is_left"].as<bool>(),
+                                std::ref(camera->second)};
 
         arv_camera_start_acquisition(std::get<1>(camera->second).get());
         g_signal_connect(
@@ -154,9 +155,9 @@ namespace input {
         arv_stream_set_emit_signals(std::get<2>(camera->second).get(), TRUE);
     }
 
-    void Camera::EmitAravisImage(ArvStream* stream, ImageContext* context) {
+    void Camera::EmitAravisImage(ArvStream* /*stream*/, ImageContext* context) {
         ArvBuffer* buffer;
-        buffer = arv_stream_pop_buffer(stream);
+        buffer = arv_stream_pop_buffer(std::get<2>(context->camera).get());
         if ((buffer != NULL) && (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS)) {
             int width, height;
             size_t buffSize;
@@ -175,7 +176,7 @@ namespace input {
             msg->isLeft        = context->isLeft;
 
             emit<Scope::DIRECT>(msg);
-            arv_stream_push_buffer(stream, buffer);
+            arv_stream_push_buffer(std::get<2>(context->camera).get(), buffer);
         }
     }
 
