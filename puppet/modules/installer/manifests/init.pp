@@ -211,8 +211,9 @@ define installer (
         exec { "autotools_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"autotools\" ",
+          # Sometimes, autogen.sh will automatically run configure
           command     => "${prebuild_cmd} &&
-                          if [ -e \"autogen.sh\" ]; then ./autogen.sh ; fi &&
+                          if [ -e \"autogen.sh\" ]; then ./autogen.sh ${args_str} --prefix=\"${prefix}/${arch}\"; fi &&
                           ./configure ${args_str} --prefix=\"${prefix}/${arch}\" &&
                           make -j\$(nproc) &&
                           make install &&
