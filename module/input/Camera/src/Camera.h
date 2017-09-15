@@ -20,31 +20,32 @@
 #include <arv.h>
 // clang-format on
 
-#include <SpinGenApi/SpinnakerGenApi.h>
-#include <Spinnaker.h>
-
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 
+#include "utility/input/ServoID.h"
+
 #include "utility/support/eigen_armadillo.h"
 
 #include "utility/vision/Vision.h"
 
-#include "SpinnakerCamera.h"
 #include "V4L2Camera.h"
 
 namespace module {
 namespace input {
 
+    // Camera contextual information for Aravis new-buffer callback function.
     typedef struct {
         uint32_t fourcc;
         std::string deviceID;
         uint cameraID;
         bool isLeft;
-        std::tuple<uint, std::unique_ptr<ArvCamera>, std::unique_ptr<ArvStream>>& camera;
-    } ImageContext;
+        ArvCamera* camera;
+        ArvStream* stream;
+        NUClear::Reactor& reactor;
+    } CameraContext;
 
     class Camera : public NUClear::Reactor {
 
@@ -53,11 +54,6 @@ namespace input {
         explicit Camera(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        void setExposure(Spinnaker::GenApi::INodeMap& nodeMap, double exposure);
-        void setGain(Spinnaker::GenApi::INodeMap& nodeMap, double gain);
-        void resetParameters(Spinnaker::GenApi::INodeMap& nodeMap);
-        bool resetUSBDevice(int bus, int device);
-
         bool dumpImages;
 
         // V4L2 Camera details
@@ -70,29 +66,16 @@ namespace input {
         std::map<std::string, V4L2Camera> V4L2Cameras;
 
 
-        // Spinnaker Camera details
-        void initiateSpinnakerCamera(const ::extension::Configuration& config);
-        void resetSpinnakerCamera(std::map<std::string, std::unique_ptr<SpinnakerImageEvent>>::iterator& camera,
-                                  const ::extension::Configuration& config);
-        void ShutdownSpinnakerCamera();
-
-        Spinnaker::SystemPtr SpinnakerSystem;
-        Spinnaker::CameraList SpinnakerCamList;
-        module::input::SpinnakerLogCallback SpinnakerLoggingCallback;
-        std::map<std::string, std::unique_ptr<SpinnakerImageEvent>> SpinnakerCameras;
-
-
         // Aravis Camera details
         void initiateAravisCamera(const ::extension::Configuration& config);
-        void EmitAravisImage(ArvStream* stream, ImageContext* context);
-        void resetAravisCamera(
-            std::map<std::string, std::tuple<uint, std::unique_ptr<ArvCamera>, std::unique_ptr<ArvStream>>>::iterator&
-                camera,
-            const ::extension::Configuration& config);
+        static void EmitAravisImage(ArvStream* stream, CameraContext* context);
+        void resetAravisCamera(std::map<std::string, CameraContext>::iterator&,
+                               const ::extension::Configuration& config);
         void ShutdownAravisCamera();
 
-        std::map<std::string, std::tuple<uint, std::unique_ptr<ArvCamera>, std::unique_ptr<ArvStream>>> AravisCameras;
+        std::map<std::string, CameraContext> AravisCameras;
 
+        // Static count of all cameras in the system.
         static uint cameraCount;
     };
 }  // namespace input

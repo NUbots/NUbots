@@ -250,115 +250,13 @@ node nubotsvmbuild {
     }
   }
 
-  archive { "Spinnaker_nuc7i7bnh":
-    url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
-    target           => "/nubots/toolchain/nuc7i7bnh/src/Spinnaker",
-    src_target       => "/nubots/toolchain/nuc7i7bnh/src",
-    purge_target     => true,
-    checksum         => false,
-    follow_redirects => true,
-    timeout          => 0,
-    extension        => "tar.gz",
-    strip_components => 1,
-    root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
-  }
-  archive { "Spinnaker_native":
-    url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
-    target           => "/nubots/toolchain/native/src/Spinnaker",
-    src_target       => "/nubots/toolchain/native/src",
-    purge_target     => true,
-    checksum         => false,
-    follow_redirects => true,
-    timeout          => 0,
-    extension        => "tar.gz",
-    strip_components => 1,
-    root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
-  }
-  archive { "Spinnaker_fitpc2i":
-    url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_i386.tar.gz",
-    target           => "/nubots/toolchain/fitpc2i/src/Spinnaker",
-    src_target       => "/nubots/toolchain/fitpc2i/src",
-    purge_target     => true,
-    checksum         => false,
-    follow_redirects => true,
-    timeout          => 0,
-    extension        => "tar.gz",
-    strip_components => 1,
-    root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
-  }
-  exec { "Spinnaker_nuc7i7bnh":
-    creates  => "/nubots/toolchain/nuc7i7bnh/include/Spinnaker.h",
-    command  => "cd include && cp -r ./* /nubots/toolchain/nuc7i7bnh/include/ && cd .. &&
-                 cd lib &&
-                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cp libptgreyvideoencoder.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cp libSpinnaker.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
-                 cd ..",
-    cwd      => "/nubots/toolchain/nuc7i7bnh/src/Spinnaker",
-    path     =>  [ "/nubots/toolchain/nuc7i7bnh/bin", "/nubots/toolchain/bin",
-                   '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    timeout  => 0,
-    provider => 'shell',
-    require  => [ Archive["Spinnaker_nuc7i7bnh"], ],
-    before   => Class['toolchain_deb'],
-  }
-  exec { "Spinnaker_native":
-    creates  => "/nubots/toolchain/native/include/Spinnaker.h",
-    command  => "cd include && cp -r ./* /nubots/toolchain/native/include/ && cd .. &&
-                 cd lib &&
-                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
-                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
-                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
-                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
-                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
-                 cp libptgreyvideoencoder.so* /nubots/toolchain/native/lib/ &&
-                 cp libSpinnaker.so* /nubots/toolchain/native/lib/ &&
-                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
-                 cd ..",
-    cwd      => "/nubots/toolchain/native/src/Spinnaker",
-    path     =>  [ "/nubots/toolchain/native/bin", "/nubots/toolchain/bin",
-                   '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    timeout  => 0,
-    provider => 'shell',
-    require  => [ Archive["Spinnaker_native"], ],
-    before   => Class['toolchain_deb'],
-  }
-  exec { "Spinnaker_fitpc2i":
-    creates  => "/nubots/toolchain/fitpc2i/include/Spinnaker.h",
-    command  => "cd include && cp -r ./* /nubots/toolchain/fitpc2i/include/ && cd .. &&
-                 cd lib &&
-                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cp libptgreyvideoencoder.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cp libSpinnaker.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
-                 cd ..",
-    cwd      => "/nubots/toolchain/fitpc2i/src/Spinnaker",
-    path     =>  [ "/nubots/toolchain/fitpc2i/bin", "/nubots/toolchain/bin",
-                   '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    timeout  => 0,
-    provider => 'shell',
-    require  => [ Archive["Spinnaker_fitpc2i"], ],
-    before   => Class['toolchain_deb'],
-  }
-
   # After we have installed, create the CMake toolchain files and then build our deb.
   Installer <| |> ~> class { 'toolchain_deb': }
 
   $archs.each |String $arch, Hash $params| {
     $prefix = '/nubots/toolchain'
 
+    # We need to prevent glib from trying to run tests when cross-compiling glib (to avoid SIGILL).
     file { "${arch}_glib.config":
       content =>
 "glib_cv_stack_grows=no

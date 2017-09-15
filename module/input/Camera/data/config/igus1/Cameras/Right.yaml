@@ -1,8 +1,5 @@
-driver: Spinnaker
-deviceID: "15211412"        # 00E81B94
-usb:
-  bus: 2
-  device: 2
+driver: Aravis
+deviceID: 00E81B94
 
 buffer_count: 4             # The number of software buffers to use.
 
@@ -10,8 +7,6 @@ format:
   width: 1280
   height: 1024
   pixel: BayerBG8
-  #pixel: YCbCr422_8_CbYCrY
-  #pixel: RGB8
 
 lens:
   radiansPerPixel: 0.00245
