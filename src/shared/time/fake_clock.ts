@@ -15,7 +15,7 @@ export class FakeClock implements Clock {
   private time: number
   private tasks: Task[]
 
-  constructor(time: number) {
+  public constructor(time: number) {
     this.nextId = 0
     this.time = time
     this.tasks = []
@@ -55,7 +55,7 @@ export class FakeClock implements Clock {
     return () => this.removeTask(id)
   }
 
-  public tick(delta: number = 1) {
+  public tick(delta: number = 1): void {
     const newTime = this.now() + delta
 
     while (this.tasks.length > 0 && this.tasks[0].nextTime <= newTime) {
@@ -66,7 +66,7 @@ export class FakeClock implements Clock {
     this.time = newTime
   }
 
-  public runAllTimers() {
+  public runAllTimers(): void {
     const limit = 1000
     let i = 0
 
@@ -80,7 +80,7 @@ export class FakeClock implements Clock {
     }
   }
 
-  public runOnlyPendingTimers() {
+  public runOnlyPendingTimers(): void {
     const limit = 1000
     let i = 0
 
@@ -96,7 +96,7 @@ export class FakeClock implements Clock {
     }
   }
 
-  public runTimersToTime(time: number) {
+  public runTimersToTime(time: number): void {
     const limit = 1000
     let i = 0
 
