@@ -100,23 +100,23 @@ class Every(DSLWord):
 
 class Priority(object):
     class REALTIME(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::REALTIME"
 
     class HIGH(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::HIGH"
 
     class NORMAL(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::NORMAL"
 
     class LOW(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::LOW"
 
     class IDLE(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::IDLE"
 
 
