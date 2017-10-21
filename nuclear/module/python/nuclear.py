@@ -197,7 +197,7 @@ def Reactor(reactor):
             // Binding function for the dsl on<{dsl}>
             m.def("bind_{func_name}", [this] (pybind11::function fn) {{
 
-                on<{dsl}>().then([this, fn] ({input_args}) {{
+                on<{dsl}>({runtime_args}).then([this, fn] ({input_args}) {{
 
                     // Create our thread state for this thread if it doesn't exist
                     if (!thread_state) {{
@@ -233,6 +233,7 @@ def Reactor(reactor):
 
             binders.add(binder_impl.format(func_name=func_name,
                                            dsl=reaction[1].template_args(),
+                                           runtime_args=reaction[1].runtime_args(),
                                            input_args=', '.join(input_args),
                                            input_types=', '.join(input_types),
                                            input_vars=', '.join(['self'] + input_vars)))
