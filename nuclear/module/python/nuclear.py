@@ -152,11 +152,21 @@ class DSLCallback(DSLWord):
     def function(self):
         return self.func
 
+def issequence(item):
+    if not hasattr(item, "strip") and hasattr(item, "__getitem__") or hasattr(item, "__iter__"):
+        return True
+    else:
+        return False
+
 # Decorator for creating instance variables/setting up reactor
 def Reactor(reactor):
 
     # Attach an emit method to the class
-    setattr(reactor, 'emit', lambda self, msg: msg._emit(self._reactor_ptr))
+    setattr(reactor, 'emit',
+            lambda self, msg:
+                # Iterable type ELSE String or other non-iterable type
+                msg[0]._emit_vector(self._reactor_ptr, msg) if issequence(msg) else msg._emit(self._reactor_ptr)
+            )
 
     try:
         # If we can import this we are running in nuclear, so run

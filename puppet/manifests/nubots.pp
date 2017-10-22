@@ -29,15 +29,11 @@ node default {
 
 node nubotsvmbuild {
   $archs = {
-    'native'    => {'flags'       => ['', ],
+    'native'    => {'flags'       => ['-m64', '-march=native', ],
                     'params'      => ['-m64', ],
                     'environment' => {'TARGET' => 'GENERIC', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', 'CCAS' => 'gcc', 'CCASFLAGS' => '-m64', },
                    },
-    'fitpc2i'   => {'flags'       => ['-march=bonnell', '-mtune=bonnell', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
-                    'params'      => ['-m32', '--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],
-                    'environment' => {'TARGET' => 'YONAH', 'USE_THREAD' => '1', 'BINARY' => '32', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m32', 'PKG_CONFIG_PATH' => '/usr/lib/i386-linux-gnu/pkgconfig', 'CCAS' => 'gcc', 'CCASFLAGS' => '-m32', },
-                   },
-    'nuc7i7bnh' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2', '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes', '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4', '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2', '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase', '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt', '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf', '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq', '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi', '-mno-clwb', '-mno-mwaitx', ],
+    'nuc7i7bnh' => {'flags'       => ['-m64', '-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2', '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes', '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4', '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2', '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase', '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt', '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf', '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq', '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi', '-mno-clwb', '-mno-mwaitx', ],
                     'params'      => ['-m64', '--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
                     'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', 'CCAS' => 'gcc', 'CCASFLAGS' => '-m64', },
                    },
@@ -58,9 +54,8 @@ node nubotsvmbuild {
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
-    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.3.0/protobuf-cpp-3.3.0.tar.gz',
+    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-cpp-3.4.0.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'nuc7i7bnh' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
                        'prebuild'    => 'make distclean',
@@ -71,22 +66,21 @@ node nubotsvmbuild {
                        'method'      => 'cmake',},
     'bzip2'        => {'url'         => 'https://github.com/Bidski/bzip2/archive/v1.0.6.1.tar.gz',
                        'args'        => { 'native'   => [ '', ],
-                                          'fitpc2i' => [ '', ],
                                           'nuc7i7bnh' => [ '', ], },
                        'creates'     => 'lib/libbz2.so',
                        'method'      => 'make',},
     'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib=ZLIB_PATH', '--without-python', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
                                           'nuc7i7bnh' => [ '--with-zlib=ZLIB_PATH', '--without-python', ], },
                        'method'      => 'autotools',},
     'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/master.tar.gz',
                        'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', ],
-                                          'fitpc2i' => [ '-DBUILD_TESTS=OFF', ],
                                           'nuc7i7bnh' => [ '-DBUILD_TESTS=OFF', ], },
                        'method'      => 'cmake',},
     # NOTE: OpenBLAS CMake support is experimental and only supports x86 at the moment.
     'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz',
+                       'args'        => { 'native'   => [ '', ],
+                                          'nuc7i7bnh' => [ 'CROSS=1', ], },
                        'method'      => 'make',
                        'creates'     => 'lib/libopenblas.a' },
     'libsvm'       => {'url'         => 'https://github.com/Bidski/libsvm/archive/v322.tar.gz',
@@ -98,23 +92,19 @@ node nubotsvmbuild {
                        'require'     => [ Installer['openblas'], ],},
     'tcmalloc'     => {'url'         => 'https://github.com/gperftools/gperftools/releases/download/gperftools-2.5.93/gperftools-2.5.93.tar.gz',
                        'args'        => { 'native'   => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-tcmalloc-pagesize=64', '--enable-minimal', ],
                                           'nuc7i7bnh' => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ], },
                        'creates'     => 'lib/libtcmalloc_minimal.a',
                        'method'      => 'autotools',},
     'yaml-cpp'     => {'url'         => 'https://github.com/jbeder/yaml-cpp/archive/master.tar.gz',
                        'args'        => { 'native'   => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
-                                          'fitpc2i' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
                                           'nuc7i7bnh' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
                        'method'      => 'cmake',},
     'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.6-pl2.tar.gz',
                        'args'        => { 'native'   => [ '--disable-fortran', '--enable-shared', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-fortran', '--enable-shared', ],
                                           'nuc7i7bnh' => [ '--disable-fortran', '--enable-shared', ], },
                        'method'      => 'autotools',},
     'jpeg'         => {'url'         => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.5.1/libjpeg-turbo-1.5.1.tar.gz',
                        'args'        => { 'native'   => [ 'CCASFLAGS="-f elf64"', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', 'CCASFLAGS="-f elf32"', ],
                                           'nuc7i7bnh' => [ 'CCASFLAGS="-f elf64"', ], },
                        'method'      => 'autotools',},
     'cppformat'    => {'url'         => 'https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz',
@@ -122,7 +112,6 @@ node nubotsvmbuild {
                        'creates'     => 'lib/libfmt.a' },
     'portaudio'    => {'url'         => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
                        'args'        => { 'native'   => [ '', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
                                           'nuc7i7bnh' => [ '', ], },
                        'method'      => 'autotools',},
     'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2',
@@ -130,7 +119,6 @@ node nubotsvmbuild {
                        'method'      => 'cmake',},
     'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz',
                        'args'        => { 'native'   => [ 'address-model=64', 'architecture=x86', 'link=static', ],
-                                          'fitpc2i' => [ 'address-model=32', 'architecture=x86', 'link=static', ],
                                           'nuc7i7bnh' => [ 'address-model=64', 'architecture=x86', 'link=static', ], },
                        'method'      => 'boost',
                        'creates'     => 'src/boost/build_complete',
@@ -143,35 +131,35 @@ node nubotsvmbuild {
                        'require'     => [ Installer['portaudio'], ],},
     'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz',
                        'args'        => { 'native'   => [ '', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
                                           'nuc7i7bnh' => [ '', ], },
                        'method'      => 'autotools', },
     'ffi'          => {'url'         => 'https://github.com/libffi/libffi/archive/v3.2.1.tar.gz',
                        'args'        => { 'native'   => [ '', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '', ],
                                           'nuc7i7bnh' => [ '', ], },
                        'postbuild'   => 'if [ -e PREFIX/lib32/libffi.a ]; then cp PREFIX/lib32/libffi* PREFIX/lib/; fi',
                        'method'      => 'autotools', },
     'glib'         => {'url'         => 'ftp://ftp.gnome.org/pub/gnome/sources/glib/2.52/glib-2.52.3.tar.xz',
                        'args'        => { 'native'   => [ '--cache-file=PREFIX/src/glib.config', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
-                                          'fitpc2i' => [ '--cache-file=PREFIX/src/glib.config', '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
                                           # Technically we are cross compiling for the nuv7i7bnh, even though both the host and build systems are both x86_64-linux-gnu
                                           'nuc7i7bnh' => [ '--cache-file=PREFIX/src/glib.config', '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ], },
-                       'prebuild'    => 'chmod a-w PREFIX/src/glib.config',
                        'postbuild'   => 'cp glib/glibconfig.h PREFIX/include/glibconfig.h',
                        'require'     => [ Installer['ffi'], ],
                        'creates'     => 'lib/libglib-2.0.so',
                        'method'      => 'autotools', },
     'aravis'       => {'url'         => 'https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_9.tar.gz',
-                       'args'        => { 'native'   => [ '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
+                       'args'        => { 'native'   => [ '--cache-file=PREFIX/src/aravis.config', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
                                           # Technically we are cross compiling for the nuv7i7bnh, even though both the host and build systems are both x86_64-linux-gnu
-                                          'nuc7i7bnh' => [ '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ], },
+                                          'nuc7i7bnh' => [ '--cache-file=PREFIX/src/aravis.config', '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ], },
                        'require'     => [ Installer['xml2'], Installer['zlib'], Installer['glib'], ],
                        'creates'     => 'lib/libaravis-0.6.so',
                        'prebuild'    => 'sed "s/return\s(entry->schema\s>>\s10)\s\&\s0x0000001f;/return ((entry->schema >> 10) \& 0x0000001f) ? ARV_UVCP_SCHEMA_ZIP : ARV_UVCP_SCHEMA_RAW;/" -i src/arvuvcp.h',
                        'postbuild'   => 'cp src/arvconfig.h PREFIX/include/arvconfig.h',
                        'method'      => 'autotools', },
+    'pybind11'     => {'url'         => 'https://github.com/pybind/pybind11/archive/v2.2.1.tar.gz',
+                       'args'        => { 'native'   => [ '-DPYBIND11_TEST=OFF', ' -DPYBIND11_PYTHON_VERSION=3',  ],
+                                          'nuc7i7bnh' => [ '-DPYBIND11_TEST=OFF', ' -DPYBIND11_PYTHON_VERSION=3', ], },
+                       'creates'     => 'include/pybind11/pybind11.h',
+                       'method'      => 'cmake', },
   }
 
   # Download each archive and spawn Installers for each one.
@@ -253,6 +241,62 @@ node nubotsvmbuild {
   # After we have installed, create the CMake toolchain files and then build our deb.
   Installer <| |> ~> class { 'toolchain_deb': }
 
+  # Patch some system utilities to make sure they ignore our preset LD_LIBRARY_PATH
+  file { "/nubots/toolchain/bin/msgfmt.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/msgfmt \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/bin/msgfmt.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/bin/msgmerge.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/msgmerge \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/bin/msgmerge.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/bin/xgettext.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/xgettext \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/bin/xgettext.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/nuc7i7bnh/bin/pkg-config.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/x86_64-linux-gnu-pkg-config \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/nuc7i7bnh/bin/pkg-config.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/native/bin/pkg-config.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/pkg-config \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/native/bin/pkg-config.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
   $archs.each |String $arch, Hash $params| {
     $prefix = '/nubots/toolchain'
 
@@ -264,7 +308,22 @@ glib_cv_uscore=no
 ",
       ensure  => present,
       path    => "${prefix}/${arch}/src/glib.config",
+      mode    => "a-w",
       before  => [ Installer['glib'], ],
+    }
+
+    # Force paths to gettext bianries (to avoid SIGILL).
+    file { "${arch}_aravis.config":
+      content =>
+"ac_cv_path_XGETTEXT=${prefix}/bin/xgettext.sh
+ac_cv_path_MSGMERGE=${prefix}/bin/msgmerge.sh
+ac_cv_path_MSGFMT=${prefix}/bin/msgfmt.sh
+ac_cv_path_PKG_CONFIG=${prefix}/${arch}/bin/pkg-config.sh
+",
+      ensure  => present,
+      path    => "${prefix}/${arch}/src/aravis.config",
+      mode    => "a-w",
+      before  => [ Installer['aravis'], ],
     }
 
     # Create CMake toolchain files.

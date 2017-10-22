@@ -134,14 +134,8 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
 # Add robot hosts
-10.1.1.1 d1 darwin1
-10.1.1.2 d2 darwin2
-10.1.1.3 d3 darwin3
-10.1.1.4 d4 darwin4
-10.1.1.5 d5 darwin5
-10.1.1.6 d6 darwin6
-
 10.1.1.11 i1 igus1
+10.1.1.12 i2 igus2
 ",
   }
 }

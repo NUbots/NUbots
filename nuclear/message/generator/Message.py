@@ -308,6 +308,19 @@ class Message:
                     // Do the emit
                     reactor->powerplant.emit_shared<NUClear::dsl::word::emit::Local>(msg.shared_from_this());
                 }});
+
+                // Build our vector emitter function that is used to emit vectors of this object
+                context.def("_emit_vector", [] ({fqn}& msg, pybind11::capsule capsule, std::vector<{fqn}>& data) {{
+                    // Extract our reactor from the capsule
+                    NUClear::Reactor* reactor = capsule;
+
+                    // Copy the vector
+                    auto vec = data;
+                    auto ptr = std::make_unique<std::vector<{fqn}>>(vec);
+
+                    // Do the emit
+                    reactor->powerplant.emit<NUClear::dsl::word::emit::Local>(std::move(ptr));
+                }});
             }}""")
 
 
