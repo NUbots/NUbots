@@ -66,3 +66,4 @@ class PedestrianDetector(object):
 
 
                 self.emit(msg)
+
