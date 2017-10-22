@@ -58,7 +58,7 @@ node nubotsvmbuild {
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
-    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.3.0/protobuf-cpp-3.3.0.tar.gz',
+    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-cpp-3.4.0.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'nuc7i7bnh' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
@@ -87,6 +87,9 @@ node nubotsvmbuild {
                        'method'      => 'cmake',},
     # NOTE: OpenBLAS CMake support is experimental and only supports x86 at the moment.
     'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz',
+                       'args'        => { 'native'   => [ '', ],
+                                          'fitpc2i' => [ 'CROSS=1', ],
+                                          'nuc7i7bnh' => [ 'CROSS=1', ], },
                        'method'      => 'make',
                        'creates'     => 'lib/libopenblas.a' },
     'libsvm'       => {'url'         => 'https://github.com/Bidski/libsvm/archive/v322.tar.gz',
@@ -157,16 +160,15 @@ node nubotsvmbuild {
                                           'fitpc2i' => [ '--cache-file=PREFIX/src/glib.config', '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
                                           # Technically we are cross compiling for the nuv7i7bnh, even though both the host and build systems are both x86_64-linux-gnu
                                           'nuc7i7bnh' => [ '--cache-file=PREFIX/src/glib.config', '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ], },
-                       'prebuild'    => 'chmod a-w PREFIX/src/glib.config',
                        'postbuild'   => 'cp glib/glibconfig.h PREFIX/include/glibconfig.h',
                        'require'     => [ Installer['ffi'], ],
                        'creates'     => 'lib/libglib-2.0.so',
                        'method'      => 'autotools', },
     'aravis'       => {'url'         => 'https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_9.tar.gz',
-                       'args'        => { 'native'   => [ '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
-                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
+                       'args'        => { 'native'   => [ '--cache-file=PREFIX/src/aravis.config', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
+                                          'fitpc2i' => [ '--cache-file=PREFIX/src/aravis.config', '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
                                           # Technically we are cross compiling for the nuv7i7bnh, even though both the host and build systems are both x86_64-linux-gnu
-                                          'nuc7i7bnh' => [ '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ], },
+                                          'nuc7i7bnh' => [ '--cache-file=PREFIX/src/aravis.config', '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ], },
                        'require'     => [ Installer['xml2'], Installer['zlib'], Installer['glib'], ],
                        'creates'     => 'lib/libaravis-0.6.so',
                        'prebuild'    => 'sed "s/return\s(entry->schema\s>>\s10)\s\&\s0x0000001f;/return ((entry->schema >> 10) \& 0x0000001f) ? ARV_UVCP_SCHEMA_ZIP : ARV_UVCP_SCHEMA_RAW;/" -i src/arvuvcp.h',
@@ -253,6 +255,73 @@ node nubotsvmbuild {
   # After we have installed, create the CMake toolchain files and then build our deb.
   Installer <| |> ~> class { 'toolchain_deb': }
 
+  # Patch some system utilities to make sure they ignore our preset LD_LIBRARY_PATH
+  file { "/nubots/toolchain/bin/msgfmt.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/msgfmt \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/bin/msgfmt.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/bin/msgmerge.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/msgmerge \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/bin/msgmerge.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/bin/xgettext.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/xgettext \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/bin/xgettext.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/nuc7i7bnh/bin/pkg-config.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/x86_64-linux-gnu-pkg-config \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/nuc7i7bnh/bin/pkg-config.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/fitpc2i/bin/pkg-config.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/i686-linux-gnu-pkg-config \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/fitpc2i/bin/pkg-config.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
+  file { "/nubots/toolchain/native/bin/pkg-config.sh":
+    content =>
+"
+#! /bin/bash
+LD_LIBRARY_PATH= /usr/bin/pkg-config \"$@\"
+",
+    ensure  => present,
+    path    => "/nubots/toolchain/native/bin/pkg-config.sh",
+    mode    => "a+x",
+  } -> Installer <| |>
+
   $archs.each |String $arch, Hash $params| {
     $prefix = '/nubots/toolchain'
 
@@ -264,7 +333,22 @@ glib_cv_uscore=no
 ",
       ensure  => present,
       path    => "${prefix}/${arch}/src/glib.config",
+      mode    => "a-w",
       before  => [ Installer['glib'], ],
+    }
+
+    # Force paths to gettext bianries (to avoid SIGILL).
+    file { "${arch}_aravis.config":
+      content =>
+"ac_cv_path_XGETTEXT=${prefix}/bin/xgettext.sh
+ac_cv_path_MSGMERGE=${prefix}/bin/msgmerge.sh
+ac_cv_path_MSGFMT=${prefix}/bin/msgfmt.sh
+ac_cv_path_PKG_CONFIG=${prefix}/${arch}/bin/pkg-config.sh
+",
+      ensure  => present,
+      path    => "${prefix}/${arch}/src/aravis.config",
+      mode    => "a-w",
+      before  => [ Installer['aravis'], ],
     }
 
     # Create CMake toolchain files.
