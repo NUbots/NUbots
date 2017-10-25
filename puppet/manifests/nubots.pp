@@ -29,7 +29,7 @@ node default {
 
 node nubotsvmbuild {
   $archs = {
-    'native'    => {'flags'       => ['-m64', '-march=native', ],
+    'native'    => {'flags'       => ['', ],
                     'params'      => ['-m64', ],
                     'environment' => {'TARGET' => 'GENERIC', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', 'CCAS' => 'gcc', 'CCASFLAGS' => '-m64', },
                    },
