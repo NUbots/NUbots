@@ -1,27 +1,35 @@
 #!/usr/bin/env python3
 
+import numpy as np
+print('-2')
+import tensorflow as tf
+print('-1')
+import yaml
+import datetime
 from nuclear import Reactor, on, Trigger, Single, With, Every
 from message.input import Image
 from message.vision import Obstacle
-import tensorflow as tf
-import numpy as np
-import yaml
-import datetime
+print('0')
 
 @Reactor
 class PedestrianDetector(object):
 
     def __init__(self):
         # Constructor for PedestrianDetector
-        self.config = yaml.load(file('config/PedestrianDetector.yaml', 'r'))
+        print('1')
+        self.config = yaml.load(open('config/PedestrianDetector.yaml', 'r'))
 
+        print('2')
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
+            print('3')
             self.od_graph_def = tf.GraphDef()
             with tf.gfile.GFile(self.config['model']['checkpoint_file'], 'rb') as fid:
+                print('4')
                 serialized_graph = fid.read()
                 self.od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(self.od_graph_def, name='')
+        print('5')
 
     # @on(Configuration('PedestrianDetector.yaml'))
     # def PedestrianDetector_configfuration(self, config):
