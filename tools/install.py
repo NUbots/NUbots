@@ -49,8 +49,6 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
     # Target location to install to
     target_dir   = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
     build_dir    = b.binary_dir
-    config_dir   = os.path.join(build_dir, '.', 'config')
-    script_dir   = os.path.join(build_dir, '.', 'scripts')
     platform_dir = '/nubots/toolchain/{0}'.format(b.cmake_cache["PLATFORM"])
     roles        = b.cmake_cache["NUCLEAR_ROLES"]
 
