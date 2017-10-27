@@ -234,6 +234,8 @@ class Enum:
                 pybind11::enum_<{fqn}::Value>(enumclass, "Value")
             {value_list}
                     .export_values();
+
+                pybind11::implicitly_convertible<{fqn}::Value, {fqn}>();
             }}""")
 
         return header_template.format(
