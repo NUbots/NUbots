@@ -2,6 +2,14 @@ INCLUDE(CMakeParseArguments)
 
 FUNCTION(NUCLEAR_MODULE)
 
+    # Assume we have no python modules initially.
+    IF(NOT DEFINED HAVE_NUCLEAR_PYTHON_MODULES)
+        SET(HAVE_NUCLEAR_PYTHON_MODULES OFF CACHE INTERNAL
+            "Indicates if there is at least one python module in the system" FORCE
+        )
+    ENDIF(NOT DEFINED HAVE_NUCLEAR_PYTHON_MODULES)
+
+
     GET_FILENAME_COMPONENT(module_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
     # Get our relative module path
@@ -59,7 +67,9 @@ FUNCTION(NUCLEAR_MODULE)
     # Python Code
     ELSEIF(MODULE_LANGUAGE STREQUAL "PYTHON")
 
-        SET(HAVE_NUCLEAR_PYTHON_MODULES ON)
+        SET(HAVE_NUCLEAR_PYTHON_MODULES ON CACHE INTERNAL
+            "Indicates if there is at least one python module in the system" FORCE
+        )
 
         FIND_PACKAGE(PythonInterp 3 REQUIRED)
         FIND_PACKAGE(pybind11 REQUIRED)
@@ -89,9 +99,6 @@ FUNCTION(NUCLEAR_MODULE)
                 DEPENDS ${python_file}
                 COMMENT "Copying updated python file ${python_file}"
             )
-
-            LIST(APPEND NUCLEAR_MODULE_DATA_FILES ${output_file})
-
         ENDFOREACH(python_file)
 
         FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/src")
@@ -187,11 +194,6 @@ FUNCTION(NUCLEAR_MODULE)
 
         LIST(APPEND NUCLEAR_MODULE_DATA_FILES ${output_file})
     ENDFOREACH(data_file)
-
-    # Add base nuclear python module to install list, only if we have python modules in the system.
-    IF(HAVE_NUCLEAR_PYTHON_MODULES)
-        LIST(APPEND NUCLEAR_MODULE_DATA_FILES "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py")
-    ENDIF()
 
     # Remove duplicate entries from NUCLEAR_MODULE_DATA_FILES
     SET(NUCLEAR_MODULE_DATA_FILES "${NUCLEAR_MODULE_DATA_FILES}" CACHE INTERNAL
