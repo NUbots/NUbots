@@ -47,11 +47,11 @@ export default {
       {
         test: /\.tsx?$/,
         use: isProduction
-            ? 'awesome-typescript-loader?module=es6'
-            : [
-              'react-hot-loader',
-              'awesome-typescript-loader',
-            ],
+          ? 'awesome-typescript-loader?module=es6'
+          : [
+            'react-hot-loader/webpack',
+            'awesome-typescript-loader',
+          ],
       },
       // local css
       {
@@ -73,6 +73,15 @@ export default {
             },
             {
               loader: 'postcss-loader',
+              options: {
+                plugins: (loader: webpack.loader.LoaderContext) => [
+                  require('postcss-import')({ root: loader.resourcePath }),
+                  require('postcss-url')(),
+                  require('postcss-cssnext')(),
+                  require('postcss-reporter')(),
+                  require('postcss-browser-reporter')({ disabled: isProduction }),
+                ],
+              },
             },
           ],
         }),
@@ -86,7 +95,7 @@ export default {
         include: [
           path.resolve(__dirname, 'node_modules'),
         ],
-        use: [ 'style-loader', 'css-loader' ],
+        use: ['style-loader', 'css-loader'],
       },
       {
         test: /\.svg$/,
@@ -120,18 +129,6 @@ export default {
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     new CopyWebpackPlugin([{ from: 'assets/images', to: 'images' }]),
-    new webpack.LoaderOptionsPlugin({
-      options: {
-        context: sourcePath,
-        postcss: [
-          require('postcss-import')({ addDependencyTo: webpack }),
-          require('postcss-url')(),
-          require('postcss-cssnext')(),
-          require('postcss-reporter')(),
-          require('postcss-browser-reporter')({ disabled: isProduction }),
-        ],
-      },
-    }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
       filename: 'vendor.bundle.js',
