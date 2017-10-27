@@ -27,3 +27,6 @@ SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} /home/darwin/toolchain/ /home/nub
 # Disable armadillo bounds checking in release and min size release builds
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DARMA_NO_DEBUG")
 SET(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DARMA_NO_DEBUG")
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
