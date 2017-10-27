@@ -233,7 +233,7 @@ IF(src)
     SET_PROPERTY(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 
     # The library uses protocol buffers
-    TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
+    TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARY})
     TARGET_LINK_LIBRARIES(nuclear_message ${NUClear_LIBRARIES})
 
     # If we have pybind11 we need to make this a python library too
