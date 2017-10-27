@@ -4,6 +4,11 @@ import re
 import os
 from textwrap import dedent
 
+# When embedded, sys has no argv, add an empty one
+import sys
+if not hasattr(sys, 'argv'):
+    sys.argv  = ['']
+
 def indent(str, len=4):
     return '\n'.join([(' ' * len) + l for l in str.splitlines()])
 
