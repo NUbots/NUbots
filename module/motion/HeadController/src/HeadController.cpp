@@ -42,17 +42,17 @@ namespace motion {
     using utility::nubugger::graph;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using message::input::Sensors;
-    using utility::behaviour::RegisterAction;
     using extension::Configuration;
     using message::behaviour::ServoCommand;
+    using message::input::Sensors;
     using message::motion::HeadCommand;
-    using utility::math::coordinates::sphericalToCartesian;
+    using message::motion::KinematicsModel;
+    using utility::behaviour::RegisterAction;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::sphericalToCartesian;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
-    using message::motion::KinematicsModel;
     using utility::support::Expression;
 
     // internal only callback messages to start and stop our action
@@ -148,15 +148,30 @@ namespace motion {
                     }
                 }
 
+
                 emit(graph("HeadController Final Angles", yaw, -pitch));
                 // log("HeadController Final Angles", yaw, -pitch);
 
 
                 // Create message
-                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                auto pitch_coeffs = kinematicsModel.head.PITCH_COEFFS;
+                auto waypoints    = std::make_unique<std::vector<ServoCommand>>();
                 waypoints->reserve(2);
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAnglesList) {
+                    // If we have a rational equation defined to limit head pitch movements, apply it now.
+                    if (std::any_of(pitch_coeffs.begin(), pitch_coeffs.end(), [](float a) -> bool { return a != 0.0; })
+                        && (angle.first == ServoID::HEAD_PITCH)) {
+                        float new_pitch =
+                            ((pitch_coeffs[0] * (yaw * yaw * yaw)) + (pitch_coeffs[1] * (yaw * yaw))
+                             + (pitch_coeffs[2] * yaw) + pitch_coeffs[3])
+                                / ((pitch_coeffs[4] * (yaw * yaw)) + (pitch_coeffs[5] * yaw) + pitch_coeffs[6])
+                            + pitch_coeffs[7];
+
+                        angle.second = std::fmin(std::fmax(new_pitch, min_pitch), max_pitch);
+                        pitch        = angle.second;
+                    }
+
                     waypoints->push_back({id,
                                           t,
                                           angle.first,

@@ -66,6 +66,7 @@ message KinematicsModel {
         float MIN_YAW                         = 10;
         float MAX_PITCH                       = 11;
         float MIN_PITCH                       = 12;
+        repeated float PITCH_COEFFS           = 14;
     }
 
     message Arm {
