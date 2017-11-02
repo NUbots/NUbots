@@ -28,6 +28,10 @@ head:
     limits:
         yaw: [-pi * 2 / 3, pi * 2 / 3] # [min_yaw, max_yaw]
         pitch: [-pi / 6, pi / 2] # [min_pitch, max_pitch]
+
+        # [p1, p2, p3, p4, q0, q1, q2, o]
+        # pitch = (p1*yaw^3 + p2*yaw^2 + p3*yaw + p4) / (q0*yaw^2 + q1*yaw + q2) + o
+        pitch_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 # rough measurements
 arm:
     distance_between_shoulders: 0.114 # distance between shoulders
