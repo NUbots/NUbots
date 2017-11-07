@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 from nuclear import Reactor, on, Trigger, Single, With, Every
-from message.input import Image
-from message.vision import Obstacle
+from message.vision import ReprojectedImage, Obstacle
 import numpy as np
 import tensorflow as tf
 import yaml
@@ -47,7 +46,7 @@ class PedestrianDetector(object):
     # def PedestrianDetector_configfuration(self, config):
     #     # Use configuration here from file PedestrianDetector.yaml
 
-    @on(Trigger(Image), Single())
+    @on(Trigger(ReprojectedImage), Single())
     def run_detection(self, image):
         # Convert image to numpy array
         image_np = np.zeros((image.dimensions[1], image.dimensions[0], 3), dtype = np.uint8)
