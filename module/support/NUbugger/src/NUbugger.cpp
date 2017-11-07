@@ -38,9 +38,9 @@ namespace support {
     using utility::nubugger::graph;
 
     using extension::Configuration;
+    using message::support::nubugger::Command;
     using message::support::nubugger::Ping;
     using message::support::nubugger::ReactionHandles;
-    using message::support::nubugger::Command;
 
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
@@ -77,6 +77,8 @@ namespace support {
         on<Configuration>("NUbugger.yaml").then([this](const Configuration& config) {
 
             max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
+            max_reprojected_image_duration =
+                durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
             max_classified_image_duration =
                 durationFromSeconds(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>());
 

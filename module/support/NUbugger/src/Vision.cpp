@@ -23,6 +23,7 @@
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/LookUpTableDiff.h"
+#include "message/vision/ReprojectedImage.h"
 #include "message/vision/VisionObjects.h"
 
 #include "utility/support/eigen_armadillo.h"
@@ -44,6 +45,7 @@ namespace support {
     using message::vision::NUsightLines;
     using message::vision::NUsightObstacles;
     using message::vision::Obstacle;
+    using message::vision::ReprojectedImage;
 
     void NUbugger::provideVision() {
         handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then(
@@ -63,6 +65,18 @@ namespace support {
 
             last_image = NUClear::clock::now();
         }));
+
+        handles["reprojected_image"].push_back(
+            on<Trigger<ReprojectedImage>, Single, Priority::LOW>().then([this](const ReprojectedImage& image) {
+
+                if (NUClear::clock::now() - last_reprojected_image < max_reprojected_image_duration) {
+                    return;
+                }
+
+                send(image, 1, false, NUClear::clock::now());
+
+                last_reprojected_image = NUClear::clock::now();
+            }));
 
         handles["classified_image"].push_back(
             on<Trigger<ClassifiedImage>, Single, Priority::LOW>().then([this](const ClassifiedImage& image) {
