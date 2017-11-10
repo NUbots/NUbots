@@ -31,6 +31,7 @@ namespace vision {
 
     Reprojection::Reprojection(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
+        , dump_images(false)
         , avg_fp_ms()
         , avg_count(0)
         , fd(-1)
@@ -50,6 +51,7 @@ namespace vision {
             arma::vec dimensions = config["output"]["dimensions"].as<arma::vec>();
             output_dimensions    = arma::conv_to<arma::uvec>::from(dimensions);
             tan_half_FOV         = std::tan(config["output"]["FOV"].as<double>() * M_PI / 360.0);
+            dump_images          = config["dump_images"].as<bool>();
         });
 
         on<Startup, MainThread>().then([this]() {
@@ -214,48 +216,6 @@ namespace vision {
                 return;
             }
 
-            // Create the depth texture.
-            // glGenTextures(1, &fbo_depth_tex);
-            // glBindTexture(GL_TEXTURE_2D, fbo_depth_tex);
-            // if (checkOpenGLError() != GL_NO_ERROR) {
-            //     log<NUClear::WARN>("1) Failed to create depth texture.");
-            //     CleanUp();
-            //     return;
-            // }
-            // glTexImage2D(GL_TEXTURE_2D,
-            //              0,
-            //              GL_RGB,
-            //              output_dimensions[0],
-            //              output_dimensions[1],
-            //              0,
-            //              GL_DEPTH_COMPONENT,
-            //              GL_UNSIGNED_BYTE,
-            //              0);
-            // if (checkOpenGLError() != GL_NO_ERROR) {
-            //     log<NUClear::WARN>("2) Failed to create depth texture.");
-            //     CleanUp();
-            //     return;
-            // }
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            // if (checkOpenGLError() != GL_NO_ERROR) {
-            //     log<NUClear::WARN>("3) Failed to create depth texture.");
-            //     CleanUp();
-            //     return;
-            // }
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // if (checkOpenGLError() != GL_NO_ERROR) {
-            //     log<NUClear::WARN>("4) Failed to create depth texture.");
-            //     CleanUp();
-            //     return;
-            // }
-            // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbo_colour_tex, 0);
-
-            // if (checkOpenGLError() != GL_NO_ERROR) {
-            //     log<NUClear::WARN>("5) Failed to create depth texture.");
-            //     CleanUp();
-            //     return;
-            // }
-
             // Always check that our framebuffer is ok
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
                 log<NUClear::WARN>("Failed to generate framebuffer.");
@@ -340,17 +300,19 @@ namespace vision {
         on<Trigger<Image>, With<CameraParameters>, Single, MainThread>().then(
             "Image Reprojection", [this](const Image& image, const CameraParameters& cam) {
 
+                // Make sure we have valid buffers and textures.
                 if (glIsBuffer(vbo) && glIsBuffer(ebo) && glIsFramebuffer(fbo) && glIsTexture(fbo_colour_tex)
                     && glIsVertexArray(vao)) {
 
+                    // For benchmarking.
                     auto start = NUClear::clock::now();
 
+                    // Figure out cameras focal length in pixels.
                     arma::vec2 output_center    = arma::conv_to<arma::vec>::from(output_dimensions - 1) * 0.5;
                     double camFocalLengthPixels = arma::norm(output_center) / tan_half_FOV;
 
-                    GLfloat dims[2] = {GLfloat(image.dimensions[0]), GLfloat(image.dimensions[1])};
-                    GLfloat red[2]  = {0.0f, 0.0f};
-
+                    // Determine the pixel coordinate of the first red pixel in the bayer image.
+                    GLfloat red[2] = {0.0f, 0.0f};
                     switch (image.format) {
                         case utility::vision::FOURCC::GRBG:
                             red[0] = 1.0f;
@@ -371,6 +333,8 @@ namespace vision {
                         default: break;
                     }
 
+                    // Load the shader uniform variables with values.
+                    GLfloat dims[2] = {GLfloat(image.dimensions[0]), GLfloat(image.dimensions[1])};
                     glUniform1i(uniImageFormat, image.format);
                     glUniform1i(uniImageWidth, output_dimensions[0]);
                     glUniform1i(uniImageHeight, output_dimensions[1]);
@@ -384,7 +348,7 @@ namespace vision {
                         return;
                     }
 
-                    // Load the texture.
+                    // Load the current image as a texture in the shader program.
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, img_tex);
                     glTexImage2D(GL_TEXTURE_2D,
@@ -409,11 +373,7 @@ namespace vision {
                         return;
                     }
 
-                    // Clear the screen.
-                    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                    // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+                    // Render the scene to the framebuffer.
                     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
                     GLenum temp = GL_COLOR_ATTACHMENT0;
                     glDrawBuffers(1, &temp);
@@ -441,6 +401,7 @@ namespace vision {
                         return;
                     }
 
+                    // Create our output message.
                     ReprojectedImage msg;
                     msg.format        = utility::vision::FOURCC::RGB3;
                     msg.dimensions    = convert<unsigned int, 2>(output_dimensions);
@@ -458,6 +419,7 @@ namespace vision {
                         log<NUClear::WARN>("0) Failed to extract reprojected image.");
                     }
 
+                    // Pixel data is read out as RGBA pixels. We need to convert these to RGB pixels.
                     auto data = std::vector<uint8_t>(output_dimensions[0] * output_dimensions[1] * 4, 0);
                     glReadPixels(
                         0, 0, output_dimensions[0], output_dimensions[1], GL_RGBA, GL_UNSIGNED_BYTE, data.data());
@@ -471,25 +433,17 @@ namespace vision {
                         log<NUClear::WARN>("1) Failed to extract reprojected image.");
                     }
 
-                    // glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo_read);
-                    // void* ptr = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, pbo_size, GL_MAP_READ_BIT);
-                    // std::memcpy(msg.data.data(), ptr, pbo_size);
-                    // glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-
-                    // if (checkOpenGLError() != GL_NO_ERROR) {
-                    //     log<NUClear::WARN>("2) Failed to extract reprojected image.");
-                    // }
-
-                    // glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-
-                    utility::vision::saveImage("reprojected_image.ppm", msg);
-
+                    // Dump image to file.
+                    if (dump_images) {
+                        utility::vision::saveImage("reprojected_image.ppm", msg);
+                    }
 
                     if (checkOpenGLError() != GL_NO_ERROR) {
                         log<NUClear::WARN>("Failed to extract reprojected image.");
                     }
 
                     else {
+                        // Emit our reprojected image.
                         emit(std::make_unique<ReprojectedImage>(msg));
                         auto end   = NUClear::clock::now();
                         auto fp_ms = std::chrono::duration<double, std::milli>(end - start);
@@ -546,9 +500,6 @@ namespace vision {
             handles.push_back(handle);
             glAttachShader(shaderProgram, handle);
         }
-
-        // Bind fragment shader output to the correct output buffer.
-        // glBindFragDataLocation(shaderProgram, 0, "outColour");
 
         // Link the shader program.
         glLinkProgram(shaderProgram);

@@ -30,6 +30,7 @@ namespace vision {
         explicit Reprojection(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        bool dump_images;
         std::chrono::duration<double, std::milli> avg_fp_ms;
         size_t avg_count;
 
