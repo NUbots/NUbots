@@ -67,7 +67,7 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
         # Get all of our required shared libraries in our toolchain and send them
         # Only send toolchain files if ours are newer than the receivers.
         cprint('Installing toolchain library files', 'blue', attrs=['bold'])
-        libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
+        libs = glob.glob(os.path.join(platform_dir, 'lib', '**', '*.so*'), recursive=True)
         call(['rsync', '-avzuPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
 
         # Set rpath for all libs on the remote machine
