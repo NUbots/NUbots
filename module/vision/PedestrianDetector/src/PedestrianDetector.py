@@ -27,20 +27,8 @@ class PedestrianDetector(object):
                 self.od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(self.od_graph_def, name='')
 
-        # Setup OpenCL kernel for demosaicing
-        #self.demosaic = Demosaic(img.dtype, output_channels = output_channels, debug=False)
-        #self.demosaic.compile()
-
-        # TODO: Find a nice way to get this information at this point in time
-        #self.img.shape = (1024, 1280)
-        #self.channels = 3
-
-        #self.cl_src_img = clarray.empty(queue, img.shape, img.dtype)
-        #self.cl_dst_img = clarray.empty(queue, img.shape + (output_channels,), img.dtype)
-        #self.dst_img = np.empty(img.shape + (output_channels,), img.dtype)
-
-        #print('PedestrianDetector: Successfully compiled OpenCL kernel.')
-
+        self.avg_fp_ms = 0
+        self.avg_count = 0
 
     # @on(Configuration('PedestrianDetector.yaml'))
     # def PedestrianDetector_configfuration(self, config):
@@ -50,18 +38,7 @@ class PedestrianDetector(object):
     def run_detection(self, image):
         # Convert image to numpy array
         image_np = np.zeros((image.dimensions[1], image.dimensions[0], 3), dtype = np.uint8)
-        img = np.array(image.data).reshape((image.dimensions[1], image.dimensions[0], 1)).astype(np.uint8)
-        image_np[:,:,0] = img[:,:,0].copy()
-        image_np[:,:,1] = img[:,:,0].copy()
-        image_np[:,:,2] = img[:,:,0].copy()
-
-        # Demosaic image
-        #demosaic_start = time.time()
-        #event = cl.enqueue_copy(queue, self.cl_src_img.data, image_np, wait_for = None)
-        #event, self.cl_dst_img = demosaic(queue, self.cl_src_img, patterns[image.format], self.cl_dst_img, wait_for = event)
-        #event = cl.enqueue_copy(queue, self.dst_img, self.cl_dst_img.data, wait_for = event)
-        #demosaic_end = time.time()
-        #print('PedestrianDetector::run_detection: Demosaicing time: {0}'.format(demosaic_end - demosaic_start))
+        img = np.array(image.data).reshape((image.dimensions[1], image.dimensions[0], 3)).astype(np.uint8)
 
         with self.detection_graph.as_default():
             with tf.Session(graph=self.detection_graph) as sess:
@@ -86,7 +63,10 @@ class PedestrianDetector(object):
                         [detection_boxes, detection_scores, detection_classes, num_detections],
                         feed_dict={image_tensor: image_np_expanded})
                 detection_end = time.time()
-                print('PedestrianDetector::run_detection: Detection time: {0}'.format(detection_end - detection_start))
+                self.avg_fp_ms += detection_end - detection_start
+                self.avg_count += 1
+                print('PedestrianDetector::run_detection: Detection time: {0:.4f} s (avg: {1:.4f} s)'.format(
+                                                detection_end - detection_start, self.avg_fp_ms / self.avg_count))
 
                 msg = []
                 merged_boxes = self.non_max_suppression_fast(np.squeeze(boxes), 0.5)
