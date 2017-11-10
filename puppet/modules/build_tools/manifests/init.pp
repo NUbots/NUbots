@@ -66,9 +66,10 @@ class build_tools {
   package { 'python-pip': ensure => latest, }
   package { 'python3-dev': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
+  package { 'gperf': ensure => latest, }
 
-  package { 'beignet-dev': ensure => installed, }
-  package { 'clinfo': ensure => installed, }
+  package { 'beignet-dev': ensure => latest, }
+  package { 'clinfo': ensure => latest, }
 
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }
@@ -88,6 +89,7 @@ class build_tools {
                 /usr/bin/pip3 install wheel &&
                 /usr/bin/pip3 install numpy &&
                 /usr/bin/pip3 install tensorflow &&
+                /usr/bin/pip3 install mako &&
                 /usr/bin/pip3 install PyYAML',
     require => [ Package['python3-pip'], ]
   }
@@ -103,5 +105,11 @@ class build_tools {
                                              --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
+  }
+
+  exec {'fix_python':
+    command => '/usr/bin/update-alternatives --remove-all python \
+             ; /usr/bin/update-alternatives --install /usr/bin/python python /usr/bin/python3 10',
+    require => [ Package['python3-dev'], ]
   }
 }
