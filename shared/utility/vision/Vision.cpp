@@ -22,19 +22,37 @@
 #include <fstream>
 #include <string>
 
-#include "message/input/Image.h"
-
 namespace utility {
 namespace vision {
 
-    void saveImage(const std::string& file, const message::input::Image& image) {
-        std::ofstream ofs(file, std::ios::out | std::ios::binary);
-        ofs << fmt::format("P6\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
+    // template <typename T>
+    // void saveImage(const std::string& file, const T& image) {
+    //     std::ofstream ofs(file, std::ios::out | std::ios::binary);
+    //     ofs << fmt::format("P6\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
 
-        for (size_t row = 0; row < image.dimensions[1]; row++) {
-            for (size_t col = 0; col < image.dimensions[0]; col++) {
-                Pixel p =
-                    getPixel(col, row, image.dimensions[0], image.dimensions[1], image.data, FOURCC(image.format));
+    //     for (size_t row = 0; row < image.dimensions[1]; row++) {
+    //         for (size_t col = 0; col < image.dimensions[0]; col++) {
+    //             Pixel p =
+    //                 getPixel(col, row, image.dimensions[0], image.dimensions[1], image.data, FOURCC(image.format));
+    //             ofs.write(reinterpret_cast<char*>(&p.components.r), sizeof(p.components.r));
+    //             ofs.write(reinterpret_cast<char*>(&p.components.g), sizeof(p.components.g));
+    //             ofs.write(reinterpret_cast<char*>(&p.components.b), sizeof(p.components.b));
+    //         }
+    //     }
+
+    //     ofs.close();
+    // }
+
+    void saveImage(const std::string& file,
+                   const Eigen::Matrix<unsigned int, 2, 1>& dimensions,
+                   const FOURCC& format,
+                   const std::vector<uint8_t>& data) {
+        std::ofstream ofs(file, std::ios::out | std::ios::binary);
+        ofs << fmt::format("P6\n{} {}\n255\n", dimensions[0], dimensions[1]);
+
+        for (size_t row = 0; row < dimensions[1]; row++) {
+            for (size_t col = 0; col < dimensions[0]; col++) {
+                Pixel p = getPixel(col, row, dimensions[0], dimensions[1], data, FOURCC(format));
                 ofs.write(reinterpret_cast<char*>(&p.components.r), sizeof(p.components.r));
                 ofs.write(reinterpret_cast<char*>(&p.components.g), sizeof(p.components.g));
                 ofs.write(reinterpret_cast<char*>(&p.components.b), sizeof(p.components.b));
@@ -42,6 +60,14 @@ namespace vision {
         }
 
         ofs.close();
+    }
+
+    void saveImage(const std::string& file, const message::input::Image& image) {
+        saveImage(file, image.dimensions, FOURCC(image.format), image.data);
+    }
+
+    void saveImage(const std::string& file, const message::vision::ReprojectedImage& image) {
+        saveImage(file, image.dimensions, FOURCC(image.format), image.data);
     }
 
     const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {

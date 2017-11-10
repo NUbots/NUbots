@@ -29,6 +29,7 @@
 #include <aravis-0.6/arv.h>
 
 #include "message/input/Image.h"
+#include "message/vision/ReprojectedImage.h"
 
 namespace utility {
 namespace vision {
@@ -256,7 +257,15 @@ namespace vision {
     const Eigen::Matrix<int8_t, 5, 5> RED_AT_GREEN =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_GREEN_ARR, 5, 5);
 
+    // template <typename T>
+    // void saveImage(const std::string& file, const T& image);
+
+    void saveImage(const std::string& file,
+                   const Eigen::Matrix<unsigned int, 2, 1>& dimensions,
+                   const FOURCC& format,
+                   const std::vector<uint8_t>& data);
     void saveImage(const std::string& file, const message::input::Image& image);
+    void saveImage(const std::string& file, const message::vision::ReprojectedImage& image);
 
     const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
     uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
