@@ -12,10 +12,10 @@ namespace input {
     uint Camera::cameraCount = 0;
 
     using extension::Configuration;
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
-    using message::input::CameraParameters;
 
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -107,7 +107,7 @@ namespace input {
                 }
 
                 if (dumpImages) {
-                    utility::vision::saveImage(fmt::format("image-{}.ppm", count++), *msg);
+                    utility::vision::saveImage(fmt::format("image-{}.ppm", count++), *msg, true);
                 }
 
                 emit(msg);
