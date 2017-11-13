@@ -7,18 +7,9 @@
 
 #include <nuclear>
 
-extern "C" {
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <GLES3/gl31.h>
-#include <fcntl.h>
-#include <gbm.h>
-}
-
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_TARGET_OPENCL_VERSION 120
+#include <CL/cl2.hpp>
 
 namespace module {
 namespace vision {
@@ -33,33 +24,27 @@ namespace vision {
         bool dump_images;
         std::chrono::duration<double, std::milli> avg_fp_ms;
         size_t avg_count;
+        cl::Platform platform;
+        cl::Device device;
+        cl::Context context;
+        cl::CommandQueue command_queue;
+        cl::Program program;
+        bool use_gpu;
 
-        int32_t fd;
-        struct gbm_device* gbm;
-        EGLDisplay egl_display;
-        EGLContext core_context;
-
-        GLuint shader_program;
-        GLuint vao, vbo, ebo, fbo, fbo_colour_tex, fbo_depth_tex, img_tex, rbo;
-        GLuint pbo_size, pbo_read;
-        GLint uniImageFormat;
-        GLint uniImageWidth;
-        GLint uniImageHeight;
-        GLint uniResolution;
-        GLint uniFirstRed;
-        GLint uniRadiansPerPixel;
-        GLint uniCamFocalLengthPixels;
+        std::function<cl::Event(const cl::EnqueueArgs&,      // The number of workers to spawn etc
+                                const cl::Image2D&,          // The input image
+                                const cl::Sampler&,          // The input image sampler
+                                uint,                        // The format of the image
+                                float,                       // The number radians spanned by a single pixel in the
+                                                             // spherical image
+                                const cl::array<float, 2>&,  // The coordinates of the center of the spherical image
+                                float,                       // The focal length of the camera in pixels, for the
+                                                             // equirectangular image
+                                cl::Image2D&)>               // The output equirectanguler image
+            reprojection;
 
         arma::uvec2 output_dimensions;
         double tan_half_FOV;
-
-        GLenum checkOpenGLError();
-        GLuint loadShaderProgram(const std::vector<std::pair<std::string, GLuint>>& shaders);
-        bool loadShader(GLuint* shader, GLenum type, const std::string& file);
-        bool getShaderCompileStatus(GLuint shader);
-        bool getProgramLinkStatus(GLuint program);
-
-        void CleanUp();
     };
 
 }  // namespace vision
