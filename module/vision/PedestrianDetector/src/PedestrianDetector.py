@@ -8,10 +8,6 @@ import yaml
 import datetime
 import time
 
-#from kernels import *
-
-#patterns = {0x42474752: 0, 0x47425247: 1, 0x47524247: 2, 0x52474742: 3}
-
 @Reactor
 class PedestrianDetector(object):
 
