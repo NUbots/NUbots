@@ -36,54 +36,55 @@ class PedestrianDetector(object):
 
     @on(Trigger(ReprojectedImage), Single())
     def run_detection(self, image):
-        # Convert image to numpy array
-        image_np = np.zeros((image.dimensions[1], image.dimensions[0], 3), dtype = np.uint8)
-        img = np.array(image.data).reshape((image.dimensions[1], image.dimensions[0], 3)).astype(np.uint8)
+        if image.camera_id > 1:
+            # Convert image to numpy array
+            image_np = np.zeros((image.dimensions[1], image.dimensions[0], 3), dtype = np.uint8)
+            img = np.array(image.data).reshape((image.dimensions[1], image.dimensions[0], 3)).astype(np.uint8)
 
-        with self.detection_graph.as_default():
-            with tf.Session(graph=self.detection_graph) as sess:
-                # Definite input and output Tensors for detection_graph
-                image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
+            with self.detection_graph.as_default():
+                with tf.Session(graph=self.detection_graph) as sess:
+                    # Definite input and output Tensors for detection_graph
+                    image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
 
-                # Each box represents a part of the image where a particular object was detected.
-                detection_boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
+                    # Each box represents a part of the image where a particular object was detected.
+                    detection_boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
 
-                # Each score represent how level of confidence for each of the objects.
-                # Score is shown on the result image, together with the class label.
-                detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
-                detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
-                num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
+                    # Each score represent how level of confidence for each of the objects.
+                    # Score is shown on the result image, together with the class label.
+                    detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
+                    detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
+                    num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
 
-                # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-                image_np_expanded = np.expand_dims(image_np, axis = 0)
+                    # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+                    image_np_expanded = np.expand_dims(image_np, axis = 0)
 
-                # Actual detection.
-                detection_start = time.time()
-                (boxes, scores, classes, num) = sess.run(
-                        [detection_boxes, detection_scores, detection_classes, num_detections],
-                        feed_dict={image_tensor: image_np_expanded})
-                detection_end = time.time()
-                self.avg_fp_ms += detection_end - detection_start
-                self.avg_count += 1
-                print('PedestrianDetector::run_detection: Detection time: {0:.4f} s (avg: {1:.4f} s)'.format(
-                                                detection_end - detection_start, self.avg_fp_ms / self.avg_count))
+                    # Actual detection.
+                    detection_start = time.time()
+                    (boxes, scores, classes, num) = sess.run(
+                            [detection_boxes, detection_scores, detection_classes, num_detections],
+                            feed_dict={image_tensor: image_np_expanded})
+                    detection_end = time.time()
+                    self.avg_fp_ms += detection_end - detection_start
+                    self.avg_count += 1
+                    print('PedestrianDetector::run_detection: Detection time: {0:.4f} s (avg: {1:.4f} s)'.format(
+                                                    detection_end - detection_start, self.avg_fp_ms / self.avg_count))
 
-                msg = []
-                merged_boxes = self.non_max_suppression_fast(np.squeeze(boxes), 0.5)
-                for box in merged_boxes:
-                    obj = Obstacle()
-                    obj.visObject.timestamp = datetime.datetime.now()
-                    obj.visObject.camera_id = image.camera_id
-                    ymin, xmin, ymax, xmax = box.tolist()
-                    obj.shape.points = [[int(xmin * image.dimensions[0]), int(ymin * image.dimensions[1])],
-                                        [int(xmax * image.dimensions[0]), int(ymin * image.dimensions[1])],
-                                        [int(xmax * image.dimensions[0]), int(ymax * image.dimensions[1])],
-                                        [int(xmin * image.dimensions[0]), int(ymax * image.dimensions[1])]]
-                    obj.team = Obstacle.Team.UNKNOWN_TEAM
+                    msg = []
+                    merged_boxes = self.non_max_suppression_fast(np.squeeze(boxes), 0.5)
+                    for box in merged_boxes:
+                        obj = Obstacle()
+                        obj.visObject.timestamp = datetime.datetime.now()
+                        obj.visObject.camera_id = image.camera_id
+                        ymin, xmin, ymax, xmax = box.tolist()
+                        obj.shape.points = [[int(xmin * image.dimensions[0]), int(ymin * image.dimensions[1])],
+                                            [int(xmax * image.dimensions[0]), int(ymin * image.dimensions[1])],
+                                            [int(xmax * image.dimensions[0]), int(ymax * image.dimensions[1])],
+                                            [int(xmin * image.dimensions[0]), int(ymax * image.dimensions[1])]]
+                        obj.team = Obstacle.Team.UNKNOWN_TEAM
 
-                    msg.append(obj)
+                        msg.append(obj)
 
-                self.emit(msg)
+                    self.emit(msg)
 
     # https://stackoverflow.com/a/37850394
     def non_max_suppression_fast(self, boxes, overlap_threshold):
