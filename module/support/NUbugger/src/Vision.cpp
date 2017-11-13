@@ -61,7 +61,7 @@ namespace support {
 
             // send<Image>(image, 1, false, NUClear::clock::now());
             // send<Image>(std::make_unique<Image>(image), 1, false, NUClear::clock::now());
-            send(image, 1, false, NUClear::clock::now());
+            send(image, image.camera_id + 1, false, NUClear::clock::now());
 
             last_image = NUClear::clock::now();
         }));
@@ -73,7 +73,7 @@ namespace support {
                     return;
                 }
 
-                send(image, 1, false, NUClear::clock::now());
+                send(image, image.camera_id + 1, false, NUClear::clock::now());
 
                 last_reprojected_image = NUClear::clock::now();
             }));
