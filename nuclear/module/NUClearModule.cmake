@@ -62,7 +62,52 @@ FUNCTION(NUCLEAR_MODULE)
             "${CMAKE_CURRENT_SOURCE_DIR}/src/**.hpp"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/**.ipp"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cuh"
         )
+
+        # Check for any CUDA source files.
+        FILE(GLOB_RECURSE cuda_files
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cu"
+        )
+
+        FOREACH(inc ${MODULE_INCLUDES})
+            SET(includes ${includes} "-I${inc}")
+        ENDFOREACH()
+
+        FOREACH(lib ${MODULE_LIBRARIES})
+            SET(libraries ${libraries} "-l${lib}")
+        ENDFOREACH()
+
+
+        FOREACH(cuda_file ${cuda_files})
+            FILE(RELATIVE_PATH output_file "${CMAKE_CURRENT_SOURCE_DIR}/src" ${cuda_file})
+            SET(output_file "${CMAKE_CURRENT_BINARY_DIR}/${output_file}.o")
+
+            STRING(REPLACE " " ";" flags ${CUDA_NVCC_FLAGS})
+
+            ADD_CUSTOM_COMMAND(
+                OUTPUT ${output_file}
+                COMMAND ${CUDA_NVCC_EXECUTABLE}
+                ARGS
+                    -ccbin=${CUDA_HOST_COMPILER}
+                    --relocatable-device-code=false
+                    --compile
+                    -dlink
+                    -std=c++14
+                    -Xcompiler -fPIC
+                    ${cuda_file}
+                    ${flags}
+                    ${includes}
+                    -o ${output_file}
+                    ${libraries}
+                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                DEPENDS ${cuda_file}
+                        ${NUCLEAR_MESSAGE_LIBRARIES}
+                COMMENT "Compiling CUDA code for ${module_name}"
+            )
+
+            SET(cuda_src ${cuda_src} ${output_file})
+        ENDFOREACH()
 
     # Python Code
     ELSEIF(MODULE_LANGUAGE STREQUAL "PYTHON")
@@ -205,7 +250,7 @@ FUNCTION(NUCLEAR_MODULE)
     ######################
 
     # Add all our code to a library and if we are doing a shared build make it a shared library
-    SET(sources ${src} ${MODULE_SOURCES} ${data})
+    SET(sources ${src} ${MODULE_SOURCES} ${data} ${cuda_src})
 
     IF(NUCLEAR_SHARED_BUILD)
         ADD_LIBRARY(${module_target_name} SHARED ${sources})
