@@ -10,7 +10,7 @@ NUCLEAR_ROLE(
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
     input::Camera
-    vision::OpenCL::Reprojection
+    vision::CUDA::Reprojection
     vision::PedestrianDetector
     support::NUbugger
 
