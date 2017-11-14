@@ -1,0 +1,4 @@
+dump_images: false
+output:
+  dimensions: [800, 600]
+  FOV: 150.0             # in degrees
