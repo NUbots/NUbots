@@ -25,6 +25,8 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
+#include "message/platform/darwin/DarwinSensors.h"
+
 namespace module {
 namespace behaviour {
     namespace tools {
@@ -32,6 +34,7 @@ namespace behaviour {
         using extension::ExecuteScriptByName;
 
         using NUClear::message::CommandLineArguments;
+        using message::platform::darwin::DarwinSensors;
 
         using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
@@ -56,7 +59,10 @@ namespace behaviour {
         }
 
         ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), scripts(), id(size_t(this) * size_t(this) - size_t(this)) {
+            : Reactor(std::move(environment))
+            , sensorHandle()
+            , scripts()
+            , id(size_t(this) * size_t(this) - size_t(this)) {
 
             // Get the scripts to run from the command line
             on<Trigger<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
@@ -68,6 +74,12 @@ namespace behaviour {
                 }
             });
 
+            sensorHandle = on<Trigger<DarwinSensors>, Single>().then([this] {
+                executeNextScript();
+                sensorHandle.disable();
+                sensorHandle.unbind();
+            });
+
             on<Trigger<ExecuteNextScript>>().then([this] { executeNextScript(); });
 
             emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
@@ -75,7 +87,7 @@ namespace behaviour {
                 "Script Runner",
                 {std::pair<float, std::set<LimbID>>(
                     1, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-                [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteNextScript>()); },
+                [this](const std::set<LimbID>&) {},
                 [this](const std::set<LimbID>&) {
                     // We should always be the only running thing
                 },

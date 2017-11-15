@@ -71,6 +71,10 @@ namespace platform {
             // Voltage (in volts)
             sensors.voltage = Convert::voltage(data.cm730.voltage);
 
+            if (sensors.voltage <= maxVoltage) {
+                sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+            }
+
             // Accelerometer (in m/s^2)
             sensors.accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
             sensors.accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
@@ -129,10 +133,6 @@ namespace platform {
                 // Get a reference to the servo we are populating
                 DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(i, sensors);
 
-                // Error code
-                servo.errorFlags = data.servoErrorCodes[i] == 0xFF
-                                       ? DarwinSensors::Error::TIMEOUT
-                                       : DarwinSensors::Error(data.servoErrorCodes[i]).value;
 
                 // Booleans
                 servo.torqueEnabled = servoState[i].torqueEnabled;
@@ -149,21 +149,71 @@ namespace platform {
                 servo.goalPosition = servoState[i].goalPosition;
                 servo.movingSpeed  = servoState[i].movingSpeed;
 
-                // Present Data
-                servo.presentPosition = Convert::servoPosition(i, data.servos[i].presentPosition);
-                servo.presentSpeed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
-                servo.load            = Convert::servoLoad(i, data.servos[i].load);
+                // If we are faking this hardware, simulate its motion
+                if (servoState[i].simulated) {
+                    // Work out how fast we should be moving
+                    // 5.236 == 50 rpm which is similar to the max speed of the servos
+                    float movingSpeed =
+                        (servoState[i].movingSpeed == 0 ? 5.236 : servoState[i].movingSpeed) / UPDATE_FREQUENCY;
 
-                // Diagnostic Information
-                servo.voltage     = Convert::voltage(data.servos[i].voltage);
-                servo.temperature = Convert::temperature(data.servos[i].temperature);
+                    // Get our offset for this servo and apply it
+                    // The values are now between -pi and pi around the servos axis
+                    auto offset  = Convert::SERVO_OFFSET[i];
+                    auto present = utility::math::angle::normalizeAngle(servoState[i].presentPosition - offset);
+                    auto goal    = utility::math::angle::normalizeAngle(servoState[i].goalPosition - offset);
+
+                    // We have reached our destination
+                    if (std::abs(present - goal) < movingSpeed) {
+                        servoState[i].presentPosition = servoState[i].goalPosition;
+                        servoState[i].presentSpeed    = 0;
+                    }
+                    // We have to move towards our destination at moving speed
+                    else {
+                        servoState[i].presentPosition = utility::math::angle::normalizeAngle(
+                            (present + movingSpeed * (goal > present ? 1 : -1)) + offset);
+                        servoState[i].presentSpeed = servoState[i].movingSpeed;
+                    }
+
+                    // Store our simulated values
+                    servo.presentPosition = servoState[i].presentPosition;
+                    servo.presentSpeed    = servoState[i].goalPosition;
+                    servo.load            = servoState[i].load;
+                    servo.voltage         = servoState[i].voltage;
+                    servo.temperature     = servoState[i].temperature;
+                }
+
+                // If we are using real data, get it from the packet
+                else {
+                    // Error code
+                    servo.errorFlags = data.servoErrorCodes[i] == 0xFF
+                                           ? DarwinSensors::Error::TIMEOUT
+                                           : DarwinSensors::Error(data.servoErrorCodes[i]).value;
+
+                    // Present Data
+                    servo.presentPosition = Convert::servoPosition(i, data.servos[i].presentPosition);
+                    servo.presentSpeed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
+                    servo.load            = Convert::servoLoad(i, data.servos[i].load);
+
+                    // Diagnostic Information
+                    servo.voltage     = Convert::voltage(data.servos[i].voltage);
+                    servo.temperature = Convert::temperature(data.servos[i].temperature);
+
+                    // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
+                    if (servo.voltage <= maxVoltage) {
+                        servo.errorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+                    }
+                }
             }
-
             return sensors;
         }
 
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState() {
+            : Reactor(std::move(environment))
+            , darwin("/dev/CM730")
+            , cm730State()
+            , servoState()
+            , maxVoltage(0.0f)
+            , minVoltage(0.0f) {
 
             on<Startup>().then("HardwareIO Startup", [this] {
                 uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
@@ -175,98 +225,102 @@ namespace platform {
                 log<NUClear::INFO>("CM730 Firmware Version:", version.str());
             });
 
-            on<Configuration>("DarwinPlatform.yaml").then([this](const Configuration& config) {
+            on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
+
+                // Set config for the packet waiting
                 darwin.setConfig(config);
 
-                for (size_t i = 0; i < config["servo_offset"].config.size(); i++) {
-                    Convert::SERVO_OFFSET[i] = config["servo_offset"][i].as<Expression>();
+                for (size_t i = 0; i < config["servos"].config.size(); ++i) {
+                    Convert::SERVO_OFFSET[i]    = config["servos"][i]["offset"].as<Expression>();
+                    Convert::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
+                    servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
                 }
 
-                for (size_t i = 0; i < config["servo_direction"].config.size(); i++) {
-                    Convert::SERVO_DIRECTION[i] = config["servo_direction"][i].as<int>();
-                }
+                maxVoltage = config["battery"]["max"].as<float>();
+                minVoltage = config["battery"]["min"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
-            on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
+            on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
+                "Hardware Loop", [this] {
 
-                // Our final sensor output
-                auto sensors = std::make_unique<DarwinSensors>();
+                    // Our final sensor output
+                    auto sensors = std::make_unique<DarwinSensors>();
 
-                std::vector<uint8_t> command = {0xFF,
-                                                0xFF,
-                                                Darwin::ID::BROADCAST,
-                                                0x00,  // The size, fill this in later
-                                                Darwin::DarwinDevice::Instruction::SYNC_WRITE,
-                                                Darwin::MX28::Address::D_GAIN,
-                                                0x0A};
+                    std::vector<uint8_t> command = {0xFF,
+                                                    0xFF,
+                                                    Darwin::ID::BROADCAST,
+                                                    0x00,  // The size, fill this in later
+                                                    Darwin::DarwinDevice::Instruction::SYNC_WRITE,
+                                                    Darwin::MX28::Address::D_GAIN,
+                                                    0x0A};
 
-                for (uint i = 0; i < servoState.size(); ++i) {
+                    for (uint i = 0; i < servoState.size(); ++i) {
 
-                    if (servoState[i].dirty) {
+                        if (servoState[i].dirty) {
 
-                        // Clear our dirty flag
-                        servoState[i].dirty = false;
+                            // Clear our dirty flag
+                            servoState[i].dirty = false;
 
-                        // If our torque should be disabled then we disable our torque
-                        if (servoState[i].torqueEnabled
-                            && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
-                            servoState[i].torqueEnabled = false;
-                            darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
-                        }
-                        else {
-                            // If our torque was disabled but is now enabled
-                            if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
-                                && servoState[i].torque != 0) {
-                                servoState[i].torqueEnabled = true;
-                                darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
+                            // If our torque should be disabled then we disable our torque
+                            if (servoState[i].torqueEnabled
+                                && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                                servoState[i].torqueEnabled = false;
+                                darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                             }
+                            else {
+                                // If our torque was disabled but is now enabled
+                                if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
+                                    && servoState[i].torque != 0) {
+                                    servoState[i].torqueEnabled = true;
+                                    darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
+                                }
 
-                            // Get our goal position and speed
-                            uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                            uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
-                            uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
+                                // Get our goal position and speed
+                                uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                                uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
+                                uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
 
-                            // Add to our sync write command
-                            command.insert(command.end(),
-                                           {
-                                               uint8_t(i + 1),
-                                               Convert::gainInverse(servoState[i].dGain),  // D Gain
-                                               Convert::gainInverse(servoState[i].iGain),  // I Gain
-                                               Convert::gainInverse(servoState[i].pGain),  // P Gain
-                                               0,                                          // Reserved
-                                               uint8_t(0xFF & goalPosition),               // Goal Position L
-                                               uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
-                                               uint8_t(0xFF & movingSpeed),                // Goal Speed L
-                                               uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
-                                               uint8_t(0xFF & torque),                     // Torque Limit L
-                                               uint8_t(0xFF & (torque >> 8))               // Torque Limit H
-                                           });
+                                // Add to our sync write command
+                                command.insert(command.end(),
+                                               {
+                                                   uint8_t(i + 1),
+                                                   Convert::gainInverse(servoState[i].dGain),  // D Gain
+                                                   Convert::gainInverse(servoState[i].iGain),  // I Gain
+                                                   Convert::gainInverse(servoState[i].pGain),  // P Gain
+                                                   0,                                          // Reserved
+                                                   uint8_t(0xFF & goalPosition),               // Goal Position L
+                                                   uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
+                                                   uint8_t(0xFF & movingSpeed),                // Goal Speed L
+                                                   uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
+                                                   uint8_t(0xFF & torque),                     // Torque Limit L
+                                                   uint8_t(0xFF & (torque >> 8))               // Torque Limit H
+                                               });
+                            }
                         }
                     }
-                }
 
-                // Write our data (if we need to)
-                if (command.size() > 7) {
-                    // Calculate our length
-                    command[Darwin::Packet::LENGTH] = command.size() - 3;
+                    // Write our data (if we need to)
+                    if (command.size() > 7) {
+                        // Calculate our length
+                        command[Darwin::Packet::LENGTH] = command.size() - 3;
 
-                    // Do a checksum
-                    command.push_back(0);
-                    command.back() = Darwin::calculateChecksum(command.data());
+                        // Do a checksum
+                        command.push_back(0);
+                        command.back() = Darwin::calculateChecksum(command.data());
 
-                    darwin.sendRawCommand(command);
-                }
+                        darwin.sendRawCommand(command);
+                    }
 
-                // Read our data
-                Darwin::BulkReadResults data = darwin.bulkRead();
+                    // Read our data
+                    Darwin::BulkReadResults data = darwin.bulkRead();
 
-                // Parse our data
-                *sensors = parseSensors(data);
+                    // Parse our data
+                    *sensors = parseSensors(data);
 
-                // Send our nicely computed sensor data out to the world
-                emit(std::move(sensors));
-            });
+                    // Send our nicely computed sensor data out to the world
+                    emit(std::move(sensors));
+                });
 
             // This trigger writes the servo positions to the hardware
             on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
@@ -274,7 +328,6 @@ namespace platform {
 
                 // Loop through each of our commands
                 for (const auto& command : commands) {
-
                     float diff = utility::math::angle::difference(
                         command.position,
                         utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);

@@ -57,7 +57,7 @@ namespace support {
                     catch (...) {
                     }
 
-                    // Print our exception detals
+                    // Print our exception details
                     std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                               << Colour::brightred << "Exception:"
                               << " " << Colour::brightred << utility::support::evil::exception_name << " "
@@ -86,7 +86,7 @@ namespace support {
 
                         std::cerr << reactor << " "
                                   << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                                  << Colour::brightred << "Exception of unkown type" << std::endl;
+                                  << Colour::brightred << "Exception of unknown type" << std::endl;
                     }
 #endif
                 }

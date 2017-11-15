@@ -28,7 +28,7 @@
 
 #include "DarwinVirtualLoadSensor.h"
 #include "MotionModel.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "utility/math/matrix/Rotation3D.h"
 
 
@@ -52,8 +52,9 @@ namespace platform {
                 Config() : battery(), motionFilter(), buttons() {}
 
                 struct Battery {
-                    Battery() : chargedVoltage(0.0f), flatVoltage(0.0f) {}
+                    Battery() : chargedVoltage(0.0f), nominalVoltage(0.0f), flatVoltage(0.0f) {}
                     float chargedVoltage;
+                    float nominalVoltage;
                     float flatVoltage;
                 } battery;
 

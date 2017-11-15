@@ -1,18 +1,22 @@
 ransac:
-  minimum_points_for_consensus: 10
-  maximum_iterations_per_fitting: 50
-  maximum_fitted_models: 5
-  consensus_error_threshold: 10
-maximum_disagreement_ratio: 1.3
-maximum_relative_seed_point_distance: 0.2
-measurement_distance_variance_factor: 0.5
+  minimum_points_for_consensus: 15
+  maximum_iterations_per_fitting: 100
+  maximum_fitted_models: 3
+  consensus_error_threshold: 0.000001
+maximum_disagreement_ratio: 0.8
+maximum_relative_seed_point_distance: 0.1
+measurement_distance_variance_factor: 0.1
 measurement_bearing_variance: 0.2
 measurement_elevation_variance: 0.2
-green_ratio_threshold: 0.2
+green_ratio_threshold: 0.1
 green_radial_samples: 12
 green_angular_samples: 12
+ball_screen_covariance: [0.1, 0.01, 0.01]
 
 print_throwout_logs: false
+
+ball_angular_cov: [0.1,0.01,0.01]
+
 
 clustering:
   number_of_clusters: 4 # set the number of Gaussians
@@ -23,17 +27,23 @@ clustering:
 
   variance_floor: 5 # the variance floor (smallest allowed value) for the diagonal covariances
 
-  print_status: false # either true or false; enable or disable printing of progress during the k-means and EM algorithms
+  print_status: false # either true or false; enable or disable printing of progress during the k-means algorithm
 
-  dist_mode: eucl_dist # specifies the distance used during the seeding of initial means and k-means clustering:
+  dist_mode: eucl_dist # specifies the distance used during the seeding of initial means and k-means
     # Parameters for dist_mode:
-    # eucl_dist     Euclidean distance
-    # maha_dist     Mahalanobis distance, which uses a global diagonal covariance matrix estimated from the training samples
+    # eucl_dist         Euclidean distance
+    # maha_dist         Mahalanobis distance, which uses a global diagonal covariance matrix estimated
 
-  seed_mode: random_spread # specifies how the initial means are seeded prior to running k-means and/or EM algorithms
+  seed_mode: random_spread # specifies how the initial means are seeded prior to running k-means
     # Parameters for seed_mode:
-    # keep_existing     keep the existing model (do not modify the means, covariances and hefts)
-    # static_subset     a subset of the training samples (repeatable)
-    # random_subset     a subset of the training samples (random)
-    # static_spread     a maximally spread subset of training samples (repeatable)
-    # random_spread     a maximally spread subset of training samples (random start)
+    # keep_existing             keep the existing model (do not modify the means, covariances and he
+    # static_subset             a subset of the training samples (repeatable)
+    # random_subset             a subset of the training samples (random)
+    # static_spread             a maximally spread subset of training samples (repeatable)
+    # random_spread             a maximally spread subset of training samples (random start)
+
+
+
+
+
+

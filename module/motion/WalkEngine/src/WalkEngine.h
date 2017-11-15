@@ -35,38 +35,29 @@
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
-
 #include "message/input/PostureRecognition.h"
-
 #include "message/motion/BalanceCommand.h"
 #include "message/motion/FootMotionCommand.h"
 #include "message/motion/FootPlacementCommand.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/TorsoMotionCommand.h"
 #include "message/motion/WalkCommand.h"
 
-#include "message/localisation/FieldObject.h"
-
 #include "utility/behaviour/Action.h"
-
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
-
 #include "utility/math/angle.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
-
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace motion {

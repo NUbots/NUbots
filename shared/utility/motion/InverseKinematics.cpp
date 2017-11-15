@@ -88,8 +88,12 @@ namespace motion {
 
             // TODO remove this. It was due to wrong convention use
             utility::math::matrix::Transform3D inputCoordinatesToCalcCoordinates;
-            inputCoordinatesToCalcCoordinates << 0 << 1 << 0 << 0 << arma::endr << 1 << 0 << 0 << 0 << arma::endr << 0
-                                              << 0 << -1 << 0 << arma::endr << 0 << 0 << 0 << 1;
+            // clang-format off
+            inputCoordinatesToCalcCoordinates << 0 << 1 <<  0 << 0 << arma::endr
+                                              << 1 << 0 <<  0 << 0 << arma::endr
+                                              << 0 << 0 << -1 << 0 << arma::endr
+                                              << 0 << 0 <<  0 << 1;
+            // clang-format on
             // Rotate input position from standard robot coords to foot coords
             // NUClear::log<NUClear::DEBUG>("Target Original\n", target);
             arma::vec4 fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);

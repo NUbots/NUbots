@@ -23,9 +23,9 @@
 
 #include "extension/Configuration.h"
 
+#include "message/localisation/Field.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/HeadCommand.h"
-#include "message/motion/KinematicsModels.h"
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
@@ -50,7 +50,7 @@ namespace behaviour {
         using message::vision::Ball;
         using message::vision::VisionObject;
         // using message::localisation::Ball;
-        using message::localisation::Self;
+        using message::localisation::Field;
         using LocBall = message::localisation::Ball;
         using message::input::Sensors;
         using message::motion::HeadCommand;
@@ -225,8 +225,8 @@ namespace behaviour {
                             if (ballMaxPriority) {
                                 headToBodyRotation =
                                     Transform3D(convert<double, 4, 4>(
-                                                    ballFixationObjects[0].visObject.sensors->forwardKinematics.at(
-                                                        ServoID::HEAD_PITCH)))
+                                                    ballFixationObjects[0]
+                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
                                     Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->world))
@@ -236,8 +236,8 @@ namespace behaviour {
                             else {
                                 headToBodyRotation =
                                     Transform3D(convert<double, 4, 4>(
-                                                    goalFixationObjects[0].visObject.sensors->forwardKinematics.at(
-                                                        ServoID::HEAD_PITCH)))
+                                                    goalFixationObjects[0]
+                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
                                     Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->world))
@@ -247,7 +247,7 @@ namespace behaviour {
                         }
                         else {
                             headToBodyRotation =
-                                Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)))
+                                Transform3D(convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]))
                                     .rotation();
                             orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
                         }
@@ -395,12 +395,11 @@ namespace behaviour {
                         goals.push_back(goal);
                     }
                     fixationObjects.push_back(combineVisionObjects(goals));
-                    search =
-                        (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end()
-                         ||  // If left post not visible or
-                         visiblePosts.find(Goal::Side::RIGHT)
-                             == visiblePosts
-                                    .end());  // right post not visible, then we need to search for the other goal post
+                    search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||  // If left post not visible
+                              visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());  // or right post not
+                                                                                            // visible, then we need to
+                                                                                            // search for the other goal
+                                                                                            // post
                 }
                 else {
                     search = true;

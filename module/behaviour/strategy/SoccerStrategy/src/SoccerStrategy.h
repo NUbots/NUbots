@@ -29,7 +29,8 @@
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/Ball.h"
+#include "message/localisation/Field.h"
 #include "message/support/FieldDescription.h"
 
 namespace module {
@@ -101,9 +102,9 @@ namespace behaviour {
             NUClear::clock::time_point ballLastMeasured =
                 NUClear::clock::now() - std::chrono::seconds(600);  // TODO: unhack
             NUClear::clock::time_point ballSearchStartTime;
-            NUClear::clock::time_point selfLastMeasured;
+            NUClear::clock::time_point goalLastMeasured;
             void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
-            void penaltyLocalisationReset();
+            void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
             void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
 
             void standStill();
@@ -116,12 +117,11 @@ namespace behaviour {
             bool pickedUp(const message::input::Sensors& sensors);
             bool penalised();
             bool ballDistance(const message::localisation::Ball& ball);
-            void goalieWalk(const std::vector<message::localisation::Self>& selfs,
-                            const std::vector<message::localisation::Ball>& balls);
-            arma::vec2 getKickPlan(const std::vector<message::localisation::Self>& selfs,
+            void goalieWalk(const message::localisation::Field& field, const message::localisation::Ball& ball);
+            arma::vec2 getKickPlan(const message::localisation::Field& field,
                                    const message::support::FieldDescription& fieldDescription);
-            void play(const std::vector<message::localisation::Self>& selfs,
-                      const std::vector<message::localisation::Ball>& balls,
+            void play(const message::localisation::Field& field,
+                      const message::localisation::Ball& ball,
                       const message::support::FieldDescription& fieldDescription,
                       const message::input::GameState::Data::Mode& mode);
 

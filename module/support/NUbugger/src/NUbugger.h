@@ -26,10 +26,9 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/Subsumption.h"
+#include "message/input/CameraParameters.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
-#include "message/localisation/FieldObject.h"
-#include "message/support/nubugger/Overview.h"
 
 namespace module {
 namespace support {
@@ -75,7 +74,6 @@ namespace support {
         bool networkEnabled = false;
         bool fileEnabled    = false;
 
-        message::support::nubugger::Overview overview;
         std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
 
         std::ofstream outputFile;
@@ -83,6 +81,9 @@ namespace support {
         std::mutex networkMutex;
         std::mutex fileMutex;
 
+        NUClear::clock::time_point last_camera_image = NUClear::clock::now();
+        NUClear::clock::time_point last_seen_ball    = NUClear::clock::now();
+        NUClear::clock::time_point last_seen_goal    = NUClear::clock::now();
 
         void provideOverview();
         void provideDataPoints();
@@ -119,10 +120,6 @@ namespace support {
                 emit<Scope::NETWORK>(msg, "nusight", reliable);
             }
         }
-
-        void EmitLocalisationModels(const std::unique_ptr<message::localisation::FieldObject>& robot_model,
-                                    const std::unique_ptr<message::localisation::FieldObject>& ball_model);
-
         // message::support::nubugger::Message::Type getMessageTypeFromString(std::string type_name);
         // std::string getStringFromMessageType(message::support::nubugger::Message::Type type);
     public:

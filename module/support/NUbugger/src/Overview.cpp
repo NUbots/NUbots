@@ -19,14 +19,21 @@
 
 #include "NUbugger.h"
 
+#include "message/behaviour/Behaviour.h"
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/WalkPath.h"
+#include "message/input/GameState.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
+#include "message/localisation/Ball.h"
+#include "message/localisation/Field.h"
 #include "message/motion/WalkCommand.h"
+#include "message/support/GlobalConfig.h"
+#include "message/support/nubugger/Overview.h"
 #include "message/vision/VisionObjects.h"
 
 #include "utility/localisation/transform.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
 
@@ -37,20 +44,21 @@ namespace module {
 namespace support {
 
     using NUClear::message::CommandLineArguments;
+    using message::support::nubugger::Overview;
     using message::behaviour::Behaviour;
     using message::behaviour::WalkPath;
     using message::behaviour::KickPlan;
     using message::input::Image;
     using message::input::Sensors;
     using message::input::GameState;
-    using message::localisation::Self;
+    using message::support::GlobalConfig;
+    using message::localisation::Field;
     using LocalisationBall = message::localisation::Ball;
     using VisionBall       = message::vision::Ball;
     using VisionGoal       = message::vision::Goal;
-    using VisionObstacle   = message::vision::Obstacle;
     using message::motion::WalkCommand;
-
-    using utility::localisation::transform::RobotToWorldTransform;
+    using utility::math::matrix::Transform3D;
+    using utility::math::matrix::Rotation3D;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview
@@ -58,88 +66,120 @@ namespace support {
      */
     void NUbugger::provideOverview() {
 
-        handles["overview"].push_back(on<Every<1, std::chrono::seconds>, Single, Priority::LOW>().then([this] {
-            // Send the overview packet
-            send(overview, 0, false, NUClear::clock::now());
-        }));
-
-        handles["overview"].push_back(on<Trigger<CommandLineArguments>, Single, Priority::LOW>().then(
-            [this](const CommandLineArguments& arguments) {
-
-                std::string role_name = arguments.at(0);
-                auto index            = role_name.rfind('/');
-                if (index != std::string::npos) {
-                    role_name = role_name.substr(index + 1);
-                }
-                overview.role_name = role_name;
-
-            }));
-
         handles["overview"].push_back(
-            on<Trigger<Behaviour::State>, Single, Priority::LOW>().then([this](const Behaviour::State& state) {
+            on<Every<2, Per<std::chrono::seconds>>,
+               Optional<With<GlobalConfig>>,
+               Optional<With<CommandLineArguments>>,
+               Optional<With<Sensors>>,
+               Optional<With<Behaviour::State>>,
+               Optional<With<Field>>,
+               Optional<With<LocalisationBall>>,
+               Optional<With<KickPlan>>,
+               Optional<With<GameState>>,
+               Optional<With<WalkPath>>,
+               Optional<With<WalkCommand>>,
+               Single,
+               Priority::LOW>()
+                .then([this](std::shared_ptr<const GlobalConfig> global,
+                             std::shared_ptr<const CommandLineArguments> cli,
+                             std::shared_ptr<const Sensors> sensors,
+                             std::shared_ptr<const Behaviour::State> behaviour_state,
+                             std::shared_ptr<const Field> field,
+                             std::shared_ptr<const LocalisationBall> loc_ball,
+                             std::shared_ptr<const KickPlan> kick_plan,
+                             std::shared_ptr<const GameState> game_state,
+                             std::shared_ptr<const WalkPath> walk_path,
+                             std::shared_ptr<const WalkCommand> walk_command) {
 
-                overview.behaviour_state = state;
 
-            }));
+                    Overview msg;
 
-        handles["overview"].push_back(
-            on<Trigger<KickPlan>, Single, Priority::LOW>().then([this](const KickPlan& /*kickPlan*/) {
+                    // Set properties
+                    msg.timestamp       = NUClear::clock::now();
+                    msg.robot_id        = global ? global->playerId : 0;
+                    msg.role_name       = cli ? cli->at(0) : "";
+                    msg.battery         = sensors ? sensors->battery : 0;
+                    msg.voltage         = sensors ? sensors->voltage : 0;
+                    msg.behaviour_state = behaviour_state ? msg.behaviour_state : Behaviour::State(0);
 
-                // TODO fix runtime error:
-                // *overview.kick_target = convert<double, 2>(kickPlan.target);
+                    if (sensors) {
+                        // Get our world transform
+                        Transform3D Htw(convert<double, 4, 4>(sensors->world));
 
-            }));
+                        // If we have field information
+                        if (field) {
+                            Transform3D Hfw =
+                                utility::localisation::fieldStateToTransform3D(convert<double, 3>(field->position));
 
-        handles["overview"].push_back(
-            on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
+                            // Get our torso in field space
+                            Transform3D Hft = Hfw * Htw.i();
+                            arma::vec3 rTFf = Hft.translation();
 
-                overview.voltage = sensors.voltage;
-                overview.battery = sensors.battery;
+                            // Get the rotation
+                            Rotation3D Rft = Hft.rotation();
 
-            }));
+                            // Store our position from field to torso
+                            msg.robot_position            = Eigen::Vector3f(rTFf[0], rTFf[1], Rft.yaw());
+                            msg.robot_position_covariance = field->covariance.cast<float>();
 
-        handles["overview"].push_back(
-            on<Trigger<std::vector<Self>>, Single, Priority::LOW>().then([this](const std::vector<Self>& selfs) {
+                            if (loc_ball) {
+                                // Get our ball in field space
+                                arma::vec2 rBWw_2d = convert<double, 2>(loc_ball->position);
+                                arma::vec4 rBWw    = {rBWw_2d[0], rBWw_2d[1], 0, 1};
+                                arma::vec4 rBFf    = Hfw * rBWw;
 
-                // Retrieve the first self in the vector.
-                Self self = selfs.front();
+                                // Store our position from field to ball
+                                msg.ball_position            = Eigen::Vector2f(rBFf[0], rBFf[1]);
+                                msg.ball_position_covariance = loc_ball->covariance.cast<float>();
+                            }
+                        }
 
-                // Set robot position.
-                overview.robot_position = self.locObject.position;
+                        // if (walk_path) {
+                        //     // Set our walk path plan
+                        //     if (walk_path) {
+                        //         for (const auto& state : walk_path->states) {
+                        //             // Make these positions in field space
+                        //             msg.path_plan.push_back(state);
+                        //         }
+                        //     }
+                        // }
+                    }
 
-                // Set robot position covariance.
-                overview.robot_position_covariance = self.locObject.position_cov;
+                    if (kick_plan) {
+                        msg.kick_target = kick_plan->target.cast<float>();
+                    }
 
-                // Set robot heading.
-                overview.robot_heading = self.heading;
-            }));
+                    // Set our game mode properties
+                    msg.game_mode  = game_state ? game_state->data.mode : GameState::Data::Mode(0);
+                    msg.game_phase = game_state ? game_state->data.phase : GameState::Data::Phase(0);
+                    msg.penalty_reason =
+                        game_state ? game_state->data.self.penalty_reason : GameState::Data::PenaltyReason(0);
 
-        handles["overview"].push_back(
-            on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Single, Priority::LOW>().then(
-                [this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
+                    // Set our last seen times
+                    msg.last_camera_image = last_camera_image;
+                    msg.last_camera_image = last_seen_ball;
+                    msg.last_camera_image = last_seen_goal;
 
-                    // Retrieve the first ball and self in the vector.
-                    LocalisationBall ball = balls.front();
-                    Self self             = selfs.front();
+                    // Set our walk command
+                    if (walk_command) {
+                        msg.walk_command = walk_command->command.cast<float>();
+                    }
+                    else {
+                        msg.walk_command = Eigen::Vector3f::Zero();
+                    }
 
-                    // Set local ball position.
-                    overview.ball_position = ball.locObject.position;
-
-                    // Set world ball position.
-                    overview.ball_world_position =
-                        convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position),
-                                                                 convert<double, 2>(self.heading),
-                                                                 convert<double, 2>(ball.locObject.position)));
+                    send(msg, 0, false, NUClear::clock::now());
                 }));
 
-        handles["overview"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then(
-            [this] { overview.last_camera_image = NUClear::clock::now(); }));
+
+        handles["overview"].push_back(
+            on<Trigger<Image>, Single, Priority::LOW>().then([this] { last_camera_image = NUClear::clock::now(); }));
 
         handles["overview"].push_back(on<Trigger<std::vector<VisionBall>>, Single, Priority::LOW>().then(
             [this](const std::vector<VisionBall>& balls) {
 
                 if (!balls.empty()) {
-                    overview.last_seen_ball = NUClear::clock::now();
+                    last_seen_ball = NUClear::clock::now();
                 }
             }));
 
@@ -147,38 +187,9 @@ namespace support {
             [this](const std::vector<VisionGoal>& goals) {
 
                 if (!goals.empty()) {
-                    overview.last_seen_goal = NUClear::clock::now();
+                    last_seen_goal = NUClear::clock::now();
                 }
             }));
-
-        handles["overview"].push_back(on<Trigger<std::vector<VisionObstacle>>, Single, Priority::LOW>().then(
-            [this](const std::vector<VisionObstacle>& obstacles) {
-
-                if (!obstacles.empty()) {
-                    overview.last_seen_obstacle = NUClear::clock::now();
-                }
-            }));
-
-        handles["overview"].push_back(
-            on<Trigger<GameState>, Single, Priority::LOW>().then([this](const GameState& gameState) {
-
-                overview.game_mode      = gameState.data.mode;
-                overview.game_phase     = gameState.data.phase;
-                overview.penalty_reason = gameState.data.self.penalty_reason;
-            }));
-
-        handles["overview"].push_back(
-            on<Trigger<WalkPath>, Single, Priority::LOW>().then([this](const WalkPath& walkPath) {
-
-                overview.path_plan.clear();
-
-                for (auto state : walkPath.states) {
-                    overview.path_plan.push_back(Eigen::Vector2d(state.x(), state.y()));
-                }
-            }));
-
-        handles["overview"].push_back(on<Trigger<WalkCommand>, Single, Priority::LOW>().then(
-            [this](const WalkCommand& walkCommand) { overview.walk_command = walkCommand.command; }));
     }
 }  // namespace support
 }  // namespace module

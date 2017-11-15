@@ -36,11 +36,12 @@ namespace math {
             Vector point;
 
             Plane() : normal(arma::fill::zeros), point(arma::fill::zeros) {}
-            Plane(Vector normal_, Vector point_) : normal(arma::fill::zeros), point(arma::fill::zeros) {
+            Plane(Vector normal_, Vector point_ = arma::zeros(n))
+                : normal(arma::fill::zeros), point(arma::fill::zeros) {
                 setFromNormal(normal_, point_);
             }
 
-            void setFromNormal(Vector normal_, Vector point_) {
+            void setFromNormal(Vector normal_, Vector point_ = arma::zeros(n)) {
                 if (arma::norm(normal_, 1) <= 0) {
                     throw std::domain_error(
                         "Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
@@ -64,11 +65,27 @@ namespace math {
                     throw std::domain_error("Plane::intersect - Plane does not meet line!");
                 }
                 double tIntersection = arma::dot(point - l.point, normal) / lDotN;
-                if (tIntersection < l.tLimits[0] || tIntersection > l.tLimits[1]) {
+                if (!l.tValid(tIntersection)) {
                     throw std::domain_error(
-                        "Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
+                        "Plane::intersect - Plane does not meet line segment (intersection falls off segment)! t = "
+                        + std::to_string(tIntersection));
                 }
                 return tIntersection * l.direction + l.point;
+            }
+
+            double distanceToPoint(const Vector& p) const {
+                return std::fabs(arma::dot(p - point, normal));
+            }
+
+            Vector orthogonalProjection(const Vector& p) const {
+                return p - arma::dot(p - point, normal) * normal;
+            }
+
+            Vector directionalProjection(const Vector& p, const Vector& dir) const {
+                // Create line
+                ParametricLine<n> line(p, p + dir);
+                // Return intersection of this plane with line
+                return intersect(line);
             }
         };
     }  // namespace geometry

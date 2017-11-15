@@ -40,7 +40,6 @@ message DarwinSensors {
         INSTRUCTION     = 64;
         CORRUPT_DATA    = 128;
         TIMEOUT         = 256;
-        TIMEOUT_VICTIM  = 512;
     }
 
     message LEDPanel {
@@ -104,7 +103,7 @@ message DarwinSensors {
         float  presentSpeed    = 10;
         float  load            = 11;
         float  voltage         = 12;
-        uint32 temperature     = 13;
+        float temperature      = 13;
     };
 
     message Servos {

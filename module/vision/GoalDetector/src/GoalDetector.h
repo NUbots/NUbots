@@ -20,6 +20,7 @@
 #ifndef MODULES_VISION_GOALDETECTOR_H
 #define MODULES_VISION_GOALDETECTOR_H
 
+#include <armadillo>
 #include <nuclear>
 
 namespace module {
@@ -36,13 +37,23 @@ namespace vision {
         double MINIMUM_ASPECT_RATIO;
         double VISUAL_HORIZON_BUFFER;
         double MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE;
-        double MAXIMUM_ANGLE_BETWEEN_GOALS;
+        double MAXIMUM_ANGLE_BETWEEN_SIDES;
         double MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+        arma::running_stat<double> stats;
 
         uint MEASUREMENT_LIMITS_LEFT;
         uint MEASUREMENT_LIMITS_RIGHT;
         uint MEASUREMENT_LIMITS_TOP;
         uint MEASUREMENT_LIMITS_BASE;
+
+        double ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL;
+        double ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL;
+
+        arma::vec3 VECTOR3_COVARIANCE;
+        arma::vec2 ANGLE_COVARIANCE;
+
+        bool DEBUG_GOAL_THROWOUTS;
+        bool DEBUG_GOAL_RANSAC;
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.

@@ -1,4 +1,4 @@
-SET(dependencies 
+SET(dependencies
 	ARMADILLO
 	)
 

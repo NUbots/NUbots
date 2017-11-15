@@ -20,6 +20,7 @@
 #include "LUTClassifier.h"
 
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/vision.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -41,7 +42,7 @@ namespace vision {
         // Get our transform to world coordinates
         const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
         const Rotation3D& Rtc =
-            Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
+            Transform3D(convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH])).rotation();
         Rotation3D Rcw = Rtc.i() * Rtw;
 
         // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
@@ -54,6 +55,7 @@ namespace vision {
         // Move our axis to be at the top left of the screen
         classifiedImage.horizon.distance =
             -horizon.distanceToPoint({-double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5});
+        classifiedImage.horizon_normal = convert<double, 3>(Rcw.z());
     }
 
 }  // namespace vision

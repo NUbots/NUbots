@@ -22,7 +22,6 @@
 #include "extension/Configuration.h"
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"

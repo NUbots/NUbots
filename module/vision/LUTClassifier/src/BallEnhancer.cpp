@@ -27,13 +27,14 @@ namespace module {
 namespace vision {
 
     using message::input::Image;
+    using message::input::CameraParameters;
     using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
 
     using utility::math::geometry::Line;
-    using utility::math::vision::getGroundPointFromScreen;
-    using utility::math::vision::projectWorldPointToScreen;
-    using utility::math::vision::imageToScreen;
+    using utility::math::geometry::Plane;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getImageFromCam;
     using utility::nubugger::drawVisionLines;
     using Colour = utility::vision::Colour;
     using FOURCC = utility::vision::FOURCC;
@@ -238,7 +239,10 @@ namespace vision {
         return std::make_pair(strength, greenNormal);
     }
 
-    void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
+    void LUTClassifier::enhanceBall(const Image& image,
+                                    const LookUpTable& lut,
+                                    ClassifiedImage& classifiedImage,
+                                    const CameraParameters& cam) {
 
         // Loop through all of our possible ball segments
         std::vector<Eigen::Vector2i> points;
@@ -262,9 +266,14 @@ namespace vision {
         std::vector<Eigen::Vector2i> edges;
 
         // For each of these points move upward until we find a strong transition to green
+        Plane<3> horizon(convert<double, 3>(classifiedImage.horizon_normal));
         for (auto& point : points) {
-            Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
-            int minY = int(std::max(3.0, horizon.y(point[0])));
+            // Project up to horizon
+            int horizon_Y = getImageFromCam(
+                horizon.directionalProjection(getCamFromImage(convert<int, 2>(point), cam), arma::vec3({0, 0, 1})),
+                cam)[1];
+
+            int minY = int(std::max(3.0, double(horizon_Y)));
 
             for (int y = point[1]; y > minY; --y) {
 
