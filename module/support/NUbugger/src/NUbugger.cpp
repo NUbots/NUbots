@@ -78,7 +78,9 @@ namespace support {
 
             max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
             max_reprojected_image_duration =
-                durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
+                durationFromSeconds(1.0 / config["output"]["network"]["max_reprojected_image_fps"].as<double>());
+            max_baked_image_duration =
+                durationFromSeconds(1.0 / config["output"]["network"]["max_baked_image_fps"].as<double>());
             max_classified_image_duration =
                 durationFromSeconds(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>());
 
