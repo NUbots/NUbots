@@ -1,0 +1,5 @@
+image_folder: "images"
+image_prefix: "image"
+image_ext: "ppm"
+image_format: "BayerBG8"
+num_images: 219
