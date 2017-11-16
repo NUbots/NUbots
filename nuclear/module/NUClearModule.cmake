@@ -93,7 +93,7 @@ FUNCTION(NUCLEAR_MODULE)
                     --relocatable-device-code=false
                     --compile
                     -dlink
-                    -std=c++14
+                    -std=c++11
                     -Xcompiler -fPIC
                     ${cuda_file}
                     ${flags}
