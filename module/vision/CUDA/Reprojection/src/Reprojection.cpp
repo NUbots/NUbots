@@ -63,13 +63,19 @@ namespace vision {
             on<Trigger<Image>, With<CameraParameters>, Single>().then(
                 "Image Reprojection", [this](const Image& image, const CameraParameters& cam) {
                     if (image.camera_id < 2) {
+                        // Set the device we want to use.
+                        if (cudaCheckError(cudaSetDevice(device))) {
+                            log<NUClear::ERROR>(fmt::format("Failed to set CUDA device to {}.", device));
+                            return;
+                        }
 
                         // For benchmarking.
                         auto start = NUClear::clock::now();
 
                         // Figure out cameras focal length in pixels.
-                        arma::vec2 input_center  = {(image.dimensions.x() - 1) * 0.5, (image.dimensions.y() - 1) * 0.5};
-                        arma::vec2 output_center = arma::conv_to<arma::vec>::from(output_dimensions - 1) * 0.5;
+                        arma::vec2 input_center     = {(image.dimensions.x() - 1.0) * 0.5,
+                                                   (image.dimensions.y() - 1.0) * 0.5};
+                        arma::vec2 output_center    = arma::conv_to<arma::vec>::from(output_dimensions - 1.0) * 0.5;
                         double camFocalLengthPixels = arma::norm(output_center) / tan_half_FOV;
 
                         // Create our output message.
@@ -83,13 +89,21 @@ namespace vision {
                         msg.data          = std::vector<uint8_t>(output_dimensions[0] * output_dimensions[1] * 3, 0);
 
                         // Invoke kernel.
-                        launchKernel(image.data.data(),
-                                     image.format,
-                                     cam.radial.radiansPerPixel,
-                                     make_uint2(image.dimensions.x(), image.dimensions.y()),
-                                     make_uint2(output_dimensions[0], output_dimensions[1]),
-                                     camFocalLengthPixels,
-                                     msg.data.data());
+                        if (cudaCheckError(launchKernel(image.data.data(),
+                                                        image.format,
+                                                        cam.radial.radiansPerPixel,
+                                                        make_uint2(image.dimensions.x(), image.dimensions.y()),
+                                                        make_uint2(output_dimensions[0], output_dimensions[1]),
+                                                        camFocalLengthPixels,
+                                                        msg.data.data()))) {
+                            log<NUClear::ERROR>("Failed to run CUDA reprojection kernel.");
+                            return;
+                        }
+
+                        if (cudaCheckError(cudaDeviceSynchronize())) {
+                            log<NUClear::ERROR>("Failed to synchronise CUDA device.");
+                            return;
+                        }
 
                         // Dump image to file.
                         if (dump_images) {

@@ -55,19 +55,19 @@ __device__ float4 bayerToRGB(float2 sample_point, float2 first_red) {
     float4 x_coord = center.x + make_float4(-2.0f, -1.0f, 1.0f, 2.0f);
     float4 y_coord = center.y + make_float4(-2.0f, -1.0f, 1.0f, 2.0f);
 
-    float C         = tex2D(input_image, center.x, center.y);   // (0, 0)
+    float C         = tex2D(input_image, center.x, center.y);  // (0, 0)
     const float4 kC = make_float4(0.5f, 0.75f, 0.625f, 0.625f);
 
     // Determine which of four types of pixels we are on.
     float2 alternate = make_float2(fmod(floor(center.z), 2.0f), fmod(floor(center.w), 2.0f));
 
-    float4 Dvec = make_float4(tex2D(input_image, x_coord.y, y_coord.y),    // (-1, -1)
-                              tex2D(input_image, x_coord.y, y_coord.z),    // (-1,  1)
-                              tex2D(input_image, x_coord.z, y_coord.y),    // ( 1, -1)
-                              tex2D(input_image, x_coord.z, y_coord.z));   // ( 1,  1)
+    float4 Dvec = make_float4(tex2D(input_image, x_coord.y, y_coord.y),   // (-1, -1)
+                              tex2D(input_image, x_coord.y, y_coord.z),   // (-1,  1)
+                              tex2D(input_image, x_coord.z, y_coord.y),   // ( 1, -1)
+                              tex2D(input_image, x_coord.z, y_coord.z));  // ( 1,  1)
 
     const float3 kC_temp = make_float3(kC.x * C, kC.y * C, kC.z * C);
-    float4 PATTERN = make_float4(kC_temp.x, kC_temp.y, kC_temp.z, kC_temp.z);
+    float4 PATTERN       = make_float4(kC_temp.x, kC_temp.y, kC_temp.z, kC_temp.z);
 
     // Can also be a dot product with (1,1,1,1) on hardware where that is
     // specially optimized.
@@ -76,21 +76,21 @@ __device__ float4 bayerToRGB(float2 sample_point, float2 first_red) {
     Dvec.y += Dvec.w;
     Dvec.x += Dvec.y;
 
-    float4 value = make_float4(tex2D(input_image, center.x,  y_coord.x),   // ( 0, -2)
-                               tex2D(input_image, center.x,  y_coord.y),   // ( 0, -1)
-                               tex2D(input_image, x_coord.x, center.y),    // (-1,  0)
-                               tex2D(input_image, x_coord.y, center.y));   // (-2,  0)
+    float4 value = make_float4(tex2D(input_image, center.x, y_coord.x),   // ( 0, -2)
+                               tex2D(input_image, center.x, y_coord.y),   // ( 0, -1)
+                               tex2D(input_image, x_coord.x, center.y),   // (-1,  0)
+                               tex2D(input_image, x_coord.y, center.y));  // (-2,  0)
 
-    float4 temp = make_float4(tex2D(input_image, center.x,  y_coord.w),    // (0, 2)
-                              tex2D(input_image, center.x,  y_coord.z),    // (0, 1)
-                              tex2D(input_image, x_coord.w, center.y),     // (2, 0)
-                              tex2D(input_image, x_coord.z, center.y));    // (1, 0)
+    float4 temp = make_float4(tex2D(input_image, center.x, y_coord.w),   // (0, 2)
+                              tex2D(input_image, center.x, y_coord.z),   // (0, 1)
+                              tex2D(input_image, x_coord.w, center.y),   // (2, 0)
+                              tex2D(input_image, x_coord.z, center.y));  // (1, 0)
 
     // Even the simplest compilers should be able to constant-fold these to avoid the division.
     // Note that on scalar processors these constants force computation of some identical products twice.
-    const float4 kA = make_float4(-0.125f, -0.1875f,  0.0625f, -0.125f);
-    const float4 kB = make_float4( 0.25f,   0.0f,     0.0f,     0.5f);
-    const float4 kD = make_float4( 0.0f,    0.25f,   -0.125f,  -0.125f);
+    const float4 kA = make_float4(-0.125f, -0.1875f, 0.0625f, -0.125f);
+    const float4 kB = make_float4(0.25f, 0.0f, 0.0f, 0.5f);
+    const float4 kD = make_float4(0.0f, 0.25f, -0.125f, -0.125f);
 
     // Conserve constant registers and take advantage of free swizzle on load
     const float4 kE = make_float4(kA.x, kA.y, kA.w, kA.z);
@@ -195,30 +195,42 @@ __global__ void projectSphericalToRectilinear(unsigned int image_format,
     switch (image_format) {
         case FORMAT_GRBG:
             colour = bayerToRGB(sample_point, make_float2(1.0, 0.0));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] = __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] = __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] = __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] =
+                __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] =
+                __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] =
+                __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
             break;
 
         case FORMAT_RGGB:
             colour = bayerToRGB(sample_point, make_float2(0.0, 0.0));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] = __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] = __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] = __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] =
+                __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] =
+                __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] =
+                __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
             break;
 
         case FORMAT_GBRG:
             colour = bayerToRGB(sample_point, make_float2(0.0, 1.0));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] = __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] = __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] = __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] =
+                __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] =
+                __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] =
+                __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
             break;
 
         case FORMAT_BGGR:
             colour = bayerToRGB(sample_point, make_float2(1.0, 1.0));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] = __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] = __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
-            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] = __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 0] =
+                __float2uint_rz(clamp(255.0f * colour.x + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 1] =
+                __float2uint_rz(clamp(255.0f * colour.y + 0.5f, 0.0f, 255.0f));
+            output[pos.y * output_dimensions.x * 3 + pos.x * 3 + 2] =
+                __float2uint_rz(clamp(255.0f * colour.z + 0.5f, 0.0f, 255.0f));
             break;
 
         // We don't handle these.
@@ -247,21 +259,15 @@ __global__ void projectSphericalToRectilinear(unsigned int image_format,
     }
 }
 
-bool cudaCheckError(const cudaError_t& err) {
-    if (cudaSuccess != err) {
-        return true;
-    }
+cudaError_t launchKernel(const unsigned char* input,
+                         unsigned int image_format,
+                         float radians_per_pixel,
+                         uint2 input_dimensions,
+                         uint2 output_dimensions,
+                         float cam_focal_length_pixels,
+                         unsigned char* output) {
 
-    return false;
-}
-
-void launchKernel(const unsigned char* input,
-                  unsigned int image_format,
-                  float radians_per_pixel,
-                  uint2 input_dimensions,
-                  uint2 output_dimensions,
-                  float cam_focal_length_pixels,
-                  unsigned char* output) {
+    cudaError_t err;
 
     // Set texture reference parameters
     input_image.addressMode[0] = cudaAddressModeClamp;  // Clamp to edge
@@ -272,58 +278,70 @@ void launchKernel(const unsigned char* input,
     // Allocate device memory for texture.
     unsigned char* texture;
     size_t pitch;
-    if (cudaCheckError(cudaMallocPitch(&texture, &pitch, input_dimensions.x, input_dimensions.y))) {
-        return;
+    if ((err = cudaMallocPitch(&texture, &pitch, input_dimensions.x, input_dimensions.y)) != cudaSuccess) {
+        return err;
     }
 
     // Copy texture to device.
-    if (cudaCheckError(cudaMemcpy2D(texture,
-                                    pitch,
-                                    input,
-                                    input_dimensions.x,
-                                    input_dimensions.x,
-                                    input_dimensions.y,
-                                    cudaMemcpyHostToDevice))) {
+    if ((cudaMemcpy2D(
+            texture, pitch, input, input_dimensions.x, input_dimensions.x, input_dimensions.y, cudaMemcpyHostToDevice))
+        != cudaSuccess) {
         cudaFree(texture);
-        return;
+        return err;
     }
 
     // Bind texture to device memory.
     size_t offset;
-    if (cudaCheckError(cudaBindTexture2D(&offset,
-                                         input_image,
-                                         texture,
-                                         cudaCreateChannelDesc<unsigned char>(),
-                                         input_dimensions.x,
-                                         input_dimensions.y,
-                                         pitch))) {
+    if ((cudaBindTexture2D(&offset,
+                           input_image,
+                           texture,
+                           cudaCreateChannelDesc<unsigned char>(),
+                           input_dimensions.x,
+                           input_dimensions.y,
+                           pitch))
+        != cudaSuccess) {
         cudaFree(texture);
-        return;
+        return err;
     }
 
     // Allocate memory for kernel output.
     unsigned char* result;
-    if (cudaCheckError(cudaMalloc(&result, output_dimensions.x * output_dimensions.y * 3 * sizeof(unsigned char)))) {
+    if ((cudaMalloc(&result, output_dimensions.x * output_dimensions.y * 3 * sizeof(unsigned char))) != cudaSuccess) {
         cudaUnbindTexture(input_image);
         cudaFree(texture);
-        return;
+        return err;
     }
 
+    // Set up kernel execution parameters.
     dim3 dimBlock(16, 16);
     dim3 dimGrid((output_dimensions.x + dimBlock.x - 1) / dimBlock.x,
                  (output_dimensions.y + dimBlock.y - 1) / dimBlock.y);
+
+    // Execute the kernel.
     projectSphericalToRectilinear<<<dimGrid, dimBlock>>>(
         image_format, radians_per_pixel, input_dimensions, output_dimensions, cam_focal_length_pixels, result);
 
-    if (cudaCheckError(cudaMemcpy(
-            output, result, output_dimensions.x * output_dimensions.y * 3, cudaMemcpyDeviceToHost))) {
+    // Check for any errors.
+    if ((err = cudaGetLastError()) != cudaSuccess) {
         cudaUnbindTexture(input_image);
         cudaFree(texture);
         cudaFree(output);
-        return;
+        return err;
     }
 
+    // Copy the result out of the device.
+    if ((err = cudaMemcpy(output, result, output_dimensions.x * output_dimensions.y * 3, cudaMemcpyDeviceToHost))
+        != cudaSuccess) {
+        cudaUnbindTexture(input_image);
+        cudaFree(texture);
+        cudaFree(output);
+        return err;
+    }
+
+    // Clean up.
     cudaUnbindTexture(input_image);
     cudaFree(texture);
-    cudaFree(output);
+    cudaFree(result);
+
+    return cudaSuccess;
 }
