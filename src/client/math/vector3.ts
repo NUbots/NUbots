@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import { computed } from 'mobx'
 import { observable } from 'mobx'
 
@@ -28,7 +27,6 @@ export class Vector3 {
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
   }
 
-  @action
   public set(x: number, y: number, z: number): Vector3 {
     this.x = x
     this.y = y
@@ -36,12 +34,10 @@ export class Vector3 {
     return this
   }
 
-  @action
   public clone(): Vector3 {
     return new Vector3(this.x, this.y, this.z)
   }
 
-  @action
   public copy(v: Vector3): Vector3 {
     this.x = v.x
     this.y = v.y
@@ -49,12 +45,10 @@ export class Vector3 {
     return this
   }
 
-  @action
   public normalize(): Vector3 {
     return this.divideScalar(this.length)
   }
 
-  @action
   public multiplyScalar(scalar: number): Vector3 {
     this.x *= scalar
     this.y *= scalar
@@ -62,7 +56,6 @@ export class Vector3 {
     return this
   }
 
-  @action
   public divideScalar(scalar: number): Vector3 {
     if (scalar !== 0) {
       const invScalar = 1 / scalar
@@ -77,7 +70,6 @@ export class Vector3 {
     return this
   }
 
-  @action
   public add(v: Vector3): Vector3 {
     this.x += v.x
     this.y += v.y
@@ -85,7 +77,6 @@ export class Vector3 {
     return this
   }
 
-  @action
   public subtract(v: Vector3): Vector3 {
     this.x -= v.x
     this.y -= v.y

@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import { observable } from 'mobx'
 import { Transform } from '../../math/transform'
 import { Object2d } from './object2d'
@@ -27,7 +26,6 @@ export class Group implements Object2d {
     })
   }
 
-  @action
   public add(obj: Object2d): void {
     this.children.push(obj)
   }

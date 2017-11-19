@@ -133,7 +133,6 @@ export class Quaternion {
     return new Quaternion(0, 0, 0, 1)
   }
 
-  @action
   public set(x: number, y: number, z: number, w: number): Quaternion {
     this.x = x
     this.y = y

@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import { computed } from 'mobx'
 import { observable } from 'mobx'
 import { Vector2 } from './vector2'
@@ -30,19 +29,16 @@ export class Matrix2 {
     return this.x.x + this.y.y
   }
 
-  @action
   public set(x: Vector2, y: Vector2): Matrix2 {
     this.x = x
     this.y = y
     return this
   }
 
-  @action
   public clone(): Matrix2 {
     return new Matrix2(this.x.clone(), this.y.clone())
   }
 
-  @action
   public copy(m: Matrix2): Matrix2 {
     this.x.copy(m.x)
     this.y.copy(m.y)

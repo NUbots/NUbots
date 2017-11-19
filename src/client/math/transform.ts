@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import { observable } from 'mobx'
 
 export type Rotate = number
@@ -39,7 +38,6 @@ export class Transform {
     })
   }
 
-  @action
   public then(transform: Transform): Transform {
     const { anticlockwise, rotate, scale, translate } = transform
 
@@ -92,7 +90,6 @@ export class Transform {
     })
   }
 
-  @action
   public setTranslate(x: number, y: number): Transform {
     this.translate.x = x
     this.translate.y = y
