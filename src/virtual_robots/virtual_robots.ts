@@ -1,11 +1,11 @@
 import { range } from '../shared/base/range'
-import { Simulator } from './simulator'
 import { VirtualRobot } from './virtual_robot'
+import { SimulatorOpts } from './virtual_robot'
 
 type Opts = {
   fakeNetworking: boolean
   numRobots: number
-  simulators: Simulator[]
+  simulators: SimulatorOpts[]
 }
 
 export class VirtualRobots {
@@ -24,13 +24,13 @@ export class VirtualRobots {
     return new VirtualRobots({ robots })
   }
 
-  public simulateWithFrequency(frequency: number): () => void {
-    const stops = this.robots.map((robot, index) => robot.simulateWithFrequency(frequency, index, this.robots.length))
+  public startSimulators(): () => void {
+    const stops = this.robots.map((robot, index) => robot.startSimulators(index, this.robots.length))
     return () => stops.forEach(stop => stop())
   }
 
-  public simulate(): void {
-    this.robots.forEach((robot, index) => robot.simulate(index, this.robots.length))
+  public simulateAll(): void {
+    this.robots.forEach((robot, index) => robot.simulateAll(index, this.robots.length))
   }
 
   public connect(): void {

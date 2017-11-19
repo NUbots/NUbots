@@ -59,11 +59,11 @@ function init() {
       fakeNetworking: true,
       numRobots: 3,
       simulators: [
-        OverviewSimulator.of(),
-        SensorDataSimulator.of(),
+        { frequency: 1, simulator: OverviewSimulator.of() },
+        { frequency: 60, simulator: SensorDataSimulator.of() },
       ],
     })
-    virtualRobots.simulateWithFrequency(60)
+    virtualRobots.startSimulators()
   }
 }
 

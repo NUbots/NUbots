@@ -35,11 +35,11 @@ if (withVirtualRobots) {
     fakeNetworking: true,
     numRobots: 3,
     simulators: [
-      SensorDataSimulator.of(),
-      OverviewSimulator.of(),
+      { frequency: 1, simulator: OverviewSimulator.of() },
+      { frequency: 60, simulator: SensorDataSimulator.of() },
     ],
   })
-  virtualRobots.simulateWithFrequency(60)
+  virtualRobots.startSimulators()
 }
 
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {

@@ -1,24 +1,29 @@
-import { Simulator } from './simulator'
+import { DirectNUClearNetClient } from '../server/nuclearnet/direct_nuclearnet_client'
+import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_client'
+import { NodeSystemClock } from '../server/time/node_clock'
 import { NUClearNetClient } from '../shared/nuclearnet/nuclearnet_client'
 import { Clock } from '../shared/time/clock'
-import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_client'
-import { DirectNUClearNetClient } from '../server/nuclearnet/direct_nuclearnet_client'
-import { NodeSystemClock } from '../server/time/node_clock'
 import { flatMap } from './flat_map'
+import { Simulator } from './simulator'
 
 type Opts = {
   fakeNetworking: boolean
   name: string
-  simulators: Simulator[]
+  simulators: SimulatorOpts[]
+}
+
+export type SimulatorOpts = {
+  frequency: number,
+  simulator: Simulator
 }
 
 export class VirtualRobot {
   private name: string
-  private simulators: Simulator[]
+  private simulators: SimulatorOpts[]
 
   constructor(private network: NUClearNetClient,
               private clock: Clock,
-              opts: { name: string, simulators: Simulator[] }) {
+              opts: { name: string, simulators: SimulatorOpts[] }) {
     this.name = opts.name
     this.simulators = opts.simulators
   }
@@ -29,14 +34,16 @@ export class VirtualRobot {
     return new VirtualRobot(network, clock, opts)
   }
 
-  public simulateWithFrequency(frequency: number, index: number, numRobots: number) {
+  public startSimulators(index: number, numRobots: number) {
     const disconnect = this.connect()
 
-    const period = 1 / frequency
-    const cancelLoop = this.clock.setInterval(() => this.simulate(index, numRobots), period)
+    const stops = this.simulators.map(opts => {
+      const period = 1 / opts.frequency
+      return this.clock.setInterval(() => this.simulate(opts.simulator, index, numRobots), period)
+    })
 
     return () => {
-      cancelLoop()
+      stops.forEach(stop => stop())
       disconnect()
     }
   }
@@ -50,13 +57,19 @@ export class VirtualRobot {
     })
   }
 
-  public simulate(index: number, numRobots: number) {
-    const messages = flatMap(simulator => simulator.simulate(this.clock.now(), index, numRobots), this.simulators)
+  public simulateAll(index: number, numRobots: number) {
+    const messages = flatMap(opts => opts.simulator.simulate(this.clock.now(), index, numRobots), this.simulators)
     messages.forEach(message => this.send(message.messageType, message.buffer))
     return messages
   }
 
   public connect(): () => void {
     return this.network.connect({ name: this.name })
+  }
+
+  private simulate(simulator: Simulator, index: number, numRobots: number) {
+    const messages = simulator.simulate(this.clock.now(), index, numRobots)
+    messages.forEach(message => this.send(message.messageType, message.buffer))
+    return messages
   }
 }

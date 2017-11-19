@@ -1,4 +1,5 @@
 import { AppModel } from '../client/components/app/model'
+import { AppNetwork } from '../client/components/app/network'
 import { MessageTypePath } from '../client/network/message_type_names'
 import { Network } from '../client/network/network'
 import { NUsightNetwork } from '../client/network/nusight_network'
@@ -6,13 +7,13 @@ import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_clien
 import { FakeNUClearNetServer } from '../server/nuclearnet/fake_nuclearnet_server'
 import { NodeSystemClock } from '../server/time/node_clock'
 import { message } from '../shared/proto/messages'
-import { VirtualRobots } from '../virtual_robots/virtual_robots'
-import { VirtualRobot } from '../virtual_robots/virtual_robot'
 import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
+import { VirtualRobot } from '../virtual_robots/virtual_robot'
+import { VirtualRobots } from '../virtual_robots/virtual_robots'
 import Sensors = message.input.Sensors
-import VisionObject = message.vision.VisionObject
 import Overview = message.support.nubugger.Overview
-import { AppNetwork } from '../client/components/app/network'
+import VisionObject = message.vision.VisionObject
+import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
 
 describe('Networking Integration', () => {
   let nuclearnetServer: FakeNUClearNetServer
@@ -33,8 +34,8 @@ describe('Networking Integration', () => {
           {
             name: 'Robot #1',
             simulators: [
-              // TODO (Annable): Add vision and overview simulators when they exist
-              new SensorDataSimulator(),
+              { frequency: 1, simulator: OverviewSimulator.of() },
+              { frequency: 60, simulator: SensorDataSimulator.of() },
             ],
           },
         ),
@@ -47,7 +48,7 @@ describe('Networking Integration', () => {
     const appModel = AppModel.of()
     const nuclearnetClient = new FakeNUClearNetClient(nuclearnetServer)
     const messageTypePath = new MessageTypePath()
-    const nusightNetwork =  new NUsightNetwork(nuclearnetClient, appModel, messageTypePath)
+    const nusightNetwork = new NUsightNetwork(nuclearnetClient, appModel, messageTypePath)
     AppNetwork.of(nusightNetwork, appModel)
     return nusightNetwork
   }
@@ -63,7 +64,7 @@ describe('Networking Integration', () => {
       const onSensors = jest.fn()
       network.on(Sensors, onSensors)
 
-      virtualRobots.simulate()
+      virtualRobots.simulateAll()
 
       expect(onSensors).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
       expect(onSensors).toHaveBeenCalledTimes(1)
@@ -77,7 +78,7 @@ describe('Networking Integration', () => {
 
       network.off()
 
-      virtualRobots.simulate()
+      virtualRobots.simulateAll()
 
       expect(onSensors1).not.toHaveBeenCalled()
       expect(onSensors2).not.toHaveBeenCalled()
@@ -91,7 +92,7 @@ describe('Networking Integration', () => {
 
       off1()
 
-      virtualRobots.simulate()
+      virtualRobots.simulateAll()
 
       expect(onSensors1).not.toHaveBeenCalled()
       expect(onSensors2).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
@@ -113,7 +114,7 @@ describe('Networking Integration', () => {
 
       nusightNetwork.connect({ name: 'nusight' })
 
-      virtualRobots.simulate()
+      virtualRobots.simulateAll()
 
       expect(onSensors).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
     })
@@ -129,7 +130,7 @@ describe('Networking Integration', () => {
       const onSensors2 = jest.fn()
       network2.on(Sensors, onSensors2)
 
-      virtualRobots.simulate()
+      virtualRobots.simulateAll()
 
       expect(onSensors1).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
       expect(onSensors2).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
@@ -151,7 +152,7 @@ describe('Networking Integration', () => {
       const onSensors = jest.fn()
       localisationNetwork.on(Sensors, onSensors)
 
-      virtualRobots.simulate()
+      virtualRobots.simulateAll()
 
       expect(onSensors).toHaveBeenCalledTimes(1)
 
@@ -160,7 +161,7 @@ describe('Networking Integration', () => {
       const onVisionObject = jest.fn()
       visionNetwork.on(VisionObject, onVisionObject)
 
-      virtualRobots.simulate()
+      virtualRobots.simulateAll()
 
       expect(onVisionObject).toHaveBeenCalledTimes(0)
       expect(onSensors).toHaveBeenCalledTimes(1)
