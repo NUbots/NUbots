@@ -1,11 +1,11 @@
-import { message } from '../../src/shared/proto/messages'
-import { Vector2 } from '../client/math/vector2'
-import { Vector3 } from '../client/math/vector3'
-import { SeededRandom } from '../shared/base/random/seeded_random'
-import { FieldDimensions } from '../shared/field/dimensions'
-import { vec2$Properties } from '../shared/proto/messages'
-import { Simulator } from './simulator'
-import { Message } from './simulator'
+import { message } from '../../shared/proto/messages'
+import { Vector2 } from '../../client/math/vector2'
+import { Vector3 } from '../../client/math/vector3'
+import { SeededRandom } from '../../shared/base/random/seeded_random'
+import { FieldDimensions } from '../../shared/field/dimensions'
+import { vec2$Properties } from '../../shared/proto/messages'
+import { Simulator } from '../simulator'
+import { Message } from '../simulator'
 import State = message.behaviour.Behaviour.State
 import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason

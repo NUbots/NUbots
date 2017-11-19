@@ -1,6 +1,6 @@
 import * as minimist from 'minimist'
-import { OverviewSimulator } from './overview_simulator'
-import { SensorDataSimulator } from './sensor_data_simulator'
+import { OverviewSimulator } from './simulators/overview_simulator'
+import { SensorDataSimulator } from './simulators/sensor_data_simulator'
 import { Simulator } from './simulator'
 import { VirtualRobots } from './virtual_robots'
 

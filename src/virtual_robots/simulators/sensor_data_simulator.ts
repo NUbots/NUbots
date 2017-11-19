@@ -1,10 +1,10 @@
 import { Matrix4 } from 'three'
 import { Vector3 } from 'three'
 import { Quaternion } from 'three'
-import { message } from '../../src/shared/proto/messages'
-import { mat44$Properties } from '../shared/proto/messages'
-import { Simulator } from './simulator'
-import { Message } from './simulator'
+import { message } from '../../shared/proto/messages'
+import { mat44$Properties } from '../../shared/proto/messages'
+import { Simulator } from '../simulator'
+import { Message } from '../simulator'
 import Sensors = message.input.Sensors
 
 export const HIP_TO_FOOT = 0.2465

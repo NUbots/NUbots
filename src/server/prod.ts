@@ -5,16 +5,14 @@ import * as http from 'http'
 import * as minimist from 'minimist'
 import * as favicon from 'serve-favicon'
 import * as sio from 'socket.io'
-import { message } from '../shared/proto/messages'
-import { OverviewSimulator } from '../simulators/overview_simulator'
-import { SensorDataSimulator } from '../simulators/sensor_data_simulator'
-import { VirtualRobots } from '../simulators/virtual_robots'
+import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
+import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
+import { VirtualRobots } from '../virtual_robots/virtual_robots'
 import { WebSocketProxyNUClearNetServer } from './nuclearnet/web_socket_proxy_nuclearnet_server'
 import { WebSocketServer } from './nuclearnet/web_socket_server'
-import Overview = message.support.nubugger.Overview
 
 const args = minimist(process.argv.slice(2))
-const withSimulators = args['with-simulators'] || false
+const withVirtualRobots = args['virtual-robots'] || false
 
 const app = express()
 const server = http.createServer(app)
@@ -32,7 +30,7 @@ server.listen(port, () => {
   console.log(`NUsight server started at http://localhost:${port}`)
 })
 
-if (withSimulators) {
+if (withVirtualRobots) {
   const virtualRobots = VirtualRobots.of({
     fakeNetworking: true,
     numRobots: 3,
@@ -45,5 +43,5 @@ if (withSimulators) {
 }
 
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
-  fakeNetworking: withSimulators,
+  fakeNetworking: withVirtualRobots,
 })

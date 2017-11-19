@@ -6,9 +6,9 @@ import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_clien
 import { FakeNUClearNetServer } from '../server/nuclearnet/fake_nuclearnet_server'
 import { NodeSystemClock } from '../server/time/node_clock'
 import { message } from '../shared/proto/messages'
-import { VirtualRobots } from '../simulators/virtual_robots'
-import { VirtualRobot } from '../simulators/virtual_robot'
-import { SensorDataSimulator } from '../simulators/sensor_data_simulator'
+import { VirtualRobots } from '../virtual_robots/virtual_robots'
+import { VirtualRobot } from '../virtual_robots/virtual_robot'
+import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
 import Sensors = message.input.Sensors
 import VisionObject = message.vision.VisionObject
 import Overview = message.support.nubugger.Overview

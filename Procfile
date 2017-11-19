@@ -1,1 +1,1 @@
-web: yarn run prod:sim
+web: yarn run prod:virtual
