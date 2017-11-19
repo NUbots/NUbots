@@ -32,9 +32,8 @@ export class NUsightNetwork {
 
   public onNUClearMessage<T>(messageType: MessageType<T>, cb: MessageCallback<T>) {
     const messageTypeName = this.messageTypePath.getPath(messageType)
-    return this.nuclearnetClient.on(`NUsight<${messageTypeName}>`, (packet: NUClearNetPacket) => {
-      // Remove NUsight header for decoding by protobufjs
-      const buffer = new Uint8Array(packet.payload).slice(HEADER_SIZE)
+    return this.nuclearnetClient.on(messageTypeName, (packet: NUClearNetPacket) => {
+      const buffer = new Uint8Array(packet.payload)
       const message = messageType.decode(buffer)
       const peer = packet.peer
       const robotModel = this.appModel.robots.find(robot => {

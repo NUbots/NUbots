@@ -42,12 +42,9 @@ export class VirtualRobot {
   }
 
   public send(messageType: string, buffer: Uint8Array, reliable?: boolean) {
-    const header = new Buffer(9)
-    header.writeUInt8(0, 0)
-    // TODO: A 64bit timestamp used to be written to the header here, but it does not seem to be used?
     this.network.send({
-      type: `NUsight<${messageType}>`,
-      payload: Buffer.concat([header, new Buffer(buffer)]),
+      type: messageType,
+      payload: new Buffer(buffer),
       target: 'nusight',
       reliable,
     })
