@@ -14,6 +14,14 @@ describe('NbsFrameCodecs', () => {
       expect(buffer.toString('hex')).toEqual('e298a218000000c042f15c9654050010abef8b5398f0d41212121212121212')
     })
 
+    it('encodes timestamps as unsigned integers', () => {
+      const hash = hashType('message.input.sensors')
+      const timestamp = -1 >>> 0 // Take any negative value and convert it to an unsigned integer.
+      const payload = new Buffer(8).fill(0x12)
+      const buffer = encodeFrame({ timestampInMicroseconds: timestamp, hash, payload })
+      expect(buffer.toString('hex')).toEqual('e298a218000000ffffffff0000000010abef8b5398f0d41212121212121212')
+    })
+
     it('errors if you supply an invalid hash size', () => {
       const hash = new Buffer(12)
       const timestamp = 1500379664696000
