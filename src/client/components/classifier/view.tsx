@@ -1,5 +1,5 @@
 import * as React from 'react'
 
-export const Classifier = () => (
+export const ClassifierView = () => (
   <h1>Classifier</h1>
 )

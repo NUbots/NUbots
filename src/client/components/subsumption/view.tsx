@@ -1,5 +1,5 @@
 import * as React from 'react'
 
-export const Subsumption = () => (
+export const SubsumptionView = () => (
   <h1>Subsumption</h1>
 )

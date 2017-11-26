@@ -1,5 +1,5 @@
 import * as React from 'react'
 
-export const Scatter = () => (
+export const ScatterPlotView = () => (
   <h1>Scatter</h1>
 )

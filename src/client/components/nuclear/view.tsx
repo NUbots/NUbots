@@ -1,5 +1,5 @@
 import * as React from 'react'
 
-export const NUClear = () => (
+export const NUClearView = () => (
   <h1>NUClear</h1>
 )

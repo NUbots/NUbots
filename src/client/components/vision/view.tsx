@@ -1,5 +1,5 @@
 import * as React from 'react'
 
-export const Vision = () => (
+export const VisionView = () => (
   <h1>Vision</h1>
 )

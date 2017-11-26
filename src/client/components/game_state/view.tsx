@@ -1,5 +1,5 @@
 import * as React from 'react'
 
-export const GameState = () => (
+export const GameStateView = () => (
   <h1>GameState</h1>
 )
