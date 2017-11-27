@@ -18,8 +18,10 @@
 #ifndef EXTENSION_CONFIGURATION_H
 #define EXTENSION_CONFIGURATION_H
 
+#include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 #include <cstdlib>
+#include <fstream>
 #include <nuclear>
 
 #include "FileWatch.h"
@@ -62,32 +64,36 @@ struct Configuration {
         : fileName(fileName), hostname(hostname), binary(binary), config() {
         bool loaded = false;
 
+        std::ifstream defaultFile(fmt::format("config/{}", fileName));
+        std::ifstream robotFile(fmt::format("config/{}/{}", hostname, fileName));
+        std::ifstream appFile(fmt::format("config/{}/{}", binary, fileName));
+
         // Load the default config file.
-        if (utility::file::exists("config/" + fileName)) {
-            config = YAML::LoadFile("config/" + fileName);
+        if (defaultFile.is_open()) {
+            config = YAML::Load(defaultFile);
             loaded = true;
         }
 
         // If the same file exists in this robots per-robot config directory then load and merge.
-        if (utility::file::exists("config/" + hostname + "/" + fileName)) {
+        if (robotFile.is_open()) {
             if (loaded) {
-                config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
+                config = mergeYAML(config, YAML::Load(robotFile));
             }
 
             else {
-                config = YAML::LoadFile("config/" + hostname + "/" + fileName);
+                config = YAML::Load(robotFile);
                 loaded = true;
             }
         }
 
         // If the same file exists in this binary's per-binary config directory then load and merge.
-        if (utility::file::exists("config/" + binary + "/" + fileName)) {
+        if (appFile.is_open()) {
             if (loaded) {
-                config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
+                config = mergeYAML(config, YAML::Load(appFile));
             }
 
             else {
-                config = YAML::LoadFile("config/" + binary + "/" + fileName);
+                config = YAML::Load(appFile);
             }
         }
     }
@@ -180,12 +186,12 @@ struct Configuration {
     }
 
     // All of these disables for this template are because the std::string constructor is magic and screwy
-    template <typename T,
-              typename Decayed = typename std::decay<T>::type,
-              typename         = typename std::enable_if<!std::is_same<const char*, Decayed>::value
-                                                 && !std::is_same<std::allocator<char>, Decayed>::value
-                                                 && !std::is_same<std::initializer_list<char>, Decayed>::value
-                                                 && !std::is_same<char, Decayed>::value>::type>
+    template <
+        typename T,
+        typename Decayed = typename std::decay<T>::type,
+        typename         = typename std::enable_if<
+            !std::is_same<const char*, Decayed>::value && !std::is_same<std::allocator<char>, Decayed>::value
+            && !std::is_same<std::initializer_list<char>, Decayed>::value && !std::is_same<char, Decayed>::value>::type>
     operator T() const {
         return config.as<T>();
     }

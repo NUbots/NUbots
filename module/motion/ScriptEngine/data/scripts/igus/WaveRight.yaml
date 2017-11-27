@@ -1,0 +1,132 @@
+- duration: 1000
+  targets:
+    - id: R_ELBOW
+      position: -2.303067
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -0.1409689
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_PITCH
+      position: 1.801141
+      gain: 5
+      torque: 100
+    - id: HEAD_PITCH
+      position: 0.5063373
+      gain: 5
+      torque: 100
+    - id: HEAD_YAW
+      position: -0.007671777
+      gain: 30
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_ELBOW
+      position: -2.470312
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -1.612416
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_PITCH
+      position: -0.07690956
+      gain: 5
+      torque: 100
+    - id: HEAD_YAW
+      position: 0
+      gain: 5
+      torque: 0
+    - id: HEAD_PITCH
+      position: 0.04756502
+      gain: 5
+      torque: 100
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1.612416
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_PITCH
+      position: -0.07690956
+      gain: 5
+      torque: 100
+    - id: R_ELBOW
+      position: -0.7502998
+      gain: 5
+      torque: 100
+    - id: HEAD_YAW
+      position: 0
+      gain: 5
+      torque: 0
+    - id: HEAD_PITCH
+      position: 0
+      gain: 5
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1.612416
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_PITCH
+      position: -0.07690956
+      gain: 5
+      torque: 100
+    - id: R_ELBOW
+      position: -2.393595
+      gain: 5
+      torque: 100
+    - id: HEAD_PITCH
+      position: 0
+      gain: 5
+      torque: 0
+    - id: HEAD_YAW
+      position: 0
+      gain: 5
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1.612416
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_PITCH
+      position: -0.07690956
+      gain: 5
+      torque: 100
+    - id: R_ELBOW
+      position: -0.7349562
+      gain: 5
+      torque: 100
+    - id: HEAD_YAW
+      position: 0
+      gain: 5
+      torque: 0
+    - id: HEAD_PITCH
+      position: 0
+      gain: 5
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_ELBOW
+      position: -2.370579
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_ROLL
+      position: -0.1517094
+      gain: 5
+      torque: 100
+    - id: R_SHOULDER_PITCH
+      position: 1.821088
+      gain: 5
+      torque: 100
+    - id: HEAD_PITCH
+      position: 0
+      gain: 5
+      torque: 0
+    - id: HEAD_YAW
+      position: 0
+      gain: 5
+      torque: 0

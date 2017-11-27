@@ -21,6 +21,8 @@
 #include <libfswatch/c++/monitor.hpp>
 #include <nuclear>
 
+#include "extension/FileWatch.h"
+
 namespace module {
 namespace extension {
 
@@ -29,9 +31,7 @@ namespace extension {
 
     class FileWatcher : public NUClear::Reactor {
     private:
-        std::map<std::string,
-                 std::map<std::string, std::vector<std::pair<std::shared_ptr<NUClear::threading::Reaction>, int>>>>
-            handlers;
+        std::map<std::string, std::map<std::string, std::vector<::extension::FileWatchRequest>>> handlers;
         std::mutex runMutex;
         std::unique_ptr<fsw::monitor> monitor;
 

@@ -29,7 +29,6 @@
 #include "utility/support/eigen_armadillo.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/Vision.h"
-#include "utility/vision/fourcc.h"
 
 namespace module {
 namespace research {

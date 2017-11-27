@@ -27,11 +27,7 @@ FIND_PACKAGE(PythonInterp 3 REQUIRED)
 INCLUDE_DIRECTORIES(SYSTEM ${Protobuf_INCLUDE_DIRS})
 
 # If we have the package pybind11 we can use to go generate python bindings
-#FIND_PACKAGE(pybind11)
-
-# We need Eigen3
-FIND_PACKAGE(Eigen3 REQUIRED)
-INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
+FIND_PACKAGE(pybind11)
 
 # We need Eigen3
 FIND_PACKAGE(Eigen3 REQUIRED)
@@ -237,7 +233,7 @@ IF(src)
     SET_PROPERTY(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 
     # The library uses protocol buffers
-    TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
+    TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARY})
     TARGET_LINK_LIBRARIES(nuclear_message ${NUClear_LIBRARIES})
 
     # If we have pybind11 we need to make this a python library too
@@ -256,11 +252,6 @@ IF(src)
             COMMENT "Copying messages lib into python file format"
         )
 
-        ADD_CUSTOM_COMMAND(TARGET nuclear_message POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py" "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
-            DEPENDS "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
-            COMMENT "Copying nuclear.py to python build directory"
-        )
 
     ENDIF()
 

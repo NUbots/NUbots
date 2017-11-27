@@ -20,9 +20,11 @@
 #include "NUbugger.h"
 
 #include "message/input/Image.h"
+#include "message/vision/BakedImage.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/LookUpTableDiff.h"
+#include "message/vision/ReprojectedImage.h"
 #include "message/vision/VisionObjects.h"
 
 #include "utility/support/eigen_armadillo.h"
@@ -32,18 +34,20 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
+    using message::input::CameraParameters;
     using message::input::Image;
+    using message::vision::BakedImage;
     using message::vision::Ball;
+    using message::vision::ClassifiedImage;
     using message::vision::Goal;
     using message::vision::Line;
-    using message::vision::Obstacle;
+    using message::vision::LookUpTableDiff;
     using message::vision::NUsightBalls;
     using message::vision::NUsightGoals;
     using message::vision::NUsightLines;
     using message::vision::NUsightObstacles;
-    using message::vision::LookUpTableDiff;
-    using message::vision::ClassifiedImage;
-    using message::input::CameraParameters;
+    using message::vision::Obstacle;
+    using message::vision::ReprojectedImage;
 
     void NUbugger::provideVision() {
         handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then(
@@ -59,10 +63,34 @@ namespace support {
 
             // send<Image>(image, 1, false, NUClear::clock::now());
             // send<Image>(std::make_unique<Image>(image), 1, false, NUClear::clock::now());
-            send(image, 1, false, NUClear::clock::now());
+            send(image, image.camera_id + 1, false, NUClear::clock::now());
 
             last_image = NUClear::clock::now();
         }));
+
+        handles["reprojected_image"].push_back(
+            on<Trigger<ReprojectedImage>, Single, Priority::LOW>().then([this](const ReprojectedImage& image) {
+
+                if (NUClear::clock::now() - last_reprojected_image < max_reprojected_image_duration) {
+                    return;
+                }
+
+                send(image, image.camera_id + 1, false, NUClear::clock::now());
+
+                last_reprojected_image = NUClear::clock::now();
+            }));
+
+        handles["baked_image"].push_back(
+            on<Trigger<BakedImage>, Single, Priority::LOW>().then([this](const BakedImage& image) {
+
+                if (NUClear::clock::now() - last_baked_image < max_baked_image_duration) {
+                    return;
+                }
+
+                send(image, image.camera_id + 2, false, NUClear::clock::now());
+
+                last_baked_image = NUClear::clock::now();
+            }));
 
         handles["classified_image"].push_back(
             on<Trigger<ClassifiedImage>, Single, Priority::LOW>().then([this](const ClassifiedImage& image) {

@@ -75,11 +75,9 @@ class user_tools (String $user) {
   file_line{ 'path_ccache': path => "/home/${user}/.zshrc", line => 'export PATH=/usr/lib/ccache:$PATH'}
 
   # Enable the git module for zprezto
-  file_line { 'zprezto_modules':
-    ensure => present,
-    path   => "/home/${user}/.zpreztorc",
-    match  => '  \'prompt\'',
-    line   => "  \'git\' \'command-not-found\' \'prompt\'",
+  exec { 'zprezto_modules':
+     command => "sed -e \"s/\\s\\s'prompt'/  'git' 'command-not-found' 'prompt'/\" -i /home/${user}/.zprezto/runcoms/zpreztorc",
+     require => [ File["/home/${user}/.zpreztorc"], ],
   }
 
   # SSH KEYS FOR THE VM
@@ -134,14 +132,8 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
 # Add robot hosts
-10.1.1.1 d1 darwin1
-10.1.1.2 d2 darwin2
-10.1.1.3 d3 darwin3
-10.1.1.4 d4 darwin4
-10.1.1.5 d5 darwin5
-10.1.1.6 d6 darwin6
-
 10.1.1.11 i1 igus1
+10.1.1.12 i2 igus2
 ",
   }
 }

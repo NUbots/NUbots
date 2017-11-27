@@ -40,7 +40,6 @@
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
-#include "utility/vision/fourcc.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
@@ -266,8 +265,8 @@ namespace vision {
                     arma::vec3 point       = arma::normalise(mid.orthogonalProjection(midpoint));
                     arma::ivec2 imagePoint = getImageFromCam(point, cam);
                     float color_intensity  = 0;
-                    while ((imagePoint[0] < image.dimensions[0]) && (imagePoint[0] > 0)
-                           && (imagePoint[1] < image.dimensions[1])) {
+                    while ((imagePoint[0] < int(image.dimensions[0])) && (imagePoint[0] > 0)
+                           && (imagePoint[1] < int(image.dimensions[1]))) {
 
                         char c = static_cast<char>(utility::vision::getPixelColour(
                             lut,
@@ -382,8 +381,8 @@ namespace vision {
                     float topAngle    = std::acos(arma::norm_dot(ctr, ctl));
                     float bottomAngle = std::acos(arma::norm_dot(cbr, cbl));
 
-                    float dAngleVertical   = std::fabs(leftAngle - rightAngle);
-                    float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
+                    // float dAngleVertical   = std::fabs(leftAngle - rightAngle);
+                    // float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
 
                     float vertAngle           = (leftAngle + rightAngle) / 2;
                     float horAngle            = (topAngle + bottomAngle) / 2;

@@ -37,14 +37,20 @@ class build_tools {
   package { 'cmake': ensure => latest, }
   package { 'automake': ensure => latest, }
   package { 'autoconf': ensure => latest, }
+  package { 'autopoint': ensure => latest, }
+  package { 'gettext': ensure => latest, }
   package { 'libtool': ensure => latest, }
+  package { 'intltool': ensure => latest, }
+  package { 'gtk-doc-tools': ensure => latest, }
+  package { 'texinfo': ensure => latest, }
+  package { 'libmount-dev': ensure => latest, }
+  package { 'libpcre3-dev': ensure => latest, }
   package { 'pkg-config': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'rsync': ensure => latest, }
   package { 'git': ensure => latest, }
   package { 'build-essential': ensure => latest, }
-  package { 'libncurses5-dev:amd64': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
-  package { 'libncurses5-dev:i386': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
+  package { 'libncurses5-dev': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
   package { 'libstdc++6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gcc-7': name => 'gcc-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-7': name => 'g++-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
@@ -54,23 +60,23 @@ class build_tools {
   package { 'binutils-dev': name => 'binutils-multiarch-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'nasm': ensure => latest, }
-  package { 'libusb-1.0-0:amd64': ensure => latest, }
-  package { 'libusb-1.0-0:i386': ensure => latest, }
-  package { 'libusb-1.0-0-dev:amd64': ensure => latest, }
-  package { 'libusb-1.0-0-dev:i386': ensure => latest, }
-  package { 'autopoint': ensure => latest, }
-  package { 'gettext': ensure => latest, }
+  package { 'libusb-1.0-0': ensure => latest, }
+  package { 'libusb-1.0-0-dev': ensure => latest, }
   package { 'python3-pip': ensure => latest, }
   package { 'python-pip': ensure => latest, }
+  package { 'python3-dev': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
+  package { 'gperf': ensure => latest, }
+
+  package { 'beignet-dev': ensure => latest, }
+  package { 'clinfo': ensure => latest, }
 
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }
   package { 'libnewlib-arm-none-eabi': ensure => latest, }
 
   # System libraries
-  package { 'libasound2-dev:amd64': ensure => latest, }
-  package { 'libasound2-dev:i386': ensure => latest, }
+  package { 'libasound2-dev': ensure => latest, }
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   exec {'install_python3_packages':
@@ -80,7 +86,11 @@ class build_tools {
                 /usr/bin/pip3 install termcolor &&
                 /usr/bin/pip3 install protobuf &&
                 /usr/bin/pip3 install xxhash &&
-                /usr/bin/pip3 install numpy',
+                /usr/bin/pip3 install wheel &&
+                /usr/bin/pip3 install numpy &&
+                /usr/bin/pip3 install tensorflow &&
+                /usr/bin/pip3 install mako &&
+                /usr/bin/pip3 install PyYAML',
     require => [ Package['python3-pip'], ]
   }
 
@@ -95,5 +105,11 @@ class build_tools {
                                              --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
+  }
+
+  exec {'fix_python':
+    command => '/usr/bin/update-alternatives --remove-all python \
+             ; /usr/bin/update-alternatives --install /usr/bin/python python /usr/bin/python3 10',
+    require => [ Package['python3-dev'], ]
   }
 }

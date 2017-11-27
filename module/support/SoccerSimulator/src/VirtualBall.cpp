@@ -89,7 +89,7 @@ namespace support {
         // Project the centre to the screen and work out the radius as if it was in the centre
         arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam), convert<uint, 2>(cam.imageSizePixels));
         // TODO actually project this
-        double radius = 100 * std::tan(angle * 0.5);
+        // double radius = 100 * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
         if (centre[0] > 0 && centre[0] < int(cam.imageSizePixels[0]) && centre[1] > 0

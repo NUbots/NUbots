@@ -49,8 +49,6 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
     # Target location to install to
     target_dir   = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
     build_dir    = b.binary_dir
-    config_dir   = os.path.join(build_dir, '.', 'config')
-    script_dir   = os.path.join(build_dir, '.', 'scripts')
     platform_dir = '/nubots/toolchain/{0}'.format(b.cmake_cache["PLATFORM"])
     roles        = b.cmake_cache["NUCLEAR_ROLES"]
 
@@ -58,11 +56,18 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
     files = glob.glob(os.path.join(build_dir, 'bin', '*'))
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + files + [target_dir])
 
+    # Install python modules ... if we have any
+    if b.cmake_cache['HAVE_NUCLEAR_PYTHON_MODULES'] == 'ON':
+        cprint('Installing python modules to ' + target_dir, 'blue', attrs=['bold'])
+        files = glob.glob(os.path.join(build_dir, 'python', '**', '*.py'), recursive = True)
+        python_files = [os.path.relpath(c, build_dir) for c in files]
+        call(['rsync', '-avzPlR', '--checksum', '-e ssh'] + python_files + [target_dir])
+
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
         # Only send toolchain files if ours are newer than the receivers.
         cprint('Installing toolchain library files', 'blue', attrs=['bold'])
-        libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
+        libs = glob.glob(os.path.join(platform_dir, 'lib', '**', '*.so*'), recursive=True)
         call(['rsync', '-avzuPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
 
         # Set rpath for all libs on the remote machine

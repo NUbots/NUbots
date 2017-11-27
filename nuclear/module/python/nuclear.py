@@ -4,6 +4,11 @@ import re
 import os
 from textwrap import dedent
 
+# When embedded, sys has no argv, add an empty one
+import sys
+if not hasattr(sys, 'argv'):
+    sys.argv  = ['']
+
 def indent(str, len=4):
     return '\n'.join([(' ' * len) + l for l in str.splitlines()])
 
@@ -100,23 +105,23 @@ class Every(DSLWord):
 
 class Priority(object):
     class REALTIME(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::REALTIME"
 
     class HIGH(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::HIGH"
 
     class NORMAL(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::NORMAL"
 
     class LOW(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::LOW"
 
     class IDLE(DSLWord):
-        def template_arg(self):
+        def template_args(self):
             return "Priority::IDLE"
 
 
@@ -152,11 +157,26 @@ class DSLCallback(DSLWord):
     def function(self):
         return self.func
 
+def is_sequence(item):
+    if not hasattr(item, "strip") and hasattr(item, "__getitem__") or hasattr(item, "__iter__"):
+        return True
+    else:
+        return False
+
+def bind_emit(self, msg):
+    # Iterable type
+    if is_sequence(msg):
+        return msg[0]._emit_vector(self._reactor_ptr, msg)
+
+    # String or other non-iterable type
+    else:
+        return msg._emit(self._reactor_ptr)
+
 # Decorator for creating instance variables/setting up reactor
 def Reactor(reactor):
 
     # Attach an emit method to the class
-    setattr(reactor, 'emit', lambda self, msg: msg._emit(self._reactor_ptr))
+    setattr(reactor, 'emit', lambda self, msg: bind_emit(self, msg))
 
     try:
         # If we can import this we are running in nuclear, so run
@@ -197,7 +217,7 @@ def Reactor(reactor):
             // Binding function for the dsl on<{dsl}>
             m.def("bind_{func_name}", [this] (pybind11::function fn) {{
 
-                on<{dsl}>().then([this, fn] ({input_args}) {{
+                on<{dsl}>({runtime_args}).then([this, fn] ({input_args}) {{
 
                     // Create our thread state for this thread if it doesn't exist
                     if (!thread_state) {{
@@ -233,6 +253,7 @@ def Reactor(reactor):
 
             binders.add(binder_impl.format(func_name=func_name,
                                            dsl=reaction[1].template_args(),
+                                           runtime_args=reaction[1].runtime_args(),
                                            input_args=', '.join(input_args),
                                            input_types=', '.join(input_types),
                                            input_vars=', '.join(['self'] + input_vars)))

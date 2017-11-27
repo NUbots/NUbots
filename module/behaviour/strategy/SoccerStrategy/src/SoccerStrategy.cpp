@@ -169,16 +169,15 @@ namespace behaviour {
                 });
 
 
-            on<Trigger<ButtonMiddleDown>, With<FieldDescription>, Single>().then(
-                [this](const FieldDescription& fieldDescription) {
+            on<Trigger<ButtonMiddleDown>, Single>().then([this] {
 
-                    if (!cfg_.forcePlaying) {
-                        NUClear::log("Force playing started.");
-                        cfg_.forcePlaying = true;
-                    }
+                if (!cfg_.forcePlaying) {
+                    NUClear::log("Force playing started.");
                     emit(std::make_unique<Nod>(true));
-                    penaltyShootoutLocalisationReset(fieldDescription);
-                });
+                    cfg_.forcePlaying = true;
+                }
+
+            });
 
             // Main Loop
             // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
@@ -359,8 +358,8 @@ namespace behaviour {
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
             ResetRobotHypotheses::Self selfSideBaseLine;
-            selfSideBaseLine.position << 1, 0.0;
-            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
+            selfSideBaseLine.position << 2.0, 0.0;
+            selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             selfSideBaseLine.heading      = 0;
             selfSideBaseLine.heading_var  = 0.005;
             reset->hypotheses.push_back(selfSideBaseLine);

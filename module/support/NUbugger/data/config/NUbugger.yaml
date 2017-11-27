@@ -5,6 +5,8 @@ output:
   network:
     enabled: true
     max_image_fps: 10
+    max_reprojected_image_fps: 10
+    max_baked_image_fps: 10
     max_classified_image_fps: 10
 
 # Select which data to send
@@ -15,6 +17,10 @@ reaction_handles:
   sensor_data: false
   # Raw image
   image: false
+  # Reprojected image
+  reprojected_image: false
+  # Baked image
+  baked_image: false
   # Classified image
   classified_image: false
   # Vision objects including goals, balls and debugging lines

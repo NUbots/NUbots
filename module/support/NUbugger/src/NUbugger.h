@@ -58,7 +58,11 @@ namespace support {
         uint subPort = 0;
 
         NUClear::clock::duration max_image_duration;
-        NUClear::clock::time_point last_image = NUClear::clock::now();
+        NUClear::clock::time_point last_image             = NUClear::clock::now();
+        NUClear::clock::time_point last_reprojected_image = NUClear::clock::now();
+        NUClear::clock::time_point last_baked_image       = NUClear::clock::now();
+        NUClear::clock::duration max_reprojected_image_duration;
+        NUClear::clock::duration max_baked_image_duration;
         NUClear::clock::duration max_classified_image_duration;
         NUClear::clock::time_point last_classified_image = NUClear::clock::now();
 

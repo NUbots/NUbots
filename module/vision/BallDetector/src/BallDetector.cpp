@@ -40,7 +40,6 @@
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/Vision.h"
-#include "utility/vision/fourcc.h"
 
 #include "utility/math/geometry/Cone.h"
 
@@ -144,7 +143,7 @@ namespace vision {
             // sample point in lut and check if == Colour::GREEN
         }
 
-        // emit(drawVisionLines(debug));
+        emit(drawVisionLines(debug));
 
         float greenRatio = actualSamples == 0 ? 1 : (numGreen / float(actualSamples));
         return greenRatio;
@@ -314,10 +313,14 @@ namespace vision {
                         }
 
                         // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
-                        double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
+                        double widthDistance = widthBasedDistanceToCircle(
+                            field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
 
                         if (widthDistance < cameraHeight * 0.5) {
-                            if (print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                            if (print_throwout_logs) {
+                                log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                                log("widthDistance =", widthDistance, "cameraHeight =", cameraHeight);
+                            }
                             continue;
                         }
 

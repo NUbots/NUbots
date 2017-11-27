@@ -1,0 +1,7 @@
+
+FIND_PACKAGE(OpenCL REQUIRED)
+
+# Build our NUClear module
+NUCLEAR_MODULE(LANGUAGE "CPP"
+               INCLUDES ${OpenCL_INCLUDE_DIRS}
+               LIBRARIES ${OpenCL_LIBRARIES})

@@ -14,10 +14,18 @@ def register(command):
     subcommands = command.add_subparsers(dest='module_command')
 
     # Generate module subcommand
-    generate_command = subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
-    generate_command.add_argument('path', metavar='path', help='a path to the new module (from the module directory)')
+    generate_command = subcommands.add_parser('generate'
+                            , help='Generate a new NUClear module based on a template')
+    generate_command.add_argument('path'
+                            , metavar='path'
+                            , help='a path to the new module (from the module directory)')
+    generate_command.add_argument('language'
+                            , metavar='language'
+                            , choices=['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py']
+                            , default='C++'
+                            , help='Language to use for the module, C++ or Python [default=C++]')
 
-def run(path, **kwargs):
+def run(path, language, **kwargs):
     # Try to get our actual module directory from the cmake cache
     if 'NUCLEAR_MODULE_DIR' in b.cmake_cache:
         module_path = os.path.join(b.source_dir, b.cmake_cache['NUCLEAR_MODULE_DIR'])
@@ -39,6 +47,13 @@ def run(path, **kwargs):
         sys.stderr.write('Module generation aborted.\n')
         sys.exit(1)
 
+    if language not in ['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py']:
+        sys.stderr.write('The language provided is invalid.\n')
+        sys.stderr.write('Module generation aborted.\n')
+        sys.exit(1)
+
+    module_language = 'CPP' if language in ['C++', 'c++', 'cpp', 'cxx'] else 'PYTHON'
+
     print('Module directory', module_path)
     print('Creating directories')
 
@@ -59,20 +74,26 @@ def run(path, **kwargs):
 
     # Write all of our files
     with open(os.path.join(path, 'CMakeLists.txt'), "w") as output:
-        output.write(generate_cmake(parts))
+        output.write(generate_cmake(parts, module_language))
         print('\t', os.path.join(path, 'CMakeLists.txt'))
 
     with open(os.path.join(path, 'README.md'), "w") as output:
         output.write(generate_readme(parts))
         print('\t', os.path.join(src_path, 'README.md'))
 
-    with open(os.path.join(src_path, '{}.h'.format(module_name)), "w") as output:
-        output.write(generate_header(parts))
-        print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
+    if module_language is 'CPP':
+        with open(os.path.join(src_path, '{}.h'.format(module_name)), "w") as output:
+            output.write(generate_header(parts))
+            print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
 
-    with open(os.path.join(src_path, '{}.cpp'.format(module_name)), "w") as output:
-        output.write(generate_cpp(parts))
-        print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
+        with open(os.path.join(src_path, '{}.cpp'.format(module_name)), "w") as output:
+            output.write(generate_cpp(parts))
+            print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
+
+    else:
+        with open(os.path.join(src_path, '{}.py'.format(module_name)), "w") as output:
+            output.write(generate_python(parts))
+            print('\t', os.path.join(src_path, '{}.py'.format(module_name)))
 
     with open(os.path.join(tests_path, '{}.cpp'.format(module_name)), "w") as output:
         output.write(generate_test(parts))
@@ -82,11 +103,11 @@ def run(path, **kwargs):
         print('\t', os.path.join(config_path, '{}.yaml'.format(module_name)))
 
 
-def generate_cmake(parts):
+def generate_cmake(parts, language):
     return textwrap.dedent("""\
         # Build our NUClear module
-        NUCLEAR_MODULE()
-        """)
+        NUCLEAR_MODULE(LANGUAGE "{module_languge}")
+        """).format(module_languge=language)
 
 def generate_header(parts):
     template = textwrap.dedent("""\
@@ -172,4 +193,22 @@ def generate_test(parts):
 
     return template.format()
 
+def generate_python(parts):
+    template = textwrap.dedent("""\
+        #!/usr/bin/env python3
+
+        from nuclear import Reactor, on, Trigger, Single, With, Every
+
+        @Reactor
+        class {className}(object):
+
+            def __init__(self):
+                # Constructor for {className}
+
+            @on(Configuration('{className}.yaml'))
+            def {className}_configfuration(self, config):
+                # Use configuration here from file {className}.yaml
+        """)
+
+    return template.format(className=parts[-1])
 

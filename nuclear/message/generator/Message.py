@@ -308,19 +308,31 @@ class Message:
                     // Do the emit
                     reactor->powerplant.emit_shared<NUClear::dsl::word::emit::Local>(msg.shared_from_this());
                 }});
+
+                // Build our vector emitter function that is used to emit vectors of this object
+                context.def("_emit_vector", [] ({fqn}& msg, pybind11::capsule capsule, std::vector<{fqn}>& data) {{
+                    // Extract our reactor from the capsule
+                    NUClear::Reactor* reactor = capsule;
+
+                    // Copy the vector
+                    auto vec = data;
+                    auto ptr = std::make_unique<std::vector<{fqn}>>(vec);
+
+                    // Do the emit
+                    reactor->powerplant.emit<NUClear::dsl::word::emit::Local>(std::move(ptr));
+                }});
             }}""")
 
 
-        python_constructor_args = ['{}& self'.format(self.fqn.replace('.', '::'))]
-        python_constructor_args.extend(['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields])
+        python_constructor_args = ['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields]
         python_members = '\n'.join('.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace('.', '::')) for f in self.fields)
         python_constructor_default_args = ['']
         python_constructor_default_args.extend(['pybind11::arg("{}") = {}'.format(t.name, t.default_value if t.default_value else '{}()'.format(t.cpp_type)) for t in self.fields])
 
         python_constructor = dedent("""\
-            .def("__init__", [] ({args}) {{
-                new (&self) {name}({vars});
-            }}{default_args})""").format(
+            .def(pybind11::init([] ({args}) {{
+                return std::make_unique<{name}>({vars});
+            }}){default_args})""").format(
             name=self.fqn.replace('.', '::'),
             args=', '.join(python_constructor_args),
             vars=', '.join('_{}'.format(t.name) for t in self.fields),

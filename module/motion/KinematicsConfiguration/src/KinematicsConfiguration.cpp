@@ -112,6 +112,7 @@ namespace motion {
         model.head.MAX_YAW                  = headMovementLimits_yaw[1];
         model.head.MIN_PITCH                = headMovementLimits_pitch[0];
         model.head.MAX_PITCH                = headMovementLimits_pitch[1];
+        model.head.PITCH_COEFFS             = objHeadMovementLimits["pitch_coeffs"].as<std::vector<float>>();
     }
 
     void KinematicsConfiguration::configureArm(KinematicsModel& model, const YAML::Node& objArm) {

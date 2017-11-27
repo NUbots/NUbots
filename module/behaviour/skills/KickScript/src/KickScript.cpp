@@ -43,11 +43,11 @@ namespace behaviour {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
-        using message::motion::KickScriptCommand;
         using message::motion::KickFinished;
+        using message::motion::KickScriptCommand;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
 
         KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -100,11 +100,11 @@ namespace behaviour {
 
                 if (leg == LimbID::RIGHT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"Stand.yaml", "RightFootForwardKickNew.yaml", "Stand.yaml"})));
+                        id, std::vector<std::string>({"Stand.yaml", "KickRightSafe.yaml", "Stand.yaml"})));
                 }
                 else {  // if (leg == LimbID::LEFT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"Stand.yaml", "LeftFootForwardKickNew.yaml", "Stand.yaml"})));
+                        id, std::vector<std::string>({"Stand.yaml", "KickLeftSafe.yaml", "Stand.yaml"})));
                 }
 
                 // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
