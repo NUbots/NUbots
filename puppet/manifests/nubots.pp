@@ -80,7 +80,7 @@ node nubotsvmbuild {
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
                                           'nuc7i7bnh' => [ '--with-zlib=ZLIB_PATH', '--without-python', ], },
                        'method'      => 'autotools',},
-    'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/release/1.0.tar.gz',
+    'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/master.tar.gz',
                        'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', ],
                                           'fitpc2i' => [ '-DBUILD_TESTS=OFF', ],
                                           'nuc7i7bnh' => [ '-DBUILD_TESTS=OFF', ], },
