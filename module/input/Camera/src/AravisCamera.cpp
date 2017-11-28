@@ -10,8 +10,8 @@
 
 namespace module {
 namespace input {
-    using message::input::CameraParameters;
     using extension::Configuration;
+    using message::input::CameraParameters;
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
 
