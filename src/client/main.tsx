@@ -8,16 +8,9 @@ import { AppController } from './components/app/controller'
 import { AppModel } from './components/app/model'
 import { AppNetwork } from './components/app/network'
 import { AppView } from './components/app/view'
-import { installChart } from './components/chart/install'
-import { installClassifier } from './components/classifier/install'
 import { installDashboard } from './components/dashboard/install'
-import { installGameState } from './components/game_state/install'
 import { installLocalisation } from './components/localisation/install'
 import { withRobotSelectorMenuBar } from './components/menu_bar/view'
-import { installNUClear } from './components/nuclear/install'
-import { installScatterPlot } from './components/scatter_plot/install'
-import { installSubsumption } from './components/subsumption/install'
-import { installVision } from './components/vision/install'
 import { NavigationConfiguration } from './navigation'
 import { NUsightNetwork } from './network/nusight_network'
 
@@ -35,13 +28,6 @@ const menu = withRobotSelectorMenuBar(appModel.robots, appController.toggleRobot
 const nav = NavigationConfiguration.of()
 installDashboard({ nav, appModel, nusightNetwork, menu })
 installLocalisation({ nav, appModel, nusightNetwork, menu })
-installVision({ nav })
-installChart({ nav })
-installScatterPlot({ nav })
-installNUClear({ nav })
-installClassifier({ nav })
-installSubsumption({ nav })
-installGameState({ nav })
 
 ReactDOM.render(
   <BrowserRouter>
