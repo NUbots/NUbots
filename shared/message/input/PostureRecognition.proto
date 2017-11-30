@@ -20,11 +20,16 @@ syntax = "proto3";
 
 package message.input;
 
-message WalkingDetected  {}
-message BendingDetected  {}
-message KickingDetected  {}
-message SittingDetected  {}
-message StandingDetected {}
+message WalkingDetected {
+}
+message BendingDetected {
+}
+message KickingDetected {
+}
+message SittingDetected {
+}
+message StandingDetected {
+}
 
 message FallingDetected {
     double x = 1;

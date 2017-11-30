@@ -26,6 +26,13 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message Image {
+    message Lens {
+        enum Projection {
+            RECTILINEAR = 0;
+            EQUIDISTANT = 1;
+        }
+    }
+
     uint32                    format        = 1;
     uvec2                     dimensions    = 2;
     bytes                     data          = 3;
@@ -33,4 +40,5 @@ message Image {
     string                    serial_number = 5;
     google.protobuf.Timestamp timestamp     = 6;
     mat44                     Hcw           = 7;
+    Lens                      lens          = 8;
 }

@@ -71,6 +71,6 @@ namespace math {
             Vector direction = arma::normalise(arma::cross(unit_axis, perp));
             return unit_axis + g * direction;
         }
-    }
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility
