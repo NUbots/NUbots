@@ -23,8 +23,8 @@ package message.support.nubugger;
 
 message ReactionHandles {
     message Handle {
-        string type = 1;
-        bool enabled = 2;
+        string type    = 1;
+        bool   enabled = 2;
     }
 
     repeated Handle handles = 1;

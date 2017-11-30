@@ -26,7 +26,7 @@ import "Matrix.proto";
 message Field {
     // Measures the position of the field centre in world space position[0,1] = (rFWw)
     // and measures the orientation of the field from the world position[2] = (thetafw)
-    vec3  position = 1;
+    vec3 position = 1;
     // Covariance of the measurement
     mat33 covariance = 2;
 }

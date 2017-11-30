@@ -31,22 +31,22 @@ import "Matrix.proto";
 
 message VisionObject {
     // Time the image was taken
-    google.protobuf.Timestamp timestamp       = 1;
+    google.protobuf.Timestamp timestamp = 1;
 
     // The angular position and size from the perspective of the camera
     // Use these values to move the camera around to see this object
-    vec2                      screenAngular   = 2;
-    vec2                      angularSize     = 3;
+    vec2 screenAngular = 2;
+    vec2 angularSize   = 3;
 
     // The sensor frame that was used to detect this object
-    input.Sensors       sensors         = 4 [(pointer) = SHARED];
+    input.Sensors sensors = 4 [(pointer) = SHARED];
 
     // The classified image that was used to detect this object
     // TODO: Why is this here?
-    ClassifiedImage           classifiedImage = 5 [(pointer) = SHARED];
+    ClassifiedImage classifiedImage = 5 [(pointer) = SHARED];
 
     // The camera which saw the object.
-    uint32                    camera_id       = 6;
+    uint32 camera_id = 6;
 }
 
 message Ball {
@@ -56,16 +56,16 @@ message Ball {
     }
 
     message Measurement {
-        MeasurementType type        = 1;
-        //Vector from camera to ball in camera coordinates
-        vec3            rBCc        = 2;
-        mat33           covariance  = 3;
+        MeasurementType type = 1;
+        // Vector from camera to ball in camera coordinates
+        vec3  rBCc       = 2;
+        mat33 covariance = 3;
     }
 
-    VisionObject  visObject             = 1;
-    repeated Measurement measurements   = 2;
-    repeated vec3 edgePoints            = 3;
-    Cone        cone                    = 4;
+    VisionObject visObject            = 1;
+    repeated Measurement measurements = 2;
+    repeated vec3 edgePoints          = 3;
+    Cone          cone                = 4;
 }
 
 message Goal {
@@ -91,20 +91,20 @@ message Goal {
     }
 
     message Measurement {
-        MeasurementType type       = 1;
+        MeasurementType type = 1;
         // Normal vectors point inwards towards the centre of the object
-        vec3            position   = 2;
-        mat33           covariance   = 3;
+        vec3  position   = 2;
+        mat33 covariance = 3;
         // Normal vectors expressed in angles (first angle is around z axis, second is elevation)
-        vec2            normalAngles = 4;
-        mat22           normAngCov   = 5;
+        vec2  normalAngles = 4;
+        mat22 normAngCov   = 5;
     }
 
-    VisionObject         visObject   = 1;
-    Side                 side        = 2;
-    Team                 team        = 3;
-    Frustum              frustum     = 4;
-    Quad                 quad        = 5;
+    VisionObject visObject           = 1;
+    Side         side                = 2;
+    Team         team                = 3;
+    Frustum      frustum             = 4;
+    Quad         quad                = 5;
     repeated Measurement measurement = 6;
 }
 

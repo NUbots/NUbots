@@ -30,12 +30,12 @@ message OptimizeScript {
     }
 
     message Frame {
-        uint32          duration = 1;
-        repeated Target targets  = 2;
+        uint32   duration       = 1;
+        repeated Target targets = 2;
     }
 
-    string         target    = 1;
-    uint32         iteration = 2;
-    string         metadata  = 3;
-    repeated Frame frames    = 4;
+    string   target       = 1;
+    uint32   iteration    = 2;
+    string   metadata     = 3;
+    repeated Frame frames = 4;
 }

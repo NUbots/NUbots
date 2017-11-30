@@ -26,4 +26,5 @@ message DiveCommand {
     vec2 direction = 1;
 }
 
-message DiveFinished {}
+message DiveFinished {
+}
