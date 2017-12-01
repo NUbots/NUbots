@@ -20,38 +20,12 @@ syntax = "proto3";
 
 package message.motion;
 
-import "Matrix.proto";
 import "Vector.proto";
+import "google/protobuf/timestamp.proto";
 
-message FootMotionStopped {
-}
+message FootTarget {
 
-message FootMotionUpdate {
-    double phase             = 1;
-    uint32 activeForwardLimb = 2;
-    vec3   leftFoot2D        = 3;
-    vec3   rightFoot2D       = 4;
-    mat44  leftFoot3D        = 5;
-    mat44  rightFoot3D       = 6;
-}
-
-message NextFootTargetInfo {
-    vec3 leftFootSource       = 1;
-    vec3 rightFootSource      = 2;
-    vec3 supportMass          = 3;
-    vec3 leftFootDestination  = 4;
-    vec3 rightFootDestination = 5;
-}
-
-message FootStepRequested {
-    bool status = 1;
-}
-
-message FootStepCompleted {
-    bool status = 1;
-}
-
-message EnableFootMotion {
-}
-message DisableFootMotion {
+    google.protobuf.Timestamp timestamp = 1;
+    int32 foot = 2;
+    vec2 position = 3;
 }

@@ -1,5 +1,5 @@
-FootPlacementPlanner
-====================
+FootStep
+========
 
 ## Description
 
