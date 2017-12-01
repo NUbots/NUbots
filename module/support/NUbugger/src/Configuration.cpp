@@ -19,6 +19,7 @@
 
 #include "NUbugger.h"
 
+#include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
 #include "utility/file/fileutil.h"
@@ -31,8 +32,8 @@
 namespace module {
 namespace support {
     using utility::file::listFiles;
-    using utility::time::getUtcTimestamp;
     using utility::strutil::split;
+    using utility::time::getUtcTimestamp;
 
 
     /**
@@ -45,7 +46,7 @@ namespace support {
      * @param root The root YAML node.
      */
     void NUbugger::saveConfigurationFile(std::string path, const std::string& root) {
-        std::string tempName = path + ".tmp";
+        std::string tempName(fmt::format("{}.tmp", path));
         utility::file::writeToFile(tempName, root);
         rename(tempName.c_str(), path.c_str());
 

@@ -28,18 +28,22 @@
 namespace module {
 namespace support {
 
-    using utility::nubugger::graph;
-    using utility::time::getUtcTimestamp;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using utility::nubugger::graph;
+    using utility::time::getUtcTimestamp;
 
     void NUbugger::provideLocalisation() {
 
-        handles["localisation"].push_back(on<Trigger<Field>, Single, Priority::LOW>().then(
-            [this](const Field& self) { send(self, 0, false, NUClear::clock::now()); }));
+        handles["localisation"].push_back(
+            on<Trigger<Field>, Single, Priority::LOW>().then([this](std::shared_ptr<const Field> self) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(self), "nusight", false);
+            }));
 
-        handles["localisation"].push_back(on<Trigger<Ball>, Single, Priority::LOW>().then(
-            [this](const Ball& ball) { send(ball, 0, false, NUClear::clock::now()); }));
+        handles["localisation"].push_back(
+            on<Trigger<Ball>, Single, Priority::LOW>().then([this](std::shared_ptr<const Ball> ball) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(ball), "nusight", false);
+            }));
     }
 }  // namespace support
 }  // namespace module

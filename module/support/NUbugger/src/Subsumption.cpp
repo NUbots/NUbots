@@ -29,17 +29,17 @@ namespace support {
 
     using message::behaviour::Subsumption;
 
-    using utility::behaviour::ActionStart;
     using utility::behaviour::ActionKill;
-    using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
+    using utility::behaviour::ActionStart;
+    using utility::behaviour::RegisterAction;
     using LimbID = utility::input::LimbID;
 
     void NUbugger::provideSubsumption() {
 
         handles["subsumption"].push_back(on<Trigger<ActionStart>>().then([this](const ActionStart& actionStart) {
 
-            Subsumption subsumption;
+            auto subsumption = std::make_unique<Subsumption>();
 
             Subsumption::ActionStateChange actionStateChange;
             actionStateChange.state = Subsumption::ActionStateChange::State::Value::START;
@@ -49,13 +49,13 @@ namespace support {
                 actionStateChange.limbs.push_back(limbID);
             }
 
-            subsumption.action_state_change.push_back(actionStateChange);
-            send(subsumption);
+            subsumption->action_state_change.push_back(actionStateChange);
+            emit<Scope::NETWORK>(subsumption, "nusight", true);
         }));
 
         handles["subsumption"].push_back(on<Trigger<ActionKill>>().then([this](const ActionKill& actionKill) {
 
-            Subsumption subsumption;
+            auto subsumption = std::make_unique<Subsumption>();
 
             Subsumption::ActionStateChange actionStateChange;
             actionStateChange.state = Subsumption::ActionStateChange::State::Value::KILL;
@@ -65,13 +65,13 @@ namespace support {
                 actionStateChange.limbs.push_back(limbID);
             }
 
-            subsumption.action_state_change.push_back(actionStateChange);
-            send(subsumption);
+            subsumption->action_state_change.push_back(actionStateChange);
+            emit<Scope::NETWORK>(subsumption, "nusight", true);
         }));
 
         handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this](const RegisterAction& action) {
 
-            Subsumption subsumption;
+            auto subsumption = std::make_unique<Subsumption>();
 
             Subsumption::ActionRegister actionRegister;
             actionRegister.id   = action.id;
@@ -89,14 +89,14 @@ namespace support {
                 actionRegister.limb_set.push_back(limbSet);
             }
 
-            subsumption.action_register.push_back(actionRegister);
+            subsumption->action_register.push_back(actionRegister);
             actionRegisters.insert(std::make_pair(action.id, actionRegister));
-            send(subsumption);
+            emit<Scope::NETWORK>(subsumption, "nusight", true);
         }));
 
         handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this](const ActionPriorites& action) {
 
-            Subsumption subsumption;
+            auto subsumption = std::make_unique<Subsumption>();
 
             Subsumption::ActionPriorites actionPriorityChange;
             actionPriorityChange.id = action.id;
@@ -111,20 +111,20 @@ namespace support {
                 index++;
             }
 
-            subsumption.action_priority_change.push_back(actionPriorityChange);
-            send(subsumption);
+            subsumption->action_priority_change.push_back(actionPriorityChange);
+            emit<Scope::NETWORK>(subsumption, "nusight", true);
         }));
     }
 
     void NUbugger::sendSubsumption() {
 
-        Subsumption subsumption;
+        auto subsumption = std::make_unique<Subsumption>();
 
         for (const auto& actionRegister : actionRegisters) {
-            subsumption.action_register.push_back(actionRegister.second);
+            subsumption->action_register.push_back(actionRegister.second);
         }
 
-        send(subsumption);
+        emit<Scope::NETWORK>(subsumption, "nusight", true);
     }
 }  // namespace support
 }  // namespace module

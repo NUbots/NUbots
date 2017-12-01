@@ -31,15 +31,10 @@ namespace support {
 
     void NUbugger::provideDataPoints() {
 
-        handles["data_point"].push_back(on<Trigger<DataPoint>>().then([this](const DataPoint& dataPoint) {
-
-            uint filterId =
-                dataPointFilterIds.find(dataPoint.label) == dataPointFilterIds.end()
-                    ? dataPointFilterIds.insert(std::make_pair(dataPoint.label, dataPointFilterId++)).first->second
-                    : dataPointFilterIds[dataPoint.label];
-
-            send(dataPoint, filterId);
-        }));
+        handles["data_point"].push_back(
+            on<Trigger<DataPoint>>().then([this](std::shared_ptr<const DataPoint> dataPoint) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(dataPoint), "nusight", false);
+            }));
     }
 }  // namespace support
 }  // namespace module

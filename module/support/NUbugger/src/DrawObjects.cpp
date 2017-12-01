@@ -26,16 +26,20 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using message::support::nubugger::DrawObjects;
     using message::support::nubugger::DrawObject;
+    using message::support::nubugger::DrawObjects;
 
     void NUbugger::provideDrawObjects() {
 
         handles["draw_objects"].push_back(
-            on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) { send(drawObjects); }));
+            on<Trigger<DrawObjects>, Priority::LOW>().then([this](std::shared_ptr<const DrawObjects> drawObjects) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(drawObjects), "nusight", false);
+            }));
 
         handles["draw_objects"].push_back(
-            on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) { send(drawObject); }));
+            on<Trigger<DrawObject>, Priority::LOW>().then([this](std::shared_ptr<const DrawObject> drawObject) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(drawObject), "nusight", false);
+            }));
     }
 }  // namespace support
 }  // namespace module

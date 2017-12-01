@@ -32,9 +32,9 @@ namespace support {
 
         // This trigger gets the output from the sensors (unfiltered)
         handles["sensor_data"].push_back(
-            on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
+            on<Trigger<Sensors>, Single, Priority::LOW>().then([this](std::shared_ptr<const Sensors> sensors) {
 
-                send(sensors, 1, false, sensors.timestamp);
+                powerplant.emit_shared<Scope::NETWORK>(std::move(sensors), "nusight", false);
 
             }));
     }

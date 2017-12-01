@@ -40,15 +40,16 @@ namespace support {
     void NUbugger::provideGameController() {
 
         // HALP X_X
+        // NO
 
         handles["game_state"].push_back(on<Trigger<TeamColour>, With<GameState>>().then(
-            [this](const GameState& gameState) { sendGameState("TeamColour", gameState); }));
+            [this](std::shared_ptr<const GameState> gameState) { sendGameState("TeamColour", gameState); }));
 
         handles["game_state"].push_back(on<Trigger<Score>, With<GameState>>().then(
-            [this](const GameState& gameState) { sendGameState("Score", gameState); }));
+            [this](std::shared_ptr<const GameState> gameState) { sendGameState("Score", gameState); }));
 
         handles["game_state"].push_back(on<Trigger<GoalScored>, With<GameState>>().then(
-            [this](const GoalScored& goalScored, const GameState& gameState) {
+            [this](const GoalScored& goalScored, std::shared_ptr<const GameState> gameState) {
                 switch (goalScored.context.value) {
                     case message::input::GameEvents::Context::Value::TEAM: {
                         sendGameState("GoalScored<TEAM>", gameState);
@@ -68,7 +69,7 @@ namespace support {
             }));
 
         handles["game_state"].push_back(on<Trigger<Penalisation>, With<GameState>>().then(
-            [this](const Penalisation& penalisation, const GameState& gameState) {
+            [this](const Penalisation& penalisation, std::shared_ptr<const GameState> gameState) {
                 switch (penalisation.context.value) {
                     case message::input::GameEvents::Context::Value::SELF: {
                         sendGameState("Penalisation<SELF>", gameState);
@@ -93,7 +94,7 @@ namespace support {
             }));
 
         handles["game_state"].push_back(on<Trigger<Unpenalisation>, With<GameState>>().then(
-            [this](const Unpenalisation& unpenalisation, const GameState& gameState) {
+            [this](const Unpenalisation& unpenalisation, std::shared_ptr<const GameState> gameState) {
                 switch (unpenalisation.context.value) {
                     case message::input::GameEvents::Context::Value::SELF: {
                         sendGameState("Unpenalisation<SELF>", gameState);
@@ -118,7 +119,7 @@ namespace support {
             }));
 
         handles["game_state"].push_back(on<Trigger<CoachMessage>, With<GameState>>().then(
-            [this](const CoachMessage& message, const GameState& gameState) {
+            [this](const CoachMessage& message, std::shared_ptr<const GameState> gameState) {
                 switch (message.context.value) {
                     case message::input::GameEvents::Context::Value::TEAM: {
                         sendGameState("CoachMessage<TEAM>", gameState);
@@ -138,10 +139,10 @@ namespace support {
             }));
 
         handles["game_state"].push_back(on<Trigger<HalfTime>, With<GameState>>().then(
-            [this](const GameState& gameState) { sendGameState("HalfTime", gameState); }));
+            [this](std::shared_ptr<const GameState> gameState) { sendGameState("HalfTime", gameState); }));
 
         handles["game_state"].push_back(on<Trigger<BallKickedOut>, With<GameState>>().then(
-            [this](const BallKickedOut& ballKickedOut, const GameState& gameState) {
+            [this](const BallKickedOut& ballKickedOut, std::shared_ptr<const GameState> gameState) {
                 switch (ballKickedOut.context.value) {
                     case message::input::GameEvents::Context::Value::TEAM: {
                         sendGameState("BallKickedOut<TEAM>", gameState);
@@ -161,10 +162,10 @@ namespace support {
             }));
 
         handles["game_state"].push_back(on<Trigger<KickOffTeam>, With<GameState>>().then(
-            [this](const GameState& gameState) { sendGameState("KickOffTeam", gameState); }));
+            [this](std::shared_ptr<const GameState> gameState) { sendGameState("KickOffTeam", gameState); }));
 
         handles["game_state"].push_back(on<Trigger<GamePhase>, With<GameState>>().then(
-            [this](const GamePhase& gamePhase, const GameState& gameState) {
+            [this](const GamePhase& gamePhase, std::shared_ptr<const GameState> gameState) {
                 switch (gamePhase.phase.value) {
                     case GameStateData::Phase::Value::INITIAL: {
                         sendGameState("GamePhase<INITIAL>", gameState);
@@ -203,8 +204,8 @@ namespace support {
                 }
             }));
 
-        handles["game_state"].push_back(
-            on<Trigger<GameMode>, With<GameState>>().then([this](const GameMode& gameMode, const GameState& gameState) {
+        handles["game_state"].push_back(on<Trigger<GameMode>, With<GameState>>().then(
+            [this](const GameMode& gameMode, std::shared_ptr<const GameState> gameState) {
                 switch (gameMode.mode.value) {
                     case GameStateData::Mode::Value::NORMAL: {
                         sendGameState("GameMode<NORMAL>", gameState);
@@ -229,57 +230,10 @@ namespace support {
             }));
     }
 
-    void NUbugger::sendGameState(std::string event, const GameState& gameState) {
+    void NUbugger::sendGameState(std::string event, std::shared_ptr<const GameState> gameState) {
         log("GameEvent:", event);
 
-        send(gameState, 0, true);
-
-        /*
-        GameState gameController;
-        GameStateData data;
-
-        gameController.event  = event;
-
-        data.phase            = gameState.data.phase;
-        data.mode             = gameState.data.mode;
-        data.first_half       = gameState.data.firstHalf;
-        data.kicked_out_by_us = gameState.data.kickedOutByUs;
-        data.kicked_out_time  = gameState.data.kickedOutTime;
-        data.our_kick_off     = gameState.data.ourKickOff;
-        data.primary_time     = gameState.data.primaryTime;
-        data.secondary_time   = gameState.data.secondaryTime;
-
-        GameStateData::Team team;
-        auto& gameStateTeam = gameState.data.team;
-        team.team_id        = gameStateTeam.teamId;
-        team.score          = gameStateTeam.score;
-        team.coach_message  = gameStateTeam.coachMessage;
-
-        for (auto& gameStatePlayer : gameStateTeam.players) {
-            GameStateData::Robot player;
-            player.id             = gameStatePlayer.id;
-            player.penalty_reason = gameStatePlayer.penaltyReason;
-            player.unpenalised    = gameStatePlayer.unpenalised;
-            team.players.push_back(player);
-        }
-
-        GameStateData::Team opponent;
-        auto& gameStateOpponent = gameState.data.opponent;
-        opponent.team_id        = gameStateOpponent.teamId;
-        opponent.score          = gameStateOpponent.score;
-        opponent.coach_message  = gameStateOpponent.coachMessage;
-
-        for (auto& gameStatePlayer : gameStateOpponent.players) {
-            GameStateData::Robot player;
-            player.id             = gameStatePlayer.id;
-            player.penalty_reason = gameStatePlayer.penaltyReason;
-            player.unpenalised    = gameStatePlayer.unpenalised;
-            opponent.players.push_back(player);
-        }
-
-        gameController.data = data;
-        send(gameController, 0, true);
-        */
+        powerplant.emit_shared<Scope::NETWORK>(std::move(gameState), "nusight", true);
     }
 }  // namespace support
 }  // namespace module

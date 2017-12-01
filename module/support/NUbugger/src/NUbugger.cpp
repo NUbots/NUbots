@@ -23,7 +23,6 @@
 
 #include "message/support/SaveConfiguration.h"
 #include "message/support/nubugger/Command.h"
-#include "message/support/nubugger/Ping.h"
 #include "message/support/nubugger/ReactionHandles.h"
 #include "message/vision/LookUpTable.h"
 
@@ -35,18 +34,15 @@
 namespace module {
 namespace support {
 
-    using utility::nubugger::graph;
-
     using extension::Configuration;
-    using message::support::nubugger::Ping;
-    using message::support::nubugger::ReactionHandles;
-    using message::support::nubugger::Command;
 
+    using message::support::SaveConfiguration;
+    using message::support::nubugger::Command;
+    using message::support::nubugger::ReactionHandles;
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
 
-    using message::support::SaveConfiguration;
-
+    using utility::nubugger::graph;
     using utility::time::durationFromSeconds;
 
     // Flag struct to upload a lut
@@ -57,11 +53,7 @@ namespace support {
         , max_image_duration()
         , max_classified_image_duration()
         , handles()
-        , dataPointFilterIds()
-        , actionRegisters()
-        , outputFile()
-        , networkMutex()
-        , fileMutex() {
+        , actionRegisters() {
 
         // These go first so the config can do things with them
         provideOverview();
@@ -77,39 +69,12 @@ namespace support {
         on<Configuration>("NUbugger.yaml").then([this](const Configuration& config) {
 
             max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
+            max_reprojected_image_duration =
+                durationFromSeconds(1.0 / config["output"]["network"]["max_reprojected_image_fps"].as<double>());
+            max_baked_image_duration =
+                durationFromSeconds(1.0 / config["output"]["network"]["max_baked_image_fps"].as<double>());
             max_classified_image_duration =
                 durationFromSeconds(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>());
-
-            // If we are using the network
-            networkEnabled = config["output"]["network"]["enabled"].as<bool>();
-
-            // If we are using files and haven't set one up yet
-            if (!fileEnabled && config["output"]["file"]["enabled"].as<bool>()) {
-
-                // Lock the file
-                std::lock_guard<std::mutex> lock(fileMutex);
-
-                // Get our timestamp
-                std::string timestamp = std::to_string(
-                    std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now().time_since_epoch()).count());
-
-                // Open a file using the file name and timestamp
-                outputFile.close();
-                outputFile.clear();
-                outputFile.open(config["output"]["file"]["path"].as<std::string>() + "/" + timestamp + ".nbs",
-                                std::ios::binary);
-
-                fileEnabled = true;
-            }
-            else if (fileEnabled && !config["output"]["file"]["enabled"].as<bool>()) {
-
-                // Lock the file
-                std::lock_guard<std::mutex> lock(fileMutex);
-
-                // Close the file
-                outputFile.close();
-                fileEnabled = false;
-            }
 
             for (auto& setting : config["reaction_handles"].config) {
                 // Lowercase the name
@@ -142,12 +107,9 @@ namespace support {
             }
         });
 
-        on<Every<1, Per<std::chrono::seconds>>, Single, Priority::LOW>().then([this] {
-            // Send a ping message
-            send(Ping(), 0, false, NUClear::clock::time_point());
+        on<Trigger<UploadLUT>, With<LookUpTable>>().then([this](std::shared_ptr<const LookUpTable> lut) {
+            powerplant.emit_shared<Scope::NETWORK>(std::move(lut), "nusight", true);
         });
-
-        on<Trigger<UploadLUT>, With<LookUpTable>>().then([this](const LookUpTable& lut) { send(lut); });
 
         on<Network<Command>>().then("Network Command", [this](const Command& message) {
             std::string command = message.command;
@@ -199,14 +161,6 @@ namespace support {
 
         sendReactionHandles();
 
-        // When we shutdown, close our publisher and our file if we have one
-        on<Shutdown>().then([this] {
-
-            // Close the file if it exists
-            fileEnabled = false;
-            outputFile.close();
-        });
-
         on<Trigger<SaveConfiguration>>().then("Save Config", [this](const SaveConfiguration& config) {
             saveConfigurationFile(config.path, config.config);
         });
@@ -214,17 +168,17 @@ namespace support {
 
     void NUbugger::sendReactionHandles() {
 
-        ReactionHandles reactionHandles;
+        auto reactionHandles = std::make_unique<ReactionHandles>();
 
         for (auto& handle : handles) {
             ReactionHandles::Handle objHandle;
             objHandle.type    = handle.first;
             auto& value       = handle.second;
             objHandle.enabled = (value.empty()) ? true : value.front().enabled();
-            reactionHandles.handles.push_back(objHandle);
+            reactionHandles->handles.push_back(objHandle);
         }
 
-        send(reactionHandles, 0, true, NUClear::clock::now());
+        emit<Scope::NETWORK>(reactionHandles, "nusight", true);
     }
 
 }  // namespace support

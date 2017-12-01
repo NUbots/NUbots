@@ -44,21 +44,21 @@ namespace module {
 namespace support {
 
     using NUClear::message::CommandLineArguments;
-    using message::support::nubugger::Overview;
     using message::behaviour::Behaviour;
-    using message::behaviour::WalkPath;
     using message::behaviour::KickPlan;
+    using message::behaviour::WalkPath;
+    using message::input::GameState;
     using message::input::Image;
     using message::input::Sensors;
-    using message::input::GameState;
-    using message::support::GlobalConfig;
     using message::localisation::Field;
+    using message::support::GlobalConfig;
+    using message::support::nubugger::Overview;
     using LocalisationBall = message::localisation::Ball;
     using VisionBall       = message::vision::Ball;
     using VisionGoal       = message::vision::Goal;
     using message::motion::WalkCommand;
-    using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
+    using utility::math::matrix::Transform3D;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview
@@ -92,15 +92,15 @@ namespace support {
                              std::shared_ptr<const WalkCommand> walk_command) {
 
 
-                    Overview msg;
+                    auto msg = std::make_unique<Overview>();
 
                     // Set properties
-                    msg.timestamp       = NUClear::clock::now();
-                    msg.robot_id        = global ? global->playerId : 0;
-                    msg.role_name       = cli ? cli->at(0) : "";
-                    msg.battery         = sensors ? sensors->battery : 0;
-                    msg.voltage         = sensors ? sensors->voltage : 0;
-                    msg.behaviour_state = behaviour_state ? msg.behaviour_state : Behaviour::State(0);
+                    msg->timestamp       = NUClear::clock::now();
+                    msg->robot_id        = global ? global->playerId : 0;
+                    msg->role_name       = cli ? cli->at(0) : "";
+                    msg->battery         = sensors ? sensors->battery : 0;
+                    msg->voltage         = sensors ? sensors->voltage : 0;
+                    msg->behaviour_state = behaviour_state ? msg->behaviour_state : Behaviour::State(0);
 
                     if (sensors) {
                         // Get our world transform
@@ -119,8 +119,8 @@ namespace support {
                             Rotation3D Rft = Hft.rotation();
 
                             // Store our position from field to torso
-                            msg.robot_position            = Eigen::Vector3f(rTFf[0], rTFf[1], Rft.yaw());
-                            msg.robot_position_covariance = field->covariance.cast<float>();
+                            msg->robot_position            = Eigen::Vector3f(rTFf[0], rTFf[1], Rft.yaw());
+                            msg->robot_position_covariance = field->covariance.cast<float>();
 
                             if (loc_ball) {
                                 // Get our ball in field space
@@ -129,8 +129,8 @@ namespace support {
                                 arma::vec4 rBFf    = Hfw * rBWw;
 
                                 // Store our position from field to ball
-                                msg.ball_position            = Eigen::Vector2f(rBFf[0], rBFf[1]);
-                                msg.ball_position_covariance = loc_ball->covariance.cast<float>();
+                                msg->ball_position            = Eigen::Vector2f(rBFf[0], rBFf[1]);
+                                msg->ball_position_covariance = loc_ball->covariance.cast<float>();
                             }
                         }
 
@@ -139,36 +139,36 @@ namespace support {
                         //     if (walk_path) {
                         //         for (const auto& state : walk_path->states) {
                         //             // Make these positions in field space
-                        //             msg.path_plan.push_back(state);
+                        //             msg->path_plan.push_back(state);
                         //         }
                         //     }
                         // }
                     }
 
                     if (kick_plan) {
-                        msg.kick_target = kick_plan->target.cast<float>();
+                        msg->kick_target = kick_plan->target.cast<float>();
                     }
 
                     // Set our game mode properties
-                    msg.game_mode  = game_state ? game_state->data.mode : GameState::Data::Mode(0);
-                    msg.game_phase = game_state ? game_state->data.phase : GameState::Data::Phase(0);
-                    msg.penalty_reason =
+                    msg->game_mode  = game_state ? game_state->data.mode : GameState::Data::Mode(0);
+                    msg->game_phase = game_state ? game_state->data.phase : GameState::Data::Phase(0);
+                    msg->penalty_reason =
                         game_state ? game_state->data.self.penalty_reason : GameState::Data::PenaltyReason(0);
 
                     // Set our last seen times
-                    msg.last_camera_image = last_camera_image;
-                    msg.last_camera_image = last_seen_ball;
-                    msg.last_camera_image = last_seen_goal;
+                    msg->last_camera_image = last_camera_image;
+                    msg->last_camera_image = last_seen_ball;
+                    msg->last_camera_image = last_seen_goal;
 
                     // Set our walk command
                     if (walk_command) {
-                        msg.walk_command = walk_command->command.cast<float>();
+                        msg->walk_command = walk_command->command.cast<float>();
                     }
                     else {
-                        msg.walk_command = Eigen::Vector3f::Zero();
+                        msg->walk_command = Eigen::Vector3f::Zero();
                     }
 
-                    send(msg, 0, false, NUClear::clock::now());
+                    emit<Scope::NETWORK>(msg, "nusight", false);
                 }));
 
 
