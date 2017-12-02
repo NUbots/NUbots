@@ -10,8 +10,8 @@
 
 namespace module {
 namespace input {
-    using message::input::CameraParameters;
     using extension::Configuration;
+    using message::input::CameraParameters;
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
 
@@ -128,9 +128,11 @@ namespace input {
         if (std::isfinite(exposure)) {
             arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_exposure_time(camera->second.camera, exposure);
+            log(fmt::format("Exposure set to {} us for camera {}", exposure, config["deviceID"].as<std::string>()));
         }
         else {
             arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_CONTINUOUS);
+            log(fmt::format("Exposure set to auto for camera {}", config["deviceID"].as<std::string>()));
             // exposure = (1.0 / 30.0) * 1e6;  // Default to 30 fps
         }
 
@@ -139,9 +141,11 @@ namespace input {
         if (std::isfinite(gain)) {
             arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_gain(camera->second.camera, gain);
+            log(fmt::format("Gain set to {} for camera {}", gain, config["deviceID"].as<std::string>()));
         }
         else {
             arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_CONTINUOUS);
+            log(fmt::format("Gain set to auto for camera {}", config["deviceID"].as<std::string>()));
         }
 
         arv_camera_start_acquisition(camera->second.camera);
