@@ -90,6 +90,7 @@ class build_tools {
                 /usr/bin/pip3 install numpy &&
                 /usr/bin/pip3 install tensorflow &&
                 /usr/bin/pip3 install mako &&
+                /usr/bin/pip3 install scikit-image &&
                 /usr/bin/pip3 install PyYAML',
     require => [ Package['python3-pip'], ]
   }
