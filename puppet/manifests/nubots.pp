@@ -99,9 +99,13 @@ node nubotsvmbuild {
                        'args'        => { 'native'   => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
                                           'nuc7i7bnh' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
                        'method'      => 'cmake',},
-    'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.6-pl2.tar.gz',
-                       'args'        => { 'native'   => [ '--disable-fortran', '--enable-shared', ],
-                                          'nuc7i7bnh' => [ '--disable-fortran', '--enable-shared', ], },
+    'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.7.tar.gz',
+                       'args'        => { 'native'   => [ '--disable-fortran', '--enable-shared', '--enable-openmp', '--enable-threads', ],
+                                          'nuc7i7bnh' => [ '--disable-fortran', '--enable-shared', '--enable-openmp', '--enable-threads', ], },
+                       'method'      => 'autotools',},
+    'fftw3f'       => {'url'         => 'http://www.fftw.org/fftw-3.3.7.tar.gz',
+                       'args'        => { 'native'   => [ '--disable-fortran', '--enable-shared', '--enable-float', '--enable-openmp', '--enable-threads', ],
+                                          'nuc7i7bnh' => [ '--disable-fortran', '--enable-shared', '--enable-float', '--enable-openmp', '--enable-threads', ], },
                        'method'      => 'autotools',},
     'jpeg'         => {'url'         => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.5.1/libjpeg-turbo-1.5.1.tar.gz',
                        'args'        => { 'native'   => [ 'CCASFLAGS="-f elf64"', ],
@@ -116,7 +120,8 @@ node nubotsvmbuild {
                        'method'      => 'autotools',},
     'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
-                       'method'      => 'cmake',},
+                       'method'      => 'cmake',
+                       'require'     => [ Installer['fftw3'], Installer['fftw3f'], ],},
     'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz',
                        'args'        => { 'native'   => [ 'address-model=64', 'architecture=x86', 'link=static', ],
                                           'nuc7i7bnh' => [ 'address-model=64', 'architecture=x86', 'link=static', ], },
@@ -245,8 +250,87 @@ node nubotsvmbuild {
                        'method'      => 'autotools', },
     'glm'          => {'url'         => 'https://github.com/g-truc/glm/archive/0.9.8.5.tar.gz',
                        'args'        => { 'native'   => [ '-DGLM_TEST_ENABLE_CXX_14=ON', '-DGLM_TEST_ENABLE_LANG_EXTENSIONS=ON', '-DGLM_TEST_ENABLE_FAST_MATH=ON',  ],
-                                          'nuc7i7bnh' => [ '-DGLM_TEST_ENABLE_FAST_MATH=ON', '-DGLM_TEST_ENABLE_FAST_MATH=ON', '-DGLM_TEST_ENABLE_FAST_MATH=ON',  ], },
-                       'creates'     => 'include/glm/glm.h',
+                                          'nuc7i7bnh' => [ '-DGLM_TEST_ENABLE_CXX_14=ON', '-DGLM_TEST_ENABLE_LANG_EXTENSIONS=ON', '-DGLM_TEST_ENABLE_FAST_MATH=ON',  ], },
+                       'creates'     => 'include/glm/glm.hpp',
+                       'method'      => 'cmake', },
+
+    # Caffe OpenCL
+    'gflags'       => {'url'         => 'https://github.com/gflags/gflags/archive/v2.2.1.tar.gz',
+                       'args'        => { 'native'   => [ '-DBUILD_TESTING=OFF', ],
+                                          'nuc7i7bnh' => [ '-DBUILD_TESTING=OFF', ], },
+                       'creates'     => 'lib/libgflags.a',
+                       'method'      => 'cmake', },
+    'gtest'        => {'url'         => 'https://github.com/google/googletest/archive/release-1.8.0.tar.gz',
+                       'creates'     => 'lib/libgtest.a',
+                       'method'      => 'cmake', },
+    'snappy'       => {'url'         => 'https://github.com/google/snappy/archive/1.1.7.tar.gz',
+                       'args'        => { 'native'   => [ '-DSNAPPY_BUILD_TESTS=OFF', ],
+                                          'nuc7i7bnh' => [ '-DSNAPPY_BUILD_TESTS=OFF', ], },
+                       'require'     => [ Installer['gtest'], Installer['gflags'], ],
+                       'creates'     => 'lib/libsnappy.a',
+                       'method'      => 'cmake', },
+    'leveldb'      => {'url'         => '',
+                       'creates'     => 'lib/leveldb.a',
+                       'prebuild'    => 'wget -N https://github.com/google/leveldb/archive/v1.20.tar.gz &&
+                                         tar -xf v1.20.tar.gz &&
+                                         cd leveldb-1.20 &&
+                                         make -j$(nproc) &&
+                                         cp out-static/lib* out-shared/lib* PREFIX/lib/ &&
+                                         cp -r include/* PREFIX/include/',
+                       'creates'     => 'lib/libleveldb.a',
+                       'require'     => [ Installer['snappy'], ],
+                       'method'      => 'custom', },
+    'lmdb'         => {'url'         => 'https://github.com/LMDB/lmdb/archive/LMDB_0.9.21.tar.gz',
+                       'creates'     => 'lib/liblmdb.so',
+                       'args'        => { 'native'   => [ 'prefix=PREFIX', ],
+                                          'nuc7i7bnh' => [ 'prefix=PREFIX', ], },
+                       'src_dir'     => 'libraries/liblmdb',
+                       'method'      => 'make', },
+    'hdf5'         => {'url'         => 'https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.1.tar.gz',
+                       'args'        => { 'native'   => [ '-DHDF5_BUILD_CPP_LIB=ON', '-DHDF5_ENABLE_Z_LIB_SUPPORT=ON', ],
+                                          'nuc7i7bnh' => [ '-DHDF5_BUILD_CPP_LIB=ON', '-DHDF5_ENABLE_Z_LIB_SUPPORT=ON', ], },
+                       'creates'     => 'lib/libhdf5.so',
+                       'method'      => 'cmake', },
+    'glog'         => {'url'         => 'https://github.com/google/glog/archive/v0.3.5.tar.gz',
+                       'args'        => { 'native'   => [ '-DBUILD_TESTING=OFF', ],
+                                          'nuc7i7bnh' => [ '-DBUILD_TESTING=OFF', ], },
+                       'require'     => [ Installer['gflags'], ],
+                       'creates'     => 'lib/libglog.a',
+                       'method'      => 'cmake', },
+    'opencv'       => {'url'         => 'https://github.com/opencv/opencv/archive/3.3.1.tar.gz',
+                       'args'        => { 'native'   => [ '-DOPENCV_ENABLE_NONFREE=ON', '-DWITH_CUDA=OFF', '-DWITH_CUFFT=OFF', '-DWITH_CUBLAS=OFF', '-DWITH_NVCUVID=OFF', '-DWITH_EIGEN=ON', '-DWITH_ARAVIS=ON', '-DWITH_TBB=ON', '-DWITH_OPENMP=ON', '-DWITH_OPENCL=ON', '-DBUILD_opencv_apps=OFFF', '-DBUILD_opencv_js=OFF', '-DBUILD_opencv_python3=ON', '-DBUILD_DOCS=OFF', '-DBUILD_EXAMPLES=OFF', '-DBUILD_PERF_TESTS=OFF', '-DBUILD_TESTS=OFF', '-DBUILD_WITH_DEBUG_INFO=OFF', '-DBUILD_ZLIB=OFF', '-DBUILD_TIFF=ON', '-DBUILD_JASPER=ON', '-DBUILD_JPEG=ON', '-DBUILD_PNG=ON', '-DBUILD_TBB=ON', ],
+                                          'nuc7i7bnh' => [ '-DOPENCV_ENABLE_NONFREE=ON', '-DWITH_CUDA=OFF', '-DWITH_CUFFT=OFF', '-DWITH_CUBLAS=OFF', '-DWITH_NVCUVID=OFF', '-DWITH_EIGEN=ON', '-DWITH_ARAVIS=ON', '-DWITH_TBB=ON', '-DWITH_OPENMP=ON', '-DWITH_OPENCL=ON', '-DBUILD_opencv_apps=OFFF', '-DBUILD_opencv_js=OFF', '-DBUILD_opencv_python3=ON', '-DBUILD_DOCS=OFF', '-DBUILD_EXAMPLES=OFF', '-DBUILD_PERF_TESTS=OFF', '-DBUILD_TESTS=OFF', '-DBUILD_WITH_DEBUG_INFO=OFF', '-DBUILD_ZLIB=OFF', '-DBUILD_TIFF=ON', '-DBUILD_JASPER=ON', '-DBUILD_JPEG=ON', '-DBUILD_PNG=ON', '-DBUILD_TBB=ON', ], },
+                       'require'     => [ Installer['aravis'], Installer['eigen3'], ],
+                       'creates'     => 'lib/libopencv_core.so',
+                       'method'      => 'cmake', },
+    'viennacl'     => {'url'         => 'https://github.com/viennacl/viennacl-dev/archive/release-1.7.1.tar.gz',
+                       'args'        => { 'native'   => [ '-DBUILD_EXAMPLES=OFF', '-DBUILD_TESTING=OFF', '-DOPENCL_LIBRARY=PREFIX/opt/intel/opencl/libOpenCL.so', ],
+                                          'nuc7i7bnh' => [ '-DBUILD_EXAMPLES=OFF', '-DBUILD_TESTING=OFF', '-DOPENCL_LIBRARY=PREFIX/opt/intel/opencl/libOpenCL.so', ], },
+                       'creates'     => 'include/viennacl/version.hpp',
+                       'method'      => 'cmake', },
+    'clfft'        => {'url'         => 'https://github.com/clMathLibraries/clFFT/archive/v2.12.2.tar.gz',
+                       'args'        => { 'native'   => [ '-DBUILD_CLIENT=OFF', '-DBUILD_TEST=OFF', '-DBUILD_EXAMPLES=OFF', '-DBUILD_CALLBACK_CLIENT=OFF', '-DSUFFIX_LIB=""', ],
+                                          'nuc7i7bnh' => [ '-DBUILD_CLIENT=OFF', '-DBUILD_TEST=OFF', '-DBUILD_EXAMPLES=OFF', '-DBUILD_CALLBACK_CLIENT=OFF', '-DSUFFIX_LIB=""', ], },
+                       'creates'     => 'lib/libclFFT.so',
+                       'src_dir'     => 'src',
+                       'require'     => [ Installer['viennacl'], Installer['fftw3f'], Installer['fftw3'], Installer['boost'], ],
+                       'method'      => 'cmake', },
+    'isaac'        => {'url'         => 'https://github.com/intel/isaac/archive/master.tar.gz',
+                       'creates'     => 'lib/libisaac.so',
+                       'require'     => [ Installer['viennacl'], ],
+                       'method'      => 'cmake', },
+    'libdnn'       => {'url'         => 'https://github.com/naibaf7/libdnn/archive/master.tar.gz',
+                       'args'        => { 'native'   => [ '-DUSE_CUDA=OFF', '-DUSE_OPENCL=ON', '-DUSE_INDEX_64=OFF', ],
+                                          'nuc7i7bnh' => [ '-DUSE_CUDA=OFF', '-DUSE_OPENCL=ON', '-DUSE_INDEX_64=OFF', ], },
+                       'creates'     => 'lib/libgreentea_libdnn.so',
+                       'require'     => [ Installer['viennacl'], ],
+                       'method'      => 'cmake', },
+    'caffe'        => {'url'         => 'https://github.com/01org/caffe/archive/inference-optimize.tar.gz',
+                       'prebuild'    => 'export ISAAC_HOME=PREFIX',
+                       'args'        => { 'native'   => [ '-DUSE_GREENTEA=ON', '-DUSE_CUDA=OFF', '-DUSE_INTEL_SPATIAL=ON', '-DBUILD_docs=OFF', '-DUSE_ISAAC=ON', '-DViennaCL_INCLUDE_DIR=PREFIX/include', '-DBLAS=Open', '-DOPENCL_LIBRARIES=PREFIX/opt/intel/opencl/libOpenCL.so', '-DOPENCL_INCLUDE_DIRS=PREFIX/opt/intel/opencl/include', '-Dpython_version=3', '-DUSE_OPENMP=ON', '-DUSE_INDEX_64=OFF', '-DUSE_FFT=OFF', '-DBUILD_examples=OFF', '-DBUILD_tools=OFF', ],
+                                          'nuc7i7bnh' => [ '-DUSE_GREENTEA=ON', '-DUSE_CUDA=OFF', '-DUSE_INTEL_SPATIAL=ON', '-DBUILD_docs=OFF', '-DUSE_ISAAC=ON', '-DViennaCL_INCLUDE_DIR=PREFIX/include', '-DBLAS=Open', '-DOPENCL_LIBRARIES=PREFIX/opt/intel/opencl/libOpenCL.so', '-DOPENCL_INCLUDE_DIRS=PREFIX/opt/intel/opencl/include', '-Dpython_version=3', '-DUSE_OPENMP=ON', '-DUSE_INDEX_64=OFF', '-DUSE_FFT=OFF', '-DBUILD_examples=OFF', '-DBUILD_tools=OFF', ], },
+                       'require'     => [ Installer['isaac'], Installer['boost'], Installer['hdf5'], Installer['leveldb'], Installer['lmdb'], Installer['glog'], Installer['gflags'], Installer['clfft'], Installer['libdnn'], Installer['opencv'], ],
+                       'creates'     => 'lib/libcaffe.so',
                        'method'      => 'cmake', },
   }
 
@@ -281,7 +365,7 @@ node nubotsvmbuild {
           default         => 'UNKNOWN',
         }
 
-        if $extension != 'UNKNOWN' {
+        if $params['url'] != '' {
           archive { "${archive}":
             url              => $params['url'],
             target           => "/nubots/toolchain/src/${archive}",
@@ -517,6 +601,26 @@ done
       path    => "${prefix}/${arch}/bin/xorg-protos.sh",
       mode    => "a+x",
       before  => Installer['xorg-protocol-headers'],
+    }
+
+    exec { "${prefix}-${arch}-intel-opencl":
+      creates    => "${prefix}/${arch}/opt/intel/opencl/libOpenCL.so",
+      command    => "cd ${prefix}/src &&
+                     wget -N http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip &&
+                     mkdir -p ${prefix}/${arch}/src/OpenCL-Linux/ &&
+                     unzip -d ${prefix}/${arch}/src/OpenCL-Linux/ -o ${prefix}/src/SRB4.1_linux64.zip &&
+                     cd ${prefix}/${arch}/src/OpenCL-Linux/ &&
+                     mkdir -p intel-opencl &&
+                     tar -C intel-opencl -Jxf intel-opencl-r4.1-61547.x86_64.tar.xz &&
+                     tar -C intel-opencl -Jxf intel-opencl-devel-r4.1-61547.x86_64.tar.xz &&
+                     tar -C intel-opencl -Jxf intel-opencl-cpu-r4.1-61547.x86_64.tar.xz &&
+                     cp -R intel-opencl/* ${prefix}/${arch}/",
+      cwd       => "${prefix}/${arch}/src",
+      path      =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+      timeout   => 0,
+      provider  => 'shell',
+      before    => Installer['viennacl'],
+      require   => Class['installer::prerequisites'],
     }
   }
 }
