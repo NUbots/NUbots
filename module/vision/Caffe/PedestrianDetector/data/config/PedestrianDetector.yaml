@@ -1,0 +1,8 @@
+use_gpu: true
+detection_threshold: 0.5
+network:
+  model: "caffe/pednet.prototxt"
+  weights: "caffe/pednet.caffemodel"
+  input_layer: "data"
+  output_cvg: "coverage"
+  output_boxes: "bboxes"

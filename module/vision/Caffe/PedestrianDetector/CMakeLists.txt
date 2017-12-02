@@ -1,0 +1,7 @@
+FIND_PACKAGE(Caffe REQUIRED)
+FIND_PACKAGE(Boost REQUIRED COMPONENTS system)
+
+# Build our NUClear module
+NUCLEAR_MODULE(LANGUAGE "CPP"
+               INCLUDES ${Caffe_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+               LIBRARIES ${Caffe_LIBRARIES} ${Boost_LIBRARIES})
