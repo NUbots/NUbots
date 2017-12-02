@@ -167,24 +167,13 @@ float3 getCamFromScreen(float2 screen, float cam_focal_length_pixels) {
     return normalize(vec);
 }
 
-kernel void projectSphericalToEquirectangular(read_only image2d_t input,
-                                              sampler_t sampler,
-                                              uint image_format,
-                                              float radians_per_pixel,
-                                              float2 input_center,
-                                              float cam_focal_length_pixels,
-                                              write_only image2d_t output) {
+kernel void debayer(read_only image2d_t input,
+                    sampler_t sampler,
+                    uint image_format,
+                    write_only image2d_t output) {
 
-    const float2 pos = {(float) (get_global_id(0)), (float) (get_global_id(1))};
-
-    const float2 output_dimensions = {(float) (get_global_size(0)), (float) (get_global_size(1))};
-    const float2 output_center     = (output_dimensions - 1.0f) * 0.5f;
-
-    float2 centered_point = {output_center.x - pos.x, output_center.y - pos.y};
-    float2 projected_point =
-        projectCamSpaceToScreen(getCamFromScreen(centered_point, cam_focal_length_pixels), radians_per_pixel);
-    float2 sample_point = {input_center.x - projected_point.x, input_center.y - projected_point.y};
-    float4 raw_colour   = read_imagef(input, sampler, sample_point);
+    const float2 pos        = {(float) (get_global_id(0)), (float) (get_global_id(1))};
+    const float4 raw_colour = read_imagef(input, sampler, pos);
 
     // convert into RGBA colour
     switch (image_format) {
@@ -194,22 +183,43 @@ kernel void projectSphericalToEquirectangular(read_only image2d_t input,
         case FORMAT_UYVY: write_imagef(output, (int2){pos.x, pos.y}, YCbCrToRGB(raw_colour)); break;
 
         case FORMAT_GRBG:
-            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, sample_point, (float2){1.0, 0.0}));
+            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, pos, (float2){1.0, 0.0}));
             break;
 
         case FORMAT_RGGB:
-            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, sample_point, (float2){0.0, 0.0}));
+            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, pos, (float2){0.0, 0.0}));
             break;
 
         case FORMAT_GBRG:
-            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, sample_point, (float2){0.0, 1.0}));
+            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, pos, (float2){0.0, 1.0}));
             break;
 
         case FORMAT_BGGR:
-            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, sample_point, (float2){1.0, 1.0}));
+            write_imagef(output, (int2){pos.x, pos.y}, bayerToRGB(input, sampler, pos, (float2){1.0, 1.0}));
             break;
 
         case FORMAT_RGB3: write_imagef(output, (int2){pos.x, pos.y}, raw_colour); break;
         default: write_imagef(output, (int2){pos.x, pos.y}, raw_colour); break;
     }
+}
+
+kernel void projectSphericalToRectilinear(read_only image2d_t input,
+                                          sampler_t sampler,
+                                          float radians_per_pixel,
+                                          float2 input_center,
+                                          float cam_focal_length_pixels,
+                                          write_only image2d_t output) {
+
+    const float2 pos = {(float) (get_global_id(0)), (float) (get_global_id(1))};
+
+    const float2 output_dimensions = {(float) (get_global_size(0)), (float) (get_global_size(1))};
+    const float2 output_center     = (output_dimensions - 1.0f) * 0.5f;
+    float2 centered_point = {output_center.x - pos.x, output_center.y - pos.y};
+
+    float2 projected_point =
+            projectCamSpaceToScreen(getCamFromScreen(centered_point, cam_focal_length_pixels), radians_per_pixel);
+
+    float2 sample_point = (float2){input_center.x - projected_point.x, input_center.y - projected_point.y};
+
+    write_imagef(output, (int2){pos.x, pos.y}, read_imagef(input, sampler, sample_point));
 }

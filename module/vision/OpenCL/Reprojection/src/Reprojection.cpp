@@ -40,7 +40,8 @@ namespace vision {
             , context()
             , command_queue()
             , program()
-            , use_gpu(false) {
+            , use_gpu(false)
+            , reproject(true) {
 
             on<Configuration>("Reprojection.yaml").then([this](const Configuration& config) {
                 arma::vec dimensions = config["output"]["dimensions"].as<arma::vec>();
@@ -48,6 +49,7 @@ namespace vision {
                 tan_half_FOV         = std::tan(config["output"]["FOV"].as<double>() * M_PI / 360.0);
                 dump_images          = config["dump_images"].as<bool>();
                 use_gpu              = config["use_gpu"].as<bool>();
+                reproject            = config["reproject"].as<bool>();
 
                 // Query the system for OpenCL platforms.
                 std::vector<cl::Platform> all_platforms;
@@ -103,17 +105,22 @@ namespace vision {
             on<OpenCL>("reprojection.cl", context).then([this](const OpenCL& ocl) {
                 program = ocl.program;
 
+                debayer = cl::KernelFunctor<const cl::Image2D&,  // The input image
+                                            const cl::Sampler&,  // The input image sampler
+                                            uint,                // The format of the image
+                                            cl::Image2D&>        // The output equirectanguler image
+                    (program, "debayer");
+
                 reprojection = cl::KernelFunctor<
                     const cl::Image2D&,          // The input image
                     const cl::Sampler&,          // The input image sampler
-                    uint,                        // The format of the image
                     float,                       // The number radians spanned by a single pixel in the
                                                  // spherical image
                     const cl::array<float, 2>&,  // The coordinates of the center of the spherical image
                     float,                       // The focal length of the camera in pixels, for the
                                                  // equirectangular image
                     cl::Image2D&>                // The output equirectanguler image
-                    (program, "projectSphericalToEquirectangular");
+                    (program, "projectSphericalToRectilinear");
 
                 command_queue = cl::CommandQueue(context, CL_QUEUE_PROFILING_ENABLE);
             });
@@ -153,66 +160,127 @@ namespace vision {
                                                         &img_event);
 
                         // Create output image.
-                        cl::Image2D output_image(context,
-                                                 CL_MEM_WRITE_ONLY,
-                                                 cl::ImageFormat(CL_RGBA, CL_UNORM_INT8),
-                                                 output_dimensions[0],
-                                                 output_dimensions[1],
-                                                 0,
-                                                 nullptr,
-                                                 nullptr);
+                        cl::Image2D debayered_image(context,
+                                                    CL_MEM_READ_WRITE,
+                                                    cl::ImageFormat(CL_RGBA, CL_UNORM_INT8),
+                                                    image.dimensions[0],
+                                                    image.dimensions[1],
+                                                    0,
+                                                    nullptr,
+                                                    nullptr);
+
+                        cl::Image2D reprojected_image(context,
+                                                      CL_MEM_WRITE_ONLY,
+                                                      cl::ImageFormat(CL_RGBA, CL_UNORM_INT8),
+                                                      output_dimensions[0],
+                                                      output_dimensions[1],
+                                                      0,
+                                                      nullptr,
+                                                      nullptr);
 
                         // Create a sampler for the input image.
                         cl::Sampler sampler(context, false, CL_ADDRESS_CLAMP_TO_EDGE, CL_FILTER_NEAREST);
 
                         // Run the kernel.
-                        cl::Event reprojected =
-                            reprojection(cl::EnqueueArgs(command_queue,
-                                                         std::vector<cl::Event>({img_event}),
-                                                         cl::NDRange(output_dimensions[0], output_dimensions[1])),
-                                         input_image,
-                                         sampler,
-                                         image.format,
-                                         cam.radial.radiansPerPixel,
-                                         std::array<float, 2>{float(input_center[0]), float(input_center[1])},
-                                         camFocalLengthPixels,
-                                         output_image);
+                        cl::Event debayered =
+                            debayer(cl::EnqueueArgs(command_queue,
+                                                    std::vector<cl::Event>({img_event}),
+                                                    cl::NDRange(image.dimensions[0], image.dimensions[1])),
+                                    input_image,
+                                    sampler,
+                                    image.format,
+                                    debayered_image);
+
+                        cl::Event reprojected;
+                        if (reproject) {
+                            reprojected =
+                                reprojection(cl::EnqueueArgs(command_queue,
+                                                             std::vector<cl::Event>({debayered}),
+                                                             cl::NDRange(output_dimensions[0], output_dimensions[1])),
+                                             debayered_image,
+                                             sampler,
+                                             cam.radial.radiansPerPixel,
+                                             std::array<float, 2>{float(input_center[0]), float(input_center[1])},
+                                             camFocalLengthPixels,
+                                             reprojected_image);
+                        }
 
                         // Create our output message.
-                        ReprojectedImage msg;
-                        msg.format        = utility::vision::FOURCC::RGB3;
-                        msg.dimensions    = convert<unsigned int, 2>(output_dimensions);
-                        msg.camera_id     = image.camera_id + 2;
-                        msg.serial_number = image.serial_number;
-                        msg.timestamp     = image.timestamp;
-                        msg.Hcw           = image.Hcw;
-                        msg.data          = std::vector<uint8_t>(output_dimensions[0] * output_dimensions[1] * 3, 0);
+                        ReprojectedImage msg[2];
+                        msg[0].format        = utility::vision::FOURCC::RGB3;
+                        msg[0].dimensions    = image.dimensions;
+                        msg[0].camera_id     = image.camera_id + 2;
+                        msg[0].serial_number = image.serial_number;
+                        msg[0].timestamp     = image.timestamp;
+                        msg[0].Hcw           = image.Hcw;
+
+                        msg[1].format        = utility::vision::FOURCC::RGB3;
+                        msg[1].dimensions    = convert<unsigned int, 2>(output_dimensions);
+                        msg[1].camera_id     = image.camera_id + 2;
+                        msg[1].serial_number = image.serial_number;
+                        msg[1].timestamp     = image.timestamp;
+                        msg[1].Hcw           = image.Hcw;
 
                         // Pixel data is read out as RGBA pixels. We need to convert these to RGB pixels.
-                        auto data = std::vector<uint8_t>(output_dimensions[0] * output_dimensions[1] * 4, 0);
+                        std::vector<uint8_t> data;
 
                         // Get the result back to the host
-                        region[0] = output_dimensions[0];
-                        region[1] = output_dimensions[1];
+                        std::vector<cl::Event> events;
                         cl::Event grab_img;
-                        std::vector<cl::Event> events({reprojected});
+
+                        region[0] = image.dimensions[0];
+                        region[1] = image.dimensions[1];
+                        events.push_back(debayered);
+                        data.resize(image.dimensions[0] * image.dimensions[1] * 4, 0);
                         command_queue.enqueueReadImage(
-                            output_image, false, origin, region, 0, 0, data.data(), &events, &grab_img);
+                            debayered_image, false, origin, region, 0, 0, data.data(), &events, &grab_img);
+
+                        msg[0].data = std::vector<uint8_t>(output_dimensions[0] * output_dimensions[1] * 3, 0);
+
                         grab_img.wait();
 
                         for (size_t i = 0, j = 0; i < data.size(); i += 4, j += 3) {
-                            msg.data[j + 0] = data[i + 0];
-                            msg.data[j + 1] = data[i + 1];
-                            msg.data[j + 2] = data[i + 2];
+                            msg[0].data[j + 0] = data[i + 0];
+                            msg[0].data[j + 1] = data[i + 1];
+                            msg[0].data[j + 2] = data[i + 2];
+                        }
+
+                        if (reproject) {
+                            region[0] = output_dimensions[0];
+                            region[1] = output_dimensions[1];
+                            events.clear();
+                            events.push_back(reprojected);
+                            data.resize(output_dimensions[0] * output_dimensions[1] * 4, 0);
+                            command_queue.enqueueReadImage(
+                                reprojected_image, false, origin, region, 0, 0, data.data(), &events, &grab_img);
+
+                            msg[1].data = std::vector<uint8_t>(output_dimensions[0] * output_dimensions[1] * 3, 0);
+                            grab_img.wait();
+
+                            for (size_t i = 0, j = 0; i < data.size(); i += 4, j += 3) {
+                                msg[1].data[j + 0] = data[i + 0];
+                                msg[1].data[j + 1] = data[i + 1];
+                                msg[1].data[j + 2] = data[i + 2];
+                            }
                         }
 
                         // Dump image to file.
                         if (dump_images) {
-                            utility::vision::saveImage("reprojected_image.ppm", msg);
+                            utility::vision::saveImage(fmt::format("debayered_image-{}.ppm", avg_count), msg[0]);
+
+                            if (reproject) {
+                                utility::vision::saveImage(fmt::format("reprojected_image-{}.ppm", avg_count), msg[1]);
+                            }
                         }
 
                         // Emit our reprojected image.
-                        emit(std::make_unique<ReprojectedImage>(msg));
+                        if (reproject) {
+                            emit(std::make_unique<ReprojectedImage>(msg[1]));
+                        }
+
+                        else {
+                            emit(std::make_unique<ReprojectedImage>(msg[0]));
+                        }
 
                         auto end   = NUClear::clock::now();
                         auto fp_ms = std::chrono::duration<double, std::milli>(end - start);

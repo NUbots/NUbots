@@ -1,5 +1,6 @@
 dump_images: false
 use_gpu: true
+reproject: true
 output:
   dimensions: [800, 600]
   FOV: 150.0             # in degrees

@@ -31,11 +31,18 @@ namespace vision {
             cl::CommandQueue command_queue;
             cl::Program program;
             bool use_gpu;
+            bool reproject;
+
+            std::function<cl::Event(const cl::EnqueueArgs&,  // The number of workers to spawn etc
+                                    const cl::Image2D&,      // The input image
+                                    const cl::Sampler&,      // The input image sampler
+                                    uint,                    // The format of the image
+                                    cl::Image2D&)>           // The output equirectanguler image
+                debayer;
 
             std::function<cl::Event(const cl::EnqueueArgs&,      // The number of workers to spawn etc
                                     const cl::Image2D&,          // The input image
                                     const cl::Sampler&,          // The input image sampler
-                                    uint,                        // The format of the image
                                     float,                       // The number radians spanned by a single pixel in the
                                                                  // spherical image
                                     const cl::array<float, 2>&,  // The coordinates of the center of the spherical image
