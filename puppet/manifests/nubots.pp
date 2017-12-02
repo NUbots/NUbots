@@ -250,6 +250,11 @@ node nubotsvmbuild {
                        'method'      => 'cmake', },
   }
 
+  file { '/usr/share/cmake-3.5/Modules/FindBoost.cmake':
+      path   => '/usr/share/cmake-3.5/Modules/FindBoost.cmake',
+      ensure => present,
+      source => 'puppet:///modules/files/FindBoost.cmake',
+   } -> Installer <| |>
 
   # Download each archive and spawn Installers for each one.
   $archives.each |String $archive,
