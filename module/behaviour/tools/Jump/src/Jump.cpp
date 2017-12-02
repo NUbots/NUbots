@@ -23,6 +23,7 @@
 #include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
+#include "message/motion/FixedMotionCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
@@ -36,29 +37,64 @@ namespace behaviour {
         using extension::Configuration;
         using extension::ExecuteScriptByName;
 
-        using message::platform::darwin::ButtonMiddleDown;
+        using message::motion::JumpCommand;
+        using message::motion::WaveLeftCommand;
+        using message::motion::WaveRightCommand;
         using message::platform::darwin::ButtonLeftDown;
+        using message::platform::darwin::ButtonMiddleDown;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
         Jump::Jump(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-                RegisterAction{2,
-                               "Jump",
-                               {std::pair<float, std::set<LimbID>>(
-                                   100, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                               [this](const std::set<LimbID>&) {},
-                               [this](const std::set<LimbID>&) {},
-                               [this](const std::set<ServoID>&) {}}));
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+                2,
+                "Jump",
+                {std::pair<float, std::set<LimbID>>(
+                    100, {LimbID::HEAD, LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                [this](const std::set<LimbID>&) {},
+                [this](const std::set<LimbID>&) {},
+                [this](const std::set<ServoID>&) {}}));
 
-            on<Trigger<ButtonMiddleDown>>().then([this] {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
+            on<Trigger<ButtonMiddleDown>>().then([this] { emit(std::make_unique<JumpCommand>(2, 0)); });
+
+            on<Trigger<JumpCommand>, Single>().then([this](const JumpCommand& cmd) {
+                if (cmd.pre_delay > 0) {
+                    std::this_thread::sleep_for(std::chrono::seconds(cmd.pre_delay));
+                }
 
                 emit(std::make_unique<ExecuteScriptByName>(2, std::vector<std::string>({"Jump.yaml"})));
+
+                if (cmd.post_delay > 0) {
+                    std::this_thread::sleep_for(std::chrono::seconds(cmd.post_delay));
+                }
+            });
+
+            on<Trigger<WaveLeftCommand>, Single>().then([this](const WaveLeftCommand& cmd) {
+                if (cmd.pre_delay > 0) {
+                    std::this_thread::sleep_for(std::chrono::seconds(cmd.pre_delay));
+                }
+
+                emit(std::make_unique<ExecuteScriptByName>(2, std::vector<std::string>({"WaveLeft.yaml"})));
+
+                if (cmd.post_delay > 0) {
+                    std::this_thread::sleep_for(std::chrono::seconds(cmd.post_delay));
+                }
+            });
+
+            on<Trigger<WaveRightCommand>, Single>().then([this](const WaveRightCommand& cmd) {
+                if (cmd.pre_delay > 0) {
+                    std::this_thread::sleep_for(std::chrono::seconds(cmd.pre_delay));
+                }
+
+                emit(std::make_unique<ExecuteScriptByName>(2, std::vector<std::string>({"WaveRight.yaml"})));
+
+                if (cmd.post_delay > 0) {
+                    std::this_thread::sleep_for(std::chrono::seconds(cmd.post_delay));
+                }
             });
         }
     }  // namespace tools
