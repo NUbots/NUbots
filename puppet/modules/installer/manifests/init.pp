@@ -265,8 +265,8 @@ define installer (
           exec { "boost_${arch}_${name}":
             creates     => "${create}",
             command     => "${prebuild_cmd} &&
-                            ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --without-libraries=python &&
-                            ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q \\
+                            ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --with-python=python3 &&
+                            ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q -a \\
                                   cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
                             ./bjam install &&
                             ${postbuild_cmd}",
