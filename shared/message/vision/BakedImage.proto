@@ -22,7 +22,6 @@ syntax = "proto3";
 package message.vision;
 
 import "google/protobuf/timestamp.proto";
-import "Matrix.proto";
 import "Vector.proto";
 
 message BakedImage {
