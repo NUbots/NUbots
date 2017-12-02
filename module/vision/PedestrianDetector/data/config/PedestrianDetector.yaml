@@ -1,2 +1,4 @@
+dump_images: false
 model:
   checkpoint_file: "pedestrian/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb"
+  label_file: "pedestrian/mscoco_label_map.pbtxt"
