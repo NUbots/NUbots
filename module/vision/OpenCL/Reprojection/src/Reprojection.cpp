@@ -46,7 +46,8 @@ namespace vision {
             on<Configuration>("Reprojection.yaml").then([this](const Configuration& config) {
                 arma::vec dimensions = config["output"]["dimensions"].as<arma::vec>();
                 output_dimensions    = arma::conv_to<arma::uvec>::from(dimensions);
-                tan_half_FOV         = std::tan(config["output"]["FOV"].as<double>() * M_PI / 360.0);
+                FOV                  = config["output"]["FOV"].as<double>();
+                tan_half_FOV         = std::tan(FOV * M_PI / 360.0);
                 dump_images          = config["dump_images"].as<bool>();
                 use_gpu              = config["use_gpu"].as<bool>();
                 reproject            = config["reproject"].as<bool>();
@@ -213,6 +214,7 @@ namespace vision {
                         msg[0].serial_number = image.serial_number;
                         msg[0].timestamp     = image.timestamp;
                         msg[0].Hcw           = image.Hcw;
+                        msg[0].FOV           = FOV;
 
                         msg[1].format        = utility::vision::FOURCC::RGB3;
                         msg[1].dimensions    = convert<unsigned int, 2>(output_dimensions);
@@ -220,6 +222,7 @@ namespace vision {
                         msg[1].serial_number = image.serial_number;
                         msg[1].timestamp     = image.timestamp;
                         msg[1].Hcw           = image.Hcw;
+                        msg[1].FOV           = FOV;
 
                         // Pixel data is read out as RGBA pixels. We need to convert these to RGB pixels.
                         std::vector<uint8_t> data;

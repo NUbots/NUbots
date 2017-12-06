@@ -33,4 +33,5 @@ message ReprojectedImage {
     string                    serial_number = 5;
     google.protobuf.Timestamp timestamp     = 6;
     mat44                     Hcw           = 7;
+    float                     FOV           = 8;
 }

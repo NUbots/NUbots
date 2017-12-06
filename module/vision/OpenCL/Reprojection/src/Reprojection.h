@@ -52,7 +52,7 @@ namespace vision {
                 reprojection;
 
             arma::uvec2 output_dimensions;
-            double tan_half_FOV;
+            double tan_half_FOV, FOV;
         };
 
     }  // namespace OpenCL
