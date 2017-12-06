@@ -235,7 +235,7 @@ namespace vision {
                         command_queue.enqueueReadImage(
                             debayered_image, false, origin, region, 0, 0, data.data(), &events, &grab_img);
 
-                        msg[0].data = std::vector<uint8_t>(output_dimensions[0] * output_dimensions[1] * 3, 0);
+                        msg[0].data = std::vector<uint8_t>(image.dimensions.x() * image.dimensions.y() * 3, 0);
 
                         grab_img.wait();
 
