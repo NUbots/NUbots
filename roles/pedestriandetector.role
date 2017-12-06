@@ -15,6 +15,7 @@ NUCLEAR_ROLE(
     input::Camera
 
     motion::ScriptEngine
+    motion::HeadController
 
     vision::OpenCL::Reprojection
     vision::PedestrianDetector

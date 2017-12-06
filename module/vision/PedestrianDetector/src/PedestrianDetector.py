@@ -2,7 +2,8 @@
 
 from nuclear import Reactor, on, Trigger, Single, With, Every
 from message.vision import ReprojectedImage, Obstacle, BakedImage
-from message.motion import WaveRightCommand
+from message.motion import HeadCommand, WaveRightCommand
+from message.input import Sensors
 import numpy as np
 import tensorflow as tf
 import yaml
@@ -86,8 +87,8 @@ class PedestrianDetector(object):
     # def PedestrianDetector_configfuration(self, config):
     #     # Use configuration here from file PedestrianDetector.yaml
 
-    @on(Trigger(ReprojectedImage), Single())
-    def run_detection(self, image):
+    @on(Trigger(ReprojectedImage), With(Sensors), Single())
+    def run_detection(self, image, sensors):
         if image.camera_id > 1:
             # Convert image to numpy array
             input_img = np.array(image.data).reshape((image.dimensions[1], image.dimensions[0], 3)).astype(np.uint8).copy()
@@ -132,13 +133,53 @@ class PedestrianDetector(object):
                     print('PedestrianDetector::run_detection: Detection time: {0:.4f} s (avg: {1:.4f} s)'.format(
                                                     detection_end - detection_start, self.avg_fp_ms / self.avg_count))
 
-                for c, s, b in zip(np.squeeze(classes), np.squeeze(scores), np.squeeze(boxes)):
-                    if self.category_index[int(c)] == 'person' and s >= 0.5:
+                index = -1
+                s_classes = np.squeeze(classes)
+                max_width_score = 0.0
+                max_score = 0.0
+                for i, s in enumerate(np.squeeze(scores)):
+                    if self.category_index[int(s_classes[i])] == 'person':
+                        ymin, xmin, ymax, xmax = np.squeeze(boxes)[i]
+                        if s * (xmax - xmin) > max_width_score:
+                            max_score = s
+                            index = i
+                            max_width_score = s * (xmax - xmin)
+
+                if max_score >= 0.5 and i > -1:
+                    # Figure out camera parameters
+                    imageCenter = (image.dimensions - 1) * 0.5
+                    camFocalLengthPixels = imageCenter[0] / np.tan(image.FOV * np.pi / 360.0)
+
+                    # Approximate pedestrian head position as vertically in the middle and about 10% from the top
+                    # of the box
+                    ymin, xmin, ymax, xmax = np.squeeze(boxes)[index]
+                    width = (xmax - xmin) * image.dimensions[0]
+                    height = (ymax - ymin) * image.dimensions[1]
+                    x = (xmin * image.dimensions[0]) + width * 0.5
+                    y = (ymin * image.dimensions[1]) + height * 0.1
+
+                    # Form unit vector from camera to head position
+                    screen = (imageCenter[0] - x, imageCenter[1] - y)
+                    vec = (camFocalLengthPixels, screen[0], screen[1])
+                    vec /= np.linalg.norm(vec)
+
+                    # Get camera to torso transform
+                    Htc = sensors.forwardKinematics[19]
+                    body_vec = Htc.dot((vec[0], vec[1], vec[2], 0))
+                    screen_angular = (np.arctan2(body_vec[1], body_vec[0]), np.arctan2(body_vec[2], body_vec[0]))
+
+                    # Now create our head movement command
+                    head_command = HeadCommand()
+                    head_command.yaw = screen_angular[0]
+                    head_command.pitch = screen_angular[1]
+                    head_command.robotSpace = True
+                    self.emit(head_command)
+
+                    if width > 0.25 * image.dimensions[0]:
                         cmd = WaveRightCommand()
                         cmd.pre_delay = 0
                         cmd.post_delay = 10
                         self.emit(cmd)
-                        break;
 
                 self.emit(img)
 
