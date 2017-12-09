@@ -3,14 +3,17 @@ import * as ExtractTextPlugin from 'extract-text-webpack-plugin'
 import * as HtmlWebpackPlugin from 'html-webpack-plugin'
 import * as path from 'path'
 import * as webpack from 'webpack'
+import Devtool = webpack.Options.Devtool
 
 const isProduction = process.argv.indexOf('-p') >= 0
 const sourcePath = path.join(__dirname, './src')
 const outPath = path.join(__dirname, './build')
 
-export default {
+const devtool: Devtool = isProduction ? 'source-map' : 'inline-source-map'
+
+export default [{
   context: sourcePath,
-  devtool: isProduction ? 'source-map' : 'inline-source-map',
+  devtool,
   entry: {
     main: [
       './client/main.tsx',
@@ -34,7 +37,7 @@ export default {
     filename: 'bundle.js',
     publicPath: '/',
   },
-  target: 'web',
+  target: 'web' as 'web',
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
     // Fix webpack's default behavior to not load packages with jsnext:main module
@@ -151,4 +154,4 @@ export default {
     fs: 'empty',
     net: 'empty',
   },
-}
+}]

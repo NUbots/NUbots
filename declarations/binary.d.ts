@@ -33,8 +33,8 @@ declare module 'binary' {
     word64bu(key: string): Binary
     word64bs(key: string): Binary
 
-    into(key: string, cb: (vars: Vars) => void): Binary
-    tap(cb: (vars: Vars) => void): Binary
+    into(key: string, cb: (this: Binary, vars: Vars) => void): Binary
+    tap(cb: (this: Binary, vars: Vars) => void): Binary
     scan(key: string, buffer: Buffer): Binary
     loop(cb: (end: () => void, vars: Vars) => void): Binary
     flush(): void

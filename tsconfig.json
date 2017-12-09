@@ -11,7 +11,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": false,
     "removeComments": true,
-    "strictNullChecks": true,
+    "strict": true,
     "downlevelIteration": true,
     "outDir": "build",
     "lib": [
@@ -22,7 +22,7 @@
   },
   "include": [
     "declarations",
-    "src"
+    "src/**/*"
   ],
   "exclude": [
     "build",
