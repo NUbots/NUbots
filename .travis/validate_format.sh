@@ -26,7 +26,8 @@ done < <(find . -type f \( -name *.h \
                         -o -name *.cxx \
                         -o -name *.cpp \
                         -o -name *.hpp \
-                        -o -name *.ipp \) -print0)
+                        -o -name *.ipp \
+                        -o -name *.proto \) -print0)
 
 # If we failed somewhere this will exit 1 and fail travis
 exit $ret

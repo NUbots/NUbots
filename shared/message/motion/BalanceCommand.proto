@@ -29,8 +29,9 @@ message BalanceBodyUpdate {
     mat44  rightFoot    = 3;
     vec3   armLPosition = 4;
     vec3   armRPosition = 5;
-
 }
 
-message EnableBalanceResponse  {}
-message DisableBalanceResponse {}
+message EnableBalanceResponse {
+}
+message DisableBalanceResponse {
+}

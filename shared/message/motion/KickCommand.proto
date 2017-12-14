@@ -34,8 +34,8 @@ enum KickCommandType {
 }
 
 message KickCommand {
-    vec3            target          = 1; // The point to kick
-    vec3            direction       = 2; // force is the magnitude
+    vec3            target          = 1;  // The point to kick
+    vec3            direction       = 2;  // force is the magnitude
     KickCommandType kickCommandType = 3;
 }
 
@@ -46,8 +46,8 @@ message KickCommand {
  * @author Brendan Annable
  */
 message KickScriptCommand {
-    vec3   direction = 1; // Direction to kick with magnitude determining force
-    uint32 leg       = 2; // Leg to kick with
+    vec3   direction = 1;  // Direction to kick with magnitude determining force
+    uint32 leg       = 2;  // Leg to kick with
 }
 
 message KickPlannerConfig {
@@ -57,7 +57,8 @@ message KickPlannerConfig {
     float kick_forward_angle_limit = 4;
 }
 
-message KickFinished {}
+message KickFinished {
+}
 
 message IKKickParams {
     float stand_height = 1;
