@@ -621,8 +621,8 @@ namespace platform {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass =
-                        convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
+                    // sensors->centreOfMass =
+                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
 
                     /************************************************
                      *                  Kinematics Horizon          *
