@@ -26,6 +26,8 @@ import "google/protobuf/timestamp.proto";
 message FootTarget {
 
     google.protobuf.Timestamp timestamp = 1;
-    int32 foot = 2;
-    vec2 position = 3;
+    // identifies which foot is the swing foot
+    bool isRightFootSwing = 2;
+    // target position of the swing foot relative to the support foot in world space
+    vec3 position = 3;
 }
