@@ -11,6 +11,7 @@ namespace vision {
     class VisualMesh : public NUClear::Reactor {
     private:
         mesh::VisualMesh<float> mesh;
+        mesh::VisualMesh<float>::Classifier classifier;
 
     public:
         /// @brief Called by the powerplant to build and setup the VisualMesh reactor.

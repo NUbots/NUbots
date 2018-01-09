@@ -21,26 +21,54 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <iomanip>
 #include <map>
 #include <numeric>
+#include <sstream>
 #include <vector>
 
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
 #define CL_HPP_TARGET_OPENCL_VERSION 120
-// #define CL_HPP_ENABLE_EXCEPTIONS
+#define CL_HPP_ENABLE_EXCEPTIONS
 #include "cl/cl2.hpp"
 
 // Include our generated OpenCL headers
-#include "mesh/cl/project_equirectangular.cl.h"
-#include "mesh/cl/project_radial.cl.h"
+#include "mesh/cl/project_equidistant.cl.h"
+#include "mesh/cl/project_equisolid.cl.h"
+#include "mesh/cl/project_rectilinear.cl.h"
 #include "mesh/cl/read_image_to_network.cl.h"
 
-// Debugging
-#include <nuclear>
-#include "mesh/Timer.hpp"
-#include "utility/nubugger/NUHelpers.h"
+#include "utility/support/Timer.hpp"
 
 namespace mesh {
+
+template <typename T>
+struct LazyBufferReader {
+
+    LazyBufferReader() = default;
+
+    LazyBufferReader(const cl::CommandQueue& queue, const cl::Buffer& buffer, const cl::Event& ready, uint n_elements)
+        : queue(queue), buffer(buffer), ready(ready), n_elements(n_elements) {}
+
+    operator std::vector<T>() {
+        std::vector<T> output(n_elements);
+        std::vector<cl::Event> ready_list = {ready};
+        queue.enqueueReadBuffer(buffer, true, 0, n_elements * sizeof(T), output.data(), &ready_list);
+        return output;
+    }
+
+    operator T() {
+        T output;
+        std::vector<cl::Event> ready_list = {ready};
+        queue.enqueueReadBuffer(buffer, true, 0, sizeof(T), &output, &ready_list);
+        return output;
+    }
+
+    cl::CommandQueue queue;
+    cl::Buffer buffer;
+    cl::Event ready;
+    uint n_elements;
+};
 
 /**
  * @brief Constructs and holds a visual mesh
@@ -59,22 +87,25 @@ public:
     using mat4 = std::array<vec4, 4>;
 
     struct Lens {
-        enum Type { EQUIRECTANGULAR, RADIAL };
-        struct Radial {
-            Scalar fov;
-            Scalar pixels_per_radian;
-        };
-        struct Equirectangular {
-            vec2 fov;
-            Scalar focal_length_pixels;
-        };
+        enum Projection { RECTILINEAR, EQUISOLID, EQUIDISTANT };
 
-        enum Type type;
+        Projection projection;
         std::array<int, 2> dimensions;
-        union {
-            Radial radial;
-            Equirectangular equirectangular;
-        };
+        Scalar fov;
+        Scalar focal_length;
+    };
+
+    struct ProjectedMesh {
+        LazyBufferReader<std::array<int, 2>> pixel_coordinates;
+        std::vector<std::array<int, 6>> neighbourhood;
+
+        // OpenCL buffers for the data
+        struct {
+            cl::Buffer pixel_coordinates;
+            cl::Event pixel_coordinates_event;
+            cl::Buffer neighbourhood;
+            cl::Event neighbourhood_event;
+        } cl;
     };
 
     struct Node {
@@ -140,8 +171,400 @@ public:
         YUYV    = 0x56595559,
         YM24    = 0x34324d59,
         RGB3    = 0x33424752,
+        RGBA    = 0x41424752,
+        BGR3    = 0x33524742,
+        BGRA    = 0x41524742,
         JPEG    = 0x4745504a,
         UNKNOWN = 0
+    };
+
+
+    class Classifier {
+    private:
+        using weights_t = std::vector<std::vector<Scalar>>;
+        using biases_t  = std::vector<Scalar>;
+
+        using layer_t             = std::pair<weights_t, biases_t>;
+        using conv_layer_t        = std::vector<layer_t>;
+        using network_structure_t = std::vector<conv_layer_t>;
+
+    public:
+        Classifier() : mesh(nullptr) {}
+
+        Classifier(VisualMesh* mesh, const network_structure_t& structure) : mesh(mesh) {
+
+            // Build using a string stream
+            std::stringstream code;
+
+            // Set our precision for how many digits a float has
+            code << std::setprecision(std::numeric_limits<Scalar>::digits10 + 1);
+
+            auto vector_type = [](const int& size) {
+                return (size == 1 || size == 2 || size == 4 || size == 8 || size == 16) ? size : 0;
+            };
+
+            for (uint conv_no = 0; conv_no < structure.size(); ++conv_no) {
+                auto& conv = structure[conv_no];
+
+                // We need to work out the input and output sizes for our convolution
+                int conv_in_size;
+                int conv_out_size;
+
+                // On the first convolution we assume an input size of 4
+                if (conv_no == 0) {
+                    conv_in_size = 4;
+                }
+                else {
+                    // The output dimension of our previous bias vector
+                    conv_in_size = structure[conv_no - 1].back().second.size();
+                }
+
+                // The output dimension of our last bias vector
+                conv_out_size = conv.back().second.size();
+
+                // Work out our input and output types
+                std::string in_type("float");
+                if (vector_type(conv_in_size)) {
+                    in_type.append(std::to_string(conv_in_size));
+                }
+                std::string out_type("float");
+                if (vector_type(conv_out_size)) {
+                    out_type.append(std::to_string(conv_out_size));
+                }
+
+                // Write our OpenCL kernel definition
+                code << "kernel void conv" << conv_no << "(global const int* neighbourhood, global const " << in_type
+                     << "* input, global " << out_type << "* output) {" << std::endl
+                     << std::endl;
+
+                code << "    // Get our kernel index" << std::endl;
+                code << "    const int idx = get_global_id(0);" << std::endl << std::endl;
+
+                /*************************************************
+                 *                    GATHER                     *
+                 *************************************************/
+
+                code << "    // Gather from our neighbourhood " << std::endl;
+                if (vector_type(conv_in_size)) {
+                    code << "    " << in_type << " in0[7] = {" << std::endl;
+                    code << "        input[idx]," << std::endl;
+                    for (int i = 0; i < 6; ++i) {
+                        code << "        input[neighbourhood[idx * 6 + " << i << "]]";
+                        if (i != 5) {
+                            code << ",";
+                        }
+                        code << std::endl;
+                    }
+                    code << "    };";
+                }
+                // Perform our gather step for non vectorized data
+                else {
+                    code << "    float in0[" << (conv_in_size * 7) << "] = {" << std::endl;
+
+                    // Read the ones for our own index
+                    for (int j = 0; j < conv_in_size; ++j) {
+                        code << "        input[idx * " << conv_in_size << " + " << j << "]";
+                    }
+
+                    // Read our neighbourhood
+                    for (int i = 0; i < 6; ++i) {
+                        for (int j = 0; j < conv_in_size; ++j) {
+                            code << "        input[neighbourhood[idx * 6 + " << i << "] * " << conv_in_size << " + "
+                                 << j << "]";
+
+                            if (i < 6 || j + 1 < conv_in_size) {
+                                code << ",";
+                            }
+                            code << std::endl;
+                        }
+                    }
+                    code << "    };";
+                }
+
+                code << std::endl << std::endl;
+
+                /*************************************************
+                 *                WEIGHTS + BIAS                 *
+                 *************************************************/
+
+                // Now we have to do our layer operations
+                int in_size = conv_in_size;
+                for (uint layer_no = 0; layer_no < conv.size(); ++layer_no) {
+                    const auto& weights = conv[layer_no].first;
+                    const auto& biases  = conv[layer_no].second;
+
+                    const int vector_in  = vector_type(in_size);
+                    const int vector_out = vector_type(biases.size());
+
+                    code << "    // Perform our matrix multiplication for weights and add bias for layer " << layer_no
+                         << std::endl;
+
+                    // Open our next input (either vector or not)
+                    if (vector_out) {
+                        code << "    float" << vector_out << " in" << (layer_no + 1) << " = (float" << vector_out
+                             << ")(" << std::endl;
+                    }
+                    else {
+                        code << "    float in" << (layer_no + 1) << "[" << biases.size() << "] = {" << std::endl;
+                    }
+
+                    // Matrix multiplication + bias
+                    if (vector_in) {
+                        for (uint i = 0; i < biases.size(); ++i) {
+                            code << "        ";
+                            for (uint j = 0; j < weights.size(); j += vector_in) {
+
+                                // If our data is gathered, we need to get our gathered index
+                                std::string gathered_index =
+                                    layer_no == 0 ? "[" + std::to_string(j / vector_in) + "]" : "";
+
+                                // Dot our element with our fixed data
+                                code << "dot(in" << layer_no << gathered_index << ", (float" << vector_in << ")(";
+
+                                // Write our fixed data
+                                for (uint k = j; k < j + vector_in; ++k) {
+                                    code << weights[k][i];
+                                    if (k + 1 < j + vector_in) {
+                                        code << ", ";
+                                    }
+                                }
+
+                                // End
+                                code << ")) + ";
+                            }
+                            code << biases[i];
+                            if (i + 1 < biases.size()) {
+                                code << ",";
+                            }
+                            code << std::endl;
+                        }
+                    }
+                    else {
+                        for (uint i = 0; i < biases.size(); ++i) {
+                            code << "        ";
+                            for (uint j = 0; j < weights.size(); ++j) {
+                                code << "in" << layer_no << "[" << j << "] * " << weights[j][i] << " + ";
+                            }
+                            code << biases[i];
+                            if (i + 1 < biases.size()) {
+                                code << ",";
+                            }
+                            code << std::endl;
+                        }
+                    }
+
+                    // Close our output
+                    if (vector_out) {
+                        code << "    );";
+                    }
+                    else {
+                        code << "    };";
+                    }
+                    code << std::endl << std::endl;
+
+
+                    /*************************************************
+                     *                  ACTIVATION.                  *
+                     *************************************************/
+
+                    // Apply our activation function
+                    code << "    // Apply the activation function" << std::endl;
+                    if (vector_out) {
+                        // Apply elu
+                        std::string e = "in" + std::to_string(layer_no + 1);
+
+                        // TODO Apply selu rather than elu
+                        code << "    " << e << " = select(native_exp(" << e << ") - 1, in" << (layer_no + 1) << ", "
+                             << e << " > 0);" << std::endl;  // select(a, b, c) == c ? b : a
+                    }
+                    else {
+                        for (uint i = 0; i < biases.size(); ++i) {
+                            std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
+                            code << "    " << e << " = " << e << " > 0 ? " << e << " : native_exp(" << e << ") - 1;"
+                                 << std::endl;
+                        }
+                    }
+                    code << std::endl;
+
+                    // If this is our last layer, apply softmax
+                    if (conv_no + 1 == structure.size() && layer_no + 1 == conv.size()) {
+                        code << "    // Apply softmax to our final output" << std::endl;
+
+                        if (vector_out) {
+                            std::string e = "in" + std::to_string(layer_no + 1);
+                            code << "    " << e << " = native_exp(" << e << ");" << std::endl;
+                            code << "    " << e << " = " << e << " / dot(" << e << ", (float" << vector_out << ")(1));"
+                                 << std::endl;
+                        }
+                        else {
+
+                            // Apply exp to each of the elements
+                            for (uint i = 0; i < biases.size(); ++i) {
+                                std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
+                                code << "    " << e << " = native_exp(" << e << ");" << std::endl;
+                            }
+
+                            // Sum up all the values
+                            code << "float exp_sum = 0";
+                            for (uint i = 0; i < biases.size(); ++i) {
+                                std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
+                                code << "    exp_sum += " << e << ";" << std::endl;
+                            }
+
+                            // Divide all the values
+                            for (uint i = 0; i < biases.size(); ++i) {
+                                std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
+                                code << "    " << e << " /= exp_sum" << std::endl;
+                            }
+                        }
+
+                        code << std::endl;
+                    }
+
+                    // Update our input size for the next loop
+                    in_size = biases.size();
+                }
+
+                /*************************************************
+                 *                    OUTPUT                     *
+                 *************************************************/
+                code << "    // Save our value to the output" << std::endl;
+                if (vector_type(conv_out_size)) {
+                    code << "    output[idx] = "
+                         << "in" << conv.size() << ";" << std::endl;
+                }
+                else {
+                    for (int i = 0; i < conv_out_size; ++i) {
+                        code << "    output[idx * " << conv_out_size << " + " << i << "] = in" << conv.size() << "["
+                             << i << "];" << std::endl;
+                    }
+                }
+
+                code << "}" << std::endl << std::endl;
+            }
+
+            // Compile the OpenCL program
+            cl::Program::Sources sources({code.str()});
+
+            // Build the program
+            program = cl::Program(mesh->context, sources);
+
+            try {
+                if (program.build("-cl-single-precision-constant -cl-strict-aliasing -cl-fast-relaxed-math")
+                    != CL_SUCCESS) {
+                    throw std::runtime_error("Error building VisualMesh Classifier\n"
+                                             + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
+                }
+            }
+            catch (const cl::BuildError) {
+                throw std::runtime_error("Error building VisualMesh Classifier\n"
+                                         + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
+            }
+
+            for (uint i = 0; i < structure.size(); ++i) {
+                std::string kernel = "conv" + std::to_string(i);
+                uint output_size   = structure[i].back().second.size();
+                conv_layers.emplace_back(
+                    cl::KernelFunctor<const cl::Buffer&, const cl::Buffer&, cl::Buffer&>(program, kernel), output_size);
+            }
+        }
+
+        std::vector<std::array<float, 2>> operator()(const void* image,
+                                                     const FOURCC& format,
+                                                     const mat4& Hoc,
+                                                     const Lens& lens) {
+
+            // Upload the image using the memory queue
+            cl::array<size_t, 3> origin = {{0, 0, 0}};
+            cl::array<size_t, 3> region = {{size_t(lens.dimensions[0]), size_t(lens.dimensions[1]), 1}};
+            cl::ImageFormat fmt;
+            switch (format) {
+                // Bayer
+                case GRBG:
+                case RGGB:
+                case GBRG:
+                case BGGR: fmt = cl::ImageFormat(CL_R, CL_UNORM_INT8); break;
+                // Oh no...
+                default: throw std::runtime_error("Unsupported image format");
+            }
+            cl::Image2D img(mesh->context,
+                            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                            fmt,
+                            size_t(lens.dimensions[0]),
+                            size_t(lens.dimensions[1]),
+                            0,
+                            const_cast<void*>(image));
+            std::size_t row_pitch = 0;
+            cl::Event img_event;
+            mesh->queue.enqueueMapImage(
+                img, CL_FALSE, CL_MAP_READ, origin, region, &row_pitch, nullptr, nullptr, &img_event);
+
+            // Project our visual mesh
+            auto projection = mesh->project(Hoc, lens);
+
+            // This includes the offscreen point at the end
+            int points = projection.neighbourhood.size();
+
+            // Our buffers for each layer
+            std::vector<std::pair<cl::Buffer, std::vector<cl::Event>>> layer_buffers;
+
+            // First layer, output from the image
+            cl::Buffer img_load_buffer(mesh->context, CL_MEM_READ_WRITE, sizeof(cl_float4) * points);
+
+            // Zero out the final value in the buffer
+            cl::Event byte_fill_event;
+            mesh->queue.enqueueFillBuffer(img_load_buffer,
+                                          cl_float4{{0.0f, 0.0f, 0.0f, 0.0f}},
+                                          (points - 1) * sizeof(cl_float4),
+                                          sizeof(cl_float4),
+                                          nullptr,
+                                          &byte_fill_event);
+
+            // Read the pixels into the buffer
+            cl::Event img_load_event = mesh->read_image_to_network(
+                cl::EnqueueArgs(mesh->queue,
+                                std::vector<cl::Event>({projection.cl.pixel_coordinates_event, img_event}),
+                                cl::NDRange(points - 1)),  // -1 as we don't project the offscreen point
+                img,
+                format,
+                projection.cl.pixel_coordinates,
+                img_load_buffer);
+
+            // These make up our first buffers
+            layer_buffers.emplace_back(
+                img_load_buffer,
+                std::vector<cl::Event>({img_load_event, byte_fill_event, projection.cl.neighbourhood_event}));
+
+            // Run each of our conv layers
+            for (auto& conv : conv_layers) {
+                cl::Buffer out_buffer(mesh->context, CL_MEM_READ_WRITE, size_t(conv.second * points * sizeof(float)));
+
+                cl::Event event =
+                    conv.first(cl::EnqueueArgs(mesh->queue, layer_buffers.back().second, cl::NDRange(points)),
+                               projection.cl.neighbourhood,
+                               layer_buffers.back().first,
+                               out_buffer);
+
+                layer_buffers.emplace_back(out_buffer, std::vector<cl::Event>({event}));
+            }
+
+            // Read out the final layers output
+            std::vector<std::array<float, 2>> output(points);
+            std::vector<cl::Event> ready_list = {layer_buffers.back().second};
+            mesh->queue.enqueueReadBuffer(
+                layer_buffers.back().first, true, 0, points * sizeof(cl_float2), output.data(), &ready_list);
+
+            return output;
+        }
+
+    private:
+        VisualMesh* mesh;
+        cl::Program program;
+        std::vector<std::pair<cl::KernelFunctor<const cl::Buffer&,  // The int* neighbourhood map
+                                                const cl::Buffer&,  // The input buffer for the layer
+                                                cl::Buffer&>,       // The output buffer for the layer
+                              int>>
+            conv_layers;
     };
 
     /**
@@ -162,7 +585,7 @@ public:
     explicit VisualMesh(const Shape& shape,
                         const Scalar& min_height,
                         const Scalar& max_height,
-                        const size_t& height_resolution,
+                        const uint& height_resolution,
                         const Scalar& min_angular_res)
         : min_angular_res(min_angular_res)
         , min_height(min_height)
@@ -180,14 +603,14 @@ public:
 
             // Loop from directly down up to the horizon (if phi is nan it will stop)
             // So we don't have a single point at the base, we move half a jump forward
-            for (Scalar phi = shape.phi(0, h) * Scalar(0.5); phi < M_PI_2;) {
+            for (Scalar phi = shape.phi(Scalar(0.0), h) * Scalar(0.5); phi < M_PI_2;) {
 
                 // Calculate our theta
                 Scalar theta = std::max(shape.theta(phi, h), min_angular_res);
 
                 if (!std::isnan(theta)) {
                     // Push back the phi, and the number of whole shapes we can fit
-                    phis.emplace_back(phi, size_t(std::ceil(Scalar(2.0) * M_PI / theta)));
+                    phis.emplace_back(phi, uint(std::ceil(Scalar(2.0) * M_PI / theta)));
                 }
 
                 // Move to our next phi
@@ -202,7 +625,7 @@ public:
 
                 if (!std::isnan(theta)) {
                     // Push back the phi, and the number of whole shapes we can fit
-                    phis.emplace_back(phi, size_t(std::ceil(Scalar(2.0) * M_PI / theta)));
+                    phis.emplace_back(phi, uint(std::ceil(Scalar(2.0) * M_PI / theta)));
                 }
 
                 // Move to our next phi
@@ -217,7 +640,7 @@ public:
             std::vector<Node> lut;
 
             // Work out how big our LUT will be
-            size_t lut_size = 0;
+            uint lut_size = 0;
             for (const auto& v : phis) {
                 lut_size += v.second;
             }
@@ -283,7 +706,7 @@ public:
                            const Scalar& pos,
                            const int& start,
                            const int& size,
-                           const size_t offset) {
+                           const uint offset) {
 
                 // Grab our current node
                 auto& node = lut[i];
@@ -305,7 +728,7 @@ public:
             };
 
             // Now we upwards and downwards to fill in the missing links
-            for (int r = 1; r < int(rows.size()) - 1; ++r) {
+            for (uint r = 1; r + 1 < rows.size(); ++r) {
 
                 // Alias for convenience
                 const auto& prev    = rows[r - 1];
@@ -344,7 +767,7 @@ public:
                     auto& node = lut[i];
 
                     // Work out which two points are on the opposite side to us
-                    const size_t index = i - front.begin + (front_size / 2);
+                    const uint index = i - front.begin + (front_size / 2);
 
                     // Find where we are in our row as a value between 0 and 1
                     const Scalar pos = Scalar(i - front.begin) / Scalar(front_size);
@@ -364,7 +787,7 @@ public:
                     auto& node = lut[i];
 
                     // Work out which two points are on the opposite side to us
-                    const size_t index = i - back.begin + (back_size / 2);
+                    const uint index = i - back.begin + (back_size / 2);
 
                     // Find where we are in our row as a value between 0 and 1
                     const Scalar pos = Scalar(i - back.begin) / Scalar(back_size);
@@ -387,7 +810,7 @@ public:
             }
 
             // Convert all the relative indices we calculated to absolute indices
-            for (int i = 0; i < lut.size(); ++i) {
+            for (uint i = 0; i < lut.size(); ++i) {
                 for (auto& n : lut[i].neighbours) {
                     n = i + n;
                 }
@@ -419,14 +842,13 @@ public:
     }
 
     template <typename Func>
-    std::pair<const Mesh&, std::vector<std::pair<size_t, size_t>>> lookup(const Scalar& height,
-                                                                          Func&& theta_limits) const {
+    std::pair<const Mesh&, std::vector<std::pair<uint, uint>>> lookup(const Scalar& height, Func&& theta_limits) const {
 
         const auto& mesh = this->height(height);
-        std::vector<std::pair<size_t, size_t>> indices;
+        std::vector<std::pair<uint, uint>> indices;
 
         // Loop through each phi row
-        for (auto& row : mesh.rows) {
+        for (const auto& row : mesh.rows) {
 
             const auto row_size = row.end - row.begin;
 
@@ -434,7 +856,7 @@ public:
             const auto theta_ranges = theta_limits(row.phi);
 
             // Work out what this range means in terms of theta
-            for (auto& range : theta_ranges) {
+            for (const auto& range : theta_ranges) {
 
                 // Convert our theta values into local indices
                 int begin = std::ceil(row_size * range.first * (Scalar(1.0) / (Scalar(2.0) * M_PI)));
@@ -464,13 +886,14 @@ public:
         return {mesh, indices};
     }
 
-    std::pair<const Mesh&, std::vector<std::pair<size_t, size_t>>> lookup(const mat4& Hoc, const Lens& lens) {
+    std::pair<const Mesh&, std::vector<std::pair<uint, uint>>> lookup(const mat4& Hoc, const Lens& lens) {
 
         // We multiply a lot of things by 2
         constexpr const Scalar x2 = Scalar(2.0);
 
-        switch (lens.type) {
-            case Lens::EQUIRECTANGULAR: {
+        // Cut down how many points we send here by calculating how many will be on screen
+        switch (lens.projection) {
+            case Lens::RECTILINEAR: {
 
                 // Extract our rotation matrix
                 const mat3 Roc = {{
@@ -486,8 +909,8 @@ public:
                 const std::array<Scalar, 3> cam = {{Hoc[0][0], Hoc[1][0], Hoc[2][0]}};
 
                 // Work out how much additional y and z we get from our field of view if we have a focal length of 1
-                const Scalar y_extent = std::tan(lens.equirectangular.fov[0] * Scalar(0.5));
-                const Scalar z_extent = std::tan(lens.equirectangular.fov[1] * Scalar(0.5));
+                const Scalar y_extent = std::tan(lens.fov * Scalar(0.5));
+                const Scalar z_extent = y_extent * Scalar(lens.dimensions[1]) / Scalar(lens.dimensions[0]);
 
                 /* The labels for each of the corners of the frustum is shown below.
                     ^    T       U
@@ -514,8 +937,9 @@ public:
                 // Make our corner to next corner vectors
                 // In cam space these are 0,1,0 style vectors so we just get a col of the other matrix
                 // But since we are multiplying by the transpose we get a row of the matrix
-                // When we are storing this matrix we represent each corner as N and the following clockwise corner as M
-                // Then it is multiplied by the extent to make a vector of the length of the edge of the frustum
+                // When we are storing this matrix we represent each corner as N and the following clockwise corner
+                // as M Then it is multiplied by the extent to make a vector of the length of the edge of the
+                // frustum
                 const std::array<vec3, 4> rMNo = {{
                     {{-Roc[0][1] * x2 * y_extent, -Roc[1][1] * x2 * y_extent, -Roc[2][1] * x2 * y_extent}},  // rUTo
                     {{-Roc[0][2] * x2 * z_extent, -Roc[1][2] * x2 * z_extent, -Roc[2][2] * x2 * z_extent}},  // rVUo
@@ -531,8 +955,8 @@ public:
                     cross(rNCo[3], rNCo[0]),  // Right edge
                 }};
 
-                // These calculations are intermediates for the solution to the cone/line equation. Since these parts
-                // are the same for all phi values, we can pre-calculate them here to save effort later
+                // These calculations are intermediates for the solution to the cone/line equation. Since these
+                // parts are the same for all phi values, we can pre-calculate them here to save effort later
                 std::array<std::array<Scalar, 6>, 4> eq_parts;
                 for (int i = 0; i < 4; ++i) {
                     const auto& o = rNCo[i];  // Line origin
@@ -621,7 +1045,7 @@ public:
                                     const Scalar z = o[2] + d[2] * t;
 
                                     // If we are both above, or both below the horizon
-                                    if ((z > 0) == (phi > M_PI_2)) {
+                                    if ((z > Scalar(0.0)) == (phi > M_PI_2)) {
 
                                         const Scalar x     = o[0] + d[0] * t;
                                         const Scalar y     = o[1] + d[1] * t;
@@ -634,9 +1058,9 @@ public:
                         }
                     }
 
-                    // If all solutions are complex we totally enclose the phi however we still need to check the cone
-                    // is on the correct side
-                    if (complex_sols == 4 && ((cos_phi > 0) == (cam[2] < 0))) {
+                    // If all solutions are complex we totally enclose the phi however we still need to check the
+                    // cone is on the correct side
+                    if (complex_sols == 4 && ((cos_phi > Scalar(0.0)) == (cam[2] < Scalar(0.0)))) {
 
                         // Make a test unit vector that is on the cone, theta=0 is easiest
                         const vec3 test_vec = {{sin_phi, Scalar(0.0), -cos_phi}};
@@ -674,7 +1098,7 @@ public:
 
                             // If this is entering, point 0 is a start, and point 1 is an end
                             std::vector<std::pair<Scalar, Scalar>> output;
-                            for (size_t i = first_is_end ? 1 : 0; i < limits.size() - 1; i += 2) {
+                            for (uint i = first_is_end ? 1 : 0; i + 1 < limits.size(); i += 2) {
                                 output.emplace_back(limits[i], limits[i + 1]);
                             }
                             if (first_is_end) {
@@ -695,10 +1119,13 @@ public:
                 return lookup(height, theta_limits);
             }
 
-            case Lens::RADIAL: {
-                // Solution for intersections on the edge is the intersection between a unit sphere, a plane, and a cone
-                // The cone is the cone made by the phi angle, and the plane intersects with the unit sphere to form
-                // The circle that defines the edge of the field of view of the camera.
+            // Both the radial lenses can be treated the same here
+            // This only works for full frame, otherwise there are extra points that are not removed
+            case Lens::EQUIDISTANT:
+            case Lens::EQUISOLID: {
+                // Solution for intersections on the edge is the intersection between a unit sphere, a plane, and a
+                // cone The cone is the cone made by the phi angle, and the plane intersects with the unit sphere to
+                // form The circle that defines the edge of the field of view of the camera.
                 //
                 // Unit sphere
                 // x^2 + y^2 + z^2 = 1
@@ -716,7 +1143,7 @@ public:
                 // on the x/z plane. We calculate the offset to make this happen and re apply it at the end
 
                 // The gradient of our field of view cone
-                const Scalar cos_half_fov = std::cos(lens.radial.fov * Scalar(0.5));
+                const Scalar cos_half_fov = std::cos(lens.fov * Scalar(0.5));
                 const vec3 cam            = {{Hoc[0][0], Hoc[1][0], Hoc[2][0]}};
 
                 // The height of our camera above the observation plane
@@ -729,11 +1156,13 @@ public:
 
                     // The cameras inclination from straight down (same reference frame as phi)
                     const Scalar cam_inc  = std::acos(-cam[2]);
-                    const Scalar half_fov = lens.radial.fov * 0.5;
+                    const Scalar half_fov = lens.fov * 0.5;
+                    // TODO work out if you can move these out of the lambda?
 
                     // First we should check if this phi is totally contained in our fov
                     // Work out what our largest fully contained phi value is
-                    // We can work this out by subtracting our offset angle from our fov and checking if phi is smaller
+                    // We can work this out by subtracting our offset angle from our fov and checking if phi is
+                    // smaller
                     if ((upper && half_fov - (M_PI - cam_inc) > M_PI - phi) || (!upper && half_fov - cam_inc > phi)) {
                         return {{std::make_pair(Scalar(0.0), Scalar(2.0) * M_PI)}};
                     }
@@ -784,20 +1213,9 @@ public:
         }
     }
 
-    void classify(const void* image_data,
-                  const size_t& image_size,
-                  const FOURCC& image_format,
-                  const mat4& Hoc,
-                  const Lens& lens) {
+    ProjectedMesh project(const mat4& Hoc, const Lens& lens) {
 
         // Timer t;  // TIMER_LINE
-        // First start uploading our image data
-        cl::Event image_buffer_event;
-        cl::Buffer image_buffer(context, CL_MEM_READ_ONLY, image_size, nullptr, nullptr);
-        mem_queue.enqueueWriteBuffer(image_buffer, false, 0, image_size, image_data, nullptr, &image_buffer_event);
-
-        // image_buffer_event.wait();          // TIMER_LINE
-        // t.measure("\tUpload image (mem)");  // TIMER_LINE
 
         // Build Rco by transposing the rotation of Hoc and upload it to the device
         const mat4 Rco = {{
@@ -808,30 +1226,37 @@ public:
         }};
 
         cl::Event Rco_event;
-        cl::Buffer Rco_buffer(context, CL_MEM_READ_ONLY, sizeof(Rco), nullptr, nullptr);
-        mem_queue.enqueueWriteBuffer(Rco_buffer, false, 0, sizeof(Rco), Rco.data(), nullptr, &Rco_event);
+        cl::Buffer Rco_buffer(context, CL_MEM_READ_ONLY, sizeof(Rco));
+        queue.enqueueWriteBuffer(Rco_buffer, false, 0, sizeof(Rco), Rco.data(), nullptr, &Rco_event);
 
         // Rco_event.wait();                 // TIMER_LINE
         // t.measure("\tUpload Rco (mem)");  // TIMER_LINE
+
         // Perform our lookup to get our relevant range
         auto ranges = lookup(Hoc, lens);
 
         // t.measure("\tLookup Range (cpu)");  // TIMER_LINE
 
+        // Convenience variables
         const auto& cl_points = ranges.first.cl_points;
         const auto& nodes     = ranges.first.nodes;
 
-        // First count the size of the buffer we will need to allocate and create it
+        // First count the size of the buffer we will need to allocate
         int points = 0;
-        for (auto& range : ranges.second) {
+        for (const auto& range : ranges.second) {
             points += range.second - range.first;
+        }
+
+        // No point processing if we have no points, return an empty mesh
+        if (points == 0) {
+            return ProjectedMesh();
         }
 
         // Build up our list of indices for OpenCL
         // Use iota to fill in the numbers
         std::vector<int> indices(points);
         auto it = indices.begin();
-        for (auto& range : ranges.second) {
+        for (const auto& range : ranges.second) {
             auto n = std::next(it, range.second - range.first);
             std::iota(it, n, range.first);
             it = n;
@@ -840,115 +1265,98 @@ public:
         // t.measure("\tBuild Range (cpu)");  // TIMER_LINE
 
         // Create buffers for indices map
-        cl::Buffer indices_map(context, CL_MEM_READ_ONLY, sizeof(cl_int) * points, nullptr, nullptr);
-        cl::Buffer pixel_coordinates(context, 0, sizeof(cl_int2) * points, nullptr, nullptr);
+        cl::Buffer indices_map(context, CL_MEM_READ_ONLY, sizeof(cl_int) * points);
+        cl::Buffer pixel_coordinates(context, 0, sizeof(cl_int2) * points);
 
         // Upload our indices map
         cl::Event indices_event;
-        mem_queue.enqueueWriteBuffer(
-            indices_map, false, 0, points * sizeof(cl_int), indices.data(), nullptr, &indices_event);
+        queue.enqueueWriteBuffer(
+            indices_map, false, 0, indices.size() * sizeof(cl_int), indices.data(), nullptr, &indices_event);
 
         // indices_event.wait();               // TIMER_LINE
         // t.measure("\tUpload Range (mem)");  // TIMER_LINE
 
         // When everything is uploaded, we can run our projection kernel to get the pixel coordinates
         cl::Event projected;
-        switch (lens.type) {
-            case Lens::EQUIRECTANGULAR: {
-                projected = project_equirectangular(
-                    cl::EnqueueArgs(
-                        exec_queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
+        switch (lens.projection) {
+            case Lens::RECTILINEAR: {
+                projected = project_rectilinear(
+                    cl::EnqueueArgs(queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
                     cl_points,
                     indices_map,
                     Rco_buffer,
-                    lens.equirectangular.focal_length_pixels,
+                    lens.focal_length,
                     lens.dimensions,
                     pixel_coordinates);
 
             } break;
-            case Lens::RADIAL: {
-                projected = project_radial(
-                    cl::EnqueueArgs(
-                        exec_queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
+            case Lens::EQUIDISTANT: {
+                projected = project_equidistant(
+                    cl::EnqueueArgs(queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
                     cl_points,
                     indices_map,
                     Rco_buffer,
-                    lens.radial.pixels_per_radian,
+                    lens.focal_length,
                     lens.dimensions,
                     pixel_coordinates);
-
+            } break;
+            case Lens::EQUISOLID: {
+                projected = project_equisolid(
+                    cl::EnqueueArgs(queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
+                    cl_points,
+                    indices_map,
+                    Rco_buffer,
+                    lens.focal_length,
+                    lens.dimensions,
+                    pixel_coordinates);
             } break;
         }
         // projected.wait();                     // TIMER_LINE
         // t.measure("\tProject points (gpu)");  // TIMER_LINE
 
-        // Build the reverse lookup map
-        std::vector<int> r_indices(nodes.size(), -1);
-        for (int i = 0; i < indices.size(); ++i) {
+        // This can happen on the CPU while the OpenCL device is busy
+        // Build the reverse lookup map where the offscreen point is one past the end
+        std::vector<int> r_indices(nodes.size(), points);
+        for (uint i = 0; i < indices.size(); ++i) {
             r_indices[indices[i]] = i;
         }
 
-        std::vector<int> local_neighbourhood;
-        local_neighbourhood.reserve(points * 6);
-
-        for (const auto& i : indices) {
-            for (const auto& n : nodes[i].neighbours) {
-                local_neighbourhood.push_back(r_indices[n]);
+        // Build the packed neighbourhood map with an extra offscreen point at the end
+        std::vector<std::array<int, 6>> local_neighbourhood(points + 1);
+        for (uint i = 0; i < indices.size(); ++i) {
+            for (uint j = 0; j < 6; ++j) {
+                const auto& n             = nodes[indices[i]].neighbours[j];
+                local_neighbourhood[i][j] = r_indices[n];
             }
         }
+        // Fill in the final offscreen point which connects only to itself
+        local_neighbourhood[points] = {{points, points, points, points, points, points}};
 
         // t.measure("\tBuild Local Neighbourhood (cpu)");  // TIMER_LINE
 
         cl::Event local_n_event;
-        cl::Buffer local_n_buffer(context, CL_MEM_READ_ONLY, points * sizeof(int) * 6, nullptr, nullptr);
-        mem_queue.enqueueWriteBuffer(
-            local_n_buffer, false, 0, points * sizeof(int) * 6, local_neighbourhood.data(), nullptr, &local_n_event);
+        cl::Buffer local_n_buffer(context, CL_MEM_READ_ONLY, local_neighbourhood.size() * sizeof(int) * 6);
+        queue.enqueueWriteBuffer(local_n_buffer,
+                                 false,
+                                 0,
+                                 local_neighbourhood.size() * sizeof(int) * 6,
+                                 local_neighbourhood.data(),
+                                 nullptr,
+                                 &local_n_event);
 
+        projected.wait();
         // local_n_event.wait();                             // TIMER_LINE
         // t.measure("\tUpload Local Neighbourhood (mem)");  // TIMER_LINE
 
-        // // Draw the projection output
-        // std::vector<std::array<int, 2>> project_output;
-        // project_output.resize(points);
+        return ProjectedMesh{LazyBufferReader<std::array<int, 2>>(queue, pixel_coordinates, projected, points),
+                             local_neighbourhood,
+                             {pixel_coordinates, projected, local_n_buffer, local_n_event}};
+    }
 
-        // mem_queue.enqueueReadBuffer(
-        //     pixel_coordinates, true, 0, points * sizeof(std::array<int, 2>), project_output.data());
+    Classifier make_classifier(
+        const std::vector<std::vector<std::pair<std::vector<std::vector<Scalar>>, std::vector<Scalar>>>>& network) {
 
-        // t.measure("\tRead Projected Points");  // TIMER_LINE
-
-        // std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-        //             Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
-        //     lines;
-
-        // for (auto& p : project_output) {
-        //     lines.emplace_back(
-        //         Eigen::Vector2i(p[0], p[1]), Eigen::Vector2i(p[0] + 1, p[1] + 1), Eigen::Vector4d(1, 1, 0, 1));
-        // }
-
-        // for (int i = 0; i < local_neighbourhood.size(); ++i) {
-        //     for (int j = 0; j < 6; ++j) {
-        //         if (local_neighbourhood[i][j] != -1) {
-        //             lines.emplace_back(Eigen::Vector2i(project_output[i][0], project_output[i][1]),
-        //                                Eigen::Vector2i(project_output[local_neighbourhood[i][j]][0],
-        //                                                project_output[local_neighbourhood[i][j]][1]),
-        //                                Eigen::Vector4d(1, 1, 1, 0.5));
-        //         }
-        //     }
-        // }
-
-        // NUClear::PowerPlant::powerplant->emit(utility::nubugger::drawVisionLines(std::move(lines)));
-
-        // Make a map where global index -> i
-
-        // Then you can use that map to lookup each neighbour and get the local index
-
-
-        // While we are projecting we can relink the neighbours to make a local neighbourhood lookup
-
-        // TODO change to using absolute neighbour indexing, reverse the mapping and use it for lookups
-
-        // TODO REMOVE ME
-        projected.wait();
+        return Classifier(this, network);
     }
 
 private:
@@ -965,7 +1373,7 @@ private:
     }
 
     inline vec3 normalise(const vec3& a) {
-        Scalar length = std::sqrt(a[0] * a[0] + a[1] * a[1] + a[2] + a[2]);
+        Scalar length = Scalar(1.0) / std::sqrt(a[0] * a[0] + a[1] * a[1] + a[2] + a[2]);
         return {{a[0] * length, a[1] * length, a[2] * length}};
     }
 
@@ -986,7 +1394,7 @@ private:
         }
 
         // Chose our default platform
-        cl::Platform default_platform = all_platforms[1];
+        cl::Platform default_platform = all_platforms.front();
         std::cerr << "Using OpenCL platform: " << default_platform.getInfo<CL_PLATFORM_NAME>() << " "
                   << default_platform.getInfo<CL_PLATFORM_VERSION>() << std::endl;
 
@@ -1005,8 +1413,8 @@ private:
         context = cl::Context({default_device});
 
         // Create two queues, one for memory transfers and one for execution
-        exec_queue = cl::CommandQueue(context, default_device);
-        mem_queue  = cl::CommandQueue(context, default_device);
+        queue = cl::CommandQueue(context, default_device);
+        queue = cl::CommandQueue(context, default_device);
 
         // Get our program source code
         cl::Program::Sources sources;
@@ -1015,40 +1423,40 @@ private:
         sources.emplace_back(get_scalar_defines(Scalar(0.0)));
 
         // Add our sources
-        sources.emplace_back(PROJECT_RADIAL_CL);
-        sources.emplace_back(PROJECT_EQUIRECTANGULAR_CL);
+        sources.emplace_back(PROJECT_EQUIDISTANT_CL);
+        sources.emplace_back(PROJECT_EQUISOLID_CL);
+        sources.emplace_back(PROJECT_RECTILINEAR_CL);
         sources.emplace_back(READ_IMAGE_TO_NETWORK_CL);
 
         // Build the program
         cl::Program program(context, sources);
-        if (program.build({default_device}) != CL_SUCCESS) {
-            std::cerr << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << std::endl;
-            exit(1);
+        try {
+            if (program.build() != CL_SUCCESS) {
+                throw std::runtime_error("Error building Mesh Programs\n"
+                                         + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
+            }
+        }
+        catch (const cl::BuildError) {
+            throw std::runtime_error("Error building Mesh Programs\n"
+                                     + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
         }
 
-        // Radial projection function
-        project_radial = cl::KernelFunctor<const cl::Buffer&,          // The Scalar4* unit vectors
-                                           const cl::Buffer&,          // The int* index map
-                                           const cl::Buffer&,          // The Rco matrix
-                                           const Scalar&,              // The ratio of pixels per radian
-                                           const std::array<int, 2>&,  // The image dimensions
-                                           cl::Buffer&>                // The output int2 buffer
-            (program, "project_radial");
+        using ProjectionKernelFuctor = cl::KernelFunctor<const cl::Buffer&,          // The Scalar4* unit vectors
+                                                         const cl::Buffer&,          // The int* index map
+                                                         const cl::Buffer&,          // The Rco matrix
+                                                         const Scalar&,              // The focal length in pixels
+                                                         const std::array<int, 2>&,  // The image dimensions
+                                                         cl::Buffer&>;               // The output int2 buffer
 
-        // Equirectangular projection function
-        project_equirectangular = cl::KernelFunctor<const cl::Buffer&,          // The Scalar4* unit vectors
-                                                    const cl::Buffer&,          // The int* index map
-                                                    const cl::Buffer&,          // The Rco matrix
-                                                    const Scalar&,              // The focal length in pixels
-                                                    const std::array<int, 2>&,  // The image dimensions
-                                                    cl::Buffer&>                // The output int2 buffer
-            (program, "project_equirectangular");
+        // Get our projection functions
+        project_equidistant = ProjectionKernelFuctor(program, "project_equidistant");
+        project_equisolid   = ProjectionKernelFuctor(program, "project_equisolid");
+        project_rectilinear = ProjectionKernelFuctor(program, "project_rectilinear");
 
         // Build functors for reading images into the neural network layer
-        read_image_to_network = cl::KernelFunctor<const cl::Buffer&,  // The int* index map
-                                                  const cl::Buffer&,  // The image buffer
-                                                  const FOURCC&,      // The binary format the image is in
-                                                  const cl::Buffer&,  // The pixel coordinates to lookup
+        read_image_to_network = cl::KernelFunctor<const cl::Image2D&,  // The image buffer
+                                                  const FOURCC&,       // The binary format the image is in
+                                                  const cl::Buffer&,   // The pixel coordinates to lookup
                                                   cl::Buffer&>  // The neural network layer information to output to
             (program, "read_image_to_network");
     }
@@ -1057,32 +1465,24 @@ private:
     cl::Context context;
 
     // OpenCL queue for executing kernels
-    cl::CommandQueue exec_queue;
-    // OpenCL queue for uploading data to the device
-    cl::CommandQueue mem_queue;
+    cl::CommandQueue queue;
+
+    using ProjectionFunction = std::function<cl::Event(const cl::EnqueueArgs&,     // The number of workers to spawn etc
+                                                       const cl::Buffer&,          // The Scalar4* unit vectors
+                                                       const cl::Buffer&,          // The int* index map
+                                                       const cl::Buffer&,          // The Rco matrix
+                                                       const Scalar&,              // The focal length in pixels
+                                                       const std::array<int, 2>&,  // The image dimensions
+                                                       cl::Buffer&)>;              // The output int2 buffer
+
 
     // OpenCL kernel functions
-    std::function<cl::Event(const cl::EnqueueArgs&,     // The number of workers to spawn etc
-                            const cl::Buffer&,          // The Scalar4* unit vectors
-                            const cl::Buffer&,          // The int* index map
-                            const cl::Buffer&,          // The Rco matrix
-                            const Scalar&,              // The ratio of pixels per radian
-                            const std::array<int, 2>&,  // The image dimensions
-                            cl::Buffer&)>               // The output int2 buffer
-        project_radial;
-
-    std::function<cl::Event(const cl::EnqueueArgs&,     // The number of workers to spawn etc
-                            const cl::Buffer&,          // The Scalar4* unit vectors
-                            const cl::Buffer&,          // The int* index map
-                            const cl::Buffer&,          // The Rco matrix
-                            const Scalar&,              // The focal length in pixels
-                            const std::array<int, 2>&,  // The image dimensions
-                            cl::Buffer&)>               // The output int2 buffer
-        project_equirectangular;
+    ProjectionFunction project_equidistant;
+    ProjectionFunction project_equisolid;
+    ProjectionFunction project_rectilinear;
 
     std::function<cl::Event(const cl::EnqueueArgs&,  // The number of workers to spawn etc
-                            const cl::Buffer&,       // The int* index map
-                            const cl::Buffer&,       // The image buffer
+                            const cl::Image2D&,      // The image buffer
                             const FOURCC&,           // The binary format the image is in
                             const cl::Buffer&,       // The pixel coordinates to lookup
                             cl::Buffer&)>            // The neural network layer information to output to
@@ -1098,7 +1498,7 @@ private:
     // The maximum height the luts are generated for
     Scalar max_height;
     // The number gradations in height
-    size_t height_resolution;
+    uint height_resolution;
 };
 
 }  // namespace mesh

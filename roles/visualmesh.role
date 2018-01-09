@@ -8,8 +8,6 @@ NUCLEAR_ROLE(
     motion::KinematicsConfiguration
 
     #Support
-    support::configuration::GlobalConfig
-    support::configuration::SoccerConfig
     support::configuration::NetworkConfiguration
     support::NUbugger
 
@@ -20,6 +18,4 @@ NUCLEAR_ROLE(
 
     #Vision
     vision::VisualMesh
-
-    vision::LUTClassifier
 )
