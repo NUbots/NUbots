@@ -23,7 +23,8 @@ package message.motion;
 import "Matrix.proto";
 import "Vector.proto";
 
-message FootMotionStopped {}
+message FootMotionStopped {
+}
 
 message FootMotionUpdate {
     double phase             = 1;
@@ -50,5 +51,7 @@ message FootStepCompleted {
     bool status = 1;
 }
 
-message EnableFootMotion  {}
-message DisableFootMotion {}
+message EnableFootMotion {
+}
+message DisableFootMotion {
+}

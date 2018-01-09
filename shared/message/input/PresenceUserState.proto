@@ -26,5 +26,4 @@ import "Matrix.proto";
 message PresenceUserState {
 
     fmat44 head_pose = 1;
-
 }
