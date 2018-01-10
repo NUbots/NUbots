@@ -34,12 +34,12 @@ namespace motion {
         using utility::motion::kinematics::calculateLegJoints;
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
-            return -std::tanh(pos.x()) * step_height * std::pow(2, (step_steep / -std::abs(std::pow(pos.y(), d))));
+            return -std::tanh(pos.x()) * step_height * std::pow(2, (step_steep / -std::abs(std::pow(pos.z(), d))));
         }
 
-        double FootStep::f_y(const Eigen::Vector3d& pos) {
+        double FootStep::f_z(const Eigen::Vector3d& pos) {
             return step_height * pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))))
-                   - pos.y() * abs((std::tanh(10 * pos.y())));
+                   - pos.z() * abs((std::tanh(10 * pos.z())));
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
@@ -83,54 +83,63 @@ namespace motion {
                     // Get the yawless world rotation
                     // TODO: Euler angle decomposition may not be in the correct order?
                     Eigen::Affine3d Rtg =
-                        Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(2, 1, 0).x(), Eigen::Vector3d::UnitZ());
+                        Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(2, 1, 0).y(), Eigen::Vector3d::UnitY());
 
                     // Apply the foot yaw to the yawless world rotation
                     // TODO: Euler angle decomposition may not be in the correct order?
-                    Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(2, 1, 0).x(), Eigen::Vector3d::UnitZ());
+                    Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(2, 1, 0).y(), Eigen::Vector3d::UnitY());
 
                     // Construct a torso to foot ground space (support foot centric world oriented space)
                     Eigen::Affine3d Htg;
                     Htg.linear()      = Rtg.linear();         // Rotation from Rtg
                     Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
 
-                    // Vector to the swing foot in groud space
-                    Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
+                    // Vector to the swing foot in ground space
+                    Eigen::Vector3d rF_wGg = Htg.inverse() * -Htf_w.translation();
                     // The target position is already measured in ground space
                     Eigen::Vector3d rAGg = target.position;
 
                     // Direction of the target from the swing foot
                     Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
                     rAF_wg.z()             = 0;
-
                     // Create a rotation to the plane that cuts through the two positions
                     Eigen::Matrix3d Rgp;
                     // X axis is the direction towards the target
                     Rgp.leftCols<1>() = rAF_wg.normalized();
-                    // Y axis is straight up (z axis)
-                    Rgp.middleCols<1>(1) = Eigen::Vector3d::UnitZ();
-                    // Z axis is the cross product
-                    Rgp.rightCols<1>() = Rgp.leftCols<1>().cross(Rgp.middleCols<1>(1));
-
+                    // Z axis is straight up
+                    Rgp.rightCols<1>() = Eigen::Vector3d::UnitZ();
+                    // Y axis is the cross product
+                    Rgp.middleCols<1>(1) = Rgp.leftCols<1>().cross(Rgp.rightCols<1>());
                     // Upgrade this to a transform
-                    Eigen::Affine3d Hgp;       // plane to ground transform
-                    Hgp.linear()      = Rgp;   // Rotation from above
-                    Hgp.translation() = rAGg;  // Translation to target
+                    Eigen::Affine3d Hgp;        // plane to ground transform
+                    Hgp.linear()      = Rgp;    // Rotation from above
+                    Hgp.translation() = -rAGg;  // Translation to target
 
                     // Make a transformation matrix that goes the whole way
                     Eigen::Affine3d Htp = Htg * Hgp;
 
                     // Swing foots position on plane
-                    Eigen::Vector3d rF_wPp = Htp.inverse() * Htf_w.translation();
-
+                    Eigen::Vector3d rF_wPp = Htp.inverse() * -Htf_w.translation();
                     // Swing foots new target position on the plane
                     Eigen::Vector3d rF_tPp = rF_wPp;
-                    rF_tPp                 = rF_tPp + Eigen::Vector3d(f_x(rF_tPp), f_y(rF_tPp), 0);
-                    Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+                    rF_tPp = rF_tPp + Eigen::Vector3d(-f_x(rF_tPp), 0, f_z(rF_tPp)).normalized() * 0.001;
+                    Eigen::Vector3d rF_tTt = Htp * -rF_tPp;
                     Eigen::Affine3d Htf_t;
                     Htf_t.linear()      = Eigen::Matrix3d::Identity();
-                    Htf_t.translation() = rF_tTt;
-
+                    Htf_t.translation() = -rF_tTt;
+                    Htf_t.translation().z() += 0.01;
+                    log("position",
+                        target.position,
+                        "\nrF_wGg",
+                        rF_wGg,
+                        "\nrAF_wg",
+                        rAF_wg,
+                        "\nrF_wPp",
+                        rF_wPp,
+                        "rF_tPp",
+                        rF_tPp,
+                        "\nrF_tTt",
+                        rF_tTt);
                     // Apply IK
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
@@ -147,15 +156,22 @@ namespace motion {
                                               100});  // TODO: support separate gains for each leg
                     }
 
+                    emit(waypoints);
                 });
 
 
             on<Every<5, std::chrono::seconds>>().then([this] {
                 //
-                log("Making new foot target");
+                double x = double(rand()) / double(RAND_MAX);
+                double y = double(rand()) / double(RAND_MAX);
+
+                x *= 0.01;
+                y *= 0.01;
+
+                log("Making new foot target at", x, y);
 
                 emit(std::make_unique<FootTarget>(
-                    NUClear::clock::now() + std::chrono::seconds(1), 0, Eigen::Vector3d(0.1, 0.1, 0.0)));
+                    NUClear::clock::now() + std::chrono::seconds(1), 0, Eigen::Vector3d(x, y, 0.0)));
             });
 
 
