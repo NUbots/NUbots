@@ -58,8 +58,8 @@ message Ball {
     message Measurement {
         MeasurementType type = 1;
         // Vector from camera to ball in camera coordinates
-        vec3  rBCc       = 2;
-        mat33 covariance = 3;
+        vec3 rBCc       = 2;
+        mat3 covariance = 3;
     }
 
     VisionObject visObject            = 1;
@@ -93,11 +93,11 @@ message Goal {
     message Measurement {
         MeasurementType type = 1;
         // Normal vectors point inwards towards the centre of the object
-        vec3  position   = 2;
-        mat33 covariance = 3;
+        vec3 position   = 2;
+        mat3 covariance = 3;
         // Normal vectors expressed in angles (first angle is around z axis, second is elevation)
-        vec2  normalAngles = 4;
-        mat22 normAngCov   = 5;
+        vec2 normalAngles = 4;
+        mat2 normAngCov   = 5;
     }
 
     VisionObject visObject           = 1;

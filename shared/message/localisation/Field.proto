@@ -28,5 +28,5 @@ message Field {
     // and measures the orientation of the field from the world position[2] = (thetafw)
     vec3 position = 1;
     // Covariance of the measurement
-    mat33 covariance = 2;
+    mat3 covariance = 2;
 }
