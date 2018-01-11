@@ -102,8 +102,7 @@ namespace vision {
             // Add our neighbourhood
             msg->neighbourhood.reserve(results.neighbourhood.size());
             for (const auto& n : results.neighbourhood) {
-                msg->neighbourhood.emplace_back(
-                    Eigen::Map<Eigen::Matrix<int, 6, 1, Eigen::DontAlign>>(results.neighbourhood.data()));
+                msg->neighbourhood.emplace_back(Eigen::Map<const Eigen::Matrix<int, 6, 1, Eigen::DontAlign>>(n.data()));
             }
 
             // Add our coordinates
