@@ -24,9 +24,9 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message TorsoMotionUpdate {
-    vec3  frameArms = 1;
-    vec3  frameLegs = 2;
-    mat44 frame3D   = 3;
+    vec3 frameArms = 1;
+    vec3 frameLegs = 2;
+    mat4 frame3D   = 3;
 }
 
 message TorsoPositionUpdate {

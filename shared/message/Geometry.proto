@@ -36,7 +36,7 @@ message Circle {
 
 message Ellipse {
     // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
-    mat33 ellipse = 1;
+    mat3 ellipse = 1;
 }
 
 message Quad {

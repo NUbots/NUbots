@@ -31,8 +31,8 @@ message FootMotionUpdate {
     uint32 activeForwardLimb = 2;
     vec3   leftFoot2D        = 3;
     vec3   rightFoot2D       = 4;
-    mat44  leftFoot3D        = 5;
-    mat44  rightFoot3D       = 6;
+    mat4   leftFoot3D        = 5;
+    mat4   rightFoot3D       = 6;
 }
 
 message NextFootTargetInfo {
