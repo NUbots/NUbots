@@ -751,4 +751,3 @@ message umat16 {
     uvec16 se = 15;
     uvec16 sf = 16;
 }
-
