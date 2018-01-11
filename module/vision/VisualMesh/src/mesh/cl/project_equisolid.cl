@@ -11,7 +11,7 @@
  */
 kernel void project_equisolid(global const Scalar4* points,
                               global int* indices,
-                              global Scalar4* Rco,
+                              const float16 Rco,
                               const Scalar f,
                               const int2 dimensions,
                               global int2* out) {
@@ -25,7 +25,7 @@ kernel void project_equisolid(global const Scalar4* points,
     Scalar4 ray = points[id];
 
     // Rotate our ray by our matrix to put it into camera space
-    ray = (Scalar4)(dot(Rco[0], ray), dot(Rco[1], ray), dot(Rco[2], ray), 0);
+    ray = (Scalar4)(dot(Rco.s0123, ray), dot(Rco.s4567, ray), dot(Rco.s89ab, ray), 0);
 
     // Calculate some intermediates
     const Scalar theta     = acos(ray.x);

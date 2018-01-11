@@ -27,10 +27,18 @@ message VisualMesh {
 
     message Row {
         float phi = 1;
-        uint32 segments = 2;
+        int32 segments = 2;
     }
 
-    repeated Row rows = 1;
-    map<uint32, uvec3> colours = 2;
-    uint32 camera_id = 3;
+    message Classification {
+        int32 dimensions = 1;
+        repeated float values = 2;
+    }
+
+    uint32 camera_id = 1;
+    repeated Row mesh = 2;
+    repeated int32 indices = 3;
+    repeated ivec neighbours = 4;
+    repeated ivec2 coordinates = 5;
+    repeated Classification classifications = 6;
 }

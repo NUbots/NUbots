@@ -18,4 +18,7 @@ NUCLEAR_ROLE(
 
     #Vision
     vision::VisualMesh
+
+    # Data logger
+    support::logging::DataLogging
 )

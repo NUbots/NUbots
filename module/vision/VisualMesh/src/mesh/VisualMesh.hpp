@@ -25,48 +25,103 @@
 #include <map>
 #include <numeric>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
-#define CL_HPP_MINIMUM_OPENCL_VERSION 120
-#define CL_HPP_TARGET_OPENCL_VERSION 120
-#define CL_HPP_ENABLE_EXCEPTIONS
-#include "cl/cl2.hpp"
+#include <CL/cl.h>
 
 // Include our generated OpenCL headers
 #include "mesh/cl/project_equidistant.cl.h"
 #include "mesh/cl/project_equisolid.cl.h"
 #include "mesh/cl/project_rectilinear.cl.h"
 #include "mesh/cl/read_image_to_network.cl.h"
-
-#include "utility/support/Timer.hpp"
+#include "opencl_error_category.hpp"
 
 namespace mesh {
+
+namespace cl {
+    template <typename T>
+    struct opencl_wrapper : public std::shared_ptr<std::remove_reference_t<decltype(*std::declval<T>())>> {
+        using std::shared_ptr<std::remove_reference_t<decltype(*std::declval<T>())>>::shared_ptr;
+
+        T* operator&() {
+            ptr = this->get();
+            return &ptr;
+        }
+
+        operator T() const {
+            return this->get();
+        }
+
+        size_t size() const {
+            return sizeof(T);
+        }
+
+    private:
+        T ptr = nullptr;
+    };
+
+    using command_queue = opencl_wrapper<::cl_command_queue>;
+    using context       = opencl_wrapper<::cl_context>;
+    using event         = opencl_wrapper<::cl_event>;
+    using kernel        = opencl_wrapper<::cl_kernel>;
+    using mem           = opencl_wrapper<::cl_mem>;
+    using program       = opencl_wrapper<::cl_program>;
+}  // namespace cl
 
 template <typename T>
 struct LazyBufferReader {
 
     LazyBufferReader() = default;
 
-    LazyBufferReader(const cl::CommandQueue& queue, const cl::Buffer& buffer, const cl::Event& ready, uint n_elements)
+    LazyBufferReader(const cl::command_queue& queue,
+                     const cl::mem& buffer,
+                     const std::vector<cl::event>& ready,
+                     uint n_elements)
         : queue(queue), buffer(buffer), ready(ready), n_elements(n_elements) {}
 
-    operator std::vector<T>() {
+    LazyBufferReader(const cl::command_queue& queue, const cl::mem& buffer, const cl::event& ready, uint n_elements)
+        : queue(queue), buffer(buffer), ready(std::vector<cl::event>({ready})), n_elements(n_elements) {}
+
+    template <typename U>
+    std::vector<U> as() const {
+        // Number of output elements will change if the sizes are different
+        std::vector<U> output(n_elements * sizeof(T) / sizeof(U));
+
+        std::vector<cl_event> events(ready.begin(), ready.end());
+        cl_int error = ::clEnqueueReadBuffer(
+            queue, buffer, true, 0, n_elements * sizeof(T), output.data(), events.size(), events.data(), nullptr);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error reading vector buffer for lazy evaluation");
+        }
+        return output;
+    }
+
+    operator std::vector<T>() const {
         std::vector<T> output(n_elements);
-        std::vector<cl::Event> ready_list = {ready};
-        queue.enqueueReadBuffer(buffer, true, 0, n_elements * sizeof(T), output.data(), &ready_list);
+        std::vector<cl_event> events(ready.begin(), ready.end());
+        cl_int error = ::clEnqueueReadBuffer(
+            queue, buffer, true, 0, n_elements * sizeof(T), output.data(), events.size(), events.data(), nullptr);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error reading vector buffer for lazy evaluation");
+        }
         return output;
     }
 
-    operator T() {
+    operator T() const {
         T output;
-        std::vector<cl::Event> ready_list = {ready};
-        queue.enqueueReadBuffer(buffer, true, 0, sizeof(T), &output, &ready_list);
+        std::vector<cl_event> events(ready.begin(), ready.end());
+        cl_int error =
+            ::clEnqueueReadBuffer(queue, buffer, true, 0, sizeof(T), &output, events.size(), events.data(), nullptr);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error reading buffer for lazy evaluation");
+        }
         return output;
     }
 
-    cl::CommandQueue queue;
-    cl::Buffer buffer;
-    cl::Event ready;
+    cl::command_queue queue;
+    cl::mem buffer;
+    std::vector<cl::event> ready;
     uint n_elements;
 };
 
@@ -96,16 +151,25 @@ public:
     };
 
     struct ProjectedMesh {
+
+        // Host side buffers for the data
         LazyBufferReader<std::array<int, 2>> pixel_coordinates;
         std::vector<std::array<int, 6>> neighbourhood;
+        std::vector<int> global_indices;
 
         // OpenCL buffers for the data
-        struct {
-            cl::Buffer pixel_coordinates;
-            cl::Event pixel_coordinates_event;
-            cl::Buffer neighbourhood;
-            cl::Event neighbourhood_event;
-        } cl;
+        cl::mem cl_pixel_coordinates;
+        cl::event cl_pixel_coordinates_event;
+        cl::mem cl_neighbourhood;
+        cl::event cl_neighbourhood_event;
+    };
+
+    struct ClassifiedMesh {
+
+        LazyBufferReader<std::array<int, 2>> pixel_coordinates;
+        std::vector<std::array<int, 6>> neighbourhood;
+        std::vector<int> global_indices;
+        std::vector<std::pair<int, LazyBufferReader<Scalar>>> classifications;
     };
 
     struct Node {
@@ -138,16 +202,17 @@ public:
     };
 
     struct Mesh {
-        Mesh(std::vector<Node>&& nodes, std::vector<Row>&& rows, cl::Buffer&& cl_points)
+        Mesh(const std::vector<Node>& nodes, const std::vector<Row>& rows, const cl::mem& cl_points)
             : nodes(nodes), rows(rows), cl_points(cl_points) {}
 
         /// The lookup table for this mesh
         std::vector<Node> nodes;
-        /// A set of individual rows for phi values. `begin` and `end` refer to the table with end being 1 past the end
+        /// A set of individual rows for phi values. `begin` and `end` refer to the table with end being 1 past the
+        /// end
         std::vector<Row> rows;
 
         /// The on device buffer of the visual mesh unit vectors
-        cl::Buffer cl_points;
+        cl::mem cl_points;
     };
 
     enum FOURCC : cl_int {
@@ -191,7 +256,8 @@ public:
     public:
         Classifier() : mesh(nullptr) {}
 
-        Classifier(VisualMesh* mesh, const network_structure_t& structure) : mesh(mesh) {
+        Classifier(VisualMesh* mesh, const network_structure_t& structure)
+            : mesh(mesh), conv_mutex(std::make_shared<std::mutex>()) {
 
             // Build using a string stream
             std::stringstream code;
@@ -443,61 +509,120 @@ public:
                 code << "}" << std::endl << std::endl;
             }
 
-            // Compile the OpenCL program
-            cl::Program::Sources sources({code.str()});
+            // Create our OpenCL program, compile it and get our kernels
+            cl_int error;
+            std::string source = code.str();
+            const char* cstr   = source.c_str();
+            size_t csize       = source.size();
 
-            // Build the program
-            program = cl::Program(mesh->context, sources);
+            program =
+                cl::program(::clCreateProgramWithSource(mesh->context, 1, &cstr, &csize, &error), ::clReleaseProgram);
 
-            try {
-                if (program.build("-cl-single-precision-constant -cl-strict-aliasing -cl-fast-relaxed-math")
-                    != CL_SUCCESS) {
-                    throw std::runtime_error("Error building VisualMesh Classifier\n"
-                                             + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
-                }
+            if (error != CL_SUCCESS) {
+                throw std::system_error(error, opencl_error_category(), "Error adding sources to classifier program");
             }
-            catch (const cl::BuildError) {
-                throw std::runtime_error("Error building VisualMesh Classifier\n"
-                                         + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
+
+            // Compile the program
+            error = ::clBuildProgram(
+                program, 0, nullptr, "-cl-single-precision-constant -cl-fast-relaxed-math", nullptr, nullptr);
+            if (error != CL_SUCCESS) {
+
+                // Get the first device
+                cl_device_id device;
+                ::clGetContextInfo(mesh->context, CL_CONTEXT_DEVICES, sizeof(cl_device_id), &device, nullptr);
+
+                // Get program build log
+                size_t used = 0;
+                ::clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &used);
+                std::vector<char> log(used);
+                ::clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, log.size(), log.data(), &used);
+
+                // Throw an error with the build log
+                throw std::system_error(
+                    error,
+                    opencl_error_category(),
+                    "Error building classifier program\n" + std::string(log.begin(), log.begin() + used));
             }
 
             for (uint i = 0; i < structure.size(); ++i) {
                 std::string kernel = "conv" + std::to_string(i);
                 uint output_size   = structure[i].back().second.size();
-                conv_layers.emplace_back(
-                    cl::KernelFunctor<const cl::Buffer&, const cl::Buffer&, cl::Buffer&>(program, kernel), output_size);
+
+                cl_int error;
+                cl::kernel k(::clCreateKernel(program, kernel.c_str(), &error), ::clReleaseKernel);
+                if (error != CL_SUCCESS) {
+                    throw std::system_error(error, opencl_error_category(), "Failed to create kernel " + kernel);
+                }
+                else {
+                    conv_layers.emplace_back(k, output_size);
+                }
             }
         }
 
-        std::vector<std::array<float, 2>> operator()(const void* image,
-                                                     const FOURCC& format,
-                                                     const mat4& Hoc,
-                                                     const Lens& lens) {
+        ClassifiedMesh operator()(const void* image, const FOURCC& format, const mat4& Hoc, const Lens& lens) {
 
-            // Upload the image using the memory queue
-            cl::array<size_t, 3> origin = {{0, 0, 0}};
-            cl::array<size_t, 3> region = {{size_t(lens.dimensions[0]), size_t(lens.dimensions[1]), 1}};
-            cl::ImageFormat fmt;
+
+            cl_image_format fmt;
+
             switch (format) {
                 // Bayer
                 case GRBG:
                 case RGGB:
                 case GBRG:
-                case BGGR: fmt = cl::ImageFormat(CL_R, CL_UNORM_INT8); break;
+                case BGGR: fmt = cl_image_format{CL_R, CL_UNORM_INT8}; break;
+                case BGRA: fmt = cl_image_format{CL_BGRA, CL_UNORM_INT8}; break;
+                case RGBA: fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8}; break;
                 // Oh no...
                 default: throw std::runtime_error("Unsupported image format");
             }
-            cl::Image2D img(mesh->context,
-                            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                            fmt,
-                            size_t(lens.dimensions[0]),
-                            size_t(lens.dimensions[1]),
-                            0,
-                            const_cast<void*>(image));
+
+            cl_image_desc desc = {CL_MEM_OBJECT_IMAGE2D,
+                                  size_t(lens.dimensions[0]),
+                                  size_t(lens.dimensions[1]),
+                                  1,
+                                  1,
+                                  0,
+                                  0,
+                                  0,
+                                  0,
+                                  nullptr};
+
+            // Create a buffer for our image
+            cl_int error;
+            cl::mem img(::clCreateImage(mesh->context,
+                                        CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                        &fmt,
+                                        &desc,
+                                        const_cast<void*>(image),
+                                        &error),
+                        ::clReleaseMemObject);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(error, opencl_error_category(), "Error creating image on device");
+            }
+
+            // Map our image into device memory
+            std::array<size_t, 3> origin = {{0, 0, 0}};
+            std::array<size_t, 3> region = {{size_t(lens.dimensions[0]), size_t(lens.dimensions[1]), 1}};
+
+            cl::event img_event;
+            cl_event ev           = nullptr;
             std::size_t row_pitch = 0;
-            cl::Event img_event;
-            mesh->queue.enqueueMapImage(
-                img, CL_FALSE, CL_MAP_READ, origin, region, &row_pitch, nullptr, nullptr, &img_event);
+            ::clEnqueueMapImage(mesh->queue,
+                                img,
+                                false,
+                                CL_MAP_READ,
+                                origin.data(),
+                                region.data(),
+                                &row_pitch,
+                                nullptr,
+                                0,
+                                nullptr,
+                                &ev,
+                                &error);
+            if (ev) img_event = cl::event(ev, ::clReleaseEvent);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(error, opencl_error_category(), "Error mapping image onto device");
+            }
 
             // Project our visual mesh
             auto projection = mesh->project(Hoc, lens);
@@ -505,66 +630,169 @@ public:
             // This includes the offscreen point at the end
             int points = projection.neighbourhood.size();
 
-            // Our buffers for each layer
-            std::vector<std::pair<cl::Buffer, std::vector<cl::Event>>> layer_buffers;
 
             // First layer, output from the image
-            cl::Buffer img_load_buffer(mesh->context, CL_MEM_READ_WRITE, sizeof(cl_float4) * points);
+            cl::mem img_load_buffer(
+                ::clCreateBuffer(mesh->context, CL_MEM_READ_WRITE, sizeof(cl_float4) * points, nullptr, &error),
+                ::clReleaseMemObject);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(error, opencl_error_category(), "Error allocating buffer on device");
+            }
 
             // Zero out the final value in the buffer
-            cl::Event byte_fill_event;
-            mesh->queue.enqueueFillBuffer(img_load_buffer,
-                                          cl_float4{{0.0f, 0.0f, 0.0f, 0.0f}},
+            cl::event offscreen_fill_event;
+            ev         = nullptr;
+            float zero = 0.0f;
+            error      = ::clEnqueueFillBuffer(mesh->queue,
+                                          img_load_buffer,
+                                          &zero,
+                                          sizeof(float),
                                           (points - 1) * sizeof(cl_float4),
                                           sizeof(cl_float4),
+                                          0,
                                           nullptr,
-                                          &byte_fill_event);
+                                          &ev);
+            if (ev) offscreen_fill_event = cl::event(ev, ::clReleaseEvent);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(error, opencl_error_category(), "Error setting the offscreen pixel values");
+            }
 
             // Read the pixels into the buffer
-            cl::Event img_load_event = mesh->read_image_to_network(
-                cl::EnqueueArgs(mesh->queue,
-                                std::vector<cl::Event>({projection.cl.pixel_coordinates_event, img_event}),
-                                cl::NDRange(points - 1)),  // -1 as we don't project the offscreen point
-                img,
-                format,
-                projection.cl.pixel_coordinates,
-                img_load_buffer);
+            cl::event img_load_event;
+            ev = nullptr;
+            /* Mutex scope */ {
+                std::lock_guard<std::mutex> lock(mesh->read_image_to_network_mutex);
+
+                error = ::clSetKernelArg(mesh->read_image_to_network, 0, img.size(), &img);
+                if (error != CL_SUCCESS) {
+                    throw std::system_error(
+                        error, opencl_error_category(), "Error setting kernel argument 0 for image load kernel");
+                }
+                error = ::clSetKernelArg(mesh->read_image_to_network, 1, sizeof(format), &format);
+                if (error != CL_SUCCESS) {
+                    throw std::system_error(
+                        error, opencl_error_category(), "Error setting kernel argument 1 for image load kernel");
+                }
+                error = ::clSetKernelArg(mesh->read_image_to_network,
+                                         2,
+                                         projection.cl_pixel_coordinates.size(),
+                                         &projection.cl_pixel_coordinates);
+                if (error != CL_SUCCESS) {
+                    throw std::system_error(
+                        error, opencl_error_category(), "Error setting kernel argument 2 for image load kernel");
+                }
+                error = ::clSetKernelArg(mesh->read_image_to_network, 3, img_load_buffer.size(), &img_load_buffer);
+                if (error != CL_SUCCESS) {
+                    throw std::system_error(
+                        error, opencl_error_category(), "Error setting kernel argument 3 for image load kernel");
+                }
+
+                size_t offset[1]       = {0};
+                size_t global_size[1]  = {size_t(points - 1)};
+                cl_event event_list[2] = {projection.cl_pixel_coordinates_event, img_event};
+                error                  = ::clEnqueueNDRangeKernel(mesh->queue,
+                                                 mesh->read_image_to_network,
+                                                 1,
+                                                 offset,
+                                                 global_size,  // -1 as we don't project the offscreen point
+                                                 nullptr,
+                                                 2,
+                                                 event_list,
+                                                 &ev);
+                if (ev) img_load_event = cl::event(ev, ::clReleaseEvent);
+                if (error != CL_SUCCESS) {
+                    throw std::system_error(error, opencl_error_category(), "Error queueing the image load kernel");
+                }
+            }
+
+            // Our buffers for each layer
+            std::vector<std::pair<cl::mem, std::vector<cl::event>>> layer_buffers;
 
             // These make up our first buffers
             layer_buffers.emplace_back(
                 img_load_buffer,
-                std::vector<cl::Event>({img_load_event, byte_fill_event, projection.cl.neighbourhood_event}));
+                std::vector<cl::event>({img_load_event, offscreen_fill_event, projection.cl_neighbourhood_event}));
 
             // Run each of our conv layers
-            for (auto& conv : conv_layers) {
-                cl::Buffer out_buffer(mesh->context, CL_MEM_READ_WRITE, size_t(conv.second * points * sizeof(float)));
+            /* Mutex Scope */ {
+                std::lock_guard<std::mutex> lock(*conv_mutex);
 
-                cl::Event event =
-                    conv.first(cl::EnqueueArgs(mesh->queue, layer_buffers.back().second, cl::NDRange(points)),
-                               projection.cl.neighbourhood,
-                               layer_buffers.back().first,
-                               out_buffer);
+                for (auto& conv : conv_layers) {
 
-                layer_buffers.emplace_back(out_buffer, std::vector<cl::Event>({event}));
+                    // Create an output buffer
+                    cl::mem out_buffer(::clCreateBuffer(mesh->context,
+                                                        CL_MEM_READ_WRITE,
+                                                        size_t(conv.second * points * sizeof(float)),
+                                                        nullptr,
+                                                        &error),
+                                       ::clReleaseMemObject);
+                    if (error) {
+                        throw std::system_error(
+                            error, opencl_error_category(), "Error creating output buffer for the convolution kernel");
+                    }
+
+                    error = ::clSetKernelArg(
+                        conv.first, 0, projection.cl_neighbourhood.size(), &projection.cl_neighbourhood);
+                    if (error) {
+                        throw std::system_error(
+                            error, opencl_error_category(), "Error setting argument 0 for convolution kernel");
+                    }
+                    error =
+                        ::clSetKernelArg(conv.first, 1, layer_buffers.back().first.size(), &layer_buffers.back().first);
+                    if (error) {
+                        throw std::system_error(
+                            error, opencl_error_category(), "Error setting argument 1 for convolution kernel");
+                    }
+                    error = ::clSetKernelArg(conv.first, 2, out_buffer.size(), &out_buffer);
+                    if (error) {
+                        throw std::system_error(
+                            error, opencl_error_category(), "Error setting argument 2 for convolution kernel");
+                    }
+
+
+                    // Convert our events into
+                    std::vector<cl_event> events(layer_buffers.back().second.begin(),
+                                                 layer_buffers.back().second.end());
+
+                    size_t offset[1]      = {0};
+                    size_t global_size[1] = {size_t(points)};
+                    cl::event event;
+                    ev    = nullptr;
+                    error = ::clEnqueueNDRangeKernel(
+                        mesh->queue, conv.first, 1, offset, global_size, nullptr, events.size(), events.data(), &ev);
+                    if (ev) event = cl::event(ev, ::clReleaseEvent);
+                    if (error) {
+                        throw std::system_error(error, opencl_error_category(), "Error queueing convolution kernel");
+                    }
+
+                    layer_buffers.emplace_back(out_buffer, std::vector<cl::event>({event}));
+                }
             }
 
-            // Read out the final layers output
-            std::vector<std::array<float, 2>> output(points);
-            std::vector<cl::Event> ready_list = {layer_buffers.back().second};
-            mesh->queue.enqueueReadBuffer(
-                layer_buffers.back().first, true, 0, points * sizeof(cl_float2), output.data(), &ready_list);
+            // Flush the queue to ensure it has executed
+            ::clFlush(mesh->queue);
 
-            return output;
+            std::vector<std::pair<int, LazyBufferReader<Scalar>>> outputs;
+            for (uint i = 0; i < layer_buffers.size(); ++i) {
+
+                uint dims = i == 0 ? 4 : conv_layers[i - 1].second;
+
+                outputs.emplace_back(dims,
+                                     LazyBufferReader<Scalar>(
+                                         mesh->queue, layer_buffers[i].first, layer_buffers[i].second, points * dims));
+            }
+
+            return ClassifiedMesh{projection.pixel_coordinates,
+                                  std::move(projection.neighbourhood),
+                                  std::move(projection.global_indices),
+                                  std::move(outputs)};
         }
 
     private:
         VisualMesh* mesh;
-        cl::Program program;
-        std::vector<std::pair<cl::KernelFunctor<const cl::Buffer&,  // The int* neighbourhood map
-                                                const cl::Buffer&,  // The input buffer for the layer
-                                                cl::Buffer&>,       // The output buffer for the layer
-                              int>>
-            conv_layers;
+        cl::program program;
+        std::vector<std::pair<cl::kernel, int>> conv_layers;
+        std::shared_ptr<std::mutex> conv_mutex;
     };
 
     /**
@@ -680,9 +908,13 @@ public:
                     const int l = i == 0 ? steps - 1 : i - 1;
                     const int r = i == steps - 1 ? 0 : i + 1;
 
-                    // Set these two neighbours
+                    // Set these two neighbours and default the others to ourself
+                    n.neighbours[0] = 0;
+                    n.neighbours[1] = 0;
                     n.neighbours[2] = l - i;  // L
                     n.neighbours[3] = r - i;  // R
+                    n.neighbours[4] = 0;
+                    n.neighbours[5] = 0;
 
                     // Move on to the next theta value
                     theta += dtheta;
@@ -761,44 +993,48 @@ public:
                 const auto& back    = rows.back();
                 const int back_size = back.end - back.begin;
 
-                // Link the front to itself
-                for (int i = front.begin; i < front.end; ++i) {
-                    // Alias our node
-                    auto& node = lut[i];
+                // Link the front to itself if it's at the top
+                if (front.phi < M_PI_2) {
+                    for (int i = front.begin; i < front.end; ++i) {
+                        // Alias our node
+                        auto& node = lut[i];
 
-                    // Work out which two points are on the opposite side to us
-                    const uint index = i - front.begin + (front_size / 2);
+                        // Work out which two points are on the opposite side to us
+                        const uint index = i - front.begin + (front_size / 2);
 
-                    // Find where we are in our row as a value between 0 and 1
-                    const Scalar pos = Scalar(i - front.begin) / Scalar(front_size);
+                        // Find where we are in our row as a value between 0 and 1
+                        const Scalar pos = Scalar(i - front.begin) / Scalar(front_size);
 
-                    // Link to ourself
-                    node.neighbours[0] = front.begin + (index % front_size) - i;
-                    node.neighbours[1] = front.begin + ((index + 1) % front_size) - i;
+                        // Link to ourself
+                        node.neighbours[0] = front.begin + (index % front_size) - i;
+                        node.neighbours[1] = front.begin + ((index + 1) % front_size) - i;
 
-                    // Link to our next row normally
-                    const auto& r2 = rows[1];
-                    link(lut, i, pos, r2.begin, r2.end - r2.begin, 4);
+                        // Link to our next row normally
+                        const auto& r2 = rows[1];
+                        link(lut, i, pos, r2.begin, r2.end - r2.begin, 4);
+                    }
                 }
 
-                // Link the back to itself
-                for (int i = back.begin; i < back.end; ++i) {
-                    // Alias our node
-                    auto& node = lut[i];
+                // Link the back to itself if it's at the bottom
+                if (back.phi > M_PI_2) {
+                    for (int i = back.begin; i < back.end; ++i) {
+                        // Alias our node
+                        auto& node = lut[i];
 
-                    // Work out which two points are on the opposite side to us
-                    const uint index = i - back.begin + (back_size / 2);
+                        // Work out which two points are on the opposite side to us
+                        const uint index = i - back.begin + (back_size / 2);
 
-                    // Find where we are in our row as a value between 0 and 1
-                    const Scalar pos = Scalar(i - back.begin) / Scalar(back_size);
+                        // Find where we are in our row as a value between 0 and 1
+                        const Scalar pos = Scalar(i - back.begin) / Scalar(back_size);
 
-                    // Link to ourself on the other side
-                    node.neighbours[4] = back.begin + (index % back_size) - i;
-                    node.neighbours[5] = back.begin + ((index + 1) % back_size) - i;
+                        // Link to ourself on the other side
+                        node.neighbours[4] = back.begin + (index % back_size) - i;
+                        node.neighbours[5] = back.begin + ((index + 1) % back_size) - i;
 
-                    // Link to our previous row normally
-                    const auto& r2 = rows[rows.size() - 2];
-                    link(lut, i, pos, r2.begin, r2.end - r2.begin, 0);
+                        // Link to our previous row normally
+                        const auto& r2 = rows[rows.size() - 2];
+                        link(lut, i, pos, r2.begin, r2.end - r2.begin, 0);
+                    }
                 }
             }
 
@@ -817,10 +1053,34 @@ public:
             }
 
             // Upload our unit vectors to the OpenCL device
-            cl::Buffer cl_points_buffer(context, cl_points.begin(), cl_points.end(), true);
+            cl_int error;
+            cl::mem cl_points_buffer(
+                ::clCreateBuffer(
+                    context, CL_MEM_READ_ONLY, cl_points.size() * sizeof(std::array<Scalar, 4>), nullptr, &error),
+                ::clReleaseMemObject);
+            if (error) {
+                throw std::system_error(error, opencl_error_category(), "Error allocating lookup table buffer");
+            }
+
+            error = ::clEnqueueWriteBuffer(queue,
+                                           cl_points_buffer,
+                                           true,
+                                           0,
+                                           cl_points.size() * sizeof(std::array<Scalar, 4>),
+                                           cl_points.data(),
+                                           0,
+                                           nullptr,
+                                           nullptr);
+
+            // Ensure everything is done
+            clFinish(queue);
+
+            if (error) {
+                throw std::system_error(error, opencl_error_category(), "Error uploading lookup table to device");
+            }
 
             // Insert our constructed mesh into the lookup
-            luts.insert(std::make_pair(h, Mesh(std::move(lut), std::move(rows), std::move(cl_points_buffer))));
+            luts.insert(std::make_pair(h, Mesh(std::move(lut), std::move(rows), cl_points_buffer)));
         }
     }
 
@@ -1215,22 +1475,29 @@ public:
 
     ProjectedMesh project(const mat4& Hoc, const Lens& lens) {
 
+        // Reused variables
+        cl_int error;
+        cl_event ev = nullptr;
+
         // Timer t;  // TIMER_LINE
 
-        // Build Rco by transposing the rotation of Hoc and upload it to the device
-        const mat4 Rco = {{
-            {{Hoc[0][0], Hoc[1][0], Hoc[2][0], Scalar(0.0)}},       //
-            {{Hoc[0][1], Hoc[1][1], Hoc[2][1], Scalar(0.0)}},       //
-            {{Hoc[0][2], Hoc[1][2], Hoc[2][2], Scalar(0.0)}},       //
-            {{Scalar(0.0), Scalar(0.0), Scalar(0.0), Scalar(0.0)}}  //
-        }};
-
-        cl::Event Rco_event;
-        cl::Buffer Rco_buffer(context, CL_MEM_READ_ONLY, sizeof(Rco));
-        queue.enqueueWriteBuffer(Rco_buffer, false, 0, sizeof(Rco), Rco.data(), nullptr, &Rco_event);
-
-        // Rco_event.wait();                 // TIMER_LINE
-        // t.measure("\tUpload Rco (mem)");  // TIMER_LINE
+        // Pack Rco into a float16
+        cl_float16 Rco = {Hoc[0][0],
+                          Hoc[1][0],
+                          Hoc[2][0],
+                          Scalar(0.0),
+                          Hoc[0][1],
+                          Hoc[1][1],
+                          Hoc[2][1],
+                          Scalar(0.0),
+                          Hoc[0][2],
+                          Hoc[1][2],
+                          Hoc[2][2],
+                          Scalar(0.0),
+                          Scalar(0.0),
+                          Scalar(0.0),
+                          Scalar(0.0),
+                          Scalar(0.0)};
 
         // Perform our lookup to get our relevant range
         auto ranges = lookup(Hoc, lens);
@@ -1265,51 +1532,87 @@ public:
         // t.measure("\tBuild Range (cpu)");  // TIMER_LINE
 
         // Create buffers for indices map
-        cl::Buffer indices_map(context, CL_MEM_READ_ONLY, sizeof(cl_int) * points);
-        cl::Buffer pixel_coordinates(context, 0, sizeof(cl_int2) * points);
+        cl::mem indices_map(::clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(cl_int) * points, nullptr, &error),
+                            ::clReleaseMemObject);
+        if (error) {
+            throw std::system_error(error, opencl_error_category(), "Error allocating indices_map buffer");
+        }
+        cl::mem pixel_coordinates(
+            ::clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_int2) * points, nullptr, &error),
+            ::clReleaseMemObject);
+        if (error) {
+            throw std::system_error(error, opencl_error_category(), "Error allocating pixel_coordinates buffer");
+        }
 
         // Upload our indices map
-        cl::Event indices_event;
-        queue.enqueueWriteBuffer(
-            indices_map, false, 0, indices.size() * sizeof(cl_int), indices.data(), nullptr, &indices_event);
+        cl::event indices_event;
+        ev    = nullptr;
+        error = ::clEnqueueWriteBuffer(
+            queue, indices_map, false, 0, indices.size() * sizeof(cl_int), indices.data(), 0, nullptr, &ev);
+        if (ev) indices_event = cl::event(ev, ::clReleaseEvent);
+        if (error) {
+            throw std::system_error(error, opencl_error_category(), "Error uploading indices_map to device");
+        }
 
         // indices_event.wait();               // TIMER_LINE
         // t.measure("\tUpload Range (mem)");  // TIMER_LINE
 
         // When everything is uploaded, we can run our projection kernel to get the pixel coordinates
-        cl::Event projected;
-        switch (lens.projection) {
-            case Lens::RECTILINEAR: {
-                projected = project_rectilinear(
-                    cl::EnqueueArgs(queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
-                    cl_points,
-                    indices_map,
-                    Rco_buffer,
-                    lens.focal_length,
-                    lens.dimensions,
-                    pixel_coordinates);
+        cl::event projected;
+        ev = nullptr;
+        /* mutex scope */ {
+            std::lock_guard<std::mutex> lock(projection_mutex);
 
-            } break;
-            case Lens::EQUIDISTANT: {
-                projected = project_equidistant(
-                    cl::EnqueueArgs(queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
-                    cl_points,
-                    indices_map,
-                    Rco_buffer,
-                    lens.focal_length,
-                    lens.dimensions,
-                    pixel_coordinates);
-            } break;
-            case Lens::EQUISOLID: {
-                projected = project_equisolid(
-                    cl::EnqueueArgs(queue, std::vector<cl::Event>({Rco_event, indices_event}), cl::NDRange(points)),
-                    cl_points,
-                    indices_map,
-                    Rco_buffer,
-                    lens.focal_length,
-                    lens.dimensions,
-                    pixel_coordinates);
-            } break;
+            cl::kernel projection_kernel;
+
+            // Select a projection kernel
+            switch (lens.projection) {
+                case Lens::RECTILINEAR: projection_kernel = project_rectilinear; break;
+                case Lens::EQUIDISTANT: projection_kernel = project_equidistant; break;
+                case Lens::EQUISOLID: projection_kernel = project_equisolid; break;
+            }
+
+            // Load the arguments
+            error = ::clSetKernelArg(projection_kernel, 0, cl_points.size(), &cl_points);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(
+                    error, opencl_error_category(), "Error setting kernel argument 0 for projection kernel");
+            }
+            error = ::clSetKernelArg(projection_kernel, 1, indices_map.size(), &indices_map);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(
+                    error, opencl_error_category(), "Error setting kernel argument 1 for projection kernel");
+            }
+            error = ::clSetKernelArg(projection_kernel, 2, sizeof(cl_float16), &Rco);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(
+                    error, opencl_error_category(), "Error setting kernel argument 2 for projection kernel");
+            }
+            error = ::clSetKernelArg(projection_kernel, 3, sizeof(lens.focal_length), &lens.focal_length);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(
+                    error, opencl_error_category(), "Error setting kernel argument 3 for projection kernel");
+            }
+            error = ::clSetKernelArg(projection_kernel, 4, sizeof(lens.dimensions), lens.dimensions.data());
+            if (error != CL_SUCCESS) {
+                throw std::system_error(
+                    error, opencl_error_category(), "Error setting kernel argument 4 for projection kernel");
+            }
+            error = ::clSetKernelArg(projection_kernel, 5, pixel_coordinates.size(), &pixel_coordinates);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(
+                    error, opencl_error_category(), "Error setting kernel argument 5 for projection kernel");
+            }
+
+            // Project!
+            size_t offset[1]      = {0};
+            size_t global_size[1] = {size_t(points)};
+            error                 = ::clEnqueueNDRangeKernel(
+                queue, projection_kernel, 1, offset, global_size, nullptr, 1, &indices_event, &ev);
+            if (ev) projected = cl::event(ev, ::clReleaseEvent);
+            if (error != CL_SUCCESS) {
+                throw std::system_error(error, opencl_error_category(), "Error queueing the projection kernel");
+            }
         }
         // projected.wait();                     // TIMER_LINE
         // t.measure("\tProject points (gpu)");  // TIMER_LINE
@@ -1330,27 +1633,46 @@ public:
             }
         }
         // Fill in the final offscreen point which connects only to itself
-        local_neighbourhood[points] = {{points, points, points, points, points, points}};
+        local_neighbourhood[points].fill(points);
 
         // t.measure("\tBuild Local Neighbourhood (cpu)");  // TIMER_LINE
 
-        cl::Event local_n_event;
-        cl::Buffer local_n_buffer(context, CL_MEM_READ_ONLY, local_neighbourhood.size() * sizeof(int) * 6);
-        queue.enqueueWriteBuffer(local_n_buffer,
-                                 false,
-                                 0,
-                                 local_neighbourhood.size() * sizeof(int) * 6,
-                                 local_neighbourhood.data(),
-                                 nullptr,
-                                 &local_n_event);
+        // Create buffers for local neighbourhood
+        cl::mem local_n_buffer(
+            ::clCreateBuffer(
+                context, CL_MEM_READ_ONLY, local_neighbourhood.size() * sizeof(std::array<int, 6>), nullptr, &error),
+            ::clReleaseMemObject);
+        if (error) {
+            throw std::system_error(error, opencl_error_category(), "Error allocating local neighbourhood buffer");
+        }
 
-        projected.wait();
+        cl::event local_n_event;
+        ev    = nullptr;
+        error = ::clEnqueueWriteBuffer(queue,
+                                       local_n_buffer,
+                                       false,
+                                       0,
+                                       local_neighbourhood.size() * sizeof(std::array<int, 6>),
+                                       local_neighbourhood.data(),
+                                       0,
+                                       nullptr,
+                                       &ev);
+        if (ev) local_n_event = cl::event(ev, ::clReleaseEvent);
+        if (error) {
+            throw std::system_error(error, opencl_error_category(), "Error uploading local neighbourhood to device");
+        }
+
         // local_n_event.wait();                             // TIMER_LINE
         // t.measure("\tUpload Local Neighbourhood (mem)");  // TIMER_LINE
+        ::clFlush(queue);
 
         return ProjectedMesh{LazyBufferReader<std::array<int, 2>>(queue, pixel_coordinates, projected, points),
-                             local_neighbourhood,
-                             {pixel_coordinates, projected, local_n_buffer, local_n_event}};
+                             std::move(local_neighbourhood),
+                             std::move(indices),
+                             pixel_coordinates,
+                             projected,
+                             local_n_buffer,
+                             local_n_event};
     }
 
     Classifier make_classifier(
@@ -1386,107 +1708,188 @@ private:
     }
 
     void setup_opencl() {
-        // Get all available platforms (drivers)
-        std::vector<cl::Platform> all_platforms;
-        cl::Platform::get(&all_platforms);
-        if (all_platforms.empty()) {
-            throw std::runtime_error("No OpenCL platforms found. Check OpenCL Installation");
-        }
 
-        // Chose our default platform
-        cl::Platform default_platform = all_platforms.front();
-        std::cerr << "Using OpenCL platform: " << default_platform.getInfo<CL_PLATFORM_NAME>() << " "
-                  << default_platform.getInfo<CL_PLATFORM_VERSION>() << std::endl;
+        // Get our platforms
+        cl_uint platform_count = 0;
+        ::clGetPlatformIDs(0, nullptr, &platform_count);
+        std::vector<cl_platform_id> platforms(platform_count);
+        ::clGetPlatformIDs(platforms.size(), platforms.data(), nullptr);
 
-        // Get the default device of the default platform
-        std::vector<cl::Device> all_devices;
-        default_platform.getDevices(CL_DEVICE_TYPE_GPU, &all_devices);
-        if (all_devices.empty()) {
-            throw std::runtime_error("No devices found. Check OpenCL installation!");
-        }
+        // Which device/platform we are going to use
+        cl_platform_id best_platform = nullptr;
+        cl_device_id best_device     = nullptr;
+        int best_compute_units       = 0;
 
-        // Choose our default device
-        cl::Device default_device = all_devices.front();
-        std::cerr << "Using OpenCL device: " << default_device.getInfo<CL_DEVICE_NAME>() << std::endl;
+        // Go through our platforms
+        // for (const auto& platform : platforms) {
+        const auto& platform = platforms.front();
 
-        // Make a context for this device
-        context = cl::Context({default_device});
+        cl_uint device_count = 0;
+        ::clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &device_count);
+        std::vector<cl_device_id> devices(device_count);
+        ::clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, device_count, devices.data(), nullptr);
 
-        // Create two queues, one for memory transfers and one for execution
-        queue = cl::CommandQueue(context, default_device);
-        queue = cl::CommandQueue(context, default_device);
+        // Go through our devices on the platform
+        for (const auto& device : devices) {
 
-        // Get our program source code
-        cl::Program::Sources sources;
+            // Length of data for strings
+            size_t len;
+            std::vector<char> data;
 
-        // First we define our templated types
-        sources.emplace_back(get_scalar_defines(Scalar(0.0)));
+            // Print device details
+            ::clGetDeviceInfo(device, CL_DEVICE_NAME, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(device, CL_DEVICE_NAME, len, data.data(), nullptr);
+            std::cout << "\tDevice: " << std::string(data.begin(), data.end()) << std::endl;
 
-        // Add our sources
-        sources.emplace_back(PROJECT_EQUIDISTANT_CL);
-        sources.emplace_back(PROJECT_EQUISOLID_CL);
-        sources.emplace_back(PROJECT_RECTILINEAR_CL);
-        sources.emplace_back(READ_IMAGE_TO_NETWORK_CL);
 
-        // Build the program
-        cl::Program program(context, sources);
-        try {
-            if (program.build() != CL_SUCCESS) {
-                throw std::runtime_error("Error building Mesh Programs\n"
-                                         + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
+            ::clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(device, CL_DEVICE_VERSION, len, data.data(), nullptr);
+            std::cout << "\tHardware version: " << std::string(data.begin(), data.end()) << std::endl;
+
+
+            ::clGetDeviceInfo(device, CL_DRIVER_VERSION, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(device, CL_DRIVER_VERSION, len, data.data(), nullptr);
+            std::cout << "\tSoftware version: " << std::string(data.begin(), data.end()) << std::endl;
+
+
+            ::clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, len, data.data(), nullptr);
+            std::cout << "\tOpenCL C version: " << std::string(data.begin(), data.end()) << std::endl;
+
+
+            cl_uint max_compute_units = 0;
+            ::clGetDeviceInfo(
+                device, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(max_compute_units), &max_compute_units, nullptr);
+            std::cout << "\tParallel compute units: " << max_compute_units << std::endl;
+
+            if (max_compute_units > best_compute_units) {
+                best_compute_units = max_compute_units;
+                best_platform      = platform;
+                best_device        = device;
             }
+
+            std::cout << std::endl;
         }
-        catch (const cl::BuildError) {
-            throw std::runtime_error("Error building Mesh Programs\n"
-                                     + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>().front().second);
+        // }
+
+        // Print information about our selected device
+        {
+            // Length of data for strings
+            size_t len;
+            std::vector<char> data;
+
+            // Print device details
+            ::clGetDeviceInfo(best_device, CL_DEVICE_NAME, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(best_device, CL_DEVICE_NAME, len, data.data(), nullptr);
+            std::cout << "\tDevice: " << std::string(data.begin(), data.end()) << std::endl;
+
+            ::clGetDeviceInfo(best_device, CL_DEVICE_VERSION, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(best_device, CL_DEVICE_VERSION, len, data.data(), nullptr);
+            std::cout << "\tHardware version: " << std::string(data.begin(), data.end()) << std::endl;
+
+            ::clGetDeviceInfo(best_device, CL_DRIVER_VERSION, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(best_device, CL_DRIVER_VERSION, len, data.data(), nullptr);
+            std::cout << "\tSoftware version: " << std::string(data.begin(), data.end()) << std::endl;
+
+            ::clGetDeviceInfo(best_device, CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &len);
+            data.resize(len);
+            ::clGetDeviceInfo(best_device, CL_DEVICE_OPENCL_C_VERSION, len, data.data(), nullptr);
+            std::cout << "\tOpenCL C version: " << std::string(data.begin(), data.end()) << std::endl;
         }
 
-        using ProjectionKernelFuctor = cl::KernelFunctor<const cl::Buffer&,          // The Scalar4* unit vectors
-                                                         const cl::Buffer&,          // The int* index map
-                                                         const cl::Buffer&,          // The Rco matrix
-                                                         const Scalar&,              // The focal length in pixels
-                                                         const std::array<int, 2>&,  // The image dimensions
-                                                         cl::Buffer&>;               // The output int2 buffer
+        // Make context
+        cl_int error;
+        context =
+            cl::context(::clCreateContext(nullptr, 1, &best_device, nullptr, nullptr, &error), ::clReleaseContext);
+        if (error) {
+            throw std::system_error(error, opencl_error_category(), "Error creating the OpenCL context");
+        }
 
-        // Get our projection functions
-        project_equidistant = ProjectionKernelFuctor(program, "project_equidistant");
-        project_equisolid   = ProjectionKernelFuctor(program, "project_equisolid");
-        project_rectilinear = ProjectionKernelFuctor(program, "project_rectilinear");
+        // Try to make an out of order queue if we can
+        queue = cl::command_queue(
+            ::clCreateCommandQueue(context, best_device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &error),
+            ::clReleaseCommandQueue);
+        if (error == CL_INVALID_VALUE) {
+            queue = cl::command_queue(::clCreateCommandQueue(context, best_device, 0, &error), ::clReleaseCommandQueue);
+        }
+        if (error) {
+            throw std::system_error(error, opencl_error_category(), "Error creating the OpenCL command queue");
+        }
 
-        // Build functors for reading images into the neural network layer
-        read_image_to_network = cl::KernelFunctor<const cl::Image2D&,  // The image buffer
-                                                  const FOURCC&,       // The binary format the image is in
-                                                  const cl::Buffer&,   // The pixel coordinates to lookup
-                                                  cl::Buffer&>  // The neural network layer information to output to
-            (program, "read_image_to_network");
+        // Get program sources (this does concatenated strings)
+        std::string source =
+            PROJECT_EQUIDISTANT_CL PROJECT_EQUISOLID_CL PROJECT_RECTILINEAR_CL READ_IMAGE_TO_NETWORK_CL;
+        source = get_scalar_defines(Scalar(0.0)) + source;
+
+        const char* cstr = source.c_str();
+        size_t csize     = source.size();
+
+        program = cl::program(::clCreateProgramWithSource(context, 1, &cstr, &csize, &error), ::clReleaseProgram);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error adding sources to projection program");
+        }
+
+        // Compile the program
+        error = ::clBuildProgram(
+            program, 0, nullptr, "-cl-single-precision-constant -cl-fast-relaxed-math", nullptr, nullptr);
+        if (error != CL_SUCCESS) {
+            // Get program build log
+            size_t used = 0;
+            ::clGetProgramBuildInfo(program, best_device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &used);
+            std::vector<char> log(used);
+            ::clGetProgramBuildInfo(program, best_device, CL_PROGRAM_BUILD_LOG, log.size(), log.data(), &used);
+
+            // Throw an error with the build log
+            throw std::system_error(
+                error,
+                opencl_error_category(),
+                "Error building projection program\n" + std::string(log.begin(), log.begin() + used));
+        }
+
+        project_rectilinear = cl::kernel(::clCreateKernel(program, "project_rectilinear", &error), ::clReleaseKernel);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error getting project_rectilinear kernel");
+        }
+        project_equidistant = cl::kernel(::clCreateKernel(program, "project_equidistant", &error), ::clReleaseKernel);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error getting project_equidistant kernel");
+        }
+        project_equisolid = cl::kernel(::clCreateKernel(program, "project_equisolid", &error), ::clReleaseKernel);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error getting project_equisolid kernel");
+        }
+        read_image_to_network =
+            cl::kernel(::clCreateKernel(program, "read_image_to_network", &error), ::clReleaseKernel);
+        if (error != CL_SUCCESS) {
+            throw std::system_error(error, opencl_error_category(), "Error getting read_image_to_network kernel");
+        }
     }
 
     // Our OpenCL context
-    cl::Context context;
+    cl::context context;
 
     // OpenCL queue for executing kernels
-    cl::CommandQueue queue;
-
-    using ProjectionFunction = std::function<cl::Event(const cl::EnqueueArgs&,     // The number of workers to spawn etc
-                                                       const cl::Buffer&,          // The Scalar4* unit vectors
-                                                       const cl::Buffer&,          // The int* index map
-                                                       const cl::Buffer&,          // The Rco matrix
-                                                       const Scalar&,              // The focal length in pixels
-                                                       const std::array<int, 2>&,  // The image dimensions
-                                                       cl::Buffer&)>;              // The output int2 buffer
-
+    cl::command_queue queue;
 
     // OpenCL kernel functions
-    ProjectionFunction project_equidistant;
-    ProjectionFunction project_equisolid;
-    ProjectionFunction project_rectilinear;
+    cl::program program;
+    cl::kernel project_equidistant;
+    cl::kernel project_equisolid;
+    cl::kernel project_rectilinear;
+    cl::kernel read_image_to_network;
 
-    std::function<cl::Event(const cl::EnqueueArgs&,  // The number of workers to spawn etc
-                            const cl::Image2D&,      // The image buffer
-                            const FOURCC&,           // The binary format the image is in
-                            const cl::Buffer&,       // The pixel coordinates to lookup
-                            cl::Buffer&)>            // The neural network layer information to output to
-        read_image_to_network;
+    // Mutex to protect image read
+    std::mutex read_image_to_network_mutex;
+
+    // Mutex to protect projection functions
+    std::mutex projection_mutex;
 
     /// A map from heights to visual mesh tables
     std::map<Scalar, Mesh> luts;
@@ -1499,7 +1902,7 @@ private:
     Scalar max_height;
     // The number gradations in height
     uint height_resolution;
-};
+};  // namespace mesh
 
 }  // namespace mesh
 

@@ -11,7 +11,7 @@
  */
 kernel void project_rectilinear(global const Scalar4* points,
                                 global const int* indices,
-                                global const Scalar4* Rco,
+                                const float16 Rco,
                                 const Scalar f,
                                 const int2 dimensions,
                                 global int2* out) {
@@ -25,7 +25,7 @@ kernel void project_rectilinear(global const Scalar4* points,
     Scalar4 ray = points[id];
 
     // Rotate our ray by our matrix to put it in the camera space
-    ray = (Scalar4)(dot(Rco[0], ray), dot(Rco[1], ray), dot(Rco[2], ray), 0);
+    ray = (Scalar4)(dot(Rco.s0123, ray), dot(Rco.s4567, ray), dot(Rco.s89ab, ray), 0);
 
     // Work out our pixel coordinates as a 0 centred image with x to the left and y up (screen space)
     const Scalar2 screen = (Scalar2)(f * ray.y / ray.x, f * ray.z / ray.x);
