@@ -26,19 +26,19 @@ import "Vector.proto";
 message VisualMesh {
 
     message Row {
-        float phi = 1;
+        float phi      = 1;
         int32 segments = 2;
     }
 
     message Classification {
-        int32 dimensions = 1;
-        repeated float values = 2;
+        int32          dimensions = 1;
+        repeated float values     = 2;
     }
 
-    uint32 camera_id = 1;
-    repeated Row mesh = 2;
-    repeated int32 indices = 3;
-    repeated ivec neighbours = 4;
-    repeated ivec2 coordinates = 5;
+    uint32   camera_id                      = 1;
+    repeated Row mesh                       = 2;
+    repeated int32 indices                  = 3;
+    repeated ivec neighbours                = 4;
+    repeated ivec2 coordinates              = 5;
     repeated Classification classifications = 6;
 }
