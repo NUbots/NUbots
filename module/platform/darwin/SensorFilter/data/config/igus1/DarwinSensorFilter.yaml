@@ -2,3 +2,8 @@ battery:
   charged_voltage: 16.8
   nominal_voltage: 14.8
   flat_voltage: 14.0
+
+motion_filter:
+  initial:
+    mean:
+      position: [0, 0, 0.45]          # A little above the ground
