@@ -7,13 +7,13 @@ import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_clien
 import { FakeNUClearNetServer } from '../server/nuclearnet/fake_nuclearnet_server'
 import { NodeSystemClock } from '../server/time/node_clock'
 import { message } from '../shared/proto/messages'
-import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
-import { VirtualRobot } from '../virtual_robots/virtual_robot'
-import { VirtualRobots } from '../virtual_robots/virtual_robots'
 import Sensors = message.input.Sensors
 import Overview = message.support.nubugger.Overview
 import VisionObject = message.vision.VisionObject
 import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
+import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
+import { VirtualRobot } from '../virtual_robots/virtual_robot'
+import { VirtualRobots } from '../virtual_robots/virtual_robots'
 
 describe('Networking Integration', () => {
   let nuclearnetServer: FakeNUClearNetServer

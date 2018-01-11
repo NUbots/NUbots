@@ -2,12 +2,12 @@ import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
+import { Clock } from '../../shared/time/clock'
+import { NodeSystemClock } from '../time/node_clock'
 import { DirectNUClearNetClient } from './direct_nuclearnet_client'
 import { FakeNUClearNetClient } from './fake_nuclearnet_client'
 import { WebSocketServer } from './web_socket_server'
 import { WebSocket } from './web_socket_server'
-import { NodeSystemClock } from '../time/node_clock'
-import { Clock } from '../../shared/time/clock'
 
 type Opts = {
   fakeNetworking: boolean

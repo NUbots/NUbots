@@ -1,7 +1,7 @@
+import { NUClearNetPacket } from 'nuclearnet.js'
 import { hashType } from '../../nuclearnet/fake_nuclearnet_server'
 import { encodeFrame } from '../nbs_frame_codecs'
 import { decodeFrame } from '../nbs_frame_codecs'
-import { NUClearNetPacket } from 'nuclearnet.js'
 import { packetToFrame } from '../nbs_frame_codecs'
 
 describe('NbsFrameCodecs', () => {

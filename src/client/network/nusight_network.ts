@@ -2,10 +2,10 @@ import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
+import { AppModel } from '../components/app/model'
+import { RobotModel } from '../components/robot/model'
 import { WebSocketProxyNUClearNetClient } from '../nuclearnet/web_socket_proxy_nuclearnet_client'
 import { MessageTypePath } from './message_type_names'
-import { RobotModel } from '../components/robot/model'
-import { AppModel } from '../components/app/model'
 
 const HEADER_SIZE = 9
 

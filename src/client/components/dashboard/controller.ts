@@ -1,5 +1,5 @@
-import { DashboardModel } from './model'
 import { action } from 'mobx'
+import { DashboardModel } from './model'
 
 export class DashboardController {
   public static of() {

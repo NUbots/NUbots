@@ -37,9 +37,19 @@
     ],
     "new-parens": true,
     "no-empty-interface": false,
+    "no-irregular-whitespace": true,
+    "no-trailing-whitespace": true,
     "object-curly-spacing": true,
     "object-literal-shorthand": true,
     "object-literal-sort-keys": false,
+    "ordered-imports": [
+      true,
+      {
+        "import-sources-order": "case-insensitive",
+        "module-source-path": "full",
+        "named-import-order": "case-insensitive"
+      }
+    ],
     "prefer-method-signature": true,
     "quotemark": {
       "options": [

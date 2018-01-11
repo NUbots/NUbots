@@ -2,12 +2,12 @@ import { action } from 'mobx'
 import * as THREE from 'three'
 import { Euler } from 'three'
 import { Quaternion } from 'three'
+import { Matrix4 } from 'three'
 import { Vector3 } from '../../math/vector3'
 import { HIP_TO_FOOT } from './darwin_robot/view_model'
 import { KeyCode } from './keycodes'
 import { LocalisationModel } from './model'
 import { ViewMode } from './model'
-import { Matrix4 } from 'three'
 
 interface KeyModifiers {
   shiftKey: boolean

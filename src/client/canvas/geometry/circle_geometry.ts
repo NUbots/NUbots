@@ -12,8 +12,8 @@ export class CircleGeometry {
   }
 
   public static of({
-    radius = 1, 
-    x = 0, 
+    radius = 1,
+    x = 0,
     y = 0,
   }: Partial<CircleGeometry> = {}): CircleGeometry {
     return new CircleGeometry({
