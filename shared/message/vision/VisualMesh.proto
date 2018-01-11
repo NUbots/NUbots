@@ -38,7 +38,7 @@ message VisualMesh {
     uint32   camera_id                      = 1;
     repeated Row mesh                       = 2;
     repeated int32 indices                  = 3;
-    repeated ivec neighbours                = 4;
+    repeated ivec6 neighbourhood            = 4;
     repeated ivec2 coordinates              = 5;
     repeated Classification classifications = 6;
 }

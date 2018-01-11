@@ -93,11 +93,18 @@ namespace vision {
 
             // Add our description
             for (const auto& r : m.rows) {
-                msg->rows.emplace_back(r.phi, r.end - r.begin);
+                msg->mesh.emplace_back(r.phi, r.end - r.begin);
             }
 
             // Add our indices
             msg->indices = std::move(results.global_indices);
+
+            // Add our neighbourhood
+            msg->neighbourhood.reserve(results.neighbourhood.size());
+            for (const auto& n : results.neighbourhood) {
+                msg->neighbourhood.emplace_back(
+                    Eigen::Map<Eigen::Matrix<int, 6, 1, Eigen::DontAlign>>(results.neighbourhood.data()));
+            }
 
             // Add our coordinates
             msg->coordinates = results.pixel_coordinates.as<Eigen::Matrix<int, 2, 1, Eigen::DontAlign>>();
