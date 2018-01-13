@@ -31,12 +31,13 @@ export class FieldViewModel {
   }
 
   @computed
-  private get groundGeometry() {
-    const geometry = new PlaneGeometry(
-      this.model.dimensions.fieldLength + this.model.dimensions.borderStripMinWidth * 2,
-      this.model.dimensions.fieldWidth + this.model.dimensions.borderStripMinWidth * 2,
+  private get groundGeometry(): Geometry {
+    const dimensions = this.model.dimensions
+    const { fieldLength, fieldWidth, borderStripMinWidth, goalDepth } = dimensions
+    return new PlaneGeometry(
+      fieldLength + goalDepth * 2 + borderStripMinWidth * 2,
+      fieldWidth + borderStripMinWidth * 2,
     )
-    return geometry
   }
 
   @computed
@@ -59,17 +60,47 @@ export class FieldViewModel {
     const fieldWidth = this.model.dimensions.fieldWidth
     const fieldLength = this.model.dimensions.fieldLength
     const lineWidth = this.model.dimensions.lineWidth
+    const goalAreaWidth = this.model.dimensions.goalAreaWidth
+    const goalAreaLength = this.model.dimensions.goalAreaLength
+    const goalDepth = this.model.dimensions.goalDepth
+    const goalWidth = this.model.dimensions.goalWidth
+    const penaltyMarkDistance = this.model.dimensions.penaltyMarkDistance
 
     const halfLength = fieldLength * 0.5
     const halfWidth = fieldWidth * 0.5
+    const halfGoalAreaWidth = goalAreaWidth * 0.5
+    const halfGoalWidth = goalWidth * 0.5
 
     const blueHalf = this.buildRectangle(-halfLength, -halfWidth, halfLength, fieldWidth, lineWidth)
+    const blueHalfGoalArea = this.buildRectangle(
+      -halfLength,
+      -halfGoalAreaWidth,
+      goalAreaLength,
+      goalAreaWidth,
+      lineWidth)
+    const blueHalfGoal = this.buildRectangle(-halfLength - goalDepth, -halfGoalWidth, goalDepth, goalWidth, lineWidth)
+    const blueHalfPenaltyMark = this.buildRectangle(-halfLength + penaltyMarkDistance, 0, 0, 0, lineWidth)
+
     const yellowHalf = this.buildRectangle(0, -halfWidth, halfLength, fieldWidth, lineWidth)
+    const yellowHalfGoalArea = this.buildRectangle(
+      halfLength - goalAreaLength,
+      -halfGoalAreaWidth,
+      goalAreaLength,
+      goalAreaWidth,
+      lineWidth)
+    const yellowHalfGoal = this.buildRectangle(halfLength, -halfGoalWidth, goalDepth, goalWidth, lineWidth)
+    const yellowHalfPenaltyMark = this.buildRectangle(halfLength - penaltyMarkDistance, 0, 0, 0, lineWidth)
 
     const identity = new Matrix4()
     geometry.merge(centerCircle, identity)
     geometry.merge(blueHalf, identity)
+    geometry.merge(blueHalfGoalArea, identity)
+    geometry.merge(blueHalfGoal, identity)
+    geometry.merge(blueHalfPenaltyMark, identity)
     geometry.merge(yellowHalf, identity)
+    geometry.merge(yellowHalfGoalArea, identity)
+    geometry.merge(yellowHalfGoal, identity)
+    geometry.merge(yellowHalfPenaltyMark, identity)
 
     return geometry
   }
@@ -91,6 +122,7 @@ export class FieldViewModel {
   private buildRectangle(x: number, y: number, w: number, h: number, lw: number) {
     const x1 = x - lw * 0.5
     const x2 = x + w + lw * 0.5
+
     const topLine = this.buildHorizontalLine(x1, x2, y, lw)
     const bottomLine = this.buildHorizontalLine(x1, x2, y + h, lw)
 
