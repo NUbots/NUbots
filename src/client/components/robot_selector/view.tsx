@@ -1,8 +1,10 @@
 import { observer } from 'mobx-react'
 import * as React from 'react'
+
 import { dropdownContainer } from '../dropdown_container/view'
 import { RobotModel } from '../robot/model'
 import { Switch } from '../switch/view'
+
 import PlugIcon from './plug.svg'
 import RobotIcon from './robot.svg'
 import * as style from './style.css'

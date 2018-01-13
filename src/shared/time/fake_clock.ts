@@ -134,7 +134,7 @@ export class FakeClock implements Clock {
 
   private removeTask(taskId: number) {
     for (let i = 0; i < this.tasks.length; i++) {
-      if (this.tasks[i].id == taskId) {
+      if (this.tasks[i].id === taskId) {
         this.tasks.splice(i, 1)
         break
       }

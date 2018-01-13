@@ -1,6 +1,8 @@
 import * as React from 'react'
 import { NavLink } from 'react-router-dom'
+
 import { NavigationConfiguration } from '../../navigation'
+
 import * as style from './style.css'
 
 interface NavigationItemViewProps {
@@ -10,7 +12,7 @@ interface NavigationItemViewProps {
   children?: any
 }
 
-const NavigationItemView = ({ exact = false, url, Icon, children = undefined }: NavigationItemViewProps) => (
+const NavigationItemView = ({ exact = false, url, Icon, children }: NavigationItemViewProps) => (
   <li className={style.header__item}>
     <NavLink exact={exact} className={style.header__link} to={url} activeClassName={style['header__link--active']}>
       <Icon className={style.header__icon}/>

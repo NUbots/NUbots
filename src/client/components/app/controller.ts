@@ -1,4 +1,5 @@
 import { action } from 'mobx'
+
 import { RobotModel } from '../robot/model'
 
 export class AppController {

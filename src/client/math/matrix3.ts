@@ -1,5 +1,6 @@
 import { computed } from 'mobx'
 import { observable } from 'mobx'
+
 import { Vector3 } from './vector3'
 
 export class Matrix3 {
@@ -18,9 +19,9 @@ export class Matrix3 {
   }
 
   public static from(mat?: {
-    x?: { x?: number, y?: number, z? :number },
-    y?: { x?: number, y?: number, z? :number },
-    z?: { x?: number, y?: number, z? :number }
+    x?: { x?: number, y?: number, z?: number },
+    y?: { x?: number, y?: number, z?: number },
+    z?: { x?: number, y?: number, z?: number }
   } | null): Matrix3 {
     if (!mat) {
       return Matrix3.of()

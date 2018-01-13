@@ -1,4 +1,5 @@
 import * as minimist from 'minimist'
+
 import { OverviewSimulator } from './simulators/overview_simulator'
 import { SensorDataSimulator } from './simulators/sensor_data_simulator'
 import { SimulatorOpts } from './virtual_robot'

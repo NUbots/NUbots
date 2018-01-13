@@ -1,5 +1,6 @@
 import { computed } from 'mobx'
 import { observable } from 'mobx'
+
 import { Transform } from './transform'
 
 export class Vector2 {

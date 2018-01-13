@@ -1,4 +1,5 @@
 import { action } from 'mobx'
+
 import { google } from '../../../shared/proto/messages'
 import { message } from '../../../shared/proto/messages'
 import { Matrix2 } from '../../math/matrix2'
@@ -8,6 +9,7 @@ import { Vector3 } from '../../math/vector3'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
+
 import { DashboardRobotModel } from './dashboard_robot/model'
 import Timestamp = google.protobuf.Timestamp$Properties
 import Overview = message.support.nubugger.Overview

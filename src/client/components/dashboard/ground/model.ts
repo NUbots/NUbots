@@ -1,4 +1,5 @@
 import { observable } from 'mobx'
+
 import { FieldDimensions } from '../../../../shared/field/dimensions'
 
 export class GroundModel {

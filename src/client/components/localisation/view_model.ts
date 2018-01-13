@@ -5,6 +5,7 @@ import { HemisphereLight } from 'three'
 import { PointLight } from 'three'
 import { PerspectiveCamera } from 'three'
 import { Object3D } from 'three'
+
 import { RobotViewModel } from './darwin_robot/view_model'
 import { FieldViewModel } from './field/view_model'
 import { LocalisationModel } from './model'

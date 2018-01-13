@@ -1,5 +1,7 @@
 import { observable } from 'mobx'
+
 import { Transform } from '../../math/transform'
+
 import { Object2d } from './object2d'
 
 export type GroupOpts = {

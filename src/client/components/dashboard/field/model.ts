@@ -1,5 +1,6 @@
 import { computed } from 'mobx'
 import { observable } from 'mobx'
+
 import { memoize } from '../../../base/memoize'
 import { Transform } from '../../../math/transform'
 import { DashboardRobotModel } from '../dashboard_robot/model'

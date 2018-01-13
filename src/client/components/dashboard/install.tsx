@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { ComponentType } from 'react'
+
 import { NavigationConfiguration } from '../../navigation'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { AppModel } from '../app/model'
+
 import { DashboardController } from './controller'
 import { FieldController } from './field/controller'
 import { Field } from './field/view'

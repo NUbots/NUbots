@@ -1,4 +1,5 @@
 import { observable } from 'mobx'
+
 import { RobotModel } from '../robot/model'
 
 export class AppModel {

@@ -2,6 +2,7 @@ import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
 import { Mesh } from 'three'
 import { MultiMaterial } from 'three'
+
 import { geometryAndMaterial } from '../../utils'
 import { HeadViewModel } from '../head/view_model'
 import { LeftArmViewModel } from '../left_arm/view_model'
@@ -9,6 +10,7 @@ import { LeftLegViewModel } from '../left_leg/view_model'
 import { LocalisationRobotModel } from '../model'
 import { RightArmViewModel } from '../right_arm/view_model'
 import { RightLegViewModel } from '../right_leg/view_model'
+
 import * as BodyConfig from './config/body.json'
 
 export class BodyViewModel {

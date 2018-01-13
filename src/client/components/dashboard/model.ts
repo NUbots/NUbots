@@ -1,6 +1,8 @@
 import { computed } from 'mobx'
 import { observable } from 'mobx'
+
 import { RobotModel } from '../robot/model'
+
 import { DashboardRobotModel } from './dashboard_robot/model'
 import { FieldModel } from './field/model'
 

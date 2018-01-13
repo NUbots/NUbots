@@ -1,5 +1,6 @@
 import { computed } from 'mobx'
 import { observable } from 'mobx'
+
 import { message } from '../../../../shared/proto/messages'
 import { memoize } from '../../../base/memoize'
 import { Matrix2 } from '../../../math/matrix2'

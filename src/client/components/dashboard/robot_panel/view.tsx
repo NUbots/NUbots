@@ -1,6 +1,8 @@
 import * as classNames from 'classnames'
 import * as React from 'react'
+
 import { Vector3 } from '../../../math/vector3'
+
 import BallIcon from './icon/ball.svg'
 import BatteryIcon from './icon/battery.svg'
 import CameraIcon from './icon/camera.svg'

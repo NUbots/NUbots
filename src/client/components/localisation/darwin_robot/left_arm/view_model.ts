@@ -3,8 +3,10 @@ import { computed } from 'mobx'
 import { Mesh } from 'three'
 import { MultiMaterial } from 'three'
 import { Object3D } from 'three'
+
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
+
 import * as LeftLowerArmConfig from './config/left_lower_arm.json'
 import * as LeftShoulderConfig from './config/left_shoulder.json'
 import * as LeftUpperArmConfig from './config/left_upper_arm.json'

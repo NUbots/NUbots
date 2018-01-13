@@ -1,4 +1,5 @@
 import { action } from 'mobx'
+
 import { FieldModel } from './model'
 
 export class FieldController {

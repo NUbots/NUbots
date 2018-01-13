@@ -1,5 +1,7 @@
 import { observable } from 'mobx'
+
 import { Transform } from '../../math/transform'
+
 import { Geometry } from './geometry'
 
 export class TextGeometry implements Geometry {

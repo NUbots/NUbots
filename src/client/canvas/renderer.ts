@@ -1,5 +1,6 @@
 import { Transform } from '../math/transform'
 import { Vector2 } from '../math/vector2'
+
 import { Appearance } from './appearance/appearance'
 import { BasicAppearance } from './appearance/basic_appearance'
 import { LineAppearance } from './appearance/line_appearance'

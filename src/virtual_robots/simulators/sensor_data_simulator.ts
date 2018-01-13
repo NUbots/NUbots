@@ -1,6 +1,7 @@
 import { Matrix4 } from 'three'
 import { Vector3 } from 'three'
 import { Quaternion } from 'three'
+
 import { message } from '../../shared/proto/messages'
 import { mat44$Properties } from '../../shared/proto/messages'
 import { Simulator } from '../simulator'

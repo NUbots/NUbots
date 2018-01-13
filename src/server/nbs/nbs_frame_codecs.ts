@@ -52,7 +52,7 @@ export function decodeFrame(buffer: Buffer): NbsFrame {
     .word32lu('size')
     .word64le('timestampInMicroseconds')
     .buffer('hash', HASH_SIZE)
-    .tap(function (vars) {
+    .tap(function(vars) {
       this.buffer('payload', vars.size)
     })
     .vars

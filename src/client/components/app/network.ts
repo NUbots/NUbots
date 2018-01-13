@@ -1,7 +1,9 @@
 import { action } from 'mobx'
 import { NUClearNetPeer } from 'nuclearnet.js'
+
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
+
 import { AppModel } from './model'
 
 export class AppNetwork {
@@ -58,7 +60,7 @@ export class AppNetwork {
   }
 
   private findRobot(peer: NUClearNetPeer): RobotModel | undefined {
-    let candidates = this.model.robots.filter(otherRobot => {
+    const candidates = this.model.robots.filter(otherRobot => {
       return otherRobot.name === peer.name && otherRobot.address === peer.address
     })
     /*

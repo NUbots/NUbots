@@ -2,6 +2,7 @@ import { computed } from 'mobx'
 import { createTransformer } from 'mobx'
 import { Object3D } from 'three'
 import { Quaternion } from 'three'
+
 import { BodyViewModel } from './body/view_model'
 import { LocalisationRobotModel } from './model'
 

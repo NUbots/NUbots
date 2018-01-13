@@ -1,8 +1,10 @@
 import { ComponentType } from 'react'
 import * as React from 'react'
+
 import { NavigationConfiguration } from '../../navigation'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { AppModel } from '../app/model'
+
 import { LocalisationController } from './controller'
 import Icon from './icon.svg'
 import { LocalisationModel } from './model'

@@ -3,8 +3,10 @@ import { computed } from 'mobx'
 import { Mesh } from 'three'
 import { MultiMaterial } from 'three'
 import { Object3D } from 'three'
+
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
+
 import * as RightAnkleConfig from './config/right_ankle.json'
 import * as RightFootConfig from './config/right_foot.json'
 import * as RightLowerLegConfig from './config/right_lower_leg.json'

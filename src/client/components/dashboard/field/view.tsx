@@ -4,7 +4,9 @@ import { IReactionDisposer } from 'mobx'
 import { observer } from 'mobx-react'
 import * as React from 'react'
 import { Component } from 'react'
+
 import { CanvasRenderer } from '../../../canvas/renderer'
+
 import { FieldController } from './controller'
 import { FieldModel } from './model'
 import * as style from './style.css'

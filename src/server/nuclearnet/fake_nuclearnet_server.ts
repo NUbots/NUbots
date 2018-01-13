@@ -1,7 +1,9 @@
 import * as EventEmitter from 'events'
 import { NUClearNetSend } from 'nuclearnet.js'
 import * as XXH from 'xxhashjs'
+
 import { createSingletonFactory } from '../../shared/base/create_singleton_factory'
+
 import { FakeNUClearNetClient } from './fake_nuclearnet_client'
 
 /**

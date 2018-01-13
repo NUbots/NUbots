@@ -3,9 +3,11 @@ import * as fs from 'fs'
 import * as stream from 'stream'
 import { PassThrough } from 'stream'
 import { createGunzip } from 'zlib'
+
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { Clock } from '../../shared/time/clock'
 import { NodeSystemClock } from '../time/node_clock'
+
 import { NbsFrameChunker } from './nbs_frame_chunker'
 import { NbsFrame } from './nbs_frame_codecs'
 import { NbsFrameDecoder } from './nbs_frame_streams'
@@ -39,7 +41,7 @@ export class NbsNUClearPlayback extends stream.Writable {
   /** Convenience method for directly streaming a file to the network. */
   public static fromFile(filename: string, nuclearnetClient: NUClearNetClient) {
     const playback = NbsNUClearPlayback.of(nuclearnetClient)
-    let rawStream = fs.createReadStream(filename)
+    const rawStream = fs.createReadStream(filename)
     const isGzipped = filename.endsWith('.nbz') || filename.endsWith('.nbs.gz')
     const decompress = isGzipped ? createGunzip() : new PassThrough()
     rawStream.pipe(decompress).pipe(new NbsFrameChunker()).pipe(new NbsFrameDecoder()).pipe(playback)

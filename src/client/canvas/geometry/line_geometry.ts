@@ -1,4 +1,5 @@
 import { observable } from 'mobx'
+
 import { Vector2 } from '../../math/vector2'
 
 export class LineGeometry {

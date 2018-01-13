@@ -1,4 +1,5 @@
 import * as stream from 'stream'
+
 import { NbsFrame } from './nbs_frame_codecs'
 import { encodeFrame } from './nbs_frame_codecs'
 import { decodeFrame } from './nbs_frame_codecs'

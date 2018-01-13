@@ -7,6 +7,7 @@ import { RingGeometry } from 'three'
 import { Object3D } from 'three'
 import { Mesh } from 'three'
 import { Geometry } from 'three'
+
 import { FieldModel } from './model'
 
 export class FieldViewModel {

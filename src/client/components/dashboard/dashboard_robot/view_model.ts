@@ -1,5 +1,6 @@
 import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+
 import { BasicAppearance } from '../../../canvas/appearance/basic_appearance'
 import { LineAppearance } from '../../../canvas/appearance/line_appearance'
 import { ArcGeometry } from '../../../canvas/geometry/arc_geometry'
@@ -12,6 +13,7 @@ import { Group } from '../../../canvas/object/group'
 import { Shape } from '../../../canvas/object/shape'
 import { Transform } from '../../../math/transform'
 import { Vector2 } from '../../../math/vector2'
+
 import { DashboardRobotModel } from './model'
 
 export class DashboardRobotViewModel {
