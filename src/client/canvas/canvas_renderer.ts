@@ -13,7 +13,7 @@ import { PolygonGeometry } from './geometry/polygon_geometry'
 import { TextGeometry } from './geometry/text_geometry'
 import { Group } from './object/group'
 import { Object2d } from './object/object2d'
-import { Shape } from './object/shape'
+import { Geometry , Shape } from './object/shape'
 
 export class CanvasRenderer {
   constructor(private context: CanvasRenderingContext2D) {
@@ -53,7 +53,7 @@ export class CanvasRenderer {
     }
   }
 
-  private renderShape(shape: Shape, worldTransform: Transform): void {
+  private renderShape(shape: Shape<Geometry>, worldTransform: Transform): void {
     const { appearance, geometry } = shape
     if (geometry instanceof ArcGeometry) {
       this.renderArc({ appearance, geometry })

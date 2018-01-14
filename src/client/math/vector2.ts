@@ -23,6 +23,10 @@ export class Vector2 {
     return new Vector2(vec.x || 0, vec.y || 0)
   }
 
+  static fromPolar(radius: number, angle: number): Vector2 {
+    return Vector2.of(radius * Math.cos(angle), radius * Math.sin(angle))
+  }
+
   @computed
   get length(): number {
     return Math.sqrt(this.x * this.x + this.y * this.y)

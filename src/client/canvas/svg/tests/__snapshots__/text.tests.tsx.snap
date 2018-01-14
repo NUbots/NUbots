@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextSVGRenderer renders 1`] = `
+<_class
+  model={
+    Shape {
+      "appearance": BasicAppearance {
+        "fillStyle": "#000",
+        "lineWidth": 1,
+        "strokeStyle": "#000",
+      },
+      "geometry": TextGeometry {
+        "alignToView": true,
+        "fontFamily": "sans-serif",
+        "maxWidth": 0.5,
+        "text": "",
+        "textAlign": "start",
+        "textBaseline": "alphabetic",
+        "x": 0,
+        "y": 0,
+      },
+      "group": Group {
+        "children": Array [],
+        "transform": Transform {
+          "anticlockwise": true,
+          "rotate": 0,
+          "scale": Object {
+            "x": 1,
+            "y": 1,
+          },
+          "translate": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    }
+  }
+  world={
+    Transform {
+      "anticlockwise": true,
+      "rotate": 0.7853981633974483,
+      "scale": Object {
+        "x": -1,
+        "y": -1,
+      },
+      "translate": Object {
+        "x": 0,
+        "y": 0,
+      },
+    }
+  }
+/>
+`;

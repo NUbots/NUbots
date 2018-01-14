@@ -161,7 +161,7 @@ export class DashboardRobotViewModel {
         Shape.of(
           TextGeometry.of({
             text: this.model.playerId.toString(),
-            textAlign: 'center',
+            textAlign: 'middle',
             textBaseline: 'middle',
             maxWidth: radius,
             x: 0,

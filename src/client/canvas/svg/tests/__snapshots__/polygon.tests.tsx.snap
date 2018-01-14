@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PolygonSVGRenderer renders 1`] = `
+<_class
+  model={
+    Shape {
+      "appearance": BasicAppearance {
+        "fillStyle": "#000",
+        "lineWidth": 1,
+        "strokeStyle": "#000",
+      },
+      "geometry": PolygonGeometry {
+        "points": Array [
+          Vector2 {
+            "x": 0,
+            "y": 0,
+          },
+          Vector2 {
+            "x": 0,
+            "y": 1,
+          },
+          Vector2 {
+            "x": 1,
+            "y": 1,
+          },
+          Vector2 {
+            "x": 1,
+            "y": 0,
+          },
+        ],
+      },
+      "group": Group {
+        "children": Array [],
+        "transform": Transform {
+          "anticlockwise": true,
+          "rotate": 0,
+          "scale": Object {
+            "x": 1,
+            "y": 1,
+          },
+          "translate": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    }
+  }
+  world={
+    Transform {
+      "anticlockwise": true,
+      "rotate": 0,
+      "scale": Object {
+        "x": 1,
+        "y": 1,
+      },
+      "translate": Object {
+        "x": 0,
+        "y": 0,
+      },
+    }
+  }
+/>
+`;

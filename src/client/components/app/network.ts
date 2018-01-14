@@ -8,6 +8,7 @@ import { AppModel } from './model'
 
 export class AppNetwork {
   private nextRobotId: number
+
   constructor(private nusightNetwork: NUsightNetwork,
               private model: AppModel) {
     this.nextRobotId = 0

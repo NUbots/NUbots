@@ -58,6 +58,7 @@ export class NUsightNetwork {
 
 export interface MessageType<T> {
   new(...args: any[]): T
+
   decode(...args: any[]): T
 }
 

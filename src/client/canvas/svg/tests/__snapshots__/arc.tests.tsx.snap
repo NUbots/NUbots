@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ArcSVGRenderer renders 1`] = `
+<_class
+  model={
+    Shape {
+      "appearance": BasicAppearance {
+        "fillStyle": "#000",
+        "lineWidth": 1,
+        "strokeStyle": "#000",
+      },
+      "geometry": ArcGeometry {
+        "anticlockwise": false,
+        "endAngle": 6.283185307179586,
+        "origin": Vector2 {
+          "x": 0,
+          "y": 0,
+        },
+        "radius": 1,
+        "startAngle": 0,
+      },
+      "group": Group {
+        "children": Array [],
+        "transform": Transform {
+          "anticlockwise": true,
+          "rotate": 0,
+          "scale": Object {
+            "x": 1,
+            "y": 1,
+          },
+          "translate": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    }
+  }
+  world={
+    Transform {
+      "anticlockwise": true,
+      "rotate": 0,
+      "scale": Object {
+        "x": 1,
+        "y": 1,
+      },
+      "translate": Object {
+        "x": 0,
+        "y": 0,
+      },
+    }
+  }
+/>
+`;
