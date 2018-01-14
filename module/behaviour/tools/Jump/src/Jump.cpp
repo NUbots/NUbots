@@ -50,14 +50,14 @@ namespace behaviour {
 
         Jump::Jump(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-                2,
-                "Jump",
-                {std::pair<float, std::set<LimbID>>(
-                    100, {LimbID::HEAD, LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                [this](const std::set<LimbID>&) {},
-                [this](const std::set<LimbID>&) {},
-                [this](const std::set<ServoID>&) {}}));
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+                RegisterAction{2,
+                               "Jump",
+                               {std::pair<float, std::set<LimbID>>(
+                                   20, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                               [this](const std::set<LimbID>&) {},
+                               [this](const std::set<LimbID>&) {},
+                               [this](const std::set<ServoID>&) {}}));
 
             on<Trigger<ButtonMiddleDown>>().then([this] { emit(std::make_unique<JumpCommand>(2, 0)); });
 
