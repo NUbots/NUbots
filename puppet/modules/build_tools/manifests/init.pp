@@ -107,10 +107,4 @@ class build_tools {
                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
   }
-
-  exec {'fix_python':
-    command => '/usr/bin/update-alternatives --remove-all python \
-             ; /usr/bin/update-alternatives --install /usr/bin/python python /usr/bin/python3 10',
-    require => [ Package['python3-dev'], ]
-  }
 }
