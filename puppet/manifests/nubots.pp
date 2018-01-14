@@ -332,6 +332,23 @@ node nubotsvmbuild {
                        'require'     => [ Installer['isaac'], Installer['boost'], Installer['hdf5'], Installer['leveldb'], Installer['lmdb'], Installer['glog'], Installer['gflags'], Installer['clfft'], Installer['libdnn'], Installer['opencv'], ],
                        'creates'     => 'lib/libcaffe.so',
                        'method'      => 'cmake', },
+    'tensorflow'   => {'url'         => 'https://github.com/tensorflow/tensorflow/archive/master.tar.gz',
+                       'prebuild'    => "patch -Np1 -i PREFIX/src/tensorflow.patch &&
+                                         cp PREFIX/src/tensorflow_eigen3.patch PREFIX/src/tensorflow/third_party/eigen3/remove_unsupported_devices.patch &&
+                                         /usr/bin/python3 tensorflow/tools/git/gen_git_source.py --configure .  &&
+                                         echo \"export PYTHON_BIN_PATH=/usr/bin/python3\" > tools/python_bin_path.sh &&
+                                         export BAZELRC=PREFIX/src/tensorflow.bazelrc",
+                       'postbuild'   => "./bazel-bin/tensorflow/tools/pip_package/build_pip_package PREFIX/tmp/tensorflow_pkg &&
+                                         /usr/bin/pip3 install --target PREFIX/lib/python3.5/site-packages PREFIX/tmp/tensorflow_pkg/tensorflow-1.4.0-cp35-cp35m-linux_x86_64.whl &&
+                                         cp PREFIX/lib/python3.5/site-packages/tensorflow/libtensorflow_framework.so PREFIX/lib/ &&
+                                         cp -r PREFIX/lib/python3.5/site-packages/tensorflow/include/tensorflow PREFIX/include/ &&
+                                         export BAZELRC=PREFIX/src/tensorflow.bazelrc &&
+                                         bazel --blazerc \$BAZELRC build --jobs \$(nproc) -c opt --config=sycl //tensorflow:libtensorflow_cc.so",
+                       'args'        => { 'native'   => [ '-c opt', '--config=sycl', '//tensorflow/tools/pip_package:build_pip_package', '--verbose_failures', ],
+                                          'nuc7i7bnh' => [ '-c opt', '--config=sycl', '//tensorflow/tools/pip_package:build_pip_package', '--verbose_failures', ], },
+                       'require'     => [ Installer['protobuf'], ],
+                       'creates'     => 'lib/libtensorflow_framework.so',
+                       'method'      => 'bazel', },
   }
 
   file { '/usr/share/cmake-3.5/Modules/FindBoost.cmake':
@@ -621,6 +638,265 @@ done
       provider  => 'shell',
       before    => Installer['viennacl'],
       require   => Class['installer::prerequisites'],
+    }
+
+    file { "${prefix}/${arch}/src/tensorflow.patch":
+      content   => "
+diff --git a/tensorflow/core/kernels/cwise_op_add_1.cc b/tensorflow/core/kernels/cwise_op_add_1.cc
+index 608a6dce3d..059ad8c193 100644
+--- a/tensorflow/core/kernels/cwise_op_add_1.cc
++++ b/tensorflow/core/kernels/cwise_op_add_1.cc
+@@ -48,7 +48,7 @@ REGISTER_KERNEL_BUILDER(Name(\"AddV2\")
+ #if TENSORFLOW_USE_SYCL
+ #define REGISTER_KERNEL(type)                          \\
+   REGISTER(BinaryOp, SYCL, \"Add\", functor::add, type); \\
+-  REEGISTER(BinaryOp, SYCL, \"AddV2\", functor::add, type);
++  REGISTER(BinaryOp, SYCL, \"AddV2\", functor::add, type);
+
+ TF_CALL_SYCL_NUMBER_TYPES(REGISTER_KERNEL);
+
+diff --git a/tensorflow/core/kernels/random_op.cc b/tensorflow/core/kernels/random_op.cc
+index 55a8b9c9b6..e96c445ab7 100644
+--- a/tensorflow/core/kernels/random_op.cc
++++ b/tensorflow/core/kernels/random_op.cc
+@@ -577,7 +577,7 @@ struct FillPhiloxRandomKernel<Distribution, false> {
+     const size_t kGroupSize = Distribution::kResultElementCount;
+
+     const size_t item_id = item.get_global(0);
+-    const size_t total_item_count = item.get_global_range();
++    const size_t total_item_count = item.get_global_range().size();
+     size_t offset = item_id * kGroupSize;
+     gen_.Skip(item_id);
+
+@@ -633,7 +633,7 @@ struct FillPhiloxRandomKernel<Distribution, true> {
+                                                 PhiloxRandom::kResultElementCount;
+
+     const size_t item_id = item.get_global(0);
+-    const size_t total_item_count = item.get_global_range();
++    const size_t total_item_count = item.get_global_range().size();
+     size_t group_index = item_id;
+     size_t offset = group_index * kGroupSize;
+
+diff --git a/tensorflow/core/kernels/transpose_functor_cpu.cc b/tensorflow/core/kernels/transpose_functor_cpu.cc
+index 41b73fdaf4..245f5f6b8c 100644
+--- a/tensorflow/core/kernels/transpose_functor_cpu.cc
++++ b/tensorflow/core/kernels/transpose_functor_cpu.cc
+@@ -169,7 +169,7 @@ template <typename T, bool conjugate>
+ struct Transpose<SYCLDevice, T, conjugate> {
+   static void run(const SYCLDevice& d, const Tensor& in,
+                   const gtl::ArraySlice<int32> perm, Tensor* out) {
+-    internal::TransposeSycl(d, in, perm, conjugate, out);
++    internal::TransposeSYCL<T>(d, in, perm, conjugate, out);
+   }
+ };
+
+diff --git a/tensorflow/workspace.bzl b/tensorflow/workspace.bzl
+index 6a496f53f0..fe27f0aa02 100644
+--- a/tensorflow/workspace.bzl
++++ b/tensorflow/workspace.bzl
+@@ -95,12 +95,13 @@ def tf_workspace(path_prefix=\"\", tf_repo_name=\"\"):
+   tf_http_archive(
+       name = \"eigen_archive\",
+       urls = [
+-          \"https://mirror.bazel.build/bitbucket.org/eigen/eigen/get/c2947c341c68.tar.gz\",
+-          \"https://bitbucket.org/eigen/eigen/get/c2947c341c68.tar.gz\",
++          \"https://mirror.bazel.build/bitbucket.org/eigen/eigen/get/default.tar.bz2\",
++          \"https://bitbucket.org/eigen/eigen/get/default.tar.bz2\",
+       ],
+-      sha256 = \"f21f8ab8a8dbcb91cd0deeade19a043f47708d0da7a4000164cdf203b4a71e34\",
+-      strip_prefix = \"eigen-eigen-c2947c341c68\",
++      sha256 = \"17c0e255752c8382a58a75fcc46632a790eb51a99cfffa7b23ac5729b9362089\",
++      strip_prefix = \"eigen-eigen-034b6c3e1017\",
+       build_file = str(Label(\"//third_party:eigen.BUILD\")),
++      patch_file = str(Label(\"//third_party/eigen3:remove_unsupported_devices.patch\")),
+   )
+
+   tf_http_archive(
+@@ -295,11 +296,11 @@ def tf_workspace(path_prefix=\"\", tf_repo_name=\"\"):
+   tf_http_archive(
+       name = \"protobuf_archive\",
+       urls = [
+-          \"https://mirror.bazel.build/github.com/google/protobuf/archive/b04e5cba356212e4e8c66c61bbe0c3a20537c5b9.tar.gz\",
+-          \"https://github.com/google/protobuf/archive/b04e5cba356212e4e8c66c61bbe0c3a20537c5b9.tar.gz\",
++          \"https://mirror.bazel.build/github.com/google/protobuf/archive/v3.5.0.tar.gz\",
++          \"https://github.com/google/protobuf/archive/v3.5.0.tar.gz\",
+       ],
+-      sha256 = \"e178a25c52efcb6b05988bdbeace4c0d3f2d2fe5b46696d1d9898875c3803d6a\",
+-      strip_prefix = \"protobuf-b04e5cba356212e4e8c66c61bbe0c3a20537c5b9\",
++      sha256 = \"0cc6607e2daa675101e9b7398a436f09167dffb8ca0489b0307ff7260498c13c\",
++      strip_prefix = \"protobuf-3.5.0\",
+       # TODO: remove patching when tensorflow stops linking same protos into
+       #       multiple shared libraries loaded in runtime by python.
+       #       This patch fixes a runtime crash when tensorflow is compiled
+@@ -313,21 +314,21 @@ def tf_workspace(path_prefix=\"\", tf_repo_name=\"\"):
+   tf_http_archive(
+       name = \"com_google_protobuf\",
+       urls = [
+-          \"https://mirror.bazel.build/github.com/google/protobuf/archive/b04e5cba356212e4e8c66c61bbe0c3a20537c5b9.tar.gz\",
+-          \"https://github.com/google/protobuf/archive/b04e5cba356212e4e8c66c61bbe0c3a20537c5b9.tar.gz\",
++          \"https://mirror.bazel.build/github.com/google/protobuf/archive/v3.5.0.tar.gz\",
++          \"https://github.com/google/protobuf/archive/v3.5.0.tar.gz\",
+       ],
+-      sha256 = \"e178a25c52efcb6b05988bdbeace4c0d3f2d2fe5b46696d1d9898875c3803d6a\",
+-      strip_prefix = \"protobuf-b04e5cba356212e4e8c66c61bbe0c3a20537c5b9\",
++      sha256 = \"0cc6607e2daa675101e9b7398a436f09167dffb8ca0489b0307ff7260498c13c\",
++      strip_prefix = \"protobuf-3.5.0\",
+   )
+
+   tf_http_archive(
+       name = \"com_google_protobuf_cc\",
+       urls = [
+-          \"https://mirror.bazel.build/github.com/google/protobuf/archive/b04e5cba356212e4e8c66c61bbe0c3a20537c5b9.tar.gz\",
+-          \"https://github.com/google/protobuf/archive/b04e5cba356212e4e8c66c61bbe0c3a20537c5b9.tar.gz\",
++          \"https://mirror.bazel.build/github.com/google/protobuf/archive/v3.5.0.tar.gz\",
++          \"https://github.com/google/protobuf/archive/v3.5.0.tar.gz\",
+       ],
+-      sha256 = \"e178a25c52efcb6b05988bdbeace4c0d3f2d2fe5b46696d1d9898875c3803d6a\",
+-      strip_prefix = \"protobuf-b04e5cba356212e4e8c66c61bbe0c3a20537c5b9\",
++      sha256 = \"0cc6607e2daa675101e9b7398a436f09167dffb8ca0489b0307ff7260498c13c\",
++      strip_prefix = \"protobuf-3.5.0\",
+   )
+
+   tf_http_archive(
+diff --git a/third_party/protobuf/add_noinlines.patch b/third_party/protobuf/add_noinlines.patch
+index af74798f06..960e480ad5 100644
+--- a/third_party/protobuf/add_noinlines.patch
++++ b/third_party/protobuf/add_noinlines.patch
+@@ -10,15 +10,6 @@ diff -u -r a/src/google/protobuf/compiler/cpp/cpp_file.cc b/src/google/protobuf/
+          \"  static GOOGLE_PROTOBUF_DECLARE_ONCE(once);\\n\"
+          \"  ::google::protobuf::GoogleOnceInit(&once, &protobuf_AssignDescriptors);\\n\"
+          \"}\\n\"
+-@@ -656,7 +656,7 @@
+-   printer->Print(
+-       \"}\\n\"
+-       \"\\n\"
+--      \"void InitDefaults() {\\n\"
+-+      \"GOOGLE_ATTRIBUTE_NOINLINE void InitDefaults() {\\n\"
+-       \"  static GOOGLE_PROTOBUF_DECLARE_ONCE(once);\\n\"
+-       \"  ::google::protobuf::GoogleOnceInit(&once, &TableStruct::InitDefaultsImpl);\\n\"
+-       \"}\\n\");
+ @@ -737,7 +737,7 @@
+    printer->Print(
+        \"}\\n\"
+diff --git a/third_party/sycl/crosstool/computecpp.tpl b/third_party/sycl/crosstool/computecpp.tpl
+index c699eabb6f..4c90e0f55e 100755
+--- a/third_party/sycl/crosstool/computecpp.tpl
++++ b/third_party/sycl/crosstool/computecpp.tpl
+@@ -60,7 +60,7 @@ def main():
+     return pipe.returncode
+
+   # check if it has parallel_for in it
+-  if not '.parallel_for' in preprocessed_file_str:
++  if not '.parallel_for' in str(preprocessed_file_str):
+     # call CXX compiler like usual
+     with tempfile.NamedTemporaryFile(suffix=\".ii\") as preprocessed_file: # Force '.ii' extension so that g++ does not preprocess the file again
+       preprocessed_file.write(preprocessed_file_str)
+diff --git a/third_party/sycl/sycl/BUILD.tpl b/third_party/sycl/sycl/BUILD.tpl
+index 21b1a2bbf7..28011eff20 100755
+--- a/third_party/sycl/sycl/BUILD.tpl
++++ b/third_party/sycl/sycl/BUILD.tpl
+@@ -20,8 +20,8 @@ config_setting(
+ config_setting(
+     name = \"using_sycl_trisycl\",
+     define_values = {
+-        \"using_sycl\": \"true\",
+-        \"using_trisycl\": \"false\",
++        \"using_sycl\": \"false\",
++        \"using_trisycl\": \"true\",
+     },
+ )
+",
+      ensure  => present,
+      path    => "${prefix}/${arch}/src/tensorflow.patch",
+      mode    => "a+r",
+      before  => Installer['tensorflow'],
+    }
+
+    file { "${prefix}/${arch}/src/tensorflow_eigen3.patch":
+      content =>
+"
+--- a/unsupported/Eigen/CXX11/src/Tensor/TensorDeviceSycl.h 2017-12-24 10:09:13.505638510 +1100
++++ b/unsupported/Eigen/CXX11/src/Tensor/TensorDeviceSycl.h 2017-12-24 10:08:53.265413927 +1100
+@@ -110,12 +110,12 @@
+   for(const auto& device : device_list){
+     auto vendor = device.template get_info<cl::sycl::info::device::vendor>();
+     std::transform(vendor.begin(), vendor.end(), vendor.begin(), ::tolower);
+-    bool unsuported_condition = (device.is_cpu() && platform_name.find(\"amd\")!=std::string::npos && vendor.find(\"apu\") == std::string::npos) ||
+-    (device.is_gpu() && platform_name.find(\"intel\")!=std::string::npos);
+-    if(!unsuported_condition){
++    //bool unsuported_condition = (device.is_cpu() && platform_name.find(\"amd\")!=std::string::npos && vendor.find(\"apu\") == std::string::npos) ||
++    //(device.is_gpu() && platform_name.find(\"intel\")!=std::string::npos);
++    //if(!unsuported_condition){
+       std::cout << \"Platform name \"<< platform_name << std::endl;
+         supported_devices.push_back(device);
+-    }
++    //}
+   }
+ }
+ return supported_devices;
+ ",
+      ensure  => present,
+      path    => "${prefix}/${arch}/src/tensorflow_eigen3.patch",
+      mode    => "a+r",
+      before  => Installer['tensorflow'],
+    }
+
+    exec { "install-${arch}-computecpp":
+      creates   => "${prefix}/${arch}/bin/compute++",
+      command   => "cd ${prefix}/src &&
+                    wget -N http://nubots.net/tarballs/ComputeCpp-CE-0.4.0-Ubuntu.16.04-64bit.tar.gz &&
+                    tar xf ${prefix}/src/ComputeCpp-CE-0.4.0-Ubuntu.16.04-64bit.tar.gz &&
+                    cp -r ${prefix}/src/ComputeCpp-CE-0.4.0-Ubuntu-16.04-64bit/* ${prefix}/${arch}/",
+      cwd       => "${prefix}/src",
+      path      =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+      timeout   => 0,
+      provider  => 'shell',
+      before    => Installer['tensorflow'],
+      require   => Class['installer::prerequisites'],
+    }
+
+    $bazel_c_options   = join(prefix($params['flags'], 'build:opt --copt='), "\n")
+    $bazel_c_params    = join(prefix(regsubst($params['params'], ' ', '\nbuild:opt --copt='), 'build:opt --copt='), "\n")
+    $bazel_cxx_options = join(prefix($params['flags'], 'build:opt --cxxopt='), "\n")
+    $bazel_cxx_params  = join(prefix(regsubst($params['params'], ' ', "\nbuild:opt --cxxopt="), 'build:opt --cxxopt='), "\n")
+
+    file { "${prefix}/${arch}/src/tensorflow.bazelrc":
+      content   => "
+build --action_env PATH=\"${prefix}/${arch}/bin:${prefix}/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin\"
+build --action_env PYTHON_BIN_PATH=\"/usr/bin/python3\"
+build --action_env PYTHON_LIB_PATH=\"/usr/lib/python3/dist-packages\"
+build --force_python=py3
+build --host_force_python=py3
+build --python_path=\"/usr/bin/python3\"
+build:gcp --define with_gcp_support=true
+build:hdfs --define with_hdfs_support=true
+build:s3 --define with_s3_support=true
+build:xla --define with_xla_support=true
+build:gdr --define with_gdr_support=true
+build:verbs --define with_verbs_support=true
+build --action_env TF_NEED_OPENCL_SYCL=\"1\"
+build --action_env HOST_CXX_COMPILER=\"/usr/bin/g++\"
+build --action_env HOST_C_COMPILER=\"/usr/bin/gcc\"
+build --action_env TF_NEED_COMPUTECPP=\"1\"
+build --action_env COMPUTECPP_TOOLKIT_PATH=\"${prefix}/${arch}\"
+build --action_env TF_NEED_CUDA=\"0\"
+build --define grpc_no_ares=true
+${bazel_c_options}
+${bazel_c_params}
+${bazel_cxx_options}
+${bazel_cxx_params}
+build:opt --define with_default_optimizations=true
+build --copt=-DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK
+build --host_copt=-DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK
+build:monolithic --define framework_shared_object=false
+build --define framework_shared_object=true
+build:android --crosstool_top=//external:android/crosstool
+build:android --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+",
+      ensure  => present,
+      path    => "${prefix}/${arch}/src/tensorflow.bazelrc",
+      mode    => "a+r",
+      before  => Installer['tensorflow'],
     }
   }
 }
