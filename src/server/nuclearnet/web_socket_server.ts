@@ -7,14 +7,14 @@ import * as SocketIO from 'socket.io'
  * There should never be enough logic in here that it needs any testing.
  */
 export class WebSocketServer {
-  public constructor(private sioServer: SocketIO.Namespace) {
+  constructor(private sioServer: SocketIO.Namespace) {
   }
 
-  public static of(server: SocketIO.Namespace) {
+  static of(server: SocketIO.Namespace) {
     return new WebSocketServer(server)
   }
 
-  public onConnection(cb: (socket: WebSocket) => void) {
+  onConnection(cb: (socket: WebSocket) => void) {
     this.sioServer.on('connection', (socket: SocketIO.Socket) => {
       const webSocket = WebSocket.of(socket)
       cb(webSocket)
@@ -23,18 +23,18 @@ export class WebSocketServer {
 }
 
 export class WebSocket {
-  public constructor(private sioSocket: SocketIO.Socket) {
+  constructor(private sioSocket: SocketIO.Socket) {
   }
 
-  public static of(socket: SocketIO.Socket) {
+  static of(socket: SocketIO.Socket) {
     return new WebSocket(socket)
   }
 
-  public on(event: string, cb: (...args: any[]) => void) {
+  on(event: string, cb: (...args: any[]) => void) {
     this.sioSocket.on(event, cb)
   }
 
-  public send(event: string, ...args: any[]) {
+  send(event: string, ...args: any[]) {
     this.sioSocket.emit(event, ...args)
   }
 }

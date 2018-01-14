@@ -19,11 +19,11 @@ import { hashType } from './fake_nuclearnet_server'
  * The fake helpers are public, but only should be used by FakeNUClearNetServer.
  */
 export class FakeNUClearNetClient implements NUClearNetClient {
-  public peer: NUClearNetPeer
+  peer: NUClearNetPeer
   private events: EventEmitter
   private connected: boolean
 
-  public constructor(private server: FakeNUClearNetServer) {
+  constructor(private server: FakeNUClearNetServer) {
     this.events = new EventEmitter()
     this.connected = false
   }
@@ -32,11 +32,11 @@ export class FakeNUClearNetClient implements NUClearNetClient {
    * Avoid using this factory in tests as FakeNUClearNetServer.of() is a singleton. You'll get cross-contamination
    * between tests. Simply use the constructor of both FakeNUClearNetServer and FakeNUClearNetClient instead.
    */
-  public static of(): FakeNUClearNetClient {
+  static of(): FakeNUClearNetClient {
     return new FakeNUClearNetClient(FakeNUClearNetServer.of())
   }
 
-  public connect(options: NUClearNetOptions): () => void {
+  connect(options: NUClearNetOptions): () => void {
     this.peer = {
       name: options.name,
       address: '127.0.0.1',
@@ -52,7 +52,7 @@ export class FakeNUClearNetClient implements NUClearNetClient {
     }
   }
 
-  public onJoin(cb: NUClearEventListener): () => void {
+  onJoin(cb: NUClearEventListener): () => void {
     const listener = (peer: NUClearNetPeer) => {
       if (this.connected) {
         cb(peer)
@@ -62,7 +62,7 @@ export class FakeNUClearNetClient implements NUClearNetClient {
     return () => this.events.removeListener('nuclear_join', listener)
   }
 
-  public onLeave(cb: NUClearEventListener): () => void {
+  onLeave(cb: NUClearEventListener): () => void {
     const listener = (peer: NUClearNetPeer) => {
       if (this.connected) {
         cb(peer)
@@ -72,7 +72,7 @@ export class FakeNUClearNetClient implements NUClearNetClient {
     return () => this.events.removeListener('nuclear_leave', listener)
   }
 
-  public on(event: string, cb: NUClearPacketListener): () => void {
+  on(event: string, cb: NUClearPacketListener): () => void {
     const hash = hashType(event).toString('hex')
     const listener = (packet: NUClearNetPacket) => {
       if (this.connected) {
@@ -83,7 +83,7 @@ export class FakeNUClearNetClient implements NUClearNetClient {
     return () => this.events.removeListener(hash, listener)
   }
 
-  public onPacket(cb: NUClearPacketListener): () => void {
+  onPacket(cb: NUClearPacketListener): () => void {
     const listener = (packet: NUClearNetPacket) => {
       if (this.connected) {
         cb(packet)
@@ -93,20 +93,20 @@ export class FakeNUClearNetClient implements NUClearNetClient {
     return () => this.events.removeListener('nuclear_packet', listener)
   }
 
-  public send(options: NUClearNetSend): void {
+  send(options: NUClearNetSend): void {
     this.server.send(this, options)
   }
 
   // Fake helpers, designed only to be used by FakeNUClearNetServer.
-  public fakeJoin(peer: NUClearNetPeer) {
+  fakeJoin(peer: NUClearNetPeer) {
     this.events.emit('nuclear_join', peer)
   }
 
-  public fakeLeave(peer: NUClearNetPeer) {
+  fakeLeave(peer: NUClearNetPeer) {
     this.events.emit('nuclear_leave', peer)
   }
 
-  public fakePacket(hash: string, packet: NUClearNetPacket) {
+  fakePacket(hash: string, packet: NUClearNetPacket) {
     this.events.emit(hash, packet)
     this.events.emit('nuclear_packet', packet)
   }

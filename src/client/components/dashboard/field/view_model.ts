@@ -9,15 +9,15 @@ import { GroundViewModel } from '../ground/view_model'
 import { FieldModel } from './model'
 
 export class FieldViewModel {
-  public constructor(private model: FieldModel) {
+  constructor(private model: FieldModel) {
   }
 
-  public static of = createTransformer((model: FieldModel): FieldViewModel => {
+  static of = createTransformer((model: FieldModel): FieldViewModel => {
     return new FieldViewModel(model)
   })
 
   @computed
-  public get scene(): Group {
+  get scene(): Group {
     return Group.of({
       transform: Transform.of({
         // TODO (Annable): move camera to the view model and put this transform there.

@@ -10,14 +10,14 @@ import { FieldModel } from './field/model'
 import { SkyboxModel } from './skybox/model'
 
 export class TimeModel {
-  @observable public time: number // seconds
-  @observable public lastRenderTime: number // seconds
+  @observable time: number // seconds
+  @observable lastRenderTime: number // seconds
 
   constructor(opts: Partial<TimeModel>) {
     Object.assign(this, opts)
   }
 
-  public static of() {
+  static of() {
     return new TimeModel({
       time: 0,
       lastRenderTime: 0,
@@ -37,22 +37,22 @@ export enum ViewMode {
 
 export class LocalisationModel {
   @observable private appModel: AppModel
-  @observable public aspect: number
-  @observable public field: FieldModel
-  @observable public skybox: SkyboxModel
-  @observable public camera: CameraModel
-  @observable public locked: boolean
-  @observable public controls: ControlsModel
-  @observable public viewMode: ViewMode
-  @observable public target?: LocalisationRobotModel
-  @observable public time: TimeModel
+  @observable aspect: number
+  @observable field: FieldModel
+  @observable skybox: SkyboxModel
+  @observable camera: CameraModel
+  @observable locked: boolean
+  @observable controls: ControlsModel
+  @observable viewMode: ViewMode
+  @observable target?: LocalisationRobotModel
+  @observable time: TimeModel
 
   constructor(appModel: AppModel, opts: Partial<LocalisationModel>) {
     this.appModel = appModel
     Object.assign(this, opts)
   }
 
-  public static of = memoize((appModel: AppModel): LocalisationModel => {
+  static of = memoize((appModel: AppModel): LocalisationModel => {
     return new LocalisationModel(appModel, {
       aspect: 300 / 150,
       field: FieldModel.of(),
@@ -71,16 +71,16 @@ export class LocalisationModel {
 }
 
 class CameraModel {
-  @observable public position: Vector3
-  @observable public yaw: number
-  @observable public pitch: number
-  @observable public distance: number
+  @observable position: Vector3
+  @observable yaw: number
+  @observable pitch: number
+  @observable distance: number
 
   constructor(opts: CameraModel) {
     Object.assign(this, opts)
   }
 
-  public static of() {
+  static of() {
     return new CameraModel({
       position: new Vector3(-1, 0, 1),
       yaw: 0,
@@ -91,20 +91,20 @@ class CameraModel {
 }
 
 export class ControlsModel {
-  @observable public forward: boolean
-  @observable public left: boolean
-  @observable public right: boolean
-  @observable public back: boolean
-  @observable public up: boolean
-  @observable public down: boolean
-  @observable public pitch: number
-  @observable public yaw: number
+  @observable forward: boolean
+  @observable left: boolean
+  @observable right: boolean
+  @observable back: boolean
+  @observable up: boolean
+  @observable down: boolean
+  @observable pitch: number
+  @observable yaw: number
 
   constructor(opts: ControlsModel) {
     Object.assign(this, opts)
   }
 
-  public static of() {
+  static of() {
     return new ControlsModel({
       forward: false,
       left: false,
@@ -119,23 +119,23 @@ export class ControlsModel {
 }
 
 export class Quaternion {
-  @observable public x: number
-  @observable public y: number
-  @observable public z: number
-  @observable public w: number
+  @observable x: number
+  @observable y: number
+  @observable z: number
+  @observable w: number
 
-  public constructor(x: number, y: number, z: number, w: number) {
+  constructor(x: number, y: number, z: number, w: number) {
     this.x = x
     this.y = y
     this.z = z
     this.w = w
   }
 
-  public static of() {
+  static of() {
     return new Quaternion(0, 0, 0, 1)
   }
 
-  public set(x: number, y: number, z: number, w: number): Quaternion {
+  set(x: number, y: number, z: number, w: number): Quaternion {
     this.x = x
     this.y = y
     this.z = z

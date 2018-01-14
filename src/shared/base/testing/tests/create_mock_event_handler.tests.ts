@@ -33,7 +33,7 @@ describe('createMockEventHandler', () => {
 type TestEventListener = (str: string, num: number) => void
 
 class TestClass {
-  public onTestEvent(callback: TestEventListener): () => void {
+  onTestEvent(callback: TestEventListener): () => void {
     return () => {
     }
   }

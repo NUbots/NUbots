@@ -6,7 +6,7 @@ import { NavigationView } from '../navigation/view'
 import * as style from './style.css'
 
 export class AppView extends React.Component<{ nav: NavigationConfiguration }> {
-  public render() {
+  render() {
     const { nav, children } = this.props
     return (
       <div className={style.app}>

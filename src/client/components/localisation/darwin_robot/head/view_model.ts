@@ -17,12 +17,12 @@ export class HeadViewModel {
   constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: LocalisationRobotModel): HeadViewModel => {
+  static of = createTransformer((model: LocalisationRobotModel): HeadViewModel => {
     return new HeadViewModel(model)
   })
 
   @computed
-  public get head() {
+  get head() {
     const head = new Object3D()
     head.add(this.neck)
     return head

@@ -29,20 +29,8 @@
     "interface-over-type-literal": false,
     "linebreak-style": "LF",
     "max-classes-per-file": false,
-    "member-access": true,
-    "member-ordering": [
-      true,
-      {
-        "order": [
-          "instance-field",
-          "constructor",
-          "static-method",
-          "public-instance-method",
-          "protected-instance-method",
-          "private-instance-method"
-        ]
-      }
-    ],
+    "member-access": [true, "no-public"],
+    "member-ordering": false,
     "new-parens": true,
     "no-bitwise": false,
     "no-conditional-assignment": true,

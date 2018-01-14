@@ -8,15 +8,15 @@ import { AppModel } from './model'
 
 export class AppNetwork {
   private nextRobotId: number
-  public constructor(private nusightNetwork: NUsightNetwork,
-                     private model: AppModel) {
+  constructor(private nusightNetwork: NUsightNetwork,
+              private model: AppModel) {
     this.nextRobotId = 0
 
     nusightNetwork.onNUClearJoin(this.onJoin)
     nusightNetwork.onNUClearLeave(this.onLeave)
   }
 
-  public static of(nusightNetwork: NUsightNetwork, model: AppModel) {
+  static of(nusightNetwork: NUsightNetwork, model: AppModel) {
     return new AppNetwork(nusightNetwork, model)
   }
 

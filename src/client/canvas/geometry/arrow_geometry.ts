@@ -3,12 +3,12 @@ import { observable } from 'mobx'
 import { Vector2 } from '../../math/vector2'
 
 export class ArrowGeometry {
-  @observable public direction: Vector2
-  @observable public headLength: number
-  @observable public headWidth: number
-  @observable public length: number
-  @observable public origin: Vector2
-  @observable public width: number
+  @observable direction: Vector2
+  @observable headLength: number
+  @observable headWidth: number
+  @observable length: number
+  @observable origin: Vector2
+  @observable width: number
 
   constructor(opts: ArrowGeometry) {
     this.direction = opts.direction
@@ -19,7 +19,7 @@ export class ArrowGeometry {
     this.width = opts.width
   }
 
-  public static of({
+  static of({
     length = 1,
     direction = Vector2.of(1, 0),
     headLength = 0.2 * length,

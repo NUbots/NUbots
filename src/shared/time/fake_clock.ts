@@ -15,47 +15,47 @@ export class FakeClock implements Clock {
   private time: number
   private tasks: Task[]
 
-  public constructor(time: number) {
+  constructor(time: number) {
     this.nextId = 0
     this.time = time
     this.tasks = []
   }
 
-  public static of(time: number = 0) {
+  static of(time: number = 0) {
     return new FakeClock(time)
   }
 
-  public now(): number {
+  now(): number {
     return this.time
   }
 
-  public date(): Date {
+  date(): Date {
     return new Date(this.now() * SecondsToMilliseconds)
   }
 
-  public performanceNow(): number {
+  performanceNow(): number {
     return this.time
   }
 
-  public setTimeout(fn: () => void, seconds: number): CancelTimer {
+  setTimeout(fn: () => void, seconds: number): CancelTimer {
     const id = this.nextId++
     this.addTask({ id, nextTime: this.now() + seconds, fn })
     return () => this.removeTask(id)
   }
 
-  public setInterval(fn: () => void, seconds: number): CancelTimer {
+  setInterval(fn: () => void, seconds: number): CancelTimer {
     const id = this.nextId++
     this.addTask({ id, nextTime: this.now() + seconds, period: seconds, fn })
     return () => this.removeTask(id)
   }
 
-  public nextTick(fn: () => void): CancelTimer {
+  nextTick(fn: () => void): CancelTimer {
     const id = this.nextId++
     this.addTask({ id, nextTime: this.now() + Number.MIN_VALUE, fn })
     return () => this.removeTask(id)
   }
 
-  public tick(delta: number = 1): void {
+  tick(delta: number = 1): void {
     const newTime = this.now() + delta
 
     while (this.tasks.length > 0 && this.tasks[0].nextTime <= newTime) {
@@ -66,7 +66,7 @@ export class FakeClock implements Clock {
     this.time = newTime
   }
 
-  public runAllTimers(): void {
+  runAllTimers(): void {
     const limit = 1000
     let i = 0
 
@@ -80,7 +80,7 @@ export class FakeClock implements Clock {
     }
   }
 
-  public runOnlyPendingTimers(): void {
+  runOnlyPendingTimers(): void {
     const limit = 1000
     let i = 0
 
@@ -96,7 +96,7 @@ export class FakeClock implements Clock {
     }
   }
 
-  public runTimersToTime(time: number): void {
+  runTimersToTime(time: number): void {
     const limit = 1000
     let i = 0
 

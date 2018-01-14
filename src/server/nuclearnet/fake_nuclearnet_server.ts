@@ -16,7 +16,7 @@ export class FakeNUClearNetServer {
   private events: EventEmitter
   private clients: FakeNUClearNetClient[]
 
-  public constructor() {
+  constructor() {
     this.events = new EventEmitter()
     this.clients = []
   }
@@ -29,11 +29,11 @@ export class FakeNUClearNetServer {
    * Avoid using this singleton factory in tests though, as you'll introduce cross-contamination between tests.
    * Simply use the constructor of both FakeNUClearNetServer and FakeNUClearNetClient instead.
    */
-  public static of = createSingletonFactory(() => {
+  static of = createSingletonFactory(() => {
     return new FakeNUClearNetServer()
   })
 
-  public connect(client: FakeNUClearNetClient): () => void {
+  connect(client: FakeNUClearNetClient): () => void {
     this.events.emit('nuclear_join', client.peer)
     this.clients.push(client)
 
@@ -58,7 +58,7 @@ export class FakeNUClearNetServer {
     }
   }
 
-  public send(client: FakeNUClearNetClient, opts: NUClearNetSend) {
+  send(client: FakeNUClearNetClient, opts: NUClearNetSend) {
     const hash: Buffer = typeof opts.type === 'string' ? hashType(opts.type) : opts.type
     const packet = {
       peer: client.peer,

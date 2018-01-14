@@ -10,15 +10,15 @@ export type GroupOpts = {
 }
 
 export class Group implements Object2d {
-  @observable public children: Object2d[]
-  @observable public transform: Transform
+  @observable children: Object2d[]
+  @observable transform: Transform
 
-  public constructor(opts: GroupOpts) {
+  constructor(opts: GroupOpts) {
     this.children = opts.children
     this.transform = opts.transform
   }
 
-  public static of({
+  static of({
     children = [],
     transform = Transform.of(),
   }: Partial<GroupOpts> = {}): Group {
@@ -28,7 +28,7 @@ export class Group implements Object2d {
     })
   }
 
-  public add(obj: Object2d): void {
+  add(obj: Object2d): void {
     this.children.push(obj)
   }
 }

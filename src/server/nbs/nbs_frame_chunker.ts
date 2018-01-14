@@ -24,11 +24,11 @@ export class NbsFrameChunker extends stream.Transform {
     this.foundPacketSize = false
   }
 
-  public static of(): NbsFrameChunker {
+  static of(): NbsFrameChunker {
     return new NbsFrameChunker()
   }
 
-  public _transform(chunk: any, encoding: string, done: (err?: any, data?: any) => void) {
+  _transform(chunk: any, encoding: string, done: (err?: any, data?: any) => void) {
     // Buffer any received data so that we can find nbs packets within it.
     this.buffers.push(chunk)
 

@@ -14,10 +14,10 @@ export type FieldModelOpts = {
 }
 
 export class FieldModel {
-  @observable public camera: Transform
-  @observable public orientation: 'left' | 'right'
-  @observable public ground: GroundModel
-  @observable public robots: DashboardRobotModel[]
+  @observable camera: Transform
+  @observable orientation: 'left' | 'right'
+  @observable ground: GroundModel
+  @observable robots: DashboardRobotModel[]
 
   constructor(opts: FieldModelOpts) {
     this.camera = opts.camera
@@ -26,7 +26,7 @@ export class FieldModel {
     this.robots = opts.robots
   }
 
-  public static of = memoize((robots: DashboardRobotModel[]): FieldModel => {
+  static of = memoize((robots: DashboardRobotModel[]): FieldModel => {
     return new FieldModel({
       camera: Transform.of({ anticlockwise: false }),
       orientation: 'right',
@@ -36,14 +36,14 @@ export class FieldModel {
   })
 
   @computed
-  public get fieldLength() {
+  get fieldLength() {
     return this.ground.dimensions.fieldLength
       + (this.ground.dimensions.goalDepth * 2)
       + (this.ground.dimensions.borderStripMinWidth * 2)
   }
 
   @computed
-  public get fieldWidth() {
+  get fieldWidth() {
     return this.ground.dimensions.fieldWidth + (this.ground.dimensions.borderStripMinWidth * 2)
   }
 }

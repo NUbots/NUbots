@@ -10,17 +10,17 @@ import { decodeFrame } from './nbs_frame_codecs'
  * Expected to be useful for writing NbsFrame objects to streams, e.g. saving them to disk with a writable file stream.
  */
 export class NbsFrameEncoder extends stream.Transform {
-  public constructor() {
+  constructor() {
     super({
       objectMode: true,
     })
   }
 
-  public static of() {
+  static of() {
     return new NbsFrameEncoder()
   }
 
-  public _transform(frame: NbsFrame, encoding: string, done: (err?: any, data?: any) => void) {
+  _transform(frame: NbsFrame, encoding: string, done: (err?: any, data?: any) => void) {
     this.push(encodeFrame(frame))
     done()
   }
@@ -32,17 +32,17 @@ export class NbsFrameEncoder extends stream.Transform {
  * Expected to be used in combination with NbsFrameChunker to read from a readable file stream.
  */
 export class NbsFrameDecoder extends stream.Transform {
-  public constructor() {
+  constructor() {
     super({
       objectMode: true,
     })
   }
 
-  public static of() {
+  static of() {
     return new NbsFrameDecoder()
   }
 
-  public _transform(buffer: Buffer, encoding: string, done: (err?: any, data?: any) => void) {
+  _transform(buffer: Buffer, encoding: string, done: (err?: any, data?: any) => void) {
     this.push(decodeFrame(buffer))
     done()
   }

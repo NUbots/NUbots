@@ -3,10 +3,10 @@ import { observable } from 'mobx'
 import { Vector2 } from '../../math/vector2'
 
 export class MarkerGeometry {
-  @observable public heading: Vector2
-  @observable public radius: number
-  @observable public x: number
-  @observable public y: number
+  @observable heading: Vector2
+  @observable radius: number
+  @observable x: number
+  @observable y: number
 
   constructor(opts: MarkerGeometry) {
     this.heading = opts.heading
@@ -15,7 +15,7 @@ export class MarkerGeometry {
     this.y = opts.y
   }
 
-  public static of({
+  static of({
     heading = Vector2.of(1, 0),
     radius = 1,
     x = 0,

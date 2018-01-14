@@ -20,11 +20,11 @@ export type DashboardProps = {
 
 @observer
 export class Dashboard extends Component<DashboardProps> {
-  public componentWillUnmount(): void {
+  componentWillUnmount(): void {
     this.props.network.destroy()
   }
 
-  public render() {
+  render() {
     const { menu: Menu, model } = this.props
     const showPanels = model.robots.some(robot => robot.enabled)
     const Field = this.props.Field

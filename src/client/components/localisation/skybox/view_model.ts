@@ -15,15 +15,15 @@ import * as SkyboxVert from './skybox.vert'
 
 export class SkyboxViewModel {
 
-  public constructor(private model: SkyboxModel) {
+  constructor(private model: SkyboxModel) {
   }
 
-  public static of = createTransformer((model: SkyboxModel): SkyboxViewModel => {
+  static of = createTransformer((model: SkyboxModel): SkyboxViewModel => {
     return new SkyboxViewModel(model)
   })
 
   @computed
-  public get skybox() {
+  get skybox() {
     // reference: http://threejs.org/examples/#webgl_shaders_sky
     const skybox = new Object3D()
 

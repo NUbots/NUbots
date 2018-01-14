@@ -3,7 +3,7 @@ import { observable } from 'mobx'
 import { Vector2 } from '../../math/vector2'
 
 export class PolygonGeometry {
-  @observable public points: Vector2[]
+  @observable points: Vector2[]
 
   constructor(opts: PolygonGeometry) {
     const points = opts.points
@@ -13,7 +13,7 @@ export class PolygonGeometry {
     this.points = points
   }
 
-  public static of(points: Vector2[]): PolygonGeometry {
+  static of(points: Vector2[]): PolygonGeometry {
     return new PolygonGeometry({ points })
   }
 }

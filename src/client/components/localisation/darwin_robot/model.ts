@@ -8,18 +8,18 @@ import { Quaternion } from '../model'
 
 export class LocalisationRobotModel {
   @observable private model: RobotModel
-  @observable public name: string
-  @observable public color?: string
-  @observable public rWTt: Vector3 // Torso to world translation in torso space.
-  @observable public Rwt: Quaternion // Torso to world rotation.
-  @observable public motors: DarwinMotorSet
+  @observable name: string
+  @observable color?: string
+  @observable rWTt: Vector3 // Torso to world translation in torso space.
+  @observable Rwt: Quaternion // Torso to world rotation.
+  @observable motors: DarwinMotorSet
 
-  public constructor(model: RobotModel, opts: Partial<LocalisationRobotModel>) {
+  constructor(model: RobotModel, opts: Partial<LocalisationRobotModel>) {
     this.model = model
     Object.assign(this, opts)
   }
 
-  public static of = memoize((model: RobotModel): LocalisationRobotModel => {
+  static of = memoize((model: RobotModel): LocalisationRobotModel => {
     return new LocalisationRobotModel(model, {
       name: model.name,
       rWTt: Vector3.of(),
@@ -34,32 +34,32 @@ export class LocalisationRobotModel {
 }
 
 export class DarwinMotorSet {
-  @observable public rightShoulderPitch: DarwinMotor
-  @observable public leftShoulderPitch: DarwinMotor
-  @observable public rightShoulderRoll: DarwinMotor
-  @observable public leftShoulderRoll: DarwinMotor
-  @observable public rightElbow: DarwinMotor
-  @observable public leftElbow: DarwinMotor
-  @observable public rightHipYaw: DarwinMotor
-  @observable public leftHipYaw: DarwinMotor
-  @observable public rightHipRoll: DarwinMotor
-  @observable public leftHipRoll: DarwinMotor
-  @observable public rightHipPitch: DarwinMotor
-  @observable public leftHipPitch: DarwinMotor
-  @observable public rightKnee: DarwinMotor
-  @observable public leftKnee: DarwinMotor
-  @observable public rightAnklePitch: DarwinMotor
-  @observable public leftAnklePitch: DarwinMotor
-  @observable public rightAnkleRoll: DarwinMotor
-  @observable public leftAnkleRoll: DarwinMotor
-  @observable public headPan: DarwinMotor
-  @observable public headTilt: DarwinMotor
+  @observable rightShoulderPitch: DarwinMotor
+  @observable leftShoulderPitch: DarwinMotor
+  @observable rightShoulderRoll: DarwinMotor
+  @observable leftShoulderRoll: DarwinMotor
+  @observable rightElbow: DarwinMotor
+  @observable leftElbow: DarwinMotor
+  @observable rightHipYaw: DarwinMotor
+  @observable leftHipYaw: DarwinMotor
+  @observable rightHipRoll: DarwinMotor
+  @observable leftHipRoll: DarwinMotor
+  @observable rightHipPitch: DarwinMotor
+  @observable leftHipPitch: DarwinMotor
+  @observable rightKnee: DarwinMotor
+  @observable leftKnee: DarwinMotor
+  @observable rightAnklePitch: DarwinMotor
+  @observable leftAnklePitch: DarwinMotor
+  @observable rightAnkleRoll: DarwinMotor
+  @observable leftAnkleRoll: DarwinMotor
+  @observable headPan: DarwinMotor
+  @observable headTilt: DarwinMotor
 
-  public constructor(opts: DarwinMotorSet) {
+  constructor(opts: DarwinMotorSet) {
     Object.assign(this, opts)
   }
 
-  public static of() {
+  static of() {
     return new DarwinMotorSet({
       rightShoulderPitch: DarwinMotor.of(),
       leftShoulderPitch: DarwinMotor.of(),
@@ -86,13 +86,13 @@ export class DarwinMotorSet {
 }
 
 class DarwinMotor {
-  @observable public angle: number
+  @observable angle: number
 
-  public constructor(opts: DarwinMotor) {
+  constructor(opts: DarwinMotor) {
     Object.assign(this, opts)
   }
 
-  public static of() {
+  static of() {
     return new DarwinMotor({ angle: 0 })
   }
 }

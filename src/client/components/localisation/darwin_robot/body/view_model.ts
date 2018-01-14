@@ -14,15 +14,15 @@ import { RightLegViewModel } from '../right_leg/view_model'
 import * as BodyConfig from './config/body.json'
 
 export class BodyViewModel {
-  public constructor(private model: LocalisationRobotModel) {
+  constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: LocalisationRobotModel): BodyViewModel => {
+  static of = createTransformer((model: LocalisationRobotModel): BodyViewModel => {
     return new BodyViewModel(model)
   })
 
   @computed
-  public get body(): Mesh {
+  get body(): Mesh {
     const { geometry, materials } = this.bodyGeometryAndMaterial
     const mesh = new Mesh(geometry, new MultiMaterial(materials))
     mesh.position.set(0, 0, 0.096)

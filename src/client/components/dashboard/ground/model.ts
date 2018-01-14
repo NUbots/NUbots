@@ -3,17 +3,17 @@ import { observable } from 'mobx'
 import { FieldDimensions } from '../../../../shared/field/dimensions'
 
 export class GroundModel {
-  @observable public bottomGoalColor: string
-  @observable public dimensions: FieldDimensions
-  @observable public fieldColor: string
-  @observable public lineColor: string
-  @observable public topGoalColor: string
+  @observable bottomGoalColor: string
+  @observable dimensions: FieldDimensions
+  @observable fieldColor: string
+  @observable lineColor: string
+  @observable topGoalColor: string
 
-  public constructor(opts: GroundModel) {
+  constructor(opts: GroundModel) {
     Object.assign(this, opts)
   }
 
-  public static of() {
+  static of() {
     return new GroundModel({
       bottomGoalColor: 'blue',
       dimensions: FieldDimensions.postYear2017(),

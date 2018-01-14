@@ -11,15 +11,15 @@ import { Geometry } from 'three'
 import { FieldModel } from './model'
 
 export class FieldViewModel {
-  public constructor(private model: FieldModel) {
+  constructor(private model: FieldModel) {
   }
 
-  public static of = createTransformer((model: FieldModel): FieldViewModel => {
+  static of = createTransformer((model: FieldModel): FieldViewModel => {
     return new FieldViewModel(model)
   })
 
   @computed
-  public get field() {
+  get field() {
     const field = new Object3D()
     field.add(this.ground)
     field.add(this.fieldLines)

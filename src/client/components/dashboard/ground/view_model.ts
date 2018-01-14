@@ -13,15 +13,15 @@ import { Vector2 } from '../../../math/vector2'
 import { GroundModel } from './model'
 
 export class GroundViewModel {
-  public constructor(private model: GroundModel) {
+  constructor(private model: GroundModel) {
   }
 
-  public static of = createTransformer((model: GroundModel): GroundViewModel => {
+  static of = createTransformer((model: GroundModel): GroundViewModel => {
     return new GroundViewModel(model)
   })
 
   @computed
-  public get ground(): Group {
+  get ground(): Group {
     return Group.of({
       children: [
         this.grass,

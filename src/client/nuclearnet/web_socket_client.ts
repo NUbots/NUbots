@@ -7,31 +7,31 @@ import * as SocketIO from 'socket.io-client'
  * There should never be enough logic in here that it needs any testing.
  */
 export class WebSocketClient {
-  public constructor(private socket: SocketIOClient.Socket) {
+  constructor(private socket: SocketIOClient.Socket) {
   }
 
-  public static of(uri: string, opts: SocketIOClient.ConnectOpts) {
+  static of(uri: string, opts: SocketIOClient.ConnectOpts) {
     const socket = SocketIO(uri, opts)
     return new WebSocketClient(socket)
   }
 
-  public connect() {
+  connect() {
     this.socket = this.socket.connect()
   }
 
-  public disconnect() {
+  disconnect() {
     this.socket.disconnect()
   }
 
-  public on(event: string, fn: Function) {
+  on(event: string, fn: Function) {
     this.socket.on(event, fn)
   }
 
-  public off(event: string, fn?: Function) {
+  off(event: string, fn?: Function) {
     this.socket.off(event, fn)
   }
 
-  public send(event: string, ...args: any[]) {
+  send(event: string, ...args: any[]) {
     this.socket.emit(event, ...args)
   }
 }

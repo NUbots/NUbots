@@ -15,16 +15,16 @@ import Timestamp = google.protobuf.Timestamp$Properties
 import Overview = message.support.nubugger.Overview
 
 export class DashboardNetwork {
-  public constructor(private network: Network) {
+  constructor(private network: Network) {
     this.network.on(Overview, this.onOverview)
   }
 
-  public static of(nusightNetwork: NUsightNetwork): DashboardNetwork {
+  static of(nusightNetwork: NUsightNetwork): DashboardNetwork {
     const network = Network.of(nusightNetwork)
     return new DashboardNetwork(network)
   }
 
-  public destroy() {
+  destroy() {
     this.network.off()
   }
 

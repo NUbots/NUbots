@@ -12,15 +12,15 @@ import { LocalisationModel } from './model'
 import { SkyboxViewModel } from './skybox/view_model'
 
 export class LocalisationViewModel {
-  public constructor(private model: LocalisationModel) {
+  constructor(private model: LocalisationModel) {
   }
 
-  public static of = createTransformer((model: LocalisationModel) => {
+  static of = createTransformer((model: LocalisationModel) => {
     return new LocalisationViewModel(model)
   })
 
   @computed
-  public get scene(): Scene {
+  get scene(): Scene {
     const scene = new Scene()
     this.robots.forEach(robot => scene.add(robot))
 
@@ -32,7 +32,7 @@ export class LocalisationViewModel {
   }
 
   @computed
-  public get camera(): PerspectiveCamera {
+  get camera(): PerspectiveCamera {
     const camera = new PerspectiveCamera(75, this.model.aspect, 0.01, 100)
     camera.position.set(this.model.camera.position.x, this.model.camera.position.y, this.model.camera.position.z)
     camera.rotation.set(Math.PI / 2 + this.model.camera.pitch, 0, -Math.PI / 2 + this.model.camera.yaw, 'ZXY')

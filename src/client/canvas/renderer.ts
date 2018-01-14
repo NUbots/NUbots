@@ -19,11 +19,11 @@ export class CanvasRenderer {
   constructor(private context: CanvasRenderingContext2D) {
   }
 
-  public static of(context: CanvasRenderingContext2D): CanvasRenderer {
+  static of(context: CanvasRenderingContext2D): CanvasRenderer {
     return new CanvasRenderer(context)
   }
 
-  public render(scene: Group, camera: Transform = Transform.of()): void {
+  render(scene: Group, camera: Transform = Transform.of()): void {
     const canvas = this.context.canvas
     this.context.clearRect(0, 0, canvas.width, canvas.height)
     this.renderObjects(scene.children, camera.inverse().then(scene.transform))

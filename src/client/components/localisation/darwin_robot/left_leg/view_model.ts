@@ -18,12 +18,12 @@ export class LeftLegViewModel {
   constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: LocalisationRobotModel): LeftLegViewModel => {
+  static of = createTransformer((model: LocalisationRobotModel): LeftLegViewModel => {
     return new LeftLegViewModel(model)
   })
 
   @computed
-  public get leftLeg() {
+  get leftLeg() {
     const leftLeg = new Object3D()
     leftLeg.add(this.leftPelvisY)
     return leftLeg

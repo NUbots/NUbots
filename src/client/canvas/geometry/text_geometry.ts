@@ -5,15 +5,15 @@ import { Transform } from '../../math/transform'
 import { Geometry } from './geometry'
 
 export class TextGeometry implements Geometry {
-  @observable public alignToView: boolean
-  @observable public fontFamily: string
-  @observable public maxWidth: number
-  @observable public text: string
-  @observable public textAlign: 'start' | 'end' | 'left' | 'right' | 'center'
-  @observable public textBaseline: 'top' | 'hanging' | 'middle' | 'alphabetic' | 'ideographic' | 'bottom'
-  @observable public transform: Transform
-  @observable public x: number
-  @observable public y: number
+  @observable alignToView: boolean
+  @observable fontFamily: string
+  @observable maxWidth: number
+  @observable text: string
+  @observable textAlign: 'start' | 'end' | 'left' | 'right' | 'center'
+  @observable textBaseline: 'top' | 'hanging' | 'middle' | 'alphabetic' | 'ideographic' | 'bottom'
+  @observable transform: Transform
+  @observable x: number
+  @observable y: number
 
   constructor(opts: TextGeometry) {
     this.alignToView = opts.alignToView
@@ -27,7 +27,7 @@ export class TextGeometry implements Geometry {
     this.y = opts.y
   }
 
-  public static of({
+  static of({
     alignToView = true,
     fontFamily = 'sans-serif',
     maxWidth = 0.5,

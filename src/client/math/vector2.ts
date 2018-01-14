@@ -4,19 +4,19 @@ import { observable } from 'mobx'
 import { Transform } from './transform'
 
 export class Vector2 {
-  @observable public x: number
-  @observable public y: number
+  @observable x: number
+  @observable y: number
 
-  public constructor(x: number, y: number) {
+  constructor(x: number, y: number) {
     this.x = x
     this.y = y
   }
 
-  public static of(x?: number, y?: number): Vector2 {
+  static of(x?: number, y?: number): Vector2 {
     return new Vector2(x || 0, y || 0)
   }
 
-  public static from(vec?: { x?: number, y?: number } | null): Vector2 {
+  static from(vec?: { x?: number, y?: number } | null): Vector2 {
     if (!vec) {
       return Vector2.of()
     }
@@ -28,7 +28,7 @@ export class Vector2 {
     return Math.sqrt(this.x * this.x + this.y * this.y)
   }
 
-  public transform(transform: Transform): Vector2 {
+  transform(transform: Transform): Vector2 {
     const { rotate, scale, translate } = transform
 
     const theta = rotate * (transform.anticlockwise ? 1 : -1)
@@ -50,23 +50,23 @@ export class Vector2 {
     return this
   }
 
-  public set(x: number, y: number): Vector2 {
+  set(x: number, y: number): Vector2 {
     this.x = x
     this.y = y
     return this
   }
 
-  public clone(): Vector2 {
+  clone(): Vector2 {
     return new Vector2(this.x, this.y)
   }
 
-  public copy(v: Vector2): Vector2 {
+  copy(v: Vector2): Vector2 {
     this.x = v.x
     this.y = v.y
     return this
   }
 
-  public normalize(): Vector2 {
+  normalize(): Vector2 {
     // We should not use the computed property 'length' as mobx can throw out the following error when called in a
     // computed context for what should be a new, unobserved vector: Computed values are not allowed to cause side
     // effects by changing observables that are already being observed.
@@ -74,13 +74,13 @@ export class Vector2 {
     return this.divideScalar(length)
   }
 
-  public multiplyScalar(scalarX: number, scalarY: number = scalarX): Vector2 {
+  multiplyScalar(scalarX: number, scalarY: number = scalarX): Vector2 {
     this.x *= scalarX
     this.y *= scalarY
     return this
   }
 
-  public divideScalar(scalarX: number, scalarY: number = scalarX): Vector2 {
+  divideScalar(scalarX: number, scalarY: number = scalarX): Vector2 {
     if (scalarX !== 0) {
       const invScalar = 1 / scalarX
       this.x *= invScalar
@@ -98,13 +98,13 @@ export class Vector2 {
     return this
   }
 
-  public add(v: Vector2): Vector2 {
+  add(v: Vector2): Vector2 {
     this.x += v.x
     this.y += v.y
     return this
   }
 
-  public subtract(v: Vector2): Vector2 {
+  subtract(v: Vector2): Vector2 {
     this.x -= v.x
     this.y -= v.y
     return this

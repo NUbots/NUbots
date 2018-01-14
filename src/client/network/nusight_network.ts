@@ -17,22 +17,22 @@ const HEADER_SIZE = 9
  * instead create their own ComponentNetwork class which uses the Network helper class.
  */
 export class NUsightNetwork {
-  public constructor(private nuclearnetClient: NUClearNetClient,
-                     private appModel: AppModel,
-                     private messageTypePath: MessageTypePath) {
+  constructor(private nuclearnetClient: NUClearNetClient,
+              private appModel: AppModel,
+              private messageTypePath: MessageTypePath) {
   }
 
-  public static of(appModel: AppModel) {
+  static of(appModel: AppModel) {
     const messageTypePath = MessageTypePath.of()
     const nuclearnetClient: NUClearNetClient = WebSocketProxyNUClearNetClient.of()
     return new NUsightNetwork(nuclearnetClient, appModel, messageTypePath)
   }
 
-  public connect(opts: NUClearNetOptions): () => void {
+  connect(opts: NUClearNetOptions): () => void {
     return this.nuclearnetClient.connect(opts)
   }
 
-  public onNUClearMessage<T>(messageType: MessageType<T>, cb: MessageCallback<T>) {
+  onNUClearMessage<T>(messageType: MessageType<T>, cb: MessageCallback<T>) {
     const messageTypeName = this.messageTypePath.getPath(messageType)
     return this.nuclearnetClient.on(messageTypeName, (packet: NUClearNetPacket) => {
       const buffer = new Uint8Array(packet.payload)
@@ -47,11 +47,11 @@ export class NUsightNetwork {
     })
   }
 
-  public onNUClearJoin(cb: (peer: NUClearNetPeer) => void) {
+  onNUClearJoin(cb: (peer: NUClearNetPeer) => void) {
     this.nuclearnetClient.onJoin(cb)
   }
 
-  public onNUClearLeave(cb: (peer: NUClearNetPeer) => void) {
+  onNUClearLeave(cb: (peer: NUClearNetPeer) => void) {
     this.nuclearnetClient.onLeave(cb)
   }
 }

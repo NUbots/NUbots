@@ -11,11 +11,11 @@ export class Network {
   // Store all event listener removers, so we can call them all in off().
   private offNUClearMessages: Set<() => void>
 
-  public constructor(private nusightNetwork: NUsightNetwork) {
+  constructor(private nusightNetwork: NUsightNetwork) {
     this.offNUClearMessages = new Set()
   }
 
-  public static of(nusightNetwork: NUsightNetwork): Network {
+  static of(nusightNetwork: NUsightNetwork): Network {
     return new Network(nusightNetwork)
   }
 
@@ -26,7 +26,7 @@ export class Network {
    * @param cb The callback to call every time a message is received
    * @returns A unsubscriber function.
    */
-  public on<T>(messageType: MessageType<T>, cb: MessageCallback<T>): () => void {
+  on<T>(messageType: MessageType<T>, cb: MessageCallback<T>): () => void {
     const offNUClearMessage = this.nusightNetwork.onNUClearMessage(messageType, cb)
     this.offNUClearMessages.add(offNUClearMessage)
     return () => {
@@ -38,7 +38,7 @@ export class Network {
   /**
    * Unsubscribe from all events that is currently being listened to.
    */
-  public off() {
+  off() {
     for (const offNUClearMessage of this.offNUClearMessages.values()) {
       offNUClearMessage()
     }

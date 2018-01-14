@@ -18,66 +18,66 @@ import Phase = message.input.GameState.Data.Phase
 export class DashboardRobotModel {
 
   // Parameters that influence the display
-  @observable public camera: Transform
-  @observable public ballColor: string
-  @observable public ballSightColor: string
-  @observable public kickTargetColor: string
+  @observable camera: Transform
+  @observable ballColor: string
+  @observable ballSightColor: string
+  @observable kickTargetColor: string
   @observable private robot: RobotModel
-  @observable public robotBorderColor: string
-  @observable public robotColor: string
-  @observable public textColor: string
+  @observable robotBorderColor: string
+  @observable robotColor: string
+  @observable textColor: string
 
   // Parameters from the network
   // The timestamp of the last message from the robot (in seconds since an arbitrary time)
-  @observable public time: number
+  @observable time: number
 
   // The player id of the robot, typically 1 through N
-  @observable public playerId: number
+  @observable playerId: number
 
   // The name of the role the robot is executing
-  @observable public roleName: string
+  @observable roleName: string
 
   // Battery as a value between 0 and 1 (percentage)
-  @observable public battery: number
+  @observable battery: number
 
   // The voltage of the battery
-  @observable public voltage: number
+  @observable voltage: number
 
   // The state of the behaviour as an enum
-  @observable public behaviourState: State
+  @observable behaviourState: State
 
   // The robots position and heading and associated covariance
-  @observable public robotPosition: Vector3 // x,y,theta
-  @observable public robotPositionCovariance: Matrix3
+  @observable robotPosition: Vector3 // x,y,theta
+  @observable robotPositionCovariance: Matrix3
 
   // The position of the ball on the field and associated covariance
-  @observable public ballPosition: Vector2
-  @observable public ballCovariance: Matrix2
+  @observable ballPosition: Vector2
+  @observable ballCovariance: Matrix2
 
   // The position on the field the robot is kicking towards
-  @observable public kickTarget: Vector2
+  @observable kickTarget: Vector2
 
   // The game state information
-  @observable public gameMode: Mode
-  @observable public gamePhase: Phase
-  @observable public penaltyReason: PenaltyReason
+  @observable gameMode: Mode
+  @observable gamePhase: Phase
+  @observable penaltyReason: PenaltyReason
 
   // The timestamp of when we last had an image, saw the ball and saw a goal
   // Measured in seconds compared to the variable `time`
-  @observable public lastCameraImage: number
-  @observable public lastSeenBall: number
-  @observable public lastSeenGoal: number
+  @observable lastCameraImage: number
+  @observable lastSeenBall: number
+  @observable lastSeenGoal: number
 
   // The walk plan and the current walk command
-  @observable public walkPathPlan: Vector2[]
-  @observable public walkCommand: Vector3
+  @observable walkPathPlan: Vector2[]
+  @observable walkCommand: Vector3
 
   constructor(robot: RobotModel, opts: DashboardRobotModelOpts) {
     this.robot = robot
     Object.assign(this, opts)
   }
 
-  public static of = memoize((robot: RobotModel): DashboardRobotModel => {
+  static of = memoize((robot: RobotModel): DashboardRobotModel => {
     return new DashboardRobotModel(robot, {
       ballColor: '#ff9800',
       ballCovariance: Matrix2.of(),
@@ -109,22 +109,22 @@ export class DashboardRobotModel {
   })
 
   @computed
-  public get connected(): boolean {
+  get connected(): boolean {
     return this.robot.connected
   }
 
   @computed
-  public get id(): string {
+  get id(): string {
     return this.robot.id
   }
 
   @computed
-  public get name(): string {
+  get name(): string {
     return this.robot.name
   }
 
   @computed
-  public get enabled(): boolean {
+  get enabled(): boolean {
     return this.robot.enabled
   }
 }

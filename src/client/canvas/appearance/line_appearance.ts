@@ -1,11 +1,11 @@
 import { observable } from 'mobx'
 
 export class LineAppearance {
-  @observable public lineCap: 'butt' | 'round' | 'square'
-  @observable public lineDashOffset: number
-  @observable public lineJoin: 'bevel' | 'round' | 'miter'
-  @observable public lineWidth: number
-  @observable public strokeStyle: string
+  @observable lineCap: 'butt' | 'round' | 'square'
+  @observable lineDashOffset: number
+  @observable lineJoin: 'bevel' | 'round' | 'miter'
+  @observable lineWidth: number
+  @observable strokeStyle: string
 
   constructor(opts: LineAppearance) {
     this.lineCap = opts.lineCap
@@ -15,7 +15,7 @@ export class LineAppearance {
     this.strokeStyle = opts.strokeStyle
   }
 
-  public static of({
+  static of({
     lineCap = 'butt',
     lineDashOffset = 0,
     lineJoin = 'miter',

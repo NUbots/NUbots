@@ -12,19 +12,19 @@ export type TransformOpts = {
 }
 
 export class Transform {
-  @observable public anticlockwise: boolean
-  @observable public rotate: Rotate
-  @observable public scale: Scale
-  @observable public translate: Translate
+  @observable anticlockwise: boolean
+  @observable rotate: Rotate
+  @observable scale: Scale
+  @observable translate: Translate
 
-  public constructor(opts: TransformOpts) {
+  constructor(opts: TransformOpts) {
     this.anticlockwise = opts.anticlockwise
     this.rotate = opts.rotate
     this.scale = opts.scale
     this.translate = opts.translate
   }
 
-  public static of({
+  static of({
                      anticlockwise = true,
                      rotate = 0,
                      scale = { x: 1, y: 1 },
@@ -38,7 +38,7 @@ export class Transform {
     })
   }
 
-  public then(transform: Transform): Transform {
+  then(transform: Transform): Transform {
     const { anticlockwise, rotate, scale, translate } = transform
 
     const scaleX = this.scale.x
@@ -66,7 +66,7 @@ export class Transform {
     return this
   }
 
-  public inverse(): Transform {
+  inverse(): Transform {
     return new Transform({
       anticlockwise: this.anticlockwise,
       scale: { x: 1 / this.scale.x, y: 1 / this.scale.y },
@@ -75,7 +75,7 @@ export class Transform {
     })
   }
 
-  public clone(): Transform {
+  clone(): Transform {
     return new Transform({
       anticlockwise: this.anticlockwise,
       rotate: this.rotate,
@@ -90,7 +90,7 @@ export class Transform {
     })
   }
 
-  public setTranslate(x: number, y: number): Transform {
+  setTranslate(x: number, y: number): Transform {
     this.translate.x = x
     this.translate.y = y
     return this

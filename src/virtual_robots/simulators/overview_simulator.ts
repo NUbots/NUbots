@@ -17,14 +17,14 @@ export class OverviewSimulator implements Simulator {
               private random: SeededRandom) {
   }
 
-  public static of() {
+  static of() {
     return new OverviewSimulator(
       FieldDimensions.postYear2017(),
       SeededRandom.of('overview_simulator'),
     )
   }
 
-  public simulate(time: number, index: number, numRobots: number): Message[] {
+  simulate(time: number, index: number, numRobots: number): Message[] {
     const messageType = 'message.support.nubugger.Overview'
 
     const t = time / 10 - index

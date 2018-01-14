@@ -18,20 +18,20 @@ interface FieldModelValues {
 }
 
 export class FieldDimensions {
-  @observable public lineWidth: number
-  @observable public markWidth: number
-  @observable public fieldLength: number
-  @observable public fieldWidth: number
-  @observable public goalDepth: number
-  @observable public goalWidth: number
-  @observable public goalAreaLength: number
-  @observable public goalAreaWidth: number
-  @observable public goalCrossbarHeight: number
-  @observable public goalPostDiameter: number
-  @observable public goalNetHeight: number
-  @observable public penaltyMarkDistance: number
-  @observable public centerCircleDiameter: number
-  @observable public borderStripMinWidth: number
+  @observable lineWidth: number
+  @observable markWidth: number
+  @observable fieldLength: number
+  @observable fieldWidth: number
+  @observable goalDepth: number
+  @observable goalWidth: number
+  @observable goalAreaLength: number
+  @observable goalAreaWidth: number
+  @observable goalCrossbarHeight: number
+  @observable goalPostDiameter: number
+  @observable goalNetHeight: number
+  @observable penaltyMarkDistance: number
+  @observable centerCircleDiameter: number
+  @observable borderStripMinWidth: number
 
   constructor(values: FieldModelValues) {
     this.lineWidth = values.lineWidth
@@ -50,7 +50,7 @@ export class FieldDimensions {
     this.borderStripMinWidth = values.borderStripMinWidth
   }
 
-  public static preYear2014() {
+  static preYear2014() {
     return new FieldDimensions({
       lineWidth: 0.05,
       markWidth: 0.1,
@@ -69,7 +69,7 @@ export class FieldDimensions {
     })
   }
 
-  public static postYear2017() {
+  static postYear2017() {
     return new FieldDimensions({
       lineWidth: 0.06,
       markWidth: 0.1,

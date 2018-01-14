@@ -2,20 +2,20 @@ import { observable } from 'mobx'
 
 export class SkyboxModel {
 
-  @observable public turbidity: number
-  @observable public rayleigh: number
-  @observable public mieCoefficient: number
-  @observable public mieDirectionalG: number // default 0.8
-  @observable public luminance: number
-  @observable public inclination: number // elevation / inclination
-  @observable public azimuth: number // Facing front,
-  @observable public showSun: boolean
+  @observable turbidity: number
+  @observable rayleigh: number
+  @observable mieCoefficient: number
+  @observable mieDirectionalG: number // default 0.8
+  @observable luminance: number
+  @observable inclination: number // elevation / inclination
+  @observable azimuth: number // Facing front,
+  @observable showSun: boolean
 
-  public constructor(opts: SkyboxModel) {
+  constructor(opts: SkyboxModel) {
     Object.assign(this, opts)
   }
 
-  public static of() {
+  static of() {
     return new SkyboxModel({
       turbidity: 10,
       rayleigh: 2,

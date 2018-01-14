@@ -14,17 +14,17 @@ import { LocalisationModel } from './model'
 import Sensors = message.input.Sensors
 
 export class LocalisationNetwork {
-  public constructor(private network: Network,
-                     private model: LocalisationModel) {
+  constructor(private network: Network,
+              private model: LocalisationModel) {
     this.network.on(Sensors, this.onSensors)
   }
 
-  public static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
+  static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
     const network = Network.of(nusightNetwork)
     return new LocalisationNetwork(network, model)
   }
 
-  public destroy() {
+  destroy() {
     this.network.off()
   }
 

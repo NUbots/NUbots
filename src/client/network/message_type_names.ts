@@ -12,16 +12,16 @@ export class MessageTypePath {
   private cache: Map<any, string>
   private searchObject: any
 
-  public constructor() {
+  constructor() {
     this.searchObject = { message }
     this.cache = new Map()
   }
 
-  public static of = createSingletonFactory(() => {
+  static of = createSingletonFactory(() => {
     return new MessageTypePath()
   })
 
-  public getPath<T>(messageType: MessageType<T>): string {
+  getPath<T>(messageType: MessageType<T>): string {
     if (!this.cache.has(messageType)) {
       const path = findPath(this.searchObject, value => value === messageType)
       if (!path) {

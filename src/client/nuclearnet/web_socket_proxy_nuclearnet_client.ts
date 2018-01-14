@@ -23,14 +23,14 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   private leaveListeners: Set<NUClearEventListener>
   private packetListeners: Map<string, Set<{ requestToken: string, listener: PacketListener }>>
 
-  public constructor(private socket: WebSocketClient) {
+  constructor(private socket: WebSocketClient) {
     this.nextRequestToken = 0
     this.joinListeners = new Set()
     this.leaveListeners = new Set()
     this.packetListeners = new Map()
   }
 
-  public static of() {
+  static of() {
     const uri = `${document.location.origin}/nuclearnet`
     return new WebSocketProxyNUClearNetClient(WebSocketClient.of(uri, {
       upgrade: false,
@@ -38,7 +38,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     }))
   }
 
-  public connect(options: NUClearNetOptions): () => void {
+  connect(options: NUClearNetOptions): () => void {
     this.socket.connect()
     this.socket.on('reconnect', this.onReconnect.bind(this, options))
     this.socket.send('nuclear_connect', options)
@@ -50,7 +50,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     }
   }
 
-  public onJoin(listener: NUClearEventListener): () => void {
+  onJoin(listener: NUClearEventListener): () => void {
     this.socket.on('nuclear_join', listener)
     this.joinListeners.add(listener)
     return () => {
@@ -59,7 +59,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     }
   }
 
-  public onLeave(listener: NUClearEventListener): () => void {
+  onLeave(listener: NUClearEventListener): () => void {
     this.socket.on('nuclear_leave', listener)
     this.leaveListeners.add(listener)
     return () => {
@@ -68,7 +68,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     }
   }
 
-  public on(event: string, cb: NUClearPacketListener): () => void {
+  on(event: string, cb: NUClearPacketListener): () => void {
     /*
      * This one is a bit more complicated than the others, mostly for performance purposes.
      *
@@ -112,11 +112,11 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     }
   }
 
-  public onPacket(cb: NUClearPacketListener): () => void {
+  onPacket(cb: NUClearPacketListener): () => void {
     return this.on('nuclear_packet', cb)
   }
 
-  public send(options: NUClearNetSend): void {
+  send(options: NUClearNetSend): void {
     if (typeof options.type === 'string') {
       this.socket.send(options.type, options)
     }

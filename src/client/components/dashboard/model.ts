@@ -13,17 +13,17 @@ export class DashboardModel {
     this.robotModels = robotModels
   }
 
-  public static of(robots: RobotModel[]): DashboardModel {
+  static of(robots: RobotModel[]): DashboardModel {
     return new DashboardModel(robots)
   }
 
   @computed
-  public get field(): FieldModel {
+  get field(): FieldModel {
     return FieldModel.of(this.robots)
   }
 
   @computed
-  public get robots(): DashboardRobotModel[] {
+  get robots(): DashboardRobotModel[] {
     return this.robotModels.map(robot => DashboardRobotModel.of(robot))
   }
 }

@@ -15,12 +15,12 @@ export class LeftArmViewModel {
   constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: LocalisationRobotModel): LeftArmViewModel => {
+  static of = createTransformer((model: LocalisationRobotModel): LeftArmViewModel => {
     return new LeftArmViewModel(model)
   })
 
   @computed
-  public get leftArm() {
+  get leftArm() {
     const leftArm = new Object3D()
     leftArm.add(this.leftShoulder)
     return leftArm

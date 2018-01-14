@@ -27,19 +27,19 @@ export class NbsNUClearPlayback extends stream.Writable {
   private firstFrameTimestamp?: number
   private firstLocalTimestamp?: number
 
-  public constructor(private nuclearnetClient: NUClearNetClient,
-                     private clock: Clock) {
+  constructor(private nuclearnetClient: NUClearNetClient,
+              private clock: Clock) {
     super({
       objectMode: true,
     })
   }
 
-  public static of(nuclearnetClient: NUClearNetClient) {
+  static of(nuclearnetClient: NUClearNetClient) {
     return new NbsNUClearPlayback(nuclearnetClient, NodeSystemClock)
   }
 
   /** Convenience method for directly streaming a file to the network. */
-  public static fromFile(filename: string, nuclearnetClient: NUClearNetClient) {
+  static fromFile(filename: string, nuclearnetClient: NUClearNetClient) {
     const playback = NbsNUClearPlayback.of(nuclearnetClient)
     const rawStream = fs.createReadStream(filename)
     const isGzipped = filename.endsWith('.nbz') || filename.endsWith('.nbs.gz')
@@ -48,13 +48,13 @@ export class NbsNUClearPlayback extends stream.Writable {
     return playback
   }
 
-  public static fromRawStream(rawStream: ReadStream, nuclearnetClient: NUClearNetClient) {
+  static fromRawStream(rawStream: ReadStream, nuclearnetClient: NUClearNetClient) {
     const playback = NbsNUClearPlayback.of(nuclearnetClient)
     rawStream.pipe(new NbsFrameChunker()).pipe(new NbsFrameDecoder()).pipe(playback)
     return playback
   }
 
-  public _write(frame: NbsFrame, encoding: string, done: Function) {
+  _write(frame: NbsFrame, encoding: string, done: Function) {
     const now = this.clock.performanceNow()
     if (this.firstFrameTimestamp === undefined || this.firstLocalTimestamp === undefined) {
       // This is the first frame we received, use this as reference point.

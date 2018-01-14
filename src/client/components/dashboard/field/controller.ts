@@ -3,12 +3,12 @@ import { action } from 'mobx'
 import { FieldModel } from './model'
 
 export class FieldController {
-  public static of(): FieldController {
+  static of(): FieldController {
     return new FieldController()
   }
 
   @action
-  public onFieldResize(model: FieldModel, width: number, height: number) {
+  onFieldResize(model: FieldModel, width: number, height: number) {
     const fieldWidth = model.fieldWidth
     const fieldLength = model.fieldLength
     const scaleX = fieldLength / width

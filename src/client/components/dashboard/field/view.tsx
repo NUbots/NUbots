@@ -24,7 +24,7 @@ export class Field extends Component<FieldProps> {
   private renderer: CanvasRenderer
   private stopAutorun: IReactionDisposer
 
-  public componentDidMount() {
+  componentDidMount() {
     if (!this.field) {
       return
     }
@@ -34,11 +34,11 @@ export class Field extends Component<FieldProps> {
     this.rafId = requestAnimationFrame(this.onAnimationFrame)
   }
 
-  public componentWillUnmount() {
+  componentWillUnmount() {
     cancelAnimationFrame(this.rafId)
   }
 
-  public render() {
+  render() {
     return <canvas className={style.field} ref={this.onRef}/>
   }
 

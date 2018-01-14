@@ -12,15 +12,15 @@ type Route = {
 export class NavigationConfiguration {
   private routes: Route[] = []
 
-  public static of() {
+  static of() {
     return new NavigationConfiguration()
   }
 
-  public addRoute(route: Route) {
+  addRoute(route: Route) {
     this.routes.push(route)
   }
 
-  public getRoutes() {
+  getRoutes() {
     return this.routes
   }
 }

@@ -4,21 +4,21 @@ import { observable } from 'mobx'
 import { Vector3 } from './vector3'
 
 export class Matrix3 {
-  @observable public x: Vector3
-  @observable public y: Vector3
-  @observable public z: Vector3
+  @observable x: Vector3
+  @observable y: Vector3
+  @observable z: Vector3
 
-  public constructor(x: Vector3, y: Vector3, z: Vector3) {
+  constructor(x: Vector3, y: Vector3, z: Vector3) {
     this.x = x
     this.y = y
     this.z = z
   }
 
-  public static of() {
+  static of() {
     return new Matrix3(new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1))
   }
 
-  public static from(mat?: {
+  static from(mat?: {
     x?: { x?: number, y?: number, z?: number },
     y?: { x?: number, y?: number, z?: number },
     z?: { x?: number, y?: number, z?: number }
@@ -33,18 +33,18 @@ export class Matrix3 {
     return this.x.x + this.y.y + this.z.z
   }
 
-  public set(x: Vector3, y: Vector3, z: Vector3): Matrix3 {
+  set(x: Vector3, y: Vector3, z: Vector3): Matrix3 {
     this.x = x
     this.y = y
     this.z = z
     return this
   }
 
-  public clone(): Matrix3 {
+  clone(): Matrix3 {
     return new Matrix3(this.x.clone(), this.y.clone(), this.z.clone())
   }
 
-  public copy(m: Matrix3): Matrix3 {
+  copy(m: Matrix3): Matrix3 {
     this.x.copy(m.x)
     this.y.copy(m.y)
     this.z.copy(m.z)

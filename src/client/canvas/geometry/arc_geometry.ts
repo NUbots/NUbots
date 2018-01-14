@@ -3,11 +3,11 @@ import { observable } from 'mobx'
 import { Vector2 } from '../../math/vector2'
 
 export class ArcGeometry {
-  @observable public origin: Vector2
-  @observable public radius: number
-  @observable public startAngle: number
-  @observable public endAngle: number
-  @observable public anticlockwise: boolean
+  @observable origin: Vector2
+  @observable radius: number
+  @observable startAngle: number
+  @observable endAngle: number
+  @observable anticlockwise: boolean
 
   constructor(opts: ArcGeometry) {
     this.origin = opts.origin
@@ -17,7 +17,7 @@ export class ArcGeometry {
     this.anticlockwise = opts.anticlockwise
   }
 
-  public static of({
+  static of({
                      origin = Vector2.of(0, 0),
                      radius = 1,
                      startAngle = 0,

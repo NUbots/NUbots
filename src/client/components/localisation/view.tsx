@@ -27,7 +27,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private stopAutorun: IReactionDisposer
   private rafId: number
 
-  public componentDidMount(): void {
+  componentDidMount(): void {
     this.renderer = new WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
@@ -42,7 +42,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.rafId = requestAnimationFrame(this.onAnimationFrame)
   }
 
-  public componentWillUnmount(): void {
+  componentWillUnmount(): void {
     this.stopAutorun()
     this.canvas.removeEventListener('click', this.onClick, false)
     document.removeEventListener('pointerlockchange', this.onPointerLockChange, false)
@@ -54,7 +54,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.network.destroy()
   }
 
-  public render(): JSX.Element {
+  render(): JSX.Element {
     return (
       <div className={style.localisation}>
         <LocalisationMenuBar menu={this.props.menu} onHawkEyeClick={this.onHawkEyeClick}/>
@@ -70,7 +70,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     )
   }
 
-  public requestPointerLock() {
+  requestPointerLock() {
     this.canvas.requestPointerLock()
   }
 

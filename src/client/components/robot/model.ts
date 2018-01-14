@@ -1,18 +1,18 @@
 import { observable } from 'mobx'
 
 export class RobotModel {
-  @observable public id: string
-  @observable public connected: boolean
-  @observable public enabled: boolean
-  @observable public name: string
-  @observable public address: string
-  @observable public port: number
+  @observable id: string
+  @observable connected: boolean
+  @observable enabled: boolean
+  @observable name: string
+  @observable address: string
+  @observable port: number
 
-  public constructor(opts: RobotModel) {
+  constructor(opts: RobotModel) {
     Object.assign(this, opts)
   }
 
-  public static of(opts: RobotModel) {
+  static of(opts: RobotModel) {
     return new RobotModel(opts)
   }
 }
