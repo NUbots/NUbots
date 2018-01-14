@@ -20,6 +20,13 @@
         "ClangFormat": {
             "style": "file",
             "format_on_save": true
-        }
+        },
+        "PyYapf":
+        {
+            "on_save": true,
+            "popup_errors": true,
+            "use_entire_file_if_no_selection": true,
+            "use_stdin": true
+        },
     }
 }
