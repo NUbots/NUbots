@@ -33,6 +33,17 @@ class build_tools {
     },
   } -> Package <| |>
 
+  # Add the bazel source
+  file { '/etc/apt/sources.list.d/bazel.list':
+    content => "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ensure  => present,
+    path    => '/etc/apt/sources.list.d/bazel.list',
+    mode    => "a+r",
+  } ->
+  exec { 'add-bazel-apt-key':
+    command => 'curl https://bazel.build/bazel-release.pub.gpg | apt-key add - && sudo apt-get update',
+  } -> Package <| |>
+
   # Tools
   package { 'cmake': ensure => latest, }
   package { 'automake': ensure => latest, }
@@ -70,6 +81,9 @@ class build_tools {
 
   package { 'beignet-dev': ensure => latest, }
   package { 'clinfo': ensure => latest, }
+
+  package { 'openjdk-8-jdk': ensure => latest, }
+  package { 'bazel': ensure => latest, require => [ Package['openjdk-8-jdk'], ], }
 
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }

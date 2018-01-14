@@ -314,6 +314,22 @@ define installer (
           }
         }
 
+        if $method == 'bazel' {
+          exec { "bazel_${arch}_${name}":
+            creates     => "${create}",
+            command     => "${prebuild_cmd} &&
+                            bazel --blazerc \$BAZELRC build --jobs \$(nproc) ${args_str}  &&
+                            ${postbuild_cmd}",
+            cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
+            environment => $environment,
+            path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                              '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+            timeout     => 0,
+            provider    => 'shell',
+            require     => [ Exec["mirror_${arch}_${name}"], ],
+          }
+        }
+
         if $method == 'custom' {
           exec { "custom_${arch}_${name}":
             creates     => "${create}",
