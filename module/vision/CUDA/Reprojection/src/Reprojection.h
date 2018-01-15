@@ -2,6 +2,7 @@
 #define MODULE_VISION_CUDA_REPROJECTION_H
 
 #include <armadillo>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -21,7 +22,9 @@ namespace vision {
 
         private:
             bool dump_images;
-            std::chrono::duration<double, std::milli> avg_fp_ms;
+            bool dump_stats;
+            std::ofstream stats_file;
+            float avg_fp_ms;
             size_t avg_count;
             int device;
 

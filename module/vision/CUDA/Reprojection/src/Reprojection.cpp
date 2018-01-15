@@ -29,14 +29,26 @@ namespace vision {
         using utility::math::vision::radial::projectCamSpaceToScreen;
 
         Reprojection::Reprojection(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), dump_images(false), avg_fp_ms(), avg_count(0), device() {
+            : Reactor(std::move(environment))
+            , dump_images(false)
+            , dump_stats(false)
+            , stats_file()
+            , avg_fp_ms()
+            , avg_count(0)
+            , device() {
 
             on<Configuration>("Reprojection.yaml").then([this](const Configuration& config) {
                 arma::vec dimensions = config["output"]["dimensions"].as<arma::vec>();
                 output_dimensions    = arma::conv_to<arma::uvec>::from(dimensions);
                 tan_half_FOV         = std::tan(config["output"]["FOV"].as<double>() * M_PI / 360.0);
-                dump_images          = config["dump_images"].as<bool>();
+                dump_images          = config["dump"]["images"].as<bool>();
+                dump_stats           = config["dump"]["stats"].as<bool>();
                 int num_devices;
+
+                if (dump_stats) {
+                    stats_file =
+                        std::ofstream(config["dump"]["stats_file"].as<std::string>(), std::ios::out | std::ios::app);
+                }
 
                 // Get a count of the number of devices available on the system.
                 if (cudaCheckError(cudaGetDeviceCount(&num_devices)) || (num_devices < 1)) {
@@ -60,17 +72,24 @@ namespace vision {
                 }
             });
 
+            on<Shutdown>().then([this] {
+                if (stats_file.is_open()) {
+                    stats_file.close();
+                }
+            });
+
             on<Trigger<Image>, With<CameraParameters>, Single>().then(
                 "Image Reprojection", [this](const Image& image, const CameraParameters& cam) {
+                    float setup_ms  = 0.0f;
+                    float kernel_ms = 0.0f;
+                    float total_ms  = 0.0f;
+
                     if (image.camera_id < 2) {
                         // Set the device we want to use.
                         if (cudaCheckError(cudaSetDevice(device))) {
                             log<NUClear::ERROR>(fmt::format("Failed to set CUDA device to {}.", device));
                             return;
                         }
-
-                        // For benchmarking.
-                        auto start = NUClear::clock::now();
 
                         // Figure out cameras focal length in pixels.
                         arma::vec2 input_center     = {(image.dimensions.x() - 1.0) * 0.5,
@@ -95,13 +114,11 @@ namespace vision {
                                                         make_uint2(image.dimensions.x(), image.dimensions.y()),
                                                         make_uint2(output_dimensions[0], output_dimensions[1]),
                                                         camFocalLengthPixels,
-                                                        msg.data.data()))) {
+                                                        msg.data.data(),
+                                                        &setup_ms,
+                                                        &kernel_ms,
+                                                        &total_ms))) {
                             log<NUClear::ERROR>("Failed to run CUDA reprojection kernel.");
-                            return;
-                        }
-
-                        if (cudaCheckError(cudaDeviceSynchronize())) {
-                            log<NUClear::ERROR>("Failed to synchronise CUDA device.");
                             return;
                         }
 
@@ -110,18 +127,22 @@ namespace vision {
                             utility::vision::saveImage("reprojected_image.ppm", msg);
                         }
 
-                        // Emit our reprojected image.
-                        emit(std::make_unique<ReprojectedImage>(msg));
-
-                        auto end   = NUClear::clock::now();
-                        auto fp_ms = std::chrono::duration<double, std::milli>(end - start);
-                        avg_fp_ms += fp_ms;
+                        avg_fp_ms += total_ms;
                         avg_count++;
+
+                        if (dump_stats && stats_file.is_open()) {
+                            stats_file << fmt::format(
+                                "{},{},{},{}\n", setup_ms, kernel_ms, total_ms, avg_fp_ms / avg_count);
+                        }
+
                         if (((avg_count - 1) % 100) == 0) {
                             log<NUClear::INFO>(fmt::format("Image reprojection time: {0:.4f} ms (avg: {1:.4f} ms)",
-                                                           fp_ms.count(),
-                                                           (avg_fp_ms / avg_count).count()));
+                                                           total_ms,
+                                                           avg_fp_ms / avg_count));
                         }
+
+                        // Emit our reprojected image.
+                        emit(std::make_unique<ReprojectedImage>(msg));
                     }
                 });
         }

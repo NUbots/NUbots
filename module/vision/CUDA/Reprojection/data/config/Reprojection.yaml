@@ -1,4 +1,7 @@
-dump_images: false
+dump:
+  images: false
+  stats: false
+  stats_file: "opencl_reprojection_stats.csv"
 output:
   dimensions: [800, 600]
   FOV: 150.0             # in degrees

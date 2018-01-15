@@ -265,10 +265,18 @@ cudaError_t launchKernel(const unsigned char* input,
                          uint2 input_dimensions,
                          uint2 output_dimensions,
                          float cam_focal_length_pixels,
-                         unsigned char* output) {
+                         unsigned char* output,
+                         float* setup_ms,
+                         float* kernel_ms,
+                         float* total_ms) {
 
     cudaError_t err;
+    cudaEvent_t setup_start, setup_end, kernel_end;
+    cudaEventCreate(&setup_start);
+    cudaEventCreate(&setup_end);
+    cudaEventCreate(&kernel_end);
 
+    cudaEventRecord(setup_start);
     // Set texture reference parameters
     input_image.addressMode[0] = cudaAddressModeClamp;  // Clamp to edge
     input_image.addressMode[1] = cudaAddressModeClamp;
@@ -312,6 +320,8 @@ cudaError_t launchKernel(const unsigned char* input,
         return err;
     }
 
+    cudaEventRecord(setup_end);
+
     // Set up kernel execution parameters.
     dim3 dimBlock(16, 16);
     dim3 dimGrid((output_dimensions.x + dimBlock.x - 1) / dimBlock.x,
@@ -337,6 +347,20 @@ cudaError_t launchKernel(const unsigned char* input,
         cudaFree(output);
         return err;
     }
+
+    if ((err = cudaDeviceSynchronize()) != cudaSuccess) {
+        cudaUnbindTexture(input_image);
+        cudaFree(texture);
+        cudaFree(output);
+        return err;
+    }
+
+    cudaEventRecord(kernel_end);
+
+    cudaEventSynchronize(kernel_end);
+    cudaEventElapsedTime(&setup_ms, setup_start, setup_end);
+    cudaEventElapsedTime(&kernel_ms, setup_end, kernel_end);
+    cudaEventElapsedTime(&total_ms, setup_start, kernel_end);
 
     // Clean up.
     cudaUnbindTexture(input_image);
