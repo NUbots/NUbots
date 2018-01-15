@@ -148,7 +148,6 @@ namespace motion {
                     }
                 }
 
-
                 emit(graph("HeadController Final Angles", yaw, -pitch));
                 // log("HeadController Final Angles", yaw, -pitch);
 
@@ -160,17 +159,18 @@ namespace motion {
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAnglesList) {
                     // If we have a rational equation defined to limit head pitch movements, apply it now.
-                    if (std::any_of(pitch_coeffs.begin(), pitch_coeffs.end(), [](float a) -> bool { return a != 0.0; })
-                        && (angle.first == ServoID::HEAD_PITCH)) {
-                        float new_pitch =
-                            ((pitch_coeffs[0] * (yaw * yaw * yaw)) + (pitch_coeffs[1] * (yaw * yaw))
-                             + (pitch_coeffs[2] * yaw) + pitch_coeffs[3])
-                                / ((pitch_coeffs[4] * (yaw * yaw)) + (pitch_coeffs[5] * yaw) + pitch_coeffs[6])
-                            + pitch_coeffs[7];
+                    // if (std::any_of(pitch_coeffs.begin(), pitch_coeffs.end(), [](float a) -> bool { return a != 0.0;
+                    // })
+                    //     && (angle.first == ServoID::HEAD_PITCH)) {
+                    //     float new_pitch =
+                    //         ((pitch_coeffs[0] * (yaw * yaw * yaw)) + (pitch_coeffs[1] * (yaw * yaw))
+                    //          + (pitch_coeffs[2] * yaw) + pitch_coeffs[3])
+                    //             / ((pitch_coeffs[4] * (yaw * yaw)) + (pitch_coeffs[5] * yaw) + pitch_coeffs[6])
+                    //         + pitch_coeffs[7];
 
-                        angle.second = std::fmin(std::fmax(new_pitch, min_pitch), max_pitch);
-                        pitch        = angle.second;
-                    }
+                    //     angle.second = std::fmin(std::fmax(new_pitch, min_pitch), max_pitch);
+                    //     pitch        = angle.second;
+                    // }
 
                     waypoints->push_back({id,
                                           t,
