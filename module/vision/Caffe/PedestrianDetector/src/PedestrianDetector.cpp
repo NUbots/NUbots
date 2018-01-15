@@ -27,7 +27,7 @@ namespace vision {
             , network_boxes()
             , pednet(nullptr) {
 
-            on<Configuration>("PedestrianDetector.yaml").then([this](const Configuration& config) {
+            on<Configuration>("CaffePedestrianDetector.yaml").then([this](const Configuration& config) {
                 log(fmt::format("{}:{}", __FILE__, __LINE__));
                 use_gpu             = config["use_gpu"].as<bool>();
                 detection_threshold = config["detection_threshold"].as<float>();
