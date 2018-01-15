@@ -1,0 +1,4 @@
+FIND_PACKAGE(tensorflow REQUIRED)
+
+# Build our NUClear module
+NUCLEAR_MODULE(LANGUAGE "PYTHON")

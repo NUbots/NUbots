@@ -18,39 +18,33 @@ import PIL.ImageDraw as ImageDraw
 import PIL.ImageFont as ImageFont
 
 STANDARD_COLORS = [
-    'AliceBlue', 'Chartreuse', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque',
-    'BlanchedAlmond', 'BlueViolet', 'BurlyWood', 'CadetBlue', 'AntiqueWhite',
-    'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan',
-    'DarkCyan', 'DarkGoldenRod', 'DarkGrey', 'DarkKhaki', 'DarkOrange',
-    'DarkOrchid', 'DarkSalmon', 'DarkSeaGreen', 'DarkTurquoise', 'DarkViolet',
-    'DeepPink', 'DeepSkyBlue', 'DodgerBlue', 'FireBrick', 'FloralWhite',
-    'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod',
-    'Salmon', 'Tan', 'HoneyDew', 'HotPink', 'IndianRed', 'Ivory', 'Khaki',
-    'Lavender', 'LavenderBlush', 'LawnGreen', 'LemonChiffon', 'LightBlue',
-    'LightCoral', 'LightCyan', 'LightGoldenRodYellow', 'LightGray', 'LightGrey',
-    'LightGreen', 'LightPink', 'LightSalmon', 'LightSeaGreen', 'LightSkyBlue',
-    'LightSlateGray', 'LightSlateGrey', 'LightSteelBlue', 'LightYellow', 'Lime',
-    'LimeGreen', 'Linen', 'Magenta', 'MediumAquaMarine', 'MediumOrchid',
-    'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue', 'MediumSpringGreen',
-    'MediumTurquoise', 'MediumVioletRed', 'MintCream', 'MistyRose', 'Moccasin',
-    'NavajoWhite', 'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed',
-    'Orchid', 'PaleGoldenRod', 'PaleGreen', 'PaleTurquoise', 'PaleVioletRed',
-    'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple',
-    'Red', 'RosyBrown', 'RoyalBlue', 'SaddleBrown', 'Green', 'SandyBrown',
-    'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 'SkyBlue', 'SlateBlue',
-    'SlateGray', 'SlateGrey', 'Snow', 'SpringGreen', 'SteelBlue', 'GreenYellow',
-    'Teal', 'Thistle', 'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White',
-    'WhiteSmoke', 'Yellow', 'YellowGreen'
+    'AliceBlue', 'Chartreuse', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'BlanchedAlmond', 'BlueViolet',
+    'BurlyWood', 'CadetBlue', 'AntiqueWhite', 'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan',
+    'DarkCyan', 'DarkGoldenRod', 'DarkGrey', 'DarkKhaki', 'DarkOrange', 'DarkOrchid', 'DarkSalmon', 'DarkSeaGreen',
+    'DarkTurquoise', 'DarkViolet', 'DeepPink', 'DeepSkyBlue', 'DodgerBlue', 'FireBrick', 'FloralWhite', 'ForestGreen',
+    'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod', 'Salmon', 'Tan', 'HoneyDew', 'HotPink', 'IndianRed',
+    'Ivory', 'Khaki', 'Lavender', 'LavenderBlush', 'LawnGreen', 'LemonChiffon', 'LightBlue', 'LightCoral', 'LightCyan',
+    'LightGoldenRodYellow', 'LightGray', 'LightGrey', 'LightGreen', 'LightPink', 'LightSalmon', 'LightSeaGreen',
+    'LightSkyBlue', 'LightSlateGray', 'LightSlateGrey', 'LightSteelBlue', 'LightYellow', 'Lime', 'LimeGreen', 'Linen',
+    'Magenta', 'MediumAquaMarine', 'MediumOrchid', 'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue',
+    'MediumSpringGreen', 'MediumTurquoise', 'MediumVioletRed', 'MintCream', 'MistyRose', 'Moccasin', 'NavajoWhite',
+    'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed', 'Orchid', 'PaleGoldenRod', 'PaleGreen', 'PaleTurquoise',
+    'PaleVioletRed', 'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple', 'Red', 'RosyBrown',
+    'RoyalBlue', 'SaddleBrown', 'Green', 'SandyBrown', 'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 'SkyBlue',
+    'SlateBlue', 'SlateGray', 'SlateGrey', 'Snow', 'SpringGreen', 'SteelBlue', 'GreenYellow', 'Teal', 'Thistle',
+    'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White', 'WhiteSmoke', 'Yellow', 'YellowGreen'
 ]
 
 
 @Reactor
-class PedestrianDetector(object):
+class PyPedestrianDetector(object):
 
     def __init__(self):
-        # Constructor for PedestrianDetector
-        self.config = yaml.load(open('config/PedestrianDetector.yaml', 'r'))
-        self.dump_images = self.config['dump_images']
+        # Constructor for PyPedestrianDetector
+        self.config = yaml.load(open('config/PyPedestrianDetector.yaml', 'r'))
+        self.dump_images = self.config['dump']['images']
+        self.dump_stats = self.config['dump']['stats']
+        self.stats_file = self.config['dump']['stats_file']
 
         # Load labels map
         self.category_index = self.load_labelmap(self.config['model']['label_file'])
@@ -58,7 +52,7 @@ class PedestrianDetector(object):
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
             self.od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile(self.config['model']['checkpoint_file'], 'rb') as fid:
+            with tf.gfile.GFile(self.config['model']['graph_file'], 'rb') as fid:
                 serialized_graph = fid.read()
                 self.od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(self.od_graph_def, name='')
@@ -83,42 +77,48 @@ class PedestrianDetector(object):
     def __del__(self):
         self.session.close()
 
-    # @on(Configuration('PedestrianDetector.yaml'))
+    # @on(Configuration('PyPedestrianDetector.yaml'))
     # def PedestrianDetector_configfuration(self, config):
-    #     # Use configuration here from file PedestrianDetector.yaml
+    #     # Use configuration here from file PyPedestrianDetector.yaml
 
     @on(Trigger(ReprojectedImage), With(Sensors), Single())
     def run_detection(self, image, sensors):
         if image.camera_id > 1:
             # Convert image to numpy array
-            input_img = np.array(image.data).reshape((image.dimensions[1], image.dimensions[0], 3)).astype(np.uint8).copy()
+            input_img = np.array(image.data).reshape((image.dimensions[1], image.dimensions[0],
+                                                      3)).astype(np.uint8).copy()
 
             with self.detection_graph.as_default():
                 # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-                image_np_expanded = np.expand_dims(input_img, axis = 0)
+                image_np_expanded = np.expand_dims(input_img, axis=0)
 
                 # Actual detection.
                 detection_start = time.time()
                 (boxes, scores, classes, num) = self.session.run(
-                        [self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
-                        feed_dict={self.image_tensor: image_np_expanded})
+                    [self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
+                    feed_dict={
+                        self.image_tensor: image_np_expanded
+                    }
+                )
                 detection_end = time.time()
 
                 # Visualization of the results of a detection.
-                self.visualize_boxes_and_labels_on_image_array(input_img,
-                                                               np.squeeze(boxes),
-                                                               np.squeeze(classes).astype(np.int32),
-                                                               np.squeeze(scores),
-                                                               self.category_index,
-                                                               use_normalized_coordinates=True,
-                                                               line_thickness=8)
+                self.visualize_boxes_and_labels_on_image_array(
+                    input_img,
+                    np.squeeze(boxes),
+                    np.squeeze(classes).astype(np.int32),
+                    np.squeeze(scores),
+                    self.category_index,
+                    use_normalized_coordinates=True,
+                    line_thickness=8
+                )
 
                 img = BakedImage()
                 img.format = image.format
                 img.dimensions = image.dimensions.copy()
                 img.data = input_img.flatten().tolist().copy()
                 img.camera_id = image.camera_id
-                img.serial_number = "PedestrianDetector"
+                img.serial_number = "PyPedestrianDetector"
                 img.timestamp = datetime.datetime.now()
 
                 if (self.dump_images):
@@ -129,9 +129,21 @@ class PedestrianDetector(object):
                 self.avg_fp_ms += detection_end - detection_start
                 self.avg_count += 1
 
+                if self.dump_stats:
+                    with open(self.stats_file, 'a') as f:
+                        f.write(
+                            '{},{},{}\n'.format(
+                                np.squeeze(boxes).shape, detection_end - detection_start,
+                                self.avg_fp_ms / self.avg_count
+                            )
+                        )
+
                 if ((self.avg_count - 1) % 10) == 0:
-                    print('PedestrianDetector::run_detection: Detection time: {0:.4f} s (avg: {1:.4f} s)'.format(
-                                                    detection_end - detection_start, self.avg_fp_ms / self.avg_count))
+                    print(
+                        'PyPedestrianDetector::run_detection: Detection time: {0:.4f} s (avg: {1:.4f} s)'.format(
+                            detection_end - detection_start, self.avg_fp_ms / self.avg_count
+                        )
+                    )
 
                 index = -1
                 s_classes = np.squeeze(classes)
@@ -184,31 +196,34 @@ class PedestrianDetector(object):
                 self.emit(img)
 
     def load_labelmap(self, path):
-        labels = yaml.load(open('pedestrian/mscoco_label_map.yaml', 'r'))
-
         category_index = {}
 
-        for label in labels['labels']:
-            if int(label['id']) < 1:
-                raise ValueError('Label map ids should be >= 1.')
+        with open(path, 'r') as label_file:
+            labels = yaml.load(label_file)
 
-            category_index[int(label['id'])] = label['display_name']
+            for label in labels['labels']:
+                if int(label['id']) < 1:
+                    raise ValueError('Label map ids should be >= 1.')
+
+                category_index[int(label['id'])] = label['display_name']
 
         return category_index
 
-    def visualize_boxes_and_labels_on_image_array(self,
-                                                  image,
-                                                  boxes,
-                                                  classes,
-                                                  scores,
-                                                  category_index,
-                                                  instance_masks=None,
-                                                  keypoints=None,
-                                                  use_normalized_coordinates=False,
-                                                  max_boxes_to_draw=20,
-                                                  min_score_thresh=.5,
-                                                  agnostic_mode=False,
-                                                  line_thickness=4):
+    def visualize_boxes_and_labels_on_image_array(
+            self,
+            image,
+            boxes,
+            classes,
+            scores,
+            category_index,
+            instance_masks=None,
+            keypoints=None,
+            use_normalized_coordinates=False,
+            max_boxes_to_draw=20,
+            min_score_thresh=.5,
+            agnostic_mode=False,
+            line_thickness=4
+    ):
         """Overlay labeled boxes on an image with formatted scores and label names.
         This function groups boxes that correspond to the same location
         and creates a display string for each detection and overlays these
@@ -271,7 +286,7 @@ class PedestrianDetector(object):
                         else:
                             class_name = 'N/A'
 
-                        display_str = '{}: {}%'.format(class_name, int(100*scores[i]))
+                        display_str = '{}: {}%'.format(class_name, int(100 * scores[i]))
 
                     else:
                         display_str = 'score: {}%'.format(int(100 * scores[i]))
@@ -289,11 +304,7 @@ class PedestrianDetector(object):
             ymin, xmin, ymax, xmax = box
 
             if instance_masks is not None:
-                self.draw_mask_on_image_array(
-                    image,
-                    box_to_instance_masks_map[box],
-                    color=color
-                )
+                self.draw_mask_on_image_array(image, box_to_instance_masks_map[box], color=color)
 
             self.draw_bounding_box_on_image_array(
                 image,
@@ -304,7 +315,8 @@ class PedestrianDetector(object):
                 color=color,
                 thickness=line_thickness,
                 display_str_list=box_to_display_str_map[box],
-                use_normalized_coordinates=use_normalized_coordinates)
+                use_normalized_coordinates=use_normalized_coordinates
+            )
 
             if keypoints is not None:
                 self.draw_keypoints_on_image_array(
@@ -312,20 +324,23 @@ class PedestrianDetector(object):
                     box_to_keypoints_map[box],
                     color=color,
                     radius=line_thickness / 2,
-                    use_normalized_coordinates=use_normalized_coordinates)
+                    use_normalized_coordinates=use_normalized_coordinates
+                )
 
         return image
 
-    def draw_bounding_box_on_image_array(self,
-                                         image,
-                                         ymin,
-                                         xmin,
-                                         ymax,
-                                         xmax,
-                                         color='red',
-                                         thickness=4,
-                                         display_str_list=(),
-                                         use_normalized_coordinates=True):
+    def draw_bounding_box_on_image_array(
+            self,
+            image,
+            ymin,
+            xmin,
+            ymax,
+            xmax,
+            color='red',
+            thickness=4,
+            display_str_list=(),
+            use_normalized_coordinates=True
+    ):
         """Adds a bounding box to an image (numpy array).
         Args:
           image: a numpy array with shape [height, width, 3].
@@ -342,21 +357,23 @@ class PedestrianDetector(object):
             coordinates as absolute.
         """
         image_pil = Image.fromarray(np.uint8(image)).convert('RGB')
-        self.draw_bounding_box_on_image(image_pil, ymin, xmin, ymax, xmax, color, thickness, display_str_list,
-                                        use_normalized_coordinates)
+        self.draw_bounding_box_on_image(
+            image_pil, ymin, xmin, ymax, xmax, color, thickness, display_str_list, use_normalized_coordinates
+        )
         np.copyto(image, np.array(image_pil))
 
-
-    def draw_bounding_box_on_image(self,
-                                   image,
-                                   ymin,
-                                   xmin,
-                                   ymax,
-                                   xmax,
-                                   color='red',
-                                   thickness=4,
-                                   display_str_list=(),
-                                   use_normalized_coordinates=True):
+    def draw_bounding_box_on_image(
+            self,
+            image,
+            ymin,
+            xmin,
+            ymax,
+            xmax,
+            color='red',
+            thickness=4,
+            display_str_list=(),
+            use_normalized_coordinates=True
+    ):
         """Adds a bounding box to an image.
         Each string in display_str_list is displayed on a separate line above the
         bounding box in black text on a rectangle filled with the input 'color'.
@@ -384,7 +401,9 @@ class PedestrianDetector(object):
         else:
             (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
 
-        draw.line([(left, top), (left, bottom), (right, bottom), (right, top), (left, top)], width=thickness, fill=color)
+        draw.line([(left, top), (left, bottom), (right, bottom), (right, top), (left, top)],
+                  width=thickness,
+                  fill=color)
 
         try:
             font = ImageFont.truetype('arial.ttf', 24)
@@ -409,16 +428,12 @@ class PedestrianDetector(object):
         for display_str in display_str_list[::-1]:
             text_width, text_height = font.getsize(display_str)
             margin = np.ceil(0.05 * text_height)
-            draw.rectangle([(left, text_bottom - text_height - 2 * margin), (left + text_width, text_bottom)], fill=color)
+            draw.rectangle([(left, text_bottom - text_height - 2 * margin), (left + text_width, text_bottom)],
+                           fill=color)
             draw.text((left + margin, text_bottom - text_height - margin), display_str, fill='black', font=font)
             text_bottom -= text_height - 2 * margin
 
-    def draw_bounding_boxes_on_image_array(self,
-                                           image,
-                                           boxes,
-                                           color='red',
-                                           thickness=4,
-                                           display_str_list_list=()):
+    def draw_bounding_boxes_on_image_array(self, image, boxes, color='red', thickness=4, display_str_list_list=()):
         """Draws bounding boxes on image (numpy array).
         Args:
           image: a numpy array object.
@@ -438,13 +453,7 @@ class PedestrianDetector(object):
         self.draw_bounding_boxes_on_image(image_pil, boxes, color, thickness, display_str_list_list)
         np.copyto(image, np.array(image_pil))
 
-
-    def draw_bounding_boxes_on_image(self,
-                                     image,
-                                     boxes,
-                                     color='red',
-                                     thickness=4,
-                                     display_str_list_list=()):
+    def draw_bounding_boxes_on_image(self, image, boxes, color='red', thickness=4, display_str_list_list=()):
         """Draws bounding boxes on image.
         Args:
           image: a PIL.Image object.
@@ -474,16 +483,11 @@ class PedestrianDetector(object):
             if display_str_list_list:
                 display_str_list = display_str_list_list[i]
 
-            self.draw_bounding_box_on_image(image, boxes[i, 0], boxes[i, 1], boxes[i, 2],
-                                            boxes[i, 3], color, thickness, display_str_list)
+            self.draw_bounding_box_on_image(
+                image, boxes[i, 0], boxes[i, 1], boxes[i, 2], boxes[i, 3], color, thickness, display_str_list
+            )
 
-
-    def draw_keypoints_on_image_array(self,
-                                      image,
-                                      keypoints,
-                                      color='red',
-                                      radius=2,
-                                      use_normalized_coordinates=True):
+    def draw_keypoints_on_image_array(self, image, keypoints, color='red', radius=2, use_normalized_coordinates=True):
         """Draws keypoints on an image (numpy array).
         Args:
           image: a numpy array with shape [height, width, 3].
@@ -497,13 +501,7 @@ class PedestrianDetector(object):
         self.draw_keypoints_on_image(image_pil, keypoints, color, radius, use_normalized_coordinates)
         np.copyto(image, np.array(image_pil))
 
-
-    def draw_keypoints_on_image(self,
-                                image,
-                                keypoints,
-                                color='red',
-                                radius=2,
-                                use_normalized_coordinates=True):
+    def draw_keypoints_on_image(self, image, keypoints, color='red', radius=2, use_normalized_coordinates=True):
         """Draws keypoints on an image.
         Args:
           image: a PIL.Image object.
@@ -524,8 +522,8 @@ class PedestrianDetector(object):
 
         for keypoint_x, keypoint_y in zip(keypoints_x, keypoints_y):
             draw.ellipse([(keypoint_x - radius, keypoint_y - radius), (keypoint_x + radius, keypoint_y + radius)],
-                         outline=color, fill=color)
-
+                         outline=color,
+                         fill=color)
 
     def draw_mask_on_image_array(self, image, mask, color='red', alpha=0.7):
         """Draws mask on an image.
@@ -552,6 +550,6 @@ class PedestrianDetector(object):
 
         solid_color = np.expand_dims(np.ones_like(mask), axis=2) * np.reshape(list(rgb), [1, 1, 3])
         pil_solid_color = Image.fromarray(np.uint8(solid_color)).convert('RGBA')
-        pil_mask = Image.fromarray(np.uint8(255.0*alpha*mask)).convert('L')
+        pil_mask = Image.fromarray(np.uint8(255.0 * alpha * mask)).convert('L')
         pil_image = Image.composite(pil_solid_color, pil_image, pil_mask)
         np.copyto(image, np.array(pil_image.convert('RGB')))
