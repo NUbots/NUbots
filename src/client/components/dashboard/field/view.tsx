@@ -5,7 +5,7 @@ import * as React from 'react'
 import { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
 
-import { SVGRenderer } from '../../../canvas/svg_renderer'
+import { SVGRenderer } from '../../../render2d/svg_renderer'
 
 import { FieldModel } from './model'
 import * as style from './style.css'

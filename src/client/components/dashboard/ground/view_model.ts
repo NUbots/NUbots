@@ -1,14 +1,14 @@
 import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
 
-import { BasicAppearance } from '../../../canvas/appearance/basic_appearance'
-import { LineAppearance } from '../../../canvas/appearance/line_appearance'
-import { CircleGeometry } from '../../../canvas/geometry/circle_geometry'
-import { LineGeometry } from '../../../canvas/geometry/line_geometry'
-import { PolygonGeometry } from '../../../canvas/geometry/polygon_geometry'
-import { Group } from '../../../canvas/object/group'
-import { Shape } from '../../../canvas/object/shape'
 import { Vector2 } from '../../../math/vector2'
+import { BasicAppearance } from '../../../render2d/appearance/basic_appearance'
+import { LineAppearance } from '../../../render2d/appearance/line_appearance'
+import { CircleGeometry } from '../../../render2d/geometry/circle_geometry'
+import { LineGeometry } from '../../../render2d/geometry/line_geometry'
+import { PolygonGeometry } from '../../../render2d/geometry/polygon_geometry'
+import { Group } from '../../../render2d/object/group'
+import { Shape } from '../../../render2d/object/shape'
 
 import { GroundModel } from './model'
 
