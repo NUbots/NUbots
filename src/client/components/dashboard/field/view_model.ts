@@ -31,6 +31,18 @@ export class FieldViewModel {
   }
 
   @computed
+  get camera(): Transform {
+    return Transform.of({
+      scale: { x: 1.0 / this.model.fieldLength, y: 1.0 / this.model.fieldLength },
+    })
+  }
+
+  @computed
+  get aspectRatio(): number {
+    return this.model.fieldLength / this.model.fieldWidth
+  }
+
+  @computed
   private get ground() {
     return GroundViewModel.of(this.model.ground).ground
   }

@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Transform } from '../../math/transform'
 import { Group as GroupGeometry } from '../object/group'
 
-import { GeometryView, toSvgTransform } from './svg'
+import { GeometryView, toSvgTransform } from './rendering'
 
 type Props = { model: GroupGeometry, world: Transform }
 export const Group = observer(({ model: { children, transform }, world }: Props) => (

@@ -5,7 +5,7 @@ import { Transform } from '../../math/transform'
 import { TextGeometry } from '../geometry/text_geometry'
 import { Shape } from '../object/shape'
 
-import { toSvgProps, toSvgTransform } from './svg'
+import { toSvgProps, toSvgTransform } from './rendering'
 
 type Props = { model: Shape<TextGeometry>, world: Transform }
 export const Text = observer(({ model: { geometry, appearance }, world }: Props) => {

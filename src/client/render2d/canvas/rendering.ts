@@ -55,7 +55,7 @@ export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Object2d, wor
   }
 }
 
-function applyTransform(ctx: CanvasRenderingContext2D, transform: Transform): void {
+export function applyTransform(ctx: CanvasRenderingContext2D, transform: Transform): void {
   ctx.translate(transform.translate.x, transform.translate.y)
   ctx.scale(transform.scale.x, transform.scale.y)
   ctx.rotate(transform.rotate * (transform.anticlockwise ? 1 : -1))

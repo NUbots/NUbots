@@ -5,7 +5,7 @@ import { Transform } from '../../math/transform'
 import { MarkerGeometry } from '../geometry/marker_geometry'
 import { Shape } from '../object/shape'
 
-import { toSvgProps } from './svg'
+import { toSvgProps } from './rendering'
 
 type Props = { model: Shape<MarkerGeometry>, world: Transform }
 export const Marker = observer(({ model: { geometry: { x, y, radius, heading }, appearance } }: Props) => {

@@ -6,7 +6,7 @@ import { Vector2 } from '../../math/vector2'
 import { ArcGeometry } from '../geometry/arc_geometry'
 import { Shape } from '../object/shape'
 
-import { toSvgProps } from './svg'
+import { toSvgProps } from './rendering'
 
 
 type Props = { model: Shape<ArcGeometry>, world: Transform }

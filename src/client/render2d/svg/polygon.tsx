@@ -5,7 +5,7 @@ import { Transform } from '../../math/transform'
 import { PolygonGeometry } from '../geometry/polygon_geometry'
 import { Shape } from '../object/shape'
 
-import { toSvgProps } from './svg'
+import { toSvgProps } from './rendering'
 
 type Props = { model: Shape<PolygonGeometry>, world: Transform }
 export const Polygon = observer(({ model: { geometry: { points }, appearance } }: Props) => (
