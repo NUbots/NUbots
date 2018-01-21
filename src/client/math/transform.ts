@@ -75,6 +75,14 @@ export class Transform {
     })
   }
 
+  isIdentity(): boolean {
+    return this.scale.x === 1
+      && this.scale.y === 1
+      && this.translate.x === 0
+      && this.translate.y === 0
+      && this.rotate === 0
+  }
+
   clone(): Transform {
     return new Transform({
       anticlockwise: this.anticlockwise,
