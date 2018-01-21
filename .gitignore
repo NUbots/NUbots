@@ -1,4 +1,4 @@
-.DS_STORE
+.DS_Store
 node_modules
 .module-cache
 build
@@ -6,6 +6,9 @@ build
 # IntelliJ IDEA
 /.idea/workspace.xml
 /.idea/tasks.xml
+
+# Sublime Text
+NUsight2.sublime-workspace
 
 # Jest coverage report
 /coverage
