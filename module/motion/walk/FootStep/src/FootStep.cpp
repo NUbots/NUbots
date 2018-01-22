@@ -36,12 +36,19 @@ namespace motion {
         using utility::nubugger::graph;
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
-            return -std::tanh(pos.x()) * step_height * std::pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))));
+            if (pos.x() > 0) {
+                return std::pow(2, std::pow(-pos.x() / d, -step_steep));
+            }
+            else {
+                return -1 * std::pow(2, std::pow(-pos.x() / d, -step_steep));
+            }
+            // return -std::tanh(pos.x()) * step_height * std::pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))));
         }
 
         double FootStep::f_y(const Eigen::Vector3d& pos) {
-            return step_height * pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))))
-                   - pos.y() * abs((std::tanh(10 * pos.y())));
+            return std::pow(2, std::pow(-pos.x(), -step_steep));
+            // return step_height * pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))))
+            //     - pos.y() * abs((std::tanh(10 * pos.y())));
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
@@ -100,8 +107,8 @@ namespace motion {
 
                     // Construct a torso to foot ground space (support foot centric world oriented space)
                     Eigen::Affine3d Htg;
-                    Htg.linear()      = Rtg.linear();         // Rotation from Rtg
-                    Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
+                    Htg.linear()      = Rtg.linear();          // Rotation from Rtg
+                    Htg.translation() = -Htf_s.translation();  // Translation is the same as to the support foot
 
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
@@ -110,8 +117,6 @@ namespace motion {
 
                     // Direction of the target from the swing foot
                     Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
-                    // Eigen::Vector3d rAF_wg = rAF_wf;
-                    // rAF_wg.z()             = 0;
                     // Create a rotation to the plane that cuts through the two positions
                     Eigen::Matrix3d Rgp;
                     // X axis is the direction towards the target
@@ -128,15 +133,14 @@ namespace motion {
                     Hgp.linear()      = Rgp;   // Rotation from above
                     Hgp.translation() = rAGg;  // Translation to target
 
-                    Eigen::Vector3d p1 = Hgp.inverse() * rF_wGg;
-                    Eigen::Vector3d p2 = Hgp.inverse() * rAGg;
+                    // Eigen::Vector3d p1 = Hgp.inverse() * rF_wGg;
+                    // Eigen::Vector3d p2 = Hgp.inverse() * rAGg;
 
                     // Make a transformation matrix that goes the whole way
                     Eigen::Affine3d Htp = Htg * Hgp;
 
                     // Swing foots position on plane
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
-                    log(rF_wPp.transpose());
 
                     // Swing foots new target position on the plane
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
@@ -145,12 +149,23 @@ namespace motion {
                     emit(graph("FootMove", g.x(), g.y()));
 
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+
                     Eigen::Affine3d Htf_t;
                     Htf_t.linear()      = Eigen::Matrix3d::Identity();
                     Htf_t.translation() = rF_tTt;
                     // Htf_t.translation().z() += 0.01;
                     // Apply IK
-                    // log("\nrF_tPp", rF_tPp);
+                    /*log(rF_wGg.transpose(),
+                        "\n",
+                        rAGg.transpose(),
+                        "\n",
+                        rAF_wg.transpose(),
+                        "\n",
+                        rF_wPp.transpose(),
+                        "\n",
+                        rF_tPp.transpose(),
+                        "\n",
+                        rF_tTt.transpose());*/
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
