@@ -11,7 +11,7 @@ namespace motion {
         class FootStep : public NUClear::Reactor {
         private:
             double f_x(const Eigen::Vector3d& vec);
-            double f_z(const Eigen::Vector3d& vec);
+            double f_y(const Eigen::Vector3d& vec);
 
             size_t subsumptionId;
 
