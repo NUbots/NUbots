@@ -17,7 +17,8 @@ namespace motion {
 
             double step_height;
             double step_steep;
-            double d;
+            double well_width;
+            double c;
 
         public:
             /// @brief Called by the powerplant to build and setup the FootStep reactor.

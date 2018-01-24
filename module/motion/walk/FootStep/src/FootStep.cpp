@@ -36,17 +36,12 @@ namespace motion {
         using utility::nubugger::graph;
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
-            if (pos.x() > 0) {
-                return std::pow(2, std::pow(-pos.x() / d, -step_steep));
-            }
-            else {
-                return -1 * std::pow(2, std::pow(-pos.x() / d, -step_steep));
-            }
+            return (pos.x() < 0 ? 1 : -1) * std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
             // return -std::tanh(pos.x()) * step_height * std::pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))));
         }
 
         double FootStep::f_y(const Eigen::Vector3d& pos) {
-            return std::pow(2, std::pow(-pos.x(), -step_steep));
+            return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
             // return step_height * pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))))
             //     - pos.y() * abs((std::tanh(10 * pos.y())));
         }
@@ -57,9 +52,11 @@ namespace motion {
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
                 step_height = config["step_height"];
-                d           = config["d"];
+                well_width  = config["well_width"];
                 step_steep  = config["step_steep"];
-
+                c           = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
+                     * std::pow(step_steep * step_height + std::pow(step_steep, 2) * step_height, -1 / step_steep))
+                    / well_width;
                 double x = config["test"]["x"].as<double>();
                 double y = config["test"]["y"].as<double>();
                 double z = config["test"]["z"].as<double>();
@@ -72,7 +69,7 @@ namespace motion {
             on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
 
-                    // Get support foot coordinate system
+                    // Get support foot coordinate systemrF_tPp
 
                     Eigen::Affine3d Htf_s;  // support foot
                     Eigen::Affine3d Htf_w;  // swing foot
@@ -99,16 +96,16 @@ namespace motion {
                     // Get the yawless world rotation
                     // TODO: Euler angle decomposition may not be in the correct order?
                     Eigen::Affine3d Rtg =
-                        Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(2, 1, 0).x(), Eigen::Vector3d::UnitZ());
+                        Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(2, 1, 0).z(), Eigen::Vector3d::UnitZ());
 
                     // Apply the foot yaw to the yawless world rotation
                     // TODO: Euler angle decomposition may not be in the correct order?
-                    Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(2, 1, 0).x(), Eigen::Vector3d::UnitZ());
+                    Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(2, 1, 0).z(), Eigen::Vector3d::UnitZ());
 
                     // Construct a torso to foot ground space (support foot centric world oriented space)
                     Eigen::Affine3d Htg;
-                    Htg.linear()      = Rtg.linear();          // Rotation from Rtg
-                    Htg.translation() = -Htf_s.translation();  // Translation is the same as to the support foot
+                    Htg.linear()      = Rtg.linear();         // Rotation from Rtg
+                    Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
 
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
@@ -155,17 +152,17 @@ namespace motion {
                     Htf_t.translation() = rF_tTt;
                     // Htf_t.translation().z() += 0.01;
                     // Apply IK
-                    /*log(rF_wGg.transpose(),
-                        "\n",
-                        rAGg.transpose(),
-                        "\n",
-                        rAF_wg.transpose(),
-                        "\n",
-                        rF_wPp.transpose(),
-                        "\n",
-                        rF_tPp.transpose(),
-                        "\n",
-                        rF_tTt.transpose());*/
+                    // log(rF_wGg.transpose(),
+                    //     "\n",
+                    //     rAGg.transpose(),
+                    //     "\n",
+                    //     rAF_wg.transpose(),
+                    //     "\n",
+                    //     rF_wPp.transpose(),
+                    //     "\n",
+                    //     rF_tPp.transpose(),
+                    //     "\n",
+                    //     rF_tTt.transpose());
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
