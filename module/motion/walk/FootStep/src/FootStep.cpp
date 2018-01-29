@@ -37,13 +37,10 @@ namespace motion {
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
             return (pos.x() < 0 ? 1 : -1) * std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
-            // return -std::tanh(pos.x()) * step_height * std::pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))));
         }
 
         double FootStep::f_y(const Eigen::Vector3d& pos) {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
-            // return step_height * pow(2, (step_steep / -std::abs(std::pow(pos.x(), d))))
-            //     - pos.y() * abs((std::tanh(10 * pos.y())));
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
@@ -66,120 +63,102 @@ namespace motion {
             });
 
 
-            on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
-                [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
+            on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then([this](
+                const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
 
-                    // Get support foot coordinate systemrF_tPp
+                // Get support foot and swing foot coordinate systems
 
-                    Eigen::Affine3d Htf_s;  // support foot
-                    Eigen::Affine3d Htf_w;  // swing foot
+                Eigen::Affine3d Htf_s;  // support foot
+                Eigen::Affine3d Htf_w;  // swing foot
 
-                    // Right foot is the swing foot
-                    if (target.isRightFootSwing) {
-                        // Transform of left foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                        // Transform of right foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                    }
-                    // Left foot is the swing foot
-                    else {
-                        // Transform of right foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                        // Transform of left foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                    }
+                // Right foot is the swing foot
+                if (target.isRightFootSwing) {
+                    // Transform of left foot to torso
+                    Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                    // Transform of right foot to torso
+                    Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                }
+                // Left foot is the swing foot
+                else {
+                    // Transform of right foot to torso
+                    Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                    // Transform of left foot to torso
+                    Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                }
 
-                    // Get orientation for world (Rotation of world->torso)
-                    Eigen::Affine3d Rtw;
-                    Rtw.linear() = Eigen::Affine3d(sensors.world).rotation();
+                // Get orientation for world (Rotation of world->torso)
+                Eigen::Affine3d Rtw;
+                Rtw.linear() = Eigen::Affine3d(sensors.world).rotation();
 
-                    // Get the yawless world rotation
-                    // TODO: Euler angle decomposition may not be in the correct order?
-                    Eigen::Affine3d Rtg =
-                        Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(2, 1, 0).z(), Eigen::Vector3d::UnitZ());
+                // Get the yawless world rotation
+                Eigen::Affine3d Rtg =
+                    Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(0, 2, 1).x(), Eigen::Vector3d::UnitZ());
 
-                    // Apply the foot yaw to the yawless world rotation
-                    // TODO: Euler angle decomposition may not be in the correct order?
-                    Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(2, 1, 0).z(), Eigen::Vector3d::UnitZ());
+                // Apply the foot yaw to the yawless world rotation
+                Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(0, 2, 1).x(), Eigen::Vector3d::UnitZ());
 
-                    // Construct a torso to foot ground space (support foot centric world oriented space)
-                    Eigen::Affine3d Htg;
-                    Htg.linear()      = Rtg.linear();         // Rotation from Rtg
-                    Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
+                // Construct a torso to foot ground space (support foot centric world oriented space)
+                Eigen::Affine3d Htg;
+                Htg.linear()      = Rtg.linear();         // Rotation from Rtg
+                Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
 
-                    // Vector to the swing foot in ground space
-                    Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
-                    // The target position is already measured in ground space
-                    Eigen::Vector3d rAGg = target.position;
+                // Vector to the swing foot in ground space
+                Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
+                // The target position is already measured in ground space
+                Eigen::Vector3d rAGg = target.position;
 
-                    // Direction of the target from the swing foot
-                    Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
-                    // Create a rotation to the plane that cuts through the two positions
-                    Eigen::Matrix3d Rgp;
-                    // X axis is the direction towards the target
-                    Rgp.leftCols<1>() = rAF_wg.normalized();
-                    // Y axis is straight up
-                    Rgp.middleCols<1>(1) = Eigen::Vector3d::UnitZ();
-                    // Z axis is the cross product
-                    Rgp.rightCols<1>() = Rgp.leftCols<1>().cross(Rgp.middleCols<1>(1)).normalized();
-                    // Fix X axis
-                    Rgp.leftCols<1>() = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>());
+                // Direction of the target from the swing foot
+                Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
+                // Create a rotation to the plane that cuts through the two positions
+                Eigen::Matrix3d Rgp;
+                // X axis is the direction towards the target
+                Rgp.leftCols<1>() = rAF_wg.normalized();
+                // Y axis is straight up
+                Rgp.middleCols<1>(1) = Eigen::Vector3d::UnitZ();
+                // Z axis is the cross product of X and Y
+                Rgp.rightCols<1>() = Rgp.leftCols<1>().cross(Rgp.middleCols<1>(1)).normalized();
+                // Fix X axis by finding the cross product Y and Z
+                Rgp.leftCols<1>() = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>());
 
-                    // Upgrade this to a transform
-                    Eigen::Affine3d Hgp;       // plane to ground transform
-                    Hgp.linear()      = Rgp;   // Rotation from above
-                    Hgp.translation() = rAGg;  // Translation to target
+                // Create transform based on above rotation
+                Eigen::Affine3d Hgp;       // plane to ground transform
+                Hgp.linear()      = Rgp;   // Rotation from above
+                Hgp.translation() = rAGg;  // Translation to target
 
-                    // Eigen::Vector3d p1 = Hgp.inverse() * rF_wGg;
-                    // Eigen::Vector3d p2 = Hgp.inverse() * rAGg;
+                // Make a transformation matrix that goes the whole way
+                Eigen::Affine3d Htp = Htg * Hgp;
 
-                    // Make a transformation matrix that goes the whole way
-                    Eigen::Affine3d Htp = Htg * Hgp;
+                // Swing foot's position on plane
+                Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
-                    // Swing foots position on plane
-                    Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
+                // Swing foot's new target position on the plane
+                Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.0001;
 
-                    // Swing foots new target position on the plane
-                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
+                // Foot target's position relative to torso
+                Eigen::Vector3d rF_tTt = Htp * rF_tPp;
 
-                    auto g = Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 1000;
-                    emit(graph("FootMove", g.x(), g.y()));
+                // Create transform to move foot
+                Eigen::Affine3d Htf_t;
+                Htf_t.linear()      = Rtg.inverse().linear();  // Ground (yawless world) rotation
+                Htf_t.translation() = rF_tTt;                  // Translation to foot target
 
-                    Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+                Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
+                auto joints =
+                    calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
 
-                    Eigen::Affine3d Htf_t;
-                    Htf_t.linear()      = Eigen::Matrix3d::Identity();
-                    Htf_t.translation() = rF_tTt;
-                    // Htf_t.translation().z() += 0.01;
-                    // Apply IK
-                    // log(rF_wGg.transpose(),
-                    //     "\n",
-                    //     rAGg.transpose(),
-                    //     "\n",
-                    //     rAF_wg.transpose(),
-                    //     "\n",
-                    //     rF_wPp.transpose(),
-                    //     "\n",
-                    //     rF_tPp.transpose(),
-                    //     "\n",
-                    //     rF_tTt.transpose());
-                    Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
-                    auto joints =
-                        calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
+                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
-                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                for (const auto& joint : joints) {
+                    waypoints->push_back({subsumptionId,
+                                          NUClear::clock::now() + std::chrono::milliseconds(10),
+                                          joint.first,
+                                          joint.second,
+                                          20,
+                                          100});  // TODO: support separate gains for each leg
+                }
 
-                    for (const auto& joint : joints) {
-                        waypoints->push_back({subsumptionId,
-                                              NUClear::clock::now() + std::chrono::milliseconds(10),
-                                              joint.first,
-                                              joint.second,
-                                              20,
-                                              100});  // TODO: support separate gains for each leg
-                    }
-
-                    emit(waypoints);
-                });
+                emit(waypoints);
+            });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
                 RegisterAction{subsumptionId,
