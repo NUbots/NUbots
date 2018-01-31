@@ -20,7 +20,7 @@ syntax = "proto3";
 
 package message.motion;
 
-import "Vector.proto";
+import "Matrix.proto";
 import "google/protobuf/timestamp.proto";
 
 message FootTarget {
@@ -28,6 +28,6 @@ message FootTarget {
     google.protobuf.Timestamp timestamp = 1;
     // identifies which foot is the swing foot
     bool isRightFootSwing = 2;
-    // target position of the swing foot relative to the support foot in world space
-    vec3 position = 3;
+    // Transform from world oriented support foot space (s) to target (a)
+    mat4 Haf_s = 3;
 }
