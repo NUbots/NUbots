@@ -85,11 +85,21 @@ namespace motion {
                     Eigen::Vector3d rATt = Htg * rAGg;
                     // Next torso target in torso space
                     Eigen::Vector3d rT_tTt = rATt.normalized() * 0.01;
-                    // Get target
-                    Eigen::Vector3d rF_tTt = ;
+                
+                    // Get support foot to torso rotation as quaternion
+                    Eigen::Quaterniond Rtf_s;
+                    Rtf_s = Htf_s.inverse().linear();
+                    // Get support foot to target as quaternion
+                    Eigen::Quaterniond Raf_s;
+                    Raf_s = target.Haf_s.linear();
+                    // Create rotation of torso to torso target
+                    Eigen::Matrix3d Rt_tt;
+                    // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
+                    // TODO: determine t
+                    Rt_tt = Rtf_s.slerp(t, Raf_s).toRotationMatrix();
                     Eigen::Affine3d Htf_t;
-                    Htf_t.linear()      = Has.inverse().linear();  // Support foot rotation
-                    Htf_t.translation() = rF_tTt;                  // Translation to foot target
+                    Htf_t.linear()      = Rt_tt;  // Rotation as above from slerp
+                    Htf_t.translation() = rT_tTt;   // Translation to foot target
 
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
