@@ -138,22 +138,25 @@ namespace motion {
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
 
-                    // Torso to target
+                    // Torso to target transform
                     Eigen::Affine3d Hat;
                     Hat = target.Haf_s * Htf_s.inverse();
+                    // Get torso to swing foot rotation as quaternion
+                    Eigen::Quaterniond Rf_wt;
+                    Rf_wt = Htf_w.inverse().linear();
+                    // Create rotation of torso to target as a quaternion
+                    Eigen::Quaterniond Rat;
+                    Rat = Hat.linear();
+                    // Create rotation matrix for foot target
+                    Eigen::Matrix3d Rf_tt;
+                    // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
+                    // TODO: determine t
+                    Rf_tt = Rf_wt.slerp(t, Rat).toRotationMatrix();
 
-                    // Create transform from foot target to torso
                     Eigen::Affine3d Htf_t;
-                    Htf_t.translation() = rF_tTt;
-                    Htf_t.linear()      = Hat.inverse().linear();
-                    // Eigen::Quaternion Ht? = Htf_t.toQuaternion().slerp(t, Htf_w.inverse().toQuaternion());
-                    // Eigen::Affine
-                    // Quaternion toRotationMatrix()
-
-                    // Eigen::Affine3d Htf_t;
-                    // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
-                    // Htf_t.linear()      = ;        // Support foot rotation
-                    // Htf_t.translation() = rF_tTt;  // Translation to foot target
+                    //Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
+                    Htf_t.linear()      = Rf_tt;        // Rotation from above
+                    Htf_t.translation() = rF_tTt;  // Translation to foot target
 
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
