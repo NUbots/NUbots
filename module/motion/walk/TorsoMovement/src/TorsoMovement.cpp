@@ -38,7 +38,6 @@ namespace motion {
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
-
                 emit(std::make_unique<TorsoMovement>(
                     NUClear::clock::now() + std::chrono::seconds(1), foot, Eigen::Vector3d(x, y, z)));
             });
@@ -49,7 +48,6 @@ namespace motion {
                     // Get support foot and swing foot coordinate systems
 
                     Eigen::Affine3d Htf_s;  // support foot
-                    Eigen::Affine3d Htf_w;  // swing foot
 
                     // Right foot is the swing foot
                     if (target.isRightFootSupport) {
@@ -62,6 +60,8 @@ namespace motion {
                         Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                     }
 
+                    Eigen::Affine3d  Haf_s;
+                    Haf_s = target.Haf_s;
 
                     // Get orientation for world (Rotation of world->torso)
                     Eigen::Affine3d Rtw;
@@ -80,26 +80,30 @@ namespace motion {
                     Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
 
                     // Target position is in ground space
-                    Eigen::Vector3d rAGg = target.position;
+                    Eigen::Vector3d rAGg = Haf_s.translation();
                     // Position of target in torso space
                     Eigen::Vector3d rATt = Htg * rAGg;
                     // Next torso target in torso space
-                    Eigen::Vector3d rT_tTt = rATt.normalized() * 0.01;
-                
-                    // Get support foot to torso rotation as quaternion
-                    Eigen::Quaterniond Rtf_s;
-                    Rtf_s = Htf_s.inverse().linear();
-                    // Get support foot to target as quaternion
-                    Eigen::Quaterniond Raf_s;
-                    Raf_s = target.Haf_s.linear();
+                    Eigen::Vector3d rT_tTt = rATt * 0.001;
+                    // Create vector from torso to foot target
+                    Eigen::Vector3d rF_tF_st = -rT_tTt;
+                    // Target rotation from torso space
+                    Eigen::Affine3d Hat;
+                    Hat = target.Haf_s * Htf_s.inverse();
+                    // Get support foot rotation from torso as quaternion
+                    Eigen::Quaterniond Rf_st;
+                    Rf_st = Htf_s.inverse().linear();
+                    // Get target rotation from torso as quaternion
+                    Eigen::Quaterniond Rat;
+                    Rat = Hat.linear();
                     // Create rotation of torso to torso target
-                    Eigen::Matrix3d Rt_tt;
+                    Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
                     // TODO: determine t
-                    Rt_tt = Rtf_s.slerp(t, Raf_s).toRotationMatrix();
+                    Rf_tt = Rf_st.slerp(t, Rat).toRotationMatrix();
                     Eigen::Affine3d Htf_t;
-                    Htf_t.linear()      = Rt_tt;  // Rotation as above from slerp
-                    Htf_t.translation() = rT_tTt;   // Translation to foot target
+                    Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
+                    Htf_t.translation() = rF_tF_st;   // Translation to foot target
 
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
