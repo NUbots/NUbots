@@ -1,7 +1,8 @@
 step_height: 0.1
 well_width: 0.02
-step_steep: 1
+step_steep: 2
 test:
-  x: 0.05
-  y: 0.07
-  z: 0.01
+  x: 0.07
+  y: -0.07
+  z: 0.00
+foot: 1

@@ -58,14 +58,17 @@ namespace motion {
                 double y = config["test"]["y"].as<double>();
                 double z = config["test"]["z"].as<double>();
                 int foot = config["foot"].as<int>();
+                Eigen::Affine3d Haf_s;
+                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
+                Haf_s.linear()      = Eigen::Matrix3d::Identity();
                 log("Making new foot target at", x, y, z);
                 emit(std::make_unique<FootTarget>(
-                    NUClear::clock::now() + std::chrono::seconds(1), foot, Eigen::Vector3d(x, y, z)));
+                    NUClear::clock::now() + std::chrono::seconds(1), foot, Haf_s.matrix()));
             });
 
 
             on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
-                [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& Has) {
+                [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
 
                     // Get support foot and swing foot coordinate systems
 
@@ -86,7 +89,8 @@ namespace motion {
                         // Transform of left foot to torso
                         Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                     }
-
+                    Eigen::Affine3d Haf_s;
+                    Haf_s = target.Haf_s;
                     // Get orientation for world (Rotation of world->torso)
                     Eigen::Affine3d Rtw;
                     Rtw.linear() = Eigen::Affine3d(sensors.world).rotation();
@@ -106,7 +110,7 @@ namespace motion {
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
                     // The target position is already measured in ground space
-                    Eigen::Vector3d rAGg = -target.Haf_s.translation();
+                    Eigen::Vector3d rAGg = -Haf_s.translation();
 
                     // Direction of the target from the swing foot
                     Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
@@ -133,14 +137,14 @@ namespace motion {
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
                     // Swing foot's new target position on the plane
-                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.003;
+                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
 
                     // Torso to target transform
                     Eigen::Affine3d Hat;
-                    Hat = target.Haf_s * Htf_s.inverse();
+                    Hat = Haf_s * Htf_s.inverse();
                     // Get torso to swing foot rotation as quaternion
                     Eigen::Quaterniond Rf_wt;
                     Rf_wt = Htf_w.inverse().linear();
@@ -151,11 +155,11 @@ namespace motion {
                     Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
                     // TODO: determine t
-                    Rf_tt = Rf_wt.slerp(t, Rat).toRotationMatrix();
+                    Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
 
                     Eigen::Affine3d Htf_t;
-                    //Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
-                    Htf_t.linear()      = Rf_tt;        // Rotation from above
+                    // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
+                    Htf_t.linear()      = Rf_tt;   // Rotation from above
                     Htf_t.translation() = rF_tTt;  // Translation to foot target
 
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
