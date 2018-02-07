@@ -17,5 +17,5 @@ NUCLEAR_ROLE(
     behaviour::Controller
 
     #Motion
-    motion::walk::FootStep
+    motion::walk::TorsoMovement
 )

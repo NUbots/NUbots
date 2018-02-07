@@ -23,11 +23,11 @@ package message.motion;
 import "Matrix.proto";
 import "google/protobuf/timestamp.proto";
 
-message TorsoMovement {
+message TorsoTarget {
 
     google.protobuf.Timestamp timestamp = 1;
     // identifies which foot is the swing foot
     bool isRightFootSupport = 2;
     // Transform from world oriented support foot space (s) to target (a)
-    mat4 Haf_s = 3;
+    mat44 Haf_s = 3;
 }

@@ -8,6 +8,7 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
+#include "message/motion/TorsoTarget.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -25,7 +26,7 @@ namespace motion {
         using message::behaviour::ServoCommand;
         using message::input::Sensors;
         using message::motion::KinematicsModel;
-        using message::motion::TorsoMovement;
+        using message::motion::TorsoTarget;
         using utility::behaviour::RegisterAction;
         using utility::input::LimbID;
         using utility::input::ServoID;
@@ -38,13 +39,20 @@ namespace motion {
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
-                emit(std::make_unique<TorsoMovement>(
-                    NUClear::clock::now() + std::chrono::seconds(1), foot, Eigen::Vector3d(x, y, z)));
+                double x = config["test"]["x"].as<double>();
+                double y = config["test"]["y"].as<double>();
+                double z = config["test"]["z"].as<double>();
+                int foot = config["foot"].as<int>();
+                Eigen::Affine3d Haf_s;
+                Haf_s.linear()      = Eigen::Matrix3d::Identity();
+                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
+                emit(std::make_unique<TorsoTarget>(
+                    NUClear::clock::now() + std::chrono::seconds(1), foot, Haf_s.matrix()));
             });
 
 
-            on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoMovement>>().then(
-                [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
+            on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
+                [this](const Sensors& sensors, const KinematicsModel& model, const TorsoTarget& target) {
                     // Get support foot and swing foot coordinate systems
 
                     Eigen::Affine3d Htf_s;  // support foot
@@ -60,7 +68,7 @@ namespace motion {
                         Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                     }
 
-                    Eigen::Affine3d  Haf_s;
+                    Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;
 
                     // Get orientation for world (Rotation of world->torso)
@@ -89,7 +97,7 @@ namespace motion {
                     Eigen::Vector3d rF_tF_st = -rT_tTt;
                     // Target rotation from torso space
                     Eigen::Affine3d Hat;
-                    Hat = target.Haf_s * Htf_s.inverse();
+                    Hat = Haf_s * Htf_s.inverse();
                     // Get support foot rotation from torso as quaternion
                     Eigen::Quaterniond Rf_st;
                     Rf_st = Htf_s.inverse().linear();
@@ -100,10 +108,10 @@ namespace motion {
                     Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
                     // TODO: determine t
-                    Rf_tt = Rf_st.slerp(t, Rat).toRotationMatrix();
+                    Rf_tt = Rf_st.slerp(0.1, Rat).toRotationMatrix();
                     Eigen::Affine3d Htf_t;
                     Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
-                    Htf_t.translation() = rF_tF_st;   // Translation to foot target
+                    Htf_t.translation() = rF_tF_st;         // Translation to foot target
 
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
