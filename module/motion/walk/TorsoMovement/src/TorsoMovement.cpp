@@ -71,30 +71,16 @@ namespace motion {
                     Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;
 
-                    // Get orientation for world (Rotation of world->torso)
-                    Eigen::Affine3d Rtw;
-                    Rtw.linear() = Eigen::Affine3d(sensors.world).rotation();
-
-                    // Get the yawless world rotation
-                    Eigen::Affine3d Rtg =
-                        Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
-
-                    // Apply the foot yaw to the yawless world rotation
-                    Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
-
-                    // Construct a torso to foot ground space (support foot centric world oriented space)
-                    Eigen::Affine3d Htg;
-                    Htg.linear()      = Rtg.linear();         // Rotation from Rtg
-                    Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
-
-                    // Target position is in ground space
-                    Eigen::Vector3d rAGg = Haf_s.translation();
+                    // Target position is in foot space
+                    Eigen::Vector3d rAF_sf_s = -Haf_s.translation();
                     // Position of target in torso space
-                    Eigen::Vector3d rATt = Htg * rAGg;
+                    Eigen::Vector3d rATt = Htf_s * rAF_sf_s;
                     // Next torso target in torso space
-                    Eigen::Vector3d rT_tTt = rATt * 0.001;
+                    Eigen::Vector3d rT_tTt = rATt * 0.01;
                     // Create vector from torso to foot target
                     Eigen::Vector3d rF_tF_st = -rT_tTt;
+                    Eigen::Vector3d rF_tTt   = Htf_s * rF_tF_st;
+
                     // Target rotation from torso space
                     Eigen::Affine3d Hat;
                     Hat = Haf_s * Htf_s.inverse();
@@ -111,13 +97,24 @@ namespace motion {
                     Rf_tt = Rf_st.slerp(0.1, Rat).toRotationMatrix();
                     Eigen::Affine3d Htf_t;
                     Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
-                    Htf_t.translation() = rF_tF_st;         // Translation to foot target
+                    Htf_t.translation() = rF_tTt;           // Translation to foot target
 
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSupport ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
 
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
+                    for (const auto& joint : joints) {
+                        waypoints->push_back({subsumptionId,
+                                              NUClear::clock::now() + std::chrono::milliseconds(10),
+                                              joint.first,
+                                              joint.second,
+                                              20,
+                                              100});  // TODO: support separate gains for each leg
+                    }
+
+                    emit(waypoints);
                 });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
