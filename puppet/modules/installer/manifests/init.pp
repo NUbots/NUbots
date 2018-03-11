@@ -35,6 +35,7 @@ define installer (
   $postbuild = 'echo', # Colon is a noop
   $strip_components = 1,
   $extension = 'UNKNOWN',
+  $environment = undef,
   Hash $archs = $archs,
 ) {
 
@@ -56,6 +57,16 @@ define installer (
     $inczlib         = "ZLIB_INCLUDE=${prefix}/${arch}/include"
     $libbzip         = "BZIP2_LIBPATH=${prefix}/${arch}/lib"
     $incbzip         = "BZIP2_INCLUDE=${prefix}/${arch}/include"
+
+    # Merge the provided environment with the archs environment.
+    # Duplicates are replaced with the value from the provided environment.
+    if $environment {
+      $env = deep_merge($params['environment'], $environment)
+    }
+
+    else {
+      $env = $params['environment']
+    }
 
     # "Intelligently" merge environment variables.
     if has_key($params['environment'], 'CFLAGS') {

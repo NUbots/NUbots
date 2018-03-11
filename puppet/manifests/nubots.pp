@@ -185,7 +185,8 @@ node nubotsvmbuild {
                           'method' => String,
                           Optional['src_dir'] => String,
                           Optional['prebuild'] => String,
-                          Optional['postbuild'] => String}] $params| {
+                          Optional['postbuild'] => String,
+                          Optional['environment'] => Hash}] $params| {
 
         $extension = $params['url'] ? {
           /.*\.zip/       => 'zip',
@@ -223,6 +224,7 @@ node nubotsvmbuild {
           prebuild    => $params['prebuild'],
           postbuild   => $params['postbuild'],
           method      => $params['method'],
+          environment => $params['environment'],
           extension   => $extension,
         }
   }
