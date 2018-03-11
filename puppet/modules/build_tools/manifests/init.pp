@@ -36,7 +36,6 @@ class build_tools {
   } -> Package <| |>
 
   # Tools
-  package { 'cmake': ensure => latest, }
   package { 'automake': ensure => latest, }
   package { 'autoconf': ensure => latest, }
   package { 'libtool': ensure => latest, }
@@ -104,5 +103,21 @@ class build_tools {
                                              --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
+  }
+
+  # Manually install cmake
+  exec {'install-cmake':
+    creates => '/usr/local/bin/cmake',
+    command => '/usr/bin/wget https://cmake.org/files/v3.5/cmake-3.5.1-Linux-x86_64.sh \
+             && /bin/sh cmake-3.5.1-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir \
+             && rm cmake-3.5.1-Linux-x86_64.sh',
+  }
+
+  # Fix up FindBoost.cmake
+  file { "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake":
+    path    => "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake",
+    ensure  => present,
+    source  => 'puppet:///modules/files/FindBoost.cmake',
+    require => [ Exec['install-cmake'], ],
   }
 }
