@@ -106,7 +106,7 @@ node nubotsvmbuild {
                                           'nuc7i7bnh' => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ], },
                        'creates'     => 'lib/libtcmalloc_minimal.a',
                        'method'      => 'autotools',},
-    'yaml-cpp'     => {'url'         => 'https://github.com/jbeder/yaml-cpp/archive/master.tar.gz',
+    'yaml-cpp'     => {'url'         => 'https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz',
                        'args'        => { 'native'   => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
                                           'fitpc2i' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
                                           'nuc7i7bnh' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
