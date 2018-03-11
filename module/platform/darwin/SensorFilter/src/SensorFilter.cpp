@@ -55,14 +55,14 @@ namespace platform {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
         // using message::localisation::ResetRobotHypotheses;
-        using utility::motion::kinematics::calculateAllPositions;
         using message::motion::KinematicsModel;
+        using utility::math::geometry::UnitQuaternion;
+        using utility::math::matrix::Rotation2D;
+        using utility::math::matrix::Rotation3D;
+        using utility::math::matrix::Transform3D;
+        using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
         using utility::motion::kinematics::calculateRobotToIMU;
-        using utility::math::matrix::Transform3D;
-        using utility::math::matrix::Rotation3D;
-        using utility::math::matrix::Rotation2D;
-        using utility::math::geometry::UnitQuaternion;
         using utility::nubugger::drawArrow;
         using utility::nubugger::drawSphere;
         using utility::nubugger::graph;
@@ -534,10 +534,10 @@ namespace platform {
                             const bool& footDown =
                                 side == ServoSide::LEFT ? sensors->leftFootDown : sensors->rightFootDown;
 
-                            const bool& prevFootDown = previousSensors
-                                                           ? side == ServoSide::LEFT ? previousSensors->leftFootDown
-                                                                                     : previousSensors->rightFootDown
-                                                           : false;
+                            const bool& prevFootDown = previousSensors ? side == ServoSide::LEFT
+                                                                             ? previousSensors->leftFootDown
+                                                                             : previousSensors->rightFootDown
+                                                                       : false;
 
                             if (footDown) {
                                 Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics[servoid]);

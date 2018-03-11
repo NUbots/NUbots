@@ -5,7 +5,7 @@ class user_tools (String $user) {
   # User tools
   package { 'vim': ensure => latest, }
   package { 'screen': ensure => latest, }
-  package { 'clang-format-4.0': ensure => latest, }
+  package { 'clang-format-5.0': ensure => latest, }
   package { 'zsh': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }

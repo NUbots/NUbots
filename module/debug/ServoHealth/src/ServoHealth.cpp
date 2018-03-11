@@ -24,9 +24,9 @@ namespace debug {
     using message::input::Sensors;
     using message::platform::darwin::DarwinSensors;
 
-    using utility::nubugger::graph;
-    using utility::behaviour::RegisterAction;
     using message::support::ServoHealthTestData;
+    using utility::behaviour::RegisterAction;
+    using utility::nubugger::graph;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using State   = message::support::ServoHealthTestData::State;
@@ -66,17 +66,10 @@ namespace debug {
 
             // If this is a testing state
             if (state != State::INITIALISE && state != State::MOVE_1 && state != State::MOVE_2
-                && state != State::SHOULDER_MOVE_1
-                && state != State::MOVE_3
-                && state != State::MOVE_4
-                && state != State::LAYDOWN
-                && state != State::HIP_MOVE_1
-                && state != State::HIP_MOVE_2
-                && state != State::ANKLE_MOVE
-                && state != State::KNEE_MOVE
-                && state != State::KNEE_MOVE_2
-                && state != State::LAYDOWN_2
-                && state != State::FINISHED) {
+                && state != State::SHOULDER_MOVE_1 && state != State::MOVE_3 && state != State::MOVE_4
+                && state != State::LAYDOWN && state != State::HIP_MOVE_1 && state != State::HIP_MOVE_2
+                && state != State::ANKLE_MOVE && state != State::KNEE_MOVE && state != State::KNEE_MOVE_2
+                && state != State::LAYDOWN_2 && state != State::FINISHED) {
 
                 auto data     = std::make_unique<ServoHealthTestData>();
                 data->state   = state;

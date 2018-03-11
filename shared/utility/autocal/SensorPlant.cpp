@@ -66,7 +66,7 @@ std::vector<SensorPlant::Hypothesis> SensorPlant::matchStreams(std::string strea
     auto answers = correctMatchings[hypothesisKey];
     for (auto& cor : correlations) {
         if (correctGuesses.count(cor.first) == 0) correctGuesses[cor.first] = 0;
-        if (totalGuesses.count(cor.first) == 0) totalGuesses[cor.first]     = 0;
+        if (totalGuesses.count(cor.first) == 0) totalGuesses[cor.first] = 0;
         if (answers.count(cor.first) > 0) {
             correctGuesses[cor.first] += int(answers[cor.first] == cor.second);
         }

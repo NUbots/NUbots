@@ -37,15 +37,15 @@ namespace support {
 
         using NUClear::message::NetworkJoin;
         using NUClear::message::NetworkLeave;
-        using utility::math::optimisation::Optimiser;
-        using utility::math::optimisation::OptimiserEstimate;
-        using utility::math::optimisation::PGAOptimiser;
         using extension::Configuration;
         using message::support::optimisation::Episode;
         using message::support::optimisation::Estimate;
-        using message::support::optimisation::RequestParameters;
         using message::support::optimisation::Parameters;
         using message::support::optimisation::RegisterOptimisation;
+        using message::support::optimisation::RequestParameters;
+        using utility::math::optimisation::Optimiser;
+        using utility::math::optimisation::OptimiserEstimate;
+        using utility::math::optimisation::PGAOptimiser;
 
         void DOpE::sendEstimateUpdate(const Optimisation& opt, const std::string& target) {
 

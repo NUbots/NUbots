@@ -36,29 +36,29 @@ namespace motion {
     using message::input::Sensors;
 
     using message::behaviour::ServoCommand;
-    using message::behaviour::WalkOptimiserCommand;
     using message::behaviour::WalkConfigSaved;
+    using message::behaviour::WalkOptimiserCommand;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
 
-    using message::motion::WalkCommand;
-    using message::motion::StopCommand;
-    using message::motion::WalkStarted;
-    using message::motion::WalkStopped;
-    using message::motion::NewWalkCommand;
     using message::motion::BalanceBodyUpdate;
-    using message::motion::EnableWalkEngineCommand;
+    using message::motion::DisableBalanceResponse;
+    using message::motion::DisableFootMotion;
+    using message::motion::DisableFootPlacement;
+    using message::motion::DisableTorsoMotion;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableBalanceResponse;
-    using message::motion::DisableBalanceResponse;
-    using message::motion::EnableTorsoMotion;
-    using message::motion::DisableTorsoMotion;
-    using message::motion::EnableFootPlacement;
-    using message::motion::DisableFootPlacement;
     using message::motion::EnableFootMotion;
-    using message::motion::DisableFootMotion;
-    using message::motion::ServoTarget;
+    using message::motion::EnableFootPlacement;
+    using message::motion::EnableTorsoMotion;
+    using message::motion::EnableWalkEngineCommand;
     using message::motion::KinematicsModel;
+    using message::motion::NewWalkCommand;
+    using message::motion::ServoTarget;
+    using message::motion::StopCommand;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStarted;
+    using message::motion::WalkStopped;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;  // TODO: advised to change to calculateLegJoints
                                                                       // (no TeamDarwin)
 
@@ -67,10 +67,10 @@ namespace motion {
 
     using utility::support::Expression;
 
+    using utility::math::angle::normalizeAngle;
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::angle::normalizeAngle;
 
     using utility::nubugger::graph;
     /*=======================================================================================================*/

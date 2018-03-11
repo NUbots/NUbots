@@ -30,10 +30,10 @@
 namespace module {
 namespace localisation {
 
+    using extension::Configuration;
     using message::input::MotionCapture;
     using message::input::Sensors;
     using message::localisation::Self;
-    using extension::Configuration;
     using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
     using utility::nubugger::graph;

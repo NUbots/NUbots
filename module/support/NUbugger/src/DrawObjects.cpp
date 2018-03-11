@@ -26,8 +26,8 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using message::support::nubugger::DrawObjects;
     using message::support::nubugger::DrawObject;
+    using message::support::nubugger::DrawObjects;
 
     void NUbugger::provideDrawObjects() {
 

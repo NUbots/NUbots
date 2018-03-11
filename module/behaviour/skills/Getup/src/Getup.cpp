@@ -42,8 +42,8 @@ namespace behaviour {
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 

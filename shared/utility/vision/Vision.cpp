@@ -1,92 +1,50 @@
-#ifndef UTILITY_VISION_FOURCC_H
-#define UTILITY_VISION_FOURCC_H
-
-#include <string>
-#include <vector>
-
-#include <Eigen/Core>
-#include <iostream>
-
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
 #include "Vision.h"
+
+#include <fmt/format.h>
+#include <fstream>
+#include <string>
+
+#include "message/input/Image.h"
 
 namespace utility {
 namespace vision {
 
-    enum FOURCC : uint32_t {
-        GREY    = 0x59455247,
-        Y12     = 0x20323159,
-        Y16     = 0x20363159,
-        GRBG    = 0x47425247,
-        RGGB    = 0x42474752,
-        GBRG    = 0x47524247,
-        BGGR    = 0x52474742,
-        GR12    = 0x32315247,
-        RG12    = 0x32314752,
-        GB12    = 0x32314247,
-        BG12    = 0x32314742,
-        GR16    = 0x36315247,
-        RG16    = 0x36314752,
-        GB16    = 0x36314247,
-        BG16    = 0x36314742,
-        Y411    = 0x31313459,
-        UYVY    = 0x59565955,
-        YUYV    = 0x56595559,
-        YM24    = 0x34324d59,
-        RGB3    = 0x33424752,
-        JPEG    = 0x4745504a,
-        UNKNOWN = 0
-    };
+    void saveImage(const std::string& file, const message::input::Image& image) {
+        std::ofstream ofs(file, std::ios::out | std::ios::binary);
+        ofs << fmt::format("P6\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
 
-    enum class BayerPixelType {
-        R,   // Its red
-        GR,  // Green on red row
-        GB,  // Green on blue row
-        B    // Its blue
-    };
+        for (size_t row = 0; row < image.dimensions[1]; row++) {
+            for (size_t col = 0; col < image.dimensions[0]; col++) {
+                Pixel p =
+                    getPixel(col, row, image.dimensions[0], image.dimensions[1], image.data, FOURCC(image.format));
+                ofs.write(reinterpret_cast<char*>(&p.components.r), sizeof(p.components.r));
+                ofs.write(reinterpret_cast<char*>(&p.components.g), sizeof(p.components.g));
+                ofs.write(reinterpret_cast<char*>(&p.components.b), sizeof(p.components.b));
+            }
+        }
 
-    // Implemented from http://www.ipol.im/pub/art/2011/g_mhcd/
-    // Malvar-He-Cutler Linear Image Demosaicking
-    // Bayer interpolators
-    // These are masks, not matrices.
-    // Green pixels at both blue and red locations.
-    constexpr int8_t BAYER_SCALE = 6;  // 8 = 2^3 .... use bit shift
-    // clang-format off
-    constexpr int8_t GREEN_AXIAL_ARR[25] = { 0,  0, -8,  0,  0,
-                                             0,  0, 16,  0,  0,
-                                            -8, 16, 32, 16, -8,
-                                             0,  0, 16,  0,  0,
-                                             0,  0, -8,  0,  0};
-    // clang-format on
+        ofs.close();
+    }
 
-    const Eigen::Matrix<int8_t, 5, 5> GREEN_AXIAL =
-        Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(GREEN_AXIAL_ARR, 5, 5);
-
-    // Red at blue locations and blue at red locations
-    // clang-format off
-    constexpr int8_t RED_AT_BLUE_ARR[25] = {  0,  0, -12,  0,   0,
-                                              0, 16,   0, 16,   0,
-                                            -12,  0,  48,  0, -12,
-                                              0, 16,   0, 16,   0,
-                                              0,  0, -12,  0,   0};
-    // clang-format on
-
-    const Eigen::Matrix<int8_t, 5, 5> RED_AT_BLUE =
-        Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_BLUE_ARR, 5, 5);
-
-    // Red at green locations and blue at green locations, on red rows
-    // Red at green locations and blue at green locations, on blue rows are the transpose of this mask.
-
-    // clang-format off
-    constexpr int8_t RED_AT_GREEN_ARR[25] = { 0,  0,  4,  0,  0,
-                                              0, -8,  0, -8,  0,
-                                             -8, 32, 40, 32, -8,
-                                              0, -8,  0, -8,  0,
-                                              0,  0,  4,  0,  0};
-    // clang-format on
-    const Eigen::Matrix<int8_t, 5, 5> RED_AT_GREEN =
-        Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_GREEN_ARR, 5, 5);
-
-    inline const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
+    const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Extract the 5x5 matrix centered at (x, y).
         // Clamped to borders.
         x = x < 2 ? 2 : x > (width - 3) ? width - 3 : x;
@@ -97,9 +55,9 @@ namespace vision {
             .block<5, 5>(y - 2, x - 2);
     }
 
-    inline uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
-                          const Eigen::Matrix<int8_t, 5, 5>& kernel,
-                          uint8_t normalisation = BAYER_SCALE) {
+    uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
+                   const Eigen::Matrix<int8_t, 5, 5>& kernel,
+                   uint8_t normalisation) {
         int16_t value = patch.cast<int16_t>().cwiseProduct(kernel.cast<int16_t>()).sum();
 
         if (normalisation == 0) {
@@ -109,7 +67,7 @@ namespace vision {
         return static_cast<uint8_t>(std::min(255, std::max(0, value >> normalisation)));
     }
 
-    inline Pixel getBayerPixel(const Eigen::Matrix<uint8_t, 5, 5>& patch, const BayerPixelType& type) {
+    Pixel getBayerPixel(const Eigen::Matrix<uint8_t, 5, 5>& patch, const BayerPixelType& type) {
         Pixel p;
 
         switch (type) {
@@ -145,7 +103,7 @@ namespace vision {
         }
     }
 
-    inline Pixel getGrey8Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getGrey8Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
         int origin = (y * width + x);
@@ -153,7 +111,7 @@ namespace vision {
         return {0, 0, data[origin]};
     }
 
-    inline Pixel getGRBGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getGRBGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: G R G R G R ....
@@ -173,7 +131,7 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    inline Pixel getRGGBPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getRGGBPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: R G R G R G ....
@@ -193,7 +151,7 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    inline Pixel getGBRGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getGBRGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: G B G B G B ....
@@ -213,7 +171,7 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    inline Pixel getBGGRPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getBGGRPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: B G B G B G ....
@@ -233,13 +191,13 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    inline Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         int origin = (y * width + x) * 2;
 
         return {0, data[origin + 1], data[origin]};
     }
 
-    inline Pixel getRGB3Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getRGB3Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
         int origin = (y * width + x) * 3;
@@ -247,7 +205,7 @@ namespace vision {
         return {data[origin + 0], data[origin + 1], data[origin + 2]};
     }
 
-    inline Pixel getYUV24Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUV24Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U0 Y0 V0 U1 Y1 V1 U2 Y2 V2
         int origin = (y * width + x) * 3;
@@ -255,7 +213,7 @@ namespace vision {
         return {data[origin + 1], data[origin + 0], data[origin + 2]};
     }
 
-    inline Pixel getYUYVPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUYVPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Y U Y V Y U Y V Y U Y V
         int origin = (y * width + x) * 2;
@@ -265,7 +223,7 @@ namespace vision {
         return {data[origin + 0], data[origin + 1 - shift], data[origin + 3 - shift]};
     }
 
-    inline Pixel getUYVYPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getUYVYPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U Y V Y U Y V Y U Y V Y
         int origin = (y * width + x) * 2;
@@ -276,7 +234,7 @@ namespace vision {
         return {data[origin + 1], data[origin + 0 - shift], data[origin + 2 - shift]};
     }
 
-    inline Pixel getYUV12Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUV12Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U0 Y0 Y1 V0 Y2 Y3 U1 Y4 Y5 V1 Y6 Y7 U2 Y8 Y9 V1 Y10 Y11
         // U0Y0V0 U0Y1V0 U0Y2V0 U0Y3V0 U1Y4V1
@@ -302,12 +260,7 @@ namespace vision {
         return {data[origin + 0 + shift], data[origin + 0 + y_shift], data[origin + 3 + shift]};
     }
 
-    inline Pixel getPixel(uint x,
-                          uint y,
-                          uint width,
-                          uint height,
-                          const std::vector<uint8_t>& data,
-                          const FOURCC& fourcc) {
+    Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc) {
         switch (fourcc) {
             case GREY: {
                 return (getGrey8Pixel(x, y, width, height, data));
@@ -368,13 +321,13 @@ namespace vision {
         }
     }
 
-    inline constexpr FOURCC fourcc(const char (&code)[5]) {
+    constexpr FOURCC fourcc(const char (&code)[5]) {
         uint32_t cc =
             (((code[0]) & 255) | (((code[1]) & 255) << 8) | (((code[2]) & 255) << 16) | (((code[3]) & 255) << 24));
         return ((FOURCC) cc);
     }
 
-    inline FOURCC getFourCCFromDescription(const std::string& code) {
+    FOURCC getFourCCFromDescription(const std::string& code) {
         if (code.compare("Mono8") == 0) {
             return (fourcc("GREY"));
         }
@@ -396,7 +349,7 @@ namespace vision {
         }
 
         else if (code.compare("BayerRG8") == 0) {
-            return (fourcc("GBRG"));
+            return (fourcc("RGGB"));
         }
 
         else if (code.compare("BayerGB8") == 0) {
@@ -479,7 +432,112 @@ namespace vision {
             return (FOURCC::UNKNOWN);
         }
     }
+
+    uint32_t getAravisPixelFormat(const std::string& code) {
+        if (code.compare("Mono8") == 0) {
+            return ARV_PIXEL_FORMAT_MONO_8;
+        }
+
+        else if (code.compare("Mono12Packed") == 0) {
+            return ARV_PIXEL_FORMAT_MONO_12_PACKED;
+        }
+
+        else if (code.compare("Mono12p") == 0) {
+            return ARV_PIXEL_FORMAT_MONO_12;
+        }
+
+        else if (code.compare("Mono16") == 0) {
+            return ARV_PIXEL_FORMAT_MONO_16;
+        }
+
+        else if (code.compare("BayerGR8") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GR_8;
+        }
+
+        else if (code.compare("BayerRG8") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_RG_8;
+        }
+
+        else if (code.compare("BayerGB8") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GB_8;
+        }
+
+        else if (code.compare("BayerBG8") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_BG_8;
+        }
+
+        else if (code.compare("BayerGR12p") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GR_12;
+        }
+
+        else if (code.compare("BayerRG12p") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_RG_12;
+        }
+
+        else if (code.compare("BayerGB12p") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GB_12;
+        }
+
+        else if (code.compare("BayerBG12p") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_BG_12;
+        }
+
+        else if (code.compare("BayerGR12Packed") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GR_12_PACKED;
+        }
+
+        else if (code.compare("BayerRG12Packed") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_RG_12_PACKED;
+        }
+
+        else if (code.compare("BayerGB12Packed") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GB_12_PACKED;
+        }
+
+        else if (code.compare("BayerBG12Packed") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_BG_12_PACKED;
+        }
+
+        else if (code.compare("BayerGR16") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GR_16;
+        }
+
+        else if (code.compare("BayerRG16") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_RG_16;
+        }
+
+        else if (code.compare("BayerGB16") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_GB_16;
+        }
+
+        else if (code.compare("BayerBG16") == 0) {
+            return ARV_PIXEL_FORMAT_BAYER_BG_16;
+        }
+
+        else if (code.compare("YCbCr411_8_CbYYCrYY") == 0) {
+            return ARV_PIXEL_FORMAT_YUV_411_PACKED;
+        }
+
+        else if (code.compare("YCbCr422_8_CbYCrY") == 0) {
+            return ARV_PIXEL_FORMAT_YUV_422_PACKED;
+        }
+
+        else if (code.compare("YCbCr8_CbYCr") == 0) {
+            return ARV_PIXEL_FORMAT_YUV_444_PACKED;
+        }
+
+        else if (code.compare("YUYV") == 0) {
+            return ARV_PIXEL_FORMAT_YUV_422_YUYV_PACKED;
+        }
+
+        else if (code.compare("RGB8") == 0) {
+            return ARV_PIXEL_FORMAT_RGB_8_PACKED;
+        }
+
+        else {
+            return 0;
+        }
+    }
+
 }  // namespace vision
 }  // namespace utility
-
-#endif  // UTILITY_VISION_FOURCC_H

@@ -27,7 +27,11 @@ Vagrant.configure("2") do |config|
   # Settings for a parallels provider
   config.vm.provider "parallels" do |v, override|
     # Use parallels virtualbox
-    override.vm.box = "parallels/ubuntu-16.04"
+    if ENV['TRAVISVM']
+        override.vm.box = "parallels/ubuntu-14.04"
+    else
+        override.vm.box = "parallels/ubuntu-16.04"
+    end
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
@@ -38,11 +42,12 @@ Vagrant.configure("2") do |config|
 
   # Settings if using a virtualbox provider
   config.vm.provider "virtualbox" do |v, override|
-    # Use the official ubuntu box
-    #override.vm.box = "ubuntu/xenial64"
-
     # Use custom box because official Ubuntu one is shit.
-    override.vm.box = "bidski/xenial64"
+    if ENV['TRAVISVM']
+        override.vm.box = "ubuntu/trusty64"
+    else
+        override.vm.box = "bidski/xenial64"
+    end
 
     override.vm.boot_timeout = 360
 
@@ -62,6 +67,10 @@ Vagrant.configure("2") do |config|
     shell.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
   end
 
+  config.vm.provision "add-32bit", type: "shell" do |shell|
+      shell.inline = "dpkg --add-architecture i386 && apt-get update"
+  end
+
   # Before anything else runs make sure dpkg isnt locked.
   # Might as well do a quick update while we are here
   config.vm.provision "unlock-dpkg", type: "shell", run: "always" do |shell|
@@ -74,15 +83,21 @@ Vagrant.configure("2") do |config|
   # Before the puppet provisioner runs
   # install puppet modules that are used
   config.vm.provision "install-puppet-modules", type: "shell" do |shell|
-    shell.inline = "apt-get install -y puppet;
-                    mkdir -p /etc/puppet/modules;
-                    puppet module list | grep -q 'puppetlabs-apt' \
+    shell.inline = "codename=$(lsb_release -sc) && \\
+                    if [ \"${codename}\" == \"trusty\" ]; then \\
+                        wget -N https://apt.puppetlabs.com/puppetlabs-release-trusty.deb && \\
+                        dpkg -i puppetlabs-release-trusty.deb && \\
+                        apt-get update; \\
+                    fi; \\
+                    apt-get install -y --reinstall puppet; \\
+                    mkdir -p /etc/puppet/modules; \\
+                    puppet module list | grep -q 'puppetlabs-apt' \\
                          || puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0;
-                    puppet module list | grep -q 'puppetlabs-vcsrepo' \
+                    puppet module list | grep -q 'puppetlabs-vcsrepo' \\
                          || puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com;
-                    puppet module list | grep -q 'camptocamp-archive' \
+                    puppet module list | grep -q 'camptocamp-archive' \\
                          || puppet module install camptocamp-archive --module_repository https://forge.puppet.com;
-                    puppet module list | grep -q 'maestrodev-wget' \
+                    puppet module list | grep -q 'maestrodev-wget' \\
                          || puppet module install maestrodev-wget --module_repository https://forge.puppet.com;"
   end
 
@@ -106,6 +121,32 @@ Vagrant.configure("2") do |config|
   # This VM will install all dependencies using the NUbots deb file (faster, generally recommended)
   config.vm.define "nubotsvm", autostart: true, primary: true do |nubots|
     nubots.vm.hostname = "nubotsvm.nubots.net"
+
+    # Note: Use NFS for more predictable shared folder support.
+    #   The guest must have 'apt-get install nfs-common'
+    nubots.vm.synced_folder ".", "/home/vagrant/NUbots"
+
+    # Private network for NUsight's benifit
+    nubots.vm.network "public_network", type: "dhcp"
+
+    # Share NUsight repository with the VM if it has been placed in the same
+    # directory as the NUbots repository
+    if File.directory?("../NUsight")
+      nubots.vm.synced_folder "../NUsight", "/home/vagrant/NUsight"
+    end
+    if File.directory?("../NUClear")
+      nubots.vm.synced_folder "../NUClear", "/home/vagrant/NUClear"
+    end
+    if File.directory?("../CM730")
+      nubots.vm.synced_folder "../CM730", "/home/vagrant/CM730"
+    end
+  end
+
+  # Define the NUbots development VM, and make it the primary VM
+  # (meaning that a plain `vagrant up` will only create this machine)
+  # This VM will install all dependencies using the NUbots deb file (faster, generally recommended)
+  config.vm.define "travisvm", autostart: false, primary: false do |nubots|
+    nubots.vm.hostname = "nubotsvmbuild.nubots.net"
 
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'

@@ -49,27 +49,27 @@ namespace motion {
     using extension::Configuration;
     using extension::Script;
 
-    using message::input::Sensors;
     using message::behaviour::ServoCommand;
-    using message::behaviour::WalkOptimiserCommand;
     using message::behaviour::WalkConfigSaved;
+    using message::behaviour::WalkOptimiserCommand;
+    using message::input::Sensors;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
-    using message::motion::WalkCommand;
-    using message::motion::StopCommand;
-    using message::motion::WalkStopped;
-    using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
-    using message::motion::ServoTarget;
+    using message::motion::EnableWalkEngineCommand;
     using message::motion::KinematicsModel;
+    using message::motion::ServoTarget;
+    using message::motion::StopCommand;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStopped;
     using message::support::SaveConfiguration;
 
     using ServoID = utility::input::ServoID;
     using LimbID  = utility::input::LimbID;
+    using utility::math::angle::normalizeAngle;
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::angle::normalizeAngle;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::nubugger::graph;
     using utility::support::Expression;

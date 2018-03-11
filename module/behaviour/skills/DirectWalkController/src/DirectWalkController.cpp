@@ -35,16 +35,16 @@ namespace behaviour {
         using extension::Configuration;
 
         using message::behaviour::MotionCommand;
-        using message::motion::WalkCommand;
-        using message::motion::StopCommand;
-        using message::motion::WalkStopped;
-        using message::motion::EnableWalkEngineCommand;
         using message::motion::DisableWalkEngineCommand;
+        using message::motion::EnableWalkEngineCommand;
+        using message::motion::StopCommand;
+        using message::motion::WalkCommand;
+        using message::motion::WalkStopped;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
 
         DirectWalkController::DirectWalkController(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {

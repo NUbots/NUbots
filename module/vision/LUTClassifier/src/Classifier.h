@@ -17,35 +17,27 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_QUEXCLASSIFIER_H
-#define MODULES_VISION_QUEXCLASSIFIER_H
+#ifndef MODULES_VISION_CLASSIFIER_H
+#define MODULES_VISION_CLASSIFIER_H
 
 #include <vector>
 
 #include <armadillo>
 
-#define QUEX_SETTING_BUFFER_MIN_FALLBACK_N 0
-#define QUEX_OPTION_ASSERTS_DISABLED
-#define QUEX_OPTION_COMPUTED_GOTOS
-#define QUEX_OPTION_TERMINATION_ZERO_DISABLED
-
-#include "Lexer.hpp"
-
 #include "message/input/Image.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 
+#include "utility/vision/Vision.h"
+
 namespace module {
 namespace vision {
-    class QuexClassifier {
+    class Classifier {
     private:
-        static constexpr size_t BUFFER_SIZE = 1280 * 1024;
-        uint8_t buffer[BUFFER_SIZE]         = {0};  // This should be big enough for now
-        quex::Lexer lexer;
-        size_t& tknNumber;
+        message::vision::ClassifiedImage::SegmentClass classifySegment(const utility::vision::Colour& colour) const;
 
     public:
-        QuexClassifier();
+        Classifier() {}
 
         std::vector<message::vision::ClassifiedImage::Segment> classify(const message::input::Image& image,
                                                                         const message::vision::LookUpTable& lut,

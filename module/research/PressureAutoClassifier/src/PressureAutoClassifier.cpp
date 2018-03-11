@@ -27,12 +27,12 @@
 namespace module {
 namespace research {
 
+    using extension::Configuration;
     using message::input::Image;
     using message::research::AutoClassifierPixels;
-    using extension::Configuration;
+    using message::vision::Colour;
     using message::vision::LookUpTable;
     using message::vision::LookUpTableDiff;
-    using message::vision::Colour;
 
 
     /**

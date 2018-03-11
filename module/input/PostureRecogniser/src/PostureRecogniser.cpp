@@ -23,18 +23,18 @@ namespace input {
 
     using extension::Configuration;
 
-    using message::input::Sensors;
-    using message::input::WalkingDetected;
     using message::input::BendingDetected;
+    using message::input::FallingDetected;
     using message::input::KickingDetected;
+    using message::input::Sensors;
     using message::input::SittingDetected;
     using message::input::StandingDetected;
-    using message::input::FallingDetected;
+    using message::input::WalkingDetected;
 
     using utility::input::ServoLoadModel;
     using utility::math::filter::UKF;
-    using utility::time::TimeDifferenceSeconds;
     using utility::nubugger::graph;
+    using utility::time::TimeDifferenceSeconds;
 
     /*=======================================================================================================*/
     //      NAME: Posture Recogniser

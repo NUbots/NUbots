@@ -25,7 +25,7 @@ stance:
           - -90 * pi / 180 # Elbow
 
   foot_offset:
-    - -0.08 # The distance the ankles are offset from the torso, in meters.
+    - -0.1 # The distance the ankles are offset from the torso, in meters.
     - -0.05 # How far from the center of the foot the center of mass is placed during each step.
   # The gains to use for the servos during the walk
   gains:
@@ -42,7 +42,7 @@ walk_cycle:
   hip_roll_compensation: 4 * pi / 180
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-    height: 0.1
+    height: 0.08
     # height of foot as a fraction of height
     height_slow_fraction: 0.5
     height_fast_fraction: 1.5

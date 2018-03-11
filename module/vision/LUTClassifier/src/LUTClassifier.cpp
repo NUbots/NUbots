@@ -36,13 +36,13 @@ namespace vision {
 
     using extension::Configuration;
 
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
-    using message::input::CameraParameters;
+    using message::support::SaveConfiguration;
+    using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
-    using message::vision::ClassifiedImage;
-    using message::support::SaveConfiguration;
     using utility::support::Expression;
 
     // using ServoID = utility::input::ServoID;
@@ -76,7 +76,7 @@ namespace vision {
 
     LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , quex(new QuexClassifier)
+        , classifier()
         , greenCentroid(Eigen::Vector3f::Zero())
         , LUT_PATH("")
         , LUT_HOST("") {
@@ -124,14 +124,23 @@ namespace vision {
         on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this](const LookUpTable& lut) {
             YAML::Node node = YAML::convert<LookUpTable>::encode(lut);
 
-            log(fmt::format("config/{}/{}", LUT_HOST, LUT_PATH));
+            log(fmt::format("Writing new LUT to tempporary file 'config/{}/{}.tmp'", LUT_HOST, LUT_PATH));
+
             std::ofstream yaml(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH), std::ios::trunc | std::ios::out);
             yaml << node;
             yaml.flush();
             yaml.close();
-            log("done saving");
+
+            if (utility::file::exists(fmt::format("config/{}/{}", LUT_HOST, LUT_PATH))) {
+                log("Deleting old LUT");
+                std::remove(fmt::format("config/{}/{}", LUT_HOST, LUT_PATH).c_str());
+            }
+
+            log("Moving new LUT into place");
             std::rename(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH).c_str(),
                         fmt::format("config/{}/{}", LUT_HOST, LUT_PATH).c_str());
+
+            log(fmt::format("LUT saved to config/{}/{}", LUT_HOST, LUT_PATH));
         });
 
         // Trigger the same function when either update

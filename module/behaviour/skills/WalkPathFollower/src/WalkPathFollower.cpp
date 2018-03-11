@@ -49,21 +49,21 @@ namespace behaviour {
         using message::behaviour::MotionCommand;
         using message::behaviour::WalkPath;
 
-        using message::motion::KickFinished;
-        using message::motion::WalkCommand;
-        using message::motion::StopCommand;
-        using message::motion::EnableWalkEngineCommand;
         using message::motion::DisableWalkEngineCommand;
+        using message::motion::EnableWalkEngineCommand;
+        using message::motion::KickFinished;
+        using message::motion::StopCommand;
+        using message::motion::WalkCommand;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
 
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
+        using utility::math::angle::vectorToBearing;
         using utility::math::geometry::RotatedRectangle;
         using utility::math::matrix::Transform2D;
-        using utility::math::angle::vectorToBearing;
 
         WalkPathFollower::WalkPathFollower(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {

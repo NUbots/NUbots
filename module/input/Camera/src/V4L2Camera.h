@@ -29,7 +29,7 @@
 
 #include "ImageData.h"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace input {

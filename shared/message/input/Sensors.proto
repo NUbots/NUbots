@@ -55,7 +55,7 @@ message Sensors {
     }
 
     message FSR {
-        repeated float value = 1 [packed = true];
+        repeated float value  = 1 [packed = true];
         vec2           centre = 2;
     }
 
@@ -79,8 +79,8 @@ message Sensors {
     bool     leftFootDown           = 13;
     bool     rightFootDown          = 14;
     repeated mat4 forwardKinematics = 15 [(array_size) = 20];
-    float         bodyCentreHeight = 16;
-    vec4          centreOfMass     = 17;
-    mat4          bodyToGround     = 18;
-    mat4          camToGround      = 19;
+    float         bodyCentreHeight  = 16;
+    vec4          centreOfMass      = 17;
+    mat4          bodyToGround      = 18;
+    mat4          camToGround       = 19;
 }

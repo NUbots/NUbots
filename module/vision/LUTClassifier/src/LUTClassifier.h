@@ -24,7 +24,7 @@
 #include <nuclear>
 
 #include <Eigen/Core>
-#include "QuexClassifier.h"
+#include "Classifier.h"
 
 #include "message/input/Image.h"
 #include "message/vision/ClassifiedImage.h"
@@ -36,12 +36,12 @@
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace vision {
 
-    class QuexClassifier;
+    // class QuexClassifier;
 
     /**
      * Classifies a raw image, producing the colour segments for object detection
@@ -50,8 +50,8 @@ namespace vision {
      */
     class LUTClassifier : public NUClear::Reactor {
     private:
-        // A pointer to our quex class (since it is generated it is not defined at this point)
-        std::shared_ptr<QuexClassifier> quex;
+        // A pointer to our classifier class (since it is generated it is not defined at this point)
+        std::shared_ptr<Classifier> classifier;
 
         Eigen::Vector3f greenCentroid;
 

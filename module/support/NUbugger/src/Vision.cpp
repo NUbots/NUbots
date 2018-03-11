@@ -32,18 +32,18 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::vision::Ball;
+    using message::vision::ClassifiedImage;
     using message::vision::Goal;
     using message::vision::Line;
-    using message::vision::Obstacle;
+    using message::vision::LookUpTableDiff;
     using message::vision::NUsightBalls;
     using message::vision::NUsightGoals;
     using message::vision::NUsightLines;
     using message::vision::NUsightObstacles;
-    using message::vision::LookUpTableDiff;
-    using message::vision::ClassifiedImage;
-    using message::input::CameraParameters;
+    using message::vision::Obstacle;
 
     void NUbugger::provideVision() {
         handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then(

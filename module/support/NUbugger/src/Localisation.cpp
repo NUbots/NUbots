@@ -28,10 +28,10 @@
 namespace module {
 namespace support {
 
-    using utility::nubugger::graph;
-    using utility::time::getUtcTimestamp;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using utility::nubugger::graph;
+    using utility::time::getUtcTimestamp;
 
     void NUbugger::provideLocalisation() {
 

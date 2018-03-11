@@ -47,18 +47,18 @@ namespace motion {
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using message::motion::StopCommand;
-    using message::motion::KickCommand;
-    using message::motion::IKKickParams;
-    using message::motion::KickFinished;
-    using message::behaviour::ServoCommand;
     using message::behaviour::KickPlan;
+    using message::behaviour::ServoCommand;
+    using message::motion::IKKickParams;
+    using message::motion::KickCommand;
+    using message::motion::KickFinished;
+    using message::motion::StopCommand;
     using KickType = message::behaviour::KickPlan::KickType;
-    using message::support::FieldDescription;
     using message::motion::KinematicsModel;
+    using message::support::FieldDescription;
 
-    using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
+    using utility::behaviour::RegisterAction;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::motion::kinematics::calculateLegJoints;
