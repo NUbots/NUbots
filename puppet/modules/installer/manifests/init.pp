@@ -69,18 +69,18 @@ define installer (
     }
 
     # "Intelligently" merge environment variables.
-    if has_key($params['environment'], 'CFLAGS') {
-      $cflags = "CFLAGS=${flags} ${params['environment']['CFLAGS']}"
-      $env0 = delete($params['environment'], 'CFLAGS')
+    if has_key($env, 'CFLAGS') {
+      $cflags = "CFLAGS=${flags} ${env['CFLAGS']}"
+      $env0 = delete($env, 'CFLAGS')
     }
 
     else {
       $cflags = "CFLAGS=${flags}"
-      $env0 = $params['environment']
+      $env0 = $env
     }
 
-    if has_key($params['environment'], 'CXXFLAGS') {
-      $cxxflags = "CXXFLAGS=${flags} ${params['environment']['CXXFLAGS']}"
+    if has_key($env, 'CXXFLAGS') {
+      $cxxflags = "CXXFLAGS=${flags} ${env['CXXFLAGS']}"
       $env1 = delete($env0, 'CXXFLAGS')
     }
 
@@ -89,8 +89,8 @@ define installer (
       $env1 = $env0
     }
 
-    if has_key($params['environment'], 'COMMON_OPT') {
-      $common_opt = "COMMON_OPT=${flags} ${params['environment']['COMMON_OPT']}"
+    if has_key($env, 'COMMON_OPT') {
+      $common_opt = "COMMON_OPT=${flags} ${env['COMMON_OPT']}"
       $env2 = delete($env1, 'COMMON_OPT')
     }
 
@@ -99,8 +99,8 @@ define installer (
       $env2 = $env1
     }
 
-    if has_key($params['environment'], 'FCOMMON_OPT') {
-      $fcommon_opt = "FCOMMON_OPT=${flags} ${params['environment']['FCOMMON_OPT']}"
+    if has_key($env, 'FCOMMON_OPT') {
+      $fcommon_opt = "FCOMMON_OPT=${flags} ${env['FCOMMON_OPT']}"
       $env3 = delete($env2, 'FCOMMON_OPT')
     }
 
@@ -109,8 +109,8 @@ define installer (
       $env3 = $env2
     }
 
-    if has_key($params['environment'], 'LDFLAGS') {
-      $linkflags  = "-L${prefix}/${arch}/lib -L${prefix}/lib ${params['environment']['LDFLAGS']}"
+    if has_key($env, 'LDFLAGS') {
+      $linkflags  = "-L${prefix}/${arch}/lib -L${prefix}/lib ${env['LDFLAGS']}"
       $env4 = delete($env3, 'LDFLAGS')
     }
 
@@ -121,8 +121,8 @@ define installer (
 
     $ldflags = "LDFLAGS=${linkflags}"
 
-    if has_key($params['environment'], 'CCASFLAGS') {
-      $ccasflags = "CCASFLAGS=${params['environment']['CCASFLAGS']}"
+    if has_key($env, 'CCASFLAGS') {
+      $ccasflags = "CCASFLAGS=${env['CCASFLAGS']}"
       $env5 = delete($env4, 'CCASFLAGS')
     }
 
@@ -131,8 +131,8 @@ define installer (
       $env5 = $env4
     }
 
-    if has_key($params['environment'], 'PKG_CONFIG_PATH') {
-      $pkgconfig = "PKG_CONFIG_PATH=${params['environment']['PKG_CONFIG_PATH']}:${prefix}/${arch}/lib/pkgconfig"
+    if has_key($env, 'PKG_CONFIG_PATH') {
+      $pkgconfig = "PKG_CONFIG_PATH=${env['PKG_CONFIG_PATH']}:${prefix}/${arch}/lib/pkgconfig"
       $env6 = delete($env5, 'PKG_CONFIG_PATH')
     }
 
@@ -141,8 +141,8 @@ define installer (
       $env6 = $env5
     }
 
-    if has_key($params['environment'], 'CMAKE_PREFIX_PATH') {
-      $cmake_prefix = "CMAKE_PREFIX_PATH=${params['environment']['CMAKE_PREFIX_PATH']}"
+    if has_key($env, 'CMAKE_PREFIX_PATH') {
+      $cmake_prefix = "CMAKE_PREFIX_PATH=${env['CMAKE_PREFIX_PATH']}"
       $env7 = delete($env6, 'CMAKE_PREFIX_PATH')
     }
 
@@ -151,8 +151,8 @@ define installer (
       $env7 = $env6
     }
 
-    if has_key($params['environment'], 'LT_SYS_LIBRARY_PATH') {
-      $ltsyslibpath = "LT_SYS_LIBRARY_PATH=${params['environment']['LT_SYS_LIBRARY_PATH']}"
+    if has_key($env, 'LT_SYS_LIBRARY_PATH') {
+      $ltsyslibpath = "LT_SYS_LIBRARY_PATH=${env['LT_SYS_LIBRARY_PATH']}"
       $env8 = delete($env7, 'LT_SYS_LIBRARY_PATH')
     }
 
@@ -161,8 +161,8 @@ define installer (
       $env8 = $env7
     }
 
-    if has_key($params['environment'], 'LD_LIBRARY_PATH') {
-      $ldlibrarypath = "LD_LIBRARY_PATH=${params['environment']['LD_LIBRARY_PATH']}"
+    if has_key($env, 'LD_LIBRARY_PATH') {
+      $ldlibrarypath = "LD_LIBRARY_PATH=${env['LD_LIBRARY_PATH']}"
       $env9 = delete($env8, 'LD_LIBRARY_PATH')
     }
 
@@ -171,8 +171,8 @@ define installer (
       $env9 = $env8
     }
 
-    if has_key($params['environment'], 'CCAS') {
-      $ccas = "CCAS=${params['environment']['CCAS']}"
+    if has_key($env, 'CCAS') {
+      $ccas = "CCAS=${env['CCAS']}"
       $env10 = delete($env9, 'CCAS')
     }
 
@@ -181,7 +181,7 @@ define installer (
       $env10 = $env9
     }
 
-    $environment = [$cflags, $cxxflags, $common_opt, $fcommon_opt,
+    $environment = ['CC=/usr/bin/gcc', 'CXX=/usr/bin/g++', $cflags, $cxxflags, $common_opt, $fcommon_opt,
                     $ldflags, $ccas, $ccasflags, $pkgconfig, $cmake_prefix,
                     $ltsyslibpath, $ldlibrarypath,
                     $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env10, "=")
