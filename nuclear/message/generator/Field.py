@@ -85,8 +85,8 @@ class Field:
         # We are special unless we are not
         special = True
 
-        vector_regex = re.compile(r'^\.([fiuc]?)vec([2-4]?)$')
-        matrix_regex = re.compile(r'^\.([fiuc]?)mat([2-4]{0,2})$')
+        vector_regex = re.compile(r'^\.([fiuc]?)vec(\d*)$')
+        matrix_regex = re.compile(r'^\.([fiuc]?)mat(\d*)$')
 
         # Check if it is a map field
         if self.map_type:
