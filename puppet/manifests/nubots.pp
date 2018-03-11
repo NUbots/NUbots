@@ -295,36 +295,14 @@ LD_LIBRARY_PATH= /usr/bin/xgettext \"$@\"
     mode    => "a+x",
   } -> Installer <| |>
 
-  file { "/nubots/toolchain/nuc7i7bnh/bin/pkg-config.sh":
-    content =>
-"
-#! /bin/bash
-LD_LIBRARY_PATH= /usr/bin/x86_64-linux-gnu-pkg-config \"$@\"
-",
-    ensure  => present,
-    path    => "/nubots/toolchain/nuc7i7bnh/bin/pkg-config.sh",
-    mode    => "a+x",
-  } -> Installer <| |>
-
-  file { "/nubots/toolchain/fitpc2i/bin/pkg-config.sh":
-    content =>
-"
-#! /bin/bash
-LD_LIBRARY_PATH= /usr/bin/i686-linux-gnu-pkg-config \"$@\"
-",
-    ensure  => present,
-    path    => "/nubots/toolchain/fitpc2i/bin/pkg-config.sh",
-    mode    => "a+x",
-  } -> Installer <| |>
-
-  file { "/nubots/toolchain/native/bin/pkg-config.sh":
+  file { "/nubots/toolchain/bin/pkg-config.sh":
     content =>
 "
 #! /bin/bash
 LD_LIBRARY_PATH= /usr/bin/pkg-config \"$@\"
 ",
     ensure  => present,
-    path    => "/nubots/toolchain/native/bin/pkg-config.sh",
+    path    => "/nubots/toolchain/bin/pkg-config.sh",
     mode    => "a+x",
   } -> Installer <| |>
 
@@ -349,7 +327,7 @@ glib_cv_uscore=no
 "ac_cv_path_XGETTEXT=${prefix}/bin/xgettext.sh
 ac_cv_path_MSGMERGE=${prefix}/bin/msgmerge.sh
 ac_cv_path_MSGFMT=${prefix}/bin/msgfmt.sh
-ac_cv_path_PKG_CONFIG=${prefix}/${arch}/bin/pkg-config.sh
+ac_cv_path_PKG_CONFIG=${prefix}/bin/pkg-config.sh
 ",
       ensure  => present,
       path    => "${prefix}/${arch}/src/aravis.config",
