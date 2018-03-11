@@ -17,11 +17,13 @@ class build_tools {
     refreshonly => true
   } -> Package <| |>
 
-  # Add the llvm 4.0 source
+  $codename = lsb_release()
+
+  # Add the llvm 5.0 source
   apt::source { 'llvm-apt-repo':
-    comment  => 'The LLVM 4.0 apt repository',
-    location => 'http://apt.llvm.org/xenial/',
-    release  => 'llvm-toolchain-xenial-4.0',
+    comment  => 'The LLVM 5.0 apt repository',
+    location => "http://apt.llvm.org/${codename}",
+    release  => "llvm-toolchain-${codename}-5.0",
     repos    => 'main',
     key      => {
       'id'     => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
