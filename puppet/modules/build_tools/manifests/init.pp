@@ -67,8 +67,8 @@ class build_tools {
   package { 'libusb-1.0-0-dev:i386': ensure => latest, }
   package { 'autopoint': ensure => latest, }
   package { 'gettext': ensure => latest, }
-  package { 'python3-pip': ensure => latest, }
   package { 'python-pip': ensure => latest, }
+  package { 'python3-pip': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
 
   # CM730 firmware compilation.
@@ -79,16 +79,18 @@ class build_tools {
   package { 'libasound2-dev:amd64': ensure => latest, }
   package { 'libasound2-dev:i386': ensure => latest, }
 
-  # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
+  # We need to match the protobuf version with the one we install in the toolchain.
   exec {'install_python3_packages':
-    command => '/usr/bin/pip3 install pyparsing &&
-                /usr/bin/pip3 install pydotplus &&
-                /usr/bin/pip3 install pygments &&
-                /usr/bin/pip3 install termcolor &&
-                /usr/bin/pip3 install protobuf &&
-                /usr/bin/pip3 install xxhash &&
-                /usr/bin/pip3 install numpy',
-    require => [ Package['python3-pip'], ]
+    command => "pip3 install pyparsing &&
+                pip3 install pydotplus &&
+                pip3 install pygments &&
+                pip3 install termcolor &&
+                pip3 install protobuf==3.5.0.post1 &&
+                pip3 install xxhash",
+    path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout     => 0,
+    provider    => 'shell',
+    require => [ Package['python3-pip'], ],
   }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
