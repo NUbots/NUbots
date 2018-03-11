@@ -44,30 +44,30 @@ namespace behaviour {
 
         using extension::Configuration;
 
-        using message::motion::WalkCommand;
         using message::behaviour::KickPlan;
         using message::behaviour::KickType;
         using message::behaviour::MotionCommand;
-        using message::motion::WalkStopped;
-        using message::motion::WalkCommand;
-        using message::motion::StopCommand;
-        using message::motion::EnableWalkEngineCommand;
         using message::motion::DisableWalkEngineCommand;
+        using message::motion::EnableWalkEngineCommand;
         using message::motion::KickFinished;
+        using message::motion::StopCommand;
+        using message::motion::WalkCommand;
+        using message::motion::WalkCommand;
+        using message::motion::WalkStopped;
         using LocalisationBall = message::localisation::Ball;
         using Self             = message::localisation::Self;
         using VisionBall       = message::vision::Ball;
         using VisionObstacle   = message::vision::Obstacle;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
         using utility::localisation::transform::RobotToWorldTransform;
         using utility::math::matrix::Transform2D;
-        using utility::nubugger::graph;
-        using utility::nubugger::drawSphere;
         using utility::nubugger::drawArrow;
+        using utility::nubugger::drawSphere;
+        using utility::nubugger::graph;
 
         BezierWalkPathPlanner::BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))

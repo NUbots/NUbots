@@ -29,13 +29,13 @@ namespace module {
 namespace vision {
 
     using message::input::Image;
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using utility::math::ransac::NPartiteRansac;
-    using utility::math::geometry::Line;
     using message::input::CameraParameters;
+    using utility::math::geometry::Line;
     using utility::math::geometry::Plane;
+    using utility::math::ransac::NPartiteRansac;
     using utility::math::vision::getCamFromImage;
 
     using utility::nubugger::drawVisionLines;

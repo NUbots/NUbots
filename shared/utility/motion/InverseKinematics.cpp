@@ -310,7 +310,7 @@ namespace motion {
             for (auto joint : headJoints) {
                 switch (joint.first.value) {
                     case ServoID::HEAD_PITCH: headPitch = joint.second; break;
-                    case ServoID::HEAD_YAW: headYaw     = joint.second; break;
+                    case ServoID::HEAD_YAW: headYaw = joint.second; break;
                     default:
                         NUClear::log<NUClear::ERROR>(__FILE__, __LINE__, "Joints for head returned unexpected values");
                         throw std::exception();

@@ -36,13 +36,13 @@ namespace vision {
 
     using extension::Configuration;
 
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
-    using message::input::CameraParameters;
+    using message::support::SaveConfiguration;
+    using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
-    using message::vision::ClassifiedImage;
-    using message::support::SaveConfiguration;
     using utility::support::Expression;
 
     // using ServoID = utility::input::ServoID;

@@ -35,12 +35,12 @@ namespace support {
     using message::vision::Ball;
     using ServoID = utility::input::ServoID;
 
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Rotation3D;
+    using utility::math::vision::getFieldToCam;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::screenToImage;
-    using utility::math::vision::getFieldToCam;
 
     VirtualBall::VirtualBall() : position(arma::fill::zeros), velocity(arma::fill::zeros), diameter(0.1), rd(rand()) {}
 

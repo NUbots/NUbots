@@ -50,29 +50,29 @@ namespace vision {
 
     using message::input::CameraParameters;
 
-    using message::vision::ClassifiedImage;
-    using message::vision::Ball;
-    using message::vision::LookUpTable;
     using message::input::Image;
     using message::support::FieldDescription;
+    using message::vision::Ball;
+    using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
 
     using Plane = utility::math::geometry::Plane<3>;
 
     using ServoID = utility::input::ServoID;
-    using utility::math::vision::widthBasedDistanceToCircle;
-    using utility::math::vision::projectCamToPlane;
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::Cone;
+    using utility::math::geometry::Line;
+    using utility::math::matrix::Transform3D;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getImageFromCam;
+    using utility::math::vision::getParallaxAngle;
     using utility::math::vision::imageToScreen;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToPlane;
     using utility::math::vision::screenToImage;
     using utility::math::vision::screenToImageCts;
-    using utility::math::vision::getCamFromScreen;
-    using utility::math::vision::getParallaxAngle;
-    using utility::math::vision::getCamFromImage;
-    using utility::math::vision::getImageFromCam;
-    using utility::math::vision::projectCamSpaceToScreen;
-    using utility::math::matrix::Transform3D;
-    using utility::math::geometry::Cone;
-    using utility::math::geometry::Circle;
-    using utility::math::geometry::Line;
+    using utility::math::vision::widthBasedDistanceToCircle;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;

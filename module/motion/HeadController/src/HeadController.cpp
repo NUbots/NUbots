@@ -42,17 +42,17 @@ namespace motion {
     using utility::nubugger::graph;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using message::input::Sensors;
-    using utility::behaviour::RegisterAction;
     using extension::Configuration;
     using message::behaviour::ServoCommand;
+    using message::input::Sensors;
     using message::motion::HeadCommand;
-    using utility::math::coordinates::sphericalToCartesian;
+    using message::motion::KinematicsModel;
+    using utility::behaviour::RegisterAction;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::sphericalToCartesian;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
-    using message::motion::KinematicsModel;
     using utility::support::Expression;
 
     // internal only callback messages to start and stop our action

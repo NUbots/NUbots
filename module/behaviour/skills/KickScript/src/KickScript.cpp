@@ -43,11 +43,11 @@ namespace behaviour {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
-        using message::motion::KickScriptCommand;
         using message::motion::KickFinished;
+        using message::motion::KickScriptCommand;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
 
         KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))

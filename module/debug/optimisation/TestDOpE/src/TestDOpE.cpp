@@ -31,8 +31,8 @@ namespace debug {
         using extension::Configuration;
         using message::support::optimisation::Episode;
         using message::support::optimisation::Parameters;
-        using message::support::optimisation::RequestParameters;
         using message::support::optimisation::RegisterOptimisation;
+        using message::support::optimisation::RequestParameters;
 
         TestDOpE::TestDOpE(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), currentParameters() {

@@ -35,10 +35,10 @@ namespace research {
 
     using extension::Configuration;
 
-    using message::vision::Ball;
-    using message::vision::Goal;
-    using message::vision::ClassifiedImage;
     using message::research::AutoClassifierPixels;
+    using message::vision::Ball;
+    using message::vision::ClassifiedImage;
+    using message::vision::Goal;
 
     using utility::math::geometry::Circle;
     using utility::math::geometry::Quad;

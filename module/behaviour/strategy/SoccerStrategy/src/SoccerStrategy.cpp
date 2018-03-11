@@ -51,8 +51,8 @@ namespace behaviour {
 
         using message::behaviour::Behaviour;
         using message::behaviour::FieldTarget;
-        using message::behaviour::Look;
         using message::behaviour::KickPlan;
+        using message::behaviour::Look;
         using KickType = message::behaviour::KickPlan::KickType;
         using message::behaviour::MotionCommand;
         using message::behaviour::Nod;
@@ -66,7 +66,6 @@ namespace behaviour {
         using GameMode       = message::input::GameState::Data::Mode;
         using message::input::Sensors;
         using VisionBall = message::vision::Ball;
-        using message::vision::Goal;
         using message::localisation::Ball;
         using message::localisation::Field;
         using message::localisation::ResetRobotHypotheses;
@@ -74,15 +73,16 @@ namespace behaviour {
         using message::motion::DiveFinished;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
-        using message::platform::darwin::ButtonMiddleDown;
         using message::platform::darwin::ButtonLeftDown;
+        using message::platform::darwin::ButtonMiddleDown;
         using message::support::FieldDescription;
+        using message::vision::Goal;
 
-        using utility::time::durationFromSeconds;
         using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
+        using utility::time::durationFromSeconds;
 
         SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -494,16 +494,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing = field.position[2];
-                int signBearing    = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed =
-                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                             cfg_.goalie_max_rotation_speed);
+                float fieldBearing  = field.position[2];
+                int signBearing     = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed = -signBearing
+                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                                  cfg_.goalie_max_rotation_speed);
 
-                int signTranslation = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed =
-                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                cfg_.goalie_max_translation_speed);
+                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed = signTranslation
+                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                     cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));

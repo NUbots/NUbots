@@ -60,23 +60,23 @@ namespace vision {
 
     using utility::math::ransac::NPartiteRansac;
 
-    using utility::math::vision::widthBasedDistanceToCircle;
-    using utility::math::vision::projectCamToPlane;
-    using utility::math::vision::imageToScreen;
-    using utility::math::vision::getCamFromScreen;
-    using utility::math::vision::getParallaxAngle;
-    using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::distanceToVerticalObject;
     using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getImageFromCam;
     using utility::math::vision::getImageFromCamCts;
+    using utility::math::vision::getParallaxAngle;
+    using utility::math::vision::imageToScreen;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToPlane;
+    using utility::math::vision::widthBasedDistanceToCircle;
     using utility::nubugger::drawVisionLines;
 
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using message::vision::Goal;
     using message::support::FieldDescription;
+    using message::vision::Goal;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the
@@ -161,8 +161,7 @@ namespace vision {
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
-                        && (segment.previous > -1)
-                        && (segment.next > -1)) {
+                        && (segment.previous > -1) && (segment.next > -1)) {
                         segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
                                                                            convert<uint, 2>(cam.imageSizePixels)),
                                                              cam),

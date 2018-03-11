@@ -31,12 +31,12 @@
 namespace module {
 namespace vision {
 
-    using message::input::Image;
-    using message::vision::LookUpTable;
     using message::input::CameraParameters;
+    using message::input::Image;
     using message::vision::ClassifiedImage;
-    using utility::math::geometry::Plane;
+    using message::vision::LookUpTable;
     using utility::math::geometry::Line;
+    using utility::math::geometry::Plane;
     using utility::math::geometry::Quad;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getImageFromCam;

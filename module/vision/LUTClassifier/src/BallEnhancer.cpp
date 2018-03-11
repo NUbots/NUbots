@@ -26,10 +26,10 @@
 namespace module {
 namespace vision {
 
-    using message::input::Image;
     using message::input::CameraParameters;
-    using message::vision::LookUpTable;
+    using message::input::Image;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
 
     using utility::math::geometry::Line;
     using utility::math::geometry::Plane;
@@ -198,9 +198,10 @@ namespace vision {
         // Find out how green each pixel is!
         std::array<float, 24> greenness;
         for (int i = 0; i < int(greenness.size()); ++i) {
-            greenness[i] = (greenCentroid - Eigen::Vector3f(float(pixels[i].components.y * 2),
-                                                            float(pixels[i].components.cb),
-                                                            float(pixels[i].components.cr)))
+            greenness[i] = (greenCentroid
+                            - Eigen::Vector3f(float(pixels[i].components.y * 2),
+                                              float(pixels[i].components.cb),
+                                              float(pixels[i].components.cr)))
                                .norm();
         }
 

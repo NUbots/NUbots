@@ -44,21 +44,21 @@ namespace module {
 namespace support {
 
     using NUClear::message::CommandLineArguments;
-    using message::support::nubugger::Overview;
     using message::behaviour::Behaviour;
-    using message::behaviour::WalkPath;
     using message::behaviour::KickPlan;
+    using message::behaviour::WalkPath;
+    using message::input::GameState;
     using message::input::Image;
     using message::input::Sensors;
-    using message::input::GameState;
-    using message::support::GlobalConfig;
     using message::localisation::Field;
+    using message::support::GlobalConfig;
+    using message::support::nubugger::Overview;
     using LocalisationBall = message::localisation::Ball;
     using VisionBall       = message::vision::Ball;
     using VisionGoal       = message::vision::Goal;
     using message::motion::WalkCommand;
-    using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
+    using utility::math::matrix::Transform3D;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview

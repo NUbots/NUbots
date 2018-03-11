@@ -26,8 +26,8 @@
 namespace module {
 namespace vision {
     using message::input::Image;
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass;
     using FOURCC       = utility::vision::FOURCC;
 
