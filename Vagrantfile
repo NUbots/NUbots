@@ -79,15 +79,21 @@ Vagrant.configure("2") do |config|
   # Before the puppet provisioner runs
   # install puppet modules that are used
   config.vm.provision "install-puppet-modules", type: "shell" do |shell|
-    shell.inline = "apt-get install -y puppet;
-                    mkdir -p /etc/puppet/modules;
-                    puppet module list | grep -q 'puppetlabs-apt' \
+    shell.inline = "codename=$(lsb_release -sc) && \\
+                    if [ \"${codename}\" == \"trusty\" ]; then \\
+                        wget -N https://apt.puppetlabs.com/puppetlabs-release-trusty.deb && \\
+                        dpkg -i puppetlabs-release-trusty.deb && \\
+                        apt-get update; \\
+                    fi; \\
+                    apt-get install -y --reinstall puppet; \\
+                    mkdir -p /etc/puppet/modules; \\
+                    puppet module list | grep -q 'puppetlabs-apt' \\
                          || puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0;
-                    puppet module list | grep -q 'puppetlabs-vcsrepo' \
+                    puppet module list | grep -q 'puppetlabs-vcsrepo' \\
                          || puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com;
-                    puppet module list | grep -q 'camptocamp-archive' \
+                    puppet module list | grep -q 'camptocamp-archive' \\
                          || puppet module install camptocamp-archive --module_repository https://forge.puppet.com;
-                    puppet module list | grep -q 'maestrodev-wget' \
+                    puppet module list | grep -q 'maestrodev-wget' \\
                          || puppet module install maestrodev-wget --module_repository https://forge.puppet.com;"
   end
 
