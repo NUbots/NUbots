@@ -49,7 +49,7 @@ node nubotsvmbuild {
   }
 
   # We need build tools to compile and we need it done before the installer
-  class {'build_tools': } -> Installer <| |>
+  class {'build_tools': } -> class { 'protobuf': } -> Installer <| |>
 
   # These user tools make the shell much easier and these also should be done before installing
   class {'user_tools':
@@ -58,7 +58,8 @@ node nubotsvmbuild {
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
-    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-cpp-3.4.0.tar.gz',
+    # We need to match the protobuf version with the one we install in the python class.
+    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.5.0/protobuf-cpp-3.5.0.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'nuc7i7bnh' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
@@ -231,9 +232,6 @@ node nubotsvmbuild {
 
   # Install quex.
   class { 'quex': }
-
-  # Install protobuf.
-  class { 'protobuf': }
 
   # Install catch.
   installer { 'catch':
