@@ -1,7 +1,7 @@
 class toolchain_deb {
 
   $build_dir = '/home/vagrant/nubots-toolchain'
-  $excludes = '--exclude=/nubots/toolchain/src/ --exclude=/nubots/toolchain/native/src/ --exclude=/nubots/toolchain/nuc7i7bnh/src/ --exclude=/nubots/toolchain/fitpc2i/src/ '
+  $excludes = '--exclude=/nubots/toolchain/src/ --exclude=/nubots/toolchain/native/src/ --exclude=/nubots/toolchain/nuc7i7bnh/src/ '
 
   file { [ "${build_dir}" , "${build_dir}/DEBIAN", ]:
     ensure  => directory,

@@ -67,10 +67,6 @@ Vagrant.configure("2") do |config|
     shell.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
   end
 
-  config.vm.provision "add-32bit", type: "shell" do |shell|
-      shell.inline = "dpkg --add-architecture i386 && apt-get update"
-  end
-
   # Before anything else runs make sure dpkg isnt locked.
   # Might as well do a quick update while we are here
   config.vm.provision "unlock-dpkg", type: "shell", run: "always" do |shell|

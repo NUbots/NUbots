@@ -142,6 +142,7 @@ ff02::2 ip6-allrouters
 10.1.1.6 d6 darwin6
 
 10.1.1.11 i1 igus1
+10.1.1.12 i2 igus2
 ",
   }
 }
