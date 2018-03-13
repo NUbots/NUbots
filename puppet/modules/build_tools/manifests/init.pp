@@ -43,28 +43,24 @@ class build_tools {
   package { 'gtk-doc-tools': ensure => latest, }
   package { 'texinfo': ensure => latest, }
   package { 'bison': ensure => latest, }
-  package { 'libpcre3-dev:amd64': ensure => latest, }
-  package { 'libpcre3-dev:i386': ensure => latest, }
+  package { 'libpcre3-dev': ensure => latest, }
   package { 'pkg-config': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'rsync': ensure => latest, }
   package { 'git': ensure => latest, }
   package { 'build-essential': ensure => latest, }
-  package { 'libncurses5-dev:amd64': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
-  package { 'libncurses5-dev:i386': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
+  package { 'libncurses5-dev': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
   package { 'libstdc++6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gcc-7': name => 'gcc-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'g++-7': name => 'g++-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gfortran-7': name => 'gfortran-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gcc-7': name => 'gcc-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'g++-7': name => 'g++-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gfortran-7': name => 'gfortran-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ccache': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'binutils': name => 'binutils-multiarch', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'binutils-dev': name => 'binutils-multiarch-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'binutils': name => 'binutils', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'binutils-dev': name => 'binutils-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'nasm': ensure => latest, }
-  package { 'libusb-1.0-0:amd64': ensure => latest, }
-  package { 'libusb-1.0-0:i386': ensure => latest, }
-  package { 'libusb-1.0-0-dev:amd64': ensure => latest, }
-  package { 'libusb-1.0-0-dev:i386': ensure => latest, }
+  package { 'libusb-1.0-0': ensure => latest, }
+  package { 'libusb-1.0-0-dev': ensure => latest, }
   package { 'autopoint': ensure => latest, }
   package { 'gettext': ensure => latest, }
   package { 'python-pip': ensure => latest, }
@@ -76,8 +72,7 @@ class build_tools {
   package { 'libnewlib-arm-none-eabi': ensure => latest, }
 
   # System libraries
-  package { 'libasound2-dev:amd64': ensure => latest, }
-  package { 'libasound2-dev:i386': ensure => latest, }
+  package { 'libasound2-dev': ensure => latest, }
 
   # We need to match the protobuf version with the one we install in the toolchain.
   exec {'install_python3_packages':
