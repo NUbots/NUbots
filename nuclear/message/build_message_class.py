@@ -11,7 +11,7 @@ with open('{}.pb'.format(base_file), 'rb') as f:
     d.ParseFromString(f.read())
 
     # Check that there is only one file
-    assert(len(d.file) == 1)
+    assert (len(d.file) == 1)
 
     # Load the file
     b = generator.File.File(d.file[0], base_file)

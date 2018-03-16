@@ -39,14 +39,16 @@ with open(role_name, 'w') as file:
         file.write('#include "{}"\n'.format(header))
 
     # Add our main function and include headers
-    main = textwrap.dedent("""
+    main = textwrap.dedent(
+        """
         #include "utility/strutil/ansi.h"
         #include "utility/strutil/banner.h"
 
         using utility::strutil::Colour;
 
         int main(int argc, char** argv) {
-        """)
+        """
+    )
     file.write(main)
 
     # Read our banner file
@@ -60,7 +62,7 @@ with open(role_name, 'w') as file:
         file.write('    std::cerr')
 
         # Split our line into sections for colours
-        sections = [[k,len(list(g))] for k, g in itertools.groupby(banner_line)]
+        sections = [[k, len(list(g))] for k, g in itertools.groupby(banner_line)]
 
         for section in sections:
 
@@ -69,37 +71,37 @@ with open(role_name, 'w') as file:
                 file.write(' << "' + (section[0] * section[1]) + '"')
             # Otherwise print the colour and then the hashes
             else:
-                if section[0] in 'k':     # black
+                if section[0] in 'k':  # black
                     file.write(' << Colour::black')
-                elif section[0] in 'K':   # darkgrey
+                elif section[0] in 'K':  # darkgrey
                     file.write(' << Colour::brightblack')
-                elif section[0] in 'r':   # darkred
+                elif section[0] in 'r':  # darkred
                     file.write(' << Colour::red')
-                elif section[0] in 'R':   # red
+                elif section[0] in 'R':  # red
                     file.write(' << Colour::brightred')
-                elif section[0] in 'g':   # darkgreen
+                elif section[0] in 'g':  # darkgreen
                     file.write(' << Colour::green')
-                elif section[0] in 'G':   # green
+                elif section[0] in 'G':  # green
                     file.write(' << Colour::brightgreen')
-                elif section[0] in 'y':   # darkyellow
+                elif section[0] in 'y':  # darkyellow
                     file.write(' << Colour::yellow')
-                elif section[0] in 'Y':   # yellow
+                elif section[0] in 'Y':  # yellow
                     file.write(' << Colour::brightyellow')
-                elif section[0] in 'b':   # darkblue
+                elif section[0] in 'b':  # darkblue
                     file.write(' << Colour::blue')
-                elif section[0] in 'B':   # blue
+                elif section[0] in 'B':  # blue
                     file.write(' << Colour::brightblue')
-                elif section[0] in 'm':   # darkmagenta
+                elif section[0] in 'm':  # darkmagenta
                     file.write(' << Colour::magenta')
-                elif section[0] in 'M':   # magenta
+                elif section[0] in 'M':  # magenta
                     file.write(' << Colour::brightmagenta')
-                elif section[0] in 'c':   # darkcyan
+                elif section[0] in 'c':  # darkcyan
                     file.write(' << Colour::cyan')
-                elif section[0] in 'C':   # cyan
+                elif section[0] in 'C':  # cyan
                     file.write(' << Colour::brightcyan')
-                elif section[0] in 'w':   # lightgrey
+                elif section[0] in 'w':  # lightgrey
                     file.write(' << Colour::gray')
-                elif section[0] in 'W':   # white
+                elif section[0] in 'W':  # white
                     file.write(' << Colour::brightgray')
                 else:
                     print("The banner file contains an invalid character", section)
@@ -108,10 +110,12 @@ with open(role_name, 'w') as file:
                 # Write the actual banner text
                 file.write(' << "' + ('#' * section[1]) + '"')
 
-        file.write(' << std::endl;\n');
+        file.write(' << std::endl;\n')
 
     # Insert banner for the name of the executing role
-    rolebanner = '    std::cerr << utility::strutil::banner("{0}");\n    std::cerr << std::endl;\n'.format(os.path.splitext(os.path.basename(role_name))[0])
+    rolebanner = '    std::cerr << utility::strutil::banner("{0}");\n    std::cerr << std::endl;\n'.format(
+        os.path.splitext(os.path.basename(role_name))[0]
+    )
     file.write(rolebanner)
 
     start = """
