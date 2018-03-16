@@ -242,19 +242,37 @@ IF(src)
 
     # If we have pybind11 we need to make this a python library too
     IF(pybind11_FOUND)
+        # Add python libraries to main message library
         TARGET_LINK_LIBRARIES(nuclear_message ${PYTHON_LIBRARIES})
-
-        # Work out what python expects the name of the library to be
-        SET(python_module_path "${PYTHON_MODULE_PREFIX}message${PYTHON_MODULE_EXTENSION}")
 
         # Make our NUClear python directory for including
         FILE(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/python/nuclear")
 
-        # Create symlinks to the files
-        ADD_CUSTOM_COMMAND(TARGET nuclear_message POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nuclear_message> "${PROJECT_BINARY_DIR}/python/nuclear/${python_module_path}"
-            COMMENT "Copying messages lib into python file format"
-        )
+        # Make an unoptimised version of the messages library specifically for python use
+        ADD_LIBRARY(python_nuclear_message SHARED ${protobufs} ${src})
+        SET_TARGET_PROPERTIES(python_nuclear_message PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python/nuclear/"
+                                                                PREFIX "${PYTHON_MODULE_PREFIX}"
+                                                                OUTPUT_NAME "message"
+                                                                SUFFIX "${PYTHON_MODULE_EXTENSION}")
+
+        # The library uses protocol buffers
+        TARGET_LINK_LIBRARIES(python_nuclear_message ${PROTOBUF_LIBRARIES})
+        TARGET_LINK_LIBRARIES(python_nuclear_message ${NUClear_LIBRARIES})
+        TARGET_LINK_LIBRARIES(python_nuclear_message ${PYTHON_LIBRARIES})
+
+        # Remove all compiler options for this library so it can be executed on any platform
+        TARGET_COMPILE_OPTIONS(python_nuclear_message PUBLIC "-march=native")
+        TARGET_COMPILE_OPTIONS(python_nuclear_message PUBLIC "-mtune=generic")
+        TARGET_COMPILE_OPTIONS(python_nuclear_message PUBLIC "-O0")
+
+        # # Work out what python expects the name of the library to be
+        # SET(python_module_path "${PYTHON_MODULE_PREFIX}message${PYTHON_MODULE_EXTENSION}")
+
+        # # Create symlinks to the files
+        # ADD_CUSTOM_COMMAND(TARGET nuclear_message POST_BUILD
+        #     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nuclear_message> "${PROJECT_BINARY_DIR}/python/nuclear/${python_module_path}"
+        #     COMMENT "Copying messages lib into python file format"
+        # )
 
     ENDIF()
 
@@ -264,3 +282,4 @@ IF(src)
     # Put it in an IDE group for shared
     SET_PROPERTY(TARGET nuclear_message PROPERTY FOLDER "shared/")
 ENDIF()
+
