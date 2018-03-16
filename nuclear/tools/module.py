@@ -5,6 +5,7 @@ import os
 import sys
 import textwrap
 
+
 def register(command):
 
     # Module help
@@ -16,6 +17,14 @@ def register(command):
     # Generate module subcommand
     generate_command = subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
     generate_command.add_argument('path', metavar='path', help='a path to the new module (from the module directory)')
+    generate_command.add_argument(
+        'language',
+        metavar='language',
+        choices=['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py'],
+        default='C++',
+        help='Language to use for the module, C++ or Python [default=C++]'
+    )
+
 
 def run(path, **kwargs):
     # Try to get our actual module directory from the cmake cache
@@ -38,6 +47,13 @@ def run(path, **kwargs):
         sys.stderr.write('The path provided already exists.\n')
         sys.stderr.write('Module generation aborted.\n')
         sys.exit(1)
+
+    if language not in ['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py']:
+        sys.stderr.write('The language provided is invalid.\n')
+        sys.stderr.write('Module generation aborted.\n')
+        sys.exit(1)
+
+    module_language = 'CPP' if language in ['C++', 'c++', 'cpp', 'cxx'] else 'PYTHON'
 
     print('Module directory', module_path)
     print('Creating directories')
@@ -66,13 +82,19 @@ def run(path, **kwargs):
         output.write(generate_readme(parts))
         print('\t', os.path.join(src_path, 'README.md'))
 
-    with open(os.path.join(src_path, '{}.h'.format(module_name)), "w") as output:
-        output.write(generate_header(parts))
-        print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
+    if module_language is 'CPP':
+        with open(os.path.join(src_path, '{}.h'.format(module_name)), "w") as output:
+            output.write(generate_header(parts))
+            print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
 
-    with open(os.path.join(src_path, '{}.cpp'.format(module_name)), "w") as output:
-        output.write(generate_cpp(parts))
-        print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
+        with open(os.path.join(src_path, '{}.cpp'.format(module_name)), "w") as output:
+            output.write(generate_cpp(parts))
+            print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
+
+    else:
+        with open(os.path.join(src_path, '{}.py'.format(module_name)), "w") as output:
+            output.write(generate_python(parts))
+            print('\t', os.path.join(src_path, '{}.py'.format(module_name)))
 
     with open(os.path.join(tests_path, '{}.cpp'.format(module_name)), "w") as output:
         output.write(generate_test(parts))
@@ -82,14 +104,18 @@ def run(path, **kwargs):
         print('\t', os.path.join(config_path, '{}.yaml'.format(module_name)))
 
 
-def generate_cmake(parts):
-    return textwrap.dedent("""\
+def generate_cmake(parts, language):
+    return textwrap.dedent(
+        """\
         # Build our NUClear module
-        NUCLEAR_MODULE()
-        """)
+        NUCLEAR_MODULE(LANGUAGE "{module_languge}")
+        """
+    ).format(module_languge=language)
+
 
 def generate_header(parts):
-    template = textwrap.dedent("""\
+    template = textwrap.dedent(
+        """\
         #ifndef {define}
         #define {define}
 
@@ -107,15 +133,20 @@ def generate_header(parts):
         {closeNamespace}
 
         #endif  // {define}
-        """)
+        """
+    )
 
-    return template.format(define='{}_H'.format('_'.join([p.upper() for p in parts]))
-                         , className=parts[-1]
-                         , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
-                         , closeNamespace = '\n'.join('}' * (len(parts) - 1)))
+    return template.format(
+        define='{}_H'.format('_'.join([p.upper() for p in parts])),
+        className=parts[-1],
+        openNamespace='\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]]),
+        closeNamespace='\n'.join('}' * (len(parts) - 1))
+    )
+
 
 def generate_cpp(parts):
-    template = textwrap.dedent("""\
+    template = textwrap.dedent(
+        """\
         #include "{className}.h"
 
         #include "extension/Configuration.h"
@@ -132,14 +163,19 @@ def generate_cpp(parts):
                 }});
             }}
         {closeNamespace}
-        """)
+        """
+    )
 
-    return template.format(className=parts[-1]
-                         , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
-                         , closeNamespace = '\n'.join(['}' for x in parts[:-1]]))
+    return template.format(
+        className=parts[-1],
+        openNamespace='\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]]),
+        closeNamespace='\n'.join(['}' for x in parts[:-1]])
+    )
+
 
 def generate_readme(parts):
-    template = textwrap.dedent("""\
+    template = textwrap.dedent(
+        """\
         {className}
         {classNameTitle}
 
@@ -154,22 +190,45 @@ def generate_readme(parts):
 
         ## Dependencies
 
-        """)
+        """
+    )
 
-    return template.format(className=parts[-1]
-                         , classNameTitle = len(parts[-1]) * '='
-                         , closeNamespace = '\n'.join(['}' for x in parts[:-1]]))
+    return template.format(
+        className=parts[-1], classNameTitle=len(parts[-1]) * '=', closeNamespace='\n'.join(['}' for x in parts[:-1]])
+    )
+
 
 def generate_test(parts):
-    template = textwrap.dedent("""\
+    template = textwrap.dedent(
+        """\
         // Uncomment this line when other test files are added
         //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
         //#include <catch.hpp>
 
         // Remove this line when test files are added
         int main() {{ return 0; }}
-        """)
+        """
+    )
 
     return template.format()
 
 
+def generate_python(parts):
+    template = textwrap.dedent(
+        """\
+        #!/usr/bin/env python3
+
+        from nuclear import Reactor, on, Trigger, Single, With, Every
+
+        @Reactor
+        class {className}(object):
+            def __init__(self):
+                # Constructor for {className}
+
+            @on(Configuration('{className}.yaml'))
+            def {className}_configfuration(self, config):
+                # Use configuration here from file {className}.yaml
+        """
+    )
+
+    return template.format(className=parts[-1])
