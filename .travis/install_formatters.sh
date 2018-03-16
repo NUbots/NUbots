@@ -9,4 +9,5 @@ sudo apt-get update
 sudo apt-get install clang-format-5.0
 sudo apt-get install colordiff
 
+sudo apt-get install python3-pip
 sudo pip3 install yapf
