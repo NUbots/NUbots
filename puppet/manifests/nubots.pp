@@ -153,6 +153,11 @@ node nubotsvmbuild {
                        'prebuild'    => 'sed "s/return\s(entry->schema\s>>\s10)\s\&\s0x0000001f;/return ((entry->schema >> 10) \& 0x0000001f) ? ARV_UVCP_SCHEMA_ZIP : ARV_UVCP_SCHEMA_RAW;/" -i src/arvuvcp.h',
                        'postbuild'   => 'cp src/arvconfig.h PREFIX/include/arvconfig.h',
                        'method'      => 'autotools', },
+    'pybind11'     => {'url'         => 'https://github.com/pybind/pybind11/archive/v2.2.2.tar.gz',
+                       'args'        => { 'native'   => [ '-DPYBIND11_TEST=OFF', ' -DPYBIND11_PYTHON_VERSION=3',  ],
+                                          'nuc7i7bnh' => [ '-DPYBIND11_TEST=OFF', ' -DPYBIND11_PYTHON_VERSION=3', ], },
+                       'creates'     => 'include/pybind11/pybind11.h',
+                       'method'      => 'cmake', },
   }
 
   # Download each archive and spawn Installers for each one.
