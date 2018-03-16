@@ -1,7 +1,6 @@
-import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 import { Mesh } from 'three'
-import { MultiMaterial } from 'three'
 import { Object3D } from 'three'
 
 import { geometryAndMaterial } from '../../utils'
@@ -32,7 +31,7 @@ export class RightLegViewModel {
   @computed
   private get rightPelvisY() {
     const { geometry, materials } = this.rightPelvisYGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.position.set(-0.037, -0.1222, -0.005)
     mesh.rotation.set(0, this.model.motors.rightHipYaw.angle, 0)
     mesh.add(this.rightPelvis)
@@ -42,7 +41,7 @@ export class RightLegViewModel {
   @computed
   private get rightPelvis() {
     const { geometry, materials } = this.rightPelvisGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.rotation.set(0, 0, this.model.motors.rightHipRoll.angle)
     mesh.add(this.rightUpperLeg)
     return mesh
@@ -51,7 +50,7 @@ export class RightLegViewModel {
   @computed
   private get rightUpperLeg() {
     const { geometry, materials } = this.rightUpperLegGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.rotation.set(this.model.motors.rightHipPitch.angle, 0, 0)
     mesh.add(this.rightLowerLeg)
     return mesh
@@ -60,7 +59,7 @@ export class RightLegViewModel {
   @computed
   private get rightLowerLeg() {
     const { geometry, materials } = this.rightLowerLegGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.position.set(0, -0.093, 0)
     mesh.rotation.set(this.model.motors.rightKnee.angle, 0, 0)
     mesh.add(this.rightAnkle)
@@ -70,7 +69,7 @@ export class RightLegViewModel {
   @computed
   private get rightAnkle() {
     const { geometry, materials } = this.rightAnkleGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.position.set(0, -0.093, 0)
     mesh.rotation.set(this.model.motors.rightAnklePitch.angle, 0, 0)
     mesh.add(this.rightFoot)
@@ -80,7 +79,7 @@ export class RightLegViewModel {
   @computed
   private get rightFoot() {
     const { geometry, materials } = this.rightFootGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.rotation.set(0, 0, this.model.motors.rightAnkleRoll.angle)
     return mesh
   }

@@ -1,4 +1,4 @@
-import { createTransformer } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 import { MeshLambertMaterial } from 'three'
 import { Color } from 'three'
 import { JSONLoader } from 'three'

@@ -112,7 +112,6 @@
       120
     ],
     "ter-prefer-arrow-callback": true,
-    "typeof-compare": true,
     "trailing-comma": [
       true,
       {

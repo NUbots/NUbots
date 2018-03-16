@@ -1,5 +1,5 @@
-import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 
 import { Transform } from '../../../math/transform'
 import { Group } from '../../../render2d/object/group'

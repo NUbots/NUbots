@@ -1,5 +1,5 @@
-import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 import { BackSide } from 'three'
 import { Mesh } from 'three'
 import { SphereBufferGeometry } from 'three'

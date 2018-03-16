@@ -27,7 +27,9 @@ export class CanvasRenderer extends Component<RendererProps> {
     }
 
     // Render when changes happen
-    this.stopAutorun = autorun(() => this.renderCanvas())
+    this.stopAutorun = autorun(() => this.renderCanvas(), {
+      scheduler: requestAnimationFrame,
+    })
   }
 
   componentWillUnmount() {

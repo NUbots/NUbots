@@ -25,21 +25,21 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private canvas: HTMLCanvasElement
   private renderer: WebGLRenderer
   private stopAutorun: IReactionDisposer
-  private rafId: number
 
   componentDidMount(): void {
     this.renderer = new WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
     })
-    this.stopAutorun = autorun(() => this.renderScene())
+    this.stopAutorun = autorun(() => this.renderScene(), {
+      scheduler: requestAnimationFrame,
+    })
     this.canvas.addEventListener('click', this.onClick, false)
     document.addEventListener('pointerlockchange', this.onPointerLockChange, false)
     document.addEventListener('mousemove', this.onMouseMove, false)
     document.addEventListener('keydown', this.onKeyDown, false)
     document.addEventListener('keyup', this.onKeyUp, false)
     document.addEventListener('wheel', this.onWheel, false)
-    this.rafId = requestAnimationFrame(this.onAnimationFrame)
   }
 
   componentWillUnmount(): void {
@@ -50,7 +50,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     document.removeEventListener('keydown', this.onKeyDown, false)
     document.removeEventListener('keyup', this.onKeyUp, false)
     document.removeEventListener('wheel', this.onWheel, false)
-    cancelAnimationFrame(this.rafId)
     this.props.network.destroy()
   }
 
@@ -72,11 +71,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   requestPointerLock() {
     this.canvas.requestPointerLock()
-  }
-
-  private onAnimationFrame = (time: number) => {
-    this.rafId = requestAnimationFrame(this.onAnimationFrame)
-    this.props.controller.onAnimationFrame(this.props.model, time)
   }
 
   private renderScene(): void {

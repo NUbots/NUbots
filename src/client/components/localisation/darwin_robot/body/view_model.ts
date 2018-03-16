@@ -1,7 +1,6 @@
-import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 import { Mesh } from 'three'
-import { MultiMaterial } from 'three'
 
 import { geometryAndMaterial } from '../../utils'
 import { HeadViewModel } from '../head/view_model'
@@ -24,7 +23,7 @@ export class BodyViewModel {
   @computed
   get body(): Mesh {
     const { geometry, materials } = this.bodyGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.position.set(0, 0, 0.096)
     mesh.add(this.head)
     mesh.add(this.leftArm)

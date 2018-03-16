@@ -1,5 +1,5 @@
-import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 
 import { Vector2 } from '../../../math/vector2'
 import { BasicAppearance } from '../../../render2d/appearance/basic_appearance'

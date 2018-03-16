@@ -1,5 +1,5 @@
-import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 
 import { Transform } from '../../../math/transform'
 import { Vector2 } from '../../../math/vector2'

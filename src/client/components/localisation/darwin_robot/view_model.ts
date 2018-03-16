@@ -1,5 +1,5 @@
 import { computed } from 'mobx'
-import { createTransformer } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 import { Object3D } from 'three'
 import { Quaternion } from 'three'
 

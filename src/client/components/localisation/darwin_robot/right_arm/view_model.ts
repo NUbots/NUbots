@@ -1,7 +1,6 @@
-import { createTransformer } from 'mobx'
 import { computed } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 import { Mesh } from 'three'
-import { MultiMaterial } from 'three'
 import { Object3D } from 'three'
 
 import { geometryAndMaterial } from '../../utils'
@@ -29,7 +28,7 @@ export class RightArmViewModel {
   @computed
   private get rightShoulder() {
     const { geometry, materials } = this.rightShoulderGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.position.set(-0.082, 0, 0)
     mesh.rotation.set(this.model.motors.rightShoulderPitch.angle - Math.PI / 2, 0, 0)
     mesh.add(this.rightUpperArm)
@@ -39,7 +38,7 @@ export class RightArmViewModel {
   @computed
   private get rightUpperArm() {
     const { geometry, materials } = this.rightUpperArmGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.position.set(0, -0.016, 0)
     mesh.rotation.set(0, 0, this.model.motors.rightShoulderRoll.angle)
     mesh.add(this.rightLowerArm)
@@ -49,7 +48,7 @@ export class RightArmViewModel {
   @computed
   private get rightLowerArm() {
     const { geometry, materials } = this.rightLowerArmGeometryAndMaterial
-    const mesh = new Mesh(geometry, new MultiMaterial(materials))
+    const mesh = new Mesh(geometry, materials)
     mesh.position.set(0, -0.06, 0.016)
     mesh.rotation.set(this.model.motors.rightElbow.angle, 0, 0)
     return mesh

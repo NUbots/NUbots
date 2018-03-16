@@ -1,5 +1,5 @@
 import { computed } from 'mobx'
-import { createTransformer } from 'mobx'
+import { createTransformer } from 'mobx-utils'
 import { Scene } from 'three'
 import { HemisphereLight } from 'three'
 import { PointLight } from 'three'
