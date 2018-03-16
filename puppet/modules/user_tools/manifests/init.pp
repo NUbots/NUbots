@@ -69,7 +69,15 @@ class user_tools (String $user) {
   file_line{ 'zshrc_numpad18': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Ok" "+"'} ->
   file_line{ 'zshrc_numpad19': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Om" "-"'} ->
   file_line{ 'zshrc_numpad20': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Oj" "*"'} ->
-  file_line{ 'zshrc_numpad21': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Oo" "/"'}
+  file_line{ 'zshrc_numpad21': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Oo" "/"'} ->
+  file_line{ 'zshrc_env0': path => "/home/${user}/.zshrc", line => ''} ->
+  file_line{ 'zshrc_env1': path => "/home/${user}/.zshrc", line => '# Define environment variables'} ->
+  file_line{ 'zshrc_env2': path => "/home/${user}/.zshrc", line => 'PREFIX=/nubots/toolchain'} ->
+  file_line{ 'zshrc_env3': path => "/home/${user}/.zshrc", line => ''} ->
+  file_line{ 'zshrc_env4': path => "/home/${user}/.zshrc", line => 'export LD_LIBRARY_PATH="$PREFIX/lib"'} ->
+  file_line{ 'zshrc_env5': path => "/home/${user}/.zshrc", line => 'export PATH="$PREFIX/bin:$PATH"'} ->
+  file_line{ 'zshrc_env6': path => "/home/${user}/.zshrc", line => 'export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"'} ->
+  file_line{ 'zshrc_env7': path => "/home/${user}/.zshrc", line => 'export CMAKE_PREFIX_PATH="$PREFIX"'}
 
   # Modify our path so ccache is in it
   file_line{ 'path_ccache': path => "/home/${user}/.zshrc", line => 'export PATH=/usr/lib/ccache:$PATH'}
@@ -105,15 +113,6 @@ class user_tools (String $user) {
     source => 'puppet:///modules/user_tools/ssh_config',
     owner => "${user}",
     mode => '600',
-    replace => true,
-  }
-
-  # SETUP ENVIRONMENT VARIABLES FOR SHELLS
-  # This file does not need execute permissions (it is "sourced" not "executed")
-  file { '/etc/profile.d/toolchain_init.sh':
-    ensure => present,
-    mode => '644',
-    source => 'puppet:///modules/user_tools/toolchain_init.sh',
     replace => true,
   }
 
