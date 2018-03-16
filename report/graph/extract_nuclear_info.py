@@ -75,13 +75,7 @@ for symbol_address in bfd.symbols:
 
     d = demangler.demangle(symbol.name)
     d = symbol.name if d == None else str(d)
-    symbols[symbol_address] = {
-        'symbol': symbol.name,
-        'name': d,
-        'string_args': [],
-        'calls': [],
-        'called_by': []
-    }
+    symbols[symbol_address] = {'symbol': symbol.name, 'name': d, 'string_args': [], 'calls': [], 'called_by': []}
 
 # Extract the strings from the read only data section so we can find our reaction names
 s_data = bfd.sections['.rodata'].content
@@ -125,13 +119,7 @@ for vma, size, disasm in opcodes.disassemble(s_plt.content, s_plt.vma):
 
             d = demangler.demangle(symbol_name)
             d = symbol_name if d == None else str(d)
-            symbols[inst_index] = {
-                'symbol': symbol_name,
-                'name': d,
-                'string_args': [],
-                'calls': [],
-                'called_by': []
-            }
+            symbols[inst_index] = {'symbol': symbol_name, 'name': d, 'string_args': [], 'calls': [], 'called_by': []}
 
 # Make a list of keys so we can bisect the list (lower bound)
 symbol_keys = sorted(list(symbols.keys()))
@@ -158,7 +146,7 @@ for vma, size, disasm in opcodes.disassemble(s_text.content, s_text.vma):
             string_args.append(ro_strings[arg_addr])
 
     call = call_regex.match(disasm)
-    if call: # This will ignore calls that are not to a specific function (e.g. call from register)
+    if call:  # This will ignore calls that are not to a specific function (e.g. call from register)
         call_addr = int(call.group(1), 16)
 
         # If call_addr is a relocated symbol, resolve to the real one
@@ -216,16 +204,20 @@ for symbol_address in symbols:
         info = [x for x in parsed[1][3] if x not in parsed[1][-1][1:] and x != []]
 
         # If this is a NUClear CommandLineArgs or ReactionStatisitcs ignore it
-        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message', 'ReactionStatistics']]:
+        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message',
+                                                                                               'ReactionStatistics']]:
             continue
 
         outputs[symbol_address] = {
-            'type': info[-1], # The type in the unique_ptr
+            'type': info[-1],  # The type in the unique_ptr
             'scopes': [x[-1] for x in info[:-1]],
             'children': []
         }
         # If empty then local scope
-        outputs[symbol_address]['scopes'] = outputs[symbol_address]['scopes'] if outputs[symbol_address]['scopes'] != [] else ['Local']
+        outputs[symbol_address]['scopes'] = outputs[symbol_address]['scopes'
+                                                                    ] if outputs[symbol_address]['scopes'] != [] else [
+                                                                        'Local'
+                                                                    ]
 
     elif emit_re[1].match(symbol['name']):
         parsed = parser.parse_symbol(symbol['name'])
@@ -236,16 +228,20 @@ for symbol_address in symbols:
         info = [x for x in parsed[1][3] if x not in parsed[1][-1][1:] and x != []]
 
         # If this is a NUClear CommandLineArgs or ReactionStatisitcs ignore it
-        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message', 'ReactionStatistics']]:
+        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message',
+                                                                                               'ReactionStatistics']]:
             continue
 
         outputs[symbol_address] = {
-            'type': info[-1], # The type in the unique_ptr
+            'type': info[-1],  # The type in the unique_ptr
             'scopes': [x[-1] for x in info[:-1]],
             'children': []
         }
         # If empty then local scope
-        outputs[symbol_address]['scopes'] = outputs[symbol_address]['scopes'] if outputs[symbol_address]['scopes'] != [] else ['Local']
+        outputs[symbol_address]['scopes'] = outputs[symbol_address]['scopes'
+                                                                    ] if outputs[symbol_address]['scopes'] != [] else [
+                                                                        'Local'
+                                                                    ]
 
     elif on_re[0].match(symbol['name']):
 
@@ -256,11 +252,11 @@ for symbol_address in symbols:
         if len(location[1][-3]) == 2 and len(location[1][-2]) == 2:
 
             # Extract our function
-            func = symbol['name'][location[1][-3][1][0] : location[1][-3][1][-1]]
+            func = symbol['name'][location[1][-3][1][0]:location[1][-3][1][-1]]
 
             # Extract our binder instance
             # This is the on call related to this reaction which has binder arguments
-            binder = symbol['name'][location[0][2][0][1][1][1][2][0][0] : location[0][2][0][1][1][1][2][0][-1]]
+            binder = symbol['name'][location[0][2][0][1][1][1][2][0][0]:location[0][2][0][1][1][1][2][0][-1]]
             binder = [x for x in symbols if symbols[x]['name'].startswith(binder)]
             binder_args = []
 
@@ -378,14 +374,8 @@ for output_address in outputs:
             if len(search) == 0:
                 isolated_outputs.append(output)
 
-
 # Build our output information structure
-jsonOutput = {
-    'name': module_name,
-    'assembly': assembly_histogram,
-    'reactions': [],
-    'output_data': []
-}
+jsonOutput = {'name': module_name, 'assembly': assembly_histogram, 'reactions': [], 'output_data': []}
 
 for reaction_address in reactions:
     for reaction in reactions[reaction_address]:
@@ -395,7 +385,8 @@ for reaction_address in reactions:
 
             r = {
                 # The name of the reaction, if the user provided use that
-                'name': reaction['user_name'][0][0] if reaction['user_name'] else None, # TODO find a better name here if you can
+                'name': reaction['user_name'][0][0]
+                        if reaction['user_name'] else None,  # TODO find a better name here if you can
 
                 # The DSL that this is generated from
                 'dsl': reaction['dsl'],
@@ -405,15 +396,15 @@ for reaction_address in reactions:
 
                 # The data that this reaction gets
                 # Consists of a list of event descriptions, and modifiers applied to the input
-                'input_data': [], # { 'scope': 'S', 'value': 'T', 'modifiers': {'last':n, 'optional':True} }
+                'input_data': [],  # { 'scope': 'S', 'value': 'T', 'modifiers': {'last':n, 'optional':True} }
 
                 # A list of the output data from this reaction
                 # Consists of a list of event descriptions, and scopes
-                'output_data': [], # { 'scope': 'S', 'value': 'T' }
+                'output_data': [],  # { 'scope': 'S', 'value': 'T' }
 
                 # Modifiers that influence how the reaction as a whole runs
                 # Consists of a set of properties and values
-                'modifiers': {} # 'single': True, 'sync': 'T'
+                'modifiers': {}  # 'single': True, 'sync': 'T'
             }
 
             # Go through our DSL word elements

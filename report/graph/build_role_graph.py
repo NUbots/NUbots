@@ -10,7 +10,9 @@ import re
 from collections import Counter
 from pydotplus.graphviz import Dot, Node, Edge, Cluster
 
+
 class NUClearGraphBuilder:
+
     def __init__(self):
         self.modules = []
 
@@ -21,9 +23,9 @@ class NUClearGraphBuilder:
 
             # Don't load some super connected modules
             if module['name'] in [
-                # 'support::logging::ConsoleLogHandler',
-                # 'support::NUbugger',
-                # 'support::extension::FileWatcher',
+                    # 'support::logging::ConsoleLogHandler',
+                    # 'support::NUbugger',
+                    # 'support::extension::FileWatcher',
             ]:
                 return
 
@@ -42,8 +44,8 @@ class NUClearGraphBuilder:
 
                     # give our global arguments
                     edge = {
-                        'src':   '"{}"'.format(output_id),
-                        'dst':   '"{}"'.format(input_id),
+                        'src': '"{}"'.format(output_id),
+                        'dst': '"{}"'.format(input_id),
                         'label': '"{}"'.format(type_name),
                         # Red for triggering edges, blue for data only edges
                         'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
@@ -77,8 +79,8 @@ class NUClearGraphBuilder:
             if input['scope'] == 'system_event':
                 # give our arguments
                 edge = {
-                    'src':   '"{}"'.format('System'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('System'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format(input['type']),
                     'color': '#00FF00'
                 }
@@ -86,8 +88,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'every':
                 edge = {
-                    'src':   '"{}"'.format('Every'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('Every'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"Every<{}, seconds>"'.format(input['type']),
                     'color': '#000000'
                 }
@@ -95,8 +97,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'always':
                 edge = {
-                    'src':   '"{}"'.format('Every'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('Every'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format('Always'),
                     'color': '#000000'
                 }
@@ -104,8 +106,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'io':
                 edge = {
-                    'src':   '"{}"'.format('IO'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('IO'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format('IO'),
                     'color': '#000000'
                 }
@@ -113,8 +115,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'tcp':
                 edge = {
-                    'src':   '"{}"'.format('TCP'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('TCP'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format('TCP'),
                     'color': '#000000'
                 }
@@ -122,8 +124,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'udp':
                 edge = {
-                    'src':   '"{}"'.format('UDP'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('UDP'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format('UDP'),
                     'color': '#000000'
                 }
@@ -131,8 +133,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'udp_broadcast':
                 edge = {
-                    'src':   '"{}"'.format('UDP'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('UDP'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format('UDP Broadcast'),
                     'color': '#000000'
                 }
@@ -140,8 +142,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'udp_multicast':
                 edge = {
-                    'src':   '"{}"'.format('UDP'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('UDP'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format('UDP Multicast'),
                     'color': '#000000'
                 }
@@ -149,8 +151,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'configuration':
                 edge = {
-                    'src':   '"{}"'.format('Configuration'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('Configuration'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format(input['type']),
                     'color': '#000000'
                 }
@@ -158,8 +160,8 @@ class NUClearGraphBuilder:
 
             if input['scope'] == 'file_watch':
                 edge = {
-                    'src':   '"{}"'.format('File Watch'),
-                    'dst':   '"{}"'.format(input_id),
+                    'src': '"{}"'.format('File Watch'),
+                    'dst': '"{}"'.format(input_id),
                     'label': '"{}"'.format(input['type']),
                     'color': '#000000'
                 }
@@ -192,18 +194,14 @@ class NUClearGraphBuilder:
             if group_clusters:
                 # Add a cluster for the module
                 cluster = Cluster(graph_name=str(id), label='"{}"'.format(m1['name']))
-                graph.add_subgraph(cluster);
+                graph.add_subgraph(cluster)
                 id += 1
             else:
                 cluster = graph
 
             # Add a node for our module itself
             if m1['output_data']:
-                node = {
-                    'name': '"{}"'.format(m1['name']),
-                    'label': '"{}"'.format(m1['name']),
-                    'shape': 'rect'
-                }
+                node = {'name': '"{}"'.format(m1['name']), 'label': '"{}"'.format(m1['name']), 'shape': 'rect'}
                 cluster.add_node(Node(**node))
 
                 for outputs in m1['output_data']:
@@ -223,7 +221,6 @@ class NUClearGraphBuilder:
                                     if edge:
                                         graph.add_edge(edge)
 
-
             # Loop through the reactions of each module
             for r1 in m1['reactions']:
 
@@ -235,11 +232,7 @@ class NUClearGraphBuilder:
 
                 # TODO if the label is Configuration, we need to get the .yaml file to help the label
 
-                node = {
-                    'name': '"{}"'.format(src_fqn),
-                    'label': '"{}"'.format(label),
-                    'shape': 'rect'
-                }
+                node = {'name': '"{}"'.format(src_fqn), 'label': '"{}"'.format(label), 'shape': 'rect'}
 
                 # If we are not grouping clusters, put the owner module here
                 if not group_clusters:
@@ -247,10 +240,10 @@ class NUClearGraphBuilder:
 
                 if r1['modifiers'].get('single', False):
                     # TODO make the outline style be dashed?
-                    pass # TODO modify the reaction
+                    pass  # TODO modify the reaction
                 if r1['modifiers'].get('sync', False):
                     # TODO make the outline style be something??
-                    pass # TODO modify the reaction
+                    pass  # TODO modify the reaction
                 if r1['modifiers'].get('priority', False):
                     if r1['modifiers']['priority'] == 'LOW':
                         node['style'] = 'filled'
@@ -296,11 +289,7 @@ class NUClearGraphBuilder:
 
         for module in self.modules:
 
-            compressed = {
-                'name': module['name'],
-                'input_data': [],
-                'output_data': []
-            }
+            compressed = {'name': module['name'], 'input_data': [], 'output_data': []}
 
             # TODO we are getting doubleups
 
@@ -321,21 +310,23 @@ class NUClearGraphBuilder:
                     if output not in compressed['output_data']:
                         compressed['output_data'].append(output)
 
-
             compressed_modules.append(compressed)
 
-
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=True, splines=True, overlap='prism10000', layout='fdp', epsilon=0.01, start=int(random.random() * 2**32))
+        graph = Dot(
+            graph_type='digraph',
+            suppress_disconnected=True,
+            splines=True,
+            overlap='prism10000',
+            layout='fdp',
+            epsilon=0.01,
+            start=int(random.random() * 2**32)
+        )
 
         for m1 in compressed_modules:
 
             # Add a node for our module itself
-            node = {
-                'name': '"{}"'.format(m1['name']),
-                'label': '"{}"'.format(m1['name']),
-                'shape': 'rect'
-            }
+            node = {'name': '"{}"'.format(m1['name']), 'label': '"{}"'.format(m1['name']), 'shape': 'rect'}
             graph.add_node(Node(**node))
 
             # Loop through our outputs
@@ -361,11 +352,11 @@ class NUClearGraphBuilder:
         l = sorted(l)
 
         # If it's an empty list
-        if(not len(l)):
+        if (not len(l)):
             return (float('nan'), float('nan'), float('nan'), float('nan'))
 
         # Calculate the average
-        mean = float(sum(l))/float(len(l))
+        mean = float(sum(l)) / float(len(l))
 
         # Use a counter to get the mode
         mode = Counter(data).most_common(1)[0][0]
@@ -374,7 +365,7 @@ class NUClearGraphBuilder:
         median = l[len(l) / 2]
 
         # Calculate the standard deviation
-        stddev = math.sqrt(sum([pow(i-mean, 2) for i in l]) / len(l))
+        stddev = math.sqrt(sum([pow(i - mean, 2) for i in l]) / len(l))
 
         return (mean, mode, median, stddev)
 
@@ -529,14 +520,16 @@ class NUClearGraphBuilder:
                 for input in reaction['input_data']:
 
                     ex = input['modifiers'].get('execution', False)
-                    t = { 'scope': input['scope'], 'type': input['type'] }
+                    t = {'scope': input['scope'], 'type': input['type']}
 
                     if input['modifiers'].get('execution', False):
                         exec_types.append(input)
                     elif t not in data_types:
                         data_types.append(t)
 
-            info['message_lmb_complexity'].append((module['name'], len(module['reactions']), len(data_types) + len(exec_types), len(data_types)))
+            info['message_lmb_complexity'].append(
+                (module['name'], len(module['reactions']), len(data_types) + len(exec_types), len(data_types))
+            )
 
             h = info['message']['reactions']['histogram']
             l = len(data_types) + len(exec_types)
@@ -553,7 +546,6 @@ class NUClearGraphBuilder:
         h = info['message']['induced_cache_variables']
         h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
 
-
         # Calculate blackboard information (get number of unique "types")
         types = []
 
@@ -562,7 +554,6 @@ class NUClearGraphBuilder:
                 for o in outputs:
                     if o['scope'] == 'type' and o['type'] not in types:
                         types.append(o['type'])
-
 
             for r in module['reactions']:
                 for i in r['input_data']:
@@ -611,7 +602,8 @@ class NUClearGraphBuilder:
                 l.append(i)
         unique_outputs = l
 
-        return {'inputs': unique_inputs, 'outputs': unique_outputs }
+        return {'inputs': unique_inputs, 'outputs': unique_outputs}
+
 
 if __name__ == "__main__":
 
@@ -633,4 +625,3 @@ if __name__ == "__main__":
 
     with open("{}_types.json".format(out), 'w') as file:
         json.dump(converter.get_unique_input_output(), file, sort_keys=True, indent=4, separators=(',', ': '))
-

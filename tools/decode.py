@@ -11,7 +11,9 @@ import pkgutil
 import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
 
+
 class NUsightDecoder:
+
     def __init__(self, pb_type):
         self.pb_type = pb_type
 
@@ -19,15 +21,15 @@ class NUsightDecoder:
         # Strip off the filterid and timestamp (first 9 bytes)
         return self.pb_type.FromString(payload[9:])
 
+
 def register(command):
 
     # Install help
     command.help = 'Decode an nbs file into a series of json objects'
 
     # Drone arguments
-    command.add_argument('file'
-        , metavar='file'
-        , help='The file to decode into a series of json objects')
+    command.add_argument('file', metavar='file', help='The file to decode into a series of json objects')
+
 
 def run(file, **kwargs):
 
@@ -61,7 +63,6 @@ def run(file, **kwargs):
         # Reverse to little endian
         nusight_hash = bytes(reversed(xxhash.xxh64(nusight_type, seed=0x4e55436c).digest()))
         decoders[nusight_hash] = (nusight_type, NUsightDecoder(message))
-
 
     # Now open the passed file
     with gzip.open(file, 'rb') if file.endswith('nbz') or file.endswith('.gz') else open(file, 'rb') as f:
@@ -100,6 +101,8 @@ def run(file, **kwargs):
                 # By default output as json
                 else:
                     out = re.sub(r'\s+', ' ', MessageToJson(msg, True))
-                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(decoders[type_hash][0], timestamp, out)
+                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(
+                        decoders[type_hash][0], timestamp, out
+                    )
                     # Print as a json object
                     print(out)
