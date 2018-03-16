@@ -313,34 +313,37 @@ ac_cv_path_PKG_CONFIG=${prefix}/bin/pkg-config.sh
     }
 
     # Create CMake toolchain files.
-    $compile_options = join(prefix(suffix($params['flags'], ')'), 'add_compile_options('), "\n")
+    $compile_options = join(prefix(suffix($params['flags'], ')'), 'ADD_COMPILE_OPTIONS('), "\n")
     $compile_params  = join($params['params'], " ")
 
     file { "${arch}.cmake":
       content =>
-"set(CMAKE_SYSTEM_NAME Linux)
+"SET(CMAKE_SYSTEM_NAME Linux)
 
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_CXX_COMPILER g++)
+SET(CMAKE_C_COMPILER gcc)
+SET(CMAKE_CXX_COMPILER g++)
 
-set(CMAKE_FIND_ROOT_PATH \"${prefix}/${arch}\"
+SET(CMAKE_FIND_ROOT_PATH \"${prefix}/${arch}\"
        \"${prefix}\"
        \"/usr/local\"
        \"/usr\")
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 ${compile_options}
 
-include_directories(SYSTEM \"${prefix}/${arch}/include\")
-include_directories(SYSTEM \"${prefix}/include\")
+INCLUDE_DIRECTORIES(SYSTEM \"${prefix}/${arch}/include\")
+INCLUDE_DIRECTORIES(SYSTEM \"${prefix}/include\")
 
-set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\")
-set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\")
+SET(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\")
+SET(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\")
 
-set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
+SET(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
+
+SET(PYTHONPATH \"${prefix}/${arch}/lib/python3.6/site-packages:${prefix}/lib/python3.6/site-packages\"
+    CACHE STRING \"Platform specific python path.\" FORCE)
 ",
       ensure  => present,
       path    => "${prefix}/${arch}.cmake",
