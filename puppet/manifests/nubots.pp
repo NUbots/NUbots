@@ -45,7 +45,7 @@ node nubotsvmbuild {
   }
 
   # We need build tools to compile and we need it done before the installer
-  class {'build_tools': } -> class { 'protobuf': } -> Installer <| |>
+  class {'build_tools': } -> class { 'python': } -> class { 'protobuf': } -> Installer <| |>
 
   # These user tools make the shell much easier and these also should be done before installing
   class {'user_tools':
