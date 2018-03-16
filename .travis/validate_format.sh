@@ -29,7 +29,7 @@ done < <(find . -type f \( -name *.h \
                         -o -name *.ipp \
                         -o -name *.proto \) -print0)
 
-# Loop through all c/cpp files
+# Loop through all python files
 while IFS= read -r -d $'\0' line; do
 
     # Get what our formatted code should be
@@ -39,7 +39,7 @@ while IFS= read -r -d $'\0' line; do
     echo "Validating formatting for $line"
 
     # Check if our text is formatted incorrectly
-    if ! cmp -s $line <(echo "$fmt"); then
+    if [ ! -z "$fmt" ]; then
 
         # Flag that it is wrong and print the difference
         ret=1
