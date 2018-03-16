@@ -33,7 +33,7 @@ done < <(find . -type f \( -name *.h \
 while IFS= read -r -d $'\0' line; do
 
     # Get what our formatted code should be
-    fmt=$( /nubobts/toolchain/bin/yapf --diff $line )
+    fmt=$( yapf --diff $line )
 
     # Print a status message so we know what it's doing
     echo "Validating formatting for $line"
