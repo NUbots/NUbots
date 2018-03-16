@@ -132,12 +132,12 @@ define installer (
     }
 
     if has_key($env, 'PKG_CONFIG_PATH') {
-      $pkgconfig = "PKG_CONFIG_PATH=${env['PKG_CONFIG_PATH']}:${prefix}/${arch}/lib/pkgconfig"
+      $pkgconfig = "PKG_CONFIG_PATH=${env['PKG_CONFIG_PATH']}:${prefix}/${arch}/lib/pkgconfig:${prefix}/${arch}/share/pkgconfig"
       $env6 = delete($env5, 'PKG_CONFIG_PATH')
     }
 
     else {
-      $pkgconfig = "PKG_CONFIG_PATH=${prefix}/${arch}/lib/pkgconfig"
+      $pkgconfig = "PKG_CONFIG_PATH=${prefix}/${arch}/lib/pkgconfig:${prefix}/${arch}/share/pkgconfig"
       $env6 = $env5
     }
 
@@ -181,10 +181,21 @@ define installer (
       $env10 = $env9
     }
 
-    $environment = ['CC=/usr/bin/gcc', 'CXX=/usr/bin/g++', $cflags, $cxxflags, $common_opt, $fcommon_opt,
+    if has_key($params['environment'], 'ACLOCAL_PATH') {
+      $aclocalpath = "ACLOCAL_PATH=${params['environment']['ACLOCAL_PATH']}"
+      $env11 = delete($env10, 'ACLOCAL_PATH')
+    }
+
+    else {
+      $aclocalpath = "ACLOCAL_PATH=${prefix}/${arch}/share/aclocal:${prefix}/share/aclocal"
+      $env11 = $env10
+    }
+
+    $environment = ['CC=/usr/bin/gcc', 'CXX=/usr/bin/g++', "PYTHON=${prefix}/bin/python3",
+                    $cflags, $cxxflags, $common_opt, $fcommon_opt,
                     $ldflags, $ccas, $ccasflags, $pkgconfig, $cmake_prefix,
                     $ltsyslibpath, $ldlibrarypath,
-                    $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env10, "=")
+                    $libzlib, $inczlib, $libbzip, $incbzip, $aclocalpath, ] + join_keys_to_values($env11, "=")
 
     # Reduce the args array to a space separated list of arguments.
     if $args {
@@ -219,76 +230,80 @@ define installer (
                             '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
         }
 
-        exec { "autotools_${arch}_${name}":
-          creates     => "${create}",
-          onlyif      => "test \"${method}\" = \"autotools\" ",
-          # Sometimes, autogen.sh will automatically run configure
-          command     => "${prebuild_cmd} &&
-                          if [ -e \"autogen.sh\" ]; then NOCONFIGURE=1 ./autogen.sh; fi &&
-                          ./configure ${args_str} --prefix=\"${prefix}/${arch}\" &&
-                          make -j\$(nproc) &&
-                          make install &&
-                          ${postbuild_cmd}",
-          cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
-          environment => $environment,
-          path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
-                            '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-          timeout     => 0,
-          provider    => 'shell',
-          require     => [ Exec["mirror_${arch}_${name}"], ],
+        if $method  == "autotools" {
+          exec { "autotools_${arch}_${name}":
+            creates     => "${create}",
+            # Sometimes, autogen.sh will automatically run configure
+            command     => "${prebuild_cmd} &&
+                            if [ -e \"autogen.sh\" ]; then NOCONFIGURE=1 ./autogen.sh; fi &&
+                            ./configure ${args_str} --prefix=\"${prefix}/${arch}\" &&
+                            make -j\$(nproc) &&
+                            make install &&
+                            ${postbuild_cmd}",
+            cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
+            environment => $environment,
+            path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                              '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+            timeout     => 0,
+            provider    => 'shell',
+            require     => [ Exec["mirror_${arch}_${name}"], ],
+          }
         }
 
-        exec { "cmake_${arch}_${name}":
-          creates     => "${create}",
-          onlyif      => "test \"${method}\" = \"cmake\" ",
-          command     => "${prebuild_cmd} &&
-                          if [ -d \"build\" ]; then rm -rf build; fi &&
-                          mkdir build ; cd build &&
-                          cmake .. ${args_str} -DCMAKE_BUILD_TYPE=\"Release\" -DCMAKE_C_FLAGS_RELEASE=\"${flags}\" -DCMAKE_CXX_FLAGS_RELEASE=\"${flags}\" -DCMAKE_INSTALL_PREFIX:PATH=\"${prefix}/${arch}\" &&
-                          make -j\$(nproc) &&
-                          make install &&
-                          ${postbuild_cmd}",
-          cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
-          environment => $environment,
-          path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
-                            '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-          timeout     => 0,
-          provider    => 'shell',
-          require     => [ Exec["mirror_${arch}_${name}"], ],
+        elsif $method  == "cmake" {
+          exec { "cmake_${arch}_${name}":
+            creates     => "${create}",
+            command     => "${prebuild_cmd} &&
+                            if [ -d \"build\" ]; then rm -rf build; fi &&
+                            mkdir build ; cd build &&
+                            cmake .. ${args_str} -DCMAKE_BUILD_TYPE=\"Release\" -DCMAKE_C_FLAGS_RELEASE=\"${flags}\" -DCMAKE_CXX_FLAGS_RELEASE=\"${flags}\" -DCMAKE_INSTALL_PREFIX:PATH=\"${prefix}/${arch}\" &&
+                            make -j\$(nproc) &&
+                            make install &&
+                            ${postbuild_cmd}",
+            cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
+            environment => $environment,
+            path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                              '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+            timeout     => 0,
+            provider    => 'shell',
+            require     => [ Exec["mirror_${arch}_${name}"], ],
+          }
         }
 
-        exec { "boost_${arch}_${name}":
-          creates     => "${create}",
-          onlyif      => "test \"${method}\" = \"boost\" ",
-          command     => "${prebuild_cmd} &&
-                          ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --without-libraries=python &&
-                          ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q \\
-                                cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
-                          ./bjam install &&
-                          ${postbuild_cmd}",
-          cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
-          environment => $environment,
-          path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
-                            '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-          timeout     => 0,
-          provider    => 'shell',
-          require     => [ Exec["mirror_${arch}_${name}"], ],
+        elsif $method  == "boost" {
+          exec { "boost_${arch}_${name}":
+            creates     => "${create}",
+            command     => "${prebuild_cmd} &&
+                            ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --with-python=python3 &&
+                            ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q -a \\
+                                  cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
+                            ./bjam install &&
+                            ${postbuild_cmd}",
+            cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
+            environment => $environment,
+            path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                              '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+            timeout     => 0,
+            provider    => 'shell',
+            require     => [ Exec["mirror_${arch}_${name}"], ],
+          }
         }
 
-        exec { "make_${arch}_${name}":
-          creates     => "${create}",
-          onlyif      => "test \"${method}\" = \"make\" ",
-          command     => "${prebuild_cmd} &&
-                          make ${args_str} -j\$(nproc) &&
-                          make ${args_str} PREFIX=\"${prefix}/${arch}\" install &&
-                          ${postbuild_cmd}",
-          cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
-          environment => $environment,
-          path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
-                            '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-          timeout     => 0,
-          provider    => 'shell',
-          require     => [ Exec["mirror_${arch}_${name}"], ],
+        elsif $method  == "make" {
+          exec { "make_${arch}_${name}":
+            creates     => "${create}",
+            command     => "${prebuild_cmd} &&
+                            make ${args_str} -j\$(nproc) &&
+                            make ${args_str} PREFIX=\"${prefix}/${arch}\" install &&
+                            ${postbuild_cmd}",
+            cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
+            environment => $environment,
+            path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                              '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+            timeout     => 0,
+            provider    => 'shell',
+            require     => [ Exec["mirror_${arch}_${name}"], ],
+          }
         }
       }
     }
