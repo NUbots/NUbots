@@ -58,6 +58,13 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
     files = glob.glob(os.path.join(build_dir, 'bin', '*'))
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + files + [target_dir])
 
+    # Install python modules ... if we have any
+    if b.cmake_cache['HAVE_NUCLEAR_PYTHON_MODULES'] == 'ON':
+        cprint('Installing python modules to ' + target_dir, 'blue', attrs=['bold'])
+        files = glob.glob(os.path.join(build_dir, 'python', '**', '*.py'), recursive=True)
+        python_files = [os.path.relpath(c, build_dir) for c in files]
+        call(['rsync', '-avzPlR', '--checksum', '-e ssh'] + python_files + [target_dir])
+
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
         # Only send toolchain files if ours are newer than the receivers.
