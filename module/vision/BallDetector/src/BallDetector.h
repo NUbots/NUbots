@@ -26,6 +26,7 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"
+#include "message/vision/VisualMesh.h"
 
 #include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"
@@ -47,6 +48,9 @@ namespace vision {
 
         double CONSENSUS_ERROR_THRESHOLD;
         double MAXIMUM_DISAGREEMENT_RATIO;
+
+        double mesh_seed_confidence_threshold;
+        double mesh_branch_confidence_threshold;
 
         double maximum_relative_seed_point_distance;
 
@@ -79,6 +83,8 @@ namespace vision {
                                           const message::input::Image& image,
                                           const message::vision::LookUpTable& lut,
                                           const message::input::CameraParameters& params);
+
+        std::vector<int> findClusters(const VisualMesh& mesh);
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.

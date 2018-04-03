@@ -3,6 +3,9 @@ ransac:
   maximum_iterations_per_fitting: 100
   maximum_fitted_models: 3
   consensus_error_threshold: 0.000001
+visual_mesh:
+  mesh_branch_confidence_threshold: 0.3
+  mesh_seed_confidence_threshold: 0.9
 maximum_disagreement_ratio: 0.8
 maximum_relative_seed_point_distance: 0.1
 measurement_distance_variance_factor: 0.1

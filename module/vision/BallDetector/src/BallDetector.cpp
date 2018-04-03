@@ -26,6 +26,7 @@
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/VisionObjects.h"
+#include "message/vision/VisualMesh.h"
 
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Line.h"
@@ -53,6 +54,7 @@ namespace vision {
     using message::vision::ClassifiedImage;
     using message::vision::Ball;
     using message::vision::LookUpTable;
+    using message::vision::VisualMesh;
     using message::input::Image;
     using message::support::FieldDescription;
 
@@ -90,7 +92,6 @@ namespace vision {
                                                     const Image& image,
                                                     const LookUpTable& lut,
                                                     const CameraParameters& params) {
-
         std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> debug;
         float r           = 0;
         int numGreen      = 0;
@@ -149,6 +150,41 @@ namespace vision {
         return greenRatio;
     }
 
+    std::vector<std::vector<int>> BallDetector::findClusters(const VisualMesh& mesh) {
+        // Alias visual mesh parameters
+        int dim = mesh.classifications.back().dimensions;
+
+        // Create container for our clusters
+        std::vector<std::vector<int>> clusters;
+
+        // Initialise our number of clusters at 0
+        int n_clusters = 0;
+
+        // Create container to mark off used points
+        std::set<int> visited_indices;
+
+        // Loop through each coordinate
+        for (auto i = 0; i < mesh.coordinates.size(); ++i) {
+            // Check if our current coordinate is above threshold
+            if (mesh.classifications.back().values[i * dim] >= mesh_seed_confidence_threshold) {
+                // Check if our current seed point has already been visited
+                if (visited_indices.find(i) != visited_indices.end()) {
+                    // Add our seed point for current cluster
+                    clusters[n_clusters].push_back(i);
+
+                    // Add seed point to the set of visited points
+                    visited_indices.push_back(i);
+
+                    // TODO: Breadth first search on seed point!
+
+                    n_clusters++;
+                }
+            }
+        }
+
+        return clusters;
+    }
+
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , MINIMUM_POINTS_FOR_CONSENSUS(0)
@@ -177,6 +213,9 @@ namespace vision {
             MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<uint>();
             MAXIMUM_DISAGREEMENT_RATIO     = config["maximum_disagreement_ratio"].as<Expression>();
 
+            mesh_branch_confidence_threshold = config["visual_mesh"]["mesh_branch_confidence_threshold"];
+            mesh_seed_confidence_threshold   = config["visual_mesh"]["mesh_seed_confidence_threshold"];
+
             maximum_relative_seed_point_distance = config["maximum_relative_seed_point_distance"].as<double>();
 
             measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<Expression>();
@@ -195,6 +234,15 @@ namespace vision {
 
             lastFrame.time = NUClear::clock::now();
         });
+
+        on<Trigger<VisualMesh>, With<FieldDescription>, Buffer<2>>().then(
+            "Visual Mesh Ball Detector", [this](const VisualMesh& mesh, const FieldDescription& field) {
+                // We need to gather all points which have a confidence prediction of over MAX_PREDICT_THRESH
+                // Then BFS to all neighbouring points which have a confidence prediction of at least MIN_PREDICT_THRESH
+                // We then need to create ransac models for each of these 'clusters' to fit a circle
+                std::vector<std::vector<int>> findClusters(mesh);
+
+            });
 
         on<Trigger<ClassifiedImage>,
            With<CameraParameters>,
