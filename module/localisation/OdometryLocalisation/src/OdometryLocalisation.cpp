@@ -16,12 +16,12 @@ namespace module {
 namespace localisation {
 
     using extension::Configuration;
+    using message::behaviour::Nod;
     using message::input::Sensors;
     using message::localisation::Field;
+    using message::platform::darwin::ButtonLeftDown;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::behaviour::Nod;
     using utility::nubugger::graph;
 
     OdometryLocalisation::OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment)

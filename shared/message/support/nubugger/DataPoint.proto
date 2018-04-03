@@ -40,5 +40,5 @@ message DataPoint {
 
     string         label = 1;
     repeated float value = 2 [packed = true];
-    Type           type = 3;
+    Type           type  = 3;
 }

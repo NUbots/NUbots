@@ -15,7 +15,7 @@ namespace support {
                     case 0xE2: header_lock = 1; break;
                     case 0x98: header_lock = header_lock == 1 ? 2 : 0; break;
                     case 0xA2: header_lock = header_lock == 2 ? 3 : 0; break;
-                    default: header_lock   = 0; break;
+                    default: header_lock = 0; break;
                     case -1: throw std::runtime_error("End of file");
                 }
             }

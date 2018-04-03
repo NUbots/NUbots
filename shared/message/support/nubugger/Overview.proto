@@ -48,12 +48,12 @@ message Overview {
     behaviour.Behaviour.State behaviour_state = 6;
 
     // Localisation measured in field space
-    fvec3  robot_position            = 7;
-    fmat33 robot_position_covariance = 8;
+    fvec3 robot_position            = 7;
+    fmat3 robot_position_covariance = 8;
 
     // The ball position measured in field space
-    fvec2  ball_position            = 9;
-    fmat22 ball_position_covariance = 10;
+    fvec2 ball_position            = 9;
+    fmat2 ball_position_covariance = 10;
 
     // The location we are kicking to
     fvec2 kick_target = 11;

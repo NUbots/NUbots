@@ -25,10 +25,10 @@
 namespace module {
 namespace support {
     using ReactionStatisticsProto = message::support::nuclear::ReactionStatistics;
-    using utility::time::getUtcTimestamp;
     using NUClear::message::ReactionStatistics;
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
+    using utility::time::getUtcTimestamp;
 
     void NUbugger::provideReactionStatistics() {
         // handles["reaction_statistics"].push_back(on<Trigger<ReactionStatistics>>().then([this](const

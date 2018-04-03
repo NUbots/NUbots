@@ -31,8 +31,8 @@
 namespace module {
 namespace support {
     using utility::file::listFiles;
-    using utility::time::getUtcTimestamp;
     using utility::strutil::split;
+    using utility::time::getUtcTimestamp;
 
 
     /**

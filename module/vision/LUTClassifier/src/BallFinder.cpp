@@ -29,14 +29,14 @@ namespace module {
 namespace vision {
 
     using message::input::Image;
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
 
     using utility::math::geometry::Line;
     using utility::math::vision::getGroundPointFromScreen;
+    using utility::math::vision::imageToScreen;
     using utility::math::vision::projectWorldPointToScreen;
     using utility::math::vision::screenToImage;
-    using utility::math::vision::imageToScreen;
 
     using message::input::CameraParameters;
 
@@ -69,7 +69,7 @@ namespace vision {
 
         arma::vec2 topY = imageToScreen(arma::ivec2({maxVisualHorizon->x(), int(maxVisualHorizon->y())}),
                                         convert<uint, 2>(classifiedImage.dimensions));
-        topY[0] = 0;  // Choose centre of screen
+        topY[0]         = 0;  // Choose centre of screen
 
         // Get the positions of the top of our green horizion, and the bottom of the screen
         arma::mat44 camToGround = convert<double, 4, 4>(classifiedImage.sensors->camToGround);
@@ -100,15 +100,15 @@ namespace vision {
         // Do our inital calculation to get our first Y
         arma::vec4 worldPosition = arma::ones(4);
         worldPosition.rows(0, 2) = xStart * direction;
-        auto camPoint = projectWorldPointToScreen(worldPosition, camToGround, cam);
-        int y         = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+        auto camPoint            = projectWorldPointToScreen(worldPosition, camToGround, cam);
+        int y                    = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
         for (double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
             // Calculate our next Y
             worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
-            camPoint  = projectWorldPointToScreen(worldPosition, camToGround, cam);
-            int nextY = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+            camPoint                 = projectWorldPointToScreen(worldPosition, camToGround, cam);
+            int nextY                = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
             // Work out our details
             arma::ivec2 start = {0, y};
@@ -176,7 +176,7 @@ namespace vision {
             // Our Y is now our next y
             y = nextY;
 
-            auto segments = quex->classify(image, lut, start, end, subsample);
+            auto segments = classifier->classify(image, lut, start, end, subsample);
             insertSegments(classifiedImage, segments, false);
         }
     }

@@ -55,29 +55,29 @@ namespace behaviour {
         using ServoID = utility::input::ServoID;
         using message::input::Sensors;
 
-        using message::motion::WalkCommand;
         using message::behaviour::KickPlan;
         using message::behaviour::MotionCommand;
+        using message::behaviour::WantsToKick;
         using message::motion::KickFinished;
         using message::motion::StopCommand;
-        using message::behaviour::WantsToKick;
+        using message::motion::WalkCommand;
         using VisionBall = message::vision::Ball;
+        using utility::localisation::fieldStateToTransform3D;
+        using utility::math::matrix::Rotation2D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
-        using utility::math::matrix::Rotation2D;
-        using utility::localisation::fieldStateToTransform3D;
-        using utility::nubugger::graph;
         using utility::nubugger::drawSphere;
+        using utility::nubugger::graph;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
 
-        using message::motion::WalkStopped;
-        using message::motion::EnableWalkEngineCommand;
         using message::motion::DisableWalkEngineCommand;
+        using message::motion::EnableWalkEngineCommand;
+        using message::motion::WalkStopped;
 
-        using message::localisation::Field;
         using message::localisation::Ball;
+        using message::localisation::Field;
         using message::support::FieldDescription;
 
 

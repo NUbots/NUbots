@@ -29,11 +29,11 @@ namespace module {
 namespace support {
     namespace optimisation {
 
+        using message::behaviour::CancelFixedWalk;
         using message::behaviour::FixedWalkCommand;
         using message::behaviour::FixedWalkFinished;
-        using message::behaviour::CancelFixedWalk;
-        using message::behaviour::WalkOptimiserCommand;
         using message::behaviour::WalkConfigSaved;
+        using message::behaviour::WalkOptimiserCommand;
 
         using message::input::Sensors;
         using message::input::ServoID;
@@ -41,8 +41,8 @@ namespace support {
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
 
-        using message::support::SaveConfiguration;
         using extension::Configuration;
+        using message::support::SaveConfiguration;
 
         WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), initialConfig("Jerry", YAML::Node()) {

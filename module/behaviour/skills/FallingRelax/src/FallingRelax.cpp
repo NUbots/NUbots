@@ -45,8 +45,8 @@ namespace behaviour {
 
         using message::input::Sensors;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 

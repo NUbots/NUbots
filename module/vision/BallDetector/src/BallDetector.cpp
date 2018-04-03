@@ -40,7 +40,6 @@
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/Vision.h"
-#include "utility/vision/fourcc.h"
 
 #include "utility/math/geometry/Cone.h"
 
@@ -51,29 +50,29 @@ namespace vision {
 
     using message::input::CameraParameters;
 
-    using message::vision::ClassifiedImage;
-    using message::vision::Ball;
-    using message::vision::LookUpTable;
     using message::input::Image;
     using message::support::FieldDescription;
+    using message::vision::Ball;
+    using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
 
     using Plane = utility::math::geometry::Plane<3>;
 
     using ServoID = utility::input::ServoID;
-    using utility::math::vision::widthBasedDistanceToCircle;
-    using utility::math::vision::projectCamToPlane;
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::Cone;
+    using utility::math::geometry::Line;
+    using utility::math::matrix::Transform3D;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getImageFromCam;
+    using utility::math::vision::getParallaxAngle;
     using utility::math::vision::imageToScreen;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToPlane;
     using utility::math::vision::screenToImage;
     using utility::math::vision::screenToImageCts;
-    using utility::math::vision::getCamFromScreen;
-    using utility::math::vision::getParallaxAngle;
-    using utility::math::vision::getCamFromImage;
-    using utility::math::vision::getImageFromCam;
-    using utility::math::vision::projectCamSpaceToScreen;
-    using utility::math::matrix::Transform3D;
-    using utility::math::geometry::Cone;
-    using utility::math::geometry::Circle;
-    using utility::math::geometry::Line;
+    using utility::math::vision::widthBasedDistanceToCircle;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
@@ -144,7 +143,7 @@ namespace vision {
             // sample point in lut and check if == Colour::GREEN
         }
 
-        // emit(drawVisionLines(debug));
+        emit(drawVisionLines(debug));
 
         float greenRatio = actualSamples == 0 ? 1 : (numGreen / float(actualSamples));
         return greenRatio;
@@ -314,10 +313,14 @@ namespace vision {
                         }
 
                         // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
-                        double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
+                        double widthDistance = widthBasedDistanceToCircle(
+                            field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
 
                         if (widthDistance < cameraHeight * 0.5) {
-                            if (print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                            if (print_throwout_logs) {
+                                log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                                log("widthDistance =", widthDistance, "cameraHeight =", cameraHeight);
+                            }
                             continue;
                         }
 

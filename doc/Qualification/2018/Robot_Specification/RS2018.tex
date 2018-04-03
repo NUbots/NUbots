@@ -1,0 +1,157 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{framed, color}
+\usepackage{colortbl}
+\usepackage{multicol}
+\usepackage{fullpage}
+\usepackage{float}
+\usepackage{array}
+\usepackage{pgf}
+\usepackage{pgfpages}
+
+\pgfpagesdeclarelayout{boxed}
+{
+  \edef\pgfpageoptionborder{0pt}
+}
+{
+  \pgfpagesphysicalpageoptions
+  {%
+    logical pages=1,%
+  }
+  \pgfpageslogicalpageoptions{1}
+  {
+    border code=\pgfsetlinewidth{2pt}\pgfstroke,%
+%    border shrink=\pgfpageoptionborder,%
+    resized width=.9\pgfphysicalwidth,%
+    resized height=.9\pgfphysicalheight,%
+    center=\pgfpoint{.5\pgfphysicalwidth}{.5\pgfphysicalheight}%
+  }%
+}
+
+\pgfpagesuselayout{boxed}
+
+\definecolor{boxcolour}{rgb}{0.0, 0.0, 0.0}
+\definecolor{textcolour}{rgb}{1.0, 0.68, 0.0}
+
+\begin{document}
+
+\begin{center}
+	\includegraphics[width=0.95\textwidth]{nubots_logo.png}
+\end{center}
+\vspace{5em}
+
+\begin{center}
+	\colorbox[rgb]{0.0, 0.0, 0.0}
+	{
+	\begin{minipage}[c][3em][c]{0.97\textwidth}
+		{\color{textcolour}
+			{
+			\begin{Large}
+				\textbf{ROBOT SPECIFICATION}
+			\end{Large}
+			}
+		}
+	\end{minipage}
+	}
+\end{center}
+
+\begin{multicols}{2}
+\begin{table}[H]
+	\begin{tabular}{|m{5.9cm}|m{1.25cm}|}
+		\hline
+		\rowcolor[rgb]{0.0, 0.0, 0.0}
+		{\color{textcolour}\textbf{{PHYSICAL SPECIFICATIONS}}} & \\
+		\hline
+		Height (cm) & 90 \\
+		\hline
+		Weight (kg) & 7.5 \\
+		\hline
+		Walking Speed (cm/s) & 20 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\begin{tabular}{|m{5.9cm}|m{1.25cm}|}
+		\hline
+		\rowcolor[rgb]{0.0, 0.0, 0.0}
+		{\color{textcolour}\textbf{{DEGREES OF FREEDOM}}} & \\
+		\hline
+		Legs (each) & 6 \\
+		\hline
+		Arms (each) & 3 \\
+		\hline
+		Neck & 2 \\
+		\hline
+		& \\
+		\hline
+		\textbf{Total} & \textbf{20} \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\begin{tabular}{|m{5.9cm}|m{1.25cm}|}
+		\hline
+		\rowcolor[rgb]{0.0, 0.0, 0.0}
+		{\color{textcolour}\textbf{{MOTORS AND SENSORS}}} & \\
+		\hline
+		Dynamixel MX-106R Servo & x12 \\
+		\hline
+		Dynamixel MX-64R Servo & x6 \\
+		\hline
+		Point Grey Flea3 FL3-U3-13E4C-C & x2 \\
+		\hline
+		3-axis Gyroscope & x1 \\
+		\hline
+		3-axis Accelerometer & x1 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\begin{tabular}{|m{5.9cm}|m{1.25cm}|}
+		\hline
+		\rowcolor[rgb]{0.0, 0.0, 0.0}
+		{\color{textcolour}\textbf{{COMPUTING UNITS}}} & \\
+		\hline
+		Intel NUC7i7BNH (Core i7-7567U) & 3.5GHz \\
+		\hline
+		CM730 Management Controller & 72MHz \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\columnbreak
+
+\begin{center}
+	\colorbox[rgb]{0.0, 0.0, 0.0}
+	{
+	\begin{minipage}[c][3.5em][c]{0.45\textwidth}
+		\begin{center}
+			{\color{textcolour}
+				{
+				\textbf{THE UNIVERSITY OF NEWCASTLE \\
+				(AUSTRALIA)}
+				}
+			}
+		\end{center}
+	\end{minipage}
+	}
+\end{center}
+
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[width=0.47\textwidth]{NUgus}\\
+		\textbf{NUGus Robot}.
+	\end{center}
+\end{figure}
+
+\end{multicols}
+
+\end{document}

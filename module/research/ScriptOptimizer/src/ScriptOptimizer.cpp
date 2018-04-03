@@ -32,10 +32,10 @@ namespace research {
     using extension::ExecuteScript;
     using extension::Script;
 
+    using message::motion::AllServoWaypointsComplete;
     using message::platform::darwin::DarwinSensors;
     using message::research::scriptoptimizer::OptimizeScript;
     using message::research::scriptoptimizer::OptimizeScriptResult;
-    using message::motion::AllServoWaypointsComplete;
 
     ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), recording(false) {

@@ -51,8 +51,8 @@ namespace behaviour {
 
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
 
         GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {

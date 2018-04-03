@@ -25,8 +25,7 @@ namespace math {
 
         bool RansacConeModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points) {
             if (points.size() == REQUIRED_POINTS && !arma::all(points[0] == points[1])
-                && !arma::all(points[0] == points[2])
-                && !arma::all(points[1] == points[2])) {
+                && !arma::all(points[0] == points[2]) && !arma::all(points[1] == points[2])) {
                 Matrix X = arma::eye(3, 3);
                 X.col(0) = arma::normalise(points[0]);
                 X.col(1) = arma::normalise(points[1]);

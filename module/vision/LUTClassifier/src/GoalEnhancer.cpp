@@ -29,13 +29,13 @@ namespace module {
 namespace vision {
 
     using message::input::Image;
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using utility::math::ransac::NPartiteRansac;
-    using utility::math::geometry::Line;
     using message::input::CameraParameters;
+    using utility::math::geometry::Line;
     using utility::math::geometry::Plane;
+    using utility::math::ransac::NPartiteRansac;
     using utility::math::vision::getCamFromImage;
 
     using utility::nubugger::drawVisionLines;
@@ -111,7 +111,7 @@ namespace vision {
         // Partition our segments so that they are split between above and below the horizon
         auto split = std::partition(std::begin(points), std::end(points), [&](const GoalPOI& point) {
             // Is the midpoint above or below the horizon?
-            arma::vec3 camPoint = getCamFromImage(arma::ivec({point.midpoint[0], point.midpoint[1]}), cam);
+            arma::vec3 camPoint = getCamFromImage(arma::ivec({int(point.midpoint[0]), int(point.midpoint[1])}), cam);
             return arma::dot(horizon_normal, camPoint) > 0;
         });
 
@@ -175,7 +175,7 @@ namespace vision {
                                int(std::round(p[1]))});
 
                 if (e[0] > 0) {
-                    auto segments = quex->classify(image, lut, s, e);
+                    auto segments = classifier->classify(image, lut, s, e);
                     newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                 }
             }

@@ -31,12 +31,12 @@ namespace module {
 namespace debug {
 
     using NUClear::DEBUG;
-    using utility::nubugger::graph;
-    using utility::nubugger::drawArrow;
-    using utility::nubugger::drawSphere;
+    using message::input::Sensors;
     using message::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
-    using message::input::Sensors;
+    using utility::nubugger::drawArrow;
+    using utility::nubugger::drawSphere;
+    using utility::nubugger::graph;
     using ServoID = utility::input::ServoID;
     using message::support::nubugger::DrawObjects;
 

@@ -4,7 +4,7 @@ FUNCTION(ToolchainLibraryFinder)
     # Extract the arguments from our function call
     SET(options, "")
     SET(oneValueArgs "NAME")
-    SET(multiValueArgs "HEADER" "LIBRARY" "BINARY" "VERSION_FILE" "VERSION_BINARY_ARGUMENTS" "VERSION_REGEX")
+    SET(multiValueArgs "HEADER" "LIBRARY" "PATH_SUFFIX" "BINARY" "VERSION_FILE" "VERSION_BINARY_ARGUMENTS" "VERSION_REGEX")
     CMAKE_PARSE_ARGUMENTS(PACKAGE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Clear our required_vars variable
@@ -17,6 +17,7 @@ FUNCTION(ToolchainLibraryFinder)
         FIND_PATH("${PACKAGE_NAME}_INCLUDE_DIR"
                   NAMES ${PACKAGE_HEADER}
                   DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) include directory"
+                  PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
         )
 
         # Setup and export our variables
@@ -30,6 +31,7 @@ FUNCTION(ToolchainLibraryFinder)
     IF(PACKAGE_LIBRARY)
         FIND_LIBRARY("${PACKAGE_NAME}_LIBRARY"
                      NAMES ${PACKAGE_LIBRARY}
+                     PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
                      DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) library"
         )
 
@@ -44,7 +46,9 @@ FUNCTION(ToolchainLibraryFinder)
     IF(PACKAGE_BINARY)
         FIND_PROGRAM("${PACKAGE_NAME}_BINARY"
                      NAMES ${PACKAGE_BINARY}
-                     DOC "The ${PACKAGE_NAME} (${PACKAGE_BINARY}) executable prgram")
+                     PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
+                     DOC "The ${PACKAGE_NAME} (${PACKAGE_BINARY}) executable prgram"
+        )
 
         # Setup and export our variables
         SET(required_vars ${required_vars} "${PACKAGE_NAME}_BINARY")

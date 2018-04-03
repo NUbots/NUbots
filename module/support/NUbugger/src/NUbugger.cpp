@@ -38,9 +38,9 @@ namespace support {
     using utility::nubugger::graph;
 
     using extension::Configuration;
+    using message::support::nubugger::Command;
     using message::support::nubugger::Ping;
     using message::support::nubugger::ReactionHandles;
-    using message::support::nubugger::Command;
 
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;

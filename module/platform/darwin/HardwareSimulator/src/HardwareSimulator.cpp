@@ -42,8 +42,8 @@ namespace platform {
 
         using extension::Configuration;
 
-        using message::platform::darwin::DarwinSensors;
         using message::motion::ServoTarget;
+        using message::platform::darwin::DarwinSensors;
         using ServoID = utility::input::ServoID;
         using message::input::Sensors;
 

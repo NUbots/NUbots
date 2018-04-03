@@ -35,13 +35,13 @@ namespace module {
 namespace localisation {
 
     using message::input::Sensors;
+    using message::support::FieldDescription;
     using message::vision::Goal;
     using utility::input::ServoID;
-    using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::angle::normalizeAngle;
-    using utility::math::matrix::Transform3D;
-    using message::support::FieldDescription;
     using utility::localisation::fieldStateToTransform3D;
+    using utility::math::angle::normalizeAngle;
+    using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::matrix::Transform3D;
 
 
     using utility::math::matrix::Transform3D;

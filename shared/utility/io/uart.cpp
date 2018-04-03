@@ -63,19 +63,19 @@ namespace io {
         bool known_baud = true;
 
         switch (baud) {
-            case 50: tio.c_cflag    = B50; break;
-            case 75: tio.c_cflag    = B75; break;
-            case 110: tio.c_cflag   = B110; break;
-            case 134: tio.c_cflag   = B134; break;
-            case 150: tio.c_cflag   = B150; break;
-            case 200: tio.c_cflag   = B200; break;
-            case 300: tio.c_cflag   = B300; break;
-            case 600: tio.c_cflag   = B600; break;
-            case 1200: tio.c_cflag  = B1200; break;
-            case 1800: tio.c_cflag  = B1800; break;
-            case 2400: tio.c_cflag  = B2400; break;
-            case 4800: tio.c_cflag  = B4800; break;
-            case 9600: tio.c_cflag  = B9600; break;
+            case 50: tio.c_cflag = B50; break;
+            case 75: tio.c_cflag = B75; break;
+            case 110: tio.c_cflag = B110; break;
+            case 134: tio.c_cflag = B134; break;
+            case 150: tio.c_cflag = B150; break;
+            case 200: tio.c_cflag = B200; break;
+            case 300: tio.c_cflag = B300; break;
+            case 600: tio.c_cflag = B600; break;
+            case 1200: tio.c_cflag = B1200; break;
+            case 1800: tio.c_cflag = B1800; break;
+            case 2400: tio.c_cflag = B2400; break;
+            case 4800: tio.c_cflag = B4800; break;
+            case 9600: tio.c_cflag = B9600; break;
             case 19200: tio.c_cflag = B19200; break;
             case 38400: tio.c_cflag = B38400; break;
 #if defined(B57600)

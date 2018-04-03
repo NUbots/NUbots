@@ -8,14 +8,14 @@
 namespace module {
 namespace vision {
 
-    using message::input::Image;
-    using message::input::Sensors;
-    using message::vision::ClassifiedImage;
-    using utility::nubugger::drawVisionLines;
     using extension::Configuration;
     using message::input::CameraParameters;
+    using message::input::Image;
+    using message::input::Sensors;
     using message::support::FieldDescription;
+    using message::vision::ClassifiedImage;
     using utility::math::vision::getImageFromCam;
+    using utility::nubugger::drawVisionLines;
 
     IgusVisionTests::IgusVisionTests(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {

@@ -29,10 +29,10 @@ namespace support {
 
     using message::behaviour::Subsumption;
 
-    using utility::behaviour::ActionStart;
     using utility::behaviour::ActionKill;
-    using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
+    using utility::behaviour::ActionStart;
+    using utility::behaviour::RegisterAction;
     using LimbID = utility::input::LimbID;
 
     void NUbugger::provideSubsumption() {

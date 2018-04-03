@@ -45,32 +45,32 @@ namespace support {
 
     using extension::Configuration;
 
-    using message::platform::darwin::ButtonMiddleDown;
-    using message::input::Sensors;
     using message::input::CameraParameters;
-    using message::input::GameState;
     using message::input::GameEvents;
-    using message::support::FieldDescription;
-    using message::motion::WalkCommand;
-    using message::motion::StopCommand;
+    using message::input::GameState;
+    using message::input::Sensors;
     using message::motion::KickCommand;
-    using message::motion::KickScriptCommand;
     using message::motion::KickFinished;
     using message::motion::KickPlannerConfig;
+    using message::motion::KickScriptCommand;
+    using message::motion::StopCommand;
+    using message::motion::WalkCommand;
+    using message::platform::darwin::ButtonMiddleDown;
     using message::platform::darwin::DarwinSensors;
+    using message::support::FieldDescription;
     using message::support::GlobalConfig;
     using message::vision::Ball;
     using message::vision::Goal;
 
-    using utility::nubugger::drawArrow;
-    using utility::nubugger::drawSphere;
+    using utility::math::angle::bearingToUnitVector;
     using utility::math::angle::normalizeAngle;
     using utility::math::angle::vectorToBearing;
-    using utility::math::angle::bearingToUnitVector;
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::motion::kinematics::calculateRobotToIMU;
-    using utility::nubugger::graph;
     using utility::math::matrix::Transform2D;
+    using utility::motion::kinematics::calculateRobotToIMU;
+    using utility::nubugger::drawArrow;
+    using utility::nubugger::drawSphere;
+    using utility::nubugger::graph;
     using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
