@@ -114,7 +114,7 @@ node nubotsvmbuild {
     'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
                        'method'      => 'cmake', },
-    'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz',
+    'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz',
                        'args'        => { 'native'   => [ 'address-model=64', 'architecture=x86', 'link=static', ],
                                           'nuc7i7bnh' => [ 'address-model=64', 'architecture=x86', 'link=static', ], },
                        'method'      => 'boost',
