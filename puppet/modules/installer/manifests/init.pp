@@ -52,7 +52,7 @@ define installer (
     # Get the environment.
     $compiler_flags  = $params['flags'].reduce |$compiler_flags, $value| { "${compiler_flags} ${value}" }
     $compiler_params = $params['params'].reduce |$compiler_params, $value| { "${compiler_params} ${value}" }
-    $flags           = "${compiler_flags} ${compiler_params} -fPIC -I${prefix}/${arch}/include -Os"
+    $flags           = "${compiler_flags} ${compiler_params} -fPIC -I\"${prefix}/${arch}/include\" -I\"${prefix}/include/python3.6m\" -Os"
     $libzlib         = "ZLIB_LIBPATH=${prefix}/${arch}/lib"
     $inczlib         = "ZLIB_INCLUDE=${prefix}/${arch}/include"
     $libbzip         = "BZIP2_LIBPATH=${prefix}/${arch}/lib"
@@ -274,8 +274,9 @@ define installer (
           exec { "boost_${arch}_${name}":
             creates     => "${create}",
             command     => "${prebuild_cmd} &&
-                            ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --with-python=python3 &&
-                            ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q -a \\
+                            ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --with-python=python3 --with-python-root=\"${prefix}\" &&
+                            ./bjam include=\"${prefix}/${arch}/include\" include=\"${prefix}/include/python3.6m\" \\
+                                  library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q -a \\
                                   cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
                             ./bjam install &&
                             ${postbuild_cmd}",
