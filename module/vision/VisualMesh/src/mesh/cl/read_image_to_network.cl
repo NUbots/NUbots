@@ -162,6 +162,6 @@ kernel void read_image_to_network(read_only image2d_t image,
 
     const int idx = get_global_id(0);
 
-    // Store our pixel value in the network
+    // Read our pixel coordinate into the image
     network[idx] = read_image(image, format, coordinates[idx]);
 }

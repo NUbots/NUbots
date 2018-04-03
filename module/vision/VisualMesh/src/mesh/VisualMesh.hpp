@@ -28,7 +28,11 @@
 #include <type_traits>
 #include <vector>
 
-#include <CL/cl.h>
+#if defined(__APPLE__) || defined(__MACOSX)
+#include <OpenCL/opencl.h>
+#else
+#include <CL/opencl.h>
+#endif  // !__APPLE__
 
 // Include our generated OpenCL headers
 #include "mesh/cl/project_equidistant.cl.h"
@@ -435,19 +439,24 @@ public:
 
                     // Apply our activation function
                     code << "    // Apply the activation function" << std::endl;
+
+                    // selu constants
+                    constexpr const float lambda = 1.0507009873554804934193349852946;
+                    constexpr const float alpha  = 1.6732632423543772848170429916717;
+
+                    // Apply selu
                     if (vector_out) {
-                        // Apply elu
                         std::string e = "in" + std::to_string(layer_no + 1);
 
-                        // TODO Apply selu rather than elu
-                        code << "    " << e << " = select(native_exp(" << e << ") - 1, in" << (layer_no + 1) << ", "
-                             << e << " > 0);" << std::endl;  // select(a, b, c) == c ? b : a
+                        code << "    " << e << " = " << lambda << "f * select(" << alpha << "f * exp(" << e << ") - "
+                             << alpha << "f, in" << (layer_no + 1) << ", " << e << " > 0);"
+                             << std::endl;  // select(a, b, c) == c ? b : a
                     }
                     else {
                         for (uint i = 0; i < biases.size(); ++i) {
                             std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
-                            code << "    " << e << " = " << e << " > 0 ? " << e << " : native_exp(" << e << ") - 1;"
-                                 << std::endl;
+                            code << "    " << e << " = " << lambda << "f * (" << e << " > 0 ? " << e << " : " << alpha
+                                 << "f * exp(" << e << ") - " << alpha << "f);" << std::endl;
                         }
                     }
                     code << std::endl;
@@ -458,7 +467,7 @@ public:
 
                         if (vector_out) {
                             std::string e = "in" + std::to_string(layer_no + 1);
-                            code << "    " << e << " = native_exp(" << e << ");" << std::endl;
+                            code << "    " << e << " = exp(" << e << ");" << std::endl;
                             code << "    " << e << " = " << e << " / dot(" << e << ", (float" << vector_out << ")(1));"
                                  << std::endl;
                         }
@@ -467,7 +476,7 @@ public:
                             // Apply exp to each of the elements
                             for (uint i = 0; i < biases.size(); ++i) {
                                 std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
-                                code << "    " << e << " = native_exp(" << e << ");" << std::endl;
+                                code << "    " << e << " = exp(" << e << ");" << std::endl;
                             }
 
                             // Sum up all the values
@@ -571,9 +580,7 @@ public:
                 case GBRG:
                 case BGGR: fmt = cl_image_format{CL_R, CL_UNORM_INT8}; break;
                 case BGRA: fmt = cl_image_format{CL_BGRA, CL_UNORM_INT8}; break;
-                case RGBA:
-                    fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8};
-                    break;
+                case RGBA: fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8}; break;
                 // Oh no...
                 default: throw std::runtime_error("Unsupported image format");
             }
@@ -1369,6 +1376,8 @@ public:
                             return output;
                         }
                         // If we have an odd number of intersections something is wrong
+                        // In this case we err on the side of caution and oversample selecting points at the widest
+                        // marks
                         else {
                             throw std::runtime_error("Odd number of intersections found with cone");
                         }
@@ -1571,7 +1580,7 @@ public:
             switch (lens.projection) {
                 case Lens::RECTILINEAR: projection_kernel = project_rectilinear; break;
                 case Lens::EQUIDISTANT: projection_kernel = project_equidistant; break;
-                case Lens::EQUISOLID: projection_kernel   = project_equisolid; break;
+                case Lens::EQUISOLID: projection_kernel = project_equisolid; break;
             }
 
             // Load the arguments
@@ -1629,8 +1638,9 @@ public:
         // Build the packed neighbourhood map with an extra offscreen point at the end
         std::vector<std::array<int, 6>> local_neighbourhood(points + 1);
         for (uint i = 0; i < indices.size(); ++i) {
+            const auto& node = nodes[indices[i]];
             for (uint j = 0; j < 6; ++j) {
-                const auto& n             = nodes[indices[i]].neighbours[j];
+                const auto& n             = node.neighbours[j];
                 local_neighbourhood[i][j] = r_indices[n];
             }
         }
