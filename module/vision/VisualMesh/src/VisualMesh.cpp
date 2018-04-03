@@ -73,15 +73,14 @@ namespace vision {
             std::array<std::array<float, 4>, 4> Hoc;
             Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
+            // TODO: Un-hardcode
             mesh::VisualMesh<float>::Lens lens;
             lens.projection   = mesh::VisualMesh<float>::Lens::EQUIDISTANT;
             lens.dimensions   = {{int(img.dimensions[0]), int(img.dimensions[1])}};
             lens.fov          = M_PI;
             lens.focal_length = (1.0 / 0.0026997136600899543);
 
-            Timer t;
             auto results = classifier(img.data.data(), mesh::VisualMesh<float>::FOURCC(img.format), Hoc, lens);
-            t.measure("Classified");
 
             // Get the mesh that was used so we can make our message
             const auto& m = mesh.height(Hoc[2][3]);
@@ -115,6 +114,8 @@ namespace vision {
             }
 
             emit(msg);
+
+            // -- Graphing for NUsight
             // msg->classifications.emplace_back(results.classifications.front().first,
             //                                   results.classifications.front().second);
             // msg->classifications.emplace_back(results.classifications.back().first,
@@ -149,10 +150,6 @@ namespace vision {
             // emit(utility::nubugger::drawVisionLines(lines));
 
             t.measure("Saved in message");
-        });
-
-        on<Shutdown>().then([this] {
-
         });
     }
 }  // namespace vision
