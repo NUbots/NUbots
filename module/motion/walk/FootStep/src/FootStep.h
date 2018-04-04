@@ -25,8 +25,8 @@ namespace motion {
             /// @brief Called by the powerplant to build and setup the FootStep reactor.
             explicit FootStep(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }   // namespace walk
+}   // namespace motion
+}   // namespace module
 
 #endif  // MODULE_MOTION_WALK_FOOTSTEP_H
