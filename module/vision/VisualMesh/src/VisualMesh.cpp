@@ -113,7 +113,6 @@ namespace vision {
                 msg->classifications.emplace_back(c.first, c.second);
             }
 
-            emit(msg);
 
             // -- Graphing for NUsight
             // msg->classifications.emplace_back(results.classifications.front().first,
@@ -128,7 +127,7 @@ namespace vision {
 
 
             // std::vector<std::array<int, 2>> pixel_coordinates = results.pixel_coordinates;
-            // std::vector<float> classification                 = results.classifications.front().second;
+            // std::vector<float> classification = results.classifications.front().second;
 
             // for (uint i = 0; i < pixel_coordinates.size(); ++i) {
 
@@ -148,8 +147,7 @@ namespace vision {
             //     }
             // }
             // emit(utility::nubugger::drawVisionLines(lines));
-
-            t.measure("Saved in message");
+            emit(msg);
         });
     }
 }  // namespace vision
