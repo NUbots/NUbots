@@ -82,4 +82,4 @@ namespace support {
 }  // namespace support
 }  // namespace module
 
-#endif  // MODULES_SUPPORT_NUSIGHT_H
+#endif  // MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
