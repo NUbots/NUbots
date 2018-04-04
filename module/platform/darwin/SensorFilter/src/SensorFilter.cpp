@@ -620,8 +620,9 @@ namespace platform {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass =
-                        convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
+                    // FIXME: Causes crashes
+                    // sensors->centreOfMass =
+                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
 
                     /************************************************
                      *                  Kinematics Horizon          *
