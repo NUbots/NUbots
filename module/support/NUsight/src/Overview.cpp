@@ -43,6 +43,7 @@
 namespace module {
 namespace support {
 
+    using NUClear::message::CommandLineArguments;
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
     using message::behaviour::WalkPath;
@@ -52,7 +53,6 @@ namespace support {
     using message::localisation::Field;
     using message::support::GlobalConfig;
     using message::support::nusight::Overview;
-    using NUClear::message::CommandLineArguments;
     using LocalisationBall = message::localisation::Ball;
     using VisionBall       = message::vision::Ball;
     using VisionGoal       = message::vision::Goal;
