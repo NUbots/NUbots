@@ -38,16 +38,16 @@ namespace debug {
     using extension::Configuration;
 
     using message::input::Sensors;
-    using message::motion::ServoTarget;
-    using message::motion::KinematicsModel;
     using message::motion::BodySide;
+    using message::motion::KinematicsModel;
+    using message::motion::ServoTarget;
 
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using utility::math::matrix::Transform3D;
+    using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::motion::kinematics::calculatePosition;
-    using utility::motion::kinematics::calculateCameraLookJoints;
 
     KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -136,9 +136,9 @@ namespace debug {
 
                     if (request.config["RANDOMIZE"].as<bool>()) {
                         ikRequest.eye();
-                        ikRequest = ikRequest.rotateY(2 * M_PI * rand() / static_cast<double>(RAND_MAX));
-                        ikRequest = ikRequest.rotateX(2 * M_PI * rand() / static_cast<double>(RAND_MAX));
-                        ikRequest = ikRequest.rotateZ(2 * M_PI * rand() / static_cast<double>(RAND_MAX));
+                        ikRequest       = ikRequest.rotateY(2 * M_PI * rand() / static_cast<double>(RAND_MAX));
+                        ikRequest       = ikRequest.rotateX(2 * M_PI * rand() / static_cast<double>(RAND_MAX));
+                        ikRequest       = ikRequest.rotateZ(2 * M_PI * rand() / static_cast<double>(RAND_MAX));
                         ikRequest(0, 3) = 0.03 * rand() / static_cast<double>(RAND_MAX);
                         ikRequest(1, 3) = 0.03 * rand() / static_cast<double>(RAND_MAX);
                         ikRequest(2, 3) = 0.1 * rand() / static_cast<double>(RAND_MAX);

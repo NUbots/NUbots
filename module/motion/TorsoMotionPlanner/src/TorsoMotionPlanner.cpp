@@ -36,21 +36,21 @@ namespace motion {
     using message::motion::WalkCommand;
     using NewFootTargetInfo = message::motion::NewFootTargetInfo;
     using FootMotionUpdate  = message::motion::FootMotionUpdate;
+    using extension::Configuration;
+    using message::motion::DisableTorsoMotion;
+    using message::motion::EnableTorsoMotion;
     using message::motion::FootStepCompleted;
+    using message::motion::KinematicsModel;
+    using message::motion::ServoTarget;
     using message::motion::TorsoMotionUpdate;
     using message::motion::TorsoPositionUpdate;
-    using message::motion::EnableTorsoMotion;
-    using message::motion::DisableTorsoMotion;
-    using message::motion::ServoTarget;
-    using message::motion::KinematicsModel;
-    using extension::Configuration;
 
     using LimbID = utility::input::LimbID;
-    using utility::motion::kinematics::calculateLegJoints;
+    using utility::math::angle::normalizeAngle;
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::angle::normalizeAngle;
+    using utility::motion::kinematics::calculateLegJoints;
     using utility::nubugger::graph;
     using utility::support::Expression;
     /*=======================================================================================================*/

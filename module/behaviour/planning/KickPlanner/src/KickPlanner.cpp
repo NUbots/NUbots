@@ -50,25 +50,25 @@ namespace behaviour {
         using message::behaviour::KickPlan;
         using KickType = message::behaviour::KickPlan::KickType;
         using message::behaviour::WantsToKick;
+        using message::input::Sensors;
         using message::localisation::Ball;
         using message::localisation::Field;
-        using message::input::Sensors;
         using VisionBall = message::vision::Ball;
         using message::motion::IKKickParams;
         using message::motion::KickCommand;
         using KickCommandType = message::motion::KickCommandType;
-        using message::motion::KickScriptCommand;
         using message::motion::KickPlannerConfig;
+        using message::motion::KickScriptCommand;
         using message::motion::KinematicsModel;
         using message::support::FieldDescription;
 
         using LimbID = utility::input::LimbID;
-        using utility::math::matrix::Transform3D;
-        using utility::math::matrix::Rotation2D;
+        using utility::localisation::fieldStateToTransform3D;
         using utility::math::coordinates::sphericalToCartesian;
+        using utility::math::matrix::Rotation2D;
+        using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::legPoseValid;
         using utility::nubugger::graph;
-        using utility::localisation::fieldStateToTransform3D;
 
         KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))

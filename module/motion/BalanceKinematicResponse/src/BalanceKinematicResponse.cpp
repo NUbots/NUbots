@@ -33,16 +33,16 @@ namespace motion {
     /*=======================================================================================================*/
     //      UTILIZATION REFERENCE(S)
     /*=======================================================================================================*/
-    using message::input::Sensors;
     using message::input::FallingDetected;
+    using message::input::Sensors;
 
+    using message::motion::BalanceBodyUpdate;
+    using message::motion::DisableBalanceResponse;
+    using message::motion::EnableBalanceResponse;
     using message::motion::FootMotionUpdate;
     using message::motion::HeadMotionUpdate;
-    using message::motion::TorsoMotionUpdate;
-    using message::motion::BalanceBodyUpdate;
-    using message::motion::EnableBalanceResponse;
-    using message::motion::DisableBalanceResponse;
     using message::motion::KinematicsModel;
+    using message::motion::TorsoMotionUpdate;
 
     using extension::Configuration;
     using utility::support::Expression;
@@ -50,9 +50,9 @@ namespace motion {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
+    using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::angle::normalizeAngle;
 
     using utility::nubugger::graph;
     /*=======================================================================================================*/

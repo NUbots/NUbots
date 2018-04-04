@@ -20,11 +20,9 @@
 #include "NUbugger.h"
 
 #include "message/input/Image.h"
-#include "message/vision/BakedImage.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/LookUpTableDiff.h"
-#include "message/vision/ReprojectedImage.h"
 #include "message/vision/VisionObjects.h"
 
 #include "utility/support/eigen_armadillo.h"
@@ -36,7 +34,6 @@ namespace support {
 
     using message::input::CameraParameters;
     using message::input::Image;
-    using message::vision::BakedImage;
     using message::vision::Ball;
     using message::vision::ClassifiedImage;
     using message::vision::Goal;
@@ -47,7 +44,6 @@ namespace support {
     using message::vision::NUsightLines;
     using message::vision::NUsightObstacles;
     using message::vision::Obstacle;
-    using message::vision::ReprojectedImage;
 
     void NUbugger::provideVision() {
         handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then(
@@ -57,7 +53,6 @@ namespace support {
 
         handles["image"].push_back(
             on<Trigger<Image>, Single, Priority::LOW>().then([this](std::shared_ptr<const Image> image) {
-
                 if (NUClear::clock::now() - last_image < max_image_duration) {
                     return;
                 }
@@ -67,33 +62,8 @@ namespace support {
                 last_image = NUClear::clock::now();
             }));
 
-        handles["reprojected_image"].push_back(on<Trigger<ReprojectedImage>, Single, Priority::LOW>().then(
-            [this](std::shared_ptr<const ReprojectedImage> image) {
-
-                if (NUClear::clock::now() - last_reprojected_image < max_reprojected_image_duration) {
-                    return;
-                }
-
-                powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-
-                last_reprojected_image = NUClear::clock::now();
-            }));
-
-        handles["baked_image"].push_back(
-            on<Trigger<BakedImage>, Single, Priority::LOW>().then([this](std::shared_ptr<const BakedImage> image) {
-
-                if (NUClear::clock::now() - last_baked_image < max_baked_image_duration) {
-                    return;
-                }
-
-                powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-
-                last_baked_image = NUClear::clock::now();
-            }));
-
         handles["classified_image"].push_back(on<Trigger<ClassifiedImage>, Single, Priority::LOW>().then(
             [this](std::shared_ptr<const ClassifiedImage> image) {
-
                 if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
                     return;
                 }
@@ -105,7 +75,6 @@ namespace support {
 
         handles["vision_object"].push_back(
             on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this](const std::vector<Ball>& balls) {
-
                 auto nusight = std::make_unique<NUsightBalls>();
 
                 for (const auto& ball : balls) {
@@ -117,7 +86,6 @@ namespace support {
 
         handles["vision_object"].push_back(
             on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this](const std::vector<Goal>& goals) {
-
                 auto nusight = std::make_unique<NUsightGoals>();
 
                 for (const auto& goal : goals) {
@@ -129,7 +97,6 @@ namespace support {
 
         handles["vision_object"].push_back(
             on<Trigger<std::vector<Line>>, Single, Priority::LOW>().then([this](const std::vector<Line>& lines) {
-
                 auto nusight = std::make_unique<NUsightLines>();
 
                 for (const auto& line : lines) {
@@ -141,7 +108,6 @@ namespace support {
 
         handles["vision_object"].push_back(on<Trigger<std::vector<Obstacle>>, Single, Priority::LOW>().then(
             [this](const std::vector<Obstacle>& obstacles) {
-
                 auto nusight = std::make_unique<NUsightObstacles>();
 
                 for (const auto& obstacles : obstacles) {

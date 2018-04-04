@@ -17,11 +17,13 @@ class build_tools {
     refreshonly => true
   } -> Package <| |>
 
-  # Add the llvm 4.0 source
+  $codename = lsb_release()
+
+  # Add the llvm 5.0 source
   apt::source { 'llvm-apt-repo':
-    comment  => 'The LLVM 4.0 apt repository',
-    location => 'http://apt.llvm.org/xenial/',
-    release  => 'llvm-toolchain-xenial-4.0',
+    comment  => 'The LLVM 5.0 apt repository',
+    location => "http://apt.llvm.org/${codename}",
+    release  => "llvm-toolchain-${codename}-5.0",
     repos    => 'main',
     key      => {
       'id'     => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
@@ -34,34 +36,35 @@ class build_tools {
   } -> Package <| |>
 
   # Tools
-  package { 'cmake': ensure => latest, }
   package { 'automake': ensure => latest, }
   package { 'autoconf': ensure => latest, }
   package { 'libtool': ensure => latest, }
+  package { 'intltool': ensure => latest, }
+  package { 'gtk-doc-tools': ensure => latest, }
+  package { 'texinfo': ensure => latest, }
+  package { 'bison': ensure => latest, }
+  package { 'libpcre3-dev': ensure => latest, }
   package { 'pkg-config': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'rsync': ensure => latest, }
   package { 'git': ensure => latest, }
   package { 'build-essential': ensure => latest, }
-  package { 'libncurses5-dev:amd64': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
-  package { 'libncurses5-dev:i386': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
+  package { 'libncurses5-dev': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
   package { 'libstdc++6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gcc-7': name => 'gcc-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'g++-7': name => 'g++-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gfortran-7': name => 'gfortran-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gcc-7': name => 'gcc-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'g++-7': name => 'g++-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gfortran-7': name => 'gfortran-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ccache': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'binutils': name => 'binutils-multiarch', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'binutils-dev': name => 'binutils-multiarch-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'binutils': name => 'binutils', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'binutils-dev': name => 'binutils-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'nasm': ensure => latest, }
-  package { 'libusb-1.0-0:amd64': ensure => latest, }
-  package { 'libusb-1.0-0:i386': ensure => latest, }
-  package { 'libusb-1.0-0-dev:amd64': ensure => latest, }
-  package { 'libusb-1.0-0-dev:i386': ensure => latest, }
+  package { 'libusb-1.0-0': ensure => latest, }
+  package { 'libusb-1.0-0-dev': ensure => latest, }
   package { 'autopoint': ensure => latest, }
   package { 'gettext': ensure => latest, }
-  package { 'python3-pip': ensure => latest, }
   package { 'python-pip': ensure => latest, }
+  package { 'python3-pip': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
 
   # CM730 firmware compilation.
@@ -69,19 +72,20 @@ class build_tools {
   package { 'libnewlib-arm-none-eabi': ensure => latest, }
 
   # System libraries
-  package { 'libasound2-dev:amd64': ensure => latest, }
-  package { 'libasound2-dev:i386': ensure => latest, }
+  package { 'libasound2-dev': ensure => latest, }
 
-  # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
+  # We need to match the protobuf version with the one we install in the toolchain.
   exec {'install_python3_packages':
-    command => '/usr/bin/pip3 install pyparsing &&
-                /usr/bin/pip3 install pydotplus &&
-                /usr/bin/pip3 install pygments &&
-                /usr/bin/pip3 install termcolor &&
-                /usr/bin/pip3 install protobuf &&
-                /usr/bin/pip3 install xxhash &&
-                /usr/bin/pip3 install numpy',
-    require => [ Package['python3-pip'], ]
+    command => "pip3 install pyparsing &&
+                pip3 install pydotplus &&
+                pip3 install pygments &&
+                pip3 install termcolor &&
+                pip3 install protobuf==3.5.0.post1 &&
+                pip3 install xxhash",
+    path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout     => 0,
+    provider    => 'shell',
+    require => [ Package['python3-pip'], ],
   }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
@@ -95,5 +99,21 @@ class build_tools {
                                              --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
+  }
+
+  # Manually install cmake
+  exec {'install-cmake':
+    creates => '/usr/local/bin/cmake',
+    command => '/usr/bin/wget https://cmake.org/files/v3.5/cmake-3.5.1-Linux-x86_64.sh \
+             && /bin/sh cmake-3.5.1-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir \
+             && rm cmake-3.5.1-Linux-x86_64.sh',
+  }
+
+  # Fix up FindBoost.cmake
+  file { "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake":
+    path    => "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake",
+    ensure  => present,
+    source  => 'puppet:///modules/files/FindBoost.cmake',
+    require => [ Exec['install-cmake'], ],
   }
 }

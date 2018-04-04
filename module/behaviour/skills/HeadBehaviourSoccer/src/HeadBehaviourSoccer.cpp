@@ -46,8 +46,8 @@ namespace behaviour {
 
         using utility::nubugger::graph;
 
-        using message::vision::Goal;
         using message::vision::Ball;
+        using message::vision::Goal;
         using message::vision::VisionObject;
         // using message::localisation::Ball;
         using message::localisation::Field;
@@ -61,13 +61,13 @@ namespace behaviour {
         using message::motion::KinematicsModel;
 
         using utility::math::coordinates::sphericalToCartesian;
-        using utility::motion::kinematics::calculateCameraLookJoints;
-        using utility::math::matrix::Rotation3D;
-        using utility::math::matrix::Transform3D;
         using utility::math::geometry::Quad;
         using utility::math::geometry::UnitQuaternion;
+        using utility::math::matrix::Rotation3D;
+        using utility::math::matrix::Transform3D;
         using utility::math::vision::objectDirectionFromScreenAngular;
         using utility::math::vision::screenAngularFromObjectDirection;
+        using utility::motion::kinematics::calculateCameraLookJoints;
 
         using ServoID = utility::input::ServoID;
 

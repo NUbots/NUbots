@@ -25,11 +25,14 @@ import "Vector.proto";
 message MotionCommand {
     // Defines the possible types of motion command:
     enum Type {
-        StandStill  = 0;  // Stop moving and just stand still, (equivalent to a VelocityCommand of {0} m/s).
-        WalkToState = 1;  // Walk to a given position and heading on the field, avoiding obstacles.
-        BallApproach =
-            2;  // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
-        DirectCommand = 3;  // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
+        // Stop moving and just stand still, (equivalent to a VelocityCommand of {0} m/s).
+        StandStill = 0;
+        // Walk to a given position and heading on the field, avoiding obstacles.
+        WalkToState = 1;
+        // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
+        BallApproach = 2;
+        // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
+        DirectCommand = 3;
     }
 
     // The type of this motion command:

@@ -34,11 +34,11 @@ namespace motion {
 
     using NewStepTargetInfo = message::motion::NewStepTargetInfo;
     using NewFootTargetInfo = message::motion::NewFootTargetInfo;
-    using message::motion::FootMotionUpdate;
-    using message::motion::EnableFootMotion;
     using message::motion::DisableFootMotion;
-    using message::motion::FootStepRequested;
+    using message::motion::EnableFootMotion;
+    using message::motion::FootMotionUpdate;
     using message::motion::FootStepCompleted;
+    using message::motion::FootStepRequested;
     using message::motion::KinematicsModel;
 
     using LimbID = utility::input::LimbID;

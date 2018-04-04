@@ -35,17 +35,17 @@
 namespace module {
 namespace support {
 
-    using message::input::Sensors;
-    using message::vision::Goal;
     using message::input::CameraParameters;
+    using message::input::Sensors;
     using message::support::FieldDescription;
+    using message::vision::Goal;
     using ServoID = utility::input::ServoID;
 
-    using utility::math::vision::cameraSpaceGoalProjection;
+    using utility::math::geometry::Quad;
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::geometry::Quad;
+    using utility::math::vision::cameraSpaceGoalProjection;
 
     arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1,
                                           const arma::vec3& norm2,
@@ -135,23 +135,17 @@ namespace support {
 
             // goal base visibility check
             if (not(quad.getBottomRight()[1] > 0 && quad.getBottomRight()[1] < camParams.imageSizePixels[1]
-                    && quad.getBottomLeft()[1] > 0
-                    && quad.getBottomLeft()[1] < camParams.imageSizePixels[1]
-                    && quad.getBottomRight()[0] > 0
-                    && quad.getBottomRight()[0] < camParams.imageSizePixels[0]
-                    && quad.getBottomLeft()[0] > 0
-                    && quad.getBottomLeft()[0] < camParams.imageSizePixels[0])) {
+                    && quad.getBottomLeft()[1] > 0 && quad.getBottomLeft()[1] < camParams.imageSizePixels[1]
+                    && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < camParams.imageSizePixels[0]
+                    && quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < camParams.imageSizePixels[0])) {
 
                 result.measurement.erase(result.measurement.begin() + 3);
             }
             // goal top visibility check
             if (not(quad.getTopRight()[1] > 0 && quad.getTopRight()[1] < camParams.imageSizePixels[1]
-                    && quad.getTopLeft()[1] > 0
-                    && quad.getTopLeft()[1] < camParams.imageSizePixels[1]
-                    && quad.getTopRight()[0] > 0
-                    && quad.getTopRight()[0] < camParams.imageSizePixels[0]
-                    && quad.getTopLeft()[0] > 0
-                    && quad.getTopLeft()[0] < camParams.imageSizePixels[0])) {
+                    && quad.getTopLeft()[1] > 0 && quad.getTopLeft()[1] < camParams.imageSizePixels[1]
+                    && quad.getTopRight()[0] > 0 && quad.getTopRight()[0] < camParams.imageSizePixels[0]
+                    && quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < camParams.imageSizePixels[0])) {
 
                 result.measurement.erase(result.measurement.begin() + 2);
             }
@@ -159,11 +153,9 @@ namespace support {
             if (not((
                         // One of the top or the bottom are in the screen coordinates of x
                         (quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < camParams.imageSizePixels[0]
-                         && quad.getBottomRight()[0] > 0
-                         && quad.getBottomRight()[0] < camParams.imageSizePixels[0])
+                         && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < camParams.imageSizePixels[0])
                         || (quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < camParams.imageSizePixels[0]
-                            && quad.getTopRight()[0] > 0
-                            && quad.getTopRight()[0] < camParams.imageSizePixels[0]))
+                            && quad.getTopRight()[0] > 0 && quad.getTopRight()[0] < camParams.imageSizePixels[0]))
                     && (
                            // Check that the bottom is below the top of the screen and the top is below the bottom of
                            // the screen

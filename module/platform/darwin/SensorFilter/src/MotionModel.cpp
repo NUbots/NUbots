@@ -32,7 +32,7 @@ namespace platform {
 
         arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
             arma::vec::fixed<size> newState = state;
-            newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
+            newState.rows(QW, QZ)           = arma::normalise(newState.rows(QW, QZ));
             return newState;
         }
 

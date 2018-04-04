@@ -30,12 +30,12 @@ namespace module {
 namespace behaviour {
     namespace strategy {
 
-        using message::behaviour::WalkApproach;
-        using message::behaviour::WalkTarget;
-        using message::behaviour::MotionCommand;
-        using message::behaviour::KickPlan;
         using extension::Configuration;
         using message::behaviour::Behaviour;
+        using message::behaviour::KickPlan;
+        using message::behaviour::MotionCommand;
+        using message::behaviour::WalkApproach;
+        using message::behaviour::WalkTarget;
         using VisionBall = message::vision::Ball;
         using VisionGoal = message::vision::Goal;
         using utility::time::durationFromSeconds;

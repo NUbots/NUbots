@@ -26,7 +26,7 @@ import "Vector.proto";
 message ResetRobotHypotheses {
     message Self {
         vec2   position     = 1;
-        mat22  position_cov = 2;
+        mat2   position_cov = 2;
         double heading      = 3;
         double heading_var  = 4;
         bool   absoluteYaw  = 5;
