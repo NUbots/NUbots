@@ -51,19 +51,9 @@ namespace motion {
                 step_height = config["step_height"];
                 well_width  = config["well_width"];
                 step_steep  = config["step_steep"];
-                c           = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
+                c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
                      * std::pow(step_steep * step_height + std::pow(step_steep, 2) * step_height, -1 / step_steep))
                     / well_width;
-                double x = config["test"]["x"].as<double>();
-                double y = config["test"]["y"].as<double>();
-                double z = config["test"]["z"].as<double>();
-                int foot = config["foot"].as<int>();
-                Eigen::Affine3d Haf_s;
-                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
-                Haf_s.linear()      = Eigen::Matrix3d::Identity();
-                log("Making new foot target at", x, y, z);
-                emit(std::make_unique<FootTarget>(
-                    NUClear::clock::now() + std::chrono::seconds(1), foot, Haf_s.matrix()));
             });
 
 

@@ -22,7 +22,7 @@ d = 2
 u = 10
 h = 7
 
-#y=2^(1/-|x|)
+# Fills xs and ys with values from dx and dy function
 for xi, x in enumerate(xs):
     for yi, y in enumerate(ys):
         dx[yi, xi] = - np.tanh(x) * h*2**(u/-abs(x**d))

@@ -18,6 +18,7 @@ namespace motion {
             double step_height;
             double step_steep;
             double well_width;
+            /// Constant for mathematical function based on step_height, step_steep and well_width
             double c;
 
         public:
