@@ -10,6 +10,7 @@ NUCLEAR_ROLE(
 
     input::Camera
 
+    vision::VisualMesh
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
