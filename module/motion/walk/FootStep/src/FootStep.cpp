@@ -52,7 +52,7 @@ namespace motion {
                 well_width  = config["well_width"];
                 step_steep  = config["step_steep"];
                 c           = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
-                    * std::pow(step_steep * step_height + std::pow(step_steep, 2) * step_height, -1 / step_steep))
+                     * std::pow(step_steep * step_height + std::pow(step_steep, 2) * step_height, -1 / step_steep))
                     / well_width;
             });
 
