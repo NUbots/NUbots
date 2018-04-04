@@ -20,6 +20,7 @@ syntax = "proto3";
 
 package message.motion;
 
+import "Matrix.proto";
 import "google/protobuf/timestamp.proto";
 
 message FootTarget {
