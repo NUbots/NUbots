@@ -21,7 +21,7 @@
 
 #include "utility/math/geometry/Line.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace module {
 namespace vision {
@@ -35,7 +35,7 @@ namespace vision {
     using utility::math::geometry::Plane;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getImageFromCam;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
     using Colour = utility::vision::Colour;
     using FOURCC = utility::vision::FOURCC;
     using Pixel  = utility::vision::Pixel;

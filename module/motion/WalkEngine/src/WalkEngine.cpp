@@ -72,7 +72,7 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
 
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     /*=======================================================================================================*/
     //      NAME: WalkEngine
     /*=======================================================================================================*/

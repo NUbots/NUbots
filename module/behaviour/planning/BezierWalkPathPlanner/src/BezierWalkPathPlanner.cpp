@@ -31,7 +31,7 @@
 
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -52,7 +52,6 @@ namespace behaviour {
         using message::motion::KickFinished;
         using message::motion::StopCommand;
         using message::motion::WalkCommand;
-        using message::motion::WalkCommand;
         using message::motion::WalkStopped;
         using LocalisationBall = message::localisation::Ball;
         using Self             = message::localisation::Self;
@@ -65,9 +64,9 @@ namespace behaviour {
         using ServoID = utility::input::ServoID;
         using utility::localisation::transform::RobotToWorldTransform;
         using utility::math::matrix::Transform2D;
-        using utility::nubugger::drawArrow;
-        using utility::nubugger::drawSphere;
-        using utility::nubugger::graph;
+        using utility::nusight::drawArrow;
+        using utility::nusight::drawSphere;
+        using utility::nusight::graph;
 
         BezierWalkPathPlanner::BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -98,7 +97,6 @@ namespace behaviour {
                 d1           = file.config["d1"].as<float>();
                 d2           = file.config["d2"].as<float>();
                 ErMax        = file.config["ErMax"].as<float>();
-
             });
 
             // Register this module with the subsumption system:
@@ -151,7 +149,6 @@ namespace behaviour {
                     [this](const LocalisationBall& ball,
                            const std::vector<Self>& selfs,
                            std::shared_ptr<const std::vector<VisionObstacle>> /*robots*/) {
-
                         if (latestCommand.type == MotionCommand::Type::StandStill) {
                             // log("Stand still motion command");
 

@@ -36,7 +36,7 @@
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -68,7 +68,7 @@ namespace behaviour {
         using utility::math::matrix::Rotation2D;
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::legPoseValid;
-        using utility::nubugger::graph;
+        using utility::nusight::graph;
 
         KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -98,7 +98,6 @@ namespace behaviour {
                        const FieldDescription& fd,
                        const KickPlan& kickPlan,
                        const Sensors& sensors) {
-
                     // Get time since last seen ball
                     auto now = NUClear::clock::now();
                     double secondsSinceLastSeen =
@@ -177,7 +176,6 @@ namespace behaviour {
                              || timeSinceValid > cfg.seconds_not_seen_limit) {
                         emit(std::make_unique<WantsToKick>(WantsToKick(false)));
                     }
-
                 });
         }
 

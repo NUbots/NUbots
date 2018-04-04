@@ -63,7 +63,7 @@ then in internet browser go to
 and then localization window
 go back to the first terminal and run
 
-    $ nano config/NUbugger.yaml
+    $ nano config/NUsight.yaml
 
 6. Select which data is to be sent to NUsight (Usually just localization and sensors)
 
@@ -101,7 +101,7 @@ TroubleShooting Vagrant
    Optional step:
    Run this after the "apt-get upgrade" command.
    This isn't necessary to resolve any problems, it will just free up some hard drive space.
-        
+
         $ sudo apt-get autoremove --purge
 
 [NUbots]:                 http://nubots.net/                                      "NUbots"

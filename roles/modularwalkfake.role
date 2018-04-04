@@ -10,7 +10,7 @@ NUCLEAR_ROLE(
     support::configuration::NetworkConfiguration
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
-    support::NUbugger
+    support::NUsight
 
     # Hardware Interface
     platform::darwin::HardwareSimulator

@@ -25,7 +25,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace module {
 namespace localisation {
@@ -36,7 +36,7 @@ namespace localisation {
     using message::localisation::Self;
     using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -48,7 +48,6 @@ namespace localisation {
         });
 
         on<Network<MotionCapture>>([this](const MotionCapture& mocap) {
-
             for (auto& rigidBody : mocap.rigid_bodies()) {
 
                 int id = rigidBody.identifier();
@@ -77,7 +76,6 @@ namespace localisation {
                     emit(graph("NUcap heading", heading));
                 }
             }
-
         });
     }
 }  // namespace localisation

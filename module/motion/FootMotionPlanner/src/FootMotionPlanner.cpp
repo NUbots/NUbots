@@ -44,7 +44,7 @@ namespace motion {
     using LimbID = utility::input::LimbID;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     using utility::support::Expression;
     /*=======================================================================================================*/
     //      NUCLEAR METHOD: FootMotionPlanner

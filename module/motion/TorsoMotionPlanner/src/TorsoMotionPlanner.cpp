@@ -51,7 +51,7 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     using utility::support::Expression;
     /*=======================================================================================================*/
     //      NUCLEAR METHOD: TorsoMotionPlanner
@@ -176,7 +176,6 @@ namespace motion {
                                                        convert<double, 3>(getTorsoDestination())));
             setTorsoSource(getTorsoDestination());
             setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
-
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this] { updateHandle.enable(); });
