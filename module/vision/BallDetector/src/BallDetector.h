@@ -30,10 +30,10 @@
 
 #include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"
+#include "utility/math/ransac/RansacConeModel.h"
+#include "utility/math/ransac/RansacVisualMeshModel.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/vision/LookUpTable.h"
-
-#include "utility/math/ransac/RansacConeModel.h"
 
 namespace module {
 namespace vision {
@@ -79,12 +79,13 @@ namespace vision {
 
         bool print_throwout_logs;
 
-        float approximateCircleGreenRatio(const utility::math::ransac::RansacConeModel& circle,
+        float approximateCircleGreenRatio(const utility::math::ransac::RansacConeModel& cone,
                                           const message::input::Image& image,
                                           const message::vision::LookUpTable& lut,
                                           const message::input::CameraParameters& params);
 
-        std::vector<int> findClusters(const VisualMesh& mesh);
+        std::vector<std::vector<arma::vec4>> findClusters(const message::vision::VisualMesh& mesh,
+                                                          const message::input::CameraParameters& cam);
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.

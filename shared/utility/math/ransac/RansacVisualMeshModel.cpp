@@ -42,7 +42,7 @@ namespace math {
             // If cone error is:
             //  > 0 (inside cone)  : error = 1 - confidence,
             //  < 0 (outside cone) : error = confidence
-            double error = (std::acos(dotDistanceToPoint(arma::vec3(p[0], p[1], p[2])))) ? p[4] : 1 - p[4];
+            double error = (std::acos(dotDistanceToPoint(p)) < 0) ? p[4] : 1 - p[4];
             return error * error;
         }
 

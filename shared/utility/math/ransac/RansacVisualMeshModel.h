@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_RANSAC_RANSACCONEMODEL_H
-#define UTILITY_MATH_RANSAC_RANSACCONEMODEL_H
+#ifndef UTILITY_MATH_RANSAC_RANSACVISUALMESHMODEL_H
+#define UTILITY_MATH_RANSAC_RANSACVISUALMESHMODEL_H
 
 #include <armadillo>
 #include <array>
@@ -27,7 +27,7 @@
 namespace utility {
 namespace math {
     namespace ransac {
-        class RansacVisualMeshModel {
+        class RansacVisualMeshModel : public utility::math::geometry::Cone<3> {
         public:
             static constexpr size_t REQUIRED_POINTS = 3;
             using DataPoint                         = arma::vec4;

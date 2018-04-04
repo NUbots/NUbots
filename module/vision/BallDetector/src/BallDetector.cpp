@@ -19,6 +19,7 @@
 
 #include "BallDetector.h"
 
+
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
@@ -34,6 +35,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacConeModel.h"
+#include "utility/math/ransac/RansacVisualMeshModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
@@ -81,6 +83,7 @@ namespace vision {
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacConeModel;
+    using utility::math::ransac::RansacVisualMeshModel;
     using utility::nubugger::drawVisionLines;
     using utility::support::Expression;
 
@@ -150,34 +153,80 @@ namespace vision {
         return greenRatio;
     }
 
-    std::vector<std::vector<int>> BallDetector::findClusters(const VisualMesh& mesh) {
+    std::vector<std::vector<arma::vec4>> BallDetector::findClusters(const VisualMesh& mesh,
+                                                                    const CameraParameters& cam) {
+        log("Finding more clusters:");
         // Alias visual mesh parameters
         int dim = mesh.classifications.back().dimensions;
 
         // Create container for our clusters
-        std::vector<std::vector<int>> clusters;
-
-        // Initialise our number of clusters at 0
-        int n_clusters = 0;
+        std::vector<std::vector<arma::vec4>> clusters;
 
         // Create container to mark off used points
         std::set<int> visited_indices;
 
         // Loop through each coordinate
-        for (auto i = 0; i < mesh.coordinates.size(); ++i) {
+        for (auto i = 1; i < int(mesh.coordinates.size()) && visited_indices.size() < mesh.coordinates.size(); ++i) {
             // Check if our current coordinate is above threshold
             if (mesh.classifications.back().values[i * dim] >= mesh_seed_confidence_threshold) {
                 // Check if our current seed point has already been visited
-                if (visited_indices.find(i) != visited_indices.end()) {
-                    // Add our seed point for current cluster
-                    clusters[n_clusters].push_back(i);
+                if (visited_indices.empty() or visited_indices.find(i) != visited_indices.end()) {
+                    std::vector<arma::vec4> cluster;
+
+                    log("New cluster seeded at:", i);
+                    arma::ivec2 seed_coord = convert<int, 2>(mesh.coordinates[i - 1]);
+                    // Transform our point into cam space
+                    auto seed_cam = getCamFromImage(seed_coord, cam);
+
+                    // Add our seed point for current cluster with confidence
+                    cluster.push_back(arma::vec4(
+                        {seed_cam[0], seed_cam[1], seed_cam[2], double(mesh.classifications.back().values[i * dim])}));
 
                     // Add seed point to the set of visited points
-                    visited_indices.push_back(i);
+                    visited_indices.insert(i);
 
-                    // TODO: Breadth first search on seed point!
+                    // Create queue for BFS
+                    std::queue<int> search_queue;
 
-                    n_clusters++;
+                    // Add our first seed point onto end of queue
+                    search_queue.push(i);
+
+                    int curr_index;
+
+                    while (!search_queue.empty()) {
+                        // Set current index and remove from queue as we branch out from seed point
+                        curr_index = search_queue.front();
+                        search_queue.pop();
+
+                        log("\tSeed        :", curr_index);
+                        log("\tPts visited :", visited_indices.size());
+                        log("\tSearch items:", search_queue.size());
+
+                        // Populate the neighbours
+                        arma::ivec6 n = convert<int, 6>(mesh.neighbourhood[curr_index]);
+
+                        // Loop through current index and add neighbours onto queue if they are above confidence
+                        // threshold
+                        for (auto j = 0; j < 6; ++j) {
+                            log("\t\tNeighbour : ", n[j]);
+                            log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j]]);
+
+                            if (mesh.classifications.back().values[n[j]] >= mesh_branch_confidence_threshold) {
+                                search_queue.push(n[j]);  // Add to our BFS queue
+
+                                arma::ivec2 point_coord = convert<int, 2>(mesh.coordinates[n[j] - 1]);
+
+                                auto point_cam = getCamFromImage(point_coord, cam);
+                                cluster.push_back(arma::vec4(
+                                    {point_cam[0],
+                                     point_cam[1],
+                                     point_cam[2],
+                                     double(mesh.classifications.back().values[n[j] * dim])}));  // Add to our cluster
+                            }
+                            visited_indices.insert(n[j]);  // Add to our list of visited points
+                        }
+                    }
+                    clusters.push_back(cluster);
                 }
             }
         }
@@ -235,13 +284,72 @@ namespace vision {
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<VisualMesh>, With<FieldDescription>, Buffer<2>>().then(
-            "Visual Mesh Ball Detector", [this](const VisualMesh& mesh, const FieldDescription& field) {
+        on<Trigger<VisualMesh>, With<FieldDescription>, With<CameraParameters>>().then(
+            "Visual Mesh", [this](const VisualMesh& mesh, const FieldDescription& field, const CameraParameters& cam) {
                 // We need to gather all points which have a confidence prediction of over MAX_PREDICT_THRESH
                 // Then BFS to all neighbouring points which have a confidence prediction of at least MIN_PREDICT_THRESH
                 // We then need to create ransac models for each of these 'clusters' to fit a circle
-                std::vector<std::vector<int>> findClusters(mesh);
 
+                // Get our coordinate clusters in camera space
+                std::vector<std::vector<arma::vec4>> clusters = findClusters(mesh, cam);
+
+                log("Number of clusters found:", clusters.size());
+
+                // For each cluster, we want to ransac the points
+                for (auto i = 0; i < int(clusters.size()); ++i) {
+                    auto ransacResults = Ransac<RansacVisualMeshModel>::fitModels(clusters[i].begin(),
+                                                                                  clusters[i].end(),
+                                                                                  MINIMUM_POINTS_FOR_CONSENSUS,
+                                                                                  MAXIMUM_ITERATIONS_PER_FITTING,
+                                                                                  MAXIMUM_FITTED_MODELS,
+                                                                                  CONSENSUS_ERROR_THRESHOLD);
+
+                    auto balls = std::make_unique<std::vector<Ball>>();
+                    balls->reserve(ransacResults.size());
+
+                    log("Ransac results:", ransacResults.size());
+
+                    for (auto& result : ransacResults) {
+                        Ball b;
+
+                        // Get the 4 points around our circle
+                        arma::vec2 top   = projectCamSpaceToScreen(result.model.getTopVector(), cam);
+                        arma::vec2 base  = projectCamSpaceToScreen(result.model.getBottomVector(), cam);
+                        arma::vec2 left  = projectCamSpaceToScreen(result.model.getLeftVector(), cam);
+                        arma::vec2 right = projectCamSpaceToScreen(result.model.getRightVector(), cam);
+
+                        double widthDistance = widthBasedDistanceToCircle(
+                            field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
+
+                        // Work out how far away the ball must be to be at the distance it is from the camera
+                        arma::vec3 width_rBCc = result.model.unit_axis * widthDistance;
+
+                        arma::vec3 rBCc = (width_rBCc);
+
+                        // Attach the measurement to the object
+                        b.measurements.push_back(Ball::Measurement());
+                        b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
+                        b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
+
+                        // Ball cam space info
+                        b.cone.axis     = convert<double, 3>(result.model.unit_axis);
+                        b.cone.gradient = result.model.gradient;
+
+                        // Angular positions from the camera
+                        b.visObject.screenAngular =
+                            convert<double, 2>(cartesianToSpherical(result.model.unit_axis).rows(1, 2));
+                        b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
+
+                        // Add our points
+                        for (auto& point : result) {
+                            b.edgePoints.push_back(convert<double, 3>(point));
+                        }
+                        b.visObject.timestamp = NUClear::clock::now();
+
+                        balls->push_back(std::move(b));
+                    }
+                    emit(std::move(balls));
+                }
             });
 
         on<Trigger<ClassifiedImage>,
