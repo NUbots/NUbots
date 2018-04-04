@@ -8,8 +8,8 @@ NUCLEAR_ROLE(
     support::DisplayTest
 
     support::configuration::NetworkConfiguration
-    support::NUbugger
-    debug::NUbugger
+    support::NUsight
+    debug::NUsight
 
     debug::optimisation::TestDOpE
     support::optimisation::DOpE

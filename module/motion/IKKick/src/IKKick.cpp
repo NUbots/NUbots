@@ -35,7 +35,7 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -61,8 +61,7 @@ namespace motion {
     using utility::behaviour::RegisterAction;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::motion::kinematics::calculateLegJoints;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     struct ExecuteKick {};
     struct FinishKick {};
@@ -118,7 +117,6 @@ namespace motion {
 
         on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then(
             [this](const KickCommand& command, const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-
                 // Enable our kick pather
                 updater.enable();
                 updatePriority(EXECUTION_PRIORITY);
@@ -166,7 +164,6 @@ namespace motion {
 
         updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Single>().then(
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-
                 // Setup kick variables
                 LimbID kickFoot;
                 if (supportFoot == LimbID::RIGHT_LEG) {
@@ -241,7 +238,6 @@ namespace motion {
 
                 // Send message
                 emit(std::move(waypoints));
-
             });
 
         updater.disable();

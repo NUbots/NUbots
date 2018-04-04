@@ -41,7 +41,7 @@
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
 
@@ -66,8 +66,8 @@ namespace behaviour {
         using utility::math::matrix::Rotation2D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
-        using utility::nubugger::drawSphere;
-        using utility::nubugger::graph;
+        using utility::nusight::drawSphere;
+        using utility::nusight::graph;
 
         using utility::behaviour::ActionPriorites;
         using utility::behaviour::RegisterAction;
@@ -92,7 +92,6 @@ namespace behaviour {
 
             // do a little configurating
             on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
-
                 turnSpeed            = file.config["turnSpeed"].as<float>();
                 forwardSpeed         = file.config["forwardSpeed"].as<float>();
                 sideSpeed            = file.config["sideSpeed"].as<float>();
@@ -266,13 +265,11 @@ namespace behaviour {
 
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
-
                 });
 
             on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this](const MotionCommand& cmd) {
                 // save the plan
                 latestCommand = cmd;
-
             });
         }
 

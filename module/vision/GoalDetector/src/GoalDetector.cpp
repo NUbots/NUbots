@@ -41,7 +41,7 @@
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
 
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -70,7 +70,7 @@ namespace vision {
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::projectCamToPlane;
     using utility::math::vision::widthBasedDistanceToCircle;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
 
     using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
@@ -103,7 +103,6 @@ namespace vision {
         // Trigger the same function when either update
         on<Configuration, Trigger<CameraParameters>>("GoalDetector.yaml")
             .then([this](const Configuration& config, const CameraParameters& cam) {
-
                 MINIMUM_POINTS_FOR_CONSENSUS   = config["ransac"]["minimum_points_for_consensus"].as<uint>();
                 CONSENSUS_ERROR_THRESHOLD      = config["ransac"]["consensus_error_threshold"].as<double>();
                 MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
@@ -147,7 +146,6 @@ namespace vision {
                    const CameraParameters& cam,
                    const LookUpTable& lut,
                    const FieldDescription& fd) {
-
                 if (DEBUG_GOAL_RANSAC) log("Detecting goals");
 
                 const auto& image = *rawImage;
@@ -638,7 +636,6 @@ namespace vision {
                 }
 
                 emit(std::move(goals));
-
             });
     }
 }  // namespace vision
