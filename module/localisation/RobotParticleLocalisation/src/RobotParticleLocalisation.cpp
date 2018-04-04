@@ -7,7 +7,7 @@
 #include "utility/localisation/transform.h"
 
 #include "utility/math/geometry/Circle.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/time/time.h"
@@ -24,8 +24,8 @@ namespace localisation {
     using utility::math::matrix::Rotation2D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::nubugger::drawCircle;
-    using utility::nubugger::graph;
+    using utility::nusight::drawCircle;
+    using utility::nusight::graph;
     using utility::time::TimeDifferenceSeconds;
 
     using message::localisation::ResetRobotHypotheses;
@@ -68,7 +68,6 @@ namespace localisation {
 
             reset->hypotheses.push_back(rightSide);
             emit(std::move(reset));
-
         });
 
         on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
@@ -109,7 +108,6 @@ namespace localisation {
 
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
             "Measurement Update", [this](const std::vector<Goal>& goals, const FieldDescription& fd) {
-
                 if (!goals.empty()) {
                     /* Perform time update */
                     auto curr_time        = NUClear::clock::now();
@@ -140,7 +138,6 @@ namespace localisation {
 
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
-
                 Transform3D Hfw;
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
                 std::vector<arma::vec3> states;

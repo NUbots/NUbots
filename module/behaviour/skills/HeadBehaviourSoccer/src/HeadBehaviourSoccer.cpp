@@ -34,7 +34,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/vision.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
 
@@ -44,7 +44,7 @@ namespace behaviour {
 
         using extension::Configuration;
 
-        using utility::nubugger::graph;
+        using utility::nusight::graph;
 
         using message::vision::Ball;
         using message::vision::Goal;
@@ -128,8 +128,6 @@ namespace behaviour {
                             searches[s].push_back(p.as<arma::vec2>());
                         }
                     }
-
-
                 });
 
 
@@ -169,7 +167,6 @@ namespace behaviour {
                            std::shared_ptr<const LocBall> locBall,
                            const KinematicsModel& kinematicsModel,
                            const CameraParameters& cam_) {
-
                         max_yaw   = kinematicsModel.head.MAX_YAW;
                         min_yaw   = kinematicsModel.head.MIN_YAW;
                         max_pitch = kinematicsModel.head.MAX_PITCH;
@@ -340,7 +337,6 @@ namespace behaviour {
 
                         lastGoalPriority = goalPriority;
                         lastBallPriority = ballPriority;
-
                     });
         }
 

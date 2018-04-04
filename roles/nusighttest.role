@@ -1,14 +1,14 @@
 NUCLEAR_ROLE(
     # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
     support::logging::ConsoleLogHandler
-    
+
     #Config
     extension::FileWatcher
     support::configuration::NetworkConfiguration
-    
+
     #Debugging
-    support::NUbugger
+    support::NUsight
 
     #emit sine waves
-    debug::NUbugger
+    debug::NUsight
 )

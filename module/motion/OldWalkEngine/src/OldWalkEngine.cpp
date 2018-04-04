@@ -39,7 +39,7 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -71,7 +71,7 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     OldWalkEngine::OldWalkEngine(std::unique_ptr<NUClear::Environment> environment)
@@ -190,7 +190,6 @@ namespace motion {
                            .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-
             Transform2D velocity = convert<double, 3>(walkCommand.command);
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();
