@@ -86,7 +86,7 @@ export class DashboardRobotViewModel {
       BasicAppearance.of({
         lineWidth: 0.025,
         fillStyle: 'transparent',
-        strokeStyle: '#000',
+        strokeStyle: '#000000',
       }),
     )
   }

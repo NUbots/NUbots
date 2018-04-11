@@ -15,11 +15,11 @@ export class GroundModel {
 
   static of() {
     return new GroundModel({
-      bottomGoalColor: 'blue',
+      bottomGoalColor: '#0000ff',
       dimensions: FieldDimensions.postYear2017(),
       fieldColor: '#009688',
-      lineColor: '#fff',
-      topGoalColor: 'yellow',
+      lineColor: '#ffffff',
+      topGoalColor: '#ffff00',
     })
   }
 }

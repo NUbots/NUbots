@@ -2,8 +2,7 @@ import { observer } from 'mobx-react'
 import * as React from 'react'
 import { Component } from 'react'
 
-import { CanvasRenderer } from '../../../render2d/canvas_renderer'
-import { SVGRenderer } from '../../../render2d/svg_renderer'
+import { Renderer } from '../../../render2d/renderer'
 
 import { FieldModel } from './model'
 import * as style from './style.css'
@@ -20,7 +19,8 @@ export class Field extends Component<FieldProps> {
     const model = this.props.model
     const viewModel = FieldViewModel.of(model)
     return <div className={style.container}>
-      <SVGRenderer
+      <Renderer
+        engine='svg'
         className={style.field}
         scene={viewModel.scene}
         camera={viewModel.camera}

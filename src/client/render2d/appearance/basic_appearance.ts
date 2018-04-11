@@ -12,9 +12,9 @@ export class BasicAppearance {
   }
 
   static of({
-    fillStyle = '#000',
+    fillStyle = '#000000',
     lineWidth = 1,
-    strokeStyle = '#000',
+    strokeStyle = '#000000',
   }: Partial<BasicAppearance> = {}): BasicAppearance {
     return new BasicAppearance({
       fillStyle,

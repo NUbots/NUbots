@@ -4,24 +4,34 @@ import { observable } from 'mobx'
 import { action } from 'mobx'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
+import { WebGLRenderer } from 'pixi.js'
+import { CanvasRenderer } from 'pixi.js'
+import { Container } from 'pixi.js'
+import { autoDetectRenderer } from 'pixi.js'
 import * as React from 'react'
 import { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
 
 import { Transform } from '../math/transform'
 
-import { renderObject2d } from './canvas/rendering'
-import { applyTransform } from './canvas/rendering'
+import { pixiObject } from './pixi/rendering'
 import { RendererProps } from './renderer_props'
 import * as style from './style.css'
 
 @observer
-export class CanvasRenderer extends Component<RendererProps> {
+export class PixiRenderer extends Component<RendererProps> {
   @observable private resolution: Transform = Transform.of()
   private canvas: HTMLCanvasElement | null = null
+  private renderer: WebGLRenderer | CanvasRenderer
   private stopAutorun: IReactionDisposer
 
   componentDidMount() {
+
+    this.renderer = autoDetectRenderer({
+      view: this.canvas!,
+      transparent: true,
+      antialias: true,
+    })
 
     // Render when changes happen
     this.stopAutorun = autorun(this.renderCanvas, {
@@ -49,7 +59,7 @@ export class CanvasRenderer extends Component<RendererProps> {
     )
   }
 
-  private onRef = (canvas: HTMLCanvasElement) => {
+  private onRef = (canvas: HTMLCanvasElement | null) => {
     this.canvas = canvas
   }
 
@@ -57,22 +67,36 @@ export class CanvasRenderer extends Component<RendererProps> {
     // Render our scene
     const { scene, camera } = this.props
 
-    const cam = this.resolution.inverse().then(camera)
-    const ctx = this.canvas!.getContext('2d')!
+    const transform = this.resolution.inverse().then(camera)
 
-    ctx.save()
-    ctx.clearRect(0, 0, this.canvas!.width, this.canvas!.height)
-    applyTransform(ctx, cam)
-    renderObject2d(ctx, scene, cam)
-    ctx.restore()
+    const cam = new Container()
+    cam.rotation = transform.rotate
+    cam.x = transform.translate.x
+    cam.y = transform.translate.y
+    cam.scale.x = transform.scale.x
+    cam.scale.y = transform.scale.y
+    cam.addChild(pixiObject(this.props.scene))
+
+    this.renderer.render(cam)
   }
 
+  /**
+   * This function is executed when the canvas resizes.
+   * It is responsible for updating the viewport used by pixi
+   * as well as adjusting the scale of the world to normalize it.
+   * This means that when aspect ratio is set, the widest size will be [-1, 1]
+   * After applying the camera transformation this means pixel coordinates don't need to be known.
+   * Without aspect ratio the whole field of view will be [-1, 1] in both x and y (stretched view)
+   */
   @action
   private onResize = (width: number, height: number) => {
 
     // Multiply all our widths by dpi
     width *= devicePixelRatio
     height *= devicePixelRatio
+
+    // Update our renderer's viewport
+    this.renderer.resize(width, height)
 
     // Translate to the center
     this.resolution.translate.x = -width * 0.5

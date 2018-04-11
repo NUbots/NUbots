@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TextSVGRenderer renders 1`] = `
+exports[`PathSVGRenderer renders 1`] = `
 <_class
   model={
     Shape {
@@ -9,15 +9,8 @@ exports[`TextSVGRenderer renders 1`] = `
         "lineWidth": 1,
         "strokeStyle": "#000000",
       },
-      "geometry": TextGeometry {
-        "alignToView": true,
-        "fontFamily": "sans-serif",
-        "maxWidth": 0.5,
-        "text": "",
-        "textAlign": "start",
-        "textBaseline": "alphabetic",
-        "x": 0,
-        "y": 0,
+      "geometry": PathGeometry {
+        "points": Array [],
       },
       "group": Group {
         "children": Array [],
@@ -39,10 +32,10 @@ exports[`TextSVGRenderer renders 1`] = `
   world={
     Transform {
       "anticlockwise": true,
-      "rotate": 0.7853981633974483,
+      "rotate": 0,
       "scale": Object {
-        "x": -1,
-        "y": -1,
+        "x": 1,
+        "y": 1,
       },
       "translate": Object {
         "x": 0,

@@ -100,7 +100,7 @@ export class DashboardRobotModel {
       robotPosition: Vector3.of(),
       robotPositionCovariance: Matrix3.of(),
       roleName: '',
-      textColor: '#fff',
+      textColor: '#ffffff',
       time: BrowserSystemClock.now(),
       voltage: -1,
       walkCommand: Vector3.of(),
