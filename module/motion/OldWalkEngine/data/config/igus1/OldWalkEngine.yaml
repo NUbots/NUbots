@@ -7,48 +7,49 @@ stance:
   arms:
       left:
         start:
-          -  120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+            -  90 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -20 * pi / 180 # Elbow
         end:
-          -  120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+            -  90 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -20 * pi / 180 # Elbow
       right:
         start:
-          -   120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+            -  90 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -20 * pi / 180 # Elbow
         end:
-          -  120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+            -  90 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -20 * pi / 180 # Elbow
 
   foot_offset:
-    - -0.1 # The distance the ankles are offset from the torso, in meters.
-    - -0.05 # How far from the center of the foot the center of mass is placed during each step.
+    - -0.090 # The distance the ankles are offset from the torso, in meters.
+    - -0.050  # How far from the center of the foot the center of mass is placed during each step.
   # The gains to use for the servos during the walk
   gains:
     arms: 15
     legs: 20
-  # ???
-  limit_margin_y: -0.15
+  # Adjusts foot separation during walk?
+  limit_margin_y: -0.05  #-0.15
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
-  step_time: 0.6
+  step_time: 0.95
   # ???
-  zmp_time: 0.4
-  hip_roll_compensation: 4 * pi / 180
+  zmp_time: 0.47
+ # 0.250
+  hip_roll_compensation: 0 * pi / 180
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-    height: 0.08
+    height: 0.07
     # height of foot as a fraction of height
     height_slow_fraction: 0.5
     height_fast_fraction: 1.5
     # These limit the distance a footstep will take
     limits:
-      - [-0.1, 0.3] # [min_x, max_x]
+      - [-0.1, 0.1] # [min_x, max_x]
       - [0.0 , 0.3] # [min_y, max_y]
       - [0, 15 * pi / 180] # [min_angle, max_angle]
   velocity:
@@ -68,8 +69,8 @@ walk_cycle:
     turning_factor: 0.6
   # When to begin and end the single support phase. Range: [0,1]
   single_support_phase:
-    start: 0.25
-    end: 0.75
+    start: 0.12
+    end: 0.88
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: false
@@ -77,23 +78,23 @@ walk_cycle:
     weight: 0.7
     offset: 0 * pi / 180
 
-    hip_rotation_scale: 2.0
-    ankle_rotation_scale: 0.5
+    hip_rotation_scale: 1.0 # 2.0
+    ankle_rotation_scale: 0.25 # 0.5
 
     angle_gain:
-      p: 0.1
-      i: 0.0
-      d: 0.0
+      p: 0.05 # 0.1
+      i: 0.15
+      d: 0.05
     translation_gain:
       X:
-        p: 0.0
-        d: -0.0
+        p: 0.05
+        d: 0.0
       Y:
-        p: 0
-        d: 0
+        p: 0.05
+        d: 0.0
       Z:
-        p: 0.035
-        d: 0
+        p: 0.05 #0.035
+        d: 0.0
     push_recovery:
       balance_time: 800
       enabled: false
