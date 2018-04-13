@@ -15,7 +15,7 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace module {
 namespace motion {
@@ -33,7 +33,7 @@ namespace motion {
         using utility::input::ServoID;
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateLegJoints;
-        using utility::nubugger::graph;
+        using utility::nusight::graph;
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
             return (pos.x() < 0 ? 1 : -1) * std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
