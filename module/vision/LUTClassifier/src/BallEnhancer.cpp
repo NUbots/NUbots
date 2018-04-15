@@ -248,7 +248,6 @@ namespace vision {
 
         // Loop through all of our possible ball segments
         std::vector<Eigen::Vector2i> points;
-        // NUClear::log("hSegments size = ", std::distance(hSegments.first,hSegments.second));
         for (const auto& segment : classifiedImage.horizontalSegments) {
             // We throw out points if they:
             // Have both edges above the green horizon
@@ -261,8 +260,6 @@ namespace vision {
             }
         }
 
-        // std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-        // Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>> debug; // DEBUG LINE
         std::vector<Eigen::Vector2i> edges;
 
         // For each of these points move upward until we find a strong transition to green
@@ -289,7 +286,6 @@ namespace vision {
                     auto p = Eigen::Vector2i(point[0], y - 1);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[0].points.push_back(p);
-                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1))); // DEBUG LINE
                     break;
                 }
             }
@@ -312,7 +308,6 @@ namespace vision {
                     auto p = Eigen::Vector2i(x + 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[1].points.push_back(p);
-                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1))); // DEBUG LINE
                     break;
                 }
             }
@@ -335,7 +330,6 @@ namespace vision {
                     auto p = Eigen::Vector2i(x - 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[2].points.push_back(p);
-                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1))); // DEBUG LINE
                     break;
                 }
             }
@@ -362,9 +356,6 @@ namespace vision {
                     break;
                 }
 
-                // std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;  // DEBUG LINE
-                // std::get<0>(d) = point;                                           // DEBUG LINE
-
                 float strength;
                 Eigen::Vector2i direction;
                 std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
@@ -382,13 +373,6 @@ namespace vision {
                 if (!isNew) {
                     break;
                 }
-
-                // std::get<1>(d) = point;  // DEBUG LINE
-
-                // float r        = (strength / 30);              // DEBUG LINE
-                // float b        = 1 - (strength / 30);          // DEBUG LINE
-                // std::get<2>(d) = Eigen::Vector4d(r, 0, b, 1);  // DEBUG LINE
-                // debug.push_back(d);                            // DEBUG LINE
             }
 
             // Go Anticlockwise
@@ -400,9 +384,6 @@ namespace vision {
                     || point[1] > (int(image.dimensions[1]) - 4)) {
                     break;
                 }
-
-                // std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;  // DEBUG LINE
-                // std::get<0>(d) = point;                                           // DEBUG LINE
 
                 float strength;
                 Eigen::Vector2i direction;
@@ -421,19 +402,11 @@ namespace vision {
                 if (!isNew) {
                     break;
                 }
-
-                // std::get<1>(d) = point;  // DEBUG LINE
-
-                // float r        = (strength / 30);              // DEBUG LINE
-                // float b        = 1 - (strength / 30);          // DEBUG LINE
-                // std::get<2>(d) = Eigen::Vector4d(r, 0, b, 1);  // DEBUG LINE
-                // debug.push_back(d);                            // DEBUG LINE
             }
         }
 
         // Put our set into the object
         classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
-        // emit(drawVisionLines(debug));  // DEBUG LINE
     }
 
 }  // namespace vision
