@@ -120,7 +120,6 @@ namespace vision {
                           const message::input::CameraParameters& cam);
 
     public:
-        bool DRAW_LIGHTNING = false;
         explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
     };
 
