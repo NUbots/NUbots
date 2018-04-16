@@ -1,7 +1,7 @@
 # Settings related to the visual horizon
 visual_horizon:
   # The spacing in radians between vertical lines
-  spacing: 0.1
+  spacing: 0.05
   # The spacing in radians between sampled pixels vertically
   subsampling: 0.02
   # The distance in radians above the horizon to begin scanning
@@ -31,7 +31,7 @@ goals:
   # The spacing in radians between horizontal lines
   spacing: 0.02
   # The spacing in radians between sampled pixels (for finding)
-  subsampling: 0.005
+  subsampling: 0.05
   # ransac settings for finding the goal area
   ransac:
     minimum_points_for_consensus: 6
