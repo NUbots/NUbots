@@ -203,6 +203,7 @@ namespace vision {
                             - Eigen::Vector3f(float(pixels[i].components.y * 2),
                                               float(pixels[i].components.cb),
                                               float(pixels[i].components.cr)))
+                               .norm();
         }
 
         constexpr float M_1_SQRT5 = 0.4472135955;
@@ -290,7 +291,7 @@ namespace vision {
                     auto p = Eigen::Vector2i(point[0], y - 1);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[0].points.push_back(p);
-                    if (lut.DRAW_LIGHTNING) {
+                    if (DRAW_LIGHTNING) {
                         debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
                     }
                     break;
@@ -315,7 +316,7 @@ namespace vision {
                     auto p = Eigen::Vector2i(x + 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[1].points.push_back(p);
-                    if (lut.DRAW_LIGHTNING) {
+                    if (DRAW_LIGHTNING) {
                         debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
                     }
                     break;
@@ -340,7 +341,7 @@ namespace vision {
                     auto p = Eigen::Vector2i(x - 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[2].points.push_back(p);
-                    if (lut.DRAW_LIGHTNING) {
+                    if (DRAW_LIGHTNING) {
                         debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
                     }
                     break;
@@ -369,8 +370,10 @@ namespace vision {
                     break;
                 }
 
-                if (lut.DRAW_LIGHTNING) {
-                    std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+                // This needs to be outside of the if statement because of scoping.
+                std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+
+                if (DRAW_LIGHTNING) {
                     std::get<0>(d) = point;
                 }
 
@@ -392,7 +395,7 @@ namespace vision {
                     break;
                 }
 
-                if (lut.DRAW_LIGHTNING) {
+                if (DRAW_LIGHTNING) {
                     std::get<1>(d) = point;
 
                     float r        = (strength / 30);
@@ -412,8 +415,10 @@ namespace vision {
                     break;
                 }
 
-                if (lut.DRAW_LIGHTNING) {
-                    std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+                // This needs to be outside of the if statement because of scoping.
+                std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+
+                if (DRAW_LIGHTNING) {
                     std::get<0>(d) = point;
                 }
 
@@ -435,7 +440,7 @@ namespace vision {
                     break;
                 }
 
-                if (lut.DRAW_LIGHTNING) {
+                if (DRAW_LIGHTNING) {
                     std::get<1>(d) = point;
 
                     float r        = (strength / 30);
@@ -448,7 +453,7 @@ namespace vision {
 
         // Put our set into the object
         classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
-        if (lut.DRAW_LIGHTNING) {
+        if (DRAW_LIGHTNING) {
             emit(drawVisionLines(debug));
         }
     }
