@@ -12,3 +12,6 @@ NUsight2.sublime-workspace
 
 # Jest coverage report
 /coverage
+
+# NBS recordings
+recordings

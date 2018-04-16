@@ -14,6 +14,10 @@ import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulat
 import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
 import { VirtualRobots } from '../virtual_robots/virtual_robots'
 
+import { NBSPlayer } from './nbs/mmap_nbs_player/nbs_player'
+import { NBSPacket } from './nbs/mmap_nbs_player/nbs_player'
+import { DirectNUClearNetClient } from './nuclearnet/direct_nuclearnet_client'
+import { FakeNUClearNetClient } from './nuclearnet/fake_nuclearnet_client'
 import { WebSocketProxyNUClearNetServer } from './nuclearnet/web_socket_proxy_nuclearnet_server'
 import { WebSocketServer } from './nuclearnet/web_socket_server'
 
@@ -21,6 +25,7 @@ const compiler = webpack(webpackConfig)
 
 const args = minimist(process.argv.slice(2))
 const withVirtualRobots = args['virtual-robots'] || false
+const nbsFile = args.play
 
 const app = express()
 const server = http.createServer(app)
@@ -66,6 +71,33 @@ function init() {
       ],
     })
     virtualRobots.startSimulators()
+  }
+
+  if (nbsFile) {
+    const nuclearnetClient = withVirtualRobots ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of()
+    nuclearnetClient.connect({ name: nbsFile })
+
+    const player = NBSPlayer.of({
+      file: nbsFile,
+    })
+
+    player.onPacket((packet: NBSPacket) => {
+      nuclearnetClient.send({
+        type: packet.hash,
+        payload: packet.payload,
+      })
+    })
+
+    player.onEnd(() => {
+      // tslint:disable-next-line no-console
+      console.log('Restarting NBS playback')
+      player.restart()
+      player.play()
+    })
+
+    // tslint:disable-next-line no-console
+    console.log(`Playing NBS file: ${nbsFile}`)
+    player.play()
   }
 }
 
