@@ -167,8 +167,9 @@ namespace behaviour {
 
 
             on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+                log("Middle button pressed!");
                 if (!cfg_.forcePlaying) {
-                    NUClear::log("Force playing started.");
+                    log("Force playing started.");
                     emit(std::make_unique<Nod>(true));
                     cfg_.forcePlaying = true;
                 }
