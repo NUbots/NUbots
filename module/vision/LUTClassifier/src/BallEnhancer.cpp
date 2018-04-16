@@ -196,7 +196,6 @@ namespace vision {
                                               image.data,
                                               static_cast<FOURCC>(image.format))};
 
-        // clang-format off
         // Find out how green each pixel is!
         std::array<float, 24> greenness;
         for (int i = 0; i < int(greenness.size()); ++i) {
@@ -205,7 +204,6 @@ namespace vision {
                                               float(pixels[i].components.cb),
                                               float(pixels[i].components.cr)))
         }
-        // clang-format on
 
         constexpr float M_1_SQRT5 = 0.4472135955;
         constexpr float M_2_SQRT5 = 0.894427191;
