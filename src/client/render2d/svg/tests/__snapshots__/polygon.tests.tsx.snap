@@ -28,21 +28,6 @@ exports[`PolygonSVGRenderer renders 1`] = `
           },
         ],
       },
-      "group": Group {
-        "children": Array [],
-        "transform": Transform {
-          "anticlockwise": true,
-          "rotate": 0,
-          "scale": Object {
-            "x": 1,
-            "y": 1,
-          },
-          "translate": Object {
-            "x": 0,
-            "y": 0,
-          },
-        },
-      },
     }
   }
   world={

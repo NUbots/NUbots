@@ -15,8 +15,8 @@ import { MarkerGeometry } from '../geometry/marker_geometry'
 import { PathGeometry } from '../geometry/path_geometry'
 import { PolygonGeometry } from '../geometry/polygon_geometry'
 import { TextGeometry } from '../geometry/text_geometry'
+import { Geometry } from '../object/geometry'
 import { Group } from '../object/group'
-import { Object2d } from '../object/object2d'
 import { Shape } from '../object/shape'
 
 import { renderArc } from './arc'
@@ -28,7 +28,7 @@ import { renderPath } from './path'
 import { renderPolygon } from './polygon'
 import { renderText } from './text'
 
-export const pixiObject = createTransformer((obj: Object2d): DisplayObject => {
+export const pixiObject = createTransformer((obj: Group | Shape<Geometry>): DisplayObject => {
 
   if (obj instanceof Group) {
     const g = new Container()
@@ -48,21 +48,21 @@ export const pixiObject = createTransformer((obj: Object2d): DisplayObject => {
 
   } else if (obj instanceof Shape) {
     if (obj.geometry instanceof ArcGeometry) {
-      return renderArc(obj)
+      return renderArc(obj as Shape<ArcGeometry>)
     } else if (obj.geometry instanceof ArrowGeometry) {
-      return renderArrow(obj)
+      return renderArrow(obj as Shape<ArrowGeometry>)
     } else if (obj.geometry instanceof CircleGeometry) {
-      return renderCircle(obj)
+      return renderCircle(obj as Shape<CircleGeometry>)
     } else if (obj.geometry instanceof LineGeometry) {
-      return renderLine(obj)
+      return renderLine(obj as Shape<LineGeometry>)
     } else if (obj.geometry instanceof MarkerGeometry) {
-      return renderMarker(obj)
+      return renderMarker(obj as Shape<MarkerGeometry>)
     } else if (obj.geometry instanceof PathGeometry) {
-      return renderPath(obj)
+      return renderPath(obj as Shape<PathGeometry>)
     } else if (obj.geometry instanceof PolygonGeometry) {
-      return renderPolygon(obj)
+      return renderPolygon(obj as Shape<PolygonGeometry>)
     } else if (obj.geometry instanceof TextGeometry) {
-      return renderText(obj)
+      return renderText(obj as Shape<TextGeometry>)
     } else {
       throw new Error(`Unsupported geometry type: ${obj.geometry}`)
     }

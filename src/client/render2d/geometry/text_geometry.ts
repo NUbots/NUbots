@@ -1,7 +1,5 @@
 import { observable } from 'mobx'
 
-import { Transform } from '../../math/transform'
-
 export class TextGeometry {
   @observable alignToView: boolean
   @observable fontFamily: string

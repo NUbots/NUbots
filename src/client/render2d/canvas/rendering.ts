@@ -10,8 +10,8 @@ import { MarkerGeometry } from '../geometry/marker_geometry'
 import { PathGeometry } from '../geometry/path_geometry'
 import { PolygonGeometry } from '../geometry/polygon_geometry'
 import { TextGeometry } from '../geometry/text_geometry'
+import { Geometry } from '../object/geometry'
 import { Group } from '../object/group'
-import { Object2d } from '../object/object2d'
 import { Shape } from '../object/shape'
 
 import { renderArc } from './arc'
@@ -23,7 +23,7 @@ import { renderPath } from './path'
 import { renderPolygon } from './polygon'
 import { renderText } from './text'
 
-export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Object2d, world: Transform) {
+export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Group | Shape<Geometry>, world: Transform) {
 
   if (obj instanceof Group) {
     const objWorld = world.clone().then(obj.transform)
@@ -36,21 +36,21 @@ export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Object2d, wor
     }
   } else if (obj instanceof Shape) {
     if (obj.geometry instanceof ArcGeometry) {
-      renderArc(ctx, obj)
+      renderArc(ctx, obj as Shape<ArcGeometry>)
     } else if (obj.geometry instanceof ArrowGeometry) {
-      renderArrow(ctx, obj)
+      renderArrow(ctx, obj as Shape<ArrowGeometry>)
     } else if (obj.geometry instanceof CircleGeometry) {
-      renderCircle(ctx, obj)
+      renderCircle(ctx, obj as Shape<CircleGeometry>)
     } else if (obj.geometry instanceof LineGeometry) {
-      renderLine(ctx, obj)
+      renderLine(ctx, obj as Shape<LineGeometry>)
     } else if (obj.geometry instanceof MarkerGeometry) {
-      renderMarker(ctx, obj)
+      renderMarker(ctx, obj as Shape<MarkerGeometry>)
     } else if (obj.geometry instanceof PathGeometry) {
-      renderPath(ctx, obj)
+      renderPath(ctx, obj as Shape<PathGeometry>)
     } else if (obj.geometry instanceof PolygonGeometry) {
-      renderPolygon(ctx, obj)
+      renderPolygon(ctx, obj as Shape<PolygonGeometry>)
     } else if (obj.geometry instanceof TextGeometry) {
-      renderText(ctx, obj, world)
+      renderText(ctx, obj as Shape<TextGeometry>, world)
     } else {
       throw new Error(`Unsupported geometry type: ${obj.geometry}`)
     }
