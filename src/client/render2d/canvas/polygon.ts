@@ -1,3 +1,4 @@
+import { BasicAppearance } from '../appearance/basic_appearance'
 import { PolygonGeometry } from '../geometry/polygon_geometry'
 import { Shape } from '../object/shape'
 
@@ -17,6 +18,10 @@ export function renderPolygon(ctx: CanvasRenderingContext2D, shape: Shape<Polygo
 
   applyAppearance(ctx, shape.appearance)
 
-  ctx.fill()
-  ctx.stroke()
+  if (shape.appearance.stroke) {
+    ctx.stroke()
+  }
+  if (shape.appearance instanceof BasicAppearance && shape.appearance.fill) {
+    ctx.fill()
+  }
 }

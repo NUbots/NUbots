@@ -10,6 +10,7 @@ import { ArrowGeometry } from '../geometry/arrow_geometry'
 import { CircleGeometry } from '../geometry/circle_geometry'
 import { LineGeometry } from '../geometry/line_geometry'
 import { MarkerGeometry } from '../geometry/marker_geometry'
+import { PathGeometry } from '../geometry/path_geometry'
 import { PolygonGeometry } from '../geometry/polygon_geometry'
 import { TextGeometry } from '../geometry/text_geometry'
 import { Group as GroupGeometry } from '../object/group'
@@ -22,23 +23,36 @@ import { Circle } from './circle'
 import { Group } from './group'
 import { Line } from './line'
 import { Marker } from './marker'
+import { Path } from './path'
 import { Polygon } from './polygon'
 import { Text } from './text'
 
 export function toSvgProps(appearance: Appearance) {
   if (appearance instanceof BasicAppearance) {
     return {
-      fill: appearance.fillStyle,
-      strokeWidth: appearance.lineWidth,
-      stroke: appearance.strokeStyle,
+      ...(appearance.fill ? {
+        fill: appearance.fill.color,
+        fillOpacity: appearance.fill.alpha,
+      } : {
+        fill: 'transparent',
+      }),
+      ...(appearance.stroke ? {
+        strokeWidth: appearance.stroke.width,
+        stroke: appearance.stroke.color,
+        strokeOpacity: appearance.stroke.alpha,
+      } : {
+        stroke: 'transparent',
+      }),
     }
   } else if (appearance instanceof LineAppearance) {
     return {
-      strokeLinecap: appearance.lineCap,
-      strokeLinejoin: appearance.lineJoin,
-      strokeDashoffset: appearance.lineDashOffset,
-      strokeWidth: appearance.lineWidth,
-      stroke: appearance.strokeStyle,
+      strokeLinecap: appearance.stroke.cap,
+      strokeLinejoin: appearance.stroke.join,
+      strokeDashoffset: appearance.stroke.dashOffset,
+      strokeWidth: appearance.stroke.width,
+      stroke: appearance.stroke.color,
+      strokeOpacity: appearance.stroke.alpha,
+      fill: 'transparent',
     }
   } else {
     throw new Error(`Unsupported appearance type ${appearance}`)
@@ -68,6 +82,8 @@ export const GeometryView = observer(({ obj, world }: Props): JSX.Element => {
       return <Line model={obj} world={world}/>
     } else if (obj.geometry instanceof MarkerGeometry) {
       return <Marker model={obj} world={world}/>
+    } else if (obj.geometry instanceof PathGeometry) {
+      return <Path model={obj} world={world}/>
     } else if (obj.geometry instanceof PolygonGeometry) {
       return <Polygon model={obj} world={world}/>
     } else if (obj.geometry instanceof TextGeometry) {

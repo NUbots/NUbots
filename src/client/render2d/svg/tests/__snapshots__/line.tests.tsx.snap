@@ -5,9 +5,8 @@ exports[`LineSVGRenderer renders 1`] = `
   model={
     Shape {
       "appearance": BasicAppearance {
-        "fillStyle": "#000000",
-        "lineWidth": 1,
-        "strokeStyle": "#000000",
+        "fill": undefined,
+        "stroke": undefined,
       },
       "geometry": LineGeometry {
         "origin": Vector2 {

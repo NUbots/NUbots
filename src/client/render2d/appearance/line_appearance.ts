@@ -1,33 +1,37 @@
 import { observable } from 'mobx'
 
-export class LineAppearance {
-  @observable lineCap: 'butt' | 'round' | 'square'
-  @observable lineDashOffset: number
-  @observable lineJoin: 'bevel' | 'round' | 'miter'
-  @observable lineWidth: number
-  @observable strokeStyle: string
+type Stroke = {
+  color: string,
+  alpha: number,
+  width: number,
+  cap: 'butt' | 'round' | 'square',
+  dashOffset: number,
+  join: 'bevel' | 'round' | 'miter'
+}
 
-  constructor(opts: LineAppearance) {
-    this.lineCap = opts.lineCap
-    this.lineDashOffset = opts.lineDashOffset
-    this.lineJoin = opts.lineJoin
-    this.lineWidth = opts.lineWidth
-    this.strokeStyle = opts.strokeStyle
+export type LineAppearanceOpts = {
+  stroke: Partial<Stroke>
+}
+
+
+export class LineAppearance {
+  @observable stroke: Stroke
+
+  constructor({ stroke }: { stroke: Stroke }) {
+    this.stroke = stroke
   }
 
-  static of({
-    lineCap = 'butt',
-    lineDashOffset = 0,
-    lineJoin = 'miter',
-    lineWidth = 1,
-    strokeStyle = '#000000',
-  }: Partial<LineAppearance> = {}): LineAppearance {
+  static of({ stroke }: LineAppearanceOpts = { stroke: {} }): LineAppearance {
     return new LineAppearance({
-      lineCap,
-      lineDashOffset,
-      lineJoin,
-      lineWidth,
-      strokeStyle,
+      stroke: {
+        color: '#000000',
+        alpha: 1,
+        width: 1,
+        cap: 'butt',
+        dashOffset: 0,
+        join: 'miter',
+        ...stroke,
+      },
     })
   }
 }

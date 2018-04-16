@@ -71,37 +71,35 @@ export const pixiObject = createTransformer((obj: Object2d): DisplayObject => {
   }
 })
 
-const toPixiColor = (style: string): {
-  color: number, // range: [0, 0xFFFFFF]
-  alpha: number // range: [0, 1]
-} => {
-  if (style === 'transparent') {
-    return { color: 0, alpha: 0 }
-  }
-  // Colors of the form #FFFFFF
-  const split = /^#([A-Fa-f0-9]{6})$/.exec(style)
-  if (split !== null) {
-    return { color: parseInt(split[1], 16), alpha: 1 }
-  }
-
-  throw new Error('Pixi cannot handle non hex colours')
-}
-
 export function applyAppearance(obj: Graphics, appearance: Appearance, draw: (obj: Graphics) => void): void {
 
   if (appearance instanceof BasicAppearance) {
-    const line = toPixiColor(appearance.strokeStyle)
-    const fill = toPixiColor(appearance.fillStyle)
-    obj.lineStyle(appearance.lineWidth, line.color, line.alpha)
-    obj.beginFill(fill.color, fill.alpha)
-    draw(obj)
-    obj.endFill()
-  } else if (appearance instanceof LineAppearance) {
-    const line = toPixiColor(appearance.strokeStyle)
-    obj.lineStyle(appearance.lineWidth, line.color, line.alpha)
+    if (appearance.stroke) {
+      obj.lineStyle(appearance.stroke.width, parseInt(appearance.stroke.color.slice(1), 16), appearance.stroke.alpha)
+    } else {
+      obj.lineStyle(0, 0, 0)
+    }
+
+    if (appearance.fill) {
+      obj.beginFill(parseInt(appearance.fill.color.slice(1), 16), appearance.fill.alpha)
+    }
+
     draw(obj)
 
-    // TODO: Support lineCap, lineCap, lineJoin, lineWidth, strokeStyle
+    if (appearance.fill) {
+      obj.endFill()
+    }
+
+  } else if (appearance instanceof LineAppearance) {
+
+    obj.lineStyle(appearance.stroke.width, parseInt(appearance.stroke.color.slice(1), 16), appearance.stroke.alpha)
+    draw(obj)
+
+    // TODO These properties don't have easy analogs in pixi
+    // appearance.stroke.cap
+    // appearance.stroke.dashOffset
+    // appearance.stroke.join
+    // appearance.stroke.width
   } else {
     throw new Error(`Unsupported appearance type: ${appearance}`)
   }
