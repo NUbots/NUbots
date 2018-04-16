@@ -3,14 +3,14 @@ import { Vector3 } from '../../client/math/vector3'
 import { SeededRandom } from '../../shared/base/random/seeded_random'
 import { FieldDimensions } from '../../shared/field/dimensions'
 import { message } from '../../shared/proto/messages'
-import { vec2$Properties } from '../../shared/proto/messages'
+import { Ivec2 } from '../../shared/proto/messages'
 import { Simulator } from '../simulator'
 import { Message } from '../simulator'
 import State = message.behaviour.Behaviour.State
 import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason
 import Phase = message.input.GameState.Data.Phase
-import Overview = message.support.nubugger.Overview
+import Overview = message.support.nusight.Overview
 
 export class OverviewSimulator implements Simulator {
   constructor(private field: FieldDimensions,
@@ -25,7 +25,7 @@ export class OverviewSimulator implements Simulator {
   }
 
   simulate(time: number, index: number, numRobots: number): Message[] {
-    const messageType = 'message.support.nubugger.Overview'
+    const messageType = 'message.support.nusight.Overview'
 
     const t = time / 10 - index
 
@@ -89,7 +89,7 @@ export class OverviewSimulator implements Simulator {
     return [message]
   }
 
-  private randomFieldPosition(): vec2$Properties {
+  private randomFieldPosition(): Ivec2 {
     const fieldLength = this.field.fieldLength
     const fieldWidth = this.field.fieldWidth
     return {

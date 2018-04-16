@@ -11,8 +11,8 @@ import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
 
 import { DashboardRobotModel } from './dashboard_robot/model'
-import Timestamp = google.protobuf.Timestamp$Properties
-import Overview = message.support.nubugger.Overview
+import Timestamp = google.protobuf.ITimestamp
+import Overview = message.support.nusight.Overview
 
 export class DashboardNetwork {
   constructor(private network: Network) {
@@ -78,7 +78,7 @@ export class DashboardNetwork {
   }
 }
 
-function toSeconds(timestamp: Timestamp | null): number {
+function toSeconds(timestamp?: Timestamp | null): number {
   if (!timestamp) {
     timestamp = { seconds: 0, nanos: 0 }
   }

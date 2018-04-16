@@ -25,12 +25,13 @@ import "Vector.proto";
 
 message BalanceBodyUpdate {
     double phase        = 1;
-    mat44  leftFoot     = 2;
-    mat44  rightFoot    = 3;
+    mat4   leftFoot     = 2;
+    mat4   rightFoot    = 3;
     vec3   armLPosition = 4;
     vec3   armRPosition = 5;
-
 }
 
-message EnableBalanceResponse  {}
-message DisableBalanceResponse {}
+message EnableBalanceResponse {
+}
+message DisableBalanceResponse {
+}

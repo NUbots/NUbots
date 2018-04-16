@@ -16,6 +16,7 @@ env:
   - CXX=g++-4.9 YARN_COMMAND=build
   - CXX=g++-4.9 YARN_COMMAND=tslint
   - CXX=g++-4.9 YARN_COMMAND=test:ci
+  - CXX=g++-4.9 YARN_COMMAND=protobuf
 addons:
   apt:
     sources:

@@ -8,7 +8,7 @@ import { FakeNUClearNetServer } from '../server/nuclearnet/fake_nuclearnet_serve
 import { NodeSystemClock } from '../server/time/node_clock'
 import { message } from '../shared/proto/messages'
 import Sensors = message.input.Sensors
-import Overview = message.support.nubugger.Overview
+import Overview = message.support.nusight.Overview
 import VisionObject = message.vision.VisionObject
 import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
 import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'

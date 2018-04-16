@@ -17,8 +17,8 @@ export class Matrix2 {
   }
 
   static from(mat?: {
-    x?: { x?: number, y?: number },
-    y?: { x?: number, y?: number }
+    x?: { x?: number | null, y?: number | null } | null,
+    y?: { x?: number | null, y?: number | null } | null
   } | null): Matrix2 {
     if (!mat) {
       return Matrix2.of()

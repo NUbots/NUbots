@@ -19,9 +19,9 @@ export class Matrix3 {
   }
 
   static from(mat?: {
-    x?: { x?: number, y?: number, z?: number },
-    y?: { x?: number, y?: number, z?: number },
-    z?: { x?: number, y?: number, z?: number }
+    x?: { x?: number | null, y?: number | null, z?: number | null } | null,
+    y?: { x?: number | null, y?: number | null, z?: number | null } | null,
+    z?: { x?: number | null, y?: number | null, z?: number | null } | null
   } | null): Matrix3 {
     if (!mat) {
       return Matrix3.of()

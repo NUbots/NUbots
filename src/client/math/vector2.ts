@@ -16,7 +16,7 @@ export class Vector2 {
     return new Vector2(x || 0, y || 0)
   }
 
-  static from(vec?: { x?: number, y?: number } | null): Vector2 {
+  static from(vec?: { x?: number | null, y?: number | null } | null): Vector2 {
     if (!vec) {
       return Vector2.of()
     }
