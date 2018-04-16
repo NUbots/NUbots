@@ -199,10 +199,9 @@ namespace vision {
         // Find out how green each pixel is!
         std::array<float, 24> greenness;
         for (int i = 0; i < int(greenness.size()); ++i) {
-            greenness[i] = (greenCentroid
-                            - Eigen::Vector3f(float(pixels[i].components.y * 2),
-                                              float(pixels[i].components.cb),
-                                              float(pixels[i].components.cr)))
+            greenness[i] = (greenCentroid - Eigen::Vector3f(float(pixels[i].components.y * 2),
+                                                            float(pixels[i].components.cb),
+                                                            float(pixels[i].components.cr)))
                                .norm();
         }
 
@@ -260,6 +259,11 @@ namespace vision {
             }
         }
 
+        // Create container for our lightning debug lines
+        std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                    Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+            debug;
+
         std::vector<Eigen::Vector2i> edges;
 
         // For each of these points move upward until we find a strong transition to green
@@ -286,6 +290,9 @@ namespace vision {
                     auto p = Eigen::Vector2i(point[0], y - 1);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[0].points.push_back(p);
+                    if (lut.DRAW_LIGHTNING) {
+                        debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
+                    }
                     break;
                 }
             }
@@ -308,6 +315,9 @@ namespace vision {
                     auto p = Eigen::Vector2i(x + 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[1].points.push_back(p);
+                    if (lut.DRAW_LIGHTNING) {
+                        debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
+                    }
                     break;
                 }
             }
@@ -330,6 +340,9 @@ namespace vision {
                     auto p = Eigen::Vector2i(x - 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[2].points.push_back(p);
+                    if (lut.DRAW_LIGHTNING) {
+                        debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
+                    }
                     break;
                 }
             }
@@ -356,6 +369,11 @@ namespace vision {
                     break;
                 }
 
+                if (lut.DRAW_LIGHTNING) {
+                    std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+                    std::get<0>(d) = point;
+                }
+
                 float strength;
                 Eigen::Vector2i direction;
                 std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
@@ -373,6 +391,15 @@ namespace vision {
                 if (!isNew) {
                     break;
                 }
+
+                if (lut.DRAW_LIGHTNING) {
+                    std::get<1>(d) = point;
+
+                    float r        = (strength / 30);
+                    float b        = 1 - (strength / 30);
+                    std::get<2>(d) = Eigen::Vector4d(r, 0, b, 1);
+                    debug.push_back(d);
+                }
             }
 
             // Go Anticlockwise
@@ -383,6 +410,11 @@ namespace vision {
                 if (point[0] < 4 || point[0] > (int(image.dimensions[0]) - 4) || point[1] < 4
                     || point[1] > (int(image.dimensions[1]) - 4)) {
                     break;
+                }
+
+                if (lut.DRAW_LIGHTNING) {
+                    std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+                    std::get<0>(d) = point;
                 }
 
                 float strength;
@@ -402,11 +434,23 @@ namespace vision {
                 if (!isNew) {
                     break;
                 }
+
+                if (lut.DRAW_LIGHTNING) {
+                    std::get<1>(d) = point;
+
+                    float r        = (strength / 30);
+                    float b        = 1 - (strength / 30);
+                    std::get<2>(d) = Eigen::Vector4d(r, 0, b, 1);
+                    debug.push_back(d);
+                }
             }
         }
 
         // Put our set into the object
         classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
+        if (lut.DRAW_LIGHTNING) {
+            emit(drawVisionLines(debug));
+        }
     }
 
 }  // namespace vision
