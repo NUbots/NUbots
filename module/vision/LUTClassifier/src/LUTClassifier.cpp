@@ -210,6 +210,7 @@ namespace vision {
 
                 MAXIMUM_LIGHTNING_BOLT_LENGTH   = config["ball"]["maximum_lighting_bolt_length"].as<int>();
                 MINIMUM_LIGHTNING_BOLT_STRENGTH = config["ball"]["minimum_lighting_bolt_strength"].as<double>();
+                DRAW_LIGHTNING                  = config["ball"]["draw_lightning"];
 
                 // Camera settings
                 FOCAL_LENGTH_PIXELS = cam.pinhole.focalLengthPixels;
