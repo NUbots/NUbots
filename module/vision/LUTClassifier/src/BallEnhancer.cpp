@@ -200,10 +200,10 @@ namespace vision {
         // Find out how green each pixel is!
         std::array<float, 24> greenness;
         for (int i = 0; i < int(greenness.size()); ++i) {
-            greenness[i] = (greenCentroid - Eigen::Vector3f(float(pixels[i].components.y * 2),
-                                                            float(pixels[i].components.cb),
-                                                            float(pixels[i].components.cr)))
-                               .norm();
+            greenness[i] = (greenCentroid
+                            - Eigen::Vector3f(float(pixels[i].components.y * 2),
+                                              float(pixels[i].components.cb),
+                                              float(pixels[i].components.cr)))
         }
         // clang-format on
 
