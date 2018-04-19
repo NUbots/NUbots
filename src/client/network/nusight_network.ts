@@ -9,8 +9,6 @@ import { WebSocketProxyNUClearNetClient } from '../nuclearnet/web_socket_proxy_n
 
 import { MessageTypePath } from './message_type_names'
 
-const HEADER_SIZE = 9
-
 /**
  * This class is intended to handle NUsight-specific networking. It handles the subscription of NUClearNet messages and
  * decoding them into real protobufjs objects for convenient use. Components should not directly use this class, but

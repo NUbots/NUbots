@@ -62,7 +62,6 @@ export class FakeNUClearNetServer {
     const hash: Buffer = typeof opts.type === 'string' ? hashType(opts.type) : opts.type
     const packet = {
       peer: client.peer,
-      type: typeof opts.type === 'string' ? opts.type : undefined,
       hash,
       payload: opts.payload,
       reliable: !!opts.reliable,

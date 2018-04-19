@@ -7,10 +7,10 @@ import * as SocketIO from 'socket.io'
  * There should never be enough logic in here that it needs any testing.
  */
 export class WebSocketServer {
-  constructor(private sioServer: SocketIO.Namespace) {
+  constructor(private sioServer: SocketIO.Server | SocketIO.Namespace) {
   }
 
-  static of(server: SocketIO.Namespace) {
+  static of(server: SocketIO.Server | SocketIO.Namespace) {
     return new WebSocketServer(server)
   }
 

@@ -74,6 +74,10 @@
   version "3.4.30"
   resolved "https://registry.yarnpkg.com/@types/clean-css/-/clean-css-3.4.30.tgz#0052c136f5248002428e3638b37de4a39818641d"
 
+"@types/component-emitter@^1.2.7":
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@types/component-emitter/-/component-emitter-1.2.7.tgz#d49a2c65a89c8b594e7355a92e43cf1d278b577c"
+
 "@types/compression@0.0.35":
   version "0.0.35"
   resolved "https://registry.yarnpkg.com/@types/compression/-/compression-0.0.35.tgz#7673a9c4b075e5194ada8c5938291015652a21e1"

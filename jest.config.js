@@ -12,7 +12,6 @@ module.exports = {
       'tsConfigFile': './tsconfig.test.json',
     },
   },
-  mapCoverage: true,
   moduleDirectories: [
     'node_modules',
     '<rootDir>/src',

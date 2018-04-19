@@ -159,6 +159,9 @@ void NBSPlayer::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         // Create our object and a player thread for it
         NBSPlayer* bind = new NBSPlayer();
 
+        // This starts the player thread
+        Nan::AsyncQueueWorker(new NBSPlayAction(bind));
+
         // Get the file name and callback function from the wrapper
         std::string filename  = *Nan::Utf8String(info[0]);
         bind->packet_callback = std::make_shared<Nan::Callback>(info[1].As<v8::Function>());
@@ -177,9 +180,6 @@ void NBSPlayer::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
         // Index the file
         bind->build_index();
-
-        // This starts the player thread
-        Nan::AsyncQueueWorker(new NBSPlayAction(bind));
 
         bind->Wrap(info.This());
         info.GetReturnValue().Set(info.This());

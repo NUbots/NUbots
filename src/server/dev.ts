@@ -10,6 +10,7 @@ import * as webpackDevMiddleware from 'webpack-dev-middleware'
 import * as webpackHotMiddleware from 'webpack-hot-middleware'
 
 import webpackConfig from '../../webpack.config'
+import * as NUClearNetProxyParser from '../shared/nuclearnet/nuclearnet_proxy_parser'
 import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
 import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
 import { VirtualRobots } from '../virtual_robots/virtual_robots'
@@ -29,7 +30,7 @@ const nbsFile = args.play
 
 const app = express()
 const server = http.createServer(app)
-const sioNetwork = sio(server)
+const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 
 // Initialize socket.io namespace immediately to catch reconnections.
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
