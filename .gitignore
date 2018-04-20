@@ -13,5 +13,9 @@ NUsight2.sublime-workspace
 # Jest coverage report
 /coverage
 
+# Generated protocol buffer files
+/src/shared/proto/messages.js
+/src/shared/proto/messages.d.ts
+
 # NBS recordings
 recordings

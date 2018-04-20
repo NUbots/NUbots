@@ -18,6 +18,7 @@
     "tscheck": "tsc --project tsconfig.json",
     "tscheck:watch": "yarn tsc --watch",
     "protobuf": "node build_scripts/generate_messages.js",
+    "postinstall": "yarn protobuf",
     "dev": "yarn start:virtual",
     "start": "nodemon ./src/server/dev.ts",
     "start:virtual": "nodemon ./src/server/dev.ts --virtual-robots",
