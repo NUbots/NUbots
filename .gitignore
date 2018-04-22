@@ -1,7 +1,8 @@
 .DS_Store
-node_modules
+/node_modules
 .module-cache
-build
+/build
+/dist
 
 # IntelliJ IDEA
 /.idea/workspace.xml

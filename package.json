@@ -25,9 +25,9 @@
     "virtual-robots": "nodemon ./src/virtual_robots/run.ts",
     "prod": "ts-node ./src/server/prod.ts",
     "prod:virtual": "ts-node ./src/server/prod.ts --virtual-robots",
-    "build": "yarn clean:build && webpack -p --progress --colors",
-    "clean": "yarn clean:build && yarn clean:coverage",
-    "clean:build": "rimraf build",
+    "build": "yarn clean:dist && webpack -p --progress --colors",
+    "clean": "yarn clean:dist && yarn clean:coverage",
+    "clean:dist": "rimraf dist",
     "clean:coverage": "rimraf coverage",
     "heroku-postbuild": "yarn build",
     "prepush": "yarn tslint"

@@ -7,7 +7,7 @@ import Devtool = webpack.Options.Devtool
 
 const isProduction = process.argv.indexOf('-p') >= 0
 const sourcePath = path.join(__dirname, './src')
-const outPath = path.join(__dirname, './build')
+const outPath = path.join(__dirname, './dist')
 
 const devtool: Devtool = isProduction ? 'source-map' : 'inline-source-map'
 

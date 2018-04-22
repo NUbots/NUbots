@@ -21,7 +21,7 @@ const app = express()
 const server = http.createServer(app)
 const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 
-const root = `${__dirname}/../../build`
+const root = `${__dirname}/../../dist`
 app.use(history())
 app.use(compression())
 app.use(express.static(root))
