@@ -1,4 +1,5 @@
 declare module 'react-resize-detector' {
+
   import { ComponentType } from 'react'
 
   const component: ComponentType<{
