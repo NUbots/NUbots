@@ -7,7 +7,9 @@ import { NUClearEventListener } from '../../shared/nuclearnet/nuclearnet_client'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import * as NUClearNetProxyParser from '../../shared/nuclearnet/nuclearnet_proxy_parser'
 
+import { DirectWebSocketClient } from './direct_web_socket_client'
 import { WebSocketClient } from './web_socket_client'
+import { WebWorkerWebSocketClient } from './webworker_web_socket_client'
 
 type PacketListener = (packet: NUClearNetPacket, ack?: () => void) => void
 
@@ -33,16 +35,15 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
 
   static of() {
     const uri = `${document.location.origin}/nuclearnet`
-    return new WebSocketProxyNUClearNetClient(WebSocketClient.of(uri, {
+    return new WebSocketProxyNUClearNetClient(WebWorkerWebSocketClient.of(uri, {
       upgrade: false,
       transports: ['websocket'],
-      parser: NUClearNetProxyParser,
     } as any))
   }
 
   connect(options: NUClearNetOptions): () => void {
-    this.socket.connect()
     this.socket.on('reconnect', this.onReconnect.bind(this, options))
+    this.socket.connect()
     this.socket.send('nuclear_connect', options)
 
     return () => {

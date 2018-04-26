@@ -1,14 +1,14 @@
 import { createMockInstance } from '../../../shared/base/testing/create_mock_instance'
-import { WebSocketClient } from '../web_socket_client'
+import { DirectWebSocketClient } from '../direct_web_socket_client'
 import { WebSocketProxyNUClearNetClient } from '../web_socket_proxy_nuclearnet_client'
 import Mocked = jest.Mocked
 
 describe('WebSocketProxyNUClearNetClient', () => {
-  let mockWebSocket: Mocked<WebSocketClient>
+  let mockWebSocket: Mocked<DirectWebSocketClient>
   let client: WebSocketProxyNUClearNetClient
 
   beforeEach(() => {
-    mockWebSocket = createMockInstance(WebSocketClient)
+    mockWebSocket = createMockInstance(DirectWebSocketClient)
     client = new WebSocketProxyNUClearNetClient(mockWebSocket)
   })
 

@@ -46,6 +46,8 @@ export default [{
   },
   module: {
     rules: [
+      // webworkers
+      { test: /\.worker\.ts$/, use: 'worker-loader' },
       // .ts, .tsx
       {
         test: /\.tsx?$/,
