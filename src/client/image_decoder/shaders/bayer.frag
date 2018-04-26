@@ -1,4 +1,4 @@
-precision highp float;
+precision lowp float;
 
 // Source: Efficient, High-Quality Bayer Demosaic Filtering on GPUs
 // Morgan McGuire, Williams College

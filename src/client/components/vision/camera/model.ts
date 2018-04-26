@@ -1,33 +1,25 @@
 import { observable } from 'mobx'
 
+import { ImageModelOpts } from '../../../image_decoder/image_decoder'
+import { ImageModel } from '../../../image_decoder/image_decoder'
 import { Matrix4 } from '../../../math/matrix4'
 import { VisionRobotModel } from '../model'
 
-type ImageModelOpts = {
-  width: number
-  height: number
-  format: number
-  data: Uint8Array
+interface VisionImageModelOpts extends ImageModelOpts {
   Hcw: Matrix4
 }
 
-export class ImageModel {
-  @observable width: number
-  @observable height: number
-  @observable format: number
-  @observable.ref data: Uint8Array
+export class VisionImageModel extends ImageModel {
+
   @observable Hcw: Matrix4
 
-  constructor({ width, height, format, data, Hcw }: ImageModelOpts) {
-    this.width = width
-    this.height = height
-    this.format = format
-    this.data = data
-    this.Hcw = Hcw
+  constructor(opts: VisionImageModelOpts) {
+    super(opts)
+    this.Hcw = opts.Hcw
   }
 
-  static of({ width, height, format, data, Hcw }: ImageModelOpts) {
-    return new ImageModel({ width, height, format, data, Hcw })
+  static of(opts: VisionImageModelOpts) {
+    return new ImageModel(opts)
   }
 }
 
@@ -39,7 +31,7 @@ type CameraModelOpts = {
 export class CameraModel {
   readonly id: number
 
-  @observable image?: ImageModel
+  @observable image?: VisionImageModel
   @observable name: string
 
   constructor(private model: VisionRobotModel, { id, name }: CameraModelOpts) {

@@ -1,4 +1,4 @@
-import { fourcc } from '../view_model'
+import { fourcc } from '../image_decoder'
 
 describe('fourcc', () => {
   it('Calculates fourcc codes from strings', () => {

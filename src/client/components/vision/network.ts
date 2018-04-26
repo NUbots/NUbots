@@ -37,13 +37,13 @@ export class VisionNetwork {
       })
       robot.cameras.set(cameraId, camera)
     }
-    camera!.image = {
+    camera.image = {
       width: dimensions!.x!,
       height: dimensions!.y!,
-      format: format!,
+      format,
       data,
       Hcw: Matrix4.from(Hcw),
     }
-    camera!.name = name
+    camera.name = name
   }
 }
