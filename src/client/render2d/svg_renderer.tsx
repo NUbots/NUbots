@@ -48,10 +48,10 @@ export class SVGRenderer extends Component<RendererProps> {
 
       // Scale to fit
       this.resolution.scale.x = scale
-      this.resolution.scale.y = scale
+      this.resolution.scale.y = -scale
     } else {
       this.resolution.scale.x = 1 / width
-      this.resolution.scale.y = 1 / height
+      this.resolution.scale.y = -1 / height
     }
   }
 }

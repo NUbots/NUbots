@@ -17,8 +17,11 @@ import * as style from './style.css'
 export interface TreeNodeProps {
   node: TreeNodeModel
   level?: number
-  renderLabel?(node: TreeNodeModel): JSX.Element
+
+  renderLabel?(node: TreeNodeModel): JSX.Element | string
+
   onCheck?(node: TreeNodeModel): void
+
   onExpand?(node: TreeNodeModel): void
 }
 
@@ -61,7 +64,7 @@ export class TreeNode extends Component<TreeNodeProps> {
             <div className={style.treenode__icon}>
               {
                 hasChildren ?
-                  (this.props.node.expanded ? <IconChevronDown /> : <IconChevronRight />) :
+                  (this.props.node.expanded ? <IconChevronDown/> : <IconChevronRight/>) :
                   null
               }
             </div>
@@ -76,21 +79,21 @@ export class TreeNode extends Component<TreeNodeProps> {
             </div>
 
             <div className={style.treenode__label}>
-              { renderLabel ? renderLabel(this.props.node) : this.props.node.label }
+              {renderLabel ? renderLabel(this.props.node) : this.props.node.label}
             </div>
           </div>
 
           {this.props.node.expanded &&
-            children.map((node, i) =>
-              <TreeNode
-                key={i}
-                node={node}
-                level={level + 1}
-                renderLabel={this.props.renderLabel}
-                onCheck={this.props.onCheck}
-                onExpand={this.props.onExpand}
-              />,
-            )
+          children.map((node, i) =>
+            <TreeNode
+              key={i}
+              node={node}
+              level={level + 1}
+              renderLabel={this.props.renderLabel}
+              onCheck={this.props.onCheck}
+              onExpand={this.props.onExpand}
+            />,
+          )
           }
         </li>
       </ul>

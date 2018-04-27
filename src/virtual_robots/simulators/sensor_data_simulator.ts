@@ -52,6 +52,10 @@ export class SensorDataSimulator implements Simulator {
         { presentPosition: 0.1 * Math.cos(t) },
         { presentPosition: 0.1 * Math.cos(t / 3) + 0.4 },
       ],
+      timestamp: {
+        seconds: Math.floor(time),
+        nanos: (time - Math.floor(time)) * 1e9,
+      },
     }).finish()
 
     const message = { messageType, buffer }

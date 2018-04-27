@@ -52,6 +52,7 @@ export function toSvgProps(appearance: Appearance) {
       strokeWidth: appearance.stroke.width,
       stroke: appearance.stroke.color,
       strokeOpacity: appearance.stroke.alpha,
+      ...(appearance.stroke.nonScaling ? { vectorEffect: 'non-scaling-stroke' } : {}),
       fill: 'transparent',
     }
   } else {

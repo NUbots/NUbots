@@ -7,29 +7,24 @@ import { applyAppearance } from './rendering'
 
 export function renderText(ctx: CanvasRenderingContext2D, shape: Shape<TextGeometry>, world: Transform): void {
 
-  const { x, y, text, maxWidth, fontFamily, textAlign, textBaseline, alignToView } = shape.geometry
+  const { x, y, text, fontSize, fontFamily, textAlign, textBaseline, worldAlignment, worldScale } = shape.geometry
 
-  ctx.font = `1em ${fontFamily}`
+  ctx.font = `${fontSize} ${fontFamily}`
   ctx.textAlign = textAlign === 'middle' ? 'center' : textAlign
   ctx.textBaseline = textBaseline
 
   const position = Vector2.of(x, y)
 
-  const textWidth = ctx.measureText(text).width
-  const scale = maxWidth / textWidth
-
-  if (alignToView) {
+  if (worldScale) {
     // Ensure the text is always rendered without rotation such that it is aligned with the screen.
-    ctx.scale(Math.sign(world.scale.x), Math.sign(world.scale.y))
-    ctx.rotate(-world.rotate)
-    position.transform(Transform.of({
-      rotate: -world.rotate,
-      scale: { x: Math.sign(world.scale.x), y: Math.sign(world.scale.y) },
-    }))
+    ctx.scale(1 / world.scale.x, 1 / world.scale.y)
   }
 
-  ctx.scale(scale, scale)
-  ctx.translate(position.x / scale, position.y / scale)
+  if (worldAlignment) {
+    ctx.rotate(-world.rotate)
+  }
+
+  ctx.translate(position.x, position.y)
 
   applyAppearance(ctx, shape.appearance)
 

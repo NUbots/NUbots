@@ -1,9 +1,10 @@
 import { observable } from 'mobx'
 
 export class TextGeometry {
-  @observable alignToView: boolean
+  @observable worldAlignment: boolean
+  @observable worldScale: boolean
   @observable fontFamily: string
-  @observable maxWidth: number
+  @observable fontSize: string
   @observable text: string
   @observable textAlign: 'start' | 'middle' | 'end' | 'left' | 'right' | 'center'
   @observable textBaseline: 'top' | 'hanging' | 'middle' | 'alphabetic' | 'ideographic' | 'bottom'
@@ -11,9 +12,10 @@ export class TextGeometry {
   @observable y: number
 
   constructor(opts: TextGeometry) {
-    this.alignToView = opts.alignToView
+    this.worldAlignment = opts.worldAlignment
+    this.worldScale = opts.worldScale
     this.fontFamily = opts.fontFamily
-    this.maxWidth = opts.maxWidth
+    this.fontSize = opts.fontSize
     this.text = opts.text
     this.textAlign = opts.textAlign
     this.textBaseline = opts.textBaseline
@@ -22,9 +24,10 @@ export class TextGeometry {
   }
 
   static of({
-    alignToView = true,
+    worldAlignment = false,
+    worldScale = false,
     fontFamily = 'sans-serif',
-    maxWidth = 0.5,
+    fontSize = '1em',
     text = '',
     textAlign = 'start',
     textBaseline = 'alphabetic',
@@ -32,9 +35,10 @@ export class TextGeometry {
     y = 0,
   }: Partial<TextGeometry> = {}): TextGeometry {
     return new TextGeometry({
-      alignToView,
+      worldAlignment,
+      worldScale,
       fontFamily,
-      maxWidth,
+      fontSize,
       text,
       textAlign,
       textBaseline,

@@ -93,6 +93,9 @@ export function applyAppearance(obj: Graphics, appearance: Appearance, draw: (ob
   } else if (appearance instanceof LineAppearance) {
 
     obj.lineStyle(appearance.stroke.width, parseInt(appearance.stroke.color.slice(1), 16), appearance.stroke.alpha)
+    if (appearance.stroke.nonScaling) {
+      obj.nativeLines = true
+    }
     draw(obj)
 
     // TODO These properties don't have easy analogs in pixi

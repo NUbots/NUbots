@@ -7,6 +7,7 @@ type Stroke = {
   cap: 'butt' | 'round' | 'square',
   dashOffset: number,
   join: 'bevel' | 'round' | 'miter'
+  nonScaling: boolean
 }
 
 export type LineAppearanceOpts = {
@@ -30,6 +31,7 @@ export class LineAppearance {
         cap: 'butt',
         dashOffset: 0,
         join: 'miter',
+        nonScaling: false,
         ...stroke,
       },
     })

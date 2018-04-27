@@ -12,11 +12,12 @@ import { applyAppearance } from './rendering'
 
 export const renderText = createTransformer((shape: Shape<TextGeometry>): Text => {
 
-  const { x, y, text, maxWidth, fontFamily, textAlign, textBaseline, alignToView } = shape.geometry
+  const { x, y, text, fontSize, fontFamily, textAlign, textBaseline, worldAlignment, worldScale } = shape.geometry
 
   if (shape.appearance instanceof BasicAppearance) {
     const t = new Text(text, {
       fontFamily,
+      fontSize,
       padding: 10,
       textBaseline: 'middle',
       ...(shape.appearance.fill ? { fill: shape.appearance.fill.color } : {}),
@@ -28,9 +29,6 @@ export const renderText = createTransformer((shape: Shape<TextGeometry>): Text =
     t.anchor.y = 0.75 // I would have thought this should be 0.5, but 0.75 works to center text.
                       // As I have found no documentation to be sure of this, this might be wrong.
                       // but since it works it's what's here. If something goes wrong with text placement, look here.
-
-    t.width = maxWidth
-    t.scale.y = t.scale.x
 
     return t
   } else {
