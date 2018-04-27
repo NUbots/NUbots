@@ -6,7 +6,6 @@ import { WebGLRenderTarget } from 'three'
 import { Scene } from 'three'
 import { Mesh } from 'three'
 import { WebGLRenderer } from 'three'
-import { Vector2 } from 'three'
 import { OrthographicCamera } from 'three'
 import { DataTexture } from 'three'
 import { LuminanceFormat } from 'three'
@@ -16,7 +15,6 @@ import { UnsignedByteType } from 'three'
 import { ClampToEdgeWrapping } from 'three'
 import { LinearFilter } from 'three'
 import { NearestFilter } from 'three'
-import { Vector4 } from 'three'
 import { Camera } from 'three'
 
 import * as bayerFragmentShader from './shaders/bayer.frag'
@@ -80,11 +78,6 @@ export class ImageDecoder {
     return new RawShaderMaterial({
       vertexShader: String(bayerVertexShader),
       fragmentShader: String(bayerFragmentShader),
-      uniforms: {
-        sourceSize: { value: new Vector4() },
-        firstRed: { value: new Vector2() },
-        image: { type: 't' },
-      },
       depthTest: false,
       depthWrite: false,
     })
@@ -111,13 +104,12 @@ export class ImageDecoder {
     const renderTarget = new WebGLRenderTarget(width, height)
     renderTarget.depthBuffer = false
     renderTarget.stencilBuffer = false
-    const material = this.bayerShader(this.renderer)
 
-    // TODO: This is wrong and not very reactive however the alternative is recompiling the shader every time
-    // you have a better idea?
-    material.uniforms.sourceSize.value = [width, height, 1 / width, 1 / height]
-    material.uniforms.firstRed.value = firstRed
-    material.uniforms.image.value = this.rawTexture(image)
+    // Cloning a material allows for new uniforms without recompiling the shader itself
+    const material = this.bayerShader(this.renderer).clone()
+    material.uniforms.sourceSize = { value: [width, height, 1 / width, 1 / height] }
+    material.uniforms.firstRed = { value: firstRed }
+    material.uniforms.image = { value: this.rawTexture(image) }
 
     const mesh = new Mesh(this.geometry, material)
     mesh.frustumCulled = false

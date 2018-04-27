@@ -28,9 +28,14 @@ import "Vector.proto";
 message Image {
     message Lens {
         enum Projection {
-            RECTILINEAR = 0;
-            EQUIDISTANT = 1;
+            UNKNOWN = 0;
+            RECTILINEAR = 1;
+            EQUIDISTANT = 2;
+            EQUISOLID = 3;
         }
+
+        Projection projection = 1;
+        float focal_length = 2;
     }
 
     uint32                    format     = 1;

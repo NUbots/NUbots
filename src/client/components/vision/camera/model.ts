@@ -6,6 +6,10 @@ import { VisionRobotModel } from '../model'
 
 export interface VisionImage extends Image {
   readonly Hcw: Matrix4
+  readonly lens: {
+    readonly projection: number
+    readonly focalLength: number
+  }
 }
 
 type CameraModelOpts = {
