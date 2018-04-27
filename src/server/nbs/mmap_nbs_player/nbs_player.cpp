@@ -64,9 +64,9 @@ void NBSPlayer::build_index() {
         int lock = 3;
         while (lock && p < map.size()) {
             switch (lock) {
-                case 3: lock = reinterpret_cast<uint8_t>(map[p++]) == 0xE2 ? 2 : 3; break;
-                case 2: lock = reinterpret_cast<uint8_t>(map[p++]) == 0x98 ? 1 : 3; break;
-                case 1: lock = reinterpret_cast<uint8_t>(map[p++]) == 0xA2 ? 0 : 3; break;
+                case 3: lock = reinterpret_cast<uint8_t&>(map[p++]) == 0xE2 ? 2 : 3; break;
+                case 2: lock = reinterpret_cast<uint8_t&>(map[p++]) == 0x98 ? 1 : 3; break;
+                case 1: lock = reinterpret_cast<uint8_t&>(map[p++]) == 0xA2 ? 0 : 3; break;
             }
         }
 
