@@ -1,0 +1,67 @@
+
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message.vision;
+
+import "google/protobuf/timestamp.proto";
+import "Neutron.proto";
+import "Vector.proto";
+import "message/Geometry.proto";
+import "Matrix.proto";
+
+message Goal {
+    enum Side {
+        UNKNOWN_SIDE = 0;
+        LEFT         = 1;
+        RIGHT        = 2;
+    }
+    enum Team {
+        UNKNOWN_TEAM = 0;
+        OWN          = 1;
+        OPPONENT     = 2;
+    }
+    enum MeasurementType {
+        UNKNOWN_MEASUREMENT = 0;
+        LEFT_NORMAL         = 1;
+        RIGHT_NORMAL        = 2;
+        TOP_NORMAL          = 3;
+        BASE_NORMAL         = 4;
+        CENTRE              = 5;
+    }
+    message Measurement {
+        MeasurementType type = 1;
+        // Normal vectors point inwards towards the centre of the object
+        vec3 position   = 2;
+        mat3 covariance = 3;
+    }
+    uint32                    camera_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    mat4                      Hcw       = 3;
+    Side                      side      = 4;
+    Team                      team      = 5;
+    Frustum                   frustum   = 6;
+    repeated Measurement measurement    = 7;
+}
+
+message Goals {
+    repeated Goal goals = 1;
+}
