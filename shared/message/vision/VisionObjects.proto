@@ -49,65 +49,6 @@ message VisionObject {
     uint32 camera_id = 6;
 }
 
-message Ball {
-    enum MeasurementType {
-        REPROJECTION = 0;
-        WIDTH_BASED  = 1;
-    }
-
-    message Measurement {
-        MeasurementType type = 1;
-        // Vector from camera to ball in camera coordinates
-        vec3 rBCc       = 2;
-        mat3 covariance = 3;
-    }
-
-    VisionObject visObject            = 1;
-    repeated Measurement measurements = 2;
-    repeated vec3 edgePoints          = 3;
-    Cone          cone                = 4;
-}
-
-message Goal {
-    enum Side {
-        UNKNOWN_SIDE = 0;
-        LEFT         = 1;
-        RIGHT        = 2;
-    }
-
-    enum Team {
-        UNKNOWN_TEAM = 0;
-        OWN          = 1;
-        OPPONENT     = 2;
-    }
-
-    enum MeasurementType {
-        UNKNOWN_MEASUREMENT = 0;
-        LEFT_NORMAL         = 1;
-        RIGHT_NORMAL        = 2;
-        TOP_NORMAL          = 3;
-        BASE_NORMAL         = 4;
-        CENTRE              = 5;
-    }
-
-    message Measurement {
-        MeasurementType type = 1;
-        // Normal vectors point inwards towards the centre of the object
-        vec3 position   = 2;
-        mat3 covariance = 3;
-        // Normal vectors expressed in angles (first angle is around z axis, second is elevation)
-        vec2 normalAngles = 4;
-        mat2 normAngCov   = 5;
-    }
-
-    VisionObject visObject           = 1;
-    Side         side                = 2;
-    Team         team                = 3;
-    Frustum      frustum             = 4;
-    Quad         quad                = 5;
-    repeated Measurement measurement = 6;
-}
-
 message Obstacle {
     enum Team {
         UNKNOWN_TEAM = 0;
