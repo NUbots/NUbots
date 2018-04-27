@@ -11,7 +11,7 @@ import { OrthographicCamera } from 'three'
 import { Camera } from 'three'
 
 import { ImageDecoder } from '../../../image_decoder/image_decoder'
-import { ImageModel } from '../../../image_decoder/image_decoder'
+import { Image } from '../../../image_decoder/image_decoder'
 
 import { CameraModel } from './model'
 
@@ -77,7 +77,7 @@ export class CameraViewModel {
     return this.model.image && this.model.image.height
   }
 
-  private image = createTransformer((image: ImageModel): Mesh => {
+  private image = createTransformer((image: Image): Mesh => {
     const mesh = new Mesh(this.quadGeometry, this.imageMaterial(image))
 
     // Normally this effect could be achieved by setting texture.flipY to make
@@ -103,7 +103,7 @@ export class CameraViewModel {
     })
   }
 
-  private imageMaterial = createTransformer((image: ImageModel) => {
+  private imageMaterial = createTransformer((image: Image) => {
     const mat = this.imageBasicMaterial
 
     // TODO: This is wrong and not very reactive however the alternative is recompiling the shader every time

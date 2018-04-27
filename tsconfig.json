@@ -3,6 +3,7 @@
     "sourceMap": true,
     "target": "es5",
     "jsx": "react",
+    "skipLibCheck": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,

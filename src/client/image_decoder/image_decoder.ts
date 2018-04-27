@@ -1,4 +1,3 @@
-import { observable } from 'mobx'
 import { createTransformer } from 'mobx-utils'
 import { BufferGeometry } from 'three'
 import { PlaneBufferGeometry } from 'three'
@@ -35,29 +34,11 @@ export function fourcc(code: string): number {
   return code.charCodeAt(3) << 24 | code.charCodeAt(2) << 16 | code.charCodeAt(1) << 8 | code.charCodeAt(0)
 }
 
-export interface ImageModelOpts {
-  width: number
-  height: number
-  format: number
-  data: Uint8Array
-}
-
-export class ImageModel {
-  @observable width: number
-  @observable height: number
-  @observable format: number
-  @observable.ref data: Uint8Array
-
-  constructor({ width, height, format, data }: ImageModelOpts) {
-    this.width = width
-    this.height = height
-    this.format = format
-    this.data = data
-  }
-
-  static of(opts: ImageModelOpts) {
-    return new ImageModel(opts)
-  }
+export interface Image {
+  readonly width: number
+  readonly height: number
+  readonly format: number
+  readonly data: Uint8Array
 }
 
 export class ImageDecoder {
@@ -77,7 +58,7 @@ export class ImageDecoder {
     )
   })
 
-  decode = createTransformer((image: ImageModel) => {
+  decode = createTransformer((image: Image) => {
     switch (image.format) {
       case fourcc('GRBG'):
       case fourcc('RGGB'):
@@ -109,7 +90,7 @@ export class ImageDecoder {
     })
   }, (material?: RawShaderMaterial) => material && material.dispose())
 
-  private bayerTexture = createTransformer((image: ImageModel) => {
+  private bayerTexture = createTransformer((image: Image) => {
     let firstRed
     switch (image.format) {
       case fourcc('GRBG'):
@@ -150,7 +131,7 @@ export class ImageDecoder {
     return renderTarget
   }, (target?: WebGLRenderTarget) => target && target.dispose())
 
-  private rgbTexture = createTransformer((image: ImageModel) => {
+  private rgbTexture = createTransformer((image: Image) => {
     const texture = new DataTexture(
       image.data,
       image.width,
@@ -168,7 +149,7 @@ export class ImageDecoder {
     return texture
   }, texture => texture && texture.dispose())
 
-  private grayTexture = createTransformer((image: ImageModel) => {
+  private grayTexture = createTransformer((image: Image) => {
     const texture = new DataTexture(
       image.data,
       image.width,
@@ -186,7 +167,7 @@ export class ImageDecoder {
     return texture
   }, texture => texture && texture.dispose())
 
-  private rawTexture = createTransformer((image: ImageModel) => {
+  private rawTexture = createTransformer((image: Image) => {
     const texture = new DataTexture(
       image.data,
       image.width,
