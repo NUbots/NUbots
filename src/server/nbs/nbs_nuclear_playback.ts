@@ -41,7 +41,9 @@ export class NbsNUClearPlayback extends stream.Writable {
   /** Convenience method for directly streaming a file to the network. */
   static fromFile(filename: string, nuclearnetClient: NUClearNetClient) {
     const playback = NbsNUClearPlayback.of(nuclearnetClient)
-    const rawStream = fs.createReadStream(filename)
+    // This high water mark is to ensure that we don't spend much time splitting/joining buffers
+    // 32MB is large enough that there will be few packets that must be split regularly
+    const rawStream = fs.createReadStream(filename, { highWaterMark: 1024 * 1024 * 32 })
     const isGzipped = filename.endsWith('.nbz') || filename.endsWith('.nbs.gz')
     const decompress = isGzipped ? createGunzip() : new PassThrough()
     rawStream.pipe(decompress).pipe(new NbsFrameChunker()).pipe(new NbsFrameDecoder()).pipe(playback)

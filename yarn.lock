@@ -60,12 +60,6 @@
     "@types/express" "*"
     "@types/node" "*"
 
-"@types/buffers@^0.1.30":
-  version "0.1.31"
-  resolved "https://registry.yarnpkg.com/@types/buffers/-/buffers-0.1.31.tgz#ae628d3e97e5862c86743c22bdaef33a93e094b0"
-  dependencies:
-    "@types/node" "*"
-
 "@types/classnames@^2.2.0":
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.2.3.tgz#3f0ff6873da793870e20a260cada55982f38a9e5"
@@ -1553,7 +1547,7 @@ buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
-buffers@^0.1.1, buffers@~0.1.1:
+buffers@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
 
