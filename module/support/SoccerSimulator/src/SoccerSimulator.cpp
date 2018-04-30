@@ -31,7 +31,8 @@
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
 #include "message/motion/WalkCommand.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
