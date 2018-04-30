@@ -20,10 +20,11 @@
 #include "NUsight.h"
 
 #include "message/input/Image.h"
+#include "message/vision/Ball.h"
 #include "message/vision/ClassifiedImage.h"
+#include "message/vision/Goal.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/LookUpTableDiff.h"
-#include "message/vision/VisionObjects.h"
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
