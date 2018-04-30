@@ -10,18 +10,15 @@ class Enum:
         self.fqn = '{}.{}'.format(context.fqn, self.name)
         self.values = [(v.name, v.number) for v in e.value]
         self.include_path = context.include_path
-        # e.name contains the name of the enum
-        # e.value is a list of enum values
-        # e.options is a set of enum options (allow_alias, deprecated, list of uninterpreted options)
-        # e.value[].name is the name of the constant
-        # e.value[].number is the number assigned
-        # e.value[].options is a set of enum options (deprecated, list of uninterpreted_option)
 
     def generate_cpp(self):
 
         # Make our value pairs
         values = indent('\n'.join(['{} = {}'.format(v[0], v[1]) for v in self.values]), 8)
         values = ',\n'.join([v for v in values.splitlines()])
+
+        scope_name='_'.join(self.fqn.split('.'))
+        set_values = ', '.join(['T{}::Value::{}'.format(scope_name, v[0]) for v in self.values])
 
         # Make our switch statement pairs
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
@@ -86,6 +83,7 @@ class Enum:
                 operator {protobuf_name}() const;
 
                 friend std::ostream& operator<< (std::ostream& out, const {name}& val);
+
             }};""")
 
         impl_template = dedent("""\
@@ -221,7 +219,9 @@ class Enum:
             protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
             default_value=default_value,
             if_chain=if_chain,
-            switches=switches
+            switches=switches,
+            scope_name=scope_name,
+            set_values=set_values
         ), python_template.format(
             fqn='::'.join(self.fqn.split('.')),
             name=self.name,

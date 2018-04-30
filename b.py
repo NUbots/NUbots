@@ -24,10 +24,26 @@ if os.path.isfile('CMakeCache.txt'):
     with open('CMakeCache.txt', 'r') as f:
         cmake_cache_text = f.readlines()
 
-# Look in a build directory
-elif os.path.isfile(os.path.join(project_dir, 'build', 'CMakeCache.txt')):
-    with open(os.path.join(project_dir, 'build', 'CMakeCache.txt'), 'r') as f:
-        cmake_cache_text = f.readlines()
+
+# Look for a build directory
+else:
+    dirs = ['build']
+    try:
+        dirs.extend([os.path.join('build', f) for f in os.listdir('build')])
+    except FileNotFoundError:
+        pass
+
+    for d in dirs:
+        if os.path.isfile(os.path.join(project_dir, d, 'CMakeCache.txt')):
+            with open(os.path.join(project_dir, d, 'CMakeCache.txt'), 'r') as f:
+                cmake_cache_text = f.readlines()
+            break;
+
+    # If we still didn't find anything
+    try:
+        cmake_cache_text
+    except NameError:
+        cmake_cache_text = []
 
 # Go and process our lines in our cmake file
 for l in cmake_cache_text:
@@ -43,50 +59,57 @@ for l in cmake_cache_text:
         # Store our value and split it into a list if it is a list
         cmake_cache[g[0]] = g[2] if ';' not in g[2].strip(';') else g[2].strip(';').split(';');
 
-binary_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR']
-source_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR']
+# Try to find our source and binary directories
+try:
+    binary_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR']
+except KeyError:
+    binary_dir = None
+
+try:
+    source_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR']
+except:
+    source_dir = project_dir
 
 if __name__ == "__main__":
 
-    # Print some information for the user
-    print("b script for", cmake_cache["CMAKE_PROJECT_NAME"])
-    print("\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR'])
-    print("\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR'])
-    print()
+    if (binary_dir is not None):
+        # Print some information for the user
+        print("b script for", cmake_cache["CMAKE_PROJECT_NAME"])
+        print("\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR'])
+        print("\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR'])
+        print()
 
     # Add our builtin tools to the path and user tools
     sys.path.append(nuclear_tools_path)
     sys.path.append(user_tools_path)
 
-    if __name__ == '__main__':
+    # Root parser information
+    command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks for working with the NUClear roles system.')
+    subcommands = command.add_subparsers(dest='command')
+    subcommands.help = "The command to run from the script. See each help for more information."
 
-        # Root parser information
-        command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks for working with the NUClear roles system.')
-        subcommands = command.add_subparsers(dest='command')
-        subcommands.help = "The command to run from the script. See each help for more information."
+    # Get all of the packages that are in the build tools
+    modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
 
-        # Get all of the packages that are in the build tools
-        modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
+    # Our tools dictionary
+    tools = {}
 
-        # Our tools dictionary
-        tools = {}
+    # Loop through all the modules we have to set them up in the parser
+    for loader, module_name, ispkg in modules:
 
-        # Loop through all the modules we have to set them up in the parser
-        for loader, module_name, ispkg in modules:
+        # Get our module, class name and registration function
+        module = loader.find_module(module_name).load_module(module_name)
+        tool = getattr(module, 'run')
+        register = getattr(module, 'register')
 
-            # Get our module, class name and registration function
-            module = loader.find_module(module_name).load_module(module_name)
-            tool = getattr(module, 'run')
-            register = getattr(module, 'register')
+        # Let the tool register it's arguments
+        register(subcommands.add_parser(module_name))
 
-            # Let the tool register it's arguments
-            register(subcommands.add_parser(module_name))
+        # Associate our module_name with this tool
+        tools[module_name] = tool
 
-            # Associate our module_name with this tool
-            tools[module_name] = tool
+    # Parse our arguments
+    args = command.parse_args()
 
-        # Parse our arguments
-        args = command.parse_args()
-
-        # Pass to our tool
-        tools[args.command](**vars(args))
+    # Pass to our tool
+    tools[args.command](**vars(args))

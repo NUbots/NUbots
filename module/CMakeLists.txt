@@ -6,6 +6,9 @@ SET(modules ${NUCLEAR_MODULES})
 LIST(REMOVE_DUPLICATES modules)
 SET(NUCLEAR_MODULES ${modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
 
+# Clear our list of data files
+UNSET(NUCLEAR_MODULE_DATA_FILES CACHE)
+
 # Build each of our modules and their corresponding tests
 FOREACH(module ${NUCLEAR_MODULES})
     STRING(REPLACE "::" "/" module_path "${module}")

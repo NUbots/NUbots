@@ -27,7 +27,11 @@ FIND_PACKAGE(PythonInterp 3 REQUIRED)
 INCLUDE_DIRECTORIES(SYSTEM ${Protobuf_INCLUDE_DIRS})
 
 # If we have the package pybind11 we can use to go generate python bindings
-FIND_PACKAGE(pybind11)
+#FIND_PACKAGE(pybind11)
+
+# We need Eigen3
+FIND_PACKAGE(Eigen3 REQUIRED)
+INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
 
 # We need Eigen3
 FIND_PACKAGE(Eigen3 REQUIRED)
@@ -74,7 +78,7 @@ FOREACH(proto ${builtin})
                                 "${message_binary_include_dir}/${file_we}.cpp"
                                 "${message_binary_include_dir}/${file_we}.py.cpp"
                                 "${message_binary_include_dir}/${file_we}.h"
-                                 PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-error=unused-parameter -Wno-error")
+                                 PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error")
 
 ENDFOREACH(proto)
 
@@ -194,7 +198,7 @@ FOREACH(proto ${protobufs})
                                 "${outputpath}/${file_we}.h"
                                 PROPERTIES GENERATED TRUE
                                 # Prevent Effective C++ and unused parameter error checks being performed on generated files.
-                                COMPILE_FLAGS "-Wno-effc++ -Wno-error=unused-parameter -Wno-error")
+                                COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error")
 
     # Add the generated files to our list
     SET(src ${src}
