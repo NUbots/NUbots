@@ -25,8 +25,8 @@
 #include "message/input/CameraParameters.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
+#include "message/vision/Goal.h"
 #include "message/vision/LookUpTable.h"
-#include "message/vision/VisionObjects.h"
 
 
 #include "utility/math/geometry/Line.h"
@@ -77,6 +77,7 @@ namespace vision {
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
     using message::support::FieldDescription;
     using message::vision::Goal;
+    using message::vision::Goals;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the
@@ -151,7 +152,7 @@ namespace vision {
                 const auto& image = *rawImage;
                 // Our segments that may be a part of a goal
                 std::vector<RansacGoalModel::GoalSegment> segments;
-                auto goals = std::make_unique<std::vector<Goal>>();
+                auto goals = std::make_unique<Goals>();
                 // Get our goal segments
                 for (const auto& segment : image.horizontalSegments) {
 
@@ -159,7 +160,8 @@ namespace vision {
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
-                        && (segment.previous > -1) && (segment.next > -1)) {
+                        && (segment.previous > -1)
+                        && (segment.next > -1)) {
                         segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
                                                                            convert<uint, 2>(cam.imageSizePixels)),
                                                              cam),
