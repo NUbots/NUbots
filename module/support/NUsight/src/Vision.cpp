@@ -34,9 +34,9 @@ namespace support {
 
     using message::input::CameraParameters;
     using message::input::Image;
-    using message::vision::Ball;
+    using message::vision::Balls;
     using message::vision::ClassifiedImage;
-    using message::vision::Goal;
+    using message::vision::Goals;
     using message::vision::Line;
     using message::vision::LookUpTableDiff;
     using message::vision::NUsightBalls;
@@ -72,6 +72,16 @@ namespace support {
 
                 last_classified_image = NUClear::clock::now();
             }));
+
+        handles["vision_object"].push_back(on<Trigger<Balls>, Single, Priority::LOW>().then([this](const Balls& balls) {
+            auto nusight = std::make_unique<Balls>();
+            emit<Scope::NETWORK>(nusight, "nusight", false);
+        }));
+
+        handles["vision_object"].push_back(on<Trigger<Goals>, Single, Priority::LOW>().then([this](const Goals& goals) {
+            auto nusight = std::make_unique<Goals>();
+            emit<Scope::NETWORK>(nusight, "nusight", false);
+        }));
 
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then(
             [this](std::shared_ptr<const LookUpTableDiff> tableDiff) {
