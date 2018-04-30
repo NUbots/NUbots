@@ -26,6 +26,8 @@
 #include "message/localisation/Field.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/HeadCommand.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
@@ -47,8 +49,9 @@ namespace behaviour {
         using utility::nusight::graph;
 
         using message::vision::Ball;
+        using message::vision::Balls;
         using message::vision::Goal;
-        using message::vision::VisionObject;
+        using message::vision::Goals;
         // using message::localisation::Ball;
         using message::localisation::Field;
         using LocBall = message::localisation::Ball;
@@ -152,8 +155,8 @@ namespace behaviour {
 
 
             on<Trigger<Sensors>,
-               Optional<With<std::vector<Ball>>>,
-               Optional<With<std::vector<Goal>>>,
+               Optional<With<Balls>>,
+               Optional<With<Goals>>,
                Optional<With<LocBall>>,
                With<KinematicsModel>,
                With<CameraParameters>,
@@ -162,8 +165,8 @@ namespace behaviour {
                 .then(
                     "Head Behaviour Main Loop",
                     [this](const Sensors& sensors,
-                           std::shared_ptr<const std::vector<Ball>> vballs,
-                           std::shared_ptr<const std::vector<Goal>> vgoals,
+                           std::shared_ptr<const Balls> vballs,
+                           std::shared_ptr<const Goals> vgoals,
                            std::shared_ptr<const LocBall> locBall,
                            const KinematicsModel& kinematicsModel,
                            const CameraParameters& cam_) {
@@ -190,8 +193,8 @@ namespace behaviour {
                         bool objectsMissing = false;
 
                         // Get the list of objects which are currently visible
-                        std::vector<Ball> ballFixationObjects = getFixationObjects(vballs, objectsMissing);
-                        std::vector<Goal> goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
+                        Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
+                        Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
                         // Determine state transition variables
                         bool lost = ((ballFixationObjects.size() <= 0) && (goalFixationObjects.size() <= 0));
@@ -340,11 +343,10 @@ namespace behaviour {
                     });
         }
 
-        std::vector<Ball> HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const std::vector<Ball>> vballs,
-                                                                  bool& search) {
+        Balls HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Balls> vballs, bool& search) {
 
             auto now = NUClear::clock::now();
-            std::vector<Ball> fixationObjects;
+            Balls fixationObjects;
 
             int maxPriority = std::max(std::max(ballPriority, goalPriority), 0);
             if (ballPriority == goalPriority)
@@ -367,11 +369,10 @@ namespace behaviour {
             return fixationObjects;
         }
 
-        std::vector<Goal> HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const std::vector<Goal>> vgoals,
-                                                                  bool& search) {
+        Goals HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Goals> vgoals, bool& search) {
 
             auto now = NUClear::clock::now();
-            std::vector<Goal> fixationObjects;
+            Goals fixationObjects;
 
             int maxPriority = std::max(std::max(ballPriority, goalPriority), 0);
             if (ballPriority == goalPriority)
@@ -385,7 +386,7 @@ namespace behaviour {
                     timeLastObjectSeen = now;
                     std::set<Goal::Side> visiblePosts;
                     // TODO treat goals as one object
-                    std::vector<Goal> goals;
+                    Goals goals;
                     for (auto& goal : *vgoals) {
                         visiblePosts.insert(goal.side);
                         goals.push_back(goal);
@@ -407,7 +408,7 @@ namespace behaviour {
 
 
         void HeadBehaviourSoccer::updateHeadPlan(const KinematicsModel& kinematicsModel,
-                                                 const std::vector<Ball>& fixationObjects,
+                                                 const Balls& fixationObjects,
                                                  const bool& search,
                                                  const Sensors& sensors,
                                                  const Rotation3D& headToIMUSpace) {
@@ -450,7 +451,7 @@ namespace behaviour {
         }
 
         void HeadBehaviourSoccer::updateHeadPlan(const KinematicsModel& kinematicsModel,
-                                                 const std::vector<Goal>& fixationObjects,
+                                                 const Goals& fixationObjects,
                                                  const bool& search,
                                                  const Sensors& sensors,
                                                  const Rotation3D& headToIMUSpace) {
@@ -529,7 +530,7 @@ namespace behaviour {
         Returns vector of arma::vec2
         */
         std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                     std::vector<Ball> fixationObjects,
+                                                                     Balls fixationObjects,
                                                                      SearchType sType,
                                                                      const Sensors&) {
             // If there is nothing of interest, we search fot points of interest
@@ -618,7 +619,7 @@ namespace behaviour {
         }
 
         std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                     std::vector<Goal> fixationObjects,
+                                                                     Goals fixationObjects,
                                                                      SearchType sType,
                                                                      const Sensors&) {
             // If there is nothing of interest, we search fot points of interest
@@ -706,7 +707,7 @@ namespace behaviour {
             return searchPoints;
         }
 
-        Ball HeadBehaviourSoccer::combineVisionObjects(const std::vector<Ball>& ob) {
+        Ball HeadBehaviourSoccer::combineVisionObjects(const Balls& ob) {
             if (ob.size() == 0) {
                 log<NUClear::WARN>(
                     "HeadBehaviourSoccer::combineVisionBalls - Attempted to combine zero vision objects into one.");
@@ -719,7 +720,7 @@ namespace behaviour {
             return v;
         }
 
-        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Ball>& ob) {
+        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.size(); i++) {
                 boundingPoints.push_back(
@@ -731,7 +732,7 @@ namespace behaviour {
         }
 
 
-        Goal HeadBehaviourSoccer::combineVisionObjects(const std::vector<Goal>& ob) {
+        Goal HeadBehaviourSoccer::combineVisionObjects(const Goals& ob) {
             if (ob.size() == 0) {
                 log<NUClear::WARN>(
                     "HeadBehaviourSoccer::combineVisionObjects - Attempted to combine zero vision objects into one.");
@@ -744,7 +745,7 @@ namespace behaviour {
             return v;
         }
 
-        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Goal>& ob) {
+        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.size(); i++) {
                 boundingPoints.push_back(

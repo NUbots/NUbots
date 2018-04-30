@@ -32,7 +32,8 @@
 #include "message/localisation/Ball.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KinematicsModel.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -52,23 +53,21 @@ namespace behaviour {
             enum SearchState { FIXATION = 0, WAIT = 1, SEARCH = 2 };
             SearchState state = SearchState::SEARCH;
 
-            std::vector<message::vision::Ball> getFixationObjects(
-                std::shared_ptr<const std::vector<message::vision::Ball>> vballs,
-                bool& search);
-            std::vector<message::vision::Goal> getFixationObjects(
-                std::shared_ptr<const std::vector<message::vision::Goal>> vgoals,
-                bool& search);
+            message::vision::Balls getFixationObjects(std::shared_ptr<const message::vision::Balls> vballs,
+                                                      bool& search);
+            message::vision::Goals getFixationObjects(std::shared_ptr<const message::vision::Goals> vgoals,
+                                                      bool& search);
 
 
             /*! @brief Updates the search plan when something has changed
              */
             void updateHeadPlan(const message::motion::KinematicsModel& kinematicsModel,
-                                const std::vector<message::vision::Ball>& fixationObjects,
+                                const message::vision::Balls& fixationObjects,
                                 const bool& search,
                                 const message::input::Sensors& sensors,
                                 const utility::math::matrix::Rotation3D& headToIMUSpace);
             void updateHeadPlan(const message::motion::KinematicsModel& kinematicsModel,
-                                const std::vector<message::vision::Goal>& fixationObjects,
+                                const message::vision::Goals& fixationObjects,
                                 const bool& search,
                                 const message::input::Sensors& sensors,
                                 const utility::math::matrix::Rotation3D& headToIMUSpace);
@@ -82,24 +81,24 @@ namespace behaviour {
             /*! @brief Gets points which allow for simultaneous search and viewing of key objects
              */
             std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    std::vector<message::vision::Ball> fixationObjects,
+                                                    message::vision::Balls fixationObjects,
                                                     message::behaviour::SoccerObjectPriority::SearchType sType,
                                                     const message::input::Sensors& sensors);
             std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    std::vector<message::vision::Goal> fixationObjects,
+                                                    message::vision::Goals fixationObjects,
                                                     message::behaviour::SoccerObjectPriority::SearchType sType,
                                                     const message::input::Sensors& sensors);
 
             /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the
              * bounding box of the objects
              */
-            message::vision::Ball combineVisionObjects(const std::vector<message::vision::Ball>& obs);
-            message::vision::Goal combineVisionObjects(const std::vector<message::vision::Goal>& obs);
+            message::vision::Ball combineVisionObjects(const message::vision::Balls& obs);
+            message::vision::Goal combineVisionObjects(const message::vision::Goals& obs);
 
             /*! @brief Gets a bounding box in screen angular space of a set of vision objects
              */
-            utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::Ball>& obs);
-            utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::Goal>& obs);
+            utility::math::geometry::Quad getScreenAngularBoundingBox(const message::vision::Balls& obs);
+            utility::math::geometry::Quad getScreenAngularBoundingBox(const message::vision::Goals& obs);
 
             bool orientationHasChanged(const message::input::Sensors& sensors);
 
