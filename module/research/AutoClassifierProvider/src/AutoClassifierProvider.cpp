@@ -36,9 +36,9 @@ namespace research {
     using extension::Configuration;
 
     using message::research::AutoClassifierPixels;
-    using message::vision::Ball;
+    using VisionBalls = message::vision::Balls;
     using message::vision::ClassifiedImage;
-    using message::vision::Goal;
+    using VisionGoals = message::vision::Goals;
 
     using utility::math::geometry::Circle;
     using utility::math::geometry::Quad;
@@ -70,8 +70,8 @@ namespace research {
         });
 
 
-        ballProvider = on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then(
-            "Auto Classifier Provider Balls", [this](const std::vector<Ball>& balls) {
+        ballProvider = on<Trigger<VisionBalls>, Single, Priority::LOW>().then(
+            "Auto Classifier Provider Balls", [this](const VisionBalls& balls) {
 
                 auto pixels            = std::make_unique<AutoClassifierPixels>();
                 pixels->classification = Colour::ORANGE;
@@ -112,8 +112,8 @@ namespace research {
                 emit(std::move(pixels));
             });
 
-        goalProvider = on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then(
-            "Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
+        goalProvider = on<Trigger<VisionGoals>, Single, Priority::LOW>().then(
+            "Auto Classifier Goals", [this](const VisionGoals& goals) {
 
                 auto pixels            = std::make_unique<AutoClassifierPixels>();
                 pixels->classification = Colour::YELLOW;

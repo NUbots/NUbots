@@ -21,8 +21,9 @@
 #define MODULES_RESEARCH_AUTOCLASSIFIERPROVIDER_H
 
 #include <nuclear>
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 #include "message/vision/LookUpTable.h"
-#include "message/vision/VisionObjects.h"
 
 namespace module {
 namespace research {
@@ -46,8 +47,8 @@ namespace research {
         int lineLightnessMin      = 0;
         int lineLightnessMax      = 255;
 
-        void handleVisionGoals(const message::vision::VisionObject& goals);
-        void handleVisionBalls(const message::vision::VisionObject& balls);
+        void handleVisionGoals(const message::vision::Goals& goals);
+        void handleVisionBalls(const message::vision::Balls& balls);
 
         ReactionHandle ballProvider;
         ReactionHandle goalProvider;
