@@ -25,7 +25,7 @@ class Message:
 
         # m.name is the name of the message
         # m.field contains the fields
-        # m.extension contains any exntesions (error don't use)
+        # m.extension contains any extensions (error don't use)
         # m.nested_type contains submessages
         # m.enum_type contains held enum types
         # m.extension_range contains extension ranges

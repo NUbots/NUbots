@@ -71,14 +71,14 @@ class File:
 
             {includes}
 
-            {openNamespace}
+            {open_namespace}
 
                 // Enum Definitions
             {enums}
                 // Message Definitions
             {messages}
 
-            {closeNamespace}
+            {close_namespace}
 
             #endif  // {define}
             """)
@@ -119,10 +119,10 @@ class File:
         return header_template.format(
             define=define,
             includes=includes,
-            openNamespace=ns_open,
+            open_namespace=ns_open,
             enums=enum_headers,
             messages=message_headers,
-            closeNamespace=ns_close
+            close_namespace=ns_close
         ), impl_template.format(
             include='#include "{}"'.format(self.name[:-6] + '.h'),
             enums=enum_impls,
