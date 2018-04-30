@@ -28,7 +28,7 @@
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -53,7 +53,7 @@ namespace behaviour {
         using message::input::Sensors;
         using message::localisation::Ball;
         using message::localisation::Field;
-        using VisionBall = message::vision::Ball;
+        using VisionBalls = message::vision::Balls;
         using message::motion::IKKickParams;
         using message::motion::KickCommand;
         using KickCommandType = message::motion::KickCommandType;
@@ -86,7 +86,7 @@ namespace behaviour {
                 emit(std::make_unique<WantsToKick>(false));
             });
 
-            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
+            on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
                 if (!balls.empty()) {
                     ballLastSeen = NUClear::clock::now();
                 }
