@@ -31,7 +31,8 @@
 #include "message/motion/GetupCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/math/geometry/Circle.h"
@@ -65,7 +66,6 @@ namespace behaviour {
         using Unpenalisation = message::input::GameEvents::Unpenalisation;
         using GameMode       = message::input::GameState::Data::Mode;
         using message::input::Sensors;
-        using VisionBall = message::vision::Ball;
         using message::localisation::Ball;
         using message::localisation::Field;
         using message::localisation::ResetRobotHypotheses;
@@ -76,7 +76,8 @@ namespace behaviour {
         using message::platform::darwin::ButtonLeftDown;
         using message::platform::darwin::ButtonMiddleDown;
         using message::support::FieldDescription;
-        using message::vision::Goal;
+        using VisionBalls = message::vision::Balls;
+        using VisionGoals = message::vision::Goals;
 
         using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
@@ -123,13 +124,13 @@ namespace behaviour {
 
 
             // For checking last seen times
-            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
+            on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
                 if (!balls.empty()) {
                     ballLastMeasured = NUClear::clock::now();
                 }
             });
 
-            on<Trigger<std::vector<Goal>>>().then([this](const std::vector<Goal>& goals) {
+            on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
                 if (!goals.empty()) {
                     goalLastMeasured = NUClear::clock::now();
                 }
@@ -490,16 +491,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position[2];
-                int signBearing     = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed = -signBearing
-                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                                  cfg_.goalie_max_rotation_speed);
+                float fieldBearing = field.position[2];
+                int signBearing    = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed =
+                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                             cfg_.goalie_max_rotation_speed);
 
-                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed = signTranslation
-                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                     cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed =
+                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));
