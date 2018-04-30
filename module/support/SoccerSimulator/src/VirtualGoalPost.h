@@ -25,7 +25,7 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Goal.h"
 
 #include "utility/math/matrix/Transform2D.h"
 
