@@ -26,7 +26,6 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/WalkCommand.h"
-#include "message/vision/VisionObjects.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
