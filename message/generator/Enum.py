@@ -18,7 +18,6 @@ class Enum:
         values = ',\n'.join([v for v in values.splitlines()])
 
         scope_name='_'.join(self.fqn.split('.'))
-        set_values = ', '.join(['T{}::Value::{}'.format(scope_name, v[0]) for v in self.values])
 
         # Make our switch statement pairs
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
@@ -83,10 +82,11 @@ class Enum:
                 operator {protobuf_name}() const;
 
                 friend std::ostream& operator<< (std::ostream& out, const {name}& val);
-
             }};""")
 
         impl_template = dedent("""\
+            typedef {fqn} T{scope_name};
+
             {fqn}::{name}() : value(Value::{default_value}) {{}}
 
             {fqn}::{name}(int const& v) : value(static_cast<Value>(v)) {{}}
@@ -221,7 +221,6 @@ class Enum:
             if_chain=if_chain,
             switches=switches,
             scope_name=scope_name,
-            set_values=set_values
         ), python_template.format(
             fqn='::'.join(self.fqn.split('.')),
             name=self.name,
