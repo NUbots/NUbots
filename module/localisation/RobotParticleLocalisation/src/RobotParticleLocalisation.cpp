@@ -4,6 +4,7 @@
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
 #include "message/localisation/ResetRobotHypotheses.h"
+#include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
 
 #include "utility/math/geometry/Circle.h"
@@ -30,7 +31,7 @@ namespace localisation {
 
     using message::localisation::ResetRobotHypotheses;
     using message::support::FieldDescription;
-    using message::vision::Goal;
+    using VisionGoals = message::vision::Goals;
     using utility::localisation::transform3DToFieldState;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
@@ -106,8 +107,8 @@ namespace localisation {
                 emit(field);
             });
 
-        on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
-            "Measurement Update", [this](const std::vector<Goal>& goals, const FieldDescription& fd) {
+        on<Trigger<VisionGoals>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
+            "Measurement Update", [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.empty()) {
                     /* Perform time update */
                     auto curr_time        = NUClear::clock::now();
@@ -155,7 +156,7 @@ namespace localisation {
                     arma::mat22 pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
                     arma::mat33 state_cov = arma::eye(3, 3);
                     state_cov.submat(0, 0, 1, 1) = pos_cov;
-                    state_cov(2, 2)              = s.heading_var;
+                    state_cov(2, 2) = s.heading_var;
                     cov.push_back(state_cov);
                 }
                 filter.resetAmbiguous(states, cov, n_particles);
