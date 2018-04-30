@@ -73,50 +73,6 @@ namespace support {
                 last_classified_image = NUClear::clock::now();
             }));
 
-        handles["vision_object"].push_back(
-            on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this](const std::vector<Ball>& balls) {
-                auto nusight = std::make_unique<NUsightBalls>();
-
-                for (const auto& ball : balls) {
-                    nusight->balls.push_back(ball);
-                }
-
-                emit<Scope::NETWORK>(nusight, "nusight", false);
-            }));
-
-        handles["vision_object"].push_back(
-            on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this](const std::vector<Goal>& goals) {
-                auto nusight = std::make_unique<NUsightGoals>();
-
-                for (const auto& goal : goals) {
-                    nusight->goals.push_back(goal);
-                }
-
-                emit<Scope::NETWORK>(nusight, "nusight", false);
-            }));
-
-        handles["vision_object"].push_back(
-            on<Trigger<std::vector<Line>>, Single, Priority::LOW>().then([this](const std::vector<Line>& lines) {
-                auto nusight = std::make_unique<NUsightLines>();
-
-                for (const auto& line : lines) {
-                    nusight->lines.push_back(line);
-                }
-
-                emit<Scope::NETWORK>(nusight, "nusight", false);
-            }));
-
-        handles["vision_object"].push_back(on<Trigger<std::vector<Obstacle>>, Single, Priority::LOW>().then(
-            [this](const std::vector<Obstacle>& obstacles) {
-                auto nusight = std::make_unique<NUsightObstacles>();
-
-                for (const auto& obstacles : obstacles) {
-                    nusight->obstacles.push_back(obstacles);
-                }
-
-                emit<Scope::NETWORK>(nusight, "nusight", false);
-            }));
-
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then(
             [this](std::shared_ptr<const LookUpTableDiff> tableDiff) {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(tableDiff), "nusight", true);
