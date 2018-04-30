@@ -10,7 +10,6 @@
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/vision/ClassifiedImage.h"
-#include "message/vision/VisionObjects.h"
 
 namespace module {
 namespace vision {

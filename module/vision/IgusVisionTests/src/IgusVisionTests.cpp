@@ -2,6 +2,8 @@
 
 #include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -14,6 +16,8 @@ namespace vision {
     using message::input::Sensors;
     using message::support::FieldDescription;
     using message::vision::ClassifiedImage;
+    using message::vision::Balls;
+    using message::vision::Goals;
     using utility::math::vision::getImageFromCam;
     using utility::nusight::drawVisionLines;
 
@@ -40,7 +44,7 @@ namespace vision {
             visual_horizon_height = config["visual_horizon_height"].as<float>();
         });
 
-        on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls) {
+        on<Trigger<Balls>>().then([this](const Balls& balls) {
             for (auto& ball : balls) {
                 for (auto& m : ball.measurements) {
                     arma::vec3 measuredPos = convert<double, 3>(m.rBCc);
@@ -54,7 +58,7 @@ namespace vision {
                 }
             }
         });
-        on<Trigger<std::vector<message::vision::Goal>>>().then([this](const std::vector<message::vision::Goal>& goals) {
+        on<Trigger<Goals>>().then([this](const Goals& goals) {
             log("Goals: ", goals.size());
             for (auto& goal : goals) {
                 for (auto& m : goal.measurement) {
