@@ -24,7 +24,6 @@
 #include <nuclear>
 #include "message/support/nusight/DataPoint.h"
 #include "message/support/nusight/DrawObjects.h"
-#include "message/vision/VisionObjects.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Rotation3D.h"
