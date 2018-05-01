@@ -152,7 +152,7 @@ namespace behaviour {
             // });
 
             on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-                if (!balls.empty()) {
+                if (balls.balls.size() > 0) {
                     timeBallLastSeen = NUClear::clock::now();
                 }
             });

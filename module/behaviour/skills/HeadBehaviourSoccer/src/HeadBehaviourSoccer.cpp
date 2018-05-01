@@ -418,21 +418,21 @@ namespace behaviour {
             arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).presentPosition,
                                      sensors.servo.at(ServoID::HEAD_PITCH).presentPosition};
 
-            for (uint i = 0; i < fixationObjects.size(); i++) {
+            for (uint i = 0; i < fixationObjects.balls.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(arma::vec(
-                    {fixationObjects[i].visObject.screenAngular[0], fixationObjects[i].visObject.screenAngular[1]}));
-                fixationSizes.push_back(arma::vec(
-                    {fixationObjects[i].visObject.angularSize[0], fixationObjects[i].visObject.angularSize[1]}));
+                fixationPoints.push_back(arma::vec({fixationObjects.balls(i).visObject.screenAngular[0],
+                                                    fixationObjects.balls(i).visObject.screenAngular[1]}));
+                fixationSizes.push_back(arma::vec({fixationObjects.balls(i).visObject.angularSize[0],
+                                                   fixationObjects.balls(i).visObject.angularSize[1]}));
                 // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular))
-                            / (fixationObjects.size());
+                centroid += arma::vec(convert<double, 2>(fixationObjects.balls(i).visObject.screenAngular))
+                            / (fixationObjects.balls.size());
             }
 
             // If there are objects to find
             if (search) {
-                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors);
+                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects.balls, searchType, sensors);
             }
 
             if (fixationPoints.size() <= 0) {
@@ -468,21 +468,21 @@ namespace behaviour {
                 }
             }
 
-            for (uint i = 0; i < fixationObjects.size(); i++) {
+            for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(arma::vec(
-                    {fixationObjects[i].visObject.screenAngular[0], fixationObjects[i].visObject.screenAngular[1]}));
-                fixationSizes.push_back(arma::vec(
-                    {fixationObjects[i].visObject.angularSize[0], fixationObjects[i].visObject.angularSize[1]}));
+                fixationPoints.push_back(arma::vec({fixationObjects.goals(i).visObject.screenAngular[0],
+                                                    fixationObjects.goals(i).visObject.screenAngular[1]}));
+                fixationSizes.push_back(arma::vec({fixationObjects.goals(i).visObject.angularSize[0],
+                                                   fixationObjects.goals(i).visObject.angularSize[1]}));
                 // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular))
-                            / (fixationObjects.size());
+                centroid += arma::vec(convert<double, 2>(fixationObjects.goals(i).visObject.screenAngular))
+                            / (fixationObjects.goals.size());
             }
 
             // If there are objects to find
             if (search) {
-                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors);
+                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects.goals, searchType, sensors);
             }
 
             if (fixationPoints.size() <= 0) {
@@ -714,7 +714,7 @@ namespace behaviour {
                 return VisionObject();
             }
             Quad q                    = getScreenAngularBoundingBox(ob);
-            Ball v                    = ob[0];
+            Ball v                    = ob.balls(0);
             v.visObject.screenAngular = convert<double, 2>(q.getCentre());
             v.visObject.angularSize   = convert<double, 2>(q.getSize());
             return v;
@@ -722,11 +722,11 @@ namespace behaviour {
 
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
             std::vector<arma::vec2> boundingPoints;
-            for (uint i = 0; i < ob.size(); i++) {
+            for (uint i = 0; i < ob.balls.size(); i++) {
                 boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular + ob[i].visObject.angularSize / 2));
+                    convert<double, 2>(ob.balls(i).visObject.screenAngular + ob.balls(i).visObject.angularSize / 2));
                 boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular - ob[i].visObject.angularSize / 2));
+                    convert<double, 2>(ob.balls(i).visObject.screenAngular - ob.balls(i).visObject.angularSize / 2));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
@@ -738,20 +738,18 @@ namespace behaviour {
                     "HeadBehaviourSoccer::combineVisionObjects - Attempted to combine zero vision objects into one.");
                 return VisionObject();
             }
-            Quad q                    = getScreenAngularBoundingBox(ob);
-            Goal v                    = ob[0];
-            v.visObject.screenAngular = convert<double, 2>(q.getCentre());
-            v.visObject.angularSize   = convert<double, 2>(q.getSize());
+            Quad q = getScreenAngularBoundingBox(ob);
+            Goal v = ob.goals(0);
             return v;
         }
 
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
             std::vector<arma::vec2> boundingPoints;
-            for (uint i = 0; i < ob.size(); i++) {
+            for (uint i = 0; i < ob.goals.size(); i++) {
                 boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular + ob[i].visObject.angularSize / 2));
+                    convert<double, 2>(ob.goals(i).visObject.screenAngular + ob.goals(i).visObject.angularSize / 2));
                 boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular - ob[i].visObject.angularSize / 2));
+                    convert<double, 2>(ob.goals(i).visObject.screenAngular - ob.goals(i).visObject.angularSize / 2));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
