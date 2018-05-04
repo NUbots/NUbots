@@ -15,7 +15,6 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace motion {
@@ -32,20 +31,10 @@ namespace motion {
         using utility::input::ServoID;
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateLegJoints;
-        using utility::nubugger::graph;
 
 
         TorsoMovement::TorsoMovement(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
-
-            on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
-                Eigen::Affine3d Haf_s;
-                Haf_s.linear()      = Eigen::Matrix3d::Identity();
-                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
-                emit(std::make_unique<TorsoTarget>(
-                    NUClear::clock::now() + std::chrono::seconds(1), foot, Haf_s.matrix()));
-            });
-
 
             on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const TorsoTarget& target) {
