@@ -36,6 +36,12 @@ namespace motion {
         TorsoMovement::TorsoMovement(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
+            // Left for possible use in future
+            on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
+
+            });
+
+
             on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const TorsoTarget& target) {
                     // Get support foot coordinate system
