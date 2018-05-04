@@ -17,8 +17,8 @@ namespace motion {
             /// @brief Called by the powerplant to build and setup the TorsoMovement reactor.
             explicit TorsoMovement(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace walk
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULE_MOTION_WALK_TORSOMOVEMENT_H
