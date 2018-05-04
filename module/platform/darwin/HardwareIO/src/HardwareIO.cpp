@@ -36,9 +36,9 @@ namespace module {
 namespace platform {
     namespace darwin {
 
-        using message::platform::darwin::DarwinSensors;
-        using message::motion::ServoTarget;
         using extension::Configuration;
+        using message::motion::ServoTarget;
+        using message::platform::darwin::DarwinSensors;
         using utility::support::Expression;
 
         DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
@@ -323,45 +323,46 @@ namespace platform {
                 });
 
             // This trigger writes the servo positions to the hardware
-            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
-                const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
+            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
+                [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
 
-                // Loop through each of our commands
-                for (const auto& command : commands) {
-                    float diff = utility::math::angle::difference(
-                        command.position,
-                        utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
-                    NUClear::clock::duration duration = command.time - NUClear::clock::now();
+                    // Loop through each of our commands
+                    for (const auto& command : commands) {
+                        float diff = utility::math::angle::difference(
+                            command.position,
+                            utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
+                        NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                    float speed;
-                    if (duration.count() > 0) {
-                        speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                        float speed;
+                        if (duration.count() > 0) {
+                            speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                        }
+                        else {
+                            speed = 0;
+                        }
+
+                        // Update our internal state
+                        if (servoState[command.id].pGain != command.gain
+                            || servoState[command.id].iGain != command.gain * 0
+                            || servoState[command.id].dGain != command.gain * 0
+                            || servoState[command.id].movingSpeed != speed
+                            || servoState[command.id].goalPosition != command.position
+                            || servoState[command.id].torque != command.torque) {
+
+                            servoState[command.id].dirty = true;
+
+                            servoState[command.id].pGain = command.gain;
+                            servoState[command.id].iGain = command.gain * 0;
+                            servoState[command.id].dGain = command.gain * 0;
+
+                            servoState[command.id].movingSpeed  = speed;
+                            servoState[command.id].goalPosition = command.position;
+
+                            servoState[command.id].torque       = command.torque;
+                            servoState[uint(command.id)].torque = command.torque;
+                        }
                     }
-                    else {
-                        speed = 0;
-                    }
-
-                    // Update our internal state
-                    if (servoState[command.id].pGain != command.gain || servoState[command.id].iGain != command.gain * 0
-                        || servoState[command.id].dGain != command.gain * 0
-                        || servoState[command.id].movingSpeed != speed
-                        || servoState[command.id].goalPosition != command.position
-                        || servoState[command.id].torque != command.torque) {
-
-                        servoState[command.id].dirty = true;
-
-                        servoState[command.id].pGain = command.gain;
-                        servoState[command.id].iGain = command.gain * 0;
-                        servoState[command.id].dGain = command.gain * 0;
-
-                        servoState[command.id].movingSpeed  = speed;
-                        servoState[command.id].goalPosition = command.position;
-
-                        servoState[command.id].torque       = command.torque;
-                        servoState[uint(command.id)].torque = command.torque;
-                    }
-                }
-            });
+                });
 
             on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
                 auto commandList = std::make_unique<std::vector<ServoTarget>>();

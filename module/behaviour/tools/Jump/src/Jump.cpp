@@ -36,11 +36,11 @@ namespace behaviour {
         using extension::Configuration;
         using extension::ExecuteScriptByName;
 
-        using message::platform::darwin::ButtonMiddleDown;
         using message::platform::darwin::ButtonLeftDown;
+        using message::platform::darwin::ButtonMiddleDown;
 
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 

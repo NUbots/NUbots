@@ -36,9 +36,9 @@ namespace module {
 namespace behaviour {
     namespace strategy {
 
-        using message::motion::KickScriptCommand;
-        using message::motion::HeadCommand;
         using message::behaviour::MotionCommand;
+        using message::motion::HeadCommand;
+        using message::motion::KickScriptCommand;
 
         using LimbID = utility::input::LimbID;
         using utility::math::matrix::Transform2D;

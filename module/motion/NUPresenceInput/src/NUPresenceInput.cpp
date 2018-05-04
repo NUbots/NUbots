@@ -45,16 +45,16 @@ namespace motion {
     using message::input::MotionCapture;
     using message::input::PresenceUserState;
     using message::input::Sensors;
-    using message::motion::KinematicsModel;
     using message::motion::BodySide;
+    using message::motion::KinematicsModel;
 
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
+    using utility::behaviour::RegisterAction;
     using ServoSide = utility::input::ServoSide;
-    using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
+    using utility::math::matrix::Transform3D;
     using utility::support::Expression;
 
     NUPresenceInput::NUPresenceInput(std::unique_ptr<NUClear::Environment> environment)

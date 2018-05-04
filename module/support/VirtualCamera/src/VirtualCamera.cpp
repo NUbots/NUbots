@@ -29,7 +29,7 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/LookUpTable.h"
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace support {

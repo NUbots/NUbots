@@ -9,6 +9,6 @@ NUCLEAR_ROLE(
     support::configuration::SoccerConfig
     support::configuration::NetworkConfiguration
     platform::darwin::SensorFilter
-    support::NUbugger
-    debug::NUbugger
+    support::NUsight
+    debug::NUsight
 )
