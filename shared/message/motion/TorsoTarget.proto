@@ -29,5 +29,5 @@ message TorsoTarget {
     // identifies which foot is the swing foot
     bool isRightFootSupport = 2;
     // Transform from world oriented support foot space (s) to target (a)
-    mat44 Haf_s = 3;
+    mat4 Haf_s = 3;
 }
