@@ -39,11 +39,6 @@ namespace motion {
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
-                double x = config["test"]["x"].as<double>();
-                double y = config["test"]["y"].as<double>();
-                double z = config["test"]["z"].as<double>();
-                int foot = config["foot"].as<int>();
-
                 Eigen::Affine3d Haf_s;
                 Haf_s.linear()      = Eigen::Matrix3d::Identity();
                 Haf_s.translation() = -Eigen::Vector3d(x, y, z);
