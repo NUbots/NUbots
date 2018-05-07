@@ -36,7 +36,7 @@ SET(NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
     -ldl
     -lbacktrace
     CACHE
-    INTERNAL
-    'Additional libraries used when linking roles, extensions, and utilities'
+    PATH
+    "Additional libraries used when linking roles, extensions, and utilities"
     FORCE
 )
