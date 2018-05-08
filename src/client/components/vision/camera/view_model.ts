@@ -1,5 +1,6 @@
 import { observable } from 'mobx'
 import { computed } from 'mobx'
+import { autorun } from 'mobx'
 import { createTransformer } from 'mobx-utils'
 import { BufferGeometry } from 'three'
 import { PlaneBufferGeometry } from 'three'
@@ -29,6 +30,7 @@ export class CameraViewModel {
   @observable viewHeight?: number
 
   readonly camera: Camera
+  readonly destroy: () => void
 
   constructor(
     private model: CameraModel,
@@ -37,7 +39,13 @@ export class CameraViewModel {
     private scene: Scene,
     camera: Camera,
   ) {
+
     this.camera = camera
+
+    // Setup an autorun that will feed images to our image decoder when they change
+    this.destroy = autorun(() => {
+      this.canvas && this.decoder.update(this.model.image!)
+    })
   }
 
   static of = createTransformer((model: CameraModel) => {
@@ -46,7 +54,7 @@ export class CameraViewModel {
       new Scene(),
       new OrthographicCamera(-1, 1, 1, -1, 0, 1),
     )
-  })
+  }, vm => vm && vm.destroy())
 
   @computed
   get id(): number {
@@ -73,7 +81,7 @@ export class CameraViewModel {
     const scene = this.scene
     scene.remove(...scene.children)
     if (this.model.image) {
-      scene.add(this.image(this.model.image))
+      scene.add(this.image)
       scene.add(this.direction(this.model.image.Hcw))
       scene.add(this.horizon(this.model.image.Hcw))
     }
@@ -90,8 +98,8 @@ export class CameraViewModel {
     return this.model.image && this.model.image.height
   }
 
-  private image = createTransformer((image: Image): Mesh => {
-    const mesh = new Mesh(this.quadGeometry, this.imageMaterial(image))
+  private get image(): Mesh {
+    const mesh = new Mesh(this.quadGeometry, this.imageMaterial)
 
     // Normally this effect could be achieved by setting texture.flipY to make
     // the textures the correct way up again. However this is ignored on RenderTargets
@@ -99,7 +107,7 @@ export class CameraViewModel {
     // Instead we just leave everything flipped and correct it here by scaling by -1 on the y axis
     mesh.scale.y = -1
     return mesh
-  })
+  }
 
   @computed
   private get quadGeometry(): BufferGeometry {
@@ -114,6 +122,14 @@ export class CameraViewModel {
       depthTest: false,
       depthWrite: false,
     })
+  }
+
+  private get imageMaterial() {
+
+    // Cloning a material allows for new uniforms without recompiling the shader
+    const mat = this.imageBasicMaterial.clone()
+    mat.map = this.decoder.texture
+    return mat
   }
 
   /**
@@ -245,12 +261,4 @@ export class CameraViewModel {
       transparent: true,
     })
   }
-
-  private imageMaterial = createTransformer((image: Image) => {
-
-    // Cloning a material allows for new uniforms without recompiling the shader
-    const mat = this.imageBasicMaterial.clone()
-    mat.map = this.decoder.decode(image)
-    return mat
-  })
 }

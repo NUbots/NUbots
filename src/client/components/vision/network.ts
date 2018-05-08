@@ -9,10 +9,13 @@ import { RobotModel } from '../robot/model'
 import { CameraModel } from './camera/model'
 import { VisionRobotModel } from './model'
 import Image = message.input.Image
+import CompressedImage = message.output.CompressedImage
 
 export class VisionNetwork {
+
   constructor(private network: Network) {
     this.network.on(Image, this.onImage)
+    this.network.on(CompressedImage, this.onImage)
   }
 
   static of(nusightNetwork: NUsightNetwork): VisionNetwork {
@@ -25,7 +28,7 @@ export class VisionNetwork {
   }
 
   @action
-  private onImage = (robotModel: RobotModel, image: Image) => {
+  private onImage = (robotModel: RobotModel, image: Image | CompressedImage) => {
     const robot = VisionRobotModel.of(robotModel)
     const { cameraId, name, dimensions, format, data, Hcw } = image
 

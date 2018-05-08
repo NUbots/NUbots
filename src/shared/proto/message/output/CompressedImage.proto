@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package message.input;
+package message.output;
 
 import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Vector.proto";
 
-message Image {
+message CompressedImage {
     message Lens {
         enum Projection {
             UNKNOWN     = 0;

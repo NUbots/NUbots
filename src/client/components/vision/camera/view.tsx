@@ -53,7 +53,7 @@ export class CameraView extends Component<{ viewModel: CameraViewModel }> {
   private onResize = (width: number, height: number) => {
 
     const { renderer, canvas } = this.props.viewModel
-    renderer(canvas)!.setSize(width, height)
+    canvas && renderer(canvas)!.setSize(width, height)
     this.props.viewModel.viewWidth = width
     this.props.viewModel.viewHeight = height
   }

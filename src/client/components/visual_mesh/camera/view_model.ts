@@ -1,6 +1,7 @@
 import * as bounds from 'binary-search-bounds'
 import { observable } from 'mobx'
 import { computed } from 'mobx'
+import { autorun } from 'mobx'
 import { createTransformer } from 'mobx-utils'
 import { RawShaderMaterial } from 'three'
 import { Float32BufferAttribute } from 'three'
@@ -20,8 +21,11 @@ import * as fragmentShader from './shaders/mesh.frag'
 import * as vertexShader from './shaders/mesh.vert'
 
 export class CameraViewModel {
+
   @observable.ref canvas: HTMLCanvasElement | null = null
+
   readonly camera: Camera
+  readonly destroy: () => void
 
   constructor(
     private model: CameraModel,
@@ -31,6 +35,11 @@ export class CameraViewModel {
     camera: Camera,
   ) {
     this.camera = camera
+
+    // Setup an autorun that will feed images to our image decoder when they change
+    this.destroy = autorun(() => {
+      this.canvas && this.decoder.update(this.model.image!)
+    })
   }
 
   static of = createTransformer((model: CameraModel) => {
@@ -73,7 +82,7 @@ export class CameraViewModel {
 
   private visualMesh = createTransformer((mesh: VisualMesh): Mesh => {
     const material = this.meshMaterial
-    material.uniforms.image.value = this.decoder.decode(this.model.image!)
+    material.uniforms.image.value = this.decoder.texture
     material.uniforms.dimensions.value = new Vector2(this.model.image!.width, this.model.image!.height)
 
     const obj = new Mesh(this.meshGeometry(mesh), this.meshMaterial)
