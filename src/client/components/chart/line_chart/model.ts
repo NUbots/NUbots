@@ -33,11 +33,6 @@ export class LineChartModel {
   }
 
   @computed
-  get now() {
-    return this.model.now
-  }
-
-  @computed
   get bufferSeconds() {
     return this.model.bufferSeconds
   }

@@ -1,6 +1,5 @@
 import { observable } from 'mobx'
 import { computed } from 'mobx'
-import { now } from 'mobx-utils'
 
 import { Vector2 } from '../../math/vector2'
 import { BrowserSystemClock } from '../../time/browser_clock'
@@ -17,15 +16,17 @@ export class DataSeries {
 
   @observable highlight: boolean = false
   @observable color: string
+  @observable startTime: number
   @observable timeDelta: number
   @observable timeVariance: number
   @observable checked: CheckedState
   @observable series: Vector2[]
 
-  constructor({ color, checked, series, timeDelta, timeVariance, kf }: {
+  constructor({ color, checked, series, startTime, timeDelta, timeVariance, kf }: {
     color: string
     checked: CheckedState
     series: Vector2[]
+    startTime: number
     timeDelta: number
     timeVariance: number
     kf: { processNoise: number, measurementNoise: number }
@@ -33,16 +34,18 @@ export class DataSeries {
     this.color = color
     this.checked = checked
     this.series = series
+    this.startTime = startTime
     this.timeDelta = timeDelta
     this.timeVariance = timeVariance
     this.kf = kf
   }
 
-  static of() {
+  static of(startTime: number = 0) {
     return new DataSeries({
       color: '#ffffff',
       checked: CheckedState.Unchecked,
       series: [],
+      startTime,
       timeDelta: 0,
       timeVariance: 1,
       kf: { processNoise: 1e-3, measurementNoise: 1e-1 },
@@ -101,10 +104,5 @@ export class ChartModel {
       nodes: Array.from(this.treeData.entries(), ([label, model]) => TreeViewModel.of({ label, model })),
       usePessimisticToggle: true,
     }
-  }
-
-  @computed
-  get now() {
-    return (now('frame') / 1000) - this.startTime
   }
 }

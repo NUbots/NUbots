@@ -78,25 +78,28 @@ export class ChartNetwork {
       const key = keys[i]!
 
       if (!node.has(key)) {
-        node.set(key, DataSeries.of())
+        // Create a new series with the start time of this datapoint
+        node.set(key, DataSeries.of(toSeconds(data.timestamp)))
       }
 
       const leaf = node.get(key) as DataSeries
       const series = leaf.series
 
-      const now = this.clock.now()
-      const rawTime = toSeconds(data.timestamp)
-      const time = toSeconds(data.timestamp) - this.model.startTime
+      // Now according to the chart timespace
+      const chartTime = this.clock.now() - this.model.startTime
 
-      // Estimate the difference between the clocks
-      leaf.updateDelta(rawTime - now)
+      // Now according to the datapoint
+      const pointTime = toSeconds(data.timestamp) - leaf.startTime
+
+      // Estimate the drifting distance between the clocks
+      leaf.updateDelta(pointTime - chartTime)
 
       // Add the series element
-      series.push(Vector2.of(time, v))
+      series.push(Vector2.of(pointTime, v))
 
       // Swap it backward until it's in place (keeping the list sorted)
       for (let i = series.length - 1; i > 0; i--) {
-        if (series[i - 1].x > time) {
+        if (series[i - 1].x > pointTime) {
           [series[i - 1], series[i]] = [series[i], series[i - 1]]
         } else {
           break
@@ -104,10 +107,10 @@ export class ChartNetwork {
       }
 
       // Find where our old data starts so we can remove it
-      const cutoff = now - this.model.startTime + leaf.timeDelta - this.model.bufferSeconds
+      const cutoff = chartTime + leaf.timeDelta - this.model.bufferSeconds
       const newStart = bounds.lt(series, Vector2.of(), p => p.x - cutoff)
 
-      // Remove old series elements (keep 10 seconds of buffer)
+      // Remove old series elements in batches
       if (newStart > 50) {
         series.splice(0, newStart)
       }

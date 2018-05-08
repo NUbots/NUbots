@@ -1,6 +1,7 @@
 import * as bounds from 'binary-search-bounds'
 import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
+import { now } from 'mobx-utils'
 
 import { Transform } from '../../../math/transform'
 import { Vector2 } from '../../../math/vector2'
@@ -114,7 +115,7 @@ export class LineChartViewModel {
         })))
 
         lines.push(Shape.of(TextGeometry.of({
-          text: y.toString(),
+          text: y.toPrecision(2).toString(),
           worldScale: true,
           textAlign: 'end',
           fontSize: '1em',
@@ -149,7 +150,7 @@ export class LineChartViewModel {
   get xAxis(): Group {
 
     // Work out our min/max value
-    const max = this.model.now
+    const max = this.now
     const min = max - this.model.bufferSeconds
     const yRange = this.maxValue - this.minValue
 
@@ -210,7 +211,7 @@ export class LineChartViewModel {
     return Group.of({
       transform: Transform.of({
         translate: {
-          x: -(this.model.now - this.model.bufferSeconds / 2),
+          x: -(this.now - this.model.bufferSeconds / 2),
           y: -(minValue + (maxValue - minValue) / 2),
         },
       }),
@@ -229,7 +230,7 @@ export class LineChartViewModel {
       const max = this.dataSeries.reduce((maxValue, series: DataSeries) => {
 
         // Get the range we are viewing
-        let end = this.model.now + series.timeDelta
+        let end = this.now + series.timeDelta
         let start = end - this.model.bufferSeconds
 
         const values = series.series
@@ -254,7 +255,7 @@ export class LineChartViewModel {
       const min = this.dataSeries.reduce((minValue, series: DataSeries) => {
 
         // Get the range we are viewing
-        let end = this.model.now + series.timeDelta
+        let end = this.now + series.timeDelta
         let start = end - this.model.bufferSeconds
 
         const values = series.series
@@ -269,10 +270,15 @@ export class LineChartViewModel {
     }
   }
 
+  @computed
+  get now() {
+    return (now('frame') / 1000) - this.model.startTime
+  }
+
   private makeLines(series: DataSeries): Group {
 
     // Get the range we are viewing
-    let end = this.model.now + series.timeDelta
+    let end = this.now + series.timeDelta
     let start = end - this.model.bufferSeconds
 
     let values = series.series
