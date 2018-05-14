@@ -36,10 +36,10 @@ namespace motion {
         TorsoMovement::TorsoMovement(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
-            // Left for possible use in future
-            on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
+            // Left for future use
+            // on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
 
-            });
+            // });
 
 
             on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
@@ -67,8 +67,22 @@ namespace motion {
                     Eigen::Vector3d rAFf = -Haf.translation();
                     // Position of target in torso space
                     Eigen::Vector3d rATt = Htf * rAFf;
+                    rATt.normalize();
+
+                    // Find scale to reach target at specified time
+                    std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
+                    double distance = std::sqrt(std::pow(rATt.x(), 2) + std::pow(rATt.y(), 2) + std::pow(rATt.z(), 2));
+                    double scale;
+                    // 0.01 refers to 10 milliseconds as below
+                    if (time_left <= std::chrono::duration<double>::zero()) {  // Time has elapsed
+                        scale = 0.01;
+                    }
+                    else {  // There is time left to complete
+                        scale = (distance / time_left.count()) * 0.01;
+                    }
+
                     // Create next torso target in torso space
-                    Eigen::Vector3d rT_tTt = rATt * 0.01;
+                    Eigen::Vector3d rT_tTt = rATt * scale;
                     // Create vector from torso to foot target
                     Eigen::Vector3d rF_tFt = -rT_tTt;
                     Eigen::Vector3d rF_tTt = Htf * rF_tFt;
@@ -85,8 +99,8 @@ namespace motion {
                     // Create rotation of torso to torso target
                     Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-                    // TODO: determine slerp first arg (t)
-                    Rf_tt = Rft.slerp(0.1, Rat).toRotationMatrix();
+                    // Scale as above to rotate in specified time
+                    Rf_tt = Rft.slerp(scale, Rat).toRotationMatrix();
                     Eigen::Affine3d Htf_t;
                     Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
                     Htf_t.translation() = rF_tTt;           // Translation to foot target
