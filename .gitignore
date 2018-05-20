@@ -17,6 +17,8 @@
 
 # Build & CMake files
 /build*/
+/Reel*/
+/reel*/
 /build
 /vagrantbuild/
 CMakeCache.txt
