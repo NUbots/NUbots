@@ -11,60 +11,67 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-if (LIBGFORTRAN_LIBRARIES)
-  # in cache already
-  set(LIBGFORTRAN_FOUND TRUE)
-else (LIBGFORTRAN_LIBRARIES)
+IF(LIBGFORTRAN_LIBRARIES)
+    # in cache already
+    SET(LIBGFORTRAN_FOUND TRUE)
+ELSE(LIBGFORTRAN_LIBRARIES)
+    IF(CMAKE_Fortran_COMPILER)
+        EXECUTE_PROCESS(COMMAND ${CMAKE_Fortran_COMPILER} -print-file-name=libgfortran.so
+                                OUTPUT_VARIABLE _libgfortran_path
+                                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        EXECUTE_PROCESS(COMMAND ${CMAKE_Fortran_COMPILER} -print-file-name=libquadmath.so
+                                OUTPUT_VARIABLE _libquadmath_path
+                                OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ELSE()
+        # Try to use gfortran to output its path to search
+        # Query gfortran to get the libgfortran.so path
+        FIND_PROGRAM(_GFORTRAN_EXECUTABLE NAMES gfortran)
+        IF(_GFORTRAN_EXECUTABLE)
+            EXECUTE_PROCESS(COMMAND ${_GFORTRAN_EXECUTABLE} -print-file-name=libgfortran.so
+                                    OUTPUT_VARIABLE _libgfortran_path
+                                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+            EXECUTE_PROCESS(COMMAND ${_GFORTRAN_EXECUTABLE} -print-file-name=libquadmath.so
+                                    OUTPUT_VARIABLE _libquadmath_path
+                                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+        ENDIF()
+    ENDIF()
 
-  # Try to use gfortran to output its path to search
-  # Query gfortran to get the libgfortran.so path
-  find_program(_GFORTRAN_EXECUTABLE NAMES gfortran)
-  if(_GFORTRAN_EXECUTABLE)
-    execute_process(COMMAND ${_GFORTRAN_EXECUTABLE} -print-file-name=libgfortran.so
-                            OUTPUT_VARIABLE _libgfortran_path
-                            OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-  if(EXISTS ${_libgfortran_path})
-    get_filename_component(_libgfortran_path ${_libgfortran_path} DIRECTORY)
-  else()
-    unset(_libgfortran_path)
-  endif()
+    IF(EXISTS ${_libgfortran_path})
+        GET_FILENAME_COMPONENT(_libgfortran_path ${_libgfortran_path} DIRECTORY)
+    ELSE()
+        UNSET(_libgfortran_path)
+    ENDIF()
 
-  find_library(GFORTRAN_LIBRARY
-    NAMES
-      gfortran
-    PATHS
-      ${_libgfortran_path}
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
-  )
+    IF(EXISTS ${_libquadmath_path})
+        GET_FILENAME_COMPONENT(_libquadmath_path ${_libquadmath_path} DIRECTORY)
+    ELSE()
+        UNSET(_libquadmath_path)
+    ENDIF()
 
-  find_library(QUADMATH_LIBRARY
-    NAMES
-      quadmath
-    PATHS
-      ${_libgfortran_path}
-      /usr/lib
-      /usr/local/lib
-      /opt/local/lib
-      /sw/lib
-  )
-
-  if (GFORTRAN_LIBRARY AND QUADMATH_LIBRARY)
-    set(LIBGFORTRAN_LIBRARIES
-        ${LIBGFORTRAN_LIBRARIES}
-        ${GFORTRAN_LIBRARY}
-        ${QUADMATH_LIBRARY}
+    FIND_LIBRARY(GFORTRAN_LIBRARY
+                 NAMES gfortran
+                 PATHS ${_libgfortran_path}
     )
-  endif (GFORTRAN_LIBRARY AND QUADMATH_LIBRARY)
 
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(LIBGFORTRAN DEFAULT_MSG GFORTRAN_LIBRARY QUADMATH_LIBRARY)
+    FIND_LIBRARY(QUADMATH_LIBRARY
+                 NAMES quadmath
+                 PATHS ${_libquadmath_path}
+    )
 
-  # show the LIBGFORTRAN_LIBRARIES variables only in the advanced view
-  mark_as_advanced(LIBGFORTRAN_LIBRARIES GFORTRAN_LIBRARY QUADMATH_LIBRARY _GFORTRAN_EXECUTABLE)
+    SET(required_vars GFORTRAN_LIBRARY)
 
-endif (LIBGFORTRAN_LIBRARIES)
+    IF(GFORTRAN_LIBRARY)
+        LIST(APPEND LIBGFORTRAN_LIBRARIES ${GFORTRAN_LIBRARY})
+    ENDIF(GFORTRAN_LIBRARY)
 
+    IF(QUADMATH_LIBRARY)
+        LIST(APPEND LIBGFORTRAN_LIBRARIES ${QUADMATH_LIBRARY})
+        LIST(APPEND required_vars QUADMATH_LIBRARY)
+    ENDIF(QUADMATH_LIBRARY)
+
+    INCLUDE(FindPackageHandleStandardArgs)
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBGFORTRAN DEFAULT_MSG ${required_vars})
+
+    # show the LIBGFORTRAN_LIBRARIES variables only in the advanced view
+    MARK_AS_ADVANCED(LIBGFORTRAN_LIBRARIES GFORTRAN_LIBRARY QUADMATH_LIBRARY _GFORTRAN_EXECUTABLE)
+ENDIF(LIBGFORTRAN_LIBRARIES)
