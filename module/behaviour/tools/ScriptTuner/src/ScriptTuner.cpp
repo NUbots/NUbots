@@ -23,6 +23,8 @@
 #include <cstdio>
 #include <sstream>
 
+#undef OK
+
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
