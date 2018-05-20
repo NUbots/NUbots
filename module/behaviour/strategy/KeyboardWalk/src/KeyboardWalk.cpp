@@ -20,7 +20,7 @@
 #include "KeyboardWalk.h"
 
 #include <fmt/format.h>
-#include <ncurses.h>
+#include <ncurses/ncurses.h>
 #include <csignal>
 #include <cstdio>
 

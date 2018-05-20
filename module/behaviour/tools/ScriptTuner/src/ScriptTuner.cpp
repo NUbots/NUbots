@@ -19,6 +19,10 @@
 
 #include "ScriptTuner.h"
 
+#include <ncurses/ncurses.h>
+#include <cstdio>
+#include <sstream>
+
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
@@ -28,10 +32,6 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
-
-#include <ncurses.h>
-#include <cstdio>
-#include <sstream>
 
 namespace module {
 namespace behaviour {
