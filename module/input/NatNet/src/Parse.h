@@ -219,7 +219,7 @@ namespace input {
             forcePlate.id = ReadData<uint32_t>::read(ptr, version);
             auto channels = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
             forcePlate.channels.reserve(channels.size());
-            for (uint channel = 0; channel < channels.size(); channel++) {
+            for (size_t channel = 0; channel < channels.size(); channel++) {
                 forcePlate.channels[channel].channel = std::move(channels[channel]);
             }
 

@@ -51,7 +51,7 @@ namespace support {
         // Reaction Handles
         std::map<std::string, std::vector<ReactionHandle>> handles;
 
-        std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
+        std::map<unsigned int, message::behaviour::Subsumption::ActionRegister> actionRegisters;
 
         NUClear::clock::time_point last_camera_image = NUClear::clock::now();
         NUClear::clock::time_point last_seen_ball    = NUClear::clock::now();

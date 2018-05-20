@@ -76,7 +76,7 @@ namespace support {
                         std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
                 }
 
-                getup_cancel_trial_threshold = config["getup_cancel_trial_threshold"].as<uint>();
+                getup_cancel_trial_threshold = config["getup_cancel_trial_threshold"].as<unsigned int>();
 
                 configuration_wait_milliseconds = config["configuration_wait_milliseconds"].as<int>();
 
@@ -176,7 +176,7 @@ namespace support {
 
         void WalkOptimiser::printState(const arma::vec& state) {
             std::cerr << "[";
-            for (uint i = 0; i < parameter_names.size(); ++i) {
+            for (size_t i = 0; i < parameter_names.size(); ++i) {
                 std::cerr << parameter_names[i] << ": " << state[i] << ", ";
             }
             std::cerr << std::endl;
@@ -184,7 +184,7 @@ namespace support {
 
         YAML::Node WalkOptimiser::getWalkConfig(const arma::vec& state) {
             YAML::Node config(initialConfig.config);
-            for (uint i = 0; i < state.size(); ++i) {
+            for (size_t i = 0; i < state.size(); ++i) {
                 config[parameter_names[i]] = state[i];
             }
             printState(state);

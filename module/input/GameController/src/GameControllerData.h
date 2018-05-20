@@ -126,43 +126,43 @@ namespace input {
 #pragma pack(pop)
 
         inline std::ostream& operator<<(std::ostream& os, const Robot& robot) {
-            os << "\t\tPenalty state......: " << uint(robot.penaltyState) << std::endl
-               << "\t\tPenalised time left: " << uint(robot.penalisedTimeLeft) << std::endl
-               << "\t\tYellow Card Count..: " << uint(robot.yellowCardCount) << std::endl
-               << "\t\tRed Card Count.....: " << uint(robot.redCardCount) << std::endl;
+            os << "\t\tPenalty state......: " << (unsigned int) (robot.penaltyState) << std::endl
+               << "\t\tPenalised time left: " << (unsigned int) (robot.penalisedTimeLeft) << std::endl
+               << "\t\tYellow Card Count..: " << (unsigned int) (robot.yellowCardCount) << std::endl
+               << "\t\tRed Card Count.....: " << (unsigned int) (robot.redCardCount) << std::endl;
             return os;
         }
 
         inline std::ostream& operator<<(std::ostream& os, const Team& team) {
-            os << "Team id: " << uint(team.teamId) << std::endl
-               << "\tTeam colour...: " << uint(team.teamColour) << std::endl
-               << "\tScore.........: " << uint(team.score) << std::endl
-               << "\tPenalty shot..: " << uint(team.penaltyShot) << std::endl
-               << "\tSingle shots..: " << uint(team.singleShots) << std::endl
-               << "\tCoach Sequence: " << uint(team.coachSequence) << std::endl
+            os << "Team id: " << (unsigned int) (team.teamId) << std::endl
+               << "\tTeam colour...: " << (unsigned int) (team.teamColour) << std::endl
+               << "\tScore.........: " << (unsigned int) (team.score) << std::endl
+               << "\tPenalty shot..: " << (unsigned int) (team.penaltyShot) << std::endl
+               << "\tSingle shots..: " << (unsigned int) (team.singleShots) << std::endl
+               << "\tCoach Sequence: " << (unsigned int) (team.coachSequence) << std::endl
                << "\tCoach message.: " << std::string(team.coachMessage.data()) << std::endl;
 
-            for (uint i = 0; i < team.players.size(); i++) {
+            for (size_t i = 0; i < team.players.size(); i++) {
                 os << "\tRobot " << i + 1 << ":" << std::endl << team.players[i] << std::endl;
             }
             return os;
         }
 
         inline std::ostream& operator<<(std::ostream& os, const GameControllerPacket& packet) {
-            os << "Version.............: " << uint(packet.version) << std::endl
-               << "Packet number.......: " << uint(packet.packetNumber) << std::endl
-               << "Players per team....: " << uint(packet.playersPerTeam) << std::endl
-               << "Game Type...........: " << uint(packet.gameType) << std::endl
-               << "State...............: " << uint(packet.state) << std::endl
+            os << "Version.............: " << (unsigned int) (packet.version) << std::endl
+               << "Packet number.......: " << (unsigned int) (packet.packetNumber) << std::endl
+               << "Players per team....: " << (unsigned int) (packet.playersPerTeam) << std::endl
+               << "Game Type...........: " << (unsigned int) (packet.gameType) << std::endl
+               << "State...............: " << (unsigned int) (packet.state) << std::endl
                << "First half..........: " << std::boolalpha << packet.firstHalf << std::endl
-               << "Kick off team.......: " << uint(packet.kickOffTeam) << std::endl
-               << "Mode................: " << uint(packet.mode) << std::endl
+               << "Kick off team.......: " << (unsigned int) (packet.kickOffTeam) << std::endl
+               << "Mode................: " << (unsigned int) (packet.mode) << std::endl
                << "Secondary State Info: "
                << std::string(packet.secondaryStateInfo.begin(), packet.secondaryStateInfo.end()) << std::endl
-               << "Drop in team........: " << uint(packet.dropInTeam) << std::endl
-               << "Drop in time........: " << uint(packet.dropInTime) << std::endl
-               << "Seconds remaining...: " << uint(packet.secsRemaining) << std::endl
-               << "Secondary time......: " << uint(packet.secondaryTime) << std::endl
+               << "Drop in team........: " << (unsigned int) (packet.dropInTeam) << std::endl
+               << "Drop in time........: " << (unsigned int) (packet.dropInTime) << std::endl
+               << "Seconds remaining...: " << (unsigned int) (packet.secsRemaining) << std::endl
+               << "Secondary time......: " << (unsigned int) (packet.secondaryTime) << std::endl
                << packet.teams[0] << std::endl
                << packet.teams[1] << std::endl;
             return os;

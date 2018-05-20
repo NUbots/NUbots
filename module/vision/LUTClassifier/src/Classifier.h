@@ -43,7 +43,7 @@ namespace vision {
                                                                         const message::vision::LookUpTable& lut,
                                                                         const arma::ivec2& start,
                                                                         const arma::ivec2& end,
-                                                                        const uint& stratification = 1);
+                                                                        const unsigned int& stratification = 1);
     };
 }  // namespace vision
 }  // namespace module

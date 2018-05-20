@@ -43,7 +43,7 @@ namespace math {
         public:
             virtual const OptimiserEstimate& estimate()                                      = 0;
             virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
-            virtual arma::mat getSamples(const uint& numSamples = 7)                         = 0;
+            virtual arma::mat getSamples(const unsigned int& numSamples = 7)                 = 0;
             virtual bool validSample(...)                                                    = 0;
             virtual void reset()                                                             = 0;
             virtual void reset(const OptimiserEstimate& est)                                 = 0;
@@ -106,7 +106,7 @@ namespace math {
              *
              * @author Josiah walker
              */
-            virtual arma::mat getSamples(const uint& numSamples = 7) {
+            virtual arma::mat getSamples(const unsigned int& numSamples = 7) {
                 return sampler.getSamples(currentValues, numSamples);
             }
 

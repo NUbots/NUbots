@@ -74,14 +74,14 @@ namespace kdtree {
                                  const arma::uvec spillDataIndices,
                                  const arma::Col<T>& LowerBounds,
                                  const arma::Col<T>& UpperBounds,
-                                 const uint& minLeafSize,
+                                 const unsigned int& minLeafSize,
                                  const double& epsilon) {
             // we need to determine the split point first, because if the data is unsplittable we should put it in a
             // leaf
             int splitDim                = 0;
             const arma::Col<T> boundGap = UpperBounds - LowerBounds;
 
-            for (uint i = 0; i < boundGap.n_elem; ++i) {
+            for (unsigned int i = 0; i < boundGap.n_elem; ++i) {
                 if (boundGap[splitDim] < boundGap[i]) {
                     splitDim = i;
                 }
@@ -157,7 +157,7 @@ namespace kdtree {
         }
 
     public:
-        KDTree(const arma::Mat<T>& d, const uint& minLeafSize, const double epsilon = 0.0f) {
+        KDTree(const arma::Mat<T>& d, const unsigned int& minLeafSize, const double epsilon = 0.0f) {
             nodes.push_back(KDTreeNode<T>());
             data            = d;
             arma::uvec inds = arma::linspace<arma::uvec>(0, data.n_cols - 1, data.n_cols);
@@ -214,11 +214,11 @@ namespace kdtree {
 
                 // add any near neighbours to the result
                 KDTreeNode<T>& cnode = nodes[std::get<1>(current)];
-                for (uint i = 0; i < cnode.dataIndices.n_elem; ++i) {
+                for (unsigned int i = 0; i < cnode.dataIndices.n_elem; ++i) {
                     double dist = getDistSq(cnode.dataIndices[i], val);
                     addNeighbour(neighbourHeap, dist, cnode.dataIndices[i]);
                 }
-                for (uint i = 0; i < cnode.spillDataIndices.n_elem; ++i) {
+                for (unsigned int i = 0; i < cnode.spillDataIndices.n_elem; ++i) {
                     double dist = getDistSq(cnode.spillDataIndices[i], val);
                     addNeighbour(neighbourHeap, dist, cnode.spillDataIndices[i]);
                 }

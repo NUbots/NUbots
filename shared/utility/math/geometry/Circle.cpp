@@ -78,7 +78,7 @@ namespace math {
             return arma::normalise(point - centre) * radius + centre;
         }
 
-        arma::vec2 Circle::getEdgePoints(uint y) const {
+        arma::vec2 Circle::getEdgePoints(unsigned int y) const {
             auto edgePoints = getEdgePoints(double(y));
             return {std::round(edgePoints[0]), std::round(edgePoints[1])};
         }

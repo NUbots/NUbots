@@ -192,7 +192,7 @@ namespace math {
             return br.size() == 2 && bl.size() == 2 && tr.size() == 2 && tl.size() == 2;
         }
 
-        arma::vec2 Quad::getEdgePoints(uint y) const {
+        arma::vec2 Quad::getEdgePoints(unsigned int y) const {
             auto edgePoints = getEdgePoints(double(y));
             return {std::round(edgePoints[0]), std::round(edgePoints[1])};
         }
@@ -272,7 +272,7 @@ namespace math {
             double max_x = points[0][0];
             double min_y = points[0][1];
             double max_y = points[0][1];
-            for (uint i = 1; i < points.size(); i++) {
+            for (unsigned int i = 1; i < points.size(); i++) {
                 auto& p = points[i];
                 max_x   = std::max(max_x, p[0]);
                 min_x   = std::min(min_x, p[0]);

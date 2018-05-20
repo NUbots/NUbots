@@ -78,8 +78,8 @@ namespace input {
                 auto cameraParameters = std::make_unique<CameraParameters>();
 
                 // Generic camera parameters
-                cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
-                    config["format"]["height"].as<uint>();
+                cameraParameters->imageSizePixels << config["format"]["width"].as<unsigned int>(),
+                    config["format"]["height"].as<unsigned int>();
                 cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
 
                 // Radial specific

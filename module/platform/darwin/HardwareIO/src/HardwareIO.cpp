@@ -255,7 +255,7 @@ namespace platform {
                                                     Darwin::MX28::Address::D_GAIN,
                                                     0x0A};
 
-                    for (uint i = 0; i < servoState.size(); ++i) {
+                    for (size_t i = 0; i < servoState.size(); ++i) {
 
                         if (servoState[i].dirty) {
 
@@ -358,8 +358,8 @@ namespace platform {
                             servoState[command.id].movingSpeed  = speed;
                             servoState[command.id].goalPosition = command.position;
 
-                            servoState[command.id].torque       = command.torque;
-                            servoState[uint(command.id)].torque = command.torque;
+                            servoState[command.id].torque                  = command.torque;
+                            servoState[(unsigned int) (command.id)].torque = command.torque;
                         }
                     }
                 });

@@ -9,7 +9,7 @@
 namespace module {
 namespace input {
 
-    uint Camera::cameraCount = 0;
+    unsigned int Camera::cameraCount = 0;
 
     using extension::Configuration;
     using message::input::CameraParameters;

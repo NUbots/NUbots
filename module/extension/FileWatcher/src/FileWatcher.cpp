@@ -48,7 +48,7 @@ namespace extension {
 
                 if (reactions != handler->second.end()) {
                     for (auto& reaction : reactions->second) {
-                        uint flags = 0;
+                        unsigned int flags = 0;
                         for (auto& flag : event.get_flags()) {
                             flags |= flag;
                         }

@@ -51,9 +51,9 @@ namespace math {
                                               Args... args) {
 
                 std::array<DataPoint, Model::REQUIRED_POINTS> points;
-                for (uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
-                    uint range = std::distance(iterators[i], iterators[i + 1]);
-                    points[i]  = *std::next(iterators[i], xorShift() % range);
+                for (unsigned int i = 0; i < Model::REQUIRED_POINTS; ++i) {
+                    unsigned int range = std::distance(iterators[i], iterators[i + 1]);
+                    points[i]          = *std::next(iterators[i], xorShift() % range);
                 }
                 return model.regenerate(points, std::forward<Args>(args)...);
             }
@@ -66,27 +66,27 @@ namespace math {
             template <typename Iterator, typename... Args>
             static std::pair<bool, RansacResult<Iterator, Model>> fitModel(
                 std::array<Iterator, Model::REQUIRED_POINTS + 1>& iterators,
-                uint minimumPointsForConsensus,
-                uint maximumIterationsPerFitting,
+                unsigned int minimumPointsForConsensus,
+                unsigned int maximumIterationsPerFitting,
                 double consensusErrorThreshold,
                 Args... args) {
 
                 // Check we have enough points in each part
-                for (uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
+                for (unsigned int i = 0; i < Model::REQUIRED_POINTS; ++i) {
                     if (std::distance(iterators[i], iterators[i + 1]) < 1) {
                         return std::make_pair(false, RansacResult<Iterator, Model>());
                     }
                 }
 
-                uint largestConsensus = 0;
-                double bestError      = std::numeric_limits<double>::max();
+                unsigned int largestConsensus = 0;
+                double bestError              = std::numeric_limits<double>::max();
                 Model bestModel;
                 Model model;
 
-                for (uint i = 0; i < maximumIterationsPerFitting; ++i) {
+                for (unsigned int i = 0; i < maximumIterationsPerFitting; ++i) {
 
-                    uint consensusSize = 0;
-                    double error       = 0.0;
+                    unsigned int consensusSize = 0;
+                    double error               = 0.0;
 
                     // Make our model have new set of points
                     if (!regenerateRandomModel(model, iterators, std::forward<Args>(args)...)) {
@@ -116,8 +116,8 @@ namespace math {
                     bestModel.refineModel(iterators.front(), iterators.back(), consensusErrorThreshold);
 
                     // Split off the valid points in each part to the start of it
-                    std::array<uint, Model::REQUIRED_POINTS> offsets;
-                    for (uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
+                    std::array<unsigned int, Model::REQUIRED_POINTS> offsets;
+                    for (unsigned int i = 0; i < Model::REQUIRED_POINTS; ++i) {
 
                         // Split the points from this list off to the start
                         auto newStart =
@@ -144,7 +144,7 @@ namespace math {
                     iterators.front() = newFirst;
 
                     // Put in our new iterator points
-                    for (uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
+                    for (unsigned int i = 0; i < Model::REQUIRED_POINTS; ++i) {
                         // Move each iterator along
                         iterators[i + 1] = std::next(iterators[i], offsets[i]);
                     }
@@ -161,9 +161,9 @@ namespace math {
             template <typename Iterator, typename... Args>
             static std::vector<RansacResult<Iterator, Model>> fitModels(
                 std::array<Iterator, Model::REQUIRED_POINTS + 1> iterators,
-                uint minimumPointsForConsensus,
-                uint maximumIterationsPerFitting,
-                uint maximumFittedModels,
+                unsigned int minimumPointsForConsensus,
+                unsigned int maximumIterationsPerFitting,
+                unsigned int maximumFittedModels,
                 double consensusErrorThreshold,
                 Args... args) {
 

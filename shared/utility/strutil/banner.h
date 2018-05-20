@@ -549,7 +549,7 @@ namespace strutil {
         for (int row = 0; row < 8; ++row) {
             // Loop through each character of our input
             for (unsigned char c : input) {
-                output << BANNER_GLYPHS[row][uint(c)];
+                output << BANNER_GLYPHS[row][(unsigned int) (c)];
             }
             output << std::endl;
         }

@@ -52,7 +52,7 @@ namespace vision {
         auto& visualHorizon = classifiedImage.visualHorizon;
 
         // Cast lines to find our visual horizon
-        for (uint x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
+        for (unsigned int x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
             // Find our point to classify from (slightly above the horizon)
             int horizon_Y = getImageFromCam(
                 // Project down to horizon

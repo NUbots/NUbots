@@ -99,7 +99,7 @@ namespace vision {
             float theta = 0;
             if (r == 0) {
                 arma::vec2 pos   = projectCamSpaceToScreen(cone.unit_axis, params);
-                arma::ivec2 ipos = screenToImage(pos, convert<uint, 2>(params.imageSizePixels));
+                arma::ivec2 ipos = screenToImage(pos, convert<unsigned int, 2>(params.imageSizePixels));
                 if (ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0
                     && ipos[1] < int(image.dimensions[1])) {
                     debug.push_back(std::make_pair(convert<int, 2>(ipos), convert<int, 2>(ipos + arma::ivec2{1, 1})));
@@ -121,7 +121,7 @@ namespace vision {
             }
             for (int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
                 arma::vec2 pos   = projectCamSpaceToScreen(cone.getPoint(r, theta), params);
-                arma::ivec2 ipos = screenToImage(pos, convert<uint, 2>(params.imageSizePixels));
+                arma::ivec2 ipos = screenToImage(pos, convert<unsigned int, 2>(params.imageSizePixels));
                 if (ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0
                     && ipos[1] < int(image.dimensions[1])) {
                     debug.push_back(std::make_pair(convert<int, 2>(ipos), convert<int, 2>(ipos + arma::ivec2{1, 1})));
@@ -169,11 +169,11 @@ namespace vision {
 
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
-            MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
+            MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<unsigned int>();
             CONSENSUS_ERROR_THRESHOLD    = config["ransac"]["consensus_error_threshold"].as<Expression>();
 
-            MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
-            MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<uint>();
+            MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<unsigned int>();
+            MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<unsigned int>();
             MAXIMUM_DISAGREEMENT_RATIO     = config["maximum_disagreement_ratio"].as<Expression>();
 
             maximum_relative_seed_point_distance = config["maximum_relative_seed_point_distance"].as<double>();
@@ -216,7 +216,8 @@ namespace vision {
                     ballPoints.reserve(image.ballPoints.size());
 
                     for (const auto& point : image.ballPoints) {
-                        arma::vec2 pt = imageToScreen(convert<int, 2>(point), convert<uint, 2>(cam.imageSizePixels));
+                        arma::vec2 pt =
+                            imageToScreen(convert<int, 2>(point), convert<unsigned int, 2>(cam.imageSizePixels));
                         ballPoints.push_back(getCamFromScreen(pt, cam));
                     }
 
@@ -285,7 +286,7 @@ namespace vision {
                                           std::numeric_limits<double>::max()});
 
                         // Loop through our seed points and find the minimum distance one
-                        for (uint i = 0; i < 3; ++i) {
+                        for (unsigned int i = 0; i < 3; ++i) {
                             for (auto& s : image.ballSeedPoints[i].points) {
                                 arma::ivec2 s_   = convert<int, 2>(s);
                                 arma::vec3 s_cam = getCamFromImage(s_, cam);
@@ -367,8 +368,8 @@ namespace vision {
 
                         // Add our points
                         for (auto& point : result) {
-                            b.edgePoints.push_back(convert<double, 3>(
-                                getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam)));
+                            b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(
+                                imageToScreen(point, convert<unsigned int, 2>(image.dimensions)), cam)));
                         }
                         b.visObject.timestamp       = NUClear::clock::now();
                         b.visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();

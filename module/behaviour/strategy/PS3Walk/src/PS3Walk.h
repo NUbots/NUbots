@@ -32,33 +32,33 @@ namespace behaviour {
         class PS3Walk : public NUClear::Reactor {
         public:
             // axes
-            static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
-            static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 2;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 3;
-            static constexpr uint AXIS_L2                        = 12;
-            static constexpr uint AXIS_R2                        = 13;
-            static constexpr uint AXIS_ACCEL_Y                   = 23;
-            static constexpr uint AXIS_ACCEL_X                   = 24;
-            static constexpr uint AXIS_ACCEL_Z                   = 25;
+            static constexpr unsigned int AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
+            static constexpr unsigned int AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
+            static constexpr unsigned int AXIS_RIGHT_JOYSTICK_HORIZONTAL = 2;
+            static constexpr unsigned int AXIS_RIGHT_JOYSTICK_VERTICAL   = 3;
+            static constexpr unsigned int AXIS_L2                        = 12;
+            static constexpr unsigned int AXIS_R2                        = 13;
+            static constexpr unsigned int AXIS_ACCEL_Y                   = 23;
+            static constexpr unsigned int AXIS_ACCEL_X                   = 24;
+            static constexpr unsigned int AXIS_ACCEL_Z                   = 25;
 
             // buttons
-            static constexpr uint BUTTON_SELECT         = 0;
-            static constexpr uint BUTTON_LEFT_JOYSTICK  = 1;
-            static constexpr uint BUTTON_RIGHT_JOYSTICK = 2;
-            static constexpr uint BUTTON_START          = 3;
-            static constexpr uint BUTTON_DPAD_UP        = 4;
-            static constexpr uint BUTTON_DPAD_RIGHT     = 5;
-            static constexpr uint BUTTON_DPAD_DOWN      = 6;
-            static constexpr uint BUTTON_DPAD_LEFT      = 7;
-            static constexpr uint BUTTON_L2             = 8;
-            static constexpr uint BUTTON_R2             = 9;
-            static constexpr uint BUTTON_L1             = 10;
-            static constexpr uint BUTTON_R1             = 11;
-            static constexpr uint BUTTON_TRIANGLE       = 12;
-            static constexpr uint BUTTON_CIRCLE         = 13;
-            static constexpr uint BUTTON_CROSS          = 14;
-            static constexpr uint BUTTON_SQUARE         = 15;
+            static constexpr unsigned int BUTTON_SELECT         = 0;
+            static constexpr unsigned int BUTTON_LEFT_JOYSTICK  = 1;
+            static constexpr unsigned int BUTTON_RIGHT_JOYSTICK = 2;
+            static constexpr unsigned int BUTTON_START          = 3;
+            static constexpr unsigned int BUTTON_DPAD_UP        = 4;
+            static constexpr unsigned int BUTTON_DPAD_RIGHT     = 5;
+            static constexpr unsigned int BUTTON_DPAD_DOWN      = 6;
+            static constexpr unsigned int BUTTON_DPAD_LEFT      = 7;
+            static constexpr unsigned int BUTTON_L2             = 8;
+            static constexpr unsigned int BUTTON_R2             = 9;
+            static constexpr unsigned int BUTTON_L1             = 10;
+            static constexpr unsigned int BUTTON_R1             = 11;
+            static constexpr unsigned int BUTTON_TRIANGLE       = 12;
+            static constexpr unsigned int BUTTON_CIRCLE         = 13;
+            static constexpr unsigned int BUTTON_CROSS          = 14;
+            static constexpr unsigned int BUTTON_SQUARE         = 15;
 
             /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
             explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);

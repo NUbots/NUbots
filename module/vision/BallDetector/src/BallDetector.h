@@ -39,9 +39,9 @@ namespace vision {
 
     class BallDetector : public NUClear::Reactor {
     private:
-        uint MINIMUM_POINTS_FOR_CONSENSUS;
-        uint MAXIMUM_ITERATIONS_PER_FITTING;
-        uint MAXIMUM_FITTED_MODELS;
+        unsigned int MINIMUM_POINTS_FOR_CONSENSUS;
+        unsigned int MAXIMUM_ITERATIONS_PER_FITTING;
+        unsigned int MAXIMUM_FITTED_MODELS;
 
         const double LAMBDA = 8.3116883;
 

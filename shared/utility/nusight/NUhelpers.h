@@ -382,7 +382,7 @@ namespace nusight {
 
     inline std::unique_ptr<DrawObjects> drawTree(std::string name,
                                                  std::vector<arma::vec2> positions,
-                                                 std::vector<uint> parentIndices,
+                                                 std::vector<size_t> parentIndices,
                                                  float line_width,
                                                  arma::vec3 colour,
                                                  float timeout = TIMEOUT) {
@@ -394,7 +394,7 @@ namespace nusight {
         object.width   = line_width;
         object.colour  = convert<double, 3>(colour);
 
-        for (uint i = 0; i < positions.size(); i++) {
+        for (size_t i = 0; i < positions.size(); i++) {
 
             DrawObject::Path node;
             node.position     = convert<double, 2>(positions[i]);
@@ -414,10 +414,10 @@ namespace nusight {
                                                      arma::vec3 colour,
                                                      float timeout = TIMEOUT) {
 
-        std::vector<uint> parentIndices;
+        std::vector<size_t> parentIndices;
         parentIndices.reserve(positions.size());
 
-        for (uint i = 0; i < positions.size(); i++) {
+        for (size_t i = 0; i < positions.size(); i++) {
             parentIndices.push_back(std::max(0, int(i) - 1));
         }
 

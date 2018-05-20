@@ -122,15 +122,22 @@ namespace support {
                 Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, convert<double, 3>(goalNormals.col(3))));
 
             // build the predicted quad
-            utility::math::geometry::Quad quad(
-                getCamRay(
-                    goalNormals.col(0), goalNormals.col(3), camParams, convert<uint, 2>(camParams.imageSizePixels)),
-                getCamRay(
-                    goalNormals.col(0), goalNormals.col(2), camParams, convert<uint, 2>(camParams.imageSizePixels)),
-                getCamRay(
-                    goalNormals.col(1), goalNormals.col(2), camParams, convert<uint, 2>(camParams.imageSizePixels)),
-                getCamRay(
-                    goalNormals.col(1), goalNormals.col(3), camParams, convert<uint, 2>(camParams.imageSizePixels)));
+            utility::math::geometry::Quad quad(getCamRay(goalNormals.col(0),
+                                                         goalNormals.col(3),
+                                                         camParams,
+                                                         convert<unsigned int, 2>(camParams.imageSizePixels)),
+                                               getCamRay(goalNormals.col(0),
+                                                         goalNormals.col(2),
+                                                         camParams,
+                                                         convert<unsigned int, 2>(camParams.imageSizePixels)),
+                                               getCamRay(goalNormals.col(1),
+                                                         goalNormals.col(2),
+                                                         camParams,
+                                                         convert<unsigned int, 2>(camParams.imageSizePixels)),
+                                               getCamRay(goalNormals.col(1),
+                                                         goalNormals.col(3),
+                                                         camParams,
+                                                         convert<unsigned int, 2>(camParams.imageSizePixels)));
 
 
             // goal base visibility check

@@ -417,7 +417,7 @@ namespace behaviour {
             arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).presentPosition,
                                      sensors.servo.at(ServoID::HEAD_PITCH).presentPosition};
 
-            for (uint i = 0; i < fixationObjects.size(); i++) {
+            for (size_t i = 0; i < fixationObjects.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
                 fixationPoints.push_back(arma::vec(
@@ -467,7 +467,7 @@ namespace behaviour {
                 }
             }
 
-            for (uint i = 0; i < fixationObjects.size(); i++) {
+            for (size_t i = 0; i < fixationObjects.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
                 fixationPoints.push_back(arma::vec(
@@ -721,7 +721,7 @@ namespace behaviour {
 
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Ball>& ob) {
             std::vector<arma::vec2> boundingPoints;
-            for (uint i = 0; i < ob.size(); i++) {
+            for (size_t i = 0; i < ob.size(); i++) {
                 boundingPoints.push_back(
                     convert<double, 2>(ob[i].visObject.screenAngular + ob[i].visObject.angularSize / 2));
                 boundingPoints.push_back(
@@ -746,7 +746,7 @@ namespace behaviour {
 
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Goal>& ob) {
             std::vector<arma::vec2> boundingPoints;
-            for (uint i = 0; i < ob.size(); i++) {
+            for (size_t i = 0; i < ob.size(); i++) {
                 boundingPoints.push_back(
                     convert<double, 2>(ob[i].visObject.screenAngular + ob[i].visObject.angularSize / 2));
                 boundingPoints.push_back(

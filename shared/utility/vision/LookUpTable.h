@@ -72,7 +72,7 @@ namespace vision {
      *   @brief The inverse of getLUTIndex
      *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
      */
-    static inline Pixel getPixelFromIndex(const message::vision::LookUpTable& lut, const uint& index) {
+    static inline Pixel getPixelFromIndex(const message::vision::LookUpTable& lut, const unsigned int& index) {
         const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
         const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
         const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
@@ -98,9 +98,9 @@ struct convert<message::vision::LookUpTable> {
     static Node encode(const message::vision::LookUpTable& rhs) {
         Node node;
 
-        node["bits"]["y"]  = uint(rhs.bits_y);
-        node["bits"]["cb"] = uint(rhs.bits_cb);
-        node["bits"]["cr"] = uint(rhs.bits_cr);
+        node["bits"]["y"]  = (unsigned int) (rhs.bits_y);
+        node["bits"]["cb"] = (unsigned int) (rhs.bits_cb);
+        node["bits"]["cr"] = (unsigned int) (rhs.bits_cr);
 
         node["lut"] = std::string(rhs.table.begin(), rhs.table.end());
 
@@ -108,9 +108,9 @@ struct convert<message::vision::LookUpTable> {
     }
 
     static bool decode(const Node& node, message::vision::LookUpTable& rhs) {
-        uint8_t bitsY  = node["bits"]["y"].as<uint>();
-        uint8_t bitsCb = node["bits"]["cb"].as<uint>();
-        uint8_t bitsCr = node["bits"]["cr"].as<uint>();
+        uint8_t bitsY  = node["bits"]["y"].as<unsigned int>();
+        uint8_t bitsCb = node["bits"]["cb"].as<unsigned int>();
+        uint8_t bitsCr = node["bits"]["cr"].as<unsigned int>();
 
         std::string dataString = node["lut"].as<std::string>();
         std::vector<uint8_t> data;

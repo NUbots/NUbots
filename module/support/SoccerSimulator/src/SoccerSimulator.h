@@ -139,7 +139,7 @@ namespace support {
         bool kicking     = false;
         bool walking     = false;
         bool lastKicking = false;
-        uint PLAYER_ID;
+        unsigned int PLAYER_ID;
 
         NUClear::clock::time_point lastNow;
 

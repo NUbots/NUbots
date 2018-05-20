@@ -258,23 +258,32 @@ namespace vision {
 
     void saveImage(const std::string& file, const message::input::Image& image);
 
-    const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
+    const auto getSubImage(unsigned int x,
+                           unsigned int y,
+                           unsigned int width,
+                           unsigned int height,
+                           const std::vector<uint8_t>& data);
     uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
                    const Eigen::Matrix<int8_t, 5, 5>& kernel,
                    uint8_t normalisation = BAYER_SCALE);
     Pixel getBayerPixel(const Eigen::Matrix<uint8_t, 5, 5>& patch, const BayerPixelType& type);
-    Pixel getGrey8Pixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getGRBGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getRGGBPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getGBRGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getBGGRPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getGrey16Pixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getRGB3Pixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getYUV24Pixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getYUYVPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getUYVYPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getYUV12Pixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
-    Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc);
+    Pixel getGrey8Pixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getGRBGPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getRGGBPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getGBRGPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getBGGRPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getGrey16Pixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getRGB3Pixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getYUV24Pixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getYUYVPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getUYVYPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getYUV12Pixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data);
+    Pixel getPixel(unsigned int x,
+                   unsigned int y,
+                   unsigned int width,
+                   unsigned int height,
+                   const std::vector<uint8_t>& data,
+                   const FOURCC& fourcc);
     constexpr FOURCC fourcc(const char (&code)[5]);
     FOURCC getFourCCFromDescription(const std::string& code);
     uint32_t getAravisPixelFormat(const std::string& code);

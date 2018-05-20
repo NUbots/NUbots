@@ -41,7 +41,7 @@ namespace math {
 
         private:
             // The number of sigma points
-            static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
+            static constexpr unsigned int NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
             using SigmaVec       = arma::vec::fixed<NUM_SIGMA_POINTS>;
             using SigmaRowVec    = arma::rowvec::fixed<NUM_SIGMA_POINTS>;
@@ -79,7 +79,7 @@ namespace math {
                 arma::mat chol = arma::chol(covarianceSigmaWeights * covariance);
 
                 // Put our values in either end of the matrix
-                for (uint i = 1; i < Model::size + 1; ++i) {
+                for (unsigned int i = 1; i < Model::size + 1; ++i) {
 
                     auto deviation              = chol.col(i - 1);
                     points.col(i)               = (mean + deviation);
@@ -167,7 +167,7 @@ namespace math {
                 generateSigmaPoints(sigmaPoints, mean, covariance);
 
                 // Write the propagated version of the sigma point
-                for (uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
+                for (unsigned int i = 0; i < NUM_SIGMA_POINTS; ++i) {
                     sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT, additionalParameters...);
                 }
 
@@ -196,7 +196,7 @@ namespace math {
                 arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 
                 // First step is to calculate the expected measurement for each sigma point.
-                for (uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
+                for (unsigned int i = 0; i < NUM_SIGMA_POINTS; ++i) {
                     predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                 }
 

@@ -85,7 +85,7 @@ namespace math {
                 // We can do this because merging models that we are going
                 // to cut off later is pointless. We only need the first
                 // n most probable models
-                for (uint i = 0; i < std::min(maxModels, filters.size()); ++i) {
+                for (size_t i = 0; i < std::min(maxModels, filters.size()); ++i) {
 
                     auto end = std::remove_if(filters.begin() + i + 1, filters.end(), [this, i](const Filter& f) {
                         return mergeProbability < bhattacharyyaDistance(filters[i].filter, f.filter);

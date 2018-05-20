@@ -67,7 +67,7 @@ namespace platform {
         using utility::nusight::drawSphere;
         using utility::nusight::graph;
 
-        std::string makeErrorString(const std::string& src, uint errorCode) {
+        std::string makeErrorString(const std::string& src, unsigned int errorCode) {
             std::stringstream s;
 
             s << "Error on ";

@@ -121,7 +121,8 @@ namespace vision {
             arma::vec2 screenPoint = arma::vec2({pixel[0], pixel[1]});
             // Convert to point referenced from top left
             arma::ivec2 imagePoint = utility::math::vision::screenToImage(
-                screenPoint, arma::uvec2({uint(image->dimensions[0]), uint(image->dimensions[1])}));
+                screenPoint,
+                arma::uvec2({(unsigned int) (image->dimensions[0]), (unsigned int) (image->dimensions[1])}));
             imagePoints.push_back(convert<int, 2>(imagePoint));
             lines.push_back(std::make_pair(imagePoints.back(), imagePoints.back() + Eigen::Vector2i(1, 1)));
             // Increment theta

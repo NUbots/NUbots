@@ -38,16 +38,16 @@ namespace input {
      */
     class GameController : public NUClear::Reactor {
     private:
-        static constexpr const uint SUPPORTED_VERSION       = 12;
-        static constexpr const uint PLAYERS_PER_TEAM        = 6;
-        static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
-        static constexpr const uint NUM_TEAMS               = 2;
+        static constexpr const unsigned int SUPPORTED_VERSION       = 12;
+        static constexpr const unsigned int PLAYERS_PER_TEAM        = 6;
+        static constexpr const unsigned int ACTIVE_PLAYERS_PER_TEAM = 4;
+        static constexpr const unsigned int NUM_TEAMS               = 2;
 
-        uint recieve_port;
-        uint send_port;
-        uint TEAM_ID;
-        uint PLAYER_ID;
-        uint BROADCAST_IP = 0xFFFFFFFF;
+        unsigned int recieve_port;
+        unsigned int send_port;
+        unsigned int TEAM_ID;
+        unsigned int PLAYER_ID;
+        unsigned int BROADCAST_IP = 0xFFFFFFFF;
 
         bool penaltyOverride = false;
         bool selfPenalised   = true;

@@ -29,15 +29,15 @@ namespace research {
 
     class PressureAutoClassifier : public NUClear::Reactor {
     private:
-        std::map<message::vision::Colour, uint> maxSurfaceArea;
-        std::map<message::vision::Colour, uint> maxVolume;
-        std::map<message::vision::Colour, uint> volume;
-        std::map<message::vision::Colour, std::set<uint>> surfaceArea;
-        std::map<message::vision::Colour, uint> zeroPoints;
-        std::map<message::vision::Colour, uint> zeroPointGrowths;
-        std::map<message::vision::Colour, uint> voteGrowths;
-        std::map<message::vision::Colour, uint> maxVotes;
-        std::map<uint, uint> votes;
+        std::map<message::vision::Colour, size_t> maxSurfaceArea;
+        std::map<message::vision::Colour, size_t> maxVolume;
+        std::map<message::vision::Colour, size_t> volume;
+        std::map<message::vision::Colour, std::set<size_t>> surfaceArea;
+        std::map<message::vision::Colour, size_t> zeroPoints;
+        std::map<message::vision::Colour, size_t> zeroPointGrowths;
+        std::map<message::vision::Colour, size_t> voteGrowths;
+        std::map<message::vision::Colour, size_t> maxVotes;
+        std::map<size_t, size_t> votes;
 
     public:
         /// @brief Called by the powerplant to build and setup the PressureAutoClassifier reactor.

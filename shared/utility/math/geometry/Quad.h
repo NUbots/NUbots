@@ -98,7 +98,7 @@ namespace math {
              * @param y The horizonal line to solve the 2 x-axis intersections with
              * @return The minX and maxX rounded that intersect given y
              */
-            arma::vec2 getEdgePoints(uint y) const;
+            arma::vec2 getEdgePoints(unsigned int y) const;
 
             std::pair<arma::vec2, arma::vec2> getIntersectionPoints(Line line) const;
 

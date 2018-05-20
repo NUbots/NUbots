@@ -35,11 +35,11 @@ namespace vision {
                                                                const LookUpTable& lut,
                                                                const arma::ivec2& start,
                                                                const arma::ivec2& end,
-                                                               const uint& subsample) {
+                                                               const unsigned int& subsample) {
 
         utility::vision::Colour colour;
         uint16_t segmentLength = 0;
-        uint i                 = 0;
+        unsigned int i         = 0;
         size_t length          = 0;
 
         std::vector<ClassifiedImage::Segment> output;

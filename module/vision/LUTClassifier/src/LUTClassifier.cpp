@@ -91,16 +91,16 @@ namespace vision {
 
             // Calculate our green centroid for ball detection
             Eigen::Vector3f greenCentroid(0, 0, 0);
-            uint nPoints = 0;
+            unsigned int nPoints = 0;
 
             // Loop through every voxel in the lut
-            for (uint x = 0; x < uint(1 << lut->bits_y); ++x) {
-                for (uint y = 0; y < uint(1 << lut->bits_cb); ++y) {
-                    for (uint z = 0; z < uint(1 << lut->bits_cr); ++z) {
+            for (unsigned int x = 0; x < (unsigned int) (1 << lut->bits_y); ++x) {
+                for (unsigned int y = 0; y < (unsigned int) (1 << lut->bits_cb); ++y) {
+                    for (unsigned int z = 0; z < (unsigned int) (1 << lut->bits_cr); ++z) {
 
                         // Get our voxel
-                        uint index = (((x << lut->bits_cr) | y) << lut->bits_cb) | z;
-                        char c     = lut->table[index];
+                        unsigned int index = (((x << lut->bits_cr) | y) << lut->bits_cb) | z;
+                        char c             = lut->table[index];
 
                         // If this is a field voxel
                         if (c == static_cast<char>(Colour::GREEN)) {
@@ -186,10 +186,11 @@ namespace vision {
 
                 // Goal detector
                 GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS =
-                    config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
+                    config["goals"]["ransac"]["minimum_points_for_consensus"].as<unsigned int>();
                 GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING =
-                    config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
-                GOAL_RANSAC_MAXIMUM_FITTED_MODELS = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
+                    config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<unsigned int>();
+                GOAL_RANSAC_MAXIMUM_FITTED_MODELS =
+                    config["goals"]["ransac"]["maximum_fitted_models"].as<unsigned int>();
                 GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD =
                     config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
 
@@ -200,7 +201,7 @@ namespace vision {
                 GOAL_HORIZONTAL_EXTENSION_SCALE = config["goals"]["horizontal_extension_scale"].as<double>();
                 GOAL_VERTICAL_EXTENSION_SCALE   = config["goals"]["vertical_extension_scale"].as<double>();
                 GOAL_WIDTH_HEIGHT_RATIO         = config["goals"]["width_height_ratio"].as<double>();
-                GOAL_LINE_INTERSECTIONS         = config["goals"]["line_intersections"].as<uint>();
+                GOAL_LINE_INTERSECTIONS         = config["goals"]["line_intersections"].as<unsigned int>();
 
                 // Ball Detector
                 BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();

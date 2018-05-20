@@ -33,8 +33,8 @@ namespace localisation {
     class BallModel {
     public:
         // The indicies for our vector
-        static constexpr uint PX = 0;
-        static constexpr uint PY = 1;
+        static constexpr unsigned int PX = 0;
+        static constexpr unsigned int PY = 1;
 
         static constexpr size_t size = 2;
 

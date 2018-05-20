@@ -40,7 +40,7 @@ namespace input {
     typedef struct {
         uint32_t fourcc;
         std::string deviceID;
-        uint cameraID;
+        unsigned int cameraID;
         bool isLeft;
         ArvCamera* camera;
         ArvStream* stream;
@@ -76,7 +76,7 @@ namespace input {
         std::map<std::string, CameraContext> AravisCameras;
 
         // Static count of all cameras in the system.
-        static uint cameraCount;
+        static unsigned int cameraCount;
     };
 }  // namespace input
 }  // namespace module

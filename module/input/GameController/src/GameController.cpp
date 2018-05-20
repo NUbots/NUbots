@@ -67,10 +67,10 @@ namespace input {
 
                       PLAYER_ID = globalConfig.playerId;
                       TEAM_ID   = globalConfig.teamId;
-                      send_port = config["send_port"].as<uint>();
+                      send_port = config["send_port"].as<unsigned int>();
 
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
-                      if (config["recieve_port"].as<uint>() != recieve_port) {
+                      if (config["recieve_port"].as<unsigned int>() != recieve_port) {
 
                           // If we have an old binding, then unbind it
                           // The port starts at 0 so this should work
@@ -79,7 +79,7 @@ namespace input {
                           }
 
                           // Update our port
-                          recieve_port = config["recieve_port"].as<uint>();
+                          recieve_port = config["recieve_port"].as<unsigned int>();
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
@@ -145,7 +145,7 @@ namespace input {
         packet.dropInTime     = -1;
         packet.secsRemaining  = 0;
         packet.secondaryTime  = 0;
-        for (uint i = 0; i < NUM_TEAMS; i++) {
+        for (unsigned int i = 0; i < NUM_TEAMS; i++) {
             auto& ownTeam       = packet.teams[i];
             ownTeam.teamId      = (i == 0 ? TEAM_ID : 0);
             ownTeam.teamColour  = static_cast<gamecontroller::TeamColour>(-1);
@@ -156,7 +156,7 @@ namespace input {
             auto& coach             = ownTeam.coach;
             coach.penaltyState      = gamecontroller::PenaltyState::UNPENALISED;
             coach.penalisedTimeLeft = 0;
-            for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
+            for (unsigned int i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
                 auto& player = ownTeam.players[i];
                 if (i <= ACTIVE_PLAYERS_PER_TEAM) {
                     player.penaltyState      = gamecontroller::PenaltyState::UNPENALISED;
@@ -237,10 +237,10 @@ namespace input {
         state->data.opponent.players.clear();
 
         // Note: assumes playersPerTeam never changes
-        for (uint i = 0; i < newPacket.playersPerTeam; i++) {
-            uint playerId      = i + 1;
-            auto& oldOwnPlayer = oldOwnTeam.players[i];
-            auto& newOwnPlayer = newOwnTeam.players[i];
+        for (unsigned int i = 0; i < newPacket.playersPerTeam; i++) {
+            unsigned int playerId = i + 1;
+            auto& oldOwnPlayer    = oldOwnTeam.players[i];
+            auto& newOwnPlayer    = newOwnTeam.players[i];
 
             auto& oldOpponentPlayer = oldOpponentTeam.players[i];
             auto& newOpponentPlayer = newOpponentTeam.players[i];

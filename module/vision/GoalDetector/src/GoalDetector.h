@@ -28,9 +28,9 @@ namespace vision {
 
     class GoalDetector : public NUClear::Reactor {
     private:
-        uint MINIMUM_POINTS_FOR_CONSENSUS;
-        uint MAXIMUM_ITERATIONS_PER_FITTING;
-        uint MAXIMUM_FITTED_MODELS;
+        unsigned int MINIMUM_POINTS_FOR_CONSENSUS;
+        unsigned int MAXIMUM_ITERATIONS_PER_FITTING;
+        unsigned int MAXIMUM_FITTED_MODELS;
         double CONSENSUS_ERROR_THRESHOLD;
 
         double MAXIMUM_ASPECT_RATIO;
@@ -41,10 +41,10 @@ namespace vision {
         double MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
         arma::running_stat<double> stats;
 
-        uint MEASUREMENT_LIMITS_LEFT;
-        uint MEASUREMENT_LIMITS_RIGHT;
-        uint MEASUREMENT_LIMITS_TOP;
-        uint MEASUREMENT_LIMITS_BASE;
+        unsigned int MEASUREMENT_LIMITS_LEFT;
+        unsigned int MEASUREMENT_LIMITS_RIGHT;
+        unsigned int MEASUREMENT_LIMITS_TOP;
+        unsigned int MEASUREMENT_LIMITS_BASE;
 
         double ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL;
         double ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL;

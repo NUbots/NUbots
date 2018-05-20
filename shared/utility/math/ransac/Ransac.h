@@ -49,16 +49,16 @@ namespace math {
             static bool regenerateRandomModel(Model& model, const Iterator first, const Iterator last, Args... args) {
 
                 // Get random points between first and last
-                uint range = std::distance(first, last);
+                unsigned int range = std::distance(first, last);
                 std::array<DataPoint, Model::REQUIRED_POINTS> points;
 
                 // Grab a unique random set
-                std::set<uint> indices;
+                std::set<unsigned int> indices;
                 while (indices.size() < Model::REQUIRED_POINTS) {
                     indices.insert(xorShift() % range);
                 }
 
-                uint i = 0;
+                unsigned int i = 0;
                 for (auto& index : indices) {
                     points[i++] = *std::next(first, index);
                 }
@@ -73,8 +73,8 @@ namespace math {
             template <typename Iterator, typename... Args>
             static std::pair<bool, RansacResult<Iterator, Model>> findModel(Iterator& first,
                                                                             Iterator& last,
-                                                                            uint minimumPointsForConsensus,
-                                                                            uint maximumIterationsPerFitting,
+                                                                            unsigned int minimumPointsForConsensus,
+                                                                            unsigned int maximumIterationsPerFitting,
                                                                             double consensusErrorThreshold,
                                                                             Args... args) {
 
@@ -83,15 +83,15 @@ namespace math {
                     return std::make_pair(false, RansacResult<Iterator, Model>());
                 }
 
-                uint largestConsensus = 0;
-                double bestError      = std::numeric_limits<double>::max();
+                unsigned int largestConsensus = 0;
+                double bestError              = std::numeric_limits<double>::max();
                 Model bestModel;
                 Model model;
 
-                for (uint i = 0; i < maximumIterationsPerFitting; ++i) {
+                for (unsigned int i = 0; i < maximumIterationsPerFitting; ++i) {
 
-                    uint consensusSize = 0;
-                    double error       = 0.0;
+                    unsigned int consensusSize = 0;
+                    double error               = 0.0;
 
                     // Make our model have new set of points
                     if (!regenerateRandomModel(model, first, last, std::forward<Args>(args)...)) {
@@ -135,9 +135,9 @@ namespace math {
             template <typename Iterator, typename... Args>
             static std::vector<RansacResult<Iterator, Model>> fitModels(Iterator first,
                                                                         Iterator last,
-                                                                        uint minimumPointsForConsensus,
-                                                                        uint maximumIterationsPerFitting,
-                                                                        uint maximumFittedModels,
+                                                                        unsigned int minimumPointsForConsensus,
+                                                                        unsigned int maximumIterationsPerFitting,
+                                                                        unsigned int maximumFittedModels,
                                                                         double consensusErrorThreshold,
                                                                         Args... args) {
 

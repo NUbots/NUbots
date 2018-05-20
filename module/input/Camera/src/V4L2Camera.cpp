@@ -56,7 +56,7 @@ namespace input {
 
 
                     try {
-                        static uint errorCount = 0;
+                        static unsigned int errorCount = 0;
 
                         if (camera.second.isStreaming()) {
                             // Set all other camera settings
@@ -72,7 +72,7 @@ namespace input {
                                     }
                                 }
                             }
-                            if (errorCount > config["max_error_count"].as<uint>()) {
+                            if (errorCount > config["max_error_count"].as<unsigned int>()) {
                                 errorCount = 0;
                                 throw std::system_error(
                                     errno, std::system_category(), ("Camerea Settings Unresponsive"));
@@ -98,7 +98,8 @@ namespace input {
         double tanHalfFOV[2], imageCentre[2];
 
         // Generic camera parameters
-        cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
+        cameraParameters->imageSizePixels << config["imageWidth"].as<unsigned int>(),
+            config["imageHeight"].as<unsigned int>();
         cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
         // TODO: configure the offset? probably not necessary for pinhole
         cameraParameters->centreOffset = Eigen::Vector2i::Zero();
@@ -120,8 +121,8 @@ namespace input {
 
         try {
             // Recreate the camera device at the required resolution
-            int width            = config["imageWidth"].as<uint>();
-            int height           = config["imageHeight"].as<uint>();
+            int width            = config["imageWidth"].as<unsigned int>();
+            int height           = config["imageHeight"].as<unsigned int>();
             std::string deviceID = config["deviceID"].as<std::string>();
             std::string format   = config["imageFormat"].as<std::string>();
             FOURCC fourcc        = utility::vision::getFourCCFromDescription(format);
@@ -343,7 +344,7 @@ namespace input {
             size_t bufferlength = width * height * 2;
 
             // Enqueue 2 buffers
-            for (uint i = 0; i < NUM_BUFFERS; ++i) {
+            for (unsigned int i = 0; i < NUM_BUFFERS; ++i) {
                 buffers[i].resize(bufferlength);
 
                 v4l2_buffer buff;
@@ -399,8 +400,8 @@ namespace input {
     void V4L2Camera::setConfig(const ::extension::Configuration& _config) {
         config = _config;
 
-        int w           = config["imageWidth"].as<uint>();
-        int h           = config["imageHeight"].as<uint>();
+        int w           = config["imageWidth"].as<unsigned int>();
+        int h           = config["imageHeight"].as<unsigned int>();
         std::string ID  = config["deviceID"].as<std::string>();
         std::string fmt = config["imageFormat"].as<std::string>();
         FOURCC cc       = utility::vision::getFourCCFromDescription(format);

@@ -67,7 +67,7 @@ namespace math {
                 // Reference: [Pawel Gora, Zdislav V. Kovarik, Daniel Pfenniger, Condensed by Amara Graps]
                 arma::mat linearEq1(std::distance(first, last), 3);
                 arma::vec linearEq2(std::distance(first, last));
-                uint i = 0;
+                unsigned int i = 0;
                 for (auto it = first; it != last; ++it) {
                     const double diff = distanceToPoint(*it);
                     if (diff * diff < candidateThreshold) {
@@ -85,7 +85,7 @@ namespace math {
                 }
             }
 
-            arma::vec2 getEdgePoints(uint y) const;
+            arma::vec2 getEdgePoints(unsigned int y) const;
             arma::vec2 getEdgePoints(double y) const;
         };
     }  // namespace geometry

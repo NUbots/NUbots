@@ -29,7 +29,7 @@ namespace math {
         }
 
         void Polygon::set(const std::vector<arma::vec2>& vertices) {
-            for (uint i = 0; i < vertices.size(); i++) {
+            for (size_t i = 0; i < vertices.size(); i++) {
                 edges.push_back(ParametricLine<2>());
                 edges.back().setFromTwoPoints(vertices[(i + 1) % vertices.size()], vertices[i], true);
             }

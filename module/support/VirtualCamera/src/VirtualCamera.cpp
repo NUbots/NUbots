@@ -70,7 +70,8 @@ namespace support {
                 double tanHalfFOV[2], imageCentre[2];
 
                 // Generic camera parameters
-                cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
+                cameraParameters->imageSizePixels << config["imageWidth"].as<unsigned int>(),
+                    config["imageHeight"].as<unsigned int>();
                 cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
                 // TODO: configure the offset? probably not necessary for pinhole
                 cameraParameters->centreOffset = Eigen::Vector2i::Zero();

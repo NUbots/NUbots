@@ -68,7 +68,7 @@ namespace vision {
             visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
         arma::vec2 topY = imageToScreen(arma::ivec2({maxVisualHorizon->x(), int(maxVisualHorizon->y())}),
-                                        convert<uint, 2>(classifiedImage.dimensions));
+                                        convert<unsigned int, 2>(classifiedImage.dimensions));
         topY[0]         = 0;  // Choose centre of screen
 
         // Get the positions of the top of our green horizion, and the bottom of the screen
@@ -101,14 +101,14 @@ namespace vision {
         arma::vec4 worldPosition = arma::ones(4);
         worldPosition.rows(0, 2) = xStart * direction;
         auto camPoint            = projectWorldPointToScreen(worldPosition, camToGround, cam);
-        int y                    = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+        int y                    = screenToImage(camPoint, convert<unsigned int, 2>(classifiedImage.dimensions))[1];
 
         for (double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
             // Calculate our next Y
             worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
             camPoint                 = projectWorldPointToScreen(worldPosition, camToGround, cam);
-            int nextY                = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+            int nextY                = screenToImage(camPoint, convert<unsigned int, 2>(classifiedImage.dimensions))[1];
 
             // Work out our details
             arma::ivec2 start = {0, y};

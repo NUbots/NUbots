@@ -103,10 +103,10 @@ namespace vision {
         // Trigger the same function when either update
         on<Configuration, Trigger<CameraParameters>>("GoalDetector.yaml")
             .then([this](const Configuration& config, const CameraParameters& cam) {
-                MINIMUM_POINTS_FOR_CONSENSUS   = config["ransac"]["minimum_points_for_consensus"].as<uint>();
+                MINIMUM_POINTS_FOR_CONSENSUS   = config["ransac"]["minimum_points_for_consensus"].as<unsigned int>();
                 CONSENSUS_ERROR_THRESHOLD      = config["ransac"]["consensus_error_threshold"].as<double>();
-                MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
-                MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<uint>();
+                MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<unsigned int>();
+                MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<unsigned int>();
 
                 MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
                 MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
@@ -123,10 +123,10 @@ namespace vision {
                 MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE =
                     std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
 
-                MEASUREMENT_LIMITS_LEFT  = config["measurement_limits"]["left"].as<uint>();
-                MEASUREMENT_LIMITS_RIGHT = config["measurement_limits"]["right"].as<uint>();
-                MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
-                MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
+                MEASUREMENT_LIMITS_LEFT  = config["measurement_limits"]["left"].as<unsigned int>();
+                MEASUREMENT_LIMITS_RIGHT = config["measurement_limits"]["right"].as<unsigned int>();
+                MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<unsigned int>();
+                MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<unsigned int>();
 
                 ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL =
                     config["angular_width_disagreement_threshold_vertical"].as<double>();
@@ -160,12 +160,13 @@ namespace vision {
                     // Do not have a transition on the other side
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
                         && (segment.previous > -1) && (segment.next > -1)) {
-                        segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
-                                                                           convert<uint, 2>(cam.imageSizePixels)),
-                                                             cam),
-                                            getCamFromScreen(imageToScreen(convert<int, 2>(segment.end),
-                                                                           convert<uint, 2>(cam.imageSizePixels)),
-                                                             cam)});
+                        segments.push_back(
+                            {getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
+                                                            convert<unsigned int, 2>(cam.imageSizePixels)),
+                                              cam),
+                             getCamFromScreen(imageToScreen(convert<int, 2>(segment.end),
+                                                            convert<unsigned int, 2>(cam.imageSizePixels)),
+                                              cam)});
                     }
                 }
                 // Is the midpoint above or below the horizon?
@@ -529,10 +530,10 @@ namespace vision {
                                                        convert<double, 2>(it->quad.br));
 
                     // Get the quad points in screen coords
-                    arma::vec2 tl = imageToScreen(quad.getTopLeft(), convert<uint, 2>(image.dimensions));
-                    arma::vec2 tr = imageToScreen(quad.getTopRight(), convert<uint, 2>(image.dimensions));
-                    arma::vec2 bl = imageToScreen(quad.getBottomLeft(), convert<uint, 2>(image.dimensions));
-                    arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
+                    arma::vec2 tl = imageToScreen(quad.getTopLeft(), convert<unsigned int, 2>(image.dimensions));
+                    arma::vec2 tr = imageToScreen(quad.getTopRight(), convert<unsigned int, 2>(image.dimensions));
+                    arma::vec2 bl = imageToScreen(quad.getBottomLeft(), convert<unsigned int, 2>(image.dimensions));
+                    arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<unsigned int, 2>(image.dimensions));
                     arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
                     // Get vectors for TL TR BL BR;

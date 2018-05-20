@@ -66,7 +66,7 @@ namespace behaviour {
                         if (l == LimbID::UNKNOWN) {
                             throw std::runtime_error(action.name + " registered an action for an unkown limb.");
                         }
-                        actions[uint(l) - 1].push_back(std::ref(request->items.back()));
+                        actions[(unsigned int) (l) -1].push_back(std::ref(request->items.back()));
                     }
                 }
 
@@ -95,7 +95,7 @@ namespace behaviour {
                 auto maxEl = std::max_element(std::begin(update.priorities), std::end(update.priorities));
 
                 // Find its index
-                uint mainElement = std::distance(std::begin(update.priorities), maxEl);
+                auto mainElement = std::distance(std::begin(update.priorities), maxEl);
 
                 // Unless we need to, try not to run the expensive subsumption algorithm
                 bool reselect;
@@ -107,7 +107,7 @@ namespace behaviour {
                 request->maxPriority = *maxEl;
 
                 // Perform our update
-                for (uint i = 0; i < request->items.size(); ++i) {
+                for (size_t i = 0; i < request->items.size(); ++i) {
 
                     bool up     = request->items[i].priority < update.priorities[i];
                     bool down   = request->items[i].priority > update.priorities[i];
@@ -142,11 +142,11 @@ namespace behaviour {
                 for (auto& command : commands) {
 
                     // Check if we have access
-                    if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1]
+                    if (this->limbAccess[(unsigned int) (utility::input::LimbID::limbForServo(command.id)) - 1]
                         == command.source) {
 
                         // Get our queue
-                        auto& queue = commandQueues[uint(command.id)];
+                        auto& queue = commandQueues[(unsigned int) (command.id)];
 
                         // Clear commands until we get back one that we are after
                         while (!queue.empty() && queue.back().time > command.time) {
@@ -229,7 +229,7 @@ namespace behaviour {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(utility::input::LimbID::limbForServo(servo)) - 1];
+                        auto id = limbAccess[(unsigned int) (utility::input::LimbID::limbForServo(servo)) - 1];
                         completeMap[id].insert(servo);
                     }
 
@@ -357,7 +357,7 @@ namespace behaviour {
         // Set the permissions for a limb according to our allocations
         for (auto& command : newActions) {
             for (auto& l : command.get().limbSet) {
-                limbAccess[uint(l) - 1] = command.get().group.id;
+                limbAccess[(unsigned int) (l) -1] = command.get().group.id;
             }
         }
 
@@ -428,7 +428,7 @@ namespace behaviour {
             // Clear our queues for this limb
             for (const auto& limb : k.second) {
                 for (const auto& servo : utility::input::LimbID::servosForLimb(limb)) {
-                    commandQueues[uint(servo)].clear();
+                    commandQueues[(unsigned int) (servo)].clear();
                 }
             }
         }

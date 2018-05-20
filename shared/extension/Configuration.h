@@ -18,6 +18,7 @@
 #ifndef EXTENSION_CONFIGURATION_H
 #define EXTENSION_CONFIGURATION_H
 
+#include <libgen.h>
 #include <yaml-cpp/yaml.h>
 #include <cstdlib>
 #include <nuclear>

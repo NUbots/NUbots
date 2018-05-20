@@ -86,7 +86,7 @@ namespace support {
             arma::vec fitnesses(opt.episodes.size());
             arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.rows());
 
-            for (uint i = 0; i < opt.episodes.size(); ++i) {
+            for (size_t i = 0; i < opt.episodes.size(); ++i) {
 
                 // Make our combined fitness
                 fitnesses[i] = 0;
@@ -94,7 +94,7 @@ namespace support {
                     fitnesses[i] += f.fitness * f.weight;
                 }
 
-                for (uint j = 0; j < samples.n_cols; ++j) {
+                for (size_t j = 0; j < samples.n_cols; ++j) {
                     samples(i, j) = opt.episodes[i].values[j];
                 }
             }

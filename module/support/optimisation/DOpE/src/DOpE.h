@@ -36,7 +36,7 @@ namespace support {
                 Optimisation() : group(""), network(false), batchSize(0), optimiser(), estimateEpisodes(), episodes() {}
                 Optimisation(const std::string& group,
                              bool network,
-                             uint size,
+                             unsigned int size,
                              std::unique_ptr<utility::math::optimisation::Optimiser>&& opt,
                              const std::vector<message::support::optimisation::Episode>& estimateEpisodes,
                              const std::vector<message::support::optimisation::Episode>& episodes)
@@ -48,7 +48,7 @@ namespace support {
                     , episodes(episodes) {}
                 std::string group;
                 bool network;
-                uint batchSize;
+                unsigned int batchSize;
                 std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
                 std::vector<message::support::optimisation::Episode> estimateEpisodes;
                 std::vector<message::support::optimisation::Episode> episodes;

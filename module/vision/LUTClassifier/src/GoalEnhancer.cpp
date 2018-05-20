@@ -42,10 +42,10 @@ namespace vision {
 
     struct GoalPOI {
         GoalPOI() : midpoint(), length() {}
-        GoalPOI(const arma::vec2 midpoint, uint length) : midpoint(midpoint), length(length) {}
+        GoalPOI(const arma::vec2 midpoint, unsigned int length) : midpoint(midpoint), length(length) {}
 
         arma::vec2 midpoint;
-        uint length;
+        unsigned int length;
     };
 
     struct GoalPOIModel {
@@ -54,10 +54,10 @@ namespace vision {
         static constexpr size_t REQUIRED_POINTS = 2;
 
         Line line;
-        std::array<uint, 2> lengths;
+        std::array<unsigned int, 2> lengths;
 
         GoalPOIModel() : line(), lengths() {}
-        GoalPOIModel(const Line& line, const std::array<uint, 2>& lengths) : line(line), lengths(lengths) {}
+        GoalPOIModel(const Line& line, const std::array<unsigned int, 2>& lengths) : line(line), lengths(lengths) {}
 
         bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts,
                         const arma::vec2& horizonTangent,
@@ -70,9 +70,9 @@ namespace vision {
         };
 
         double calculateError(const DataPoint& p) const {
-            double dist = line.distanceToPoint(p.midpoint);
-            uint d1     = std::abs(int(lengths[0] - p.length));
-            uint d2     = std::abs(int(lengths[1] - p.length));
+            double dist     = line.distanceToPoint(p.midpoint);
+            unsigned int d1 = std::abs(int(lengths[0] - p.length));
+            unsigned int d2 = std::abs(int(lengths[1] - p.length));
 
             return dist * dist + d1 * d1 + d2 * d2;
         };

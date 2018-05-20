@@ -44,7 +44,11 @@ namespace vision {
         ofs.close();
     }
 
-    const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
+    const auto getSubImage(unsigned int x,
+                           unsigned int y,
+                           unsigned int width,
+                           unsigned int height,
+                           const std::vector<uint8_t>& data) {
         // Extract the 5x5 matrix centered at (x, y).
         // Clamped to borders.
         x = x < 2 ? 2 : x > (width - 3) ? width - 3 : x;
@@ -103,7 +107,7 @@ namespace vision {
         }
     }
 
-    Pixel getGrey8Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getGrey8Pixel(unsigned int x, unsigned int y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
         int origin = (y * width + x);
@@ -111,7 +115,7 @@ namespace vision {
         return {0, 0, data[origin]};
     }
 
-    Pixel getGRBGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getGRBGPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: G R G R G R ....
@@ -131,7 +135,7 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getRGGBPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getRGGBPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: R G R G R G ....
@@ -151,7 +155,7 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getGBRGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getGBRGPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: G B G B G B ....
@@ -171,7 +175,7 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getBGGRPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getBGGRPixel(unsigned int x, unsigned int y, int width, int height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: B G B G B G ....
@@ -191,13 +195,13 @@ namespace vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getGrey16Pixel(unsigned int x, unsigned int y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         int origin = (y * width + x) * 2;
 
         return {0, data[origin + 1], data[origin]};
     }
 
-    Pixel getRGB3Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getRGB3Pixel(unsigned int x, unsigned int y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
         int origin = (y * width + x) * 3;
@@ -205,7 +209,7 @@ namespace vision {
         return {data[origin + 0], data[origin + 1], data[origin + 2]};
     }
 
-    Pixel getYUV24Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUV24Pixel(unsigned int x, unsigned int y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U0 Y0 V0 U1 Y1 V1 U2 Y2 V2
         int origin = (y * width + x) * 3;
@@ -213,7 +217,7 @@ namespace vision {
         return {data[origin + 1], data[origin + 0], data[origin + 2]};
     }
 
-    Pixel getYUYVPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUYVPixel(unsigned int x, unsigned int y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Y U Y V Y U Y V Y U Y V
         int origin = (y * width + x) * 2;
@@ -223,7 +227,7 @@ namespace vision {
         return {data[origin + 0], data[origin + 1 - shift], data[origin + 3 - shift]};
     }
 
-    Pixel getUYVYPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getUYVYPixel(unsigned int x, unsigned int y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U Y V Y U Y V Y U Y V Y
         int origin = (y * width + x) * 2;
@@ -234,7 +238,7 @@ namespace vision {
         return {data[origin + 1], data[origin + 0 - shift], data[origin + 2 - shift]};
     }
 
-    Pixel getYUV12Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUV12Pixel(unsigned int x, unsigned int y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U0 Y0 Y1 V0 Y2 Y3 U1 Y4 Y5 V1 Y6 Y7 U2 Y8 Y9 V1 Y10 Y11
         // U0Y0V0 U0Y1V0 U0Y2V0 U0Y3V0 U1Y4V1
@@ -251,7 +255,7 @@ namespace vision {
         // U0Y3V0     {data[0], data[5], data[3]} (3, 0)
         // U1Y4V1     {data[6], data[7], data[9]} (4, 0)
         // U1Y5V1     {data[6], data[8], data[9]} (5, 0)
-        const uint Y_OFFSET[6] = {1, 2, 4, 5, 7, 8};
+        const unsigned int Y_OFFSET[6] = {1, 2, 4, 5, 7, 8};
 
         int origin  = (y * width + (x - (x % 6))) * 6;
         int shift   = ((x % 6) > 3) ? 6 : 0;
@@ -260,7 +264,12 @@ namespace vision {
         return {data[origin + 0 + shift], data[origin + 0 + y_shift], data[origin + 3 + shift]};
     }
 
-    Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc) {
+    Pixel getPixel(unsigned int x,
+                   unsigned int y,
+                   unsigned int width,
+                   unsigned int height,
+                   const std::vector<uint8_t>& data,
+                   const FOURCC& fourcc) {
         switch (fourcc) {
             case GREY: {
                 return (getGrey8Pixel(x, y, width, height, data));

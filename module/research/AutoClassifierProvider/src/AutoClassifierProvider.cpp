@@ -86,16 +86,16 @@ namespace research {
 
                     // find the min and max y points on the circle
                     // capped at the bounds of the image
-                    uint minY = std::max(std::ceil(centre[1] - radius), 0.0);
-                    uint maxY = std::min(std::floor(centre[1] + radius), double(image.dimensions[1] - 1));
+                    unsigned int minY = std::max(std::ceil(centre[1] - radius), 0.0);
+                    unsigned int maxY = std::min(std::floor(centre[1] + radius), double(image.dimensions[1] - 1));
 
                     // loop through pixels on the image in bounding box
-                    for (uint y = minY + ballEdgeBuffer; y <= maxY - ballEdgeBuffer; ++y) {
-                        auto edgePoints = circle.getEdgePoints(y);
-                        uint minX       = std::max(edgePoints[0], 0.0);
-                        uint maxX       = std::min(edgePoints[1], double(image.dimensions[0] - 1));
+                    for (unsigned int y = minY + ballEdgeBuffer; y <= maxY - ballEdgeBuffer; ++y) {
+                        auto edgePoints   = circle.getEdgePoints(y);
+                        unsigned int minX = std::max(edgePoints[0], 0.0);
+                        unsigned int maxX = std::min(edgePoints[1], double(image.dimensions[0] - 1));
 
-                        for (uint x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; ++x) {
+                        for (unsigned int x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; ++x) {
                             auto pixel = getPixel(x,
                                                   y,
                                                   image.dimensions[0],
@@ -127,11 +127,11 @@ namespace research {
 
                     // find the min and max y points on the quad
                     // capped at the bounds of the image
-                    uint minY = std::max(std::min(quad.getTopLeft()[1], quad.getTopRight()[1]), 0.0);
-                    uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]),
-                                         double(image.dimensions[1] - 1));
+                    unsigned int minY = std::max(std::min(quad.getTopLeft()[1], quad.getTopRight()[1]), 0.0);
+                    unsigned int maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]),
+                                                 double(image.dimensions[1] - 1));
 
-                    for (uint y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; ++y) {
+                    for (unsigned int y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; ++y) {
                         arma::vec2 edgePoints;
                         try {
                             edgePoints = quad.getEdgePoints(y);
@@ -139,10 +139,10 @@ namespace research {
                         catch (std::domain_error&) {
                             continue;  // no intersection
                         }
-                        uint minX = std::max(edgePoints[0], 0.0);
-                        uint maxX = std::min(edgePoints[1], double(image.dimensions[0] - 1));
+                        unsigned int minX = std::max(edgePoints[0], 0.0);
+                        unsigned int maxX = std::min(edgePoints[1], double(image.dimensions[0] - 1));
 
-                        for (uint x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; ++x) {
+                        for (unsigned int x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; ++x) {
                             auto pixel = getPixel(x,
                                                   y,
                                                   image.dimensions[0],
@@ -167,9 +167,9 @@ namespace research {
 
                 auto& image = *classifiedImage.image;
 
-                for (uint x = fieldEdgeBuffer; x < classifiedImage.dimensions[0] - fieldEdgeBuffer; ++x) {
+                for (unsigned int x = fieldEdgeBuffer; x < classifiedImage.dimensions[0] - fieldEdgeBuffer; ++x) {
 
-                    for (uint y = utility::vision::visualHorizonAtPoint(classifiedImage, x) + fieldEdgeBuffer;
+                    for (unsigned int y = utility::vision::visualHorizonAtPoint(classifiedImage, x) + fieldEdgeBuffer;
                          y < classifiedImage.dimensions[1] - fieldEdgeBuffer;
                          ++y) {
                         auto pixel = getPixel(x,

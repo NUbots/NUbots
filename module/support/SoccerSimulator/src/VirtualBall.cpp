@@ -87,7 +87,8 @@ namespace support {
         double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
 
         // Project the centre to the screen and work out the radius as if it was in the centre
-        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam), convert<uint, 2>(cam.imageSizePixels));
+        arma::ivec2 centre =
+            screenToImage(projectCamSpaceToScreen(rBCc, cam), convert<unsigned int, 2>(cam.imageSizePixels));
         // TODO actually project this
         // double radius = 100 * std::tan(angle * 0.5);
 

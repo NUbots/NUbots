@@ -38,7 +38,7 @@ namespace support {
 
         class FitnessData {
         public:
-            uint numberOfGetups = 0;
+            unsigned int numberOfGetups = 0;
             arma::running_stat<double> tilt;
             bool recording;
             double popFitness();

@@ -41,7 +41,7 @@ struct convert<arma::Col<int>> {
 
     static bool decode(const Node& node, arma::Col<int>& rhs) {
         rhs.resize(node.size());
-        for (uint i = 0; i < node.size(); ++i) {
+        for (size_t i = 0; i < node.size(); ++i) {
             rhs[i] = node[i].as<utility::support::Expression>();
         }
 
@@ -63,7 +63,7 @@ struct convert<arma::Col<int64_t>> {
 
     static bool decode(const Node& node, arma::Col<int64_t>& rhs) {
         rhs.resize(node.size());
-        for (uint i = 0; i < node.size(); ++i) {
+        for (size_t i = 0; i < node.size(); ++i) {
             rhs[i] = node[i].as<utility::support::Expression>();
         }
 
@@ -85,7 +85,7 @@ struct convert<arma::vec> {
 
     static bool decode(const Node& node, arma::vec& rhs) {
         rhs.resize(node.size());
-        for (uint i = 0; i < node.size(); ++i) {
+        for (size_t i = 0; i < node.size(); ++i) {
             rhs[i] = node[i].as<utility::support::Expression>();
         }
 
@@ -93,12 +93,12 @@ struct convert<arma::vec> {
     }
 };
 
-template <uint size>
+template <unsigned int size>
 struct convert<arma::vec::fixed<size>> {
     static Node encode(const arma::vec::fixed<size>& rhs) {
         Node node;
 
-        for (uint i = 0; i < size; ++i) {
+        for (unsigned int i = 0; i < size; ++i) {
             node.push_back(rhs[i]);
         }
 
@@ -108,7 +108,7 @@ struct convert<arma::vec::fixed<size>> {
     static bool decode(const Node& node, arma::vec::fixed<size>& rhs) {
         if (node.size() == size) {
 
-            for (uint i = 0; i < size; ++i) {
+            for (unsigned int i = 0; i < size; ++i) {
                 rhs[i] = node[i].as<utility::support::Expression>();
             }
 
@@ -126,9 +126,9 @@ struct convert<arma::mat> {
     static Node encode(const arma::mat& rhs) {
         Node node;
 
-        for (uint i = 0; i < rhs.n_rows; ++i) {
+        for (unsigned int i = 0; i < rhs.n_rows; ++i) {
             Node row;
-            for (uint j = 0; j < rhs.n_cols; ++j) {
+            for (unsigned int j = 0; j < rhs.n_cols; ++j) {
                 row.push_back(rhs(i, j));
             }
             node.push_back(row);
@@ -141,8 +141,8 @@ struct convert<arma::mat> {
 
         rhs.resize(node.size(), node[0].size());
 
-        for (uint i = 0; i < node.size(); ++i) {
-            for (uint j = 0; j < node[i].size(); ++j) {
+        for (size_t i = 0; i < node.size(); ++i) {
+            for (size_t j = 0; j < node[i].size(); ++j) {
                 rhs(i, j) = node[i][j].as<utility::support::Expression>();
             }
         }
@@ -151,15 +151,15 @@ struct convert<arma::mat> {
     }
 };
 
-template <uint rows, uint cols>
+template <unsigned int rows, unsigned int cols>
 struct convert<arma::mat::fixed<rows, cols>> {
     // TODO: use arma::vec decoding for each row?
     static Node encode(const arma::mat::fixed<rows, cols>& rhs) {
         Node node;
 
-        for (uint i = 0; i < rows; ++i) {
+        for (unsigned int i = 0; i < rows; ++i) {
             Node row;
-            for (uint j = 0; j < cols; ++j) {
+            for (unsigned int j = 0; j < cols; ++j) {
                 row.push_back(rhs(i, j));
             }
             node.push_back(row);
@@ -171,8 +171,8 @@ struct convert<arma::mat::fixed<rows, cols>> {
     static bool decode(const Node& node, arma::mat::fixed<rows, cols>& rhs) {
         if (node.size() == rows) {  // TODO: check cols
 
-            for (uint i = 0; i < rows; ++i) {
-                for (uint j = 0; j < cols; ++j) {
+            for (unsigned int i = 0; i < rows; ++i) {
+                for (unsigned int j = 0; j < cols; ++j) {
                     rhs(i, j) = node[i][j].as<utility::support::Expression>();
                 }
             }

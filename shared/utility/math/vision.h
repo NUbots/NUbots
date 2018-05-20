@@ -146,17 +146,17 @@ namespace math {
         /////////////////////
 
 
-        inline arma::vec3 getCamFromImage(const arma::ivec2& image, const message::input::CameraParameters& cam) {
-            return getCamFromScreen(imageToScreen(image, convert<uint, 2>(cam.imageSizePixels)), cam);
-        }
+        inline arma::vec3 getCamFromImage(const arma::ivec2& image, const message::input::CameraParameters& cam) {}
 
         inline arma::ivec2 getImageFromCam(const arma::vec3& unit_vector, const message::input::CameraParameters& cam) {
-            return screenToImage(projectCamSpaceToScreen(unit_vector, cam), convert<uint, 2>(cam.imageSizePixels));
+            return screenToImage(projectCamSpaceToScreen(unit_vector, cam),
+                                 convert<unsigned int, 2>(cam.imageSizePixels));
         }
 
         inline arma::vec2 getImageFromCamCts(const arma::vec3& unit_vector,
                                              const message::input::CameraParameters& cam) {
-            return screenToImageCts(projectCamSpaceToScreen(unit_vector, cam), convert<uint, 2>(cam.imageSizePixels));
+            return screenToImageCts(projectCamSpaceToScreen(unit_vector, cam),
+                                    convert<unsigned int, 2>(cam.imageSizePixels));
         }
 
 

@@ -34,25 +34,25 @@ namespace platform {
             static constexpr double G = -9.80665;
 
             // Our position in global space
-            static constexpr uint PX = 0;
-            static constexpr uint PY = 1;
-            static constexpr uint PZ = 2;
+            static constexpr unsigned int PX = 0;
+            static constexpr unsigned int PY = 1;
+            static constexpr unsigned int PZ = 2;
 
             // Our velocity in global space
-            static constexpr uint VX = 3;
-            static constexpr uint VY = 4;
-            static constexpr uint VZ = 5;
+            static constexpr unsigned int VX = 3;
+            static constexpr unsigned int VY = 4;
+            static constexpr unsigned int VZ = 5;
 
             // Our orientation from robot to world
-            static constexpr uint QW = 6;
-            static constexpr uint QX = 7;
-            static constexpr uint QY = 8;
-            static constexpr uint QZ = 9;
+            static constexpr unsigned int QW = 6;
+            static constexpr unsigned int QX = 7;
+            static constexpr unsigned int QY = 8;
+            static constexpr unsigned int QZ = 9;
 
             // Our rotational velocity in robot space
-            static constexpr uint WX = 10;
-            static constexpr uint WY = 11;
-            static constexpr uint WZ = 12;
+            static constexpr unsigned int WX = 10;
+            static constexpr unsigned int WY = 11;
+            static constexpr unsigned int WZ = 12;
 
             // The size of our state
             static constexpr size_t size = 13;
