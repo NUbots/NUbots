@@ -19,6 +19,7 @@
 
 #include "GoalDetector.h"
 
+#include <math.h>
 #include "extension/Configuration.h"
 
 #include "RansacGoalModel.h"
@@ -591,9 +592,11 @@ namespace vision {
                         Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
                             VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
 
-
-                        it->measurement.push_back(
-                            Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
+                        if(!isinf(rGCc_sphr[0]) && !isinf(rGCc_sphr[1]) && !isinf(rGCc_sphr[2]))
+                        {
+                            it->measurement.push_back(
+                                Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
+                        }
                     }
 
                     // Check that the points are not too close to the edges of the screen
