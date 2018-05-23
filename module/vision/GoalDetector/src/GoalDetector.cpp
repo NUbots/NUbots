@@ -160,7 +160,8 @@ namespace vision {
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
-                        && (segment.previous > -1) && (segment.next > -1)) {
+                        && (segment.previous > -1)
+                        && (segment.next > -1)) {
                         segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
                                                                            convert<uint, 2>(cam.imageSizePixels)),
                                                              cam),
@@ -592,8 +593,7 @@ namespace vision {
                         Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
                             VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
 
-                        if(!isinf(rGCc_sphr[0]) && !isinf(rGCc_sphr[1]) && !isinf(rGCc_sphr[2]))
-                        {
+                        if (!isinf(rGCc_sphr[0]) && !isinf(rGCc_sphr[1]) && !isinf(rGCc_sphr[2])) {
                             it->measurement.push_back(
                                 Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
                         }
