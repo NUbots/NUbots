@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo apt-add-repository -y ppa:toolchain-ubuntu-r/test
+sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
 
 # Add the llvm 6.0 repo to our sources and add its key
 wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
