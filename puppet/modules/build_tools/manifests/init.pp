@@ -49,11 +49,11 @@ class build_tools {
   package { 'rsync': ensure => latest, }
   package { 'git': ensure => latest, }
   package { 'build-essential': ensure => latest, }
-  package { 'libncurses5-dev': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
+  package { 'libncurses5-dev': ensure => latest, require => [ Package['gcc-8'], Package['g++-8'], ], }
   package { 'libstdc++6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gcc-7': name => 'gcc-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'g++-7': name => 'g++-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gfortran-7': name => 'gfortran-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gcc-8': name => 'gcc-8', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'g++-8': name => 'g++-8', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gfortran-8': name => 'gfortran-8', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ccache': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils': name => 'binutils', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils-dev': name => 'binutils-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
@@ -97,10 +97,10 @@ class build_tools {
              ;  /usr/bin/update-alternatives --remove-all gfortan \
              ;  /usr/bin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && /usr/bin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
-             && /usr/bin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 \
-                                             --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
-                                             --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
-    require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
+             && /usr/bin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 \
+                                             --slave /usr/bin/g++ g++ /usr/bin/g++-8 \
+                                             --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-8',
+    require => [ Package['gcc-8'], Package['g++-8'], Package['gfortran-8'], Package['build-essential'], Package['binutils'], ]
   }
 
   # Manually install cmake
