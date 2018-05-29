@@ -19,11 +19,11 @@ class build_tools {
 
   $codename = lsb_release()
 
-  # Add the llvm 5.0 source
+  # Add the llvm 6.0 source
   apt::source { 'llvm-apt-repo':
-    comment  => 'The LLVM 5.0 apt repository',
+    comment  => 'The LLVM 6.0 apt repository',
     location => "http://apt.llvm.org/${codename}",
-    release  => "llvm-toolchain-${codename}-5.0",
+    release  => "llvm-toolchain-${codename}-6.0",
     repos    => 'main',
     key      => {
       'id'     => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
