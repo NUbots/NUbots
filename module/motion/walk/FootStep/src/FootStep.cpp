@@ -59,7 +59,6 @@ namespace motion {
 
             on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
-
                     // Get support foot and swing foot coordinate systems
 
                     Eigen::Affine3d Htf_s;  // support foot

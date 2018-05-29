@@ -327,7 +327,6 @@ namespace research {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("PressureAutoClassifier.yaml").then([this](const Configuration& config) {
-
             // Loop through each classification char
             for (auto& limit : config["limits"]) {
 
@@ -344,7 +343,6 @@ namespace research {
         // When we get a look up table then it was uploaded or emitted by someone else
         // We need to set it up for our datastructure
         on<Trigger<LookUpTable>>().then([this](const LookUpTable& lut) {
-
             std::map<Colour, std::set<uint>> newSA;
             std::map<Colour, uint> newVol;
             std::map<uint, uint> newVotes;
@@ -463,7 +461,6 @@ namespace research {
 
         on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Single>().then(
             [this](const AutoClassifierPixels& pixels, const LookUpTable& lut) {
-
                 // Some aliases
                 const auto& c         = pixels.classification;
                 auto& vol             = volume[c];

@@ -85,7 +85,6 @@ namespace behaviour {
             });
 
             on<Trigger<LockServo>, With<DarwinSensors>>().then([this](const DarwinSensors& sensors) {
-
                 auto id = selection < 2 ? 18 + selection : selection - 2;
 
                 Script::Frame::Target target;
