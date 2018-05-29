@@ -143,6 +143,7 @@ ff02::2 ip6-allrouters
 
 10.1.1.11 i1 igus1
 10.1.1.12 i2 igus2
+10.1.1.13 i3 igus3
 ",
   }
 }
