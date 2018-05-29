@@ -58,7 +58,6 @@ namespace behaviour {
 
             // do a little configurating
             on<Configuration>("Getup.yaml").then([this](const Configuration& file) {
-
                 // encode fallen angle as a cosine so we can compare it directly to the z axis value
                 double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
                 FALLEN_ANGLE             = cos(fallenAngleConfig);
@@ -69,7 +68,6 @@ namespace behaviour {
             });
 
             fallenCheck = on<Trigger<Sensors>, Single>().then("Getup Fallen Check", [this](const Sensors& sensors) {
-
                 // check if the orientation is smaller than the cosine of our fallen angle
                 if (!gettingUp && fabs(sensors.world(2, 2)) < FALLEN_ANGLE) {
                     updatePriority(GETUP_PRIORITY);
@@ -78,7 +76,6 @@ namespace behaviour {
             });
 
             on<Trigger<ExecuteGetup>, With<Sensors>>().then("Execute Getup", [this](const Sensors& sensors) {
-
                 gettingUp = true;
 
                 // Check with side we're getting up from

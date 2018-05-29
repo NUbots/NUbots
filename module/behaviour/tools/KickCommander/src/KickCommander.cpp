@@ -49,7 +49,6 @@ namespace behaviour {
                                     convert<double, 3>(config["direction"].as<arma::vec3>()),
                                     KickCommandType::NORMAL)));
                 }
-
             });
         }
     }  // namespace tools

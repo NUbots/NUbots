@@ -76,7 +76,6 @@ namespace behaviour {
             });
 
             on<Trigger<Image>, With<Sensors>, Single>().then([this](const Image& image, const Sensors& sensors) {
-
                 auto imageFragment = std::make_unique<ImageFragment>();
 
                 imageFragment->image = image;
@@ -106,7 +105,6 @@ namespace behaviour {
                 imageFragment->cam_to_feet = convert<float, 4, 4>(arma::conv_to<arma::fmat>::from(cam_to_feet));
 
                 emit<Scope::NETWORK>(imageFragment, "nupresenceclient", reliable);
-
             });
 
             on<Trigger<NUClear::message::NetworkJoin>>().then(
