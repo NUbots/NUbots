@@ -26,8 +26,8 @@ class build_tools {
     release  => "llvm-toolchain-${codename}-6.0",
     repos    => 'main',
     key      => {
-      'id'     => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
-      'server' => 'pgp.mit.edu',
+      'id'      => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
+      'source'  => 'https://apt.llvm.org/llvm-snapshot.gpg.key'
     },
     include  => {
       'src' => true,
