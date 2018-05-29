@@ -66,6 +66,7 @@ class build_tools {
   package { 'python-pip': ensure => latest, }
   package { 'python3-pip': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
+  package { 'libjpeg-turbo8-dev': ensure => latest, }
 
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }
@@ -87,7 +88,7 @@ class build_tools {
     path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout     => 0,
     provider    => 'shell',
-    require => [ Package['python3-pip'], ],
+    require => [ Package['python3-pip'], Package['zlib1g-dev'], Package['libjpeg-turbo8-dev'], ],
   }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
