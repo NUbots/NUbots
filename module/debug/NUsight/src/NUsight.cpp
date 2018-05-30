@@ -30,9 +30,9 @@
 namespace module {
 namespace debug {
 
-    using NUClear::DEBUG;
     using message::input::Sensors;
     using message::platform::darwin::DarwinSensors;
+    using NUClear::DEBUG;
     using std::chrono::milliseconds;
     using utility::nusight::drawArrow;
     using utility::nusight::drawSphere;
