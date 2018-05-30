@@ -33,4 +33,4 @@ sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:
 sudo update-alternatives --remove-all gcc || true
 sudo update-alternatives --remove-all g++ || true
 sudo update-alternatives --remove-all gfortan || true
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-8
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 --slave /usr/bin/g++ g++ /usr/bin/g++-7 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7
