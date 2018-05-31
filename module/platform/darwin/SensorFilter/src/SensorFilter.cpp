@@ -31,7 +31,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
@@ -63,9 +63,9 @@ namespace platform {
         using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
         using utility::motion::kinematics::calculateRobotToIMU;
-        using utility::nubugger::drawArrow;
-        using utility::nubugger::drawSphere;
-        using utility::nubugger::graph;
+        using utility::nusight::drawArrow;
+        using utility::nusight::drawSphere;
+        using utility::nusight::graph;
 
         std::string makeErrorString(const std::string& src, uint errorCode) {
             std::stringstream s;
@@ -111,7 +111,6 @@ namespace platform {
             , footlanding_Rwf() {
 
             on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config) {
-
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
@@ -621,8 +620,9 @@ namespace platform {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass =
-                        convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
+                    // FIXME: Causes crashes
+                    // sensors->centreOfMass =
+                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
 
                     /************************************************
                      *                  Kinematics Horizon          *

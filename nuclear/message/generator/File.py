@@ -40,10 +40,19 @@ class File:
         message_python = ('\n\n'.join([m[2] for m in messages]))
 
         # By default include some useful headers
+        # yapf: disable
         includes = {
-            '1<cstdint>', '2<string>', '2<map>', '2<vector>', '2<array>', '2<memory>',
-            '4"{}"'.format(self.name[:-6] + '.pb.h'), '5"message/MessageBase.h"'
+            '1<cstdint>',
+            '2<string>',
+            '2<array>',
+            '2<exception>',
+            '2<map>',
+            '2<memory>',
+            '2<vector>',
+            '4"{}"'.format(self.name[:-6] + '.pb.h'),
+            '5"message/MessageBase.h"'
         }
+        # yapf: enable
 
         # We use a dirty hack here of putting a priority on each header
         # to make the includes be in a better order
@@ -67,14 +76,14 @@ class File:
 
             {includes}
 
-            {openNamespace}
+            {open_namespace}
 
                 // Enum Definitions
             {enums}
                 // Message Definitions
             {messages}
 
-            {closeNamespace}
+            {close_namespace}
 
             #endif  // {define}
             """
@@ -120,10 +129,10 @@ class File:
         return header_template.format(
             define=define,
             includes=includes,
-            openNamespace=ns_open,
+            open_namespace=ns_open,
             enums=enum_headers,
             messages=message_headers,
-            closeNamespace=ns_close
+            close_namespace=ns_close
         ), impl_template.format(
             include='#include "{}"'.format(self.name[:-6] + '.h'), enums=enum_impls, messages=message_impls
         ), python_template.format(

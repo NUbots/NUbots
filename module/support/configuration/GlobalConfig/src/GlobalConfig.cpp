@@ -31,7 +31,6 @@ namespace support {
             : Reactor(std::move(environment)) {
 
             on<Configuration>("GlobalConfig.yaml").then([this](const Configuration& config) {
-
                 auto msg      = std::make_unique<message::support::GlobalConfig>();
                 msg->playerId = config["playerId"].as<uint32_t>();
                 msg->teamId   = config["teamId"].as<uint32_t>();

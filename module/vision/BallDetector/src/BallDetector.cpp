@@ -34,7 +34,7 @@
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacConeModel.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -75,11 +75,11 @@ namespace vision {
     using utility::math::vision::widthBasedDistanceToCircle;
 
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacConeModel;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
     using utility::support::Expression;
 
     using FOURCC = utility::vision::FOURCC;
@@ -169,7 +169,6 @@ namespace vision {
 
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
-
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD    = config["ransac"]["consensus_error_threshold"].as<Expression>();
 
@@ -208,7 +207,6 @@ namespace vision {
                        const CameraParameters& cam,
                        const FieldDescription& field,
                        const LookUpTable& lut) {
-
                     const auto& image   = *rawImage;
                     const auto& sensors = *image.sensors;
 

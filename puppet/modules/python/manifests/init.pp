@@ -50,6 +50,7 @@ class python {
                   /nubots/toolchain/bin/pip3.6 install tensorflow &&
                   /nubots/toolchain/bin/pip3.6 install scikit-image &&
                   /nubots/toolchain/bin/pip3.6 install scipy &&
+                  /nubots/toolchain/bin/pip3.6 install stringcase &&
                   touch /nubots/toolchain/src/pip_packages_complete",
       creates     => "/nubots/toolchain/src/pip_packages_complete",
       path        =>  [ '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],

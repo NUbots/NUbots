@@ -29,6 +29,7 @@ class Field:
         self.pointer = f.options.Extensions[pointer]
         self.array_size = f.options.Extensions[array_size]
         self.bytes_type = f.type == f.TYPE_BYTES
+        self.one_of = False
 
         # Basic types are treated as primitives by the library
         self.basic = f.type not in [f.TYPE_MESSAGE, f.TYPE_GROUP, f.TYPE_BYTES]

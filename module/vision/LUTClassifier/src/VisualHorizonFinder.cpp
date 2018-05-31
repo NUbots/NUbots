@@ -25,7 +25,7 @@
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
@@ -40,7 +40,7 @@ namespace vision {
     using utility::math::geometry::Quad;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getImageFromCam;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
 
     void LUTClassifier::findVisualHorizon(const Image& image,
                                           const LookUpTable& lut,

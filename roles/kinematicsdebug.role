@@ -8,6 +8,6 @@ NUCLEAR_ROLE(
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
     support::configuration::NetworkConfiguration
-    support::NUbugger
+    support::NUsight
     debug::KinematicsDebug
 )

@@ -45,11 +45,7 @@ namespace behaviour {
             // TODO: unhack?
             emit(std::make_unique<KickPlan>(KickPlan{{3, 0}}));
 
-            on<Every<30, Per<std::chrono::seconds>>, Single>().then([this] {
-
-                doBehaviour();
-
-            });
+            on<Every<30, Per<std::chrono::seconds>>, Single>().then([this] { doBehaviour(); });
 
             on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
                 if (!balls.empty()) {

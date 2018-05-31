@@ -22,7 +22,7 @@
 #include "utility/math/geometry/Line.h"
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
@@ -38,7 +38,7 @@ namespace vision {
     using utility::math::ransac::NPartiteRansac;
     using utility::math::vision::getCamFromImage;
 
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
 
     struct GoalPOI {
         GoalPOI() : midpoint(), length() {}

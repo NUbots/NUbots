@@ -2,6 +2,8 @@
 
 from generator.textutil import indent, dedent
 from generator.Field import Field, PointerType
+from generator.OneOfField import OneOfField
+from generator.OneOfType import OneOfType
 from generator.Enum import Enum
 
 
@@ -16,24 +18,23 @@ class Message:
 
         # Get all the submessages that are not map entries
         self.submessages = [Message(n, self) for n in m.nested_type if not n.options.map_entry]
-        self.oneofs = []
 
         for n in m.nested_type:
             if n.options.map_entry:
                 Field.map_types['{}.{}'.format(self.fqn, n.name)] = (Field(n.field[0], self), Field(n.field[1], self))
 
-        # All fields that are not a part of oneof
-        self.fields = [Field(f, self) for f in m.field if f.oneof_index == 0]
+        self.fields = []
+        for f in m.field:
+            # All fields that are not a part of oneof
+            if not f.HasField('oneof_index'):
+                self.fields.append(Field(f, self))
 
-        # m.name is the name of the message
-        # m.field contains the fields
-        # m.extension contains any exntesions (error don't use)
-        # m.nested_type contains submessages
-        # m.enum_type contains held enum types
-        # m.extension_range contains extension ranges
-        # m.oneof_decl contaions all one_of declarations
-        # m.options contains options (message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option)
-        # m.reserved_range and m.reserved_name contains names/field numbers not to use
+            # Fields that are a part of oneof
+            elif [v for v in m.field if v.oneof_index == f.oneof_index].index(f) == 0:
+                oneof_fields = [v for v in m.field if v.oneof_index == f.oneof_index]
+                oneof_name = m.oneof_decl[f.oneof_index].name
+                self.fields.append(OneOfField(oneof_name, oneof_fields, self))
+                self.submessages.append(OneOfType(oneof_name, oneof_fields, self))
 
     def generate_default_constructor(self):
 
@@ -86,7 +87,8 @@ class Message:
         )
 
         rule_of_five = dedent(
-            """{warning}\
+            """\
+            {warning}
             {name}(const {name}&) = default;
             {name}({name}&&) = default;
             ~{name}() = default;
@@ -202,6 +204,52 @@ class Message:
                                 )
                             )
 
+                elif v.one_of:
+                    lines.append(indent('switch (proto.{}_case()) {{').format(v.name.lower()))
+                    for oneof_field in v.oneof_fields:
+                        lines.append(indent('case {}: {{'.format(oneof_field.number), 8))
+
+                        if oneof_field.bytes_type:
+                            lines.append(
+                                indent(
+                                    dedent(
+                                        """\
+                                        {0}.{1} = {2};
+                                        {0}.{1}.insert(std::end({0}.{1}), std::begin(proto.{3}()), std::end(proto.{3}()));"""
+                                        .format(
+                                            v.name, oneof_field.name, oneof_field.default_value,
+                                            oneof_field.name.lower()
+                                        )
+                                    ), 12
+                                )
+                            )
+
+                        elif oneof_field.special_cpp_type:
+                            lines.append(
+                                indent(
+                                    dedent(
+                                        """\
+                                        {0}.{1} = {2};
+                                        message::conversion::convert({0}.{1}, proto.{3}());""".format(
+                                            v.name, oneof_field.name, oneof_field.default_value,
+                                            oneof_field.name.lower()
+                                        )
+                                    ), 12
+                                )
+                            )
+
+                        else:  # Basic and other types are handled the same
+                            lines.append(
+                                indent(
+                                    '{0}.{1} = proto.{2}();'.format(v.name, oneof_field.name, oneof_field.name.lower()),
+                                    12
+                                )
+                            )
+
+                        lines.append(indent('} break;', 8))
+                    lines.append(indent('default: object.reset(); break;', 8))
+                    lines.append(indent('}'))
+
                 else:
                     if v.bytes_type:
                         lines.append(
@@ -290,6 +338,47 @@ class Message:
                     else:
                         lines.append(indent('*proto.add_{}() = _v;'.format(v.name.lower()), 8))
 
+                    lines.append(indent('}'))
+
+                elif v.one_of:
+                    lines.append(indent('switch ({}.val_index) {{').format(v.name))
+                    for oneof_field in v.oneof_fields:
+                        lines.append(indent('case {}: {{'.format(oneof_field.number), 8))
+
+                        if oneof_field.bytes_type:
+                            lines.append(
+                                indent(
+                                    'proto.mutable_{0}()->append(std::begin({1}.{2}.get()), std::end({1}.{2}.get()));'.
+                                    format(oneof_field.name.lower(), v.name, oneof_field.name), 12
+                                )
+                            )
+                        elif oneof_field.special_cpp_type:
+                            lines.append(
+                                indent(
+                                    'message::conversion::convert(*proto.mutable_{0}(), {1}.{2}.get());'.format(
+                                        oneof_field.name.lower(), v.name, oneof_field.name
+                                    ), 12
+                                )
+                            )
+                        elif oneof_field.basic:
+                            lines.append(
+                                indent(
+                                    'proto.set_{0}({1}.{2}.get());'.format(
+                                        oneof_field.name.lower(), v.name, oneof_field.name
+                                    ), 12
+                                )
+                            )
+                        else:
+                            lines.append(
+                                indent(
+                                    '*proto.mutable_{0}() = {1}.{2}.get();'.format(
+                                        oneof_field.name.lower(), v.name, oneof_field.name
+                                    ), 12
+                                )
+                            )
+
+                        lines.append(indent('} break;', 8))
+                    lines.append(indent('default: break;', 8))
                     lines.append(indent('}'))
 
                 else:
@@ -415,23 +504,11 @@ class Message:
                     // Do the emit
                     reactor->powerplant.emit_shared<NUClear::dsl::word::emit::Local>(msg.shared_from_this());
                 }});
-
-                // Build our vector emitter function that is used to emit vectors of this object
-                context.def("_emit_vector", [] ({fqn}& msg, pybind11::capsule capsule, std::vector<{fqn}>& data) {{
-                    // Extract our reactor from the capsule
-                    NUClear::Reactor* reactor = capsule;
-
-                    // Copy the vector
-                    auto vec = data;
-                    auto ptr = std::make_unique<std::vector<{fqn}>>(vec);
-
-                    // Do the emit
-                    reactor->powerplant.emit<NUClear::dsl::word::emit::Local>(std::move(ptr));
-                }});
             }}"""
         )
 
-        python_constructor_args = ['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields]
+        python_constructor_args = ['{}& self'.format(self.fqn.replace('.', '::'))]
+        python_constructor_args.extend(['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields])
         python_members = '\n'.join(
             '.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace('.', '::'))
             for f in self.fields
@@ -445,9 +522,9 @@ class Message:
 
         python_constructor = dedent(
             """\
-            .def(pybind11::init([] ({args}) {{
-                return std::make_unique<{name}>({vars});
-            }}){default_args})"""
+            .def("__init__", [] ({args}) {{
+                new (&self) {name}({vars});
+            }}{default_args})"""
         ).format(
             name=self.fqn.replace('.', '::'),
             args=', '.join(python_constructor_args),

@@ -38,7 +38,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/time/time.h"
@@ -94,7 +94,6 @@ namespace behaviour {
             , goalLastMeasured() {
 
             on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
-
                 cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
                 cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
 
@@ -117,7 +116,6 @@ namespace behaviour {
                 cfg_.alwaysPowerKick      = config["always_power_kick"].as<bool>();
                 cfg_.forcePlaying         = config["force_playing"].as<bool>();
                 cfg_.forcePenaltyShootout = config["force_penalty_shootout"].as<bool>();
-
             });
 
             // TODO: unhack
@@ -158,7 +156,6 @@ namespace behaviour {
 
             on<Trigger<Unpenalisation>, With<FieldDescription>>().then(
                 [this](const Unpenalisation& selfPenalisation, const FieldDescription& fieldDescription) {
-
                     if (selfPenalisation.context == GameEvents::Context::SELF) {
                         selfPenalised = false;
 
@@ -170,13 +167,12 @@ namespace behaviour {
 
 
             on<Trigger<ButtonMiddleDown>, Single>().then([this] {
-
+                log("Middle button pressed!");
                 if (!cfg_.forcePlaying) {
-                    NUClear::log("Force playing started.");
+                    log("Force playing started.");
                     emit(std::make_unique<Nod>(true));
                     cfg_.forcePlaying = true;
                 }
-
             });
 
             // Main Loop
@@ -195,7 +191,6 @@ namespace behaviour {
                              const FieldDescription& fieldDescription,
                              const Field& field,
                              const Ball& ball) {
-
                     try {
 
                         Behaviour::State previousState = currentState;
@@ -274,7 +269,7 @@ namespace behaviour {
                 [this](const Field& field, const FieldDescription& fieldDescription) {
                     auto kickTarget = convert<double, 2>(getKickPlan(field, fieldDescription));
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
-                    emit(utility::nubugger::drawCircle(
+                    emit(utility::nusight::drawCircle(
                         "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.3, {0, 0, 0}));
                 });
         }
@@ -302,8 +297,9 @@ namespace behaviour {
                 }
                 currentState = Behaviour::State::LOCALISING;
             }
-            else*/ if (NUClear::clock::now() - ballLastMeasured
-                       < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
+            else*/
+                if (NUClear::clock::now() - ballLastMeasured
+                    < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
                     currentState = Behaviour::State::WALK_TO_BALL;

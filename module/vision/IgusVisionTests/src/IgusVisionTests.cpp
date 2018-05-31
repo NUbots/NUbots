@@ -2,7 +2,7 @@
 
 #include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {
@@ -15,7 +15,7 @@ namespace vision {
     using message::support::FieldDescription;
     using message::vision::ClassifiedImage;
     using utility::math::vision::getImageFromCam;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
 
     IgusVisionTests::IgusVisionTests(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
