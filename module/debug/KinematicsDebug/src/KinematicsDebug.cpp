@@ -217,7 +217,6 @@ namespace debug {
                     emit(std::move(sensors));
                 }
                 std::cout << "IK Leg NULL Test : " << numberOfFails << " Total Failures " << std::endl;
-
             });
 
         on<Configuration, With<KinematicsModel>>("HeadKinematicsNULLTest.yaml")
@@ -283,8 +282,6 @@ namespace debug {
                 }
                 std::cout << "IK Head NULL Test : " << numberOfFails << " Total Failures out of " << iterations
                           << std::endl;
-
-
             });
     }
 }  // namespace debug

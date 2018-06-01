@@ -24,7 +24,6 @@ namespace input {
         // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
         V4L2FrameRateHandle =
             on<Every<V4L2Camera::FRAMERATE, Per<std::chrono::seconds>>, Single>().then("Read V4L2Camera", [this] {
-
                 for (auto& camera : V4L2Cameras) {
                     try {
                         // If the camera is ready, get an image and emit it
@@ -51,7 +50,6 @@ namespace input {
 
         V4L2SettingsHandle =
             on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this, config] {
-
                 for (auto& camera : V4L2Cameras) {
 
 
