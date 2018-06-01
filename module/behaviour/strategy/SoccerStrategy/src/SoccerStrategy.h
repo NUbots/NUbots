@@ -48,6 +48,8 @@ namespace behaviour {
                     , ball_search_walk_slow_time(0.0f)
                     , start_position_offensive(arma::fill::zeros)
                     , start_position_defensive(arma::fill::zeros)
+                    , initial_position(arma::fill::zeros)
+                    , initial_position_cov(arma::fill::zeros)
                     , is_goalie(false)
                     , goalie_command_timeout(0.0f)
                     , goalie_rotation_speed_factor(0.0f)
@@ -69,6 +71,8 @@ namespace behaviour {
 
                 arma::vec2 start_position_offensive;
                 arma::vec2 start_position_defensive;
+                arma::vec3 initial_position;
+                arma::vec3 initial_position_cov;
                 bool is_goalie;
 
                 float goalie_command_timeout;

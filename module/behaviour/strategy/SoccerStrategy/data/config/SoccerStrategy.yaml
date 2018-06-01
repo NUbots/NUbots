@@ -2,6 +2,8 @@ ball_last_seen_max_time: 10
 goal_last_seen_max_time: 10
 start_position_offensive: [-0.2, 0]
 start_position_defensive: [1.5, 0]
+initial_position: [0,0,1.57]
+initial_position_cov: [0.2,0.2,0.35]
 goalie: false
 
 ball_search_walk_start_speed: 0.5

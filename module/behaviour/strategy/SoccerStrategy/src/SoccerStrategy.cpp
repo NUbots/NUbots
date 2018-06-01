@@ -102,6 +102,8 @@ namespace behaviour {
 
                 cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
                 cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
+                cfg_.initial_position         = config["initial_position"].as<arma::vec3>();
+                cfg_.initial_position_cov     = config["initial_position_cov"].as<arma::vec3>();
 
                 cfg_.is_goalie = config["goalie"].as<bool>();
 
@@ -329,21 +331,23 @@ namespace behaviour {
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
             ResetRobotHypotheses::Self leftSide;
-            // Start on goal line
-            leftSide.position << -fieldDescription.dimensions.field_length * 0.5,
-                fieldDescription.dimensions.field_width / 2;
+
+            leftSide.position << cfg_.initial_position[0], cfg_.initial_position[1];
             leftSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
-            leftSide.heading      = 0;
-            leftSide.heading_var  = 0.005;
+            leftSide.position_cov(0, 0) = cfg_.initial_position_cov[0];
+            leftSide.position_cov(1, 1) = cfg_.initial_position_cov[1];
+            leftSide.heading     = cfg_.initial_position[2];
+            leftSide.heading_var = cfg_.initial_position_cov[2];
 
             reset->hypotheses.push_back(leftSide);
             ResetRobotHypotheses::Self rightSide;
-            // Start on goal line
-            rightSide.position << -fieldDescription.dimensions.field_length * 0.5,
-                -fieldDescription.dimensions.field_width / 2;
+
+            rightSide.position << cfg_.initial_position[0], cfg_.initial_position[1];
             rightSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
-            rightSide.heading      = 0;
-            rightSide.heading_var  = 0.005;
+            rightSide.position_cov(0, 0) = cfg_.initial_position_cov[0];
+            rightSide.position_cov(1, 1) = cfg_.initial_position_cov[1];
+            rightSide.heading     = cfg_.initial_position[2];
+            rightSide.heading_var = cfg_.initial_position_cov[2];
 
             reset->hypotheses.push_back(rightSide);
             emit(std::move(reset));
@@ -490,16 +494,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position[2];
-                int signBearing     = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed = -signBearing
-                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                                  cfg_.goalie_max_rotation_speed);
+                float fieldBearing = field.position[2];
+                int signBearing    = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed =
+                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                             cfg_.goalie_max_rotation_speed);
 
-                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed = signTranslation
-                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                     cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed =
+                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));

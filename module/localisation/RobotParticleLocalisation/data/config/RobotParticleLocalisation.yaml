@@ -1,6 +1,6 @@
-process_noise_diagonal: [0.001,0.001,0.0001]
-start_state: [-2,-3,1.5]
-start_variance: [0.001,0.001,0.0000001]
+process_noise_diagonal: [0.01,0.01,0.001]
+start_state: [0,0,1.57]
+start_variance: [0.2,0.2,0.35]
 
 draw_particles: 20
 n_particles: 20
