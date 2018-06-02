@@ -1,10 +1,8 @@
 #include "V4L2Camera.h"
 #include "Camera.h"
 
-#include <fmt/format.h>
 #include <Eigen/Core>
 #include <Eigen/LU>
-#include <cstdlib>
 #include <nuclear>
 
 #include "extension/FileWatch.h"
@@ -141,9 +139,8 @@ namespace input {
 
                 if (it != settings.end()) {
                     if (camera.setSetting(it->second, setting.second.as<int>()) == false) {
-                        throw std::system_error(errno,
-                                                std::system_category(),
-                                                fmt::format("Failed to set {} on camera {}", it->first, deviceID));
+                        throw std::system_error(
+                            errno, std::system_category(), ("Failed to set", it->first, "on camera", deviceID));
                     }
                 }
             }
@@ -234,23 +231,21 @@ namespace input {
         // Open the camera device
         fd = open(deviceID.c_str(), O_RDWR);
         if (fd >= 0) {
-            NUClear::log("Reopened Camera");
+            std::cout << "Reopened Camera" << std::endl;
         }
 
         // Check if we managed to open our file descriptor
         int resetCount = 0;
 
         while (fd < 0 && resetCount < 10) {
-            NUClear::log("Toggling GPIO");
-            if (std::system("/bin/bash /home/nubots/gpio_toggle.sh") != 0) {
-                NUClear::log<NUClear::WARN>("Toggling GPIO: Command returned non-zero value");
-            }
+            std::cout << "Toggling GPIO" << std::endl;
+            system("/bin/bash /home/nubots/gpio_toggle.sh");
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
             fd = open(deviceID.c_str(), O_RDWR);
             resetCount++;
         }
         if (fd < 0) {
-            throw std::runtime_error(fmt::format("We were unable to access the camera device on {}", deviceID));
+            throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceID);
         }
 
         // Here we set the "Format" of the device (the type of data we are getting)
