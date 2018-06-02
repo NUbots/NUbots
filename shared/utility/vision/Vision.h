@@ -29,6 +29,7 @@
 #include <aravis-0.6/arv.h>
 
 #include "message/input/Image.h"
+#include "message/vision/ReprojectedImage.h"
 
 namespace utility {
 namespace vision {
@@ -256,7 +257,73 @@ namespace vision {
     const Eigen::Matrix<int8_t, 5, 5> RED_AT_GREEN =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_GREEN_ARR, 5, 5);
 
-    void saveImage(const std::string& file, const message::input::Image& image);
+    template <typename T>
+    inline void saveImage(const std::string& file, const T& image, bool raw = false) {
+        std::ofstream ofs(file, std::ios::out | std::ios::binary);
+
+        if (!raw) {
+            ofs << fmt::format("P6\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
+            for (size_t row = 0; row < image.dimensions[1]; row++) {
+                for (size_t col = 0; col < image.dimensions[0]; col++) {
+                    Pixel p =
+                        getPixel(col, row, image.dimensions[0], image.dimensions[1], image.data, FOURCC(image.format));
+                    ofs.write(reinterpret_cast<char*>(&p.components.r), sizeof(p.components.r));
+                    ofs.write(reinterpret_cast<char*>(&p.components.g), sizeof(p.components.g));
+                    ofs.write(reinterpret_cast<char*>(&p.components.b), sizeof(p.components.b));
+                }
+            }
+        }
+
+        else {
+            ofs << fmt::format("P5\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
+            ofs.write(reinterpret_cast<const char*>(image.data.data()), image.data.size());
+        }
+
+        ofs.close();
+    }
+
+    template <typename T>
+    inline void loadImage(const std::string& file, T& image) {
+        std::ifstream ifs(file, std::ios::in | std::ios::binary);
+        std::string magic_number, width, height, max_val;
+        uint8_t bytes_per_pixel;
+        bool RGB;
+        ifs >> magic_number;
+
+        if (magic_number.compare("P6") == 0) {
+            RGB = true;
+        }
+
+        else if (magic_number.compare("P5") == 0) {
+            RGB = false;
+        }
+
+        else {
+            throw std::runtime_error("Image has incorrect format.");
+            return;
+        }
+
+        ifs >> width >> height >> max_val;
+        image.dimensions.x() = std::stoi(width);
+        image.dimensions.y() = std::stoi(height);
+        bytes_per_pixel      = ((std::stoi(max_val) > 255) ? 2 : 1) * (RGB ? 3 : 1);
+
+        image.data.resize(image.dimensions.x() * image.dimensions.y() * bytes_per_pixel, 0);
+
+        // Skip data in file until a whitespace character is found.
+        while (ifs && !std::isspace(ifs.peek())) {
+            ifs.ignore();
+        }
+
+        // Skip all whitespace until we find non-whtespace.
+        while (ifs && std::isspace(ifs.peek())) {
+            ifs.ignore();
+        }
+
+        ifs.read(reinterpret_cast<char*>(image.data.data()), image.data.size());
+
+        ifs.close();
+    }
 
     const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
     uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,

@@ -1,0 +1,2 @@
+INCLUDE(FindPythonModule)
+FIND_PYTHON_MODULE(tensorflow REQUIRED)
