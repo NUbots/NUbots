@@ -52,7 +52,7 @@ define installer (
     # Get the environment.
     $compiler_flags  = $params['flags'].reduce |$compiler_flags, $value| { "${compiler_flags} ${value}" }
     $compiler_params = $params['params'].reduce |$compiler_params, $value| { "${compiler_params} ${value}" }
-    $flags           = "${compiler_flags} ${compiler_params} -fPIC -I\"${prefix}/${arch}/include\" -I\"${prefix}/include/python3.6m\" -Os"
+    $flags           = "${compiler_flags} ${compiler_params} -fPIC -I${prefix}/${arch}/include -I${prefix}/include/python3.6m -Os"
     $libzlib         = "ZLIB_LIBPATH=${prefix}/${arch}/lib"
     $inczlib         = "ZLIB_INCLUDE=${prefix}/${arch}/include"
     $libbzip         = "BZIP2_LIBPATH=${prefix}/${arch}/lib"
@@ -278,7 +278,9 @@ define installer (
                             ./bjam include=\"${prefix}/${arch}/include\" include=\"${prefix}/include/python3.6m\" \\
                                   library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q -a \\
                                   cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
-                            ./bjam install &&
+                            ./bjam include=\"${prefix}/${arch}/include\" include=\"${prefix}/include/python3.6m\" \\
+                                  library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q \\
+                                  cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" install &&
                             ${postbuild_cmd}",
             cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
             environment => $environment,
