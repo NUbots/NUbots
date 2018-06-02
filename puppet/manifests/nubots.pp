@@ -224,6 +224,23 @@ node nubotsvmbuild {
     method    => 'wget',
   }
 
+  exec { "Intel_OpenCL_SDK":
+    creates     => "/nubots/toolchain/opt/intel/opencl/libOpenCL.so",
+    command     => "mkdir intel-opencl &&
+                    cd intel-opencl &&
+                    wget http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip &&
+                    unzip SRB5.0_linux64.zip &&
+                    mkdir root &&
+                    for i in *.tar.xz; do tar -C root -xf \"\$i\"; done &&
+                    cp -r root/* /nubots/toolchain",
+    cwd         => "/nubots/toolchain/src",
+    path        =>  [ "/nubots/toolchain/bin",
+                      '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout     => 0,
+    provider    => 'shell',
+    require     => [ Class['installer::prerequisites'], Class['build_tools'], ],
+  }
+
   # Perform any complicated postbuild instructions here.
   $archs.each |String $arch, Hash $params| {
     # Update the armadillo config header file for all archs.
@@ -339,6 +356,9 @@ INCLUDE_DIRECTORIES(SYSTEM \"${prefix}/include\")
 
 SET(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\")
 SET(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\")
+
+SET(OpenCL_INCLUDE_DIR \"${prefix}/opt/intel/opencl/include\" CACHE STRING \"\")
+SET(OpenCL_LIBRARY \"${prefix}/opt/intel/opencl/libOpenCL.so\" CACHE STRING \"\")
 
 SET(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
 
