@@ -242,38 +242,21 @@ IF(src)
 
     # If we have pybind11 we need to make this a python library too
     IF(pybind11_FOUND)
-        # Add python libraries to main message library
         TARGET_LINK_LIBRARIES(nuclear_message ${PYTHON_LIBRARIES})
 
-        # Make our NUClear python directory for including
-        FILE(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/python/nuclear")
-
-        # Make an unoptimised version of the messages library specifically for python use
-        ADD_LIBRARY(python_nuclear_message SHARED ${protobufs} ${src})
-        SET_TARGET_PROPERTIES(python_nuclear_message PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python/nuclear/"
-                                                                PREFIX "${PYTHON_MODULE_PREFIX}"
-                                                                OUTPUT_NAME "message"
-                                                                SUFFIX "${PYTHON_MODULE_EXTENSION}")
-
-        # The library uses protocol buffers
-        TARGET_LINK_LIBRARIES(python_nuclear_message ${PROTOBUF_LIBRARIES})
-        TARGET_LINK_LIBRARIES(python_nuclear_message ${NUClear_LIBRARIES})
-        TARGET_LINK_LIBRARIES(python_nuclear_message ${PYTHON_LIBRARIES})
-
-        # Remove all compiler options for this library so it can be executed on any platform
-        TARGET_COMPILE_OPTIONS(python_nuclear_message PUBLIC "-march=native")
-        TARGET_COMPILE_OPTIONS(python_nuclear_message PUBLIC "-mtune=generic")
-        TARGET_COMPILE_OPTIONS(python_nuclear_message PUBLIC "-O0")
-
-        # # Work out what python expects the name of the library to be
-        # SET(python_module_path "${PYTHON_MODULE_PREFIX}message${PYTHON_MODULE_EXTENSION}")
-
-        # # Create symlinks to the files
-        # ADD_CUSTOM_COMMAND(TARGET nuclear_message POST_BUILD
-        #     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nuclear_message> "${PROJECT_BINARY_DIR}/python/nuclear/${python_module_path}"
-        #     COMMENT "Copying messages lib into python file format"
-        # )
-
+        # Generate a python file containing stub classes for all of our messages
+        ADD_CUSTOM_COMMAND(
+            OUTPUT "${PROJECT_BINARY_DIR}/python/nuclear/message.py"
+            COMMAND ${PYTHON_EXECUTABLE}
+            ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
+                 "${PROJECT_BINARY_DIR}/shared"
+                 "${PROJECT_BINARY_DIR}/python/nuclear"
+            WORKING_DIRECTORY ${message_binary_dir}
+            DEPENDS ${src}
+            COMMENT "Generating python sub messages")
+        SET_SOURCE_FILES_PROPERTIES("${PROJECT_BINARY_DIR}/python/nuclear/message.py" PROPERTIES GENERATED TRUE)
+        ADD_CUSTOM_TARGET(python_nuclear_message DEPENDS "${PROJECT_BINARY_DIR}/python/nuclear/message.py")
+        ADD_DEPENDENCIES(nuclear_message python_nuclear_message)
     ENDIF()
 
     # Add to our list of NUClear message libraries

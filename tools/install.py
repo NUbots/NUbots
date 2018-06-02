@@ -63,6 +63,12 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
         cprint('Installing python modules to ' + target_dir, 'blue', attrs=['bold'])
         files = glob.glob(os.path.join(build_dir, 'python', '**', '*.py'), recursive=True)
         python_files = [os.path.relpath(c, build_dir) for c in files]
+
+        # Exclude the stub message files from the installation
+        rem = [f for f in python_files if f.startswith(os.path.join('python', 'nuclear', 'message'))]
+        for r in rem:
+            python_files.remove(r)
+
         call(['rsync', '-avzPlR', '--checksum', '-e ssh'] + python_files + [target_dir])
 
     if toolchain:
