@@ -35,6 +35,7 @@ jobs:
       script: .travis/validate_format.sh
 
     # If that passes, then we can try building the code for the nuc7i7bnh
-    - env: PLATFORM=nuc7i7bnh
+    - stage: Build
+      env: PLATFORM=nuc7i7bnh
       install: .travis/install_toolchain.sh
       script: .travis/build_code.sh
