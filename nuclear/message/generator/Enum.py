@@ -18,7 +18,7 @@ class Enum:
         values = indent('\n'.join(['{} = {}'.format(v[0], v[1]) for v in self.values]), 8)
         values = ',\n'.join([v for v in values.splitlines()])
 
-        scope_name = '_'.join(self.fqn.split('.'))
+        scope_name='_'.join(self.fqn.split('.'))
 
         # Make our switch statement pairs
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
@@ -86,8 +86,7 @@ class Enum:
                 operator {protobuf_name}() const;
 
                 friend std::ostream& operator<< (std::ostream& out, const {name}& val);
-            }};"""
-        )
+            }};""")
 
         impl_template = dedent(
             """\
