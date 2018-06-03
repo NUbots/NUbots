@@ -76,8 +76,8 @@ class SymbolParser:
         funcCall = pp.Suppress('(') + pp.Optional(pp.Group(pp.delimitedList(pp.Group(nsType)))) + pp.Suppress(')')
 
         # A lambda type e.g. {lambda(a,b,c)#1} or {parm#2}
-        lambdaType = pp.Suppress('{') + pp.Group(cType + pp.Optional(funcCall) + pp.Suppress('#') +
-                                                 pp.Word(pp.nums)) + pp.Suppress('}')
+        lambdaType = pp.Suppress('{') + pp.Group(cType + pp.Optional(funcCall) + pp.Suppress('#') + pp.Word(pp.nums)
+                                                 ) + pp.Suppress('}')
 
         # grouping using parens
         parensGroup = pp.Suppress('(') + pp.Group(nsType) + pp.Suppress(')')

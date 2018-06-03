@@ -11,8 +11,8 @@ class Quad:
         self.br = br
 
     def interp(self, x, y):
-        return ((1 - x) * (1 - y) * self.bl + (1 - x) * (1 + y) * self.tl + (1 + x) * (1 + y) * self.tr +
-                (1 + x) * (1 - y) * self.br) / 4
+        return ((1 - x) * (1 - y) * self.bl + (1 - x) * (1 + y) * self.tl + (1 + x) * (1 + y) * self.tr + (1 + x) *
+                (1 - y) * self.br) / 4
 
 
 bl = np.array([-3, -3])
