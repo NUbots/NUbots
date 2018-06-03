@@ -9,9 +9,9 @@ from generator.textutil import dedent, indent
 
 def recurse(messages, root, key='message', indent=0):
     keys = list(messages[key].keys())
-    if 'path' in messages[key]:
-        path = os.path.join(root, messages[key]['path'])
-        header = '{}.h'.format(os.path.join(messages[key]['path'], key))
+    if 'file' in messages[key]:
+        header = messages[key]['file']
+        path = os.path.dirname(os.path.join(root, header))
 
         if not os.path.isdir(path):
             os.makedirs(path, exist_ok=True)
@@ -20,7 +20,7 @@ def recurse(messages, root, key='message', indent=0):
             f.write('{}class {}:\n'.format(' ' * indent, key))
             f.write('{}    def include_path(): return "{}"\n'.format(' ' * indent, header))
 
-        keys.remove('path')
+        keys.remove('file')
         indent += 4
 
     for k in keys:
@@ -59,6 +59,6 @@ for message in messages:
         if element not in current:
             current[element] = {}
         current = current[element]
-    current['path'] = os.path.dirname(message[1])
+    current['file'] = message[1].replace('.proto', '.h')
 
 recurse(files, sys.argv[2])
