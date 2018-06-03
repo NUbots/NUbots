@@ -246,7 +246,7 @@ IF(src)
 
         # Generate a python file containing stub classes for all of our messages
         ADD_CUSTOM_COMMAND(
-            OUTPUT "${PROJECT_BINARY_DIR}/python/nuclear/message.py"
+            OUTPUT "${PROJECT_BINARY_DIR}/python/nuclear/message"
             COMMAND ${PYTHON_EXECUTABLE}
             ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
                  "${PROJECT_BINARY_DIR}/shared"
@@ -254,8 +254,8 @@ IF(src)
             WORKING_DIRECTORY ${message_binary_dir}
             DEPENDS ${src}
             COMMENT "Generating python sub messages")
-        SET_SOURCE_FILES_PROPERTIES("${PROJECT_BINARY_DIR}/python/nuclear/message.py" PROPERTIES GENERATED TRUE)
-        ADD_CUSTOM_TARGET(python_nuclear_message DEPENDS "${PROJECT_BINARY_DIR}/python/nuclear/message.py")
+        SET_SOURCE_FILES_PROPERTIES("${PROJECT_BINARY_DIR}/python/nuclear/message" PROPERTIES GENERATED TRUE)
+        ADD_CUSTOM_TARGET(python_nuclear_message DEPENDS "${PROJECT_BINARY_DIR}/python/nuclear/message")
         ADD_DEPENDENCIES(nuclear_message python_nuclear_message)
     ENDIF()
 
