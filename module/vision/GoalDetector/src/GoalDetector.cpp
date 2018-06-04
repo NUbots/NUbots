@@ -19,8 +19,8 @@
 
 #include "GoalDetector.h"
 
-#include <cmath.h>
 #include "extension/Configuration.h"
+#include <cmath>
 
 #include "RansacGoalModel.h"
 #include "message/input/CameraParameters.h"
