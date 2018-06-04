@@ -19,10 +19,11 @@
 
 #include "GoalDetector.h"
 
-#include "extension/Configuration.h"
 #include <cmath>
 
 #include "RansacGoalModel.h"
+
+#include "extension/Configuration.h"
 #include "message/input/CameraParameters.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
@@ -30,21 +31,18 @@
 #include "message/vision/VisionObjects.h"
 
 
+#include "utility/math/coordinates.h"
 #include "utility/math/geometry/Line.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/Quad.h"
-
-#include "utility/math/coordinates.h"
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/vision.h"
-
-#include "utility/vision/ClassifiedImage.h"
-#include "utility/vision/LookUpTable.h"
-#include "utility/vision/Vision.h"
-
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
+#include "utility/vision/ClassifiedImage.h"
+#include "utility/vision/LookUpTable.h"
+#include "utility/vision/Vision.h"
 
 
 namespace module {
@@ -53,14 +51,16 @@ namespace vision {
     using extension::Configuration;
 
     using message::input::CameraParameters;
+    using message::support::FieldDescription;
+    using message::vision::ClassifiedImage;
+    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
+    using message::vision::Goal;
+    using message::vision::LookUpTable;
 
     using utility::math::coordinates::cartesianToSpherical;
-
     using Plane = utility::math::geometry::Plane<3>;
     using utility::math::geometry::Quad;
-
     using utility::math::ransac::NPartiteRansac;
-
     using utility::math::vision::distanceToVerticalObject;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getCamFromScreen;
@@ -73,11 +73,6 @@ namespace vision {
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::nusight::drawVisionLines;
 
-    using message::vision::ClassifiedImage;
-    using message::vision::LookUpTable;
-    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using message::support::FieldDescription;
-    using message::vision::Goal;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the
@@ -113,10 +108,8 @@ namespace vision {
                 MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
 
                 arma::vec3 horizon_buffer_height = {1, 0, tan(config["visual_horizon_buffer"].as<double>())};
-                VISUAL_HORIZON_BUFFER =
-                    std::max(1,
-                             int(projectCamSpaceToScreen(
-                                 horizon_buffer_height, cam)[1]));  // Max of 1 and y coordinate of cam space projection
+                // Max of 1 and y coordinate of cam space projection
+                VISUAL_HORIZON_BUFFER = std::max(1, int(projectCamSpaceToScreen(horizon_buffer_height, cam)[1]));
                 MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE =
                     std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
 
@@ -160,8 +153,7 @@ namespace vision {
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
-                        && (segment.previous > -1)
-                        && (segment.next > -1)) {
+                        && (segment.previous > -1) && (segment.next > -1)) {
                         segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
                                                                            convert<uint, 2>(cam.imageSizePixels)),
                                                              cam),
@@ -471,7 +463,6 @@ namespace vision {
                                 log("NOT TRUE : goalsParallel");
                                 log("angle between sides = ",
                                     std::abs(arma::dot(arma::cross(cbr, ctr), arma::cross(cbl, ctl))));
-                                // log();
                             }
                         }
                         it = goals->erase(it);
@@ -587,11 +578,10 @@ namespace vision {
                             fd.dimensions.goalpost_width, cbl, cbr);
                         float distance = (distance_top + distance_bottom) / 2;
 
-                        auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(
-                            distance * rGCc_norm));  // Just converted into eigen. Still the unit vector
+                        auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(distance * rGCc_norm));
                         arma::vec3 covariance_amplifier({distance, 1, 1});
-                        Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
-                            VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
+                        Eigen::Matrix3d rGCc_cov =
+                            convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE % covariance_amplifier));
 
                         if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
                             it->measurement.push_back(
@@ -610,11 +600,9 @@ namespace vision {
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                     }
 
-
                     // Add classified image corresponding to this message
                     it->visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
                 }
-
 
                 // Assign leftness and rightness to goals
                 if (goals->size() == 2) {
