@@ -49,7 +49,8 @@ namespace behaviour {
             void turnRight();
             void getUp();
             void reset();
-            void kickRightForward();
+            void kickLeft();
+            void kickRight();
             void lookLeft();
             void lookRight();
             void lookUp();

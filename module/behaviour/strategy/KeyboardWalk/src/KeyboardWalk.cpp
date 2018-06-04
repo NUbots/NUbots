@@ -67,7 +67,8 @@ namespace behaviour {
                     case 'r': reset(); break;
                     case 'g': getUp(); break;
                     case 'e': walkToggle(); break;
-                    case ' ': kickRightForward(); break;
+                    case '.': kickRight(); break;
+                    case ',': kickLeft(); break;
                     case KEY_LEFT: lookLeft(); break;
                     case KEY_RIGHT: lookRight(); break;
                     case KEY_UP: lookUp(); break;
@@ -133,13 +134,18 @@ namespace behaviour {
             log("getup");
         }
 
-        void KeyboardWalk::kickRightForward() {
-            /*emit(std::make_unique<KickCommand>(KickCommand{
-                {-0.05, 0, 0}, //Ball is right of centre for right kick
-                {1, 0, 0}
-            }));*/
+        void KeyboardWalk::kickLeft() {
+            emit(std::make_unique<KickCommand>(KickCommand{{0.05, 0, 0},  // Ball is right of centre for left kick
+                                                           {1, 0, 0}}));
+            log("left forward kick");
+        }
+
+        void KeyboardWalk::kickRight() {
+            emit(std::make_unique<KickCommand>(KickCommand{{-0.05, 0, 0},  // Ball is right of centre for right kick
+                                                           {1, 0, 0}}));
             log("right forward kick");
         }
+
 
         void KeyboardWalk::lookLeft() {
             headYaw += HEAD_DIFF;
