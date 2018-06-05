@@ -10,6 +10,3 @@ sudo apt-add-repository -y 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trust
 sudo apt-get update
 sudo apt-get install clang-format-6.0
 sudo apt-get install colordiff
-
-sudo apt-get install python3-pip
-sudo pip3 install yapf
