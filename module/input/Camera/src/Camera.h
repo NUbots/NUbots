@@ -16,8 +16,10 @@
 #include <nuclear>
 
 // clang-format off
+extern "C" {
 #include <arvconfig.h>
-#include <arv.h>
+#include <aravis-0.6/arv.h>
+}
 // clang-format on
 
 #include "extension/Configuration.h"
