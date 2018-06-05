@@ -69,8 +69,8 @@ namespace behaviour {
                     case 'r': reset(); break;
                     case 'g': getUp(); break;
                     case 'e': walkToggle(); break;
-                    case '.': kickRight(); break;
-                    case ',': kickLeft(); break;
+                    case '.': kick(LimbID::RIGHT_LEG); break;
+                    case ',': kick(LimbID::LEFT_LEG); break;
                     case KEY_LEFT: lookLeft(); break;
                     case KEY_RIGHT: lookRight(); break;
                     case KEY_UP: lookUp(); break;
@@ -136,24 +136,14 @@ namespace behaviour {
             log("getup");
         }
 
-        void KeyboardWalk::kickLeft() {
+        void KeyboardWalk::kick(LimbID::Value l) {
             message::motion::KickScriptCommand ks;
-            ks.direction = {0.05, 0, 0};
-            ks.leg       = LimbID::LEFT_LEG;
-
+            ks.direction    = {0.05, 0, 0};
+            ks.leg          = l;
+            std::string leg = (l == 1) ? "left" : "right";
             emit(std::make_unique<message::motion::KickScriptCommand>(ks));
-            log("left kick");
+            log("kick", leg);
         }
-
-        void KeyboardWalk::kickRight() {
-            message::motion::KickScriptCommand ks;
-            ks.direction = {0.05, 0, 0};
-            ks.leg       = LimbID::RIGHT_LEG;
-
-            emit(std::make_unique<message::motion::KickScriptCommand>(ks));
-            log("right kick");
-        }
-
 
         void KeyboardWalk::lookLeft() {
             headYaw += HEAD_DIFF;
