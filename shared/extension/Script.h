@@ -173,12 +173,12 @@ struct Script {
     }
 
     // All of these disables for this template are because the std::string constructor is magic and screwy
-    template <typename T,
-              typename Decayed = typename std::decay<T>::type,
-              typename         = typename std::enable_if<!std::is_same<const char*, Decayed>::value
-                                                 && !std::is_same<std::allocator<char>, Decayed>::value
-                                                 && !std::is_same<std::initializer_list<char>, Decayed>::value
-                                                 && !std::is_same<char, Decayed>::value>::type>
+    template <
+        typename T,
+        typename Decayed = typename std::decay<T>::type,
+        typename         = typename std::enable_if<
+            !std::is_same<const char*, Decayed>::value && !std::is_same<std::allocator<char>, Decayed>::value
+            && !std::is_same<std::initializer_list<char>, Decayed>::value && !std::is_same<char, Decayed>::value>::type>
     operator T() const {
         return config.as<T>();
     }

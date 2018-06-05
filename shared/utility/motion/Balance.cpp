@@ -28,10 +28,10 @@ namespace motion {
     using LimbID = utility::input::LimbID;
     // using ServoID = utility::input::ServoID;
     using message::input::Sensors;
+    using message::motion::KinematicsModel;
+    using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
-    using utility::math::geometry::UnitQuaternion;
-    using message::motion::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();

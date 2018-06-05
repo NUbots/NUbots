@@ -19,7 +19,8 @@
         "default_line_ending": "unix",
         "ClangFormat": {
             "style": "file",
-            "format_on_save": true
+            "format_on_save": true,
+            "languages": [ "C", "C++", "C++11", "Protobuf" ],
         }
     }
 }

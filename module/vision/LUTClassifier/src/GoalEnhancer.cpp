@@ -22,23 +22,23 @@
 #include "utility/math/geometry/Line.h"
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace vision {
 
     using message::input::Image;
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using utility::math::ransac::NPartiteRansac;
-    using utility::math::geometry::Line;
     using message::input::CameraParameters;
+    using utility::math::geometry::Line;
     using utility::math::geometry::Plane;
+    using utility::math::ransac::NPartiteRansac;
     using utility::math::vision::getCamFromImage;
 
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
 
     struct GoalPOI {
         GoalPOI() : midpoint(), length() {}
@@ -111,7 +111,7 @@ namespace vision {
         // Partition our segments so that they are split between above and below the horizon
         auto split = std::partition(std::begin(points), std::end(points), [&](const GoalPOI& point) {
             // Is the midpoint above or below the horizon?
-            arma::vec3 camPoint = getCamFromImage(arma::ivec({point.midpoint[0], point.midpoint[1]}), cam);
+            arma::vec3 camPoint = getCamFromImage(arma::ivec({int(point.midpoint[0]), int(point.midpoint[1])}), cam);
             return arma::dot(horizon_normal, camPoint) > 0;
         });
 
@@ -175,7 +175,7 @@ namespace vision {
                                int(std::round(p[1]))});
 
                 if (e[0] > 0) {
-                    auto segments = quex->classify(image, lut, s, e);
+                    auto segments = classifier->classify(image, lut, s, e);
                     newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                 }
             }

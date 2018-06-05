@@ -13,7 +13,8 @@ namespace util {
     namespace serialise {
 
         template <typename T>
-        struct Serialise<T, std::enable_if_t<std::is_base_of<::message::MessageBase<T>, T>::value, T>> {
+        struct Serialise<T,
+                         std::enable_if_t<std::is_base_of<::message::MessageBase<std::remove_cv_t<T>>, T>::value, T>> {
 
             using protobuf_type = typename T::protobuf_type;
 

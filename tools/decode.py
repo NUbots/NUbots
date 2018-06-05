@@ -32,7 +32,7 @@ def register(command):
 def run(file, **kwargs):
 
     # Open up our message output directory to get our protobuf types
-    shared_path = os.path.join(b.cmake_cache[b.cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR'], 'shared')
+    shared_path = os.path.join(b.binary_dir, 'shared')
 
     sys.path.append(shared_path)
 

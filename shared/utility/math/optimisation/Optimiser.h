@@ -36,18 +36,18 @@
 namespace utility {
 namespace math {
     namespace optimisation {
-        using message::support::optimisation::OptimiserParameters;
         using message::support::optimisation::OptimiserEstimate;
+        using message::support::optimisation::OptimiserParameters;
 
         class Optimiser {
         public:
-            virtual const OptimiserEstimate& estimate() = 0;
+            virtual const OptimiserEstimate& estimate()                                      = 0;
             virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
-            virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
-            virtual bool validSample(...)                            = 0;
-            virtual void reset()                                     = 0;
-            virtual void reset(const OptimiserEstimate& est)         = 0;
-            virtual ~Optimiser()                                     = default;
+            virtual arma::mat getSamples(const uint& numSamples = 7)                         = 0;
+            virtual bool validSample(...)                                                    = 0;
+            virtual void reset()                                                             = 0;
+            virtual void reset(const OptimiserEstimate& est)                                 = 0;
+            virtual ~Optimiser()                                                             = default;
         };
 
         /**

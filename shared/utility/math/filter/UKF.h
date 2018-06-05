@@ -230,8 +230,9 @@ namespace math {
                         arma::mat innovationVariance       = predictedCovariance + measurementVariance;
                         arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
                         double loglikelihood =
-                            0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0])
-                                   + innovation.n_elem * std::log(2 * M_PI));
+                            0.5
+                            * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0])
+                               + innovation.n_elem * std::log(2 * M_PI));
                         return -loglikelihood;
                     });
             }
