@@ -24,12 +24,12 @@
 #include "RansacGoalModel.h"
 
 #include "extension/Configuration.h"
+
 #include "message/input/CameraParameters.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/VisionObjects.h"
-
 
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Line.h"
@@ -51,11 +51,11 @@ namespace vision {
     using extension::Configuration;
 
     using message::input::CameraParameters;
-    using message::support::FieldDescription;
     using message::vision::ClassifiedImage;
-    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using message::vision::Goal;
     using message::vision::LookUpTable;
+    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
+    using message::support::FieldDescription;
+    using message::vision::Goal;
 
     using utility::math::coordinates::cartesianToSpherical;
     using Plane = utility::math::geometry::Plane<3>;
@@ -72,7 +72,6 @@ namespace vision {
     using utility::math::vision::projectCamToPlane;
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::nusight::drawVisionLines;
-
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the
