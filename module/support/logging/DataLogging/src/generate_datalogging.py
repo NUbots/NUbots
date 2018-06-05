@@ -42,9 +42,9 @@ if __name__ == "__main__":
 
     messages = list(messages)
 
+
     # The base of our source file we will be filling in
-    source = dedent(
-        """\
+    source = dedent("""\
         #include "DataLogging.h"
         #include <iomanip>
 
@@ -178,8 +178,7 @@ if __name__ == "__main__":
                 }}
             }}  // namespace logging
         }}  // namespace support
-        }}  // namespace module\n"""
-    )
+        }}  // namespace module\n""")
 
     # Work out our includes
     includes = ['#include "{}"'.format(i) for i in includes]
@@ -204,3 +203,4 @@ if __name__ == "__main__":
     # and write it out
     with open(yaml_file, 'w') as f:
         f.write(yaml_template.format(messages='\n'.join(yaml_keys)))
+

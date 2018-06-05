@@ -29,7 +29,7 @@ state = 1
 left_predict = []
 left_state = []
 for v in left_probability:
-    k = n / (n + np)  #2 * v)
+    k = n / (n + np) #2 * v)
     s = s + k * (v - s)
     n = (1 - k) * n + 1
 
@@ -53,9 +53,9 @@ state = 1
 right_predict = []
 right_state = []
 for v in right_probability:
-    k = n / (n + np)  #2 * v)
+    k = n / (n + np) #2 * v)
     s = s + k * (v - s)
-    n = (1 - k) * n + 1
+    n = (1 - k) * n+1
 
     right_predict.append(s)
 
@@ -73,7 +73,7 @@ left_fn = 0
 left_tp = 0
 left_tn = 0
 for v in zip(left_truth, left_state):
-    if v[0] == 0 and v[1] == 0:
+    if   v[0] == 0 and v[1] == 0:
         left_tn += 1
     elif v[0] == 0 and v[1] == 1:
         left_fp += 1
@@ -87,7 +87,7 @@ right_fn = 0
 right_tp = 0
 right_tn = 0
 for v in zip(right_truth, right_state):
-    if v[0] == 0 and v[1] == 0:
+    if   v[0] == 0 and v[1] == 0:
         right_tn += 1
     elif v[0] == 0 and v[1] == 1:
         right_fp += 1
@@ -100,9 +100,7 @@ print 'Left False Positive  {:5.2f}%'.format(100.0 * float(left_fp) / float(left
 print 'Left False Negative  {:5.2f}%'.format(100.0 * float(left_fn) / float(left_fp + left_fn + left_tp + left_tn))
 print 'Left True Positive   {:5.2f}%'.format(100.0 * float(left_tp) / float(left_fp + left_fn + left_tp + left_tn))
 print 'Left True Negative   {:5.2f}%'.format(100.0 * float(left_tn) / float(left_fp + left_fn + left_tp + left_tn))
-print 'Left Accuracy        {:5.2f}%'.format(
-    100.0 * float(left_tp + left_tn) / float(left_fp + left_fn + left_tp + left_tn)
-)
+print 'Left Accuracy        {:5.2f}%'.format(100.0 * float(left_tp + left_tn) / float(left_fp + left_fn + left_tp + left_tn))
 
 print
 
@@ -110,15 +108,10 @@ print 'Right False Positive {:5.2f}%'.format(100.0 * float(right_fp) / float(rig
 print 'Right False Negative {:5.2f}%'.format(100.0 * float(right_fn) / float(right_fp + right_fn + right_tp + right_tn))
 print 'Right True Positive  {:5.2f}%'.format(100.0 * float(right_tp) / float(right_fp + right_fn + right_tp + right_tn))
 print 'Right True Negative  {:5.2f}%'.format(100.0 * float(right_tn) / float(right_fp + right_fn + right_tp + right_tn))
-print 'Right Accuracy       {:5.2f}%'.format(
-    100.0 * float(right_tp + right_tn) / float(right_fp + right_fn + right_tp + right_tn)
-)
+print 'Right Accuracy       {:5.2f}%'.format(100.0 * float(right_tp + right_tn) / float(right_fp + right_fn + right_tp + right_tn))
 
 print
-print 'Total Accuracy       {:5.2f}%'.format(
-    100.0 * float(right_tp + right_tn + left_tp + left_tn) /
-    float(left_fp + left_fn + left_tp + left_tn + right_fp + right_fn + right_tp + right_tn)
-)
+print 'Total Accuracy       {:5.2f}%'.format(100.0 * float(right_tp + right_tn + left_tp + left_tn) / float(left_fp + left_fn + left_tp + left_tn + right_fp + right_fn + right_tp + right_tn))
 
 # Plot our predicted state with some offset to make it easy to distinguish from the ground truth
 pyplot.plot([s * 0.8 + 0.1 for s in right_state], marker='^')
@@ -133,7 +126,8 @@ pyplot.plot(right_predict, marker='x')
 pyplot.plot(right_truth, marker='o')
 
 # Extend a little above 0,1
-pyplot.ylim((-0.05, 1.05))
+pyplot.ylim((-0.05,1.05))
 
 # Show our graph
 pyplot.show()
+

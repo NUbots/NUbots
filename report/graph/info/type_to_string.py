@@ -1,3 +1,4 @@
+
 def type_to_string(type_list):
 
     # Remove the allocator from vectors to make them easier to read
@@ -18,12 +19,12 @@ def type_to_string(type_list):
         period = period[3][-1][-1]
 
         period = ['std', 'chrono'] + {
-            1e-9: ['nanoseconds'],
-            1e-6: ['microseconds'],
-            1e-3: ['milliseconds'],
-            1: ['seconds'],
-            60: ['minutes'],
-            3600: ['hours']
+            1e-9 : ['nanoseconds'],
+            1e-6 : ['microseconds'],
+            1e-3 : ['milliseconds'],
+            1    : ['seconds'],
+            60   : ['minutes'],
+            3600 : ['hours']
         }[float(period[0][0][:-2]) / float(period[1][0][:-2])]
 
         if is_per:

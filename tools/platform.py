@@ -5,7 +5,6 @@ import b
 from termcolor import cprint
 from subprocess import call, STDOUT
 
-
 def register(command):
 
     # Install help
@@ -22,14 +21,9 @@ def register(command):
         if f.endswith('.cmake'):
             toolchains.append(f[:-6])
 
-    init_command.add_argument(
-        'platform', metavar='platform', choices=toolchains, help='the platform to select as the primary workspace'
-    )
+    init_command.add_argument('platform', metavar='platform', choices=toolchains, help='the platform to select as the primary workspace')
 
-    init_command.add_argument(
-        '-s', '--static', dest='static', action='store_true', help='perform a static build to get maximum performance'
-    )
-
+    init_command.add_argument('-s', '--static', dest='static', action='store_true', help='perform a static build to get maximum performance')
 
 def run(workspace_command, static, **kwargs):
     if workspace_command == 'select':
@@ -73,8 +67,6 @@ def run(workspace_command, static, **kwargs):
         # Yell at windows users for having a crappy OS
         if not symlink_success:
             cprint('Windows does not support symlinks so we can\'t link to the build directory', 'red', attrs=['bold'])
-            cprint(
-                'Instead you will need to change to the build_{} directory to build'.format(platform),
-                'red',
-                attrs=['bold']
-            )
+            cprint('Instead you will need to change to the build_{} directory to build'.format(platform), 'red', attrs=['bold'])
+
+

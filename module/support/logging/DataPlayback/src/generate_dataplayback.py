@@ -42,9 +42,9 @@ if __name__ == "__main__":
 
     messages = list(messages)
 
+
     # The base of our source file we will be filling in
-    source = dedent(
-        """\
+    source = dedent("""\
         #include "DataPlayback.h"
 
         #include "extension/Configuration.h"
@@ -199,8 +199,7 @@ if __name__ == "__main__":
         }}  // namespace support
         }}  // namespace module
 
-        """
-    )
+        """)
 
     # Work out our includes and players
     includes = ['#include "{}"'.format(i) for i in includes]
@@ -210,8 +209,7 @@ if __name__ == "__main__":
         f.write(source.format(includes='\n'.join(includes), players='\n'.join(players)))
 
     # Now generate our yaml file
-    yaml_template = dedent(
-        """\
+    yaml_template = dedent("""\
         file: ""
         loop_playback: true
         # The amount of time into the future to buffer, should be at least 1000ms
@@ -219,11 +217,11 @@ if __name__ == "__main__":
 
         messages:
         {messages}
-    """
-    )
+    """)
 
     yaml_keys = ['  {}: false'.format(m) for m in sorted(messages)]
 
     # and write it out
     with open(yaml_file, 'w') as f:
         f.write(yaml_template.format(messages='\n'.join(yaml_keys)))
+

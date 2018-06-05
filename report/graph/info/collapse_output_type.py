@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import pdb
 
-
 def collapse_output_type(output):
 
     # We will fill this with our new list of children

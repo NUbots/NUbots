@@ -59,19 +59,18 @@ for k in usage:
 
 points = sorted([usage[k] for k in usage], reverse=True)
 
-img = Image.new('RGB', (11, 11), 'black')
-img2 = Image.new('RGB', (166, 166), 'black')
+img = Image.new('RGB', (11,11), 'black')
+img2 = Image.new('RGB', (166,166), 'black')
 pixels = img.load()
 pixels2 = img2.load()
 
 for i in xrange(0, len(points)):
     for x in xrange(1, 15):
         for y in xrange(1, 15):
-            pixels2[int((i % 11) * 15 + x), int((i / 11) * 15 + y)
-                    ] = (int(points[i] * 255), int(points[i] * 255), int(points[i] * 255))
+            pixels2[int((i%11) * 15 + x), int((i/11) * 15 + y)] = (int(points[i]*255), int(points[i]*255), int(points[i]*255))
 
 for i in xrange(0, len(points)):
-    pixels[int(i % 11), int(i / 11)] = (int(points[i] * 255), int(points[i] * 255), int(points[i] * 255))
+    pixels[int(i%11), int(i/11)] = (int(points[i]*255), int(points[i]*255), int(points[i]*255))
 
 img.save('out.png')
 img2.save('out2.png')
