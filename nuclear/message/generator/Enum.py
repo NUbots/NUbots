@@ -84,8 +84,7 @@ class Enum:
                 friend std::ostream& operator<< (std::ostream& out, const {name}& val);
             }};""")
 
-        impl_template = dedent(
-            """\
+        impl_template = dedent("""\
             typedef {fqn} T{scope_name};
 
             {fqn}::{name}() : value(Value::{default_value}) {{}}
