@@ -4,7 +4,6 @@ from generator.textutil import indent, dedent
 
 
 class Enum:
-
     def __init__(self, e, context):
         self.package = context.package
         self.name = e.name
@@ -24,16 +23,13 @@ class Enum:
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
 
         # Make our if chain
-        if_chain = indent(
-            '\nelse '.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values])
-        )
+        if_chain = indent('\nelse '.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values]))
 
         # Get our default value
         default_value = dict([reversed(v) for v in self.values])[0]
 
         # Make our fancy enums
-        header_template = dedent(
-            """\
+        header_template = dedent("""\
             struct {name} : public ::message::MessageBase<{name}> {{
                 enum Value {{
             {values}
@@ -177,11 +173,9 @@ class Enum:
 
             std::ostream& {namespace}::operator<< (std::ostream& out, const {fqn}& val) {{
                 return out << static_cast<std::string>(val);
-            }}"""
-        )
+            }}""")
 
-        python_template = dedent(
-            """\
+        python_template = dedent("""\
             // Local scope for this enum
             {{
                 auto enumclass = pybind11::class_<{fqn}, std::shared_ptr<{fqn}>>(context, "{name}")
@@ -213,13 +207,12 @@ class Enum:
                 pybind11::enum_<{fqn}::Value>(enumclass, "Value")
             {value_list}
                     .export_values();
-
-                pybind11::implicitly_convertible<{fqn}::Value, {fqn}>();
-            }}"""
-        )
+            }}""")
 
         return header_template.format(
-            name=self.name, protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')), values=values
+            name=self.name,
+            protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
+            values=values
         ), impl_template.format(
             fqn='::'.join(self.fqn.split('.')),
             namespace='::'.join(self.package.split('.')),
@@ -233,10 +226,6 @@ class Enum:
             fqn='::'.join(self.fqn.split('.')),
             name=self.name,
             include_path=self.include_path,
-            value_list=indent(
-                '\n'.join(
-                    '.value("{name}", {fqn}::{name})'.format(name=v[0], fqn=self.fqn.replace('.', '::'))
-                    for v in self.values
-                ), 8
-            )
+            value_list=indent('\n'.join('.value("{name}", {fqn}::{name})'.format(name=v[0], fqn=self.fqn.replace('.', '::')) for v in self.values), 8)
         )
+

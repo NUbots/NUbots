@@ -14,7 +14,7 @@ project_dir = os.path.dirname(nuclear_dir)
 
 # Get the tools directories to find b modules
 nuclear_tools_path = os.path.join(nuclear_dir, 'tools')
-user_tools_path = os.path.join(project_dir, 'tools')
+user_tools_path    = os.path.join(project_dir, 'tools')
 
 # Build our cmake cache
 cmake_cache = {}
@@ -23,6 +23,7 @@ cmake_cache = {}
 if os.path.isfile('CMakeCache.txt'):
     with open('CMakeCache.txt', 'r') as f:
         cmake_cache_text = f.readlines()
+
 
 # Look for a build directory
 else:
@@ -36,7 +37,7 @@ else:
         if os.path.isfile(os.path.join(project_dir, d, 'CMakeCache.txt')):
             with open(os.path.join(project_dir, d, 'CMakeCache.txt'), 'r') as f:
                 cmake_cache_text = f.readlines()
-            break
+            break;
 
     # If we still didn't find anything
     try:
@@ -56,7 +57,7 @@ for l in cmake_cache_text:
         g = re.match(r'([a-zA-Z_$][a-zA-Z_.$0-9-]*):(\w+)=(.*)', l).groups()
 
         # Store our value and split it into a list if it is a list
-        cmake_cache[g[0]] = g[2] if ';' not in g[2].strip(';') else g[2].strip(';').split(';')
+        cmake_cache[g[0]] = g[2] if ';' not in g[2].strip(';') else g[2].strip(';').split(';');
 
 # Try to find our source and binary directories
 try:
@@ -83,10 +84,7 @@ if __name__ == "__main__":
     sys.path.append(user_tools_path)
 
     # Root parser information
-    command = argparse.ArgumentParser(
-        description=
-        'This script is an optional helper script for performing common tasks for working with the NUClear roles system.'
-    )
+    command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks for working with the NUClear roles system.')
     subcommands = command.add_subparsers(dest='command')
     subcommands.help = "The command to run from the script. See each help for more information."
 

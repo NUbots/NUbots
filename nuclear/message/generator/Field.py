@@ -13,7 +13,6 @@ FieldOptions.RegisterExtension(pointer)
 FieldOptions.RegisterExtension(array_size)
 PointerType = dict(PointerType.items())
 
-
 class Field:
 
     # Static map_types field
@@ -39,7 +38,7 @@ class Field:
             self.type = Field.map_types[f.type_name]
 
         # Normal message types
-        elif f.type in [f.TYPE_MESSAGE, f.TYPE_ENUM, f.TYPE_GROUP]:
+        elif f.type in [ f.TYPE_MESSAGE, f.TYPE_ENUM, f.TYPE_GROUP ]:
             self.type = f.type_name
             self.default_value = f.default_value
 
@@ -48,21 +47,21 @@ class Field:
             # Work out what primitive type we have
             # and the default default for that field
             type_info = {
-                f.TYPE_DOUBLE: ('double', '0.0'),
-                f.TYPE_FLOAT: ('float', '0.0'),
-                f.TYPE_INT64: ('int64', '0'),
-                f.TYPE_UINT64: ('uint64', '0'),
-                f.TYPE_INT32: ('int32', '0'),
-                f.TYPE_FIXED64: ('fixed64', '0'),
-                f.TYPE_FIXED32: ('fixed32', '0'),
-                f.TYPE_BOOL: ('bool', 'false'),
-                f.TYPE_STRING: ('string', '""'),
-                f.TYPE_BYTES: ('bytes', ''),
-                f.TYPE_UINT32: ('uint32', '0'),
+                f.TYPE_DOUBLE:   ('double',   '0.0'),
+                f.TYPE_FLOAT:    ('float',    '0.0'),
+                f.TYPE_INT64:    ('int64',    '0'),
+                f.TYPE_UINT64:   ('uint64',   '0'),
+                f.TYPE_INT32:    ('int32',    '0'),
+                f.TYPE_FIXED64:  ('fixed64',  '0'),
+                f.TYPE_FIXED32:  ('fixed32',  '0'),
+                f.TYPE_BOOL:     ('bool',     'false'),
+                f.TYPE_STRING:   ('string',   '""'),
+                f.TYPE_BYTES:    ('bytes',    ''),
+                f.TYPE_UINT32:   ('uint32',   '0'),
                 f.TYPE_SFIXED32: ('sfixed32', '0'),
                 f.TYPE_SFIXED64: ('sfixed64', '0'),
-                f.TYPE_SINT32: ('sint32', '0'),
-                f.TYPE_SINT64: ('sint64', '0')
+                f.TYPE_SINT32:   ('sint32',   '0'),
+                f.TYPE_SINT64:   ('sint64',   '0')
             }[f.type]
 
             self.type = type_info[0]

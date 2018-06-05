@@ -13,25 +13,20 @@ if not hasattr(sys, 'argv'):
 def indent(str, len=4):
     return '\n'.join([(' ' * len) + l for l in str.splitlines()])
 
-
 class DSLWord(object):
     pass
 
-
 # Single type keywords
-
 
 class SingleTypeDSLWord(DSLWord):
 
     def __init__(self, t):
         self._name = self.__class__.__name__
         self._t = t
-        self._include_paths = [t.include_path()]
+        self._include_paths = [ t.include_path() ]
 
     def template_args(self):
-        return "{}<::{}::{}>".format(
-            self._name, self._t.__module__.replace('.', '::'), self._t.__name__.replace('.', '::')
-        )
+        return "{}<::{}::{}>".format(self._name, self._t.__module__.replace('.', '::'), self._t.__name__.replace('.', '::'))
 
     def input_types(self):
         return ["const {}::{}&".format(self._t.__module__.replace('.', '::'), self._t.__name__.replace('.', '::'))]
@@ -39,56 +34,28 @@ class SingleTypeDSLWord(DSLWord):
     def include_paths(self):
         return self._include_paths
 
-
-class Trigger(SingleTypeDSLWord):
-    pass
-
-
-class With(SingleTypeDSLWord):
-    pass
-
-
-class Sync(SingleTypeDSLWord):
-    pass
-
+class Trigger(SingleTypeDSLWord): pass
+class With(SingleTypeDSLWord): pass
+class Sync(SingleTypeDSLWord): pass
 
 # No arg Keywords
 
-
 class NoArgsDSLWord(DSLWord):
-
     def __init__(self):
         self._name = self.__class__.__name__
 
     def template_args(self):
         return self._name
 
-
-class Always(NoArgsDSLWord):
-    pass
-
-
-class MainThread(NoArgsDSLWord):
-    pass
-
-
-class Single(NoArgsDSLWord):
-    pass
-
-
-class Startup(NoArgsDSLWord):
-    pass
-
-
-class Shutdown(NoArgsDSLWord):
-    pass
-
+class Always(NoArgsDSLWord): pass
+class MainThread(NoArgsDSLWord): pass
+class Single(NoArgsDSLWord): pass
+class Startup(NoArgsDSLWord): pass
+class Shutdown(NoArgsDSLWord): pass
 
 # DSL modifiers
 
-
 class Last(DSLWord):
-
     def __init__(self, dsl, count):
         self._name = self.__class__.__name__
         self._dsl = dsl
@@ -103,9 +70,7 @@ class Last(DSLWord):
     def include_paths(self):
         return self._dsl.include_paths()
 
-
 class Optional(DSLWord):
-
     def __init__(self, dsl):
         self._name = self.__class__.__name__
         self._dsl = dsl
@@ -119,12 +84,9 @@ class Optional(DSLWord):
     def include_paths(self):
         return self._dsl.include_paths()
 
-
 # Weird types
 
-
 class Buffer(DSLWord):
-
     def __init__(self, k):
         self._name = self.__class__.__name__
         self._k = k
@@ -132,9 +94,7 @@ class Buffer(DSLWord):
     def template_args(self):
         return "{}<{}>".format(self._name, self._k)
 
-
 class Every(DSLWord):
-
     def __init__(self, time):
         self._name = self.__class__.__name__
         self._time = time
@@ -145,35 +105,28 @@ class Every(DSLWord):
 
 
 class Priority(object):
-
     class REALTIME(DSLWord):
-
         def template_args(self):
             return "Priority::REALTIME"
 
     class HIGH(DSLWord):
-
         def template_args(self):
             return "Priority::HIGH"
 
     class NORMAL(DSLWord):
-
         def template_args(self):
             return "Priority::NORMAL"
 
     class LOW(DSLWord):
-
         def template_args(self):
             return "Priority::LOW"
 
     class IDLE(DSLWord):
-
         def template_args(self):
             return "Priority::IDLE"
 
 
 # Type that holds a DSL function
-
 
 class DSLCallback(DSLWord):
 
@@ -182,7 +135,7 @@ class DSLCallback(DSLWord):
 
         self._t_args = ", ".join(w.template_args() for w in dsl if hasattr(w, 'template_args') and w.template_args())
 
-        self._r_args = ", ".join(w.runtime_args() for w in dsl if hasattr(w, 'runtime_args') and w.runtime_args())
+        self._r_args = ", ".join(w.runtime_args()  for w in dsl if hasattr(w, 'runtime_args')  and w.runtime_args())
 
         paths = [w.include_paths() for w in dsl if hasattr(w, 'include_paths') and w.include_paths()]
         self._include_paths = [b for a in paths for b in a]
@@ -239,7 +192,6 @@ def Reactor(reactor):
 
         # Go through all of our DSL callbacks to bind them
         reactions = inspect.getmembers(reactor, predicate=lambda x: isinstance(x, DSLCallback))
-
         for reaction in reactions:
             func_name = 'bind_{}'.format(re.sub(r'(?:\W|^(?=\d))+', '_', reaction[1].template_args()))
             getattr(nuclear_reactor, func_name)(reaction[1].function())
@@ -265,8 +217,7 @@ def Reactor(reactor):
         # Get our reactions
         reactions = inspect.getmembers(reactor, predicate=lambda x: isinstance(x, DSLCallback))
 
-        binder_impl = dedent(
-            """\
+        binder_impl = dedent("""\
             // Binding function for the dsl on<{dsl}>
             m.def("bind_{func_name}", [this] (pybind11::function fn) {{
 
@@ -291,8 +242,7 @@ def Reactor(reactor):
                         std::rethrow_exception(std::current_exception());
                     }}
                 }});
-            }});"""
-        )
+            }});""")
 
         binders = set()
         includes = set()
@@ -305,27 +255,22 @@ def Reactor(reactor):
             input_vars = ['var{}'.format(i) for i in range(len(input_types))]
             input_args = ['{} {}'.format(arg, var) for arg, var in zip(input_types, input_vars)]
 
-            binders.add(
-                binder_impl.format(
-                    func_name=func_name,
-                    dsl=reaction[1].template_args(),
-                    runtime_args=reaction[1].runtime_args(),
-                    input_args=', '.join(input_args),
-                    input_types=', '.join(input_types),
-                    input_vars=', '.join(['self'] + input_vars)
-                )
-            )
+            binders.add(binder_impl.format(func_name=func_name,
+                                           dsl=reaction[1].template_args(),
+                                           runtime_args=reaction[1].runtime_args(),
+                                           input_args=', '.join(input_args),
+                                           input_types=', '.join(input_types),
+                                           input_vars=', '.join(['self'] + input_vars)))
 
             for include in reaction[1].include_paths():
                 includes.add('#include "{}"'.format(include))
 
         macro_guard = "{}_H".format(reactor_name.upper())
         header_file = "{}.h".format(reactor_name)
-        open_namespace = '\n'.join('namespace {} {{'.format(n) for n in reactor_namespace.split(os.path.sep))
+        open_namespace  = '\n'.join('namespace {} {{'.format(n) for n in reactor_namespace.split(os.path.sep))
         close_namespace = '\n'.join('}}  // namespace {}'.format(n) for n in reactor_namespace.split(os.path.sep))
 
-        header_template = dedent(
-            """\
+        header_template = dedent("""\
             #ifndef {macro_guard}
             #define {macro_guard}
 
@@ -358,21 +303,15 @@ def Reactor(reactor):
             {close_namespace}
 
             #endif  // {macro_guard}
-            """
-        )
+            """)
 
         with open(os.getcwd() + os.sep + reactor_name + '.h', 'w') as f:
-            f.write(
-                header_template.format(
-                    class_name=reactor_name,
-                    macro_guard=macro_guard,
-                    open_namespace=open_namespace,
-                    close_namespace=close_namespace
-                )
-            )
+            f.write(header_template.format(class_name=reactor_name,
+                                           macro_guard=macro_guard,
+                                           open_namespace=open_namespace,
+                                           close_namespace=close_namespace))
 
-        cpp_template = dedent(
-            """\
+        cpp_template = dedent("""\
             #include "{header_file}"
 
             #include <pybind11/functional.h>
@@ -449,26 +388,20 @@ def Reactor(reactor):
                 }}
 
             {close_namespace}
-            """
-        )
+            """)
 
         with open(os.getcwd() + os.sep + reactor_name + '.cpp', 'w') as f:
-            f.write(
-                cpp_template.format(
-                    header_file=header_file,
-                    class_name=reactor_name,
-                    includes='\n'.join(includes),
-                    nuclear_directory=os.path.join('python', 'nuclear'),
-                    reactor_directory=os.path.join('python', reactor_dir),
-                    python_file=os.path.join('python', reactor_path),
-                    binders=indent('\n\n'.join(binders), 8),
-                    open_namespace=open_namespace,
-                    close_namespace=close_namespace
-                )
-            )
+            f.write(cpp_template.format(header_file=header_file,
+                                        class_name=reactor_name,
+                                        includes='\n'.join(includes),
+                                        nuclear_directory=os.path.join('python', 'nuclear'),
+                                        reactor_directory=os.path.join('python', reactor_dir),
+                                        python_file=os.path.join('python', reactor_path),
+                                        binders=indent('\n\n'.join(binders), 8),
+                                        open_namespace=open_namespace,
+                                        close_namespace=close_namespace))
 
     return reactor
-
 
 # Our on function that creates the binding
 def on(*args):
@@ -478,7 +411,6 @@ def on(*args):
         return DSLCallback(func, *args)
 
     return decorator
-
 
 # TYPES THAT I DON'T KNOW IF I WANT
 
