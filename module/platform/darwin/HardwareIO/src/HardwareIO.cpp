@@ -237,7 +237,6 @@ namespace platform {
 
                 chargedVoltage = config["battery"]["charged_voltage"].as<float>();
                 flatVoltage    = config["battery"]["flat_voltage"].as<float>();
-
             });
 
             // This trigger gets the sensor data from the CM730
@@ -322,8 +321,8 @@ namespace platform {
                         std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
                     // cm730 leds to display battery voltage
-                    uint32_t ledl = 0;
-                    uint32_t ledr = 0;
+                    uint32_t ledl            = 0;
+                    uint32_t ledr            = 0;
                     std::array<bool, 3> ledp = {false, false, false};
 
                     if (sensors->battery > 0.9) {
