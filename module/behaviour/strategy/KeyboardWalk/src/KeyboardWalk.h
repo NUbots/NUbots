@@ -23,6 +23,8 @@
 #include <armadillo>
 #include <nuclear>
 
+#include "utility/input/LimbID.h"
+
 namespace module {
 namespace behaviour {
     namespace strategy {
@@ -49,7 +51,7 @@ namespace behaviour {
             void turnRight();
             void getUp();
             void reset();
-            void kickRightForward();
+            void kick(utility::input::LimbID::Value l);
             void lookLeft();
             void lookRight();
             void lookUp();

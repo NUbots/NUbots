@@ -28,6 +28,7 @@
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KickCommand.h"
 #include "utility/behaviour/MotionCommand.h"
+#include "utility/input/LimbID.h"
 #include "utility/math/matrix/Transform2D.h"
 
 namespace module {
@@ -39,6 +40,7 @@ namespace behaviour {
         using message::motion::KickCommand;
         using NUClear::message::LogMessage;
         using utility::math::matrix::Transform2D;
+        using LimbID = utility::input::LimbID;
 
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), velocity(arma::fill::zeros) {
@@ -67,7 +69,8 @@ namespace behaviour {
                     case 'r': reset(); break;
                     case 'g': getUp(); break;
                     case 'e': walkToggle(); break;
-                    case ' ': kickRightForward(); break;
+                    case '.': kick(LimbID::RIGHT_LEG); break;
+                    case ',': kick(LimbID::LEFT_LEG); break;
                     case KEY_LEFT: lookLeft(); break;
                     case KEY_RIGHT: lookRight(); break;
                     case KEY_UP: lookUp(); break;
@@ -133,12 +136,13 @@ namespace behaviour {
             log("getup");
         }
 
-        void KeyboardWalk::kickRightForward() {
-            /*emit(std::make_unique<KickCommand>(KickCommand{
-                {-0.05, 0, 0}, //Ball is right of centre for right kick
-                {1, 0, 0}
-            }));*/
-            log("right forward kick");
+        void KeyboardWalk::kick(LimbID::Value l) {
+            message::motion::KickScriptCommand ks;
+            ks.direction    = {0.05, 0, 0};
+            ks.leg          = l;
+            std::string leg = (l == 1) ? "left" : "right";
+            emit(std::make_unique<message::motion::KickScriptCommand>(ks));
+            log("kick", leg);
         }
 
         void KeyboardWalk::lookLeft() {
