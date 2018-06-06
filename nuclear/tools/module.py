@@ -121,16 +121,16 @@ def generate_header(parts):
 
         #include <nuclear>
 
-        {openNamespace}
+        {open_namespace}
 
-            class {className} : public NUClear::Reactor {{
+            class {class_name} : public NUClear::Reactor {{
 
             public:
-                /// @brief Called by the powerplant to build and setup the {className} reactor.
-                explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+                /// @brief Called by the powerplant to build and setup the {class_name} reactor.
+                explicit {class_name}(std::unique_ptr<NUClear::Environment> environment);
             }};
 
-        {closeNamespace}
+        {close_namespace}
 
         #endif  // {define}
         """
@@ -138,46 +138,46 @@ def generate_header(parts):
 
     return template.format(
         define='{}_H'.format('_'.join([p.upper() for p in parts])),
-        className=parts[-1],
-        openNamespace='\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]]),
-        closeNamespace='\n'.join('}' * (len(parts) - 1))
+        class_name=parts[-1],
+        open_namespace='\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]]),
+        close_namespace='\n'.join('}' * (len(parts) - 1))
     )
 
 
 def generate_cpp(parts):
     template = textwrap.dedent(
         """\
-        #include "{className}.h"
+        #include "{class_name}.h"
 
         #include "extension/Configuration.h"
 
-        {openNamespace}
+        {open_namespace}
 
             using extension::Configuration;
 
-            {className}::{className}(std::unique_ptr<NUClear::Environment> environment)
+            {class_name}::{class_name}(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)) {{
 
-                on<Configuration>("{className}.yaml").then([this] (const Configuration& config) {{
-                    // Use configuration here from file {className}.yaml
+                on<Configuration>("{class_name}.yaml").then([this] (const Configuration& config) {{
+                    // Use configuration here from file {class_name}.yaml
                 }});
             }}
-        {closeNamespace}
+        {close_namespace}
         """
     )
 
     return template.format(
-        className=parts[-1],
-        openNamespace='\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]]),
-        closeNamespace='\n'.join(['}' for x in parts[:-1]])
+        class_name=parts[-1],
+        open_namespace='\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]]),
+        close_namespace='\n'.join(['}' for x in parts[:-1]])
     )
 
 
 def generate_readme(parts):
     template = textwrap.dedent(
         """\
-        {className}
-        {classNameTitle}
+        {class_name}
+        {class_name_title}
 
         ## Description
 
@@ -193,9 +193,7 @@ def generate_readme(parts):
         """
     )
 
-    return template.format(
-        className=parts[-1], classNameTitle=len(parts[-1]) * '=', closeNamespace='\n'.join(['}' for x in parts[:-1]])
-    )
+    return template.format(class_name=parts[-1], class_name_title=len(parts[-1]) * '=')
 
 
 def generate_test(parts):
@@ -221,14 +219,14 @@ def generate_python(parts):
         from nuclear import Reactor, on, Trigger, Single, With, Every
 
         @Reactor
-        class {className}(object):
+        class {class_name}(object):
             def __init__(self):
-                # Constructor for {className}
+                # Constructor for {class_name}
 
-            @on(Configuration('{className}.yaml'))
-            def {className}_configfuration(self, config):
-                # Use configuration here from file {className}.yaml
+            @on(Configuration('{class_name}.yaml'))
+            def {class_name}_configfuration(self, config):
+                # Use configuration here from file {class_name}.yaml
         """
     )
 
-    return template.format(className=parts[-1])
+    return template.format(class_name=parts[-1])
