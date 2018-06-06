@@ -223,9 +223,10 @@ def generate_python(parts):
             def __init__(self):
                 # Constructor for {class_name}
 
-            @on(Configuration('{class_name}.yaml'))
-            def {class_name}_configfuration(self, config):
-                # Use configuration here from file {class_name}.yaml
+            # Disabled until extension bindings and made
+            # @on(Configuration('{class_name}.yaml'))
+            # def {class_name}_configfuration(self, config):
+            #     # Use configuration here from file {class_name}.yaml
         """
     )
 
