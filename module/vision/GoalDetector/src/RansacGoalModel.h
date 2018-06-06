@@ -54,7 +54,7 @@ namespace vision {
         double calculateError(const DataPoint& p) const;
 
         template <typename Iterator>
-        void refineModel(Iterator& begin, Iterator& end, const double& threshold) {
+        void refineModel(Iterator& /*begin*/, Iterator& /*end*/, const double& /*threshold*/) {
             // TODO: new least squares model for plane
             // Allows us to iterate through only the left states without copying
 

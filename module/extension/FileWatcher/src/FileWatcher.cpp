@@ -82,7 +82,6 @@ namespace extension {
 
         // We use an on always here as we can't use on IO due to the library
         on<Always>().then("File Watcher", [this] {
-
             // Lock so that while we are changing things this won't run
             std::lock_guard<std::mutex> lock(runMutex);
 
@@ -112,7 +111,6 @@ namespace extension {
         });
 
         on<Trigger<Unbind>>().then([this](const Unbind& fw) {
-
             // Lock our mutex and stop our monitor
             std::lock_guard<std::mutex> lock(runMutex);
             monitor->stop();
@@ -147,7 +145,6 @@ namespace extension {
         });
 
         on<Trigger<FileWatchRequest>>().then([this](const FileWatchRequest& req) {
-
             // Get the real path with a unique ptr to ensure it is freed properly
             std::unique_ptr<char, void (*)(void*)> realPath{::realpath(req.path.c_str(), nullptr), std::free};
 

@@ -30,16 +30,16 @@ import "google/protobuf/timestamp.proto";
 message DarwinSensors {
     // bitmask values
     enum Error {
-        OK              = 0;    // not really a flag but the lack of any other flag
-        INPUT_VOLTAGE   = 1;
-        ANGLE_LIMIT     = 2;
-        OVERHEATING     = 4;
-        RANGE           = 8;
-        CHECKSUM        = 16;
-        OVERLOAD        = 32;
-        INSTRUCTION     = 64;
-        CORRUPT_DATA    = 128;
-        TIMEOUT         = 256;
+        OK            = 0;  // not really a flag but the lack of any other flag
+        INPUT_VOLTAGE = 1;
+        ANGLE_LIMIT   = 2;
+        OVERHEATING   = 4;
+        RANGE         = 8;
+        CHECKSUM      = 16;
+        OVERLOAD      = 32;
+        INSTRUCTION   = 64;
+        CORRUPT_DATA  = 128;
+        TIMEOUT       = 256;
     }
 
     message LEDPanel {
@@ -76,12 +76,12 @@ message DarwinSensors {
     }
 
     message FSR {
-        float fsr1        = 1;
-        float fsr2        = 2;
-        float fsr3        = 3;
-        float fsr4        = 4;
-        float centreX     = 5;
-        float centreY     = 6;
+        float  fsr1       = 1;
+        float  fsr2       = 2;
+        float  fsr3       = 3;
+        float  fsr4       = 4;
+        float  centreX    = 5;
+        float  centreY    = 6;
         uint32 errorFlags = 7;
     }
 
@@ -103,7 +103,7 @@ message DarwinSensors {
         float  presentSpeed    = 10;
         float  load            = 11;
         float  voltage         = 12;
-        float temperature      = 13;
+        float  temperature     = 13;
     };
 
     message Servos {
@@ -143,7 +143,11 @@ message DarwinSensors {
 }
 
 // Button press events
-message ButtonLeftDown   {}
-message ButtonLeftUp     {}
-message ButtonMiddleDown {}
-message ButtonMiddleUp   {}
+message ButtonLeftDown {
+}
+message ButtonLeftUp {
+}
+message ButtonMiddleDown {
+}
+message ButtonMiddleUp {
+}

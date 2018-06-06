@@ -34,13 +34,12 @@
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacConeModel.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/Vision.h"
-#include "utility/vision/fourcc.h"
 
 #include "utility/math/geometry/Cone.h"
 
@@ -51,36 +50,36 @@ namespace vision {
 
     using message::input::CameraParameters;
 
-    using message::vision::ClassifiedImage;
-    using message::vision::Ball;
-    using message::vision::LookUpTable;
     using message::input::Image;
     using message::support::FieldDescription;
+    using message::vision::Ball;
+    using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
 
     using Plane = utility::math::geometry::Plane<3>;
 
     using ServoID = utility::input::ServoID;
-    using utility::math::vision::widthBasedDistanceToCircle;
-    using utility::math::vision::projectCamToPlane;
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::Cone;
+    using utility::math::geometry::Line;
+    using utility::math::matrix::Transform3D;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getImageFromCam;
+    using utility::math::vision::getParallaxAngle;
     using utility::math::vision::imageToScreen;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToPlane;
     using utility::math::vision::screenToImage;
     using utility::math::vision::screenToImageCts;
-    using utility::math::vision::getCamFromScreen;
-    using utility::math::vision::getParallaxAngle;
-    using utility::math::vision::getCamFromImage;
-    using utility::math::vision::getImageFromCam;
-    using utility::math::vision::projectCamSpaceToScreen;
-    using utility::math::matrix::Transform3D;
-    using utility::math::geometry::Cone;
-    using utility::math::geometry::Circle;
-    using utility::math::geometry::Line;
+    using utility::math::vision::widthBasedDistanceToCircle;
 
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacConeModel;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
     using utility::support::Expression;
 
     using FOURCC = utility::vision::FOURCC;
@@ -144,7 +143,7 @@ namespace vision {
             // sample point in lut and check if == Colour::GREEN
         }
 
-        // emit(drawVisionLines(debug));
+        emit(drawVisionLines(debug));
 
         float greenRatio = actualSamples == 0 ? 1 : (numGreen / float(actualSamples));
         return greenRatio;
@@ -169,7 +168,6 @@ namespace vision {
 
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
-
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD    = config["ransac"]["consensus_error_threshold"].as<Expression>();
 
@@ -202,14 +200,14 @@ namespace vision {
            With<LookUpTable>,
            Single,
            Priority::LOW>()
-            .then("Ball Detector",
-                  [this](std::shared_ptr<const ClassifiedImage> rawImage,
-                         const CameraParameters& cam,
-                         const FieldDescription& field,
-                         const LookUpTable& lut) {
-
-                      const auto& image   = *rawImage;
-                      const auto& sensors = *image.sensors;
+            .then(
+                "Ball Detector",
+                [this](std::shared_ptr<const ClassifiedImage> rawImage,
+                       const CameraParameters& cam,
+                       const FieldDescription& field,
+                       const LookUpTable& lut) {
+                    const auto& image   = *rawImage;
+                    const auto& sensors = *image.sensors;
 
                       // Copy our image across so we can do a check
                       auto imagePoints = image.ballPoints;
@@ -299,12 +297,17 @@ namespace vision {
 
                               double cameraHeight = camToGround(2, 3);
 
-                              // Get a unit vector pointing to the centre of the ball
-                              arma::vec3 ballCentreRay = axis;
+                        // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
+                        double widthDistance = widthBasedDistanceToCircle(
+                            field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
 
-                              /************************************************
-                               *                  THROWOUTS                   *
-                               ************************************************/
+                        if (widthDistance < cameraHeight * 0.5) {
+                            if (print_throwout_logs) {
+                                log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                                log("widthDistance =", widthDistance, "cameraHeight =", cameraHeight);
+                            }
+                            continue;
+                        }
 
                               if (print_throwout_logs) {
                                   log("Ball model: g =  ",

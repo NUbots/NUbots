@@ -23,30 +23,29 @@ package message.input;
 import "Vector.proto";
 
 
-
 message CameraParameters {
-    enum LensType{
+    enum LensType {
         PINHOLE = 0;
-        RADIAL = 1;
+        RADIAL  = 1;
     }
 
-    message Pinhole{
+    message Pinhole {
         vec2   pixelsToTanThetaFactor = 1;
         double focalLengthPixels      = 2;
         double distortionFactor       = 3;
     }
 
-    message Radial{
-        double radiansPerPixel = 1; //AKA lambda to some
+    message Radial {
+        double radiansPerPixel = 1;  // AKA lambda to some
     }
 
-    //Common
-    uvec2  imageSizePixels        = 1;
-    vec2   FOV                    = 2;
-    ivec2 centreOffset             = 3;
-    //Lens specific
-    Pinhole pinhole               = 4;
-    Radial radial                 = 5;
-    //Lens type
-    LensType lens                 = 6;
+    // Common
+    uvec2 imageSizePixels = 1;
+    vec2  FOV             = 2;
+    ivec2 centreOffset    = 3;
+    // Lens specific
+    Pinhole pinhole = 4;
+    Radial  radial  = 5;
+    // Lens type
+    LensType lens = 6;
 }

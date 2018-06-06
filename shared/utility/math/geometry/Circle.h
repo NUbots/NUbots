@@ -73,7 +73,7 @@ namespace math {
                     if (diff * diff < candidateThreshold) {
                         linearEq1.row(i).cols(0, 1) = (*it).t();
                         linearEq1(i, 2)             = 1.0;
-                        linearEq2(i) = -arma::dot((*it), (*it));
+                        linearEq2(i)                = -arma::dot((*it), (*it));
                         ++i;
                     }
                 }

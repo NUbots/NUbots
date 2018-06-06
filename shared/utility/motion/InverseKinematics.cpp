@@ -96,9 +96,10 @@ namespace motion {
             // clang-format on
             // Rotate input position from standard robot coords to foot coords
             // NUClear::log<NUClear::DEBUG>("Target Original\n", target);
-            arma::vec4 fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);
-            target        = inputCoordinatesToCalcCoordinates * target * inputCoordinatesToCalcCoordinates.t();
-            target.col(3) = fourthColumn;
+            arma::vec3 fourthColumn = target.col(3).head(3);
+            fourthColumn            = inputCoordinatesToCalcCoordinates.transformPoint(fourthColumn);
+            target                = inputCoordinatesToCalcCoordinates * target * inputCoordinatesToCalcCoordinates.t();
+            target.col(3).head(3) = fourthColumn;
             // NUClear::log<NUClear::DEBUG>("Target Final\n", target);
 
             // swap legs if needed
@@ -310,7 +311,7 @@ namespace motion {
             for (auto joint : headJoints) {
                 switch (joint.first.value) {
                     case ServoID::HEAD_PITCH: headPitch = joint.second; break;
-                    case ServoID::HEAD_YAW: headYaw     = joint.second; break;
+                    case ServoID::HEAD_YAW: headYaw = joint.second; break;
                     default:
                         NUClear::log<NUClear::ERROR>(__FILE__, __LINE__, "Joints for head returned unexpected values");
                         throw std::exception();

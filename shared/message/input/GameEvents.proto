@@ -40,30 +40,30 @@ message GameEvents {
     };
 
     message Score {
-        uint32 ownScore = 1;
+        uint32 ownScore      = 1;
         uint32 opponentScore = 2;
     }
 
     message GoalScored {
-        Context context = 1;
-        uint32 totalScore = 2;
+        Context context    = 1;
+        uint32  totalScore = 2;
     }
 
     message Penalisation {
-        Context context = 1;
-        uint32 robotId = 2;
-        google.protobuf.Timestamp ends = 3;
-        GameState.Data.PenaltyReason reason = 4;
+        Context                      context = 1;
+        uint32                       robotId = 2;
+        google.protobuf.Timestamp    ends    = 3;
+        GameState.Data.PenaltyReason reason  = 4;
     }
 
     message Unpenalisation {
         Context context = 1;
-        uint32 robotId = 2;
+        uint32  robotId = 2;
     }
 
     message CoachMessage {
         Context context = 1;
-        string message = 2;
+        string  message = 2;
     }
 
     message HalfTime {
@@ -71,8 +71,8 @@ message GameEvents {
     }
 
     message BallKickedOut {
-        Context context = 1;
-        google.protobuf.Timestamp time = 3;
+        Context                   context = 1;
+        google.protobuf.Timestamp time    = 3;
     }
 
     message KickOffTeam {
@@ -80,7 +80,7 @@ message GameEvents {
     }
 
     message GamePhase {
-        GameState.Data.Phase phase          = 1;
+        GameState.Data.Phase phase = 1;
 
         // INITIAL
 
@@ -90,14 +90,14 @@ message GameEvents {
         // SET
 
         // PLAYING
-        google.protobuf.Timestamp endHalf   = 3;
-        google.protobuf.Timestamp ballFree  = 4;
+        google.protobuf.Timestamp endHalf  = 3;
+        google.protobuf.Timestamp ballFree = 4;
 
         // TIMEOUT
-        google.protobuf.Timestamp ends      = 5;
+        google.protobuf.Timestamp ends = 5;
 
         // FINISHED
-        google.protobuf.Timestamp nextHalf  = 6;
+        google.protobuf.Timestamp nextHalf = 6;
     }
 
     message GameMode {

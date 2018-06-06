@@ -20,5 +20,7 @@ syntax = "proto3";
 
 package message.motion;
 
-message ExecuteGetup {}
-message KillGetup    {}
+message ExecuteGetup {
+}
+message KillGetup {
+}

@@ -7,6 +7,7 @@ import re
 
 
 class File:
+
     def __init__(self, f, base_file):
 
         # Store relevant information from our class in our object
@@ -39,16 +40,19 @@ class File:
         message_python = ('\n\n'.join([m[2] for m in messages]))
 
         # By default include some useful headers
+        # yapf: disable
         includes = {
             '1<cstdint>',
             '2<string>',
-            '2<map>',
-            '2<vector>',
             '2<array>',
+            '2<exception>',
+            '2<map>',
             '2<memory>',
+            '2<vector>',
             '4"{}"'.format(self.name[:-6] + '.pb.h'),
             '5"message/MessageBase.h"'
         }
+        # yapf: enable
 
         # We use a dirty hack here of putting a priority on each header
         # to make the includes be in a better order
@@ -56,7 +60,7 @@ class File:
             if d in ['Vector.proto', 'Matrix.proto']:
                 includes.add('4"message/conversion/proto_matrix.h"')
             elif d in ['Neutron.proto']:
-                pass # We don't need to do anything for these ones
+                pass  # We don't need to do anything for these ones
             elif d in ['google/protobuf/timestamp.proto', 'google/protobuf/duration.proto']:
                 includes.add('4"message/conversion/proto_time.h"')
             else:
@@ -65,25 +69,28 @@ class File:
         # Don't forget to remove the first character
         includes = '\n'.join(['#include {}'.format(i[1:]) for i in sorted(list(includes))])
 
-        header_template = dedent("""\
+        header_template = dedent(
+            """\
             #ifndef {define}
             #define {define}
 
             {includes}
 
-            {openNamespace}
+            {open_namespace}
 
                 // Enum Definitions
             {enums}
                 // Message Definitions
             {messages}
 
-            {closeNamespace}
+            {close_namespace}
 
             #endif  // {define}
-            """)
+            """
+        )
 
-        impl_template = dedent("""\
+        impl_template = dedent(
+            """\
             {include}
 
             // Enum Implementations
@@ -91,9 +98,11 @@ class File:
 
             // Message Implementations
             {messages}
-            """)
+            """
+        )
 
-        python_template = dedent("""\
+        python_template = dedent(
+            """\
             #include <pybind11/pybind11.h>
             #include <pybind11/complex.h>
             #include <pybind11/stl.h>
@@ -112,21 +121,20 @@ class File:
 
             {messages}
             }}
-            """)
+            """
+        )
 
         python_submodules = ''.join('.def_submodule("{}")'.format(m) for m in self.fqn.split('.')[2:])
 
         return header_template.format(
             define=define,
             includes=includes,
-            openNamespace=ns_open,
+            open_namespace=ns_open,
             enums=enum_headers,
             messages=message_headers,
-            closeNamespace=ns_close
+            close_namespace=ns_close
         ), impl_template.format(
-            include='#include "{}"'.format(self.name[:-6] + '.h'),
-            enums=enum_impls,
-            messages=message_impls
+            include='#include "{}"'.format(self.name[:-6] + '.h'), enums=enum_impls, messages=message_impls
         ), python_template.format(
             include='#include "{}"'.format(self.name[:-6] + '.h'),
             messages=indent(message_python),

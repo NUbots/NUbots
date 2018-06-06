@@ -1,0 +1,166 @@
+stance:
+  # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
+  body_height: 0.60
+  # The angle of the torso when walking
+  body_tilt: 10 * pi / 180
+  # Default arm positions while walking
+  arms:
+      left:
+        start:
+            -  120 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -90 * pi / 180 # Elbow
+        end:
+            -  120 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -90 * pi / 180 # Elbow
+      right:
+        start:
+            -  120 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -90 * pi / 180 # Elbow
+        end:
+            -  120 * pi / 180 # Shoulder Pitch
+            -   0 * pi / 180 # Shoulder Roll
+            - -90 * pi / 180 # Elbow
+
+  foot_offset:
+    - -0.090 # The distance the ankles are offset from the torso, in meters.
+    - -0.050  # How far from the center of the foot the center of mass is placed during each step.
+  # The gains to use for the servos during the walk
+  gains:
+    arms: 15
+    legs: 20
+  # Adjusts foot separation during walk?
+  limit_margin_y: -0.05  #-0.15
+
+walk_cycle:
+  # Defines how long it will take for the robot to take its next step, in seconds.
+  step_time: 0.9
+  # ???
+  zmp_time: 0.5 # 0.250
+  hip_roll_compensation: 1 * pi / 180
+  step:
+    # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
+    height: 0.06
+    # height of foot as a fraction of height
+    height_slow_fraction: 0.5
+    height_fast_fraction: 1.5
+    # These limit the distance a footstep will take
+    limits:
+      - [-0.1, 0.3] # [min_x, max_x]
+      - [0.0 , 0.3] # [min_y, max_y]
+      - [0, 15 * pi / 180] # [min_angle, max_angle]
+  velocity:
+    # Velocity limits for the walk
+    limits:
+      - [-0.027, 0.3] # [min_x, max_x]
+      - [-0.01, 0.01] # [min_y, max_y]
+      - [-0.8, 0.8] # [min_angle, max_angle]
+    # This defines a 'fast' speed in the forward direction
+    high_speed: 0.06
+  acceleration:
+    # Acceleration limits
+    limits: [1.5, 0.045, 5]
+    # When moving at 'fast' speed or faster, use these limits instead
+    limits_high: [0.08, 0.05, 5]
+    # Factor to slow down walk when turning
+    turning_factor: 0.6
+  # When to begin and end the single support phase. Range: [0,1]
+  single_support_phase:
+    start: 0.12
+    end: 0.88
+  # TODO: balance params disabled until they are futher understood
+  balance:
+    enabled: false
+    amplitude: 1.0
+    weight: 0.7
+    offset: 0 * pi / 180
+
+    hip_rotation_scale: 1.0 # 2.0
+    ankle_rotation_scale: 0.25 # 0.5
+
+    angle_gain:
+      p: 0.05 # 0.1
+      i: 0.15
+      d: 0.05
+    translation_gain:
+      X:
+        p: 0.05
+        d: 0.0
+      Y:
+        p: 0.05
+        d: 0.0
+      Z:
+        p: 0.05 #0.035
+        d: 0.0
+    push_recovery:
+      balance_time: 800
+      enabled: false
+      amplitude: 1.0
+      weight: 0.7
+      offset: 0 * pi / 180
+
+      hip_rotation_scale: 2.0
+      ankle_rotation_scale: 0.5
+
+      angle_gain:
+        p: 0.5
+        i: 0.0
+        d: 0.0
+      translation_gain:
+        X:
+          p: 0.0
+          d: -0.0
+        Y:
+          p: 0
+          d: 0
+        Z:
+          p: 0.035
+          d: 0
+    servo_gains:
+      # -
+      #   id: "HIP_YAW"
+      #   p: 100
+      # -
+      #   id: "HIP_ROLL"
+      #   p: 100
+      # -
+      #   id: "HIP_PITCH"
+      #   p: 100
+      # -
+      #   id: "KNEE"
+      #   p: 1000
+      # -
+      #   id: "ANKLE_PITCH"
+      #   p: 100
+      # -
+      #   id: "ANKLE_ROLL"
+      #   p: 100
+
+    # Support bias parameters to reduce backlash-based instability
+    # velFastForward: 0.05
+    # velFastTurn: 0.15
+    # supportFront: 0.03
+    # supportFront2: 0.03
+    # supportBack: -0.02
+    # supportSideX: -0.01
+    # supportSideY: -0.005
+    # toeTipCompensation: 0 * pi / 180
+    gyro:
+      # Ratio to normalize gyro gains into units of degree/second
+      # gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
+      # ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # kneeImuParamX: [0.5, 0.7 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # hipImuParamY: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
+      # armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]   # supportTurn: 0.02
+
+STAND_SCRIPT_DURATION: 1
+
+# Use this to emit fake localisation Self objects based on the walk engine's blind belief
+# Note: This is really only useful as a debugging tool
+emit_localisation: true
+
+

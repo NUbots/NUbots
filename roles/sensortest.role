@@ -11,6 +11,6 @@ NUCLEAR_ROLE(
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
-    support::NUbugger
-    debug::NUbugger
+    support::NUsight
+    debug::NUsight
 )
