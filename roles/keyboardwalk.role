@@ -19,7 +19,6 @@ NUCLEAR_ROLE(
     motion::OldWalkEngine
     motion::ScriptEngine
     motion::HeadController
-    #motion::IKKick
 
     #Vision
     vision::LUTClassifier
@@ -31,6 +30,7 @@ NUCLEAR_ROLE(
     behaviour::skills::Stand
     #behaviour::skills::FallingRelax
     behaviour::skills::Getup
+    behaviour::skills::KickScript
     behaviour::skills::DirectWalkController
     behaviour::strategy::KeyboardWalk
 )
