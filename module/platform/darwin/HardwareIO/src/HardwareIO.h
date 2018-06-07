@@ -58,6 +58,17 @@ namespace platform {
                 message::platform::darwin::DarwinSensors::EyeLED eyeLED   = {0x000000FF};
             };
 
+            struct Config {
+                Config() : battery() {}
+
+                struct Battery {
+                    Battery() : chargedVoltage(0.0f), nominalVoltage(0.0f), flatVoltage(0.0f) {}
+                    float chargedVoltage;
+                    float nominalVoltage;
+                    float flatVoltage;
+                } battery;
+            } config;
+
             struct ServoState {
                 // True if we need to write new values to the hardware
                 bool dirty = false;
@@ -90,8 +101,8 @@ namespace platform {
             /// @brief Our state for or MX28s for variables we send to it
             std::array<ServoState, 20> servoState;
 
-            float maxVoltage;
-            float minVoltage;
+            float chargedVoltage;
+            float flatVoltage;
 
         public:
             /// @brief called by a Powerplant to construct this reactor

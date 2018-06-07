@@ -71,7 +71,7 @@ namespace platform {
             // Voltage (in volts)
             sensors.voltage = Convert::voltage(data.cm730.voltage);
 
-            if (sensors.voltage <= maxVoltage) {
+            if (sensors.voltage <= chargedVoltage) {
                 sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
             }
 
@@ -199,7 +199,7 @@ namespace platform {
                     servo.temperature = Convert::temperature(data.servos[i].temperature);
 
                     // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
-                    if (servo.voltage <= maxVoltage) {
+                    if (servo.voltage <= chargedVoltage) {
                         servo.errorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
                     }
                 }
@@ -212,8 +212,8 @@ namespace platform {
             , darwin("/dev/CM730")
             , cm730State()
             , servoState()
-            , maxVoltage(0.0f)
-            , minVoltage(0.0f) {
+            , chargedVoltage(0.0f)
+            , flatVoltage(0.0f) {
 
             on<Startup>().then("HardwareIO Startup", [this] {
                 uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
@@ -235,8 +235,8 @@ namespace platform {
                     servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
                 }
 
-                maxVoltage = config["battery"]["max"].as<float>();
-                minVoltage = config["battery"]["min"].as<float>();
+                chargedVoltage = config["battery"]["charged_voltage"].as<float>();
+                flatVoltage    = config["battery"]["flat_voltage"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
@@ -316,6 +316,56 @@ namespace platform {
                     // Parse our data
                     *sensors = parseSensors(data);
 
+                    // Work out a battery charged percentage
+                    sensors->battery =
+                        std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
+
+                    // cm730 leds to display battery voltage
+                    uint32_t ledl            = 0;
+                    uint32_t ledr            = 0;
+                    std::array<bool, 3> ledp = {false, false, false};
+
+                    if (sensors->battery > 0.9) {
+                        ledp = {true, true, true};
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                    }
+                    else if (sensors->battery > 0.7) {
+                        ledp = {false, true, true};
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                    }
+                    else if (sensors->battery > 0.5) {
+                        ledp = {false, false, true};
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                    }
+                    else if (sensors->battery > 0.3) {
+                        ledp = {false, false, false};
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                    }
+                    else if (sensors->battery > 0.2) {
+                        ledp = {false, false, false};
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
+                    }
+                    else if (sensors->battery > 0) {
+                        ledp = {false, false, false};
+                        ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
+                        ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
+                    }
+                    // Error in reading voltage blue
+                    else {
+                        ledp = {false, false, false};
+                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
+                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
+                    }
+                    log(sensors->battery, sensors->voltage);
+                    emit(std::make_unique<DarwinSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
+                    emit(std::make_unique<DarwinSensors::EyeLED>(ledl));
+                    emit(std::make_unique<DarwinSensors::HeadLED>(ledr));
+
                     // Send our nicely computed sensor data out to the world
                     emit(std::move(sensors));
                 });
@@ -389,6 +439,15 @@ namespace platform {
                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
+            });
+
+            // If we get a EyeLED command then write it
+            on<Trigger<DarwinSensors::LEDPanel>>().then([this](const DarwinSensors::LEDPanel& led) {
+                // Update our internal state
+                cm730State.ledPanel = led;
+
+                darwin.cm730.write(Darwin::CM730::Address::LED_PANNEL,
+                                   (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
             });
         }
     }  // namespace darwin
