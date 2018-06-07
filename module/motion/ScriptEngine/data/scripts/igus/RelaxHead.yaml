@@ -1,0 +1,9 @@
+[
+    {
+        "duration": 25,
+        "targets": [
+            { "id": "HEAD_YAW", "position": 0, "gain": .NaN, "torque": 0  },
+            { "id": "HEAD_PITCH", "position": 0, "gain": .NaN, "torque": 0  }
+        ]
+    }
+]
