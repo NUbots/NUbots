@@ -118,4 +118,4 @@ namespace behaviour {
 
     }  // namespace tools
 }  // namespace behaviour
-}  // namespace
+}  // namespace module
