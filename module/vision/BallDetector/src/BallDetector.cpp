@@ -200,14 +200,13 @@ namespace vision {
            With<LookUpTable>,
            Single,
            Priority::LOW>()
-            .then(
-                "Ball Detector",
-                [this](std::shared_ptr<const ClassifiedImage> rawImage,
-                       const CameraParameters& cam,
-                       const FieldDescription& field,
-                       const LookUpTable& lut) {
-                    const auto& image   = *rawImage;
-                    const auto& sensors = *image.sensors;
+            .then("Ball Detector",
+                  [this](std::shared_ptr<const ClassifiedImage> rawImage,
+                         const CameraParameters& cam,
+                         const FieldDescription& field,
+                         const LookUpTable& lut) {
+                      const auto& image   = *rawImage;
+                      const auto& sensors = *image.sensors;
 
                       // Copy our image across so we can do a check
                       auto imagePoints = image.ballPoints;
@@ -297,17 +296,17 @@ namespace vision {
 
                               double cameraHeight = camToGround(2, 3);
 
-                        // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
-                        double widthDistance = widthBasedDistanceToCircle(
-                            field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
+                              // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
+                              double widthDistance = widthBasedDistanceToCircle(
+                                  field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
 
-                        if (widthDistance < cameraHeight * 0.5) {
-                            if (print_throwout_logs) {
-                                log("Ball discarded: widthDistance < cameraHeight * 0.5");
-                                log("widthDistance =", widthDistance, "cameraHeight =", cameraHeight);
-                            }
-                            continue;
-                        }
+                              if (widthDistance < cameraHeight * 0.5) {
+                                  if (print_throwout_logs) {
+                                      log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                                      log("widthDistance =", widthDistance, "cameraHeight =", cameraHeight);
+                                  }
+                                  continue;
+                              }
 
                               if (print_throwout_logs) {
                                   log("Ball model: g =  ",
@@ -406,9 +405,7 @@ namespace vision {
                               b.visObject.sensors = image.sensors;
 
                               // Work out how far away the ball must be to be at the distance it is from the camera
-                              arma::vec3 width_rBCc = ballCentreRay * widthDistance;
-
-                              arma::vec3 rBCc = (width_rBCc);
+                              arma::vec3 rBCc = ballCentreRay * widthDistance;
 
                               // Attach the measurement to the object
                               b.measurements.push_back(Ball::Measurement());
