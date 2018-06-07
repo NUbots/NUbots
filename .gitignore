@@ -75,10 +75,3 @@ tags
 .idea
 *.sublime-workspace
 
-# ORB-SLAM folders to ignore
-opencv-3.2.0/
-DBoW2/
-g2o/
-*.json
-ORBvoc.txt
-protoc3/readme.txt

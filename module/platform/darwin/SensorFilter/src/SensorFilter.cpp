@@ -114,11 +114,6 @@ namespace platform {
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
-                // Battery config
-                this->config.battery.chargedVoltage = config["battery"]["charged_voltage"].as<float>();
-                this->config.battery.nominalVoltage = config["battery"]["nominal_voltage"].as<float>();
-                this->config.battery.flatVoltage    = config["battery"]["flat_voltage"].as<float>();
-
                 // Foot load sensor config
                 leftFootDown =
                     DarwinVirtualLoadSensor(config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>(),
@@ -295,13 +290,8 @@ namespace platform {
                     // Set our timestamp to when the data was read
                     sensors->timestamp = input.timestamp;
 
-                    // Set our voltage and battery
-                    sensors->voltage = input.voltage;
+                    sensors->battery = input.battery;
 
-                    // Work out a battery charged percentage
-                    sensors->battery = std::max(0.0f,
-                                                (input.voltage - config.battery.flatVoltage)
-                                                    / (config.battery.chargedVoltage - config.battery.flatVoltage));
 
                     // This checks for an error on the CM730 and reports it
                     if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
@@ -396,7 +386,7 @@ namespace platform {
                     }
                     else {
                         sensors->accelerometer = {
-                            -input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
+                            -input.accelerometer.y, -input.accelerometer.x, input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
@@ -410,7 +400,7 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {input.gyroscope.x, input.gyroscope.y, -input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
 
                     // Put in our FSR information

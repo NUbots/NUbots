@@ -42,7 +42,6 @@ namespace debug {
             });
 
             on<Trigger<Parameters>>().then([this](const Parameters& params) {
-
                 // If these parameters are for us
                 if (params.group == "test_dope") {
                     currentParameters = params;
@@ -53,7 +52,6 @@ namespace debug {
             // Emit an optimisation param request
 
             on<Every<1, Per<std::chrono::seconds>>>().then([this] {
-
                 auto e = std::make_unique<Episode>();
 
                 e->group      = "test_dope";

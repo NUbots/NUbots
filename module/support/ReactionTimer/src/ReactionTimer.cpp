@@ -5,8 +5,8 @@
 namespace module {
 namespace support {
 
-    using NUClear::message::ReactionStatistics;
     using extension::Configuration;
+    using NUClear::message::ReactionStatistics;
 
     ReactionTimer::ReactionTimer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -15,7 +15,6 @@ namespace support {
         });
 
         on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
-
             log(stats.identifier[0],
                 1000.0
                     * (double((stats.finished - stats.started).count())
