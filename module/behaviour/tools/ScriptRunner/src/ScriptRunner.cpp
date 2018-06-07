@@ -71,18 +71,18 @@ namespace behaviour {
             on<Configuration, With<CommandLineArguments>>("ScriptRunner.yaml")
                 .then([this](const Configuration& config, const CommandLineArguments& args) {
                     script_delay = config["script_delay"].as<uint>();
-
+                    scripts      = config["scripts"].as<std::vector<std::string>>();
                     // Check for scripts entered in the command line
                     if (args.size() > 1) {
-                        NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
-                        std::copy(std::next(args.begin(), 1), args.end(), scripts.begin());
+                        NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " script from argument");
+                        scripts.clear();
+                        std::copy(std::next(args.begin(), 1), args.end(), std::back_inserter(scripts));
                         script_delay = 0;
                     }
 
                     // If scripts are in the config file
                     else if (scripts.size() > 0) {
-                        NUClear::log<NUClear::INFO>("Executing: ", scripts.size(), " scripts");
-                        scripts = config["scripts"].as<std::vector<std::string>>();
+                        NUClear::log<NUClear::INFO>("Executing: ", scripts.size(), " script from config");
                     }
 
                     // No default scripts or commandline scripts
@@ -91,12 +91,6 @@ namespace behaviour {
                     }
                 });
 
-            sensorHandle = on<Trigger<DarwinSensors>, Single>().then([this] {
-                executeNextScript();
-                sensorHandle.disable();
-                sensorHandle.unbind();
-            });
-
             on<Trigger<ExecuteNextScript>>().then([this] { executeNextScript(); });
 
             emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
@@ -104,7 +98,12 @@ namespace behaviour {
                 "Script Runner",
                 {std::pair<float, std::set<LimbID>>(
                     1, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-                [this](const std::set<LimbID>&) {},
+                [this](const std::set<LimbID>&) {
+                    on<Trigger<ButtonMiddleDown>>().then([this] {
+                        std::this_thread::sleep_for(std::chrono::seconds(script_delay));
+                        emit(std::make_unique<ExecuteNextScript>());
+                    });
+                },
                 [this](const std::set<LimbID>&) {
                     // We should always be the only running thing
                 },
