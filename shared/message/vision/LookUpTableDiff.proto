@@ -23,7 +23,7 @@ package message.vision;
 
 message LookUpTableDiff {
     message Diff {
-        uint32 lut_index = 1;
+        uint32 lut_index      = 1;
         uint32 classification = 2;
     }
 

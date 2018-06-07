@@ -22,16 +22,18 @@ package message.motion;
 
 import "Vector.proto";
 
-message WalkStarted {}
-message WalkStopped {}
+message WalkStarted {
+}
+message WalkStopped {
+}
 
 message WalkCommand {
-    uint64 subsumptionId = 1;           // reservation identifier for servo control
-    vec3   command       = 2;           // x and y are velocity in m/s and angle is in rads/s
+    uint64 subsumptionId = 1;  // reservation identifier for servo control
+    vec3   command       = 2;  // x and y are velocity in m/s and angle is in rads/s
 }
 
 message StopCommand {
-    uint64 subsumptionId = 1;           // reservation identifier for servo control
+    uint64 subsumptionId = 1;  // reservation identifier for servo control
 }
 
 message NewWalkCommand {
@@ -39,9 +41,9 @@ message NewWalkCommand {
 }
 
 message EnableWalkEngineCommand {
-    uint64 subsumptionId = 1;           // reservation identifier for servo control
+    uint64 subsumptionId = 1;  // reservation identifier for servo control
 }
 
 message DisableWalkEngineCommand {
-    uint64 subsumptionId = 1;           // reservation identifier for servo control
+    uint64 subsumptionId = 1;  // reservation identifier for servo control
 }

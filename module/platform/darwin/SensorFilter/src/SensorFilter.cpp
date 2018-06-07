@@ -31,7 +31,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
@@ -55,17 +55,17 @@ namespace platform {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
         // using message::localisation::ResetRobotHypotheses;
-        using utility::motion::kinematics::calculateAllPositions;
         using message::motion::KinematicsModel;
+        using utility::math::geometry::UnitQuaternion;
+        using utility::math::matrix::Rotation2D;
+        using utility::math::matrix::Rotation3D;
+        using utility::math::matrix::Transform3D;
+        using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
         using utility::motion::kinematics::calculateRobotToIMU;
-        using utility::math::matrix::Transform3D;
-        using utility::math::matrix::Rotation3D;
-        using utility::math::matrix::Rotation2D;
-        using utility::math::geometry::UnitQuaternion;
-        using utility::nubugger::drawArrow;
-        using utility::nubugger::drawSphere;
-        using utility::nubugger::graph;
+        using utility::nusight::drawArrow;
+        using utility::nusight::drawSphere;
+        using utility::nusight::graph;
 
         std::string makeErrorString(const std::string& src, uint errorCode) {
             std::stringstream s;
@@ -111,14 +111,8 @@ namespace platform {
             , footlanding_Rwf() {
 
             on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config) {
-
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
-
-                // Battery config
-                this->config.battery.chargedVoltage = config["battery"]["charged_voltage"].as<float>();
-                this->config.battery.nominalVoltage = config["battery"]["nominal_voltage"].as<float>();
-                this->config.battery.flatVoltage    = config["battery"]["flat_voltage"].as<float>();
 
                 // Foot load sensor config
                 leftFootDown =
@@ -296,13 +290,8 @@ namespace platform {
                     // Set our timestamp to when the data was read
                     sensors->timestamp = input.timestamp;
 
-                    // Set our voltage and battery
-                    sensors->voltage = input.voltage;
+                    sensors->battery = input.battery;
 
-                    // Work out a battery charged percentage
-                    sensors->battery = std::max(0.0f,
-                                                (input.voltage - config.battery.flatVoltage)
-                                                    / (config.battery.chargedVoltage - config.battery.flatVoltage));
 
                     // This checks for an error on the CM730 and reports it
                     if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
@@ -397,7 +386,7 @@ namespace platform {
                     }
                     else {
                         sensors->accelerometer = {
-                            -input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
+                            -input.accelerometer.y, -input.accelerometer.x, input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
@@ -411,7 +400,7 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {input.gyroscope.x, input.gyroscope.y, -input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
 
                     // Put in our FSR information
@@ -534,10 +523,10 @@ namespace platform {
                             const bool& footDown =
                                 side == ServoSide::LEFT ? sensors->leftFootDown : sensors->rightFootDown;
 
-                            const bool& prevFootDown = previousSensors
-                                                           ? side == ServoSide::LEFT ? previousSensors->leftFootDown
-                                                                                     : previousSensors->rightFootDown
-                                                           : false;
+                            const bool& prevFootDown = previousSensors ? side == ServoSide::LEFT
+                                                                             ? previousSensors->leftFootDown
+                                                                             : previousSensors->rightFootDown
+                                                                       : false;
 
                             if (footDown) {
                                 Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics[servoid]);
@@ -621,8 +610,9 @@ namespace platform {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass =
-                        convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
+                    // FIXME: Causes crashes
+                    // sensors->centreOfMass =
+                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
 
                     /************************************************
                      *                  Kinematics Horizon          *

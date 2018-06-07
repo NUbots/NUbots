@@ -36,7 +36,7 @@
 
 #include "utility/time/time.h"
 
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace module {
 namespace input {

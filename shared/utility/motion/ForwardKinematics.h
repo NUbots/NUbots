@@ -55,7 +55,7 @@ namespace motion {
             std::map<ServoID, utility::math::matrix::Transform3D> positions;
 
             utility::math::matrix::Transform3D runningTransform;
-            arma::vec3 NECK_POS = {model.head.NECK_BASE_POS_FROM_ORIGIN_X,
+            arma::vec3 NECK_POS       = {model.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                    model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                    model.head.NECK_BASE_POS_FROM_ORIGIN_Z};
             float NECK_LENGTH         = model.head.NECK_LENGTH;

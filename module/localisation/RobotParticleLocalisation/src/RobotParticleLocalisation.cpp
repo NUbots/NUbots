@@ -7,7 +7,7 @@
 #include "utility/localisation/transform.h"
 
 #include "utility/math/geometry/Circle.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/time/time.h"
@@ -20,17 +20,17 @@ namespace localisation {
     using message::input::Sensors;
     using message::localisation::Field;
 
+    using utility::math::geometry::Circle;
     using utility::math::matrix::Rotation2D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::nubugger::graph;
-    using utility::nubugger::drawCircle;
-    using utility::math::geometry::Circle;
+    using utility::nusight::drawCircle;
+    using utility::nusight::graph;
     using utility::time::TimeDifferenceSeconds;
 
+    using message::localisation::ResetRobotHypotheses;
     using message::support::FieldDescription;
     using message::vision::Goal;
-    using message::localisation::ResetRobotHypotheses;
     using utility::localisation::transform3DToFieldState;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
@@ -68,7 +68,6 @@ namespace localisation {
 
             reset->hypotheses.push_back(rightSide);
             emit(std::move(reset));
-
         });
 
         on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
@@ -109,7 +108,6 @@ namespace localisation {
 
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
             "Measurement Update", [this](const std::vector<Goal>& goals, const FieldDescription& fd) {
-
                 if (!goals.empty()) {
                     /* Perform time update */
                     auto curr_time        = NUClear::clock::now();
@@ -140,7 +138,6 @@ namespace localisation {
 
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
-
                 Transform3D Hfw;
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
                 std::vector<arma::vec3> states;
@@ -158,7 +155,7 @@ namespace localisation {
                     arma::mat22 pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
                     arma::mat33 state_cov = arma::eye(3, 3);
                     state_cov.submat(0, 0, 1, 1) = pos_cov;
-                    state_cov(2, 2) = s.heading_var;
+                    state_cov(2, 2)              = s.heading_var;
                     cov.push_back(state_cov);
                 }
                 filter.resetAmbiguous(states, cov, n_particles);

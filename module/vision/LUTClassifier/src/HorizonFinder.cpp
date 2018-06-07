@@ -28,8 +28,8 @@ namespace module {
 namespace vision {
 
     using message::input::Image;
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
 
     using ServoID = utility::input::ServoID;
     using utility::math::matrix::Rotation3D;

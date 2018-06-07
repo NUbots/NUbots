@@ -31,8 +31,8 @@ namespace debug {
         using extension::Configuration;
         using message::support::optimisation::Episode;
         using message::support::optimisation::Parameters;
-        using message::support::optimisation::RequestParameters;
         using message::support::optimisation::RegisterOptimisation;
+        using message::support::optimisation::RequestParameters;
 
         TestDOpE::TestDOpE(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), currentParameters() {
@@ -42,7 +42,6 @@ namespace debug {
             });
 
             on<Trigger<Parameters>>().then([this](const Parameters& params) {
-
                 // If these parameters are for us
                 if (params.group == "test_dope") {
                     currentParameters = params;
@@ -53,7 +52,6 @@ namespace debug {
             // Emit an optimisation param request
 
             on<Every<1, Per<std::chrono::seconds>>>().then([this] {
-
                 auto e = std::make_unique<Episode>();
 
                 e->group      = "test_dope";

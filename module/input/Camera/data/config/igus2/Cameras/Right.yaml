@@ -1,17 +1,15 @@
-driver: Spinnaker
-deviceID: "15211412"        # 00E81B94
+driver: Aravis
+deviceID: 0115138C
 
 buffer_count: 4             # The number of software buffers to use.
 
 format:
   width: 1280
   height: 1024
-  pixel: BayerBG8
-  #pixel: YCbCr422_8_CbYCrY
-  #pixel: RGB8
+  pixel: BayerRG8
 
 lens:
-  radiansPerPixel: 0.00245
+  radiansPerPixel: 0.0024242              # 1/focal_length_in_pixels = camera_pixel_size / camera_focal_length = 4.8um / 1.98mm = 2.4242e-3
   centreOffset: [0,0]
   FOV: 3.14
 

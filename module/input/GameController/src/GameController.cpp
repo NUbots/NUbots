@@ -27,13 +27,13 @@ namespace module {
 namespace input {
 
     using extension::Configuration;
-    using message::support::GlobalConfig;
     using gamecontroller::GameControllerPacket;
     using gamecontroller::GameControllerReplyPacket;
     using gamecontroller::ReplyMessage;
     using gamecontroller::Team;
     using message::input::GameEvents;
     using message::input::GameState;
+    using message::support::GlobalConfig;
     using TeamColour      = message::input::GameEvents::TeamColour::Value;
     using Score           = GameEvents::Score;
     using GoalScored      = GameEvents::GoalScored;
@@ -64,7 +64,6 @@ namespace input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
                   [this](const Configuration& config, const GlobalConfig& globalConfig) {
-
                       PLAYER_ID = globalConfig.playerId;
                       TEAM_ID   = globalConfig.teamId;
                       send_port = config["send_port"].as<uint>();
@@ -114,8 +113,8 @@ namespace input {
     }
 
     void GameController::sendReplyMessage(const ReplyMessage& message) {
-        auto packet    = std::make_unique<GameControllerReplyPacket>();
-        packet->header = {gamecontroller::RETURN_HEADER[0],
+        auto packet     = std::make_unique<GameControllerReplyPacket>();
+        packet->header  = {gamecontroller::RETURN_HEADER[0],
                           gamecontroller::RETURN_HEADER[1],
                           gamecontroller::RETURN_HEADER[2],
                           gamecontroller::RETURN_HEADER[3]};
@@ -466,8 +465,9 @@ namespace input {
                 emit(msg);
             });
         }
-        else if (oldPacket.state != newPacket.state || (oldPacket.mode == gamecontroller::Mode::TIMEOUT
-                                                        && newPacket.mode != gamecontroller::Mode::TIMEOUT)) {
+        else if (oldPacket.state != newPacket.state
+                 || (oldPacket.mode == gamecontroller::Mode::TIMEOUT
+                     && newPacket.mode != gamecontroller::Mode::TIMEOUT)) {
 
             // State has changed, process it
 

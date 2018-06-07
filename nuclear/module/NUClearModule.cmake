@@ -26,7 +26,7 @@ FUNCTION(NUCLEAR_MODULE)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
 
-    # Include our messages extensions and utilty folders
+    # Include our messages extensions and utility folders
     INCLUDE_DIRECTORIES(${NUCLEAR_MESSAGE_INCLUDE_DIRS})
     INCLUDE_DIRECTORIES(${NUCLEAR_UTILITY_INCLUDE_DIRS})
     INCLUDE_DIRECTORIES(${NUCLEAR_EXTENSION_INCLUDE_DIRS})
@@ -53,6 +53,7 @@ FUNCTION(NUCLEAR_MODULE)
             "${CMAKE_CURRENT_SOURCE_DIR}/src/**.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/**.hpp"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/**.ipp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/**.hh"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h")
 
     # Python Code
@@ -202,15 +203,17 @@ FUNCTION(NUCLEAR_MODULE)
         SET(test_module_target_name "Test${module_target_name}")
 
         # Rebuild our sources using the test module
-        FILE(GLOB_RECURSE test_src "tests/**.cpp" "tests/**.h")
-        ADD_EXECUTABLE(${test_module_target_name} ${test_src})
-        TARGET_LINK_LIBRARIES(${test_module_target_name} ${module_target_name} ${LIBRARIES})
+        FILE(GLOB_RECURSE test_src "tests/**.cpp" "tests/**.cc" "tests/**.c" "tests/**.hpp" "tests/**.hh" "tests/**.h")
+        IF(test_src)
+          ADD_EXECUTABLE(${test_module_target_name} ${test_src})
+          TARGET_LINK_LIBRARIES(${test_module_target_name} ${module_target_name} ${MODULE_TEST_LIBRARIES} ${NUCLEAR_TEST_LIBRARIES})
 
-        SET_PROPERTY(TARGET ${test_module_target_name} PROPERTY FOLDER "modules/tests")
+          SET_PROPERTY(TARGET ${test_module_target_name} PROPERTY FOLDER "modules/tests")
 
-        # Add the test
-        ADD_TEST(${test_module_target_name} ${test_module_target_name})
+          # Add the test
+          ADD_TEST(NAME ${test_module_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${test_module_target_name})
 
+        ENDIF()
     ENDIF()
 
 ENDFUNCTION(NUCLEAR_MODULE)
