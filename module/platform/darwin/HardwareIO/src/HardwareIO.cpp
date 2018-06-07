@@ -361,7 +361,6 @@ namespace platform {
                         ledl = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
                         ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
                     }
-                    log(sensors->battery, sensors->voltage);
                     emit(std::make_unique<DarwinSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
                     emit(std::make_unique<DarwinSensors::EyeLED>(ledl));
                     emit(std::make_unique<DarwinSensors::HeadLED>(ledr));
