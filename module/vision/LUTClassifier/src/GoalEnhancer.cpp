@@ -160,7 +160,7 @@ namespace vision {
             // Get the min and max for intersecting with top and bottom of the screen
 
             double jump = (maxTangent - minTangent) / double(GOAL_LINE_INTERSECTIONS);
-            for (auto d = minTangent; d <= maxTangent; d += jump) {
+            for (auto d = minTangent; d <= maxTangent && jump > 0; d += jump) {
 
                 // Get our centre point
                 arma::vec2 p = model.model.line.pointFromTangentialDistance(d);
