@@ -39,7 +39,7 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -49,29 +49,29 @@ namespace motion {
     using extension::Configuration;
     using extension::Script;
 
-    using message::input::Sensors;
     using message::behaviour::ServoCommand;
-    using message::behaviour::WalkOptimiserCommand;
     using message::behaviour::WalkConfigSaved;
+    using message::behaviour::WalkOptimiserCommand;
+    using message::input::Sensors;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
-    using message::motion::WalkCommand;
-    using message::motion::StopCommand;
-    using message::motion::WalkStopped;
-    using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
-    using message::motion::ServoTarget;
+    using message::motion::EnableWalkEngineCommand;
     using message::motion::KinematicsModel;
+    using message::motion::ServoTarget;
+    using message::motion::StopCommand;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStopped;
     using message::support::SaveConfiguration;
 
     using ServoID = utility::input::ServoID;
     using LimbID  = utility::input::LimbID;
+    using utility::math::angle::normalizeAngle;
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::angle::normalizeAngle;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     OldWalkEngine::OldWalkEngine(std::unique_ptr<NUClear::Environment> environment)
@@ -190,7 +190,6 @@ namespace motion {
                            .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-
             Transform2D velocity = convert<double, 3>(walkCommand.command);
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();

@@ -6,9 +6,9 @@ This code is part of mocap-kinect experiments*/
 
 namespace autocal {
 
-using utility::math::matrix::Transform3D;
-using utility::math::matrix::Rotation3D;
 using utility::math::geometry::UnitQuaternion;
+using utility::math::matrix::Rotation3D;
+using utility::math::matrix::Transform3D;
 
 void MocapRecording::addMeasurement(const std::string& name,
                                     const TimeStamp& timeStamp,

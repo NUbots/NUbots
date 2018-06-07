@@ -2,32 +2,58 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
+  host = RbConfig::CONFIG['host_os']
+
+  if host =~ /darwin/
+    cpus = `sysctl -n hw.physicalcpu_max`.to_i
+    # sysctl returns Bytes, convert to KB
+    memory = `sysctl -n hw.memsize`.to_i / 1024
+  elsif host =~ /linux/
+    cpus = `lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l`.to_i
+    # meminfo returns KB already
+    memory = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i
+  elsif host =~ /mswin|mingw|cygwin/
+    cpus = `wmic cpu get NumberOfCores`.split[1].to_i
+    # Get TotalPhysicalMemory returns Bytes, convert to KB
+    memory = `wmic computersystem Get TotalPhysicalMemory`.split[1].to_i / 1024
+  end
+
+  # Convert memory to MB for for Vagrant
+  memory = memory / 1024
+
+  # Use half the system memory for VM
+  memory = memory / 2
 
   # Settings for a parallels provider
   config.vm.provider "parallels" do |v, override|
     # Use parallels virtualbox
-    override.vm.box = "parallels/ubuntu-16.04"
+    if ENV['TRAVISVM']
+        override.vm.box = "parallels/ubuntu-14.04"
+    else
+        override.vm.box = "parallels/ubuntu-16.04"
+    end
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.customize ["set", :id, "--cpus", `sysctl -n hw.physicalcpu_max 2> /dev/null`.chomp ]
-    v.customize ["set", :id, "--memsize", `echo "scale=0; $(sysctl -n hw.memsize 2> /dev/null || echo 0)/2097152" | bc`.chomp ]
+    v.customize ["set", :id, "--cpus", cpus ]
+    v.customize ["set", :id, "--memsize", memory ]
     v.update_guest_tools = true
   end
 
   # Settings if using a virtualbox provider
   config.vm.provider "virtualbox" do |v, override|
-    # Use the official ubuntu box
-    #override.vm.box = "ubuntu/xenial64"
-
     # Use custom box because official Ubuntu one is shit.
-    override.vm.box = "bidski/xenial64"
+    if ENV['TRAVISVM']
+        override.vm.box = "ubuntu/trusty64"
+    else
+        override.vm.box = "bidski/xenial64"
+    end
 
     override.vm.boot_timeout = 360
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    v.customize ["modifyvm", :id, "--cpus", `if [ "x$(uname)" = "xDarwin" ]; then sysctl -n hw.physicalcpu_max; else lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l; fi`.chomp ]
-    v.customize ["modifyvm", :id, "--memory", `if [ "x$(uname)" = "xDarwin" ]; then echo "scale=0; $(sysctl -n hw.memsize)/2097152" | bc; else echo "scale=0; $(awk '/MemTotal/{print $2}' /proc/meminfo)/2048" | bc; fi`.chomp ]
+    v.customize ["modifyvm", :id, "--cpus", cpus ]
+    v.customize ["modifyvm", :id, "--memory", memory ]
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
@@ -53,15 +79,21 @@ Vagrant.configure("2") do |config|
   # Before the puppet provisioner runs
   # install puppet modules that are used
   config.vm.provision "install-puppet-modules", type: "shell" do |shell|
-    shell.inline = "apt-get install -y puppet;
-                    mkdir -p /etc/puppet/modules;
-                    puppet module list | grep -q 'puppetlabs-apt' \
+    shell.inline = "codename=$(lsb_release -sc) && \\
+                    if [ \"${codename}\" == \"trusty\" ]; then \\
+                        wget -N https://apt.puppetlabs.com/puppetlabs-release-trusty.deb && \\
+                        dpkg -i puppetlabs-release-trusty.deb && \\
+                        apt-get update; \\
+                    fi; \\
+                    apt-get install -y --reinstall puppet; \\
+                    mkdir -p /etc/puppet/modules; \\
+                    puppet module list | grep -q 'puppetlabs-apt' \\
                          || puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0;
-                    puppet module list | grep -q 'puppetlabs-vcsrepo' \
+                    puppet module list | grep -q 'puppetlabs-vcsrepo' \\
                          || puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com;
-                    puppet module list | grep -q 'camptocamp-archive' \
+                    puppet module list | grep -q 'camptocamp-archive' \\
                          || puppet module install camptocamp-archive --module_repository https://forge.puppet.com;
-                    puppet module list | grep -q 'maestrodev-wget' \
+                    puppet module list | grep -q 'maestrodev-wget' \\
                          || puppet module install maestrodev-wget --module_repository https://forge.puppet.com;"
   end
 
@@ -85,6 +117,32 @@ Vagrant.configure("2") do |config|
   # This VM will install all dependencies using the NUbots deb file (faster, generally recommended)
   config.vm.define "nubotsvm", autostart: true, primary: true do |nubots|
     nubots.vm.hostname = "nubotsvm.nubots.net"
+
+    # Note: Use NFS for more predictable shared folder support.
+    #   The guest must have 'apt-get install nfs-common'
+    nubots.vm.synced_folder ".", "/home/vagrant/NUbots"
+
+    # Private network for NUsight's benifit
+    nubots.vm.network "public_network", type: "dhcp"
+
+    # Share NUsight repository with the VM if it has been placed in the same
+    # directory as the NUbots repository
+    if File.directory?("../NUsight")
+      nubots.vm.synced_folder "../NUsight", "/home/vagrant/NUsight"
+    end
+    if File.directory?("../NUClear")
+      nubots.vm.synced_folder "../NUClear", "/home/vagrant/NUClear"
+    end
+    if File.directory?("../CM730")
+      nubots.vm.synced_folder "../CM730", "/home/vagrant/CM730"
+    end
+  end
+
+  # Define the NUbots development VM, and make it the primary VM
+  # (meaning that a plain `vagrant up` will only create this machine)
+  # This VM will install all dependencies using the NUbots deb file (faster, generally recommended)
+  config.vm.define "travisvm", autostart: false, primary: false do |nubots|
+    nubots.vm.hostname = "nubotsvmbuild.nubots.net"
 
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'

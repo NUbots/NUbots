@@ -23,15 +23,15 @@ package message.behaviour;
 import "Vector.proto";
 
 message KickPlan {
-	enum KickType {
-		SCRIPTED = 0;
-		IK_KICK  = 1;
-	}
+    enum KickType {
+        SCRIPTED = 0;
+        IK_KICK  = 1;
+    }
 
-	vec2     target   = 1;
-	KickType kickType = 2;
+    vec2     target   = 1;
+    KickType kickType = 2;
 }
 
 message WantsToKick {
-	bool kick = 1;
+    bool kick = 1;
 }

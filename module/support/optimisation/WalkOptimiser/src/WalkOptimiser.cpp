@@ -29,11 +29,11 @@ namespace module {
 namespace support {
     namespace optimisation {
 
+        using message::behaviour::CancelFixedWalk;
         using message::behaviour::FixedWalkCommand;
         using message::behaviour::FixedWalkFinished;
-        using message::behaviour::CancelFixedWalk;
-        using message::behaviour::WalkOptimiserCommand;
         using message::behaviour::WalkConfigSaved;
+        using message::behaviour::WalkOptimiserCommand;
 
         using message::input::Sensors;
         using message::input::ServoID;
@@ -41,14 +41,13 @@ namespace support {
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
 
-        using message::support::SaveConfiguration;
         using extension::Configuration;
+        using message::support::SaveConfiguration;
 
         WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), initialConfig("Jerry", YAML::Node()) {
 
             on<Configuration>("WalkOptimiser.yaml").then([this](const Configuration& config) {
-
                 log("Starting up walk optimiser");
 
                 number_of_samples = config["number_of_samples"].as<int>();
@@ -85,7 +84,6 @@ namespace support {
 
             on<Trigger<OptimiseWalkCommand>, Configuration, Sync<WalkOptimiser>>("WalkEngine.yaml")
                 .then("Optimise Walk", [this](const OptimiseWalkCommand&, const Configuration& walkConfig) {
-
                     // Start optimisation
                     std::cerr << "Optimiser command" << std::endl;
                     // Get samples
@@ -103,7 +101,6 @@ namespace support {
                     // Apply the parameters to the walk engine
                     setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
                     // Now wait for WalkConfigSaved
-
                 });
 
             on<Trigger<WalkConfigSaved>, Sync<WalkOptimiser>>([this] {
@@ -123,7 +120,6 @@ namespace support {
             on<Trigger<ExecuteGetup>>().then("Getup Recording", [this] {
                 // Record the robot falling over
                 data.recordGetup();
-
             });
 
             on<Trigger<KillGetup>>().then("Getup Recording", [this] {

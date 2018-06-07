@@ -1,7 +1,3 @@
-battery:
-  charged_voltage: 12.6
-  nominal_voltage: 11.1
-  flat_voltage: 10.7
 buttons:
   debounce_threshold : 7
 

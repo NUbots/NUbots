@@ -8,9 +8,9 @@ NUCLEAR_ROLE(
     support::configuration::GlobalConfig
     support::DisplayTest
     support::configuration::NetworkConfiguration
-    support::NUbugger
-    
-    debug::NUbugger
+    support::NUsight
+
+    debug::NUsight
 
     support::configuration::SoccerConfig
 )

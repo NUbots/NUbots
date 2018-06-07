@@ -25,44 +25,44 @@ import "Vector.proto";
 
 message MotionCapture {
     message Marker {
-        uint32        id       = 1;
-        fvec3         position = 2;
-        float         size     = 3;
+        uint32 id       = 1;
+        fvec3  position = 2;
+        float  size     = 3;
     }
 
     message MarkerSet {
-        string          name    = 1;
+        string   name           = 1;
         repeated Marker markers = 2;
     }
 
     message RigidBody {
-        uint32          id            = 1;
-        fvec3           position      = 2;
-        fvec4           rotation      = 3;
+        uint32   id                   = 1;
+        fvec3    position             = 2;
+        fvec4    rotation             = 3;
         repeated Marker markers       = 4;
         float           error         = 5;
         bool            trackingValid = 6;
 
         // Information added by the model
-        string          name          = 7;
-        fvec3           offset        = 8;
-        uint32          parent        = 9;
-        repeated uint32 children      = 10;
+        string   name            = 7;
+        fvec3    offset          = 8;
+        uint32   parent          = 9;
+        repeated uint32 children = 10;
     }
 
     message Skeleton {
-        uint32             id    = 1;
+        uint32   id              = 1;
         repeated RigidBody bones = 2;
 
         // Information added by the model
-        string             name  = 3;
+        string name = 3;
     }
 
     message LabeledMarker {
-        Marker        marker           = 1;
-        bool          occluded         = 2;
-        bool          pointCloudSolved = 3;
-        bool          modelSolved      = 4;
+        Marker marker           = 1;
+        bool   occluded         = 2;
+        bool   pointCloudSolved = 3;
+        bool   modelSolved      = 4;
     }
 
     message Channel {
@@ -70,22 +70,22 @@ message MotionCapture {
     }
 
     message ForcePlate {
-        uint32           id       = 1;
+        uint32   id               = 1;
         repeated Channel channels = 2;
     }
 
-    uint32                 frameNumber          = 1;
-    float                  latency              = 2;
-    uint32                 timecode             = 3;
-    uint32                 timecodeSub          = 4;
-    double                 timestamp            = 5;
-    bool                   recording            = 6;
-    bool                   trackedModelsChanged = 7;
+    uint32 frameNumber          = 1;
+    float  latency              = 2;
+    uint32 timecode             = 3;
+    uint32 timecodeSub          = 4;
+    double timestamp            = 5;
+    bool   recording            = 6;
+    bool   trackedModelsChanged = 7;
 
-    repeated MarkerSet     markerSets           = 8;
-    repeated Marker        markers              = 9;
-    repeated RigidBody     rigidBodies          = 10;
-    repeated Skeleton      skeletons            = 11;
-    repeated LabeledMarker labeledMarkers       = 12;
-    repeated ForcePlate    forcePlates          = 13;
+    repeated MarkerSet markerSets         = 8;
+    repeated Marker markers               = 9;
+    repeated RigidBody rigidBodies        = 10;
+    repeated Skeleton skeletons           = 11;
+    repeated LabeledMarker labeledMarkers = 12;
+    repeated ForcePlate forcePlates       = 13;
 }

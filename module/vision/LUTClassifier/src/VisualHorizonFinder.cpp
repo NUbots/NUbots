@@ -19,28 +19,28 @@
 
 #include "LUTClassifier.h"
 
-#include "QuexClassifier.h"
+#include "Classifier.h"
 
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace vision {
 
-    using message::input::Image;
-    using message::vision::LookUpTable;
     using message::input::CameraParameters;
+    using message::input::Image;
     using message::vision::ClassifiedImage;
-    using utility::math::geometry::Plane;
+    using message::vision::LookUpTable;
     using utility::math::geometry::Line;
+    using utility::math::geometry::Plane;
     using utility::math::geometry::Quad;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getImageFromCam;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
 
     void LUTClassifier::findVisualHorizon(const Image& image,
                                           const LookUpTable& lut,
@@ -63,7 +63,7 @@ namespace vision {
             top     = std::min(top, int(image.dimensions[1] - 1));
 
             // Classify our segments
-            auto segments = quex->classify(
+            auto segments = classifier->classify(
                 image, lut, {int(x), top}, {int(x), int(image.dimensions[1] - 1)}, VISUAL_HORIZON_SUBSAMPLING);
 
             // Our default green point is the bottom of the screen
@@ -111,7 +111,7 @@ namespace vision {
             arma::ivec2 end   = {int(image.dimensions[0] - 1), int(image.dimensions[1] - 1)};
 
             // Classify our segments
-            auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
+            auto segments = classifier->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
 
             // Our default green point is the bottom of the screen
             arma::ivec2 greenPoint = {int(image.dimensions[0] - 1), int(image.dimensions[1])};

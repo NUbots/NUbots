@@ -50,8 +50,8 @@ namespace math {
             Vector getRightVector() const;
             Vector getPoint(float g, float theta) const;
         };
-    }
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility
 
 #endif
