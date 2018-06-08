@@ -296,7 +296,8 @@ namespace vision {
                               double cameraHeight = camToGround(2, 3);
 
                               // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
-                              double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
+                              double widthDistance = widthBasedDistanceToCircle(
+                                  field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
 
                               if (widthDistance < cameraHeight * 0.5) {
                                   if (print_throwout_logs) {
