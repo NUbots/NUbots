@@ -51,6 +51,8 @@ namespace platform {
             struct Config {
                 Config() : nominal_z(0.0f), motionFilter(), buttons() {}
 
+                float nominal_z;
+
                 struct MotionFilter {
                     MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
 
