@@ -249,7 +249,6 @@ namespace vision {
 
                       // Create result message
                       auto balls = std::make_unique<std::vector<Ball>>();
-                      int i      = 1;
                       // Loop through the groups and perform ransac on each
                       for (const auto& group : screenPointGroups) {
                           if (group.size() < MINIMUM_POINTS_FOR_CONSENSUS) {
