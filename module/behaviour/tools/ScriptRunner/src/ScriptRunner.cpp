@@ -38,8 +38,8 @@ namespace behaviour {
 
         using extension::ExecuteScriptByName;
 
-        using NUClear::message::CommandLineArguments;
         using message::platform::darwin::DarwinSensors;
+        using NUClear::message::CommandLineArguments;
 
         using message::platform::darwin::ButtonMiddleDown;
 
