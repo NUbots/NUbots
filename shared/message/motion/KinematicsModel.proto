@@ -28,7 +28,7 @@ enum BodySide {
 }
 
 message KinematicsModel {
-    //Convention: all values positive
+    // Convention: all values positive
     message Leg {
         float HIP_OFFSET_X                = 1;
         float HIP_OFFSET_Y                = 2;
@@ -61,11 +61,11 @@ message KinematicsModel {
         float CAMERA_DECLINATION_ANGLE_OFFSET = 8;
         float INTERPUPILLARY_DISTANCE         = 13;
 
-        //Head movement limits
-        float MAX_YAW                         = 9;
-        float MIN_YAW                         = 10;
-        float MAX_PITCH                       = 11;
-        float MIN_PITCH                       = 12;
+        // Head movement limits
+        float MAX_YAW   = 9;
+        float MIN_YAW   = 10;
+        float MAX_PITCH = 11;
+        float MIN_PITCH = 12;
     }
 
     message Arm {

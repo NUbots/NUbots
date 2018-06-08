@@ -27,8 +27,8 @@
 namespace utility {
 namespace behaviour {
 
-    using utility::math::matrix::Transform2D;
     using message::behaviour::MotionCommand;
+    using utility::math::matrix::Transform2D;
 
     inline MotionCommand StandStill() {
         MotionCommand cmd;

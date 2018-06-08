@@ -54,33 +54,32 @@ message ClassifiedImage {
     }
 
     // The sensor frame that happened with this image
-    input.Sensors             sensors            = 1 [(pointer) = SHARED];
+    input.Sensors sensors = 1 [(pointer) = SHARED];
 
     // The image that was used to create this classified image
-    input.Image               image              = 2 [(pointer) = SHARED];
+    input.Image image = 2 [(pointer) = SHARED];
 
     // Our images dimensions
-    uvec2                     dimensions         = 3;
+    uvec2 dimensions = 3;
 
     // Points that are on the edge of the ball
-    repeated SeedPoints       ballSeedPoints     = 4 [(array_size) = 3];
+    repeated SeedPoints ballSeedPoints = 4 [(array_size) = 3];
 
     // Points that could make up the ball
-    repeated ivec2            ballPoints         = 5;
+    repeated ivec2 ballPoints = 5;
 
     // Our horizon
-    vec3                      horizon_normal     = 6;
+    vec3 horizon_normal = 6;
 
     // The points of the visual horizon
-    repeated ivec2            visualHorizon      = 7;
+    repeated ivec2 visualHorizon = 7;
 
     // Our segments, split into vertical and horizontal components
-    repeated Segment          horizontalSegments = 8;
-    repeated Segment          verticalSegments   = 9;
-    //map<uint32, Segment>      horizontalSegments = 8;
-    //map<uint32, Segment>      verticalSegments   = 9;
+    repeated Segment horizontalSegments = 8;
+    repeated Segment verticalSegments   = 9;
+    // map<uint32, Segment>      horizontalSegments = 8;
+    // map<uint32, Segment>      verticalSegments   = 9;
 
-    //Old horizon TODO: phase out
-    Line                      horizon            = 10;
+    // Old horizon TODO: phase out
+    Line horizon = 10;
 }
-

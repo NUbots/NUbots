@@ -7,4 +7,4 @@ initial:
   yaw: 0
   pitch: 0
 #Gain for controller to reduce look judder and oscillation
-p_gain: 0.1
+p_gain: 0.05

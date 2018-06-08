@@ -21,5 +21,5 @@ syntax = "proto3";
 package message.behaviour;
 
 message Nod {
-	bool value = 1;
+    bool value = 1;
 }

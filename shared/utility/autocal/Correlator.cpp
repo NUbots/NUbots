@@ -6,9 +6,9 @@ This code is part of mocap-kinect experiments*/
 #include <limits>
 namespace autocal {
 
-using utility::math::matrix::Transform3D;
-using utility::math::matrix::Rotation3D;
 using utility::math::geometry::UnitQuaternion;
+using utility::math::matrix::Rotation3D;
+using utility::math::matrix::Transform3D;
 
 Correlator::Correlator() : firstRotationReadings() {
     number_of_samples           = 10;

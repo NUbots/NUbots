@@ -26,15 +26,15 @@ namespace module {
 namespace behaviour {
     namespace planning {
 
-        using message::motion::WalkCommand;
-        using message::motion::StopCommand;
-        using message::motion::WalkStopped;
+        using message::behaviour::CancelFixedWalk;
         using message::behaviour::FixedWalkCommand;
         using message::behaviour::FixedWalkFinished;
-        using message::behaviour::CancelFixedWalk;
+        using message::input::Sensors;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
-        using message::input::Sensors;
+        using message::motion::StopCommand;
+        using message::motion::WalkCommand;
+        using message::motion::WalkStopped;
         using utility::math::matrix::Rotation2D;
 
 

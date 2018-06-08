@@ -54,7 +54,7 @@ namespace behaviour {
         ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , id(size_t(this) * size_t(this) - size_t(this))
-            , scriptPath("ERROR")
+            , scriptPath("Initializing...")
             , script()
             , frame(0)
             , selection(0)
@@ -73,6 +73,8 @@ namespace behaviour {
                     if (utility::file::exists(scriptPath)) {
                         NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                         loadScript(scriptPath);
+                        // Build our initial gui with context from loaded script
+                        refreshView();
                     }
                 }
 
@@ -83,7 +85,6 @@ namespace behaviour {
             });
 
             on<Trigger<LockServo>, With<DarwinSensors>>().then([this](const DarwinSensors& sensors) {
-
                 auto id = selection < 2 ? 18 + selection : selection - 2;
 
                 Script::Frame::Target target;
@@ -124,9 +125,6 @@ namespace behaviour {
             noecho();
             // Hide the cursor
             curs_set(false);
-
-            // Build our initial GUI
-            refreshView();
 
             // Trigger when stdin has something to read
             on<IO>(STDIN_FILENO, IO::READ).then([this] {

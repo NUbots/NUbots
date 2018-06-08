@@ -8,6 +8,6 @@ NUCLEAR_ROLE(
     behaviour::tools::ScriptTuner
     behaviour::Controller
     support::configuration::NetworkConfiguration
-    support::NUbugger
+    support::NUsight
     motion::ScriptEngine
 )

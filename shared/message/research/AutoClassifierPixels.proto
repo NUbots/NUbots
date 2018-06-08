@@ -21,6 +21,6 @@ syntax = "proto3";
 package message.research;
 
 message AutoClassifierPixels {
-	repeated uint32 pixels         = 1;
-	uint32          classification = 2;
+    repeated uint32 pixels         = 1;
+    uint32          classification = 2;
 }

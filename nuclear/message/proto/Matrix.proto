@@ -3,103 +3,751 @@ syntax = "proto3";
 import "Vector.proto";
 
 message mat {
-    uint32 rows = 1;
-    uint32 cols = 2;
-    repeated double v = 3 [packed=true];
+    uint32          rows = 1;
+    uint32          cols = 2;
+    repeated double v    = 3 [packed = true];
 }
 
 message fmat {
-    uint32 rows = 1;
-    uint32 cols = 2;
-    repeated float v = 3 [packed=true];
+    uint32         rows = 1;
+    uint32         cols = 2;
+    repeated float v    = 3 [packed = true];
 }
 
 message imat {
-    uint32 rows = 1;
-    uint32 cols = 2;
-    repeated sint32 v = 3 [packed=true];
+    uint32   rows     = 1;
+    uint32   cols     = 2;
+    repeated sint32 v = 3 [packed = true];
 }
 
 message umat {
-    uint32 rows = 1;
-    uint32 cols = 2;
-    repeated uint32 v = 3 [packed=true];
+    uint32   rows     = 1;
+    uint32   cols     = 2;
+    repeated uint32 v = 3 [packed = true];
 }
 
 message cmat {
     uint32 rows = 1;
     uint32 cols = 2;
-    bytes v = 3;
+    bytes  v    = 3;
 }
 
-message mat22 {
+message mat2 {
     vec2 x = 1;
     vec2 y = 2;
 }
 
-message fmat22 {
+message fmat2 {
     fvec2 x = 1;
     fvec2 y = 2;
 }
 
-message imat22 {
+message imat2 {
     ivec2 x = 1;
     ivec2 y = 2;
 }
 
-message umat22 {
+message umat2 {
     uvec2 x = 1;
     uvec2 y = 2;
 }
 
-message mat33 {
+message mat3 {
     vec3 x = 1;
     vec3 y = 2;
     vec3 z = 3;
 }
 
-message fmat33 {
+message fmat3 {
     fvec3 x = 1;
     fvec3 y = 2;
     fvec3 z = 3;
 }
 
-message imat33 {
+message imat3 {
     ivec3 x = 1;
     ivec3 y = 2;
     ivec3 z = 3;
 }
 
-message umat33 {
+message umat3 {
     uvec3 x = 1;
     uvec3 y = 2;
     uvec3 z = 3;
 }
 
-message mat44 {
+message mat4 {
     vec4 x = 1;
     vec4 y = 2;
     vec4 z = 3;
     vec4 t = 4;
 }
 
-message fmat44 {
+message fmat4 {
     fvec4 x = 1;
     fvec4 y = 2;
     fvec4 z = 3;
     fvec4 t = 4;
 }
 
-message imat44 {
+message imat4 {
     ivec4 x = 1;
     ivec4 y = 2;
     ivec4 z = 3;
     ivec4 t = 4;
 }
 
-message umat44 {
+message umat4 {
     uvec4 x = 1;
     uvec4 y = 2;
     uvec4 z = 3;
     uvec4 t = 4;
+}
+
+message mat5 {
+    vec5 s0 = 1;
+    vec5 s1 = 2;
+    vec5 s2 = 3;
+    vec5 s3 = 4;
+    vec5 s4 = 5;
+}
+
+message fmat5 {
+    fvec5 s0 = 1;
+    fvec5 s1 = 2;
+    fvec5 s2 = 3;
+    fvec5 s3 = 4;
+    fvec5 s4 = 5;
+}
+
+message imat5 {
+    ivec5 s0 = 1;
+    ivec5 s1 = 2;
+    ivec5 s2 = 3;
+    ivec5 s3 = 4;
+    ivec5 s4 = 5;
+}
+
+message umat5 {
+    uvec5 s0 = 1;
+    uvec5 s1 = 2;
+    uvec5 s2 = 3;
+    uvec5 s3 = 4;
+    uvec5 s4 = 5;
+}
+
+message mat6 {
+    vec6 s0 = 1;
+    vec6 s1 = 2;
+    vec6 s2 = 3;
+    vec6 s3 = 4;
+    vec6 s4 = 5;
+    vec6 s5 = 6;
+}
+
+message fmat6 {
+    fvec6 s0 = 1;
+    fvec6 s1 = 2;
+    fvec6 s2 = 3;
+    fvec6 s3 = 4;
+    fvec6 s4 = 5;
+    fvec6 s5 = 6;
+}
+
+message imat6 {
+    ivec6 s0 = 1;
+    ivec6 s1 = 2;
+    ivec6 s2 = 3;
+    ivec6 s3 = 4;
+    ivec6 s4 = 5;
+    ivec6 s5 = 6;
+}
+
+message umat6 {
+    uvec6 s0 = 1;
+    uvec6 s1 = 2;
+    uvec6 s2 = 3;
+    uvec6 s3 = 4;
+    uvec6 s4 = 5;
+    uvec6 s5 = 6;
+}
+
+message mat7 {
+    vec7 s0 = 1;
+    vec7 s1 = 2;
+    vec7 s2 = 3;
+    vec7 s3 = 4;
+    vec7 s4 = 5;
+    vec7 s5 = 6;
+    vec7 s6 = 7;
+}
+
+message fmat7 {
+    fvec7 s0 = 1;
+    fvec7 s1 = 2;
+    fvec7 s2 = 3;
+    fvec7 s3 = 4;
+    fvec7 s4 = 5;
+    fvec7 s5 = 6;
+    fvec7 s6 = 7;
+}
+
+message imat7 {
+    ivec7 s0 = 1;
+    ivec7 s1 = 2;
+    ivec7 s2 = 3;
+    ivec7 s3 = 4;
+    ivec7 s4 = 5;
+    ivec7 s5 = 6;
+    ivec7 s6 = 7;
+}
+
+message umat7 {
+    uvec7 s0 = 1;
+    uvec7 s1 = 2;
+    uvec7 s2 = 3;
+    uvec7 s3 = 4;
+    uvec7 s4 = 5;
+    uvec7 s5 = 6;
+    uvec7 s6 = 7;
+}
+
+message mat8 {
+    vec8 s0 = 1;
+    vec8 s1 = 2;
+    vec8 s2 = 3;
+    vec8 s3 = 4;
+    vec8 s4 = 5;
+    vec8 s5 = 6;
+    vec8 s6 = 7;
+    vec8 s7 = 8;
+}
+
+message fmat8 {
+    fvec8 s0 = 1;
+    fvec8 s1 = 2;
+    fvec8 s2 = 3;
+    fvec8 s3 = 4;
+    fvec8 s4 = 5;
+    fvec8 s5 = 6;
+    fvec8 s6 = 7;
+    fvec8 s7 = 8;
+}
+
+message imat8 {
+    ivec8 s0 = 1;
+    ivec8 s1 = 2;
+    ivec8 s2 = 3;
+    ivec8 s3 = 4;
+    ivec8 s4 = 5;
+    ivec8 s5 = 6;
+    ivec8 s6 = 7;
+    ivec8 s7 = 8;
+}
+
+message umat8 {
+    uvec8 s0 = 1;
+    uvec8 s1 = 2;
+    uvec8 s2 = 3;
+    uvec8 s3 = 4;
+    uvec8 s4 = 5;
+    uvec8 s5 = 6;
+    uvec8 s6 = 7;
+    uvec8 s7 = 8;
+}
+
+message mat9 {
+    vec9 s0 = 1;
+    vec9 s1 = 2;
+    vec9 s2 = 3;
+    vec9 s3 = 4;
+    vec9 s4 = 5;
+    vec9 s5 = 6;
+    vec9 s6 = 7;
+    vec9 s7 = 8;
+    vec9 s8 = 9;
+}
+
+message fmat9 {
+    fvec9 s0 = 1;
+    fvec9 s1 = 2;
+    fvec9 s2 = 3;
+    fvec9 s3 = 4;
+    fvec9 s4 = 5;
+    fvec9 s5 = 6;
+    fvec9 s6 = 7;
+    fvec9 s7 = 8;
+    fvec9 s8 = 9;
+}
+
+message imat9 {
+    ivec9 s0 = 1;
+    ivec9 s1 = 2;
+    ivec9 s2 = 3;
+    ivec9 s3 = 4;
+    ivec9 s4 = 5;
+    ivec9 s5 = 6;
+    ivec9 s6 = 7;
+    ivec9 s7 = 8;
+    ivec9 s8 = 9;
+}
+
+message umat9 {
+    uvec9 s0 = 1;
+    uvec9 s1 = 2;
+    uvec9 s2 = 3;
+    uvec9 s3 = 4;
+    uvec9 s4 = 5;
+    uvec9 s5 = 6;
+    uvec9 s6 = 7;
+    uvec9 s7 = 8;
+    uvec9 s8 = 9;
+}
+
+message mat10 {
+    vec10 s0 = 1;
+    vec10 s1 = 2;
+    vec10 s2 = 3;
+    vec10 s3 = 4;
+    vec10 s4 = 5;
+    vec10 s5 = 6;
+    vec10 s6 = 7;
+    vec10 s7 = 8;
+    vec10 s8 = 9;
+    vec10 s9 = 10;
+}
+
+message fmat10 {
+    fvec10 s0 = 1;
+    fvec10 s1 = 2;
+    fvec10 s2 = 3;
+    fvec10 s3 = 4;
+    fvec10 s4 = 5;
+    fvec10 s5 = 6;
+    fvec10 s6 = 7;
+    fvec10 s7 = 8;
+    fvec10 s8 = 9;
+    fvec10 s9 = 10;
+}
+
+message imat10 {
+    ivec10 s0 = 1;
+    ivec10 s1 = 2;
+    ivec10 s2 = 3;
+    ivec10 s3 = 4;
+    ivec10 s4 = 5;
+    ivec10 s5 = 6;
+    ivec10 s6 = 7;
+    ivec10 s7 = 8;
+    ivec10 s8 = 9;
+    ivec10 s9 = 10;
+}
+
+message umat10 {
+    uvec10 s0 = 1;
+    uvec10 s1 = 2;
+    uvec10 s2 = 3;
+    uvec10 s3 = 4;
+    uvec10 s4 = 5;
+    uvec10 s5 = 6;
+    uvec10 s6 = 7;
+    uvec10 s7 = 8;
+    uvec10 s8 = 9;
+    uvec10 s9 = 10;
+}
+
+message mat11 {
+    vec11 s0 = 1;
+    vec11 s1 = 2;
+    vec11 s2 = 3;
+    vec11 s3 = 4;
+    vec11 s4 = 5;
+    vec11 s5 = 6;
+    vec11 s6 = 7;
+    vec11 s7 = 8;
+    vec11 s8 = 9;
+    vec11 s9 = 10;
+    vec11 sa = 11;
+}
+
+message fmat11 {
+    fvec11 s0 = 1;
+    fvec11 s1 = 2;
+    fvec11 s2 = 3;
+    fvec11 s3 = 4;
+    fvec11 s4 = 5;
+    fvec11 s5 = 6;
+    fvec11 s6 = 7;
+    fvec11 s7 = 8;
+    fvec11 s8 = 9;
+    fvec11 s9 = 10;
+    fvec11 sa = 11;
+}
+
+message imat11 {
+    ivec11 s0 = 1;
+    ivec11 s1 = 2;
+    ivec11 s2 = 3;
+    ivec11 s3 = 4;
+    ivec11 s4 = 5;
+    ivec11 s5 = 6;
+    ivec11 s6 = 7;
+    ivec11 s7 = 8;
+    ivec11 s8 = 9;
+    ivec11 s9 = 10;
+    ivec11 sa = 11;
+}
+
+message umat11 {
+    uvec11 s0 = 1;
+    uvec11 s1 = 2;
+    uvec11 s2 = 3;
+    uvec11 s3 = 4;
+    uvec11 s4 = 5;
+    uvec11 s5 = 6;
+    uvec11 s6 = 7;
+    uvec11 s7 = 8;
+    uvec11 s8 = 9;
+    uvec11 s9 = 10;
+    uvec11 sa = 11;
+}
+
+message mat12 {
+    vec12 s0 = 1;
+    vec12 s1 = 2;
+    vec12 s2 = 3;
+    vec12 s3 = 4;
+    vec12 s4 = 5;
+    vec12 s5 = 6;
+    vec12 s6 = 7;
+    vec12 s7 = 8;
+    vec12 s8 = 9;
+    vec12 s9 = 10;
+    vec12 sa = 11;
+    vec12 sb = 12;
+}
+
+message fmat12 {
+    fvec12 s0 = 1;
+    fvec12 s1 = 2;
+    fvec12 s2 = 3;
+    fvec12 s3 = 4;
+    fvec12 s4 = 5;
+    fvec12 s5 = 6;
+    fvec12 s6 = 7;
+    fvec12 s7 = 8;
+    fvec12 s8 = 9;
+    fvec12 s9 = 10;
+    fvec12 sa = 11;
+    fvec12 sb = 12;
+}
+
+message imat12 {
+    ivec12 s0 = 1;
+    ivec12 s1 = 2;
+    ivec12 s2 = 3;
+    ivec12 s3 = 4;
+    ivec12 s4 = 5;
+    ivec12 s5 = 6;
+    ivec12 s6 = 7;
+    ivec12 s7 = 8;
+    ivec12 s8 = 9;
+    ivec12 s9 = 10;
+    ivec12 sa = 11;
+    ivec12 sb = 12;
+}
+
+message umat12 {
+    uvec12 s0 = 1;
+    uvec12 s1 = 2;
+    uvec12 s2 = 3;
+    uvec12 s3 = 4;
+    uvec12 s4 = 5;
+    uvec12 s5 = 6;
+    uvec12 s6 = 7;
+    uvec12 s7 = 8;
+    uvec12 s8 = 9;
+    uvec12 s9 = 10;
+    uvec12 sa = 11;
+    uvec12 sb = 12;
+}
+
+message mat13 {
+    vec13 s0 = 1;
+    vec13 s1 = 2;
+    vec13 s2 = 3;
+    vec13 s3 = 4;
+    vec13 s4 = 5;
+    vec13 s5 = 6;
+    vec13 s6 = 7;
+    vec13 s7 = 8;
+    vec13 s8 = 9;
+    vec13 s9 = 10;
+    vec13 sa = 11;
+    vec13 sb = 12;
+    vec13 sc = 13;
+}
+
+message fmat13 {
+    fvec13 s0 = 1;
+    fvec13 s1 = 2;
+    fvec13 s2 = 3;
+    fvec13 s3 = 4;
+    fvec13 s4 = 5;
+    fvec13 s5 = 6;
+    fvec13 s6 = 7;
+    fvec13 s7 = 8;
+    fvec13 s8 = 9;
+    fvec13 s9 = 10;
+    fvec13 sa = 11;
+    fvec13 sb = 12;
+    fvec13 sc = 13;
+}
+
+message imat13 {
+    ivec13 s0 = 1;
+    ivec13 s1 = 2;
+    ivec13 s2 = 3;
+    ivec13 s3 = 4;
+    ivec13 s4 = 5;
+    ivec13 s5 = 6;
+    ivec13 s6 = 7;
+    ivec13 s7 = 8;
+    ivec13 s8 = 9;
+    ivec13 s9 = 10;
+    ivec13 sa = 11;
+    ivec13 sb = 12;
+    ivec13 sc = 13;
+}
+
+message umat13 {
+    uvec13 s0 = 1;
+    uvec13 s1 = 2;
+    uvec13 s2 = 3;
+    uvec13 s3 = 4;
+    uvec13 s4 = 5;
+    uvec13 s5 = 6;
+    uvec13 s6 = 7;
+    uvec13 s7 = 8;
+    uvec13 s8 = 9;
+    uvec13 s9 = 10;
+    uvec13 sa = 11;
+    uvec13 sb = 12;
+    uvec13 sc = 13;
+}
+
+message mat14 {
+    vec14 s0 = 1;
+    vec14 s1 = 2;
+    vec14 s2 = 3;
+    vec14 s3 = 4;
+    vec14 s4 = 5;
+    vec14 s5 = 6;
+    vec14 s6 = 7;
+    vec14 s7 = 8;
+    vec14 s8 = 9;
+    vec14 s9 = 10;
+    vec14 sa = 11;
+    vec14 sb = 12;
+    vec14 sc = 13;
+    vec14 sd = 14;
+}
+
+message fmat14 {
+    fvec14 s0 = 1;
+    fvec14 s1 = 2;
+    fvec14 s2 = 3;
+    fvec14 s3 = 4;
+    fvec14 s4 = 5;
+    fvec14 s5 = 6;
+    fvec14 s6 = 7;
+    fvec14 s7 = 8;
+    fvec14 s8 = 9;
+    fvec14 s9 = 10;
+    fvec14 sa = 11;
+    fvec14 sb = 12;
+    fvec14 sc = 13;
+    fvec14 sd = 14;
+}
+
+message imat14 {
+    ivec14 s0 = 1;
+    ivec14 s1 = 2;
+    ivec14 s2 = 3;
+    ivec14 s3 = 4;
+    ivec14 s4 = 5;
+    ivec14 s5 = 6;
+    ivec14 s6 = 7;
+    ivec14 s7 = 8;
+    ivec14 s8 = 9;
+    ivec14 s9 = 10;
+    ivec14 sa = 11;
+    ivec14 sb = 12;
+    ivec14 sc = 13;
+    ivec14 sd = 14;
+}
+
+message umat14 {
+    uvec14 s0 = 1;
+    uvec14 s1 = 2;
+    uvec14 s2 = 3;
+    uvec14 s3 = 4;
+    uvec14 s4 = 5;
+    uvec14 s5 = 6;
+    uvec14 s6 = 7;
+    uvec14 s7 = 8;
+    uvec14 s8 = 9;
+    uvec14 s9 = 10;
+    uvec14 sa = 11;
+    uvec14 sb = 12;
+    uvec14 sc = 13;
+    uvec14 sd = 14;
+}
+
+message mat15 {
+    vec15 s0 = 1;
+    vec15 s1 = 2;
+    vec15 s2 = 3;
+    vec15 s3 = 4;
+    vec15 s4 = 5;
+    vec15 s5 = 6;
+    vec15 s6 = 7;
+    vec15 s7 = 8;
+    vec15 s8 = 9;
+    vec15 s9 = 10;
+    vec15 sa = 11;
+    vec15 sb = 12;
+    vec15 sc = 13;
+    vec15 sd = 14;
+    vec15 se = 15;
+}
+
+message fmat15 {
+    fvec15 s0 = 1;
+    fvec15 s1 = 2;
+    fvec15 s2 = 3;
+    fvec15 s3 = 4;
+    fvec15 s4 = 5;
+    fvec15 s5 = 6;
+    fvec15 s6 = 7;
+    fvec15 s7 = 8;
+    fvec15 s8 = 9;
+    fvec15 s9 = 10;
+    fvec15 sa = 11;
+    fvec15 sb = 12;
+    fvec15 sc = 13;
+    fvec15 sd = 14;
+    fvec15 se = 15;
+}
+
+message imat15 {
+    ivec15 s0 = 1;
+    ivec15 s1 = 2;
+    ivec15 s2 = 3;
+    ivec15 s3 = 4;
+    ivec15 s4 = 5;
+    ivec15 s5 = 6;
+    ivec15 s6 = 7;
+    ivec15 s7 = 8;
+    ivec15 s8 = 9;
+    ivec15 s9 = 10;
+    ivec15 sa = 11;
+    ivec15 sb = 12;
+    ivec15 sc = 13;
+    ivec15 sd = 14;
+    ivec15 se = 15;
+}
+
+message umat15 {
+    uvec15 s0 = 1;
+    uvec15 s1 = 2;
+    uvec15 s2 = 3;
+    uvec15 s3 = 4;
+    uvec15 s4 = 5;
+    uvec15 s5 = 6;
+    uvec15 s6 = 7;
+    uvec15 s7 = 8;
+    uvec15 s8 = 9;
+    uvec15 s9 = 10;
+    uvec15 sa = 11;
+    uvec15 sb = 12;
+    uvec15 sc = 13;
+    uvec15 sd = 14;
+    uvec15 se = 15;
+}
+
+message mat16 {
+    vec16 s0 = 1;
+    vec16 s1 = 2;
+    vec16 s2 = 3;
+    vec16 s3 = 4;
+    vec16 s4 = 5;
+    vec16 s5 = 6;
+    vec16 s6 = 7;
+    vec16 s7 = 8;
+    vec16 s8 = 9;
+    vec16 s9 = 10;
+    vec16 sa = 11;
+    vec16 sb = 12;
+    vec16 sc = 13;
+    vec16 sd = 14;
+    vec16 se = 15;
+    vec16 sf = 16;
+}
+
+message fmat16 {
+    fvec16 s0 = 1;
+    fvec16 s1 = 2;
+    fvec16 s2 = 3;
+    fvec16 s3 = 4;
+    fvec16 s4 = 5;
+    fvec16 s5 = 6;
+    fvec16 s6 = 7;
+    fvec16 s7 = 8;
+    fvec16 s8 = 9;
+    fvec16 s9 = 10;
+    fvec16 sa = 11;
+    fvec16 sb = 12;
+    fvec16 sc = 13;
+    fvec16 sd = 14;
+    fvec16 se = 15;
+    fvec16 sf = 16;
+}
+
+message imat16 {
+    ivec16 s0 = 1;
+    ivec16 s1 = 2;
+    ivec16 s2 = 3;
+    ivec16 s3 = 4;
+    ivec16 s4 = 5;
+    ivec16 s5 = 6;
+    ivec16 s6 = 7;
+    ivec16 s7 = 8;
+    ivec16 s8 = 9;
+    ivec16 s9 = 10;
+    ivec16 sa = 11;
+    ivec16 sb = 12;
+    ivec16 sc = 13;
+    ivec16 sd = 14;
+    ivec16 se = 15;
+    ivec16 sf = 16;
+}
+
+message umat16 {
+    uvec16 s0 = 1;
+    uvec16 s1 = 2;
+    uvec16 s2 = 3;
+    uvec16 s3 = 4;
+    uvec16 s4 = 5;
+    uvec16 s5 = 6;
+    uvec16 s6 = 7;
+    uvec16 s7 = 8;
+    uvec16 s8 = 9;
+    uvec16 s9 = 10;
+    uvec16 sa = 11;
+    uvec16 sb = 12;
+    uvec16 sc = 13;
+    uvec16 sd = 14;
+    uvec16 se = 15;
+    uvec16 sf = 16;
 }

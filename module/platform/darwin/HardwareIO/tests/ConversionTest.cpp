@@ -148,7 +148,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
             for (auto& test : forwardTests) {
                 float expected = utility::math::angle::normalizeAngle((test.second + Convert::SERVO_OFFSET[i])
                                                                       * Convert::SERVO_DIRECTION[i]);
-                float actual = Convert::servoPosition(i, test.first);
+                float actual   = Convert::servoPosition(i, test.first);
 
                 INFO("Expected: " << expected << " Actual: " << actual);
 
@@ -180,29 +180,29 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first + 2 * M_PI);
-                INFO(
-                    "Testing Input:" << test.first - 2 * M_PI << " Expected: " << test.second << " Actual: " << actual);
+                INFO("Testing Input:" << test.first - 2 * M_PI << " Expected: " << test.second
+                                      << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first - 2 * M_PI);
-                INFO(
-                    "Testing Input:" << test.first + 2 * M_PI << " Expected: " << test.second << " Actual: " << actual);
+                INFO("Testing Input:" << test.first + 2 * M_PI << " Expected: " << test.second
+                                      << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first + M_PI);
-                INFO("Testing Input:" << test.first + M_PI << " Expected: " << test.second - 2048 << " Actual: "
-                                      << actual);
+                INFO("Testing Input:" << test.first + M_PI << " Expected: " << test.second - 2048
+                                      << " Actual: " << actual);
                 expected = test.second - 2048;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first - M_PI);
-                INFO("Testing Input:" << test.first - M_PI << " Expected: " << test.second - 2048 << " Actual: "
-                                      << actual);
+                INFO("Testing Input:" << test.first - M_PI << " Expected: " << test.second - 2048
+                                      << " Actual: " << actual);
                 expected = test.second - 2048;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
@@ -272,10 +272,8 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
                 uint16_t actual =
                     Convert::servoSpeedInverse(i, fabs(test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023)));
 
-                INFO("Input: " << fabs(test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023)) << " Expected: "
-                               << test.first
-                               << " Actual: "
-                               << actual);
+                INFO("Input: " << fabs(test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023))
+                               << " Expected: " << test.first << " Actual: " << actual);
 
                 // These should be equal
                 REQUIRE(expected == actual);

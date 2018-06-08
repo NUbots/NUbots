@@ -34,5 +34,5 @@ message OptimiserParameters {
     vec               upperBound = 2;
     vec               lowerBound = 3;
     uint32            batchSize  = 4;
-    //TODO: add extra params!
+    // TODO: add extra params!
 }

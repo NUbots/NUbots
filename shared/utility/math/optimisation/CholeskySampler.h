@@ -29,8 +29,8 @@
 namespace utility {
 namespace math {
     namespace optimisation {
-        using message::support::optimisation::OptimiserParameters;
         using message::support::optimisation::OptimiserEstimate;
+        using message::support::optimisation::OptimiserParameters;
 
         class CholeskySampler {
         private:

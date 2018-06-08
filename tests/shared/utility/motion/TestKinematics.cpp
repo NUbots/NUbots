@@ -24,8 +24,8 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
 
-using message::input::ServoID;
 using message::input::Sensors;
+using message::input::ServoID;
 using message::motion::kinematics::KinematicsModel;
 using utility::motion::kinematics::calculateCameraLookJoints;
 

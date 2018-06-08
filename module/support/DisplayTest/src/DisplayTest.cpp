@@ -20,10 +20,10 @@
 #include "DisplayTest.h"
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
-using utility::nubugger::graph;
+using utility::nusight::graph;
 
 namespace module {
 namespace support {
