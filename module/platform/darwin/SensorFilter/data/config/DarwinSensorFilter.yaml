@@ -1,3 +1,5 @@
+nominal_z: 0.01
+
 buttons:
   debounce_threshold : 7
 
