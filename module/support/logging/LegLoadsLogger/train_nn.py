@@ -65,7 +65,7 @@ negative_files = [
 positive_files = [loadfile(f, 1) for f in ['standing.csv']]
 
 # Files that have the feet changing based on the walk
-mixed_files = [loadfile(f) for f in ['walking.csv', 'walking2.csv']]
+mixed_files = [loadfile(f) for f in ['walking.csv', 'walking2.csv', 'walking3.csv', 'walking4.csv']]
 
 # The file we will use for validation
 test_files = [loadfile(f) for f in ['long_walk.csv']]

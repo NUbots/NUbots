@@ -104,6 +104,8 @@ for f in [
 for f in [
         'walking.csv',
         'walking2.csv',
+        'walking3.csv',
+        'walking4.csv',
 ]:
     datasets.append(
         tf.data.Dataset.zip((
