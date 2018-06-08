@@ -10,6 +10,13 @@ leg:
         height: 0.04
         length: 0.215 # rough
         toe_length: 0.13 # measured
+    left_to_right:
+        hip_yaw:    -1
+        hip_roll:   -1
+        hip_pitch:   1
+        knee:        1
+        ankle_pitch: 1
+        ankle_roll: -1
 head:
     camera_declination_angle_offset: pi / 90.0 # 2 degrees
     neck_to_camera: [0.069, 0, 0.065] # [x, y, z]
