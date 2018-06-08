@@ -10,5 +10,6 @@ NUCLEAR_ROLE(
     behaviour::Controller
     motion::ScriptEngine
     behaviour::tools::ScriptRunner
+    platform::darwin::SensorFilter
     support::NUsight
 )
