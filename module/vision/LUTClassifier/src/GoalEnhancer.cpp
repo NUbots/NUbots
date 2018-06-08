@@ -160,23 +160,25 @@ namespace vision {
             // Get the min and max for intersecting with top and bottom of the screen
 
             double jump = (maxTangent - minTangent) / double(GOAL_LINE_INTERSECTIONS);
-            for (auto d = minTangent; d <= maxTangent; d += jump) {
+            if (jump > 0) {
+                for (auto d = minTangent; d <= maxTangent; d += jump) {
 
-                // Get our centre point
-                arma::vec2 p = model.model.line.pointFromTangentialDistance(d);
+                    // Get our centre point
+                    arma::vec2 p = model.model.line.pointFromTangentialDistance(d);
 
-                if ((p[1] > int(image.dimensions[1]) - 1) || (p[1] < 0)) {
-                    continue;
-                }
+                    if ((p[1] > int(image.dimensions[1]) - 1) || (p[1] < 0)) {
+                        continue;
+                    }
 
-                // Start and end
-                arma::ivec2 s({std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
-                arma::ivec2 e({std::min(int(image.dimensions[0]) - 1, int(std::round(p[0] + lineHalfWidth))),
-                               int(std::round(p[1]))});
+                    // Start and end
+                    arma::ivec2 s({std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
+                    arma::ivec2 e({std::min(int(image.dimensions[0]) - 1, int(std::round(p[0] + lineHalfWidth))),
+                                   int(std::round(p[1]))});
 
-                if (e[0] > 0) {
-                    auto segments = classifier->classify(image, lut, s, e);
-                    newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                    if (e[0] > 0) {
+                        auto segments = classifier->classify(image, lut, s, e);
+                        newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                    }
                 }
             }
 
