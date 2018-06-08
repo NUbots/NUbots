@@ -1,3 +1,5 @@
+nominal_z: 0.01
+
 buttons:
   debounce_threshold : 7
 
@@ -42,7 +44,7 @@ motion_filter:
 
   initial:
     mean:
-      position: [0, 0, 0.22]          # A little above the ground
+      position: [0, 0, 0.49]          # A little above the ground
       velocity: [0, 0, 0]             # Not moving
       rotational_velocity: [0, 0, 0]  # Not spinning
       rotation: [1, 0, 0, 0]          # Upright
