@@ -29,7 +29,7 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/LookUpTable.h"
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace support {
@@ -47,12 +47,10 @@ namespace support {
 
         emitImageHandle = on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then(
             "Simulated Images (VCamera)", [this](const CameraParameters& cam) {
-
                 // 2 Bytes per pixel
                 std::vector<uint8_t> data(2 * cam.imageSizePixels[0] * cam.imageSizePixels[1], 255);  // White pixels
                 emit(std::make_unique<Image>(
                     FOURCC::YUYV, cam.imageSizePixels, std::move(data), 0, "VirtualCamera", NUClear::clock::now()));
-
             });
 
         on<Configuration>("VirtualLookUpTable.yaml").then([this](const Configuration& config) {
@@ -109,7 +107,6 @@ namespace support {
                 std::cout << "Emitting camera parameters from VirtualCamera" << std::endl;
 
                 emit<Scope::DIRECT>(std::move(cameraParameters));
-
             });
     }
 }  // namespace support

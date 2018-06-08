@@ -1,10 +1,10 @@
 #include "Camera.h"
 
-#include <Eigen/Geometry>
-
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace input {
@@ -12,18 +12,25 @@ namespace input {
     uint Camera::cameraCount = 0;
 
     using extension::Configuration;
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
 
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
+        , dumpImages(false)
         , V4L2FrameRateHandle()
         , V4L2SettingsHandle()
         , V4L2Cameras()
-        , SpinnakerSystem()
-        , SpinnakerCamList()
-        , SpinnakerCameras() {
+        , AravisCameras() {
+
+        // Needed for Aravis cameras.
+        arv_g_type_init();
+
+        on<Configuration>("Camera.yaml").then("Camera Module Configuration", [this](const Configuration& config) {
+            dumpImages = config["dump_images"].as<bool>();
+        });
 
         on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
             // Monitor camera config directory for files.
@@ -48,16 +55,16 @@ namespace input {
                     }
                 }
 
-                else if (driver == "Spinnaker") {
-                    auto cam = SpinnakerCameras.find(deviceID);
+                else if (driver == "Aravis") {
+                    auto cam = AravisCameras.find(deviceID);
 
-                    if (cam == SpinnakerCameras.end()) {
-                        initiateSpinnakerCamera(config);
+                    if (cam == AravisCameras.end()) {
+                        initiateAravisCamera(config);
                         cameraCount++;
                     }
 
                     else {
-                        resetSpinnakerCamera(cam, config);
+                        resetAravisCamera(cam, config);
                     }
                 }
 
@@ -71,6 +78,8 @@ namespace input {
             [this](const ImageData& image_data,
                    std::shared_ptr<const Sensors> sensors,
                    std::shared_ptr<const KinematicsModel> model) {
+                static uint8_t count = 0;
+
 
                 // NOTE: we only emit direct the ImageData messages and steal their data
                 // Make sure you do not trigger on them anywhere else
@@ -97,13 +106,16 @@ namespace input {
                     msg->Hcw.setIdentity();
                 }
 
+                if (dumpImages) {
+                    utility::vision::saveImage(fmt::format("image-{}.ppm", count++), *msg);
+                }
 
                 emit(msg);
             });
 
         on<Shutdown>().then([this] {
             ShutdownV4L2Camera();
-            ShutdownSpinnakerCamera();
+            ShutdownAravisCamera();
         });
     }
 

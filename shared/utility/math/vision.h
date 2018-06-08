@@ -171,10 +171,10 @@ namespace math {
         }
 
         inline double widthBasedDistanceToCircle(const double& radius,
-                                                 const arma::vec2& s1,
-                                                 const arma::vec2& s2,
-                                                 const message::input::CameraParameters& cam) {
-            double parallaxAngle                = getParallaxAngle(s1, s2, cam);
+                                                 const arma::vec3& c1,
+                                                 const arma::vec3& c2,
+                                                 const message::input::CameraParameters&) {
+            double parallaxAngle                = utility::math::angle::acos_clamped(arma::norm_dot(c1, c2));
             double correctionForClosenessEffect = radius * std::sin(parallaxAngle / 2.0);
 
             return radius / std::tan(parallaxAngle / 2.0) + correctionForClosenessEffect;

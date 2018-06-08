@@ -11,5 +11,5 @@ NUCLEAR_ROLE(
     motion::ScriptEngine
     behaviour::tools::Jump
     support::configuration::NetworkConfiguration
-    support::NUbugger
+    support::NUsight
 )

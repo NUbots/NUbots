@@ -1,0 +1,26 @@
+ransac:
+  minimum_points_for_consensus: 10
+  maximum_iterations_per_fitting: 50
+  maximum_fitted_models: 20
+  consensus_error_threshold: 0.00001
+
+measurement_limits:
+  left:   10
+  right:  10
+  top:    10
+  base:   10
+
+aspect_ratio_range: [ 1, 40]
+visual_horizon_buffer: 0.1
+minimum_goal_horizon_angle: 0.4
+maximum_angle_between_sides: 1.3
+maximum_vertical_goal_perspective_angle: 0.3
+angular_width_disagreement_threshold_vertical: 0.1
+angular_width_disagreement_threshold_horizontal: 0.2
+
+# Localisation covariances
+vector3_covariance: [0.1,0.001,0.001]
+angle_covariance: [0.001,0.01]
+
+debug_goal_throwouts: false
+debug_goal_ransac: false

@@ -49,16 +49,7 @@ namespace platform {
             utility::math::filter::UKF<MotionModel> motionFilter;
 
             struct Config {
-                Config() : nominal_z(0.0f), battery(), motionFilter(), buttons() {}
-
-                float nominal_z;
-
-                struct Battery {
-                    Battery() : chargedVoltage(0.0f), nominalVoltage(0.0f), flatVoltage(0.0f) {}
-                    float chargedVoltage;
-                    float nominalVoltage;
-                    float flatVoltage;
-                } battery;
+                Config() : nominal_z(0.0f), motionFilter(), buttons() {}
 
                 struct MotionFilter {
                     MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}

@@ -25,8 +25,8 @@ namespace module {
 namespace vision {
 
     using message::input::Image;
-    using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
 
     using utility::math::geometry::Line;
 
@@ -50,7 +50,7 @@ namespace vision {
             arma::ivec2 end   = {int(image.dimensions[0] - 1), y};
 
             // Insert our segments
-            auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);
+            auto segments = classifier->classify(image, lut, start, end, GOAL_SUBSAMPLING);
             insertSegments(classifiedImage, segments, false);
         }
     }

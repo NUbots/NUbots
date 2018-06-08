@@ -6,9 +6,9 @@ This code is part of mocap-kinect experiments*/
 
 namespace autocal {
 
-using utility::math::matrix::Transform3D;
-using utility::math::matrix::Rotation3D;
 using utility::math::geometry::UnitQuaternion;
+using utility::math::matrix::Rotation3D;
+using utility::math::matrix::Transform3D;
 
 
 std::string MocapStream::Frame::toString() {
@@ -57,7 +57,10 @@ MocapStream::Frame MocapStream::createFrame(arma::mat m, const std::set<int>& al
             UnitQuaternion q(rot);
             // Change back to mocap coords from nubots coords (sigh...)
             UnitQuaternion q_(arma::vec4{
-                q.kX(), -q.kZ(), q.kW(), -q.kY(),
+                q.kX(),
+                -q.kZ(),
+                q.kW(),
+                -q.kY(),
             });
             // Turn back into rotation
             r.pose.rotation() = Rotation3D(q_);
@@ -250,7 +253,10 @@ bool MocapStream::setRigidBodyInFrame(const TimeStamp& frame_time,
         UnitQuaternion q(rot);
         // Change back to mocap coords from nubots coords (sigh...)
         UnitQuaternion q_(arma::vec4{
-            q.kX(), -q.kZ(), q.kW(), -q.kY(),
+            q.kX(),
+            -q.kZ(),
+            q.kW(),
+            -q.kY(),
         });
         // Turn back into rotation
         r.pose.rotation()    = Rotation3D(q_);

@@ -22,6 +22,10 @@
 
 #include "DarwinDevice.h"
 
+#ifdef VERSION
+#undef VERSION
+#endif
+
 namespace Darwin {
 
 /**

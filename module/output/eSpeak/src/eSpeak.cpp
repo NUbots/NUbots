@@ -50,7 +50,7 @@ namespace output {
                          espeakCHARS_AUTO,        // Flags (auto encoding)
                          nullptr,                 // User identifier for callback
                          nullptr                  // Callback
-                         );
+            );
         });
 
         on<Shutdown>().then(espeak_Terminate);

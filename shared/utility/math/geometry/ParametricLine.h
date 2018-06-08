@@ -113,10 +113,9 @@ namespace math {
                 arma::vec /*2*/ tValues = Ainverse * (arma::vec(l.point) - arma::vec(point));  // arma::meat
 
                 // Check bounds of line segments
-                if (tValues[0] < tLimits[0] || tValues[0] > tLimits[1]  // ie outside range of first line
-                    || tValues[1] < l.tLimits[0]
-                    || tValues[1] > l.tLimits[1]  // outside range of second
-                    ) {
+                if (tValues[0] < tLimits[0] || tValues[0] > tLimits[1]         // ie outside range of first line
+                    || tValues[1] < l.tLimits[0] || tValues[1] > l.tLimits[1]  // outside range of second
+                ) {
                     throw std::domain_error("Line::intersect - Lines do not intersect (tValues out of range)");
                 }
                 return point + tValues[0] * direction;

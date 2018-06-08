@@ -117,8 +117,9 @@ namespace motion {
         int signSupportFootPosY   = supportFootPos[1] < 0 ? -1 : 1;
         float clippingPlaneY =
             supportFootPos[1]
-            - signSupportFootPosY * (foot_separation_margin + (kinematicsModel.leg.FOOT_WIDTH / 2.0
-                                                               - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
+            - signSupportFootPosY
+                  * (foot_separation_margin
+                     + (kinematicsModel.leg.FOOT_WIDTH / 2.0 - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
         float liftClipDistance = (liftGoal[1] - clippingPlaneY);
         if (signSupportFootPosY * liftClipDistance > 0) {

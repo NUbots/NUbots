@@ -87,15 +87,6 @@ namespace math {
              */
             Transform(const arma::vec3& in);
 
-            Transform3D operator*(const Transform3D& B) {
-                return Transform3D(arma::mat44(*this) * arma::mat44(B));
-            }
-
-            template <typename T>
-            arma::mat44 operator*(const T& B) {
-                return arma::mat44(*this) * B;
-            }
-
             /**
              * @brief Translate the current basis by the given 3D vector in local space
              *

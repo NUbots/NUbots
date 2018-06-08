@@ -43,7 +43,3 @@ jobs:
     - env: PLATFORM=nuc7i7bnh
       install: .travis/install_toolchain.sh
       script: .travis/build_code.sh
-
-    - env: PLATFORM=fitpc2i
-      install: .travis/install_toolchain.sh
-      script: .travis/build_code.sh

@@ -2,9 +2,13 @@
 
 from generator.textutil import indent, dedent
 from generator.Field import Field, PointerType
+from generator.OneOfField import OneOfField
+from generator.OneOfType import OneOfType
 from generator.Enum import Enum
 
+
 class Message:
+
     def __init__(self, m, context):
         self.package = context.package
         self.name = m.name
@@ -14,68 +18,83 @@ class Message:
 
         # Get all the submessages that are not map entries
         self.submessages = [Message(n, self) for n in m.nested_type if not n.options.map_entry]
-        self.oneofs = []
 
         for n in m.nested_type:
             if n.options.map_entry:
                 Field.map_types['{}.{}'.format(self.fqn, n.name)] = (Field(n.field[0], self), Field(n.field[1], self))
 
-        # All fields that are not a part of oneof
-        self.fields = [Field(f, self) for f in m.field if f.oneof_index == 0]
+        self.fields = []
+        for f in m.field:
+            # All fields that are not a part of oneof
+            if not f.HasField('oneof_index'):
+                self.fields.append(Field(f, self))
 
-        # m.name is the name of the message
-        # m.field contains the fields
-        # m.extension contains any exntesions (error don't use)
-        # m.nested_type contains submessages
-        # m.enum_type contains held enum types
-        # m.extension_range contains extension ranges
-        # m.oneof_decl contaions all one_of declarations
-        # m.options contains options (message_set_wire_format no_standard_descriptor_accessor deprecated map_entry uninterpreted_option)
-        # m.reserved_range and m.reserved_name contains names/field numbers not to use
+            # Fields that are a part of oneof
+            elif [v for v in m.field if v.oneof_index == f.oneof_index].index(f) == 0:
+                oneof_fields = [v for v in m.field if v.oneof_index == f.oneof_index]
+                oneof_name = m.oneof_decl[f.oneof_index].name
+                self.fields.append(OneOfField(oneof_name, oneof_fields, self))
+                self.submessages.append(OneOfType(oneof_name, oneof_fields, self))
 
     def generate_default_constructor(self):
 
         # Fully qualified c++ name
-        cpp_fqn = '::'.join(self.fqn.split('.'));
+        cpp_fqn = '::'.join(self.fqn.split('.'))
 
         # If we are empty it's easy
         if not self.fields:
-            return ('{}();'.format(self.name),
-                    '{}::{}() {{}}'.format(cpp_fqn, self.name))
+            return ('{}();'.format(self.name), '{}::{}() {{}}'.format(cpp_fqn, self.name))
         else:
             field_list = ', '.join(['{} const& _{}'.format(v.cpp_type, v.name) for v in self.fields])
-            default_field_list = ', '.join(['{} const& _{} = {}'.format(v.cpp_type, v.name, v.default_value if v.default_value else '{}()'.format(v.cpp_type)) for v in self.fields])
+            default_field_list = ', '.join([
+                '{} const& _{} = {}'.format(
+                    v.cpp_type, v.name, v.default_value if v.default_value else '{}()'.format(v.cpp_type)
+                ) for v in self.fields
+            ])
             field_set = ', '.join(['{0}(_{0})'.format(v.name) for v in self.fields])
 
-            return ('{}({});'.format(self.name, default_field_list),
-                    '{}::{}({}) : {} {{}}'.format(cpp_fqn, self.name, field_list, field_set))
+            return (
+                '{}({});'.format(self.name, default_field_list),
+                '{}::{}({}) : {} {{}}'.format(cpp_fqn, self.name, field_list, field_set)
+            )
 
     def generate_equality_operator(self):
 
         # Fully qualified c++ name
-        cpp_fqn = '::'.join(self.fqn.split('.'));
+        cpp_fqn = '::'.join(self.fqn.split('.'))
 
         # If we are empty it's easy
         if not self.fields:
-            return ('bool operator== (const {}&) const;'.format(self.name),
-                    'bool {}::operator== (const {}&) const {{ return true; }}'.format(cpp_fqn, self.name))
+            return (
+                'bool operator== (const {}&) const;'.format(self.name),
+                'bool {}::operator== (const {}&) const {{ return true; }}'.format(cpp_fqn, self.name)
+            )
         else:
             equality_test = ' && '.join(['{0} == other.{0}'.format(v.name) for v in self.fields])
 
-            return ('bool operator== (const {}& other) const;'.format(self.name),
-                    'bool {}::operator== (const {}& other) const {{ return {}; }}'.format(cpp_fqn, self.name, equality_test))
+            return (
+                'bool operator== (const {}& other) const;'.format(self.name),
+                'bool {}::operator== (const {}& other) const {{ return {}; }}'.format(
+                    cpp_fqn, self.name, equality_test
+                )
+            )
 
     def generate_rule_of_five(self):
 
         raw_pointer = [v.name for v in self.fields if v.pointer and v.pointer == PointerType['RAW']]
-        raw_pointer_warning = '#pragma message ( "WARNING: The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}") \n'.format(self.name, ', '.join(raw_pointer))
+        raw_pointer_warning = '#pragma message ( "WARNING: The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}") \n'.format(
+            self.name, ', '.join(raw_pointer)
+        )
 
-        rule_of_five = dedent("""{warning}\
+        rule_of_five = dedent(
+            """\
+            {warning}
             {name}(const {name}&) = default;
             {name}({name}&&) = default;
             ~{name}() = default;
             {name}& operator=(const {name}&) = default;
-            {name}& operator=({name}&&) = default;""")
+            {name}& operator=({name}&&) = default;"""
+        )
 
         return (rule_of_five.format(name=self.name, warning=raw_pointer_warning if raw_pointer else ''), '')
 
@@ -89,8 +108,10 @@ class Message:
 
         # If we are empty it's easy
         if not self.fields:
-            return ('{}(const {}&);'.format(self.name, protobuf_name),
-                    '{}::{}(const {}&) {{}}'.format(cpp_fqn, self.name, protobuf_name))
+            return (
+                '{}(const {}&);'.format(self.name, protobuf_name),
+                '{}::{}(const {}&) {{}}'.format(cpp_fqn, self.name, protobuf_name)
+            )
         else:
             lines = ['{}::{}(const {}& proto) {{'.format(cpp_fqn, self.name, protobuf_name)]
 
@@ -101,7 +122,12 @@ class Message:
                 elif v.map_type:
                     if v.type[1].bytes_type:
                         lines.append(indent('for (auto& _v : proto.{}()) {{'.format(v.name)))
-                        lines.append(indent('{0}[_v.first].insert(std::end({0}[_v.first]), std::begin(_v.second), std::end(_v.second));'.format(v.name), 8))
+                        lines.append(
+                            indent(
+                                '{0}[_v.first].insert(std::end({0}[_v.first]), std::begin(_v.second), std::end(_v.second));'.
+                                format(v.name), 8
+                            )
+                        )
                         lines.append(indent('}'))
 
                     elif v.type[1].special_cpp_type:
@@ -110,41 +136,134 @@ class Message:
                         lines.append(indent('}'))
 
                     else:  # Basic and other types are handled the same
-                        lines.append(indent('{0}.insert(std::begin(proto.{1}()), std::end(proto.{1}()));'.format(v.name, v.name.lower()), 8))
+                        lines.append(
+                            indent(
+                                '{0}.insert(std::begin(proto.{1}()), std::end(proto.{1}()));'.format(
+                                    v.name, v.name.lower()
+                                ), 8
+                            )
+                        )
 
                 elif v.repeated:
                     if v.bytes_type:
                         lines.append(indent('{0}.resize(proto.{0}_size());'.format(v.name.lower())))
                         lines.append(indent('for (size_t _i = 0; _i < {0}.size(); ++_i) {{'.format(v.name)))
-                        lines.append(indent('{0}[_i].insert(std::end({0}[_i]), std::begin(proto.{1}(_i)), std::end(proto.{1}(_i)));'.format(v.name, v.name.lower()), 8))
+                        lines.append(
+                            indent(
+                                '{0}[_i].insert(std::end({0}[_i]), std::begin(proto.{1}(_i)), std::end(proto.{1}(_i)));'.
+                                format(v.name, v.name.lower()), 8
+                            )
+                        )
                         lines.append(indent('}'))
 
                     elif v.special_cpp_type:
                         if v.array_size > 0:
-                            lines.append(indent('for (size_t _i = 0; _i < {0}.size() && _i < size_t(proto.{1}_size()); ++_i) {{'.format(v.name, v.name.lower())))
-                            lines.append(indent('message::conversion::convert({0}[_i], proto.{1}(_i));'.format(v.name, v.name.lower()), 8))
+                            lines.append(
+                                indent(
+                                    'for (size_t _i = 0; _i < {0}.size() && _i < size_t(proto.{1}_size()); ++_i) {{'.
+                                    format(v.name, v.name.lower())
+                                )
+                            )
+                            lines.append(
+                                indent(
+                                    'message::conversion::convert({0}[_i], proto.{1}(_i));'.format(
+                                        v.name, v.name.lower()
+                                    ), 8
+                                )
+                            )
                             lines.append(indent('}'))
                         else:
                             # Add the top of our for loop for the repeated field
                             lines.append(indent('{0}.resize(proto.{1}_size());'.format(v.name, v.name.lower())))
                             lines.append(indent('for (size_t _i = 0; _i < {0}.size(); ++_i) {{'.format(v.name)))
-                            lines.append(indent('message::conversion::convert({0}[_i], proto.{1}(_i));'.format(v.name, v.name.lower()), 8))
+                            lines.append(
+                                indent(
+                                    'message::conversion::convert({0}[_i], proto.{1}(_i));'.format(
+                                        v.name, v.name.lower()
+                                    ), 8
+                                )
+                            )
                             lines.append(indent('}'))
 
                     else:  # Basic and other types are handled the same
                         if v.array_size > 0:
-                            lines.append(indent('for (size_t _i = 0; _i < {0}.size() && _i < size_t(proto.{1}_size()); ++_i) {{'.format(v.name, v.name.lower())))
+                            lines.append(
+                                indent(
+                                    'for (size_t _i = 0; _i < {0}.size() && _i < size_t(proto.{1}_size()); ++_i) {{'.
+                                    format(v.name, v.name.lower())
+                                )
+                            )
                             lines.append(indent('{0}[_i] = proto.{1}(_i);'.format(v.name, v.name.lower()), 8))
                             lines.append(indent('}'))
                         else:
-                            lines.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(v.name, v.name.lower())))
+                            lines.append(
+                                indent(
+                                    '{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(
+                                        v.name, v.name.lower()
+                                    )
+                                )
+                            )
+
+                elif v.one_of:
+                    lines.append(indent('switch (proto.{}_case()) {{').format(v.name.lower()))
+                    for oneof_field in v.oneof_fields:
+                        lines.append(indent('case {}: {{'.format(oneof_field.number), 8))
+
+                        if oneof_field.bytes_type:
+                            lines.append(
+                                indent(
+                                    dedent(
+                                        """\
+                                        {0}.{1} = {2};
+                                        {0}.{1}.insert(std::end({0}.{1}), std::begin(proto.{3}()), std::end(proto.{3}()));"""
+                                        .format(
+                                            v.name, oneof_field.name, oneof_field.default_value,
+                                            oneof_field.name.lower()
+                                        )
+                                    ), 12
+                                )
+                            )
+
+                        elif oneof_field.special_cpp_type:
+                            lines.append(
+                                indent(
+                                    dedent(
+                                        """\
+                                        {0}.{1} = {2};
+                                        message::conversion::convert({0}.{1}, proto.{3}());""".format(
+                                            v.name, oneof_field.name, oneof_field.default_value,
+                                            oneof_field.name.lower()
+                                        )
+                                    ), 12
+                                )
+                            )
+
+                        else:  # Basic and other types are handled the same
+                            lines.append(
+                                indent(
+                                    '{0}.{1} = proto.{2}();'.format(v.name, oneof_field.name, oneof_field.name.lower()),
+                                    12
+                                )
+                            )
+
+                        lines.append(indent('} break;', 8))
+                    lines.append(indent('default: object.reset(); break;', 8))
+                    lines.append(indent('}'))
 
                 else:
                     if v.bytes_type:
-                        lines.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(v.name, v.name.lower())))
+                        lines.append(
+                            indent(
+                                '{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(
+                                    v.name, v.name.lower()
+                                )
+                            )
+                        )
 
                     elif v.special_cpp_type:
-                        lines.append(indent('message::conversion::convert({}, proto.{}());'.format(v.name, v.name.lower())))
+                        lines.append(
+                            indent('message::conversion::convert({}, proto.{}());'.format(v.name, v.name.lower()))
+                        )
 
                     else:  # Basic and other types are handled the same
                         lines.append(indent('{} = proto.{}();'.format(v.name, v.name.lower())))
@@ -163,11 +282,15 @@ class Message:
 
         # If we are empty it's easy
         if not self.fields:
-            return ('operator {0}() const;'.format(protobuf_name),
-                    '{0}::operator {1}() const {{\n    return {1}();\n}}'.format(cpp_fqn, protobuf_name))
+            return (
+                'operator {0}() const;'.format(protobuf_name),
+                '{0}::operator {1}() const {{\n    return {1}();\n}}'.format(cpp_fqn, protobuf_name)
+            )
         else:
-            lines = ['{}::operator {}() const {{'.format(cpp_fqn, protobuf_name),
-                     indent('{} proto;'.format(protobuf_name))]
+            lines = [
+                '{}::operator {}() const {{'.format(cpp_fqn, protobuf_name),
+                indent('{} proto;'.format(protobuf_name))
+            ]
 
             for v in self.fields:
 
@@ -179,22 +302,37 @@ class Message:
                     lines.append(indent('for (auto& _v : {}) {{'.format(v.name)))
 
                     if v.type[1].bytes_type:
-                        lines.append(indent('(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.format(v.name.lower()), 8))
+                        lines.append(
+                            indent(
+                                '(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.
+                                format(v.name.lower()), 8
+                            )
+                        )
                     elif v.type[1].special_cpp_type:
-                        lines.append(indent('message::conversion::convert((*proto.mutable_{}())[_v.first], _v.second);'.format(v.name.lower()), 8))
-                    else: # Basic and others are handled the same
+                        lines.append(
+                            indent(
+                                'message::conversion::convert((*proto.mutable_{}())[_v.first], _v.second);'.format(
+                                    v.name.lower()
+                                ), 8
+                            )
+                        )
+                    else:  # Basic and others are handled the same
                         lines.append(indent('(*proto.mutable_{}())[_v.first] = _v.second;'.format(v.name.lower()), 8))
 
                     lines.append(indent('}'))
 
-                elif v.repeated: # We don't need to handle array here specially because it's the same
+                elif v.repeated:  # We don't need to handle array here specially because it's the same
                     # Add the top of our for loop for the repeated field
                     lines.append(indent('for (auto& _v : {}) {{'.format(v.name)))
 
                     if v.bytes_type:
-                        lines.append(indent('proto.add_{}()->append(std::begin(_v), std::end(_v));'.format(v.name.lower()), 8))
+                        lines.append(
+                            indent('proto.add_{}()->append(std::begin(_v), std::end(_v));'.format(v.name.lower()), 8)
+                        )
                     elif v.special_cpp_type:
-                        lines.append(indent('message::conversion::convert(*proto.add_{}(), _v);'.format(v.name.lower()), 8))
+                        lines.append(
+                            indent('message::conversion::convert(*proto.add_{}(), _v);'.format(v.name.lower()), 8)
+                        )
                     elif v.basic:
                         lines.append(indent('proto.add_{}(_v);'.format(v.name.lower()), 8))
                     else:
@@ -202,11 +340,62 @@ class Message:
 
                     lines.append(indent('}'))
 
+                elif v.one_of:
+                    lines.append(indent('switch ({}.val_index) {{').format(v.name))
+                    for oneof_field in v.oneof_fields:
+                        lines.append(indent('case {}: {{'.format(oneof_field.number), 8))
+
+                        if oneof_field.bytes_type:
+                            lines.append(
+                                indent(
+                                    'proto.mutable_{0}()->append(std::begin({1}.{2}.get()), std::end({1}.{2}.get()));'.
+                                    format(oneof_field.name.lower(), v.name, oneof_field.name), 12
+                                )
+                            )
+                        elif oneof_field.special_cpp_type:
+                            lines.append(
+                                indent(
+                                    'message::conversion::convert(*proto.mutable_{0}(), {1}.{2}.get());'.format(
+                                        oneof_field.name.lower(), v.name, oneof_field.name
+                                    ), 12
+                                )
+                            )
+                        elif oneof_field.basic:
+                            lines.append(
+                                indent(
+                                    'proto.set_{0}({1}.{2}.get());'.format(
+                                        oneof_field.name.lower(), v.name, oneof_field.name
+                                    ), 12
+                                )
+                            )
+                        else:
+                            lines.append(
+                                indent(
+                                    '*proto.mutable_{0}() = {1}.{2}.get();'.format(
+                                        oneof_field.name.lower(), v.name, oneof_field.name
+                                    ), 12
+                                )
+                            )
+
+                        lines.append(indent('} break;', 8))
+                    lines.append(indent('default: break;', 8))
+                    lines.append(indent('}'))
+
                 else:
                     if v.bytes_type:
-                        lines.append(indent('proto.mutable_{0}()->append(std::begin({1}), std::end({1}));'.format(v.name.lower(), v.name), 8))
+                        lines.append(
+                            indent(
+                                'proto.mutable_{0}()->append(std::begin({1}), std::end({1}));'.format(
+                                    v.name.lower(), v.name
+                                ), 8
+                            )
+                        )
                     elif v.special_cpp_type:
-                        lines.append(indent('message::conversion::convert(*proto.mutable_{}(), {});'.format(v.name.lower(), v.name)))
+                        lines.append(
+                            indent(
+                                'message::conversion::convert(*proto.mutable_{}(), {});'.format(v.name.lower(), v.name)
+                            )
+                        )
                     elif v.basic:
                         lines.append(indent('proto.set_{}({});'.format(v.name.lower(), v.name)))
                     else:
@@ -244,12 +433,15 @@ class Message:
         protobuf_converter = self.generate_protobuf_converter()
         equality_operator = self.generate_equality_operator()
 
-        constructor_headers = indent('\n\n'.join([default_constructor[0], rule_of_five[0], protobuf_constructor[0], equality_operator[0]]))
+        constructor_headers = indent(
+            '\n\n'.join([default_constructor[0], rule_of_five[0], protobuf_constructor[0], equality_operator[0]])
+        )
         constructor_impl = '\n\n'.join([default_constructor[1], protobuf_constructor[1], equality_operator[1]])
         converter_headers = indent('\n\n'.join([protobuf_converter[0]]))
         converter_impl = '\n\n'.join([protobuf_converter[1]])
 
-        header_template = dedent("""\
+        header_template = dedent(
+            """\
             struct {name} : public ::message::MessageBase<{name}> {{
                 // Protobuf type
                 using protobuf_type = {protobuf_type};
@@ -264,9 +456,11 @@ class Message:
             {converters}
                 // Fields
             {fields}
-            }};""")
+            }};"""
+        )
 
-        impl_template = dedent("""\
+        impl_template = dedent(
+            """\
             // Constructors
             {constructors}
 
@@ -277,9 +471,11 @@ class Message:
             {enums}
 
             // Submessages
-            {submessages}""")
+            {submessages}"""
+        )
 
-        python_template = dedent("""\
+        python_template = dedent(
+            """\
             // Local scope for this message
             {{
                 // Use our context and assign a new one to a shadow
@@ -308,19 +504,28 @@ class Message:
                     // Do the emit
                     reactor->powerplant.emit_shared<NUClear::dsl::word::emit::Local>(msg.shared_from_this());
                 }});
-            }}""")
-
+            }}"""
+        )
 
         python_constructor_args = ['{}& self'.format(self.fqn.replace('.', '::'))]
         python_constructor_args.extend(['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields])
-        python_members = '\n'.join('.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace('.', '::')) for f in self.fields)
+        python_members = '\n'.join(
+            '.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace('.', '::'))
+            for f in self.fields
+        )
         python_constructor_default_args = ['']
-        python_constructor_default_args.extend(['pybind11::arg("{}") = {}'.format(t.name, t.default_value if t.default_value else '{}()'.format(t.cpp_type)) for t in self.fields])
+        python_constructor_default_args.extend([
+            'pybind11::arg("{}") = {}'.format(
+                t.name, t.default_value if t.default_value else '{}()'.format(t.cpp_type)
+            ) for t in self.fields
+        ])
 
-        python_constructor = dedent("""\
+        python_constructor = dedent(
+            """\
             .def("__init__", [] ({args}) {{
                 new (&self) {name}({vars});
-            }}{default_args})""").format(
+            }}{default_args})"""
+        ).format(
             name=self.fqn.replace('.', '::'),
             args=', '.join(python_constructor_args),
             vars=', '.join('_{}'.format(t.name) for t in self.fields),
@@ -336,10 +541,7 @@ class Message:
             converters=converter_headers,
             fields=fields
         ), impl_template.format(
-            constructors=constructor_impl,
-            converters=converter_impl,
-            enums=enum_impls,
-            submessages=submessage_impls
+            constructors=constructor_impl, converters=converter_impl, enums=enum_impls, submessages=submessage_impls
         ), python_template.format(
             constructor=indent(python_constructor, 8),
             message_members=indent(python_members, 8),

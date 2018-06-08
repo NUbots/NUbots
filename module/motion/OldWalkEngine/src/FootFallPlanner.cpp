@@ -20,7 +20,7 @@
 #include "OldWalkEngine.h"
 
 #include "message/motion/KinematicsModel.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace module {
 namespace motion {
@@ -29,7 +29,7 @@ namespace motion {
     using message::motion::KinematicsModel;
 
     using utility::math::matrix::Transform2D;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     void OldWalkEngine::calculateNewStep() {
         updateVelocity();

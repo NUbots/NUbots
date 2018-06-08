@@ -35,4 +35,8 @@ SET(NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
     ${fmt_LIBRARIES}
     -ldl
     -lbacktrace
+    CACHE
+    PATH
+    "Additional libraries used when linking roles, extensions, and utilities"
+    FORCE
 )
