@@ -318,11 +318,11 @@ namespace vision {
                               // CENTRE OF BALL IS ABOVE THE HORIZON
                               arma::ivec2 centre_im = getImageFromCam(axis, cam);
                               if (utility::vision::visualHorizonAtPoint(image, centre_im[0]) > centre_im[1]
-                                  || arma::dot(convert<double, 3>(image.horizon_normal), ballCentreRay) > 0) {
+                                  || arma::dot(convert<double, 3>(image.horizon_normal), axis) > 0) {
                                   if (print_throwout_logs) {
-                                      log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
+                                      log("Ball discarded: arma::dot(image.horizon_normal,axis) > 0 ");
                                       log("Horizon normal = ", image.horizon_normal.transpose());
-                                      log("Ball centre ray = ", ballCentreRay.t());
+                                      log("Ball centre ray = ", axis.t());
                                   }
                                   continue;
                               }
@@ -381,8 +381,7 @@ namespace vision {
                               // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
                               // Project this vector to a plane midway through the ball
                               Plane ballBisectorPlane({0, 0, 1}, {0, 0, field.ball_radius});
-                              arma::vec3 ballCentreGroundProj =
-                                  projectCamToPlane(ballCentreRay, camToGround, ballBisectorPlane);
+                              arma::vec3 ballCentreGroundProj = projectCamToPlane(axis, camToGround, ballBisectorPlane);
                               double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
 
                               if (std::abs((widthDistance - ballCentreGroundProjDistance)
@@ -405,7 +404,7 @@ namespace vision {
                               b.visObject.sensors = image.sensors;
 
                               // Work out how far away the ball must be to be at the distance it is from the camera
-                              arma::vec3 rBCc = ballCentreRay * widthDistance;
+                              arma::vec3 rBCc = axis * widthDistance;
 
                               // Attach the measurement to the object
                               b.measurements.push_back(Ball::Measurement());
@@ -413,12 +412,11 @@ namespace vision {
                               b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
 
                               // Ball cam space info
-                              b.cone.axis     = convert<double, 3>(ballCentreRay);
+                              b.cone.axis     = convert<double, 3>(axis);
                               b.cone.gradient = result.model.gradient;
 
                               // Angular positions from the camera
-                              b.visObject.screenAngular =
-                                  convert<double, 2>(cartesianToSpherical(ballCentreRay).rows(1, 2));
+                              b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(axis).rows(1, 2));
                               b.visObject.angularSize << getParallaxAngle(left, right, cam),
                                   getParallaxAngle(top, base, cam);
 
