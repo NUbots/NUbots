@@ -17,10 +17,10 @@ csv_data_cols = 12
 learning_rate = 0.001
 
 
-def save_yaml_model(sess, output_path, global_step, loss, variables=None):
+def save_yaml_model(sess, output_path, global_step, loss, variables=None, name=None):
 
     # Run tf to get all our variables
-    variables = variables if variables is not None else {v.name: sess.run(v) for v in tf.trainable_variables()}
+    variables = {v.name: sess.run(v) for v in tf.trainable_variables()} if variables is None else variables
     output = []
     output.append({'loss': loss})
 
@@ -49,7 +49,8 @@ def save_yaml_model(sess, output_path, global_step, loss, variables=None):
 
     # Print as yaml
     os.makedirs(os.path.join(output_path, 'yaml_models'), exist_ok=True)
-    with open(os.path.join(output_path, 'yaml_models', 'model_{}.yaml'.format(global_step)), 'w') as f:
+    output_name = 'model_{}.yaml'.format(global_step) if name is None else '{}.yaml'.format(name)
+    with open(os.path.join(output_path, 'yaml_models', output_name), 'w') as f:
         f.write(yaml.dump(output, width=120))
 
 
@@ -137,7 +138,7 @@ valid_iterator = valid_dataset.make_initializable_iterator()
 
 # Build the network using the provided structure
 line = tf.placeholder(tf.string, [])
-iterator = tf.data.Iterator.from_string_handle(line, train_iterator.output_classes, train_iterator.output_shapes)
+iterator = tf.data.Iterator.from_string_handle(line, dataset.output_types, dataset.output_shapes)
 logits, labels = iterator.get_next()
 logits = tf.reshape(logits, [-1, csv_data_cols])
 for i, out_s in enumerate(network_structure):
@@ -189,19 +190,14 @@ with tf.Session() as sess:
     best_step = -1
     tloss = 0
     duration = 0
+    start = time.time()
     while True:
         try:
-            start = time.time()
+            begin = time.time()
             _, l, = sess.run([optimiser, loss], feed_dict={line: train_handle})
-            end = time.time()
-            duration += end - start
+            duration += time.time() - begin
             step = tf.train.global_step(sess, global_step)
             tloss += l
-
-            if l < best_loss:
-                best_loss = l
-                best_model = {v.name: sess.run(v) for v in tf.trainable_variables()}
-                best_step = tf.train.global_step(sess, global_step)
 
             if step and (step % 100) == 0:
                 tloss /= 100
@@ -220,17 +216,25 @@ with tf.Session() as sess:
                         count += 1
                     except tf.errors.OutOfRangeError:
                         vloss /= count
+
+                        if vloss < best_loss:
+                            best_loss = vloss
+                            best_model = {v.name: sess.run(v) for v in tf.trainable_variables()}
+                            best_step = tf.train.global_step(sess, global_step)
+
                         print('Batch {:5d}: valid loss (avg) {:6f}'.format(step, vloss))
+                        sess.run(valid_iterator.initializer)
+                        valid_handle = sess.run(valid_iterator.string_handle('valid_dataset'))
+                        break
 
                 # Save our model in yaml format
                 save_yaml_model(sess, '.', tf.train.global_step(sess, global_step), l)
 
         except tf.errors.OutOfRangeError:
             print('Training done')
+            print('Training took {:6f}s'.format(time.time() - start))
             break
 
     # Save our model in yaml format
     save_yaml_model(sess, '.', tf.train.global_step(sess, global_step))
-
-    if l != best_loss:
-        save_yaml_model(sess, '.', best_step, best_loss, variables=best_model)
+    save_yaml_model(sess, '.', best_step, best_loss, variables=best_model, name='best_vloss')
