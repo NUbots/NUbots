@@ -111,6 +111,9 @@ namespace platform {
             , footlanding_Rwf() {
 
             on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config) {
+
+                this->config.nominal_z = config["nominal_z"].as<float>();
+
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
@@ -446,42 +449,42 @@ namespace platform {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
+                    sensors->rightFootDown = false;
+                    sensors->leftFootDown  = false;
+
                     if (previousSensors) {
                         // Use our virtual load sensor class to work out if our foot is down
-                        arma::vec leftFootFeatureVec = {
-                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_HIP_PITCH].load,
-                            sensors->servo[ServoID::L_KNEE].presentVelocity,
-                            sensors->servo[ServoID::L_KNEE].presentVelocity
-                                - previousSensors->servo[ServoID::L_KNEE].presentVelocity,
-                            sensors->servo[ServoID::L_KNEE].load,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].load};
-                        sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
-                        arma::vec rightFootFeatureVec = {
-                            sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_HIP_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_HIP_PITCH].load,
-                            sensors->servo[ServoID::R_KNEE].presentVelocity,
-                            sensors->servo[ServoID::R_KNEE].presentVelocity
-                                - previousSensors->servo[ServoID::R_KNEE].presentVelocity,
-                            sensors->servo[ServoID::R_KNEE].load,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].load};
-                        sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
+                        // line 542
+                        // want Hwf
+                        // get lowest z
+                        // confirm accel and foot vector are close
+                        // weight CM730 higher
+
+                        Transform3D Hwt = convert<double, 4, 4>(previousSensors->world).i();
+                        Transform3D Htl =
+                            convert<double, 4, 4>(previousSensors->forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        Transform3D Htr =
+                            convert<double, 4, 4>(previousSensors->forwardKinematics[ServoID::R_ANKLE_ROLL]);
+
+                        double zCompL = Htl(2, 3);
+                        double zCompR = Htr(2, 3);
+
+                        if (std::abs(zCompL - zCompR) > config.nominal_z) {
+                            if (zCompL > zCompR) {
+                                sensors->rightFootDown = true;
+                            }
+                            else {
+                                sensors->leftFootDown = true;
+                            }
+                        }
+                        else {
+                            sensors->rightFootDown = true;
+                            sensors->leftFootDown  = true;
+                        }
                     }
-                    else {
-                        sensors->leftFootDown  = false;
-                        sensors->rightFootDown = false;
-                    }
+
+                    emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -602,6 +605,7 @@ namespace platform {
                     world.eye();
                     world.rotation()    = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     world.translation() = -(world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+
                     // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
                     sensors->world = convert<double, 4, 4>(world);
 
