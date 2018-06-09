@@ -19,6 +19,8 @@
 
 #include "SensorFilter.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
@@ -104,8 +106,7 @@ namespace platform {
             : Reactor(std::move(environment))
             , motionFilter()
             , config()
-            , leftFootDown()
-            , rightFootDown()
+            , load_sensor()
             , footlanding_rFWw()
             , footlanding_Rfw()
             , footlanding_Rwf() {
@@ -117,23 +118,7 @@ namespace platform {
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
                 // Foot load sensor config
-                leftFootDown =
-                    DarwinVirtualLoadSensor(config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                            config["foot_load_sensor"]["certainty_threshold"].as<double>(),
-                                            config["foot_load_sensor"]["uncertainty_threshold"].as<double>());
-
-                rightFootDown =
-                    DarwinVirtualLoadSensor(config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                            config["foot_load_sensor"]["certainty_threshold"].as<double>(),
-                                            config["foot_load_sensor"]["uncertainty_threshold"].as<double>());
+                load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
 
                 // Motion filter config
                 // Update our velocity timestep dekay
@@ -452,35 +437,22 @@ namespace platform {
                     sensors->leftFootDown  = false;
 
                     if (previousSensors) {
-                        // Use our virtual load sensor class to work out if our foot is down
+                        // Use our virtual load sensor class to work out which feet are down
+                        Eigen::Matrix<float, 1, 12> features;
+                        features << sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
+                            sensors->servo[ServoID::R_HIP_PITCH].load,
+                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
+                            sensors->servo[ServoID::L_HIP_PITCH].load, sensors->servo[ServoID::R_KNEE].presentVelocity,
+                            sensors->servo[ServoID::R_KNEE].load, sensors->servo[ServoID::L_KNEE].presentVelocity,
+                            sensors->servo[ServoID::L_KNEE].load,
+                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
+                            sensors->servo[ServoID::R_ANKLE_PITCH].load,
+                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
+                            sensors->servo[ServoID::L_ANKLE_PITCH].load;
 
-                        // line 542
-                        // want Hwf
-                        // get lowest z
-                        // confirm accel and foot vector are close
-                        // weight CM730 higher
-
-                        Transform3D Hwt = convert<double, 4, 4>(previousSensors->world).i();
-                        Transform3D Htl =
-                            convert<double, 4, 4>(previousSensors->forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                        Transform3D Htr =
-                            convert<double, 4, 4>(previousSensors->forwardKinematics[ServoID::R_ANKLE_ROLL]);
-
-                        double zCompL = Htl(2, 3);
-                        double zCompR = Htr(2, 3);
-
-                        if (std::abs(zCompL - zCompR) > config.nominal_z) {
-                            if (zCompL > zCompR) {
-                                sensors->rightFootDown = true;
-                            }
-                            else {
-                                sensors->leftFootDown = true;
-                            }
-                        }
-                        else {
-                            sensors->rightFootDown = true;
-                            sensors->leftFootDown  = true;
-                        }
+                        auto feet_down         = load_sensor.updateFeet(features);
+                        sensors->leftFootDown  = feet_down.first;
+                        sensors->rightFootDown = feet_down.second;
                     }
 
                     emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));

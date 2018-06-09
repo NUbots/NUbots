@@ -26,8 +26,8 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 
-#include "DarwinVirtualLoadSensor.h"
 #include "MotionModel.h"
+#include "VirtualLoadSensor.h"
 #include "message/motion/KinematicsModel.h"
 #include "utility/math/matrix/Rotation3D.h"
 
@@ -127,8 +127,7 @@ namespace platform {
             bool middleDown = false;
 
             // Our sensor for foot down
-            DarwinVirtualLoadSensor leftFootDown;
-            DarwinVirtualLoadSensor rightFootDown;
+            VirtualLoadSensor load_sensor;
 
             // World to foot in world rotation when the foot landed
             std::array<arma::vec3, 2> footlanding_rFWw;
