@@ -78,13 +78,12 @@ namespace behaviour {
         using message::support::FieldDescription;
         using message::vision::Goal;
 
-        using utility::time::TimeDifferenceSeconds;
-        using utility::time::durationFromSeconds;
         using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
         using utility::time::durationFromSeconds;
+        using utility::time::TimeDifferenceSeconds;
 
         SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
