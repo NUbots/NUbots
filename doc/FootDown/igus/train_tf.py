@@ -8,13 +8,13 @@ import tensorflow as tf
 import time
 import yaml
 
-max_height_delta = 0.008
-network_structure = [8, 4, 4]
+max_height_delta = 0.0065
+network_structure = [8, 8, 4]
 batch_size = 50
-epochs = 10000
+epochs = 5000
 shuffle_size = 10000
 csv_data_cols = 12
-learning_rate = 0.001
+learning_rate = 0.0001
 
 
 def save_yaml_model(sess, output_path, global_step, loss, variables=None, name=None):
@@ -218,23 +218,24 @@ with tf.Session() as sess:
                         vloss /= count
 
                         if vloss < best_loss:
-                            best_loss = vloss
-                            best_model = {v.name: sess.run(v) for v in tf.trainable_variables()}
-                            best_step = tf.train.global_step(sess, global_step)
+                            best_vloss = loss
+                            save_yaml_model(
+                                sess, '.', tf.train.global_step(sess, global_step), vloss, name='best_vloss'
+                            )
 
                         print('Batch {:5d}: valid loss (avg) {:6f}'.format(step, vloss))
                         sess.run(valid_iterator.initializer)
                         valid_handle = sess.run(valid_iterator.string_handle('valid_dataset'))
                         break
 
+            if step and (step % 5000) == 0:
                 # Save our model in yaml format
                 save_yaml_model(sess, '.', tf.train.global_step(sess, global_step), l)
 
         except tf.errors.OutOfRangeError:
             print('Training done')
             print('Training took {:6f}s'.format(time.time() - start))
-            break
 
-    # Save our model in yaml format
-    save_yaml_model(sess, '.', tf.train.global_step(sess, global_step))
-    save_yaml_model(sess, '.', best_step, best_loss, variables=best_model, name='best_vloss')
+            # Save our final model
+            save_yaml_model(sess, '.', tf.train.global_step(sess, global_step), l)
+            break

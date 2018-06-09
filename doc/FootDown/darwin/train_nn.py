@@ -4,7 +4,7 @@ from sklearn.neural_network import MLPClassifier
 import numpy as np
 
 
-def loadfile(path, label=None, max_height_delta=0.005):
+def loadfile(path, label=None, max_height_delta=0.008):
     with open(path, 'r') as f:
         # Get our lines from our csv
         lines = f.readlines()
