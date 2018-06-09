@@ -36,10 +36,6 @@ jobs:
 
     # If that passes, then we can try building the three build targets
     - stage: Build
-      env: PLATFORM=native
-      install: .travis/install_toolchain.sh
-      script: .travis/build_code.sh
-
-    - env: PLATFORM=nuc7i7bnh
+      env: PLATFORM=nuc7i7bnh
       install: .travis/install_toolchain.sh
       script: .travis/build_code.sh
