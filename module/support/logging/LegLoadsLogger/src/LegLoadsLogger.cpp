@@ -23,22 +23,20 @@ namespace support {
             : Reactor(std::move(environment)), logFile(), logFilePath("NON_EXISTENT_FILE.CSV") {
 
             on<Configuration>("LegLoadsLogger.yaml")
-                .then("Leg Loads Logger Configuration", [this](const Configuration& config) {
-                    // logFilePath = config["log_file"].as<std::string>("NON_EXISTENT_FILE.CSV");
-                    logFilePath = config["log_file"].as<std::string>();
-                });
+                .then("Leg Loads Logger Configuration",
+                      [this](const Configuration& config) { logFilePath = config["log_file"].as<std::string>(); });
 
             on<Startup>().then("Leg Loads Logger Startup", [this]() {
                 logFile.open(logFilePath, std::ios::out | std::ios::binary);
 
                 if ((logFile.is_open() == true) && (logFile.good() == true)) {
-                    logFile << "RIGHT_FOOT_DISPLACEMENT, LEFT_FOOT_DISPLACEMENT, "
-                            << "R_HIP_PITCH_PRESENT_VELOCITY, R_HIP_PITCH_LOAD, "
-                            << "L_HIP_PITCH_PRESENT_VELOCITY, L_HIP_PITCH_LOAD, "
-                            << "R_KNEE_PRESENT_VELOCITY, R_KNEE_LOAD, "
-                            << "L_KNEE_PRESENT_VELOCITY, L_KNEE_LOAD, "
-                            << "R_ANKLE_PITCH_PRESENT_VELOCITY, R_ANKLE_PITCH_LOAD, "
-                            << "L_ANKLE_PITCH_PRESENT_VELOCITY, L_ANKLE_PITCH_LOAD" << std::endl;
+                    logFile << "RIGHT_FOOT_DISPLACEMENT,LEFT_FOOT_DISPLACEMENT,"
+                            << "R_HIP_PITCH_PRESENT_VELOCITY,R_HIP_PITCH_LOAD,"
+                            << "L_HIP_PITCH_PRESENT_VELOCITY,L_HIP_PITCH_LOAD,"
+                            << "R_KNEE_PRESENT_VELOCITY,R_KNEE_LOAD,"
+                            << "L_KNEE_PRESENT_VELOCITY,L_KNEE_LOAD,"
+                            << "R_ANKLE_PITCH_PRESENT_VELOCITY,R_ANKLE_PITCH_LOAD,"
+                            << "L_ANKLE_PITCH_PRESENT_VELOCITY,L_ANKLE_PITCH_LOAD" << std::endl;
                 }
 
                 else {
@@ -71,13 +69,12 @@ namespace support {
                 float LeftAnklePitchLoad             = sensors.servo[ServoID::L_ANKLE_PITCH].load;
 
                 if ((logFile.is_open() == true) && (logFile.good() == true)) {
-                    logFile << RightFootDisplacement.at(2) << ", " << LeftFootDisplacement.at(2) << ", "
-                            << RightHipPitchPresentVelocity << ", " << RightHipPitchLoad << ", "
-                            << LeftHipPitchPresentVelocity << ", " << LeftHipPitchLoad << ", "
-                            << RightKneePresentVelocity << ", " << RightKneeLoad << ", " << LeftKneePresentVelocity
-                            << ", " << LeftKneeLoad << ", " << RightAnklePitchPresentVelocity << ", "
-                            << RightAnklePitchLoad << ", " << LeftAnklePitchPresentVelocity << ", "
-                            << LeftAnklePitchLoad << std::endl;
+                    logFile << RightFootDisplacement.at(2) << "," << LeftFootDisplacement.at(2) << ","
+                            << RightHipPitchPresentVelocity << "," << RightHipPitchLoad << ","
+                            << LeftHipPitchPresentVelocity << "," << LeftHipPitchLoad << "," << RightKneePresentVelocity
+                            << "," << RightKneeLoad << "," << LeftKneePresentVelocity << "," << LeftKneeLoad << ","
+                            << RightAnklePitchPresentVelocity << "," << RightAnklePitchLoad << ","
+                            << LeftAnklePitchPresentVelocity << "," << LeftAnklePitchLoad << std::endl;
                 }
 
                 else {
