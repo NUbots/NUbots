@@ -63,7 +63,7 @@ Eigen::Vector4i threshold(const Eigen::Matrix<float, 1, 4>& x) {
 }
 
 int main(void) {
-    YAML::Node network = YAML::LoadFile("yaml_models/best_vloss.yaml");
+    YAML::Node network = YAML::LoadFile("best_vloss.yaml");
 
     Eigen::Matrix<float, 1, 12> input;
 
@@ -116,10 +116,11 @@ int main(void) {
     };
 
     // Load input
-    std::ifstream input_data("long_walk.csv");
+    std::ifstream input_data("walk_load_datasets/long_walk.csv");
     std::string line;
     std::getline(input_data, line);
     Eigen::Matrix2i confusion = Eigen::Matrix2i::Zero();
+    size_t count              = 0;
     while (std::getline(input_data, line)) {
         auto data = split(line, ' ');
         for (size_t row = 2; row < data.size(); row++) {
@@ -132,7 +133,8 @@ int main(void) {
 
         int left_down  = std::stof(trim(data[0], ",")) < std::stof(trim(data[1])) + 0.0065f;
         int right_down = std::stof(trim(data[1], ",")) < std::stof(trim(data[0])) + 0.0065f;
-        std::cout << "Truth: [" << left_down << ", " << 1 - left_down << ", " << right_down << ", " << 1 - right_down
+        std::cout << "Batch: " << count++ << " -> "
+                  << "Truth: [" << left_down << ", " << 1 - left_down << ", " << right_down << ", " << 1 - right_down
                   << "] Prediction: " << out << " Thresholded: " << thresholded.transpose() << std::endl;
 
         // Left

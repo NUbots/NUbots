@@ -77,12 +77,12 @@ datasets = []
 
 # Negative files
 for f in [
-        'laying_back.csv',
-        'laying_front.csv',
-        'picked_up.csv',
-        'walking_picked_up.csv',
-        'walking_laying_back.csv',
-        'walking_laying_front.csv',
+        'walk_load_datasets/laying_back.csv',
+        'walk_load_datasets/laying_front.csv',
+        'walk_load_datasets/picked_up.csv',
+        'walk_load_datasets/walking_picked_up.csv',
+        'walk_load_datasets/walking_laying_back.csv',
+        'walk_load_datasets/walking_laying_front.csv',
 ]:
     datasets.append(
         tf.data.Dataset.zip((
@@ -93,7 +93,7 @@ for f in [
 
 # Positive files
 for f in [
-        'standing.csv',
+        'walk_load_datasets/standing.csv',
 ]:
     datasets.append(
         tf.data.Dataset.zip((
@@ -104,10 +104,10 @@ for f in [
 
 # Files that have the feet changing based on the walk
 for f in [
-        'walking.csv',
-        'walking2.csv',
-        'walking3.csv',
-        'walking4.csv',
+        'walk_load_datasets/walking.csv',
+        'walk_load_datasets/walking2.csv',
+        'walk_load_datasets/walking3.csv',
+        'walk_load_datasets/walking4.csv',
 ]:
     datasets.append(
         tf.data.Dataset.zip((
@@ -127,8 +127,8 @@ dataset = dataset.batch(batch_size)
 train_iterator = dataset.make_initializable_iterator()
 
 valid_dataset = tf.data.Dataset.zip((
-    tf.data.TextLineDataset('long_walk.csv').skip(1),
-    tf.data.Dataset.from_tensors([-1, -1]).repeat(1),
+    tf.data.TextLineDataset('walk_load_datasets/long_walk.csv').skip(1),
+    tf.data.Dataset.from_tensors([-1, -1]),
 ))
 valid_dataset = valid_dataset.map(parse_row)
 valid_dataset = valid_dataset.repeat(epochs)
