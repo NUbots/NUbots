@@ -451,8 +451,8 @@ namespace platform {
                             sensors->servo[ServoID::L_ANKLE_PITCH].load;
 
                         auto feet_down         = load_sensor.updateFeet(features);
-                        sensors->leftFootDown  = feet_down.first;
-                        sensors->rightFootDown = feet_down.second;
+                        sensors->leftFootDown  = feet_down[0];
+                        sensors->rightFootDown = feet_down[1];
                     }
 
                     emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
