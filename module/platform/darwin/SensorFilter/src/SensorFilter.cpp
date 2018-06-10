@@ -621,7 +621,7 @@ namespace platform {
 
                     emit(std::move(sensors));
                 });
-        }
-    }  // namespace darwin
+        }  // namespace darwin
+    }      // namespace darwin
 }  // namespace platform
 }  // namespace module
