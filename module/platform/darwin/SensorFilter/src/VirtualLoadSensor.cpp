@@ -70,11 +70,7 @@ namespace platform {
             return ret;
         }
 
-        Eigen::Vector2f VirtualLoadSensor::threshold(const Eigen::Matrix<float, 1, 4>& x) {
-            return Eigen::Vector2f(x(0) > x(1), x(2) > x(3));
-        }
-
-        std::pair<bool, bool> VirtualLoadSensor::updateFeet(const Eigen::Matrix<float, 1, 12>& features) {
+        std::array<bool, 2> VirtualLoadSensor::updateFeet(const Eigen::Matrix<float, 12, 1>& input) {
 
             auto SELU = [](float x) -> float {
                 static constexpr float alpha  = 1.6732632423543772848170429916717;
@@ -89,7 +85,9 @@ namespace platform {
                 }
             };
 
-            auto out = threshold(softmax(((features * W1 + b1).unaryExpr(SELU) * W2 + b2).unaryExpr(SELU) * W3 + b3));
+            auto out = softmax(
+                ((input.transpose() * W1 + b1.transpose()).unaryExpr(SELU) * W2 + b2.transpose()).unaryExpr(SELU) * W3
+                + b3.transpose());
 
             // Do the bayes update (1D kalman filter thing)
             float k = current_noise / (current_noise + noise_factor);
@@ -97,18 +95,18 @@ namespace platform {
             current_noise *= 1.0f - k;
             current_noise += 1.0f;
 
-            if (state(0) >= certainty_threshold) {
-                output_state.first = true;
-            }
-            else if (state(0) < uncertainty_threshold) {
-                output_state.first = false;
-            }
-
-            if (state(1) >= certainty_threshold) {
-                output_state.second = true;
-            }
-            else if (state(1) < uncertainty_threshold) {
-                output_state.second = false;
+            for (size_t leg = 0, index = 0; leg < 4; leg += 2, index++) {
+                // We have some certainty in our measurement
+                if (std::abs(state(leg) - state(leg + 1)) > uncertainty_threshold) {
+                    // The foot is definitely on the ground
+                    if ((state(leg) >= certainty_threshold) && (state(leg + 1) < certainty_threshold)) {
+                        output_state[index] = true;
+                    }
+                    // The foot is definitely off the ground
+                    else if ((state(leg + 1) >= certainty_threshold) && (state(leg) < certainty_threshold)) {
+                        output_state[index] = false;
+                    }
+                }
             }
 
             return output_state;

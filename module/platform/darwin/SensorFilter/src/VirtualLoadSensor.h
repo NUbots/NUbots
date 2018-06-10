@@ -21,7 +21,7 @@
 #define MODULES_PLATFORM_DARWIN_VIRTUALLOADSENSOR_H
 
 #include <Eigen/Core>
-#include <utility>
+#include <array>
 
 #include <extension/Configuration.h>
 
@@ -32,41 +32,28 @@ namespace platform {
         class VirtualLoadSensor {
             // this implements a linear model (trained by logistic regression) with a bayes filter on the output
         private:
-            float noise_factor;
-            float current_noise;
-            float certainty_threshold;
-            float uncertainty_threshold;
+            float noise_factor          = 0.0f;
+            float current_noise         = 0.0f;
+            float certainty_threshold   = 0.0f;
+            float uncertainty_threshold = 0.0f;
 
-            Eigen::Matrix<float, 12, 8> W1;
-            Eigen::Matrix<float, 1, 8> b1;
-            Eigen::Matrix<float, 8, 8> W2;
-            Eigen::Matrix<float, 1, 8> b2;
-            Eigen::Matrix<float, 8, 4> W3;
-            Eigen::Matrix<float, 1, 4> b3;
+            Eigen::Matrix<float, 12, 8> W1 = Eigen::Matrix<float, 12, 8>::Zero();
+            Eigen::Matrix<float, 8, 1> b1  = Eigen::Matrix<float, 8, 1>::Zero();
+            Eigen::Matrix<float, 8, 8> W2  = Eigen::Matrix<float, 8, 8>::Zero();
+            Eigen::Matrix<float, 8, 1> b2  = Eigen::Matrix<float, 8, 1>::Zero();
+            Eigen::Matrix<float, 8, 4> W3  = Eigen::Matrix<float, 8, 4>::Zero();
+            Eigen::Matrix<float, 4, 1> b3  = Eigen::Matrix<float, 4, 1>::Zero();
 
-            Eigen::Vector2f state;
-            std::pair<bool, bool> output_state = {true, true};
+            Eigen::Matrix<float, 4, 1> state = Eigen::Matrix<float, 4, 1>::Constant(0.5f);
+            std::array<bool, 2> output_state = {true, true};
 
-            Eigen::Matrix<float, 1, 4> softmax(const Eigen::Matrix<float, 1, 4>& x);
-            Eigen::Vector2f threshold(const Eigen::Matrix<float, 1, 4>& x);
+            Eigen::Matrix<float, 4, 1> softmax(const Eigen::Matrix<float, 4, 1>& x);
 
         public:
-            VirtualLoadSensor()
-                : noise_factor(0.0f)
-                , current_noise(0.0f)
-                , certainty_threshold(0.0f)
-                , uncertainty_threshold(0.0f)
-                , W1()
-                , b1()
-                , W2()
-                , b2()
-                , W3()
-                , b3()
-                , state(0.5f, 0.5f) {}
-
+            VirtualLoadSensor() {}
             VirtualLoadSensor(const ::extension::Configuration& network);
 
-            std::pair<bool, bool> updateFeet(const Eigen::Matrix<float, 1, 12>& features);
+            std::array<bool, 2> updateFeet(const Eigen::Matrix<float, 12, 1>& features);
         };
     }  // namespace darwin
 }  // namespace platform
