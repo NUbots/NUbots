@@ -36,19 +36,6 @@ inline std::string trim(const std::string& str, const std::string& tokens = " ")
     return temp;
 }
 
-float SELU(float x) {
-    static constexpr float alpha  = 1.6732632423543772848170429916717;
-    static constexpr float lambda = 1.0507009873554804934193349852946;
-    static constexpr float la     = lambda * alpha;
-
-    if (x < 0) {
-        return la * std::exp(x) - la;
-    }
-    else {
-        return lambda * x;
-    }
-}
-
 Eigen::Matrix<float, 1, 4> softmax(const Eigen::Matrix<float, 1, 4>& x) {
     auto left_expx  = x.leftCols<2>().array().exp().matrix();
     auto right_expx = x.rightCols<2>().array().exp().matrix();
