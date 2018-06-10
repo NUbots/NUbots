@@ -50,8 +50,11 @@ float SELU(float x) {
 }
 
 Eigen::Matrix<float, 1, 4> softmax(const Eigen::Matrix<float, 1, 4>& x) {
-    auto expx = x.array().exp().matrix();
-    return expx / expx.sum();
+    auto left_expx  = x.leftCols<2>().array().exp().matrix();
+    auto right_expx = x.rightCols<2>().array().exp().matrix();
+    Eigen::Matrix<float, 1, 4> ret;
+    ret << left_expx / left_expx.sum(), right_expx / right_expx.sum();
+    return ret;
 }
 
 Eigen::Vector4i threshold(const Eigen::Matrix<float, 1, 4>& x) {

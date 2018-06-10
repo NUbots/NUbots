@@ -62,9 +62,12 @@ namespace platform {
             }
         }
 
-        Eigen::Matrix<float, 1, 4> VirtualLoadSensor::softmax(const Eigen::Matrix<float, 1, 4>& x) {
-            auto expx = x.array().exp().matrix();
-            return expx / expx.sum();
+        Eigen::Matrix<float, 4, 1> VirtualLoadSensor::softmax(const Eigen::Matrix<float, 4, 1>& x) {
+            Eigen::Matrix<float, 2, 1> left_expx  = x.topRows<2>().array().exp().matrix().transpose();
+            Eigen::Matrix<float, 2, 1> right_expx = x.bottomRows<2>().array().exp().matrix().transpose();
+            Eigen::Matrix<float, 4, 1> ret;
+            ret << left_expx / left_expx.sum(), right_expx / right_expx.sum();
+            return ret;
         }
 
         Eigen::Vector2f VirtualLoadSensor::threshold(const Eigen::Matrix<float, 1, 4>& x) {

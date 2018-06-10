@@ -84,7 +84,10 @@ for i, out_s in enumerate(network_structure):
         if i < len(network_structure) - 1:
             logits = tf.nn.selu(logits)
         else:
-            logits = tf.nn.softmax(logits)
+            logits = tf.reshape(
+                tf.stack([tf.nn.softmax(logits=logits[:, 0:2]),
+                          tf.nn.softmax(logits=logits[:, 2:4])]), [4]
+            )
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
