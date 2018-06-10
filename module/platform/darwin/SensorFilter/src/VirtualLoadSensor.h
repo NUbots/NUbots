@@ -54,6 +54,8 @@ namespace platform {
             VirtualLoadSensor(const ::extension::Configuration& network);
 
             std::array<bool, 2> updateFeet(const Eigen::Matrix<float, 12, 1>& features);
+
+            EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         };
     }  // namespace darwin
 }  // namespace platform
