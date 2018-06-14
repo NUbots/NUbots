@@ -8,7 +8,8 @@ NUCLEAR_ROLE(
     motion::KinematicsConfiguration
     support::configuration::GlobalConfig
 
-    input::Camera
+    #input::Camera
+    support::VirtualCamera
 
     vision::LUTClassifier
     vision::GoalDetector
@@ -18,7 +19,8 @@ NUCLEAR_ROLE(
     support::NUsight
     support::configuration::SoccerConfig
 
-    platform::darwin::HardwareIO
+    #platform::darwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
 
 )
