@@ -7,7 +7,7 @@
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/vision/VisualMesh.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/Timer.hpp"
 
 namespace module {

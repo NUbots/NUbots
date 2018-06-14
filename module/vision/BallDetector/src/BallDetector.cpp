@@ -86,7 +86,7 @@ namespace vision {
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacConeModel;
     using utility::math::ransac::RansacVisualMeshModel;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
     using utility::support::Expression;
 
     using FOURCC = utility::vision::FOURCC;
