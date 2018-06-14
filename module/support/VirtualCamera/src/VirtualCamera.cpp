@@ -47,11 +47,13 @@ namespace support {
 
         emitImageHandle = on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then(
             "Simulated Images (VCamera)", [this](const CameraParameters& cam) {
-                // 2 Bytes per pixel
-                Image img;
-                utility::vision::loadImage(imagePath, img);  // Load image from file
-                emit(std::make_unique<Image>(
-                    FOURCC::BGGR, cam.imageSizePixels, std::move(img.data), 0, "VirtualCamera", NUClear::clock::now()));
+                auto msg           = std::make_unique<message::input::Image>();
+                msg->format        = FOURCC::BGGR;
+                msg->camera_id     = 0;
+                msg->serial_number = "VirtualCamera";
+                msg->timestamp     = NUClear::clock::now();
+                utility::vision::loadImage(imagePath, *msg);
+                emit(msg);
             });
 
         on<Configuration>("VirtualLookUpTable.yaml").then([this](const Configuration& config) {
