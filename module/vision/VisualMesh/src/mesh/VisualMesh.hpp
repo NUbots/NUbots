@@ -35,10 +35,10 @@
 #endif  // !__APPLE__
 
 // Include our generated OpenCL headers
-#include "mesh/cl/project_equidistant.cl.h"
-#include "mesh/cl/project_equisolid.cl.h"
-#include "mesh/cl/project_rectilinear.cl.h"
-#include "mesh/cl/read_image_to_network.cl.h"
+#include "cl/project_equidistant.cl.hpp"
+#include "cl/project_equisolid.cl.hpp"
+#include "cl/project_rectilinear.cl.hpp"
+#include "cl/read_image_to_network.cl.hpp"
 #include "opencl_error_category.hpp"
 
 namespace mesh {
@@ -157,7 +157,7 @@ public:
     struct ProjectedMesh {
 
         // Host side buffers for the data
-        LazyBufferReader<std::array<int, 2>> pixel_coordinates;
+        LazyBufferReader<std::array<Scalar, 2>> pixel_coordinates;
         std::vector<std::array<int, 6>> neighbourhood;
         std::vector<int> global_indices;
 
@@ -170,7 +170,7 @@ public:
 
     struct ClassifiedMesh {
 
-        LazyBufferReader<std::array<int, 2>> pixel_coordinates;
+        LazyBufferReader<std::array<Scalar, 2>> pixel_coordinates;
         std::vector<std::array<int, 6>> neighbourhood;
         std::vector<int> global_indices;
         std::vector<std::pair<int, LazyBufferReader<Scalar>>> classifications;
@@ -838,9 +838,14 @@ public:
             // This is a list of phi values along with the delta theta values associated with them
             std::vector<std::pair<Scalar, int>> phis;
 
+            // Add our 0 point at the bottom if that is a valid location
+            if (shape.phi(Scalar(0.0), h) < Scalar(M_PI_2)) {
+                phis.emplace_back(Scalar(0.0), 1);
+            }
+
             // Loop from directly down up to the horizon (if phi is nan it will stop)
             // So we don't have a single point at the base, we move half a jump forward
-            for (Scalar phi = shape.phi(Scalar(0.0), h) * Scalar(0.5); phi < M_PI_2;) {
+            for (Scalar phi = shape.phi(Scalar(0.0), h); phi < Scalar(M_PI_2);) {
 
                 // Calculate our theta
                 Scalar theta = std::max(shape.theta(phi, h), min_angular_res);
@@ -850,12 +855,20 @@ public:
                     phis.emplace_back(phi, uint(std::ceil(Scalar(2.0) * M_PI / theta)));
                 }
 
-                // Move to our next phi
-                phi = std::max(phi + min_angular_res, shape.phi(phi, h));
+                // Calculate our next phi value
+                const Scalar new_phi = shape.phi(phi, h);
+
+                // Apply our min jump if the new values is not nan
+                phi = std::isnan(new_phi) ? new_phi : std::max(phi + min_angular_res, new_phi);
+            }
+
+            // Add our 0 point at the bottom if that is a valid location
+            if (Scalar(M_PI) + shape.phi(M_PI, h) > Scalar(M_PI_2)) {
+                phis.emplace_back(Scalar(M_PI), 1);
             }
 
             // Loop from directly up down to the horizon (if phi is nan it will stop)
-            for (Scalar phi = (M_PI + shape.phi(M_PI, h)) * Scalar(0.5); phi > M_PI_2;) {
+            for (Scalar phi = Scalar(M_PI) + shape.phi(M_PI, h); phi > Scalar(M_PI_2);) {
 
                 // Calculate our theta
                 Scalar theta = std::max(shape.theta(phi, h), min_angular_res);
@@ -865,8 +878,11 @@ public:
                     phis.emplace_back(phi, uint(std::ceil(Scalar(2.0) * M_PI / theta)));
                 }
 
+                // Calculate our next phi value
+                const Scalar new_phi = shape.phi(phi, h);
+
                 // Move to our next phi
-                phi = std::min(phi - min_angular_res, shape.phi(phi, h));
+                phi = std::isnan(new_phi) ? new_phi : std::min(phi - min_angular_res, new_phi);
             }
 
 
@@ -952,20 +968,30 @@ public:
                 // Grab our current node
                 auto& node = lut[i];
 
-                // Work out if we are closer to the left or right and make an offset var for it
-                // Note this bool is used like a bool and int. It is 0 when we should access TR first
-                // and 1 when we should access TL first. This is to avoid accessing values which wrap around
-                // and instead access a non wrap element and use its neighbours to work out ours
-                const bool left = pos > Scalar(0.5);
+                // If the size of the row we are linking to is 1, all elements will link to it
+                // This is the case for the very first and very last row
+                if (size == 1) {
 
-                // Get our closest neighbour on the previous row and use it to work out where the other one
-                // is This will be the Right element when < 0.5 and Left when > 0.5
-                const int o1 = start + std::floor(pos * size + !left);  // Use `left` to add one to one
-                const int o2 = o1 + lut[o1].neighbours[2 + left];       // But not the other
+                    // Now use these to set our TL and TR neighbours
+                    node.neighbours[offset]     = start - i;
+                    node.neighbours[offset + 1] = start - i;
+                }
+                else {
+                    // Work out if we are closer to the left or right and make an offset var for it
+                    // Note this bool is used like a bool and int. It is 0 when we should access TR first
+                    // and 1 when we should access TL first. This is to avoid accessing values which wrap around
+                    // and instead access a non wrap element and use its neighbours to work out ours
+                    const bool left = pos > Scalar(0.5);
 
-                // Now use these to set our TL and TR neighbours
-                node.neighbours[offset]     = (left ? o1 : o2) - i;
-                node.neighbours[offset + 1] = (left ? o2 : o1) - i;
+                    // Get our closest neighbour on the previous row and use it to work out where the other one
+                    // is This will be the Right element when < 0.5 and Left when > 0.5
+                    const int o1 = start + std::floor(pos * size + !left);  // Use `left` to add one to one
+                    const int o2 = o1 + lut[o1].neighbours[2 + left];       // But not the other
+
+                    // Now use these to set our TL and TR neighbours
+                    node.neighbours[offset]     = (left ? o1 : o2) - i;
+                    node.neighbours[offset + 1] = (left ? o2 : o1) - i;
+                }
             };
 
             // Now we upwards and downwards to fill in the missing links
@@ -995,54 +1021,35 @@ public:
 
             // Now we have to deal with the very first, and very last rows as they can't be linked in the normal way
             if (!rows.empty()) {
-
                 const auto& front    = rows.front();
                 const int front_size = front.end - front.begin;
+
+                const auto& row_2    = rows.size() > 1 ? rows[1] : rows.front();
+                const int row_2_size = row_2.end - row_2.begin;
 
                 const auto& back    = rows.back();
                 const int back_size = back.end - back.begin;
 
-                // Link the front to itself if it's at the top
-                if (front.phi < M_PI_2) {
-                    for (int i = front.begin; i < front.end; ++i) {
-                        // Alias our node
-                        auto& node = lut[i];
+                const auto& row_2_last    = rows.size() > 1 ? rows[rows.size() - 1] : rows.back();
+                const int row_2_last_size = row_2_last.end - row_2_last.begin;
 
-                        // Work out which two points are on the opposite side to us
-                        const uint index = i - front.begin + (front_size / 2);
-
-                        // Find where we are in our row as a value between 0 and 1
-                        const Scalar pos = Scalar(i - front.begin) / Scalar(front_size);
-
-                        // Link to ourself
-                        node.neighbours[0] = front.begin + (index % front_size) - i;
-                        node.neighbours[1] = front.begin + ((index + 1) % front_size) - i;
-
-                        // Link to our next row normally
-                        const auto& r2 = rows[1];
-                        link(lut, i, pos, r2.begin, r2.end - r2.begin, 4);
+                // Link to our next row in a circle
+                if (front_size == 1) {
+                    Scalar delta(Scalar(row_2_size) / Scalar(6.0));
+                    auto& n = lut.front().neighbours;
+                    for (int i = 0; i < 6; ++i) {
+                        // Get the position on the next row
+                        n[i] = row_2.begin + int(std::round(delta * i));
                     }
                 }
 
-                // Link the back to itself if it's at the bottom
-                if (back.phi > M_PI_2) {
-                    for (int i = back.begin; i < back.end; ++i) {
-                        // Alias our node
-                        auto& node = lut[i];
-
-                        // Work out which two points are on the opposite side to us
-                        const uint index = i - back.begin + (back_size / 2);
-
-                        // Find where we are in our row as a value between 0 and 1
-                        const Scalar pos = Scalar(i - back.begin) / Scalar(back_size);
-
-                        // Link to ourself on the other side
-                        node.neighbours[4] = back.begin + (index % back_size) - i;
-                        node.neighbours[5] = back.begin + ((index + 1) % back_size) - i;
-
-                        // Link to our previous row normally
-                        const auto& r2 = rows[rows.size() - 2];
-                        link(lut, i, pos, r2.begin, r2.end - r2.begin, 0);
+                // Link to our next row in a circle
+                if (back_size == 1) {
+                    Scalar delta(Scalar(row_2_last_size) / Scalar(6.0));
+                    auto& n = lut.back().neighbours;
+                    for (int i = 0; i < 6; ++i) {
+                        // Get the position on the previous row
+                        n[i] = row_2_last.begin + int(std::round(delta * i)) - (lut.size() - 1);
                     }
                 }
             }
@@ -1549,7 +1556,7 @@ public:
             throw std::system_error(error, opencl_error_category(), "Error allocating indices_map buffer");
         }
         cl::mem pixel_coordinates(
-            ::clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(cl_int2) * points, nullptr, &error),
+            ::clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(std::array<Scalar, 2>) * points, nullptr, &error),
             ::clReleaseMemObject);
         if (error) {
             throw std::system_error(error, opencl_error_category(), "Error allocating pixel_coordinates buffer");
@@ -1678,7 +1685,7 @@ public:
         // t.measure("\tUpload Local Neighbourhood (mem)");  // TIMER_LINE
         ::clFlush(queue);
 
-        return ProjectedMesh{LazyBufferReader<std::array<int, 2>>(queue, pixel_coordinates, projected, points),
+        return ProjectedMesh{LazyBufferReader<std::array<Scalar, 2>>(queue, pixel_coordinates, projected, points),
                              std::move(local_neighbourhood),
                              std::move(indices),
                              pixel_coordinates,
@@ -1712,11 +1719,21 @@ private:
     }
 
     std::string get_scalar_defines(float) {
-        return "#define Scalar float\n#define Scalar2 float2\n#define Scalar3 float3\n#define Scalar4 float4\n";
+        return "#define Scalar float\n"
+               "#define Scalar2 float2\n"
+               "#define Scalar3 float3\n"
+               "#define Scalar4 float4\n"
+               "#define Scalar8 float8\n"
+               "#define Scalar16 float16\n";
     }
 
     std::string get_scalar_defines(double) {
-        return "#define Scalar double\n#define Scalar2 double2\n#define Scalar3 double3\n#define Scalar4 double4\n";
+        return "#define Scalar double\n"
+               "#define Scalar2 double2\n"
+               "#define Scalar3 double3\n"
+               "#define Scalar4 double4\n"
+               "#define Scalar8 double8\n"
+               "#define Scalar16 double16\n";
     }
 
     void setup_opencl() {

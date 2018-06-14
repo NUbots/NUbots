@@ -11,10 +11,10 @@
  */
 kernel void project_rectilinear(global const Scalar4* points,
                                 global const int* indices,
-                                const float16 Rco,
+                                const Scalar16 Rco,
                                 const Scalar f,
                                 const int2 dimensions,
-                                global int2* out) {
+                                global Scalar2* out) {
 
     const int index = get_global_id(0);
 
@@ -35,5 +35,5 @@ kernel void project_rectilinear(global const Scalar4* points,
         (Scalar2)((Scalar)(dimensions.x - 1) * (Scalar)(0.5), (Scalar)(dimensions.y - 1) * (Scalar)(0.5)) - screen;
 
     // Store our output coordinates
-    out[index] = (int2)(round(image.x), round(image.y));
+    out[index] = image;
 }

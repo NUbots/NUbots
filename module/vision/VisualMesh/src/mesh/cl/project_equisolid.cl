@@ -11,10 +11,10 @@
  */
 kernel void project_equisolid(global const Scalar4* points,
                               global int* indices,
-                              const float16 Rco,
+                              const Scalar16 Rco,
                               const Scalar f,
                               const int2 dimensions,
-                              global int2* out) {
+                              global Scalar2* out) {
 
     const int index = get_global_id(0);
 
@@ -43,5 +43,5 @@ kernel void project_equisolid(global const Scalar4* points,
     // TODO apply this
 
     // Store our output coordinates
-    out[index] = (int2)(round(image.x), round(image.y));
+    out[index] = image;
 }

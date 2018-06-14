@@ -1,4 +1,6 @@
-const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+const sampler_t bayer_sampler  = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+const sampler_t interp_sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR;
+
 
 enum FOURCC {
     GREY    = 0x59455247,
@@ -132,24 +134,24 @@ float4 bayerToRGB(read_only image2d_t raw_image, sampler_t sampler, float2 coord
 }
 
 
-float4 read_image(read_only image2d_t image, const enum FOURCC format, const int2 coordinates) {
+float4 read_image(read_only image2d_t image, const enum FOURCC format, const float2 coordinates) {
     switch (format) {
         case GRBG: {
-            return bayerToRGB(image, sampler, (float2)(coordinates.x, coordinates.y), (float2)(1.0, 0.0));
+            return bayerToRGB(image, bayer_sampler, coordinates, (float2)(1.0, 0.0));
         }
         case RGGB: {
-            return bayerToRGB(image, sampler, (float2)(coordinates.x, coordinates.y), (float2)(0.0, 0.0));
+            return bayerToRGB(image, bayer_sampler, coordinates, (float2)(0.0, 0.0));
         }
         case GBRG: {
-            return bayerToRGB(image, sampler, (float2)(coordinates.x, coordinates.y), (float2)(0.0, 1.0));
+            return bayerToRGB(image, bayer_sampler, coordinates, (float2)(0.0, 1.0));
         }
         case BGGR: {
-            return bayerToRGB(image, sampler, (float2)(coordinates.x, coordinates.y), (float2)(1.0, 1.0));
+            return bayerToRGB(image, bayer_sampler, coordinates, (float2)(1.0, 1.0));
         }
         case RGB3:
         case BGRA:
         case RGBA: {
-            return read_imagef(image, sampler, coordinates);
+            return read_imagef(image, interp_sampler, coordinates);
         }
         default: { return (float4)(0); }
     }
@@ -157,7 +159,7 @@ float4 read_image(read_only image2d_t image, const enum FOURCC format, const int
 
 kernel void read_image_to_network(read_only image2d_t image,
                                   const enum FOURCC format,
-                                  global int2* coordinates,
+                                  global float2* coordinates,
                                   global float4* network) {
 
     const int idx = get_global_id(0);
