@@ -28,8 +28,8 @@
 namespace utility {
 namespace math {
     namespace optimisation {
-        using message::support::optimisation::OptimiserParameters;
         using message::support::optimisation::OptimiserEstimate;
+        using message::support::optimisation::OptimiserParameters;
 
         /**
          * The PGAEstimator provides a steady-state solution to the PI2 path integral RL algorithm.

@@ -37,7 +37,7 @@
 #include "utility/math/ransac/RansacConeModel.h"
 #include "utility/math/ransac/RansacVisualMeshModel.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -53,8 +53,10 @@ namespace vision {
 
     using message::input::CameraParameters;
 
-    using message::vision::ClassifiedImage;
+    using message::input::Image;
+    using message::support::FieldDescription;
     using message::vision::Ball;
+    using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
     using message::vision::VisualMesh;
     using message::input::Image;
@@ -63,23 +65,23 @@ namespace vision {
     using Plane = utility::math::geometry::Plane<3>;
 
     using ServoID = utility::input::ServoID;
-    using utility::math::vision::widthBasedDistanceToCircle;
-    using utility::math::vision::projectCamToPlane;
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::Cone;
+    using utility::math::geometry::Line;
+    using utility::math::matrix::Transform3D;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getImageFromCam;
+    using utility::math::vision::getParallaxAngle;
     using utility::math::vision::imageToScreen;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToPlane;
     using utility::math::vision::screenToImage;
     using utility::math::vision::screenToImageCts;
-    using utility::math::vision::getCamFromScreen;
-    using utility::math::vision::getParallaxAngle;
-    using utility::math::vision::getCamFromImage;
-    using utility::math::vision::getImageFromCam;
-    using utility::math::vision::projectCamSpaceToScreen;
-    using utility::math::matrix::Transform3D;
-    using utility::math::geometry::Cone;
-    using utility::math::geometry::Circle;
-    using utility::math::geometry::Line;
+    using utility::math::vision::widthBasedDistanceToCircle;
 
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacConeModel;
@@ -254,7 +256,6 @@ namespace vision {
 
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
-
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD    = config["ransac"]["consensus_error_threshold"].as<Expression>();
 
@@ -364,7 +365,6 @@ namespace vision {
                        const CameraParameters& cam,
                        const FieldDescription& field,
                        const LookUpTable& lut) {
-
                     const auto& image   = *rawImage;
                     const auto& sensors = *image.sensors;
 

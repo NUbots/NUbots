@@ -32,10 +32,10 @@ namespace research {
     using extension::ExecuteScript;
     using extension::Script;
 
+    using message::motion::AllServoWaypointsComplete;
     using message::platform::darwin::DarwinSensors;
     using message::research::scriptoptimizer::OptimizeScript;
     using message::research::scriptoptimizer::OptimizeScriptResult;
-    using message::motion::AllServoWaypointsComplete;
 
     ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), recording(false) {
@@ -47,7 +47,6 @@ namespace research {
 
         on<Network<OptimizeScript>, With<NUClear::extensions::NetworkingConfiguration>>(
             [this](const Network<OptimizeScript>& task, const NUClear::extensions::NetworkingConfiguration config) {
-
                 // Check if this script is for us
                 if (config.deviceName == task.data->target()) {
 
@@ -93,7 +92,6 @@ namespace research {
             });
 
         on<Trigger<DarwinSensors>>([this](std::shared_ptr<const DarwinSensors> frame) {
-
             // While we are recording, store all the frames in a vector
             if (this->recording) {
                 sensors.push_back(frame);
@@ -101,7 +99,6 @@ namespace research {
         });
 
         on<Trigger<AllServoWaypointsComplete>>().then([this](const AllServoWaypointsComplete&) {
-
             // If we were recording
             if (this->recording) {
 

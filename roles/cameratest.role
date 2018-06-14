@@ -10,7 +10,7 @@ NUCLEAR_ROLE(
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
     input::Camera
-    support::NUbugger
+    support::NUsight
 
     support::configuration::SoccerConfig
 )

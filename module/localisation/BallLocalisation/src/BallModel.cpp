@@ -31,11 +31,11 @@
 namespace module {
 namespace localisation {
 
-    using utility::math::matrix::Rotation3D;
-    using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Transform2D;
-    using message::support::FieldDescription;
     using message::input::Sensors;
+    using message::support::FieldDescription;
+    using utility::math::matrix::Rotation3D;
+    using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
     using ServoID = utility::input::ServoID;
     using utility::math::coordinates::cartesianToSpherical;
 

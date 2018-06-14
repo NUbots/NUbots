@@ -51,8 +51,8 @@ namespace behaviour {
 
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
-        using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
 
         GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
@@ -64,7 +64,6 @@ namespace behaviour {
             });
 
             on<Trigger<DiveCommand>>().then([this](const DiveCommand& diveCommand) {
-
                 this->diveCommand = diveCommand;
                 updatePriority(DIVE_PRIORITY);
             });
@@ -84,7 +83,6 @@ namespace behaviour {
                 }
 
                 updatePriority(EXECUTION_PRIORITY);
-
             });
 
             on<Trigger<FinishDive>>().then([this] {

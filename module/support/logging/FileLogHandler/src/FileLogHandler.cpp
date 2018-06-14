@@ -88,7 +88,6 @@ namespace support {
             });
 
             on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
-
                 std::lock_guard<std::mutex> lock(mutex);
 
                 // Where this message came from

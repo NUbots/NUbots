@@ -39,7 +39,6 @@ namespace motion {
         : Reactor(std::move(environment)), scripts() {
 
         on<Script>("").then([this](const Script& script) {
-
             // Add this script to our list of scripts
             try {
                 scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, std::move(script)));

@@ -35,10 +35,10 @@ namespace behaviour {
 
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
-        using message::input::Sensors;
-        using message::behaviour::ServoCommand;
-        using message::behaviour::RegisterAction;
         using extension::Configuration;
+        using message::behaviour::RegisterAction;
+        using message::behaviour::ServoCommand;
+        using message::input::Sensors;
         using utility::support::Expression;
 
         ArmVisionAvoidance::ArmVisionAvoidance(std::unique_ptr<NUClear::Environment> environment)

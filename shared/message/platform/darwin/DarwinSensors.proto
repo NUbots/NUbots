@@ -135,6 +135,7 @@ message DarwinSensors {
     HeadLED                   headLED         = 4;
     EyeLED                    eyeLED          = 5;
     Buttons                   buttons         = 6;
+    float                     battery         = 12;
     float                     voltage         = 7;
     Accelerometer             accelerometer   = 8;
     Gyroscope                 gyroscope       = 9;

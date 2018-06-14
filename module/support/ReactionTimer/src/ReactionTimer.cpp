@@ -15,10 +15,10 @@ namespace support {
         });
 
         on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
-
             log(stats.identifier[0],
-                1000.0 * (double((stats.finished - stats.started).count())
-                          / double(NUClear::clock::duration::period::den)),
+                1000.0
+                    * (double((stats.finished - stats.started).count())
+                       / double(NUClear::clock::duration::period::den)),
                 "ms");
         });
     }

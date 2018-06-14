@@ -1,7 +1,7 @@
 #include "MocapRecorder.h"
 
-using utility::math::matrix::Transform3D;
 using utility::math::matrix::Rotation3D;
+using utility::math::matrix::Transform3D;
 
 bool MocapRecorder::saveFrame(const std::vector<Transform3D>& poses) {
     arma::mat rigidBodies(13, poses.size());

@@ -9,6 +9,7 @@ format:
   pixel: BayerBG8
 
 lens:
+  radiansPerPixel: 0.0026768              # 1/focal_length_in_pixels = camera_pixel_size / camera_focal_length = 5.3um / 1.98mm = 2.6768e-3
   radiansPerPixel: 0.00245
   centreOffset: [0,0]
   FOV: 3.14

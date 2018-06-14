@@ -12,6 +12,7 @@ namespace input {
     uint Camera::cameraCount = 0;
 
     using extension::Configuration;
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::motion::KinematicsModel;

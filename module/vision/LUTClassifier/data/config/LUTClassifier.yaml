@@ -23,6 +23,8 @@ ball:
   maximum_lighting_bolt_length: 20
   # The minimum magnitude of gradient a lighting bolt can have before it stops
   minimum_lighting_bolt_strength: 15.0
+  # Configuration for if lightning should be drawn or not
+  draw_lightning: False
 
 # Settings related to the goal finder
 goals:

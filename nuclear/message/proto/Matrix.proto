@@ -5,13 +5,13 @@ import "Vector.proto";
 message mat {
     uint32          rows = 1;
     uint32          cols = 2;
-    repeated double v = 3 [packed = true];
+    repeated double v    = 3 [packed = true];
 }
 
 message fmat {
     uint32         rows = 1;
     uint32         cols = 2;
-    repeated float v = 3 [packed = true];
+    repeated float v    = 3 [packed = true];
 }
 
 message imat {
