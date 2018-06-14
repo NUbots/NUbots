@@ -51,7 +51,7 @@ namespace vision {
         }
 
         // Create mask image within visual horizon
-        std::vector<uint8_t> mask(image.dimensions, 0);
+        std::vector<uint8_t> mask(image.dimensions[0] * image.dimensions[1], 0);
         // Reserve space for mask image (width * visual horizon max height)
         // Reserving entire image bypasses need to remap y in new mask image space
         // But reserving could be achieved by:
