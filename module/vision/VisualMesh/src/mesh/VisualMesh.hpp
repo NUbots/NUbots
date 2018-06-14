@@ -18,6 +18,7 @@
 #ifndef VISUALMESH_HPP
 #define VISUALMESH_HPP
 
+#include <fmt/format.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -580,9 +581,7 @@ public:
                 case GBRG:
                 case BGGR: fmt = cl_image_format{CL_R, CL_UNORM_INT8}; break;
                 case BGRA: fmt = cl_image_format{CL_BGRA, CL_UNORM_INT8}; break;
-                case RGBA:
-                    fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8};
-                    break;
+                case RGBA: fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8}; break;
                 // Oh no...
                 default: throw std::runtime_error("Unsupported image format");
             }
@@ -966,7 +965,6 @@ public:
                            const int& start,
                            const int& size,
                            const uint offset) {
-
                 // Grab our current node
                 auto& node = lut[i];
 
@@ -1271,7 +1269,6 @@ public:
 
                 // Calculate our theta limits
                 auto theta_limits = [&](const Scalar& phi) {
-
                     // Precalculate some trigonometric functions
                     const Scalar sin_phi = std::sin(phi);
                     const Scalar cos_phi = std::cos(phi);
@@ -1430,7 +1427,6 @@ public:
                 const Scalar& height = Hoc[2][3];
 
                 auto theta_limits = [&](const Scalar& phi) -> std::array<std::pair<Scalar, Scalar>, 1> {
-
                     // Check if we are intersecting with an upper or lower cone
                     const bool upper = phi > M_PI_2;
 
@@ -1589,7 +1585,7 @@ public:
             switch (lens.projection) {
                 case Lens::RECTILINEAR: projection_kernel = project_rectilinear; break;
                 case Lens::EQUIDISTANT: projection_kernel = project_equidistant; break;
-                case Lens::EQUISOLID: projection_kernel   = project_equisolid; break;
+                case Lens::EQUISOLID: projection_kernel = project_equisolid; break;
             }
 
             // Load the arguments
@@ -1746,66 +1742,75 @@ private:
         std::vector<cl_platform_id> platforms(platform_count);
         ::clGetPlatformIDs(platforms.size(), platforms.data(), nullptr);
 
+        if (platform_count == 0) {
+            log<NUClear::ERROR>("No OpenCL platforms found. Check OpenCL Installation");
+            throw std::runtime_error("No OpenCL platforms found. Check OpenCL Installation");
+        }
+
         // Which device/platform we are going to use
         cl_platform_id best_platform = nullptr;
         cl_device_id best_device     = nullptr;
         int best_compute_units       = 0;
 
         // Go through our platforms
-        // for (const auto& platform : platforms) {
-        const auto& platform = platforms.front();
+        for (const auto& platform : platforms) {
+            cl_uint device_count = 0;
+            ::clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &device_count);
+            std::vector<cl_device_id> devices(device_count);
+            ::clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, device_count, devices.data(), nullptr);
 
-        cl_uint device_count = 0;
-        ::clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, nullptr, &device_count);
-        std::vector<cl_device_id> devices(device_count);
-        ::clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, device_count, devices.data(), nullptr);
+            // Go through our devices on the platform
+            for (const auto& device : devices) {
 
-        // Go through our devices on the platform
-        for (const auto& device : devices) {
+                // Length of data for strings
+                size_t len;
+                std::vector<char> data;
 
-            // Length of data for strings
-            size_t len;
-            std::vector<char> data;
-
-            // Print device details
-            ::clGetDeviceInfo(device, CL_DEVICE_NAME, 0, nullptr, &len);
-            data.resize(len);
-            ::clGetDeviceInfo(device, CL_DEVICE_NAME, len, data.data(), nullptr);
-            std::cout << "\tDevice: " << std::string(data.begin(), data.end()) << std::endl;
+                // Print device details
+                ::clGetDeviceInfo(device, CL_DEVICE_NAME, 0, nullptr, &len);
+                data.resize(len);
+                ::clGetDeviceInfo(device, CL_DEVICE_NAME, len, data.data(), nullptr);
+                NUClear::log<NUClear::INFO>(fmt::format("\tDevice: {}", std::string(data.begin(), data.end())));
 
 
-            ::clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, nullptr, &len);
-            data.resize(len);
-            ::clGetDeviceInfo(device, CL_DEVICE_VERSION, len, data.data(), nullptr);
-            std::cout << "\tHardware version: " << std::string(data.begin(), data.end()) << std::endl;
+                ::clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, nullptr, &len);
+                data.resize(len);
+                ::clGetDeviceInfo(device, CL_DEVICE_VERSION, len, data.data(), nullptr);
+                NUClear::log<NUClear::INFO>(
+                    fmt::format("\tHardware version: {}", std::string(data.begin(), data.end())));
 
 
-            ::clGetDeviceInfo(device, CL_DRIVER_VERSION, 0, nullptr, &len);
-            data.resize(len);
-            ::clGetDeviceInfo(device, CL_DRIVER_VERSION, len, data.data(), nullptr);
-            std::cout << "\tSoftware version: " << std::string(data.begin(), data.end()) << std::endl;
+                ::clGetDeviceInfo(device, CL_DRIVER_VERSION, 0, nullptr, &len);
+                data.resize(len);
+                ::clGetDeviceInfo(device, CL_DRIVER_VERSION, len, data.data(), nullptr);
+                NUClear::log<NUClear::INFO>(
+                    fmt::format("\tSoftware version: {}", std::string(data.begin(), data.end())));
 
 
-            ::clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &len);
-            data.resize(len);
-            ::clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, len, data.data(), nullptr);
-            std::cout << "\tOpenCL C version: " << std::string(data.begin(), data.end()) << std::endl;
+                ::clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &len);
+                data.resize(len);
+                ::clGetDeviceInfo(device, CL_DEVICE_OPENCL_C_VERSION, len, data.data(), nullptr);
+                NUClear::log<NUClear::INFO>(
+                    fmt::format("\tOpenCL C version: {}", std::string(data.begin(), data.end())));
 
 
-            cl_uint max_compute_units = 0;
-            ::clGetDeviceInfo(
-                device, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(max_compute_units), &max_compute_units, nullptr);
-            std::cout << "\tParallel compute units: " << max_compute_units << std::endl;
+                cl_uint max_compute_units = 0;
+                ::clGetDeviceInfo(
+                    device, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(max_compute_units), &max_compute_units, nullptr);
+                NUClear::log<NUClear::INFO>(fmt::format("\tParallel compute units: {}", max_compute_units));
 
-            if (max_compute_units > best_compute_units) {
-                best_compute_units = max_compute_units;
-                best_platform      = platform;
-                best_device        = device;
+                if (max_compute_units > best_compute_units) {
+                    best_compute_units = max_compute_units;
+                    best_platform      = platform;
+                    best_device        = device;
+                }
             }
-
-            std::cout << std::endl;
         }
-        // }
+
+        if ((best_platform == nullptr) || (best_device == nullptr) || (best_compute_units == 0)) {
+            log<NUClear::ERROR>("No OpenCL devices found. Check OpenCL Installation");
+            throw std::runtime_error("No OpenCL devices found. Check OpenCL Installation");
+        }
 
         // Print information about our selected device
         {
