@@ -51,7 +51,7 @@ namespace support {
                 Image img;
                 utility::vision::loadImage(imagePath, img);  // Load image from file
                 emit(std::make_unique<Image>(
-                    FOURCC::YUYV, cam.imageSizePixels, std::move(img.data), 0, "VirtualCamera", NUClear::clock::now()));
+                    FOURCC::RGB3, cam.imageSizePixels, std::move(img.data), 0, "VirtualCamera", NUClear::clock::now()));
             });
 
         on<Configuration>("VirtualLookUpTable.yaml").then([this](const Configuration& config) {

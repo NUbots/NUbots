@@ -22,6 +22,7 @@
 #include "utility/math/geometry/Line.h"
 #include "utility/math/vision.h"
 #include "utility/vision/ClassifiedImage.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace vision {
@@ -50,36 +51,54 @@ namespace vision {
             greenHorzHeight = (y < greenHorzHeight) ? y : greenHorzHeight;
         }
 
-        // Create mask image within visual horizon
-        std::vector<uint8_t> mask(image.dimensions[0] * image.dimensions[1], 0);
-        // Reserve space for mask image (width * visual horizon max height)
-        // Reserving entire image bypasses need to remap y in new mask image space
-        // But reserving could be achieved by:
-        //      mask.reserve(image.dimensions[0] * (image.dimensions[1] - greenHorzHeight));
+        // Check if visual horizon could be found
+        //  (if not will be a single pixel width on bottom of image)
+        if (image.dimensions[1] - greenHorzHeight > 1) {
+            log("Image dims:", image.dimensions);
+            log("Green horizon height:", greenHorzHeight);
 
-        // Fill mask image with field line coloured segments
-        for (const auto& segment : classifiedImage.horizontalSegments) {
-            // If we're within the green horizon
-            if (segment.start[1] <= visualHorizonAtPoint(classifiedImage, segment.start[0])
-                && segment.end[1] <= visualHorizonAtPoint(classifiedImage, segment.end[0])) {
-                // If the segment is of line type
-                if (segment.segmentClass == ClassifiedImage::SegmentClass::LINE) {
-                    // Add segment to mask image
-                    // Create line for segment
-                    utility::math::geometry::Line l({double(segment.start[0]), double(segment.start[1])},
-                                                    {double(segment.end[0]), double(segment.end[1])});
-                    // Get the min and max x to iterate across line
-                    int minX = segment.start[0], maxX = segment.end[0];
-                    if (segment.start[0] > segment.end[0]) {
-                        minX = segment.end[0];
-                        maxX = segment.start[0];
-                    }
-                    // Iterate through line and add each pixel
-                    for (auto& x = minX; x <= maxX; ++x) {
-                        mask[int(lround(l.y(x))) * width + x] = 1;
+            // Create mask image message
+            Image mask;
+            mask.format         = utility::vision::FOURCC::RGB3;
+            mask.dimensions.x() = image.dimensions[0];
+            mask.dimensions.y() = image.dimensions[1] - greenHorzHeight;
+            mask.data.resize(mask.dimensions.x() * (mask.dimensions.y() - greenHorzHeight), 0);
+
+            log("Mask data dims:", mask.dimensions.x(), mask.dimensions.y() - greenHorzHeight);
+
+            // Fill mask image with field line coloured segments
+            for (const auto& segment : classifiedImage.horizontalSegments) {
+                // log("\n\tSegment:", "\nStart:\n", segment.start, "\nEnd:\n", segment.end);
+                // If we're within the green horizon
+                if (segment.start[1] >= visualHorizonAtPoint(classifiedImage, segment.start[0])
+                    && segment.end[1] >= visualHorizonAtPoint(classifiedImage, segment.end[0])) {
+                    log("Within green horz", segment.segmentClass);
+                    // If the segment is of line type
+                    if (segment.segmentClass == ClassifiedImage::SegmentClass::LINE) {
+                        log("Adding segment");
+                        // Add segment to mask image
+                        // Create line for segment
+                        utility::math::geometry::Line l({double(segment.start[0]), double(segment.start[1])},
+                                                        {double(segment.end[0]), double(segment.end[1])});
+                        // Get the min and max x to iterate across line
+                        int minX = segment.start[0], maxX = segment.end[0];
+                        if (segment.start[0] > segment.end[0]) {
+                            minX = segment.end[0];
+                            maxX = segment.start[0];
+                        }
+                        // Iterate through line and add each pixel
+                        for (auto& x = minX; x <= maxX; ++x) {
+                            mask.data[(int(lround(l.y(x))) - greenHorzHeight) * image.dimensions[0] + x] = 1;
+                        }
                     }
                 }
             }
+
+            // DEBUG: Save the image
+            utility::vision::saveImage("test.ppm", mask);
+        }
+        else {
+            log<NUClear::WARN>("Could not construct visual horizon");
         }
     }
 

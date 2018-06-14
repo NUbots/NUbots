@@ -12,7 +12,7 @@ DISTORTION_FACTOR: -0.0000
 
 emit_images: true
 
-image_path: "field.ppm"
+image_path: "lines.ppm"
 
 # lens_type: pinhole
 
