@@ -580,7 +580,9 @@ public:
                 case GBRG:
                 case BGGR: fmt = cl_image_format{CL_R, CL_UNORM_INT8}; break;
                 case BGRA: fmt = cl_image_format{CL_BGRA, CL_UNORM_INT8}; break;
-                case RGBA: fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8}; break;
+                case RGBA:
+                    fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8};
+                    break;
                 // Oh no...
                 default: throw std::runtime_error("Unsupported image format");
             }
@@ -1587,7 +1589,7 @@ public:
             switch (lens.projection) {
                 case Lens::RECTILINEAR: projection_kernel = project_rectilinear; break;
                 case Lens::EQUIDISTANT: projection_kernel = project_equidistant; break;
-                case Lens::EQUISOLID: projection_kernel = project_equisolid; break;
+                case Lens::EQUISOLID: projection_kernel   = project_equisolid; break;
             }
 
             // Load the arguments
@@ -1813,6 +1815,7 @@ private:
 
             // Print device details
             ::clGetDeviceInfo(best_device, CL_DEVICE_NAME, 0, nullptr, &len);
+            NUClear::log("Length of allocation", len);
             data.resize(len);
             ::clGetDeviceInfo(best_device, CL_DEVICE_NAME, len, data.data(), nullptr);
             std::cout << "\tDevice: " << std::string(data.begin(), data.end()) << std::endl;
