@@ -27,6 +27,7 @@ namespace support {
 
     class VirtualCamera : public NUClear::Reactor {
         ReactionHandle emitImageHandle;
+        std::string imagePath;
 
     public:
         /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.

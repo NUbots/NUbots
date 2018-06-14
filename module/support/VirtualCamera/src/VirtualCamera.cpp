@@ -48,9 +48,10 @@ namespace support {
         emitImageHandle = on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then(
             "Simulated Images (VCamera)", [this](const CameraParameters& cam) {
                 // 2 Bytes per pixel
-                std::vector<uint8_t> data(2 * cam.imageSizePixels[0] * cam.imageSizePixels[1], 255);  // White pixels
+                Image img;
+                utility::vision::loadImage(imagePath, img);  // Load image from file
                 emit(std::make_unique<Image>(
-                    FOURCC::YUYV, cam.imageSizePixels, std::move(data), 0, "VirtualCamera", NUClear::clock::now()));
+                    FOURCC::YUYV, cam.imageSizePixels, std::move(img.data), 0, "VirtualCamera", NUClear::clock::now()));
             });
 
         on<Configuration>("VirtualLookUpTable.yaml").then([this](const Configuration& config) {
@@ -72,6 +73,8 @@ namespace support {
                 cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
                 // TODO: configure the offset? probably not necessary for pinhole
                 cameraParameters->centreOffset = Eigen::Vector2i::Zero();
+
+                imagePath = config["image_path"].as<std::string>();
 
                 if (config["lens_type"].as<std::string>().compare("pinhole") == 0) {
                     // Pinhole specific
