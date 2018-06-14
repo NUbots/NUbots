@@ -119,10 +119,7 @@ namespace vision {
                           message::vision::ClassifiedImage& classifiedImage,
                           const message::input::CameraParameters& cam);
 
-        void findLines(const message::input::Image& image,
-                       const message::vision::LookUpTable& lut,
-                       message::vision::ClassifiedImage& classifiedImage,
-                       const message::input::CameraParameters& cam);
+        void findLines(const message::input::Image& image, message::vision::ClassifiedImage& classifiedImage);
 
     public:
         bool DRAW_LIGHTNING = false;

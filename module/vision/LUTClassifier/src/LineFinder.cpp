@@ -18,13 +18,9 @@
  */
 
 #include "LUTClassifier.h"
-
-#include "utility/math/geometry/Line.h"
-
-#include "utility/math/vision.h"
-
 #include "message/input/CameraParameters.h"
-
+#include "utility/math/geometry/Line.h"
+#include "utility/math/vision.h"
 #include "utility/vision/ClassifiedImage.h"
 
 namespace module {
@@ -44,20 +40,13 @@ namespace vision {
 
     using message::input::CameraParameters;
 
-    void LUTClassifier::findLines(const Image& image,
-                                  const LookUpTable& lut,
-                                  ClassifiedImage& classifiedImage,
-                                  const CameraParameters& cam) {
-
-        // Our visual horizon will bound the field line classification
-        auto& visualHorizon = classifiedImage.visualHorizon;
-
+    void LUTClassifier::findLines(const Image& image, ClassifiedImage& classifiedImage) {
         // TODO: Possibly remove fitted ball classification models
 
         // Find a bounding box for green horizon to reserve space in mask image
         int greenHorzHeight = image.dimensions[1];
-        for (int x = 0; x < image.dimensions[0]; ++x) {
-            int y           = visualHorizonAtPoint(*classifiedImage, x);
+        for (int x = 0; x < int(image.dimensions[0]); ++x) {
+            int y           = visualHorizonAtPoint(classifiedImage, x);
             greenHorzHeight = (y < greenHorzHeight) ? y : greenHorzHeight;
         }
 
@@ -73,15 +62,16 @@ namespace vision {
         mask.assign(mask.size(), 0);
 
         // Fill mask image with field line coloured segments
-        for (const auto& segment : classifiedImage->horizontalSegments) {
+        for (const auto& segment : classifiedImage.horizontalSegments) {
             // If we're within the green horizon
-            if (segment.start[1] <= visualHorizonAtPoint(segment.start[0])
-                && segment.end[1] <= visualHorizonAtPoint(segment.end[0])) {
+            if (segment.start[1] <= visualHorizonAtPoint(classifiedImage, segment.start[0])
+                && segment.end[1] <= visualHorizonAtPoint(classifiedImage, segment.end[0])) {
                 // If the segment is of line type
-                if (segment.segmentClass = ClassifiedImage::SegmentClass::LINE) {
+                if (segment.segmentClass == ClassifiedImage::SegmentClass::LINE) {
                     // Add segment to mask image
                     // Create line for segment
-                    utility::math::geometry::Line l(segment.start, segment.end);
+                    utility::math::geometry::Line l({double(segment.start[0]), double(segment.start[1])},
+                                                    {double(segment.end[0]), double(segment.end[1])});
                     // Get the min and max x to iterate across line
                     int minX = segment.start[0], maxX = segment.end[0];
                     if (segment.start[0] > segment.end[0]) {
