@@ -119,6 +119,11 @@ namespace vision {
                           message::vision::ClassifiedImage& classifiedImage,
                           const message::input::CameraParameters& cam);
 
+        void findLines(const message::input::Image& image,
+                       const message::vision::LookUpTable& lut,
+                       message::vision::ClassifiedImage& classifiedImage,
+                       const message::input::CameraParameters& cam);
+
     public:
         bool DRAW_LIGHTNING = false;
         explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
