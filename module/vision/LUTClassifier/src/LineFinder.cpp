@@ -51,15 +51,11 @@ namespace vision {
         }
 
         // Create mask image within visual horizon
-        std::vector<uint8_t> mask;
+        std::vector<uint8_t> mask(image.dimensions, 0);
         // Reserve space for mask image (width * visual horizon max height)
         // Reserving entire image bypasses need to remap y in new mask image space
         // But reserving could be achieved by:
         //      mask.reserve(image.dimensions[0] * (image.dimensions[1] - greenHorzHeight));
-        mask.reserve(image.dimensions[0] * image.dimensions[1]);
-
-        // TODO: Check if necessary
-        mask.assign(mask.size(), 0);
 
         // Fill mask image with field line coloured segments
         for (const auto& segment : classifiedImage.horizontalSegments) {
