@@ -76,8 +76,7 @@ namespace vision {
                     }
                     // Iterate through line and add each pixel
                     for (auto& x = minX; x <= maxX; ++x) {
-                        // TODO: Check access to image vector
-                        mask[x * int(lround(l.y(x)))] = 1;
+                        mask[int(lround(l.y(x))) * width + x] = 1;
                     }
                 }
             }
