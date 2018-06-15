@@ -224,6 +224,8 @@ namespace vision {
                                 arma::ivec2 point_coord = convert<int, 2>(mesh.coordinates[n[j] - 1]);
 
                                 auto point_cam = getCamFromImage(point_coord, cam);
+                                log("\t\t\tRaw classification:",
+                                    double(mesh.classifications.back().values[n[j] * dim]));
                                 cluster.push_back(arma::vec4(
                                     {point_cam[0],
                                      point_cam[1],
@@ -297,6 +299,7 @@ namespace vision {
                 // We need to gather all points which have a confidence prediction of over MAX_PREDICT_THRESH
                 // Then BFS to all neighbouring points which have a confidence prediction of at least MIN_PREDICT_THRESH
                 // We then need to create ransac models for each of these 'clusters' to fit a circle
+                log("Visual mesh triggered");
 
                 // Get our coordinate clusters in camera space
                 std::vector<std::vector<arma::vec4>> clusters = findClusters(mesh, cam);
@@ -305,6 +308,7 @@ namespace vision {
 
                 // For each cluster, we want to ransac the points
                 for (auto i = 0; i < int(clusters.size()); ++i) {
+                    log("Points in cluster:", clusters[i].size());
                     auto ransacResults = Ransac<RansacVisualMeshModel>::fitModels(clusters[i].begin(),
                                                                                   clusters[i].end(),
                                                                                   MINIMUM_POINTS_FOR_CONSENSUS,
