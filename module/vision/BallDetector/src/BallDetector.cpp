@@ -156,7 +156,7 @@ namespace vision {
 
     std::vector<std::vector<arma::vec4>> BallDetector::findClusters(const VisualMesh& mesh,
                                                                     const CameraParameters& cam) {
-        log("Finding more clusters:");
+        // log("Finding more clusters:");
         // Alias visual mesh parameters
         int dim = mesh.classifications.back().dimensions;
 
@@ -174,7 +174,7 @@ namespace vision {
                 if (visited_indices.empty() or visited_indices.find(i) != visited_indices.end()) {
                     std::vector<arma::vec4> cluster;
 
-                    log("New cluster seeded at:", i);
+                    // log("New cluster seeded at:", i);
                     arma::ivec2 seed_coord = convert<int, 2>(mesh.coordinates[i - 1]);
                     // Transform our point into cam space
                     auto seed_cam = getCamFromImage(seed_coord, cam);
@@ -199,10 +199,10 @@ namespace vision {
                         curr_index = search_queue.front();
                         search_queue.pop();
 
-                        log("search_queue", search_queue.size());
-                        log("\tSeed        :", curr_index);
-                        log("\tPts visited :", visited_indices.size());
-                        log("\tSearch items:", search_queue.size());
+                        // log("search_queue", search_queue.size());
+                        // log("\tSeed        :", curr_index);
+                        // log("\tPts visited :", visited_indices.size());
+                        // log("\tSearch items:", search_queue.size());
 
                         // Populate the neighbours
                         arma::ivec6 n = convert<int, 6>(mesh.neighbourhood[curr_index]);
@@ -210,14 +210,14 @@ namespace vision {
                         // Loop through current index and add neighbours onto queue if they are above confidence
                         // threshold
                         for (auto j = 0; j < 6; ++j) {
-                            log("\t\tNeighbour : ", n[j]);
-                            log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j] * dim]);
+                            // log("\t\tNeighbour : ", n[j]);
+                            // log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j] * dim]);
 
                             // Make sure our confidence is above the threshold
                             // Make sure we haven't visited the point before
                             if ((mesh.classifications.back().values[n[j] * dim] >= mesh_branch_confidence_threshold)) {
                                 if (visited_indices.find(n[j]) == visited_indices.end()) {
-                                    log("\t\t\t\tFind :", *visited_indices.find(n[j]));
+                                    // log("\t\t\t\tFind :", *visited_indices.find(n[j]));
                                     search_queue.push(n[j]);  // Add to our BFS queue
                                 }
 
@@ -297,12 +297,12 @@ namespace vision {
                 // We need to gather all points which have a confidence prediction of over MAX_PREDICT_THRESH
                 // Then BFS to all neighbouring points which have a confidence prediction of at least MIN_PREDICT_THRESH
                 // We then need to create ransac models for each of these 'clusters' to fit a circle
-                log("Visual mesh triggered");
+                // log("Visual mesh triggered");
 
                 // Get our coordinate clusters in camera space
                 std::vector<std::vector<arma::vec4>> clusters = findClusters(mesh, cam);
 
-                log("Number of clusters found:", clusters.size());
+                // log("Number of clusters found:", clusters.size());
 
                 auto balls = std::make_unique<std::vector<Ball>>();
                 balls->reserve(clusters.size());
@@ -325,9 +325,9 @@ namespace vision {
                         min_z = std::min(min_z, point[2]);
                         max_z = std::max(max_z, point[2]);
 
-                        log("point 0 : ", point[0]);
-                        log("point 1 : ", point[1]);
-                        log("point 2 : ", point[2]);
+                        // log("point 0 : ", point[0]);
+                        // log("point 1 : ", point[1]);
+                        // log("point 2 : ", point[2]);
                     }
 
                     center /= clusters[i].size();
@@ -376,10 +376,10 @@ namespace vision {
 
                     b.visObject.timestamp = NUClear::clock::now();
 
-                    std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius" << radius
-                              << " widthDistance " << widthDistance << " rBCc " << rBCc.t() << " screenAngular "
-                              << b.visObject.screenAngular.transpose() << " angularSize "
-                              << b.visObject.angularSize.transpose() << std::endl;
+                    // std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius" << radius
+                    //           << " widthDistance " << widthDistance << " rBCc " << rBCc.t() << " screenAngular "
+                    //           << b.visObject.screenAngular.transpose() << " angularSize "
+                    //           << b.visObject.angularSize.transpose() << std::endl;
 
                     balls->push_back(std::move(b));
                 }
