@@ -60,8 +60,6 @@ namespace vision {
     using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
     using message::vision::VisualMesh;
-    using message::input::Image;
-    using message::support::FieldDescription;
 
     using Plane = utility::math::geometry::Plane<3>;
 
