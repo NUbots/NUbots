@@ -89,10 +89,12 @@ namespace motion {
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
             goalRobotSpace = command.robotSpace;
             if (goalRobotSpace) {
-                goalAngles = {command.yaw, command.pitch};
+                goalAngles = {utility::math::clamp(-float(M_PI_2), command.yaw, float(M_PI_2)),
+                              utility::math::clamp(-float(M_PI_2), command.pitch, float(M_PI_2))};
             }
             else {
-                goalAngles = {command.yaw, -command.pitch};
+                goalAngles = {utility::math::clamp(-float(M_PI_2), command.yaw, float(M_PI_2)),
+                              -utility::math::clamp(-float(M_PI_2), command.pitch, float(M_PI_2))};
             }
         });
 
