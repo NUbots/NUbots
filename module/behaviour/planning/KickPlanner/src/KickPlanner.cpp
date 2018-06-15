@@ -82,7 +82,8 @@ namespace behaviour {
                 cfg.kick_corridor_width      = config["kick_corridor_width"].as<float>();
                 cfg.seconds_not_seen_limit   = config["seconds_not_seen_limit"].as<float>();
                 cfg.kick_forward_angle_limit = config["kick_forward_angle_limit"].as<float>();
-                cfg.is_dribbling             = config['is_dribbling'].as<bool>();
+                cfg.is_dribbling             = config["is_dribbling"].as<bool>();
+                cfg.max_goal_distance        = config["max_goal_distance"].as<float>();
                 emit(std::make_unique<KickPlannerConfig>(cfg));
                 emit(std::make_unique<WantsToKick>(false));
             });
@@ -127,6 +128,17 @@ namespace behaviour {
                     // log("KickAngle",KickAngle);
                     // log("ballPosition",ballPosition);
                     // log("secondsSinceLastSeen",secondsSinceLastSeen);
+
+                    // Calculate the Manhattan distance to centre of goals (x = field_length / 2, y = 0) from current
+                    // field position
+                    float distanceToGoals = arma::norm(
+                        arma::vec2({fd.dimensions.field_length / 2., 0}) - convert<double, 3>(field.position).head(2),
+                        1);
+
+                    // Determine if positioning is valid based on goal distance and dribble behaviour
+                    bool nearGoals       = distanceToGoals < cfg.max_goal_distance;
+                    bool positionIsValid = (!cfg.is_dribbling) || (cfg.is_dribbling && nearGoals);
+
                     bool kickIsValid = kickValid(ballPosition);
                     if (kickIsValid) {
                         lastTimeValid = now;
@@ -137,7 +149,7 @@ namespace behaviour {
                     //     , kickIsValid
                     //     , KickAngle < cfg.kick_forward_angle_limit);
                     if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid
-                        && KickAngle < cfg.kick_forward_angle_limit) {
+                        && KickAngle < cfg.kick_forward_angle_limit && positionIsValid) {
 
                         switch (kickPlan.kickType.value) {
                             case KickType::IK_KICK:
