@@ -334,7 +334,7 @@ namespace vision {
                     // Work out the width distance
                     arma::vec3 top_2  = arma::normalise(center + arma::vec3({0, 0, radius}));
                     arma::vec2 top    = projectCamSpaceToScreen(top_2, cam);
-                    arma::vec2 base_2 = arma::normalise(center - arma::vec3({0, 0, radius}));
+                    arma::vec3 base_2 = arma::normalise(center - arma::vec3({0, 0, radius}));
                     arma::vec2 base   = projectCamSpaceToScreen(base_2, cam);
                     arma::vec2 left =
                         projectCamSpaceToScreen(arma::normalise(center + arma::vec3({0, radius, 0})), cam);
