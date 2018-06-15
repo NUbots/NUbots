@@ -213,10 +213,12 @@ namespace vision {
                         for (auto j = 0; j < 6; ++j) {
                             log("\t\tNeighbour : ", n[j]);
                             log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j]]);
+                            // log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j] * dim ]);
 
                             // Make sure our confidence is above the threshold
                             // Make sure we haven't visited the point before
                             if ((mesh.classifications.back().values[n[j]] >= mesh_branch_confidence_threshold)) {
+                            if ((mesh.classifications.back().values[n[j] * dim] >= mesh_branch_confidence_threshold)) {
                                 if (visited_indices.find(n[j]) != visited_indices.end()) {
                                     search_queue.push(n[j]);  // Add to our BFS queue
                                 }
@@ -233,6 +235,7 @@ namespace vision {
                                      utility::math::clamp(0.0,
                                                           double(mesh.classifications.back().values[n[j] * dim]),
                                                           1.0)}));  // Add to our cluster
+                                     mesh.classifications.back().values[n[j] * dim]}));  // Add to our cluster
                             }
                             visited_indices.insert(n[j]);  // Add to our list of visited points
                         }
