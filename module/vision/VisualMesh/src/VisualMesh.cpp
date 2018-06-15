@@ -28,13 +28,11 @@ namespace vision {
     using VisualMeshMsg = message::vision::VisualMesh;
 
     VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), mesh() {
+        : Reactor(std::move(environment)), mesh_ptr(nullptr) {
 
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
             log("Loading visual mesh");
-
-            // Build our classification network
-            std::vector<std::vector<std::pair<std::vector<std::vector<float>>, std::vector<float>>>> network;
+            network.clear();
 
             // Load our weights and biases
             for (const auto& conv : config.config) {
@@ -69,17 +67,16 @@ namespace vision {
             log("Finished loading visual mesh");
         });
 
-        on<Startup, With<FieldDescription>, With<CameraParameters>>().then(
-            [this](const FieldDescription* field, const CameraParameters& cam) {
-                mesh = mesh::VisualMesh<float>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
-                                               0.5,
-                                               1.0,
-                                               50,
-                                               cam.FOV.maxCoeff() / cam.imageSizePixels.maxCoeff());
-
-                // Make the classifier
-                classifier = mesh.make_classifier(network);
-            });
+        on<Startup, With<FieldDescription>, With<CameraParameters>>().then([this](const FieldDescription& field,
+                                                                                  const CameraParameters& cam) {
+            mesh_ptr = std::make_unique<mesh::VisualMesh<float>>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
+                                                                 0.5,
+                                                                 1.0,
+                                                                 50,
+                                                                 cam.FOV.maxCoeff() / cam.imageSizePixels.maxCoeff());
+            // Make the classifier
+            classifier = mesh_ptr->make_classifier(network);
+        });
 
         on<Trigger<Image>, With<CameraParameters>, Buffer<4>>().then([this](const Image& img,
                                                                             const CameraParameters& cam) {
@@ -108,7 +105,7 @@ namespace vision {
             auto results = classifier(img.data.data(), mesh::VisualMesh<float>::FOURCC(img.format), Hoc, lens);
 
             // Get the mesh that was used so we can make our message
-            const auto& m = mesh.height(Hoc[2][3]);
+            const auto& m = mesh_ptr->height(Hoc[2][3]);
 
             auto msg = std::make_unique<VisualMeshMsg>();
 
@@ -174,7 +171,7 @@ namespace vision {
                     }
                 }
             }
-            emit(utility::nusight::drawVisionLines(lines));
+            // emit(utility::nusight::drawVisionLines(lines));
             emit(msg);
         });
     }

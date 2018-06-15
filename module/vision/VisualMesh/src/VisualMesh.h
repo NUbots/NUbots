@@ -10,7 +10,10 @@ namespace vision {
 
     class VisualMesh : public NUClear::Reactor {
     private:
-        mesh::VisualMesh<float> mesh;
+        // Build our classification network
+        std::vector<std::vector<std::pair<std::vector<std::vector<float>>, std::vector<float>>>> network;
+
+        std::unique_ptr<mesh::VisualMesh<float>> mesh_ptr;
         mesh::VisualMesh<float>::Classifier classifier;
 
     public:
