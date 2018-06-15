@@ -35,6 +35,7 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 
@@ -81,6 +82,10 @@ namespace motion {
                 head_motor_gain   = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
 
+                // Goal angle limits
+                yaw_limits   = config["yaw"].as<arma::vec2>();
+                pitch_limits = config["pitch"].as<arma::vec2>();
+
                 emit(std::make_unique<HeadCommand>(
                     HeadCommand{config["initial"]["yaw"].as<float>(), config["initial"]["pitch"].as<float>(), false}));
 
@@ -90,12 +95,12 @@ namespace motion {
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
             goalRobotSpace = command.robotSpace;
             if (goalRobotSpace) {
-                goalAngles = {utility::math::clamp(-float(M_PI_2), command.yaw, float(M_PI_2)),
-                              utility::math::clamp(-float(M_PI_2), command.pitch, float(M_PI_2))};
+                goalAngles = {utility::math::clamp(float(yaw_limits[0]), command.yaw, float(yaw_limits[1])),
+                              utility::math::clamp(float(pitch_limits[0]), command.pitch, float(pitch_limits[1]))};
             }
             else {
-                goalAngles = {utility::math::clamp(-float(M_PI_2), command.yaw, float(M_PI_2)),
-                              -utility::math::clamp(-float(M_PI_2), command.pitch, float(M_PI_2))};
+                goalAngles = {utility::math::clamp(float(yaw_limits[0]), command.yaw, float(yaw_limits[1])),
+                              -utility::math::clamp(float(pitch_limits[0]), command.pitch, float(pitch_limits[1]))};
             }
         });
 

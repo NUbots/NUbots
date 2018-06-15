@@ -36,6 +36,8 @@ namespace motion {
         const size_t id;
         double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
         ReactionHandle updateHandle;
+        arma::vec2 yaw_limits;
+        arma::vec2 pitch_limits;
         // Debug var:
         NUClear::clock::time_point lastTime;
 
