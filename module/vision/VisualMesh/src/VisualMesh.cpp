@@ -3,10 +3,14 @@
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
+
 #include "mesh/Sphere.hpp"
+
+#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/vision/VisualMesh.h"
+
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/Timer.hpp"
 
@@ -14,15 +18,17 @@ namespace module {
 namespace vision {
 
     using extension::Configuration;
+
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
+
     using VisualMeshMsg = message::vision::VisualMesh;
 
     VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), mesh(mesh::Sphere<float>(0, 0.075, 4, 10), 0.5, 1.0, 50, M_PI / 1280.0) {
 
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
-
             log("Loading visual mesh");
 
             // Build our classification network
@@ -64,8 +70,8 @@ namespace vision {
             log("Finished loading visual mesh");
         });
 
-        on<Trigger<Image>, Buffer<4>>().then([this](const Image& img) {
-
+        on<Trigger<Image>, With<CameraParameters>, Buffer<4>>().then([this](const Image& img,
+                                                                            const CameraParameters& cam) {
             // Get our camera to world matrix
             Eigen::Affine3f Hcw(img.Hcw.cast<float>());
 
@@ -75,10 +81,18 @@ namespace vision {
 
             // TODO: Un-hardcode
             mesh::VisualMesh<float>::Lens lens;
-            lens.projection   = mesh::VisualMesh<float>::Lens::EQUIDISTANT;
-            lens.dimensions   = {{int(img.dimensions[0]), int(img.dimensions[1])}};
-            lens.fov          = M_PI;
-            lens.focal_length = (1.0 / 0.0026997136600899543);
+            switch (cam.lens.value) {
+                case CameraParameters::LensType::RADIAL:
+                    lens.projection   = mesh::VisualMesh<float>::Lens::EQUIDISTANT;
+                    lens.focal_length = 1.0 / cam.radial.radiansPerPixel;
+                    break;
+                case CameraParameters::LensType::PINHOLE:
+                    lens.projection   = mesh::VisualMesh<float>::Lens::RECTILINEAR;
+                    lens.focal_length = cam.pinhole.focalLengthPixels;
+                    break;
+            }
+            lens.dimensions = {{int(img.dimensions[0]), int(img.dimensions[1])}};
+            lens.fov        = cam.FOV.x();
 
             auto results = classifier(img.data.data(), mesh::VisualMesh<float>::FOURCC(img.format), Hoc, lens);
 
