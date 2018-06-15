@@ -332,16 +332,16 @@ namespace vision {
                     Ball b;
 
                     // Work out the width distance
-
-                    arma::vec2 top = projectCamSpaceToScreen(arma::normalise(center + arma::vec3({0, 0, radius})), cam);
-                    arma::vec2 base =
-                        projectCamSpaceToScreen(arma::normalise(center - arma::vec3({0, 0, radius})), cam);
+                    arma::vec3 top_2  = arma::normalise(center + arma::vec3({0, 0, radius}));
+                    arma::vec2 top    = projectCamSpaceToScreen(top_2, cam);
+                    arma::vec2 base_2 = arma::normalise(center - arma::vec3({0, 0, radius}));
+                    arma::vec2 base   = projectCamSpaceToScreen(base_2, cam);
                     arma::vec2 left =
                         projectCamSpaceToScreen(arma::normalise(center + arma::vec3({0, radius, 0})), cam);
                     arma::vec2 right =
                         projectCamSpaceToScreen(arma::normalise(center - arma::vec3({0, radius, 0})), cam);
 
-                    double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
+                    double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top_2, base_2, cam);
 
                     // Work out how far away the ball must be to be at the distance it is from the camera
                     arma::vec3 rBCc = center * widthDistance;
