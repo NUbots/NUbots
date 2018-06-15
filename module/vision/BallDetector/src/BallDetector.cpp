@@ -334,9 +334,8 @@ namespace vision {
                     center = arma::normalise(center);
 
                     // Use the average of the extreme coordinates to determine the radius
-                    // double radius = (std::abs(max_x - min_x) + std::abs(max_y - min_y) + std::abs(max_z - min_z)) /
-                    // 6.0;
-                    double radius = (std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 4.0;
+                    double radius = (std::abs(max_x - min_x) + std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 6.0;
+                    // double radius = (std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 4.0;
 
                     // Work out the width distance
                     arma::vec3 topCam   = arma::normalise(center + arma::vec3({0, 0, radius}));
@@ -361,11 +360,11 @@ namespace vision {
 
                     // Ball cam space info
                     b.cone.axis     = convert<double, 3>(center);
-                    b.cone.gradient = -std::numeric_limits<double>::max();
+                    b.cone.gradient = std::numeric_limits<double>::max();
 
                     for (const auto& point : clusters[i]) {
                         // Check our cluster pointer for the maximum gradient
-                        b.cone.gradient = std::max(b.cone.gradient, arma::dot(point.head(3), center));
+                        b.cone.gradient = std::min(b.cone.gradient, arma::dot(point.head(3), center));
 
                         // Add our points
                         b.edgePoints.push_back(convert<double, 3>(point.head(3)));
