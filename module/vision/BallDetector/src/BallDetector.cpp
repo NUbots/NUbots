@@ -357,7 +357,7 @@ namespace vision {
 
                     // Check our cluster pointer for the maximum gradient
                     for (int j = 1; j < int(clusters[i].size()); j++) {
-                        auto temp = arma::dot(clusters[i][0].head(3), convert<double, 3>(b.cone.axis));
+                        auto temp = arma::dot(clusters[i][j].head(3), convert<double, 3>(b.cone.axis));
                         if (temp > b.cone.gradient) {
                             b.cone.gradient = temp;
                         }
