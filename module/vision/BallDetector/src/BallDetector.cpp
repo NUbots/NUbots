@@ -342,7 +342,7 @@ namespace vision {
                     arma::vec2 left  = projectCamSpaceToScreen(leftCam, cam);
                     arma::vec2 right = projectCamSpaceToScreen(rightCam, cam);
 
-                    double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top_2, base_2, cam);
+                    double widthDistance = widthBasedDistanceToCircle(field.ball_radius, topCam, baseCam, cam);
 
                     // Work out how far away the ball must be to be at the distance it is from the camera
                     arma::vec3 rBCc = center * widthDistance;
