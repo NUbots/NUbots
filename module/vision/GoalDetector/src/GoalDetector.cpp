@@ -365,14 +365,18 @@ namespace vision {
                     arma::vec3 ctr = convert<double, 3>(it->frustum.tr);
                     arma::vec3 cbr = convert<double, 3>(it->frustum.br);
 
-
                     float leftAngle   = std::acos(arma::norm_dot(cbl, ctl));
                     float rightAngle  = std::acos(arma::norm_dot(cbr, ctr));
                     float topAngle    = std::acos(arma::norm_dot(ctr, ctl));
                     float bottomAngle = std::acos(arma::norm_dot(cbr, cbl));
 
+                    // Get the centre ray of goal by averaging points
+                    arma::vec3 goalCentreRay = cbl + ctl + ctr + cbr;
+                    goalCentreRay /= 4;
+
                     // float dAngleVertical   = std::fabs(leftAngle - rightAngle);
                     // float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
+                    it->visObject.screenAngular = convert<double, 2>(cartesianToSpherical(goalCentreRay).rows(1, 2));
 
                     float vertAngle           = (leftAngle + rightAngle) / 2;
                     float horAngle            = (topAngle + bottomAngle) / 2;
