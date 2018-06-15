@@ -52,6 +52,8 @@ namespace support {
                 msg->camera_id     = 0;
                 msg->serial_number = "VirtualCamera";
                 msg->timestamp     = NUClear::clock::now();
+                msg->Hcw           = Eigen::Matrix4d::Identity();
+                msg->Hcw(3, 2) = 0.92;
                 utility::vision::loadImage(imagePath, *msg);
                 emit(msg);
             });
