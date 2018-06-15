@@ -1743,7 +1743,7 @@ private:
         ::clGetPlatformIDs(platforms.size(), platforms.data(), nullptr);
 
         if (platform_count == 0) {
-            log<NUClear::ERROR>("No OpenCL platforms found. Check OpenCL Installation");
+            NUClear::log<NUClear::ERROR>("No OpenCL platforms found. Check OpenCL Installation");
             throw std::runtime_error("No OpenCL platforms found. Check OpenCL Installation");
         }
 
@@ -1808,7 +1808,7 @@ private:
         }
 
         if ((best_platform == nullptr) || (best_device == nullptr) || (best_compute_units == 0)) {
-            log<NUClear::ERROR>("No OpenCL devices found. Check OpenCL Installation");
+            NUClear::log<NUClear::ERROR>("No OpenCL devices found. Check OpenCL Installation");
             throw std::runtime_error("No OpenCL devices found. Check OpenCL Installation");
         }
 
