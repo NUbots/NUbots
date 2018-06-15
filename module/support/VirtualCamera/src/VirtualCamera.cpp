@@ -53,7 +53,7 @@ namespace support {
                 msg->serial_number = "VirtualCamera";
                 msg->timestamp     = NUClear::clock::now();
                 msg->Hcw           = Eigen::Matrix4d::Identity();
-                msg->Hcw(3, 2) = 0.92;
+                msg->Hcw(3, 2)     = 0.92;
                 utility::vision::loadImage(imagePath, *msg);
                 emit(msg);
             });
@@ -94,10 +94,8 @@ namespace support {
                 }
                 else if (config["lens_type"].as<std::string>().compare("radial") == 0) {
                     // Radial specific
-                    cameraParameters->lens = CameraParameters::LensType::RADIAL;
-                    cameraParameters->radial.radiansPerPixel =
-                        cameraParameters->FOV[0]
-                        / cameraParameters->imageSizePixels[0];  // config["lens"]["radiansPerPixel"].as<float>();
+                    cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
+                    cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
                     cameraParameters->centreOffset = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
                 }
                 else {
