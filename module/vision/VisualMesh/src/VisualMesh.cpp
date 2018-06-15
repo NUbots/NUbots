@@ -9,6 +9,7 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
+#include "message/support/FieldDescription.h"
 #include "message/vision/VisualMesh.h"
 
 #include "utility/nusight/NUhelpers.h"
@@ -22,11 +23,12 @@ namespace vision {
     using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
+    using message::support::FieldDescription;
 
     using VisualMeshMsg = message::vision::VisualMesh;
 
     VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), mesh(mesh::Sphere<float>(0, 0.075, 4, 10), 0.5, 1.0, 50, M_PI / 1280.0) {
+        : Reactor(std::move(environment)), mesh() {
 
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
             log("Loading visual mesh");
@@ -64,11 +66,20 @@ namespace vision {
                 }
             }
 
-            // Make the classifier
-            classifier = mesh.make_classifier(network);
-
             log("Finished loading visual mesh");
         });
+
+        on<Startup, With<FieldDescription>, With<CameraParameters>>().then(
+            [this](const FieldDescription* field, const CameraParameters& cam) {
+                mesh = mesh::VisualMesh<float>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
+                                               0.5,
+                                               1.0,
+                                               50,
+                                               cam.FOV.maxCoeff() / cam.imageSizePixels.maxCoeff());
+
+                // Make the classifier
+                classifier = mesh.make_classifier(network);
+            });
 
         on<Trigger<Image>, With<CameraParameters>, Buffer<4>>().then([this](const Image& img,
                                                                             const CameraParameters& cam) {
