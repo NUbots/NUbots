@@ -42,8 +42,54 @@ namespace vision {
     using message::input::CameraParameters;
 
     void LUTClassifier::findLines(const Image& image, ClassifiedImage& classifiedImage) {
-        // TODO: Possibly remove fitted ball classification models
+        // Create spherical cam for projection
+        CameraParameters sphericalCam;
+        sphericalCam.imageSizePixels        = {320, 240};
+        sphericalCam.FOV                    = {3.14, 3.14};
+        sphericalCam.centreOffset           = {0, 0};
+        sphericalCam.lens                   = CameraParameters::LensType::RADIAL;
+        sphericalCam.radial.radiansPerPixel = 0.01;
 
+        // Create rectangular cam for projection
+        CameraParameters rectCam;
+        rectCam.imageSizePixels           = {320, 240};
+        rectCam.FOV                       = {1.0472, 0.785};
+        rectCam.centreOffset              = {0, 0};
+        rectCam.lens                      = CameraParameters::LensType::PINHOLE;
+        rectCam.pinhole.distortionFactor  = 0;
+        arma::vec2 tanHalfFOV             = {std::tan(rectCam.FOV[0] * 0.5), std::tan(rectCam.FOV[0] * 0.5)};
+        arma::vec2 imageCentre            = {rectCam.imageSizePixels[0] * 0.5, rectCam.imageSizePixels[1] * 0.5};
+        rectCam.pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+        rectCam.pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), tanHalfFOV[1] / imageCentre[1];
+
+        // Create rectangular projection
+        Image proj;
+        proj.format         = utility::vision::FOURCC::GREY;
+        proj.dimensions.x() = image.dimensions[0];
+        proj.dimensions.y() = image.dimensions[1];
+        proj.data.resize(proj.dimensions.x() * proj.dimensions.y(), 0);
+
+        log("Projection");
+
+        // Iterate through pixels and transform each one
+        for (int x = 0; x < image.dimensions[0]; ++x) {
+            for (int y = 0; y < image.dimensions[1]; ++y) {
+                arma::vec3 camVec    = utility::math::vision::getCamFromImage(arma::ivec2({x, y}), sphericalCam);
+                arma::ivec2 pixelMap = utility::math::vision::getImageFromCam(camVec, rectCam);
+                // Bounds check new coordinates
+                if (pixelMap[0] > 0 && pixelMap[0] < proj.dimensions.x() && pixelMap[1] > 0
+                    && pixelMap[1] < proj.dimensions.y()) {
+                    // log("From:", x, y, "To:", pixelMap[0], pixelMap[1]);
+                    proj.data[pixelMap[1] * proj.dimensions.x() + pixelMap[0]] =
+                        image.data[y * image.dimensions.x() + x];
+                }
+            }
+        }
+
+
+        utility::vision::saveImage("projection.ppm", proj);
+
+        log("Finished");
         // Create visual horizon image message
         Image vHorizon;
         vHorizon.format         = utility::vision::FOURCC::GREY;
@@ -59,6 +105,11 @@ namespace vision {
             vHorizon.data[y * image.dimensions[0] + x] = 255;
         }
 
+        log("Saving visual horizon");
+        utility::vision::saveImage("vHorz.ppm", vHorizon);
+        log("Saved visual horizon");
+
+
         // Check if visual horizon could be found
         //  (if not will be a single pixel width on bottom of image)
         if (image.dimensions[1] - greenHorzHeight > 1) {
@@ -67,31 +118,32 @@ namespace vision {
             log("\tGreen horizon height:", greenHorzHeight);
 
             Image mask;
-            mask.format         = utility::vision::FOURCC::GREY;
+            mask.format         = image.format;
             mask.dimensions.x() = image.dimensions[0];
             mask.dimensions.y() = image.dimensions[1];
             mask.data.resize(mask.dimensions.x() * mask.dimensions.y(), 0);
 
-            log("\tMask data dims: [", mask.dimensions.x(), mask.dimensions.y(), "]");
+            // log("\tMask data dims: [", mask.dimensions.x(), mask.dimensions.y(), "]");
 
             int segments = 0;
 
-            log("\tHorizontal segments");
+            // log("\tHorizontal segments");
             // Fill mask image with field line coloured horizontal segments
             for (const auto& segment : classifiedImage.horizontalSegments) {
+                log(segment.start, segment.end);
                 // If we're within the green horizon
-                if (segment.start[1] >= visualHorizonAtPoint(classifiedImage, segment.start[0])
-                    && segment.end[1] >= visualHorizonAtPoint(classifiedImage, segment.end[0])) {
-                    log("\t\tWithin green horz", segment.segmentClass);
+                if (segment.start[1] >= 0 && segment.end[1] >= 0) {
                     // If the segment is of line type
-                    if (segment.segmentClass == ClassifiedImage::SegmentClass::FIELD) {
-                        log("\t\tAdding Segment");
-                        log("\t\t\tStart: [", segment.start[0], segment.start[1], "]");
-                        log("\t\t\tEnd: [", segment.end[0], segment.end[1], "]");
+                    if (segment.segmentClass == ClassifiedImage::SegmentClass::GOAL
+                        || segment.segmentClass == ClassifiedImage::SegmentClass::LINE) {
+                        // log("\t\tAdding Segment");
+                        // log("\t\t\tStart: [", segment.start[0], segment.start[1], "]");
+                        // log("\t\t\tEnd: [", segment.end[0], segment.end[1], "]");
                         // Add segment to mask image
                         // Create line for segment
                         utility::math::geometry::Line l({double(segment.start[0]), double(segment.start[1])},
                                                         {double(segment.end[0]), double(segment.end[1])});
+
                         // Get the min and max x to iterate across line
                         int minX = segment.start[0], maxX = segment.end[0];
                         if (segment.start[0] > segment.end[0]) {
@@ -103,54 +155,23 @@ namespace vision {
                         if (minX != maxX) {
                             segments++;
                             for (auto& x = minX; x <= maxX; ++x) {
-                                mask.data[(int(lround(l.y(x)))) * mask.dimensions.x() + x] = 255;
+                                int y = int(lround(l.y(x)));
+                                if (y > 0 && y < mask.dimensions.y() && x > 0 && x < mask.dimensions.x()) {
+                                    mask.data[y * mask.dimensions.x() + x] = 255;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            log("\tVertical segments");
-            // Fill mask image with field line coloured vertical segments
-            for (const auto& segment : classifiedImage.verticalSegments) {
-                // If we're within the green horizon
-                if (segment.start[1] >= visualHorizonAtPoint(classifiedImage, segment.start[0])
-                    && segment.end[1] >= visualHorizonAtPoint(classifiedImage, segment.end[0])) {
-                    log("\t\tWithin green horz", segment.segmentClass);
-                    // If the segment is of line type
-                    if (segment.segmentClass == ClassifiedImage::SegmentClass::FIELD) {
-                        log("\t\tAdding Segment");
-                        log("\t\t\tStart: [", segment.start[0], segment.start[1], "]");
-                        log("\t\t\tEnd: [", segment.end[0], segment.end[1], "]");
-                        // Add segment to mask image
-                        // Create line for segment
-                        utility::math::geometry::Line l({double(segment.start[0]), double(segment.start[1])},
-                                                        {double(segment.end[0]), double(segment.end[1])});
-                        // Get the min and max x to iterate across line
-                        int minY = segment.start[1], maxY = segment.end[1];
-                        if (segment.start[1] > segment.end[1]) {
-                            minY = segment.end[1];
-                            maxY = segment.start[1];
-                        }
-
-                        // Iterate through line and add each pixel
-                        if (minY != maxY) {
-                            segments++;
-                            for (auto& y = minY; y <= maxY; ++y) {
-                                mask.data[int(lround(l.x(y))) * mask.dimensions.y() + y] = 255;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (segments > 0) {
-                log("Saving image");
+            if (segments > 0 && (int(mask.data[0]) >= 0 || int(mask.data[0] <= 255))) {
                 // DEBUG: Save the image
+                log("Saving mask");
                 utility::vision::saveImage("test.ppm", mask);
+                log("Saved mask");
             }
 
-            utility::vision::saveImage("vHorz.ppm", vHorizon);
 
             // else {
             //     log<NUClear::WARN>("Could not construct visual horizon");
