@@ -41,18 +41,60 @@ namespace vision {
 
     using message::input::CameraParameters;
 
+
+    // TESTING
+    //  Projects an image from radial to rectangular lens perspectives
+    void projectToRectangular(const Image& image,
+                              const CameraParameters& cam1,
+                              const CameraParameters& cam2,
+                              const std::string name) {
+
+        // Create rectangular projection
+        auto proj            = std::make_unique<Image>();
+        proj->format         = image.format;
+        proj->dimensions.x() = image.dimensions[0];
+        proj->dimensions.y() = image.dimensions[1];
+        proj->data.resize(3 * image.dimensions[0] * image.dimensions[1], 0);
+
+        // Iterate through pixels and transform each one
+        for (int x = 0; x < int(image.dimensions[0]); ++x) {
+            for (int y = 0; y < int(image.dimensions[1]); ++y) {
+                arma::vec3 camVec    = utility::math::vision::getCamFromImage(arma::ivec2({x, y}), cam1);
+                arma::ivec2 pixelMap = utility::math::vision::getImageFromCam(camVec, cam2);
+                // Bounds check new coordinates
+                if (pixelMap[0] > 0 && pixelMap[0] < int(proj->dimensions.x()) && pixelMap[1] > 0
+                    && pixelMap[1] < int(proj->dimensions.y())) {
+                    for (int channel = 0; channel < 3; channel++) {
+                        proj->data[3 * (pixelMap[1] * proj->dimensions.x() + pixelMap[0]) + channel] =
+                            image.data[3 * (y * image.dimensions.x() + x) + channel];
+                    }
+                }
+            }
+        }
+
+        NUClear::log("Projection expected dims:",
+                     3 * proj->dimensions.x() * proj->dimensions.y(),
+                     "Actual dims:",
+                     proj->data.size());
+
+        // Save our image
+        utility::vision::saveImage(name, *proj);
+    }
+
     void LUTClassifier::findLines(const Image& image, ClassifiedImage& classifiedImage) {
+        NUClear::log("Finding lines");
+
         // Create spherical cam for projection
         CameraParameters sphericalCam;
-        sphericalCam.imageSizePixels        = {320, 240};
-        sphericalCam.FOV                    = {3.14, 3.14};
+        sphericalCam.imageSizePixels        = {image.dimensions[0], image.dimensions[1]};
+        sphericalCam.FOV                    = {2.61799, 2.61799};
         sphericalCam.centreOffset           = {0, 0};
         sphericalCam.lens                   = CameraParameters::LensType::RADIAL;
         sphericalCam.radial.radiansPerPixel = 0.01;
 
         // Create rectangular cam for projection
         CameraParameters rectCam;
-        rectCam.imageSizePixels           = {320, 240};
+        rectCam.imageSizePixels           = {image.dimensions[0], image.dimensions[1]};
         rectCam.FOV                       = {1.0472, 0.785};
         rectCam.centreOffset              = {0, 0};
         rectCam.lens                      = CameraParameters::LensType::PINHOLE;
@@ -62,120 +104,98 @@ namespace vision {
         rectCam.pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
         rectCam.pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), tanHalfFOV[1] / imageCentre[1];
 
-        // Create rectangular projection
-        Image proj;
-        proj.format         = utility::vision::FOURCC::GREY;
-        proj.dimensions.x() = image.dimensions[0];
-        proj.dimensions.y() = image.dimensions[1];
-        proj.data.resize(proj.dimensions.x() * proj.dimensions.y(), 0);
-
-        log("Projection");
-
-        // Iterate through pixels and transform each one
-        for (int x = 0; x < image.dimensions[0]; ++x) {
-            for (int y = 0; y < image.dimensions[1]; ++y) {
-                arma::vec3 camVec    = utility::math::vision::getCamFromImage(arma::ivec2({x, y}), sphericalCam);
-                arma::ivec2 pixelMap = utility::math::vision::getImageFromCam(camVec, rectCam);
-                // Bounds check new coordinates
-                if (pixelMap[0] > 0 && pixelMap[0] < proj.dimensions.x() && pixelMap[1] > 0
-                    && pixelMap[1] < proj.dimensions.y()) {
-                    // log("From:", x, y, "To:", pixelMap[0], pixelMap[1]);
-                    proj.data[pixelMap[1] * proj.dimensions.x() + pixelMap[0]] =
-                        image.data[y * image.dimensions.x() + x];
-                }
-            }
-        }
+        NUClear::log("Projecting image");
+        projectToRectangular(image, sphericalCam, rectCam, "projection.ppm");
+        NUClear::log("Projected image");
 
 
-        utility::vision::saveImage("projection.ppm", proj);
+        // log("Finished");
+        // // Create visual horizon image message
+        // Image vHorizon;
+        // vHorizon.format         = utility::vision::FOURCC::GREY;
+        // vHorizon.dimensions.x() = image.dimensions[0];
+        // vHorizon.dimensions.y() = image.dimensions[1];
+        // vHorizon.data.resize(vHorizon.dimensions.x() * vHorizon.dimensions.y(), 0);
 
-        log("Finished");
-        // Create visual horizon image message
-        Image vHorizon;
-        vHorizon.format         = utility::vision::FOURCC::GREY;
-        vHorizon.dimensions.x() = image.dimensions[0];
-        vHorizon.dimensions.y() = image.dimensions[1];
-        vHorizon.data.resize(vHorizon.dimensions.x() * vHorizon.dimensions.y(), 0);
+        // // Find a bounding box for green horizon to reserve space in vHorizon image
+        // int greenHorzHeight = image.dimensions[1];
+        // for (int x = 0; x < int(image.dimensions[0]); ++x) {
+        //     int y                                      = visualHorizonAtPoint(classifiedImage, x);
+        //     greenHorzHeight                            = (y < greenHorzHeight) ? y : greenHorzHeight;
+        //     vHorizon.data[y * image.dimensions[0] + x] = 255;
+        // }
 
-        // Find a bounding box for green horizon to reserve space in vHorizon image
-        int greenHorzHeight = image.dimensions[1];
-        for (int x = 0; x < int(image.dimensions[0]); ++x) {
-            int y                                      = visualHorizonAtPoint(classifiedImage, x);
-            greenHorzHeight                            = (y < greenHorzHeight) ? y : greenHorzHeight;
-            vHorizon.data[y * image.dimensions[0] + x] = 255;
-        }
-
-        log("Saving visual horizon");
-        utility::vision::saveImage("vHorz.ppm", vHorizon);
-        log("Saved visual horizon");
+        // log("Saving visual horizon");
+        // utility::vision::saveImage("vHorz.ppm", vHorizon);
+        // log("Saved visual horizon");
 
 
-        // Check if visual horizon could be found
-        //  (if not will be a single pixel width on bottom of image)
-        if (image.dimensions[1] - greenHorzHeight > 1) {
-            log("New Image");
-            log("\tImage dims: [", image.dimensions[0], image.dimensions[1], "]");
-            log("\tGreen horizon height:", greenHorzHeight);
+        // // Check if visual horizon could be found
+        // //  (if not will be a single pixel width on bottom of image)
+        // if (image.dimensions[1] - greenHorzHeight > 1) {
+        //     log("New Image");
+        //     log("\tImage dims: [", image.dimensions[0], image.dimensions[1], "]");
+        //     log("\tGreen horizon height:", greenHorzHeight);
 
-            Image mask;
-            mask.format         = image.format;
-            mask.dimensions.x() = image.dimensions[0];
-            mask.dimensions.y() = image.dimensions[1];
-            mask.data.resize(mask.dimensions.x() * mask.dimensions.y(), 0);
+        //     Image mask;
+        //     mask.format         = image.format;
+        //     mask.dimensions.x() = image.dimensions[0];
+        //     mask.dimensions.y() = image.dimensions[1];
+        //     mask.data.resize(mask.dimensions.x() * mask.dimensions.y(), 0);
 
-            // log("\tMask data dims: [", mask.dimensions.x(), mask.dimensions.y(), "]");
+        //     // log("\tMask data dims: [", mask.dimensions.x(), mask.dimensions.y(), "]");
 
-            int segments = 0;
+        //     int segments = 0;
 
-            // log("\tHorizontal segments");
-            // Fill mask image with field line coloured horizontal segments
-            for (const auto& segment : classifiedImage.horizontalSegments) {
-                log(segment.start, segment.end);
-                // If we're within the green horizon
-                if (segment.start[1] >= 0 && segment.end[1] >= 0) {
-                    // If the segment is of line type
-                    if (segment.segmentClass == ClassifiedImage::SegmentClass::GOAL
-                        || segment.segmentClass == ClassifiedImage::SegmentClass::LINE) {
-                        // log("\t\tAdding Segment");
-                        // log("\t\t\tStart: [", segment.start[0], segment.start[1], "]");
-                        // log("\t\t\tEnd: [", segment.end[0], segment.end[1], "]");
-                        // Add segment to mask image
-                        // Create line for segment
-                        utility::math::geometry::Line l({double(segment.start[0]), double(segment.start[1])},
-                                                        {double(segment.end[0]), double(segment.end[1])});
+        //     // log("\tHorizontal segments");
+        //     // Fill mask image with field line coloured horizontal segments
+        //     for (const auto& segment : classifiedImage.horizontalSegments) {
+        //         log(segment.start, segment.end);
+        //         // If we're within the green horizon
+        //         if (segment.start[1] >= 0 && segment.end[1] >= 0) {
+        //             // If the segment is of line type
+        //             if (segment.segmentClass == ClassifiedImage::SegmentClass::GOAL
+        //                 || segment.segmentClass == ClassifiedImage::SegmentClass::LINE) {
+        //                 // log("\t\tAdding Segment");
+        //                 // log("\t\t\tStart: [", segment.start[0], segment.start[1], "]");
+        //                 // log("\t\t\tEnd: [", segment.end[0], segment.end[1], "]");
+        //                 // Add segment to mask image
+        //                 // Create line for segment
+        //                 utility::math::geometry::Line l({double(segment.start[0]), double(segment.start[1])},
+        //                                                 {double(segment.end[0]), double(segment.end[1])});
 
-                        // Get the min and max x to iterate across line
-                        int minX = segment.start[0], maxX = segment.end[0];
-                        if (segment.start[0] > segment.end[0]) {
-                            minX = segment.end[0];
-                            maxX = segment.start[0];
-                        }
+        //                 // Get the min and max x to iterate across line
+        //                 int minX = segment.start[0], maxX = segment.end[0];
+        //                 if (segment.start[0] > segment.end[0]) {
+        //                     minX = segment.end[0];
+        //                     maxX = segment.start[0];
+        //                 }
 
-                        // Iterate through line and add each pixel
-                        if (minX != maxX) {
-                            segments++;
-                            for (auto& x = minX; x <= maxX; ++x) {
-                                int y = int(lround(l.y(x)));
-                                if (y > 0 && y < mask.dimensions.y() && x > 0 && x < mask.dimensions.x()) {
-                                    mask.data[y * mask.dimensions.x() + x] = 255;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        //                 // Iterate through line and add each pixel
+        //                 if (minX != maxX) {
+        //                     segments++;
+        //                     for (auto& x = minX; x <= maxX; ++x) {
+        //                         int y = int(lround(l.y(x)));
+        //                         if (y > 0 && y < mask.dimensions.y() && x > 0 && x < mask.dimensions.x()) {
+        //                             mask.data[y * mask.dimensions.x() + x] = 255;
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
 
-            if (segments > 0 && (int(mask.data[0]) >= 0 || int(mask.data[0] <= 255))) {
-                // DEBUG: Save the image
-                log("Saving mask");
-                utility::vision::saveImage("test.ppm", mask);
-                log("Saved mask");
-            }
+        //     if (segments > 0 && (int(mask.data[0]) >= 0 || int(mask.data[0] <= 255))) {
+        //         // DEBUG: Save the image
+        //         log("Saving mask");
+        //         utility::vision::saveImage("test.ppm", mask);
+        //         log("Saved mask");
+        //     }
 
 
-            // else {
-            //     log<NUClear::WARN>("Could not construct visual horizon");
-        }
-    }  // namespace vision
+        // else {
+        //     log<NUClear::WARN>("Could not construct visual horizon");
+    }
 }  // namespace vision
+   // namespace module
 }  // namespace module
