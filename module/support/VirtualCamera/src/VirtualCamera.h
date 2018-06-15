@@ -20,6 +20,7 @@
 #ifndef MODULES_SUPPORT_VIRTUALCAMERA_H
 #define MODULES_SUPPORT_VIRTUALCAMERA_H
 
+#include <Eigen/Core>
 #include <nuclear>
 
 namespace module {
@@ -32,6 +33,9 @@ namespace support {
     public:
         /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
         explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
+
+    private:
+        Eigen::Matrix4d Hcw;
     };
 }  // namespace support
 }  // namespace module

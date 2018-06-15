@@ -46,30 +46,13 @@ namespace support {
         : Reactor(std::move(environment)), emitImageHandle() {
 
         emitImageHandle = on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then(
-            "Simulated Images (VCamera)", [this](const CameraParameters& cam) {
+            "Simulated Images (VCamera)", [this]() {
                 auto msg           = std::make_unique<message::input::Image>();
                 msg->format        = FOURCC::BGGR;
                 msg->camera_id     = 0;
                 msg->serial_number = "VirtualCamera";
                 msg->timestamp     = NUClear::clock::now();
-                // msg->Hcw           = Eigen::Matrix4d::Identity();
-                // msg->Hcw(3, 2)     = 0.92;
-                msg->Hcw(0, 0) = 0.965924;
-                msg->Hcw(0, 1) = -0.191532;
-                msg->Hcw(0, 2) = -0.174086;
-                msg->Hcw(0, 3) = 0.0367347;
-                msg->Hcw(1, 0) = 0.172727;
-                msg->Hcw(1, 1) = -0.0239005;
-                msg->Hcw(1, 2) = 0.98468;
-                msg->Hcw(1, 3) = -0.794162;
-                msg->Hcw(2, 0) = 0.192758;
-                msg->Hcw(2, 1) = 0.981195;
-                msg->Hcw(2, 2) = -0.00999666;
-                msg->Hcw(2, 3) = 0.0383995;
-                msg->Hcw(3, 0) = 0;
-                msg->Hcw(3, 1) = 0;
-                msg->Hcw(3, 2) = 0;
-                msg->Hcw(3, 3) = 1;
+                msg->Hcw           = Hcw;
 
                 utility::vision::loadImage(imagePath, *msg);
                 emit(msg);
@@ -95,7 +78,13 @@ namespace support {
                 // TODO: configure the offset? probably not necessary for pinhole
                 cameraParameters->centreOffset = Eigen::Vector2i::Zero();
 
-                imagePath = config["image_path"].as<std::string>();
+                imagePath = config["image"]["path"].as<std::string>();
+
+                for (size_t row = 0; row < config["image"]["Hcw"].config.size(); row++) {
+                    for (size_t col = 0; col < config["image"]["Hcw"][row].config.size(); col++) {
+                        Hcw(row, col) = config["image"]["Hcw"][row][col].as<double>();
+                    }
+                }
 
                 if (config["lens_type"].as<std::string>().compare("pinhole") == 0) {
                     // Pinhole specific
