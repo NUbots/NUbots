@@ -213,8 +213,12 @@ namespace vision {
                             log("\t\tNeighbour : ", n[j]);
                             log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j]]);
 
-                            if (mesh.classifications.back().values[n[j]] >= mesh_branch_confidence_threshold) {
-                                search_queue.push(n[j]);  // Add to our BFS queue
+                            // Make sure our confidence is above the threshold
+                            // Make sure we haven't visited the point before
+                            if ((mesh.classifications.back().values[n[j]] >= mesh_branch_confidence_threshold)) {
+                                if (visited_indices.find(n[j]) != visited_indices.end()) {
+                                    search_queue.push(n[j]);  // Add to our BFS queue
+                                }
 
                                 arma::ivec2 point_coord = convert<int, 2>(mesh.coordinates[n[j] - 1]);
 
