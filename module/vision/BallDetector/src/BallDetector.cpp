@@ -369,6 +369,11 @@ namespace vision {
 
                     b.visObject.timestamp = NUClear::clock::now();
 
+                    std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius " << radius
+                              << " widthDistance " << widthDistance << " rBCc " << rBCc.t() << " screenAngular "
+                              << b.visObject.screenAngular.transpose() << " angularSize "
+                              << b.visObject.angularSize.transpose() << std::endl;
+
                     balls->push_back(std::move(b));
                 }
 
@@ -647,7 +652,7 @@ namespace vision {
                             }
                         }
                     }
-                    emit(std::move(balls));
+                    // emit(std::move(balls));
                     lastFrame.time = sensors.timestamp;
                 });
     }
