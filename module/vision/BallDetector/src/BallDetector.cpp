@@ -29,6 +29,7 @@
 #include "message/vision/VisionObjects.h"
 #include "message/vision/VisualMesh.h"
 
+#include "utility/math/comparison.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Line.h"
 #include "utility/math/geometry/Plane.h"
@@ -227,7 +228,9 @@ namespace vision {
                                     {point_cam[0],
                                      point_cam[1],
                                      point_cam[2],
-                                     double(mesh.classifications.back().values[n[j] * dim])}));  // Add to our cluster
+                                     utility::math::clamp(0.0,
+                                                          double(mesh.classifications.back().values[n[j] * dim]),
+                                                          1.0)}));  // Add to our cluster
                             }
                             visited_indices.insert(n[j]);  // Add to our list of visited points
                         }
