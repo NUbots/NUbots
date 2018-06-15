@@ -56,6 +56,7 @@ message KickPlannerConfig {
     float seconds_not_seen_limit   = 3;
     float kick_forward_angle_limit = 4;
     bool is_dribbling              = 5;
+    float max_goal_distance        = 6;
 }
 
 message KickFinished {
