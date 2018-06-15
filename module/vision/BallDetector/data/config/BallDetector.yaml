@@ -1,5 +1,5 @@
 ransac:
-  minimum_points_for_consensus: 15
+  minimum_points_for_consensus: 3
   maximum_iterations_per_fitting: 100
   maximum_fitted_models: 3
   consensus_error_threshold: 0.000001
