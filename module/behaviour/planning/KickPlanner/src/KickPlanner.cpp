@@ -129,11 +129,10 @@ namespace behaviour {
                     // log("ballPosition",ballPosition);
                     // log("secondsSinceLastSeen",secondsSinceLastSeen);
 
-                    // Calculate the Manhattan distance to centre of goals (x = field_length / 2, y = 0) from current
+                    // Calculate the Euclidean distance to centre of goals (x = field_length / 2, y = 0) from current
                     // field position
-                    float distanceToGoals = arma::norm(
-                        arma::vec2({fd.dimensions.field_length / 2., 0}) - convert<double, 3>(field.position).head(2),
-                        1);
+                    float distanceToGoals = arma::norm(arma::vec2({fd.dimensions.field_length / 2., 0})
+                                                       - convert<double, 3>(field.position).head(2));
 
                     // Determine if positioning is valid based on goal distance and dribble behaviour
                     bool nearGoals       = distanceToGoals < cfg.max_goal_distance;
