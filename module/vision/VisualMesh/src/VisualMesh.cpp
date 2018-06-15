@@ -144,16 +144,16 @@ namespace vision {
                 msg->coordinates.push_back({int(coord[0]), int(coord[1])});
             }
 
-            std::vector<float> classification = results.classifications.front().second;
+            std::vector<float> classification = results.classifications.back().second;
 
             for (uint i = 0; i < msg->coordinates.size(); ++i) {
 
                 Eigen::Vector2i p1(msg->coordinates[i]);
 
                 // Eigen::Vector4d colour(results.second[i][1], 0, results.second[i][0], 1);
-                // Eigen::Vector4d colour(classification[i * 2 + 1] > 0.5, 0, classification[i * 2 + 0] > 0.5, 1);
-                Eigen::Vector4d colour(
-                    classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 + 2], 1);
+                Eigen::Vector4d colour(classification[i * 2 + 1] > 0.5, 0, classification[i * 2 + 0] > 0.5, 1);
+                // Eigen::Vector4d colour(classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 +
+                // 2], 1);
 
                 for (const auto& n : results.neighbourhood[i]) {
                     if (n < msg->coordinates.size()) {
