@@ -82,6 +82,7 @@ namespace behaviour {
                 cfg.kick_corridor_width      = config["kick_corridor_width"].as<float>();
                 cfg.seconds_not_seen_limit   = config["seconds_not_seen_limit"].as<float>();
                 cfg.kick_forward_angle_limit = config["kick_forward_angle_limit"].as<float>();
+                cfg.is_dribbling             = config['is_dribbling'].as<bool>();
                 emit(std::make_unique<KickPlannerConfig>(cfg));
                 emit(std::make_unique<WantsToKick>(false));
             });
