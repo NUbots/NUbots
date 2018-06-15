@@ -308,6 +308,8 @@ namespace vision {
                 balls->reserve(clusters.size());
 
                 for (auto i = 0; i < int(clusters.size()); ++i) {
+                    Ball b;
+
                     // Average all the points in the cluster to find the center
                     arma::vec3 center(arma::fill::zeros);
                     double max_x = -1.0, min_x = 1.0;
@@ -323,13 +325,12 @@ namespace vision {
                         min_z = std::min(min_z, point[2]);
                         max_z = std::max(max_z, point[2]);
                     }
+
                     center /= clusters[i].size();
                     center = arma::normalise(center);
 
                     // Use the average of the extreme coordinates to determine the radius
                     double radius = ((max_x - min_x) + (max_y - min_y) + (max_z - min_z)) / 3.0;
-
-                    Ball b;
 
                     // Work out the width distance
                     arma::vec3 topCam   = arma::normalise(center + arma::vec3({0, 0, radius}));
@@ -354,29 +355,27 @@ namespace vision {
 
                     // Ball cam space info
                     b.cone.axis     = convert<double, 3>(center);
-                    b.cone.gradient = arma::dot(clusters[i][0].head(3), convert<double, 3>(b.cone.axis));
+                    b.cone.gradient = -std::numeric_limits<double>::max();
 
-                    // Check our cluster pointer for the maximum gradient
-                    for (int j = 1; j < int(clusters[i].size()); j++) {
-                        auto temp = arma::dot(clusters[i][j].head(3), convert<double, 3>(b.cone.axis));
-                        if (temp > b.cone.gradient) {
-                            b.cone.gradient = temp;
-                        }
+                    for (const auto& point : clusters[i]) {
+                        // Check our cluster pointer for the maximum gradient
+                        b.cone.gradient = std::max(b.cone.gradient, arma::dot(point.head(3), center));
+
+                        // Add our points
+                        b.edgePoints.push_back(convert<double, 3>(point.head(3)));
                     }
 
                     // Angular positions from the camera
                     b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(center).rows(1, 2));
                     b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
 
-                    // Add our points
-                    for (auto& point : clusters[i]) {
-                        b.edgePoints.push_back(convert<double, 3>(point.head(3)));
-                    }
                     b.visObject.timestamp = NUClear::clock::now();
 
                     balls->push_back(std::move(b));
                 }
+
                 emit(std::move(balls));
+
                 /*
                                 // For each cluster, we want to ransac the points
                                 for (auto i = 0; i < int(clusters.size()); ++i) {
