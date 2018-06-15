@@ -24,14 +24,16 @@ namespace math {
     namespace ransac {
 
         bool RansacVisualMeshModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points) {
-            if (points.size() == REQUIRED_POINTS && !arma::all(points[0].head(3) == points[1].head(3))
-                && !arma::all(points[0].head(3) == points[2].head(3))
-                && !arma::all(points[1].head(3) == points[2].head(3))) {
+            const arma::vec3 p1 = arma::normalise(points[0].head(3));
+            const arma::vec3 p2 = arma::normalise(points[1].head(3));
+            const arma::vec3 p3 = arma::normalise(points[2].head(3));
+
+            if (!arma::all(p1 == p2) && !arma::all(p1 == p3) && !arma::all(p2 == p3)) {
                 // std::cout << "regenerate" << std::endl;
                 Matrix X = arma::eye(3, 3);
-                X.col(0) = arma::normalise(points[0].head(3));
-                X.col(1) = arma::normalise(points[1].head(3));
-                X.col(2) = arma::normalise(points[2].head(3));
+                X.col(0) = p1;
+                X.col(1) = p2;
+                X.col(2) = p3;
                 return setFromPoints(X);
             }
             else {
@@ -43,7 +45,8 @@ namespace math {
             // If cone error is:
             //  > 0 (inside cone)  : error = 1 - confidence,
             //  < 0 (outside cone) : error = confidence
-            double error = (std::acos(dotDistanceToPoint(p.head(3))) < 0) ? p[4] : 1 - p[4];
+            const arma::vec3 p1 = p.head(3);
+            double error        = (std::acos(dotDistanceToPoint(p1)) < 0) ? p[4] : 1 - p[4];
             std::cout << "error " << error << " p[4] " << p[4] << std::endl;
             return error * error;
         }

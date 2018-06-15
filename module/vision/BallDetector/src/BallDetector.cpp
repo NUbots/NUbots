@@ -211,13 +211,11 @@ namespace vision {
                         // Loop through current index and add neighbours onto queue if they are above confidence
                         // threshold
                         for (auto j = 0; j < 6; ++j) {
-                            log("\t\tNeighbour : ", n[j]);
-                            log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j]]);
+                            // log("\t\tNeighbour : ", n[j]);
                             // log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j] * dim ]);
 
                             // Make sure our confidence is above the threshold
                             // Make sure we haven't visited the point before
-                            if ((mesh.classifications.back().values[n[j]] >= mesh_branch_confidence_threshold)) {
                             if ((mesh.classifications.back().values[n[j] * dim] >= mesh_branch_confidence_threshold)) {
                                 if (visited_indices.find(n[j]) != visited_indices.end()) {
                                     search_queue.push(n[j]);  // Add to our BFS queue
@@ -226,15 +224,12 @@ namespace vision {
                                 arma::ivec2 point_coord = convert<int, 2>(mesh.coordinates[n[j] - 1]);
 
                                 auto point_cam = getCamFromImage(point_coord, cam);
-                                log("\t\t\tRaw classification:",
-                                    double(mesh.classifications.back().values[n[j] * dim]));
+                                // log("\t\t\tRaw classification:", double(mesh.classifications.back().values[n[j] *
+                                // dim ]));
                                 cluster.push_back(arma::vec4(
                                     {point_cam[0],
                                      point_cam[1],
                                      point_cam[2],
-                                     utility::math::clamp(0.0,
-                                                          double(mesh.classifications.back().values[n[j] * dim]),
-                                                          1.0)}));  // Add to our cluster
                                      mesh.classifications.back().values[n[j] * dim]}));  // Add to our cluster
                             }
                             visited_indices.insert(n[j]);  // Add to our list of visited points
@@ -309,62 +304,127 @@ namespace vision {
 
                 log("Number of clusters found:", clusters.size());
 
-                // For each cluster, we want to ransac the points
+                auto balls = std::make_unique<std::vector<Ball>>();
+                balls->reserve(clusters.size());
+
                 for (auto i = 0; i < int(clusters.size()); ++i) {
-                    log("Points in cluster:", clusters[i].size());
-                    auto ransacResults = Ransac<RansacVisualMeshModel>::fitModels(clusters[i].begin(),
-                                                                                  clusters[i].end(),
-                                                                                  MINIMUM_POINTS_FOR_CONSENSUS,
-                                                                                  MAXIMUM_ITERATIONS_PER_FITTING,
-                                                                                  MAXIMUM_FITTED_MODELS,
-                                                                                  CONSENSUS_ERROR_THRESHOLD);
+                    // Average all the points in the cluster to find the center
+                    arma::vec3 center(arma::fill::zeros);
+                    double max_x = -1.0, min_x = 1.0;
+                    double max_y = -1.0, min_y = 1.0;
+                    double max_z = -1.0, min_z = 1.0;
+                    for (const auto& point : clusters[i]) {
+                        center += point.head(3);
 
-                    auto balls = std::make_unique<std::vector<Ball>>();
-                    balls->reserve(ransacResults.size());
-
-                    log("Ransac results:", ransacResults.size());
-
-                    for (auto& result : ransacResults) {
-                        Ball b;
-
-                        // Get the 4 points around our circle
-                        arma::vec2 top   = projectCamSpaceToScreen(result.model.getTopVector(), cam);
-                        arma::vec2 base  = projectCamSpaceToScreen(result.model.getBottomVector(), cam);
-                        arma::vec2 left  = projectCamSpaceToScreen(result.model.getLeftVector(), cam);
-                        arma::vec2 right = projectCamSpaceToScreen(result.model.getRightVector(), cam);
-
-                        double widthDistance = widthBasedDistanceToCircle(
-                            field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
-
-                        // Work out how far away the ball must be to be at the distance it is from the camera
-                        arma::vec3 width_rBCc = result.model.unit_axis * widthDistance;
-
-                        arma::vec3 rBCc = (width_rBCc);
-
-                        // Attach the measurement to the object
-                        b.measurements.push_back(Ball::Measurement());
-                        b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
-                        b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
-
-                        // Ball cam space info
-                        b.cone.axis     = convert<double, 3>(result.model.unit_axis);
-                        b.cone.gradient = result.model.gradient;
-
-                        // Angular positions from the camera
-                        b.visObject.screenAngular =
-                            convert<double, 2>(cartesianToSpherical(result.model.unit_axis).rows(1, 2));
-                        b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
-
-                        // Add our points
-                        for (auto& point : result) {
-                            b.edgePoints.push_back(convert<double, 3>(point));
-                        }
-                        b.visObject.timestamp = NUClear::clock::now();
-
-                        balls->push_back(std::move(b));
+                        min_x = std::min(min_x, point[0]);
+                        max_x = std::max(max_x, point[0]);
+                        min_x = std::min(min_y, point[1]);
+                        max_x = std::max(max_y, point[1]);
+                        min_x = std::min(min_z, point[2]);
+                        max_x = std::max(max_z, point[2]);
                     }
-                    emit(std::move(balls));
+                    center /= clusters[i].size();
+                    center = arma::normalise(center);
+
+                    // Use the average of the extreme coordinates to determine the radius
+                    double radius = ((max_x - min_x) + (max_y - min_y) + (max_z - min_z)) / 3.0;
+
+                    Ball b;
+
+                    // Work out the width distance
+                    arma::vec3 top   = arma::normalise(center + arma::vec3({0, 0, radius}));
+                    arma::vec3 base  = arma::normalise(center - arma::vec3({0, 0, radius}));
+                    arma::vec3 left  = arma::normalise(center + arma::vec3({0, radius, 0}));
+                    arma::vec3 right = arma::normalise(center - arma::vec3({0, radius, 0}));
+
+                    double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
+
+                    // Work out how far away the ball must be to be at the distance it is from the camera
+                    arma::vec3 rBCc = center * widthDistance;
+
+                    // Attach the measurement to the object
+                    b.measurements.push_back(Ball::Measurement());
+                    b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
+                    b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
+
+                    // Ball cam space info
+                    b.cone.axis     = convert<double, 3>(center);
+                    b.cone.gradient = 1;  // TODO: Actually calculate this
+
+                    // Angular positions from the camera
+                    b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(center).rows(1, 2));
+                    b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
+
+                    // Add our points
+                    for (auto& point : clusters[i]) {
+                        b.edgePoints.push_back(convert<double, 3>(point.head(3)));
+                    }
+                    b.visObject.timestamp = NUClear::clock::now();
+
+                    balls->push_back(std::move(b));
                 }
+                emit(std::move(balls));
+
+                // For each cluster, we want to ransac the points
+                // for (auto i = 0; i < int(clusters.size()); ++i) {
+                //     log("Points in cluster:", clusters[i].size());
+                //     for (const auto& val : clusters[i]) {
+                //         log(val);
+                //     }
+                //     auto ransacResults = Ransac<RansacVisualMeshModel>::fitModels(clusters[i].begin(),
+                //                                                                   clusters[i].end(),
+                //                                                                   MINIMUM_POINTS_FOR_CONSENSUS,
+                //                                                                   MAXIMUM_ITERATIONS_PER_FITTING,
+                //                                                                   MAXIMUM_FITTED_MODELS,
+                //                                                                   CONSENSUS_ERROR_THRESHOLD);
+
+                //     auto balls = std::make_unique<std::vector<Ball>>();
+                //     balls->reserve(ransacResults.size());
+
+                //     log("Ransac results:", ransacResults.size());
+
+                //     for (auto& result : ransacResults) {
+                //         Ball b;
+
+                //         // Get the 4 points around our circle
+                //         arma::vec2 top   = projectCamSpaceToScreen(result.model.getTopVector(), cam);
+                //         arma::vec2 base  = projectCamSpaceToScreen(result.model.getBottomVector(), cam);
+                //         arma::vec2 left  = projectCamSpaceToScreen(result.model.getLeftVector(), cam);
+                //         arma::vec2 right = projectCamSpaceToScreen(result.model.getRightVector(), cam);
+
+                //         double widthDistance = widthBasedDistanceToCircle(
+                //             field.ball_radius, result.model.getTopVector(), result.model.getBottomVector(), cam);
+
+                //         // Work out how far away the ball must be to be at the distance it is from the camera
+                //         arma::vec3 width_rBCc = result.model.unit_axis * widthDistance;
+
+                //         arma::vec3 rBCc = (width_rBCc);
+
+                //         // Attach the measurement to the object
+                //         b.measurements.push_back(Ball::Measurement());
+                //         b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
+                //         b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
+
+                //         // Ball cam space info
+                //         b.cone.axis     = convert<double, 3>(result.model.unit_axis);
+                //         b.cone.gradient = result.model.gradient;
+
+                //         // Angular positions from the camera
+                //         b.visObject.screenAngular =
+                //             convert<double, 2>(cartesianToSpherical(result.model.unit_axis).rows(1, 2));
+                //         b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base,
+                //         cam);
+
+                //         // Add our points
+                //         for (auto& point : result) {
+                //             b.edgePoints.push_back(convert<double, 3>(point));
+                //         }
+                //         b.visObject.timestamp = NUClear::clock::now();
+
+                //         balls->push_back(std::move(b));
+                //     }
+                //     emit(std::move(balls));
+                // }
             });
 
         on<Trigger<ClassifiedImage>,
