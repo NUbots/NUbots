@@ -317,7 +317,6 @@ namespace vision {
                     double max_z = -1.0, min_z = 1.0;
                     for (const auto& point : clusters[i]) {
                         center += point.head(3);
-
                         min_x = std::min(min_x, point[0]);
                         max_x = std::max(max_x, point[0]);
                         min_y = std::min(min_y, point[1]);
@@ -348,10 +347,18 @@ namespace vision {
                     arma::vec2 left  = projectCamSpaceToScreen(leftCam, cam);
                     arma::vec2 right = projectCamSpaceToScreen(rightCam, cam);
 
-                    double widthDistance = widthBasedDistanceToCircle(field.ball_radius, topCam, baseCam, cam);
+                    // double widthDistance = widthBasedDistanceToCircle(field.ball_radius, topCam, baseCam, cam);
 
                     // Work out how far away the ball must be to be at the distance it is from the camera
-                    arma::vec3 rBCc = center * widthDistance;
+                    // arma::vec3 rBCc = center * widthDistance;
+
+                    // https://en.wikipedia.org/wiki/Angular_diameter
+                    double delta    = std::acos(arma::dot(topCam, baseCam));
+                    double distance = field.ball_radius / std::sin(delta * 0.5);
+                    // double widthDistance = widthBasedDistanceToCircle(field.ball_radius, topCam, baseCam, cam);
+
+                    // Work out how far away the ball must be to be at the distance it is from the camera
+                    arma::vec3 rBCc = center * distance;
 
                     // Attach the measurement to the object
                     b.measurements.push_back(Ball::Measurement());
