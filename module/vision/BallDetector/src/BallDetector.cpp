@@ -383,13 +383,46 @@ namespace vision {
 
                     b.visObject.timestamp = NUClear::clock::now();
 
-                    // std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius" << radius
-                    //           << " widthDistance " << widthDistance << " rBCc " << rBCc.t() << " screenAngular "
-                    //           << b.visObject.screenAngular.transpose() << " angularSize "
-                    //           << b.visObject.angularSize.transpose() << std::endl;
+                    std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius " << radius
+                              << " Distance " << distance << " rBCc " << rBCc.t() << " screenAngular "
+                              << b.visObject.screenAngular.transpose() << " angularSize "
+                              << b.visObject.angularSize.transpose() << std::endl;
 
                     balls->push_back(std::move(b));
                 }
+
+                std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                            Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+                    lines;
+                for (size_t i = 0; i < clusters.size(); ++i) {
+
+                    Eigen::Vector2i center = convert<int, 2>(
+                        screenToImage(projectCamSpaceToScreen(convert<double, 3>(balls->at(i).cone.axis), cam),
+                                      convert<uint, 2>(cam.imageSizePixels)));
+
+                    for (size_t j = 0; j < (clusters[i].size()); ++j) {
+                        Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0, clusters[i][j][3] < 0.5, 1);
+
+                        Eigen::Vector2i point =
+                            convert<int, 2>(screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), cam),
+                                                          convert<uint, 2>(cam.imageSizePixels)));
+
+                        Eigen::Vector2i p2x = point.cast<int>() + ((center.cast<int>() - point.cast<int>()) / 2);
+                        std::cout << "Center " << std::endl;
+                        std::cout << center.cast<int>() << std::endl;
+                        std::cout << " Point " << std::endl;
+                        std::cout << point.cast<int>() << std::endl;
+                        std::cout << " Norm " << std::endl;
+                        std::cout << (center.cast<int>() - point.cast<int>()).norm() << std::endl;
+                        std::cout << " Colour" << std::endl;
+                        std::cout << colour << std::endl;
+
+                        lines.emplace_back(center.cast<int>(), point.cast<int>(), colour);
+                    }
+                }
+
+
+                emit(utility::nusight::drawVisionLines(lines));
 
                 emit(std::move(balls));
 
