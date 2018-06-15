@@ -11,6 +11,7 @@ NUCLEAR_ROLE(
     support::configuration::NetworkConfiguration
     support::NUsight
     support::VirtualCamera
+    support::configuration::SoccerConfig
 
     #Sensors
     #input::Camera
@@ -20,6 +21,7 @@ NUCLEAR_ROLE(
 
     #Vision
     vision::VisualMesh
+    vision::BallDetector
 
     # Data logger
     support::logging::DataLogging
