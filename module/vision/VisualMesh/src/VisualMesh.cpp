@@ -115,38 +115,44 @@ namespace vision {
 
 
             // -- Graphing for NUsight
-            // msg->classifications.emplace_back(results.classifications.front().first,
-            //                                   results.classifications.front().second);
-            // msg->classifications.emplace_back(results.classifications.back().first,
-            //                                   results.classifications.back().second);
+            msg->classifications.emplace_back(results.classifications.front().first,
+                                              results.classifications.front().second);
+            msg->classifications.emplace_back(results.classifications.back().first,
+                                              results.classifications.back().second);
 
 
-            // std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-            //             Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
-            //     lines;
+            std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                        Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+                lines;
 
 
-            // std::vector<std::array<int, 2>> pixel_coordinates = results.pixel_coordinates;
-            // std::vector<float> classification = results.classifications.front().second;
+            std::vector<std::array<int, 2>> pixel_coordinates;
+            std::vector<std::array<float, 2>> lazyConvert = results.pixel_coordinates;
+            pixel_coordinates.reserve(lazyConvert.size());
+            for (int i = 0; i < lazyConvert.size(); ++i) {
+                pixel_coordinates[i] = {int(lazyConvert[i][0]), int(lazyConvert[i][1])};
+            }
 
-            // for (uint i = 0; i < pixel_coordinates.size(); ++i) {
+            std::vector<float> classification = results.classifications.front().second;
 
-            //     Eigen::Vector2i p1(pixel_coordinates[i][0], pixel_coordinates[i][1]);
+            for (uint i = 0; i < pixel_coordinates.size(); ++i) {
 
-            //     // Eigen::Vector4d colour(results.second[i][1], 0, results.second[i][0], 1);
-            //     // Eigen::Vector4d colour(classification[i * 2 + 1] > 0.5, 0, classification[i * 2 + 0] > 0.5, 1);
-            //     Eigen::Vector4d colour(
-            //         classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 + 2], 1);
+                Eigen::Vector2i p1(pixel_coordinates[i][0], pixel_coordinates[i][1]);
 
-            //     for (const auto& n : results.neighbourhood[i]) {
-            //         if (n < pixel_coordinates.size()) {
-            //             Eigen::Vector2i p2(pixel_coordinates[n][0], pixel_coordinates[n][1]);
-            //             Eigen::Vector2i p2x = p1 + ((p2 - p1) / 2);
-            //             lines.emplace_back(p1, p2x, colour);
-            //         }
-            //     }
-            // }
-            // emit(utility::nubugger::drawVisionLines(lines));
+                // Eigen::Vector4d colour(results.second[i][1], 0, results.second[i][0], 1);
+                // Eigen::Vector4d colour(classification[i * 2 + 1] > 0.5, 0, classification[i * 2 + 0] > 0.5, 1);
+                Eigen::Vector4d colour(
+                    classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 + 2], 1);
+
+                for (const auto& n : results.neighbourhood[i]) {
+                    if (n < pixel_coordinates.size()) {
+                        Eigen::Vector2i p2(pixel_coordinates[n][0], pixel_coordinates[n][1]);
+                        Eigen::Vector2i p2x = p1 + ((p2 - p1) / 2);
+                        lines.emplace_back(p1, p2x, colour);
+                    }
+                }
+            }
+            emit(utility::nusight::drawVisionLines(lines));
             emit(msg);
         });
     }
