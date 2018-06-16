@@ -48,7 +48,7 @@ namespace vision {
                     auto& net_layer = net_conv.back();
 
                     // Copy across our weights
-                    for (const auto& l : layer["weights"]) {
+                    for (const auto& l : layer["network"]["weights"]) {
                         net_layer.first.emplace_back();
                         auto& weight = net_layer.first.back();
 
@@ -58,11 +58,14 @@ namespace vision {
                     }
 
                     // Copy across our biases
-                    for (const auto& v : layer["biases"]) {
+                    for (const auto& v : layer["network"]["biases"]) {
                         net_layer.second.push_back(v.as<float>());
                     }
                 }
             }
+
+            draw_mesh = config["debug"]["draw_mesh"].as<bool>();
+            draw_type = config["debug"]["colour_type"].as<int>();
 
             log("Finished loading visual mesh");
         });
@@ -152,26 +155,39 @@ namespace vision {
                 msg->coordinates.push_back({int(coord[0]), int(coord[1])});
             }
 
-            std::vector<float> classification = results.classifications.back().second;
+            if (draw_mesh) {
+                if (draw_type == 0) {
+                    std::vector<float> classification = results.classifications.front().second;
+                }
+                if (draw_type == 1) {
+                    std::vector<float> classification = results.classifications.back().second;
+                }
 
-            for (uint i = 0; i < msg->coordinates.size(); ++i) {
+                for (uint i = 0; i < msg->coordinates.size(); ++i) {
 
-                Eigen::Vector2i p1(msg->coordinates[i]);
+                    Eigen::Vector2i p1(msg->coordinates[i]);
 
-                // Eigen::Vector4d colour(results.second[i][1], 0, results.second[i][0], 1);
-                Eigen::Vector4d colour(classification[i * 2 + 1] > 0.5, 0, classification[i * 2 + 0] > 0.5, 1);
-                // Eigen::Vector4d colour(classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 +
-                // 2], 1);
+                    // Eigen::Vector4d colour(results.second[i][1], 0, results.second[i][0], 1);
 
-                for (const auto& n : results.neighbourhood[i]) {
-                    if (n < msg->coordinates.size()) {
-                        Eigen::Vector2i p2(msg->coordinates[n]);
-                        Eigen::Vector2i p2x = p1 + ((p2 - p1) / 2);
-                        lines.emplace_back(p1, p2x, colour);
+                    if (draw_type == 1) {
+                        Eigen::Vector4d colour(classification[i * 2 + 1] > 0.5, 0, classification[i * 2 + 0] > 0.5, 1);
+                    }
+
+                    if (draw_type == 0) {
+                        Eigen::Vector4d colour(
+                            classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 + 2], 1);
+                    }
+
+                    for (const auto& n : results.neighbourhood[i]) {
+                        if (n < msg->coordinates.size()) {
+                            Eigen::Vector2i p2(msg->coordinates[n]);
+                            Eigen::Vector2i p2x = p1 + ((p2 - p1) / 2);
+                            lines.emplace_back(p1, p2x, colour);
+                        }
                     }
                 }
+                emit(utility::nusight::drawVisionLines(lines));
             }
-            // emit(utility::nusight::drawVisionLines(lines));
             emit(msg);
         });
     }

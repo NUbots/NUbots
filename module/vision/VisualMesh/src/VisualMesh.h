@@ -16,6 +16,9 @@ namespace vision {
         std::unique_ptr<mesh::VisualMesh<float>> mesh_ptr;
         mesh::VisualMesh<float>::Classifier classifier;
 
+        bool draw_mesh;
+        int colour_type;
+
     public:
         /// @brief Called by the powerplant to build and setup the VisualMesh reactor.
         explicit VisualMesh(std::unique_ptr<NUClear::Environment> environment);
