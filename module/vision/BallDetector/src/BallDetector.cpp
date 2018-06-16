@@ -326,26 +326,38 @@ namespace vision {
                     Ball b;
 
                     // Average all the points in the cluster to find the center
+                    arma::mat A(3, clusters[i].size(), arma::fill::zeros);
                     arma::vec3 center(arma::fill::zeros);
                     double max_x = -1.0, min_x = 1.0;
                     double max_y = -1.0, min_y = 1.0;
                     double max_z = -1.0, min_z = 1.0;
-                    for (const auto& point : clusters[i]) {
-                        center += point.head(3);
-                        min_x = std::min(min_x, point[0]);
-                        max_x = std::max(max_x, point[0]);
-                        min_y = std::min(min_y, point[1]);
-                        max_y = std::max(max_y, point[1]);
-                        min_z = std::min(min_z, point[2]);
-                        max_z = std::max(max_z, point[2]);
+                    for (size_t j = 0; j < clusters[i].size(); j++) {
+                        // center += point.head(3);
+                        A.col(j) = clusters[i][j].head(3);
+                        min_x    = std::min(min_x, clusters[i][j][0]);
+                        max_x    = std::max(max_x, clusters[i][j][0]);
+                        min_y    = std::min(min_y, clusters[i][j][1]);
+                        max_y    = std::max(max_y, clusters[i][j][1]);
+                        min_z    = std::min(min_z, clusters[i][j][2]);
+                        max_z    = std::max(max_z, clusters[i][j][2]);
 
-                        // log("point 0 : ", point[0]);
-                        // log("point 1 : ", point[1]);
-                        // log("point 2 : ", point[2]);
+                        // log("point 0 : ", clusters[i][j][0]);
+                        // log("point 1 : ", clusters[i][j][1]);
+                        // log("point 2 : ", clusters[i][j][2]);
                     }
 
-                    center /= clusters[i].size();
-                    center = arma::normalise(center);
+                    // center /= clusters[i].size();
+                    // center = arma::normalise(center);
+                    try {
+                        center = arma::normalise(arma::solve(A, arma::vec3({1, 1, 1})));
+                    }
+                    catch (std::runtime_error e) {
+                        std::cout << __FILE__ << " : " << __LINE__
+                                  << " standard exception : cannot construct cone from points - they are redundant or "
+                                     "coplanar."
+                                  << std::endl;
+                        center.zeros();
+                    }
 
                     // Use the average of the extreme coordinates to determine the radius
                     double radius = (std::abs(max_x - min_x) + std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 6.0;
