@@ -258,7 +258,7 @@ namespace vision {
                 enhanceBall(rawImage, lut, *classifiedImage, cam);
 
                 // Find field lines
-                findLines(rawImage, *classifiedImage);
+                findLines(rawImage, *classifiedImage, sensors);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));
