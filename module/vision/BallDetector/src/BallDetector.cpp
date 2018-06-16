@@ -171,7 +171,7 @@ namespace vision {
             // Check if our current coordinate is above threshold
             if (mesh.classifications.back().values[i * dim] >= mesh_seed_confidence_threshold) {
                 // Check if our current seed point has already been visited
-                if (visited_indices.empty() or visited_indices.find(i) != visited_indices.end()) {
+                if (visited_indices.empty() or visited_indices.find(i) == visited_indices.end()) {
                     std::vector<arma::vec4> cluster;
 
                     // log("New cluster seeded at:", i);
@@ -347,15 +347,9 @@ namespace vision {
                     arma::vec2 left  = projectCamSpaceToScreen(leftCam, cam);
                     arma::vec2 right = projectCamSpaceToScreen(rightCam, cam);
 
-                    // double widthDistance = widthBasedDistanceToCircle(field.ball_radius, topCam, baseCam, cam);
-
-                    // Work out how far away the ball must be to be at the distance it is from the camera
-                    // arma::vec3 rBCc = center * widthDistance;
-
                     // https://en.wikipedia.org/wiki/Angular_diameter
                     double delta    = std::acos(arma::dot(topCam, baseCam));
                     double distance = field.ball_radius / std::sin(delta * 0.5);
-                    // double widthDistance = widthBasedDistanceToCircle(field.ball_radius, topCam, baseCam, cam);
 
                     // Work out how far away the ball must be to be at the distance it is from the camera
                     arma::vec3 rBCc = center * distance;
@@ -367,11 +361,12 @@ namespace vision {
 
                     // Ball cam space info
                     b.cone.axis     = convert<double, 3>(center);
-                    b.cone.gradient = std::numeric_limits<double>::max();
+                    b.cone.gradient = -std::numeric_limits<double>::max();
 
                     for (const auto& point : clusters[i]) {
                         // Check our cluster pointer for the maximum gradient
-                        b.cone.gradient = std::min(b.cone.gradient, arma::dot(point.head(3), center));
+                        b.cone.gradient = std::tan(std::acos(arma::dot(center, point.head(3))));
+                        // radius / distance;  // std::min(b.cone.gradient, arma::dot(point.head(3), center));
 
                         // Add our points
                         b.edgePoints.push_back(convert<double, 3>(point.head(3)));
@@ -401,21 +396,11 @@ namespace vision {
                                       convert<uint, 2>(cam.imageSizePixels)));
 
                     for (size_t j = 0; j < (clusters[i].size()); ++j) {
-                        Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0, clusters[i][j][3] < 0.5, 1);
+                        Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0.50, clusters[i][j][3] < 0.5, 1);
 
                         Eigen::Vector2i point =
                             convert<int, 2>(screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), cam),
                                                           convert<uint, 2>(cam.imageSizePixels)));
-
-                        Eigen::Vector2i p2x = point.cast<int>() + ((center.cast<int>() - point.cast<int>()) / 2);
-                        std::cout << "Center " << std::endl;
-                        std::cout << center.cast<int>() << std::endl;
-                        std::cout << " Point " << std::endl;
-                        std::cout << point.cast<int>() << std::endl;
-                        std::cout << " Norm " << std::endl;
-                        std::cout << (center.cast<int>() - point.cast<int>()).norm() << std::endl;
-                        std::cout << " Colour" << std::endl;
-                        std::cout << colour << std::endl;
 
                         lines.emplace_back(center.cast<int>(), point.cast<int>(), colour);
                     }
