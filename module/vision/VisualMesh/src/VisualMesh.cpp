@@ -35,7 +35,7 @@ namespace vision {
             network.clear();
 
             // Load our weights and biases
-            for (const auto& conv : config.config) {
+            for (const auto& conv : config["network"].config) {
 
                 // New conv layer
                 network.emplace_back();
@@ -48,7 +48,7 @@ namespace vision {
                     auto& net_layer = net_conv.back();
 
                     // Copy across our weights
-                    for (const auto& l : layer["network"]["weights"]) {
+                    for (const auto& l : layer["weights"]) {
                         net_layer.first.emplace_back();
                         auto& weight = net_layer.first.back();
 
@@ -58,7 +58,7 @@ namespace vision {
                     }
 
                     // Copy across our biases
-                    for (const auto& v : layer["network"]["biases"]) {
+                    for (const auto& v : layer["biases"]) {
                         net_layer.second.push_back(v.as<float>());
                     }
                 }
