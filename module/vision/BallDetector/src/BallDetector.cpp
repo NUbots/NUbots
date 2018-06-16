@@ -156,7 +156,6 @@ namespace vision {
 
     std::vector<std::vector<arma::vec4>> BallDetector::findClusters(const VisualMesh& mesh,
                                                                     const CameraParameters& cam) {
-        // log("Finding more clusters:");
         // Alias visual mesh parameters
         int dim = mesh.classifications.back().dimensions;
 
@@ -174,7 +173,10 @@ namespace vision {
                 if (visited_indices.empty() or visited_indices.find(i) == visited_indices.end()) {
                     std::vector<arma::vec4> cluster;
 
-                    // log("New cluster seeded at:", i);
+                    if (print_mesh_debug) {
+                        log("New cluster seeded at:", i);
+                    }
+
                     arma::ivec2 seed_coord = convert<int, 2>(mesh.coordinates[i - 1]);
                     // Transform our point into cam space
                     auto seed_cam = getCamFromImage(seed_coord, cam);
@@ -199,10 +201,11 @@ namespace vision {
                         curr_index = search_queue.front();
                         search_queue.pop();
 
-                        // log("search_queue", search_queue.size());
-                        // log("\tSeed        :", curr_index);
-                        // log("\tPts visited :", visited_indices.size());
-                        // log("\tSearch items:", search_queue.size());
+                        if (print_mesh_debug) {
+                            log("\tSeed        :", curr_index);
+                            log("\tPts visited :", visited_indices.size());
+                            log("\tSearch items:", search_queue.size());
+                        }
 
                         // Populate the neighbours
                         arma::ivec6 n = convert<int, 6>(mesh.neighbourhood[curr_index]);
@@ -210,8 +213,12 @@ namespace vision {
                         // Loop through current index and add neighbours onto queue if they are above confidence
                         // threshold
                         for (auto j = 0; j < 6; ++j) {
-                            // log("\t\tNeighbour : ", n[j]);
-                            // log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j] * dim]);
+                            if (print_mesh_debug) {
+                                log("\t\tNeighbour : ", n[j]);
+                            }
+                            if (print_mesh_debug) {
+                                log("\t\t\tConfidence: ", mesh.classifications.back().values[n[j] * dim]);
+                            }
 
                             // Make sure our confidence is above the threshold
                             // Make sure we haven't visited the point before
@@ -219,7 +226,6 @@ namespace vision {
                                 && (n[j] != mesh.coordinates.size())
                                 && (n[j] != 0)) {
                                 if (visited_indices.find(n[j]) == visited_indices.end()) {
-                                    // log("\t\t\t\tFind :", *visited_indices.find(n[j]));
                                     search_queue.push(n[j]);  // Add to our BFS queue
                                 }
 
@@ -240,8 +246,6 @@ namespace vision {
                                     arma::ivec2 point_coord = convert<int, 2>(mesh.coordinates[n[j] - 1]);
 
                                     auto point_cam = getCamFromImage(point_coord, cam);
-                                    // log("\t\t\tRaw classification:", double(mesh.classifications.back().values[n[j] *
-                                    // dim ]));
                                     cluster.push_back(arma::vec4(
                                         {point_cam[0],
                                          point_cam[1],
@@ -290,6 +294,7 @@ namespace vision {
             mesh_branch_confidence_threshold = config["visual_mesh"]["mesh_branch_confidence_threshold"];
             mesh_seed_confidence_threshold   = config["visual_mesh"]["mesh_seed_confidence_threshold"];
 
+
             maximum_relative_seed_point_distance = config["maximum_relative_seed_point_distance"].as<double>();
 
             measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<Expression>();
@@ -305,6 +310,8 @@ namespace vision {
             kmeansClusterer.configure(config["clustering"]);
 
             print_throwout_logs = config["print_throwout_logs"].as<bool>();
+            print_mesh_debug    = config["print_mesh_debug"].as<bool>();
+            draw_cluster        = config["draw_cluster"].as<bool>();
 
             lastFrame.time = NUClear::clock::now();
         });
@@ -314,12 +321,13 @@ namespace vision {
                 // We need to gather all points which have a confidence prediction of over MAX_PREDICT_THRESH
                 // Then BFS to all neighbouring points which have a confidence prediction of at least MIN_PREDICT_THRESH
                 // We then need to create ransac models for each of these 'clusters' to fit a circle
-                // log("Visual mesh triggered");
 
                 // Get our coordinate clusters in camera space
                 std::vector<std::vector<arma::vec4>> clusters = findClusters(mesh, cam);
 
-                // log("Number of clusters found:", clusters.size());
+                if (print_mesh_debug) {
+                    log("Number of clusters found:", clusters.size());
+                }
 
                 auto balls = std::make_unique<std::vector<Ball>>();
                 balls->reserve(clusters.size());
@@ -340,10 +348,6 @@ namespace vision {
                         max_y = std::max(max_y, point[1]);
                         min_z = std::min(min_z, point[2]);
                         max_z = std::max(max_z, point[2]);
-
-                        // log("point 0 : ", point[0]);
-                        // log("point 1 : ", point[1]);
-                        // log("point 2 : ", point[2]);
                     }
 
                     center /= clusters[i].size();
@@ -351,7 +355,6 @@ namespace vision {
 
                     // Use the average of the extreme coordinates to determine the radius
                     double radius = (std::abs(max_x - min_x) + std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 6.0;
-                    // double radius = (std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 4.0;
 
                     // Work out the width distance
                     arma::vec3 topCam   = arma::normalise(center + arma::vec3({0, 0, radius}));
@@ -383,7 +386,6 @@ namespace vision {
                     for (const auto& point : clusters[i]) {
                         // Check our cluster pointer for the maximum gradient
                         b.cone.gradient = std::tan(std::acos(arma::dot(center, point.head(3))));
-                        // radius / distance;  // std::min(b.cone.gradient, arma::dot(point.head(3), center));
 
                         // Add our points
                         b.edgePoints.push_back(convert<double, 3>(point.head(3)));
@@ -395,39 +397,43 @@ namespace vision {
 
                     b.visObject.timestamp = NUClear::clock::now();
 
-                    std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius " << radius
-                              << " Distance " << distance << " rBCc " << rBCc.t() << " screenAngular "
-                              << b.visObject.screenAngular.transpose() << " angularSize "
-                              << b.visObject.angularSize.transpose() << std::endl;
+                    if (print_mesh_debug) {
+                        std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius " << radius
+                                  << " Distance " << distance << " rBCc " << rBCc.t() << " screenAngular "
+                                  << b.visObject.screenAngular.transpose() << " angularSize "
+                                  << b.visObject.angularSize.transpose() << std::endl;
+                    }
 
                     balls->push_back(std::move(b));
                 }
 
-                std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-                            Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
-                    lines;
-                for (size_t i = 0; i < clusters.size(); ++i) {
+                if (draw_cluster) {
+                    std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                                Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+                        lines;
+                    for (size_t i = 0; i < clusters.size(); ++i) {
 
-                    Eigen::Vector2i center = convert<int, 2>(
-                        screenToImage(projectCamSpaceToScreen(convert<double, 3>(balls->at(i).cone.axis), cam),
-                                      convert<uint, 2>(cam.imageSizePixels)));
+                        Eigen::Vector2i center = convert<int, 2>(
+                            screenToImage(projectCamSpaceToScreen(convert<double, 3>(balls->at(i).cone.axis), cam),
+                                          convert<uint, 2>(cam.imageSizePixels)));
 
-                    for (size_t j = 0; j < (clusters[i].size()); ++j) {
-                        Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0.50, clusters[i][j][3] < 0.5, 1);
+                        for (size_t j = 0; j < (clusters[i].size()); ++j) {
+                            Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0.50, clusters[i][j][3] < 0.5, 1);
 
-                        Eigen::Vector2i point =
-                            convert<int, 2>(screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), cam),
-                                                          convert<uint, 2>(cam.imageSizePixels)));
+                            Eigen::Vector2i point =
+                                convert<int, 2>(screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), cam),
+                                                              convert<uint, 2>(cam.imageSizePixels)));
 
-                        lines.emplace_back(center.cast<int>(), point.cast<int>(), colour);
+                            lines.emplace_back(center.cast<int>(), point.cast<int>(), colour);
+                        }
                     }
+
+                    emit(utility::nusight::drawVisionLines(lines));
                 }
-
-
-                emit(utility::nusight::drawVisionLines(lines));
 
                 emit(std::move(balls));
 
+                // This is the ransac model for visual mesh
                 /*
                 // For each cluster, we want to ransac the points
                 for (auto i = 0; i < int(clusters.size()); ++i) {

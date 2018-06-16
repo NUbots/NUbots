@@ -17,6 +17,8 @@ green_angular_samples: 12
 ball_screen_covariance: [0.1, 0.01, 0.01]
 
 print_throwout_logs: false
+print_mesh_debug: false
+draw_cluster: false
 
 ball_angular_cov: [0.1,0.01,0.01]
 

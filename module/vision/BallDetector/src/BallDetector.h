@@ -78,6 +78,9 @@ namespace vision {
         Frame lastFrame;
 
         bool print_throwout_logs;
+        bool print_throwout_logs;
+        bool print_mesh_debug;
+        bool draw_cluster;
 
         float approximateCircleGreenRatio(const utility::math::ransac::RansacConeModel& cone,
                                           const message::input::Image& image,
