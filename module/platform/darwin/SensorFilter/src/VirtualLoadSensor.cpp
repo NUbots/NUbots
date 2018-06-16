@@ -62,12 +62,10 @@ namespace platform {
             }
         }
 
-        Eigen::Matrix<float, 4, 1> VirtualLoadSensor::softmax(const Eigen::Matrix<float, 4, 1>& x) {
+        Eigen::Matrix<float, 2, 1> VirtualLoadSensor::softmax(const Eigen::Matrix<float, 4, 1>& x) {
             Eigen::Matrix<float, 2, 1> left_expx  = x.topRows<2>().array().exp().matrix().transpose();
             Eigen::Matrix<float, 2, 1> right_expx = x.bottomRows<2>().array().exp().matrix().transpose();
-            Eigen::Matrix<float, 4, 1> ret;
-            ret << left_expx / left_expx.sum(), right_expx / right_expx.sum();
-            return ret;
+            return {left_expx.x() / left_expx.sum(), right_expx.x() / right_expx.sum()};
         }
 
         std::array<bool, 2> VirtualLoadSensor::updateFeet(const Eigen::Matrix<float, 12, 1>& input) {
@@ -95,13 +93,13 @@ namespace platform {
             current_noise *= 1.0f - k;
             current_noise += 1.0f;
 
-            for (size_t leg = 0, index = 0; leg < 4; leg += 2, index++) {
+            for (size_t leg = 0; leg < 2; leg++) {
                 // We have some certainty in our measurement
                 if (state[leg] > certainty_threshold) {
-                    output_state[index] = true;
+                    output_state[leg] = true;
                 }
-                if (state[leg] < uncertianty_threshold) {
-                    output_state[index] = false;
+                if (state[leg] < uncertainty_threshold) {
+                    output_state[leg] = false;
                 }
             }
 

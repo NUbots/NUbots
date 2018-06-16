@@ -44,10 +44,10 @@ namespace platform {
             Eigen::Matrix<float, 8, 4> W3  = Eigen::Matrix<float, 8, 4>::Zero();
             Eigen::Matrix<float, 4, 1> b3  = Eigen::Matrix<float, 4, 1>::Zero();
 
-            Eigen::Matrix<float, 4, 1> state = Eigen::Matrix<float, 4, 1>::Constant(0.5f);
+            Eigen::Matrix<float, 2, 1> state = Eigen::Matrix<float, 2, 1>::Constant(0.5f);
             std::array<bool, 2> output_state = {true, true};
 
-            Eigen::Matrix<float, 4, 1> softmax(const Eigen::Matrix<float, 4, 1>& x);
+            Eigen::Matrix<float, 2, 1> softmax(const Eigen::Matrix<float, 4, 1>& x);
 
         public:
             VirtualLoadSensor() {}
