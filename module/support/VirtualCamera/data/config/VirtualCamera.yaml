@@ -4,8 +4,10 @@ lens:
   radiansPerPixel: 0.01
   centreOffset: [0,0]
 
-imageWidth: 320
-imageHeight: 240
+# Warning: Image dimensions must match input image size
+imageWidth: 910
+imageHeight: 651
+
 FOV_X: 3.14
 FOV_Y: 3.14
 DISTORTION_FACTOR: -0.0000

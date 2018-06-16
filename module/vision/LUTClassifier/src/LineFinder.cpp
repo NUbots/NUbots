@@ -18,6 +18,9 @@
  */
 
 #include "LUTClassifier.h"
+
+#include <cmath>
+
 #include "message/input/CameraParameters.h"
 #include "utility/math/geometry/Line.h"
 #include "utility/math/vision.h"
@@ -32,7 +35,9 @@ namespace vision {
     using message::vision::LookUpTable;
 
     using utility::math::geometry::Line;
+    using utility::math::vision::getCamFromImage;
     using utility::math::vision::getGroundPointFromScreen;
+    using utility::math::vision::getImageFromCam;
     using utility::math::vision::imageToScreen;
     using utility::math::vision::projectWorldPointToScreen;
     using utility::math::vision::screenToImage;
@@ -44,23 +49,23 @@ namespace vision {
 
     // TESTING
     //  Projects an image from radial to rectangular lens perspectives
-    void projectToRectangular(const Image& image,
-                              const CameraParameters& cam1,
-                              const CameraParameters& cam2,
-                              const std::string name) {
+    Image projectToRectangular(const Image& image,
+                               const CameraParameters& cam1,
+                               const CameraParameters& cam2,
+                               const std::string name) {
 
         // Create rectangular projection
         auto proj            = std::make_unique<Image>();
-        proj->format         = image.format;
+        proj->format         = utility::vision::FOURCC::RGB3;
         proj->dimensions.x() = image.dimensions[0];
         proj->dimensions.y() = image.dimensions[1];
         proj->data.resize(3 * image.dimensions[0] * image.dimensions[1], 0);
 
-        // Iterate through pixels and transform each one
+        // Iterate through pixels and project each one
         for (int x = 0; x < int(image.dimensions[0]); ++x) {
             for (int y = 0; y < int(image.dimensions[1]); ++y) {
-                arma::vec3 camVec    = utility::math::vision::getCamFromImage(arma::ivec2({x, y}), cam1);
-                arma::ivec2 pixelMap = utility::math::vision::getImageFromCam(camVec, cam2);
+                arma::ivec2 pixelMap =
+                    utility::math::vision::getImageFromCam(getCamFromImage(arma::ivec2({x, y}), cam1), cam2);
                 // Bounds check new coordinates
                 if (pixelMap[0] > 0 && pixelMap[0] < int(proj->dimensions.x()) && pixelMap[1] > 0
                     && pixelMap[1] < int(proj->dimensions.y())) {
@@ -72,42 +77,33 @@ namespace vision {
             }
         }
 
-        NUClear::log("Projection expected dims:",
-                     3 * proj->dimensions.x() * proj->dimensions.y(),
-                     "Actual dims:",
-                     proj->data.size());
-
         // Save our image
         utility::vision::saveImage(name, *proj);
+        return *proj;
     }
 
     void LUTClassifier::findLines(const Image& image, ClassifiedImage& classifiedImage) {
-        NUClear::log("Finding lines");
-
         // Create spherical cam for projection
-        CameraParameters sphericalCam;
-        sphericalCam.imageSizePixels        = {image.dimensions[0], image.dimensions[1]};
-        sphericalCam.FOV                    = {2.61799, 2.61799};
-        sphericalCam.centreOffset           = {0, 0};
-        sphericalCam.lens                   = CameraParameters::LensType::RADIAL;
-        sphericalCam.radial.radiansPerPixel = 0.01;
+        auto sphericalCam                    = std::make_unique<CameraParameters>();
+        sphericalCam->imageSizePixels        = {image.dimensions[0], image.dimensions[1]};
+        sphericalCam->FOV                    = {M_PI, M_PI};
+        sphericalCam->centreOffset           = {0, 0};
+        sphericalCam->lens                   = CameraParameters::LensType::RADIAL;
+        sphericalCam->radial.radiansPerPixel = 0.0026768;
 
         // Create rectangular cam for projection
-        CameraParameters rectCam;
-        rectCam.imageSizePixels           = {image.dimensions[0], image.dimensions[1]};
-        rectCam.FOV                       = {1.0472, 0.785};
-        rectCam.centreOffset              = {0, 0};
-        rectCam.lens                      = CameraParameters::LensType::PINHOLE;
-        rectCam.pinhole.distortionFactor  = 0;
-        arma::vec2 tanHalfFOV             = {std::tan(rectCam.FOV[0] * 0.5), std::tan(rectCam.FOV[0] * 0.5)};
-        arma::vec2 imageCentre            = {rectCam.imageSizePixels[0] * 0.5, rectCam.imageSizePixels[1] * 0.5};
-        rectCam.pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
-        rectCam.pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), tanHalfFOV[1] / imageCentre[1];
+        auto rectCam                       = std::make_unique<CameraParameters>();
+        rectCam->imageSizePixels           = {image.dimensions[0], image.dimensions[1]};
+        rectCam->FOV                       = {140 * M_PI / 180., 140 * M_PI / 180.};
+        rectCam->centreOffset              = {0, 0};
+        rectCam->lens                      = CameraParameters::LensType::PINHOLE;
+        rectCam->pinhole.distortionFactor  = 0;
+        arma::vec2 tanHalfFOV              = {std::tan(rectCam->FOV[0] * 0.5), std::tan(rectCam->FOV[0] * 0.5)};
+        arma::vec2 imageCentre             = {image.dimensions[0] * 0.5, image.dimensions[1] * 0.5};
+        rectCam->pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+        rectCam->pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), tanHalfFOV[1] / imageCentre[1];
 
-        NUClear::log("Projecting image");
-        projectToRectangular(image, sphericalCam, rectCam, "projection.ppm");
-        NUClear::log("Projected image");
-
+        projectToRectangular(image, *sphericalCam, *rectCam, "projection.ppm");
 
         // log("Finished");
         // // Create visual horizon image message
