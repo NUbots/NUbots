@@ -497,10 +497,10 @@ namespace platform {
                             const bool& footDown =
                                 side == ServoSide::LEFT ? sensors->leftFootDown : sensors->rightFootDown;
 
-                            const bool& prevFootDown = previousSensors ? side == ServoSide::LEFT
-                                                                             ? previousSensors->leftFootDown
-                                                                             : previousSensors->rightFootDown
-                                                                       : false;
+                            const bool& prevFootDown = previousSensors
+                                                           ? side == ServoSide::LEFT ? previousSensors->leftFootDown
+                                                                                     : previousSensors->rightFootDown
+                                                           : false;
 
                             if (footDown) {
                                 Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics[servoid]);
@@ -621,7 +621,7 @@ namespace platform {
 
                     emit(std::move(sensors));
                 });
-        }  // namespace darwin
-    }      // namespace darwin
+        }
+    }  // namespace darwin
 }  // namespace platform
 }  // namespace module

@@ -97,15 +97,11 @@ namespace platform {
 
             for (size_t leg = 0, index = 0; leg < 4; leg += 2, index++) {
                 // We have some certainty in our measurement
-                if (std::abs(state(leg) - state(leg + 1)) > uncertainty_threshold) {
-                    // The foot is definitely on the ground
-                    if ((state(leg) >= certainty_threshold) && (state(leg + 1) < certainty_threshold)) {
-                        output_state[index] = true;
-                    }
-                    // The foot is definitely off the ground
-                    else if ((state(leg + 1) >= certainty_threshold) && (state(leg) < certainty_threshold)) {
-                        output_state[index] = false;
-                    }
+                if (state[leg] > certainty_threshold) {
+                    output_state[index] = true;
+                }
+                if (state[leg] < uncertianty_threshold) {
+                    output_state[index] = false;
                 }
             }
 
