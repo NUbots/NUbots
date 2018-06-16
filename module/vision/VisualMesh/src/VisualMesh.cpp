@@ -64,12 +64,13 @@ namespace vision {
                 }
             }
 
-            draw_mesh = config["debug"]["draw_mesh"].as<bool>();
-            draw_type = config["debug"]["colour_type"].as<int>();
+            draw_mesh   = config["debug"]["draw_mesh"].as<bool>();
+            colour_type = config["debug"]["colour_type"].as<int>();
 
             log("Finished loading visual mesh");
         });
 
+        // TODO: Recreate mesh when network configuration changes
         on<Startup, With<FieldDescription>, With<CameraParameters>>().then([this](const FieldDescription& field,
                                                                                   const CameraParameters& cam) {
             mesh_ptr = std::make_unique<mesh::VisualMesh<float>>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
@@ -90,7 +91,6 @@ namespace vision {
             std::array<std::array<float, 4>, 4> Hoc;
             Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
-            // TODO: Un-hardcode
             mesh::VisualMesh<float>::Lens lens;
             switch (cam.lens.value) {
                 case CameraParameters::LensType::RADIAL:
@@ -142,12 +142,6 @@ namespace vision {
             msg->classifications.emplace_back(results.classifications.back().first,
                                               results.classifications.back().second);
 
-
-            std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-                        Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
-                lines;
-
-
             // Add our coordinates
             std::vector<std::array<float, 2>> pixel_coordinates = results.pixel_coordinates;
             msg->coordinates.reserve(pixel_coordinates.size());
@@ -156,26 +150,30 @@ namespace vision {
             }
 
             if (draw_mesh) {
-                if (draw_type == 0) {
-                    std::vector<float> classification = results.classifications.front().second;
+                std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                            Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+                    lines;
+
+                std::vector<float> classification;
+                if (colour_type == 0) {
+                    classification = results.classifications.front().second;
                 }
-                if (draw_type == 1) {
-                    std::vector<float> classification = results.classifications.back().second;
+                if (colour_type == 1) {
+                    classification = results.classifications.back().second;
                 }
 
                 for (uint i = 0; i < msg->coordinates.size(); ++i) {
 
                     Eigen::Vector2i p1(msg->coordinates[i]);
 
-                    // Eigen::Vector4d colour(results.second[i][1], 0, results.second[i][0], 1);
-
-                    if (draw_type == 1) {
-                        Eigen::Vector4d colour(classification[i * 2 + 1] > 0.5, 0, classification[i * 2 + 0] > 0.5, 1);
+                    Eigen::Vector4d colour;
+                    if (colour_type == 1) {
+                        colour << double(classification[i * 2 + 1] > 0.5), 0.0, double(classification[i * 2 + 0] > 0.5),
+                            1.0;
                     }
 
-                    if (draw_type == 0) {
-                        Eigen::Vector4d colour(
-                            classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 + 2], 1);
+                    if (colour_type == 0) {
+                        colour << classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 + 2], 1.0;
                     }
 
                     for (const auto& n : results.neighbourhood[i]) {
