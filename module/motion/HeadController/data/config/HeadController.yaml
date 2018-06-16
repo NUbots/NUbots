@@ -8,7 +8,3 @@ initial:
   pitch: 0
 #Gain for controller to reduce look judder and oscillation
 p_gain: 0.1
-# Yaw and pitch limits for goal angle commands
-# Yaw limits [min, max]
-yaw: [-3.14159, 3.14159]
-pitch: [-3.14159, 3.14159]
