@@ -428,9 +428,9 @@ namespace vision {
                             continue;
                         }
 
-                        const auto& sensors     = *image.sensors;
-                        arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
-                        double cameraHeight     = camToGround(2, 3);
+                        const auto& sensors            = *image.sensors;
+                        const arma::mat44& camToGround = convert<double, 4, 4>(sensors.camToGround);
+                        const double cameraHeight      = camToGround(2, 3);
 
                         if (distance < cameraHeight * 0.5) {
                             if (print_throwout_logs) {
@@ -440,7 +440,7 @@ namespace vision {
                             continue;
                         }
 
-                        // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
+                        // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
                         // Project this vector to a plane midway through the ball
                         Plane ballBisectorPlane({0, 0, 1}, {0, 0, field.ball_radius});
                         arma::vec3 ballCentreGroundProj     = projectCamToPlane(center, camToGround, ballBisectorPlane);
@@ -461,7 +461,7 @@ namespace vision {
                     }
 
                     /***********************************************
-                     *                  USTERS DRAW                *
+                     *                  CLUSTERS DRAW              *
                      ***********************************************/
 
                     if (draw_cluster) {
