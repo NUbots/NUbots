@@ -16,7 +16,6 @@ namespace input {
     using message::input::Image;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
-    using message::input::CameraParameters;
 
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
