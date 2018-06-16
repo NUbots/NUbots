@@ -23,6 +23,8 @@
 
 #include "message/input/CameraParameters.h"
 #include "utility/math/geometry/Line.h"
+#include "utility/math/geometry/ParametricLine.h"
+#include "utility/math/geometry/Plane.h"
 #include "utility/math/vision.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/Vision.h"
@@ -35,6 +37,7 @@ namespace vision {
     using message::vision::LookUpTable;
 
     using utility::math::geometry::Line;
+    using utility::math::geometry::Plane;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getGroundPointFromScreen;
     using utility::math::vision::getImageFromCam;
@@ -45,14 +48,15 @@ namespace vision {
     using utility::vision::visualHorizonAtPoint;
 
     using message::input::CameraParameters;
+    using message::input::Sensors;
 
 
     // TESTING
     //  Projects an image from radial to rectangular lens perspectives
-    Image projectToRectangular(const Image& image,
-                               const CameraParameters& cam1,
-                               const CameraParameters& cam2,
-                               const std::string name) {
+    Image projectToCameraParams(const Image& image,
+                                const CameraParameters& cam1,
+                                const CameraParameters& cam2,
+                                const std::string name) {
 
         // Create rectangular projection
         auto proj            = std::make_unique<Image>();
@@ -64,8 +68,7 @@ namespace vision {
         // Iterate through pixels and project each one
         for (int x = 0; x < int(image.dimensions[0]); ++x) {
             for (int y = 0; y < int(image.dimensions[1]); ++y) {
-                arma::ivec2 pixelMap =
-                    utility::math::vision::getImageFromCam(getCamFromImage(arma::ivec2({x, y}), cam1), cam2);
+                arma::ivec2 pixelMap = getImageFromCam(getCamFromImage(arma::ivec2({x, y}), cam1), cam2);
                 // Bounds check new coordinates
                 if (pixelMap[0] > 0 && pixelMap[0] < int(proj->dimensions.x()) && pixelMap[1] > 0
                     && pixelMap[1] < int(proj->dimensions.y())) {
@@ -82,7 +85,57 @@ namespace vision {
         return *proj;
     }
 
-    void LUTClassifier::findLines(const Image& image, ClassifiedImage& classifiedImage) {
+    Image projectToTopDown(const Image& image,
+                           const CameraParameters& cam,
+                           const Sensors& sensors,
+                           const std::string name) {
+        // Create rectangular projection
+        auto topImage            = std::make_unique<Image>();
+        topImage->format         = utility::vision::FOURCC::RGB3;
+        topImage->dimensions.x() = image.dimensions[0];
+        topImage->dimensions.y() = image.dimensions[1];
+        topImage->data.resize(3 * image.dimensions[0] * image.dimensions[1], 0);
+
+        // Create plane normal to ground
+        Plane<3> p(arma::vec3({0, 0, 1}));
+
+        Eigen::Affine3d Htc(sensors.forwardKinematics[utility::input::ServoID::HEAD_PITCH]);
+        // Htc(1, 3) += model->head.INTERPUPILLARY_DISTANCE * 0.5f * (i.isLeft ? 1.0f : -1.0f);
+        auto Hcw             = Htc.inverse() * sensors.world;
+        arma::vec3 cameraPos = convert<double, 3>(Hcw.col(3).head<3>());
+
+        // Iterate through pixels and project each one
+        for (int x = 0; x < int(image.dimensions[0]); ++x) {
+            for (int y = 0; y < int(image.dimensions[1]); ++y) {
+
+                arma::vec3 camspace = getCamFromImage(arma::ivec2({x, y}), cam);
+                auto camToGround    = convert<double, 4, 4>(sensors.camToGround);
+                auto groundspace    = utility::math::matrix::Transform3D(camToGround).transformVector(camspace);
+                auto topInCam       = p.intersect(utility::math::geometry::ParametricLine<3>(cameraPos, groundspace));
+                auto pixelMap       = getImageFromCam(topInCam, cam);
+
+                // NUClear::log("Pixel map", pixelMap);
+
+                // Write over pixels to new coordinates
+                if (pixelMap[0] > 0 && pixelMap[0] < int(topImage->dimensions.x()) && pixelMap[1] > 0
+                    && pixelMap[1] < int(topImage->dimensions.y())) {
+                    for (int channel = 0; channel < 3; channel++) {
+                        topImage->data[3 * (pixelMap[1] * topImage->dimensions.x() + pixelMap[0]) + channel] =
+                            image.data[3 * (y * image.dimensions.x() + x) + channel];
+                    }
+                }
+            }
+        }
+
+        // Save our image
+        NUClear::log("Saving", name);
+        utility::vision::saveImage(name, *topImage);
+        NUClear::log("Saved", name);
+
+        return *topImage;
+    }
+
+    void LUTClassifier::findLines(const Image& image, ClassifiedImage& classifiedImage, const Sensors& sensors) {
         // Create spherical cam for projection
         auto sphericalCam                    = std::make_unique<CameraParameters>();
         sphericalCam->imageSizePixels        = {image.dimensions[0], image.dimensions[1]};
@@ -103,7 +156,9 @@ namespace vision {
         rectCam->pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
         rectCam->pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), tanHalfFOV[1] / imageCentre[1];
 
-        projectToRectangular(image, *sphericalCam, *rectCam, "projection.ppm");
+        auto proj = projectToCameraParams(image, *sphericalCam, *rectCam, "projection.ppm");
+
+        auto top = projectToTopDown(image, *rectCam, sensors, "top_down.ppm");
 
         // log("Finished");
         // // Create visual horizon image message
