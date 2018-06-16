@@ -215,22 +215,37 @@ namespace vision {
 
                             // Make sure our confidence is above the threshold
                             // Make sure we haven't visited the point before
-                            if ((mesh.classifications.back().values[n[j] * dim] >= mesh_branch_confidence_threshold)) {
+                            if ((mesh.classifications.back().values[n[j] * dim] >= mesh_branch_confidence_threshold)
+                                && (n[j] != mesh.coordinates.size())) {
                                 if (visited_indices.find(n[j]) == visited_indices.end()) {
                                     // log("\t\t\t\tFind :", *visited_indices.find(n[j]));
                                     search_queue.push(n[j]);  // Add to our BFS queue
                                 }
 
-                                arma::ivec2 point_coord = convert<int, 2>(mesh.coordinates[n[j] - 1]);
+                                // Try to determine if we are on an edge point
+                                bool edge           = true;
+                                arma::ivec6 local_n = convert<int, 6>(mesh.neighbourhood[n[j]]);
+                                for (const auto& l : local_n) {
+                                    if ((visited_indices.find(l) == visited_indices.end())
+                                        && (mesh.classifications.back().values[l * dim]
+                                            >= mesh_branch_confidence_threshold)
+                                        && (l != mesh.coordinates.size())) {
+                                        edge = false;
+                                    }
+                                }
 
-                                auto point_cam = getCamFromImage(point_coord, cam);
-                                // log("\t\t\tRaw classification:", double(mesh.classifications.back().values[n[j] *
-                                // dim ]));
-                                cluster.push_back(arma::vec4(
-                                    {point_cam[0],
-                                     point_cam[1],
-                                     point_cam[2],
-                                     mesh.classifications.back().values[n[j] * dim]}));  // Add to our cluster
+                                if (edge) {
+                                    arma::ivec2 point_coord = convert<int, 2>(mesh.coordinates[n[j] - 1]);
+
+                                    auto point_cam = getCamFromImage(point_coord, cam);
+                                    // log("\t\t\tRaw classification:", double(mesh.classifications.back().values[n[j] *
+                                    // dim ]));
+                                    cluster.push_back(arma::vec4(
+                                        {point_cam[0],
+                                         point_cam[1],
+                                         point_cam[2],
+                                         mesh.classifications.back().values[n[j] * dim]}));  // Add to our cluster
+                                }
                             }
                             visited_indices.insert(n[j]);  // Add to our list of visited points
                         }
