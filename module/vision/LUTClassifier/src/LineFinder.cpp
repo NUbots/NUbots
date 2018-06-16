@@ -100,21 +100,37 @@ namespace vision {
         Plane<3> p(arma::vec3({0, 0, 1}));
 
         Eigen::Affine3d Htc(sensors.forwardKinematics[utility::input::ServoID::HEAD_PITCH]);
-        // Htc(1, 3) += model->head.INTERPUPILLARY_DISTANCE * 0.5f * (i.isLeft ? 1.0f : -1.0f);
+
         auto Hcw             = Htc.inverse() * sensors.world;
+        auto Hcw_arma        = convert<double, 4, 4>(Hcw);
         arma::vec3 cameraPos = convert<double, 3>(Hcw.col(3).head<3>());
 
         // Iterate through pixels and project each one
         for (int x = 0; x < int(image.dimensions[0]); ++x) {
             for (int y = 0; y < int(image.dimensions[1]); ++y) {
+                auto camspace    = getCamFromImage(arma::ivec2({x, y}), cam);
+                auto camToGround = convert<double, 4, 4>(sensors.camToGround);
+                auto groundspace = utility::math::matrix::Transform3D(camToGround).transformVector(camspace);
+                auto topInCam    = p.intersect(utility::math::geometry::ParametricLine<3>(cameraPos, groundspace));
+                auto pixelMap    = getImageFromCam(topInCam, cam);
 
-                arma::vec3 camspace = getCamFromImage(arma::ivec2({x, y}), cam);
-                auto camToGround    = convert<double, 4, 4>(sensors.camToGround);
-                auto groundspace    = utility::math::matrix::Transform3D(camToGround).transformVector(camspace);
-                auto topInCam       = p.intersect(utility::math::geometry::ParametricLine<3>(cameraPos, groundspace));
-                auto pixelMap       = getImageFromCam(topInCam, cam);
-
-                // NUClear::log("Pixel map", pixelMap);
+                NUClear::log("-----");
+                NUClear::log("Pixel coords:",
+                             x,
+                             y,
+                             "->",
+                             pixelMap[0],
+                             pixelMap[1],
+                             "(",
+                             image.dimensions[0],
+                             image.dimensions[1],
+                             ")");
+                NUClear::log("Hcw:", convert<double, 4, 4>(camToGround));
+                NUClear::log("Cam to ground:", camToGround);
+                NUClear::log("Cam space:", camspace.t());
+                NUClear::log("Ground space:", groundspace.t());
+                NUClear::log("Camera pos:", cameraPos.t());
+                NUClear::log("Plane intersection vector:", topInCam.t());
 
                 // Write over pixels to new coordinates
                 if (pixelMap[0] > 0 && pixelMap[0] < int(topImage->dimensions.x()) && pixelMap[1] > 0
