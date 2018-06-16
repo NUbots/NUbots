@@ -148,7 +148,6 @@ private:
         // This function calculates the equation for optimising
         // It works out the difference between the target and obtained total phi
         auto f = [this, eh, p0](const Scalar& er) {
-
             // Calculate phi0 once starting at 0
             Scalar p = phi0(0, er, eh);
 
