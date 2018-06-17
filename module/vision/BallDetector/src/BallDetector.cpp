@@ -431,7 +431,7 @@ namespace vision {
                         continue;
                     }
 
-                    // DISTANCE IS LESS THAN HALF OF CAM HEIGHT (fine)
+                    // DISTANCE IS LESS THAN HALF OF CAM HEIGHT
                     const auto& sensors            = *image.sensors;
                     const arma::mat44& camToGround = convert<double, 4, 4>(sensors.camToGround);
                     const double cameraHeight      = camToGround(2, 3);
@@ -461,6 +461,7 @@ namespace vision {
                         continue;
                     }
 
+                    // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
                     if (distance > field.dimensions.field_length) {
                         if (print_throwout_logs) {
                             log("Ball discarded: Distance to ball greater than field length: distance =",
