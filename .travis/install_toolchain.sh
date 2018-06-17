@@ -34,13 +34,3 @@ sudo update-alternatives --remove-all gcc || true
 sudo update-alternatives --remove-all g++ || true
 sudo update-alternatives --remove-all gfortan || true
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 --slave /usr/bin/g++ g++ /usr/bin/g++-7 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7
-
-# Install OpenCL
-mkdir intel-opencl
-cd intel-opencl
-wget http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip
-unzip SRB5.0_linux64.zip
-mkdir root
-for i in *.tar.xz; do tar -C root -xf \"\$i\"; done
-sudo cp -r root/* /
-sudo ldconfig
