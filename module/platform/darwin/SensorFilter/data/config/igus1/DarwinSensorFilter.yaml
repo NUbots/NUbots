@@ -1,5 +1,0 @@
-
-motion_filter:
-  initial:
-    mean:
-      position: [0, 0, 0.45]          # A little above the ground
