@@ -62,13 +62,12 @@ namespace platform {
             }
         }
 
-        Eigen::Matrix<float, 2, 1> VirtualLoadSensor::softmax(const Eigen::Matrix<float, 4, 1>& x) {
-            Eigen::Matrix<float, 2, 1> left_expx  = x.topRows<2>().array().exp().matrix().transpose();
-            Eigen::Matrix<float, 2, 1> right_expx = x.bottomRows<2>().array().exp().matrix().transpose();
-            return {left_expx.x() / left_expx.sum(), right_expx.x() / right_expx.sum()};
+        arma::frowvec::fixed<2> VirtualLoadSensor::softmax(const arma::frowvec::fixed<4>& x) {
+            arma::frowvec::fixed<4> expx = arma::exp(x);
+            return {expx(0) / arma::sum(expx.head(2)), expx(2) / arma::sum(expx.tail(2))};
         }
 
-        std::array<bool, 2> VirtualLoadSensor::updateFeet(const Eigen::Matrix<float, 12, 1>& input) {
+        std::array<bool, 2> VirtualLoadSensor::updateFeet(const arma::frowvec::fixed<12>& input) {
 
             auto SELU = [](float x) -> float {
                 static constexpr float alpha  = 1.6732632423543772848170429916717;
@@ -83,9 +82,7 @@ namespace platform {
                 }
             };
 
-            auto out = softmax(
-                ((input.transpose() * W1 + b1.transpose()).unaryExpr(SELU) * W2 + b2.transpose()).unaryExpr(SELU) * W3
-                + b3.transpose());
+            auto out = softmax(((input * W1 + b1).eval().for_each(SELU) * W2 + b2).eval().for_each(SELU) * W3 + b3);
 
             // Do the bayes update (1D kalman filter thing)
             float k = current_noise / (current_noise + noise_factor);

@@ -438,17 +438,18 @@ namespace platform {
 
                     if (previousSensors) {
                         // Use our virtual load sensor class to work out which feet are down
-                        Eigen::Matrix<float, 1, 12> features;
-                        features << sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_HIP_PITCH].load,
-                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_HIP_PITCH].load, sensors->servo[ServoID::R_KNEE].presentVelocity,
-                            sensors->servo[ServoID::R_KNEE].load, sensors->servo[ServoID::L_KNEE].presentVelocity,
-                            sensors->servo[ServoID::L_KNEE].load,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].load;
+                        arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::R_HIP_PITCH].load,
+                                                             sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::L_HIP_PITCH].load,
+                                                             sensors->servo[ServoID::R_KNEE].presentVelocity,
+                                                             sensors->servo[ServoID::R_KNEE].load,
+                                                             sensors->servo[ServoID::L_KNEE].presentVelocity,
+                                                             sensors->servo[ServoID::L_KNEE].load,
+                                                             sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::R_ANKLE_PITCH].load,
+                                                             sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::L_ANKLE_PITCH].load};
 
                         auto feet_down         = load_sensor.updateFeet(features);
                         sensors->leftFootDown  = feet_down[0];

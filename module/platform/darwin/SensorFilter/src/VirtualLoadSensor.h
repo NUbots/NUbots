@@ -20,7 +20,7 @@
 #ifndef MODULES_PLATFORM_DARWIN_VIRTUALLOADSENSOR_H
 #define MODULES_PLATFORM_DARWIN_VIRTUALLOADSENSOR_H
 
-#include <Eigen/Core>
+#include <armadillo>
 #include <array>
 
 #include <extension/Configuration.h>
@@ -32,30 +32,40 @@ namespace platform {
         class VirtualLoadSensor {
             // this implements a linear model (trained by logistic regression) with a bayes filter on the output
         private:
-            float noise_factor          = 0.0f;
-            float current_noise         = 0.0f;
-            float certainty_threshold   = 0.0f;
-            float uncertainty_threshold = 0.0f;
+            float noise_factor;
+            float current_noise;
+            float certainty_threshold;
+            float uncertainty_threshold;
 
-            Eigen::Matrix<float, 12, 8> W1 = Eigen::Matrix<float, 12, 8>::Zero();
-            Eigen::Matrix<float, 8, 1> b1  = Eigen::Matrix<float, 8, 1>::Zero();
-            Eigen::Matrix<float, 8, 8> W2  = Eigen::Matrix<float, 8, 8>::Zero();
-            Eigen::Matrix<float, 8, 1> b2  = Eigen::Matrix<float, 8, 1>::Zero();
-            Eigen::Matrix<float, 8, 4> W3  = Eigen::Matrix<float, 8, 4>::Zero();
-            Eigen::Matrix<float, 4, 1> b3  = Eigen::Matrix<float, 4, 1>::Zero();
+            arma::fmat::fixed<12, 8> W1;
+            arma::frowvec::fixed<8> b1;
+            arma::fmat::fixed<8, 8> W2;
+            arma::frowvec::fixed<8> b2;
+            arma::fmat::fixed<8, 4> W3;
+            arma::frowvec::fixed<4> b3;
 
-            Eigen::Matrix<float, 2, 1> state = Eigen::Matrix<float, 2, 1>::Constant(0.5f);
-            std::array<bool, 2> output_state = {true, true};
+            arma::frowvec::fixed<2> state;
+            std::array<bool, 2> output_state;
 
-            Eigen::Matrix<float, 2, 1> softmax(const Eigen::Matrix<float, 4, 1>& x);
+            arma::frowvec::fixed<2> softmax(const arma::frowvec::fixed<4>& x);
 
         public:
-            VirtualLoadSensor() {}
+            VirtualLoadSensor()
+                : noise_factor(0.0f)
+                , current_noise(0.0f)
+                , certainty_threshold(0.0f)
+                , uncertainty_threshold(0.0f)
+                , W1(arma::fill::zeros)
+                , b1(arma::fill::zeros)
+                , W2(arma::fill::zeros)
+                , b2(arma::fill::zeros)
+                , W3(arma::fill::zeros)
+                , b3(arma::fill::zeros)
+                , state(arma::fill::zeros)
+                , output_state({true, true}) {}
             VirtualLoadSensor(const ::extension::Configuration& network);
 
-            std::array<bool, 2> updateFeet(const Eigen::Matrix<float, 12, 1>& features);
-
-            EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+            std::array<bool, 2> updateFeet(const arma::frowvec::fixed<12>& features);
         };
     }  // namespace darwin
 }  // namespace platform
