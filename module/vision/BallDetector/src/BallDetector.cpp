@@ -408,7 +408,8 @@ namespace vision {
 
                         for (const auto& point : cluster) {
                             // Calculate image space pixel coordinate of point
-                            auto pixel = projectCamSpaceToScreen(point.head(3), cam);
+                            auto pixel = screenToImage(projectCamSpaceToScreen(point.head(3), cam),
+                                                       convert<uint, 2>((*pixelImage).dimensions));
 
                             // Check our cluster pointer for the maximum gradient
                             b.cone.gradient = std::tan(std::acos(arma::dot(center, point.head(3))));
@@ -433,10 +434,10 @@ namespace vision {
 
                         if (cluster.size() > 0) {
                             greenRatio = numGreen / float(cluster.size());
+                            // Log our green ratio
+                            log("Green ratio", greenRatio);
                         }
 
-                        // Log our green ratio
-                        log("Green ratio", greenRatio);
 
                         // Angular positions from the camera
                         b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(center).rows(1, 2));
@@ -520,7 +521,7 @@ namespace vision {
                             continue;
                         }
 
-                        log("Distance : ", distance);
+                        // log("Distance : ", distance);
 
                         // IF THE BALL IS HAS TOO HIGH OF A GREEN RATIO
                         if (greenRatio > green_ratio_threshold) {
