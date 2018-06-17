@@ -22,7 +22,8 @@ NUCLEAR_ROLE(
     #Vision
     vision::VisualMesh
     vision::BallDetector
+    vision::LUTClassifier
 
     # Data logger
-    support::logging::DataLogging
+    # support::logging::DataLogging
 )
