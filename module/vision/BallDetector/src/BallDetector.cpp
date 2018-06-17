@@ -522,6 +522,18 @@ namespace vision {
 
                         log("Distance : ", distance);
 
+                        // IF THE BALL IS HAS TOO HIGH OF A GREEN RATIO
+                        if (greenRatio > green_ratio_threshold) {
+                            if (print_throwout_logs) {
+                                log("Ball discarded: Green ratio (",
+                                    greenRatio,
+                                    ") > green ratio threshold (",
+                                    green_ratio_threshold,
+                                    ")");
+                                continue;
+                            }
+                        }
+
                         balls->push_back(std::move(b));
                     }
 
