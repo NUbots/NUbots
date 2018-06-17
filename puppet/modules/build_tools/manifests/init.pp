@@ -36,6 +36,7 @@ class build_tools {
   } -> Package <| |>
 
   # Tools
+  package { 'unzip': ensure => latest, }
   package { 'automake': ensure => latest, }
   package { 'autoconf': ensure => latest, }
   package { 'libtool': ensure => latest, }
@@ -118,5 +119,20 @@ class build_tools {
     ensure  => present,
     source  => 'puppet:///modules/files/FindBoost.cmake',
     require => [ Exec['install-cmake'], ],
+  }
+
+  exec { "Intel_OpenCL_SDK":
+    creates     => "/opt/intel/opencl/libOpenCL.so",
+    command     => "mkdir intel-opencl &&
+                    cd intel-opencl &&
+                    wget http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip &&
+                    unzip SRB5.0_linux64.zip &&
+                    mkdir root &&
+                    for i in *.tar.xz; do tar -C root -xf \"\$i\"; done &&
+                    cp -r root/* /",
+    path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout     => 0,
+    provider    => 'shell',
+    require     => [ Package['unzip'], ],
   }
 }
