@@ -1,7 +1,8 @@
 debug:
-  draw_mesh: true
-  colour_type: 0 # 0 - Image colour one?
-          # 1 - Confidence weigthtings
+  draw_mesh: false
+  colour_type: 1
+# 0 - Image colour one?
+# 1 - Confidence weigthtings
 
 network:
   - - biases: [-0.12340225279331207, -0.2602671980857849, 0.331647664308548, 0.320194274187088]
