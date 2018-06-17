@@ -313,210 +313,255 @@ namespace vision {
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<VisualMesh>, With<FieldDescription>, With<CameraParameters>, With<ClassifiedImage>>().then(
-            "Visual Mesh",
-            [this](const VisualMesh& mesh,
-                   const FieldDescription& field,
-                   const CameraParameters& cam,
-                   std::shared_ptr<const ClassifiedImage> rawImage) {
-                // We need to gather all points which have a confidence prediction of over MAX_PREDICT_THRESH
-                // Then BFS to all neighbouring points which have a confidence prediction of at least
-                // MIN_PREDICT_THRESH
-                // We then need to create ransac models for each of these 'clusters' to fit a circle
-                const auto& image = *rawImage;
+        on<Trigger<VisualMesh>,
+           With<FieldDescription>,
+           With<CameraParameters>,
+           With<ClassifiedImage>,
+           With<LookUpTable>>()
+            .then(
+                "Visual Mesh",
+                [this](const VisualMesh& mesh,
+                       const FieldDescription& field,
+                       const CameraParameters& cam,
+                       std::shared_ptr<const ClassifiedImage> rawImage,
+                       const LookUpTable& lut) {
+                    // We need to gather all points which have a confidence prediction of over MAX_PREDICT_THRESH
+                    // Then BFS to all neighbouring points which have a confidence prediction of at least
+                    // MIN_PREDICT_THRESH
+                    // We then need to create ransac models for each of these 'clusters' to fit a circle
+                    const auto& image = *rawImage;
 
 
-                // log("Visual Mesh Triggered");
+                    // log("Visual Mesh Triggered");
 
-                // Get our coordinate clusters in camera space
-                std::vector<std::vector<arma::vec4>> clusters = findClusters(mesh, cam);
-
-                if (print_mesh_debug) {
-                    log("Number of clusters found:", clusters.size());
-                }
-
-                auto balls = std::make_unique<std::vector<Ball>>();
-                if (clusters.size() > 0) {
-                    balls->reserve(clusters.size());
-                }
-
-                for (const auto& cluster : clusters) {
-                    // log("cluster:", i, " of ", int(clusters.size()));
-                    Ball b;
-
-                    // Average all the points in the cluster to find the center
-                    arma::vec3 center(arma::fill::zeros);
-                    double max_x = -1.0, min_x = 1.0;
-                    double max_y = -1.0, min_y = 1.0;
-                    double max_z = -1.0, min_z = 1.0;
-                    for (const auto& point : cluster) {
-                        center += point.head(3);
-                        min_x = std::min(min_x, point[0]);
-                        max_x = std::max(max_x, point[0]);
-                        min_y = std::min(min_y, point[1]);
-                        max_y = std::max(max_y, point[1]);
-                        min_z = std::min(min_z, point[2]);
-                        max_z = std::max(max_z, point[2]);
-                    }
-
-                    center /= cluster.size();
-                    center = arma::normalise(center);
-
-                    // Use the average of the extreme coordinates to determine the radius
-                    double radius = (std::abs(max_x - min_x) + std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 6.0;
-
-                    // Work out the width distance
-                    arma::vec3 topCam   = arma::normalise(center + arma::vec3({0, 0, radius}));
-                    arma::vec3 baseCam  = arma::normalise(center - arma::vec3({0, 0, radius}));
-                    arma::vec3 leftCam  = arma::normalise(center + arma::vec3({0, radius, 0}));
-                    arma::vec3 rightCam = arma::normalise(center - arma::vec3({0, radius, 0}));
-
-                    arma::vec2 top   = projectCamSpaceToScreen(topCam, cam);
-                    arma::vec2 base  = projectCamSpaceToScreen(baseCam, cam);
-                    arma::vec2 left  = projectCamSpaceToScreen(leftCam, cam);
-                    arma::vec2 right = projectCamSpaceToScreen(rightCam, cam);
-
-                    // https://en.wikipedia.org/wiki/Angular_diameter
-                    double delta    = std::acos(arma::dot(topCam, baseCam));
-                    double distance = field.ball_radius / std::sin(delta * 0.5);
-
-                    // Work out how far away the ball must be to be at the distance it is from the camera
-                    arma::vec3 rBCc = center * distance;
-
-                    // Attach the measurement to the object
-                    b.measurements.push_back(Ball::Measurement());
-                    b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
-                    b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
-
-                    // Ball cam space info
-                    b.cone.axis     = convert<double, 3>(center);
-                    b.cone.gradient = -std::numeric_limits<double>::max();
-
-                    for (const auto& point : cluster) {
-                        // Check our cluster pointer for the maximum gradient
-                        b.cone.gradient = std::tan(std::acos(arma::dot(center, point.head(3))));
-
-                        // Add our points
-                        b.edgePoints.push_back(convert<double, 3>(point.head(3)));
-                    }
-
-                    // Angular positions from the camera
-                    b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(center).rows(1, 2));
-                    b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
-                    b.visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
-                    b.visObject.timestamp       = NUClear::clock::now();
-                    b.visObject.sensors         = image.sensors;
+                    // Get our coordinate clusters in camera space
+                    std::vector<std::vector<arma::vec4>> clusters = findClusters(mesh, cam);
 
                     if (print_mesh_debug) {
-                        std::cout << "Gradient " << b.cone.gradient << " Center " << center.t() << " Radius " << radius
-                                  << " Distance " << distance << " rBCc " << rBCc.t() << " screenAngular "
-                                  << b.visObject.screenAngular.transpose() << " angularSize "
-                                  << b.visObject.angularSize.transpose() << std::endl;
+                        log("Number of clusters found:", clusters.size());
                     }
 
-
-                    /***********************************************
-                     *                  THROWOUTS                  *
-                     ***********************************************/
-
-                    // CENTRE OF BALL IS ABOVE THE VISUAL HORIZON
-                    arma::ivec2 centre_im = getImageFromCam(center, cam);
-                    if (utility::vision::visualHorizonAtPoint(image, centre_im[0]) > centre_im[1]
-                        || arma::dot(convert<double, 3>(image.horizon_normal), center) > 0) {
-                        if (print_throwout_logs) {
-                            log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
-                            log("Horizon normal = ", image.horizon_normal.transpose());
-                            log("Ball centre ray = ", center.t());
-                        }
-                        continue;
+                    auto balls = std::make_unique<std::vector<Ball>>();
+                    if (clusters.size() > 0) {
+                        balls->reserve(clusters.size());
                     }
 
-                    // DISTANCE IS LESS THAN HALF OF CAM HEIGHT
-                    const auto& sensors            = *image.sensors;
-                    const arma::mat44& camToGround = convert<double, 4, 4>(sensors.camToGround);
-                    const double cameraHeight      = camToGround(2, 3);
-
-                    if (distance < cameraHeight * 0.5) {
-                        if (print_throwout_logs) {
-                            log("Ball discarded: distance < cameraHeight * 0.5");
-                            log("distance =", distance, "cameraHeight =", cameraHeight);
-                        }
-                        continue;
-                    }
-
-                    // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                    // Project this vector to a plane midway through the ball
-                    Plane ballBisectorPlane({0, 0, 1}, {0, 0, field.ball_radius});
-                    arma::vec3 ballCentreGroundProj     = projectCamToPlane(center, camToGround, ballBisectorPlane);
-                    double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
-
-                    if (std::abs((distance - ballCentreGroundProjDistance)
-                                 / std::max(ballCentreGroundProjDistance, distance))
-                        > MAXIMUM_DISAGREEMENT_RATIO) {
-                        if (print_throwout_logs)
-                            log("Ball discarded: Width and proj distance disagree too much: width =",
-                                distance,
-                                "proj =",
-                                ballCentreGroundProjDistance);
-                        continue;
-                    }
-
-                    // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
-                    if (distance > field.dimensions.field_length) {
-                        if (print_throwout_logs) {
-                            log("Ball discarded: Distance to ball greater than field length: distance =",
-                                distance,
-                                "field length=",
-                                field.dimensions.field_length);
-                        }
-                        continue;
-                    }
-
-                    log("Distance : ", distance);
-
-                    balls->push_back(std::move(b));
-                }
-
-                /***********************************************
-                 *                  CLUSTERS DRAW              *
-                 ***********************************************/
-
-                if (draw_cluster) {
-                    std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-                                Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
-                        lines;
-                    for (size_t i = 0; i < clusters.size(); ++i) {
-
-                        arma::vec3 axis(arma::fill::zeros);
-                        for (const auto& point : clusters[i]) {
-                            axis += point.head(3);
-                        }
-
-                        axis /= clusters[i].size();
-                        axis = arma::normalise(axis);
-
-                        Eigen::Vector2i center = convert<int, 2>(
-                            screenToImage(projectCamSpaceToScreen(axis, cam), convert<uint, 2>(cam.imageSizePixels)));
+                    for (const auto& cluster : clusters) {
+                        // log("cluster:", i, " of ", int(clusters.size()));
+                        Ball b;
 
                         // Average all the points in the cluster to find the center
-
-
-                        for (size_t j = 0; j < (clusters[i].size()); ++j) {
-                            Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0.50, clusters[i][j][3] < 0.5, 1);
-
-                            Eigen::Vector2i point =
-                                convert<int, 2>(screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), cam),
-                                                              convert<uint, 2>(cam.imageSizePixels)));
-
-                            lines.emplace_back(center.cast<int>(), point.cast<int>(), colour);
+                        arma::vec3 center(arma::fill::zeros);
+                        double max_x = -1.0, min_x = 1.0;
+                        double max_y = -1.0, min_y = 1.0;
+                        double max_z = -1.0, min_z = 1.0;
+                        for (const auto& point : cluster) {
+                            center += point.head(3);
+                            min_x = std::min(min_x, point[0]);
+                            max_x = std::max(max_x, point[0]);
+                            min_y = std::min(min_y, point[1]);
+                            max_y = std::max(max_y, point[1]);
+                            min_z = std::min(min_z, point[2]);
+                            max_z = std::max(max_z, point[2]);
                         }
+
+                        center /= cluster.size();
+                        center = arma::normalise(center);
+
+                        // Use the average of the extreme coordinates to determine the radius
+                        double radius =
+                            (std::abs(max_x - min_x) + std::abs(max_y - min_y) + std::abs(max_z - min_z)) / 6.0;
+
+                        // Work out the width distance
+                        arma::vec3 topCam   = arma::normalise(center + arma::vec3({0, 0, radius}));
+                        arma::vec3 baseCam  = arma::normalise(center - arma::vec3({0, 0, radius}));
+                        arma::vec3 leftCam  = arma::normalise(center + arma::vec3({0, radius, 0}));
+                        arma::vec3 rightCam = arma::normalise(center - arma::vec3({0, radius, 0}));
+
+                        arma::vec2 top   = projectCamSpaceToScreen(topCam, cam);
+                        arma::vec2 base  = projectCamSpaceToScreen(baseCam, cam);
+                        arma::vec2 left  = projectCamSpaceToScreen(leftCam, cam);
+                        arma::vec2 right = projectCamSpaceToScreen(rightCam, cam);
+
+                        // https://en.wikipedia.org/wiki/Angular_diameter
+                        double delta    = std::acos(arma::dot(topCam, baseCam));
+                        double distance = field.ball_radius / std::sin(delta * 0.5);
+
+                        // Work out how far away the ball must be to be at the distance it is from the camera
+                        arma::vec3 rBCc = center * distance;
+
+                        // Attach the measurement to the object
+                        b.measurements.push_back(Ball::Measurement());
+                        b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
+                        b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
+
+                        // Ball cam space info
+                        b.cone.axis     = convert<double, 3>(center);
+                        b.cone.gradient = -std::numeric_limits<double>::max();
+
+                        // Percentage of green classified points in cluster
+                        auto numGreen    = 0;
+                        float greenRatio = 0.;
+
+                        // Cast raw image from classified image
+                        auto pixelImage = const_cast<Image*>(image.image.get())->shared_from_this();
+
+                        for (const auto& point : cluster) {
+                            // Calculate image space pixel coordinate of point
+                            auto pixel = projectCamSpaceToScreen(point.head(3), cam);
+
+                            // Check our cluster pointer for the maximum gradient
+                            b.cone.gradient = std::tan(std::acos(arma::dot(center, point.head(3))));
+
+                            // Add our points
+                            b.edgePoints.push_back(convert<double, 3>(point.head(3)));
+
+                            // Calculate number of classified green points in cluster
+                            char c = static_cast<char>(
+                                utility::vision::getPixelColour(lut,
+                                                                getPixel(pixel[0],
+                                                                         pixel[1],
+                                                                         (*pixelImage).dimensions[0],
+                                                                         (*pixelImage).dimensions[1],
+                                                                         (*pixelImage).data,
+                                                                         static_cast<FOURCC>((*pixelImage).format))));
+
+                            if (c == Colour::GREEN) {
+                                numGreen++;
+                            }
+                        }
+
+                        if (cluster.size() > 0) {
+                            greenRatio = numGreen / float(cluster.size());
+                        }
+
+                        // Log our green ratio
+                        log("Green ratio", greenRatio);
+
+                        // Angular positions from the camera
+                        b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(center).rows(1, 2));
+                        b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
+                        b.visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
+                        b.visObject.timestamp       = NUClear::clock::now();
+                        b.visObject.sensors         = image.sensors;
+
+                        if (print_mesh_debug) {
+                            log("Gradient",
+                                b.cone.gradient,
+                                "Center",
+                                center.t(),
+                                "Radius",
+                                radius,
+                                "Distance",
+                                distance,
+                                "rBCc",
+                                rBCc.t(),
+                                "Vision object: screenAngular",
+                                b.visObject.screenAngular.transpose(),
+                                "Vision object: angularSize",
+                                b.visObject.angularSize.transpose());
+                        }
+
+
+                        /***********************************************
+                         *                  THROWOUTS                  *
+                         ***********************************************/
+
+                        // CENTRE OF BALL IS ABOVE THE VISUAL HORIZON
+                        arma::ivec2 centre_im = getImageFromCam(center, cam);
+                        if (utility::vision::visualHorizonAtPoint(image, centre_im[0]) > centre_im[1]
+                            || arma::dot(convert<double, 3>(image.horizon_normal), center) > 0) {
+                            if (print_throwout_logs) {
+                                log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
+                                log("Horizon normal = ", image.horizon_normal.transpose());
+                                log("Ball centre ray = ", center.t());
+                            }
+                            continue;
+                        }
+
+                        // DISTANCE IS LESS THAN HALF OF CAM HEIGHT
+                        const auto& sensors            = *image.sensors;
+                        const arma::mat44& camToGround = convert<double, 4, 4>(sensors.camToGround);
+                        const double cameraHeight      = camToGround(2, 3);
+
+                        if (distance < cameraHeight * 0.5) {
+                            if (print_throwout_logs) {
+                                log("Ball discarded: distance < cameraHeight * 0.5");
+                                log("distance =", distance, "cameraHeight =", cameraHeight);
+                            }
+                            continue;
+                        }
+
+                        // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
+                        // Project this vector to a plane midway through the ball
+                        Plane ballBisectorPlane({0, 0, 1}, {0, 0, field.ball_radius});
+                        arma::vec3 ballCentreGroundProj     = projectCamToPlane(center, camToGround, ballBisectorPlane);
+                        double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
+
+                        if (std::abs((distance - ballCentreGroundProjDistance)
+                                     / std::max(ballCentreGroundProjDistance, distance))
+                            > MAXIMUM_DISAGREEMENT_RATIO) {
+                            if (print_throwout_logs)
+                                log("Ball discarded: Width and proj distance disagree too much: width =",
+                                    distance,
+                                    "proj =",
+                                    ballCentreGroundProjDistance);
+                            continue;
+                        }
+
+                        // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
+                        if (distance > field.dimensions.field_length) {
+                            if (print_throwout_logs) {
+                                log("Ball discarded: Distance to ball greater than field length: distance =",
+                                    distance,
+                                    "field length=",
+                                    field.dimensions.field_length);
+                            }
+                            continue;
+                        }
+
+                        log("Distance : ", distance);
+
+                        balls->push_back(std::move(b));
                     }
 
-                    emit(utility::nusight::drawVisionLines(lines));
-                }
+                    /***********************************************
+                     *                  CLUSTERS DRAW              *
+                     ***********************************************/
 
-                emit(std::move(balls));
-            });
+                    if (draw_cluster) {
+                        std::vector<
+                            std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                            Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+                            lines;
+                        for (size_t i = 0; i < clusters.size(); ++i) {
+
+                            arma::vec3 axis(arma::fill::zeros);
+                            for (const auto& point : clusters[i]) {
+                                axis += point.head(3);
+                            }
+
+                            axis /= clusters[i].size();
+                            axis = arma::normalise(axis);
+
+                            Eigen::Vector2i center = convert<int, 2>(screenToImage(
+                                projectCamSpaceToScreen(axis, cam), convert<uint, 2>(cam.imageSizePixels)));
+
+                            // Average all the points in the cluster to find the center
+                            for (size_t j = 0; j < (clusters[i].size()); ++j) {
+                                Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0.50, clusters[i][j][3] < 0.5, 1);
+
+                                Eigen::Vector2i point =
+                                    convert<int, 2>(screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), cam),
+                                                                  convert<uint, 2>(cam.imageSizePixels)));
+
+                                lines.emplace_back(center.cast<int>(), point.cast<int>(), colour);
+                            }
+                        }
+                        emit(utility::nusight::drawVisionLines(lines));
+                    }
+                    emit(std::move(balls));
+                });
     }
 }  // namespace vision
 }  // namespace module
