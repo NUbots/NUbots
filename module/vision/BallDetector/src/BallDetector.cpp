@@ -221,8 +221,7 @@ namespace vision {
                             // Make sure our confidence is above the threshold
                             // Make sure we haven't visited the point before
                             if ((mesh.classifications.back().values[n[j] * dim] >= mesh_branch_confidence_threshold)
-                                && (n[j] != int(mesh.coordinates.size()))
-                                && (n[j] != 0)) {
+                                && (n[j] != int(mesh.coordinates.size())) && (n[j] != 0)) {
                                 if (visited_indices.find(n[j]) == visited_indices.end()) {
                                     search_queue.push(n[j]);  // Add to our BFS queue
                                 }
@@ -235,8 +234,7 @@ namespace vision {
                                     if ((visited_indices.find(l) == visited_indices.end())
                                         && (mesh.classifications.back().values[l * dim]
                                             >= mesh_branch_confidence_threshold)
-                                        && (l != int(mesh.coordinates.size()))
-                                        && (l != 0)) {
+                                        && (l != int(mesh.coordinates.size())) && (l != 0)) {
                                         edge = false;
                                     }
                                 }
