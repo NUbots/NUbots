@@ -152,8 +152,7 @@ namespace vision {
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
-                        && (segment.previous > -1)
-                        && (segment.next > -1)) {
+                        && (segment.previous > -1) && (segment.next > -1)) {
                         segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
                                                                            convert<uint, 2>(cam.imageSizePixels)),
                                                              cam),
