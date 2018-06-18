@@ -268,9 +268,6 @@ namespace vision {
                     // We then need to create ransac models for each of these 'clusters' to fit a circle
                     const auto& image = *rawImage;
 
-
-                    // log("Visual Mesh Triggered");
-
                     // Get our coordinate clusters in camera space
                     std::vector<std::vector<arma::vec4>> clusters = findClusters(mesh, cam);
 
@@ -284,7 +281,6 @@ namespace vision {
                     }
 
                     for (const auto& cluster : clusters) {
-                        // log("cluster:", i, " of ", int(clusters.size()));
                         Ball b;
 
                         // Average all the points in the cluster to find the center
