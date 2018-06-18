@@ -91,69 +91,6 @@ namespace vision {
     using FOURCC = utility::vision::FOURCC;
     using Colour = utility::vision::Colour;
 
-
-    float BallDetector::approximateCircleGreenRatio(const RansacConeModel& cone,
-                                                    const Image& image,
-                                                    const LookUpTable& lut,
-                                                    const CameraParameters& params) {
-        std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> debug;
-        float r           = 0;
-        int numGreen      = 0;
-        int actualSamples = 0;
-        for (int i = 0; i < green_radial_samples; r = (++i) * cone.gradient / float(green_radial_samples)) {
-            float theta = 0;
-            if (r == 0) {
-                arma::vec2 pos   = projectCamSpaceToScreen(cone.unit_axis, params);
-                arma::ivec2 ipos = screenToImage(pos, convert<uint, 2>(params.imageSizePixels));
-                if (ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0
-                    && ipos[1] < int(image.dimensions[1])) {
-                    debug.push_back(std::make_pair(convert<int, 2>(ipos), convert<int, 2>(ipos + arma::ivec2{1, 1})));
-                    char c =
-                        static_cast<char>(utility::vision::getPixelColour(lut,
-                                                                          getPixel(ipos[0],
-                                                                                   ipos[1],
-                                                                                   image.dimensions[0],
-                                                                                   image.dimensions[1],
-                                                                                   image.data,
-                                                                                   static_cast<FOURCC>(image.format))));
-
-                    if (c == Colour::GREEN) {
-                        numGreen++;
-                    }
-                    actualSamples++;
-                }
-                continue;
-            }
-            for (int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
-                arma::vec2 pos   = projectCamSpaceToScreen(cone.getPoint(r, theta), params);
-                arma::ivec2 ipos = screenToImage(pos, convert<uint, 2>(params.imageSizePixels));
-                if (ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0
-                    && ipos[1] < int(image.dimensions[1])) {
-                    debug.push_back(std::make_pair(convert<int, 2>(ipos), convert<int, 2>(ipos + arma::ivec2{1, 1})));
-                    char c =
-                        static_cast<char>(utility::vision::getPixelColour(lut,
-                                                                          getPixel(ipos[0],
-                                                                                   ipos[1],
-                                                                                   image.dimensions[0],
-                                                                                   image.dimensions[1],
-                                                                                   image.data,
-                                                                                   static_cast<FOURCC>(image.format))));
-
-                    if (c == Colour::GREEN) {
-                        numGreen++;
-                    }
-                    actualSamples++;
-                }
-            }
-            // sample point in lut and check if == Colour::GREEN
-        }
-
-        emit(drawVisionLines(debug));
-
-        float greenRatio = actualSamples == 0 ? 1 : (numGreen / float(actualSamples));
-        return greenRatio;
-    }
-
     std::vector<std::vector<arma::vec4>> BallDetector::findClusters(const VisualMesh& mesh,
                                                                     const CameraParameters& cam) {
         // Alias visual mesh parameters
