@@ -519,8 +519,6 @@ namespace vision {
                             continue;
                         }
 
-                        // log("Distance : ", distance);
-
                         // IF THE BALL IS HAS TOO HIGH OF A GREEN RATIO
                         if (greenRatio > green_ratio_threshold) {
                             if (print_throwout_logs) {
