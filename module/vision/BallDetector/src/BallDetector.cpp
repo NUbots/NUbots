@@ -434,8 +434,6 @@ namespace vision {
 
                         if (cluster.size() > 0) {
                             greenRatio = numGreen / float(cluster.size());
-                            // Log our green ratio
-                            log("Green ratio", greenRatio);
                         }
 
 
