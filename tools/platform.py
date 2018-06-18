@@ -2,8 +2,10 @@
 
 import os
 import b
+import argparse
 from termcolor import cprint
 from subprocess import call, STDOUT
+
 
 def register(command):
 
@@ -21,11 +23,18 @@ def register(command):
         if f.endswith('.cmake'):
             toolchains.append(f[:-6])
 
-    init_command.add_argument('platform', metavar='platform', choices=toolchains, help='the platform to select as the primary workspace')
+    init_command.add_argument(
+        'platform', metavar='platform', choices=toolchains, help='the platform to select as the primary workspace'
+    )
 
-    init_command.add_argument('-s', '--static', dest='static', action='store_true', help='perform a static build to get maximum performance')
+    init_command.add_argument(
+        '-s', '--static', dest='static', action='store_true', help='perform a static build to get maximum performance'
+    )
 
-def run(workspace_command, static, **kwargs):
+    init_command.add_argument('cmake_args', nargs=argparse.REMAINDER, help='Extra arguments to pass to cmake')
+
+
+def run(workspace_command, static=False, cmake_args=None, **kwargs):
     if workspace_command == 'select':
         platform = kwargs['platform']
 
@@ -61,12 +70,17 @@ def run(workspace_command, static, **kwargs):
             args.append('-DSTATIC_LIBRARIES=ON')
             args.append('-DNUCLEAR_SHARED_BUILD=OFF')
 
+        if cmake_args is not None:
+            args += cmake_args
+
         # Run cmake
         call(args)
 
         # Yell at windows users for having a crappy OS
         if not symlink_success:
             cprint('Windows does not support symlinks so we can\'t link to the build directory', 'red', attrs=['bold'])
-            cprint('Instead you will need to change to the build_{} directory to build'.format(platform), 'red', attrs=['bold'])
-
-
+            cprint(
+                'Instead you will need to change to the build_{} directory to build'.format(platform),
+                'red',
+                attrs=['bold']
+            )

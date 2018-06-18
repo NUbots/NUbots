@@ -11,7 +11,6 @@ class user_tools (String $user) {
   package { 'gdb': ensure => latest, }
   package { 'cmake-curses-gui': ensure => latest, }
   package { 'dos2unix': ensure => latest, }
-  package { 'unzip': ensure => latest, }
   package { 'graphviz': ensure => latest, }
 
   # INSTALL ROBOT HOST PARSER
