@@ -446,7 +446,7 @@ public:
                     constexpr const float alpha  = 1.6732632423543772848170429916717;
 
                     // If this is not our last layer, apply selu
-                    if (layer_no + 1 < conv.size()) {
+                    if (conv_no + 1 < structure.size() || layer_no + 1 < conv.size()) {
                         // Apply selu
                         if (vector_out) {
                             std::string e = "in" + std::to_string(layer_no + 1);
@@ -462,11 +462,10 @@ public:
                                      << alpha << "f * exp(" << e << ") - " << alpha << "f);" << std::endl;
                             }
                         }
+                        code << std::endl;
                     }
-                    code << std::endl;
-
-                    // If this is our last layer, apply softmax
-                    if (conv_no + 1 == structure.size() && layer_no + 1 == conv.size()) {
+                    else {
+                        // If this is our last layer, apply softmax
                         code << "    // Apply softmax to our final output" << std::endl;
 
                         if (vector_out) {
@@ -584,7 +583,9 @@ public:
                 case GBRG:
                 case BGGR: fmt = cl_image_format{CL_R, CL_UNORM_INT8}; break;
                 case BGRA: fmt = cl_image_format{CL_BGRA, CL_UNORM_INT8}; break;
-                case RGBA: fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8}; break;
+                case RGBA:
+                    fmt = cl_image_format{CL_RGBA, CL_UNORM_INT8};
+                    break;
                 // Oh no...
                 default: throw std::runtime_error("Unsupported image format");
             }
@@ -1588,7 +1589,7 @@ public:
             switch (lens.projection) {
                 case Lens::RECTILINEAR: projection_kernel = project_rectilinear; break;
                 case Lens::EQUIDISTANT: projection_kernel = project_equidistant; break;
-                case Lens::EQUISOLID: projection_kernel = project_equisolid; break;
+                case Lens::EQUISOLID: projection_kernel   = project_equisolid; break;
             }
 
             // Load the arguments
