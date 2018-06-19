@@ -445,19 +445,22 @@ public:
                     constexpr const float lambda = 1.0507009873554804934193349852946;
                     constexpr const float alpha  = 1.6732632423543772848170429916717;
 
-                    // Apply selu
-                    if (vector_out) {
-                        std::string e = "in" + std::to_string(layer_no + 1);
+                    // If this is not our last layer, apply selu
+                    if (layer_no + 1 < conv.size()) {
+                        // Apply selu
+                        if (vector_out) {
+                            std::string e = "in" + std::to_string(layer_no + 1);
 
-                        code << "    " << e << " = " << lambda << "f * select(" << alpha << "f * exp(" << e << ") - "
-                             << alpha << "f, in" << (layer_no + 1) << ", " << e << " > 0);"
-                             << std::endl;  // select(a, b, c) == c ? b : a
-                    }
-                    else {
-                        for (uint i = 0; i < biases.size(); ++i) {
-                            std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
-                            code << "    " << e << " = " << lambda << "f * (" << e << " > 0 ? " << e << " : " << alpha
-                                 << "f * exp(" << e << ") - " << alpha << "f);" << std::endl;
+                            code << "    " << e << " = " << lambda << "f * select(" << alpha << "f * exp(" << e
+                                 << ") - " << alpha << "f, in" << (layer_no + 1) << ", " << e << " > 0);"
+                                 << std::endl;  // select(a, b, c) == c ? b : a
+                        }
+                        else {
+                            for (uint i = 0; i < biases.size(); ++i) {
+                                std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
+                                code << "    " << e << " = " << lambda << "f * (" << e << " > 0 ? " << e << " : "
+                                     << alpha << "f * exp(" << e << ") - " << alpha << "f);" << std::endl;
+                            }
                         }
                     }
                     code << std::endl;
