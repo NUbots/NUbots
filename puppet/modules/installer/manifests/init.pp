@@ -35,6 +35,7 @@ define installer (
   $postbuild = 'echo', # Colon is a noop
   $strip_components = 1,
   $extension = 'UNKNOWN',
+  $environment = undef,
   Hash $archs = $archs,
 ) {
 
@@ -57,19 +58,29 @@ define installer (
     $libbzip         = "BZIP2_LIBPATH=${prefix}/${arch}/lib"
     $incbzip         = "BZIP2_INCLUDE=${prefix}/${arch}/include"
 
+    # Merge the provided environment with the archs environment.
+    # Duplicates are replaced with the value from the provided environment.
+    if $environment {
+      $env = deep_merge($params['environment'], $environment)
+    }
+
+    else {
+      $env = $params['environment']
+    }
+
     # "Intelligently" merge environment variables.
-    if has_key($params['environment'], 'CFLAGS') {
-      $cflags = "CFLAGS=${flags} ${params['environment']['CFLAGS']}"
-      $env0 = delete($params['environment'], 'CFLAGS')
+    if has_key($env, 'CFLAGS') {
+      $cflags = "CFLAGS=${flags} ${env['CFLAGS']}"
+      $env0 = delete($env, 'CFLAGS')
     }
 
     else {
       $cflags = "CFLAGS=${flags}"
-      $env0 = $params['environment']
+      $env0 = $env
     }
 
-    if has_key($params['environment'], 'CXXFLAGS') {
-      $cxxflags = "CXXFLAGS=${flags} ${params['environment']['CXXFLAGS']}"
+    if has_key($env, 'CXXFLAGS') {
+      $cxxflags = "CXXFLAGS=${flags} ${env['CXXFLAGS']}"
       $env1 = delete($env0, 'CXXFLAGS')
     }
 
@@ -78,8 +89,8 @@ define installer (
       $env1 = $env0
     }
 
-    if has_key($params['environment'], 'COMMON_OPT') {
-      $common_opt = "COMMON_OPT=${flags} ${params['environment']['COMMON_OPT']}"
+    if has_key($env, 'COMMON_OPT') {
+      $common_opt = "COMMON_OPT=${flags} ${env['COMMON_OPT']}"
       $env2 = delete($env1, 'COMMON_OPT')
     }
 
@@ -88,8 +99,8 @@ define installer (
       $env2 = $env1
     }
 
-    if has_key($params['environment'], 'FCOMMON_OPT') {
-      $fcommon_opt = "FCOMMON_OPT=${flags} ${params['environment']['FCOMMON_OPT']}"
+    if has_key($env, 'FCOMMON_OPT') {
+      $fcommon_opt = "FCOMMON_OPT=${flags} ${env['FCOMMON_OPT']}"
       $env3 = delete($env2, 'FCOMMON_OPT')
     }
 
@@ -98,8 +109,8 @@ define installer (
       $env3 = $env2
     }
 
-    if has_key($params['environment'], 'LDFLAGS') {
-      $linkflags  = "-L${prefix}/${arch}/lib -L${prefix}/lib ${params['environment']['LDFLAGS']}"
+    if has_key($env, 'LDFLAGS') {
+      $linkflags  = "-L${prefix}/${arch}/lib -L${prefix}/lib ${env['LDFLAGS']}"
       $env4 = delete($env3, 'LDFLAGS')
     }
 
@@ -110,8 +121,8 @@ define installer (
 
     $ldflags = "LDFLAGS=${linkflags}"
 
-    if has_key($params['environment'], 'CCASFLAGS') {
-      $ccasflags = "CCASFLAGS=${params['environment']['CCASFLAGS']}"
+    if has_key($env, 'CCASFLAGS') {
+      $ccasflags = "CCASFLAGS=${env['CCASFLAGS']}"
       $env5 = delete($env4, 'CCASFLAGS')
     }
 
@@ -120,8 +131,8 @@ define installer (
       $env5 = $env4
     }
 
-    if has_key($params['environment'], 'PKG_CONFIG_PATH') {
-      $pkgconfig = "PKG_CONFIG_PATH=${params['environment']['PKG_CONFIG_PATH']}"
+    if has_key($env, 'PKG_CONFIG_PATH') {
+      $pkgconfig = "PKG_CONFIG_PATH=${env['PKG_CONFIG_PATH']}:${prefix}/${arch}/lib/pkgconfig"
       $env6 = delete($env5, 'PKG_CONFIG_PATH')
     }
 
@@ -130,8 +141,8 @@ define installer (
       $env6 = $env5
     }
 
-    if has_key($params['environment'], 'CMAKE_PREFIX_PATH') {
-      $cmake_prefix = "CMAKE_PREFIX_PATH=${params['environment']['CMAKE_PREFIX_PATH']}"
+    if has_key($env, 'CMAKE_PREFIX_PATH') {
+      $cmake_prefix = "CMAKE_PREFIX_PATH=${env['CMAKE_PREFIX_PATH']}"
       $env7 = delete($env6, 'CMAKE_PREFIX_PATH')
     }
 
@@ -140,8 +151,8 @@ define installer (
       $env7 = $env6
     }
 
-    if has_key($params['environment'], 'LT_SYS_LIBRARY_PATH') {
-      $ltsyslibpath = "LT_SYS_LIBRARY_PATH=${params['environment']['LT_SYS_LIBRARY_PATH']}"
+    if has_key($env, 'LT_SYS_LIBRARY_PATH') {
+      $ltsyslibpath = "LT_SYS_LIBRARY_PATH=${env['LT_SYS_LIBRARY_PATH']}"
       $env8 = delete($env7, 'LT_SYS_LIBRARY_PATH')
     }
 
@@ -150,8 +161,8 @@ define installer (
       $env8 = $env7
     }
 
-    if has_key($params['environment'], 'LD_LIBRARY_PATH') {
-      $ldlibrarypath = "LD_LIBRARY_PATH=${params['environment']['LD_LIBRARY_PATH']}"
+    if has_key($env, 'LD_LIBRARY_PATH') {
+      $ldlibrarypath = "LD_LIBRARY_PATH=${env['LD_LIBRARY_PATH']}"
       $env9 = delete($env8, 'LD_LIBRARY_PATH')
     }
 
@@ -160,8 +171,8 @@ define installer (
       $env9 = $env8
     }
 
-    if has_key($params['environment'], 'CCAS') {
-      $ccas = "CCAS=${params['environment']['CCAS']}"
+    if has_key($env, 'CCAS') {
+      $ccas = "CCAS=${env['CCAS']}"
       $env10 = delete($env9, 'CCAS')
     }
 
@@ -170,11 +181,10 @@ define installer (
       $env10 = $env9
     }
 
-
-    $environment = [$cflags, $cxxflags, $common_opt, $fcommon_opt,
+    $environment = ['CC=/usr/bin/gcc', 'CXX=/usr/bin/g++', $cflags, $cxxflags, $common_opt, $fcommon_opt,
                     $ldflags, $ccas, $ccasflags, $pkgconfig, $cmake_prefix,
                     $ltsyslibpath, $ldlibrarypath,
-                    $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env9, "=")
+                    $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env10, "=")
 
     # Reduce the args array to a space separated list of arguments.
     if $args {
@@ -184,6 +194,7 @@ define installer (
       $args_str = $arg2.reduce |$args_str, $value| { "${args_str} ${value}" }
     }
 
+    $prebuild_cmd = regsubst($prebuild, 'PREFIX', "${prefix}/${arch}", 'G')
     $postbuild_cmd = regsubst($postbuild, 'PREFIX', "${prefix}/${arch}", 'G')
 
     case $extension {
@@ -211,8 +222,9 @@ define installer (
         exec { "autotools_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"autotools\" ",
-          command     => "${prebuild} &&
-                          if [ -e \"autogen.sh\" ]; then ./autogen.sh ; fi &&
+          # Sometimes, autogen.sh will automatically run configure
+          command     => "${prebuild_cmd} &&
+                          if [ -e \"autogen.sh\" ]; then NOCONFIGURE=1 ./autogen.sh; fi &&
                           ./configure ${args_str} --prefix=\"${prefix}/${arch}\" &&
                           make -j\$(nproc) &&
                           make install &&
@@ -229,7 +241,7 @@ define installer (
         exec { "cmake_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"cmake\" ",
-          command     => "${prebuild} &&
+          command     => "${prebuild_cmd} &&
                           if [ -d \"build\" ]; then rm -rf build; fi &&
                           mkdir build ; cd build &&
                           cmake .. ${args_str} -DCMAKE_BUILD_TYPE=\"Release\" -DCMAKE_C_FLAGS_RELEASE=\"${flags}\" -DCMAKE_CXX_FLAGS_RELEASE=\"${flags}\" -DCMAKE_INSTALL_PREFIX:PATH=\"${prefix}/${arch}\" &&
@@ -248,7 +260,7 @@ define installer (
         exec { "boost_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"boost\" ",
-          command     => "${prebuild} &&
+          command     => "${prebuild_cmd} &&
                           ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --without-libraries=python &&
                           ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q \\
                                 cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
@@ -266,7 +278,7 @@ define installer (
         exec { "make_${arch}_${name}":
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"make\" ",
-          command     => "${prebuild} &&
+          command     => "${prebuild_cmd} &&
                           make ${args_str} -j\$(nproc) &&
                           make ${args_str} PREFIX=\"${prefix}/${arch}\" install &&
                           ${postbuild_cmd}",

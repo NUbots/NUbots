@@ -22,18 +22,18 @@ package message.behaviour;
 
 message SoccerObjectPriority {
     enum SearchType {
-        LOST = 0;
+        LOST                    = 0;
         FIND_ADDITIONAL_OBJECTS = 1;
-        GOAL_SEARCH = 2;
-        GOAL_LEFT = 3;
-        GOAL_RIGHT = 4;
-        GROUND_LEFT = 5;
-        GROUND_RIGHT = 6;
-        OTHE = 7;
+        GOAL_SEARCH             = 2;
+        GOAL_LEFT               = 3;
+        GOAL_RIGHT              = 4;
+        GROUND_LEFT             = 5;
+        GROUND_RIGHT            = 6;
+        OTHE                    = 7;
     }
 
-    int32 ball = 1;
-    int32 goal = 2;
-    int32 line = 3;
+    int32      ball       = 1;
+    int32      goal       = 2;
+    int32      line       = 3;
     SearchType searchType = 4;
 }

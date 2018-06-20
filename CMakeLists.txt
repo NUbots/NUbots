@@ -34,7 +34,7 @@ MARK_AS_ADVANCED(
 )
 
 # Our banner file for placing at the top of the roles
-SET(NUCLEAR_ROLE_BANNER_FILE "${PROJECT_SOURCE_DIR}/cmake/banner.txt" CACHE PATH "The path the banner to print at the start of each role execution" FORCE)
+SET(NUCLEAR_ROLE_BANNER_FILE "${PROJECT_SOURCE_DIR}/cmake/banner.png" CACHE PATH "The path the banner to print at the start of each role execution" FORCE)
 
 # Include the NUClear roles system
 ADD_SUBDIRECTORY(nuclear)

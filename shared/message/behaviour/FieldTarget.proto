@@ -22,12 +22,11 @@ syntax = "proto3";
 package message.behaviour;
 
 message FieldTarget {
-	enum Target {
-		SELF = 0;
-		BALL = 1;
-		GOAL = 2;
-	}
+    enum Target {
+        SELF = 0;
+        BALL = 1;
+        GOAL = 2;
+    }
 
-	Target target = 1;
+    Target target = 1;
 }
-

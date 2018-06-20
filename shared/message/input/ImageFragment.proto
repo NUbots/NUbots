@@ -29,5 +29,5 @@ message ImageFragment {
     Image  image       = 1;
     uint32 start       = 5;
     uint32 end         = 6;
-    fmat44 cam_to_feet = 7;
+    fmat4  cam_to_feet = 7;
 }

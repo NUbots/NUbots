@@ -302,7 +302,7 @@
       position: 0.24
       gain: 50
       torque: 100
-- duration: 1000
+- duration: 700
   targets:
     - id: R_SHOULDER_ROLL
       position: -0.14

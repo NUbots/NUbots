@@ -35,12 +35,12 @@ namespace support {
     using message::vision::Ball;
     using ServoID = utility::input::ServoID;
 
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::math::matrix::Rotation3D;
+    using utility::math::vision::getFieldToCam;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::screenToImage;
-    using utility::math::vision::getFieldToCam;
 
     VirtualBall::VirtualBall() : position(arma::fill::zeros), velocity(arma::fill::zeros), diameter(0.1), rd(rand()) {}
 
@@ -89,7 +89,7 @@ namespace support {
         // Project the centre to the screen and work out the radius as if it was in the centre
         arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam), convert<uint, 2>(cam.imageSizePixels));
         // TODO actually project this
-        double radius = 100 * std::tan(angle * 0.5);
+        // double radius = 100 * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
         if (centre[0] > 0 && centre[0] < int(cam.imageSizePixels[0]) && centre[1] > 0

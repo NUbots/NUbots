@@ -242,7 +242,7 @@ bool drawCamera(CvCapture* video, float verticalFOV) {
                          float(image->width) / float(image->height),  // aspect ratio
                          0.01f,                                       // near plane distance (min z)
                          10.0f                                        // Far plane distance (max z)
-                         );
+        );
     glLoadMatrixf(glm::value_ptr(proj));
 
     checkGLError();

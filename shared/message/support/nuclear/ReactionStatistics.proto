@@ -22,14 +22,14 @@ syntax = "proto3";
 package message.support.nuclear;
 
 message ReactionStatistics {
-    string name = 1;
-    string triggerName = 2;
-    string functionName = 3;
-    uint64 reactionId = 4;
-    uint64 taskId = 5;
+    string name            = 1;
+    string triggerName     = 2;
+    string functionName    = 3;
+    uint64 reactionId      = 4;
+    uint64 taskId          = 5;
     uint64 causeReactionId = 6;
-    uint64 causeTaskId = 7;
-    uint64 emitted = 8;
-    uint64 started = 9;
-    uint64 finished = 10;
+    uint64 causeTaskId     = 7;
+    uint64 emitted         = 8;
+    uint64 started         = 9;
+    uint64 finished        = 10;
 }

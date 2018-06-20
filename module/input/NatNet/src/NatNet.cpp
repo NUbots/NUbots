@@ -41,7 +41,6 @@ namespace input {
         , dataHandle() {
 
         on<Configuration>("NatNet.yaml").then([this](const Configuration& config) {
-
             // We are updating to a new multicast address
             if (multicastAddress != config["multicast_address"].as<std::string>()
                 || dataPort != config["data_port"].as<uint32_t>()
@@ -68,7 +67,6 @@ namespace input {
                 // Create a listening UDP port for data
                 std::tie(dataHandle, std::ignore, std::ignore) =
                     on<UDP::Multicast>(multicastAddress, dataPort).then("NatNet Data", [this](UDP::Packet packet) {
-
                         // Test if we are "connected" to this remote
                         // And if we are we can use the data
                         if (remote == packet.remote.address && version != 0) {

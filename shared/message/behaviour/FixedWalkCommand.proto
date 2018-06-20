@@ -23,9 +23,12 @@ package message.behaviour;
 import "google/protobuf/duration.proto";
 import "Vector.proto";
 
-message FixedWalkFinished { }
-message WalkConfigSaved { }
-message CancelFixedWalk { }
+message FixedWalkFinished {
+}
+message WalkConfigSaved {
+}
+message CancelFixedWalk {
+}
 
 message WalkOptimiserCommand {
     string walkConfig = 1;
@@ -33,11 +36,11 @@ message WalkOptimiserCommand {
 
 message FixedWalkCommand {
     message WalkSegment {
-        vec2 direction = 1;
-        double curvePeriod = 2;
-        double normalisedVelocity = 3;
-        double normalisedAngularVelocity = 4;
-        google.protobuf.Duration duration = 5;
+        vec2                     direction                 = 1;
+        double                   curvePeriod               = 2;
+        double                   normalisedVelocity        = 3;
+        double                   normalisedAngularVelocity = 4;
+        google.protobuf.Duration duration                  = 5;
     };
 
     repeated WalkSegment segments = 1;

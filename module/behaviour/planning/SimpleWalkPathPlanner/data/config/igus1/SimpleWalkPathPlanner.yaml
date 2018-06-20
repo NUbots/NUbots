@@ -1,0 +1,13 @@
+forwardSpeed: 0.2
+sideSpeed: 0.1
+turnSpeed : 0.3
+slow_approach_factor: 0.2
+a: 7
+b: 0
+search_timeout: 3
+
+robot_ground_space: false
+
+ball_approach_dist: 0.2
+slowdown_distance: 0.3
+useLocalisation: true

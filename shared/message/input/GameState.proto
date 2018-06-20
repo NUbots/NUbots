@@ -63,25 +63,25 @@ message GameState {
         }
 
         message Team {
-            uint32 team_id         = 1; // unique team number
-            uint32 score           = 2; // team's score
-            string coach_message   = 3; // the coach's message to the team
+            uint32   team_id       = 1;  // unique team number
+            uint32   score         = 2;  // team's score
+            string   coach_message = 3;  // the coach's message to the team
             repeated Robot players = 4;
         }
 
-        Phase phase                               = 1;
-        Mode mode                                 = 2;
-        bool first_half                           = 3;
-        bool kicked_out_by_us                     = 4;
-        google.protobuf.Timestamp kicked_out_time = 5;
-        bool our_kick_off                         = 6;
-        google.protobuf.Timestamp primary_time    = 7;
-        google.protobuf.Timestamp secondary_time  = 8;
-        Team team                                 = 9;
-        Team opponent                             = 10;
-        Robot self                                = 11;
+        Phase                     phase            = 1;
+        Mode                      mode             = 2;
+        bool                      first_half       = 3;
+        bool                      kicked_out_by_us = 4;
+        google.protobuf.Timestamp kicked_out_time  = 5;
+        bool                      our_kick_off     = 6;
+        google.protobuf.Timestamp primary_time     = 7;
+        google.protobuf.Timestamp secondary_time   = 8;
+        Team                      team             = 9;
+        Team                      opponent         = 10;
+        Robot                     self             = 11;
     }
 
-    Data data = 1;
+    Data   data  = 1;
     string event = 2;
 }

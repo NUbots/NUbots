@@ -1,19 +1,19 @@
 syntax = "proto3";
 
 message vec {
-    repeated double v = 1 [packed=true];
+    repeated double v = 1 [packed = true];
 }
 
 message fvec {
-    repeated float v = 1 [packed=true];
+    repeated float v = 1 [packed = true];
 }
 
 message ivec {
-    repeated sint32 v = 1 [packed=true];
+    repeated sint32 v = 1 [packed = true];
 }
 
 message uvec {
-    repeated uint32 v = 1 [packed=true];
+    repeated uint32 v = 1 [packed = true];
 }
 
 message cvec {
@@ -21,73 +21,721 @@ message cvec {
 }
 
 message vec2 {
-     double x = 1;
-     double y = 2;
+    double x = 1;
+    double y = 2;
 }
 
 message fvec2 {
-     float x = 1;
-     float y = 2;
+    float x = 1;
+    float y = 2;
 }
 
 message ivec2 {
-     sint32 x = 1;
-     sint32 y = 2;
+    sint32 x = 1;
+    sint32 y = 2;
 }
 
 message uvec2 {
-     uint32 x = 1;
-     uint32 y = 2;
+    uint32 x = 1;
+    uint32 y = 2;
 }
 
 message vec3 {
-     double x = 1;
-     double y = 2;
-     double z = 3;
+    double x = 1;
+    double y = 2;
+    double z = 3;
 }
 
 message fvec3 {
-     float x = 1;
-     float y = 2;
-     float z = 3;
+    float x = 1;
+    float y = 2;
+    float z = 3;
 }
 
 message ivec3 {
-     sint32 x = 1;
-     sint32 y = 2;
-     sint32 z = 3;
+    sint32 x = 1;
+    sint32 y = 2;
+    sint32 z = 3;
 }
 
 message uvec3 {
-     uint32 x = 1;
-     uint32 y = 2;
-     uint32 z = 3;
+    uint32 x = 1;
+    uint32 y = 2;
+    uint32 z = 3;
 }
 
 message vec4 {
-     double x = 1;
-     double y = 2;
-     double z = 3;
-     double t = 4;
+    double x = 1;
+    double y = 2;
+    double z = 3;
+    double t = 4;
 }
 
 message fvec4 {
-     float x = 1;
-     float y = 2;
-     float z = 3;
-     float t = 4;
+    float x = 1;
+    float y = 2;
+    float z = 3;
+    float t = 4;
 }
 
 message ivec4 {
-     sint32 x = 1;
-     sint32 y = 2;
-     sint32 z = 3;
-     sint32 t = 4;
+    sint32 x = 1;
+    sint32 y = 2;
+    sint32 z = 3;
+    sint32 t = 4;
 }
 
 message uvec4 {
-     uint32 x = 1;
-     uint32 y = 2;
-     uint32 z = 3;
-     uint32 t = 4;
+    uint32 x = 1;
+    uint32 y = 2;
+    uint32 z = 3;
+    uint32 t = 4;
+}
+
+message vec5 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+}
+
+message fvec5 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+}
+
+message ivec5 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+}
+
+message uvec5 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+}
+
+message vec6 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+}
+
+message fvec6 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+}
+
+message ivec6 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+}
+
+message uvec6 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+}
+
+message vec7 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+}
+
+message fvec7 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+}
+
+message ivec7 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+}
+
+message uvec7 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+}
+
+message vec8 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+}
+
+message fvec8 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+}
+
+message ivec8 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+}
+
+message uvec8 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+}
+
+message vec9 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+}
+
+message fvec9 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+}
+
+message ivec9 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+}
+
+message uvec9 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+}
+
+message vec10 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+    double s9 = 10;
+}
+
+message fvec10 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+    float s9 = 10;
+}
+
+message ivec10 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+    sint32 s9 = 10;
+}
+
+message uvec10 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+    uint32 s9 = 10;
+}
+
+message vec11 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+    double s9 = 10;
+    double sa = 11;
+}
+
+message fvec11 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+    float s9 = 10;
+    float sa = 11;
+}
+
+message ivec11 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+    sint32 s9 = 10;
+    sint32 sa = 11;
+}
+
+message uvec11 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+    uint32 s9 = 10;
+    uint32 sa = 11;
+}
+
+message vec12 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+    double s9 = 10;
+    double sa = 11;
+    double sb = 12;
+}
+
+message fvec12 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+    float s9 = 10;
+    float sa = 11;
+    float sb = 12;
+}
+
+message ivec12 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+    sint32 s9 = 10;
+    sint32 sa = 11;
+    sint32 sb = 12;
+}
+
+message uvec12 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+    uint32 s9 = 10;
+    uint32 sa = 11;
+    uint32 sb = 12;
+}
+
+message vec13 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+    double s9 = 10;
+    double sa = 11;
+    double sb = 12;
+    double sc = 13;
+}
+
+message fvec13 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+    float s9 = 10;
+    float sa = 11;
+    float sb = 12;
+    float sc = 13;
+}
+
+message ivec13 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+    sint32 s9 = 10;
+    sint32 sa = 11;
+    sint32 sb = 12;
+    sint32 sc = 13;
+}
+
+message uvec13 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+    uint32 s9 = 10;
+    uint32 sa = 11;
+    uint32 sb = 12;
+    uint32 sc = 13;
+}
+
+message vec14 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+    double s9 = 10;
+    double sa = 11;
+    double sb = 12;
+    double sc = 13;
+    double sd = 14;
+}
+
+message fvec14 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+    float s9 = 10;
+    float sa = 11;
+    float sb = 12;
+    float sc = 13;
+    float sd = 14;
+}
+
+message ivec14 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+    sint32 s9 = 10;
+    sint32 sa = 11;
+    sint32 sb = 12;
+    sint32 sc = 13;
+    sint32 sd = 14;
+}
+
+message uvec14 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+    uint32 s9 = 10;
+    uint32 sa = 11;
+    uint32 sb = 12;
+    uint32 sc = 13;
+    uint32 sd = 14;
+}
+
+message vec15 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+    double s9 = 10;
+    double sa = 11;
+    double sb = 12;
+    double sc = 13;
+    double sd = 14;
+    double se = 15;
+}
+
+message fvec15 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+    float s9 = 10;
+    float sa = 11;
+    float sb = 12;
+    float sc = 13;
+    float sd = 14;
+    float se = 15;
+}
+
+message ivec15 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+    sint32 s9 = 10;
+    sint32 sa = 11;
+    sint32 sb = 12;
+    sint32 sc = 13;
+    sint32 sd = 14;
+    sint32 se = 15;
+}
+
+message uvec15 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+    uint32 s9 = 10;
+    uint32 sa = 11;
+    uint32 sb = 12;
+    uint32 sc = 13;
+    uint32 sd = 14;
+    uint32 se = 15;
+}
+
+message vec16 {
+    double s0 = 1;
+    double s1 = 2;
+    double s2 = 3;
+    double s3 = 4;
+    double s4 = 5;
+    double s5 = 6;
+    double s6 = 7;
+    double s7 = 8;
+    double s8 = 9;
+    double s9 = 10;
+    double sa = 11;
+    double sb = 12;
+    double sc = 13;
+    double sd = 14;
+    double se = 15;
+    double sf = 16;
+}
+
+message fvec16 {
+    float s0 = 1;
+    float s1 = 2;
+    float s2 = 3;
+    float s3 = 4;
+    float s4 = 5;
+    float s5 = 6;
+    float s6 = 7;
+    float s7 = 8;
+    float s8 = 9;
+    float s9 = 10;
+    float sa = 11;
+    float sb = 12;
+    float sc = 13;
+    float sd = 14;
+    float se = 15;
+    float sf = 16;
+}
+
+message ivec16 {
+    sint32 s0 = 1;
+    sint32 s1 = 2;
+    sint32 s2 = 3;
+    sint32 s3 = 4;
+    sint32 s4 = 5;
+    sint32 s5 = 6;
+    sint32 s6 = 7;
+    sint32 s7 = 8;
+    sint32 s8 = 9;
+    sint32 s9 = 10;
+    sint32 sa = 11;
+    sint32 sb = 12;
+    sint32 sc = 13;
+    sint32 sd = 14;
+    sint32 se = 15;
+    sint32 sf = 16;
+}
+
+message uvec16 {
+    uint32 s0 = 1;
+    uint32 s1 = 2;
+    uint32 s2 = 3;
+    uint32 s3 = 4;
+    uint32 s4 = 5;
+    uint32 s5 = 6;
+    uint32 s6 = 7;
+    uint32 s7 = 8;
+    uint32 s8 = 9;
+    uint32 s9 = 10;
+    uint32 sa = 11;
+    uint32 sb = 12;
+    uint32 sc = 13;
+    uint32 sd = 14;
+    uint32 se = 15;
+    uint32 sf = 16;
 }

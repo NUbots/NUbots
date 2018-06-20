@@ -29,30 +29,32 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
+#include "utility/math/comparison.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 
 namespace module {
 namespace motion {
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using message::input::Sensors;
-    using utility::behaviour::RegisterAction;
     using extension::Configuration;
     using message::behaviour::ServoCommand;
+    using message::input::Sensors;
     using message::motion::HeadCommand;
-    using utility::math::coordinates::sphericalToCartesian;
+    using message::motion::KinematicsModel;
+    using utility::behaviour::RegisterAction;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::sphericalToCartesian;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
-    using message::motion::KinematicsModel;
     using utility::support::Expression;
 
     // internal only callback messages to start and stop our action
@@ -84,23 +86,23 @@ namespace motion {
                     HeadCommand{config["initial"]["yaw"].as<float>(), config["initial"]["pitch"].as<float>(), false}));
 
                 p_gain = config["p_gain"].as<float>();
-
             });
 
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
             goalRobotSpace = command.robotSpace;
             if (goalRobotSpace) {
-                goalAngles = {command.yaw, command.pitch};
+                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
+                              utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
             }
             else {
-                goalAngles = {command.yaw, -command.pitch};
+                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
+                              -utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
             }
         });
 
         updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>().then(
             "Head Controller - Update Head Position",
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
                 // P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;

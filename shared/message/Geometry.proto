@@ -25,18 +25,18 @@ import "Vector.proto";
 import "Matrix.proto";
 
 message Line {
-    vec2 normal = 1;
+    vec2   normal   = 1;
     double distance = 2;
 }
 
 message Circle {
-	double radius = 1;
-	vec2 centre = 2;
+    double radius = 1;
+    vec2   centre = 2;
 }
 
 message Ellipse {
     // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
-    mat33 ellipse = 1;
+    mat3 ellipse = 1;
 }
 
 message Quad {
@@ -58,6 +58,6 @@ message Frustum {
 }
 
 message Cone {
-    vec3 axis = 1;
+    vec3   axis     = 1;
     double gradient = 2;
 }

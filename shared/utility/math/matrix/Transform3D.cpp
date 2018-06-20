@@ -36,7 +36,7 @@ namespace math {
         }
 
         Transform3D::Transform(const Rotation3D& rotation, const arma::vec3& translation) : Transform() {
-            submat(0, 0, 2, 2) = rotation;
+            submat(0, 0, 2, 2)  = rotation;
             this->translation() = translation;
         }
 

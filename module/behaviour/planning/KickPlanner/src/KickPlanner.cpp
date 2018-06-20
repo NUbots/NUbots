@@ -38,7 +38,7 @@
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -52,6 +52,7 @@ namespace behaviour {
         using message::behaviour::KickPlan;
         using KickType = message::behaviour::KickPlan::KickType;
         using message::behaviour::WantsToKick;
+        using message::input::Sensors;
         using message::localisation::Ball;
         using message::localisation::Field;
         using message::input::GameState;
@@ -63,18 +64,18 @@ namespace behaviour {
         using message::motion::KickCommand;
         using message::platform::darwin::ButtonMiddleDown;
         using KickCommandType = message::motion::KickCommandType;
-        using message::motion::KickScriptCommand;
         using message::motion::KickPlannerConfig;
+        using message::motion::KickScriptCommand;
         using message::motion::KinematicsModel;
         using message::support::FieldDescription;
 
         using LimbID = utility::input::LimbID;
-        using utility::math::matrix::Transform3D;
-        using utility::math::matrix::Rotation2D;
-        using utility::math::coordinates::sphericalToCartesian;
-        using utility::motion::kinematics::legPoseValid;
-        using utility::nubugger::graph;
         using utility::localisation::fieldStateToTransform3D;
+        using utility::math::coordinates::sphericalToCartesian;
+        using utility::math::matrix::Rotation2D;
+        using utility::math::matrix::Transform3D;
+        using utility::motion::kinematics::legPoseValid;
+        using utility::nusight::graph;
 
         KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -197,7 +198,6 @@ namespace behaviour {
                              || timeSinceValid > cfg.seconds_not_seen_limit) {
                         emit(std::make_unique<WantsToKick>(WantsToKick(false)));
                     }
-
                 });
         }
 
