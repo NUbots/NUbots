@@ -46,6 +46,50 @@ namespace extension {
 
             for (const auto& t : global_tasks) {
 
+                // We should have a current state tree (which initially may be empty), a transitional state tree and a
+                // new state tree. The current state tree represents what was last executed.
+                //
+                // The transitional state tree is used when we are trying to change states, but there are some leaving
+                // reactions in the current state tree that are preventing us from changing. Often this tree will be
+                // empty after each iteration as completed transitions are moved into the current state tree.
+                //
+                // The new state tree is the one we are generating and it represents our desired state change.
+                // If at some point while generating the new state tree we reach an impasse where we are unable to
+                // change states due to a condition our progress so far is stored within the transitional state tree. In
+                // these times we will instead run a modified version of the current state tree.
+                //
+                // The algorithm for generating is recursively done for each level using the global tasks first, and
+                // then local tasks from each provider.
+                //
+                // We take the set of tasks and the current state tree and use them to work out which reactions need to
+                // be updated. As we generate a new state tree we compare it to the current state tree. While doing this
+                // there are a few situations that can occur
+                //      1st: the node we generated is identical to the transitional, or if it does not exist current
+                //      state tree and with identical data.
+                //          Do nothing (do not execute this reaction) and continue down the tree
+                //      2nd: the node we generated is identical to the transitional, or if it does not exist current
+                //      state tree, but with different data
+                //          Execute this node of the graph, and then continue to generate the state tree
+                //      3rd: the node we generated is different to the current state tree
+                //          From the bottom of the now dead branch of the current/transitional state tree up, gather any
+                //          leaving reactions but do not execute them yet as we may not actually be leaving depending on
+                //          what is lower in our own tree
+                //      4th: We want to generate a different state tree, but we are blocked by a when condition
+                //          The branches of the new state tree that we have generated thus far becomes a part of the
+                //          transitional tree. Then from the bottom of the now dead branch up of the current state tree
+                //          up, in addition to any we gathered in a 3rd step from above check to see if any of them have
+                //          a leaving reaction that will fulfil our when condition and if so, execute that branch of the
+                //          tree. Otherwise, try to find an entering reaction for our current branch that fulfils the
+                //          condition and execute that instead.
+                //      5th: We have reached a leaf node of our existing tree without changing anything in our subgraph
+                //          In this case, we want to run the parent of this component again so that it will generate a
+                //          new task for the leaf node. This scheme can be used to allow things to continuously execute
+                //          and draw more data as needed. For example, if the task was to move the leg through an IK
+                //          pose, once it reached the target position the Provider who asked to move the leg to that
+                //          position would execute again, potentially providing a new pose. Or if that provider had
+                //          finished its task, it may emit an empty task in which case it's parent would run (perhaps a
+                //          walk engine step phase).
+
                 // TODO
                 // Basically we have a tree of providers that we can use to complete tasks
                 // We take each of our global tasks and based on priority we send them through the tree of providers
