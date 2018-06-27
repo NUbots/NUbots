@@ -12,7 +12,7 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/time/time.h"
@@ -29,7 +29,7 @@ namespace localisation {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::matrix::Transform3D;
     using ServoID = utility::input::ServoID;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), filter() {
@@ -84,7 +84,6 @@ namespace localisation {
         /* To run whenever a ball has been detected */
         on<Trigger<std::vector<message::vision::Ball>>, With<FieldDescription>>().then(
             [this](const std::vector<message::vision::Ball>& balls, const FieldDescription& field) {
-
                 if (balls.size() > 0) {
                     /* Call Time Update first */
                     auto curr_time        = NUClear::clock::now();

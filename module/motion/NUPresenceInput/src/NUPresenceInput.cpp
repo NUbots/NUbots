@@ -139,12 +139,10 @@ namespace motion {
             mocap_to_robot         = arma::join_rows(mocap_x_axis, arma::join_rows(mocap_y_axis, mocap_z_axis));
 
             gyro_compensation = config["gyro_compensation"].as<bool>();
-
         });
 
         on<Network<PresenceUserState>, Sync<NUPresenceInput>>().then(
             "NUPresenceInput Network Input", [this](const PresenceUserState& user) {
-
                 // Rotate to robot coordinate system
                 goalCamPose = arma::conv_to<arma::mat>::from(convert<float, 4, 4>(user.head_pose));
                 goalCamPose = camera_to_robot * goalCamPose.i() * camera_to_robot.t();
@@ -157,7 +155,6 @@ namespace motion {
                 // std::cout << "goalCamPose = \n" << goalCamPose << std::endl;
                 // std::cout << "robotCamPos = " << user.head_pose().t().x() << " "<<  user.head_pose().t().y() << " "<<
                 // user.head_pose().t().z() << std::endl;
-
             });
 
         on<Trigger<MotionCapture>, Sync<NUPresenceInput>>().then([this](const MotionCapture& mocap) {
@@ -192,7 +189,6 @@ namespace motion {
 
         on<Every<60, Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Sync<NUPresenceInput>>().then(
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-
                 // Record current arm position:
                 // arma::vec3 prevArmJointsL = {
                 //                          sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,

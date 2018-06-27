@@ -50,7 +50,6 @@ namespace behaviour {
 
             on<Trigger<LocalisationBall>, With<std::vector<VisionBall>>>().then(
                 [this](const LocalisationBall& ball, const std::vector<VisionBall>& vision_balls) {
-
                     if (vision_balls.size() > 0 &&  // It means a ball was detected.
                         ball.position[0] > 0 &&     //
                         -ball.velocity[0] > SPEED_THRESHOLD

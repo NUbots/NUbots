@@ -35,7 +35,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace module {
 namespace behaviour {
@@ -105,7 +105,6 @@ namespace behaviour {
                 cfg_.walk_to_far_forward_speed   = config["walk_to_far_forward_speed"].as<double>();
                 cfg_.walk_to_near_speed          = config["walk_to_near_speed"].as<double>();
                 cfg_.goal_close_distance         = config["goal_close_distance"].as<double>();
-
             });
 
             // Enable/Disable path following based on the current motion command.
@@ -134,7 +133,6 @@ namespace behaviour {
                 on<Trigger<WalkPath>, With<std::vector<Self>>, Sync<WalkPathFollower>, Single>()
                     .then("Update current path plan",
                           [this](const WalkPath& walkPath, const std::vector<Self>& selfs) {
-
                               currentPath = walkPath;
 
                               // Draw the robot's estimated path:
@@ -146,7 +144,7 @@ namespace behaviour {
                                   auto self                = selfs.front();
                                   Transform2D currentState = {self.position, vectorToBearing(self.heading)};
                                   auto estPath             = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
-                                  emit(utility::nubugger::drawPath(
+                                  emit(utility::nusight::drawPath(
                                       "WPF_EstimatedPath", estPath.states, 0.05, {1, 0.8, 0}));
                               }
                           })
@@ -169,12 +167,12 @@ namespace behaviour {
 
                             // Get the robot's current state as a Transform2D:
                             Transform2D currentState = {self.position, vectorToBearing(self.heading)};
-                            emit(utility::nubugger::drawRectangle("WPF_RobotFootprint",
-                                                                  RotatedRectangle(currentState, {0.12, 0.17})));
-                            emit(utility::nubugger::drawRectangle("WPF_GoalState",
-                                                                  RotatedRectangle(currentPath.goal, {0.12, 0.17}),
-                                                                  {0.4, 0.4, 0.4},
-                                                                  0.123));
+                            emit(utility::nusight::drawRectangle("WPF_RobotFootprint",
+                                                                 RotatedRectangle(currentState, {0.12, 0.17})));
+                            emit(utility::nusight::drawRectangle("WPF_GoalState",
+                                                                 RotatedRectangle(currentPath.goal, {0.12, 0.17}),
+                                                                 {0.4, 0.4, 0.4},
+                                                                 0.123));
 
                             // if (cfg_.follow_path_in_ball_space &&
                             //     currentPath.command.type == MotionCommand::Type::BallApproach) {
@@ -222,7 +220,7 @@ namespace behaviour {
                                 walkCommand = std::make_unique<WalkCommand>(walkBetweenFar(currentState, targetState));
                             }
 
-                            // emit(utility::nubugger::drawArrow("WPF_Closest_Arrow",
+                            // emit(utility::nusight::drawArrow("WPF_Closest_Arrow",
                             // currentState.localToWorld(walkCommand->command), {1,1,1}, 1));
                             arma::vec2 arrowTip = currentState.localToWorld(walkCommand->command).xy();
                             arma::vec2 dirPoint =
@@ -230,21 +228,21 @@ namespace behaviour {
                                     .localToWorld({walkCommand->command.rotation() * walkCommand->command.xy(), 0})
                                     .xy();
 
-                            emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", currentState.xy(), arrowTip, 1));
-                            emit(utility::nubugger::drawArrow("WPF_Closest_Arrow_Rotation", arrowTip, dirPoint, 1));
+                            emit(utility::nusight::drawArrow("WPF_Closest_Arrow", currentState.xy(), arrowTip, 1));
+                            emit(utility::nusight::drawArrow("WPF_Closest_Arrow_Rotation", arrowTip, dirPoint, 1));
 
                             emit(std::move(walkCommand));
 
-                            emit(utility::nubugger::drawRectangle(
+                            emit(utility::nusight::drawRectangle(
                                 "WPF_Closest", RotatedRectangle(targetState, {0.12, 0.17}), {0, 0, 0}));
 
-                            emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", targetState, {1, 0, 1}, 1));
+                            emit(utility::nusight::drawArrow("WPF_Closest_Arrow", targetState, {1, 0, 1}, 1));
 
                             // // Remove unnecessary (visited) states from the path:
                             // int removed = trimPath(currentState, currentPath);
                             // if (removed && cfg_.draw_estimated_path) {
                             //     auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
-                            //     emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05,
+                            //     emit(utility::nusight::drawPath("WPF_EstimatedPath", estPath.states, 0.05,
                             //     {1,0.8,0}));
                             // }
 
@@ -259,7 +257,7 @@ namespace behaviour {
 
             // Find the index of the closest state:
             auto closestIndex = closestPathIndex(currentState, walkPath);
-            // emit(utility::nubugger::drawRectangle("WPF_Closest", RotatedRectangle(walkPath.states[closestIndex],
+            // emit(utility::nusight::drawRectangle("WPF_Closest", RotatedRectangle(walkPath.states[closestIndex],
             // {0.12, 0.17}), {0, 0, 0}));
 
             // Check if we're close enough to have 'visited' the closest state:
@@ -270,7 +268,7 @@ namespace behaviour {
             // Remove all states before the closest state:
             if (closestIndex != 0) {
                 walkPath.states.erase(walkPath.states.begin(), walkPath.states.begin() + closestIndex);
-                // emit(utility::nubugger::drawPath("OMPLPP_Path", walkPath.states, 0.1, {0,0.5,0.5}));
+                // emit(utility::nusight::drawPath("OMPLPP_Path", walkPath.states, 0.1, {0,0.5,0.5}));
             }
 
             // Return the number of states removed from the path.
@@ -310,7 +308,7 @@ namespace behaviour {
             // Aim for the index after the closest state:
             int targetIndex         = std::min(1, int(currentPath.states.size()) - 1);
             Transform2D targetState = currentPath.states[targetIndex];  // {3, 3, 3.14};
-            emit(utility::nubugger::drawRectangle(
+            emit(utility::nusight::drawRectangle(
                 "WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
 
             std::unique_ptr<WalkCommand> command;

@@ -8,7 +8,7 @@
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -22,7 +22,7 @@ namespace localisation {
     using message::platform::darwin::ButtonLeftDown;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
 
     OdometryLocalisation::OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -42,7 +42,6 @@ namespace localisation {
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
-
             Transform2D Trw = Transform3D(convert<double, 4, 4>(sensors.world)).projectTo2D();
             Transform2D Twr = Trw.i();
 

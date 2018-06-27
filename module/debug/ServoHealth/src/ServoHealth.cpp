@@ -12,7 +12,7 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 
 namespace module {
@@ -26,7 +26,7 @@ namespace debug {
 
     using message::support::ServoHealthTestData;
     using utility::behaviour::RegisterAction;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using State   = message::support::ServoHealthTestData::State;
@@ -63,7 +63,6 @@ namespace debug {
             [this](const std::set<ServoID>&) { emit(std::make_unique<ScriptEnd>()); }}));
 
         on<Trigger<DarwinSensors>>().then("Log Servo Data", [this](const DarwinSensors& sensors) {
-
             // If this is a testing state
             if (state != State::INITIALISE && state != State::MOVE_1 && state != State::MOVE_2
                 && state != State::SHOULDER_MOVE_1 && state != State::MOVE_3 && state != State::MOVE_4

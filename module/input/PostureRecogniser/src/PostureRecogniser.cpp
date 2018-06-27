@@ -33,7 +33,7 @@ namespace input {
 
     using utility::input::ServoLoadModel;
     using utility::math::filter::UKF;
-    using utility::nubugger::graph;
+    using utility::nusight::graph;
     using utility::time::TimeDifferenceSeconds;
 
     /*=======================================================================================================*/

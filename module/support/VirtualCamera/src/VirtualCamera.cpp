@@ -46,13 +46,16 @@ namespace support {
         : Reactor(std::move(environment)), emitImageHandle() {
 
         emitImageHandle = on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then(
-            "Simulated Images (VCamera)", [this](const CameraParameters& cam) {
+            "Simulated Images (VCamera)", [this]() {
+                auto msg           = std::make_unique<message::input::Image>();
+                msg->format        = FOURCC::BGGR;
+                msg->camera_id     = 0;
+                msg->serial_number = "VirtualCamera";
+                msg->timestamp     = NUClear::clock::now();
+                msg->Hcw           = Hcw;
 
-                // 2 Bytes per pixel
-                std::vector<uint8_t> data(2 * cam.imageSizePixels[0] * cam.imageSizePixels[1], 255);  // White pixels
-                emit(std::make_unique<Image>(
-                    FOURCC::YUYV, cam.imageSizePixels, std::move(data), 0, "VirtualCamera", NUClear::clock::now()));
-
+                utility::vision::loadImage(imagePath, *msg);
+                emit(msg);
             });
 
         on<Configuration>("VirtualLookUpTable.yaml").then([this](const Configuration& config) {
@@ -75,6 +78,14 @@ namespace support {
                 // TODO: configure the offset? probably not necessary for pinhole
                 cameraParameters->centreOffset = Eigen::Vector2i::Zero();
 
+                imagePath = config["image"]["path"].as<std::string>();
+
+                for (size_t row = 0; row < config["image"]["Hcw"].config.size(); row++) {
+                    for (size_t col = 0; col < config["image"]["Hcw"][row].config.size(); col++) {
+                        Hcw(row, col) = config["image"]["Hcw"][row][col].as<double>();
+                    }
+                }
+
                 if (config["lens_type"].as<std::string>().compare("pinhole") == 0) {
                     // Pinhole specific
                     cameraParameters->lens                     = CameraParameters::LensType::PINHOLE;
@@ -89,10 +100,8 @@ namespace support {
                 }
                 else if (config["lens_type"].as<std::string>().compare("radial") == 0) {
                     // Radial specific
-                    cameraParameters->lens = CameraParameters::LensType::RADIAL;
-                    cameraParameters->radial.radiansPerPixel =
-                        cameraParameters->FOV[0]
-                        / cameraParameters->imageSizePixels[0];  // config["lens"]["radiansPerPixel"].as<float>();
+                    cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
+                    cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
                     cameraParameters->centreOffset = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
                 }
                 else {
@@ -109,7 +118,6 @@ namespace support {
                 std::cout << "Emitting camera parameters from VirtualCamera" << std::endl;
 
                 emit<Scope::DIRECT>(std::move(cameraParameters));
-
             });
     }
 }  // namespace support

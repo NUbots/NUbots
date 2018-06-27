@@ -5,5 +5,5 @@ NUCLEAR_ROLE(
     support::logging::ConsoleLogHandler
     #Support
     support::configuration::NetworkConfiguration
-    support::NUbugger
+    support::NUsight
 )

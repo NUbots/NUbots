@@ -22,7 +22,7 @@ class NUClearGraphBuilder:
             # Don't load some super connected modules
             if module['name'] in [
                 # 'support::logging::ConsoleLogHandler',
-                # 'support::NUbugger',
+                # 'support::NUsight',
                 # 'support::extension::FileWatcher',
             ]:
                 return

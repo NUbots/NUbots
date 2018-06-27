@@ -26,13 +26,14 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"
+#include "message/vision/VisualMesh.h"
 
 #include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"
+#include "utility/math/ransac/RansacConeModel.h"
+#include "utility/math/ransac/RansacVisualMeshModel.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/vision/LookUpTable.h"
-
-#include "utility/math/ransac/RansacConeModel.h"
 
 namespace module {
 namespace vision {
@@ -47,6 +48,9 @@ namespace vision {
 
         double CONSENSUS_ERROR_THRESHOLD;
         double MAXIMUM_DISAGREEMENT_RATIO;
+
+        double mesh_seed_confidence_threshold;
+        double mesh_branch_confidence_threshold;
 
         double maximum_relative_seed_point_distance;
 
@@ -74,11 +78,16 @@ namespace vision {
         Frame lastFrame;
 
         bool print_throwout_logs;
+        bool print_mesh_debug;
+        bool draw_cluster;
 
-        float approximateCircleGreenRatio(const utility::math::ransac::RansacConeModel& circle,
+        float approximateCircleGreenRatio(const utility::math::ransac::RansacConeModel& cone,
                                           const message::input::Image& image,
                                           const message::vision::LookUpTable& lut,
                                           const message::input::CameraParameters& params);
+
+        std::vector<std::vector<arma::vec4>> findClusters(const message::vision::VisualMesh& mesh,
+                                                          const message::input::CameraParameters& cam);
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.

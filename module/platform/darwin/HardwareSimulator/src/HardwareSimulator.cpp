@@ -32,7 +32,7 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -48,7 +48,7 @@ namespace platform {
         using message::input::Sensors;
 
         using utility::math::matrix::Transform3D;
-        using utility::nubugger::graph;
+        using utility::nusight::graph;
         using utility::support::Expression;
 
         HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)

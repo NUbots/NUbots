@@ -21,7 +21,7 @@
 
 #include "utility/math/geometry/Line.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace module {
 namespace vision {
@@ -35,7 +35,8 @@ namespace vision {
     using utility::math::geometry::Plane;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getImageFromCam;
-    using utility::nubugger::drawVisionLines;
+    using utility::nusight::drawVisionLines;
+    using utility::vision::visualHorizonAtPoint;
     using Colour = utility::vision::Colour;
     using FOURCC = utility::vision::FOURCC;
     using Pixel  = utility::vision::Pixel;
@@ -247,23 +248,23 @@ namespace vision {
 
         // Loop through all of our possible ball segments
         std::vector<Eigen::Vector2i> points;
-        // NUClear::log("hSegments size = ", std::distance(hSegments.first,hSegments.second));
-        for (auto it = classifiedImage.horizontalSegments.begin(); it != classifiedImage.horizontalSegments.end();
-             ++it) {
-
+        for (const auto& segment : classifiedImage.horizontalSegments) {
             // We throw out points if they:
             // Have both edges above the green horizon
             // Are too small
-            if ((it->segmentClass == ClassifiedImage::SegmentClass::GOAL)
-                && (utility::vision::visualHorizonAtPoint(classifiedImage, it->start[0]) <= it->start[1]
-                    || utility::vision::visualHorizonAtPoint(classifiedImage, it->end[0]) <= it->end[1])
-                && it->length > 1) {
-                points.push_back(it->midpoint);
+            if ((segment.segmentClass == ClassifiedImage::SegmentClass::GOAL)
+                && (visualHorizonAtPoint(classifiedImage, segment.start[0]) <= segment.start[1]
+                    || visualHorizonAtPoint(classifiedImage, segment.end[0]) <= segment.end[1])
+                && segment.length > 1) {
+                points.push_back(segment.midpoint);
             }
         }
 
-        // std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-        // Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>> debug; // DEBUG LINE
+        // Create container for our lightning debug lines
+        std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
+                    Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
+            debug;
+
         std::vector<Eigen::Vector2i> edges;
 
         // For each of these points move upward until we find a strong transition to green
@@ -290,7 +291,9 @@ namespace vision {
                     auto p = Eigen::Vector2i(point[0], y - 1);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[0].points.push_back(p);
-                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0,1,1,1))); // DEBUG LINE
+                    if (DRAW_LIGHTNING) {
+                        debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
+                    }
                     break;
                 }
             }
@@ -313,7 +316,9 @@ namespace vision {
                     auto p = Eigen::Vector2i(x + 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[1].points.push_back(p);
-                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0,1,1,1))); // DEBUG LINE
+                    if (DRAW_LIGHTNING) {
+                        debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
+                    }
                     break;
                 }
             }
@@ -336,7 +341,9 @@ namespace vision {
                     auto p = Eigen::Vector2i(x - 1, point[1]);
                     edges.push_back(p);
                     classifiedImage.ballSeedPoints[2].points.push_back(p);
-                    // debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0,1,1,1))); // DEBUG LINE
+                    if (DRAW_LIGHTNING) {
+                        debug.push_back(std::make_tuple(point, edges.back(), Eigen::Vector4d(0, 1, 1, 1)));
+                    }
                     break;
                 }
             }
@@ -363,8 +370,12 @@ namespace vision {
                     break;
                 }
 
-                // std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d; // DEBUG LINE
-                // std::get<0>(d) = point; // DEBUG LINE
+                // This needs to be outside of the if statement because of scoping.
+                std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+
+                if (DRAW_LIGHTNING) {
+                    std::get<0>(d) = point;
+                }
 
                 float strength;
                 Eigen::Vector2i direction;
@@ -384,12 +395,14 @@ namespace vision {
                     break;
                 }
 
-                // std::get<1>(d)  = point; // DEBUG LINE
+                if (DRAW_LIGHTNING) {
+                    std::get<1>(d) = point;
 
-                // float r = (strength / 30); // DEBUG LINE
-                // float b = 1 - (strength / 30); // DEBUG LINE
-                // std::get<2>(d)  = Eigen::Vector4d(r,0,b,1); // DEBUG LINE
-                // debug.push_back(d); // DEBUG LINE
+                    float r        = (strength / 30);
+                    float b        = 1 - (strength / 30);
+                    std::get<2>(d) = Eigen::Vector4d(r, 0, b, 1);
+                    debug.push_back(d);
+                }
             }
 
             // Go Anticlockwise
@@ -402,8 +415,12 @@ namespace vision {
                     break;
                 }
 
-                // std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d; // DEBUG LINE
-                // std::get<0>(d) = point; // DEBUG LINE
+                // This needs to be outside of the if statement because of scoping.
+                std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d> d;
+
+                if (DRAW_LIGHTNING) {
+                    std::get<0>(d) = point;
+                }
 
                 float strength;
                 Eigen::Vector2i direction;
@@ -423,18 +440,22 @@ namespace vision {
                     break;
                 }
 
-                // std::get<1>(d)  = point; // DEBUG LINE
+                if (DRAW_LIGHTNING) {
+                    std::get<1>(d) = point;
 
-                // float r = (strength / 30); // DEBUG LINE
-                // float b = 1 - (strength / 30); // DEBUG LINE
-                // std::get<2>(d)  = Eigen::Vector4d(r,0,b,1); // DEBUG LINE
-                // debug.push_back(d); // DEBUG LINE
+                    float r        = (strength / 30);
+                    float b        = 1 - (strength / 30);
+                    std::get<2>(d) = Eigen::Vector4d(r, 0, b, 1);
+                    debug.push_back(d);
+                }
             }
         }
 
         // Put our set into the object
         classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
-        // emit(drawVisionLines(debug)); // DEBUG LINE
+        if (DRAW_LIGHTNING) {
+            emit(drawVisionLines(debug));
+        }
     }
 
 }  // namespace vision

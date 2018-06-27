@@ -36,7 +36,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
 
@@ -68,9 +68,9 @@ namespace support {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::matrix::Transform2D;
     using utility::motion::kinematics::calculateRobotToIMU;
-    using utility::nubugger::drawArrow;
-    using utility::nubugger::drawSphere;
-    using utility::nubugger::graph;
+    using utility::nusight::drawArrow;
+    using utility::nusight::drawSphere;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
@@ -257,7 +257,6 @@ namespace support {
                       oldBallPose  = world.ball.position;
                       lastNow      = now;
                       lastKicking  = kicking;
-
                   });
 
         // Simulate Vision
@@ -270,7 +269,6 @@ namespace support {
                   [this](const Sensors& sensors,
                          const CameraParameters& camParams,
                          const std::shared_ptr<const FieldDescription> fd) {
-
                       if (!fd) {
                           NUClear::log<NUClear::ERROR>(
                               __FILE__, __LINE__, "Field Description must be available for vision simulation!");
@@ -348,7 +346,7 @@ namespace support {
                   });
 
 
-        // Emit exact position to NUbugger
+        // Emit exact position to NUsight
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
             arma::vec2 bearingVector      = world.robotPose.rotation() * arma::vec2({1, 0});
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
@@ -366,7 +364,6 @@ namespace support {
                     GameEvents::GamePhase(GameState::Data::Phase::PLAYING, time, time)));
                 emit(std::make_unique<GameState::Data::Phase>(GameState::Data::Phase::PLAYING));
             }
-
         });
     }
 

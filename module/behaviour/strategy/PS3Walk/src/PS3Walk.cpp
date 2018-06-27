@@ -47,7 +47,6 @@ namespace behaviour {
             : Reactor(std::move(environment)), joystick() {
 
             on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
-
                 JoystickEvent event;
                 // read from joystick
                 if (joystick.sample(&event)) {
