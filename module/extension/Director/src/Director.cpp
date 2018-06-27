@@ -98,32 +98,6 @@ namespace extension {
                 //          position would execute again, potentially providing a new pose. Or if that provider had
                 //          finished its task, it may emit an empty task in which case it's parent would run (perhaps a
                 //          walk engine step phase).
-
-                // TODO
-                // Basically we have a tree of providers that we can use to complete tasks
-                // We take each of our global tasks and based on priority we send them through the tree of providers
-                // If a previous task has taken a provider, it is not available for future providers
-                // There are also enter/leave/causing that we have to deal with
-                // We only execute a task if its command has changed from the last time it ran, or if the child of it's
-                // command has no tasks This way we can keep a constant flow of information through the system without
-                // running things unnecessarily
-                // Also you don't run rerun the parent if you were stuck on an entering/leaving provider, you just
-                // switch to the appropriate provider
-
-
-                // Basic idea is that global task with highest priority gets first grab at the providers
-                // If at any point it has a when that is not met, it'll grab the entering or leaving that gives it
-                // control However if there is a generic leaving we have to run that too
-
-                // This is a tricky algorithm!
-                // What we need to do, is give access to providers based first on their global priority
-                // However some of them may have when conditions that we must try to fulfil which may change our path to
-                // the entering/leaving tasks that cause our whens to be true To know this we have to go through the
-                // current task tree as well to see what is assigned
-
-
-                // TODO Features
-                // when a child has no tasks with priority of their own, rerun the parent of that task
             }
         });
     }
