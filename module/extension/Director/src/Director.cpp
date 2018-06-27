@@ -81,7 +81,16 @@ namespace extension {
                 //          a leaving reaction that will fulfil our when condition and if so, execute that branch of the
                 //          tree. Otherwise, try to find an entering reaction for our current branch that fulfils the
                 //          condition and execute that instead.
-                //      5th: We have reached a leaf node of our existing tree without changing anything in our subgraph
+                //      5th: We want to generate a different state tree, but we are blocked by another task with a
+                //      higher global priority, or by another task from our current provider with a higher local
+                //      priority.
+                //          We can't continue here, we perform the transition technique like when there is a when
+                //          condition that we cannot execute. This branch ends here.
+                //          TODO what happens when our local provider has another task to execute as well that isn't
+                //          blocked? Do we allow that second task to execute or perform a block one block all. Both
+                //          cases seem to exist (walk engine doesn't need arms) so maybe there needs to be a way to emit
+                //          groups of tasks where it is accept all, or accept none.
+                //      6th: We have reached a leaf node of our existing tree without changing anything in our subgraph
                 //          In this case, we want to run the parent of this component again so that it will generate a
                 //          new task for the leaf node. This scheme can be used to allow things to continuously execute
                 //          and draw more data as needed. For example, if the task was to move the leg through an IK
