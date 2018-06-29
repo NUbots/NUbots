@@ -6,37 +6,101 @@ namespace module {
 namespace extension {
 
     using extension::Configuration;
+    using NUClear::threading::Reaction;
+
+    void Director::add_provider(const std::type_index& data_type,
+                                const std::shared_ptr<Reaction>& r,
+                                const Provider::Type& provider_type) {
+
+        // Find our specific item
+        auto range = providers.equal_range(data_type);
+        auto it    = std::find(range.first, range.second, [&](auto item) { return item.reaction == r; });
+
+        // No item means add a new one
+        if (it == providers.end()) {
+            it = providers.insert(std::make_pair(data_type, Provider()));
+            reactions.insert(std::make_pair(r->id, it));
+        }
+        else {
+            throw std::runtime_error("There cannot be multiple provider statements in a single on statement.");
+        }
+    }
+
+    void Director::remove_provider(const uint64_t& id) {
+
+        // If we can find it, erase it
+        auto it = reactions.find(id);
+        if (it != reactions.end()) {
+            providers->erase(it->second);
+            reactions.erase(it);
+        }
+        else {
+            throw std::runtime_error("Attempted to remove a Provider that was not loaded")
+        }
+    }
 
     Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("Director.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file Director.yaml
+        // Remove a provider
+        on<Trigger<Unbind<ProvidesReaction>>>().then([this](const Unbind<ProvidesReaction>& unbind) {  //
+            remove_provider(unbind.id);
         });
 
-        on<Trigger<EnteringReaction>>().then([this](const EnteringReaction& r) {
-            // TODO add an entering flag for this provider
+        // Add a normal provider
+        on<Trigger<ProvidesReaction>>().then([this](const ProvidesReaction& r) {  //
+            add_provider(r.type, r.reaction, Provider::NORMAL);
         });
 
-        on<Trigger<LeavingReaction>>().then([this](const LeavingReaction& r) {
-            // TODO add a leaving flag for this provider
+        // Add an entering provider
+        on<Trigger<EnteringReaction>>().then([this](const EnteringReaction& r) {  //
+            add_provider(r.type, r.reaction, Provider::ENTERING);
         });
 
-        on<Trigger<ProvidesReaction>>().then([this](const ProvidesReaction& r) {
-            // TODO add a provider flag for this provider
+        // Add a leaving provider
+        on<Trigger<LeavingReaction>>().then([this](const LeavingReaction& r) {  //
+            add_provider(r.type, r.reaction, Provider::LEAVING);
         });
 
+        // Add a when expression to this provider
         on<Trigger<WhenExpression>>().then([this](const WhenReaction& r) {
-            // TODO add a when expression for this provider
+            auto it = reactions.find(r->reaction->id);
+            if (it != reactions.end()) {
+                it->second->when.push_back(r.expression);
+            }
+            else {
+                throw std::runtime_error(
+                    "When statements can only come after a Provides, Entering or Leaving statement");
+            }
         });
 
+        // Add a causing condition to this provider
         on<Trigger<CausingExpression>>().then([this](const CausingReaction& r) {
-            // TODO add a causing expression for this provider
+            auto it = reactions.find(r->reaction->id);
+            if (it != reactions.end()) {
+                it->second->causing.push_back(r.expression);
+            }
+            else {
+                throw std::runtime_error(
+                    "Causing statements can only come after a Provides, Entering or Leaving statement");
+            }
         });
 
         on<Trigger<DirectorTask>>().then([this](const DirectorTask& task) {
             // Check which provider emitted this task (if any) to get its scope
+            auto it = reactions.find(task.requester_id);
+            if (it != reactions.end()) {
 
-            // TODO if the cause_id is not any of our reactions remove it from scope
+                // Zero priority tasks mean remove tasks of this type sent by this reaction
+                if (task.priority == 0) {
+                }
+            }
+            // If this task was not emitted by a provider, then it's a global task
+            else {
+                // Zero priority tasks mean remove tasks of this type sent by this reaction
+                if (task.priority == 0) {
+                }
+                global_tasks.push_back(task);
+            }
         });
 
         // Main director function
@@ -78,9 +142,9 @@ namespace extension {
                 //          The branches of the new state tree that we have generated thus far becomes a part of the
                 //          transitional tree. Then from the bottom of the now dead branch up of the current state tree
                 //          up, in addition to any we gathered in a 3rd step from above check to see if any of them have
-                //          a leaving reaction that will fulfil our when condition and if so, execute that branch of the
-                //          tree. Otherwise, try to find an entering reaction for our current branch that fulfils the
-                //          condition and execute that instead.
+                //          a leaving reaction that will fulfill our when condition and if so, execute that branch of
+                //          the tree. Otherwise, try to find an entering reaction for our current branch that fulfills
+                //          the condition and execute that instead.
                 //      5th: We want to generate a different state tree, but we are blocked by another task with a
                 //      higher global priority, or by another task from our current provider with a higher local
                 //      priority.

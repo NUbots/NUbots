@@ -6,18 +6,24 @@ namespace behaviour {
 
     namespace commands {
         struct EnteringReaction {
-            EnteringReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction) : reaction(reaction) {}
+            EnteringReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction, const std::type_index& type)
+                : reaction(reaction), type(type) {}
             std::shared_ptr<threading::Reaction> reaction;
+            std::type_index type;
         };
 
         struct LeavingReaction {
-            LeavingReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction) : reaction(reaction) {}
+            LeavingReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction, const std::type_index& type)
+                : reaction(reaction), type(type) {}
             std::shared_ptr<threading::Reaction> reaction;
+            std::type_index type;
         };
 
         struct ProvidesReaction {
-            ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction) : reaction(reaction) {}
+            ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction, const std::type_index& type)
+                : reaction(reaction), type(type) {}
             std::shared_ptr<threading::Reaction> reaction;
+            std::type_index type;
         };
 
         struct WhenExpression {
@@ -38,13 +44,13 @@ namespace behaviour {
 
         struct DirectorTask {
             DirectorTask(std::type_index type,
-                         uint64_t cause_id,
+                         uint64_t requester_id,
                          std::shared_ptr<void> command,
                          int priority,
                          const std::string& name)
-                : type(type), cause_id(cause_id), command(command), priority(priority), name(name) {}
+                : type(type), requester_id(requester_id), command(command), priority(priority), name(name) {}
             std::type_index type;
-            uint64_t cause_id;
+            uint64_t requester_id;
             std::shared_ptr<void> command;
             int priority;
             std::string name;
@@ -67,12 +73,12 @@ namespace behaviour {
         static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
 
             // Tell the director
-            reaction->reactor.powerplant.emit(std::make_unique<commands::EnteringReaction>(reaction));
+            reaction->reactor.powerplant.emit(std::make_unique<commands::EnteringReaction>(reaction, typeid(T)));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const threading::Reaction& r) {
                 r.reactor.emit<word::emit::Direct>(
-                    std::make_unique<operation::Unbind<commands::EnteringReaction>>(r.id));
+                    std::make_unique<operation::Unbind<commands::ProvidesReaction>>(r.id));
             });
         }
     };
@@ -93,12 +99,12 @@ namespace behaviour {
         static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
 
             // Tell the director
-            reaction->reactor.powerplant.emit(std::make_unique<commands::LeavingReaction>(reaction));
+            reaction->reactor.powerplant.emit(std::make_unique<commands::LeavingReaction>(reaction, typeid(T)));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const threading::Reaction& r) {
                 r.reactor.emit<word::emit::Direct>(
-                    std::make_unique<operation::Unbind<commands::LeavingReaction>>(r.id));
+                    std::make_unique<operation::Unbind<commands::ProvidesReaction>>(r.id));
             });
         }
     };
@@ -118,7 +124,7 @@ namespace behaviour {
         static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
 
             // Tell the director
-            reaction->reactor.powerplant.emit(std::make_unique<commands::ProvidesReaction>(reaction));
+            reaction->reactor.powerplant.emit(std::make_unique<commands::ProvidesReaction>(reaction, typeid(T)));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const threading::Reaction& r) {
@@ -143,20 +149,21 @@ namespace behaviour {
      *
      * @tparam T the condition expression that must be true in order to execute this task.
      */
-    template <typename T>
+    template <typename State, typename Condition>
     struct When {
 
         template <typename DSL>
         static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
 
+            // TODO the statement would look something like this for example
+            // on<Provides<Kick>, When<Stability, GreaterEqual<StaticallyStable>>>().then([this] {});
+            // Whatever function is generated off this needs to be able to both accept the current state as well as
+            // predicted states from any causes statements
+
+
             // Tell the director
             // TODO find a way to encode these expressions in the DSL
-            reaction->reactor.powerplant.emit(std::make_unique<commands::WhenExpression>(reaction, [] {}));
-
-            // Add our unbinder
-            reaction->unbinders.emplace_back([](const threading::Reaction& r) {
-                r.reactor.emit<word::emit::Direct>(std::make_unique<operation::Unbind<command::WhenExpression>>(r.id));
-            });
+            reaction->reactor.powerplant.emit(std::make_unique<commands::WhenExpression>(reaction, T::expression));
         }
     };
 
@@ -173,15 +180,10 @@ namespace behaviour {
         template <typename DSL>
         static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
 
+            on<Provides<Getup>, Causes<Stability, Stability::Standing>>().then([this] {});
             // Tell the director
             // TODO find a way to encode these expressions in the DSL
-            reaction->reactor.powerplant.emit(std::make_unique<commands::CausingExpression>(reaction, [] {}));
-
-            // Add our unbinder
-            reaction->unbinders.emplace_back([](const threading::Reaction& r) {
-                r.reactor.emit<word::emit::Direct>(
-                    std::make_unique<operation::Unbind<command::CausingExpression>>(r.id));
-            });
+            reaction->reactor.powerplant.emit(std::make_unique<commands::CausingExpression>(reaction, T::expression));
         }
     };
 
