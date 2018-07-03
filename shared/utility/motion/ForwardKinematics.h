@@ -151,14 +151,16 @@ namespace motion {
             }
 
             runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(HIP_ROLL)].presentPosition);
+
+            // Translate to hip pitch joint
+            runningTransform = runningTransform.translateZ(model.leg.HIP_PITCH_OFFSET);
+
             // Return basis facing down leg plane, with z oriented through axis of roll motor. Position still hip joint
             positions[HIP_ROLL] = runningTransform;
             if (servoID == HIP_ROLL) {
                 return positions;
             }
 
-            // Translate to hip pitch joint
-            runningTransform = runningTransform.translateZ(model.leg.HIP_PITCH_OFFSET);
             // Rotate to face down upper leg
             runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(HIP_PITCH)].presentPosition);
             // Translate down upper leg
