@@ -33,21 +33,23 @@ message KinematicsModel {
         float HIP_OFFSET_X                = 1;
         float HIP_OFFSET_Y                = 2;
         float HIP_OFFSET_Z                = 3;
-        float UPPER_LEG_LENGTH            = 4;
-        float LOWER_LEG_LENGTH            = 5;
-        float FOOT_HEIGHT                 = 6;
-        float FOOT_LENGTH                 = 7;
-        float TOE_LENGTH                  = 8;
-        float HEEL_LENGTH                 = 9;
-        float FOOT_WIDTH                  = 10;
-        float FOOT_CENTRE_TO_ANKLE_CENTRE = 11;
-        float LENGTH_BETWEEN_LEGS         = 12;
-        int32 LEFT_TO_RIGHT_HIP_YAW       = 13;
-        int32 LEFT_TO_RIGHT_HIP_ROLL      = 14;
-        int32 LEFT_TO_RIGHT_HIP_PITCH     = 15;
-        int32 LEFT_TO_RIGHT_KNEE          = 16;
-        int32 LEFT_TO_RIGHT_ANKLE_PITCH   = 17;
-        int32 LEFT_TO_RIGHT_ANKLE_ROLL    = 18;
+        float HIP_PITCH_OFFSET            = 4;
+        float UPPER_LEG_LENGTH            = 5;
+        float LOWER_LEG_LENGTH            = 6;
+        float FOOT_HEIGHT                 = 7;
+        float FOOT_LENGTH                 = 8;
+        float TOE_LENGTH                  = 9;
+        float HEEL_LENGTH                 = 10;
+        float FOOT_WIDTH                  = 11;
+        float FOOT_CENTRE_TO_ANKLE_CENTRE = 12;
+        float STUD_HEIGHT                 = 13;
+        float LENGTH_BETWEEN_LEGS         = 14;
+        int32 LEFT_TO_RIGHT_HIP_YAW       = 15;
+        int32 LEFT_TO_RIGHT_HIP_ROLL      = 16;
+        int32 LEFT_TO_RIGHT_HIP_PITCH     = 17;
+        int32 LEFT_TO_RIGHT_KNEE          = 18;
+        int32 LEFT_TO_RIGHT_ANKLE_PITCH   = 19;
+        int32 LEFT_TO_RIGHT_ANKLE_ROLL    = 20;
     }
 
     message Head {
@@ -69,18 +71,18 @@ message KinematicsModel {
     }
 
     message Arm {
-        float DISTANCE_BETWEEN_SHOULDERS = 1;
-        float SHOULDER_Z_OFFSET          = 2;
-        float SHOULDER_X_OFFSET          = 3;
-        float SHOULDER_LENGTH            = 4;
-        float SHOULDER_WIDTH             = 5;
-        float SHOULDER_HEIGHT            = 6;
-        float UPPER_ARM_LENGTH           = 7;
-        float UPPER_ARM_Y_OFFSET         = 8;
-        float UPPER_ARM_X_OFFSET         = 9;
-        float LOWER_ARM_LENGTH           = 10;
-        float LOWER_ARM_Y_OFFSET         = 11;
-        float LOWER_ARM_Z_OFFSET         = 12;
+        float SHOULDER_X_OFFSET  = 1;
+        float SHOULDER_Y_OFFSET  = 2;
+        float SHOULDER_Z_OFFSET  = 3;
+        float SHOULDER_LENGTH    = 4;
+        float SHOULDER_WIDTH     = 5;
+        float SHOULDER_HEIGHT    = 6;
+        float UPPER_ARM_X_OFFSET = 7;
+        float UPPER_ARM_Y_OFFSET = 8;
+        float UPPER_ARM_Z_OFFSET = 9;
+        float LOWER_ARM_X_OFFSET = 10;
+        float LOWER_ARM_Y_OFFSET = 11;
+        float LOWER_ARM_Z_OFFSET = 12;
     }
 
     message MassModel {

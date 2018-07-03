@@ -157,6 +157,8 @@ namespace motion {
                 return positions;
             }
 
+            // Translate to hip pitch joint
+            runningTransform = runningTransform.translateZ(model.leg.HIP_PITCH_OFFSET);
             // Rotate to face down upper leg
             runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(HIP_PITCH)].presentPosition);
             // Translate down upper leg
@@ -233,13 +235,9 @@ namespace motion {
             float shoulder_roll  = sensors.servo[static_cast<int>(SHOULDER_ROLL)].presentPosition;
             float elbow          = sensors.servo[static_cast<int>(ELBOW)].presentPosition;
 
-            // std::cout << "shoulder_pitch = " << shoulder_pitch << std::endl;
-            // std::cout << "shoulder_roll = " << shoulder_roll << std::endl;
-            // std::cout << "elbow = " << elbow << std::endl;
-
             // Translate to shoulder
             runningTransform = runningTransform.translate({model.arm.SHOULDER_X_OFFSET,
-                                                           negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2.0,
+                                                           negativeIfRight * model.arm.SHOULDER_Y_OFFSET,
                                                            model.arm.SHOULDER_Z_OFFSET});
             // Rotate about shoulder pitch with zero position Zombie arms
             runningTransform = runningTransform.rotateY(shoulder_pitch - M_PI_2);
@@ -258,7 +256,7 @@ namespace motion {
             // Translate to centre of next joint
             runningTransform = runningTransform.translate({model.arm.UPPER_ARM_X_OFFSET,
                                                            negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
-                                                           -model.arm.UPPER_ARM_LENGTH});
+                                                           -model.arm.UPPER_ARM_Z_OFFSET});
             // Rotate to face down arm
             runningTransform = runningTransform.rotateY(M_PI_2);
 
@@ -270,7 +268,7 @@ namespace motion {
             // Rotate by the elbow angle
             runningTransform = runningTransform.rotateY(elbow);
             // Translate to centre of end of arm, in line with joint
-            runningTransform = runningTransform.translate({model.arm.LOWER_ARM_LENGTH,
+            runningTransform = runningTransform.translate({model.arm.LOWER_ARM_X_OFFSET,
                                                            negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
                                                            -model.arm.LOWER_ARM_Z_OFFSET});
             positions[ELBOW] = runningTransform;
@@ -478,8 +476,8 @@ namespace motion {
                 model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT};
             const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
-                                   -model.arm.UPPER_ARM_LENGTH};
-            const arma::vec3 t3 = {model.arm.LOWER_ARM_LENGTH,
+                                   -model.arm.UPPER_ARM_Z_OFFSET};
+            const arma::vec3 t3 = {model.arm.LOWER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
                                    -model.arm.LOWER_ARM_Z_OFFSET};
 
@@ -507,15 +505,15 @@ namespace motion {
             int negativeIfRight = isLeft ? 1 : -1;
 
             const arma::vec3 t0 = {model.arm.SHOULDER_X_OFFSET,
-                                   negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2.0,
+                                   negativeIfRight * model.arm.SHOULDER_Y_OFFSET,
                                    model.arm.SHOULDER_Z_OFFSET};
 
             const arma::vec3 t1 = {
                 model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT};
             const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
-                                   -model.arm.UPPER_ARM_LENGTH};
-            const arma::vec3 t3 = {model.arm.LOWER_ARM_LENGTH,
+                                   -model.arm.UPPER_ARM_Z_OFFSET};
+            const arma::vec3 t3 = {model.arm.LOWER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
                                    -model.arm.LOWER_ARM_Z_OFFSET};
 

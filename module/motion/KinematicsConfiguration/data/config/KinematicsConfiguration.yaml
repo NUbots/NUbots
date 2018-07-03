@@ -1,15 +1,16 @@
 leg:
-    # darwin says this is [0.008, 0.008, 0.034]
-    hip_offset: [0.00, 0.055, 0.045] # [x, y, z]
-    upper_leg_length: 0.2
-    lower_leg_length: 0.2
-    heel_length: 0.085 # measured
-    foot_centre_to_ankle_centre: 0.02 # rough
+    hip_offset: [0.00, 0.055, 0.055] # [x, y, z]  distance from torso origin to yaw/roll intersection
+    hip_pitch_offset: 0.0248  # distance from yaw/roll intersection to pitch joint axis
+    upper_leg_length: 0.2 # distance from hip pitch axis to knee axis
+    lower_leg_length: 0.2 # distance from knee axis to ankle pitch axis
     foot:
-        width: 0.130 # rough
-        height: 0.04
-        length: 0.215 # rough
-        toe_length: 0.13 # measured
+        width: 0.1315 # total width of the foot
+        height: 0.038 # distance from ankle roll axis to bottom of foot
+        length: 0.215 # total length of foot (toe_length + heel length)
+        toe_length: 0.127 # distance from ankle pitch axis to front of foot
+        centre_to_ankle_centre: 0.0108  # distance from ankle center to foot center (y-axis)
+        heel_length: 0.088  # distance from ankle pitch axis to back of foot
+        stud_height: 0.02 # height of studs
     left_to_right:
         hip_yaw:    -1
         hip_roll:   -1
@@ -19,29 +20,20 @@ leg:
         ankle_roll: -1
 head:
     camera_declination_angle_offset: pi / 90.0 # 2 degrees
-    neck_to_camera: [0.069, 0, 0.065] # [x, y, z]
+    neck_to_camera: [0.073, 0, 0.0654] # [x, y, z] distance from head pitch axis to camera (middle of both cameras if there are 2)
     ipd: 0.068 # Interpupillary distance - y axis
-    neck: # not yet calculated
-        length: 0.048
-        base_position_from_origin: [-0.007, 0, 0.21] # [x, y, z]
+    neck:
+        length: 0.049  # distance from head yaw axis to head pitch axis
+        base_position_from_origin: [-0.008, 0, 0.20825] # [x, y, z] distance from torso origin to head yaw axis
     # head movement limits
     limits: # pitch limit is a function of yaw ... need to calculate this properly
         yaw: [-pi/4, pi/4] # [min_yaw, max_yaw]
         pitch: [pi/6, pi/6] # [min_pitch, max_pitch]
-# rough measurements
 arm:
-    distance_between_shoulders: 0.17 # distance between shoulders
-    shoulder:
-        length: 0.0
-        width: 0.04
-        height: 0.010
-        offset: [0.0, 0.1905] # [x, z]
-    upper_arm:
-        length: 0.16
-        offset: [0, 0.03] # [y, x] very rough
-    lower_arm:
-        length: 0.235
-        offset: [0, 0] # [y, z] very rough
+    shoulder:  [0.0, 0.077, 0.17725] # [x, y, z] distance from torso origin to shoulder pitch axis
+    shoulder_pitch_to_roll: [0.0, 0.048, 0.01] # [x, y, z] distance from shoulder pitch axis to shoulder roll axis
+    upper_arm: [0.033, 0.0, 0.1575] # [x, y, z] distance from shoulder roll axis to elbow axis
+    lower_arm: [0.2247, 0.0, 0.0] # [x, y, z] distance from elbow axis to tip of hand (x-axis)
 mass_model:
     number_of_masses: 21
     mass_representation_dimension: 4
@@ -68,4 +60,4 @@ mass_model:
         - [-0.035,                     0,           0.01,      0.11708]     # 19 - HEAD_PITCH
         - [-0.0066631,        -0.00311589,      0.0705563,      0.975599]   # 20 - TORSO
 
-team_darwin_chest_to_origin: 0.18 # - leg.hip_offset[2] # rough
+team_darwin_chest_to_origin: 0.17725 # torso origin to center of chest (z-axis)

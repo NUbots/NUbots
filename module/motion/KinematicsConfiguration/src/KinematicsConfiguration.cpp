@@ -61,18 +61,19 @@ namespace motion {
         model.leg.HIP_OFFSET_Y   = leg_hipOffset[1];
         model.leg.HIP_OFFSET_Z   = leg_hipOffset[2];
 
+        model.leg.HIP_PITCH_OFFSET = objLeg["hip_pitch_offset"].as<float>();
+
         model.leg.UPPER_LEG_LENGTH = objLeg["upper_leg_length"].as<float>();
         model.leg.LOWER_LEG_LENGTH = objLeg["lower_leg_length"].as<float>();
 
-        model.leg.HEEL_LENGTH = objLeg["heel_length"].as<float>();
-
-        model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE = objLeg["foot_centre_to_ankle_centre"].as<float>();
-
-        auto& objFoot         = objLeg["foot"];
-        model.leg.FOOT_WIDTH  = objFoot["width"].as<float>();
-        model.leg.FOOT_HEIGHT = objFoot["height"].as<float>();
-        model.leg.FOOT_LENGTH = objFoot["length"].as<float>();
-        model.leg.TOE_LENGTH  = objFoot["toe_length"].as<float>();
+        auto& objFoot                         = objLeg["foot"];
+        model.leg.FOOT_WIDTH                  = objFoot["width"].as<float>();
+        model.leg.FOOT_HEIGHT                 = objFoot["height"].as<float>();
+        model.leg.FOOT_LENGTH                 = objFoot["length"].as<float>();
+        model.leg.TOE_LENGTH                  = objFoot["toe_length"].as<float>();
+        model.leg.HEEL_LENGTH                 = objFoot["heel_length"].as<float>();
+        model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE = objFoot["centre_to_ankle_centre"].as<float>();
+        model.leg.STUD_HEIGHT                 = objFoot["stud_height"].as<float>();
 
         model.leg.LENGTH_BETWEEN_LEGS = 2.0 * model.leg.HIP_OFFSET_Y;
 
@@ -94,8 +95,7 @@ namespace motion {
         model.head.NECK_TO_CAMERA_Z        = head_neckToCamera[2];
         model.head.INTERPUPILLARY_DISTANCE = objHead["ipd"].as<float>();
 
-        auto& objNeck = objHead["neck"];
-
+        auto& objNeck          = objHead["neck"];
         model.head.NECK_LENGTH = objNeck["length"].as<float>();
 
         arma::vec3 neck_basePositionFromOrigin = objNeck["base_position_from_origin"].as<arma::vec3>();
@@ -114,37 +114,25 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureArm(KinematicsModel& model, const YAML::Node& objArm) {
-        // arm.distanceBetweenShoulders = objArm["distance_between_shoulders"].as<float>();
+        arma::vec3 shoulder         = objArm["shoulder"].as<arma::vec3>();
+        model.arm.SHOULDER_X_OFFSET = shoulder[0];
+        model.arm.SHOULDER_Y_OFFSET = shoulder[1];
+        model.arm.SHOULDER_Z_OFFSET = shoulder[2];
 
-        // auto& shoulder = arm.shoulder;
-        auto& objShoulder = objArm["shoulder"];
-        // shoulder.length = objShoulder["length"].as<float>();
-        // shoulder.width = objShoulder["width"].as<float>();
-        // shoulder.height = objShoulder["height"].as<float>();
-        // shoulder.offset = objShoulder["offset"].as<arma::vec2>();
+        arma::vec3 pitch_to_roll  = objArm["shoulder_pitch_to_roll"].as<arma::vec3>();
+        model.arm.SHOULDER_LENGTH = pitch_to_roll[0];
+        model.arm.SHOULDER_WIDTH  = pitch_to_roll[1];
+        model.arm.SHOULDER_HEIGHT = pitch_to_roll[2];
 
-        // auto& upperArm = arm.upperArm;
-        auto& objUpperArm = objArm["upper_arm"];
-        // upperArm.length = objUpperArm["length"].as<float>();
-        // upperArm.offset = objUpperArm["offset"].as<arma::vec2>();
+        arma::vec3 upper_arm         = objArm["upper_arm"].as<arma::vec3>();
+        model.arm.UPPER_ARM_X_OFFSET = upper_arm[0];
+        model.arm.UPPER_ARM_Y_OFFSET = upper_arm[1];
+        model.arm.UPPER_ARM_Z_OFFSET = upper_arm[2];
 
-        // auto& lowerArm = arm.lowerArm;
-        auto& objLowerArm = objArm["lower_arm"];
-        // lowerArm.length = objLowerArm["length"].as<float>();
-        // lowerArm.offset = objLowerArm["offset"].as<arma::vec2>();
-
-        model.arm.DISTANCE_BETWEEN_SHOULDERS = objArm["distance_between_shoulders"].as<float>();
-        model.arm.SHOULDER_Z_OFFSET          = objShoulder["offset"].as<arma::vec2>()[1];
-        model.arm.SHOULDER_X_OFFSET          = objShoulder["offset"].as<arma::vec2>()[0];
-        model.arm.SHOULDER_LENGTH            = objShoulder["length"].as<float>();
-        model.arm.SHOULDER_WIDTH             = objShoulder["width"].as<float>();
-        model.arm.SHOULDER_HEIGHT            = objShoulder["height"].as<float>();
-        model.arm.UPPER_ARM_LENGTH           = objUpperArm["length"].as<float>();
-        model.arm.UPPER_ARM_Y_OFFSET         = objUpperArm["offset"].as<arma::vec2>()[0];
-        model.arm.UPPER_ARM_X_OFFSET         = objUpperArm["offset"].as<arma::vec2>()[1];
-        model.arm.LOWER_ARM_LENGTH           = objLowerArm["length"].as<float>();
-        model.arm.LOWER_ARM_Y_OFFSET         = objLowerArm["offset"].as<arma::vec2>()[0];
-        model.arm.LOWER_ARM_Z_OFFSET         = objLowerArm["offset"].as<arma::vec2>()[1];
+        arma::vec3 lower_arm         = objArm["lower_arm"].as<arma::vec3>();
+        model.arm.LOWER_ARM_X_OFFSET = lower_arm[0];
+        model.arm.LOWER_ARM_Y_OFFSET = lower_arm[1];
+        model.arm.LOWER_ARM_Z_OFFSET = lower_arm[2];
     }
 
     void KinematicsConfiguration::configureMassModel(KinematicsModel& model, const YAML::Node& objMassModel) {

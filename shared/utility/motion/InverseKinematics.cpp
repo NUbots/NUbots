@@ -424,7 +424,7 @@ namespace motion {
             float pitch, roll, elbow = 0;
 
             arma::vec3 shoulderPos = {model.arm.SHOULDER_X_OFFSET,
-                                      negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2,
+                                      negativeIfRight * model.arm.SHOULDER_Y_OFFSET,
                                       model.arm.SHOULDER_Z_OFFSET};
 
             arma::vec3 handFromShoulder = pos - shoulderPos;
@@ -434,8 +434,8 @@ namespace motion {
 
             // ELBOW
             float extensionLength    = arma::norm(handFromShoulder);
-            float upperArmLength     = model.arm.UPPER_ARM_LENGTH;
-            float lowerArmLength     = model.arm.LOWER_ARM_LENGTH;
+            float upperArmLength     = model.arm.UPPER_ARM_Z_OFFSET;
+            float lowerArmLength     = model.arm.LOWER_ARM_X_OFFSET;
             float sqrUpperArmLength  = upperArmLength * upperArmLength;
             float sqrLowerArmLength  = lowerArmLength * lowerArmLength;
             float sqrExtensionLength = extensionLength * extensionLength;
