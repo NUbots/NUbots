@@ -183,6 +183,9 @@ namespace debug {
                     NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n", lFootPosition);
                     NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n", rFootPosition);
                     std::cout << "Compared to request: \n" << ikRequest << std::endl;
+                    for (size_t servoID = 0; servoID < ServoID::NUMBER_OF_SERVOS; servoID++) {
+                        std::cout << ServoID(servoID) << ": " << sensors->servo[servoID].presentPosition << std::endl;
+                    }
 
                     float lmax_error = 0;
                     float rmax_error = 0;
