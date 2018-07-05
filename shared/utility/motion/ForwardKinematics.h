@@ -118,7 +118,7 @@ namespace motion {
             ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
             int negativeIfRight = 1;
 
-            if (static_cast<bool>(isLeft)) {
+            if (isLeft == BodySide::LEFT) {
                 HIP_YAW     = ServoID::L_HIP_YAW;
                 HIP_ROLL    = ServoID::L_HIP_ROLL;
                 HIP_PITCH   = ServoID::L_HIP_PITCH;
@@ -221,7 +221,7 @@ namespace motion {
             ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
             int negativeIfRight = 1;
 
-            if (static_cast<bool>(isLeft)) {
+            if (isLeft == BodySide::LEFT) {
                 SHOULDER_PITCH = ServoID::L_SHOULDER_PITCH;
                 SHOULDER_ROLL  = ServoID::L_SHOULDER_ROLL;
                 ELBOW          = ServoID::L_ELBOW;
