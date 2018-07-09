@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package message.support.gazebo;
+
+/// \brief String message
+
+message StringMsg {
+    /// \brief String data
+    string data = 1;
+}

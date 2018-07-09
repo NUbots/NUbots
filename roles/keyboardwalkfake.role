@@ -12,8 +12,9 @@ NUCLEAR_ROLE(
     support::NUsight
 
     # Hardware Interface
-    platform::darwin::HardwareSimulator
+    #platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
+    support::Gazebo
 
     # Motion
     motion::OldWalkEngine
