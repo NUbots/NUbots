@@ -61,7 +61,7 @@ namespace motion {
         model.leg.HIP_OFFSET_Y   = leg_hipOffset[1];
         model.leg.HIP_OFFSET_Z   = leg_hipOffset[2];
 
-        model.leg.HIP_PITCH_OFFSET = objLeg["hip_pitch_offset"].as<float>();
+        model.leg.HIP_PITCH_TRANSLATION = objLeg["hip_pitch_translation"].as<float>();
 
         model.leg.UPPER_LEG_LENGTH = objLeg["upper_leg_length"].as<float>();
         model.leg.LOWER_LEG_LENGTH = objLeg["lower_leg_length"].as<float>();

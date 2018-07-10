@@ -33,7 +33,7 @@ message KinematicsModel {
         float HIP_OFFSET_X                = 1;
         float HIP_OFFSET_Y                = 2;
         float HIP_OFFSET_Z                = 3;
-        float HIP_PITCH_OFFSET            = 4;
+        float HIP_PITCH_TRANSLATION       = 4;
         float UPPER_LEG_LENGTH            = 5;
         float LOWER_LEG_LENGTH            = 6;
         float FOOT_HEIGHT                 = 7;
