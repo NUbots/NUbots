@@ -187,35 +187,66 @@ namespace debug {
                         std::cout << ServoID(servoID) << ": " << sensors->servo[servoID].presentPosition << std::endl;
                     }
 
-                    float lmax_error = 0;
-                    float rmax_error = 0;
-                    for (int i = 0; i < 16; i++) {
-                        float lerror = std::abs(lFootPosition(i % 4, i / 4) - ikRequest(i % 4, i / 4));
-                        float rerror = std::abs(rFootPosition(i % 4, i / 4) - ikRequest(i % 4, i / 4));
-                        if (lerror > lmax_error) {
-                            lmax_error = lerror;
-                        }
-                        if (rerror > rmax_error) {
-                            rmax_error = rerror;
+                    float lmax_error[2] = {0};
+                    float rmax_error[2] = {0};
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            float lerror = std::abs(lFootPosition(i, j) - ikRequest(i, j));
+                            float rerror = std::abs(rFootPosition(i, j) - ikRequest(i, j));
+                            if (lerror > lmax_error[0]) {
+                                lmax_error[0] = lerror;
+                            }
+                            if (rerror > rmax_error[0]) {
+                                rmax_error[0] = rerror;
+                            }
+
+                            // We are not looking at x and y translation
+                            if (((i != 0) && (i != 1)) || (j != 3)) {
+                                if (lerror > lmax_error[1]) {
+                                    lmax_error[1] = lerror;
+                                }
+                                if (rerror > rmax_error[1]) {
+                                    rmax_error[1] = rerror;
+                                }
+                            }
                         }
                     }
-                    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-                    std::cout << (lmax_error < ERROR_THRESHOLD
-                                      ? "LEFT IK TEST PASSED"
-                                      : "\n\n\n!!!!!!!!!! LEFT IK TEST FAILED !!!!!!!!!!\n\n\n")
-                              << "     (max_error = " << lmax_error << ")" << std::endl;
-                    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
 
                     std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-                    std::cout << (rmax_error < ERROR_THRESHOLD
-                                      ? "RIGHT IK TEST PASSED"
-                                      : "\n\n\n!!!!!!!!!! RIGHT IK TEST FAILED !!!!!!!!!!\n\n\n")
-                              << "     (max_error = " << rmax_error << ")" << std::endl;
-                    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-
-                    if (lmax_error >= ERROR_THRESHOLD or rmax_error >= ERROR_THRESHOLD) {
+                    if (lmax_error[1] < ERROR_THRESHOLD) {
+                        if (lmax_error[0] >= ERROR_THRESHOLD) {
+                            std::cout << "LEFT IK TEST PASSED - IK IS INCONSISTENT WITH FK DUE TO HIP PITCH TRANSLATION"
+                                      << std::endl;
+                        }
+                        else {
+                            std::cout << "LEFT IK TEST PASSED" << std::endl;
+                        }
+                    }
+                    else {
+                        std::cout << "\n\n\n!!!!!!!!!! LEFT IK TEST FAILED !!!!!!!!!!\n\n\n"
+                                  << "     (max_error = " << lmax_error[0] << ", " << lmax_error[1] << ")" << std::endl;
                         numberOfFails++;
                     }
+                    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+
+                    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+                    if (rmax_error[1] < ERROR_THRESHOLD) {
+                        if (rmax_error[0] >= ERROR_THRESHOLD) {
+                            std::cout
+                                << "RIGHT IK TEST PASSED - IK IS INCONSISTENT WITH FK DUE TO HIP PITCH TRANSLATION"
+                                << std::endl;
+                        }
+                        else {
+                            std::cout << "RIGHT IK TEST PASSED" << std::endl;
+                        }
+                    }
+                    else {
+                        std::cout << "\n\n\n!!!!!!!!!! RIGHT IK TEST FAILED !!!!!!!!!!\n\n\n"
+                                  << "     (max_error = " << rmax_error[0] << ", " << rmax_error[1] << ")" << std::endl;
+                        numberOfFails++;
+                    }
+                    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+
                     sensors->world.setIdentity();
                     emit(std::move(sensors));
                 }
