@@ -21,7 +21,6 @@ namespace motion {
     namespace walk {
 
         using extension::Configuration;
-
         using message::behaviour::ServoCommand;
         using message::input::Sensors;
         using message::motion::KinematicsModel;
@@ -37,9 +36,17 @@ namespace motion {
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             // Left for future use
-            // on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
-
-            // });
+            on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
+                double x = config["test"]["x"].as<double>();
+                double y = config["test"]["y"].as<double>();
+                double z = config["test"]["z"].as<double>();
+                int foot = config["foot"].as<int>();
+                Eigen::Affine3d Haf_s;
+                Haf_s.linear()      = Eigen::Matrix3d::Identity();
+                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
+                emit(std::make_unique<TorsoTarget>(
+                    NUClear::clock::now() + std::chrono::seconds(1), foot, Haf_s.matrix()));
+            });
 
 
             on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
@@ -65,28 +72,31 @@ namespace motion {
 
                     // Create vector to target from support foot
                     Eigen::Vector3d rAFf = -Haf.translation();
+                    log("rAFf", rAFf.transpose());
                     // Position of target in torso space
                     Eigen::Vector3d rATt = Htf * rAFf;
-                    rATt.normalize();
+                    log("rATt", rATt.transpose());
 
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
-                    double distance = std::sqrt(std::pow(rATt.x(), 2) + std::pow(rATt.y(), 2) + std::pow(rATt.z(), 2));
                     double scale;
+
                     // 0.01 refers to 10 milliseconds as below
                     if (time_left <= std::chrono::duration<double>::zero()) {  // Time has elapsed
                         scale = 0.01;
                     }
                     else {  // There is time left to complete
-                        scale = (distance / time_left.count()) * 0.01;
+                        scale = (rATt.norm() / time_left.count()) * 0.01;
                     }
-
+                    if (rATt.norm() < 0.005) {
+                        // stop
+                    }
+                    log("distance", rATt.norm());
                     // Create next torso target in torso space
                     Eigen::Vector3d rT_tTt = rATt * scale;
+                    log("rT_tTt", rT_tTt.transpose());
                     // Create vector from torso to foot target
-                    Eigen::Vector3d rF_tFt = -rT_tTt;
-                    Eigen::Vector3d rF_tTt = Htf * rF_tFt;
-
+                    Eigen::Vector3d rF_tTt = Htf * -rT_tTt;
                     // Target rotation from torso space
                     Eigen::Affine3d Hat;
                     Hat = Haf * Htf.inverse();
@@ -102,14 +112,21 @@ namespace motion {
                     // Scale as above to rotate in specified time
                     Rf_tt = Rft.slerp(scale, Rat).toRotationMatrix();
                     Eigen::Affine3d Htf_t;
-                    Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
-                    Htf_t.translation() = rF_tTt;           // Translation to foot target
-
+                    Htf_t.linear() = Eigen::Matrix3d::Identity();  // Rf_tt.inverse();  // Rotation as above from slerp
+                    Htf_t.translation() = rF_tTt;                  // Translation to foot target
+                    log("rF_tTt", rF_tTt.transpose());
                     Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSupport ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
-
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+
+
+                    log(joints.at(0).second,
+                        joints.at(1).second,
+                        joints.at(2).second,
+                        joints.at(3).second,
+                        joints.at(4).second,
+                        joints.at(5).second);
 
                     for (const auto& joint : joints) {
                         waypoints->push_back({subsumptionId,
