@@ -21,43 +21,55 @@
 #include <string>
 #include "unistd.h"
 
-Joystick::Joystick() : _fd(-1), path("/dev/input/js0") {
-    openPath(path);
+Joystick::Joystick() : _fd({-1, -1}), path({"/dev/input/js0", "/dev/input/js1"}) {}
+
+Joystick::Joystick(const std::string& device, const std::string& acc) : _fd({-1, -1}), path({device, acc}) {
+    reconnect();
 }
 
-Joystick::Joystick(std::string path) : _fd(-1), path(path) {
-    openPath(path);
-}
-
-void Joystick::openPath(std::string devicePath) {
-    std::cout << "Connecting to " << devicePath << std::endl;
-    _fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
+void Joystick::connect(const std::string& device, const std::string& acc) {
+    path[0] = device;
+    path[1] = acc;
+    reconnect();
 }
 
 bool Joystick::sample(JoystickEvent* event) {
-    int bytes = read(_fd, event, sizeof(*event));
-
-    if (bytes == -1) return false;
+    int bytes = read(_fd[0], event, sizeof(*event));
 
     // NOTE if this condition is not met, we're probably out of sync and this
     // Joystick instance is likely unusable
-    return bytes == sizeof(*event);
+    return (bytes == sizeof(*event));
+}
+
+bool Joystick::sample_acc(JoystickEvent* event) {
+    int bytes = read(_fd[1], event, sizeof(*event));
+
+    // NOTE if this condition is not met, we're probably out of sync and this
+    // Joystick instance is likely unusable
+    return (bytes == sizeof(*event));
 }
 
 bool Joystick::found() {
-    return _fd >= 0;
+    return (_fd[0] >= 0);
 }
 
 bool Joystick::valid() {
     // Check if we can get the stats
-    return !(fcntl(_fd, F_GETFL) < 0 && errno == EBADF);
+    return !(fcntl(_fd[0], F_GETFL) < 0 && errno == EBADF);
 }
 
 void Joystick::reconnect() {
-    close(_fd);
-    openPath(path);
+    close();
+    std::cout << "Connecting to " << path[0] << " and " << path[1] << std::endl;
+    _fd[0] = open(path[0].c_str(), O_RDONLY | O_NONBLOCK);
+    _fd[1] = open(path[1].c_str(), O_RDONLY | O_NONBLOCK);
+}
+
+void Joystick::close() {
+    ::close(_fd[0]);
+    ::close(_fd[1]);
 }
 
 Joystick::~Joystick() {
-    close(_fd);
+    close();
 }

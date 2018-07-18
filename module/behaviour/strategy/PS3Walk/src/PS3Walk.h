@@ -23,6 +23,8 @@
 
 #include <armadillo>
 #include <nuclear>
+#include <string>
+#include <vector>
 #include "Joystick.h"
 
 namespace module {
@@ -34,43 +36,47 @@ namespace behaviour {
             // axes
             static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
             static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 2;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 3;
-            static constexpr uint AXIS_L2                        = 12;
-            static constexpr uint AXIS_R2                        = 13;
-            static constexpr uint AXIS_ACCEL_Y                   = 23;
-            static constexpr uint AXIS_ACCEL_X                   = 24;
-            static constexpr uint AXIS_ACCEL_Z                   = 25;
+            static constexpr uint AXIS_L2                        = 2;
+            static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 3;
+            static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 4;
+            static constexpr uint AXIS_R2                        = 5;
+
+            // static constexpr uint AXIS_ACCEL_Y = 23;
+            // static constexpr uint AXIS_ACCEL_X = 24;
+            // static constexpr uint AXIS_ACCEL_Z = 25;
 
             // buttons
-            static constexpr uint BUTTON_SELECT         = 0;
-            static constexpr uint BUTTON_LEFT_JOYSTICK  = 1;
-            static constexpr uint BUTTON_RIGHT_JOYSTICK = 2;
-            static constexpr uint BUTTON_START          = 3;
-            static constexpr uint BUTTON_DPAD_UP        = 4;
-            static constexpr uint BUTTON_DPAD_RIGHT     = 5;
-            static constexpr uint BUTTON_DPAD_DOWN      = 6;
-            static constexpr uint BUTTON_DPAD_LEFT      = 7;
-            static constexpr uint BUTTON_L2             = 8;
-            static constexpr uint BUTTON_R2             = 9;
-            static constexpr uint BUTTON_L1             = 10;
-            static constexpr uint BUTTON_R1             = 11;
-            static constexpr uint BUTTON_TRIANGLE       = 12;
-            static constexpr uint BUTTON_CIRCLE         = 13;
-            static constexpr uint BUTTON_CROSS          = 14;
-            static constexpr uint BUTTON_SQUARE         = 15;
+            static constexpr uint BUTTON_CROSS    = 0;
+            static constexpr uint BUTTON_CIRCLE   = 1;
+            static constexpr uint BUTTON_TRIANGLE = 2;
+            static constexpr uint BUTTON_SQUARE   = 3;
+            static constexpr uint BUTTON_L1       = 4;
+            static constexpr uint BUTTON_R1       = 5;
+
+            static constexpr uint BUTTON_SELECT         = 8;
+            static constexpr uint BUTTON_START          = 9;
+            static constexpr uint BUTTON_PS             = 10;
+            static constexpr uint BUTTON_LEFT_JOYSTICK  = 11;
+            static constexpr uint BUTTON_RIGHT_JOYSTICK = 12;
+            static constexpr uint BUTTON_DPAD_UP        = 13;
+            static constexpr uint BUTTON_DPAD_DOWN      = 14;
+            static constexpr uint BUTTON_DPAD_LEFT      = 15;
+            static constexpr uint BUTTON_DPAD_RIGHT     = 16;
 
             /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
             explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
 
         private:
             Joystick joystick;  // TODO: make configurable
+            size_t id;
             arma::vec strafe{0, 0};
             float rotationalSpeed = 0;
             bool moving           = false;
             bool headLocked       = false;
             float headPitch       = 0;
             float headYaw         = 0;
+
+            std::vector<std::string> actions;
         };
     }  // namespace strategy
 }  // namespace behaviour

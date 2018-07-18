@@ -77,10 +77,8 @@ public:
  */
 class Joystick {
 private:
-    void openPath(std::string devicePath);
-
-    int _fd;
-    std::string path;
+    int _fd[2];
+    std::string path[2];
 
 public:
     ~Joystick();
@@ -99,7 +97,7 @@ public:
     /**
      * Initialises an instance for the joystick device specified.
      */
-    Joystick(std::string devicePath);
+    Joystick(const std::string& device, const std::string& acc);
 
     /**
      * Returns true if the joystick was found and may be used, otherwise false.
@@ -112,15 +110,31 @@ public:
     bool valid();
 
     /**
+     * Open a connection to a new joystick
+     */
+    void connect(const std::string& device, const std::string& acc);
+
+    /**
      * Reconnect to the joystick
      */
     void reconnect();
+
+    /**
+     * Closes connection to the joystick
+     */
+    void close();
 
     /**
      * Attempts to populate the provided JoystickEvent instance with data
      * from the joystick. Returns true if data is available, otherwise false.
      */
     bool sample(JoystickEvent* event);
+
+    /**
+     * Attempts to populate the provided JoystickEvent instance with data
+     * from the joystick. Returns true if data is available, otherwise false.
+     */
+    bool sample_acc(JoystickEvent* event);
 };
 
 #endif

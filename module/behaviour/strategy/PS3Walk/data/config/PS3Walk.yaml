@@ -1,0 +1,2 @@
+controller_path: "/dev/input/js0"
+action_scripts: ["Stand.yaml", "WaveRight.yaml", "Stand.yaml"]

@@ -21,6 +21,9 @@
 
 #include "PS3Walk.h"
 
+#include "extension/Configuration.h"
+#include "extension/Script.h"
+
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/HeadCommand.h"
@@ -29,6 +32,7 @@
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -36,21 +40,35 @@ namespace module {
 namespace behaviour {
     namespace strategy {
 
+        using extension::Configuration;
+        using extension::ExecuteScriptByName;
+
         using message::behaviour::MotionCommand;
         using message::motion::HeadCommand;
         using message::motion::KickScriptCommand;
 
-        using LimbID = utility::input::LimbID;
+        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
+        using utility::input::LimbID;
+        using utility::input::ServoID;
         using utility::math::matrix::Transform2D;
 
         PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), joystick() {
+            : Reactor(std::move(environment)), joystick(), id(size_t(this) * size_t(this) - size_t(this)) {
+
+            on<Configuration>("PS3Walk.yaml").then([this](const Configuration& config) {
+                joystick.connect(config["controller_path"], config["accelerometer_path"]);
+
+                actions.clear();
+                for (const auto& action : config["action_scripts"].as<std::vector<std::string>>()) {
+                    actions.push_back(action);
+                }
+            });
 
             on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
                 JoystickEvent event;
                 // read from joystick
                 if (joystick.sample(&event)) {
-
                     if (event.isAxis()) {
                         // event was an axis event
                         switch (event.number) {
@@ -93,34 +111,41 @@ namespace behaviour {
                                     headLocked = !headLocked;
                                 }
                                 break;
-                            /*case BUTTON_L1:
-                                if (event.value > 0) { // button down
-                                    NUClear::log("Requesting Left Side Kick");
-                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                                        {0, -1, 0}, // vector pointing right relative to robot
-                                        LimbID::LEFT_LEG
-                                    }));
+                            case BUTTON_CROSS:
+                                if (event.value > 0) {  // button down
+                                    NUClear::log("Triggering actions");
+                                    emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
+                                    emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {90}}));
+                                    emit(std::make_unique<ExecuteScriptByName>(id, actions));
                                 }
                                 break;
-                            case BUTTON_L2:
-                                if (event.value > 0) { // button down
+                            // case BUTTON_L1:
+                            //     if (event.value > 0) { // button down
+                            //         NUClear::log("Requesting Left Side Kick");
+                            //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
+                            //             {0, -1, 0}, // vector pointing right relative to robot
+                            //             LimbID::LEFT_LEG
+                            //         }));
+                            //     }
+                            //     break;
+                            case BUTTON_L1:
+                                if (event.value > 0) {  // button down
                                     NUClear::log("Requesting Left Front Kick");
                                     emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                                        {1, 0, 0}, // vector pointing forward relative to robot
-                                        LimbID::LEFT_LEG
-                                    }));
+                                        Eigen::Vector3d(1, 0, 0),  // vector pointing forward relative to robot
+                                        LimbID::LEFT_LEG}));
                                 }
                                 break;
+                            // case BUTTON_R1:
+                            //     if (event.value > 0) { // button down
+                            //         NUClear::log("Requesting Right Side Kick");
+                            //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
+                            //             {0, 1, 0}, // vector pointing left relative to robot
+                            //             LimbID::RIGHT_LEG
+                            //         }));
+                            //     }
+                            //     break;
                             case BUTTON_R1:
-                                if (event.value > 0) { // button down
-                                    NUClear::log("Requesting Right Side Kick");
-                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                                        {0, 1, 0}, // vector pointing left relative to robot
-                                        LimbID::RIGHT_LEG
-                                    }));
-                                }
-                                break;*/
-                            case BUTTON_R2:
                                 if (event.value > 0) {  // button down
                                     NUClear::log("Requesting Right Front Kick");
                                     emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
@@ -130,6 +155,9 @@ namespace behaviour {
                                 break;
                         }
                     }
+                }
+                else if (joystick.sample_acc(&event)) {
+                    // Accelerometer comes in here .... if you know which axis is which
                 }
                 // If it's closed then we should try to reconnect
                 else if (!joystick.valid()) {
@@ -159,6 +187,17 @@ namespace behaviour {
                     emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(transform)));
                 }
             });
+
+            emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
+                id,
+                "PS3Walk",
+                {std::pair<float, std::set<LimbID>>(
+                    0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                [this](const std::set<LimbID>&) {},
+                [this](const std::set<LimbID>&) {},
+                [this](const std::set<ServoID>&) {
+                    emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {0}}));
+                }}));
         }
     }  // namespace strategy
 }  // namespace behaviour
