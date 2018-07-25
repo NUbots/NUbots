@@ -30,9 +30,11 @@ export class ChartView extends Component<{
     nusightNetwork: NUsightNetwork
     LineChart: ComponentType<LineChartProps>
   }): ComponentType {
-    const network = ChartNetwork.of(nusightNetwork, model)
     const controller = ChartController.of({ model })
-    return () => <ChartView controller={controller} Menu={menu} model={model} network={network} LineChart={LineChart}/>
+    return () => {
+      const network = ChartNetwork.of(nusightNetwork, model)
+      return <ChartView controller={controller} Menu={menu} model={model} network={network} LineChart={LineChart}/>
+    }
   }
 
   componentWillUnmount(): void {
