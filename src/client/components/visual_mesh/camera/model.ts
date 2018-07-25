@@ -6,9 +6,9 @@ import { VisualMeshRobotModel } from '../model'
 export interface VisualMesh {
   readonly rows: number[]
   readonly indices: number[]
-  readonly neighbours: number[][]
-  readonly coordinates: Array<[number, number]>
-  readonly classifications: Array<{ dim: number, values: number[] }>
+  readonly neighbours: number[]
+  readonly coordinates: number[]
+  readonly classifications: { dim: number, values: number[] }
 }
 
 type CameraModelOpts = {

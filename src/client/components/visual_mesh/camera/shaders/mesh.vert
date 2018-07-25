@@ -5,7 +5,7 @@ uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
 
 attribute vec2 position;
-attribute vec3 classification;
+// attribute vec3 classification;
 attribute vec2 uv;
 
 varying vec2 vUv;
@@ -16,7 +16,7 @@ varying vec3 vClassification;
 void main() {
   // Forward our varyings
   vUv = uv;
-  vClassification = classification;
+  // vClassification = classification;
 
   // Calculate our position in the mesh
   float theta = M_PI * 2.0 * position.y;

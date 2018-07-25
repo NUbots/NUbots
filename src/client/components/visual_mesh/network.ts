@@ -45,9 +45,9 @@ export class VisualMeshNetwork {
     camera.mesh = {
       rows: mesh.map(v => v.segments!),
       indices,
-      neighbours: neighbourhood.map(v => [v.s0!, v.s1!, v.s2!, v.s3!, v.s4!, v.s5!]),
-      coordinates: coordinates.map(v => [v.x!, v.y!] as [number, number]),
-      classifications: classifications.map(v => ({ dim: v.dimensions!, values: v.values! })),
+      neighbours: neighbourhood!.v!,
+      coordinates: coordinates!.v!,
+      classifications: { dim: classifications!.cols!, values: classifications!.v! },
     }
   }
 

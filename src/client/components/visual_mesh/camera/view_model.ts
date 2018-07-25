@@ -1,8 +1,9 @@
 import * as bounds from 'binary-search-bounds'
+import { autorun } from 'mobx'
 import { observable } from 'mobx'
 import { computed } from 'mobx'
-import { autorun } from 'mobx'
 import { createTransformer } from 'mobx-utils'
+import { Object3D } from 'three'
 import { RawShaderMaterial } from 'three'
 import { Float32BufferAttribute } from 'three'
 import { Scene } from 'three'
@@ -17,8 +18,8 @@ import { ImageDecoder } from '../../../image_decoder/image_decoder'
 
 import { CameraModel } from './model'
 import { VisualMesh } from './model'
-import * as fragmentShader from './shaders/mesh.frag'
-import * as vertexShader from './shaders/mesh.vert'
+import * as meshFragmentShader from './shaders/mesh.frag'
+import * as meshVertexShader from './shaders/mesh.vert'
 
 export class CameraViewModel {
 
@@ -80,21 +81,25 @@ export class CameraViewModel {
     return scene
   }
 
-  private visualMesh = createTransformer((mesh: VisualMesh): Mesh => {
-    const material = this.meshMaterial
-    material.uniforms.image.value = this.decoder.texture
-    material.uniforms.dimensions.value = new Vector2(this.model.image!.width, this.model.image!.height)
+  private visualMesh = createTransformer((mesh: VisualMesh): Object3D => {
+    const meshMaterial = this.meshMaterial
+    meshMaterial.uniforms.image.value = this.decoder.texture
+    meshMaterial.uniforms.dimensions.value = new Vector2(this.model.image!.width, this.model.image!.height)
 
-    const obj = new Mesh(this.meshGeometry(mesh), this.meshMaterial)
-    obj.frustumCulled = false
+    // The UV mapped mesh
+    const m = new Mesh(this.meshGeometry(mesh), meshMaterial)
+    m.frustumCulled = false
+
+    const obj = new Object3D()
+    obj.add(m)
     return obj
   })
 
   @computed
   get meshMaterial(): RawShaderMaterial {
     return new RawShaderMaterial({
-      vertexShader: String(vertexShader),
-      fragmentShader: String(fragmentShader),
+      vertexShader: String(meshVertexShader),
+      fragmentShader: String(meshFragmentShader),
       uniforms: {
         image: { type: 't' },
         dimensions: { value: new Vector2() },
@@ -105,6 +110,8 @@ export class CameraViewModel {
   private meshGeometry = createTransformer((mesh: VisualMesh): BufferGeometry => {
 
     const { rows, indices, neighbours, coordinates, classifications } = mesh
+
+    const nElem = coordinates.length / 2
 
     // Cumulative sum so we can work out which row our segments are on
     const cRows = rows.reduce((acc, v, i) => {
@@ -120,27 +127,30 @@ export class CameraViewModel {
       // How far around the ring we are as a value between 0 and 1
       const theta = (i - cRows[idx]) / rows[idx]
       return [phi, theta]
-    }), [Number.NaN, Number.NaN])
+    }))
+
 
     // Calculate our triangle indexes
-    const triangles = ([] as number[]).concat(...(neighbours.map((n, i) => {
-      // Define our top left and top triangles (all that's needed since we get smaller with distance)
-      return [
-        i, n[0], n[2], // TL
-        i, n[1], n[0], // T
-      ]
-    })))
+    const triangles = []
+    for (let i = 0; i < nElem; i++) {
+      const ni = i * 6
+      if (neighbours[ni + 0] < nElem) {
+        if (neighbours[ni + 2] < nElem) {
+          triangles.push(i, neighbours[ni + 0], neighbours[ni + 2])
+        }
+        if (neighbours[ni + 1] < nElem) {
+          triangles.push(i, neighbours[ni + 1], neighbours[ni + 0])
+        }
+      }
+    }
 
     // Calculate our uv for mapping images
-    const uvs = ([] as number[]).concat(...coordinates, [Number.NaN, Number.NaN])
-
-    // Choose our classification to view
-    const c = classifications[classifications.length - 1]
+    const uvs = coordinates
 
     const geometry = new BufferGeometry()
     geometry.setIndex(triangles)
     geometry.addAttribute('position', new Float32BufferAttribute(position, 2))
-    geometry.addAttribute('classification', new Float32BufferAttribute(c.values, c.dim))
+    geometry.addAttribute('classification', new Float32BufferAttribute(classifications.values, classifications.dim))
     geometry.addAttribute('uv', new Float32BufferAttribute(uvs, 2))
 
     return geometry
