@@ -88,7 +88,6 @@ namespace behaviour {
 
         on<Trigger<ActionPriorites>, Sync<Controller>, Priority::HIGH>().then(
             "Action Priority Update", [this](const ActionPriorites& update) {
-
                 auto& request = requests[update.id];
 
                 // Find the largest priority
@@ -129,7 +128,6 @@ namespace behaviour {
 
         // For single waypoints
         on<Trigger<ServoCommand>>().then([this](const ServoCommand& point) {
-
             // Make a vector of the command
             auto points = std::make_unique<std::vector<ServoCommand>>();
             points->push_back(point);
@@ -138,7 +136,6 @@ namespace behaviour {
 
         on<Trigger<std::vector<ServoCommand>>, Sync<Controller>>().then(
             "Command Filter", [this](const std::vector<ServoCommand>& commands) {
-
                 for (auto& command : commands) {
 
                     // Check if we have access
@@ -177,7 +174,6 @@ namespace behaviour {
 
         on<Every<90, Per<std::chrono::seconds>>, Single, Sync<Controller>, Priority::HIGH>().then(
             "Controller Update Waypoints", [this] {
-
                 auto now = NUClear::clock::now();
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
@@ -301,7 +297,6 @@ namespace behaviour {
                 std::max_element(std::begin(limbs),
                                  std::end(limbs),
                                  [](const std::pair<LimbID, iterators>& a, const std::pair<LimbID, iterators>& b) {
-
                                      // Empty lists go to the end
                                      if (a.second.first == a.second.second) {
                                          return true;

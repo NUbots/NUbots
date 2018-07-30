@@ -61,7 +61,6 @@ namespace behaviour {
 
             // do a little configurating
             on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
-
                 // Store falling angle as a cosine so we can compare it directly to the z axis value
                 double fallingAngle = config["FALLING_ANGLE"].as<double>();
                 FALLING_ANGLE       = cos(fallingAngle);
@@ -76,7 +75,6 @@ namespace behaviour {
             });
 
             on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
-
                 if (!falling && !sensors.empty() && fabs(sensors.back()->world(2, 2)) < FALLING_ANGLE) {
 
                     // We might be falling, check the accelerometer

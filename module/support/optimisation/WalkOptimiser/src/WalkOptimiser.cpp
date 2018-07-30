@@ -48,7 +48,6 @@ namespace support {
             : Reactor(std::move(environment)), initialConfig("Jerry", YAML::Node()) {
 
             on<Configuration>("WalkOptimiser.yaml").then([this](const Configuration& config) {
-
                 log("Starting up walk optimiser");
 
                 number_of_samples = config["number_of_samples"].as<int>();
@@ -85,7 +84,6 @@ namespace support {
 
             on<Trigger<OptimiseWalkCommand>, Configuration, Sync<WalkOptimiser>>("WalkEngine.yaml")
                 .then("Optimise Walk", [this](const OptimiseWalkCommand&, const Configuration& walkConfig) {
-
                     // Start optimisation
                     std::cerr << "Optimiser command" << std::endl;
                     // Get samples
@@ -103,7 +101,6 @@ namespace support {
                     // Apply the parameters to the walk engine
                     setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
                     // Now wait for WalkConfigSaved
-
                 });
 
             on<Trigger<WalkConfigSaved>, Sync<WalkOptimiser>>([this] {
@@ -123,7 +120,6 @@ namespace support {
             on<Trigger<ExecuteGetup>>().then("Getup Recording", [this] {
                 // Record the robot falling over
                 data.recordGetup();
-
             });
 
             on<Trigger<KillGetup>>().then("Getup Recording", [this] {

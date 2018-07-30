@@ -39,7 +39,6 @@ namespace motion {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("KinematicsConfiguration.yaml").then([this](const Configuration& config) {
-
             KinematicsModel model;
             configure(model, config);
             emit(std::make_unique<KinematicsModel>(model));

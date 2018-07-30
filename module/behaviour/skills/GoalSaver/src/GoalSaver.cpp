@@ -64,7 +64,6 @@ namespace behaviour {
             });
 
             on<Trigger<DiveCommand>>().then([this](const DiveCommand& diveCommand) {
-
                 this->diveCommand = diveCommand;
                 updatePriority(DIVE_PRIORITY);
             });
@@ -84,7 +83,6 @@ namespace behaviour {
                 }
 
                 updatePriority(EXECUTION_PRIORITY);
-
             });
 
             on<Trigger<FinishDive>>().then([this] {

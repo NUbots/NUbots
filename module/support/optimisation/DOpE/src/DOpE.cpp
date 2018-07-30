@@ -35,14 +35,14 @@ namespace support {
 
         using google::protobuf::util::MessageDifferencer;
 
-        using NUClear::message::NetworkJoin;
-        using NUClear::message::NetworkLeave;
         using extension::Configuration;
         using message::support::optimisation::Episode;
         using message::support::optimisation::Estimate;
         using message::support::optimisation::Parameters;
         using message::support::optimisation::RegisterOptimisation;
         using message::support::optimisation::RequestParameters;
+        using NUClear::message::NetworkJoin;
+        using NUClear::message::NetworkLeave;
         using utility::math::optimisation::Optimiser;
         using utility::math::optimisation::OptimiserEstimate;
         using utility::math::optimisation::PGAOptimiser;
@@ -130,7 +130,6 @@ namespace support {
 
             on<Trigger<NetworkJoin>, Sync<DOpE>>().then(
                 "Distrubute Initial Optimisation", [this](const NetworkJoin& joiner) {
-
                     log<NUClear::INFO>(fmt::format("{} joined the optimisation network", joiner.name));
 
                     for (auto& op : optimisations) {
@@ -144,7 +143,6 @@ namespace support {
 
             on<Network<Estimate>, Sync<DOpE>>().then(
                 "Network Estimate", [this](const NetworkSource& src, const Estimate& estimate) {
-
                     log<NUClear::INFO>(fmt::format(
                         "Estimate {} gen {} received from {}", estimate.group, estimate.generation, src.name));
 
@@ -218,7 +216,6 @@ namespace support {
 
             on<Network<Episode>, Sync<DOpE>>().then(
                 "Network Episode", [this](const NetworkSource& src, const Episode& episode) {
-
                     // If we have this optimisation
                     auto el = optimisations.find(episode.group);
                     if (el != optimisations.end()) {
@@ -252,7 +249,6 @@ namespace support {
                 });
 
             on<Trigger<Episode>, Sync<DOpE>>().then("Local Episode", [this](const Episode& episode) {
-
                 // If we have this optimisation
                 auto el = optimisations.find(episode.group);
                 if (el != optimisations.end()) {
@@ -316,7 +312,6 @@ namespace support {
 
             on<Trigger<RequestParameters>, Sync<DOpE>>().then(
                 "Request Optimisation Parameters", [this](const RequestParameters& request) {
-
                     auto el = optimisations.find(request.group);
                     if (el != optimisations.end()) {
                         auto& opt = el->second;

@@ -5,13 +5,12 @@ class user_tools (String $user) {
   # User tools
   package { 'vim': ensure => latest, }
   package { 'screen': ensure => latest, }
-  package { 'clang-format-5.0': ensure => latest, }
+  package { 'clang-format-6.0': ensure => latest, }
   package { 'zsh': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }
   package { 'cmake-curses-gui': ensure => latest, }
   package { 'dos2unix': ensure => latest, }
-  package { 'unzip': ensure => latest, }
   package { 'graphviz': ensure => latest, }
 
   # INSTALL ROBOT HOST PARSER
@@ -143,6 +142,7 @@ ff02::2 ip6-allrouters
 
 10.1.1.11 i1 igus1
 10.1.1.12 i2 igus2
+10.1.1.13 i3 igus3
 ",
   }
 }

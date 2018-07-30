@@ -2,27 +2,6 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  host = RbConfig::CONFIG['host_os']
-
-  if host =~ /darwin/
-    cpus = `sysctl -n hw.physicalcpu_max`.to_i
-    # sysctl returns Bytes, convert to KB
-    memory = `sysctl -n hw.memsize`.to_i / 1024
-  elsif host =~ /linux/
-    cpus = `lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l`.to_i
-    # meminfo returns KB already
-    memory = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i
-  elsif host =~ /mswin|mingw|cygwin/
-    cpus = `wmic cpu get NumberOfCores`.split[1].to_i
-    # Get TotalPhysicalMemory returns Bytes, convert to KB
-    memory = `wmic computersystem Get TotalPhysicalMemory`.split[1].to_i / 1024
-  end
-
-  # Convert memory to MB for for Vagrant
-  memory = memory / 1024
-
-  # Use half the system memory for VM
-  memory = memory / 2
 
   # Settings for a parallels provider
   config.vm.provider "parallels" do |v, override|
@@ -35,8 +14,8 @@ Vagrant.configure("2") do |config|
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.customize ["set", :id, "--cpus", cpus ]
-    v.customize ["set", :id, "--memsize", memory ]
+    v.customize ["set", :id, "--cpus", `sysctl -n hw.physicalcpu_max 2> /dev/null`.chomp ]
+    v.customize ["set", :id, "--memsize", `echo "scale=0; $(sysctl -n hw.memsize 2> /dev/null || echo 0)/2097152" | bc`.chomp ]
     v.update_guest_tools = true
   end
 
@@ -52,8 +31,8 @@ Vagrant.configure("2") do |config|
     override.vm.boot_timeout = 360
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    v.customize ["modifyvm", :id, "--cpus", cpus ]
-    v.customize ["modifyvm", :id, "--memory", memory ]
+    v.customize ["modifyvm", :id, "--cpus", `if [ "x$(uname)" = "xDarwin" ]; then sysctl -n hw.physicalcpu_max; else lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l; fi`.chomp ]
+    v.customize ["modifyvm", :id, "--memory", `if [ "x$(uname)" = "xDarwin" ]; then echo "scale=0; $(sysctl -n hw.memsize)/2097152" | bc; else echo "scale=0; $(awk '/MemTotal/{print $2}' /proc/meminfo)/2048" | bc; fi`.chomp ]
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
