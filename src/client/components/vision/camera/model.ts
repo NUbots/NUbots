@@ -2,6 +2,7 @@ import { observable } from 'mobx'
 
 import { Image } from '../../../image_decoder/image_decoder'
 import { Matrix4 } from '../../../math/matrix4'
+import { Vector2 } from '../../../math/vector2'
 import { VisionRobotModel } from '../model'
 
 export interface VisionImage extends Image {
@@ -9,6 +10,7 @@ export interface VisionImage extends Image {
   readonly lens: {
     readonly projection: number
     readonly focalLength: number
+    readonly centre: Vector2
   }
 }
 

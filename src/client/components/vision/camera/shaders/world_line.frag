@@ -2,35 +2,97 @@ precision lowp float;
 
 #define M_PI 3.1415926535897932384626433832795
 
+// Lens/projection parameters
 uniform vec2 viewSize;
 uniform float focalLength;
+uniform int projection;
+uniform vec2 centre;
+
+// Line parameters
 uniform vec3 axis;
 uniform vec3 start;
 uniform vec3 end;
+
+// Style
 uniform vec4 colour;
 uniform float lineWidth;
 
 varying vec2 vUv;
 
+#define RECTILINEAR_PROJECTION 1
+#define EQUIDISTANT_PROJECTION 2
+#define EQUISOLID_PROJECTION 3
+
 // TODO(trent) these should be moved into a separate GLSL file once there is a decent #include system
-vec3 unprojectEquidistant(vec2 point, float focalLength) {
-  float r = length(point);
+vec3 unprojectEquidistant(vec2 point, float f, vec2 c) {
+  float r = length(point + c);
+  float theta = r / f;
   vec3 s = vec3(
-    cos(r / focalLength),
-    sin(r / focalLength) * point.x / r,
-    sin(r / focalLength) * point.y / r
+    cos(theta),
+    sin(theta) * point.x / r,
+    sin(theta) * point.y / r
   );
   return normalize(s);
 }
 
-vec2 projectEquidistant(vec3 ray, float focalLength) {
-  float theta = acos(ray.x);
-  float r = focalLength * theta;
-  float sinTheta = sin(theta);
-  return vec2(
-    r * ray.y / sinTheta,
-    r * ray.z / sinTheta
+vec2 projectEquidistant(vec3 ray, float f, vec2 c) {
+  // Calculate some intermediates
+  float theta     = acos(ray.x);
+  float r         = f * theta;
+  float rSinTheta = 1.0 / sqrt(1.0 - ray.x * ray.x);
+
+  // Work out our pixel coordinates as a 0 centred image with x to the left and y up (screen space)
+  vec2 screen = ray.x >= 1.0 ? vec2(0) : vec2(r * ray.y * rSinTheta, r * ray.z * rSinTheta);
+
+  // Then apply the offset to the centre of our lens
+  return screen - c;
+}
+
+vec3 unprojectEquisolid(vec2 point, float f, vec2 c) {
+  float r = length(point + c);
+  float theta = 2.0 * asin(r / (2.0 * f));
+  vec3 s = vec3(
+    cos(theta),
+    sin(theta) * point.x / r,
+    sin(theta) * point.y / r
   );
+  return normalize(s);
+}
+
+vec2 projectEquisolid(vec3 ray, float f, vec2 c) {
+  // Calculate some intermediates
+  float theta     = acos(ray.x);
+  float r         = 2.0 * f * sin(theta * 0.5);
+  float rSinTheta = 1.0 / sqrt(1.0 - ray.x * ray.x);
+
+  // Work out our pixel coordinates as a 0 centred image with x to the left and y up (screen space)
+  vec2 screen = ray.x >= 1.0 ? vec2(0) : vec2(r * ray.y * rSinTheta, r * ray.z * rSinTheta);
+
+  // Then apply the offset to the centre of our lens
+  return screen - c;
+}
+
+vec3 unprojectRectilinear(vec2 point, float f, vec2 c) {
+  return normalize(vec3(f, point + c));
+}
+
+vec2 projectRectilinear(vec3 ray, float f, vec2 c) {
+  float rx = 1.0 / ray.x;
+  return vec2(f * ray.y * rx, f * ray.z * rx) - c;
+}
+
+vec3 unproject(vec2 point, float f, vec2 c, int projection) {
+  if (projection == RECTILINEAR_PROJECTION) return unprojectRectilinear(point, f, c);
+  if (projection == EQUIDISTANT_PROJECTION) return unprojectEquidistant(point, f, c);
+  if (projection == EQUISOLID_PROJECTION) return unprojectEquisolid(point, f, c);
+  return vec3(0);
+}
+
+vec2 project(vec3 ray, float f, vec2 c, int projection) {
+  if (projection == RECTILINEAR_PROJECTION) return projectRectilinear(ray, f, c);
+  if (projection == EQUIDISTANT_PROJECTION) return projectEquidistant(ray, f, c);
+  if (projection == EQUISOLID_PROJECTION) return projectEquisolid(ray, f, c);
+  return vec2(0);
 }
 
 /**
@@ -66,8 +128,7 @@ void main() {
   float gradient = dot(axis, start);
 
   // Project it into the world space
-  // TODO(trent) this can't handle different lens types, in a future PR fix this
-  vec3 cam = unprojectEquidistant(screenPoint, focalLength * viewSize.x);
+  vec3 cam = unproject(screenPoint, focalLength * viewSize.x, centre, projection);
 
   // Rotate the axis vector towards the screen point by the angle to gradient
   // This gives the closest point on the curve
@@ -85,7 +146,7 @@ void main() {
   nearestPoint = value > range && value - range < (M_PI * 2.0 - range) * 0.5 ? end : nearestPoint;
 
   // When we project this back onto the image we get the nearest pixel
-  vec2 nearestPixel = projectEquidistant(nearestPoint, focalLength * viewSize.x);
+  vec2 nearestPixel = project(nearestPoint, focalLength * viewSize.x, centre, projection);
 
   // We get the distance from us to the nearest pixel and smoothstep to make a line
   float pixelDistance = length(screenPoint - nearestPixel);
@@ -93,4 +154,3 @@ void main() {
 
   gl_FragColor = vec4(colour.rgb, colour.a * alpha);
 }
-
