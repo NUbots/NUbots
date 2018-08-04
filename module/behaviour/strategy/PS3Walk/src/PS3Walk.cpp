@@ -119,6 +119,14 @@ namespace behaviour {
                                     emit(std::make_unique<ExecuteScriptByName>(id, actions));
                                 }
                                 break;
+                            case BUTTON_CIRCLE:
+                                if (event.value > 0) {  // button down
+                                    NUClear::log("Standing");
+                                    emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
+                                    emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {90}}));
+                                    emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml"));
+                                }
+                                break;
                             // case BUTTON_L1:
                             //     if (event.value > 0) { // button down
                             //         NUClear::log("Requesting Left Side Kick");
