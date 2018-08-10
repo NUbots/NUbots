@@ -43,6 +43,8 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
+        double FootStep::distance(const Eigen::Vector3d& pos) {}
+
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
@@ -126,47 +128,53 @@ namespace motion {
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
                     // Swing foot's new target position on the plane
-                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
+                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized();
 
-                    // Foot target's position relative to torso
-                    Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+                    double distance = distance(rF_wPp);
+                    if (distance > 0.005) {
+                        time_left = target.timestamp
+                                    - if ()
 
-                    // Torso to target transform
-                    Eigen::Affine3d Hat;
-                    Hat = Haf_s * Htf_s.inverse();
-                    // Get torso to swing foot rotation as quaternion
-                    Eigen::Quaterniond Rf_wt;
-                    Rf_wt = Htf_w.inverse().linear();
-                    // Create rotation of torso to target as a quaternion
-                    Eigen::Quaterniond Rat;
-                    Rat = Hat.linear();
-                    // Create rotation matrix for foot target
-                    Eigen::Matrix3d Rf_tt;
-                    // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-                    // TODO: determine t
-                    Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
+                                    // Foot target's position relative to torso
+                                    Eigen::Vector3d rF_tTt = Htp * rF_tPp;
 
-                    Eigen::Affine3d Htf_t;
-                    // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
-                    Htf_t.linear()      = Rf_tt;   // Rotation from above
-                    Htf_t.translation() = rF_tTt;  // Translation to foot target
+                        // Torso to target transform
+                        Eigen::Affine3d Hat;
+                        Hat = Haf_s * Htf_s.inverse();
+                        // Get torso to swing foot rotation as quaternion
+                        Eigen::Quaterniond Rf_wt;
+                        Rf_wt = Htf_w.inverse().linear();
+                        // Create rotation of torso to target as a quaternion
+                        Eigen::Quaterniond Rat;
+                        Rat = Hat.linear();
+                        // Create rotation matrix for foot target
+                        Eigen::Matrix3d Rf_tt;
+                        // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
+                        // TODO: determine t
+                        Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
 
-                    Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
-                    auto joints =
-                        calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
+                        Eigen::Affine3d Htf_t;
+                        // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
+                        Htf_t.linear()      = Rf_tt;   // Rotation from above
+                        Htf_t.translation() = rF_tTt;  // Translation to foot target
 
-                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                        Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
+                        auto joints   = calculateLegJoints(
+                            model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
 
-                    for (const auto& joint : joints) {
-                        waypoints->push_back({subsumptionId,
-                                              NUClear::clock::now() + std::chrono::milliseconds(10),
-                                              joint.first,
-                                              joint.second,
-                                              20,
-                                              100});  // TODO: support separate gains for each leg
+                        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+
+                        for (const auto& joint : joints) {
+                            waypoints->push_back({subsumptionId,
+                                                  NUClear::clock::now() + std::chrono::milliseconds(10),
+                                                  joint.first,
+                                                  joint.second,
+                                                  20,
+                                                  100});  // TODO: support separate gains for each leg
+                        }
+
+                        emit(waypoints);
                     }
-
-                    emit(waypoints);
                 });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
