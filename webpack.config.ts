@@ -13,13 +13,13 @@ const config: webpack.Configuration = {
   context: sourcePath,
   devtool: isProduction ? 'source-map' : 'inline-source-map',
   entry: {
-    main: './client/main.tsx',
+    main: ['./client/main.tsx', 'webpack-hot-middleware/client?reload=true'],
   },
   output: {
     path: outPath,
     filename: '[name].js',
-    chunkFilename: '[name].js',
     publicPath: '/',
+    globalObject: 'this',
   },
   target: 'web',
   resolve: {
@@ -35,12 +35,16 @@ const config: webpack.Configuration = {
       // .ts, .tsx
       {
         test: /\.tsx?$/,
-        use: isProduction
-          ? 'awesome-typescript-loader?module=es6'
-          : [
-            'react-hot-loader/webpack',
-            'awesome-typescript-loader',
-          ],
+        exclude: [
+          path.resolve(__dirname, 'node_modules'),
+        ],
+        use: [{
+          loader: 'awesome-typescript-loader',
+          options: {
+            useBabel: true,
+            babelCore: '@babel/core',
+          },
+        }],
       },
       // local css
       {
@@ -90,12 +94,7 @@ const config: webpack.Configuration = {
       {
         test: /\.svg$/,
         use: [
-          {
-            loader: 'babel-loader',
-            query: {
-              presets: ['env'],
-            },
-          },
+          'babel-loader',
           {
             loader: 'react-svg-loader',
             query: {
@@ -119,10 +118,6 @@ const config: webpack.Configuration = {
     splitChunks: {
       name: true,
       cacheGroups: {
-        common: {
-          chunks: 'initial',
-          minChunks: 2,
-        },
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           chunks: 'all',
@@ -135,7 +130,6 @@ const config: webpack.Configuration = {
         },
       },
     },
-    runtimeChunk: true,
   },
   plugins: [
     new CopyWebpackPlugin([{ from: 'assets/images', to: 'images' }]),
@@ -145,7 +139,10 @@ const config: webpack.Configuration = {
     }),
     new HtmlWebpackPlugin({
       template: 'assets/index.html',
+      filename: 'index.html',
+      chunks: ['main'],
     }),
+    new webpack.HotModuleReplacementPlugin(),
   ] as any as webpack.Plugin[],
   node: {
     // workaround for webpack-dev-server issue
