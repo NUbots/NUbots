@@ -13,7 +13,10 @@ const config: webpack.Configuration = {
   context: sourcePath,
   devtool: isProduction ? 'source-map' : 'inline-source-map',
   entry: {
-    main: ['./client/main.tsx', 'webpack-hot-middleware/client?reload=true'],
+    main: [
+      './client/main.tsx',
+      ...(isProduction ? [] : ['webpack-hot-middleware/client?reload=true']),
+    ],
   },
   output: {
     path: outPath,
@@ -142,7 +145,7 @@ const config: webpack.Configuration = {
       filename: 'index.html',
       chunks: ['main'],
     }),
-    new webpack.HotModuleReplacementPlugin(),
+    ...(isProduction ? [] : [new webpack.HotModuleReplacementPlugin()]),
   ] as any as webpack.Plugin[],
   node: {
     // workaround for webpack-dev-server issue
