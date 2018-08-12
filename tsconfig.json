@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "target": "es5",
+    "target": "ES2017",
     "jsx": "react",
     "skipLibCheck": true,
     "module": "commonjs",
@@ -17,8 +17,10 @@
     "downlevelIteration": true,
     "outDir": "build",
     "lib": [
-      "es6",
-      "es7",
+      "ES2015",
+      "ES2016",
+      "ES2017",
+      "ES2018",
       "dom",
       "webworker"
     ]

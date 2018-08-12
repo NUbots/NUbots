@@ -2,34 +2,19 @@ import { observable } from 'mobx'
 import { computed } from 'mobx'
 
 import { memoize } from '../../../base/memoize'
+import { Quaternion } from '../../../math/quaternion'
 import { Vector3 } from '../../../math/vector3'
 import { RobotModel } from '../../robot/model'
-import { Quaternion } from '../model'
 
-export class LocalisationRobotModel {
-  @observable private model: RobotModel
-  @observable name: string
-  @observable color?: string
-  @observable rWTt: Vector3 // Torso to world translation in torso space.
-  @observable Rwt: Quaternion // Torso to world rotation.
-  @observable motors: DarwinMotorSet
+class DarwinMotor {
+  @observable angle: number
 
-  constructor(model: RobotModel, opts: Partial<LocalisationRobotModel>) {
-    this.model = model
+  constructor(opts: DarwinMotor) {
     Object.assign(this, opts)
   }
 
-  static of = memoize((model: RobotModel): LocalisationRobotModel => {
-    return new LocalisationRobotModel(model, {
-      name: model.name,
-      rWTt: Vector3.of(),
-      Rwt: Quaternion.of(),
-      motors: DarwinMotorSet.of(),
-    })
-  })
-
-  @computed get visible() {
-    return this.model.enabled
+  static of() {
+    return new DarwinMotor({ angle: 0 })
   }
 }
 
@@ -85,14 +70,29 @@ export class DarwinMotorSet {
   }
 }
 
-class DarwinMotor {
-  @observable angle: number
+export class LocalisationRobotModel {
+  @observable private model: RobotModel
+  @observable name: string
+  @observable color?: string
+  @observable rWTt: Vector3 // Torso to world translation in torso space.
+  @observable Rwt: Quaternion // Torso to world rotation.
+  @observable motors: DarwinMotorSet
 
-  constructor(opts: DarwinMotor) {
+  constructor(model: RobotModel, opts: Partial<LocalisationRobotModel>) {
+    this.model = model
     Object.assign(this, opts)
   }
 
-  static of() {
-    return new DarwinMotor({ angle: 0 })
+  static of = memoize((model: RobotModel): LocalisationRobotModel => {
+    return new LocalisationRobotModel(model, {
+      name: model.name,
+      rWTt: Vector3.of(),
+      Rwt: Quaternion.of(),
+      motors: DarwinMotorSet.of(),
+    })
+  })
+
+  @computed get visible() {
+    return this.model.enabled
   }
 }
