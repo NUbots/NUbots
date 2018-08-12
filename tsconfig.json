@@ -13,6 +13,7 @@
     "noImplicitReturns": false,
     "removeComments": true,
     "strict": true,
+    "strictPropertyInitialization": false,
     "downlevelIteration": true,
     "outDir": "build",
     "lib": [

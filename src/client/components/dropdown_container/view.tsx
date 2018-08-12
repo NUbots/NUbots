@@ -102,7 +102,7 @@ export const dropdownContainer = (WrappedComponent: ComponentType<DropdownProps>
   return EnhancedDropdown
 }
 
-function isOutsideEl(target: EventTarget, el?: HTMLElement): boolean {
+function isOutsideEl(target: EventTarget | null, el?: HTMLElement): boolean {
   let current: Node | null = target as Node
   while (current) {
     if (current === el) {
