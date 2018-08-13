@@ -36,26 +36,41 @@ namespace motion {
         using utility::nusight::graph;
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
-            return (pos.x() < 0 ? 1 : -1) * std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
+            return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
         }
 
         double FootStep::f_y(const Eigen::Vector3d& pos) {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
-        double FootStep::distance(const Eigen::Vector3d& pos) {}
+        double FootStep::distance(const Eigen::Vector3d& pos) {
+            return (std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))))
+                   / (-std::abs(std::pow(c * pos.x(), -step_steep)));
+        }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
+                double x    = config["test"]["x"].as<double>();
+                double y    = config["test"]["y"].as<double>();
+                double z    = config["test"]["z"].as<double>();
+                int foot    = config["foot"].as<int>();
                 step_height = config["step_height"];
                 well_width  = config["well_width"];
                 step_steep  = config["step_steep"];
-                c           = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
+
+                c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
                      * std::pow(step_steep * step_height + std::pow(step_steep, 2) * step_height, -1 / step_steep))
                     / well_width;
+
+                Eigen::Affine3d Haf_s;
+                Haf_s.linear()      = Eigen::Matrix3d::Identity();
+                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
+
+                emit(std::make_unique<TorsoTarget>(
+                    NUClear::clock::now() + std::chrono::seconds(time), foot, Haf_s.matrix()));
             });
 
 
@@ -131,12 +146,23 @@ namespace motion {
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized();
 
                     double distance = distance(rF_wPp);
-                    if (distance > 0.005) {
-                        time_left = target.timestamp
-                                    - if ()
+                    log(distance);
 
-                                    // Foot target's position relative to torso
-                                    Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+                    if (distance > 0.005) {
+                        // Find scale to reach target at specified time
+                        std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
+                        double scale;
+
+                        // 0.1 refers to 10 milliseconds as below
+                        if (time_left <= std::chrono::duration<double>::zero()) {  // Time has elapsed
+                            scale = 0.1;
+                        }
+                        else {  // There is time left to complete
+                            scale = (distance / time_left.count()) * 0.1;
+                        }
+
+                        // Foot target's position relative to torso
+                        Eigen::Vector3d rF_tTt = Htp * rF_tPp;
 
                         // Torso to target transform
                         Eigen::Affine3d Hat;
