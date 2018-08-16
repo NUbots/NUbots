@@ -44,8 +44,8 @@ namespace motion {
         }
 
         double FootStep::distance(const Eigen::Vector3d& pos) {
-            return (std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))))
-                   / (-std::abs(std::pow(c * pos.x(), -step_steep)));
+            // ( |C|^-s |x|^s+2 e^-|(cx)^-s| ) / (sx)
+            return (abs(pow(c, -s)) * pow(abs(pos.x()), s + 2) * exp(-abs(pow(c * pos.x(), -s)))) / (s * pos.x());
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
