@@ -2,6 +2,8 @@ import { observable } from 'mobx'
 import { autorun } from 'mobx'
 import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
+import { Float32BufferAttribute } from 'three'
+import { LineSegments } from 'three'
 import { BufferGeometry } from 'three'
 import { Object3D } from 'three'
 import { PlaneBufferGeometry } from 'three'
@@ -20,6 +22,9 @@ import { ImageDecoder } from '../../../image_decoder/image_decoder'
 import { Matrix4 as Matrix4Model } from '../../../math/matrix4'
 
 import { CameraModel } from './model'
+import { VisualMesh } from './model'
+import * as meshFragmentShader from './shaders/mesh.frag'
+import * as meshVertexShader from './shaders/mesh.vert'
 import * as worldLineFragmentShader from './shaders/world_line.frag'
 import * as worldLineVertexShader from './shaders/world_line.vert'
 
@@ -85,6 +90,9 @@ export class CameraViewModel {
       scene.add(this.compass(this.model.image.Hcw))
       scene.add(this.horizon(this.model.image.Hcw))
     }
+    if (this.model.visualmesh) {
+      scene.add(this.visualmesh(this.model.visualmesh))
+    }
     return scene
   }
 
@@ -108,6 +116,52 @@ export class CameraViewModel {
     mesh.scale.y = -1
     return mesh
   }
+
+  private meshGeometry = createTransformer((mesh: VisualMesh): BufferGeometry => {
+
+    const { neighbours, coordinates, classifications } = mesh
+
+    // Calculate our triangle indexes
+    const nElem = mesh.coordinates.length / 2
+    const triangles: number[] = []
+    for (let i = 0; i < nElem; ++i) {
+      const idx = i * 6
+      for (let j = 0; j < 6; ++j) {
+        const nIdx = idx + j
+        if (neighbours[nIdx] < nElem) {
+          triangles.push(i, neighbours[nIdx])
+        }
+      }
+    }
+
+    const geometry = new BufferGeometry()
+    geometry.setIndex(triangles)
+    geometry.addAttribute('position', new Float32BufferAttribute(coordinates, 2))
+    geometry.addAttribute('classification', new Float32BufferAttribute(classifications.values, classifications.dim))
+    return geometry
+  }, (geom?: BufferGeometry) => geom && geom.dispose())
+
+  @computed
+  private get meshMaterial() {
+    return new RawShaderMaterial({
+      vertexShader: String(meshVertexShader),
+      fragmentShader: String(meshFragmentShader),
+      depthTest: false,
+      depthWrite: false,
+      transparent: true,
+      uniforms: {
+        dimensions: { value: new Vector2() },
+      },
+    })
+  }
+
+  private visualmesh = createTransformer((mesh: VisualMesh) => {
+    const material = this.meshMaterial.clone()
+    material.uniforms.dimensions.value = new Vector2(this.model.image!.width, this.model.image!.height)
+    const lines = new LineSegments(this.meshGeometry(mesh), material)
+    lines.frustumCulled = false
+    return lines
+  })
 
   @computed
   private get quadGeometry(): BufferGeometry {

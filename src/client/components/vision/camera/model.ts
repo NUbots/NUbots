@@ -5,6 +5,12 @@ import { Matrix4 } from '../../../math/matrix4'
 import { Vector2 } from '../../../math/vector2'
 import { VisionRobotModel } from '../model'
 
+export interface VisualMesh {
+  readonly neighbours: number[]
+  readonly coordinates: number[]
+  readonly classifications: { dim: number, values: number[] }
+}
+
 export interface VisionImage extends Image {
   readonly Hcw: Matrix4
   readonly lens: {
@@ -22,6 +28,7 @@ type CameraModelOpts = {
 export class CameraModel {
   readonly id: number
 
+  @observable.shallow visualmesh?: VisualMesh
   @observable.shallow image?: VisionImage
   @observable name: string
 
