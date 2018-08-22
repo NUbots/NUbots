@@ -10,6 +10,10 @@
 //#include <gazebo/msgs/msgs.hh>
 //#include <gazebo/transport/transport.hh>
 
+// ZeroMQ_libzmq _VERSION:INTERNAL=
+//ADVANCED       ^ space breaks ./b module generate   property for variable: _GFORTRAN_EXECUTABLE
+
+
 #include "message/motion/ServoTarget.h"
 
 namespace module {

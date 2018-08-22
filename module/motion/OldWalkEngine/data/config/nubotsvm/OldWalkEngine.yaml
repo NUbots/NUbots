@@ -36,7 +36,7 @@ stance:
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
-  step_time: 0.85
+  step_time: 1.8
   # ???
   zmp_time: 0.4 # 0.47
  # 0.250

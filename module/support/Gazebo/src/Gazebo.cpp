@@ -62,11 +62,7 @@ namespace support {
                     std::unique_ptr<DarwinSensors> sensors = std::make_unique<DarwinSensors>();
                     std::stringstream ss(_msg.data());
                     std::string line;
-                    //float currentPos, currentVelocity;
 
-                    // Timestamp when our data was taken
-                    //sensors.timestamp = NUClear::clock::now();
-                    //std::cout << "RUNNING\n";
                     // Servos
                     for (int i = 0; i < 20; ++i)
                     {
@@ -78,6 +74,19 @@ namespace support {
                         servo.presentPosition = std::stof(line);
                     }
 
+                    std::getline(ss, line);
+                    //std::cout << line << std::endl;
+
+                    // Timestamp when our data was taken
+                    //sensors.timestamp = std::chrono::duration; // NUClear::clock::now();
+
+                    sensors->accelerometer.x = 0.0;
+                    sensors->accelerometer.y = 0.0;
+                    sensors->accelerometer.z = 9.8;
+
+                    sensors->gyroscope.x = 0.0;
+                    sensors->gyroscope.y = 0.0;
+                    sensors->gyroscope.z = 0.0;
                     emit(sensors);
                 }
             );
@@ -86,11 +95,20 @@ namespace support {
             std::function<void(const ignition::transport::MessagePublisher &_publisher)> onDiscoveryCb(
             [this](const ignition::transport::MessagePublisher &_publisher) -> void
                 {
-                    std::cout << "Discovered a Message Publisher!" << std::endl;
-                    std::cout << _publisher << std::endl;
+                    //std::cout << "Discovered a Message Publisher!" << std::endl;
+                    //std::cout << _publisher << std::endl;
+                });
+
+            // Set up a callback function for the discovery service disconnections event
+            std::function<void(const ignition::transport::MessagePublisher &_publisher)> onDisconnectionCb(
+                [this](const ignition::transport::MessagePublisher &_publisher) -> void
+                {
+                    //std::cout << "Disconnected from the Simulation!" << std::endl;
+                    //std::cout << _publisher << std::endl;
                 });
 
             discoveryNode->ConnectionsCb(onDiscoveryCb);
+            discoveryNode->DisconnectionsCb(onDisconnectionCb);
 
             discoveryNode->Start();
 
@@ -163,6 +181,20 @@ namespace support {
         for (const auto& command : commands)
         {
             commandOrder.push_back(command.id);
+            //if (command.id == 12)
+            //{
+            //    log("pos:  ");
+            //    log(command.position);
+            //    log("gain: ");
+            //    log(command.gain);
+            //}
+            if (command.id == 13)
+            {
+                log("13 pos:  ");
+                log(command.position);
+                log("13 gain: ");
+                log(command.gain);
+            }
         }
 
         for (int i = 0; i < 20; i++)
@@ -206,3 +238,29 @@ namespace support {
     }
 }
 }
+
+/*
+#include <chrono>
+
+#define NUCLEAR_CLOCK struct clock { \
+    using duration              = std::chrono::steady_clock::duration; \
+    using rep                   = std::chrono::steady_clock::rep; \
+    using period                = std::chrono::steady_clock::period; \
+    using time_point            = std::chrono::steady_clock::time_point; \
+    static constexpr bool is_steady = false; \
+    static time_point timestamp; \
+    static inline time_point now() noexcept { \
+      return timestamp; \
+    } \
+}; \
+clock::time_point clock::timestamp;
+
+#include <nuclear>
+#include <iostream>
+
+int main(void) {
+  for (int i = 0; i < 10; i++){
+    std::cout << NUClear::clock::now().time_since_epoch().count() << std::endl;
+    NUClear::clock::timestamp = std::chrono::steady_clock::now();
+  }
+  return 0;*/
