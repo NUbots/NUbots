@@ -12,7 +12,7 @@ namespace motion {
         private:
             double f_x(const Eigen::Vector3d& vec);
             double f_y(const Eigen::Vector3d& vec);
-            double distance(const Eigen::Vector3d& vec);
+            double foot_distance(const Eigen::Vector3d& vec);
 
             size_t subsumptionId;
 

@@ -43,7 +43,7 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
-        double FootStep::distance(const Eigen::Vector3d& pos) {
+        double FootStep::foot_distance(const Eigen::Vector3d& pos) {
             // ( |C|^-s |x|^s+2 e^-|(cx)^-s| ) / (sx)
             return (abs(pow(c, -step_steep)) * pow(abs(pos.x()), step_steep + 2)
                     * exp(-abs(pow(c * pos.x(), -step_steep))))
@@ -59,6 +59,7 @@ namespace motion {
                 double y    = config["test"]["y"].as<double>();
                 double z    = config["test"]["z"].as<double>();
                 int foot    = config["foot"].as<int>();
+                int time    = config["time"].as<int>();
                 step_height = config["step_height"];
                 well_width  = config["well_width"];
                 step_steep  = config["step_steep"];
@@ -147,7 +148,7 @@ namespace motion {
                     // Swing foot's new target position on the plane
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized();
 
-                    double distance = distance(rF_wPp);
+                    double distance = foot_distance(rF_wPp);
                     log(distance);
 
                     if (distance > 0.005) {
