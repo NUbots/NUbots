@@ -45,7 +45,9 @@ namespace motion {
 
         double FootStep::distance(const Eigen::Vector3d& pos) {
             // ( |C|^-s |x|^s+2 e^-|(cx)^-s| ) / (sx)
-            return (abs(pow(c, -s)) * pow(abs(pos.x()), s + 2) * exp(-abs(pow(c * pos.x(), -s)))) / (s * pos.x());
+            return (abs(pow(c, -step_steep)) * pow(abs(pos.x()), step_steep + 2)
+                    * exp(-abs(pow(c * pos.x(), -step_steep))))
+                   / (step_steep * pos.x());
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
@@ -69,7 +71,7 @@ namespace motion {
                 Haf_s.linear()      = Eigen::Matrix3d::Identity();
                 Haf_s.translation() = -Eigen::Vector3d(x, y, z);
 
-                emit(std::make_unique<TorsoTarget>(
+                emit(std::make_unique<FootTarget>(
                     NUClear::clock::now() + std::chrono::seconds(time), foot, Haf_s.matrix()));
             });
 
