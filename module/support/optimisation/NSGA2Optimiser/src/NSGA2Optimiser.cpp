@@ -2,11 +2,17 @@
 
 #include "extension/Configuration.h"
 
+#include "message/support/optimisation/NSGA2EvaluationRequest.h"
+#include "message/support/optimisation/NSGA2FitnessScores.h"
+
 namespace module {
 namespace support {
 namespace optimisation {
 
     using extension::Configuration;
+    using message::support::optimisation::NSGA2FitnessScores;
+    using message::support::optimisation::NSGA2EvaluationRequest;
+
 
     NSGA2Optimiser::NSGA2Optimiser(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -35,7 +41,6 @@ namespace optimisation {
             double binCrossProb = 0;
             double binMutProb   = 0;
 
-            indEvaluated = false;
             std::cout << "Starting..." << std::endl;
 
             nsga2Algorithm.randGen = &randGen;
@@ -54,18 +59,20 @@ namespace optimisation {
             nsga2Algorithm.SetBitCount(binBits);
             nsga2Algorithm.SetRealVarLimits(realLimits);
             nsga2Algorithm.SetBinVarLimits(binLimits);
-            nsga2Algorithm.SetFitnessFunction(fitnessFunction);
 
             if (nsga2Algorithm.PreEvaluationInitialize() != 0)
                 return 1;
 
             // This starts the algorithm
-            nsga2Algorithm.parentPop->EvaluateInd(0);
+            std::cout << "Evaluating gen 0 ind 0" << std::endl;
+            requestIndEvaluation(0,
+                nsga2Algorithm.parentPop->generation,
+                nsga2Algorithm.parentPop->GetIndReals(0));
             //nsga2Algorithm.Evolve();
         });
 
         on<Trigger<NSGA2FitnessScores>>().then(
-            [this](const std::vector<NSGA2FitnessScores>& scores)
+            [this](const NSGA2FitnessScores& scores)
             {
                 // Set the objScore and constraints
 
@@ -78,15 +85,25 @@ namespace optimisation {
                         SetIndConstraints(scores.id, scores.constraints);
 
                     if (scores.id < nsga2Algorithm.popSize - 1)
-                        nsga2Algorithm.parentPop->EvaluateInd(scores.id + 1);
+                    {
+                        std::cout << "Evaluating gen 0 ind " << scores.id + 1 << std::endl;
+                        requestIndEvaluation(scores.id + 1,
+                            nsga2Algorithm.parentPop->generation,
+                            nsga2Algorithm.parentPop->GetIndReals(scores.id + 1));
+                    }
                     else if (scores.id == nsga2Algorithm.popSize - 1)
                     {
                         nsga2Algorithm.PostEvaluationInitialize();
                         nsga2Algorithm.PreEvaluationAdvance();
-                        nsga2Algorithm.childPop->EvaluateInd(0);
+
+                        std::cout << "Evaluating gen 1 ind 0" << std::endl;
+                        requestIndEvaluation(0,
+                            nsga2Algorithm.childPop->generation,
+                            nsga2Algorithm.childPop->GetIndReals(0));
+                        //nsga2Algorithm.childPop->EvaluateInd(0);
                     }
                 }
-                else if (scores.generation <= nsga2Algorithm.generations) // FOLLOWING GENERATIONS
+                else // FOLLOWING GENERATIONS
                 {
                     nsga2Algorithm.childPop->
                         SetIndObjectiveScore(scores.id, scores.objScore);
@@ -94,7 +111,13 @@ namespace optimisation {
                         SetIndConstraints(scores.id, scores.constraints);
 
                     if (scores.id < nsga2Algorithm.popSize - 1)
-                        nsga2Algorithm.childPop->EvaluateInd(scores.id + 1);
+                    {
+                        std::cout << "Evaluating gen " << scores.generation << " ind " << scores.id + 1 << std::endl;
+                        requestIndEvaluation(scores.id + 1,
+                            nsga2Algorithm.childPop->generation,
+                            nsga2Algorithm.childPop->GetIndReals(scores.id + 1));
+                        //nsga2Algorithm.childPop->EvaluateInd(scores.id + 1);
+                    }
                     else if (scores.id == nsga2Algorithm.popSize - 1)
                     {
                         if (scores.generation == nsga2Algorithm.generations) // FINAL GENERATION
@@ -106,21 +129,23 @@ namespace optimisation {
                         {
                             nsga2Algorithm.PostEvaluationAdvance();
                             nsga2Algorithm.PreEvaluationAdvance();
-                            nsga2Algorithm.childPop->EvaluateInd(0);
+
+                            std::cout << "Evaluating gen " << scores.generation + 1 << " ind 0" << std::endl;
+                            requestIndEvaluation(scores.id + 1,
+                                nsga2Algorithm.childPop->generation,
+                                nsga2Algorithm.childPop->GetIndReals(scores.id + 1));
                         }
                     }
                 }
         });
     }
 
-    void NSGA2Optimiser::fitnessFunction(int _id, int _generation, std::vector<double> _reals,
-        std::vector<double> _bins, std::vector<std::vector<int>> _gene,
-        std::vector<double> _objScore, std::vector<double> _constraints)
+    void NSGA2Optimiser::requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals)
     {
-        NSGA2EvaluationRequest request;
-        request.id = _id;
-        request.generation = _generation;
-        request.reals = _reals;
+        std::unique_ptr<NSGA2EvaluationRequest> request = std::make_unique<NSGA2EvaluationRequest>();
+        request->id = _id;
+        request->generation = _generation;
+        request->reals = _reals;
         emit(request); // send to the kick engine all the _reals for the population
     }
 }

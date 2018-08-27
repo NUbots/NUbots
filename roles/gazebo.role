@@ -13,4 +13,7 @@ NUCLEAR_ROLE(
    support::configuration::NetworkConfiguration
    support::Gazebo
    motion::OldWalkEngine
+
+   support::optimisation::NSGA2Optimiser
+   support::optimisation::NSGA2Evaluator
 )

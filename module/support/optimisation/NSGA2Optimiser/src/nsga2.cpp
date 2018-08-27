@@ -31,7 +31,6 @@ namespace nsga2
 		mixedPop = NULL;
 		crowdObj = true;
 		randGen = NULL;
-		fitnessFunction = NULL;
 	}
 
 	NSGA2::~NSGA2()
@@ -134,11 +133,6 @@ namespace nsga2
 		binLimits = _binLimits;
 	}
 
-	void NSGA2::SetFitnessFunction(IndividualConfigurator::fitnessFunction _funct)
-	{
-		fitnessFunction = _funct;
-	}
-
 	int NSGA2::PreEvaluationInitialize()
 	{
 		std::cout << "Initializing NSGA-II\nChecking configuration..." << std::endl;
@@ -236,15 +230,15 @@ namespace nsga2
 
 		parentPop = new Population(popSize, realVars, binVars, constraints,
 			binBits, realLimits, binLimits, objectives, realMutProb,
-			binMutProb, etaM, epsC, crowdObj, randGen, fitnessFunction);
+			binMutProb, etaM, epsC, crowdObj, randGen);
 
 		childPop = new Population(popSize, realVars, binVars, constraints,
 			binBits, realLimits, binLimits, objectives, realMutProb,
-			binMutProb, etaM, epsC, crowdObj, randGen, fitnessFunction);
+			binMutProb, etaM, epsC, crowdObj, randGen);
 
 		mixedPop = new Population(popSize * 2, realVars, binVars, constraints,
 			binBits, realLimits, binLimits, objectives, realMutProb,
-			binMutProb, etaM, epsC, crowdObj, randGen, fitnessFunction);
+			binMutProb, etaM, epsC, crowdObj, randGen);
 
 		parentPop->Initialize();
 		std::cout << "Initialization done!\nCreating generation 1" << std::endl;
@@ -572,17 +566,17 @@ namespace nsga2
 		// create next population Qt
 		Selection(*parentPop, *childPop);
 		std::pair<int, int> mutationsCount = childPop->Mutate();
-		childPop->generation = currentGen + 1;
+        // mutation book-keeping
+        realMutCount += mutationsCount.first;
+        binMutCount  += mutationsCount.second;
+
+        childPop->generation = currentGen + 1;
 		childPop->Decode();
 		//childPop->Evaluate();
     }
 
     void NSGA2::PostEvaluationAdvance()
     {
-		// mutation book-keeping
-		realMutCount += mutationsCount.first;
-		binMutCount  += mutationsCount.second;
-
 		// create population Rt = Pt U Qt
 		mixedPop->Merge(*parentPop, *childPop);
 		mixedPop->generation = currentGen + 1;
@@ -627,14 +621,14 @@ namespace nsga2
 		}
 	}
 
-	void NSGA2::Evolve()
+	/*void NSGA2::Evolve()
 	{
 		while (currentGen < generations)
 		{
 			Advance();
 		}
 
-	}
+	}*/
 
     void NSGA2::ReportFinalGenerationPop()
     {

@@ -11,10 +11,6 @@ namespace nsga2
 {
 	struct IndividualConfigurator
 	{
-		typedef void(*fitnessFunction)(int _id, int _generation, std::vector<double> _reals,
-			std::vector<double> _bins, std::vector<std::vector<int>> _gene,
-			std::vector<double> _objScore, std::vector<double> _constraints);
-
 		int realVars;
 		std::vector<std::pair<double, double>> realLimits;
 		double realMutProb;
@@ -27,7 +23,6 @@ namespace nsga2
 		double etaM;
 		double epsC;
 		RandomGenerator* randGen;
-		fitnessFunction fitFunct;
 	};
 
 	class Individual

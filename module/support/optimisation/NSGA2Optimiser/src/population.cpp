@@ -7,8 +7,7 @@ namespace nsga2
 		const std::vector<std::pair<double, double>> _realLimits,
 		const std::vector<std::pair<double, double>> _binLimits, const int _objectives,
 		const double _realMutProb, const double _binMutProb, const double _etaM,
-		const double _epsC, const bool _crowdObj, RandomGenerator* _randGen,
-		IndividualConfigurator::fitnessFunction _fitnessFunct)
+		const double _epsC, const bool _crowdObj, RandomGenerator* _randGen)
 	{
 		generation = 0;
 		crowdObj = _crowdObj;
@@ -26,7 +25,6 @@ namespace nsga2
 		indConfig.etaM = _etaM;
 		indConfig.epsC = _epsC;
 		indConfig.randGen = _randGen;
-		indConfig.fitFunct = _fitnessFunct;
 
         size = _size;
 
@@ -61,7 +59,7 @@ namespace nsga2
 		}
 	}
 
-	void Population::Evaluate()
+	/*void Population::Evaluate()
 	{
 		std::vector<Individual>::iterator it;
 		for (it = inds.begin();
@@ -69,13 +67,16 @@ namespace nsga2
 		{
 			it->Evaluate();
 		}
-	}
+	}*/
 
-    void Population::EvaluateInd(int _id)
+    /*void Population::EvaluateInd(int _id)
     {
         inds[_id].Evaluate(generation);
+    }*/
+    std::vector<double> Population::GetIndReals(int _id)
+    {
+        return inds[_id].reals;
     }
-
 
     void Population::SetIndObjectiveScore(int _id, std::vector<double> _objScore)
     {

@@ -27,8 +27,8 @@ namespace nsga2
 		{
 			gene[j].resize(config->binBits[j], 0);
 		}
-		objScore.resize(config->objectives,0);
-		constr.resize(config->constraints,0);
+		objScore.resize(config->objectives, 0);
+		constr.resize(config->constraints, 0);
 	}
 
 	Individual::~Individual() { }
@@ -72,7 +72,7 @@ namespace nsga2
 		}
 	}
 
-	void Individual::Evaluate(int _generation)
+	/*void Individual::Evaluate(int _generation)
 	{
 		config->fitFunct(id, _generation, reals, bins, gene, objScore, constr);
 		// HERE IS THE EVALUATION FUNCTION
@@ -83,7 +83,7 @@ namespace nsga2
 		// call the function you want to evaluate the individual here
 
 		// check for contraint violations
-    }
+    }*/
 
     void Individual::CheckConstraints()
     {

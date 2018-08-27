@@ -18,13 +18,13 @@ namespace nsga2
 			const std::vector<std::pair<double, double>> _realLimits,
 			const std::vector<std::pair<double, double>> _binLimits, const int _objectives,
 			const double _realMutProb, const double _binMutProb, const double _etaM,
-			const double _epsC, const bool _crowdObj, RandomGenerator* _randGen,
-			IndividualConfigurator::fitnessFunction _fitnessFunct);
+			const double _epsC, const bool _crowdObj, RandomGenerator* _randGen);
 		virtual ~Population();
 		void Initialize();
 		void Decode();
-		void Evaluate();
-        void EvaluateInd(int _indID);
+		//void Evaluate();
+        void EvaluateInd(int _id);
+        std::vector<double> GetIndReals(int _id);
         void SetIndObjectiveScore(int _id, std::vector<double> _objScore);
         void SetIndConstraints(int _id, std::vector<double> _constraints);
         void CheckConstraints();

@@ -22,7 +22,7 @@ namespace nsga2
         void PostEvaluationInitialize();
         void PreEvaluationAdvance();
 		void PostEvaluationAdvance();
-		void Evolve();
+		//void Evolve();
 		void SetSeed(int _seed);
 		void SetCrowdObj(bool _crowd);
 		void SetRealVariableCount(int _realVars);
@@ -41,10 +41,10 @@ namespace nsga2
 		void SetBitCount(const std::vector<int> _binBits);
 		void SetRealVarLimits(const std::vector<std::pair<double,double>> _realLimits);
 		void SetBinVarLimits(const std::vector<std::pair<double,double>> _binLimits);
-		void SetFitnessFunction(IndividualConfigurator::fitnessFunction _funct);
 		void InitStreams();
 		void ReportParams(std::ostream& os) const;
 		void ReportPop(const Population& pop, std::ostream& os) const;
+        void ReportFinalGenerationPop();
 
 		void Selection(Population& oldpop, Population& newpop);
 		Individual& Tournament(Individual& ind1, Individual& ind2) const;
@@ -59,7 +59,6 @@ namespace nsga2
 		Population* childPop;
 		Population* mixedPop;
 		RandomGenerator* randGen;
-		IndividualConfigurator::fitnessFunction fitnessFunction;
 
 		bool crowdObj;
 		int reportCount;
