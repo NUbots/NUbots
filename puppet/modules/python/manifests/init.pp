@@ -41,7 +41,7 @@ class python {
                   /nubots/toolchain/bin/pip3.6 install pydotplus &&
                   /nubots/toolchain/bin/pip3.6 install pygments &&
                   /nubots/toolchain/bin/pip3.6 install termcolor &&
-                  /nubots/toolchain/bin/pip3.6 install protobuf==3.5.0.post1 &&
+                  /nubots/toolchain/bin/pip3.6 install protobuf==3.6.1 &&
                   /nubots/toolchain/bin/pip3.6 install numpy &&
                   /nubots/toolchain/bin/pip3.6 install wheel &&
                   /nubots/toolchain/bin/pip3.6 install PyYAML &&

@@ -55,7 +55,7 @@ node nubotsvmbuild {
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
     # We need to match the protobuf version with the one we install in the python class.
-    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.5.0/protobuf-cpp-3.5.0.tar.gz',
+    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.6.1/protobuf-cpp-3.6.1.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'nuc7i7bnh' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
@@ -68,7 +68,7 @@ node nubotsvmbuild {
     'bzip2'        => {'url'         => 'https://github.com/Bidski/bzip2/archive/v1.0.6.1.tar.gz',
                        'creates'     => 'lib/libbz2.so',
                        'method'      => 'make', },
-    'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz',
+    'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.8.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib=ZLIB_PATH', '--without-python', ],
                                           'nuc7i7bnh' => [ '--with-zlib=ZLIB_PATH', '--without-python', ], },
                        'method'      => 'autotools', },
@@ -77,7 +77,7 @@ node nubotsvmbuild {
                                           'nuc7i7bnh' => [ '-DBUILD_TESTS=OFF', ], },
                        'method'      => 'cmake', },
     # NOTE: OpenBLAS CMake support is experimental and only supports x86 at the moment.
-    'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz',
+    'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.20.tar.gz',
                        'args'        => { 'native'   => [ '', ],
                                           'nuc7i7bnh' => [ 'CROSS=1', ], },
                        'method'      => 'make',
@@ -85,7 +85,7 @@ node nubotsvmbuild {
     'libsvm'       => {'url'         => 'https://github.com/Bidski/libsvm/archive/v322.tar.gz',
                        'creates'     => 'lib/svm.o',
                        'method'      => 'make', },
-    'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz',
+    'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-9.100.5.tar.xz',
                        'method'      => 'cmake',
                        'creates'     => 'lib/libarmadillo.so',
                        'require'     => [ Installer['openblas'], ], },
@@ -98,7 +98,7 @@ node nubotsvmbuild {
                        'args'        => { 'native'   => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
                                           'nuc7i7bnh' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
                        'method'      => 'cmake', },
-    'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.6-pl2.tar.gz',
+    'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.8.tar.gz',
                        'args'        => { 'native'   => [ '--disable-fortran', '--enable-shared', ],
                                           'nuc7i7bnh' => [ '--disable-fortran', '--enable-shared', ], },
                        'method'      => 'autotools', },
@@ -106,15 +106,15 @@ node nubotsvmbuild {
                        'args'        => { 'native'   => [ 'CCASFLAGS="-f elf64"', ],
                                           'nuc7i7bnh' => [ 'CCASFLAGS="-f elf64"', ], },
                        'method'      => 'autotools', },
-    'cppformat'    => {'url'         => 'https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz',
+    'cppformat'    => {'url'         => 'https://github.com/fmtlib/fmt/archive/5.1.0.tar.gz',
                        'method'      => 'cmake',
                        'creates'     => 'lib/libfmt.a', },
     'portaudio'    => {'url'         => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
                        'method'      => 'autotools', },
-    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2',
+    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.5.tar.bz2',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
                        'method'      => 'cmake', },
-    'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz',
+    'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz',
                        'args'        => { 'native'   => [ 'address-model=64', 'architecture=x86', 'link=static', ],
                                           'nuc7i7bnh' => [ 'address-model=64', 'architecture=x86', 'link=static', ], },
                        'method'      => 'boost',
@@ -126,17 +126,17 @@ node nubotsvmbuild {
                        'prebuild'    => 'cp portaudio19.h portaudio.h',
                        'method'      => 'make',
                        'require'     => [ Installer['portaudio'], ], },
-    'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz',
+    'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/archive/1.12.0.tar.gz',
                        'method'      => 'autotools', },
     'ffi'          => {'url'         => 'https://github.com/libffi/libffi/archive/v3.2.1.tar.gz',
                        'postbuild'   => 'if [ -e PREFIX/lib32/libffi.a ]; then cp PREFIX/lib32/libffi* PREFIX/lib/; fi',
                        'method'      => 'autotools', },
-    'util-linux'   => {'url'         => 'https://www.kernel.org/pub/linux/utils/util-linux/v2.31/util-linux-2.31.tar.xz',
+    'util-linux'   => {'url'         => 'https://www.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32.1.tar.xz',
                        'args'        => { 'native'    => [ '--disable-all-programs', '--enable-libblkid', '--enable-libmount', '--enable-libuuid', '--without-python', '--with-bashcompletiondir=PREFIX/share/bash-completion/completions' ],
                                           'nuc7i7bnh' => [ '--disable-all-programs', '--enable-libblkid', '--enable-libmount', '--enable-libuuid', '--without-python', '--with-bashcompletiondir=PREFIX/share/bash-completion/completions' ], },
                        'creates'     => 'lib/libmount.so',
                         'method'     => 'autotools', },
-    'glib'         => {'url'         => 'ftp://ftp.gnome.org/pub/gnome/sources/glib/2.52/glib-2.52.3.tar.xz',
+    'glib'         => {'url'         => 'ftp://ftp.gnome.org/pub/gnome/sources/glib/2.56/glib-2.56.2.tar.xz',
                        'args'        => { 'native'   => [ '--cache-file=PREFIX/src/glib.config', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ],
                                           # Technically we are cross compiling for the nuc7i7bnh, even though both the host and build systems are both x86_64-linux-gnu
                                           'nuc7i7bnh' => [ '--cache-file=PREFIX/src/glib.config', '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-threads', '--with-pcre=internal', '--disable-gtk-doc', '--disable-man', ], },
@@ -144,7 +144,7 @@ node nubotsvmbuild {
                        'require'     => [ Installer['ffi'], Installer['util-linux'], ],
                        'creates'     => 'lib/libglib-2.0.so',
                        'method'      => 'autotools', },
-    'aravis'       => {'url'         => 'https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_9.tar.gz',
+    'aravis'       => {'url'         => 'https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_13.tar.gz',
                        'args'        => { 'native'   => [ '--cache-file=PREFIX/src/aravis.config', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ],
                                           # Technically we are cross compiling for the nuc7i7bnh, even though both the host and build systems are both x86_64-linux-gnu
                                           'nuc7i7bnh' => [ '--cache-file=PREFIX/src/aravis.config', '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-viewer', '--disable-gst-plugin', '--disable-gst-0.10-plugin', '--disable-gtk-doc', '--disable-gtk-doc-html', '--disable-gtk-doc-pdf', '--enable-usb', '--disable-zlib-pc', ], },
@@ -153,7 +153,7 @@ node nubotsvmbuild {
                        'prebuild'    => 'sed "s/return\s(entry->schema\s>>\s10)\s\&\s0x0000001f;/return ((entry->schema >> 10) \& 0x0000001f) ? ARV_UVCP_SCHEMA_ZIP : ARV_UVCP_SCHEMA_RAW;/" -i src/arvuvcp.h',
                        'postbuild'   => 'cp src/arvconfig.h PREFIX/include/arvconfig.h',
                        'method'      => 'autotools', },
-    'pybind11'     => {'url'         => 'https://github.com/pybind/pybind11/archive/v2.2.2.tar.gz',
+    'pybind11'     => {'url'         => 'https://github.com/pybind/pybind11/archive/v2.2.3.tar.gz',
                        'args'        => { 'native'   => [ '-DPYBIND11_TEST=OFF', ' -DPYBIND11_PYTHON_VERSION=3',  ],
                                           'nuc7i7bnh' => [ '-DPYBIND11_TEST=OFF', ' -DPYBIND11_PYTHON_VERSION=3', ], },
                        'creates'     => 'include/pybind11/pybind11.h',
@@ -218,7 +218,7 @@ node nubotsvmbuild {
 
   # Install catch.
   installer { 'catch':
-    url       => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp',
+    url       => 'https://github.com/catchorg/Catch2/releases/download/v2.0.1/catch.hpp',
     archs     => $archs,
     extension => 'hpp',
     method    => 'wget',
@@ -362,6 +362,7 @@ SET(OpenCL_LIBRARY \"${prefix}/opt/intel/opencl/libOpenCL.so\" CACHE STRING \"\"
 
 SET(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
 
+SET(PYTHON_EXECUTABLE \"${prefix}/bin/python3.6\" CACHE STRING \"Toolchain specific python executable.\" FORCE)
 SET(PYTHONPATH \"${prefix}/${arch}/lib/python3.6/site-packages:${prefix}/lib/python3.6/site-packages\"
     CACHE STRING \"Platform specific python path.\" FORCE)
 ",
