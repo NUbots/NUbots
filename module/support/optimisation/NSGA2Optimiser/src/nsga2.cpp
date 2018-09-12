@@ -31,6 +31,7 @@ namespace nsga2
 		mixedPop = NULL;
 		crowdObj = true;
 		randGen = NULL;
+        randomInitialize = true;
 	}
 
 	NSGA2::~NSGA2()
@@ -133,6 +134,16 @@ namespace nsga2
 		binLimits = _binLimits;
 	}
 
+    void NSGA2::SetInitialRealVars(std::vector<double> _initRealVars)
+    {
+        initialRealVars = _initRealVars;
+    }
+
+    void NSGA2::SetRandomInitialize(bool _randomInitialize)
+    {
+        randomInitialize = _randomInitialize;
+    }
+
 	int NSGA2::PreEvaluationInitialize()
 	{
 		std::cout << "Initializing NSGA-II\nChecking configuration..." << std::endl;
@@ -217,6 +228,11 @@ namespace nsga2
 			std::cout << "Invalid number of binary variable limits" << std::endl;
 			return -1;
 		}
+        if (!randomInitialize && (initialRealVars.size() != realVars))
+        {
+            std::cout << "Invalid number of initial real variables" << std::endl;
+            return -1;
+        }
 
 		InitStreams();
 		ReportParams(fpt5);
@@ -230,18 +246,18 @@ namespace nsga2
 
 		parentPop = new Population(popSize, realVars, binVars, constraints,
 			binBits, realLimits, binLimits, objectives, realMutProb,
-			binMutProb, etaM, epsC, crowdObj, randGen);
+			binMutProb, etaM, epsC, crowdObj, randGen, initialRealVars);
 
 		childPop = new Population(popSize, realVars, binVars, constraints,
 			binBits, realLimits, binLimits, objectives, realMutProb,
-			binMutProb, etaM, epsC, crowdObj, randGen);
+			binMutProb, etaM, epsC, crowdObj, randGen, initialRealVars);
 
 		mixedPop = new Population(popSize * 2, realVars, binVars, constraints,
 			binBits, realLimits, binLimits, objectives, realMutProb,
-			binMutProb, etaM, epsC, crowdObj, randGen);
+			binMutProb, etaM, epsC, crowdObj, randGen, initialRealVars);
 
-		parentPop->Initialize();
-		std::cout << "Initialization done!\nCreating generation 1" << std::endl;
+		parentPop->Initialize(randomInitialize);
+		std::cout << "Initialization done!" << std::endl;
 
 		parentPop->Decode();
 		//parentPop->EvaluateInd(); // split here
@@ -255,7 +271,7 @@ namespace nsga2
 
 		currentGen = 1;
 
-        std::cout << "Generation 1 complete!" << std::endl;
+        //std::cout << "Generation 1 complete!" << std::endl;
 
 		ReportPop(*parentPop, fpt1);
 		fpt4 << "# gen = " << currentGen << "\n";
@@ -268,11 +284,11 @@ namespace nsga2
 
 	void NSGA2::InitStreams()
 	{
-		fpt1.open("nsga2_initial_pop.out" , std::ios::out | std::ios::trunc);
-		fpt2.open("nsga2_final_pop.out" , std::ios::out | std::ios::trunc);
-		fpt3.open("nsga2_best_pop.out" , std::ios::out | std::ios::trunc);
-		fpt4.open("nsga2_all_pop.out" , std::ios::out | std::ios::trunc);
-		fpt5.open("nsga2_params.out" , std::ios::out | std::ios::trunc);
+		fpt1.open("../module/support/Gazebo/data/nsga2_initial_pop.out" , std::ios::out | std::ios::trunc);
+		fpt2.open("../module/support/Gazebo/data/nsga2_final_pop.out" , std::ios::out | std::ios::trunc);
+		fpt3.open("../module/support/Gazebo/data/nsga2_best_pop.out" , std::ios::out | std::ios::trunc);
+		fpt4.open("../module/support/Gazebo/data/nsga2_all_pop.out" , std::ios::out | std::ios::trunc);
+		fpt5.open("../module/support/Gazebo/data/nsga2_params.out" , std::ios::out | std::ios::trunc);
 
 		fpt1.setf(std::ios::scientific);
 		fpt2.setf(std::ios::scientific);

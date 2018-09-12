@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "nsga2.h"
+#include "extension/Script.h"
 
 namespace module {
 namespace support {

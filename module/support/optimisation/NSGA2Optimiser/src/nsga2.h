@@ -27,6 +27,7 @@ namespace nsga2
 		void SetCrowdObj(bool _crowd);
 		void SetRealVariableCount(int _realVars);
 		void SetBinVariableCount(int _binVars);
+        void SetInitialRealVars(std::vector<double> _initRealVars);
 		void SetObjectiveCount(int _objectives);
 		void SetContraintCount(int _constraints);
 		void SetPopulationSize(int _popSize);
@@ -45,6 +46,7 @@ namespace nsga2
 		void ReportParams(std::ostream& os) const;
 		void ReportPop(const Population& pop, std::ostream& os) const;
         void ReportFinalGenerationPop();
+        void SetRandomInitialize(bool _randomInitialize);
 
 		void Selection(Population& oldpop, Population& newpop);
 		Individual& Tournament(Individual& ind1, Individual& ind2) const;
@@ -91,6 +93,8 @@ namespace nsga2
 		double etaM;
 		double epsC;
 		std::vector<int> binBits;
+        std::vector<double> initialRealVars;
+        bool randomInitialize;
 		std::vector<std::pair<double,double>> realLimits;
 		std::vector<std::pair<double,double>> binLimits;
 	};

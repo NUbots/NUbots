@@ -33,25 +33,38 @@ namespace nsga2
 
 	Individual::~Individual() { }
 
-	void Individual::Initialize(int _id)
+	void Individual::Initialize(int _id, bool randomInitialize)
 	{
         id = _id;
         generation = 1;
-		for (int i = 0; i < config->realVars; i++)
-		{
-			reals[i] = config->randGen->
-				Real(config->realLimits[i].first,
-				config->realLimits[i].second);
-		}
+        if (randomInitialize)
+        {
+            for (int i = 0; i < config->realVars; i++)
+            {
+                reals[i] = config->randGen->
+                    Real(config->realLimits[i].first,
+                    config->realLimits[i].second);
+            }
 
-		for (int i = 0; i < config->binVars; i++)
-		{
-			for (int j = 0; j < config->binBits[i]; j++)
-			{
-				gene[i][j] =
-					config->randGen->Realu() <= 0.5 ? 0 : 1;
-			}
-		}
+            for (int i = 0; i < config->binVars; i++)
+            {
+                for (int j = 0; j < config->binBits[i]; j++)
+                {
+                    gene[i][j] =
+                        config->randGen->Realu() <= 0.5 ? 0 : 1;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < config->realVars; i++)
+            {
+                reals[i] = config->initialRealVars[i];
+            }
+            if (_id != 0)
+                realMutate();
+        }
+
 	}
 
 	void Individual::Decode()

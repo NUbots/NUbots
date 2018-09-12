@@ -18,9 +18,10 @@ namespace nsga2
 			const std::vector<std::pair<double, double>> _realLimits,
 			const std::vector<std::pair<double, double>> _binLimits, const int _objectives,
 			const double _realMutProb, const double _binMutProb, const double _etaM,
-			const double _epsC, const bool _crowdObj, RandomGenerator* _randGen);
+			const double _epsC, const bool _crowdObj, RandomGenerator* _randGen,
+            const std::vector<double> _initialRealVars);
 		virtual ~Population();
-		void Initialize();
+		void Initialize(bool randomInitialize);
 		void Decode();
 		//void Evaluate();
         void EvaluateInd(int _id);

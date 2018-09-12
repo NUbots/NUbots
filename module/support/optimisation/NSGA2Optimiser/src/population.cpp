@@ -7,9 +7,10 @@ namespace nsga2
 		const std::vector<std::pair<double, double>> _realLimits,
 		const std::vector<std::pair<double, double>> _binLimits, const int _objectives,
 		const double _realMutProb, const double _binMutProb, const double _etaM,
-		const double _epsC, const bool _crowdObj, RandomGenerator* _randGen)
+		const double _epsC, const bool _crowdObj, RandomGenerator* _randGen,
+        const std::vector<double> _initialRealVars)
 	{
-		generation = 0;
+		generation = 1;
 		crowdObj = _crowdObj;
 		front = std::vector<std::vector<int>>();
 
@@ -25,6 +26,7 @@ namespace nsga2
 		indConfig.etaM = _etaM;
 		indConfig.epsC = _epsC;
 		indConfig.randGen = _randGen;
+        indConfig.initialRealVars = _initialRealVars;
 
         size = _size;
 
@@ -41,11 +43,11 @@ namespace nsga2
 		return inds.size();
 	}
 
-	void Population::Initialize()
+	void Population::Initialize(bool randomInitialize)
 	{
 		for (int i = 0; i < size; i++)
 		{
-			inds[i].Initialize(i);
+			inds[i].Initialize(i, randomInitialize);
 		}
 	}
 

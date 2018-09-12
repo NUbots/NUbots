@@ -4,6 +4,9 @@
 
 #include "message/support/optimisation/NSGA2EvaluationRequest.h"
 #include "message/support/optimisation/NSGA2FitnessScores.h"
+#include "message/support/optimisation/NSGA2Terminate.h"
+#include "utility/input/ServoID.h"
+#include "utility/file/fileutil.h"
 
 namespace module {
 namespace support {
@@ -12,6 +15,9 @@ namespace optimisation {
     using extension::Configuration;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2EvaluationRequest;
+    using message::support::optimisation::NSGA2Terminate;
+    using extension::Script;
+    using ServoID = utility::input::ServoID;
 
 
     NSGA2Optimiser::NSGA2Optimiser(std::unique_ptr<NUClear::Environment> environment)
@@ -23,18 +29,103 @@ namespace optimisation {
             int seed = 30;
             randGen.SetSeed(seed);
 
-            int popSize = 20;
-            int generations = 10;
+            int popSize = 12;
+            int generations = 100;
             int objectives = 2;
-            int constraints = 0;
+            int constraints = 2;
             int realVars = 2;
             std::vector<std::pair<double,double>> realLimits;
-            realLimits.push_back(std::make_pair(0.2, 1.0));
-            realLimits.push_back(std::make_pair(0.2, 1.0));
-            double realCrossProb = 0.75;
-            double realMutProb = 0.6;
-            double etaC = 5;
-            double etaM = 5;
+            //realLimits.push_back(std::make_pair(0.01, 0.3));
+            //realLimits.push_back(std::make_pair(45 * 3.14 / 180, 100 * 3.14 / 180));
+
+            std::vector<double> initialValues;
+            bool optimiseScript = true;
+            if (optimiseScript) {
+                ::extension::Script script = YAML::LoadFile("scripts/nubotsvm/KickRightOptimised.yaml").as<Script>();
+
+                realVars = 0;
+                double delta = 0.5;
+                for (int i = 0; i < script.frames.size(); i++)
+                {
+                    for (auto& target : script.frames[i].targets)
+                    {
+                        initialValues.push_back((double)target.position);
+                        realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
+
+                        /*if (target.id == ServoID::R_SHOULDER_PITCH) {
+                            realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
+                        }
+                        else if (target.id == ServoID::L_SHOULDER_PITCH) {
+                            realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
+                        }
+                        else if (target.id == ServoID::R_SHOULDER_ROLL) {
+                            realLimits.push_back(std::make_pair(-2.0, 0.0));
+                        }
+                        else if (target.id == ServoID::L_SHOULDER_ROLL) {
+                            realLimits.push_back(std::make_pair(0.0, 2.0));
+                        }
+                        else if (target.id == ServoID::R_ELBOW) {
+                            realLimits.push_back(std::make_pair(-2.75, 0.0));
+                        }
+                        else if (target.id == ServoID::L_ELBOW) {
+                            realLimits.push_back(std::make_pair(-2.75, 0.0));
+                        }
+                        else if (target.id == ServoID::R_HIP_YAW) {
+                            realLimits.push_back(std::make_pair(-0.1, 0.1));
+                        }
+                        else if (target.id == ServoID::L_HIP_YAW) {
+                            realLimits.push_back(std::make_pair(-0.1, 0.1));
+                        }
+                        else if (target.id == ServoID::R_HIP_ROLL) {
+                            realLimits.push_back(std::make_pair(-0.1, 0.1));
+                        }
+                        else if (target.id == ServoID::L_HIP_ROLL) {
+                            realLimits.push_back(std::make_pair(-0.1, 0.1));
+                        }
+                        else if (target.id == ServoID::R_HIP_PITCH) {
+
+                            realLimits.push_back(std::make_pair(-1.0, 0.5));
+                        }
+                        else if (target.id == ServoID::L_HIP_PITCH) {
+                            realLimits.push_back(std::make_pair(-1.0, 0.5));
+
+                        }
+                        else if (target.id == ServoID::R_KNEE) {
+                            realLimits.push_back(std::make_pair(0.0, 2.75));
+                        }
+                        else if (target.id == ServoID::L_KNEE) {
+                            realLimits.push_back(std::make_pair(0.0, 2.75));
+
+                        }
+                        else if (target.id == ServoID::R_ANKLE_PITCH) {
+                            realLimits.push_back(std::make_pair(-1.0, 1.0));
+                        }
+                        else if (target.id == ServoID::L_ANKLE_PITCH) {
+                            realLimits.push_back(std::make_pair(-1.0, 1.0));
+
+                        }
+                        else if (target.id == ServoID::R_ANKLE_ROLL) {
+                            realLimits.push_back(std::make_pair(-1.0, 1.0));
+                        }
+                        else if (target.id == ServoID::L_ANKLE_ROLL) {
+                            realLimits.push_back(std::make_pair(-1.0, 1.0));
+
+                        }
+                        else if (target.id == ServoID::HEAD_YAW){
+                            realLimits.push_back(std::make_pair(-1.5, 1.5));
+                        }
+                        else if (target.id == ServoID::HEAD_PITCH){
+                            realLimits.push_back(std::make_pair(-1.0, 1.0));
+                        }*/
+
+                        realVars++;
+                    }
+                }
+            }
+            double realCrossProb = 0.5;
+            double realMutProb = 0.5;
+            double etaC = 18;
+            double etaM = 50;
             int binVars = 0;
             std::vector<int> binBits;
             std::vector<std::pair<double,double>> binLimits;
@@ -59,25 +150,26 @@ namespace optimisation {
             nsga2Algorithm.SetBitCount(binBits);
             nsga2Algorithm.SetRealVarLimits(realLimits);
             nsga2Algorithm.SetBinVarLimits(binLimits);
+            nsga2Algorithm.SetRandomInitialize(false);
+            nsga2Algorithm.SetInitialRealVars(initialValues);
 
-            if (nsga2Algorithm.PreEvaluationInitialize() != 0)
-                return 1;
+            if (nsga2Algorithm.PreEvaluationInitialize() == 0)
+            {
+                // This starts the algorithm
+                std::cout << "Evaluating gen " << nsga2Algorithm.parentPop->generation << " ind 0" << std::endl;
+                requestIndEvaluation(0, nsga2Algorithm.parentPop->generation, nsga2Algorithm.parentPop->GetIndReals(0));
+                //nsga2Algorithm.Evolve();
+            }
 
-            // This starts the algorithm
-            std::cout << "Evaluating gen 0 ind 0" << std::endl;
-            requestIndEvaluation(0,
-                nsga2Algorithm.parentPop->generation,
-                nsga2Algorithm.parentPop->GetIndReals(0));
-            //nsga2Algorithm.Evolve();
         });
 
-        on<Trigger<NSGA2FitnessScores>>().then(
+        on<Trigger<NSGA2FitnessScores>, Single>().then(
             [this](const NSGA2FitnessScores& scores)
             {
                 // Set the objScore and constraints
 
                 // move on to next individual
-                if (scores.generation == 0) // INITIAL GENERATION
+                if (scores.generation == 1) // INITIAL GENERATION
                 {
                     nsga2Algorithm.parentPop->
                         SetIndObjectiveScore(scores.id, scores.objScore);
@@ -86,7 +178,8 @@ namespace optimisation {
 
                     if (scores.id < nsga2Algorithm.popSize - 1)
                     {
-                        std::cout << "Evaluating gen 0 ind " << scores.id + 1 << std::endl;
+                        std::cout << "Evaluating gen " << nsga2Algorithm.parentPop->generation  <<
+                            " ind " << scores.id + 1 << std::endl;
                         requestIndEvaluation(scores.id + 1,
                             nsga2Algorithm.parentPop->generation,
                             nsga2Algorithm.parentPop->GetIndReals(scores.id + 1));
@@ -96,7 +189,7 @@ namespace optimisation {
                         nsga2Algorithm.PostEvaluationInitialize();
                         nsga2Algorithm.PreEvaluationAdvance();
 
-                        std::cout << "Evaluating gen 1 ind 0" << std::endl;
+                        std::cout << "Evaluating gen " << nsga2Algorithm.childPop->generation << " ind 0" << std::endl;
                         requestIndEvaluation(0,
                             nsga2Algorithm.childPop->generation,
                             nsga2Algorithm.childPop->GetIndReals(0));
@@ -112,7 +205,7 @@ namespace optimisation {
 
                     if (scores.id < nsga2Algorithm.popSize - 1)
                     {
-                        std::cout << "Evaluating gen " << scores.generation << " ind " << scores.id + 1 << std::endl;
+                        std::cout << "Evaluating gen " << nsga2Algorithm.childPop->generation << " ind " << scores.id + 1 << std::endl;
                         requestIndEvaluation(scores.id + 1,
                             nsga2Algorithm.childPop->generation,
                             nsga2Algorithm.childPop->GetIndReals(scores.id + 1));
@@ -124,16 +217,21 @@ namespace optimisation {
                         {
                             nsga2Algorithm.PostEvaluationAdvance();
                             nsga2Algorithm.ReportFinalGenerationPop();
+                            std::cout << "NSGA2 evaluation finished!" << std::endl;
+                            std::unique_ptr<NSGA2Terminate> terminate = std::make_unique<NSGA2Terminate>();
+                            terminate->terminateMe = 1;
+                            emit(terminate);
+                            // send command to terminate tests
                         }
-                        else
+                        else if (scores.generation < nsga2Algorithm.generations)
                         {
                             nsga2Algorithm.PostEvaluationAdvance();
                             nsga2Algorithm.PreEvaluationAdvance();
 
-                            std::cout << "Evaluating gen " << scores.generation + 1 << " ind 0" << std::endl;
-                            requestIndEvaluation(scores.id + 1,
+                            std::cout << "Evaluating gen " << nsga2Algorithm.childPop->generation << " ind 0" << std::endl;
+                            requestIndEvaluation(0,
                                 nsga2Algorithm.childPop->generation,
-                                nsga2Algorithm.childPop->GetIndReals(scores.id + 1));
+                                nsga2Algorithm.childPop->GetIndReals(0));
                         }
                     }
                 }

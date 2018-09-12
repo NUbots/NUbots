@@ -33,6 +33,7 @@
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/SaveConfiguration.h"
+#include "message/support/optimisation/NSGA2EvaluationParameters.h"
 
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -71,6 +72,9 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
+
+    using message::support::optimisation::NSGA2EvaluationParameters;
+
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -210,6 +214,81 @@ namespace motion {
             requestStop();
         });
 
+        on<Trigger<NSGA2EvaluationParameters>>().then([this](const NSGA2EvaluationParameters& params) {
+            std::cout << "Setting to " << params.bodyTilt << ", " << params.qLArmStartPitch << std::endl;
+            /*bodyTilt     = params.bodyTilt;
+            float QLARMSTART1 = params.qLArmStartPitch;
+            float QLARMSTART2 = params.qLArmStartRoll;
+            float QLARMSTART3 = params.qLArmStartElbow;
+            std::vector<double> vectore;
+            vectore.push_back((double)QLARMSTART1);
+            vectore.push_back((double)QLARMSTART2);
+            vectore.push_back((double)QLARMSTART3);
+            arma::vec QLARMSTART = arma::vec(vectore);
+            qLArmStart[0]   = params.qLArmStartPitch;
+            qRArmStart[0]   = params.qLArmStartPitch;*/
+            /*
+            qLArmEnd     = stance["arms"]["left"]["end"].as<arma::vec>();
+            qRArmStart   = stance["arms"]["right"]["start"].as<arma::vec>();
+            qRArmEnd     = stance["arms"]["right"]["end"].as<arma::vec>();
+            footOffset   = stance["foot_offset"].as<arma::vec>();
+            // gToe/heel overlap checking values
+            stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
+
+            auto& gains = stance["gains"];
+            gainArms    = gains["arms"].as<Expression>();
+            gainLegs    = gains["legs"].as<Expression>();
+
+            for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; ++i) {
+                if (int(i) < 6) {
+                    jointGains[i] = gainArms;
+                }
+                else {
+                    jointGains[i] = gainLegs;
+                }
+            }
+
+            auto& walkCycle     = config["walk_cycle"];
+            stepTime            = walkCycle["step_time"].as<Expression>();
+            zmpTime             = walkCycle["zmp_time"].as<Expression>();
+            hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
+            stepHeight          = walkCycle["step"]["height"].as<Expression>();
+            stepLimits          = walkCycle["step"]["limits"].as<arma::mat::fixed<3, 2>>();
+
+            step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
+            step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
+
+            auto& velocity = walkCycle["velocity"];
+            velocityLimits = velocity["limits"].as<arma::mat::fixed<3, 2>>();
+            velocityHigh   = velocity["high_speed"].as<Expression>();
+
+            auto& acceleration        = walkCycle["acceleration"];
+            accelerationLimits        = acceleration["limits"].as<arma::vec>();
+            accelerationLimitsHigh    = acceleration["limits_high"].as<arma::vec>();
+            accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
+
+            phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
+            phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
+
+            auto& balance  = walkCycle["balance"];
+            balanceEnabled = balance["enabled"].as<bool>();
+            // balanceAmplitude = balance["amplitude"].as<Expression>();
+            // balanceWeight = balance["weight"].as<Expression>();
+            // balanceOffset = balance["offset"].as<Expression>();
+
+            balancer.configure(balance);
+
+            for (auto& gain : balance["servo_gains"]) {
+                float p = gain["p"].as<Expression>();
+                ServoID sr(gain["id"].as<std::string>(), utility::input::ServoSide::RIGHT);
+                ServoID sl(gain["id"].as<std::string>(), utility::input::ServoSide::LEFT);
+                servoControlPGains[sr] = p;
+                servoControlPGains[sl] = p;
+            }
+
+            STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();*/
+        });
+
         on<Configuration>("OldWalkEngine.yaml").then([this](const Configuration& config) { configure(config.config); });
 
         // TODO: finish push detection and compensation
@@ -254,7 +333,7 @@ namespace motion {
         reset();
     }
 
-    void OldWalkEngine::configure(const YAML::Node& config) {
+    void OldWalkEngine::configure(const YAML::Node& config) {log("configuring");
         auto& stance = config["stance"];
         bodyHeight   = stance["body_height"].as<Expression>();
         bodyTilt     = stance["body_tilt"].as<Expression>();

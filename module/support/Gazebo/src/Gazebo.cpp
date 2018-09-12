@@ -3,12 +3,17 @@
 #include "extension/Configuration.h"
 
 #include "message/input/Sensors.h"
-#include "message/support/Gazebo/GazeboMessage.h"
+#include "message/support/Gazebo/GazeboWorldCtrl.h"
+#include "message/support/Gazebo/GazeboWorldStatus.h"
+#include "message/support/Gazebo/GazeboBallLocation.h"
+#include "message/support/Gazebo/GazeboRobotLocation.h"
 
 
+#include "utility/math/angle.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/platform/darwin/DarwinSensors.h"
+//#include "utility/clock/CustomClock.hpp"
 
 namespace module {
 namespace support {
@@ -17,7 +22,9 @@ namespace support {
     using message::input::Sensors;
     using message::platform::darwin::DarwinSensors;
     using message::support::Gazebo::GazeboWorldCtrl;
+    using message::support::Gazebo::GazeboWorldStatus;
     using message::support::Gazebo::GazeboBallLocation;
+    using message::support::Gazebo::GazeboRobotLocation;
     using message::motion::ServoTarget;
     using namespace ignition;
     using namespace transport;
@@ -25,53 +32,73 @@ namespace support {
     Gazebo::Gazebo(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), node(new ignition::transport::Node()) {
 
+        //utility::clock::custom_rtf = 1.0;
+        //utility::clock::lastUpdate = std::chrono::steady_clock::now();
+        //log(utility::clock::start);
+
+
         on<Configuration>("Gazebo.yaml").then([this](const Configuration& config) {
-            setenv("IGN_PARTITION", "NubotsIgus", 1);
+            //setenv("IGN_PARTITION", "Nubots", 1);
             setenv("IGN_IP", "10.1.0.92", 1);
             // gazebo_url  = config["gazebo"]["url"].as<std::string>();
             // gazebo_port = config["gazebo"]["port"].as<std::string>();
             static std::string pUuid = ignition::transport::Uuid().ToString();
             static std::string nUuid = ignition::transport::Uuid().ToString();
-            static std::string topicStatus = "NubotsIgusStatus";
             static std::string topicCtrl = "NubotsIgusCtrl";
+            static std::string topicStatus = "NubotsIgusStatus";
             static std::string topicWorldCtrl = "NubotsWorldCtrl";
             static std::string topicWorldStatus = "NubotsWorldStatus";
+            static std::string topicBallStatus = "NubotsBallStatus";
             static std::string hostAddr = "10.1.0.92";
             static std::string ctrlAddr = "10.1.0.92";
-            static std::string id1 = "identity1";
 
+            this->realDelta = 0.0;
+            this->simDelta = 0.0;
+            this->currentRealTime = 0.0;
+            this->currentSimTime = 0.0;
+
+            this->connected = false;
 
             // Set up transport node for joint control
             // This will be ADVERTISED to the Ctrl topic
             ignition::transport::NodeOptions jointCtrlNodeOpts;
-            jointCtrlNodeOpts.SetPartition("Joint");
-            jointCtrlNodeOpts.SetNameSpace("Igus");
+            jointCtrlNodeOpts.SetPartition("Igus");
+            jointCtrlNodeOpts.SetNameSpace("Nubots");
             jointCtrl = new ignition::transport::Node(jointCtrlNodeOpts);
 
             // Set up transport node for joint status
             // This will be SUBSCRIBED to the Status topic
             ignition::transport::NodeOptions jointStatusNodeOpts;
-            jointStatusNodeOpts.SetPartition("Joint");
-            jointStatusNodeOpts.SetNameSpace("Igus");
+            jointStatusNodeOpts.SetPartition("Igus");
+            jointStatusNodeOpts.SetNameSpace("Nubots");
             jointStatus = new ignition::transport::Node(jointStatusNodeOpts);
 
             // Set up transport node for world control
             // This will be ADVERTISED to the Ctrl topic
             ignition::transport::NodeOptions worldCtrlNodeOpts;
             worldCtrlNodeOpts.SetPartition("World");
-            worldCtrlNodeOpts.SetNameSpace("Igus");
+            worldCtrlNodeOpts.SetNameSpace("Nubots");
             worldCtrl = new ignition::transport::Node(worldCtrlNodeOpts);
 
-            // Set up transport node for joint status
+            // Set up transport node for world status
             // This will be SUBSCRIBED to the Status topic
             ignition::transport::NodeOptions worldStatusNodeOpts;
             worldStatusNodeOpts.SetPartition("World");
-            worldStatusNodeOpts.SetNameSpace("Igus");
+            worldStatusNodeOpts.SetNameSpace("Nubots");
             worldStatus = new ignition::transport::Node(worldStatusNodeOpts);
+
+            // Set up transport node for ball status
+            // This will be SUBSCRIBED to the Status topic
+            ignition::transport::NodeOptions ballStatusNodeOpts;
+            ballStatusNodeOpts.SetPartition("Ball");
+            ballStatusNodeOpts.SetNameSpace("Nubots");
+            ballStatus = new ignition::transport::Node(ballStatusNodeOpts);
 
             static const ignition::transport::AdvertiseMessageOptions* AdMsgOpts =
                 new ignition::transport::AdvertiseMessageOptions();
+
             discoveryNode = new MsgDiscovery(pUuid, g_msgPort);
+
             msgPublisher = new MessagePublisher(topicCtrl, hostAddr, ctrlAddr, pUuid,
                 nUuid, "ADVERTISE", *AdMsgOpts);
 
@@ -102,30 +129,41 @@ namespace support {
                     // Timestamp when our data was taken
                     //sensors.timestamp = std::chrono::duration; // NUClear::clock::now();
 
-                    std::getline(ss, line);//log("gyroscope.x = " + line);
+                    /*sensors->gyroscope.x = 0.0;
+                    sensors->gyroscope.y = 0.0;
+                    sensors->gyroscope.x = 0.0;
+
+                    sensors->accelerometer.x = 0.0;
+                    sensors->accelerometer.y = 0.0;
+                    sensors->accelerometer.z = -9.81;*/
+
+                    std::getline(ss, line);//log("gyroscope.x =     " + line);
                     sensors->gyroscope.x = std::stof(line);
-                    std::getline(ss, line);//log("gyroscope.y = " + line);
+                    std::getline(ss, line);//log("gyroscope.y =     " + line);
                     sensors->gyroscope.y = std::stof(line);
-                    std::getline(ss, line);//log("gyroscope.z = " + line);
-                    sensors->gyroscope.z = 0.0 - std::stof(line);
+                    std::getline(ss, line);//log("gyroscope.z =     " + line);
+                    sensors->gyroscope.z = std::stof(line);
 
-                    std::getline(ss, line);//log("accelerometer.x " + line);
+                    std::getline(ss, line);//log("accelerometer.x = " + line);
                     sensors->accelerometer.x = std::stof(line);
-                    std::getline(ss, line);//log("accelerometer.y " + line);
-                    sensors->accelerometer.y = 0.0 - std::stof(line);
-                    std::getline(ss, line);//log("accelerometer.z " + line);
-                    sensors->accelerometer.z = 0.0 - std::stof(line);
-
+                    std::getline(ss, line);//log("accelerometer.y = " + line);
+                    sensors->accelerometer.y = std::stof(line);
+                    std::getline(ss, line);//log("accelerometer.z = " + line);
+                    sensors->accelerometer.z = std::stof(line);
                     emit(sensors);
 
-                    std::unique_ptr<GazeboBallLocation> ballLoc = std::make_unique<GazeboBallLocation>();
+                    // Send Robot World coordinates
+                    std::unique_ptr<GazeboRobotLocation> location = std::make_unique<GazeboRobotLocation>();
+
                     std::getline(ss, line);
-                    ballLoc->x = std::stof(line);
+                    location->x = std::stof(line);
                     std::getline(ss, line);
-                    ballLoc->y = std::stof(line);
+                    location->y = std::stof(line);
                     std::getline(ss, line);
-                    ballLoc->z = std::stof(line);
-                    emit(ballLoc);
+                    location->z = std::stof(line);
+
+                    //std::cout << "emitting ball location..." << std::endl;
+                    emit(location);
                 }
             );
 
@@ -133,6 +171,54 @@ namespace support {
             [this](const ignition::msgs::StringMsg &_msg) -> void
                 {
                     // GET WORLD updates sime time
+                    std::unique_ptr<GazeboWorldStatus> status = std::make_unique<GazeboWorldStatus>();
+                    std::stringstream ss(_msg.data());
+                    std::string line;
+
+                    std::getline(ss, line);
+                    status->simTime = std::stod(line);
+                    std::getline(ss, line);
+                    status->realTime = std::stod(line);
+                    double prevSimDelta = simDelta;
+                    double prevRealDelta = realDelta;
+
+                    realDelta = status->realTime - currentRealTime;
+                    simDelta = status->simTime - currentSimTime;
+
+
+                    //utility::clock::custom_rtf = ((simDelta + prevSimDelta) / 2) / ((realDelta + prevRealDelta) / 2);//log(utility::clock::custom_rtf);
+                    //utility::clock::lastUpdate = std::chrono::time_point::now();
+                    //std::cout << (simDelta / realDelta) << std::endl;
+                    currentRealTime = status->realTime;
+                    currentSimTime = status->simTime;
+                    emit(status);
+                }
+            );
+
+            std::function<void(const ignition::msgs::StringMsg &_msg)> BallStatusCb(
+            [this](const ignition::msgs::StringMsg &_msg) -> void
+                {
+                    // GET BALL updates
+                    std::unique_ptr<GazeboBallLocation> location = std::make_unique<GazeboBallLocation>();
+                    std::stringstream ss(_msg.data());
+                    std::string line;
+
+                    std::getline(ss, line);
+                    location->x = std::stof(line);
+                    std::getline(ss, line);
+                    location->y = std::stof(line);
+                    std::getline(ss, line);
+                    location->z = std::stof(line);
+
+                    std::getline(ss, line);
+                    location->velx = std::stof(line);
+                    std::getline(ss, line);
+                    location->vely = std::stof(line);
+                    std::getline(ss, line);
+                    location->velz = std::stof(line);
+
+                    //std::cout << "emitting ball location..." << std::endl;
+                    emit(location);
                 }
             );
 
@@ -140,7 +226,9 @@ namespace support {
             std::function<void(const ignition::transport::MessagePublisher &_publisher)> onDiscoveryCb(
             [this](const ignition::transport::MessagePublisher &_publisher) -> void
                 {
-                    //std::cout << "Discovered a Message Publisher!" << std::endl;
+                    this->connected = true;
+
+                    std::cout << "Discovered a Message Publisher!" << std::endl;
                     //std::cout << _publisher << std::endl;
                 });
 
@@ -148,7 +236,11 @@ namespace support {
             std::function<void(const ignition::transport::MessagePublisher &_publisher)> onDisconnectionCb(
                 [this](const ignition::transport::MessagePublisher &_publisher) -> void
                 {
-                    //std::cout << "Disconnected from the Simulation!" << std::endl;
+                    this->connected = false;
+                    this->realDelta = 10000000000000.0;
+                    this->simDelta = 10000000000000.0;
+
+                    std::cout << "Disconnected from the Simulation!" << std::endl;
                     //std::cout << _publisher << std::endl;
                 });
 
@@ -169,11 +261,17 @@ namespace support {
             if (!discoveryNode->Discover(topicWorldStatus))
                 std::cout << "discovery of world status topic failed..." << std::endl;
 
+            if (!discoveryNode->Discover(topicBallStatus))
+                std::cout << "discovery of ball status topic failed..." << std::endl;
+
             if (!jointStatus->Subscribe<ignition::msgs::StringMsg>(topicStatus, JointStatusCb))
                 std::cout << "Error subscribing to joint commands messages at [" << topicStatus << "]" << std::endl;
 
             if (!worldStatus->Subscribe<ignition::msgs::StringMsg>(topicWorldStatus, WorldStatusCb))
-                std::cout << "Error subscribing to joint commands messages at [" << worldStatus << "]" << std::endl;
+                std::cout << "Error subscribing to joint commands messages at [" << topicWorldStatus << "]" << std::endl;
+
+            if (!ballStatus->Subscribe<ignition::msgs::StringMsg>(topicBallStatus, BallStatusCb))
+                std::cout << "Error subscribing to joint commands messages at [" << topicBallStatus << "]" << std::endl;
 
             // ADVERTISE to the control topic
             pub = jointCtrl->Advertise<ignition::msgs::StringMsg>(topicCtrl);
@@ -210,10 +308,10 @@ namespace support {
 
         });*/
 
-        on<Trigger<std::vector<ServoTarget>>>().then(
-            [this](const std::vector<ServoTarget>& commands) {
+        on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
+            [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
 
-            if (!this->pub.Publish(this->parseServos(commands)))
+            if (!this->pub.Publish(this->parseServos(commands, sensors)))
                 std::cout << "Error publishing to topic [topicCtrl]" << std::endl;
         });
 
@@ -234,7 +332,7 @@ namespace support {
         return message;
     }
 
-    const ignition::msgs::StringMsg Gazebo::parseServos(const std::vector<ServoTarget>& commands)
+    const ignition::msgs::StringMsg Gazebo::parseServos(const std::vector<ServoTarget>& commands, const DarwinSensors& sensors)
     {
         ignition::msgs::StringMsg message;
         std::vector<int> commandOrder;
@@ -242,6 +340,7 @@ namespace support {
         std::vector<int> commandPresent;
         std::vector<float> positions;
         std::vector<float> gains;
+        std::vector<double> velocities;
 
         for (const auto& command : commands)
         {
@@ -267,6 +366,7 @@ namespace support {
             commandPresent.push_back(0);
             positions.push_back(0.0);
             gains.push_back(0.0);
+            velocities.push_back(0.0);
         }
 
         for (int i = 0; i < commands.size(); i++)
@@ -278,6 +378,13 @@ namespace support {
                     commandPresent[i] = 1;
                     positions[i] = commands[j].position;
                     gains[i] = commands[j].gain;
+                    NUClear::clock::duration duration = commands[j].time - NUClear::clock::now();
+                    float diff = utility::math::angle::difference(
+                        commands[j].position, utility::platform::darwin::getDarwinServo(commands[j].id, sensors).presentPosition);
+                    if (duration.count() > 0)
+                        velocities[i] = diff / ((double)duration.count() / (double)NUClear::clock::period::den);
+                    else
+                        velocities[i] = 0.0;
                     break;
                 }
             }
@@ -290,12 +397,14 @@ namespace support {
                 string += std::to_string(1) + "\n";
                 string += std::to_string(positions[i]) + "\n";
                 string += std::to_string(gains[i]) + "\n";
+                string += std::to_string(velocities[i]) + "\n";
             }
             else
             {
                 string += std::to_string(0) + "\n";
                 string += std::to_string((float) 0.11) + "\n";
                 string += std::to_string((float) 0.11) + "\n";
+                string += std::to_string((double) 0.11) + "\n";
             }
         }
         message.set_data(string);

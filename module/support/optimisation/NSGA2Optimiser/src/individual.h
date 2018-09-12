@@ -23,6 +23,7 @@ namespace nsga2
 		double etaM;
 		double epsC;
 		RandomGenerator* randGen;
+        std::vector<double> initialRealVars;
 	};
 
 	class Individual
@@ -30,7 +31,7 @@ namespace nsga2
 	public:
 		Individual(const IndividualConfigurator &_config);
 		virtual ~Individual();
-		void Initialize(int _id);
+		void Initialize(int _id, bool randomInitialize);
 		void Decode();
 		void Evaluate(int _generation);
 		std::pair<int,int> Mutate();

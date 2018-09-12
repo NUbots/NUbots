@@ -28,6 +28,7 @@
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
+#include "message/motion/ExecuteKick.h"
 
 
 #include "utility/behaviour/Action.h"
@@ -55,6 +56,7 @@ namespace motion {
     using message::motion::StopCommand;
     using KickType = message::behaviour::KickPlan::KickType;
     using message::motion::KinematicsModel;
+    using message::motion::ExecuteKick;
     using message::support::FieldDescription;
 
     using utility::behaviour::ActionPriorites;
@@ -63,7 +65,6 @@ namespace motion {
     using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
 
-    struct ExecuteKick {};
     struct FinishKick {};
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
@@ -112,7 +113,7 @@ namespace motion {
 
             emit(std::make_unique<StopCommand>(subsumptionId));  // Stop the walk
 
-            updatePriority(KICK_PRIORITY);
+            updatePriority(KICK_PRIORITY);log("RUNNING ON TRIGGER KICK");
         });
 
         on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then(
@@ -121,7 +122,7 @@ namespace motion {
                 updater.enable();
                 updatePriority(EXECUTION_PRIORITY);
 
-
+                log("RUNNING");
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
                 Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                 Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);

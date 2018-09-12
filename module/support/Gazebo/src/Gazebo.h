@@ -15,6 +15,9 @@
 
 
 #include "message/motion/ServoTarget.h"
+#include "message/platform/darwin/DarwinSensors.h"
+
+#include "utility/platform/darwin/DarwinSensors.h"
 
 namespace module {
 namespace support {
@@ -33,13 +36,20 @@ namespace support {
         ignition::transport::Node* jointStatus;
         ignition::transport::Node* worldCtrl;
         ignition::transport::Node* worldStatus;
+        ignition::transport::Node* ballStatus;
         ignition::transport::Node* spareNode;
         ignition::transport::Node::Publisher pub;
         ignition::transport::Node::Publisher worldPub;
-        const ignition::msgs::StringMsg parseServos(const std::vector<message::motion::ServoTarget>& commands);
+        const ignition::msgs::StringMsg parseServos(const std::vector<message::motion::ServoTarget>& commands, const message::platform::darwin::DarwinSensors& sensors);
         const ignition::msgs::StringMsg GenerateMsg();
         static const int g_msgPort = 11319;
 
+        double currentRealTime;
+        double currentSimTime;
+        double realDelta;
+        double simDelta;
+
+        bool connected;
     private:
 
     };
