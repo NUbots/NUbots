@@ -26,11 +26,11 @@ namespace optimisation {
         on<Configuration>("NSGA2Optimiser.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file NSGA2Optimiser.yaml
 
-            int seed = 30;
+            int seed = 50;
             randGen.SetSeed(seed);
 
-            int popSize = 12;
-            int generations = 100;
+            int popSize = 40;
+            int generations = 500;
             int objectives = 2;
             int constraints = 2;
             int realVars = 2;
@@ -122,8 +122,8 @@ namespace optimisation {
                     }
                 }
             }
-            double realCrossProb = 0.5;
-            double realMutProb = 0.5;
+            double realCrossProb = 0.33;
+            double realMutProb = 0.2;
             double etaC = 18;
             double etaM = 50;
             int binVars = 0;
