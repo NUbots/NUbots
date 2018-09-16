@@ -26,7 +26,7 @@ namespace optimisation {
         on<Configuration>("NSGA2Optimiser.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file NSGA2Optimiser.yaml
 
-            int seed = 50;
+            int seed = 666;
             randGen.SetSeed(seed);
 
             int popSize = 40;
@@ -50,8 +50,17 @@ namespace optimisation {
                     for (auto& target : script.frames[i].targets)
                     {
                         initialValues.push_back((double)target.position);
-                        realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
 
+                        if (target.id == ServoID::R_SHOULDER_PITCH || target.id == ServoID::L_SHOULDER_PITCH ||
+                            target.id == ServoID::R_SHOULDER_ROLL  || target.id == ServoID::L_SHOULDER_ROLL ||
+                            target.id == ServoID::R_ELBOW          || target.id == ServoID::L_ELBOW)
+                        {
+                            realLimits.push_back(std::make_pair((double)target.position - delta * 1.5, (double)target.position + delta * 1.5));
+                        }
+                        else {
+                            realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
+
+                        }
                         /*if (target.id == ServoID::R_SHOULDER_PITCH) {
                             realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
                         }
@@ -125,7 +134,7 @@ namespace optimisation {
             double realCrossProb = 0.33;
             double realMutProb = 0.2;
             double etaC = 18;
-            double etaM = 50;
+            double etaM = 45;
             int binVars = 0;
             std::vector<int> binBits;
             std::vector<std::pair<double,double>> binLimits;

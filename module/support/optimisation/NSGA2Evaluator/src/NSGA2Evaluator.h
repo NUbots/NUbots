@@ -34,6 +34,7 @@ namespace optimisation {
         arma::vec2 velocity;
         float rotation;
 
+        bool terminating;
         bool walking;
         bool standing;
         bool evaluating;

@@ -55,6 +55,7 @@ namespace optimisation {
             finished = false;
             walking = false;
             standing = false;
+            terminating = false;
             generation = 0;
             id = 0;
             scores = std::vector<double>(2, 0.0);
@@ -94,7 +95,7 @@ namespace optimisation {
             if (optimizeScript)
                 script = YAML::LoadFile("scripts/nubotsvm/KickRightOptimised.yaml").as<Script>();
 
-            ResetWorld();
+            //ResetWorld();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
@@ -112,8 +113,8 @@ namespace optimisation {
             generation = request.generation;
             id = request.id;
             parameters = request.reals;
-            if (generation == 1 && id == 0)
-                ResetWorld();
+            //if (generation == 1 && id == 0)
+            //    ResetWorld();
             ResetWorldTime();
 
             std::unique_ptr<NSGA2EvaluationParameters> params = std::make_unique<NSGA2EvaluationParameters>();
@@ -136,12 +137,11 @@ namespace optimisation {
             //       {0, -1, 0}, //Ball is right of centre for right kick
             //{0, 0, 1}, message::motion::KickCommandType::NORMAL
             //   }));//log("EMITTING");
-            emit(std::make_unique<ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
             //emit(std::make_unique<MotionCommand>(
             //    utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
 
             emit(params);
-            evaluating = true;
+            terminating = false;
         });
 
         on<Trigger<Sensors>, Single>().then([this](const Sensors& sensors) {
@@ -160,12 +160,12 @@ namespace optimisation {
             sway[1] += gyroscope[1] * simTimeDelta;
             sway[2] += gyroscope[2] * simTimeDelta;
 
-            if ((accelerometer[0] < -7.0 || accelerometer[1] < -7.0) && accelerometer[2] < 0.0 && simTime > 3.0)
+            if (!terminating && (accelerometer[0] < -7.0 || accelerometer[1] < -7.0) && accelerometer[2] < 0.0 && simTime > 3.0)
                 fallenOver = true;
 
             fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2), 0.5);
 
-            if (evaluating && !finished && fieldPlaneSway > maxFieldPlaneSway && simTime > 0.1) {
+            if (!terminating && evaluating && !finished && fieldPlaneSway > maxFieldPlaneSway && simTime > 0.1) {
 
                 maxFieldPlaneSway = fieldPlaneSway;
                 //log(maxFieldPlaneSway);
@@ -177,7 +177,7 @@ namespace optimisation {
             // log("accelerme.y = " + std::to_string(accelerometer[1]));
             // log("accelerme.z = " + std::to_string(accelerometer[2]));
 
-            if (evaluating && !finished && simTime > 4.0)
+            if (!terminating && evaluating && !finished && simTime > 4.0)
             {
                 if (fallenOver)
                     BeginTermination();
@@ -202,8 +202,16 @@ namespace optimisation {
 
             //}
 
-            if (!evaluating && !finished && (simTime - timeSinceTermination) > 2.0)
+            if (simTime > 1.0 && !evaluating & !terminating) {
+                emit(std::make_unique<ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
+                ResetWorldTime();
+                evaluating = true;
+            }
+
+            if (terminating && !evaluating && !finished && (simTime - timeSinceTermination) > 2.0) {
+                terminating = false;
                 SendFitnessScores();
+            }
 
         });
 
@@ -280,6 +288,7 @@ namespace optimisation {
 
     bool NSGA2Evaluator::BeginTermination()
     {
+        terminating = true;
         evaluating = false;
         log("terminating..");
         timeSinceTermination = simTime;
