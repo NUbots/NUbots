@@ -4,6 +4,6 @@ import * as ReactDOM from 'react-dom'
 
 import AppView from './components/app/view'
 
-configure({ enforceActions: true })
+configure({ enforceActions: 'observed' })
 ReactDOM.render(<AppView/>, document.getElementById('root'))
 

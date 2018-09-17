@@ -1,5 +1,5 @@
 {
   "execMap": {
-    "ts": "ts-node"
+    "ts": "TS_NODE_FILES=true ts-node"
   }
 }

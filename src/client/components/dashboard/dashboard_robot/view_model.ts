@@ -67,7 +67,7 @@ export class DashboardRobotViewModel {
     const t = 2
     const translation = Vector2.from(this.model.walkCommand)
     const rotation = this.model.walkCommand.z
-    const radius = translation.length / Math.abs(rotation)
+    const radius = translation.length / (Math.abs(rotation) + 1E-10)
     const origin = Vector2.of(-translation.y, translation.x).divideScalar(rotation)
     const arcLength = rotation * t
     const angle = Math.atan2(translation.y / rotation, translation.x / rotation) - Math.PI / 2
