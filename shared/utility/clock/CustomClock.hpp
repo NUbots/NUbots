@@ -1,4 +1,4 @@
-/*#ifndef UTILITY_CLOCK_H
+#ifndef UTILITY_CLOCK_H
 #define UTILITY_CLOCK_H
 
 #include <nuclear>
@@ -21,4 +21,4 @@ namespace utility {
 // }
 // }  // namespace NUClear
 
-#endif // UTILITY_CLOCK_H*/
+#endif // UTILITY_CLOCK_H

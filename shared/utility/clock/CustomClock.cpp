@@ -1,4 +1,4 @@
-/*#include "CustomClock.hpp"
+#include "CustomClock.hpp"
 #include <chrono>
 
 namespace utility {
@@ -19,4 +19,4 @@ namespace NUClear {
     return utility::clock::lastUpdate;
 
 }
-}  // namespace NUClear*/
+}  // namespace NUClear

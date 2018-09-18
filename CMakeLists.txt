@@ -12,7 +12,7 @@ ENDIF()
 
 # Set flag so NUClear uses a custom clock implementation
 # See utility::clock::CustomClock
-#ADD_COMPILE_OPTIONS(-DNUCLEAR_CUSTOM_CLOCK)
+ADD_COMPILE_OPTIONS(-DNUCLEAR_CUSTOM_CLOCK)
 
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")

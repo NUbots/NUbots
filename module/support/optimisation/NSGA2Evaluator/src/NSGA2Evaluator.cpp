@@ -124,7 +124,7 @@ namespace optimisation {
             if (optimizeScript)
             {
                 int var = 0;
-                for (int i = 0; i < script.frames.size(); i++)
+                for (int i = 1; i < script.frames.size() - 1; i++)
                 {
                     for (auto& target : script.frames[i].targets)
                     {
@@ -305,14 +305,19 @@ namespace optimisation {
             distanceTravelled = 0.001;
         else if (distanceTravelled > 10.0)
             distanceTravelled = 10.0;
+        else if (fallenOver)
+            distanceTravelled = 0.001;
 
         maxFieldPlaneSway = std::abs(maxFieldPlaneSway);
 
-        if (maxFieldPlaneSway == 0 || maxFieldPlaneSway > 1000.0)
+        if (fallenOver || maxFieldPlaneSway == 0 || maxFieldPlaneSway > 1000.0)
             maxFieldPlaneSway = 1000.0;
 
         if (fallenOver)
+        {
             constraints[0] = -10.0;
+            maxFieldPlaneSway = 1000.0;
+        }
 
         sway[2] = std::abs(sway[2]);
         //log(sway[2]);

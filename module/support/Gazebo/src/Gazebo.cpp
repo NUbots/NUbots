@@ -13,7 +13,7 @@
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/platform/darwin/DarwinSensors.h"
-//#include "utility/clock/CustomClock.hpp"
+#include "utility/clock/CustomClock.hpp"
 
 namespace module {
 namespace support {
@@ -32,7 +32,7 @@ namespace support {
     Gazebo::Gazebo(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), node(new ignition::transport::Node()) {
 
-        //utility::clock::custom_rtf = 1.0;
+        utility::clock::custom_rtf = 0.86;
         //utility::clock::lastUpdate = std::chrono::steady_clock::now();
         //log(utility::clock::start);
 

@@ -45,22 +45,22 @@ namespace optimisation {
 
                 realVars = 0;
                 double delta = 0.5;
-                for (int i = 0; i < script.frames.size(); i++)
+                for (int i = 1; i < script.frames.size() - 1; i++)
                 {
                     for (auto& target : script.frames[i].targets)
                     {
                         initialValues.push_back((double)target.position);
 
-                        if (target.id == ServoID::R_SHOULDER_PITCH || target.id == ServoID::L_SHOULDER_PITCH ||
-                            target.id == ServoID::R_SHOULDER_ROLL  || target.id == ServoID::L_SHOULDER_ROLL ||
-                            target.id == ServoID::R_ELBOW          || target.id == ServoID::L_ELBOW)
-                        {
-                            realLimits.push_back(std::make_pair((double)target.position - delta * 1.5, (double)target.position + delta * 1.5));
-                        }
-                        else {
+                        // if (target.id == ServoID::R_SHOULDER_PITCH || target.id == ServoID::L_SHOULDER_PITCH ||
+                        //     target.id == ServoID::R_SHOULDER_ROLL  || target.id == ServoID::L_SHOULDER_ROLL ||
+                        //     target.id == ServoID::R_ELBOW          || target.id == ServoID::L_ELBOW)
+                        // {
+                        //     realLimits.push_back(std::make_pair((double)target.position - delta * 1.5, (double)target.position + delta * 1.5));
+                        // }
+                        //else {
                             realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
 
-                        }
+                        //}
                         /*if (target.id == ServoID::R_SHOULDER_PITCH) {
                             realLimits.push_back(std::make_pair((double)target.position - delta, (double)target.position + delta));
                         }
@@ -134,7 +134,7 @@ namespace optimisation {
             double realCrossProb = 0.33;
             double realMutProb = 0.2;
             double etaC = 18;
-            double etaM = 45;
+            double etaM = 50;
             int binVars = 0;
             std::vector<int> binBits;
             std::vector<std::pair<double,double>> binLimits;
