@@ -10,6 +10,7 @@ module.exports = {
   globals: {
     'ts-jest': {
       'tsConfigFile': './tsconfig.test.json',
+      'skipBabel': true,
     },
   },
   moduleDirectories: [
@@ -36,7 +37,7 @@ module.exports = {
     '**/tests/**/*.tests.{ts,tsx}',
   ],
   transform: {
-    '.(ts|tsx)': '<rootDir>/node_modules/ts-jest/preprocessor.js',
+    '.(ts|tsx)': 'ts-jest',
   },
 }
 

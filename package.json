@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "jest",
-    "test:ci": "yarn test --ci",
+    "test:ci": "yarn test --ci --runInBand",
     "test:watch": "yarn test --watch",
     "coverage": "yarn test --coverage",
     "coverage:ci": "yarn test:ci --coverage",
@@ -28,6 +28,7 @@
     "prod": "TS_NODE_FILES=true ts-node ./src/server/prod.ts",
     "prod:virtual": "TS_NODE_FILES=true ts-node ./src/server/prod.ts --virtual-robots",
     "build": "yarn clean:dist && webpack -p --progress --colors",
+    "build:ci": "yarn clean:dist && webpack --ci --progress --colors",
     "clean": "yarn clean:dist && yarn clean:coverage",
     "clean:dist": "rimraf dist",
     "clean:coverage": "rimraf coverage",
