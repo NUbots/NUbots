@@ -18,5 +18,8 @@
 ## Developing (Virtual Robots)
 `yarn dev`
 
+## Developing without typechecking
+`yarn dev -t`
+
 ## Testing
 `yarn test`

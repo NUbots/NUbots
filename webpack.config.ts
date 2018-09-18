@@ -5,6 +5,7 @@ import * as path from 'path'
 import * as webpack from 'webpack'
 
 const isProduction = process.argv.indexOf('-p') >= 0
+const transpileOnly = process.argv.indexOf('-t') >= 0
 const sourcePath = path.join(__dirname, './src')
 const outPath = path.join(__dirname, './dist')
 
@@ -45,6 +46,7 @@ const config: webpack.Configuration = {
           loader: 'awesome-typescript-loader',
           options: {
             useBabel: true,
+            transpileOnly,
             babelCore: '@babel/core',
           },
         }],
