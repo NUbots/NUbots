@@ -9,8 +9,8 @@ import { RobotModel } from '../../robot/model'
 class DarwinMotor {
   @observable angle: number
 
-  constructor(opts: DarwinMotor) {
-    Object.assign(this, opts)
+  constructor({ angle }: DarwinMotor) {
+    this.angle = angle
   }
 
   static of() {
@@ -40,8 +40,48 @@ export class DarwinMotorSet {
   @observable headPan: DarwinMotor
   @observable headTilt: DarwinMotor
 
-  constructor(opts: DarwinMotorSet) {
-    Object.assign(this, opts)
+  constructor({
+    rightShoulderPitch,
+    leftShoulderPitch,
+    rightShoulderRoll,
+    leftShoulderRoll,
+    rightElbow,
+    leftElbow,
+    rightHipYaw,
+    leftHipYaw,
+    rightHipRoll,
+    leftHipRoll,
+    rightHipPitch,
+    leftHipPitch,
+    rightKnee,
+    leftKnee,
+    rightAnklePitch,
+    leftAnklePitch,
+    rightAnkleRoll,
+    leftAnkleRoll,
+    headPan,
+    headTilt,
+  }: DarwinMotorSet) {
+    this.rightShoulderPitch = rightShoulderPitch
+    this.leftShoulderPitch = leftShoulderPitch
+    this.rightShoulderRoll = rightShoulderRoll
+    this.leftShoulderRoll = leftShoulderRoll
+    this.rightElbow = rightElbow
+    this.leftElbow = leftElbow
+    this.rightHipYaw = rightHipYaw
+    this.leftHipYaw = leftHipYaw
+    this.rightHipRoll = rightHipRoll
+    this.leftHipRoll = leftHipRoll
+    this.rightHipPitch = rightHipPitch
+    this.leftHipPitch = leftHipPitch
+    this.rightKnee = rightKnee
+    this.leftKnee = leftKnee
+    this.rightAnklePitch = rightAnklePitch
+    this.leftAnklePitch = leftAnklePitch
+    this.rightAnkleRoll = rightAnkleRoll
+    this.leftAnkleRoll = leftAnkleRoll
+    this.headPan = headPan
+    this.headTilt = headTilt
   }
 
   static of() {
@@ -78,13 +118,25 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion // Torso to world rotation.
   @observable motors: DarwinMotorSet
 
-  constructor(model: RobotModel, opts: Partial<LocalisationRobotModel>) {
+  constructor({ model, name, color, rWTt, Rwt, motors }: {
+    model: RobotModel,
+    name: string,
+    color?: string,
+    rWTt: Vector3,
+    Rwt: Quaternion,
+    motors: DarwinMotorSet
+  }) {
     this.model = model
-    Object.assign(this, opts)
+    this.name = name
+    this.color = color
+    this.rWTt = rWTt
+    this.Rwt = Rwt
+    this.motors = motors
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
-    return new LocalisationRobotModel(model, {
+    return new LocalisationRobotModel({
+      model,
       name: model.name,
       rWTt: Vector3.of(),
       Rwt: Quaternion.of(),

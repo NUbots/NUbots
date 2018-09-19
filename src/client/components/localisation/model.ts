@@ -13,8 +13,9 @@ export class TimeModel {
   @observable time: number // seconds
   @observable lastRenderTime: number // seconds
 
-  constructor(opts: Partial<TimeModel>) {
-    Object.assign(this, opts)
+  constructor({ time, lastRenderTime }: { time: number, lastRenderTime: number }) {
+    this.time = time
+    this.lastRenderTime = lastRenderTime
   }
 
   static of() {
@@ -41,8 +42,11 @@ class CameraModel {
   @observable pitch: number
   @observable distance: number
 
-  constructor(opts: CameraModel) {
-    Object.assign(this, opts)
+  constructor({ position, yaw, pitch, distance }: CameraModel) {
+    this.position = position
+    this.yaw = yaw
+    this.pitch = pitch
+    this.distance = distance
   }
 
   static of() {
@@ -65,8 +69,15 @@ export class ControlsModel {
   @observable pitch: number
   @observable yaw: number
 
-  constructor(opts: ControlsModel) {
-    Object.assign(this, opts)
+  constructor({ forward, left, right, back, up, down, pitch, yaw }: ControlsModel) {
+    this.forward = forward
+    this.left = left
+    this.right = right
+    this.back = back
+    this.up = up
+    this.down = down
+    this.pitch = pitch
+    this.yaw = yaw
   }
 
   static of() {
@@ -95,9 +106,27 @@ export class LocalisationModel {
   @observable target?: LocalisationRobotModel
   @observable time: TimeModel
 
-  constructor(appModel: AppModel, opts: Partial<LocalisationModel>) {
+  constructor(appModel: AppModel, { aspect, field, skybox, camera, locked, controls, viewMode, target, time }: {
+    aspect: number,
+    field: FieldModel,
+    skybox: SkyboxModel,
+    camera: CameraModel,
+    locked: boolean,
+    controls: ControlsModel,
+    viewMode: ViewMode,
+    target?: LocalisationRobotModel,
+    time: TimeModel
+  }) {
     this.appModel = appModel
-    Object.assign(this, opts)
+    this.aspect = aspect
+    this.field = field
+    this.skybox = skybox
+    this.camera = camera
+    this.locked = locked
+    this.controls = controls
+    this.viewMode = viewMode
+    this.target = target
+    this.time = time
   }
 
   static of = memoize((appModel: AppModel): LocalisationModel => {

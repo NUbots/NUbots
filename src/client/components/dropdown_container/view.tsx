@@ -21,9 +21,9 @@ export const dropdownContainer = (WrappedComponent: ComponentType<DropdownProps>
   // Refer to: https://github.com/Microsoft/TypeScript/issues/7342
   @observer
   class EnhancedDropdown extends React.Component<DropdownContainerProps> {
-    private dropdown: HTMLDivElement
+    private dropdown?: HTMLDivElement
     @observable private isOpen: boolean = false
-    private removeListeners: () => void
+    private removeListeners?: () => void
 
     componentDidMount() {
       const onClick = (event: MouseEvent) => this.onDocumentClick(event)

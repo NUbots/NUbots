@@ -71,9 +71,59 @@ export class DashboardRobotModel {
   @observable walkPathPlan: Vector2[]
   @observable walkCommand: Vector3
 
-  constructor(robot: RobotModel, opts: DashboardRobotModelOpts) {
+  constructor(robot: RobotModel, {
+    camera,
+    ballColor,
+    ballSightColor,
+    kickTargetColor,
+    robotColor,
+    textColor,
+    time,
+    roleName,
+    battery,
+    voltage,
+    behaviourState,
+    robotPosition,
+    robotPositionCovariance,
+    ballPosition,
+    ballCovariance,
+    kickTarget,
+    gameMode,
+    gamePhase,
+    penaltyReason,
+    playerId,
+    lastCameraImage,
+    lastSeenBall,
+    lastSeenGoal,
+    walkPathPlan,
+    walkCommand,
+  }: DashboardRobotModelOpts) {
     this.robot = robot
-    Object.assign(this, opts)
+    this.camera = camera
+    this.ballColor = ballColor
+    this.ballSightColor = ballSightColor
+    this.kickTargetColor = kickTargetColor
+    this.robotColor = robotColor
+    this.textColor = textColor
+    this.time = time
+    this.roleName = roleName
+    this.battery = battery
+    this.voltage = voltage
+    this.behaviourState = behaviourState
+    this.robotPosition = robotPosition
+    this.robotPositionCovariance = robotPositionCovariance
+    this.ballPosition = ballPosition
+    this.ballCovariance = ballCovariance
+    this.kickTarget = kickTarget
+    this.gameMode = gameMode
+    this.gamePhase = gamePhase
+    this.penaltyReason = penaltyReason
+    this.playerId = playerId
+    this.lastCameraImage = lastCameraImage
+    this.lastSeenBall = lastSeenBall
+    this.lastSeenGoal = lastSeenGoal
+    this.walkPathPlan = walkPathPlan
+    this.walkCommand = walkCommand
   }
 
   static of = memoize((robot: RobotModel): DashboardRobotModel => {

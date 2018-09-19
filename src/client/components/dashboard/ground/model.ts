@@ -9,8 +9,12 @@ export class GroundModel {
   @observable lineColor: string
   @observable topGoalColor: string
 
-  constructor(opts: GroundModel) {
-    Object.assign(this, opts)
+  constructor({ bottomGoalColor, dimensions, fieldColor, lineColor, topGoalColor }: GroundModel) {
+    this.bottomGoalColor = bottomGoalColor
+    this.dimensions = dimensions
+    this.fieldColor = fieldColor
+    this.lineColor = lineColor
+    this.topGoalColor = topGoalColor
   }
 
   static of() {

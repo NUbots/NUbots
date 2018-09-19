@@ -22,10 +22,10 @@ type LocalisationViewProps = {
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
-  private canvas: HTMLCanvasElement
-  private renderer: WebGLRenderer
-  private stopAutorun: IReactionDisposer
-  private rafId: number
+  private canvas?: HTMLCanvasElement
+  private renderer?: WebGLRenderer
+  private stopAutorun?: IReactionDisposer
+  private rafId: number = 0
 
   componentDidMount(): void {
     this.renderer = new WebGLRenderer({
@@ -35,7 +35,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.stopAutorun = autorun(() => this.renderScene(), {
       scheduler: requestAnimationFrame,
     })
-    this.canvas.addEventListener('click', this.onClick, false)
+    this.canvas!.addEventListener('click', this.onClick, false)
     document.addEventListener('pointerlockchange', this.onPointerLockChange, false)
     document.addEventListener('mousemove', this.onMouseMove, false)
     document.addEventListener('keydown', this.onKeyDown, false)
@@ -45,8 +45,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   }
 
   componentWillUnmount(): void {
-    this.stopAutorun()
-    this.canvas.removeEventListener('click', this.onClick, false)
+    if (this.stopAutorun) {
+      this.stopAutorun()
+    }
+    this.canvas!.removeEventListener('click', this.onClick, false)
     document.removeEventListener('pointerlockchange', this.onPointerLockChange, false)
     document.removeEventListener('mousemove', this.onMouseMove, false)
     document.removeEventListener('keydown', this.onKeyDown, false)
@@ -73,7 +75,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   }
 
   requestPointerLock() {
-    this.canvas.requestPointerLock()
+    this.canvas!.requestPointerLock()
   }
 
   private onAnimationFrame = (time: number) => {
@@ -82,16 +84,16 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   }
 
   private renderScene(): void {
-    const canvas = this.canvas
+    const canvas = this.canvas!
 
     if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
-      this.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false)
+      this.renderer!.setSize(canvas.clientWidth, canvas.clientHeight, false)
       runInAction(() => this.props.model.aspect = canvas.clientWidth / canvas.clientHeight)
     }
 
     const viewModel = LocalisationViewModel.of(this.props.model)
 
-    this.renderer.render(viewModel.scene, viewModel.camera)
+    this.renderer!.render(viewModel.scene, viewModel.camera)
 
     runInAction(() => this.props.model.time.lastRenderTime = this.props.model.time.time)
   }

@@ -30,6 +30,8 @@ describe('NbsNUClearPlayback', () => {
       payload: Buffer.alloc(8),
     }
 
+    nuclearnetClient.connect({ name: 'Bob' })
+
     jest.spyOn(nuclearnetClient, 'send')
 
     clock.tick(1000) // Start clock at an offset to test that packets are sent at a relative time.

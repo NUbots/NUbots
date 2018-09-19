@@ -5,8 +5,8 @@ import { RobotModel } from '../robot/model'
 export class AppModel {
   @observable robots: RobotModel[]
 
-  constructor(opts: AppModel) {
-    Object.assign(this, opts)
+  constructor({ robots }: AppModel) {
+    this.robots = robots
   }
 
   static of(options: { robots: RobotModel[] } = { robots: [] }) {

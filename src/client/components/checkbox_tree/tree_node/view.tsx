@@ -27,8 +27,8 @@ export interface TreeNodeProps {
 
 @observer
 export class TreeNode extends Component<TreeNodeProps> {
-  private checkbox: HTMLInputElement
-  private stopAutorun: IReactionDisposer
+  private checkbox?: HTMLInputElement
+  private stopAutorun?: IReactionDisposer
 
   componentDidMount() {
     if (!this.checkbox) {
@@ -41,7 +41,9 @@ export class TreeNode extends Component<TreeNodeProps> {
   }
 
   componentWillUnmount() {
-    this.stopAutorun()
+    if (this.stopAutorun) {
+      this.stopAutorun()
+    }
   }
 
   render(): JSX.Element {
@@ -112,13 +114,13 @@ export class TreeNode extends Component<TreeNodeProps> {
 
   private updateCheckbox = () => {
     if (this.props.node.checked === CheckedState.Checked) {
-      this.checkbox.indeterminate = false
-      this.checkbox.checked = true
+      this.checkbox!.indeterminate = false
+      this.checkbox!.checked = true
     } else if (this.props.node.checked === CheckedState.Unchecked) {
-      this.checkbox.indeterminate = false
-      this.checkbox.checked = false
+      this.checkbox!.indeterminate = false
+      this.checkbox!.checked = false
     } else {
-      this.checkbox.indeterminate = true
+      this.checkbox!.indeterminate = true
     }
   }
 

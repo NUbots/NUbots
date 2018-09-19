@@ -22,11 +22,10 @@ import * as style from './style.css'
 export class PixiRenderer extends Component<RendererProps> {
   @observable private resolution: Transform = Transform.of()
   private canvas: HTMLCanvasElement | null = null
-  private renderer: WebGLRenderer | CanvasRenderer
-  private stopAutorun: IReactionDisposer
+  private renderer?: WebGLRenderer | CanvasRenderer
+  private stopAutorun?: IReactionDisposer
 
   componentDidMount() {
-
     this.renderer = autoDetectRenderer({
       view: this.canvas!,
       transparent: true,
@@ -75,9 +74,9 @@ export class PixiRenderer extends Component<RendererProps> {
     cam.y = transform.translate.y
     cam.scale.x = transform.scale.x
     cam.scale.y = transform.scale.y
-    cam.addChild(pixiObject(this.props.scene))
+    cam.addChild(pixiObject(scene))
 
-    this.renderer.render(cam)
+    this.renderer!.render(cam)
   }
 
   /**
@@ -96,7 +95,7 @@ export class PixiRenderer extends Component<RendererProps> {
     height *= devicePixelRatio
 
     // Update our renderer's viewport
-    this.renderer.resize(width, height)
+    this.renderer!.resize(width, height)
 
     // Translate to the center
     this.resolution.translate.x = -width * 0.5

@@ -19,7 +19,7 @@ import { hashType } from './fake_nuclearnet_server'
  * The fake helpers are public, but only should be used by FakeNUClearNetServer.
  */
 export class FakeNUClearNetClient implements NUClearNetClient {
-  peer: NUClearNetPeer
+  peer?: NUClearNetPeer
   private events: EventEmitter
   private connected: boolean
 

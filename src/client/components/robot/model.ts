@@ -8,8 +8,13 @@ export class RobotModel {
   @observable address: string
   @observable port: number
 
-  constructor(opts: RobotModel) {
-    Object.assign(this, opts)
+  constructor({ id, connected, enabled, name, address, port }: RobotModel) {
+    this.id = id
+    this.connected = connected
+    this.enabled = enabled
+    this.name = name
+    this.address = address
+    this.port = port
   }
 
   static of(opts: RobotModel) {

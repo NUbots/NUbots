@@ -39,12 +39,12 @@ export class FakeNUClearNetServer {
 
     for (const otherClient of this.clients) {
       // This ensures that the newly connected client receives a nuclear_join event from everyone else on the network.
-      client.fakeJoin(otherClient.peer)
+      otherClient.peer && client.fakeJoin(otherClient.peer)
 
       // This conditional avoids sending nuclear_join twice to the newly connected client.
       if (otherClient !== client) {
         // Send a single nuclear_join to everyone on the network about the newly connected client.
-        otherClient.fakeJoin(client.peer)
+        client.peer && otherClient.fakeJoin(client.peer)
       }
     }
 
@@ -53,12 +53,16 @@ export class FakeNUClearNetServer {
       this.clients.splice(this.clients.indexOf(client), 1)
 
       for (const otherClient of this.clients) {
-        otherClient.fakeLeave(client.peer)
+        client.peer && otherClient.fakeLeave(client.peer)
       }
     }
   }
 
   send(client: FakeNUClearNetClient, opts: NUClearNetSend) {
+    if (!client.peer) {
+      throw new Error('Cannot send a packaet to a client who has not connected to the network')
+    }
+
     const hash: Buffer = typeof opts.type === 'string' ? hashType(opts.type) : opts.type
     const packet = {
       peer: client.peer,
@@ -73,7 +77,7 @@ export class FakeNUClearNetServer {
      */
     const targetClients = opts.target === undefined
       ? this.clients
-      : this.clients.filter(otherClient => otherClient.peer.name === opts.target)
+      : this.clients.filter(otherClient => otherClient.peer && otherClient.peer.name === opts.target)
 
     const hashString = hash.toString('hex')
     for (const client of targetClients) {
