@@ -17,7 +17,7 @@ describe('NbsFrameChunker', () => {
   }
 
   function randomBuffer(size: number) {
-    const buffer = new Buffer(size)
+    const buffer = Buffer.alloc(size)
     for (let i = 0; i < size; i++) {
       buffer[i] = randomByte()
     }
@@ -64,7 +64,7 @@ describe('NbsFrameChunker', () => {
       done()
     })
 
-    chunker.write(new Buffer(32).fill(randomByte()))
+    chunker.write(Buffer.alloc(32).fill(randomByte()))
     chunker.write(buffer1)
     chunker.write(buffer2)
     chunker.write(buffer3)
@@ -85,13 +85,13 @@ describe('NbsFrameChunker', () => {
     })
 
     // These random buffers are filled with a single random byte so as to not have a header
-    chunker.write(new Buffer(32).fill(randomByte()))
+    chunker.write(Buffer.alloc(32).fill(randomByte()))
     chunker.write(buffer1)
-    chunker.write(new Buffer(32).fill(randomByte()))
+    chunker.write(Buffer.alloc(32).fill(randomByte()))
     chunker.write(buffer2)
-    chunker.write(new Buffer(32).fill(randomByte()))
+    chunker.write(Buffer.alloc(32).fill(randomByte()))
     chunker.write(buffer3)
-    chunker.write(new Buffer(32).fill(randomByte()))
+    chunker.write(Buffer.alloc(32).fill(randomByte()))
     chunker.end()
   })
 

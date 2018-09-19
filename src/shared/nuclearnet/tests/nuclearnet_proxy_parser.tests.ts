@@ -139,8 +139,8 @@ describe('NUClearNetProxyParser', () => {
           address: '192.168.2.11',
           port: randomPort(),
         },
-        hash: new Buffer(8),
-        payload: new Buffer(1000),
+        hash: Buffer.alloc(8),
+        payload: Buffer.alloc(1000),
         reliable: true,
       },
       {
@@ -149,8 +149,8 @@ describe('NUClearNetProxyParser', () => {
           address: '192.168.2.11',
           port: randomPort(),
         },
-        hash: new Buffer(8),
-        payload: new Buffer(1000),
+        hash: Buffer.alloc(8),
+        payload: Buffer.alloc(1000),
         reliable: true,
       },
     ]

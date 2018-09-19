@@ -132,7 +132,7 @@ describe('FakeNUClearNetClient', () => {
     const onSensors = jest.fn()
     bob.on('sensors', onSensors)
 
-    const payload = new Buffer(8)
+    const payload = Buffer.alloc(8)
     bob.send({ type: 'sensors', payload })
 
     expect(onSensors).toHaveBeenCalledTimes(1)
@@ -156,7 +156,7 @@ describe('FakeNUClearNetClient', () => {
     const eveOnSensors = jest.fn()
     eve.on('sensors', eveOnSensors)
 
-    const payload = new Buffer(8)
+    const payload = Buffer.alloc(8)
     eve.send({ type: 'sensors', payload })
 
     expect(bobOnSensors).toHaveBeenCalledTimes(1)
@@ -192,7 +192,7 @@ describe('FakeNUClearNetClient', () => {
     const eveOnSensors = jest.fn()
     eve.on('sensors', eveOnSensors)
 
-    const payload = new Buffer(8)
+    const payload = Buffer.alloc(8)
     eve.send({ type: 'sensors', payload })
 
     expect(bobOnPacket).toHaveBeenCalledTimes(1)
@@ -228,7 +228,7 @@ describe('FakeNUClearNetClient', () => {
     const eveOnSensors = jest.fn()
     eve.on('sensors', eveOnSensors)
 
-    const payload = new Buffer(8)
+    const payload = Buffer.alloc(8)
     eve.send({ type: 'sensors', payload, target: 'bob' })
 
     expect(bobOnSensors).toHaveBeenCalledTimes(1)
@@ -258,7 +258,7 @@ describe('FakeNUClearNetClient', () => {
     const eveOnSensors = jest.fn()
     eve.on('sensors', eveOnSensors)
 
-    const payload = new Buffer(8)
+    const payload = Buffer.alloc(8)
     eve.send({ type: 'sensors', payload, target: 'bob' })
 
     expect(bobOnSensors1).toHaveBeenCalledTimes(1)

@@ -52,7 +52,7 @@ export class VirtualRobot {
   send(messageType: string, buffer: Uint8Array, reliable?: boolean) {
     this.network.send({
       type: messageType,
-      payload: new Buffer(buffer),
+      payload: Buffer.from(buffer),
       target: 'nusight',
       reliable,
     })

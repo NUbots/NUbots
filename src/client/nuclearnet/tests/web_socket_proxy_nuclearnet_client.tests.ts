@@ -85,7 +85,7 @@ describe('WebSocketProxyNUClearNetClient', () => {
     it('forwards send calls to socket', () => {
       const opts = {
         type: 'foo',
-        payload: new Buffer(8),
+        payload: Buffer.alloc(8),
       }
       client.send(opts)
       expect(mockWebSocket.send).toHaveBeenCalledWith('foo', opts)

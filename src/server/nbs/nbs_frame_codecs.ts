@@ -29,11 +29,11 @@ export function encodeFrame(frame: NbsFrame): Buffer {
     `Expected hash buffer size of ${HASH_SIZE} but received ${frame.hash.byteLength}`)
 
   const size = TIMESTAMP_SIZE + HASH_SIZE + frame.payload.byteLength
-  const sizeBuffer = new Buffer(PACKET_SIZE_SIZE)
+  const sizeBuffer = Buffer.alloc(PACKET_SIZE_SIZE)
   sizeBuffer.writeUInt32LE(size, 0)
 
   const timeLong = Long.fromNumber(frame.timestampInMicroseconds)
-  const timestampBuffer = new Buffer(TIMESTAMP_SIZE)
+  const timestampBuffer = Buffer.alloc(TIMESTAMP_SIZE)
   timestampBuffer.writeUInt32LE(timeLong.getLowBitsUnsigned(), 0)
   timestampBuffer.writeUInt32LE(timeLong.getHighBitsUnsigned(), 4)
 

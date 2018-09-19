@@ -20,7 +20,7 @@ export class NbsFrameChunker extends stream.Transform {
 
     this.foundHeader = false
     this.foundPacketSize = false
-    this.buffer = new Buffer(0)
+    this.buffer = Buffer.alloc(0)
   }
 
   static of(): NbsFrameChunker {
@@ -41,7 +41,7 @@ export class NbsFrameChunker extends stream.Transform {
     // If there are no headers within the data, just empty the buffer.
     // Prevents this being an unbounded buffer continually accumulating when no nbs packets are to be found.
     if (this.buffer.indexOf(NBS_HEADER) === -1) {
-      this.buffer = new Buffer(0)
+      this.buffer = Buffer.alloc(0)
     }
 
     done()

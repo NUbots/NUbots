@@ -9,7 +9,7 @@ describe('NbsFrameEncoder', () => {
     const frame = {
       timestampInMicroseconds: 0,
       hash: hashType('fake'),
-      payload: new Buffer(8).fill(12),
+      payload: Buffer.alloc(8).fill(12),
     }
     const buffer = encodeFrame(frame)
     const spy = jest.fn()
@@ -29,7 +29,7 @@ describe('NbsFrameDecoder', () => {
     const frame = {
       timestampInMicroseconds: 0,
       hash: hashType('fake'),
-      payload: new Buffer(8).fill(12),
+      payload: Buffer.alloc(8).fill(12),
     }
     const buffer = encodeFrame(frame)
     const spy = jest.fn()
