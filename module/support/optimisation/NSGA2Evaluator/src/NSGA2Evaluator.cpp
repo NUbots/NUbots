@@ -156,11 +156,14 @@ namespace optimisation {
             gyroscope[1] = sensors.gyroscope[1];
             gyroscope[2] = sensors.gyroscope[2];//log(distanceTravelled);
 
-            sway[0] += gyroscope[0] * simTimeDelta;
-            sway[1] += gyroscope[1] * simTimeDelta;
-            sway[2] += gyroscope[2] * simTimeDelta;
+            if (simTime > 0.1)
+            {
+                sway[0] += gyroscope[0] * simTimeDelta;
+                sway[1] += gyroscope[1] * simTimeDelta;
+                sway[2] += gyroscope[2] * simTimeDelta;
+            }
 
-            if (!terminating && (accelerometer[0] < -7.0 || accelerometer[1] < -7.0) && accelerometer[2] < 0.0 && simTime > 3.0)
+            if (!terminating && (std::abs(accelerometer[0]) > 9.0 || std::abs(accelerometer[1]) > 9.0) && std::abs(accelerometer[2]) < 1.0 && simTime > 3.0)
                 fallenOver = true;
 
             fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2), 0.5);
@@ -301,12 +304,10 @@ namespace optimisation {
     {
         distanceTravelled = std::abs(ballLocation[0]);
 
-        if (distanceTravelled == 0.0)
+        if (fallenOver || distanceTravelled == 0.0)
             distanceTravelled = 0.001;
         else if (distanceTravelled > 10.0)
             distanceTravelled = 10.0;
-        else if (fallenOver)
-            distanceTravelled = 0.001;
 
         maxFieldPlaneSway = std::abs(maxFieldPlaneSway);
 
