@@ -43,11 +43,23 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
-        double FootStep::foot_distance(const Eigen::Vector3d& pos) {
-            // ( |C|^-s |x|^s+2 e^-|(cx)^-s| ) / (sx)
-            return (abs(pow(c, -step_steep)) * pow(abs(pos.x()), step_steep + 2)
-                    * exp(-abs(pow(c * pos.x(), -step_steep))))
-                   / (step_steep * pos.x());
+        double FootStep::factor(const Eigen::Vector3d& pos, double t) {
+            Eigen::Vector3d rF_wPp = pos;
+            double distance = rF_wPp.norm();
+            int count = 0;
+
+            while (distance > 0.005) {
+                rF_wPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
+                distance = rF_wPp.norm();
+                count++;
+            }
+
+            if (count == 0) {
+                return 0;
+            }
+            else {
+                return count / (t*10);
+            }
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
@@ -146,23 +158,20 @@ namespace motion {
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
                     // Swing foot's new target position on the plane
-                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized();
+                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
 
-                    double distance = foot_distance(rF_wPp);
-                    log(distance);
 
-                    if (distance > 0.005) {
-                        // Find scale to reach target at specified time
-                        std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
-                        double scale;
+                    // Find scale to reach target at specified time
+                    std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
+                    //double scale;
 
-                        // 0.1 refers to 10 milliseconds as below
-                        if (time_left <= std::chrono::duration<double>::zero()) {  // Time has elapsed
-                            scale = 0.1;
-                        }
-                        else {  // There is time left to complete
-                            scale = (distance / time_left.count()) * 0.1;
-                        }
+                    // 0.1 refers to 10 milliseconds as below
+                        // if (time_left <= std::chrono::duration<double>::zero()) {  // Time has elapsed
+                        //     scale = 0.1;
+                        // }
+                        // else {  // There is time left to complete
+                        //     scale = (distance / time_left.count()) * 0.1;
+                        // }
 
                         // Foot target's position relative to torso
                         Eigen::Vector3d rF_tTt = Htp * rF_tPp;
@@ -203,7 +212,7 @@ namespace motion {
                         }
 
                         emit(waypoints);
-                    }
+
                 });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
