@@ -10,8 +10,11 @@ namespace motion {
 
         class FootStep : public NUClear::Reactor {
         private:
+            // Returns vector from the vector field of where the foot should move on x-axis
             double f_x(const Eigen::Vector3d& vec);
+            // Returns vector from the vector field of where the foot should move on y-axis (in plane space)
             double f_y(const Eigen::Vector3d& vec);
+            // Returns factor by which the foot should move this iteration to reach target at specified time
             double factor(const Eigen::Vector3d& vec, double t);
 
             size_t subsumptionId;

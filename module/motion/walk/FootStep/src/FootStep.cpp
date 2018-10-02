@@ -33,7 +33,6 @@ namespace motion {
         using utility::input::ServoID;
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateLegJoints;
-        using utility::nusight::graph;
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
@@ -44,22 +43,31 @@ namespace motion {
         }
 
         double FootStep::factor(const Eigen::Vector3d& pos, double t) {
+
+            // If the time has already elapsed, do not execute the rest of the method
+            // and instead return 1, so the scaling will not affect the foot movement
+            if (t <= 0) {
+                return 1;
+            }
+
+            // pos is swing foot's position on the plane
             Eigen::Vector3d rF_wPp = pos;
             double distance = rF_wPp.norm();
             int count = 0;
 
+            // Loops while foot is not roughly at the target to find how many iterations it takes to reach
             while (distance > 0.005) {
+                // 'Move' the foot by one iteration
                 rF_wPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
-                distance = rF_wPp.norm();
-                count++;
+                distance = rF_wPp.norm();   // Update distance
+                count++;    // Update count
             }
 
-            if (count == 0) {
-                return 0;
-            }
-            else {
-                return count / (t*10);
-            }
+            // Returns the factor by which the foot should move based on how many iterations
+            // need to be taken at normal speed and how many iterations it has before the time
+            // has elapsed.
+            // If the foot is already in position, count will be 0 and so 0 will be returned
+            return count / (t*10);
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
@@ -76,8 +84,9 @@ namespace motion {
                 well_width  = config["well_width"];
                 step_steep  = config["step_steep"];
 
+                // Constant for f_x and f_y
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
-                     * std::pow(step_steep * step_height + std::pow(step_steep, 2) * step_height, -1 / step_steep))
+                     * std::pow(step_steep * step_height + (step_steep * step_steep * step_height), -1 / step_steep))
                     / well_width;
 
                 Eigen::Affine3d Haf_s;
