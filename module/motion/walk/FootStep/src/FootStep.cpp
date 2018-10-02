@@ -163,15 +163,13 @@ namespace motion {
 
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
-                    //double scale;
+                    double scale = factor(rF_wPp, time_left.count());
 
-                    // 0.1 refers to 10 milliseconds as below
-                        // if (time_left <= std::chrono::duration<double>::zero()) {  // Time has elapsed
-                        //     scale = 0.1;
-                        // }
-                        // else {  // There is time left to complete
-                        //     scale = (distance / time_left.count()) * 0.1;
-                        // }
+                    // If the scale returns zero, the foot is already in position so do not execute any foot movement.
+                    // If it is not zero, can proceed.
+                    if (scale != 0) {
+                        // Scale rF_tPp to result of factor to allow foot to reach the target at appropriate time
+                        rF_tPp = rF_tPp * scale;
 
                         // Foot target's position relative to torso
                         Eigen::Vector3d rF_tTt = Htp * rF_tPp;
@@ -212,7 +210,7 @@ namespace motion {
                         }
 
                         emit(waypoints);
-
+                    }
                 });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
