@@ -34,7 +34,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   }
 
   static of() {
-    const uri = `${document.location.origin}/nuclearnet`
+    const uri = `${document.location!.origin}/nuclearnet`
     return new WebSocketProxyNUClearNetClient(WebWorkerWebSocketClient.of(uri, {
       upgrade: false,
       transports: ['websocket'],
