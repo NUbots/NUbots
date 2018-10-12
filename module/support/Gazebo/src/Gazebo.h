@@ -52,6 +52,9 @@ namespace support {
 
         bool connected;
 
+        // Remote simulators
+        std::unordered_set<std::string> remotes;
+
     private:
     };
 }  // namespace support

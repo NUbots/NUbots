@@ -3,6 +3,7 @@ syntax = "proto3";
 package message.support.Gazebo;
 
 message GazeboBallLocation {
+
     double x = 1;
     double y = 2;
     double z = 3;
@@ -10,4 +11,6 @@ message GazeboBallLocation {
     double velx = 4;
     double vely = 5;
     double velz = 6;
+
+    string sourceName = 7;
 }

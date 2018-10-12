@@ -8,4 +8,6 @@ message GazeboWorldStatus {
     double simDelta  = 3;
     double realDelta = 4;
     double rtf       = 5;
+
+    string sourceName = 6;
 }

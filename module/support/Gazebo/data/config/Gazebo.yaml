@@ -1,3 +1,6 @@
 gazeboNUclear:
   url: 10.1.0.43
   port: 7447
+# Change this to match nubots_ign_namespace in gazebo client plugin.
+# Change it from nubots to avoid conflicts
+ignition_namespace: "nubots"
