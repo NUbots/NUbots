@@ -22,8 +22,8 @@ syntax = "proto3";
 package message.support.optimisation;
 
 message NSGA2FitnessScores {
-    int32 id 					= 1;
-    int32 generation 	= 2;
-    repeated double objScore 		= 3;
+    int32           id          = 1;
+    int32           generation  = 2;
+    repeated double objScore    = 3;
     repeated double constraints = 4;
 }

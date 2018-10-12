@@ -333,7 +333,8 @@ namespace motion {
         reset();
     }
 
-    void OldWalkEngine::configure(const YAML::Node& config) {log("configuring");
+    void OldWalkEngine::configure(const YAML::Node& config) {
+        log("configuring");
         auto& stance = config["stance"];
         bodyHeight   = stance["body_height"].as<Expression>();
         bodyTilt     = stance["body_tilt"].as<Expression>();

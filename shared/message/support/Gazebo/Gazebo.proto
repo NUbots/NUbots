@@ -10,5 +10,5 @@ message StringMsg {
 }
 
 message GazeboWorldCtrl {
-	bool resetWorld = 1;
-	}
+    bool resetWorld = 1;
+}

@@ -3,7 +3,7 @@ syntax = "proto3";
 package message.support.Gazebo;
 
 message GazeboRobotLocation {
-	double x = 1;
-	double y = 2;
-	double z = 3;
-	}
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}

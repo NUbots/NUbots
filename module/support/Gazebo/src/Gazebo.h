@@ -4,14 +4,14 @@
 #include <nuclear>
 
 //#include <ignition/msgs1/ignition/msgs.hh>
-#include <ignition/transport.hh>
 #include <ignition/msgs.hh>
+#include <ignition/transport.hh>
 //#include <gazebo/gazebo_config.h>
 //#include <gazebo/msgs/msgs.hh>
 //#include <gazebo/transport/transport.hh>
 
 // ZeroMQ_libzmq _VERSION:INTERNAL= git add . / git commit -am "message" git push
-//ADVANCED       ^ space breaks ./b module generate   property for variable: _GFORTRAN_EXECUTABLE
+// ADVANCED       ^ space breaks ./b module generate   property for variable: _GFORTRAN_EXECUTABLE
 
 
 #include "message/motion/ServoTarget.h"
@@ -40,7 +40,8 @@ namespace support {
         ignition::transport::Node* spareNode;
         ignition::transport::Node::Publisher pub;
         ignition::transport::Node::Publisher worldPub;
-        const ignition::msgs::StringMsg parseServos(const std::vector<message::motion::ServoTarget>& commands, const message::platform::darwin::DarwinSensors& sensors);
+        const ignition::msgs::StringMsg parseServos(const std::vector<message::motion::ServoTarget>& commands,
+                                                    const message::platform::darwin::DarwinSensors& sensors);
         const ignition::msgs::StringMsg GenerateMsg();
         static const int g_msgPort = 11319;
 
@@ -50,10 +51,10 @@ namespace support {
         double simDelta;
 
         bool connected;
-    private:
 
+    private:
     };
-}
-}
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_GAZEBO_H

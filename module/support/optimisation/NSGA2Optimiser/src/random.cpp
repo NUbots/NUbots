@@ -2,38 +2,31 @@
 
 using namespace nsga2;
 
-RandomGenerator::RandomGenerator(uint32_t _seed)
-{
-	seed = _seed;
-	generator.seed(_seed);
-} 
-
-RandomGenerator::~RandomGenerator() { }
-
-double RandomGenerator::Realu()
-{
-	return u01d(generator);
+RandomGenerator::RandomGenerator(uint32_t _seed) {
+    seed = _seed;
+    generator.seed(_seed);
 }
 
-double RandomGenerator::Real(double _low, double _high)
-{
-	return (_low + (_high - _low) * Realu());
+RandomGenerator::~RandomGenerator() {}
+
+double RandomGenerator::Realu() {
+    return u01d(generator);
 }
 
-int RandomGenerator::Integer(int _low, int _high)
-{
-	uintd.param(
-		boost::random::uniform_int_distribution<int>::param_type(_low, _high));
-	return uintd(generator);
+double RandomGenerator::Real(double _low, double _high) {
+    return (_low + (_high - _low) * Realu());
 }
 
-void RandomGenerator::SetSeed(uint32_t _seed)
-{
-	seed = _seed;
-	generator.seed(seed);
+int RandomGenerator::Integer(int _low, int _high) {
+    uintd.param(boost::random::uniform_int_distribution<int>::param_type(_low, _high));
+    return uintd(generator);
 }
 
-int RandomGenerator::GetSeed() const
-{
-	return seed;
+void RandomGenerator::SetSeed(uint32_t _seed) {
+    seed = _seed;
+    generator.seed(seed);
+}
+
+int RandomGenerator::GetSeed() const {
+    return seed;
 }

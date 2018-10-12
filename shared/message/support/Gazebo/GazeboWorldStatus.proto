@@ -3,9 +3,9 @@ syntax = "proto3";
 package message.support.Gazebo;
 
 message GazeboWorldStatus {
-	double simTime = 1;
-	double realTime = 2;
-	double simDelta = 3;
-	double realDelta = 4;
-	double rtf = 5;
-	}
+    double simTime   = 1;
+    double realTime  = 2;
+    double simDelta  = 3;
+    double realDelta = 4;
+    double rtf       = 5;
+}

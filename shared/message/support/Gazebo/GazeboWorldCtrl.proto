@@ -3,5 +3,5 @@ syntax = "proto3";
 package message.support.Gazebo;
 
 message GazeboWorldCtrl {
-	string command = 1;
-	}
+    string command = 1;
+}

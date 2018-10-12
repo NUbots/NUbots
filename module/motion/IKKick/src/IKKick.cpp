@@ -24,11 +24,11 @@
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
+#include "message/motion/ExecuteKick.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
-#include "message/motion/ExecuteKick.h"
 
 
 #include "utility/behaviour/Action.h"
@@ -55,8 +55,8 @@ namespace motion {
     using message::motion::KickFinished;
     using message::motion::StopCommand;
     using KickType = message::behaviour::KickPlan::KickType;
-    using message::motion::KinematicsModel;
     using message::motion::ExecuteKick;
+    using message::motion::KinematicsModel;
     using message::support::FieldDescription;
 
     using utility::behaviour::ActionPriorites;
@@ -113,7 +113,8 @@ namespace motion {
 
             emit(std::make_unique<StopCommand>(subsumptionId));  // Stop the walk
 
-            updatePriority(KICK_PRIORITY);log("RUNNING ON TRIGGER KICK");
+            updatePriority(KICK_PRIORITY);
+            log("RUNNING ON TRIGGER KICK");
         });
 
         on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then(
