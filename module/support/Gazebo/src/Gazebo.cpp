@@ -126,7 +126,7 @@ namespace support {
                             std::getline(ss, line);
                             servo.presentPosition = std::stof(line);
                         }
-
+                        std::cout << "sourceName " << sourceName << std::endl;
                         // std::getline(ss, line);
                         // std::cout << line << std::endl;
 
@@ -160,7 +160,7 @@ namespace support {
                     // Send Robot World coordinates
                     std::unique_ptr<GazeboRobotLocation> location = std::make_unique<GazeboRobotLocation>();
 
-                    location.sourceName = sourceName;
+                    location->sourceName = sourceName;
 
                     std::getline(ss, line);
                     location->x = std::stof(line);
@@ -185,7 +185,7 @@ namespace support {
                     std::string sourceName;
                     std::getline(ss, sourceName);
                     remotes.insert(sourceName);
-                    status.sourceName = sourceName;
+                    status->sourceName = sourceName;
 
                     std::getline(ss, line);
                     status->simTime = std::stod(line);
@@ -211,8 +211,6 @@ namespace support {
             std::function<void(const ignition::msgs::StringMsg& _msg)> BallStatusCb(
                 [this](const ignition::msgs::StringMsg& _msg) -> void {
 
-                    remotes[_msg.Addr()];
-
                     // GET BALL updates
                     std::unique_ptr<GazeboBallLocation> location = std::make_unique<GazeboBallLocation>();
                     std::stringstream ss(_msg.data());
@@ -222,7 +220,7 @@ namespace support {
                     std::string sourceName;
                     std::getline(ss, sourceName);
                     remotes.insert(sourceName);
-                    location.sourceName = sourceName;
+                    location->sourceName = sourceName;
 
                     std::getline(ss, line);
                     location->x = std::stof(line);
@@ -249,8 +247,6 @@ namespace support {
 
                     std::cout << "Discovered a Message Publisher!" << std::endl;
                     std::cout << _publisher << std::endl;
-
-                    remotes[_publisher.Addr()] = "Remote" + std::to_string(remotes.size());
                 });
 
             // Set up a callback function for the discovery service disconnections event
