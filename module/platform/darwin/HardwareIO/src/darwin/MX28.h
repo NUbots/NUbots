@@ -37,6 +37,7 @@ public:
      * @details
      *  for additional details see http://support.robotis.com/en/product/dynamixel/mx_series/mx-28.htm
      */
+
     enum Address {
         MODEL_NUMBER_L         = 0,
         MODEL_NUMBER_H         = 1,
