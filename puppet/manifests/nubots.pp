@@ -225,7 +225,8 @@ node nubotsvmbuild {
 
   exec { "Intel_OpenCL_SDK":
     creates     => "/nubots/toolchain/opt/intel/opencl/libOpenCL.so",
-    command     => "mkdir intel-opencl &&
+    command     => "if [ -d \"intel-opencl\" ]; then rm -rf \"intel-opencl\"; fi &&
+                    mkdir intel-opencl &&
                     cd intel-opencl &&
                     wget http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip &&
                     unzip SRB5.0_linux64.zip &&
