@@ -29,14 +29,6 @@ INCLUDE_DIRECTORIES(SYSTEM ${Protobuf_INCLUDE_DIRS})
 # If we have the package pybind11 we can use to go generate python bindings
 FIND_PACKAGE(pybind11)
 
-# We need Eigen3
-FIND_PACKAGE(Eigen3 REQUIRED)
-INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
-
-# We need Eigen3
-FIND_PACKAGE(Eigen3 REQUIRED)
-INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
-
 # If we found pybind11 include its directories
 IF(pybind11_FOUND)
     FIND_PACKAGE(PythonLibsNew 3 REQUIRED)
