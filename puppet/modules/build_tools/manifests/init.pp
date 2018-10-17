@@ -41,6 +41,11 @@ class build_tools {
   Class['apt::update'] ->
   Package <| provider == 'apt' |>
 
+  # Add this repo to get a newer version of gettext on trusty (needed for FSWatch)
+  if $codename == 'trusty' {
+    apt::ppa {'ppa:keinstein-junior/travis-ci-upgrades': }
+  }
+
   # Tools
   package { 'unzip': ensure => latest, }
   package { 'automake': ensure => latest, }
