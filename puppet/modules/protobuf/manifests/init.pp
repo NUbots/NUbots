@@ -19,7 +19,8 @@ class protobuf {
       creates     => '/nubots/toolchain/bin/protoc',
       command     => "cp protobuf-native.tar.gz protobuf.tar.gz &&
                       cd protobuf &&
-                      ./configure --prefix=\"/nubots/toolchain\" --with-zlib &&
+                      mkdir cmake/build && cd cmake/build &&
+                      cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=\"/nubots/toolchain\" ../ &&
                       make -j\$(nproc) &&
                       make install",
       cwd         => '/nubots/toolchain/src',
