@@ -60,6 +60,7 @@ node nubotsvmbuild {
                                           'nuc7i7bnh' => [ '-Dprotobuf_BUILD_SHARED_LIBS=ON', '-Dprotobuf_WITH_ZLIB=ON', '-Dprotobuf_BUILD_EXAMPLES=OFF', '-Dprotobuf_BUILD_TESTS=OFF', '-Dprotobuf_BUILD_PROTOC_BINARIES=OFF', ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
                        'src_dir'     => 'cmake',
+                       'creates'     => 'lib/libprotobuf.so',
                        'method'      => 'cmake', },
     'zlib'         => {'url'         => 'http://www.zlib.net/zlib-1.2.11.tar.gz',
                        'creates'     => 'lib/libz.a',
