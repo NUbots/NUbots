@@ -507,8 +507,7 @@ class Message:
             }}"""
         )
 
-        python_constructor_args = ['{}& self'.format(self.fqn.replace('.', '::'))]
-        python_constructor_args.extend(['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields])
+        python_constructor_args = ['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields]
         python_members = '\n'.join(
             '.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace('.', '::'))
             for f in self.fields
@@ -522,9 +521,9 @@ class Message:
 
         python_constructor = dedent(
             """\
-            .def("__init__", [] ({args}) {{
-                new (&self) {name}({vars});
-            }}{default_args})"""
+            .def(pybind11::init([]({args}) {{
+                return new {name}({vars});
+            }}){default_args})"""
         ).format(
             name=self.fqn.replace('.', '::'),
             args=', '.join(python_constructor_args),
