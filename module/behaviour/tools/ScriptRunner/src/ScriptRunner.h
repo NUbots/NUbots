@@ -21,7 +21,7 @@
 #define MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
 
 #include <nuclear>
-#include <queue>
+#include <vector>
 
 namespace module {
 namespace behaviour {
@@ -34,13 +34,18 @@ namespace behaviour {
          */
         class ScriptRunner : public NUClear::Reactor {
         private:
-            ReactionHandle sensorHandle;
-
             /// The scripts to be executed
-            std::queue<std::string> scripts;
+            std::vector<std::string> scripts;
 
             /// Our ID for subsumption
             const size_t id;
+
+            // Script delay
+            uint script_delay;
+
+            // Default scripts
+
+            // TODO
 
             /// Execute the next script in the list
             void executeNextScript();
