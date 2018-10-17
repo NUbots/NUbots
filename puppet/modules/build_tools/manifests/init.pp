@@ -1,5 +1,8 @@
 class build_tools {
 
+  # Find the codename for the currently running Ubuntu installation
+  $codename = lsb_release()
+
   # Update apt before getting any packages (if we need to)
   exec { "apt-update":
     command => "/usr/bin/apt-key update && /usr/bin/apt-get update",
@@ -9,15 +12,10 @@ class build_tools {
   exec { "install-software-properties":
     command => "/usr/bin/apt-get install -y software-properties-common",
     unless => '/usr/bin/dpkg -s software-properties-common',
-  } ->
-  # Add the ubuntu test toolchain ppa (for modern g++ etc)
-  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ~>
-  exec { "apt-update-ppa":
-    command => "/usr/bin/apt-get update",
-    refreshonly => true
-  } -> Package <| |>
+  }
 
-  $codename = lsb_release()
+  # Add the ubuntu test toolchain ppa (for modern g++ etc)
+  apt::ppa {'ppa:ubuntu-toolchain-r/test': }
 
   # Add the llvm 6.0 source
   apt::source { 'llvm-apt-repo':
@@ -33,7 +31,15 @@ class build_tools {
       'src' => true,
       'deb' => true,
     },
-  } -> Package <| |>
+  }
+
+  # Make sure there is an apt update before any apt packages are installed
+  # Also make sure that all ppa repos/sources are added before any apt updates are called
+  Exec['install-software-properties'] ->
+  Apt::Ppa <| |> ->
+  Apt::Source <| |> ->
+  Class['apt::update'] ->
+  Package <| provider == 'apt' |>
 
   # Tools
   package { 'automake': ensure => latest, }
