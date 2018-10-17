@@ -37,6 +37,15 @@ IF(pybind11_FOUND)
     INCLUDE_DIRECTORIES(SYSTEM ${PYTHON_INCLUDE_DIRS})
 ENDIF()
 
+# We need Eigen3
+FIND_PACKAGE(Eigen3 REQUIRED)
+INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
+
+# Construct empty lists for later use
+SET(src "")
+SET(message_dependencies "")
+SET(py_message_modules "")
+
 # Build our builtin protobuf classes
 FILE(GLOB_RECURSE builtin "${CMAKE_CURRENT_SOURCE_DIR}/proto/**.proto")
 FOREACH(proto ${builtin})
@@ -57,7 +66,7 @@ FOREACH(proto ${builtin})
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
         COMMENT "Compiling protocol buffer ${proto}")
 
-    SET(src ${src}
+    LIST(APPEND src
             "${message_binary_include_dir}/${file_we}.pb.cc"
             "${message_binary_include_dir}/${file_we}.pb.h"
             "${message_binary_include_dir}/${file_we}_pb2.py")
@@ -76,8 +85,6 @@ ENDFOREACH(proto)
 
 # Get our dependency files for our message class generator
 FILE(GLOB_RECURSE message_class_generator_depends "${CMAKE_CURRENT_SOURCE_DIR}/generator/**.py")
-
-UNSET(message_dependencies)
 
 # Build all of our normal messages
 FILE(GLOB_RECURSE protobufs "${message_source_dir}/**.proto")
@@ -140,7 +147,7 @@ FOREACH(proto ${protobufs})
         COMMENT "Extracting protocol buffer information from ${proto}")
 
     # Gather the dependencies for each message.
-    SET(message_dependencies ${message_dependencies} "${outputpath}/${file_we}.dep")
+    LIST(APPEND message_dependencies "${outputpath}/${file_we}.dep")
 
     # Repackage our protocol buffers so they don't collide with the actual classes
     # when we make our c++ protobuf classes by adding protobuf to the package
@@ -185,6 +192,7 @@ FOREACH(proto ${protobufs})
                                 "${outputpath}/${file_we}.proto"
                                 "${outputpath}/${file_we}.pb.cc"
                                 "${outputpath}/${file_we}.pb.h"
+                                "${outputpath}/${file_we}_pb2.py"
                                 "${outputpath}/${file_we}.cpp"
                                 "${outputpath}/${file_we}.py.cpp"
                                 "${outputpath}/${file_we}.h"
@@ -193,18 +201,22 @@ FOREACH(proto ${protobufs})
                                 COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error")
 
     # Add the generated files to our list
-    SET(src ${src}
+    LIST(APPEND src
             "${outputpath}/${file_we}.pb.cc"
             "${outputpath}/${file_we}.pb.h"
             "${outputpath}/${file_we}.cpp"
             "${outputpath}/${file_we}.h")
+    LIST(APPEND py_message_modules "${outputpath}/${file_we}_pb2.py")
 
     # If we have pybind11 also add the python bindings
     IF(pybind11_FOUND)
-        SET(src ${src} "${outputpath}/${file_we}.py.cpp")
-    ENDIF()
+        LIST(APPEND src "${outputpath}/${file_we}.py.cpp")
+    ENDIF(pybind11_FOUND)
 
 ENDFOREACH(proto)
+
+# Add Neutron_pb2.py here to prevent adding duplicate items to the list
+LIST(APPEND src "${message_binary_include_dir}/Neutron_pb2.py")
 
 # If we have pybind11 we need to generate our final binding class
 IF(pybind11_FOUND)
@@ -220,12 +232,29 @@ IF(pybind11_FOUND)
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" ${message_dependencies}
         COMMENT "Building outer python message binding")
 
-    SET(src ${src} "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp")
-ENDIF()
+    LIST(APPEND src "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp")
+ENDIF(pybind11_FOUND)
+
+# Macro to list all subdirectories of a given directory
+MACRO(SUBDIRLIST result curdir)
+    # Get list of directory entries in current directory
+    FILE(GLOB_RECURSE children LIST_DIRECTORIES TRUE RELATIVE ${curdir} ${curdir}/*)
+
+    # Append all subdirectories of current directory to our directory list
+    SET(dirlist "")
+    FOREACH(child ${children})
+        IF(IS_DIRECTORY "${curdir}/${child}")
+            LIST(APPEND dirlist "${child}")
+        ENDIF(IS_DIRECTORY "${curdir}/${child}")
+    ENDFOREACH(child)
+
+    # Return result
+    SET(${result} ${dirlist})
+ENDMACRO(SUBDIRLIST)
 
 IF(src)
     # Build a library from these files
-    ADD_LIBRARY(nuclear_message SHARED ${protobufs} ${src})
+    ADD_LIBRARY(nuclear_message SHARED ${protobufs} ${src} ${py_message_modules})
     SET_PROPERTY(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 
     # The library uses protocol buffers
@@ -236,25 +265,42 @@ IF(src)
     IF(pybind11_FOUND)
         TARGET_LINK_LIBRARIES(nuclear_message ${PYTHON_LIBRARIES})
 
-        # Generate a python file containing stub classes for all of our messages
+        # Generate a list of all of the python message files we will be generating
+        # This allows us to tell cmake at configure time what we will be generating at build time
+        # This should also allow us to set up proper dependencies and clean up generated files at clean time
+        SET(py_messages "")
+        LIST(REMOVE_DUPLICATES py_message_modules)
+
+        SUBDIRLIST(py_messages ${message_source_dir})
+        LIST(APPEND py_messages "")
+        LIST(TRANSFORM py_messages PREPEND "${PROJECT_BINARY_DIR}/python/nuclear/message/")
+        LIST(TRANSFORM py_messages APPEND "/__init__.py")
+
+        # Generate module pythons file containing stub classes for all of our messages
         ADD_CUSTOM_COMMAND(
-            OUTPUT "${PROJECT_BINARY_DIR}/python/nuclear/message"
+            OUTPUT ${py_messages}
+            BYPRODUCTS "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
             COMMAND ${PYTHON_EXECUTABLE}
             ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
                  "${PROJECT_BINARY_DIR}/shared"
                  "${PROJECT_BINARY_DIR}/python/nuclear"
+                 "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
             WORKING_DIRECTORY ${message_binary_dir}
-            DEPENDS ${src}
+            DEPENDS ${src} ${py_message_modules}
             COMMENT "Generating python sub messages")
-        SET_SOURCE_FILES_PROPERTIES("${PROJECT_BINARY_DIR}/python/nuclear/message" PROPERTIES GENERATED TRUE)
-        ADD_CUSTOM_TARGET(python_nuclear_message DEPENDS "${PROJECT_BINARY_DIR}/python/nuclear/message")
+
+        # Make sure all of the generated files are marked as generated
+        SET_SOURCE_FILES_PROPERTIES(${py_messages} PROPERTIES GENERATED TRUE)
+
+        # Create the python messages target and set the dependency chain up
+        ADD_CUSTOM_TARGET(python_nuclear_message DEPENDS ${py_messages})
         ADD_DEPENDENCIES(nuclear_message python_nuclear_message)
-    ENDIF()
+    ENDIF(pybind11_FOUND)
 
     # Add to our list of NUClear message libraries
     SET(NUCLEAR_MESSAGE_LIBRARIES nuclear_message CACHE INTERNAL "List of libraries that are built as messages" FORCE)
 
     # Put it in an IDE group for shared
     SET_PROPERTY(TARGET nuclear_message PROPERTY FOLDER "shared/")
-ENDIF()
+ENDIF(src)
 
