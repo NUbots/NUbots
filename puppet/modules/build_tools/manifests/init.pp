@@ -42,6 +42,7 @@ class build_tools {
   Package <| provider == 'apt' |>
 
   # Tools
+  package { 'unzip': ensure => latest, }
   package { 'automake': ensure => latest, }
   package { 'autoconf': ensure => latest, }
   package { 'libtool': ensure => latest, }
