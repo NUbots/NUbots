@@ -19,6 +19,8 @@
 
 #include "SensorFilter.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
@@ -104,39 +106,19 @@ namespace platform {
             : Reactor(std::move(environment))
             , motionFilter()
             , config()
-            , leftFootDown()
-            , rightFootDown()
+            , load_sensor()
             , footlanding_rFWw()
             , footlanding_Rfw()
             , footlanding_Rwf() {
 
-            on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config) {
+            on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
+                this->config.nominal_z = config["nominal_z"].as<float>();
+
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
-                // Battery config
-                this->config.battery.chargedVoltage = config["battery"]["charged_voltage"].as<float>();
-                this->config.battery.nominalVoltage = config["battery"]["nominal_voltage"].as<float>();
-                this->config.battery.flatVoltage    = config["battery"]["flat_voltage"].as<float>();
-
                 // Foot load sensor config
-                leftFootDown =
-                    DarwinVirtualLoadSensor(config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                            config["foot_load_sensor"]["certainty_threshold"].as<double>(),
-                                            config["foot_load_sensor"]["uncertainty_threshold"].as<double>());
-
-                rightFootDown =
-                    DarwinVirtualLoadSensor(config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>(),
-                                            config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>(),
-                                            config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                            config["foot_load_sensor"]["certainty_threshold"].as<double>(),
-                                            config["foot_load_sensor"]["uncertainty_threshold"].as<double>());
+                load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
 
                 // Motion filter config
                 // Update our velocity timestep dekay
@@ -295,13 +277,8 @@ namespace platform {
                     // Set our timestamp to when the data was read
                     sensors->timestamp = input.timestamp;
 
-                    // Set our voltage and battery
-                    sensors->voltage = input.voltage;
+                    sensors->battery = input.battery;
 
-                    // Work out a battery charged percentage
-                    sensors->battery = std::max(0.0f,
-                                                (input.voltage - config.battery.flatVoltage)
-                                                    / (config.battery.chargedVoltage - config.battery.flatVoltage));
 
                     // This checks for an error on the CM730 and reports it
                     if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
@@ -396,7 +373,7 @@ namespace platform {
                     }
                     else {
                         sensors->accelerometer = {
-                            -input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
+                            -input.accelerometer.y, -input.accelerometer.x, input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
@@ -410,7 +387,7 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {input.gyroscope.x, input.gyroscope.y, -input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
 
                     // Put in our FSR information
@@ -456,42 +433,30 @@ namespace platform {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    if (previousSensors) {
-                        // Use our virtual load sensor class to work out if our foot is down
-                        arma::vec leftFootFeatureVec = {
-                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_HIP_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_HIP_PITCH].load,
-                            sensors->servo[ServoID::L_KNEE].presentVelocity,
-                            sensors->servo[ServoID::L_KNEE].presentVelocity
-                                - previousSensors->servo[ServoID::L_KNEE].presentVelocity,
-                            sensors->servo[ServoID::L_KNEE].load,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].load};
-                        sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
+                    sensors->rightFootDown = false;
+                    sensors->leftFootDown  = false;
 
-                        arma::vec rightFootFeatureVec = {
-                            sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_HIP_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_HIP_PITCH].load,
-                            sensors->servo[ServoID::R_KNEE].presentVelocity,
-                            sensors->servo[ServoID::R_KNEE].presentVelocity
-                                - previousSensors->servo[ServoID::R_KNEE].presentVelocity,
-                            sensors->servo[ServoID::R_KNEE].load,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity
-                                - previousSensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].load};
-                        sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
+                    if (previousSensors) {
+                        // Use our virtual load sensor class to work out which feet are down
+                        arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::R_HIP_PITCH].load,
+                                                             sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::L_HIP_PITCH].load,
+                                                             sensors->servo[ServoID::R_KNEE].presentVelocity,
+                                                             sensors->servo[ServoID::R_KNEE].load,
+                                                             sensors->servo[ServoID::L_KNEE].presentVelocity,
+                                                             sensors->servo[ServoID::L_KNEE].load,
+                                                             sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::R_ANKLE_PITCH].load,
+                                                             sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::L_ANKLE_PITCH].load};
+
+                        auto feet_down         = load_sensor.updateFeet(features);
+                        sensors->leftFootDown  = feet_down[0];
+                        sensors->rightFootDown = feet_down[1];
                     }
-                    else {
-                        sensors->leftFootDown  = false;
-                        sensors->rightFootDown = false;
-                    }
+
+                    emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -612,6 +577,7 @@ namespace platform {
                     world.eye();
                     world.rotation()    = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     world.translation() = -(world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+
                     // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
                     sensors->world = convert<double, 4, 4>(world);
 

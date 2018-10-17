@@ -117,4 +117,19 @@ class build_tools {
              && /bin/sh cmake-3.12.1-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir \
              && rm cmake-3.12.1-Linux-x86_64.sh',
   }
+
+  exec { "Intel_OpenCL_SDK":
+    creates     => "/opt/intel/opencl/libOpenCL.so",
+    command     => "mkdir intel-opencl &&
+                    cd intel-opencl &&
+                    wget http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip &&
+                    unzip SRB5.0_linux64.zip &&
+                    mkdir root &&
+                    for i in *.tar.xz; do tar -C root -xf \"\$i\"; done &&
+                    cp -r root/* /",
+    path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout     => 0,
+    provider    => 'shell',
+    require     => [ Package['unzip'], ],
+  }
 }

@@ -1,21 +1,27 @@
 ransac:
-  minimum_points_for_consensus: 10
-  maximum_iterations_per_fitting: 10
+  minimum_points_for_consensus: 3
+  maximum_iterations_per_fitting: 100
   maximum_fitted_models: 3
   consensus_error_threshold: 0.000001
+visual_mesh:
+  mesh_branch_confidence_threshold: 0.7
+  mesh_seed_confidence_threshold: 0.9
 maximum_disagreement_ratio: 0.8
 maximum_relative_seed_point_distance: 0.1
 measurement_distance_variance_factor: 0.1
 measurement_bearing_variance: 0.2
 measurement_elevation_variance: 0.2
 green_ratio_threshold: 0.1
-green_radial_samples: 18
+green_radial_samples: 12
 green_angular_samples: 12
 ball_screen_covariance: [0.1, 0.01, 0.01]
 
 print_throwout_logs: false
+print_mesh_debug: false
+draw_cluster: true
 
 ball_angular_cov: [0.1,0.01,0.01]
+
 
 clustering:
   number_of_clusters: 4 # set the number of Gaussians

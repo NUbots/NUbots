@@ -1,15 +1,15 @@
 driver: Aravis
-deviceID: 00F7D6EC
+deviceID: 000000
 
 buffer_count: 4             # The number of software buffers to use.
 
 format:
   width: 1280
   height: 1024
-  pixel: BayerBG8
+  pixel: BayerRG8
 
 lens:
-  radiansPerPixel: 0.00245
+  radiansPerPixel: 0.0026768              # 1/focal_length_in_pixels = camera_pixel_size / camera_focal_length = 5.3um / 1.98mm = 2.6768e-3
   centreOffset: [0,0]
   FOV: 3.14
 
