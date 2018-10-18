@@ -34,3 +34,8 @@ sudo update-alternatives --remove-all gcc || true
 sudo update-alternatives --remove-all g++ || true
 sudo update-alternatives --remove-all gfortan || true
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 --slave /usr/bin/g++ g++ /usr/bin/g++-7 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7
+
+# Install newer cmake
+wget https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.sh
+sudo /bin/sh cmake-3.12.1-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir
+rm cmake-3.12.1-Linux-x86_64.sh'
