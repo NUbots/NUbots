@@ -10,11 +10,7 @@ export CMAKE_PREFIX_PATH="$PREFIX"
 
 which cmake
 cmake --version
-update-alternatives --list cmake
-echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
-echo "PATH = $PATH"
-echo "PKG_CONFIG_PATH = $PKG_CONFIG_PATH"
-echo "CMAKE_PREFIX_PATH = $CMAKE_PREFIX_PATH"
+dpkg --get-selections | grep cmake
 
 /nubots/toolchain/bin/python3 nuclear/b platform select $PLATFORM
 cd build
