@@ -167,8 +167,18 @@ namespace io {
         return ::read(fd, buf, count);
     }
 
+    template <typename T>
+    ssize_t read(T& data) {
+        return ::read(fd, static_cast<void*>(&data), sizeof(T));
+    }
+
     ssize_t uart::write(const void* buf, size_t count) {
         return ::write(fd, buf, count);
+    }
+
+    template <typename T>
+    ssize_t write(const T& buf) {
+        return ::write(fd, static_cast<void*>(&buf), sizeof(T));
     }
 }  // namespace io
 }  // namespace utility

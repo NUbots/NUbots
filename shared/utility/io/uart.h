@@ -76,6 +76,16 @@ namespace io {
         ssize_t read(void* buf, size_t count);
 
         /**
+         * @brief Read from the device into a structure
+         *
+         * @param data the structure to read in to
+         *
+         * @return the number of bytes that were actually read, or -1 if fail. See ::read
+         */
+        template <typename T>
+        ssize_t read(T& data);
+
+        /**
          * @brief Write bytes to the uart
          *
          * @param buf the buffer to write bytes from
@@ -84,6 +94,16 @@ namespace io {
          * @return the number of bytes that were written
          */
         ssize_t write(const void* buf, size_t count);
+
+        /**
+         * @brief Write bytes to the uart
+         *
+         * @param data the data to write
+         *
+         * @return the number of bytes that were written
+         */
+        template <typename T>
+        ssize_t write(const T& data);
 
         /**
          * @brief Open the uart for the given file descriptor. Closes any currently open file.
