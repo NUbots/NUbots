@@ -54,17 +54,21 @@ namespace Types {
      * @brief This represents the data that comes from one of the MX28 motors
      */
     struct MX28Data {
-        MX28Data() : presentPosition(0), presentSpeed(0), load(0), voltage(0), temperature(0) {}
-        uint16_t presentPosition;
-        uint16_t presentSpeed;
+        MX28Data()
+            : load(0), presentSpeed(0), presentPosition(0), reserved1(0), reserved2(0), voltage(0), temperature(0) {}
         uint16_t load;
-        uint8_t voltage;
+        uint32_t presentSpeed;
+        uint32_t presentPosition;
+        uint16_t reserved1;
+        uint16_t reserved2;
+        uint16_t voltage;
         uint8_t temperature;
     };
 
     /**
      * This represents data that comes from the Force Sensitive Resistors
      */
+    // TODO Update data sizes / This doesn't exist anymore...
     struct FSRData {
         FSRData() : fsr1(0), fsr2(0), fsr3(0), fsr4(0), centreX(0), centreY(0) {}
         uint16_t fsr1;
@@ -81,24 +85,37 @@ namespace Types {
     struct CM730Data {
         CM730Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
         uint8_t buttons;
-        uint8_t reserved[7] = {0};
+        uint8_t voltage;
         Gyro gyroscope;
         Accelerometer accelerometer;
-        uint8_t voltage;
     };
 
     /**
      * This is a type that is used control the motors, It is sent to the motors to cause a change
      */
+    // TODO Remove reserved, move block to indirect address
     struct ServoValues {
-        ServoValues() : servoId(0), dGain(0), iGain(0), pGain(0), reserved(0), goalPostion(0), movingSpeed(0) {}
+        ServoValues()
+            : servoId(0)
+            , dGain(0)
+            , iGain(0)
+            , pGain(0)
+            , reserved1(0)
+            , reserved2(0)
+            , reserved3(0)
+            , reserved4(0)
+            , goalPostion(0)
+            , movingSpeed(0) {}
         uint8_t servoId;
-        uint8_t dGain;
-        uint8_t iGain;
-        uint8_t pGain;
-        uint8_t reserved;
+        uint16_t dGain;
+        uint16_t iGain;
+        uint16_t pGain;
+        uint16_t reserved1;
+        uint16_t reserved2;
+        uint8_t reserved3;
+        uint16_t reserved4;
         uint16_t goalPostion;
-        uint16_t movingSpeed;
+        uint32_t movingSpeed;
     };
 }  // namespace Types
 
