@@ -3,6 +3,6 @@
   "watch": "src",
   "ignore": ["*.tests.ts", "src/client"],
   "execMap": {
-    "ts": "TS_NODE_FILES=true ts-node"
+    "ts": "cross-env TS_NODE_FILES=true ts-node"
   }
 }
