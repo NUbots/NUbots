@@ -19,7 +19,7 @@ namespace v2 {
     // Access Error      Attempt to write a value in an Address that is Read Only or has not been defined
     //                   Attempt to read a value in an Address that is Write Only or has not been defined
     //                   Attempt to write a value in the ROM domain while in a state of Torque Enable(ROM Lock)
-    enum CommandError : uint8_t {
+    enum class CommandError : uint8_t {
         NO_ERROR          = 0x00,
         RESULT_FAIL       = 0x01,
         INSTRUCTION_ERROR = 0x02,
@@ -44,30 +44,33 @@ namespace v2 {
  * @author Alex Biddulph
  */
 #pragma pack(push, 1)  // Make it so that the compiler reads this struct "as is" (no padding bytes)
-    template <typename T>
     struct StatusReturnCommand {
 
-        StatusReturnCommand()
+        StatusReturnCommand(uint8_t id,
+                            uint16_t length,
+                            const CommandError& error,
+                            const std::vector<uint8_t>& data,
+                            uint16_t checksum)
             : magic(0x00FDFFFF)
-            , id(0)
-            , length(0)
+            , id(id)
+            , length(length)
             , instruction(Instruction::STATUS_RETURN)
-            , error(CommandError::NO_ERROR)
-            , data()
-            , checksum(0) {}
+            , error(error)
+            , data(data)
+            , checksum(checksum) {}
 
         /// Magic number that heads up every packet
         const uint32_t magic;
         /// The ID of the device that we are communicating with
         const uint8_t id;
-        /// The total length of the data packet (3 plus however many bytes we are writing)
+        /// The total length of the data packet (4 plus the size of data)
         const uint16_t length;
-        /// The instruction that we will be executing
+        /// Will always be Instruction::STATUS_RETURN
         const uint8_t instruction;
         /// Error value
         const CommandError error;
         /// Expected return data
-        const T data;
+        std::vector<uint8_t> data;
         /// Our checksum for this command
         const uint16_t checksum;
     };

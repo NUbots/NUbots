@@ -17,6 +17,9 @@ namespace platform {
 
         private:
             utility::io::uart opencr;
+
+            uint32_t byte_wait;
+            uint32_t packet_wait;
         };
 
     }  // namespace nugus
