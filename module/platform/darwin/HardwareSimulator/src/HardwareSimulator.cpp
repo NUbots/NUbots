@@ -247,12 +247,12 @@ namespace platform {
                     }
                     sumGyro             = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0, 0, imu_drift_rate}));
                     sensors.gyroscope.x = sumGyro[0];
-                    sensors.gyroscope.y = sumGyro[1];
-                    sensors.gyroscope.z = sumGyro[2];
+                    sensors.gyroscope.y = -sumGyro[1];
+                    sensors.gyroscope.z = -sumGyro[2];
 
                     sensors.accelerometer.x = 0;
-                    sensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
-                    sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
+                    sensors.accelerometer.y = 9.8 * std::sin(-bodyTilt);
+                    sensors.accelerometer.z = -9.8 * std::cos(-bodyTilt);
 
                     sensors.timestamp = NUClear::clock::now();
 
@@ -312,12 +312,12 @@ namespace platform {
         void HardwareSimulator::addNoise(std::unique_ptr<DarwinSensors>& sensors) {
             // TODO: Use a more standard c++ random generator.
             sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
-            sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
-            sensors->accelerometer.z += noise.accelerometer.z * centered_noise();
+            sensors->accelerometer.y += -noise.accelerometer.y * centered_noise();
+            sensors->accelerometer.z += -noise.accelerometer.z * centered_noise();
 
             sensors->gyroscope.x += noise.gyroscope.x * centered_noise();
-            sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
-            sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
+            sensors->gyroscope.y += -noise.gyroscope.y * centered_noise();
+            sensors->gyroscope.z += -noise.gyroscope.z * centered_noise();
         }
 
         void HardwareSimulator::setRightFootDown(bool down) {
