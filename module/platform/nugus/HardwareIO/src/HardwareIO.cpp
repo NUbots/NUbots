@@ -2,7 +2,7 @@
 
 #include "extension/Configuration.h"
 
-#include "OpenCR.h"
+#include "NUgus.h"
 #include "dynamixel/v2/Dynamixel.hpp"
 
 #include "message/platform/nugus/StatusReturn.h"
@@ -29,12 +29,76 @@ namespace platform {
 
             on<Startup>().then("HardwareIO Startup", [this] {
                 // Find OpenCR firmware and model versions
-                dynamixel::v2::Read(OpenCR::ID, OpenCR::Address::MODEL_NUMBER_L, 3);
+                opencr.write(dynamixel::v2::Read(NUgus::ID::OPENCR, OpenCR::Address::MODEL_NUMBER_L, 3));
 
                 // Enable power to the servos
-                dynamixel::v2::Write(OpenCR::ID, OpenCR::Address::DYNAMIXEL_POWER, uint8_t(1));
+                opencr.write(dynamixel::v2::Write(NUgus::ID::OpenCR, OpenCR::Address::DYNAMIXEL_POWER, uint8_t(1)));
 
-                // Set up indirect addressing ... if needed
+                // Wait about 300ms for the dynamixels to start up
+                std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+                // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been
+                // configured before)
+                std::array<dynamixel::v2::BulkWriteData<uint8_t>, 21> data;
+                for (int i = 0; i < 20; ++i) {
+                    data[i] = dynamixel::v2::BulkWriteData<uint8_t>(i, (NUgus[i])::Address::RETURN_DELAY_TIME, 0);
+                }
+                data[20] = dynamixel::v2::BulkWriteData<uint8_t>(
+                    NUgus::ID::OpenCR, NUgus::OPENCR::Address::RETURN_DELAY_TIME, 0);
+
+                opencr.write(dynamixel::v2::BulkWrite(data));
+
+                // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
+                for (int i = 0; i < 20; ++i) {
+                    data[i] = dynamixel::v2::BulkWriteData<uint8_t>(i, (NUgus[i])::Address::STATUS_RETURN_LEVEL, 1);
+                }
+                data[20] = dynamixel::v2::BulkWriteData<uint8_t>(
+                    NUgus::ID::OpenCR, NUgus::OPENCR::Address::STATUS_RETURN_LEVEL, 1);
+
+                opencr.write(dynamixel::v2::BulkWrite(data));
+
+                // Set up indirect addressing for read addresses
+                std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 7>>, 20> read_data;
+
+                for (int i = 0; i < 20; ++i) {
+                    read_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 7>>(
+                        i,
+                        {NUgus::L_SHOULDER_PITCH::Address::HARDWARE_ERROR_STATUS,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_PWM,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_CURRENT,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VELOCITY,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_POSITION,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VOLTAGE,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_TEMPERATURE});
+                }
+
+                opencr.write(
+                    dynamixel::v2::SyncWrite(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L, read_data));
+
+                // Set up indirect addressing for write addresses
+                std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 14>>, 20> write_data;
+
+                for (int i = 0; i < 20; ++i) {
+                    write_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 14>>(
+                        i,
+                        {NUgus::L_SHOULDER_PITCH::Address::TORQUE_ENABLE,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_I_GAIN,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_P_GAIN,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_D_GAIN,
+                         NUgus::L_SHOULDER_PITCH::Address::POSITION_I_GAIN,
+                         NUgus::L_SHOULDER_PITCH::Address::POSITION_P_GAIN,
+                         NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_1ST_GAIN,
+                         NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_2ND_GAIN,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_PWM,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_CURRENT,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_VELOCITY,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_ACCELERATION,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_VELOCITY,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_POSITION});
+                }
+
+                opencr.write(
+                    dynamixel::v2::SyncWrite(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_8_L, write_data));
             });
 
             on<Shutdown>().then("HardwareIO Startup", [this] {
