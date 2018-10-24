@@ -93,6 +93,12 @@ namespace platform {
                     default: throw std::runtime_error("Unknown device id");
                 }
             }
+
+            static constexpr std::array<uint8_t, ID::HEAD_PITCH - ID::R_SHOULDER_PITCH + 1> servo_ids() const {
+                std::array<uint8_t, ID::HEAD_PITCH - ID::R_SHOULDER_PITCH + 1> ids;
+                std::iota(ids.begin(), ids.end(), R_SHOULDER_PITCH);
+                return ids;
+            }
         };
 
 #pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
