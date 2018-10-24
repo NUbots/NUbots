@@ -1,12 +1,16 @@
 #ifndef MODULE_PLATFORM_NUGUS_OPENCR_H
 #define MODULE_PLATFORM_NUGUS_OPENCR_H
 
+#include "dynamixel/v2/DynamixelDevice.h"
+
 namespace module {
 namespace platform {
     namespace nugus {
-        class OpenCR {
+        class OpenCR : DynamixelDevice {
         public:
-            static constexpr uint8_t ID = 200;
+            uint8_t ID;
+
+            OpenCR(uint8_t ID) : ID(ID) {}
 
             /**
              * @brief Holds the addresses of the various bytes in the OpenCR RAM table.
