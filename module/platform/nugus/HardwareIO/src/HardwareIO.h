@@ -1,6 +1,7 @@
 #ifndef MODULE_PLATFORM_NUGUS_HARDWAREIO_H
 #define MODULE_PLATFORM_NUGUS_HARDWAREIO_H
 
+#include <map>
 #include <nuclear>
 
 #include "utility/io/uart.h"
@@ -20,6 +21,10 @@ namespace platform {
 
             uint32_t byte_wait;
             uint32_t packet_wait;
+
+            // Maps device IDs to expected packet data
+            enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA };
+            std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
         };
 
     }  // namespace nugus

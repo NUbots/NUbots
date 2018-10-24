@@ -14,7 +14,7 @@ namespace platform {
         using extension::Configuration;
 
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), opencr(), byte_wait(0), packet_wait(0) {
+            : Reactor(std::move(environment)), opencr(), byte_wait(0), packet_wait(0), packet_queue() {
 
             on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
                 // Make sure OpenCR is operating at the correct baud rate (based on config params)
@@ -25,10 +25,23 @@ namespace platform {
                 opencr.open(config["opencr"]["device"], config["opencr"]["baud"]);
                 byte_wait   = config["opencr"]["byte_wait"];
                 packet_wait = config["opencr"]["packet_wait"];
+
+                // Initialise packet_queue map
+                packet_queue[NUgus::ID::OPENCR] = std::vector<PacketTypes>();
+                for (int i = 0; i < 20; ++i) {
+                    packet_queue[i] = std::vector<PacketTypes>();
+                }
             });
 
             on<Startup>().then("HardwareIO Startup", [this] {
+                // Set the OpenCR to not return a status packet when written to (to allow consecutive writes)
+                opencr.write(dynamixel::v2::Write(NUgus::ID::OpenCR, OpenCR::Address::STATUS_RETURN_LEVEL, uint8_t(1)));
+
+                // Set the OpenCRs delay time to 0 (it may not have been configured before)
+                opencr.write(dynamixel::v2::Write(NUgus::ID::OpenCR, OpenCR::Address::RETURN_DELAY_TIME, uint8_t(0)));
+
                 // Find OpenCR firmware and model versions
+                packet_queue[NUgus::ID::OPENCR].push_back(PacketTypes::MODEL_INFORMATION);
                 opencr.write(dynamixel::v2::Read(NUgus::ID::OPENCR, OpenCR::Address::MODEL_NUMBER_L, 3));
 
                 // Enable power to the servos
@@ -37,25 +50,23 @@ namespace platform {
                 // Wait about 300ms for the dynamixels to start up
                 std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
+                // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
+                std::array<dynamixel::v2::SyncWriteData<uint8_t>, 20> data;
+                for (int i = 0; i < 20; ++i) {
+                    data[i] = dynamixel::v2::SyncWriteData<uint8_t>(i, 1);
+                }
+
+                opencr.write(
+                    dynamixel::v2::SyncWrite<uint8_t, 20>(NUgus::R_SHOULDER_PITCH::Address::STATUS_RETURN_LEVEL, data));
+
                 // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been
                 // configured before)
-                std::array<dynamixel::v2::BulkWriteData<uint8_t>, 21> data;
                 for (int i = 0; i < 20; ++i) {
-                    data[i] = dynamixel::v2::BulkWriteData<uint8_t>(i, (NUgus[i])::Address::RETURN_DELAY_TIME, 0);
+                    data[i] = dynamixel::v2::SyncWriteData<uint8_t>(i, 0);
                 }
-                data[20] = dynamixel::v2::BulkWriteData<uint8_t>(
-                    NUgus::ID::OpenCR, NUgus::OPENCR::Address::RETURN_DELAY_TIME, 0);
 
-                opencr.write(dynamixel::v2::BulkWrite(data));
-
-                // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
-                for (int i = 0; i < 20; ++i) {
-                    data[i] = dynamixel::v2::BulkWriteData<uint8_t>(i, (NUgus[i])::Address::STATUS_RETURN_LEVEL, 1);
-                }
-                data[20] = dynamixel::v2::BulkWriteData<uint8_t>(
-                    NUgus::ID::OpenCR, NUgus::OPENCR::Address::STATUS_RETURN_LEVEL, 1);
-
-                opencr.write(dynamixel::v2::BulkWrite(data));
+                opencr.write(
+                    dynamixel::v2::SyncWrite<uint8_t, 20>(NUgus::R_SHOULDER_PITCH::Address::RETURN_DELAY_TIME, data));
 
                 // Set up indirect addressing for read addresses
                 std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 7>>, 20> read_data;
@@ -72,8 +83,8 @@ namespace platform {
                          NUgus::L_SHOULDER_PITCH::Address::PRESENT_TEMPERATURE});
                 }
 
-                opencr.write(
-                    dynamixel::v2::SyncWrite(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L, read_data));
+                opencr.write(dynamixel::v2::SyncWrite<std::array<uint16_t, 7>, 20>(
+                    NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L, read_data));
 
                 // Set up indirect addressing for write addresses
                 std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 14>>, 20> write_data;
@@ -97,8 +108,8 @@ namespace platform {
                          NUgus::L_SHOULDER_PITCH::Address::GOAL_POSITION});
                 }
 
-                opencr.write(
-                    dynamixel::v2::SyncWrite(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_8_L, write_data));
+                opencr.write(dynamixel::v2::SyncWrite<std::array<uint16_t, 7>, 20>(
+                    NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_8_L, write_data));
             });
 
             on<Shutdown>().then("HardwareIO Startup", [this] {
@@ -119,14 +130,17 @@ namespace platform {
 
                     // Get updated servo data
                     // SYNC_READ (read the same memory addresses on all devices)
-                    std::array<uint8_t, 20> devices = {
-                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 20};
-                    opencr.write(dynamixel::v2::SyncReadCommand(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L,
-                                                                sizeof(DynamixelServoReadData),
-                                                                devices));
+                    for (int i = 0; i < 20; ++i) {
+                        packet_queue[i].push_back(PacketTypes::SERVO_DATA);
+                    }
+                    opencr.write(
+                        dynamixel::v2::SyncReadCommand<20>(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L,
+                                                           sizeof(DynamixelServoReadData),
+                                                           NUgus::servo_ids()));
 
                     // Get OpenCR data
                     // READ (only reading from a single device here)
+                    packet_queue[NUgus::ID::OPENCR].push_back(PacketTypes::OPENCR_DATA);
                     opencr.write(
                         dynamixel::v2::ReadCommand(NUgus::ID::OPENCR, NUgus::OPENCR::Address::LED, sizeof(OpenCRData)));
                 });
