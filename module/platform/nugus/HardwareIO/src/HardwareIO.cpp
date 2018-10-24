@@ -119,21 +119,16 @@ namespace platform {
 
                     // Get updated servo data
                     // SYNC_READ (read the same memory addresses on all devices)
+                    std::array<uint8_t, 20> devices = {
+                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 20};
+                    opencr.write(dynamixel::v2::SyncReadCommand(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L,
+                                                                sizeof(DynamixelServoReadData),
+                                                                devices));
 
                     // Get OpenCR data
                     // READ (only reading from a single device here)
-
-                    // Parse our data
-                    *sensors = parseSensors(data);
-
-                    // Work out a battery charged percentage
-                    sensors->battery =
-                        std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
-
-                    // Change LEDs to reflect battery voltage
-
-                    // Send our nicely computed sensor data out to the world
-                    emit(std::move(sensors));
+                    opencr.write(
+                        dynamixel::v2::ReadCommand(NUgus::ID::OPENCR, NUgus::OPENCR::Address::LED, sizeof(OpenCRData)));
                 });
 
             // This trigger writes the servo positions to the hardware
@@ -167,8 +162,20 @@ namespace platform {
                 // Update our internal state
             });
 
-            on<Trigger<>>().then([this] {
+            on<Trigger<message::platform::nugus::StatusReturn>>().then([this] {
+                // Figure out what the contents of the message are
 
+
+                // Parse our data
+                *sensors = parseSensors(data);
+
+                // Work out a battery charged percentage
+                sensors->battery = std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
+
+                // Change LEDs to reflect battery voltage
+
+                // Send our nicely computed sensor data out to the world
+                emit(std::move(sensors));
             });
 
             // When we receive data back from the OpenCR it will arrive here
