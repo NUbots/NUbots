@@ -176,21 +176,37 @@ namespace platform {
                 // Update our internal state
             });
 
-            on<Trigger<message::platform::nugus::StatusReturn>>().then([this] {
-                // Figure out what the contents of the message are
+            on<Trigger<message::platform::nugus::StatusReturn>>().then(
+                [this](const message::platform::nugus::StatusReturn& packet) {
+                    // Figure out what the contents of the message are
+                    if (packet_queue[packet.id].size() > 0) {
+                        switch (packet_queue[packet.id].front()) {
+                            case PacketTypes::MODEL_INFORMATION:
+                                uint16_t model  = (packet.data[1] << 8) | packet.data[0];
+                                uint8_t version = packet.data[2];
+                                log<NUClear::INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
+                                log<NUClear::INFO>(fmt::format("OpenCR Firmware Version: {:#04X}", version));
+                                break;
 
+                            case PacketTypes::OPENCR_DATA:
+                                // Work out a battery charged percentage
+                                sensors->battery =
+                                    std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
+                                break;
 
-                // Parse our data
-                *sensors = parseSensors(data);
+                            case PacketTypes::SERVO_DATA:
+                                // Parse our data
+                                break;
 
-                // Work out a battery charged percentage
-                sensors->battery = std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
+                            // What is this??
+                            default: log<NUClear::WARN>("Unknown packet data received") break;
+                        }
+                    }
 
-                // Change LEDs to reflect battery voltage
-
-                // Send our nicely computed sensor data out to the world
-                emit(std::move(sensors));
-            });
+                    else {
+                        log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
+                    }
+                });
 
             // When we receive data back from the OpenCR it will arrive here
             // Run a state machine to handle reception of packet header and data
