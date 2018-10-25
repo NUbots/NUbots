@@ -5,6 +5,11 @@ import os
 import sys
 import textwrap
 
+# List of known languages and the variations with which they may be specified
+CXX = ['CPP', 'cpp', 'C++', 'c++', 'CXX', 'cxx']
+PYTHON = ['PYTHON', 'Python', 'python', 'Py', 'PY', 'py']
+KNOWN_LANGUAGES = CXX + PYTHON
+
 
 def register(command):
 
@@ -20,10 +25,10 @@ def register(command):
     generate_command.add_argument(
         'language',
         metavar='language',
-        choices=['C++', 'c++', 'CPP', 'cpp', 'cxx', 'Python', 'python', 'py'],
-        default='CPP',
+        choices=KNOWN_LANGUAGES,
+        default=KNOWN_LANGUAGES[0],
         nargs='?',
-        help='Language to use for the module, C++ or Python [default=C++]'
+        help='Language to use for the module, C++ or Python [default={}]'.format(KNOWN_LANGUAGES[0])
     )
 
 
@@ -50,12 +55,12 @@ def run(path, **kwargs):
         sys.exit(1)
 
     language = kwargs.get('language')
-    if language not in ['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py']:
+    if language not in KNOWN_LANGUAGES:
         sys.stderr.write('The language provided is invalid.\n')
         sys.stderr.write('Module generation aborted.\n')
         sys.exit(1)
 
-    module_language = 'CPP' if language in ['C++', 'c++', 'cpp', 'cxx'] else 'PYTHON'
+    module_language = 'CPP' if language in CXX else 'PYTHON'
 
     print('Module directory', module_path)
     print('Creating directories')
