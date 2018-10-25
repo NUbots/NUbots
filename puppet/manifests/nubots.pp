@@ -224,6 +224,15 @@ node nubotsvmbuild {
     method    => 'wget',
   }
 
+  # Manually install cmake
+  exec {'install-cmake':
+    creates => '/usr/local/bin/cmake',
+    command => '/usr/bin/wget https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.sh \
+             && /bin/sh cmake-3.12.1-Linux-x86_64.sh --prefix=/nubots/toolchain --exclude-subdir \
+             && rm cmake-3.12.1-Linux-x86_64.sh',
+    require     => [ Class['installer::prerequisites'], Class['build_tools'], ],
+  } -> Installer <| |>
+
   exec { "Intel_OpenCL_SDK":
     creates     => "/nubots/toolchain/opt/intel/opencl/libOpenCL.so",
     command     => "if [ -d \"intel-opencl\" ]; then rm -rf \"intel-opencl\"; fi &&
