@@ -8,10 +8,6 @@ export PATH="$PREFIX/$PLATFORM/bin:$PREFIX/bin:/usr/lib/ccache:$PATH"
 export PKG_CONFIG_PATH="$PREFIX/$PLATFORM/lib/pkgconfig:$PREFIX/lib/pkgconfig"
 export CMAKE_PREFIX_PATH="$PREFIX"
 
-which cmake
-cmake --version
-dpkg --get-selections | grep cmake
-
 /nubots/toolchain/bin/python3 nuclear/b platform select $PLATFORM
 cd build
 ninja
