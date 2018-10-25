@@ -219,11 +219,17 @@ def generate_python(parts):
         #!/usr/bin/env python3
 
         from nuclear import Reactor, on, Trigger, Single, With, Every
+        import yaml
+
 
         @Reactor
         class {class_name}(object):
+
             def __init__(self):
                 # Constructor for {class_name}
+
+                # Load configuration here until extension bindings are made
+                self.config = yaml.load(open('config/{class_name}.yaml', 'r'))
 
             # Disabled until extension bindings and made
             # @on(Configuration('{class_name}.yaml'))
