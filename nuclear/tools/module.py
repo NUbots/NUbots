@@ -20,8 +20,9 @@ def register(command):
     generate_command.add_argument(
         'language',
         metavar='language',
-        choices=['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py'],
-        default='C++',
+        choices=['C++', 'c++', 'CPP', 'cpp', 'cxx', 'Python', 'python', 'py'],
+        default='CPP',
+        nargs='?',
         help='Language to use for the module, C++ or Python [default=C++]'
     )
 
@@ -48,6 +49,7 @@ def run(path, **kwargs):
         sys.stderr.write('Module generation aborted.\n')
         sys.exit(1)
 
+    language = kwargs.get('language')
     if language not in ['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py']:
         sys.stderr.write('The language provided is invalid.\n')
         sys.stderr.write('Module generation aborted.\n')
@@ -75,7 +77,7 @@ def run(path, **kwargs):
 
     # Write all of our files
     with open(os.path.join(path, 'CMakeLists.txt'), "w") as output:
-        output.write(generate_cmake(parts))
+        output.write(generate_cmake(parts, module_language))
         print('\t', os.path.join(path, 'CMakeLists.txt'))
 
     with open(os.path.join(path, 'README.md'), "w") as output:
@@ -104,13 +106,13 @@ def run(path, **kwargs):
         print('\t', os.path.join(config_path, '{}.yaml'.format(module_name)))
 
 
-def generate_cmake(parts, language):
+def generate_cmake(parts, module_languge):
     return textwrap.dedent(
         """\
         # Build our NUClear module
         NUCLEAR_MODULE(LANGUAGE "{module_languge}")
         """
-    ).format(module_languge=language)
+    ).format(module_languge=module_languge)
 
 
 def generate_header(parts):
