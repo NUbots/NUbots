@@ -4,6 +4,7 @@ import b
 import os
 import sys
 import textwrap
+from subprocess import call
 
 # List of known languages and the variations with which they may be specified
 CXX = ['CPP', 'cpp', 'C++', 'c++', 'CXX', 'cxx']
@@ -109,6 +110,22 @@ def run(path, **kwargs):
 
     with open(os.path.join(config_path, '{}.yaml'.format(module_name)), 'a'):
         print('\t', os.path.join(config_path, '{}.yaml'.format(module_name)))
+
+    print('Formatting files')
+    try:
+        if module_language is 'CPP':
+            print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
+            call(['clang-format-6.0', '-i', '-style=file', os.path.join(src_path, '{}.h'.format(module_name))])
+
+            print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
+            call(['clang-format-6.0', '-i', '-style=file', os.path.join(src_path, '{}.cpp'.format(module_name))])
+
+        print('\t', os.path.join(src_path, os.path.join(tests_path, '{}.cpp'.format(module_name))))
+        call(['clang-format-6.0', '-i', '-style=file', os.path.join(tests_path, '{}.cpp'.format(module_name))])
+
+    except FileNotFoundError:
+        print('\tThe formatting tools (clang-format-6) are not installed, ignoring formatting')
+        pass
 
 
 def generate_cmake(parts, module_languge):
