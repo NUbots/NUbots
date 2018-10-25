@@ -2,8 +2,9 @@
 
 from nuclear import Reactor, on, Trigger, Single, With, Every
 from message.vision import ReprojectedImage, Obstacle, BakedImage
-from message.motion import HeadCommand, WaveRightCommand
+from message.motion import HeadCommand
 from message.input import Sensors
+from message.behaviour import PythonScript
 import numpy as np
 import tensorflow as tf
 import yaml
@@ -73,6 +74,10 @@ class PyPedestrianDetector(object):
 
         self.avg_fp_ms = 0
         self.avg_count = 0
+
+        # Enforce a limit on how often we make the arm wave
+        self.wave_pause = datetime.timedelta(seconds=10)
+        self.last_wave = datetime.datetime.now() - self.wave_pause
 
     def __del__(self):
         self.session.close()
@@ -185,11 +190,13 @@ class PyPedestrianDetector(object):
                     head_command.robotSpace = True
                     self.emit(head_command)
 
-                    if width > 0.25 * image.dimensions[0]:
-                        cmd = WaveRightCommand()
-                        cmd.pre_delay = 0
-                        cmd.post_delay = 10
-                        self.emit(cmd)
+                    # Only issue a new wave command if a sufficient
+                    # amount of time has passed since the last wave
+                    if datetime.datetime.now() > (self.last_wave + self.wave_pause):
+                        if width > 0.25 * image.dimensions[0]:
+                            cmd = PythonScript()
+                            cmd.script_name = 'WaveRight.yaml'
+                            self.emit(cmd)
 
                 self.emit(img)
 
