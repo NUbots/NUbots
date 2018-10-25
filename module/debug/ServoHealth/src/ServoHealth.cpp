@@ -5,6 +5,7 @@
 #include "extension/Configuration.h"
 #include "extension/Script.h"
 
+#include "message/extension/Script.h"
 #include "message/input/Sensors.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/ServoHealthTestData.h"
@@ -19,8 +20,8 @@ namespace module {
 namespace debug {
 
     using extension::Configuration;
-    using extension::ExecuteScriptByName;
 
+    using message::extension::ExecuteScriptByName;
     using message::input::Sensors;
     using message::platform::darwin::DarwinSensors;
 
@@ -79,7 +80,7 @@ namespace debug {
         });
 
         on<Trigger<TestStart>, With<Sensors>>().then([this](const Sensors& sensors) {
-            double duration1 = 1.0;
+            std::vector<double> duration1({1.0});
 
             // Set up initial state.
 
@@ -87,22 +88,29 @@ namespace debug {
                 if (sensors.world(0, 2) < 0.0) {
                     emit(std::make_unique<ExecuteScriptByName>(
                         id,
-                        std::vector<std::string>(
-                            {"Relax.yaml", "Relax.yaml", "StandUpFront.yaml", "YogaSplit1.yaml"})));
-                    emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit1.yaml", duration1));
+                        std::vector<std::string>({"Relax.yaml", "Relax.yaml", "StandUpFront.yaml", "YogaSplit1.yaml"}),
+                        std::vector<double>({1.0}),
+                        NUClear::clock::now()));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"YogaSplit1.yaml"}), duration1, NUClear::clock::now()));
                     log<NUClear::ERROR>("FRONT");
                 }
                 else {
                     emit(std::make_unique<ExecuteScriptByName>(
                         id,
-                        std::vector<std::string>({"Relax.yaml", "Relax.yaml", "StandUpBack.yaml", "YogaSplit1.yaml"})));
-                    emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit1.yaml", duration1));
+                        std::vector<std::string>({"Relax.yaml", "Relax.yaml", "StandUpBack.yaml", "YogaSplit1.yaml"}),
+                        std::vector<double>({1.0}),
+                        NUClear::clock::now()));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"YogaSplit1.yaml"}), duration1, NUClear::clock::now()));
                     log<NUClear::ERROR>("BACK");
                 }
             }
             else {
-                emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit1.yaml", duration1));
-                emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit1.yaml", duration1));
+                emit(std::make_unique<ExecuteScriptByName>(
+                    id, std::vector<std::string>({"YogaSplit1.yaml"}), duration1, NUClear::clock::now()));
+                emit(std::make_unique<ExecuteScriptByName>(
+                    id, std::vector<std::string>({"YogaSplit1.yaml"}), duration1, NUClear::clock::now()));
                 log<NUClear::ERROR>("I'M UP MAN");
             }
             state = State::INITIALISE;
@@ -114,193 +122,236 @@ namespace debug {
 
         on<Trigger<ScriptEnd>>().then([this] {
             // Durations to execute scripts at
-            double duration1 = 2.0;
+            std::vector<double> duration1({2.0});
 
             switch (State::Value(state)) {
                 case State::INITIALISE: {
                     counter = 0;
                     state   = State::MOVE_1;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_1.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Move_1.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::MOVE_1: {
                     counter = 0;
                     state   = State::ELBOW;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Elbow.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Elbow.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::ELBOW: {
                     if (++counter > test_loops) {
                         state   = State::MOVE_2;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_2.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Move_2.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Elbow.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Elbow.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
                 case State::MOVE_2: {
                     counter = 0;
                     state   = State::SHOULDER_PITCH;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Pitch.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Shoulder_Pitch.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::SHOULDER_PITCH: {
                     if (++counter > test_loops) {
                         state   = State::SHOULDER_MOVE_1;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Move_1.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id,
+                            std::vector<std::string>({"Yoga_Shoulder_Move_1.yaml"}),
+                            duration1,
+                            NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Pitch.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id,
+                            std::vector<std::string>({"Yoga_Shoulder_Pitch.yaml"}),
+                            duration1,
+                            NUClear::clock::now()));
                     }
                 } break;
                 case State::SHOULDER_MOVE_1: {
                     counter = 0;
                     state   = State::SHOULDER_ROLL;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Roll.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Shoulder_Roll.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::SHOULDER_ROLL: {
                     if (++counter > test_loops) {
                         state   = State::MOVE_3;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_3.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Move_3.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Roll.yaml", duration1));
+                        emit(
+                            std::make_unique<ExecuteScriptByName>(id,
+                                                                  std::vector<std::string>({"Yoga_Shoulder_Roll.yaml"}),
+                                                                  duration1,
+                                                                  NUClear::clock::now()));
                     }
                 } break;
 
                 case State::MOVE_3: {
                     counter = 0;
                     state   = State::HEAD_PITCH;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Pitch.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Head_Pitch.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::HEAD_PITCH: {
                     if (++counter > test_loops) {
                         state   = State::MOVE_4;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_4.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Move_4.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Pitch.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Head_Pitch.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
                 case State::MOVE_4: {
                     counter = 0;
                     state   = State::HEAD_YAW;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Yaw.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Head_Yaw.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::HEAD_YAW: {
                     if (++counter > test_loops) {
                         state   = State::LAYDOWN;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Laydown.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Laydown.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Yaw.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Head_Yaw.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
                 case State::LAYDOWN: {
                     counter = 0;
                     state   = State::HIP_ROLL;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Roll.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Hip_Roll.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::HIP_ROLL: {
                     if (++counter > test_loops) {
                         state   = State::HIP_MOVE_1;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Move_1.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Hip_Move_1.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Roll.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Hip_Roll.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
 
                 case State::HIP_MOVE_1: {
                     counter = 0;
                     state   = State::HIP_YAW;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Yaw.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Hip_Yaw.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::HIP_YAW: {
                     if (++counter > test_loops) {
                         state   = State::HIP_MOVE_2;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Move_2.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Hip_Move_2.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Yaw.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Hip_Yaw.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
                 case State::HIP_MOVE_2: {
                     counter = 0;
                     state   = State::ANKLE_PITCH;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Pitch.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Ankle_Pitch.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::ANKLE_PITCH: {
                     if (++counter > test_loops) {
                         state   = State::ANKLE_MOVE;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Move.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Ankle_Move.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Pitch.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Ankle_Pitch.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
 
                 case State::ANKLE_MOVE: {
                     counter = 0;
                     state   = State::ANKLE_ROLL;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Roll.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Ankle_Roll.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::ANKLE_ROLL: {
                     if (++counter > test_loops) {
                         state   = State::KNEE_MOVE;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee_Move.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Knee_Move.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Roll.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Ankle_Roll.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
 
                 case State::KNEE_MOVE: {
                     counter = 0;
                     state   = State::KNEE;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Knee.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::KNEE: {
                     if (++counter > test_loops) {
                         state   = State::KNEE_MOVE_2;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee_Move_2.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Knee_Move_2.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Knee.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
 
                 case State::KNEE_MOVE_2: {
                     counter = 0;
                     state   = State::HIP_PITCH;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Pitch.yaml", duration1));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Yoga_Hip_Pitch.yaml"}), duration1, NUClear::clock::now()));
                 } break;
                 case State::HIP_PITCH: {
                     if (++counter > test_loops) {
                         state   = State::LAYDOWN_2;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Laydown_2.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Laydown_2.yaml"}), duration1, NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Pitch.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id, std::vector<std::string>({"Yoga_Hip_Pitch.yaml"}), duration1, NUClear::clock::now()));
                     }
                 } break;
 
@@ -308,8 +359,12 @@ namespace debug {
                     counter = 0;
                     state   = State::FINISHED;
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml", duration1));
+                        id,
+                        std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"}),
+                        std::vector<double>({1.0}),
+                        NUClear::clock::now()));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id, std::vector<std::string>({"Stand.yaml"}), duration1, NUClear::clock::now()));
                 } break;
 
                 case State::FINISHED: {

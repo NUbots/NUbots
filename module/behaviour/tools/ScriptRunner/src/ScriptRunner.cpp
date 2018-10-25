@@ -24,6 +24,7 @@
 #include "extension/Configuration.h"
 #include "extension/Script.h"
 
+#include "message/extension/Script.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -36,8 +37,7 @@ namespace behaviour {
 
         using extension::Configuration;
 
-        using extension::ExecuteScriptByName;
-
+        using message::extension::ExecuteScriptByName;
         using message::platform::darwin::DarwinSensors;
         using NUClear::message::CommandLineArguments;
 
@@ -54,7 +54,8 @@ namespace behaviour {
             // If we have a script to execute
             if (!scripts.empty()) {
                 // Get it and emit it
-                emit(std::make_unique<ExecuteScriptByName>(id, scripts));
+                emit(std::make_unique<ExecuteScriptByName>(
+                    id, scripts, std::vector<double>({1.0}), NUClear::clock::now()));
             }
             // Otherwise we are done, shutdown
             else {
