@@ -18,16 +18,16 @@
  */
 syntax = "proto3";
 
-package message.platform.darwin;
+package message.platform.nugus;
 
 import "google/protobuf/timestamp.proto";
 
 /**
  * TODO document
  *
- * @author Trent Houliston
+ * @author Alex Biddulph
  */
-message DarwinSensors {
+message Sensors {
     // bitmask values
     enum Error {
         OK            = 0;  // not really a flag but the lack of any other flag
@@ -61,6 +61,7 @@ message DarwinSensors {
     message Buttons {
         bool left   = 1;
         bool middle = 2;
+        bool right  = 3;
     }
 
     message Accelerometer {
@@ -75,35 +76,28 @@ message DarwinSensors {
         float z = 3;
     }
 
-    message FSR {
-        float  fsr1       = 1;
-        float  fsr2       = 2;
-        float  fsr3       = 3;
-        float  fsr4       = 4;
-        float  centreX    = 5;
-        float  centreY    = 6;
-        uint32 errorFlags = 7;
-    }
-
-    message FSRs {
-        FSR left  = 1;
-        FSR right = 2;
-    }
-
     message Servo {
-        uint32 errorFlags      = 1;
-        bool   torqueEnabled   = 2;
-        float  pGain           = 3;
-        float  iGain           = 4;
-        float  dGain           = 5;
-        float  goalPosition    = 6;
-        float  movingSpeed     = 7;
-        float  torque          = 8;
-        float  presentPosition = 9;
-        float  presentSpeed    = 10;
-        float  load            = 11;
-        float  voltage         = 12;
-        float  temperature     = 13;
+        uint32 errorFlags          = 1;
+        bool   torqueEnabled       = 2;
+        float  velocityPGain       = 3;
+        float  velocityIGain       = 4;
+        float  velocityDGain       = 5;
+        float  positionPGain       = 6;
+        float  positionIGain       = 7;
+        float  feedforward1stGain  = 8;
+        float  feedforward2ndGain  = 9;
+        float  presentPWM          = 10;
+        float  presentCurrent      = 11;
+        float  presentVelocity     = 12;
+        float  presentPosition     = 13;
+        float  goalPWM             = 14;
+        float  goalCurrent         = 15;
+        float  goalVelocity        = 16;
+        float  goalPosition        = 17;
+        float  voltage             = 18;
+        float  temperature         = 19;
+        float  profileAcceleration = 20;
+        float  profileVelocity     = 21;
     };
 
     message Servos {
@@ -129,18 +123,16 @@ message DarwinSensors {
         Servo headTilt       = 20;
     }
 
-    google.protobuf.Timestamp timestamp       = 1;
-    uint32                    cm730ErrorFlags = 2;
-    LEDPanel                  ledPanel        = 3;
-    HeadLED                   headLED         = 4;
-    EyeLED                    eyeLED          = 5;
-    Buttons                   buttons         = 6;
-    float                     battery         = 12;
-    float                     voltage         = 7;
-    Accelerometer             accelerometer   = 8;
-    Gyroscope                 gyroscope       = 9;
-    FSRs                      fsr             = 10;
-    Servos                    servo           = 11;
+    google.protobuf.Timestamp timestamp        = 1;
+    uint32                    OpenCRErrorFlags = 2;
+    LEDPanel                  ledPanel         = 3;
+    HeadLED                   headLED          = 4;
+    EyeLED                    eyeLED           = 5;
+    Buttons                   buttons          = 6;
+    Accelerometer             accelerometer    = 7;
+    Gyroscope                 gyroscope        = 8;
+    Servos                    servo            = 9;
+    float                     battery          = 10;
 }
 
 // Button press events

@@ -4,6 +4,8 @@
 #include "DynamixelServo.h"
 #include "OpenCR.h"
 
+#include "utility/math/comparison.h"
+
 namespace module {
 namespace platform {
     namespace nugus {
@@ -99,54 +101,116 @@ namespace platform {
                 std::iota(ids.begin(), ids.end(), R_SHOULDER_PITCH);
                 return ids;
             }
+
+            static uint16_t convertPWM(uint16_t pwm) {
+                // Range: -885 - +885
+                return utility::math::clamp(-885, pwm, 885);
+            }
+
+            static float convertVelocity(uint16_t velocity) {
+                // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
+                // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
+                return utility::math::clamp(-210, velocity, 210) * 0.229f / 60.0f;
+            }
+
+            static uint16_t convertVelocity(float velocity) {
+                // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
+                // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
+                return uint16_t(utility::math::clamp(-210.0f, velocity * 60.0f / 0.229f, 210.0f));
+            }
+
+            static float convertCurrent(uint16_t current) {
+                // Base unit: 3.36mA = 0.00336A
+                // Range: -2047 - +2047 = -6.87792A - +6.87792A
+                return utility::math::clamp(-2047, current, 2047) * 0.00336f;
+            }
+
+            static uint16_t convertCurrent(float current) {
+                // Base unit: 3.36mA = 0.00336A
+                // Range: -2047 - +2047 = -6.87792A - +6.87792A
+                return uint16_t(utility::math::clamp(-6.87792f, current, 6.87792f) / 0.00336f);
+            }
+
+            // Convert P, I, D, and feed-forward gains between control table values and actual values
+            static float convertPGain(uint16_t p_gain) const {
+                return p_gain / 128.0f;
+            }
+
+            static uint16_t convertPGain(float p_gain) const {
+                return uint16_t(p_gain * 128.0f);
+            }
+
+            static float convertIGain(uint16_t i_gain) const {
+                return i_gain / 65536.0f;
+            }
+
+            static uint16_t convertIGain(float i_gain) const {
+                return uint16_t(i_gain * 65536.0f);
+            }
+
+            static float convertDGain(uint16_t d_gain) const {
+                return d_gain / 18.0f;
+            }
+
+            static uint16_t convertDGain(float d_gain) const {
+                return uint16_t(d_gain * 18.0f);
+            }
+
+            static float convertFFGain(uint16_t ff_gain) const {
+                return ff_gain / 4.0f;
+            }
+
+            static uint16_t convertFFGain(float ff_gain) const {
+                return uint16_t(ff_gain * 4.0f);
+            }
         };
 
 #pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
-        struct DynamixelServoWriteData {
-            uint8_t TORQUE_ENABLE;
-            uint16_t VELOCITY_I_GAIN;
-            uint16_t VELOCITY_P_GAIN;
-            uint16_t VELOCITY_D_GAIN;
-            uint16_t POSITION_I_GAIN;
-            uint16_t POSITION_P_GAIN;
-            uint16_t FEEDFORWARD_1ST_GAIN;
-            uint16_t FEEDFORWARD_2ND_GAIN;
-            uint16_t GOAL_PWM;
-            uint16_t GOAL_CURRENT;
-            uint32_t GOAL_VELOCITY;
-            uint32_t PROFILE_ACCELERATION;
-            uint32_t PROFILE_VELOCITY;
-            uint32_t GOAL_POSITION;
+        struct DynamixelServoWriteDataPart1 {
+            uint8_t torqueEnable;
+            uint16_t velocityIGain;
+            uint16_t velocityPGain;
+            uint16_t velocityDGain;
+            uint16_t positionIGain;
+            uint16_t positionPGain;
+        };
+
+        struct DynamixelServoWriteDataPart2 {
+            uint16_t feedforward1stGain;
+            uint16_t feedforward2ndGain;
+            uint16_t goalPwm;
+            uint16_t goalCurrent;
+            uint32_t goalVelocity;
+            uint32_t profileAcceleration;
+            uint32_t profileVelocity;
+            uint32_t goalPosition;
         };
 
         struct DynamixelServoReadData {
-            uint8_t HARDWARE_ERROR_STATUS;
-            uint16_t PRESENT_PWM;
-            uint16_t PRESENT_CURRENT;
-            uint32_t PRESENT_VELOCITY;
-            uint32_t PRESENT_POSITION;
-            uint16_t PRESENT_VOLTAGE;
-            uint8_t PRESENT_TEMPERATURE;
+            uint8_t torqueEnable;
+            uint8_t hardwareErrorStatus;
+            uint16_t presentPwm;
+            uint16_t presentCurrent;
+            uint32_t presentVelocity;
+            uint32_t presentPosition;
+            uint16_t presentVoltage;
+            uint8_t presentTemperature;
         };
 
         struct OpenCRWriteData {
-            uint8_t LED;
-            uint16_t RGB_LED;
-            uint16_t Buzzer;
+            uint8_t led;
+            uint16_t rgbLED;
+            uint8_t buzzer;
         };
 
         struct OpenCRReadData {
-            uint8_t LED;
-            uint16_t RGB_LED;
-            uint16_t Buzzer;
+            uint8_t led;
+            uint16_t rgbLed;
+            uint16_t buzzer;
             uint8_t button;
             uint8_t voltage;
-            uint16_t gyro_z;
-            uint16_t gyro_y;
-            uint16_t gyro_x;
-            uint16_t acc_x;
-            uint16_t acc_y;
-            uint16_t acc_z;
+            uint16_t[3] gyro;
+            uint16_t[3] acc;
         };
 #pragma pack(pop)  // Stop bitpacking our results
 

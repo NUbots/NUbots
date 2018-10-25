@@ -216,7 +216,12 @@ namespace platform {
                 [this](const message::platform::nugus::StatusReturn& packet) {
                     // Figure out what the contents of the message are
                     if (packet_queue[packet.id].size() > 0) {
-                        switch (packet_queue[packet.id].front()) {
+                        // Pop the front of the packet queue
+                        auto info = packet_queue[packet.id].front();
+                        packet_queue[packet.id].erase(packet_queue[packet.id].begin());
+
+                        switch (info.front()) {
+                            // Handles OpenCR model and version information
                             case PacketTypes::MODEL_INFORMATION:
                                 uint16_t model  = (packet.data[1] << 8) | packet.data[0];
                                 uint8_t version = packet.data[2];
@@ -224,14 +229,28 @@ namespace platform {
                                 log<NUClear::INFO>(fmt::format("OpenCR Firmware Version: {:#04X}", version));
                                 break;
 
+                            // Handles OpenCR sensor data
                             case PacketTypes::OPENCR_DATA:
                                 // Work out a battery charged percentage
                                 sensors->battery =
                                     std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
                                 break;
 
+                            // Handles servo data
                             case PacketTypes::SERVO_DATA:
                                 // Parse our data
+                                NUgus::DynamixelServoReadData data =
+                                    *(reinterpret_cast<NUgus::DynamixelServoReadData*>(packet.data));
+
+                                servoState[packet.id].torqueEnabled   = data.torqueEnable;
+                                servoState[packet.id].errorFlags      = data.hardwareErrorStatus;
+                                servoState[packet.id].presentPwm      = data.presentPwm;
+                                servoState[packet.id].presentCurrent  = data.presentCurrent;
+                                servoState[packet.id].presentVelocity = data.presentVelocity;
+                                servoState[packet.id].presentPosition = data.presentPosition;
+                                servoState[packet.id].voltage         = data.presentVoltage;
+                                servoState[packet.id].temperature     = data.presentTemperature;
+
                                 break;
 
                             // What is this??
