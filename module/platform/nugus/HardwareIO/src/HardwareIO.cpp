@@ -69,47 +69,84 @@ namespace platform {
                     dynamixel::v2::SyncWrite<uint8_t, 20>(NUgus::R_SHOULDER_PITCH::Address::RETURN_DELAY_TIME, data));
 
                 // Set up indirect addressing for read addresses
-                std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 7>>, 20> read_data;
+                std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>, 20> read_data;
 
                 for (int i = 0; i < 20; ++i) {
-                    read_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 7>>(
+                    read_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>(
                         i,
-                        {NUgus::L_SHOULDER_PITCH::Address::HARDWARE_ERROR_STATUS,
-                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_PWM,
-                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_CURRENT,
-                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VELOCITY,
-                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_POSITION,
-                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VOLTAGE,
+                        {NUgus::L_SHOULDER_PITCH::Address::TORQUE_ENABLE,
+                         NUgus::L_SHOULDER_PITCH::Address::HARDWARE_ERROR_STATUS,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_PWM_L,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_PWM_H,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_CURRENT_L,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_CURRENT_H,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VELOCITY_L,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VELOCITY_2,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VELOCITY_3,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VELOCITY_H,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_POSITION_L,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_POSITION_2,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_POSITION_3,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_POSITION_H,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VOLTAGE_L,
+                         NUgus::L_SHOULDER_PITCH::Address::PRESENT_VOLTAGE_H,
                          NUgus::L_SHOULDER_PITCH::Address::PRESENT_TEMPERATURE});
                 }
 
-                opencr.write(dynamixel::v2::SyncWrite<std::array<uint16_t, 7>, 20>(
+                opencr.write(dynamixel::v2::SyncWrite<std::array<uint16_t, 17>, 20>(
                     NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L, read_data));
 
                 // Set up indirect addressing for write addresses
-                std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 14>>, 20> write_data;
+                std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>, 20> write_data1;
+                std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>>, 20> write_data2;
 
                 for (int i = 0; i < 20; ++i) {
-                    write_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 14>>(
+                    write_data1[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>(
                         i,
                         {NUgus::L_SHOULDER_PITCH::Address::TORQUE_ENABLE,
-                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_I_GAIN,
-                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_P_GAIN,
-                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_D_GAIN,
-                         NUgus::L_SHOULDER_PITCH::Address::POSITION_I_GAIN,
-                         NUgus::L_SHOULDER_PITCH::Address::POSITION_P_GAIN,
-                         NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_1ST_GAIN,
-                         NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_2ND_GAIN,
-                         NUgus::L_SHOULDER_PITCH::Address::GOAL_PWM,
-                         NUgus::L_SHOULDER_PITCH::Address::GOAL_CURRENT,
-                         NUgus::L_SHOULDER_PITCH::Address::GOAL_VELOCITY,
-                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_ACCELERATION,
-                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_VELOCITY,
-                         NUgus::L_SHOULDER_PITCH::Address::GOAL_POSITION});
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_I_GAIN_L,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_I_GAIN_H,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_P_GAIN_L,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_P_GAIN_H,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_D_GAIN_L,
+                         NUgus::L_SHOULDER_PITCH::Address::VELOCITY_D_GAIN_H,
+                         NUgus::L_SHOULDER_PITCH::Address::POSITION_I_GAIN_L,
+                         NUgus::L_SHOULDER_PITCH::Address::POSITION_I_GAIN_H,
+                         NUgus::L_SHOULDER_PITCH::Address::POSITION_P_GAIN_L,
+                         NUgus::L_SHOULDER_PITCH::Address::POSITION_P_GAIN_H});
+
+                    write_data2[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>>(
+                        i,
+                        {NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_1ST_GAIN_L,
+                         NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_1ST_GAIN_H,
+                         NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_2ND_GAIN_L,
+                         NUgus::L_SHOULDER_PITCH::Address::FEEDFORWARD_2ND_GAIN_H,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_PWM_L,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_PWM_H,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_CURRENT_L,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_CURRENT_H,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_VELOCITY_L,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_VELOCITY_2,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_VELOCITY_3,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_VELOCITY_H,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_ACCELERATION_L,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_ACCELERATION_2,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_ACCELERATION_3,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_ACCELERATION_H,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_VELOCITY_L,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_VELOCITY_2,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_VELOCITY_3,
+                         NUgus::L_SHOULDER_PITCH::Address::PROFILE_VELOCITY_H,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_POSITION_L,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_POSITION_2,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_POSITION_3,
+                         NUgus::L_SHOULDER_PITCH::Address::GOAL_POSITION_H});
                 }
 
-                opencr.write(dynamixel::v2::SyncWrite<std::array<uint16_t, 7>, 20>(
-                    NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_8_L, write_data));
+                opencr.write(dynamixel::v2::SyncWrite<std::array<uint16_t, 11>, 20>(
+                    NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_18_L, write_data1));
+                opencr.write(dynamixel::v2::SyncWrite<std::array<uint16_t, 24>, 20>(
+                    NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_29_L, write_data2));
             });
 
             on<Shutdown>().then("HardwareIO Startup", [this] {
@@ -133,10 +170,9 @@ namespace platform {
                     for (int i = 0; i < 20; ++i) {
                         packet_queue[i].push_back(PacketTypes::SERVO_DATA);
                     }
-                    opencr.write(
-                        dynamixel::v2::SyncReadCommand<20>(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_ADDRESS_1_L,
-                                                           sizeof(DynamixelServoReadData),
-                                                           NUgus::servo_ids()));
+                    opencr.write(dynamixel::v2::SyncReadCommand<20>(NUgus::L_SHOULDER_PITCH::Address::INDIRECT_DATA_1_L,
+                                                                    sizeof(DynamixelServoReadData),
+                                                                    NUgus::servo_ids()));
 
                     // Get OpenCR data
                     // READ (only reading from a single device here)
