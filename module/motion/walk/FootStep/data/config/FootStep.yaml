@@ -5,6 +5,6 @@ step_steep: 2
 foot: 0
 time: 1
 test:
-  x: 0.05
-  y: -0.04
+  x: 0.08
+  y: 0.07
   z: 0.01

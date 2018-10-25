@@ -172,11 +172,11 @@ namespace motion {
 
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
-                    double scale = 1;//factor(rF_wPp, time_left.count());
+                    double scale = factor(rF_wPp, time_left.count());
 
                     // If the scale returns zero, the foot is already in position so do not execute any foot movement.
                     // If it is not zero, can proceed.
-                    //if (scale != 0) {
+                    if (scale != 0) {
                         // Scale rF_tPp to result of factor to allow foot to reach the target at appropriate time
                         rF_tPp = rF_tPp * scale;
 
@@ -219,7 +219,7 @@ namespace motion {
                         }
 
                         emit(waypoints);
-                    //}
+                    }
                 });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
