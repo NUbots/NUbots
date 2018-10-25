@@ -14,23 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.motion;
+package message.behaviour;
 
-message JumpCommand {
-    int32 pre_delay  = 1;
-    int32 post_delay = 2;
-}
-
-message WaveLeftCommand {
-    int32 pre_delay  = 1;
-    int32 post_delay = 2;
-}
-
-message WaveRightCommand {
-    int32 pre_delay  = 1;
-    int32 post_delay = 2;
+message PythonScript {
+    string script_name = 1;
 }
