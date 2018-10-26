@@ -41,6 +41,10 @@ namespace platform {
                 message::platform::nugus::Sensors::Accelerometer acc = {0.0f, 0.0f, 0.0f};
                 message::platform::nugus::Sensors::Gyroscope gyro    = {0.0f, 0.0f, 0.0f};
 
+                // Buzzer
+                uint16_t buzzer;
+
+                // Error status
                 uint8_t errorFlags;
             };
 
@@ -66,7 +70,7 @@ namespace platform {
                 bool torqueEnabled = true;
 
                 // Cached values that are never read
-                float velocityPGain       = 32.0f / 255.0f;
+                float velocityPGain       = 0.0f;
                 float velocityIGain       = 0.0f;
                 float velocityDGain       = 0.0f;
                 float positionPGain       = 0.0f;

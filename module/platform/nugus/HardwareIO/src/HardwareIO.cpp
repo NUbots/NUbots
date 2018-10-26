@@ -31,6 +31,12 @@ namespace platform {
                 for (int i = 0; i < 20; ++i) {
                     packet_queue[i] = std::vector<PacketTypes>();
                 }
+
+                for (size_t i = 0; i < config["servos"].config.size(); ++i) {
+                    NUgus::SERVO_OFFSET[i]    = config["servos"][i]["offset"].as<Expression>();
+                    NUgus::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
+                    servoState[i].simulated   = config["servos"][i]["simulated"].as<bool>();
+                }
             });
 
             on<Startup>().then("HardwareIO Startup", [this] {
@@ -164,6 +170,58 @@ namespace platform {
 
                     // Write out servo data
                     // SYNC_WRITE (write the same memory addresses on all devices)
+                    // We need to do 2 sync writes here.
+                    // We always write to all servos if at least one of them is dirty
+                    if (std::any_of(servoState.cbegin(), servoState.cend(), [](const NUgus::ServoState& servo) -> bool {
+                            return servo.dirty;
+                        })) {
+                        std::array<dynamixel::v2::SyncWriteData<NUgus::DynamixelServoWriteDataPart2>, 20> data1;
+                        std::array<dynamixel::v2::SyncWriteData<NUgus::DynamixelServoWriteDataPart2>, 20> data2;
+
+                        for (uint i = 0; i < servoState.size(); ++i) {
+                            data1[i].id = i;
+                            data2[i].id = i;
+
+                            // Clear our dirty flag
+                            servoState[i].dirty = false;
+
+                            // If our torque should be disabled then we disable our torque
+                            if (servoState[i].torqueEnabled
+                                && (std::isnan(servoState[i].goalPosition) || servoState[i].goalCurrent == 0)) {
+                                servoState[i].torqueEnabled = false;
+                                data1[i].data.torqueEnabled = 0;
+                            }
+                            else {
+                                // If our torque was disabled but is now enabled
+                                if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
+                                    && servoState[i].goalCurrent != 0) {
+                                    servoState[i].torqueEnabled = true;
+                                    data1[i].data.torqueEnabled = 1;
+                                }
+                            }
+
+                            // Pack our data
+                            data1[i].data.velocityPGain = NUgus::convertPGain(servoState[i].velocityPGain);
+                            data1[i].data.velocityIGain = NUgus::convertIGain(servoState[i].velocityIGain);
+                            data1[i].data.velocityDGain = NUgus::convertDGain(servoState[i].velocityDGain);
+                            data1[i].data.positionPGain = NUgus::convertPGain(servoState[i].positionPGain);
+                            data1[i].data.positionIGain = NUgus::convertIGain(servoState[i].positionIGain);
+
+                            data2[i].data.feedforward1stGain  = NUgus::convertFFGain(servoState[i].feedforward1stGain);
+                            data2[i].data.feedforward2ndGain  = NUgus::convertFFGain(servoState[i].feedforward2ndGain);
+                            data2[i].data.goalPwm             = NUgus::convertPWM(servoState[i].goalPwm);
+                            data2[i].data.goalCurrent         = NUgus::convertCurrent(servoState[i].goalCurrent);
+                            data2[i].data.goalVelocity        = NUgus::convertVelocity(servoState[i].goalVelocity);
+                            data2[i].data.profileAcceleration = NUgus::convertFFGain(servoState[i].profileAcceleration);
+                            data2[i].data.profileVelocity     = NUgus::convertFFGain(servoState[i].profileVelocity);
+                            data2[i].data.goalPosition        = NUgus::convertPosition(i, servoState[i].goalPosition);
+                        }
+
+                        opencr.write(dynamixel::v2::SyncWrite<NUgus::DynamixelServoWriteDataPart1, 20>(
+                            NUgus::L_SHOULDER_PITCH::Address::INDIRECT_DATA_18_L, data1));
+                        opencr.write(dynamixel::v2::SyncWrite<NUgus::DynamixelServoWriteDataPart2, 20>(
+                            NUgus::L_SHOULDER_PITCH::Address::INDIRECT_DATA_29_L, data2));
+                    }
 
                     // Get updated servo data
                     // SYNC_READ (read the same memory addresses on all devices)
@@ -179,17 +237,59 @@ namespace platform {
                     packet_queue[NUgus::ID::OPENCR].push_back(PacketTypes::OPENCR_DATA);
                     opencr.write(
                         dynamixel::v2::ReadCommand(NUgus::ID::OPENCR, NUgus::OPENCR::Address::LED, sizeof(OpenCRData)));
+
+
+                    // TODO: Find a way to gather received data and combine into a Sensors message for emitting
                 });
 
             // This trigger writes the servo positions to the hardware
-            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
-                [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
-                    // Loop through each of our commands and update servo state information accordingly
-                    for (const auto& command : commands) {
+            on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
+                // Loop through each of our commands and update servo state information accordingly
+                for (const auto& command : commands) {
+                    message ServoCommand {
+                        uint64 source                  = 1;
+                        google.protobuf.Timestamp time = 2;
+                        uint32 id                      = 3;
+                        float position                 = 4;
+                        float gain                     = 5;
+                        float torque                   = 6;
                     }
-                });
 
-            on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
+                    float diff =
+                        utility::math::angle::difference(command.position, servoState[command.id].presentPosition);
+                    NUClear::clock::duration duration = command.time - NUClear::clock::now();
+
+                    float speed;
+                    if (duration.count() > 0) {
+                        speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    }
+                    else {
+                        speed = 0;
+                    }
+
+                    // Update our internal state
+                    if (servoState[command.id].velocityPGain != command.gain
+                        || servoState[command.id].velocityIGain != command.gain * 0
+                        || servoState[command.id].velocityDGain != command.gain * 0
+                        || servoState[command.id].goalVelocity != speed
+                        || servoState[command.id].goalPosition != command.position
+                        || servoState[command.id].goalCurrent != command.current) {
+
+                        servoState[command.id].dirty = true;
+
+                        servoState[command.id].velocityPGain = command.gain;
+                        servoState[command.id].velocityIGain = command.gain * 0;
+                        servoState[command.id].velocityDGain = command.gain * 0;
+
+                        servoState[command.id].goalVelocity = speed;
+                        servoState[command.id].goalPosition = command.position;
+
+                        servoState[command.id].goalCurrent = command.current;
+                    }
+                }
+            });
+
+            on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
                 auto commandList = std::make_unique<std::vector<ServoTarget>>();
                 commandList->push_back(command);
 
@@ -198,17 +298,17 @@ namespace platform {
             });
 
             // If we get a HeadLED command then write it
-            on<Trigger<DarwinSensors::HeadLED>>().then([this](const DarwinSensors::HeadLED& led) {
+            on<Trigger<Sensors::HeadLED>>().then([this](const Sensors::HeadLED& led) {
                 // Update our internal state
             });
 
             // If we get a EyeLED command then write it
-            on<Trigger<DarwinSensors::EyeLED>>().then([this](const DarwinSensors::EyeLED& led) {
+            on<Trigger<Sensors::EyeLED>>().then([this](const Sensors::EyeLED& led) {
                 // Update our internal state
             });
 
             // If we get a EyeLED command then write it
-            on<Trigger<DarwinSensors::LEDPanel>>().then([this](const DarwinSensors::LEDPanel& led) {
+            on<Trigger<Sensors::LEDPanel>>().then([this](const Sensors::LEDPanel& led) {
                 // Update our internal state
             });
 
@@ -231,6 +331,47 @@ namespace platform {
 
                             // Handles OpenCR sensor data
                             case PacketTypes::OPENCR_DATA:
+                                // Parse our data
+                                NUgus::OpenCRReadData data = *(reinterpret_cast<NUgus::OpenCRReadData*>(packet.data));
+
+                                // 00000321
+                                // LED_1 = 0x01
+                                // LED_2 = 0x02
+                                // LED_3 = 0x04
+                                opencrState.ledPanel = {data.led & 0x01, data.led & 0x02, data.led & 0x04};
+
+                                // 0BBBBBGG GGGRRRRR
+                                // R = 0x001F
+                                // G = 0x02E0
+                                // B = 0x7C00
+                                uint32_t RGB = uint8_t(data.rgbLed & 0x001F) << 16;
+                                RGB |= uint8_t(data.rgbLed & 0x02E0) << 8;
+                                RGB |= uint8_t(data.rgbLed & 0x7C00);
+                                opencrState.headLED = {RGB};
+                                opencrState.headLED = {RGB};
+
+                                // Frequency of the buzzer
+                                opencrState.buzzer = data.buzzer;
+
+                                // 00004321
+                                // Button_4 = Not used
+                                // Button Right (Reset) = 0x01
+                                // Button Middle = 0x02
+                                // Button Left = 0x04
+                                opencrState.buttons = {data.button & 0x04, data.button & 0x02, data.button & 0x01};
+
+                                batteryState.currentVoltage = NUgus::convertVoltage(data.voltage);
+
+                                opencrState.gyro = {NUgus::convertGyro(data.gyro[2]),   // X
+                                                    NUgus::convertGyro(data.gyro[1]),   // Y
+                                                    NUgus::convertGyro(data.gyro[0])};  // Z
+
+                                opencrState.acc = {NUgus::convertAcc(data.acc[0]),   // X
+                                                   NUgus::convertAcc(data.acc[1]),   // Y
+                                                   NUgus::convertAcc(data.acc[2])};  // Z
+
+                                opencrState.errorFlags = packet.error;
+
                                 // Work out a battery charged percentage
                                 sensors->battery =
                                     std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
@@ -242,14 +383,15 @@ namespace platform {
                                 NUgus::DynamixelServoReadData data =
                                     *(reinterpret_cast<NUgus::DynamixelServoReadData*>(packet.data));
 
-                                servoState[packet.id].torqueEnabled   = data.torqueEnable;
+                                servoState[packet.id].torqueEnabled   = (data.torqueEnable == 1);
                                 servoState[packet.id].errorFlags      = data.hardwareErrorStatus;
-                                servoState[packet.id].presentPwm      = data.presentPwm;
-                                servoState[packet.id].presentCurrent  = data.presentCurrent;
-                                servoState[packet.id].presentVelocity = data.presentVelocity;
-                                servoState[packet.id].presentPosition = data.presentPosition;
-                                servoState[packet.id].voltage         = data.presentVoltage;
-                                servoState[packet.id].temperature     = data.presentTemperature;
+                                servoState[packet.id].presentPwm      = NUgus::convertPWM(data.presentPwm);
+                                servoState[packet.id].presentCurrent  = NUgus::convertCurrent(data.presentCurrent);
+                                servoState[packet.id].presentVelocity = NUgus::convertVelocity(data.presentVelocity);
+                                servoState[packet.id].presentPosition =
+                                    NUgus::convertPosition(packet.id, data.presentPosition);
+                                servoState[packet.id].voltage     = NUgus::convertVoltage(data.presentVoltage);
+                                servoState[packet.id].temperature = NUgus::convertTemperature(data.presentTemperature);
 
                                 break;
 

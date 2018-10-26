@@ -22,6 +22,14 @@ namespace platform {
 
         class NUgus {
         public:
+            /// Picks which direction a motor should be measured in (forward or reverse) -- configurable based on the
+            /// specific humanoid being used.
+            static std::array<int8_t, 20> SERVO_DIRECTION;
+
+            /// Offsets the radian angles of motors to change their 0 position -- configurable based on the specific
+            /// humanoid being used.
+            static std::array<double, 20> SERVO_OFFSET;
+
             enum ID {
                 OPENCR           = 200,
                 R_SHOULDER_PITCH = 1,
@@ -102,21 +110,126 @@ namespace platform {
                 return ids;
             }
 
+            static float convertGyro(uint16_t gyro) {
+                // Range: -32800 - +32800 = -2000dps - +2000dps
+                //
+                //               gyro(raw) - min_gyro(raw)
+                // gyro(dps) = ----------------------------- * (max_gyro(dps) - min_gyro(dps)) + min_gyro(dps)
+                //             max_gyro(raw) - min_gyro(raw)
+                //
+                uint16_t clamped = utility::math::clamp(-32800, gyro, 32800);
+                float normalised = (clamped + 32800.0f) / 65600.0f;
+                return normalised * 4000.0f - 2000.0f;
+            }
+
+            static uint16_t convertGyro(float gyro) {
+                // Range: -32800 - +32800 = -2000dps - +2000dps
+                //
+                //               gyro(dps) - min_gyro(dps)
+                // gyro(raw) = ----------------------------- * (max_gyro(raw) - min_gyro(raw)) + min_gyro(raw)
+                //             max_gyro(dps) - min_gyro(dps)
+                //
+                float clamped    = utility::math::clamp(-2000.0f, gyro, 2000.0f);
+                float normalised = (clamped + 2000.0f) / 4000.0f;
+                return uint16_t(normalised * 65600.0f - 32800.0f);
+            }
+
+            static float convertAcc(uint16_t gyro) {
+                // Range: -32768 - +32768 = -2g - +2g
+                //
+                //               acc(raw) - min_acc(raw)
+                // acc(dps) = ----------------------------- * (max_acc(dps) - min_acc(dps)) + min_acc(dps)
+                //             max_acc(raw) - min_acc(raw)
+                //
+                uint16_t clamped = utility::math::clamp(-32768, gyro, 32768);
+                float normalised = (clamped + 32768.0f) / 65536.0f;
+                return normalised * 4.0f - 2.0f;
+            }
+
+            static uint16_t convertAcc(float gyro) {
+                // Range: -32768 - +32768 = -2g - +2g
+                //
+                //               acc(dps) - min_acc(dps)
+                // acc(raw) = ----------------------------- * (max_acc(raw) - min_acc(raw)) + min_acc(raw)
+                //             max_acc(dps) - min_acc(dps)
+                //
+                float clamped    = utility::math::clamp(-2.0f, gyro, 2.0f);
+                float normalised = (clamped + 2.0f) / 4.0f;
+                return uint16_t(normalised * 65536.0f - 32768.0f);
+            }
+
             static uint16_t convertPWM(uint16_t pwm) {
                 // Range: -885 - +885
                 return utility::math::clamp(-885, pwm, 885);
             }
 
-            static float convertVelocity(uint16_t velocity) {
+            static float convertTemperature(uint8_t temp) {
+                // Base unit: 1 degree C
+                // Range: 0 - 100 = 0 - 100 degrees C
+                return utility::math::clamp(0, temp, 100) * 1.0f;
+            }
+
+            static uint8_t convertTemperature(float temp) {
+                // Base unit: 1 degree C
+                // Range: 0 - 100 = 0 - 100 degrees C
+                return uint8_t(utility::math::clamp(0.0f, temp, 100.0f));
+            }
+
+            static uint8_t convertTemperature(float temp) {
+                // Base unit: 1 degree C
+                // Range: 0 - 100 = 0 - 100 degrees C
+                return uint16_t(utility::math::clamp(0.0f, temp, 100.0f));
+            }
+
+            static float convertVoltage(uint16_t voltage) {
+                // Base unit: 0.1 volts
+                // Range: 95 - 160 =  9.5V - 16.0V
+                return utility::math::clamp(95, voltage, 160) * 0.1;
+            }
+
+            static uint16_t convertVoltage(float voltage) {
+                // Base unit: 0.1 volts
+                // Range: 95 - 160 =  9.5V - 16.0V
+                return uint16_t(utility::math::clamp(9.5f, voltage * 10.f, 16.0f));
+            }
+
+            static float convertVoltage(uint8_t voltage) {
+                // Base unit: 0.1 volts
+                // Range: 95 - 160 =  9.5V - 16.0V
+                return utility::math::clamp(95, voltage, 160) * 0.1;
+            }
+
+            static uint8_t convertVoltage(float voltage) {
+                // Base unit: 0.1 volts
+                // Range: 95 - 160 =  9.5V - 16.0V
+                return uint8_t(utility::math::clamp(9.5f, voltage * 10.f, 16.0f));
+            }
+
+            static float convertPosition(uint8_t id, uint32_t position) {
+                // Base unit: 0.088 degrees = 0.0015358897 rad
+                // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
+                return utility::math::angle::normalizeAngle(
+                    (utility::math::clamp(0, position, 4095) * 0.0015358897f * SERVO_DIRECTION[id]) + SERVO_OFFSET[id]);
+            }
+
+            static uint32_t convertPosition(uint8_t id, float position) {
+                // Base unit: 0.088 degrees = 0.0015358897 rad
+                // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
+                float angle = utility::math::angle::normalizeAngle((position - SERVO_OFFSET[id]) * SERVO_DIRECTION[id]);
+
+                return uint32_t(utility::math::clamp(0.0f, angle / 0.0015358897f, 4095.0f));
+            }
+
+            static float convertVelocity(uint32_t velocity) {
                 // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
                 // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
                 return utility::math::clamp(-210, velocity, 210) * 0.229f / 60.0f;
             }
 
-            static uint16_t convertVelocity(float velocity) {
+            static uint32_t convertVelocity(float velocity) {
                 // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
                 // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
-                return uint16_t(utility::math::clamp(-210.0f, velocity * 60.0f / 0.229f, 210.0f));
+                return uint32_t(utility::math::clamp(-210.0f, velocity * 60.0f / 0.229f, 210.0f));
             }
 
             static float convertCurrent(uint16_t current) {
