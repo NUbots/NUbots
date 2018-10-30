@@ -4,7 +4,10 @@
 #include <map>
 #include <nuclear>
 
+#include "NUgus.h"
+
 #include "message/platform/nugus/Sensors.h"
+#include "message/platform/nugus/StatusReturn.h"
 
 #include "utility/io/uart.h"
 
@@ -19,7 +22,11 @@ namespace platform {
             explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
         private:
+            // How often we read the servos
+            static constexpr int UPDATE_FREQUENCY = 90;
+
             utility::io::uart opencr;
+            NUgus nugus;
 
             uint32_t byte_wait;
             uint32_t packet_wait;
@@ -29,6 +36,8 @@ namespace platform {
             std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
 
             struct OpenCRState {
+                bool dirty = false;
+
                 message::platform::nugus::Sensors::LEDPanel ledPanel = {false, false, false};
                 //  0x00, 0xRR, 0xGG, 0xBB
                 message::platform::nugus::Sensors::HeadLED headLED = {0x0000FF00};
@@ -42,18 +51,19 @@ namespace platform {
                 message::platform::nugus::Sensors::Gyroscope gyro    = {0.0f, 0.0f, 0.0f};
 
                 // Buzzer
-                uint16_t buzzer;
+                uint16_t buzzer = 0;
 
                 // Error status
-                uint8_t errorFlags;
+                uint8_t errorFlags = 0;
             };
 
             struct Battery {
-                Battery() : chargedVoltage(0.0f), nominalVoltage(0.0f), flatVoltage(0.0f) {}
-                float chargedVoltage;
-                float nominalVoltage;
-                float flatVoltage;
-                float currentVoltage;
+                float chargedVoltage = 0.0f;
+                float nominalVoltage = 0.0f;
+                float flatVoltage    = 0.0f;
+                float currentVoltage = 0.0f;
+                float percentage     = 0.0f;
+                bool dirty           = false;
             };
 
             struct ServoState {
@@ -101,6 +111,10 @@ namespace platform {
 
             /// @brief Our state for our battery
             Battery batteryState;
+
+            void processModelInformation(const message::platform::nugus::StatusReturn& packet);
+            void processOpenCRData(const message::platform::nugus::StatusReturn& packet);
+            void processServoData(const message::platform::nugus::StatusReturn& packet);
         };
 
     }  // namespace nugus

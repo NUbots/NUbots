@@ -1,12 +1,14 @@
 #ifndef MODULE_PLATFORM_NUGUS_SERVOS_H
 #define MODULE_PLATFORM_NUGUS_SERVOS_H
 
+#include <cstdint>
+
 #include "dynamixel/v2/DynamixelDevice.h"
 
 namespace module {
 namespace platform {
     namespace nugus {
-        struct DynamixelServo : DynamixelDevice {
+        struct DynamixelServo : public DynamixelDevice {
             /**
              * @brief Holds the addresses of the various bytes in the RAM table of a Dynamixel V2 servo.
              *
@@ -15,7 +17,7 @@ namespace platform {
              * http://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/
              * http://emanual.robotis.com/docs/en/dxl/mx/mx-106-2/
              */
-            enum class Address : uint8_t {
+            enum class Address : uint16_t {
                 MODEL_NUMBER_L          = 0,
                 MODEL_NUMBER_H          = 1,
                 MODEL_INFORMATION_L     = 2,
@@ -73,8 +75,8 @@ namespace platform {
                 VELOCITY_I_GAIN_H       = 77,
                 VELOCITY_P_GAIN_L       = 78,
                 VELOCITY_P_GAIN_H       = 79,
-                POSITION_D_GAIN_L       = 80,
-                POSITION_D_GAIN_H       = 81,
+                VELOCITY_D_GAIN_L       = 80,
+                VELOCITY_D_GAIN_H       = 81,
                 POSITION_I_GAIN_L       = 82,
                 POSITION_I_GAIN_H       = 83,
                 POSITION_P_GAIN_L       = 84,
@@ -86,8 +88,8 @@ namespace platform {
                 BUS_WATCHDOG            = 98,
                 GOAL_PWM_L              = 100,
                 GOAL_PWM_H              = 101,
-                GOAL_CURRENT            = 102,
-                GOAL_CURRENT            = 103,
+                GOAL_CURRENT_L          = 102,
+                GOAL_CURRENT_H          = 103,
                 GOAL_VELOCITY_L         = 104,
                 GOAL_VELOCITY_2         = 105,
                 GOAL_VELOCITY_3         = 106,

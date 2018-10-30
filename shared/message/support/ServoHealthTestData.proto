@@ -20,7 +20,7 @@ syntax = "proto3";
 
 package message.support;
 
-import "message/platform/darwin/DarwinSensors.proto";
+import "message/platform/nugus/Sensors.proto";
 
 message ServoHealthTestData {
 
@@ -52,6 +52,6 @@ message ServoHealthTestData {
         FINISHED        = 24;
     };
 
-    State                         state   = 1;
-    platform.darwin.DarwinSensors sensors = 2;
+    State                  state   = 1;
+    platform.nugus.Sensors sensors = 2;
 }

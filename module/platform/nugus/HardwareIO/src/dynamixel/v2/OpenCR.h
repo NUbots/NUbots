@@ -6,11 +6,11 @@
 namespace module {
 namespace platform {
     namespace nugus {
-        class OpenCR : DynamixelDevice {
+        class OpenCR : public DynamixelDevice {
         public:
-            uint8_t ID;
-
             OpenCR(uint8_t ID) : ID(ID) {}
+
+            const uint8_t ID;
 
             /**
              * @brief Holds the addresses of the various bytes in the OpenCR RAM table.

@@ -168,7 +168,7 @@ namespace io {
     }
 
     template <typename T>
-    ssize_t read(T& data) {
+    ssize_t uart::read(T& data) {
         return ::read(fd, static_cast<void*>(&data), sizeof(T));
     }
 
@@ -177,7 +177,7 @@ namespace io {
     }
 
     template <typename T>
-    ssize_t write(const T& buf) {
+    ssize_t uart::write(const T& buf) {
         return ::write(fd, static_cast<void*>(&buf), sizeof(T));
     }
 }  // namespace io

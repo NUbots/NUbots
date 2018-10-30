@@ -26,7 +26,7 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
 //#include "message/localisation/ResetRobotHypotheses.h"
-#include "message/platform/darwin/DarwinSensors.h"
+#include "message/platform/nugus/Sensors.h"
 
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -47,11 +47,11 @@ namespace platform {
         using message::input::CameraParameters;
         using message::input::Sensors;
         using message::motion::BodySide;
-        using message::platform::darwin::ButtonLeftDown;
-        using message::platform::darwin::ButtonLeftUp;
-        using message::platform::darwin::ButtonMiddleDown;
-        using message::platform::darwin::ButtonMiddleUp;
-        using message::platform::darwin::DarwinSensors;
+        using message::platform::nugus::ButtonLeftDown;
+        using message::platform::nugus::ButtonLeftUp;
+        using message::platform::nugus::ButtonMiddleDown;
+        using message::platform::nugus::ButtonMiddleUp;
+        using NUgusSensors = message::platform::nugus::Sensors;
 
         using utility::input::ServoSide;
         using LimbID  = utility::input::LimbID;
@@ -77,25 +77,25 @@ namespace platform {
             s << ":";
 
 
-            if (errorCode & DarwinSensors::Error::INPUT_VOLTAGE) {
+            if (errorCode & NUgusSensors::Error::INPUT_VOLTAGE) {
                 s << " Input Voltage ";
             }
-            if (errorCode & DarwinSensors::Error::ANGLE_LIMIT) {
+            if (errorCode & NUgusSensors::Error::ANGLE_LIMIT) {
                 s << " Angle Limit ";
             }
-            if (errorCode & DarwinSensors::Error::OVERHEATING) {
+            if (errorCode & NUgusSensors::Error::OVERHEATING) {
                 s << " Overheating ";
             }
-            if (errorCode & DarwinSensors::Error::OVERLOAD) {
+            if (errorCode & NUgusSensors::Error::OVERLOAD) {
                 s << " Overloaded ";
             }
-            if (errorCode & DarwinSensors::Error::INSTRUCTION) {
+            if (errorCode & NUgusSensors::Error::INSTRUCTION) {
                 s << " Bad Instruction ";
             }
-            if (errorCode & DarwinSensors::Error::CORRUPT_DATA) {
+            if (errorCode & NUgusSensors::Error::CORRUPT_DATA) {
                 s << " Corrupt Data ";
             }
-            if (errorCode & DarwinSensors::Error::TIMEOUT) {
+            if (errorCode & NUgusSensors::Error::TIMEOUT) {
                 s << " Timeout ";
             }
 
@@ -217,17 +217,17 @@ namespace platform {
             //     motionFilter.setState(newFilter, arma::diagmat(covariance));
             // });
 
-            on<Last<20, Trigger<DarwinSensors>>, Single>().then(
-                [this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {
+            on<Last<20, Trigger<NUgusSensors>>, Single>().then(
+                [this](const std::list<std::shared_ptr<const NUgusSensors>>& sensors) {
                     int leftCount   = 0;
                     int middleCount = 0;
 
                     // If we have any downs in the last 20 frames then we are button pushed
                     for (const auto& s : sensors) {
-                        if (s->buttons.left && !s->cm730ErrorFlags) {
+                        if (s->buttons.left && !s->OpenCRErrorFlags) {
                             ++leftCount;
                         }
-                        if (s->buttons.middle && !s->cm730ErrorFlags) {
+                        if (s->buttons.middle && !s->OpenCRErrorFlags) {
                             ++middleCount;
                         }
                     }
@@ -263,9 +263,9 @@ namespace platform {
                     }
                 });
 
-            on<Trigger<DarwinSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>().then(
+            on<Trigger<NUgusSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>().then(
                 "Main Sensors Loop",
-                [this](const DarwinSensors& input,
+                [this](const NUgusSensors& input,
                        std::shared_ptr<const Sensors> previousSensors,
                        const KinematicsModel& kinematicsModel) {
                     auto sensors = std::make_unique<Sensors>();
@@ -281,17 +281,8 @@ namespace platform {
 
 
                     // This checks for an error on the CM730 and reports it
-                    if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
-                        NUClear::log<NUClear::WARN>(makeErrorString("CM730", input.cm730ErrorFlags));
-                    }
-
-                    // Output errors on the FSRs
-                    if (input.fsr.left.errorFlags != DarwinSensors::Error::OK) {
-                        NUClear::log<NUClear::WARN>(makeErrorString("Left FSR", input.fsr.left.errorFlags));
-                    }
-
-                    if (input.fsr.right.errorFlags != DarwinSensors::Error::OK) {
-                        NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.errorFlags));
+                    if (input.OpenCRErrorFlags != NUgusSensors::Error::OK) {
+                        NUClear::log<NUClear::WARN>(makeErrorString("CM730", input.OpenCRErrorFlags));
                     }
 
                     // Read through all of our sensors
@@ -300,29 +291,26 @@ namespace platform {
                         auto& error    = original.errorFlags;
 
                         // Check for an error on the servo and report it
-                        while (error != DarwinSensors::Error::OK) {
+                        while (error != NUgusSensors::Error::OK) {
                             std::stringstream s;
                             s << "Error on Servo " << (i + 1) << " (" << static_cast<ServoID>(i) << "):";
 
-                            if (error & DarwinSensors::Error::INPUT_VOLTAGE) {
+                            if (error & NUgusSensors::Error::INPUT_VOLTAGE) {
                                 s << " Input Voltage - " << original.voltage;
                             }
-                            if (error & DarwinSensors::Error::ANGLE_LIMIT) {
+                            if (error & NUgusSensors::Error::ANGLE_LIMIT) {
                                 s << " Angle Limit - " << original.presentPosition;
                             }
-                            if (error & DarwinSensors::Error::OVERHEATING) {
+                            if (error & NUgusSensors::Error::OVERHEATING) {
                                 s << " Overheating - " << original.temperature;
                             }
-                            if (error & DarwinSensors::Error::OVERLOAD) {
-                                s << " Overloaded - " << original.load;
-                            }
-                            if (error & DarwinSensors::Error::INSTRUCTION) {
+                            if (error & NUgusSensors::Error::INSTRUCTION) {
                                 s << " Bad Instruction ";
                             }
-                            if (error & DarwinSensors::Error::CORRUPT_DATA) {
+                            if (error & NUgusSensors::Error::CORRUPT_DATA) {
                                 s << " Corrupt Data ";
                             }
-                            if (error & DarwinSensors::Error::TIMEOUT) {
+                            if (error & NUgusSensors::Error::TIMEOUT) {
                                 s << " Timeout ";
                             }
 
@@ -332,16 +320,16 @@ namespace platform {
 
                         // If we have previous sensors and our current sensors have an error
                         // we then use our previous sensor values with some updates
-                        if (previousSensors && error != DarwinSensors::Error::OK) {
+                        if (previousSensors && error != NUgusSensors::Error::OK) {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({error,
                                                       i,
                                                       original.torqueEnabled,
-                                                      original.pGain,
-                                                      original.iGain,
-                                                      original.dGain,
+                                                      original.velocityPGain,
+                                                      original.velocityIGain,
+                                                      original.velocityDGain,
                                                       original.goalPosition,
-                                                      original.movingSpeed,
+                                                      original.goalVelocity,
                                                       previousSensors->servo[i].presentPosition,
                                                       previousSensors->servo[i].presentVelocity,
                                                       previousSensors->servo[i].load,
@@ -354,21 +342,21 @@ namespace platform {
                             sensors->servo.push_back({error,
                                                       i,
                                                       original.torqueEnabled,
-                                                      original.pGain,
-                                                      original.iGain,
-                                                      original.dGain,
+                                                      original.velocityPGain,
+                                                      original.velocityIGain,
+                                                      original.velocityDGain,
                                                       original.goalPosition,
-                                                      original.movingSpeed,
+                                                      original.goalVelocity,
                                                       original.presentPosition,
-                                                      original.presentSpeed,
-                                                      original.load,
+                                                      original.presentVelocity,
+                                                      original.presentCurrent,
                                                       original.voltage,
                                                       float(original.temperature)});
                         }
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if (previousSensors && (input.cm730ErrorFlags)) {
+                    if (previousSensors && (input.OpenCRErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
                     else {
@@ -378,7 +366,7 @@ namespace platform {
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
                     if (previousSensors
-                        && (input.cm730ErrorFlags
+                        && (input.OpenCRErrorFlags
                             || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2)
                                    > 4 * M_PI)) {
                         NUClear::log<NUClear::WARN>(
@@ -389,24 +377,6 @@ namespace platform {
                     else {
                         sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
-
-                    // Put in our FSR information
-                    sensors->fsr.emplace_back();
-                    sensors->fsr.emplace_back();
-
-                    sensors->fsr[LimbID::LEFT_LEG - 1].centre << input.fsr.left.centreX, input.fsr.left.centreY;
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.reserve(4);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr1);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr2);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr3);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr4);
-
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].centre << input.fsr.right.centreX, input.fsr.right.centreY;
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.reserve(4);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr1);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr2);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr3);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr4);
 
                     /************************************************
                      *               Buttons and LEDs               *

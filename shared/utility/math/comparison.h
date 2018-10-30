@@ -20,6 +20,8 @@
 #ifndef UTILITY_MATH_COMPARISON_H
 #define UTILITY_MATH_COMPARISON_H
 
+#include <algorithm>
+#include <cmath>
 #include <limits>
 #include <type_traits>
 

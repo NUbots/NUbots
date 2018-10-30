@@ -19,7 +19,7 @@
 #ifndef UTILITY_PLATFORM_DARWIN_DARWINSENSORS_H
 #define UTILITY_PLATFORM_DARWIN_DARWINSENSORS_H
 
-#include "message/platform/darwin/DarwinSensors.h"
+#include "message/platform/nugus/Sensors.h"
 #include "utility/input/ServoID.h"
 
 namespace utility {
@@ -27,9 +27,9 @@ namespace platform {
     namespace darwin {
 
         using ServoID = utility::input::ServoID;
-        using message::platform::darwin::DarwinSensors;
+        using message::platform::nugus::Sensors;
 
-        inline const DarwinSensors::Servo& getDarwinServo(ServoID servoId, const DarwinSensors& sensors) {
+        inline const Sensors::Servo& getDarwinServo(ServoID servoId, const Sensors& sensors) {
 
             switch (servoId.value) {
                 case ServoID::R_SHOULDER_PITCH: return sensors.servo.rShoulderPitch;
@@ -57,7 +57,7 @@ namespace platform {
             }
         }
 
-        inline DarwinSensors::Servo& getDarwinServo(ServoID servoId, DarwinSensors& sensors) {
+        inline Sensors::Servo& getDarwinServo(ServoID servoId, Sensors& sensors) {
 
             switch (servoId.value) {
                 case ServoID::R_SHOULDER_PITCH: return sensors.servo.rShoulderPitch;

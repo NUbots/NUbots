@@ -8,7 +8,7 @@ NUCLEAR_ROLE(
     support::configuration::GlobalConfig
     support::configuration::NetworkConfiguration
 
-    platform::darwin::HardwareIO
+    platform::nugus::HardwareIO
     platform::darwin::SensorFilter
 
     support::NUsight

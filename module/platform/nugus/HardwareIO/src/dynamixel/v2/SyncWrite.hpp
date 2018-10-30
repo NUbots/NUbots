@@ -29,6 +29,7 @@ namespace v2 {
     template <typename T>
     struct SyncWriteData {
         static_assert(std::is_trivial<T>::value && std::is_standard_layout<T>::value, "Values must be trivial data");
+        SyncWriteData() : id(0), data() {}
         SyncWriteData(uint8_t id, T data) : id(id), data(data) {}
 
         /// The ID of the device that we are communicating with

@@ -22,7 +22,6 @@
 #include <random>
 
 #include "message/input/Sensors.h"
-#include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/input/ServoID.h"
 #include "utility/nusight/NUhelpers.h"
@@ -31,7 +30,6 @@ namespace module {
 namespace debug {
 
     using message::input::Sensors;
-    using message::platform::darwin::DarwinSensors;
     using NUClear::DEBUG;
     using std::chrono::milliseconds;
     using utility::nusight::drawArrow;
