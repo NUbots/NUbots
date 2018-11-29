@@ -75,7 +75,7 @@ namespace motion {
             // need to be taken at normal speed and how many iterations it has before the time
             // has elapsed.
             // If the foot is already in position, count will be 0 and so 0 will be returned
-            log("count: " + count);
+            // log("count: " + count);
             return count / (t * 90);  // footstep runs 90 times/second
         }
 
@@ -176,37 +176,37 @@ namespace motion {
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
                     // Swing foot's new target position on the plane
-                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized();
+                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
                     // double scale                            = factor(rF_wPp, time_left.count());
                     double distance = rF_wPp.norm();
                     double scale    = 1;
 
-                    // Time has elapsed
-                    if (time_left <= std::chrono::duration<double>::zero()) {
-                        scale = 0.001;
-                    }
-                    // Distance is low enough to stop
-                    else if (distance < 0.005) {
-                        scale = 0;
-                        // disable footstep
-                    }
-                    // Time has not elapsed, so determine how fast the foot should move
-                    else {
-                        scale = distance / (time_left.count() * 90);  // footstep runs 90 times/second
-                    }
-                    log("scale: ", scale, "\ntime left: ", time_left.count(), "\ndistance: ", distance);
+                    // // Time has elapsed
+                    // if (time_left <= std::chrono::duration<double>::zero()) {
+                    //     scale = 0.001;
+                    // }
+                    // // Distance is low enough to stop
+                    // else if (distance < 0.005) {
+                    //     scale = 0;
+                    //     // disable footstep
+                    // }
+                    // // Time has not elapsed, so determine how fast the foot should move
+                    // else {
+                    //     scale = distance / (time_left.count() * 90);  // footstep runs 90 times/second
+                    // }
+                    // log("scale: ", scale, "\ntime left: ", time_left.count(), "\ndistance: ", distance);
                     // If the scale returns zero, the foot is already in position so do not execute any foot movement.
                     // If it is not zero, can proceed.
                     if (scale != 0) {
                         // Scale rF_tPp to result of factor to allow foot to reach the target at appropriate time
-                        log("rF_tPp", rF_tPp);
+                        // log("rF_tPp", rF_tPp);
                         rF_tPp = rF_tPp * scale;
 
                         // Foot target's position relative to torso
                         Eigen::Vector3d rF_tTt = Htp * rF_tPp;
-                        log("rF_tTt: ", rF_tTt);
+                        // log("rF_tTt: ", rF_tTt);
                         // Torso to target transform
                         Eigen::Affine3d Hat;
                         Hat = Haf_s * Htf_s.inverse();
