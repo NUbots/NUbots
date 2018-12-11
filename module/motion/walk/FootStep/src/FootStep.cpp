@@ -80,7 +80,9 @@ namespace motion {
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+            : Reactor(std::move(environment))
+            , updateHandle()
+            , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
@@ -179,71 +181,65 @@ namespace motion {
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
-                    // double scale                            = factor(rF_wPp, time_left.count());
-                    double distance = rF_wPp.norm();
-                    double scale    = 1;
+                    double distance                         = rF_wPp.norm();
 
-                    // // Time has elapsed
-                    // if (time_left <= std::chrono::duration<double>::zero()) {
-                    //     scale = 0.001;
-                    // }
-                    // // Distance is low enough to stop
-                    // else if (distance < 0.005) {
-                    //     scale = 0;
-                    //     // disable footstep
-                    // }
-                    // // Time has not elapsed, so determine how fast the foot should move
-                    // else {
-                    //     scale = distance / (time_left.count() * 90);  // footstep runs 90 times/second
-                    // }
-                    // log("scale: ", scale, "\ntime left: ", time_left.count(), "\ndistance: ", distance);
-                    // If the scale returns zero, the foot is already in position so do not execute any foot movement.
-                    // If it is not zero, can proceed.
-                    if (scale != 0) {
-                        // Scale rF_tPp to result of factor to allow foot to reach the target at appropriate time
-                        // log("rF_tPp", rF_tPp);
-                        rF_tPp = rF_tPp * scale;
-
-                        // Foot target's position relative to torso
-                        Eigen::Vector3d rF_tTt = Htp * rF_tPp;
-                        // log("rF_tTt: ", rF_tTt);
-                        // Torso to target transform
-                        Eigen::Affine3d Hat;
-                        Hat = Haf_s * Htf_s.inverse();
-                        // Get torso to swing foot rotation as quaternion
-                        Eigen::Quaterniond Rf_wt;
-                        Rf_wt = Htf_w.inverse().linear();
-                        // Create rotation of torso to target as a quaternion
-                        Eigen::Quaterniond Rat;
-                        Rat = Hat.linear();
-                        // Create rotation matrix for foot target
-                        Eigen::Matrix3d Rf_tt;
-                        // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-                        // TODO: determine t
-                        Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
-
-                        Eigen::Affine3d Htf_t;
-                        // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
-                        Htf_t.linear()      = Rf_tt;   // Rotation from above
-                        Htf_t.translation() = rF_tTt;  // Translation to foot target
-
-                        Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
-                        auto joints   = calculateLegJoints(
-                            model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
-
-                        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-
-                        for (const auto& joint : joints) {
-                            waypoints->push_back({subsumptionId,
-                                                  NUClear::clock::now() + std::chrono::milliseconds(10),
-                                                  joint.first,
-                                                  joint.second,
-                                                  20,
-                                                  100});  // TODO: support separate gains for each leg
-                        }
-
-                        emit(waypoints);
+                    // Time has elapsed
+                    if (time_left <= std::chrono::duration<double>::zero()) {
+                        scale = 0.001;
                     }
+
+                    // Distance is low enough to stop
+                    else if (distance < 0.005) {
+                        updateHandle.disable();  // disable footstep
+                    }
+
+                    // Time has not elapsed, so determine how fast the foot should move
+                    else {
+                        scale = distance / (time_left.count() * 90);  // footstep runs 90 times/second
+                    }
+
+                    // Scale rF_tPp to result of factor to allow foot to reach the target at appropriate time
+                    rF_tPp = rF_tPp * scale;
+
+                    // Foot target's position relative to torso
+                    Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+                    // log("rF_tTt: ", rF_tTt);
+                    // Torso to target transform
+                    Eigen::Affine3d Hat;
+                    Hat = Haf_s * Htf_s.inverse();
+                    // Get torso to swing foot rotation as quaternion
+                    Eigen::Quaterniond Rf_wt;
+                    Rf_wt = Htf_w.inverse().linear();
+                    // Create rotation of torso to target as a quaternion
+                    Eigen::Quaterniond Rat;
+                    Rat = Hat.linear();
+                    // Create rotation matrix for foot target
+                    Eigen::Matrix3d Rf_tt;
+                    // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
+                    // TODO: determine t
+                    Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
+
+                    Eigen::Affine3d Htf_t;
+                    // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
+                    Htf_t.linear()      = Rf_tt;   // Rotation from above
+                    Htf_t.translation() = rF_tTt;  // Translation to foot target
+
+                    Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
+                    auto joints =
+                        calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
+
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+
+                    for (const auto& joint : joints) {
+                        waypoints->push_back({subsumptionId,
+                                              NUClear::clock::now() + std::chrono::milliseconds(10),
+                                              joint.first,
+                                              joint.second,
+                                              20,
+                                              100});  // TODO: support separate gains for each leg
+                    }
+
+                    emit(waypoints);
                 });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
