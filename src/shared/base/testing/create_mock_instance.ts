@@ -1,6 +1,6 @@
 import Mocked = jest.Mocked
 
-export function createMockInstance<T>(ctor: { new (...args: any[]): T }): Mocked<T> {
+export function createMockInstance<T>(ctor: new (...args: any[]) => T): Mocked<T> {
   return stubMethods<T>(Object.create(ctor.prototype))
 }
 

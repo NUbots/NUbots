@@ -71,9 +71,8 @@ export class NBSPlayer {
   }
 }
 
-interface MMapNBSPlayerConstructor {
-  new(file: string, cb: (timestamp?: number, hash?: Buffer, payload?: Buffer) => void): MMapNBSPlayer
-}
+type MMapNBSPlayerConstructor
+  = new(file: string, cb: (timestamp?: number, hash?: Buffer, payload?: Buffer) => void) => MMapNBSPlayer
 
 interface MMapNBSPlayer {
   play(): void
