@@ -23,7 +23,12 @@ const server = http.createServer(app)
 const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 
 const root = `${__dirname}/../../dist`
-app.use(history())
+app.use(history({
+  rewrites: [
+    // Allows user to navigate to /storybook/ without needing to type /index.html
+    { from: /\/storybook\/$/, to: 'storybook/index.html' },
+  ],
+}))
 app.use(compression())
 app.use(express.static(root))
 app.use(favicon(`${__dirname}/../assets/favicon.ico`))
