@@ -21,5 +21,8 @@
 ## Developing without typechecking
 `yarn dev -t`
 
+## Developing Components
+`yarn storybook`
+
 ## Testing
 `yarn test`
