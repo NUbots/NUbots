@@ -18,10 +18,11 @@ namespace motion {
             double factor(const Eigen::Vector3d& vec, double t);
 
             size_t subsumptionId;
-
+            ReactionHandle update_handle;
             double step_height;
             double step_steep;
             double well_width;
+            double time_horizon;
             /// Constant for mathematical function based on step_height, step_steep and well_width
             double c;
 

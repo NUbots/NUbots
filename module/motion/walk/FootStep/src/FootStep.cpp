@@ -80,20 +80,19 @@ namespace motion {
         }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , updateHandle()
-            , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+            : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
-                double x    = config["test"]["x"].as<double>();
-                double y    = config["test"]["y"].as<double>();
-                double z    = config["test"]["z"].as<double>();
-                int foot    = config["foot"].as<int>();
-                int time    = config["time"].as<int>();
-                step_height = config["step_height"];
-                well_width  = config["well_width"];
-                step_steep  = config["step_steep"];
+                double x     = config["test"]["x"].as<double>();
+                double y     = config["test"]["y"].as<double>();
+                double z     = config["test"]["z"].as<double>();
+                int foot     = config["foot"].as<int>();
+                int time     = config["time"].as<int>();
+                time_horizon = config["time_horizon"].as<double>();
+                step_height  = config["step_height"];
+                well_width   = config["well_width"];
+                step_steep   = config["step_steep"];
 
                 // Constant for f_x and f_y
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
@@ -108,7 +107,7 @@ namespace motion {
                     NUClear::clock::now() + std::chrono::seconds(time), foot, Haf_s.matrix()));
             });
 
-            on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
+            update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
                     // Get support foot and swing foot coordinate systems
 
@@ -177,11 +176,10 @@ namespace motion {
                     // Swing foot's position on plane
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
-                    // Swing foot's new target position on the plane
-                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
                     double distance                         = rF_wPp.norm();
+                    double scale                            = 1;
 
                     // Time has elapsed
                     if (time_left <= std::chrono::duration<double>::zero()) {
@@ -190,16 +188,18 @@ namespace motion {
 
                     // Distance is low enough to stop
                     else if (distance < 0.005) {
-                        updateHandle.disable();  // disable footstep
+                        update_handle.disable();  // disable footstep
                     }
 
                     // Time has not elapsed, so determine how fast the foot should move
                     else {
-                        scale = distance / (time_left.count() * 90);  // footstep runs 90 times/second
+                        scale = (distance / time_left.count()) * time_horizon;  // footstep runs 90 times/second
                     }
 
                     // Scale rF_tPp to result of factor to allow foot to reach the target at appropriate time
-                    rF_tPp = rF_tPp * scale;
+
+                    // Swing foot's new target position on the plane
+                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * scale;
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
@@ -241,6 +241,8 @@ namespace motion {
 
                     emit(waypoints);
                 });
+
+            on<Trigger<FootStep>>().then([this] { update_handle.enable(); });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
                 RegisterAction{subsumptionId,
