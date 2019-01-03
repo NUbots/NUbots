@@ -27,12 +27,12 @@ namespace motion {
         using message::input::Sensors;
         using message::motion::FootTarget;
         using message::motion::KinematicsModel;
-
         using utility::behaviour::RegisterAction;
         using utility::input::LimbID;
         using utility::input::ServoID;
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateLegJoints;
+        using utility::nusight::graph;
 
         double FootStep::f_x(const Eigen::Vector3d& pos) {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
@@ -42,53 +42,11 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
-        double FootStep::factor(const Eigen::Vector3d& pos, double t) {
-            // If the time has already elapsed, do not execute the rest of the method
-            // and instead return 1, so the scaling will not affect the foot movement
-            if (t <= 0) {
-                return 1;
-            }
-
-            // pos is swing foot's position on the plane
-            Eigen::Vector3d helper = pos;
-            Eigen::Vector3d rF_wPp = pos;
-            double distance        = rF_wPp.norm();
-            int count              = 0;
-            // log("BEGIN FACTOR ", rF_wPp.transpose(), "\n", pos.transpose());
-            // Loops while foot is not roughly at the target to find how many iterations it takes to reach
-            while (distance > 0.01) {
-                // 'Move' the foot by one iteration
-                rF_wPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
-                // log(  // helper.transpose(),
-                //       //     " + ",
-                //       //     (Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001).transpose(),
-                //       //     " = ",
-                //       //     rF_wPp.transpose(),
-                //     ", distance: ",
-                //     rF_wPp.norm());
-                distance = rF_wPp.norm();  // Update distance
-                helper   = rF_wPp;
-                count++;  // Update count
-            }
-
-            // Returns the factor by which the foot should move based on how many iterations
-            // need to be taken at normal speed and how many iterations it has before the time
-            // has elapsed.
-            // If the foot is already in position, count will be 0 and so 0 will be returned
-            // log("count: " + count);
-            return count / (t * 90);  // footstep runs 90 times/second
-        }
-
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
-                double x     = config["test"]["x"].as<double>();
-                double y     = config["test"]["y"].as<double>();
-                double z     = config["test"]["z"].as<double>();
-                int foot     = config["foot"].as<int>();
-                int time     = config["time"].as<int>();
                 time_horizon = config["time_horizon"].as<double>();
                 step_height  = config["step_height"];
                 well_width   = config["well_width"];
@@ -98,13 +56,6 @@ namespace motion {
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
                      * std::pow(step_steep * step_height + (step_steep * step_steep * step_height), -1 / step_steep))
                     / well_width;
-
-                Eigen::Affine3d Haf_s;
-                Haf_s.linear()      = Eigen::Matrix3d::Identity();
-                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
-
-                emit(std::make_unique<FootTarget>(
-                    NUClear::clock::now() + std::chrono::seconds(time), foot, Haf_s.matrix()));
             });
 
             update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
@@ -148,8 +99,8 @@ namespace motion {
 
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
-                    // The target position is already measured in ground space
-                    // Change it to go from groud to target, rather than support foot to target
+
+                    // Vector from ground to target
                     Eigen::Vector3d rAGg = (Htg.inverse() * Htf_s) * -Haf_s.translation();
 
                     // Direction of the target from the swing foot
@@ -181,29 +132,27 @@ namespace motion {
                     double distance                         = rF_wPp.norm();
                     double scale                            = 1;
 
-                    // Time has elapsed
+                    // Time has elapsed, use a default scale
                     if (time_left <= std::chrono::duration<double>::zero()) {
-                        scale = 0.001;
+                        scale = 0.01;
                     }
 
-                    // Distance is low enough to stop
-                    else if (distance < 0.005) {
+                    // Distance is low enough to stop the foot
+                    else if (distance < 0.01) {
                         update_handle.disable();  // disable footstep
                     }
 
                     // Time has not elapsed, so determine how fast the foot should move
                     else {
-                        scale = (distance / time_left.count()) * time_horizon;  // footstep runs 90 times/second
+                        scale = (distance / time_left.count()) * time_horizon;
                     }
 
-                    // Scale rF_tPp to result of factor to allow foot to reach the target at appropriate time
-
-                    // Swing foot's new target position on the plane
+                    // Swing foot's new target position on the plane, scaled for time
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * scale;
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
-                    // log("rF_tTt: ", rF_tTt);
+
                     // Torso to target transform
                     Eigen::Affine3d Hat;
                     Hat = Haf_s * Htf_s.inverse();
@@ -231,12 +180,14 @@ namespace motion {
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
                     for (const auto& joint : joints) {
-                        waypoints->push_back({subsumptionId,
-                                              NUClear::clock::now() + std::chrono::milliseconds(10),
-                                              joint.first,
-                                              joint.second,
-                                              20,
-                                              100});  // TODO: support separate gains for each leg
+                        waypoints->push_back(
+                            {subsumptionId,
+                             NUClear::clock::now()
+                                 + NUClear::clock::duration(int(time_horizon * NUClear::clock::period::den)),
+                             joint.first,
+                             joint.second,
+                             20,
+                             100});  // TODO: support separate gains for each leg
                     }
 
                     emit(waypoints);
