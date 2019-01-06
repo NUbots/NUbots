@@ -6,4 +6,3 @@ import AppView from './components/app/view'
 
 configure({ enforceActions: 'observed' })
 ReactDOM.render(<AppView/>, document.getElementById('root'))
-

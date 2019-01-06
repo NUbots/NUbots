@@ -9,11 +9,11 @@ import { NodeSystemClock } from '../server/time/node_clock'
 import { message } from '../shared/proto/messages'
 import Sensors = message.input.Sensors
 import Overview = message.support.nusight.Overview
-import VisionObject = message.vision.VisionObject
 import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
 import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
 import { VirtualRobot } from '../virtual_robots/virtual_robot'
 import { VirtualRobots } from '../virtual_robots/virtual_robots'
+import CompressedImage = message.output.CompressedImage
 
 describe('Networking Integration', () => {
   let nuclearnetServer: FakeNUClearNetServer
@@ -158,12 +158,12 @@ describe('Networking Integration', () => {
 
       localisationNetwork.off()
 
-      const onVisionObject = jest.fn()
-      visionNetwork.on(VisionObject, onVisionObject)
+      const onCompressedImage = jest.fn()
+      visionNetwork.on(CompressedImage, onCompressedImage)
 
       virtualRobots.simulateAll()
 
-      expect(onVisionObject).toHaveBeenCalledTimes(0)
+      expect(onCompressedImage).toHaveBeenCalledTimes(0)
       expect(onSensors).toHaveBeenCalledTimes(1)
 
       visionNetwork.off()
@@ -172,7 +172,7 @@ describe('Networking Integration', () => {
       dashboardNetwork.on(Overview, onOverview)
 
       expect(onOverview).toHaveBeenCalledTimes(0)
-      expect(onVisionObject).toHaveBeenCalledTimes(0)
+      expect(onCompressedImage).toHaveBeenCalledTimes(0)
       expect(onSensors).toHaveBeenCalledTimes(1)
 
       dashboardNetwork.off()

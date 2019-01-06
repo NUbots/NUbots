@@ -14,6 +14,7 @@ import * as NUClearNetProxyParser from '../shared/nuclearnet/nuclearnet_proxy_pa
 import { ChartSimulator } from '../virtual_robots/simulators/chart_data_simulator'
 import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
 import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
+import { VisionSimulator } from '../virtual_robots/simulators/vision_simulator'
 import { VirtualRobots } from '../virtual_robots/virtual_robots'
 
 import { NBSPlayer } from './nbs/mmap_nbs_player/nbs_player'
@@ -71,6 +72,7 @@ function init() {
         { frequency: 1, simulator: OverviewSimulator.of() },
         { frequency: 60, simulator: SensorDataSimulator.of() },
         { frequency: 60, simulator: ChartSimulator.of() },
+        { frequency: 1, simulator: VisionSimulator.of() },
       ],
     })
     virtualRobots.startSimulators()

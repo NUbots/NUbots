@@ -1,13 +1,14 @@
 import { observable } from 'mobx'
-import { autorun } from 'mobx'
 import { computed } from 'mobx'
+import { autorun } from 'mobx'
 import { createTransformer } from 'mobx-utils'
+import { Matrix4 } from 'three'
 import { Float32BufferAttribute } from 'three'
 import { LineSegments } from 'three'
 import { BufferGeometry } from 'three'
 import { Object3D } from 'three'
 import { PlaneBufferGeometry } from 'three'
-import { MeshBasicMaterial } from 'three'
+import { Mesh } from 'three'
 import { Scene } from 'three'
 import { Vector2 } from 'three'
 import { WebGLRenderer } from 'three'
@@ -16,11 +17,14 @@ import { Camera } from 'three'
 import { Vector4 } from 'three'
 import { RawShaderMaterial } from 'three'
 import { Vector3 } from 'three'
-import { Mesh } from 'three'
+import { MeshBasicMaterial } from 'three'
 
 import { ImageDecoder } from '../../../image_decoder/image_decoder'
 import { Matrix4 as Matrix4Model } from '../../../math/matrix4'
+import { Vector3 as Vector3Model } from '../../../math/vector3'
 
+import { Goal } from './model'
+import { Ball } from './model'
 import { CameraModel } from './model'
 import { VisualMesh } from './model'
 import * as meshFragmentShader from './shaders/mesh.frag'
@@ -93,8 +97,39 @@ export class CameraViewModel {
     if (this.model.visualmesh) {
       scene.add(this.visualmesh(this.model.visualmesh))
     }
+    this.model.balls.forEach(ball => scene.add(this.ball(ball)))
+    this.model.goals.forEach(goal => scene.add(this.goal(goal)))
     return scene
   }
+
+  private ball = createTransformer((m: Ball) => {
+    const Hwc = new Matrix4().getInverse(toThreeMatrix4(m.Hcw))
+    const imageHcw = this.model.image ? toThreeMatrix4(this.model.image.Hcw) : new Matrix4()
+    const Hcc = imageHcw.multiply(Hwc)
+    return this.makeCone({
+      axis: toThreeVector3(m.cone.axis).applyMatrix4(Hcc),
+      gradient: m.cone.gradient,
+      colour: new Vector4(0, 0, 1, 0.7),
+      lineWidth: 10,
+    })
+  })
+
+  private goal = createTransformer((m: Goal) => {
+    const goal = new Object3D()
+    const Hwc = new Matrix4().getInverse(toThreeMatrix4(m.Hcw))
+    const imageHcw = this.model.image ? toThreeMatrix4(this.model.image.Hcw) : new Matrix4()
+    const Hcc = imageHcw.multiply(Hwc)
+    const tl = toThreeVector3(m.frustum.tl).applyMatrix4(Hcc)
+    const tr = toThreeVector3(m.frustum.tr).applyMatrix4(Hcc)
+    const bl = toThreeVector3(m.frustum.bl).applyMatrix4(Hcc)
+    const br = toThreeVector3(m.frustum.br).applyMatrix4(Hcc)
+    const colour = new Vector4(0.8, 0.8, 0, 0.5)
+    goal.add(this.makePlaneSegment({ start: tl, end: bl, colour, lineWidth: 10 }))
+    goal.add(this.makePlaneSegment({ start: bl, end: br, colour, lineWidth: 10 }))
+    goal.add(this.makePlaneSegment({ start: br, end: tr, colour, lineWidth: 10 }))
+    goal.add(this.makePlaneSegment({ start: tr, end: tl, colour, lineWidth: 10 }))
+    return goal
+  })
 
   @computed
   get imageWidth(): number | undefined {
@@ -346,4 +381,17 @@ export class CameraViewModel {
       transparent: true,
     })
   }
+}
+
+function toThreeMatrix4(mat4: Matrix4Model): Matrix4 {
+  return new Matrix4().set(
+    mat4.x.x, mat4.y.x, mat4.z.x, mat4.t.x,
+    mat4.x.y, mat4.y.y, mat4.z.y, mat4.t.y,
+    mat4.x.z, mat4.y.z, mat4.z.z, mat4.t.z,
+    mat4.x.t, mat4.y.t, mat4.z.t, mat4.t.t,
+  )
+}
+
+function toThreeVector3(vec3: Vector3Model): Vector3 {
+  return new Vector3(vec3.x, vec3.y, vec3.z)
 }

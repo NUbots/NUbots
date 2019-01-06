@@ -1,17 +1,20 @@
 import { action } from 'mobx'
 
 import { message } from '../../../shared/proto/messages'
+import { toSeconds } from '../../../shared/time/timestamp'
 import { Matrix4 } from '../../math/matrix4'
 import { Vector2 } from '../../math/vector2'
+import { Vector3 } from '../../math/vector3'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
 
 import { CameraModel } from './camera/model'
 import { VisionRobotModel } from './model'
-
 import Image = message.input.Image
 import CompressedImage = message.output.CompressedImage
+import Balls = message.vision.Balls
+import Goals = message.vision.Goals
 import VisualMesh = message.vision.VisualMesh
 
 export class VisionNetwork {
@@ -20,6 +23,8 @@ export class VisionNetwork {
     this.network.on(Image, this.onImage)
     this.network.on(CompressedImage, this.onImage)
     this.network.on(VisualMesh, this.onMesh)
+    this.network.on(Balls, this.onBalls)
+    this.network.on(Goals, this.onGoals)
   }
 
   static of(nusightNetwork: NUsightNetwork): VisionNetwork {
@@ -39,10 +44,7 @@ export class VisionNetwork {
 
     let camera = robot.cameras.get(cameraId)
     if (!camera) {
-      camera = CameraModel.of(robot, {
-        id: cameraId,
-        name,
-      })
+      camera = CameraModel.of(robot, { id: cameraId, name })
       robot.cameras.set(cameraId, camera)
     }
     camera.image = {
@@ -67,10 +69,7 @@ export class VisionNetwork {
 
     let camera = robot.cameras.get(cameraId)
     if (!camera) {
-      camera = CameraModel.of(robot, {
-        id: cameraId,
-        name,
-      })
+      camera = CameraModel.of(robot, { id: cameraId, name })
       robot.cameras.set(cameraId, camera)
     }
 
@@ -80,5 +79,45 @@ export class VisionNetwork {
       coordinates: coordinates!.v!,
       classifications: { dim: classifications!.cols!, values: classifications!.v! },
     }
+  }
+
+  @action
+  private onBalls(robotModel: RobotModel, packet: Balls) {
+    const robot = VisionRobotModel.of(robotModel)
+    const { cameraId, timestamp, Hcw, balls } = packet
+    let camera = robot.cameras.get(cameraId)
+    if (!camera) {
+      camera = CameraModel.of(robot, { id: cameraId, name })
+      robot.cameras.set(cameraId, camera)
+    }
+    camera.balls = balls.map(ball => ({
+      timestamp: toSeconds(timestamp),
+      Hcw: Matrix4.from(Hcw),
+      cone: {
+        axis: Vector3.from(ball.cone!.axis),
+        gradient: ball.cone!.gradient!,
+      },
+    }))
+  }
+
+  @action
+  private onGoals(robotModel: RobotModel, packet: Goals) {
+    const robot = VisionRobotModel.of(robotModel)
+    const { cameraId, timestamp, Hcw, goals } = packet
+    let camera = robot.cameras.get(cameraId)
+    if (!camera) {
+      camera = CameraModel.of(robot, { id: cameraId, name })
+      robot.cameras.set(cameraId, camera)
+    }
+    camera.goals = goals.map(goal => ({
+      timestamp: toSeconds(timestamp),
+      Hcw: Matrix4.from(Hcw),
+      frustum: {
+        tl: Vector3.from(goal.frustum!.tl),
+        tr: Vector3.from(goal.frustum!.tr),
+        bl: Vector3.from(goal.frustum!.bl),
+        br: Vector3.from(goal.frustum!.br),
+      },
+    }))
   }
 }

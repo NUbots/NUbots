@@ -1,5 +1,5 @@
-import { fourcc } from '../image_decoder'
-import { fourccToString } from '../image_decoder'
+import { fourcc } from '../fourcc'
+import { fourccToString } from '../fourcc'
 
 describe('fourcc', () => {
   it('Calculates fourcc codes from strings', () => {

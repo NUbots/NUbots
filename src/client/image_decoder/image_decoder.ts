@@ -8,7 +8,7 @@ import { WebGLRenderTarget } from 'three'
 import { Scene } from 'three'
 import { Mesh } from 'three'
 import { PixelFormat } from 'three'
-import { Camera } from 'three'
+import { WebGLRenderer } from 'three'
 import { OrthographicCamera } from 'three'
 import { DataTexture } from 'three'
 import { LuminanceFormat } from 'three'
@@ -18,29 +18,12 @@ import { UnsignedByteType } from 'three'
 import { ClampToEdgeWrapping } from 'three'
 import { LinearFilter } from 'three'
 import { NearestFilter } from 'three'
-import { WebGLRenderer } from 'three'
+import { Camera } from 'three'
 
+import { fourccToString } from './fourcc'
+import { fourcc } from './fourcc'
 import * as bayerFragmentShader from './shaders/bayer.frag'
 import * as bayerVertexShader from './shaders/bayer.vert'
-
-/**
- * Convert a four letter string into its integer fourcc code (see http://fourcc.org/)
- * This code allows identification of a stream using the integer.
- *
- * @param code four letters that describe the format
- *
- * @return the fourcc integer code for this format
- */
-export function fourcc(code: string): number {
-  return code.charCodeAt(3) << 24 | code.charCodeAt(2) << 16 | code.charCodeAt(1) << 8 | code.charCodeAt(0)
-}
-
-export function fourccToString(code: number): string {
-  return String.fromCharCode(code & 0xFF) +
-  String.fromCharCode(code >> 8 & 0xFF) +
-  String.fromCharCode(code >> 16 & 0xFF) +
-  String.fromCharCode(code >> 24 & 0xFF)
-}
 
 export interface Image {
   readonly width: number
