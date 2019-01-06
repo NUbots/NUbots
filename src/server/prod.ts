@@ -48,7 +48,7 @@ if (withVirtualRobots) {
       { frequency: 1, simulator: OverviewSimulator.of() },
       { frequency: 10, simulator: SensorDataSimulator.of() },
       { frequency: 10, simulator: ChartSimulator.of() },
-      { frequency: 1, simulator: VisionSimulator.of() },
+      { frequency: 5, simulator: VisionSimulator.of() },
     ],
   })
   virtualRobots.startSimulators()

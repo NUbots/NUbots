@@ -8,6 +8,7 @@ import { NodeSystemClock } from '../time/node_clock'
 
 import { DirectNUClearNetClient } from './direct_nuclearnet_client'
 import { FakeNUClearNetClient } from './fake_nuclearnet_client'
+import { LruPriorityQueue } from './lru_priority_queue'
 import { WebSocketServer } from './web_socket_server'
 import { WebSocket } from './web_socket_server'
 
@@ -40,14 +41,16 @@ class WebSocketServerClient {
   private offJoin: () => void
   private offLeave: () => void
   private offListenMap: Map<string, () => void>
-  private processors: Map<NUClearNetPeer, PacketProcessor>
 
-  constructor(private nuclearnetClient: NUClearNetClient, private socket: WebSocket) {
+  constructor(
+    private nuclearnetClient: NUClearNetClient,
+    private socket: WebSocket,
+    private processor: PacketProcessor,
+  ) {
     this.connected = false
     this.offJoin = this.nuclearnetClient.onJoin(this.onJoin)
     this.offLeave = this.nuclearnetClient.onLeave(this.onLeave)
     this.offListenMap = new Map()
-    this.processors = new Map()
 
     this.socket.on('listen', this.onListen)
     this.socket.on('unlisten', this.onUnlisten)
@@ -56,20 +59,15 @@ class WebSocketServerClient {
   }
 
   static of(nuclearNetClient: NUClearNetClient, socket: WebSocket) {
-    return new WebSocketServerClient(nuclearNetClient, socket)
+    return new WebSocketServerClient(nuclearNetClient, socket, PacketProcessor.of(socket))
   }
 
   private onJoin = (peer: NUClearNetPeer) => {
     this.socket.send('nuclear_join', peer)
-    this.processors.set(peer, PacketProcessor.of(this.socket))
   }
 
   private onLeave = (peer: NUClearNetPeer) => {
     this.socket.send('nuclear_leave', peer)
-    const peerKey = this.getPeer(this.processors.keys(), peer)
-    if (peerKey) {
-      this.processors.delete(peerKey)
-    }
   }
 
   private onConnect = (options: NUClearNetOptions) => {
@@ -104,82 +102,65 @@ class WebSocketServerClient {
   }
 
   private onPacket = (event: string, packet: NUClearNetPacket) => {
-    const peerKey = this.getPeer(this.processors.keys(), packet.peer)
-    if (peerKey) {
-      const processor = this.processors.get(peerKey)
-      if (processor) {
-        processor.onPacket(event, packet)
-      }
-    }
-  }
-
-  /**
-   * Look for the needle 'peer' inside the haystack 'peers'. They might not be the same object reference.
-   */
-  private getPeer(peers: Iterable<NUClearNetPeer>, peer: NUClearNetPeer): NUClearNetPeer | undefined {
-    return Array.from(peers).find(otherPeer => {
-      return otherPeer.name === peer.name && otherPeer.address === peer.address && otherPeer.port === peer.port
-    })
+    this.processor.onPacket(event, packet)
   }
 }
 
 class PacketProcessor {
-  private eventQueueSize: Map<string, number>
+  private outgoingPackets: number = 0
 
-  // The maximum number of packets of a unique type to send before receiving acknowledgements.
-  private limit: number
+  // The maximum number of packets to send before receiving acknowledgements.
+  private outgoingLimit: number
 
   // The number of seconds before giving up on an acknowledge
   private timeout: number
 
   constructor(private socket: WebSocket,
               private clock: Clock,
-              opts: { limit: number, timeout: number }) {
-    this.limit = opts.limit
-    this.timeout = opts.timeout
-    this.eventQueueSize = new Map()
+              private queue: LruPriorityQueue<string, { event: string, packet: NUClearNetPacket }>,
+              { outgoingLimit, timeout }: { outgoingLimit: number, timeout: number }) {
+    this.outgoingLimit = outgoingLimit
+    this.timeout = timeout
+    this.queue = queue
   }
 
   static of(socket: WebSocket) {
-    return new PacketProcessor(socket, NodeSystemClock, { limit: 2, timeout: 1 })
+    return new PacketProcessor(
+      socket,
+      NodeSystemClock,
+      new LruPriorityQueue({ capacityPerKey: 2 }),
+      { outgoingLimit: 10, timeout: 5 },
+    )
   }
 
   onPacket(event: string, packet: NUClearNetPacket) {
     if (packet.reliable) {
-      this.sendReliablePacket(event, packet)
-    } else if (this.isEventBelowLimit(event)) {
-      this.sendUnreliablePacket(event, packet)
-    }/* else {
-      // This event is unreliable and already at the limit, simply drop the packet.
-    }*/
+      // Always send reliable packets
+      this.socket.send(event, packet)
+    } else {
+      // Throttle unreliable packets so that we do not overwhelm the client with traffic.
+      const key = `${event}:${packet.peer.name}:${packet.peer.address}:${packet.peer.port}`
+      this.queue.add(key, { event, packet })
+      this.maybeSendNextPacket()
+    }
   }
 
-  private isEventBelowLimit(event: string) {
-    return (this.eventQueueSize.get(event) || 0) < this.limit
-  }
-
-  private sendReliablePacket(event: string, packet: NUClearNetPacket) {
-    // Always send reliable packets
-    this.socket.send(event, packet)
-  }
-
-  private sendUnreliablePacket(event: string, packet: NUClearNetPacket) {
-    // Throttle unreliable packets so that we do not overwhelm the client with traffic.
-    const done = this.enqueue(event)
-    this.socket.volatileSend(event, packet, done)
-    this.clock.setTimeout(done, this.timeout)
-  }
-
-  private enqueue(event: string): () => void {
-    let isDone = false
-    const eventQueueSize = this.eventQueueSize.get(event) || 0
-    this.eventQueueSize.set(event, eventQueueSize + 1)
-
-    return () => {
-      if (!isDone) {
-        const eventQueueSize = this.eventQueueSize.get(event) || 0
-        this.eventQueueSize.set(event, eventQueueSize - 1)
-        isDone = true
+  private maybeSendNextPacket() {
+    if (this.outgoingPackets < this.outgoingLimit) {
+      const next = this.queue.pop()
+      if (next) {
+        const { event, packet } = next
+        let isDone = false
+        const done = () => {
+          if (!isDone) {
+            this.outgoingPackets--
+            isDone = true
+            this.maybeSendNextPacket()
+          }
+        }
+        this.outgoingPackets++
+        this.socket.volatileSend(event, packet, done)
+        this.clock.setTimeout(done, this.timeout)
       }
     }
   }
