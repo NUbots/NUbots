@@ -110,7 +110,7 @@ namespace motion {
 
                     for (const auto& joint : joints) {
                         waypoints->push_back(
-                            {subsumptionId,
+                            {target.subsumption_id,
                              NUClear::clock::now()
                                  + NUClear::clock::duration(int(time_horizon * NUClear::clock::period::den)),
                              joint.first,

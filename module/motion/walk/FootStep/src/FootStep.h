@@ -15,7 +15,6 @@ namespace motion {
             // Returns vector from the vector field of where the foot should move on y-axis (in plane space)
             double f_y(const Eigen::Vector3d& vec);
 
-            size_t subsumptionId;
             ReactionHandle update_handle;
             double step_height;
             double step_steep;

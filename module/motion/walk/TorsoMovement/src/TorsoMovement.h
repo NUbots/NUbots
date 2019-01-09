@@ -10,7 +10,6 @@ namespace motion {
 
         class TorsoMovement : public NUClear::Reactor {
         private:
-            size_t subsumptionId;
             ReactionHandle update_handle;
             double time_horizon;
 
