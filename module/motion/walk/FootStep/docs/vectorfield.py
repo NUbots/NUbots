@@ -18,15 +18,17 @@ ys = np.linspace(ymin, ymax, ny)
 dx = np.zeros((ny, nx))
 dy = np.zeros((ny, nx))
 
-d = 2
-u = 10
-h = 7
+step_steep = 2
+well_width = 0.02
+step_height = 0.1
+
+c = step_steep**(2 / step_steep) * step_height**(1 / step_steep) * (step_steep * step_height + step_steep**2 * step_height)**(-1 / step_steep) / well_width;
 
 # Fills xs and ys with values from dx and dy function
 for xi, x in enumerate(xs):
     for yi, y in enumerate(ys):
-        dx[yi, xi] = - np.tanh(x) * h*2**(u/-abs(x**d))
-        dy[yi, xi] = h*2**(u/-abs(x**d)) - y * abs((np.tanh(10 * y)))
+        dx[yi, xi] = -x/abs(x) * np.exp(-abs(cx**-step_steep))
+        dy[yi, xi] = np.exp(-abs(cx**-step_steep)) - y/step_height
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
