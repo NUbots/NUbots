@@ -11,7 +11,8 @@ namespace motion {
         class TorsoMovement : public NUClear::Reactor {
         private:
             size_t subsumptionId;
-
+            ReactionHandle update_handle;
+            double time_horizon;
 
         public:
             /// @brief Called by the powerplant to build and setup the TorsoMovement reactor.
