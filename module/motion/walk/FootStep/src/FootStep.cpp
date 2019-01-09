@@ -42,16 +42,10 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
-        FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+        FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
-                double x    = config["test"]["x"].as<double>();
-                double y    = config["test"]["y"].as<double>();
-                double z    = config["test"]["z"].as<double>();
-                int foot    = config["foot"].as<int>();
-                int time    = config["time"].as<int>();
                 step_height = config["step_height"];
                 well_width  = config["well_width"];
                 step_steep  = config["step_steep"];
@@ -60,13 +54,6 @@ namespace motion {
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
                      * std::pow(step_steep * step_height + (step_steep * step_steep * step_height), -1 / step_steep))
                     / well_width;
-
-                Eigen::Affine3d Haf_s;
-                Haf_s.linear()      = Eigen::Matrix3d::Identity();
-                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
-
-                emit(std::make_unique<FootTarget>(
-                    NUClear::clock::now() + std::chrono::seconds(time), foot, Haf_s.matrix()));
             });
 
             update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
@@ -212,14 +199,6 @@ namespace motion {
                 });
 
             on<Trigger<FootStep>>().then([this] { update_handle.enable(); });
-
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-                RegisterAction{subsumptionId,
-                               "FootStep",
-                               {std::pair<float, std::set<LimbID>>(10, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG})},
-                               [this](const std::set<LimbID>&) {},
-                               [this](const std::set<LimbID>&) {},
-                               [this](const std::set<ServoID>& servoSet) {}}));
         }
     }  // namespace walk
 }  // namespace motion

@@ -33,21 +33,10 @@ namespace motion {
 
 
         TorsoMovement::TorsoMovement(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+            : Reactor(std::move(environment)) {
 
             on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
                 time_horizon = config["time_horizon"].as<double>();
-
-                double x = config["test"]["x"].as<double>();
-                double y = config["test"]["y"].as<double>();
-                double z = config["test"]["z"].as<double>();
-                int time = config["time"].as<int>();
-                int foot = config["foot"].as<int>();
-                Eigen::Affine3d Haf_s;
-                Haf_s.linear()      = Eigen::Matrix3d::Identity();
-                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
-                emit(std::make_unique<TorsoTarget>(
-                    NUClear::clock::now() + std::chrono::seconds(time), foot, Haf_s.matrix()));
             });
 
 
@@ -134,14 +123,6 @@ namespace motion {
                 });
 
             on<Trigger<TorsoMovement>>().then([this] { update_handle.enable(); });
-
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-                RegisterAction{subsumptionId,
-                               "TorsoMovement",
-                               {std::pair<float, std::set<LimbID>>(10, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG})},
-                               [this](const std::set<LimbID>&) {},
-                               [this](const std::set<LimbID>&) {},
-                               [this](const std::set<ServoID>& servoSet) {}}));
         }
     }  // namespace walk
 }  // namespace motion
