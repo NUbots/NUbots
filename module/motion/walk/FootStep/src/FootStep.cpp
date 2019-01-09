@@ -47,15 +47,26 @@ namespace motion {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
-                time_horizon = config["time_horizon"].as<double>();
-                step_height  = config["step_height"];
-                well_width   = config["well_width"];
-                step_steep   = config["step_steep"];
+                double x    = config["test"]["x"].as<double>();
+                double y    = config["test"]["y"].as<double>();
+                double z    = config["test"]["z"].as<double>();
+                int foot    = config["foot"].as<int>();
+                int time    = config["time"].as<int>();
+                step_height = config["step_height"];
+                well_width  = config["well_width"];
+                step_steep  = config["step_steep"];
 
                 // Constant for f_x and f_y
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
                      * std::pow(step_steep * step_height + (step_steep * step_steep * step_height), -1 / step_steep))
                     / well_width;
+
+                Eigen::Affine3d Haf_s;
+                Haf_s.linear()      = Eigen::Matrix3d::Identity();
+                Haf_s.translation() = -Eigen::Vector3d(x, y, z);
+
+                emit(std::make_unique<FootTarget>(
+                    NUClear::clock::now() + std::chrono::seconds(time), foot, Haf_s.matrix()));
             });
 
             update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
@@ -151,7 +162,8 @@ namespace motion {
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * scale;
 
                     // if start y is > 0 and end y is < 0 then make y = 0
-                    // this creates a boundary stopping the robot from moving its foot through the floor/pushing on the floor
+                    // this creates a boundary stopping the robot from moving its foot through the floor/pushing on the
+                    // floor
                     if (rF_wPp.y() > 0 && rF_tPp.y() < 0) {
                         rF_tPp.y() = 0;
                     }
