@@ -59,7 +59,6 @@ namespace motion {
             update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
                     // Get support foot and swing foot coordinate systems
-
                     Eigen::Affine3d Htf_s;  // support foot
                     Eigen::Affine3d Htf_w;  // swing foot
 
@@ -128,32 +127,31 @@ namespace motion {
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
                     double distance                         = rF_wPp.norm();
-                    double scale                            = 1;
+                    double scale                            = time_left > std::chrono::duration<double>::zero()
+                                       ? (distance / time_left.count()) * time_horizon
+                                       : 1;
 
-                    // Time has elapsed, use a default scale
-                    if (time_left <= std::chrono::duration<double>::zero()) {
-                        scale = 0.01;
-                    }
+                    log(time_left.count(), distance, rF_wPp.transpose(), rF_wGg.transpose(), scale, rAGg.transpose());
 
-                    // Distance is low enough to stop the foot
-                    else if (distance < 0.01) {
-                        update_handle.disable();  // disable footstep
-                    }
 
-                    // Time has not elapsed, so determine how fast the foot should move
-                    else {
-                        scale = (distance / time_left.count()) * time_horizon;
+                    if (distance < 0.001) {
+                        update_handle.disable();
+                        return;
                     }
 
                     // Swing foot's new target position on the plane, scaled for time
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * scale;
-
                     // if start y is > 0 and end y is < 0 then make y = 0
                     // this creates a boundary stopping the robot from moving its foot through the floor/pushing on the
                     // floor
-                    if (rF_wPp.y() > 0 && rF_tPp.y() < 0) {
+                    if (!target.lift) {
                         rF_tPp.y() = 0;
                     }
+
+                    if (scale > distance) {
+                        rF_tPp = rF_wPp;
+                    }
+
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
@@ -177,8 +175,7 @@ namespace motion {
                     // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
                     Htf_t.linear()      = Rf_tt;   // Rotation from above
                     Htf_t.translation() = rF_tTt;  // Translation to foot target
-
-                    Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
+                    Transform3D t       = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
 
@@ -186,7 +183,7 @@ namespace motion {
 
                     for (const auto& joint : joints) {
                         waypoints->push_back(
-                            {subsumptionId,
+                            {target.subsumption_id,
                              NUClear::clock::now()
                                  + NUClear::clock::duration(int(time_horizon * NUClear::clock::period::den)),
                              joint.first,
@@ -198,7 +195,7 @@ namespace motion {
                     emit(waypoints);
                 });
 
-            on<Trigger<FootStep>>().then([this] { update_handle.enable(); });
+            on<Trigger<FootTarget>>().then([this] { update_handle.enable(); });
         }
     }  // namespace walk
 }  // namespace motion

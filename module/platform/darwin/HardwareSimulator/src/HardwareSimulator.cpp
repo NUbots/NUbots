@@ -328,7 +328,7 @@ namespace platform {
             sensors.fsr.right.fsr4 = down ? 1 : 0;
 
             // Set the knee loads to something huge to be foot down
-            utility::platform::darwin::getDarwinServo(ServoID::R_KNEE, sensors).load = down ? 1.0 : -1.0;
+            utility::platform::darwin::getDarwinServo(ServoID::R_KNEE, sensors).load = down ? 1.0 : 0;
 
             // Centre
             sensors.fsr.right.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
@@ -343,7 +343,7 @@ namespace platform {
             sensors.fsr.left.fsr4 = down ? 1 : 0;
 
             // Set the knee loads to something huge to be foot down
-            utility::platform::darwin::getDarwinServo(ServoID::L_KNEE, sensors).load = down ? 1.0 : -1.0;
+            utility::platform::darwin::getDarwinServo(ServoID::L_KNEE, sensors).load = down ? 1.0 : 0;
 
             // Centre
             sensors.fsr.left.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();

@@ -42,8 +42,9 @@ namespace motion {
 
             update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const TorsoTarget& target) {
-                    // Get support foot coordinate system
+                    log("moving torso");
 
+                    // Get support foot coordinate system
                     Eigen::Affine3d Htf;  // support foot
 
                     // Right foot is the support foot
@@ -72,17 +73,20 @@ namespace motion {
 
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
-                    double scale;
+                    double distance                         = rATt.norm();
+                    double scale                            = time_left > std::chrono::duration<double>::zero()
+                                       ? (distance / time_left.count()) * time_horizon
+                                       : 1;
 
-                    if (time_left <= std::chrono::duration<double>::zero()) {  // Time has elapsed
-                        scale = 0.01;
-                    }
-                    else {  // There is time left to complete
-                        scale = (rATt.norm() / time_left.count()) * time_horizon;
-                    }
 
                     // Create next torso target in torso space
-                    Eigen::Vector3d rT_tTt = rATt * scale;
+                    Eigen::Vector3d rT_tTt = rATt.normalized() * scale;
+
+                    // If our scale would move us past the target
+                    if (scale > distance) {
+                        rT_tTt = rATt;
+                    }
+
                     // Create vector from torso to foot target
                     Eigen::Vector3d rF_tTt = Htf * -rT_tTt;
                     // Target rotation from torso space
@@ -122,8 +126,8 @@ namespace motion {
                     emit(waypoints);
                 });
 
-            on<Trigger<TorsoMovement>>().then([this] { update_handle.enable(); });
-        }
-    }  // namespace walk
+            on<Trigger<TorsoTarget>>().then([this] { update_handle.enable(); });
+        }  // namespace walk
+    }      // namespace walk
 }  // namespace motion
 }  // namespace module

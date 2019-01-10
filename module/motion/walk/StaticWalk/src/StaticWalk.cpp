@@ -1,9 +1,11 @@
 #include "StaticWalk.h"
 
 #include "extension/Configuration.h"
+#include "message/input/Sensors.h"
 #include "message/motion/FootTarget.h"
 #include "message/motion/TorsoTarget.h"
-
+#include "message/motion/WalkCommand.h"
+#include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
@@ -12,9 +14,10 @@ namespace motion {
     namespace walk {
 
         using extension::Configuration;
-
+        using message::input::Sensors;
         using message::motion::FootTarget;
         using message::motion::TorsoTarget;
+        using message::motion::WalkCommand;
         using utility::behaviour::RegisterAction;
         using utility::input::LimbID;
         using utility::input::ServoID;
@@ -24,28 +27,50 @@ namespace motion {
 
             on<Configuration>("StaticWalk.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file StaticWalk.yaml
-                phase_time = config["phase_time"].as<double>();
-                start_time = NUClear::clock::now();
-                auto swing = std::make_unique<FootTarget>();
-                auto torso = std::make_unique<TorsoTarget>();
-                emit()
+                double x_speed = config["x_speed"].as<double>();
+                double y_speed = config["y_speed"].as<double>();
+                double angle   = config["angle"].as<double>();
+                torso_height   = config["torso_height"].as<double>();
+                phase_time     = std::chrono::seconds(config["phase_time"].as<int>());
+                start_phase    = NUClear::clock::now();
+                state          = INITIAL;
+                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(x_speed, y_speed, angle)));
             });
 
-            on<ResetWalk>().then([this] {
-                state      = LEFT_LEAN;
-                start_time = NUClear::clock::now();
-            });
+            // on<ResetWalk>().then([this] {
+            //     state       = INITIAL;
+            //     start_phase = NUClear::clock::now();
+            // });
 
             on<Trigger<Sensors>, With<WalkCommand>>().then(
                 [this](const Sensors& sensors, const WalkCommand& walkcommand) {
+                    if (state == INITIAL) {
+                        Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
+                                * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        Hff_w.translation().z() = 0;
+                        state                   = LEFT_LEAN;
+                    }
+
                     // Timer is up, go to next phase
                     if (NUClear::clock::now() > start_phase + phase_time) {
                         start_phase = NUClear::clock::now();
                         switch (state) {
                             case LEFT_LEAN: state = RIGHT_STEP; break;
-                            case RIGHT_STEP: state = RIGHT_LEAN; break;
+                            case RIGHT_STEP: {
+                                // Store where support is relative to swing ignoring height
+                                Hff_w = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
+                                        * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                                Hff_w.translation().z() = 0;
+                                state                   = RIGHT_LEAN;
+                            } break;
                             case RIGHT_LEAN: state = LEFT_STEP; break;
-                            case LEFT_STEP: state = LEFT_LEAN; break;
+                            case LEFT_STEP: {
+                                // Store where support is relative to swing ignoring height
+                                Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
+                                        * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                                Hff_w.translation().z() = 0;
+                                state                   = LEFT_LEAN;
+                            } break;
                         }
                     }
 
@@ -53,65 +78,87 @@ namespace motion {
                     switch (state) {
                         case LEFT_LEAN: {
                             // Support foot to torso transform
-                            Eigen::Affine3d Htf = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                            Eigen::Affine3d Htf(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
 
                             // move COM to foot
                             // move torso to foot - COM
                             // distance from torso to COM
                             // (0,0,z) - rCTt
 
-                            // Create foot to target vector
-                            rAFf = Eigen::Vector3d(0, 0, height) - Htc.translation();
+                            // Create support foot to target vector
+                            Eigen::Vector3d rAFf(0, 0, torso_height);
 
+                            // Create matrix for TorsoTarget
+                            Eigen::Affine3d Haf;
                             Haf.linear()      = Htf.linear();
                             Haf.translation() = -rAFf;
 
-                            emit(std::make_unique<TorsoTarget>(start_phase + phase_time, false, Haf.matrix()));
+                            // COM over foot
+                            emit(std::make_unique<TorsoTarget>(
+                                start_phase + phase_time, false, Haf.matrix(), subsumptionId));
+
+                            // // Maintain foot position
+                            emit(std::make_unique<FootTarget>(
+                                start_phase + phase_time, true, Hff_w.matrix(), false, subsumptionId));
+
+
                         } break;
                         case RIGHT_LEAN: {
                             // Support foot to torso transform
-                            Eigen::Affine3d Htf = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                            Eigen::Affine3d Htf(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
 
                             // move COM to foot
                             // move torso to foot - COM
                             // distance from torso to COM
                             // (0,0,z) - rCTt
 
-                            // Create foot to target vector
-                            rAFf = Eigen::Vector3d(0, 0, height) - Htc.translation();
+                            // Create support foot to target vector
+                            Eigen::Vector3d rAFf(0, 0, torso_height);  // - Htc.translation();
+
+                            // Create matrix for TorsoTarget
+                            Eigen::Affine3d Haf;
 
                             Haf.linear()      = Htf.linear();
                             Haf.translation() = -rAFf;
 
-                            emit(std::make_unique<TorsoTarget>(start_phase + phase_time, false, Haf.matrix()));
+                            emit(std::make_unique<TorsoTarget>(
+                                start_phase + phase_time, true, Haf.matrix(), subsumptionId));
+
+                            // Maintain foot position
+                            emit(std::make_unique<FootTarget>(
+                                start_phase + phase_time, false, Hff_w.matrix(), false, subsumptionId));
+
+
                         } break;
                         case RIGHT_STEP: {
-                            // walkcommand is (x,y,theta) where x,y is
-                            // velocity in m/s and theta is angle in radians/seconds
-                            Eigen::Affine3d Haf;
-                            Haf.linear() = Eigen::Affine3d::Identity() * walkcommand.command.z() / phase_time;
-                            Haf.translation() =
-                                -(walkcommand.command.x() / phase_time, walkcommand.command.y() / phase_time, 0);
+                            // // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
+                            // // radians/seconds
+                            // Eigen::Affine3d Haf;
+                            // Haf.linear() = Eigen::Affine3d::Identity() * walkcommand.command.z() / phase_time;
+                            // Haf.translation() =
+                            //     -(walkcommand.command.x() / phase_time, walkcommand.command.y() / phase_time, 0);
 
-                            emit(std::make_unique<FootTarget>(start_phase + phase_time, true, Haf));
+                            // emit(std::make_unique<FootTarget>(start_phase + phase_time, true, Haf, true,
+                            // subsumptionId));
                         } break;
                         case LEFT_STEP: {
-                            // walkcommand is (x,y,theta) where x,y is
-                            // velocity in *metres/second* and theta is angle in
-                            // *radians/seconds*
-                            Eigen::Affine3d Haf;
-                            Haf.linear() = Eigen::Affine3d::Identity() * walkcommand.command.z() / phase_time;
-                            Haf.translation() =
-                                -(walkcommand.command.x() / phase_time, walkcommand.command.y() / phase_time, 0);
+                            // // walkcommand is (x,y,theta) where x,y is velocity in *metres/second* and theta is angle
+                            // in
+                            // // radians/seconds
+                            // Eigen::Affine3d Haf;
+                            // Haf.linear() = Eigen::Affine3d::Identity() * walkcommand.command.z() / phase_time;
+                            // Haf.translation() =
+                            //     -(walkcommand.command.x() / phase_time, walkcommand.command.y() / phase_time, 0);
 
-                            emit(std::make_unique<FootTarget>(start_phase + phase_time, false, Haf));
+                            // emit(std::make_unique<FootTarget>(start_phase + phase_time, false, Haf, true,
+                            // subsumptionId));
                         } break;
                     }
                 });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
                 RegisterAction{subsumptionId,
-                               "FootStep",
+                               "StaticWalk",
                                {std::pair<float, std::set<LimbID>>(10, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG})},
                                [this](const std::set<LimbID>&) {},
                                [this](const std::set<LimbID>&) {},

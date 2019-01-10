@@ -30,5 +30,6 @@ message FootTarget {
     bool isRightFootSwing = 2;
     // Transform from world oriented support foot space (s) to target (a)
     mat4  Haf_s          = 3;
-    int64 subsumption_id = 4;
+    bool  lift           = 4;
+    int64 subsumption_id = 5;
 }

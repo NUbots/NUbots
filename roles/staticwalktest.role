@@ -18,4 +18,6 @@ NUCLEAR_ROLE(
 
     #Motion
     motion::walk::StaticWalk
+    motion::walk::TorsoMovement
+    motion::walk::FootStep
 )
