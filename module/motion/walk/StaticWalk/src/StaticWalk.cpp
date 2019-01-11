@@ -140,7 +140,6 @@ namespace motion {
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance,
                                 0);
-                            log(Haf.translation().x(), phase_time.count());
 
                             emit(std::make_unique<FootTarget>(
                                 start_phase + phase_time, true, Haf.matrix(), true, subsumptionId));

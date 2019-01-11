@@ -60,16 +60,16 @@ namespace motion {
                     Eigen::Affine3d Haf;
                     Haf = target.Haf;
 
-                    // Create vector to target from support foot
-                    Eigen::Vector3d rAFf = -Haf.translation();
-                    // Position of target in torso space
-                    Eigen::Vector3d rATt = Htf * rAFf;
+                    // Position of the target in torso space
+                    Eigen::Vector3d rATt = Htf * -Haf.translation();
 
+                    // If the torso is close enough to the position, stop running
                     if (rATt.norm() < 0.001) {
                         update_handle.disable();
                     }
 
-                    // Find scale to reach target at specified time
+                    // Find scale to reach target at specified time based on distance from target, time left, and the
+                    // time horizon
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
                     double distance                         = rATt.norm();
                     double scale                            = time_left > std::chrono::duration<double>::zero()
@@ -80,7 +80,7 @@ namespace motion {
                     // Create next torso target in torso space
                     Eigen::Vector3d rT_tTt = rATt.normalized() * scale;
 
-                    // If our scale would move us past the target
+                    // If our scale would move us past the target, then just go to the target
                     if (scale > distance) {
                         rT_tTt = rATt;
                     }
@@ -102,8 +102,9 @@ namespace motion {
                     // Scale as above to rotate in specified time
                     Rf_tt = Rft.slerp(scale, Rat).toRotationMatrix();
                     Eigen::Affine3d Htf_t;
-                    Htf_t.linear() = Eigen::Matrix3d::Identity();  // Rf_tt.inverse();  // Rotation as above from slerp
-                    Htf_t.translation() = rF_tTt;                  // Translation to foot target
+                    // Htf_t.linear() = Eigen::Matrix3d::Identity();
+                    Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
+                    Htf_t.translation() = rF_tTt;           // Translation to foot target
                     Transform3D t       = convert<double, 4, 4>(Htf_t.matrix());
 
                     auto joints =

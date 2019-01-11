@@ -132,6 +132,7 @@ namespace motion {
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
 
+                    // If the distance is small enough, stop moving the foot
                     if (distance < 0.001) {
                         update_handle.disable();
                         return;
@@ -139,17 +140,16 @@ namespace motion {
 
                     // Swing foot's new target position on the plane, scaled for time
                     Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * scale;
-                    // if start y is > 0 and end y is < 0 then make y = 0
-                    // this creates a boundary stopping the robot from moving its foot through the floor/pushing on the
-                    // floor
+
+                    // If no lift is wanted, then set the y (vertical axis in plane space) to 0
                     if (!target.lift) {
-                        rF_tPp = rF_wPp.normalized() * scale;
+                        rF_tPp.y() = 0;
                     }
 
+                    // If the scale is more than the distance, go to the target to avoid overshooting
                     if (scale > distance) {
                         rF_tPp = rF_wPp;
                     }
-
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
@@ -187,7 +187,7 @@ namespace motion {
                              joint.first,
                              joint.second,
                              20,
-                             100});  // TODO: support separate gains for each leg
+                             100});
                     }
                     emit(waypoints);
                 });
