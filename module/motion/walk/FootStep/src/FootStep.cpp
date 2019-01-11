@@ -78,6 +78,7 @@ namespace motion {
                     }
                     Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;
+
                     // Get orientation for world (Rotation of world->torso)
                     Eigen::Affine3d Rtw;
                     Rtw.linear() = Eigen::Affine3d(sensors.world).rotation();
@@ -131,9 +132,6 @@ namespace motion {
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
 
-                    log(time_left.count(), distance, rF_wPp.transpose(), rF_wGg.transpose(), scale, rAGg.transpose());
-
-
                     if (distance < 0.001) {
                         update_handle.disable();
                         return;
@@ -145,7 +143,7 @@ namespace motion {
                     // this creates a boundary stopping the robot from moving its foot through the floor/pushing on the
                     // floor
                     if (!target.lift) {
-                        rF_tPp.y() = 0;
+                        rF_tPp = rF_wPp.normalized() * scale;
                     }
 
                     if (scale > distance) {
@@ -191,7 +189,6 @@ namespace motion {
                              20,
                              100});  // TODO: support separate gains for each leg
                     }
-
                     emit(waypoints);
                 });
 

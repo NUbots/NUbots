@@ -31,6 +31,7 @@ namespace motion {
                 double y_speed = config["y_speed"].as<double>();
                 double angle   = config["angle"].as<double>();
                 torso_height   = config["torso_height"].as<double>();
+                feet_distance  = config["feet_distance"].as<double>();
                 phase_time     = std::chrono::seconds(config["phase_time"].as<int>());
                 start_phase    = NUClear::clock::now();
                 state          = INITIAL;
@@ -131,28 +132,33 @@ namespace motion {
 
                         } break;
                         case RIGHT_STEP: {
-                            // // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
-                            // // radians/seconds
-                            // Eigen::Affine3d Haf;
-                            // Haf.linear() = Eigen::Affine3d::Identity() * walkcommand.command.z() / phase_time;
-                            // Haf.translation() =
-                            //     -(walkcommand.command.x() / phase_time, walkcommand.command.y() / phase_time, 0);
+                            // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
+                            // radians/seconds
+                            Eigen::Affine3d Haf;
+                            Haf.linear()      = Eigen::Matrix3d::Identity();  // * walkcommand.command.z() / phase_time;
+                            Haf.translation() = -Eigen::Vector3d(
+                                walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
+                                (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance,
+                                0);
+                            log(Haf.translation().x(), phase_time.count());
 
-                            // emit(std::make_unique<FootTarget>(start_phase + phase_time, true, Haf, true,
-                            // subsumptionId));
+                            emit(std::make_unique<FootTarget>(
+                                start_phase + phase_time, true, Haf.matrix(), true, subsumptionId));
                         } break;
                         case LEFT_STEP: {
-                            // // walkcommand is (x,y,theta) where x,y is velocity in *metres/second* and theta is angle
-                            // in
-                            // // radians/seconds
-                            // Eigen::Affine3d Haf;
-                            // Haf.linear() = Eigen::Affine3d::Identity() * walkcommand.command.z() / phase_time;
-                            // Haf.translation() =
-                            //     -(walkcommand.command.x() / phase_time, walkcommand.command.y() / phase_time, 0);
+                            // walkcommand is (x,y,theta) where x,y is velocity in *metres/second* and theta is angle in
+                            // radians/seconds
+                            Eigen::Affine3d Haf;
+                            Haf.linear()      = Eigen::Matrix3d::Identity();  // * walkcommand.command.z() / phase_time;
+                            Haf.translation() = -Eigen::Vector3d(
+                                walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
+                                (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) + feet_distance,
+                                0);
 
-                            // emit(std::make_unique<FootTarget>(start_phase + phase_time, false, Haf, true,
-                            // subsumptionId));
+                            emit(std::make_unique<FootTarget>(
+                                start_phase + phase_time, false, Haf.matrix(), true, subsumptionId));
                         } break;
+                        case INITIAL: break;
                     }
                 });
 

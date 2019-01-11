@@ -42,8 +42,6 @@ namespace motion {
 
             update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const TorsoTarget& target) {
-                    log("moving torso");
-
                     // Get support foot coordinate system
                     Eigen::Affine3d Htf;  // support foot
 
@@ -67,7 +65,7 @@ namespace motion {
                     // Position of target in torso space
                     Eigen::Vector3d rATt = Htf * rAFf;
 
-                    if (rATt.norm() < 0.01) {
+                    if (rATt.norm() < 0.001) {
                         update_handle.disable();
                     }
 

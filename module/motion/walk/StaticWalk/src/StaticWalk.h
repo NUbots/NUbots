@@ -15,6 +15,7 @@ namespace motion {
             NUClear::clock::duration phase_time;
             NUClear::clock::time_point start_phase;
             double torso_height;
+            double feet_distance;
             size_t subsumptionId;
             Eigen::Affine3d Hff_w;
 
