@@ -46,10 +46,10 @@ namespace motion {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file FootStep.yaml
-                step_height = config["step_height"];
-                well_width  = config["well_width"];
-                step_steep  = config["step_steep"];
-
+                step_height  = config["step_height"];
+                well_width   = config["well_width"];
+                step_steep   = config["step_steep"];
+                time_horizon = config["time_horizon"];
                 // Constant for f_x and f_y
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
                      * std::pow(step_steep * step_height + (step_steep * step_steep * step_height), -1 / step_steep))
