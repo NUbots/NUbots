@@ -32,6 +32,7 @@ namespace motion {
                 double angle   = config["angle"].as<double>();
                 torso_height   = config["torso_height"].as<double>();
                 feet_distance  = config["feet_distance"].as<double>();
+                stance_width   = config["stance_width"].as<double>();
                 phase_time     = std::chrono::seconds(config["phase_time"].as<int>());
                 start_phase    = NUClear::clock::now();
                 state          = INITIAL;
@@ -62,7 +63,9 @@ namespace motion {
                                 Hff_w = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                                 Hff_w.translation().z() = 0;
-                                state                   = RIGHT_LEAN;
+                                Hff_w.translation().y() = -stance_width;
+
+                                state = RIGHT_LEAN;
                             } break;
                             case RIGHT_LEAN: state = LEFT_STEP; break;
                             case LEFT_STEP: {
@@ -70,8 +73,11 @@ namespace motion {
                                 Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                                 Hff_w.translation().z() = 0;
-                                state                   = LEFT_LEAN;
+                                Hff_w.translation().y() = stance_width;
+
+                                state = LEFT_LEAN;
                             } break;
+                            default: break;
                         }
                     }
 
@@ -98,7 +104,7 @@ namespace motion {
                             emit(std::make_unique<TorsoTarget>(
                                 start_phase + phase_time, false, Haf.matrix(), subsumptionId));
 
-                            // // Maintain foot position
+                            // Maintain foot position
                             emit(std::make_unique<FootTarget>(
                                 start_phase + phase_time, true, Hff_w.matrix(), false, subsumptionId));
 
@@ -157,7 +163,7 @@ namespace motion {
                             emit(std::make_unique<FootTarget>(
                                 start_phase + phase_time, false, Haf.matrix(), true, subsumptionId));
                         } break;
-                        case INITIAL: break;
+                        default: break;
                     }
                 });
 

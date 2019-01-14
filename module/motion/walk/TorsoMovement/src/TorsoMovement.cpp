@@ -67,7 +67,6 @@ namespace motion {
                     if (rATt.norm() < 0.001) {
                         update_handle.disable();
                     }
-
                     // Find scale to reach target at specified time based on distance from target, time left, and the
                     // time horizon
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();

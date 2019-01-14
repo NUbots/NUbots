@@ -132,6 +132,7 @@ namespace motion {
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
 
+
                     // If the distance is small enough, stop moving the foot
                     if (distance < 0.001) {
                         update_handle.disable();
