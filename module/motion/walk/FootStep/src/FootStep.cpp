@@ -149,11 +149,15 @@ namespace motion {
 
                     // If the scale is more than the distance, go to the target to avoid overshooting
                     if (scale > distance) {
-                        rF_tPp = rF_wPp;
+                        rF_tPp = Eigen::Vector3d(0, 0, 0);
                     }
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+
+                    if (target.lift) {
+                        log(rF_tTt.transpose());
+                    }
 
                     // Torso to target transform
                     Eigen::Affine3d Hat;
