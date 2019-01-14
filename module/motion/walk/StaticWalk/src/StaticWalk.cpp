@@ -141,20 +141,28 @@ namespace motion {
                             // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
                             // radians/seconds
                             Eigen::Affine3d Haf;
-                            Haf.linear()      = Eigen::Matrix3d::Identity();  // * walkcommand.command.z() / phase_time;
+                            Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
+                                           * Eigen::Matrix3d::Identity();
                             Haf.translation() = -Eigen::Vector3d(
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance,
                                 0);
 
+                            // double radius = Haf.translation().norm() / (Math.abs(walkcommand.command.z()) + 1E-10);
+                            // Eigen::Vector3d origin(-walkcommand.command.y() / walkcommand.command.z(),
+                            //                        walkcommand.command.x() / walkcommand.command.z(),
+                            //                        0);
+
+
                             emit(std::make_unique<FootTarget>(
                                 start_phase + phase_time, true, Haf.matrix(), true, subsumptionId));
                         } break;
                         case LEFT_STEP: {
-                            // walkcommand is (x,y,theta) where x,y is velocity in *metres/second* and theta is angle in
-                            // radians/seconds
+                            // walkcommand is (x,y,theta) where x,y is velocity in *metres/second* and theta is angle
+                            // in radians/seconds
                             Eigen::Affine3d Haf;
-                            Haf.linear()      = Eigen::Matrix3d::Identity();  // * walkcommand.command.z() / phase_time;
+                            Haf.linear() = Eigen::Matrix3d::Identity();  // * walkcommand.command.z() /
+                            phase_time;
                             Haf.translation() = -Eigen::Vector3d(
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) + feet_distance,
