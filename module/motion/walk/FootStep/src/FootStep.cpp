@@ -64,16 +64,12 @@ namespace motion {
 
                     // Right foot is the swing foot
                     if (target.isRightFootSwing) {
-                        // Transform of left foot to torso
                         Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                        // Transform of right foot to torso
                         Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                     }
                     // Left foot is the swing foot
                     else {
-                        // Transform of right foot to torso
                         Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                        // Transform of left foot to torso
                         Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                     }
                     Eigen::Affine3d Haf_s;
@@ -98,7 +94,10 @@ namespace motion {
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
 
+                    Eigen::Vector3d rF_sF_wf_w = (Htf_s.inverse() * Htf_w).translation();
+
                     // Vector from ground to target
+                    // Hgf_s * rAF_sf_s
                     Eigen::Vector3d rAGg = (Htg.inverse() * Htf_s) * -Haf_s.translation();
 
                     // Direction of the target from the swing foot
@@ -156,7 +155,18 @@ namespace motion {
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
 
                     if (target.lift) {
-                        log(rF_tTt.transpose());
+                        log("rF_wPp: ",
+                            rF_wPp.transpose(),
+                            "\nrF_tPp: ",
+                            rF_tPp.transpose(),
+                            "\nrF_wGg: ",
+                            rF_wGg.transpose(),
+                            "\nrAGg: ",
+                            rAGg.transpose(),
+                            "\nrF_sF_wf_w: ",
+                            rF_sF_wf_w.transpose(),
+                            "\nrF_tTt:",
+                            rF_tTt.transpose());
                     }
 
                     // Torso to target transform

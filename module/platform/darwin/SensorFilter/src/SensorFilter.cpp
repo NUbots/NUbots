@@ -433,30 +433,30 @@ namespace platform {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    sensors->rightFootDown = false;
-                    sensors->leftFootDown  = false;
+                    // sensors->rightFootDown = false;
+                    // sensors->leftFootDown  = false;
 
-                    if (previousSensors) {
-                        // Use our virtual load sensor class to work out which feet are down
-                        arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
-                                                             sensors->servo[ServoID::R_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
-                                                             sensors->servo[ServoID::L_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::R_KNEE].presentVelocity,
-                                                             sensors->servo[ServoID::R_KNEE].load,
-                                                             sensors->servo[ServoID::L_KNEE].presentVelocity,
-                                                             sensors->servo[ServoID::L_KNEE].load,
-                                                             sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
-                                                             sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                                                             sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
-                                                             sensors->servo[ServoID::L_ANKLE_PITCH].load};
+                    // if (previousSensors) {
+                    //     // Use our virtual load sensor class to work out which feet are down
+                    //     arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
+                    //                                          sensors->servo[ServoID::R_HIP_PITCH].load,
+                    //                                          sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
+                    //                                          sensors->servo[ServoID::L_HIP_PITCH].load,
+                    //                                          sensors->servo[ServoID::R_KNEE].presentVelocity,
+                    //                                          sensors->servo[ServoID::R_KNEE].load,
+                    //                                          sensors->servo[ServoID::L_KNEE].presentVelocity,
+                    //                                          sensors->servo[ServoID::L_KNEE].load,
+                    //                                          sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
+                    //                                          sensors->servo[ServoID::R_ANKLE_PITCH].load,
+                    //                                          sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
+                    //                                          sensors->servo[ServoID::L_ANKLE_PITCH].load};
 
-                        auto feet_down         = load_sensor.updateFeet(features);
-                        sensors->leftFootDown  = feet_down[0];
-                        sensors->rightFootDown = feet_down[1];
-                    }
+                    //     auto feet_down         = load_sensor.updateFeet(features);
+                    //     sensors->leftFootDown  = feet_down[0];
+                    //     sensors->rightFootDown = feet_down[1];
+                    // }
 
-                    emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
+                    // emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *

@@ -43,16 +43,14 @@ namespace motion {
             update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const TorsoTarget& target) {
                     // Get support foot coordinate system
-                    Eigen::Affine3d Htf;  // support foot
+                    Eigen::Affine3d Htf;
 
                     // Right foot is the support foot
                     if (target.isRightFootSupport) {
-                        // Transform of right foot to torso
                         Htf = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                     }
                     // Left foot is the support foot
                     else {
-                        // Transform of left foot to torso
                         Htf = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                     }
 

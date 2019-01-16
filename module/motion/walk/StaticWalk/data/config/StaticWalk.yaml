@@ -1,11 +1,11 @@
 # time each phase takes to finish (seconds)
 phase_time: 1
 # Height of the torso from the ground when standing (m)
-torso_height: 0.23
+torso_height: 0.15
 # Distance between the feet (m)
-feet_distance: 0.07
+feet_distance: 0.05
 # Width between the feet wile walking (m)
-stance_width: 0.1
+stance_width: 0.08
 # values for walkcommand (test)
 x_speed: 0.02
 y_speed: 0

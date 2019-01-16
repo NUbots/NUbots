@@ -201,9 +201,10 @@ namespace platform {
 
                     for (int i = 0; i < 20; ++i) {
 
-                        auto& servo       = utility::platform::darwin::getDarwinServo(i, sensors);
-                        float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
-                        movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
+                        auto& servo        = utility::platform::darwin::getDarwinServo(i, sensors);
+                        float movingSpeed  = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
+                        movingSpeed        = movingSpeed > 0.1 ? 0.1 : movingSpeed;
+                        servo.presentSpeed = movingSpeed * UPDATE_FREQUENCY;
 
 
                         if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
@@ -328,7 +329,9 @@ namespace platform {
             sensors.fsr.right.fsr4 = down ? 1 : 0;
 
             // Set the knee loads to something huge to be foot down
-            utility::platform::darwin::getDarwinServo(ServoID::R_KNEE, sensors).load = down ? 1.0 : 0;
+            utility::platform::darwin::getDarwinServo(ServoID::R_KNEE, sensors).load        = down ? 0.1 : 0;
+            utility::platform::darwin::getDarwinServo(ServoID::R_HIP_PITCH, sensors).load   = down ? -0.07 : 0;
+            utility::platform::darwin::getDarwinServo(ServoID::R_ANKLE_PITCH, sensors).load = down ? -0.17 : 0;
 
             // Centre
             sensors.fsr.right.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
@@ -343,7 +346,9 @@ namespace platform {
             sensors.fsr.left.fsr4 = down ? 1 : 0;
 
             // Set the knee loads to something huge to be foot down
-            utility::platform::darwin::getDarwinServo(ServoID::L_KNEE, sensors).load = down ? 1.0 : 0;
+            utility::platform::darwin::getDarwinServo(ServoID::L_KNEE, sensors).load        = down ? 0.1 : 0;
+            utility::platform::darwin::getDarwinServo(ServoID::L_HIP_PITCH, sensors).load   = down ? 0.04 : 0;
+            utility::platform::darwin::getDarwinServo(ServoID::L_ANKLE_PITCH, sensors).load = down ? -0.56 : 0;
 
             // Centre
             sensors.fsr.left.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();

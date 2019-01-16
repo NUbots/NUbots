@@ -37,6 +37,7 @@ namespace motion {
                 double x_speed = config["x_speed"].as<double>();
                 double y_speed = config["y_speed"].as<double>();
                 double angle   = config["angle"].as<double>();
+
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(x_speed, y_speed, angle)));
             });
 
@@ -52,6 +53,7 @@ namespace motion {
                         // Hff_w = Htf.inverse() * Htf_w
                         Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
                                 * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        // Hff_w.translation().y() = stance_width;
                         // Set z to 0 so there is no lift
                         Hff_w.translation().z() = 0;
                         state                   = LEFT_LEAN;
@@ -69,8 +71,8 @@ namespace motion {
                                 // stance width
                                 Hff_w = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                                Hff_w.translation().z() = 0;
                                 Hff_w.translation().y() = -stance_width;
+                                Hff_w.translation().z() = 0;
 
                                 state = RIGHT_LEAN;
                             } break;
@@ -80,8 +82,8 @@ namespace motion {
                                 // stance width
                                 Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                                Hff_w.translation().z() = 0;
                                 Hff_w.translation().y() = stance_width;
+                                Hff_w.translation().z() = 0;
 
                                 state = LEFT_LEAN;
                             } break;
@@ -137,7 +139,7 @@ namespace motion {
                                            * Eigen::Matrix3d::Identity();
                             Haf.translation() = -Eigen::Vector3d(
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
-                                (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance / 2,
+                                (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance,
                                 0);
 
                             // double radius = Haf.translation().norm() / (Math.abs(walkcommand.command.z()) + 1E-10);
@@ -158,7 +160,7 @@ namespace motion {
                                            * Eigen::Matrix3d::Identity();
                             Haf.translation() = -Eigen::Vector3d(
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
-                                (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance / 2,
+                                (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) + feet_distance,
                                 0);
 
                             // Move the left foot to the location specified by the walkcommand
