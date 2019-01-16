@@ -72,6 +72,7 @@ namespace motion {
                         Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                         Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                     }
+
                     Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;
 
@@ -93,8 +94,6 @@ namespace motion {
 
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
-
-                    Eigen::Vector3d rF_sF_wf_w = (Htf_s.inverse() * Htf_w).translation();
 
                     // Vector from ground to target
                     // Hgf_s * rAF_sf_s
@@ -154,19 +153,10 @@ namespace motion {
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
 
+                    Eigen::Vector3d rF_tF_wf_w = Htf_w.inverse() * rF_tTt;
+
                     if (target.lift) {
-                        log("rF_wPp: ",
-                            rF_wPp.transpose(),
-                            "\nrF_tPp: ",
-                            rF_tPp.transpose(),
-                            "\nrF_wGg: ",
-                            rF_wGg.transpose(),
-                            "\nrAGg: ",
-                            rAGg.transpose(),
-                            "\nrF_sF_wf_w: ",
-                            rF_sF_wf_w.transpose(),
-                            "\nrF_tTt:",
-                            rF_tTt.transpose());
+                        log("rF_tF_wf_w:", rF_tF_wf_w.transpose());
                     }
 
                     // Torso to target transform
@@ -182,12 +172,12 @@ namespace motion {
                     Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
                     // TODO: determine t
-                    Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
+                    Rf_tt = Rf_wt.slerp(time_left.count(), Rat).toRotationMatrix();
 
                     Eigen::Affine3d Htf_t;
                     // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
-                    Htf_t.linear()      = Rf_tt;   // Rotation from above
-                    Htf_t.translation() = rF_tTt;  // Translation to foot target
+                    Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
+                    Htf_t.translation() = rF_tTt;           // Translation to foot target
                     Transform3D t       = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);

@@ -135,17 +135,15 @@ namespace motion {
                             // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
                             // radians/seconds
                             Eigen::Affine3d Haf;
-                            Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
-                                           * Eigen::Matrix3d::Identity();
                             Haf.translation() = -Eigen::Vector3d(
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance,
                                 0);
-
-                            // double radius = Haf.translation().norm() / (Math.abs(walkcommand.command.z()) + 1E-10);
-                            // Eigen::Vector3d origin(-walkcommand.command.y() / walkcommand.command.z(),
-                            //                        walkcommand.command.x() / walkcommand.command.z(),
-                            //                        0);
+                            Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
+                                           * Eigen::Matrix3d::Identity();
+                            Haf.linear() =
+                                Eigen::Matrix3d::Identity()
+                                * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
 
                             // Move the right foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(
@@ -156,12 +154,15 @@ namespace motion {
                             // radians/seconds. Create foot to target matrix based on this walkcommand, taking into
                             // account phase time and foot distance offset
                             Eigen::Affine3d Haf;
-                            Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
-                                           * Eigen::Matrix3d::Identity();
                             Haf.translation() = -Eigen::Vector3d(
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) + feet_distance,
                                 0);
+                            Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
+                                           * Eigen::Matrix3d::Identity();
+                            Haf.linear() =
+                                Eigen::Matrix3d::Identity()
+                                * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
 
                             // Move the left foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(
