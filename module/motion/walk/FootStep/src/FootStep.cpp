@@ -42,6 +42,23 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
+        double FootStep::trapezoidal_distance(const Eigen::Vector3d& pos, int n) {
+            // pos = rF_wPp
+            // from a to b do trapezoidal
+            // integral from 0 to rF_wPp.x() f(x) dx ~ b-a/2n (f(a) + 2f(x1) + ... +2f(xn-1) + f(b))
+            // change in x = b-a/n
+            // a = 0, b = rF_wPp.x()
+            // use f_x for f(a),f(x1),...,f(b)
+            double sum      = f_x(pos);
+            double change_x = pos.x() / n;
+            double x        = change_x;
+            for (int i = 0; i < n - 1; i++) {
+                sum += 2 * f_x(Eigen::Vector3d(x, 0, 0));
+                x += change_x;
+            }
+            return std::abs((pos.x() / (2 * n)) * sum);
+        }
+
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
@@ -126,10 +143,14 @@ namespace motion {
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
                     double distance                         = rF_wPp.norm();
-                    double scale                            = time_left > std::chrono::duration<double>::zero()
+                    // double distance = target.lift ? trapezoidal_distance(rF_wPp, 30) : rF_wPp.norm();
+                    double scale = time_left > std::chrono::duration<double>::zero()
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
 
+                    // if (target.lift) {
+                    // log("distance:", distance, "scale", scale);
+                    // }
 
                     // If the distance is small enough, stop moving the foot
                     if (distance < 0.001) {
@@ -152,11 +173,8 @@ namespace motion {
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
-
-                    Eigen::Vector3d rF_tF_wf_w = Htf_w.inverse() * rF_tTt;
-
                     if (target.lift) {
-                        log("rF_tF_wf_w:", rF_tF_wf_w.transpose());
+                        log("rF_tF_wf_w:", (Htf_w.inverse() * rF_tTt).transpose());
                     }
 
                     // Torso to target transform
