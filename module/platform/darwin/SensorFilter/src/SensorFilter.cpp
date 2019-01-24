@@ -367,13 +367,21 @@ namespace platform {
                         }
                     }
 
+                    // gyro_x to the right
+                    // gyro_y to the back
+                    // gyro_z down
+
+                    // acc_x to the back
+                    // acc_y to the left
+                    // acc_z up
+
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
                     if (previousSensors && (input.cm730ErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
                     else {
-                        sensors->accelerometer = {
-                            -input.accelerometer.y, -input.accelerometer.x, input.accelerometer.z};
+                        sensors->accelerometer = {-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z};
+                        // CM730 {-input.accelerometer.y, -input.accelerometer.x, input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
@@ -387,7 +395,8 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                        sensors->gyroscope = {-input.gyroscope.y, -input.gyroscope.x, -input.gyroscope.z};
+                        // CM730 sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
 
                     // Put in our FSR information
