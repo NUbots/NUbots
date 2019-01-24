@@ -49,11 +49,13 @@ namespace motion {
             // change in x = b-a/n
             // a = 0, b = rF_wPp.x()
             // use f_x for f(a),f(x1),...,f(b)
-            double sum      = f_x(pos);
+            double sum      = 0;
+            double y        = 0;
             double change_x = pos.x() / n;
             double x        = change_x;
             for (int i = 0; i < n - 1; i++) {
-                sum += 2 * f_x(Eigen::Vector3d(x, 0, 0));
+                sum += 2 * f_y(Eigen::Vector3d(x, y, 0));
+                y = f_y(Eigen::Vector3d(x, y, 0));
                 x += change_x;
             }
             return std::abs((pos.x() / (2 * n)) * sum);
@@ -94,23 +96,49 @@ namespace motion {
                     Haf_s = target.Haf_s;
 
                     // Get orientation for world (Rotation of world->torso)
-                    Eigen::Affine3d Rtw;
-                    Rtw.linear() = Eigen::Affine3d(sensors.world).rotation();
+                    Eigen::Matrix3d Rtw;
+                    Rtw = Eigen::Affine3d(sensors.world).rotation();
 
-                    // Get the yawless world rotation
-                    Eigen::Affine3d Rtg =
-                        Rtw * Eigen::AngleAxisd(-Rtw.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
+                    Eigen::Vector3d ea_Rtw;
+                    ea_Rtw = Rtw.eulerAngles(0, 1, 2);
+                    Eigen::Vector3d ea_Htf_s;
+                    ea_Htf_s = Htf_s.rotation().eulerAngles(0, 1, 2);
 
-                    // Apply the foot yaw to the yawless world rotation
-                    Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
+                    Eigen::Matrix3d Rtg;
+                    Rtg = Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
+                          * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
+                          * Eigen::AngleAxisd(ea_Htf_s.z(), Eigen::Vector3d::UnitZ());
+
+
+                    // // Get the yawless world rotation
+                    // Eigen::Matrix3d Rtg =
+                    //     Eigen::AngleAxisd(-Rtw.eulerAngles(2, 1, 0).x(), Eigen::Vector3d::UnitZ()) * Rtw;
+
+                    // // Apply the foot yaw to the yawless world rotation
+                    // Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(2, 1, 0).x(),
+                    // Eigen::Vector3d::UnitZ());
 
                     // Construct a torso to foot ground space (support foot centric world oriented space)
                     Eigen::Affine3d Htg;
-                    Htg.linear()      = Rtg.linear();         // Rotation from Rtg
+                    Htg.linear()      = Rtg;                  // Rotation from Rtg
                     Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
-
+                    Htg               = Htf_s;
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
+
+                    // if (target.lift) {
+                    //     // log("rF_wGg",
+                    //     // // rF_wGg.transpose().x(),
+                    //     // // "\nrGTt",
+                    //     // // Htg.inverse().translation().transpose().x(),
+                    //     // // "\nrF_wTt",
+                    //     // // Htf_w.translation().transpose().x());
+                    // }
+                    // else {
+                    //     log("not lift");
+                    // }
+
+                    // log("rF_sAa", Haf_s.translation());
 
                     // Vector from ground to target
                     // Hgf_s * rAF_sf_s
@@ -127,7 +155,7 @@ namespace motion {
                     // Z axis is the cross product of X and Y
                     Rgp.rightCols<1>() = Rgp.leftCols<1>().cross(Rgp.middleCols<1>(1)).normalized();
                     // Fix X axis by finding the cross product Y and Z
-                    Rgp.leftCols<1>() = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>());
+                    Rgp.leftCols<1>() = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>()).normalized();
 
                     // Create transform based on above rotation
                     Eigen::Affine3d Hgp;       // plane to ground transform
@@ -143,14 +171,11 @@ namespace motion {
                     // Find scale to reach target at specified time
                     std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
                     double distance                         = rF_wPp.norm();
+                    double trapezoidal                      = trapezoidal_distance(rF_wPp, 30);
                     // double distance = target.lift ? trapezoidal_distance(rF_wPp, 30) : rF_wPp.norm();
                     double scale = time_left > std::chrono::duration<double>::zero()
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
-
-                    // if (target.lift) {
-                    // log("distance:", distance, "scale", scale);
-                    // }
 
                     // If the distance is small enough, stop moving the foot
                     if (distance < 0.001) {
@@ -173,8 +198,36 @@ namespace motion {
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
+
+
                     if (target.lift) {
-                        log("rF_tF_wf_w:", (Htf_w.inverse() * rF_tTt).transpose());
+                        // log("rF_tF_wf_w:",
+                        //     (Htf_w.inverse() * rF_tTt).transpose(),
+                        //     "\nDistance:",
+                        //     distance,
+                        //     "\nScale:",
+                        //     scale,
+                        //     "\nTrapezoidal scale:",
+                        //     trapezoidal);
+                        // emit(graph("x", (Htf_w.inverse() * rF_tTt).x()));
+                        // emit(graph("y", (Htf_w.inverse() * rF_tTt).y()));
+                        // emit(graph("z", (Htf_w.inverse() * rF_tTt).z()));
+                        // log("rF_wGg",
+                        //     rF_wGg.x(),
+                        //     "\nrF_wPp",
+                        //     rF_wPp.x(),
+                        //     "\nrF_tPp",
+                        //     rF_tPp.x(),
+                        //     "\nrF_tTt",
+                        //     rF_tTt.x());
+                        // "\nrF_tTt",
+                        // rF_tTt.transpose(),
+                        // "\nrATt",
+                        // -(Haf_s * Htf_s.inverse()).translation().transpose());
+
+                        // emit(graph("x", rF_tTt.x()));
+                        // emit(graph("y", rF_tTt.y()));
+                        // emit(graph("z", rF_tTt.z()));
                     }
 
                     // Torso to target transform
@@ -189,7 +242,6 @@ namespace motion {
                     // Create rotation matrix for foot target
                     Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-                    // TODO: determine t
                     Rf_tt = Rf_wt.slerp(time_left.count(), Rat).toRotationMatrix();
 
                     Eigen::Affine3d Htf_t;
@@ -199,7 +251,6 @@ namespace motion {
                     Transform3D t       = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
-
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
                     for (const auto& joint : joints) {

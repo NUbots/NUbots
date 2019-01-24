@@ -1,11 +1,13 @@
-# time each phase takes to finish (seconds)
-phase_time: 1
+# Time each phase takes to finish (milliseconds)
+phase_time: 1000
+# Time between each phase where robot is unmoving, to prevent jitter (milliseconds)
+wait_time: 200
 # Height of the torso from the ground when standing (m)
 torso_height: 0.2
 # Distance between the feet (m)
-feet_distance: 0.05
+feet_distance: 0.074
 # Width between the feet wile walking (m)
-stance_width: 0.08
+stance_width: 0.1
 # values for walkcommand (test)
 x_speed: 0.02
 y_speed: 0

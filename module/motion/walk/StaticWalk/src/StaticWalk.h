@@ -13,6 +13,7 @@ namespace motion {
         private:
             enum State { INITIAL, LEFT_LEAN, RIGHT_STEP, RIGHT_LEAN, LEFT_STEP } state;
             NUClear::clock::duration phase_time;
+            NUClear::clock::duration wait_time;
             NUClear::clock::time_point start_phase;
             double torso_height;
             double feet_distance;
