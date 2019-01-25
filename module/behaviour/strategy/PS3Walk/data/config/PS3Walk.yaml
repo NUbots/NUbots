@@ -1,5 +1,3 @@
-# The main controller (with all the buttons), this appears to be on the higher device index
 controller_path: "/dev/input/js1"
-# The accelerometer on the controller (no buttons)
 accelerometer_path: "/dev/input/js0"
-action_scripts: ["Stand.yaml", "WaveRight.yaml", "Stand.yaml"]
+action_scripts: ["WaveLeft.yaml"]
