@@ -1,7 +1,5 @@
 # Time each phase takes to finish (milliseconds)
 phase_time: 1000
-# Time between each phase where robot is unmoving, to prevent jitter (milliseconds)
-wait_time: 200
 # Height of the torso from the ground when standing (m)
 torso_height: 0.2
 # Distance between the feet (m)

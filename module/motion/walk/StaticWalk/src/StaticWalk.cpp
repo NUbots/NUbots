@@ -31,7 +31,6 @@ namespace motion {
                 feet_distance = config["feet_distance"].as<double>();
                 stance_width  = config["stance_width"].as<double>();
                 phase_time    = std::chrono::milliseconds(config["phase_time"].as<int>());
-                wait_time     = std::chrono::milliseconds(config["wait_time"].as<int>());
                 start_phase   = NUClear::clock::now();
                 state         = INITIAL;
 
@@ -51,13 +50,12 @@ namespace motion {
                 [this](const Sensors& sensors, const WalkCommand& walkcommand) {
                     // INITIAL state occurs only as the first state in the walk to set the matrix Hff_w
                     if (state == INITIAL) {
-                        // Hff_w = Htf.inverse() * Htf_w
                         Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
                                 * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                        // Hff_w.translation().y() = stance_width;
                         // Set z to 0 so there is no lift
                         Hff_w.translation().z() = 0;
-                        state                   = LEFT_LEAN;
+
+                        state = LEFT_LEAN;
                     }
 
                     // When the time is over for this phase, begin the next phase
@@ -102,12 +100,14 @@ namespace motion {
                             Eigen::Affine3d Haf;
                             Haf.linear()      = Htf.linear();
                             Haf.translation() = -Eigen::Vector3d(0, 0, torso_height);
+
                             // Maintain right foot position while the torso moves over the left foot
                             emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time - wait_time, true, Hff_w.matrix(), false, subsumptionId));
+                                start_phase + phase_time, true, Hff_w.matrix(), false, subsumptionId));
+
                             // Move the COM over the left foot
                             emit(std::make_unique<TorsoTarget>(
-                                start_phase + phase_time - wait_time, false, Haf.matrix(), subsumptionId));
+                                start_phase + phase_time, false, Haf.matrix(), subsumptionId));
                         } break;
                         case RIGHT_LEAN: {
                             // Support foot to torso transform
@@ -118,14 +118,13 @@ namespace motion {
                             Haf.linear()      = Htf.linear();
                             Haf.translation() = -Eigen::Vector3d(0, 0, torso_height);
 
-                            // Maintain left foot position while the torso moves over the right foot
-                            emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time - wait_time, false, Hff_w.matrix(), false, subsumptionId));
-
                             // Move the COM over the right foot
                             emit(std::make_unique<TorsoTarget>(
-                                start_phase + phase_time - wait_time, true, Haf.matrix(), subsumptionId));
+                                start_phase + phase_time, true, Haf.matrix(), subsumptionId));
 
+                            // Maintain left foot position while the torso moves over the right foot
+                            emit(std::make_unique<FootTarget>(
+                                start_phase + phase_time, false, Hff_w.matrix(), false, subsumptionId));
 
                         } break;
                         case RIGHT_STEP: {
@@ -144,7 +143,7 @@ namespace motion {
 
                             // Move the right foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time - wait_time, true, Haf.matrix(), true, subsumptionId));
+                                start_phase + phase_time, true, Haf.matrix(), true, subsumptionId));
                         } break;
                         case LEFT_STEP: {
                             // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
@@ -163,7 +162,7 @@ namespace motion {
 
                             // Move the left foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time - wait_time, false, Haf.matrix(), true, subsumptionId));
+                                start_phase + phase_time, false, Haf.matrix(), true, subsumptionId));
                         } break;
                         default: break;
                     }
@@ -176,7 +175,7 @@ namespace motion {
                                [this](const std::set<LimbID>&) {},
                                [this](const std::set<LimbID>&) {},
                                [this](const std::set<ServoID>& servoSet) {}}));
-        }  // namespace walk
-    }      // namespace walk
+        }
+    }  // namespace walk
 }  // namespace motion
 }  // namespace module

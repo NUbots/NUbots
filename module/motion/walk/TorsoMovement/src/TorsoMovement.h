@@ -12,6 +12,7 @@ namespace motion {
         private:
             ReactionHandle update_handle;
             double time_horizon;
+            NUClear::clock::duration offset_time;
 
         public:
             /// @brief Called by the powerplant to build and setup the TorsoMovement reactor.

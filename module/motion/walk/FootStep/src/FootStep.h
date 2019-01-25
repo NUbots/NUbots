@@ -14,16 +14,14 @@ namespace motion {
             double f_x(const Eigen::Vector3d& vec);
             // Returns vector from the vector field of where the foot should move on y-axis (in plane space)
             double f_y(const Eigen::Vector3d& vec);
-            // Returns the distance of vec from 0 along the curve defined above in f_x, using the trapezoidal rule with
-            // n partitions
-            double trapezoidal_distance(const Eigen::Vector3d& vec, int n);
-
 
             ReactionHandle update_handle;
             double step_height;
             double step_steep;
             double well_width;
             double time_horizon;
+            NUClear::clock::duration offset_time;
+
             /// Constant for mathematical function based on step_height, step_steep and well_width
             double c;
 

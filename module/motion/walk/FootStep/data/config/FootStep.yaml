@@ -3,3 +3,5 @@ step_height: 0.03
 well_width: 0.02
 step_steep: 2
 time_horizon: 0.1
+# Make the step complete slightly earlier to make sure it is at the target on time (milliseconds)
+offset_time: 200

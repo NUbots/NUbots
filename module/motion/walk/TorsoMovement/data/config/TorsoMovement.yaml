@@ -1,1 +1,3 @@
 time_horizon: 0.1
+# Make the movement complete slightly earlier to make sure it is at the target on time (milliseconds)
+offset_time: 200

@@ -42,25 +42,6 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
-        double FootStep::trapezoidal_distance(const Eigen::Vector3d& pos, int n) {
-            // pos = rF_wPp
-            // from a to b do trapezoidal
-            // integral from 0 to rF_wPp.x() f(x) dx ~ b-a/2n (f(a) + 2f(x1) + ... +2f(xn-1) + f(b))
-            // change in x = b-a/n
-            // a = 0, b = rF_wPp.x()
-            // use f_x for f(a),f(x1),...,f(b)
-            double sum      = 0;
-            double y        = 0;
-            double change_x = pos.x() / n;
-            double x        = change_x;
-            for (int i = 0; i < n - 1; i++) {
-                sum += 2 * f_y(Eigen::Vector3d(x, y, 0));
-                y = f_y(Eigen::Vector3d(x, y, 0));
-                x += change_x;
-            }
-            return std::abs((pos.x() / (2 * n)) * sum);
-        }
-
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             on<Configuration>("FootStep.yaml").then([this](const Configuration& config) {
@@ -69,6 +50,8 @@ namespace motion {
                 well_width   = config["well_width"];
                 step_steep   = config["step_steep"];
                 time_horizon = config["time_horizon"];
+                offset_time  = std::chrono::milliseconds(config["offset_time"].as<int>());
+
                 // Constant for f_x and f_y
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)
                      * std::pow(step_steep * step_height + (step_steep * step_steep * step_height), -1 / step_steep))
@@ -99,46 +82,27 @@ namespace motion {
                     Eigen::Matrix3d Rtw;
                     Rtw = Eigen::Affine3d(sensors.world).rotation();
 
+                    // Convert Rtw and Htf_s rotation into euler angles to get pitch and roll from Rtw and yaw from
+                    // Htf_s to create a new rotation matrix
                     Eigen::Vector3d ea_Rtw;
                     ea_Rtw = Rtw.eulerAngles(0, 1, 2);
                     Eigen::Vector3d ea_Htf_s;
                     ea_Htf_s = Htf_s.rotation().eulerAngles(0, 1, 2);
 
+                    // Rtg is the yawless world rotation
                     Eigen::Matrix3d Rtg;
                     Rtg = Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
                           * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
                           * Eigen::AngleAxisd(ea_Htf_s.z(), Eigen::Vector3d::UnitZ());
-
-
-                    // // Get the yawless world rotation
-                    // Eigen::Matrix3d Rtg =
-                    //     Eigen::AngleAxisd(-Rtw.eulerAngles(2, 1, 0).x(), Eigen::Vector3d::UnitZ()) * Rtw;
-
-                    // // Apply the foot yaw to the yawless world rotation
-                    // Rtg = Rtg * Eigen::AngleAxisd(Htf_s.rotation().eulerAngles(2, 1, 0).x(),
-                    // Eigen::Vector3d::UnitZ());
 
                     // Construct a torso to foot ground space (support foot centric world oriented space)
                     Eigen::Affine3d Htg;
                     Htg.linear()      = Rtg;                  // Rotation from Rtg
                     Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
                     Htg               = Htf_s;
+
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
-
-                    // if (target.lift) {
-                    //     // log("rF_wGg",
-                    //     // // rF_wGg.transpose().x(),
-                    //     // // "\nrGTt",
-                    //     // // Htg.inverse().translation().transpose().x(),
-                    //     // // "\nrF_wTt",
-                    //     // // Htf_w.translation().transpose().x());
-                    // }
-                    // else {
-                    //     log("not lift");
-                    // }
-
-                    // log("rF_sAa", Haf_s.translation());
 
                     // Vector from ground to target
                     // Hgf_s * rAF_sf_s
@@ -146,6 +110,7 @@ namespace motion {
 
                     // Direction of the target from the swing foot
                     Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
+
                     // Create a rotation to the plane that cuts through the two positions
                     Eigen::Matrix3d Rgp;
                     // X axis is the direction towards the target
@@ -169,11 +134,9 @@ namespace motion {
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
                     // Find scale to reach target at specified time
-                    std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
+                    std::chrono::duration<double> time_left = target.timestamp - offset_time - NUClear::clock::now();
                     double distance                         = rF_wPp.norm();
-                    double trapezoidal                      = trapezoidal_distance(rF_wPp, 30);
-                    // double distance = target.lift ? trapezoidal_distance(rF_wPp, 30) : rF_wPp.norm();
-                    double scale = time_left > std::chrono::duration<double>::zero()
+                    double scale                            = time_left > std::chrono::duration<double>::zero()
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
 
@@ -198,37 +161,6 @@ namespace motion {
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
-
-
-                    if (target.lift) {
-                        // log("rF_tF_wf_w:",
-                        //     (Htf_w.inverse() * rF_tTt).transpose(),
-                        //     "\nDistance:",
-                        //     distance,
-                        //     "\nScale:",
-                        //     scale,
-                        //     "\nTrapezoidal scale:",
-                        //     trapezoidal);
-                        // emit(graph("x", (Htf_w.inverse() * rF_tTt).x()));
-                        // emit(graph("y", (Htf_w.inverse() * rF_tTt).y()));
-                        // emit(graph("z", (Htf_w.inverse() * rF_tTt).z()));
-                        // log("rF_wGg",
-                        //     rF_wGg.x(),
-                        //     "\nrF_wPp",
-                        //     rF_wPp.x(),
-                        //     "\nrF_tPp",
-                        //     rF_tPp.x(),
-                        //     "\nrF_tTt",
-                        //     rF_tTt.x());
-                        // "\nrF_tTt",
-                        // rF_tTt.transpose(),
-                        // "\nrATt",
-                        // -(Haf_s * Htf_s.inverse()).translation().transpose());
-
-                        // emit(graph("x", rF_tTt.x()));
-                        // emit(graph("y", rF_tTt.y()));
-                        // emit(graph("z", rF_tTt.z()));
-                    }
 
                     // Torso to target transform
                     Eigen::Affine3d Hat;

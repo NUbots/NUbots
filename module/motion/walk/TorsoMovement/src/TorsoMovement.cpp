@@ -37,6 +37,7 @@ namespace motion {
 
             on<Configuration>("TorsoMovement.yaml").then([this](const Configuration& config) {
                 time_horizon = config["time_horizon"].as<double>();
+                offset_time  = std::chrono::milliseconds(config["offset_time"].as<int>());
             });
 
 
@@ -67,12 +68,11 @@ namespace motion {
                     }
                     // Find scale to reach target at specified time based on distance from target, time left, and the
                     // time horizon
-                    std::chrono::duration<double> time_left = target.timestamp - NUClear::clock::now();
+                    std::chrono::duration<double> time_left = target.timestamp - offset_time - NUClear::clock::now();
                     double distance                         = rATt.norm();
                     double scale                            = time_left > std::chrono::duration<double>::zero()
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
-
 
                     // Create next torso target in torso space
                     Eigen::Vector3d rT_tTt = rATt.normalized() * scale;
@@ -98,6 +98,7 @@ namespace motion {
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
                     // Scale as above to rotate in specified time
                     Rf_tt = Rft.slerp(scale, Rat).toRotationMatrix();
+
                     Eigen::Affine3d Htf_t;
                     // Htf_t.linear() = Eigen::Matrix3d::Identity();
                     Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
@@ -123,7 +124,7 @@ namespace motion {
                 });
 
             on<Trigger<TorsoTarget>>().then([this] { update_handle.enable(); });
-        }  // namespace walk
-    }      // namespace walk
+        }
+    }  // namespace walk
 }  // namespace motion
 }  // namespace module
