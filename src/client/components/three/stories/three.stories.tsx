@@ -1,14 +1,14 @@
 import { storiesOf } from '@storybook/react'
-import { IComputedValue } from 'mobx'
 import { reaction } from 'mobx'
 import { observable } from 'mobx'
 import { action } from 'mobx'
 import { computed } from 'mobx'
+import { IComputedValue } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { now } from 'mobx-utils'
 import { Component } from 'react'
 import * as React from 'react'
-import { Light } from 'three'
+import { Scene } from 'three'
 import { Object3D } from 'three'
 import { Material } from 'three'
 import { Geometry } from 'three'
@@ -18,8 +18,9 @@ import { MeshPhongMaterial } from 'three'
 import { Mesh } from 'three'
 import { BoxGeometry } from 'three'
 import { PerspectiveCamera } from 'three'
-import { Scene } from 'three'
+import { Light } from 'three'
 
+import { disposableComputed } from '../../../base/disposable_computed'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
 import { Stage } from '../three'
@@ -59,9 +60,9 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
   }
 
   private createStage = (canvas: Canvas): IComputedValue<Stage> => {
-    const geometry = computed(() => this.boxGeometry())
+    const geometry = disposableComputed(() => this.boxGeometry())
     const box = (box: BoxModel) => {
-      const material = computed(() => this.boxMaterial(box))
+      const material = disposableComputed(() => this.boxMaterial(box))
       return computed(() => this.box(box, geometry.get(), material.get()))
     }
     const camera = computed(() => this.camera(canvas))
