@@ -4,6 +4,7 @@ import { action } from 'mobx'
 import { computed } from 'mobx'
 import { reaction } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
+import { expr } from 'mobx-utils'
 import { createTransformer } from 'mobx-utils'
 import { now } from 'mobx-utils'
 import { Component } from 'react'
@@ -94,13 +95,9 @@ class ViewModel {
   }
 
   @computed
-  private get aspect() {
-    return this.canvas.width / this.canvas.height
-  }
-
-  @computed
   private get camera(): Camera {
-    const camera = new PerspectiveCamera(60, this.aspect, 0.5, 10)
+    const aspect = expr(() => this.canvas.width / this.canvas.height)
+    const camera = new PerspectiveCamera(60, aspect, 0.5, 10)
     camera.position.z = 4
     return camera
   }

@@ -1,60 +1,75 @@
 import { IComputedValue } from 'mobx'
 import { computed } from 'mobx'
+import { expr } from 'mobx-utils'
 import { Component } from 'react'
 import * as React from 'react'
-import { Scene } from 'three'
+import { PerspectiveCamera } from 'three'
 import { SpotLight } from 'three'
 import { PointLight } from 'three'
 import { Object3D } from 'three'
 import { AxesHelper } from 'three'
-import { PerspectiveCamera } from 'three'
-import { Camera } from 'three'
+import { Scene } from 'three'
 
+import { Stage } from '../../../three/three'
 import { Canvas } from '../../../three/three'
 import { Three } from '../../../three/three'
 
 export class ModelVisualiser extends Component<{ model: IComputedValue<Object3D>; }> {
   render() {
-    return <Three stage={this.createStage}/>
+    return <Three stage={this.stage}/>
   }
 
-  private createStage = (canvas: Canvas) => {
-    const model = computed(() => this.props.model.get())
-    const camera = computed(() => this.camera(canvas))
-    const helper = computed(() => this.helper())
-    const spotlight = computed(() => this.spotlight())
-    const pointlight = computed(() => this.pointlight(camera.get()))
-    const scene = computed(() => this.scene([helper.get(), spotlight.get(), pointlight.get(), model.get()]))
-    return computed(() => ({ camera: camera.get(), scene: scene.get() }))
+  private stage = (canvas: Canvas) => {
+    const viewModel = new ViewModel(canvas, this.props.model)
+    return computed(() => viewModel.stage)
+  }
+}
+
+class ViewModel {
+  constructor(private readonly canvas: Canvas, private readonly model: IComputedValue<Object3D>) {
   }
 
-  private camera(canvas: Canvas) {
-    const camera = new PerspectiveCamera(75, canvas.width / canvas.height, 0.01, 100)
+  @computed
+  get stage(): Stage {
+    return { camera: this.camera, scene: this.scene }
+  }
+
+  @computed
+  private get camera() {
+    const aspect = expr(() => this.canvas.width / this.canvas.height)
+    const camera = new PerspectiveCamera(75, aspect, 0.01, 100)
     camera.position.set(0.4, 0.3, 0.3)
     camera.up.set(0, 0, 1)
     camera.lookAt(0, 0, 0)
     return camera
   }
 
-  private scene(children: Object3D[]): Scene {
+  @computed
+  private get scene(): Scene {
     const scene = new Scene()
-    scene.add(...children)
+    scene.add(this.helper)
+    scene.add(this.spotlight)
+    scene.add(this.pointlight)
+    scene.add(this.model.get())
     return scene
   }
 
-  private helper() {
+  @computed
+  private get helper() {
     return new AxesHelper()
   }
 
-  private spotlight() {
+  @computed
+  private get spotlight() {
     const light = new SpotLight('#fff', 1, 20, Math.PI / 8)
     light.position.set(0, 0, 1)
     return light
   }
 
-  private pointlight(camera: Camera) {
+  @computed
+  private get pointlight() {
     const light = new PointLight('#fff')
-    light.position.copy(camera.position)
+    light.position.copy(this.camera.position)
     return light
   }
 }
