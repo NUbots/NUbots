@@ -15,7 +15,7 @@ import { Three } from '../../../three/three'
 
 export class ModelVisualiser extends Component<{ model: IComputedValue<Object3D>; }> {
   render() {
-    return <Three createStage={this.createStage}/>
+    return <Three stage={this.createStage}/>
   }
 
   private createStage = (canvas: Canvas) => {

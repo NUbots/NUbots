@@ -15,14 +15,14 @@ import * as styles from './styles.css'
 export type Stage = { scene: Scene, camera: Camera }
 export type Canvas = { width: number, height: number }
 
-export class Three extends Component<{ createStage(canvas: Canvas): IComputedValue<Stage> }> {
+export class Three extends Component<{ stage(canvas: Canvas): IComputedValue<Stage> }> {
   @observable private canvas: Canvas = { width: 0, height: 0 }
   private ref: HTMLCanvasElement | null = null
   private renderer?: WebGLRenderer
 
   componentDidMount() {
     this.renderer = new WebGLRenderer({ canvas: this.ref!, antialias: true })
-    const stage = this.props.createStage(this.canvas)
+    const stage = this.props.stage(this.canvas)
     disposeOnUnmount(this, autorun(() => this.renderStage(stage.get()), { scheduler: requestAnimationFrame }))
   }
 
