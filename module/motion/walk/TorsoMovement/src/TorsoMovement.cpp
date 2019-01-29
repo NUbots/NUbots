@@ -41,7 +41,7 @@ namespace motion {
             });
 
 
-            update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
+            on<Trigger<Sensors>, With<KinematicsModel>, With<TorsoTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const TorsoTarget& target) {
                     // Get support foot coordinate system
                     Eigen::Affine3d Htf;
@@ -62,10 +62,6 @@ namespace motion {
                     // Position of the target in torso space
                     Eigen::Vector3d rATt = Htf * -Haf.translation();
 
-                    // If the torso is close enough to the position, stop running
-                    if (rATt.norm() < 0.001) {
-                        update_handle.disable();
-                    }
                     // Find scale to reach target at specified time based on distance from target, time left, and the
                     // time horizon
                     std::chrono::duration<double> time_left = target.timestamp - offset_time - NUClear::clock::now();
@@ -73,6 +69,11 @@ namespace motion {
                     double scale                            = time_left > std::chrono::duration<double>::zero()
                                        ? (distance / time_left.count()) * time_horizon
                                        : 1;
+
+                    // If the torso is close enough to the position, stop running
+                    if (distance < 0.001) {
+                        scale = 1;
+                    }
 
                     // Create next torso target in torso space
                     Eigen::Vector3d rT_tTt = rATt.normalized() * scale;
@@ -100,9 +101,9 @@ namespace motion {
                     Rf_tt = Rft.slerp(scale, Rat).toRotationMatrix();
 
                     Eigen::Affine3d Htf_t;
-                    // Htf_t.linear() = Eigen::Matrix3d::Identity();
-                    Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
-                    Htf_t.translation() = rF_tTt;           // Translation to foot target
+                    Htf_t.linear() = Eigen::Matrix3d::Identity();
+                    // Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
+                    Htf_t.translation() = rF_tTt;  // Translation to foot target
                     Transform3D t       = convert<double, 4, 4>(Htf_t.matrix());
 
                     auto joints =
@@ -122,8 +123,6 @@ namespace motion {
 
                     emit(waypoints);
                 });
-
-            on<Trigger<TorsoTarget>>().then([this] { update_handle.enable(); });
         }
     }  // namespace walk
 }  // namespace motion

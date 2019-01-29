@@ -58,7 +58,7 @@ namespace motion {
                     / well_width;
             });
 
-            update_handle = on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
+            on<Trigger<Sensors>, With<KinematicsModel>, With<FootTarget>>().then(
                 [this](const Sensors& sensors, const KinematicsModel& model, const FootTarget& target) {
                     // Get support foot and swing foot coordinate systems
                     Eigen::Affine3d Htf_s;  // support foot
@@ -99,7 +99,6 @@ namespace motion {
                     Eigen::Affine3d Htg;
                     Htg.linear()      = Rtg;                  // Rotation from Rtg
                     Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
-                    Htg               = Htf_s;
 
                     // Vector to the swing foot in ground space
                     Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
@@ -142,8 +141,7 @@ namespace motion {
 
                     // If the distance is small enough, stop moving the foot
                     if (distance < 0.001) {
-                        update_handle.disable();
-                        return;
+                        scale = 1;
                     }
 
                     // Swing foot's new target position on the plane, scaled for time
@@ -174,12 +172,12 @@ namespace motion {
                     // Create rotation matrix for foot target
                     Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-                    Rf_tt = Rf_wt.slerp(time_left.count(), Rat).toRotationMatrix();
+                    Rf_tt = Rf_wt.slerp(scale, Rat).toRotationMatrix();
 
                     Eigen::Affine3d Htf_t;
-                    // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
-                    Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
-                    Htf_t.translation() = rF_tTt;           // Translation to foot target
+                    Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
+                    // Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
+                    Htf_t.translation() = rF_tTt;  // Translation to foot target
                     Transform3D t       = convert<double, 4, 4>(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
@@ -197,8 +195,6 @@ namespace motion {
                     }
                     emit(waypoints);
                 });
-
-            on<Trigger<FootTarget>>().then([this] { update_handle.enable(); });
         }
     }  // namespace walk
 }  // namespace motion

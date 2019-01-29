@@ -10,7 +10,6 @@ namespace motion {
 
         class TorsoMovement : public NUClear::Reactor {
         private:
-            ReactionHandle update_handle;
             double time_horizon;
             NUClear::clock::duration offset_time;
 
