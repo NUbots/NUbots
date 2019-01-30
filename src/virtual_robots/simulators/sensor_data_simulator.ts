@@ -4,13 +4,13 @@ import { Quaternion } from 'three'
 
 import { message } from '../../shared/proto/messages'
 import { Imat4 } from '../../shared/proto/messages'
-import { Simulator } from '../simulator'
+import { PeriodicSimulator } from '../simulator'
 import { Message } from '../simulator'
 import Sensors = message.input.Sensors
 
 export const HIP_TO_FOOT = 0.2465
 
-export class SensorDataSimulator implements Simulator {
+export class SensorDataSimulator implements PeriodicSimulator {
   static of() {
     return new SensorDataSimulator()
   }

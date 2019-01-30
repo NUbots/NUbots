@@ -1,12 +1,14 @@
 import { range } from '../shared/base/range'
 
+import { Simulator } from './simulator'
 import { VirtualRobot } from './virtual_robot'
-import { SimulatorOpts } from './virtual_robot'
+import { PeriodicSimulatorOpts } from './virtual_robot'
 
 type Opts = {
   fakeNetworking: boolean
   numRobots: number
-  simulators: SimulatorOpts[]
+  simulators: Simulator[]
+  periodicSimulators: PeriodicSimulatorOpts[]
 }
 
 export class VirtualRobots {
@@ -21,6 +23,7 @@ export class VirtualRobots {
       fakeNetworking: opts.fakeNetworking,
       name: `Virtual Robot #${index + 1}`,
       simulators: opts.simulators,
+      periodicSimulators: opts.periodicSimulators,
     }))
     return new VirtualRobots({ robots })
   }

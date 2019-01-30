@@ -33,10 +33,11 @@ describe('Networking Integration', () => {
           NodeSystemClock,
           {
             name: 'Robot #1',
-            simulators: [
+            periodicSimulators: [
               { frequency: 1, simulator: OverviewSimulator.of() },
               { frequency: 60, simulator: SensorDataSimulator.of() },
             ],
+            simulators: [],
           },
         ),
       ],

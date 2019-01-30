@@ -1,11 +1,11 @@
 import { message } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
-import { Simulator } from '../simulator'
+import { PeriodicSimulator } from '../simulator'
 import { Message } from '../simulator'
 
 import DataPoint = message.support.nusight.DataPoint
 
-export class ChartSimulator implements Simulator {
+export class ChartSimulator implements PeriodicSimulator {
   static of(): ChartSimulator {
     return new ChartSimulator()
   }

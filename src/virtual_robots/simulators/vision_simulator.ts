@@ -8,7 +8,7 @@ import { Imat4 } from '../../shared/proto/messages'
 import { message } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
 import { Message } from '../simulator'
-import { Simulator } from '../simulator'
+import { PeriodicSimulator } from '../simulator'
 import CompressedImage = message.output.CompressedImage
 import Projection = message.output.CompressedImage.Lens.Projection
 import Balls = message.vision.Balls
@@ -16,7 +16,7 @@ import Side = message.vision.Goal.Side
 import Team = message.vision.Goal.Team
 import Goals = message.vision.Goals
 
-export class VisionSimulator implements Simulator {
+export class VisionSimulator implements PeriodicSimulator {
   constructor(private images: Uint8Array[]) {
   }
 

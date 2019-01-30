@@ -5,28 +5,31 @@ import { NUClearNetClient } from '../shared/nuclearnet/nuclearnet_client'
 import { Clock } from '../shared/time/clock'
 
 import { flatMap } from './flat_map'
-import { Simulator } from './simulator'
+import { PeriodicSimulator, Simulator } from './simulator'
 
 type Opts = {
   fakeNetworking: boolean
   name: string
-  simulators: SimulatorOpts[]
+  simulators: Simulator[],
+  periodicSimulators: PeriodicSimulatorOpts[]
 }
 
-export type SimulatorOpts = {
+export type PeriodicSimulatorOpts = {
   frequency: number,
-  simulator: Simulator
+  simulator: PeriodicSimulator
 }
 
 export class VirtualRobot {
   private name: string
-  private simulators: SimulatorOpts[]
+  private simulators: Simulator[]
+  private periodicSimulators: PeriodicSimulatorOpts[]
 
   constructor(private network: NUClearNetClient,
               private clock: Clock,
-              opts: { name: string, simulators: SimulatorOpts[] }) {
+              opts: { name: string, simulators: Simulator[], periodicSimulators: PeriodicSimulatorOpts[] }) {
     this.name = opts.name
     this.simulators = opts.simulators
+    this.periodicSimulators = opts.periodicSimulators
   }
 
   static of(opts: Opts): VirtualRobot {
@@ -38,10 +41,14 @@ export class VirtualRobot {
   startSimulators(index: number, numRobots: number) {
     const disconnect = this.connect()
 
-    const stops = this.simulators.map(opts => {
-      const period = 1 / opts.frequency
-      return this.clock.setInterval(() => this.simulate(opts.simulator, index, numRobots), period)
-    })
+    const stops: Array<() => void> = this.periodicSimulators
+      .map(opts => {
+        const period = 1 / opts.frequency
+        return this.clock.setInterval(() => this.simulate(opts.simulator, index, numRobots), period)
+      })
+      .concat(this.simulators.map(simulator => {
+        return simulator.start(this.network)
+      }))
 
     return () => {
       stops.forEach(stop => stop())
@@ -59,7 +66,10 @@ export class VirtualRobot {
   }
 
   simulateAll(index: number, numRobots: number) {
-    const messages = flatMap(opts => opts.simulator.simulate(this.clock.now(), index, numRobots), this.simulators)
+    const messages = flatMap(
+      opts => opts.simulator.simulate(this.clock.now(), index, numRobots),
+      this.periodicSimulators,
+    )
     messages.forEach(message => this.send(message.messageType, message.buffer))
     return messages
   }
@@ -68,7 +78,7 @@ export class VirtualRobot {
     return this.network.connect({ name: this.name })
   }
 
-  private simulate(simulator: Simulator, index: number, numRobots: number) {
+  private simulate(simulator: PeriodicSimulator, index: number, numRobots: number) {
     const messages = simulator.simulate(this.clock.now(), index, numRobots)
     messages.forEach(message => this.send(message.messageType, message.buffer))
     return messages

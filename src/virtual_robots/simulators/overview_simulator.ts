@@ -5,7 +5,7 @@ import { FieldDimensions } from '../../shared/field/dimensions'
 import { message } from '../../shared/proto/messages'
 import { Ivec2 } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
-import { Simulator } from '../simulator'
+import { PeriodicSimulator } from '../simulator'
 import { Message } from '../simulator'
 import State = message.behaviour.Behaviour.State
 import Mode = message.input.GameState.Data.Mode
@@ -13,7 +13,7 @@ import PenaltyReason = message.input.GameState.Data.PenaltyReason
 import Phase = message.input.GameState.Data.Phase
 import Overview = message.support.nusight.Overview
 
-export class OverviewSimulator implements Simulator {
+export class OverviewSimulator implements PeriodicSimulator {
   constructor(private field: FieldDimensions,
               private random: SeededRandom) {
   }

@@ -44,12 +44,13 @@ if (withVirtualRobots) {
   const virtualRobots = VirtualRobots.of({
     fakeNetworking: true,
     numRobots: 3,
-    simulators: [
+    periodicSimulators: [
       { frequency: 1, simulator: OverviewSimulator.of() },
       { frequency: 10, simulator: SensorDataSimulator.of() },
       { frequency: 10, simulator: ChartSimulator.of() },
       { frequency: 5, simulator: VisionSimulator.of() },
     ],
+    simulators: [],
   })
   virtualRobots.startSimulators()
 }
