@@ -1,8 +1,8 @@
 import { storiesOf } from '@storybook/react'
-import { observable } from 'mobx'
 import { action } from 'mobx'
 import { computed } from 'mobx'
 import { reaction } from 'mobx'
+import { observable } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { expr } from 'mobx-utils'
 import { createTransformer } from 'mobx-utils'
@@ -20,6 +20,7 @@ import { BoxGeometry } from 'three'
 import { PerspectiveCamera } from 'three'
 import { Light } from 'three'
 
+import { disposableComputed } from '../../../base/disposable_computed'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
 import { Stage } from '../three'
@@ -121,7 +122,7 @@ class ViewModel {
 }
 
 class BoxViewModel {
-  private static geometry = computed<Geometry>(() => new BoxGeometry(1, 1, 1))
+  private static geometry = disposableComputed<Geometry>(() => new BoxGeometry(1, 1, 1))
 
   constructor(private readonly model: BoxModel) {
   }
@@ -139,7 +140,7 @@ class BoxViewModel {
     return mesh
   }
 
-  @computed
+  @disposableComputed
   private get material(): Material {
     return new MeshPhongMaterial({ color: this.model.color })
   }

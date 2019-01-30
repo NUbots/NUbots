@@ -74,4 +74,95 @@ describe('disposableComputed', () => {
       expect(countUnique(someValues)).toBe(5)
     })
   })
+
+  describe('as a decorator', () => {
+    let model: Model
+    let viewModel: ViewModel
+    let factory: TriangleFactory
+
+    class Model {
+      @observable.ref color: string
+
+      constructor({ color }: { color: string }) {
+        this.color = color
+      }
+    }
+
+    class ViewModel {
+      constructor(
+        private readonly factory: TriangleFactory,
+        private readonly model: { color: string },
+      ) {
+      }
+
+      @disposableComputed
+      get value(): Triangle {
+        return this.factory.createTriangle(this.model.color)
+      }
+    }
+
+    beforeEach(() => {
+      factory = new TriangleFactory()
+      model = new Model({ color: 'red' })
+      viewModel = new ViewModel(factory, model)
+    })
+
+    it('returns computed value', () => {
+      expect(viewModel.value).toBeInstanceOf(Triangle)
+      expect(viewModel.value.color).toBe('red')
+    })
+
+    it('caches values while being observed', () => {
+      const dispose = autorun(() => viewModel.value)
+      expect(viewModel.value).toBe(viewModel.value)
+      expect(factory.allocations).toBe(1)
+      dispose()
+    })
+
+    it('disposes when no longer observed', () => {
+      const dispose = autorun(() => viewModel.value)
+      expect(factory.refCount).toBe(1)
+      dispose()
+      expect(factory.refCount).toBe(0)
+    })
+
+    it('disposes old values as new values are computed', () => {
+      const dispose = autorun(() => viewModel.value)
+      expect(factory.allocations).toBe(1)
+      expect(factory.refCount).toBe(1)
+
+      model.color = 'green'
+      expect(factory.allocations).toBe(2)
+      expect(factory.refCount).toBe(1)
+
+      model.color = 'blue'
+      expect(factory.allocations).toBe(3)
+      expect(factory.refCount).toBe(1)
+
+      dispose()
+      expect(factory.allocations).toBe(3)
+      expect(factory.refCount).toBe(0)
+    })
+  })
 })
+
+/** Helper classes to track and test allocations and disposes */
+class TriangleFactory {
+  allocations = 0
+  refCount = 0
+
+  createTriangle(color: string) {
+    this.allocations++
+    this.refCount++
+    return new Triangle(color, () => this.refCount--)
+  }
+}
+
+class Triangle {
+  constructor(public color: string, private onDispose: () => void) {
+  }
+
+  dispose() {
+    this.onDispose()
+  }
+}
