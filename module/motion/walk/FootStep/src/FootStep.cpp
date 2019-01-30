@@ -153,7 +153,7 @@ namespace motion {
                     }
 
                     // If the scale is more than the distance, go to the target to avoid overshooting
-                    if (scale > distance) {
+                    if ((scale > distance) || (!target.lift)) {
                         rF_tPp = Eigen::Vector3d(0, 0, 0);
                     }
 

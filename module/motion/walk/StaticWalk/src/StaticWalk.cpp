@@ -50,12 +50,12 @@ namespace motion {
                 [this](const Sensors& sensors, const WalkCommand& walkcommand) {
                     // INITIAL state occurs only as the first state in the walk to set the matrix Hff_w
                     if (state == INITIAL) {
-                        Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
-                                * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        Hff_w = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
+                                * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                         // Set z to 0 so there is no lift
                         Hff_w.translation().z() = 0;
 
-                        state = LEFT_LEAN;
+                        state = RIGHT_LEAN;
                     }
 
                     // When the time is over for this phase, begin the next phase
@@ -104,6 +104,7 @@ namespace motion {
                             // Maintain right foot position while the torso moves over the left foot
                             emit(std::make_unique<FootTarget>(
                                 start_phase + phase_time, true, Hff_w.matrix(), false, subsumptionId));
+
 
                             // Move the COM over the left foot
                             emit(std::make_unique<TorsoTarget>(
