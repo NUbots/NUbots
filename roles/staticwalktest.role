@@ -10,7 +10,7 @@ NUCLEAR_ROLE(
     support::NUsight
 
     #Sensors
-    platform::darwin::HardwareSimulator
+    platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
     #Behaviour
@@ -18,6 +18,5 @@ NUCLEAR_ROLE(
 
     #Motion
     motion::walk::StaticWalk
-    motion::walk::TorsoMovement
-    motion::walk::FootStep
+    motion::walk::MovementController
 )

@@ -52,7 +52,6 @@ namespace motion {
                     if (state == INITIAL) {
                         Hff_w = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                 * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                        // Set z to 0 so there is no lift
                         Hff_w.translation().z() = 0;
 
                         state = RIGHT_LEAN;
@@ -73,6 +72,7 @@ namespace motion {
                                 Hff_w.translation().y() = -stance_width;
                                 Hff_w.translation().z() = 0;
 
+
                                 state = RIGHT_LEAN;
                             } break;
                             case RIGHT_LEAN: state = LEFT_STEP; break;
@@ -83,6 +83,7 @@ namespace motion {
                                         * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                                 Hff_w.translation().y() = stance_width;
                                 Hff_w.translation().z() = 0;
+
 
                                 state = LEFT_LEAN;
                             } break;
@@ -101,14 +102,13 @@ namespace motion {
                             Haf.linear()      = Htf.linear();
                             Haf.translation() = -Eigen::Vector3d(0, 0, torso_height);
 
-                            // Maintain right foot position while the torso moves over the left foot
-                            emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time, true, Hff_w.matrix(), false, subsumptionId));
-
-
                             // Move the COM over the left foot
                             emit(std::make_unique<TorsoTarget>(
                                 start_phase + phase_time, false, Haf.matrix(), subsumptionId));
+
+                            // Maintain right foot position while the torso moves over the left foot
+                            emit(std::make_unique<FootTarget>(
+                                start_phase + phase_time, true, Hff_w.matrix(), false, subsumptionId));
                         } break;
                         case RIGHT_LEAN: {
                             // Support foot to torso transform

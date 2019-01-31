@@ -98,10 +98,11 @@ namespace motion {
                     Eigen::Matrix3d Rf_tt;
                     // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
                     // Scale as above to rotate in specified time
-                    Rf_tt = Rft.slerp(scale, Rat).toRotationMatrix();
+                    Rf_tt = Rft.slerp(1, Rat).toRotationMatrix();
 
                     Eigen::Affine3d Htf_t;
-                    Htf_t.linear() = Eigen::Matrix3d::Identity();
+                    Htf_t.linear() = Htf.linear();
+                    // Htf_t.linear() = Eigen::Matrix3d::Identity();
                     // Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
                     Htf_t.translation() = rF_tTt;  // Translation to foot target
                     Transform3D t       = convert<double, 4, 4>(Htf_t.matrix());
