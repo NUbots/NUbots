@@ -44,7 +44,7 @@ namespace motion {
             return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
         }
 
-        Eigen::Affine3d& MovementController::plan_torso(const Sensors& sensors, const TorsoTarget& target) {
+        Eigen::Affine3d MovementController::plan_torso(const Sensors& sensors, const TorsoTarget& target) {
             // Get support foot coordinate system
             Eigen::Affine3d Htf;
 
@@ -70,7 +70,6 @@ namespace motion {
             double distance                         = rATt.norm();
             double scale =
                 time_left > std::chrono::duration<double>::zero() ? (distance / time_left.count()) * time_horizon : 1;
-
             // If the torso is close enough to the position, stop running
             if (distance < 0.001) {
                 scale = 1;
@@ -109,32 +108,35 @@ namespace motion {
             return Htf_t;
         }
 
-        Eigen::Affine3d& MovementController::plan_swing(const Sensors& sensors,
-                                                        const FootTarget& target,
-                                                        const Eigen::Affine3d& Htf_s) {
+        Eigen::Affine3d MovementController::plan_swing(const Sensors& sensors,
+                                                       const FootTarget& target,
+                                                       const Eigen::Affine3d& Htf_s) {
             // Get support foot and swing foot coordinate systems
             Eigen::Affine3d Htf_w;  // swing foot
-            Eigen::Affine3d Hf_sf_w;
+            Eigen::Affine3d Htt_t;
 
             // Right foot is the swing foot
             if (target.isRightFootSwing) {
-                Hf_sf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
-                          * Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                // Htf_s * Ht_tf_s.inverse() = Htt_t
+                Htt_t = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]) * Htf_s.inverse();
+                // Htf_w * Htt_t = Hf_wt_t, Htf_w = Hf_wt_t.inverse()
+                Htf_w = (Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse() * Htt_t).inverse();
             }
             // Left foot is the swing foot
             else {
-                Hf_sf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
-                          * Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                // Htf_s * Ht_tf_s.inverse() = Htt_t
+                Htt_t = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]) * Htf_s.inverse();
+                // Htf_w * Htt_t = Hf_wt_t, Htf_w = Hf_wt_t.inverse()
+                Htf_w = (Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse() * Htt_t).inverse();
             }
-
-            Htf_w = Htf_s * Hf_sf_w;
 
             Eigen::Affine3d Haf_s;
             Haf_s = target.Haf_s;
 
             // Get orientation for world (Rotation of world->torso)
             Eigen::Matrix3d Rtw;
-            Rtw = Eigen::Affine3d(sensors.world).rotation();
+            // (Htw.inverse() * Htt_t).inverse()
+            Rtw = (Eigen::Affine3d(sensors.world).inverse() * Htt_t).inverse().rotation();
 
             // Convert Rtw and Htf_s rotation into euler angles to get pitch and roll from Rtw and yaw from
             // Htf_s to create a new rotation matrix
@@ -192,11 +194,6 @@ namespace motion {
             double scale =
                 time_left > std::chrono::duration<double>::zero() ? (distance / time_left.count()) * time_horizon : 1;
 
-            // If the distance is small enough, stop moving the foot
-            if (distance < 0.001) {
-                scale = 1;
-            }
-
             // Swing foot's new target position on the plane, scaled for time
             Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * scale;
 
@@ -206,7 +203,7 @@ namespace motion {
             }
 
             // If the scale is more than the distance, go to the target to avoid overshooting
-            if ((scale > distance) || (!target.lift)) {
+            if ((scale > distance) || (!target.lift) || (distance < 0.001)) {
                 rF_tPp = Eigen::Vector3d(0, 0, 0);
             }
 
@@ -228,8 +225,8 @@ namespace motion {
             Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
 
             Eigen::Affine3d Htf_t;
-            Htf_t.linear() = Htf_w.linear();
-            // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
+            // Htf_t.linear() = Htf_w.linear();
+            Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
             // Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
             Htf_t.translation() = rF_tTt;  // Translation to foot target
             return Htf_t;
@@ -261,31 +258,19 @@ namespace motion {
                     Eigen::Affine3d torso_Htf_t;
                     torso_Htf_t = plan_torso(sensors, torso_target);
 
-                    // torso_Htf_t.inverse() = Htt_t
-                    // Htt_t.inverse * Htf_s = Ht_tf_s
-                    // or new Htf_s
-                    Eigen::Affine3d Htf_s;
-
-                    if (foot_target.isRightFootSwing) {
-                        Htf_s = torso_Htf_t * Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                    }
-                    else {
-                        Htf_s = torso_Htf_t * Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                    }
-
                     Eigen::Affine3d swing_Htf_t;
-                    swing_Htf_t = plan_swing(sensors, foot_target, Htf_s);
+                    swing_Htf_t = plan_swing(sensors, foot_target, torso_Htf_t);
 
                     // MOVE TORSO
 
                     Transform3D t_t = convert<double, 4, 4>(torso_Htf_t.matrix());
                     auto joints_t   = calculateLegJoints(
-                        model, t_t, foot_target.isRightFootSwing ? LimbID::LEFT_LEG : LimbID::RIGHT_LEG);
+                        model, t_t, torso_target.isRightFootSupport ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
                     auto waypoints_t = std::make_unique<std::vector<ServoCommand>>();
 
                     for (const auto& joint : joints_t) {
                         waypoints_t->push_back(
-                            {foot_target.subsumption_id,
+                            {torso_target.subsumption_id,
                              NUClear::clock::now()
                                  + NUClear::clock::duration(int(time_horizon * NUClear::clock::period::den)),
                              joint.first,

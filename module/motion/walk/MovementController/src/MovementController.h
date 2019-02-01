@@ -21,9 +21,9 @@ namespace motion {
             // Returns vector from the vector field of where the foot should move on y-axis (in plane space)
             double f_y(const Eigen::Vector3d& vec);
             // Plans where the torso will move to next
-            Eigen::Affine3d& plan_torso(const Sensors& sensors, const TorsoTarget& target);
+            Eigen::Affine3d plan_torso(const Sensors& sensors, const TorsoTarget& target);
             // Plans where the swing foot will move to next
-            Eigen::Affine3d& plan_swing(const Sensors& sensors, const FootTarget& target, const Eigen::Affine3d& Htf_s);
+            Eigen::Affine3d plan_swing(const Sensors& sensors, const FootTarget& target, const Eigen::Affine3d& Htf_s);
 
 
             double step_height;
