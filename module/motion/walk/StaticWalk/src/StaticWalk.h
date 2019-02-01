@@ -18,7 +18,7 @@ namespace motion {
             double feet_distance;
             double stance_width;
             size_t subsumptionId;
-            Eigen::Affine3d Hff_w;
+            Eigen::Affine3d Hff_s;
 
         public:
             /// @brief Called by the powerplant to build and setup the StaticWalk reactor.

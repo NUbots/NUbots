@@ -50,9 +50,9 @@ namespace motion {
                 [this](const Sensors& sensors, const WalkCommand& walkcommand) {
                     // INITIAL state occurs only as the first state in the walk to set the matrix Hff_w
                     if (state == INITIAL) {
-                        Hff_w = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
+                        Hff_s = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                 * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                        Hff_w.translation().z() = 0;
+                        Hff_s.translation().z() = 0;
 
                         state = RIGHT_LEAN;
                     }
@@ -67,10 +67,10 @@ namespace motion {
                             case RIGHT_STEP: {
                                 // Store where support is relative to swing, ignoring height and setting the y to the
                                 // stance width
-                                Hff_w = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
+                                Hff_s = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                                Hff_w.translation().y() = -stance_width;
-                                Hff_w.translation().z() = 0;
+                                Hff_s.translation().y() = -stance_width;
+                                Hff_s.translation().z() = 0;
 
 
                                 state = RIGHT_LEAN;
@@ -79,10 +79,10 @@ namespace motion {
                             case LEFT_STEP: {
                                 // Store where support is relative to swing, ignoring height and setting the y to the
                                 // stance width
-                                Hff_w = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
+                                Hff_s = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                                Hff_w.translation().y() = stance_width;
-                                Hff_w.translation().z() = 0;
+                                Hff_s.translation().y() = stance_width;
+                                Hff_s.translation().z() = 0;
 
 
                                 state = LEFT_LEAN;
@@ -108,7 +108,7 @@ namespace motion {
 
                             // Maintain right foot position while the torso moves over the left foot
                             emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time, true, Hff_w.matrix(), false, subsumptionId));
+                                start_phase + phase_time, true, Hff_s.matrix(), false, subsumptionId));
                         } break;
                         case RIGHT_LEAN: {
                             // Support foot to torso transform
@@ -125,7 +125,7 @@ namespace motion {
 
                             // Maintain left foot position while the torso moves over the right foot
                             emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time, false, Hff_w.matrix(), false, subsumptionId));
+                                start_phase + phase_time, false, Hff_s.inverse().matrix(), false, subsumptionId));
 
                         } break;
                         case RIGHT_STEP: {

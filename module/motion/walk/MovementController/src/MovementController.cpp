@@ -119,15 +119,15 @@ namespace motion {
             if (target.isRightFootSwing) {
                 // Htf_s * Ht_tf_s.inverse() = Htt_t
                 Htt_t = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]) * Htf_s.inverse();
-                // Htf_w * Htt_t = Hf_wt_t, Htf_w = Hf_wt_t.inverse()
-                Htf_w = (Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse() * Htt_t).inverse();
+                // Htt_t.inverse() * Htf_w = Ht_tt * Htf_w = Ht_tf_w
+                Htf_w = Htt_t.inverse() * Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
             }
             // Left foot is the swing foot
             else {
                 // Htf_s * Ht_tf_s.inverse() = Htt_t
                 Htt_t = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]) * Htf_s.inverse();
-                // Htf_w * Htt_t = Hf_wt_t, Htf_w = Hf_wt_t.inverse()
-                Htf_w = (Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse() * Htt_t).inverse();
+                // Htt_t.inverse() * Htf_w = Ht_tt * Htf_w = Ht_tf_w
+                Htf_w = Htt_t.inverse() * Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
             }
 
             Eigen::Affine3d Haf_s;
@@ -136,7 +136,7 @@ namespace motion {
             // Get orientation for world (Rotation of world->torso)
             Eigen::Matrix3d Rtw;
             // (Htw.inverse() * Htt_t).inverse()
-            Rtw = (Eigen::Affine3d(sensors.world).inverse() * Htt_t).inverse().rotation();
+            Rtw = (Htt_t.inverse() * Eigen::Affine3d(sensors.world)).rotation();
 
             // Convert Rtw and Htf_s rotation into euler angles to get pitch and roll from Rtw and yaw from
             // Htf_s to create a new rotation matrix
@@ -158,7 +158,7 @@ namespace motion {
 
             // Vector to the swing foot in ground space
             Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
-
+            log(rF_wGg.transpose(), Htt_t.translation().transpose());
             // Vector from ground to target
             // Hgf_s * rAF_sf_s
             Eigen::Vector3d rAGg = (Htg.inverse() * Htf_s) * -Haf_s.translation();
@@ -203,7 +203,7 @@ namespace motion {
             }
 
             // If the scale is more than the distance, go to the target to avoid overshooting
-            if ((scale > distance) || (!target.lift) || (distance < 0.001)) {
+            if ((scale > distance) || (distance < 0.001)) {
                 rF_tPp = Eigen::Vector3d(0, 0, 0);
             }
 
@@ -225,10 +225,11 @@ namespace motion {
             Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
 
             Eigen::Affine3d Htf_t;
-            // Htf_t.linear() = Htf_w.linear();
-            Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
+            Htf_t.linear() = Htf_w.linear();
+            // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
             // Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
             Htf_t.translation() = rF_tTt;  // Translation to foot target
+            log(rF_tTt.transpose());
             return Htf_t;
         }
 
@@ -260,7 +261,10 @@ namespace motion {
 
                     Eigen::Affine3d swing_Htf_t;
                     swing_Htf_t = plan_swing(sensors, foot_target, torso_Htf_t);
-
+                    log("Torso:",
+                        torso_Htf_t.translation().transpose(),
+                        "\n Swing:",
+                        swing_Htf_t.translation().transpose());
                     // MOVE TORSO
 
                     Transform3D t_t = convert<double, 4, 4>(torso_Htf_t.matrix());
