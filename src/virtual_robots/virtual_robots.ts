@@ -1,43 +1,40 @@
-import { range } from '../shared/base/range'
+import { DirectNUClearNetClient } from '../server/nuclearnet/direct_nuclearnet_client'
+import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_client'
 
-import { Simulator } from './simulator'
+import { ChartSimulator } from './simulators/chart_data_simulator'
+import { OverviewSimulator } from './simulators/overview_simulator'
+import { ScriptDataSimulator } from './simulators/script_data_simulator'
+import { SensorsSimulator } from './simulators/sensors_simulator'
+import { VisionSimulator } from './simulators/vision_simulator'
 import { VirtualRobot } from './virtual_robot'
-import { PeriodicSimulatorOpts } from './virtual_robot'
-
-type Opts = {
-  fakeNetworking: boolean
-  numRobots: number
-  simulators: Simulator[]
-  periodicSimulators: PeriodicSimulatorOpts[]
-}
 
 export class VirtualRobots {
   private robots: VirtualRobot[]
 
-  constructor(opts: { robots: VirtualRobot[] }) {
-    this.robots = opts.robots
+  constructor({ robots }: { robots: VirtualRobot[] }) {
+    this.robots = robots
   }
 
-  static of(opts: Opts): VirtualRobots {
-    const robots = range(opts.numRobots).map(index => VirtualRobot.of({
-      fakeNetworking: opts.fakeNetworking,
-      name: `Virtual Robot #${index + 1}`,
-      simulators: opts.simulators,
-      periodicSimulators: opts.periodicSimulators,
-    }))
+  static of({ fakeNetworking, numRobots }: { fakeNetworking: boolean, numRobots: number }) {
+    const robots = Array.from({ length: numRobots }, (_, i) => {
+      const nuclearnetClient = fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of()
+      return VirtualRobot.of({
+        name: `Virtual Robot ${i + 1}`,
+        nuclearnetClient,
+        simulators: [
+          OverviewSimulator.of({ nuclearnetClient, robotIndex: i, numRobots }),
+          SensorsSimulator.of({ nuclearnetClient, robotIndex: i, numRobots }),
+          ChartSimulator.of({ nuclearnetClient }),
+          VisionSimulator.of({ nuclearnetClient }),
+          ScriptDataSimulator.of({ nuclearnetClient }),
+        ],
+      })
+    })
     return new VirtualRobots({ robots })
   }
 
-  startSimulators(): () => void {
-    const stops = this.robots.map((robot, index) => robot.startSimulators(index, this.robots.length))
+  start(): () => void {
+    const stops = this.robots.map(robot => robot.start())
     return () => stops.forEach(stop => stop())
-  }
-
-  simulateAll(): void {
-    this.robots.forEach((robot, index) => robot.simulateAll(index, this.robots.length))
-  }
-
-  connect(): void {
-    this.robots.forEach(robot => robot.connect())
   }
 }

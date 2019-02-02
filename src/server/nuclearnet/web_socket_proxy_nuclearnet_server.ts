@@ -58,8 +58,8 @@ class WebSocketServerClient {
     this.socket.on('disconnect', this.onDisconnect)
   }
 
-  static of(nuclearNetClient: NUClearNetClient, socket: WebSocket) {
-    return new WebSocketServerClient(nuclearNetClient, socket, PacketProcessor.of(socket))
+  static of(nuclearnetClient: NUClearNetClient, socket: WebSocket) {
+    return new WebSocketServerClient(nuclearnetClient, socket, PacketProcessor.of(socket))
   }
 
   private onJoin = (peer: NUClearNetPeer) => {

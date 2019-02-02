@@ -1,19 +1,26 @@
+import { autorun } from 'mobx'
+
+import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { message } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
-import { PeriodicSimulator } from '../simulator'
+import { Simulator } from '../simulator'
 import { Message } from '../simulator'
 
+import { periodic } from './periodic'
 import DataPoint = message.support.nusight.DataPoint
 
-export class ChartSimulator implements PeriodicSimulator {
-  static of(): ChartSimulator {
-    return new ChartSimulator()
+export class ChartSimulator extends Simulator {
+  static of({ nuclearnetClient }: { nuclearnetClient: NUClearNetClient }): ChartSimulator {
+    return new ChartSimulator(nuclearnetClient)
   }
 
-  simulate(time: number, index: number, numRobots: number): Message[] {
+  start() {
+    return autorun(() => this.send(this.chartData))
+  }
 
+  get chartData(): Message {
     // Offset our time to test the adaptive window
-    time = time - 3
+    const time = periodic(60) - 3
 
     const messageType = 'message.support.nusight.DataPoint'
     const period = 10
@@ -28,8 +35,7 @@ export class ChartSimulator implements PeriodicSimulator {
     }).finish()
 
     const message = { messageType, buffer }
-
-    return [message]
+    return message
   }
 }
 

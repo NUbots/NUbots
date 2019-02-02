@@ -1,14 +1,18 @@
 import * as fs from 'fs'
+import { autorun } from 'mobx'
 import * as path from 'path'
 import { Vector3 } from 'three'
 import { Matrix4 } from 'three'
 
 import { fourcc } from '../../client/image_decoder/fourcc'
+import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { Imat4 } from '../../shared/proto/messages'
 import { message } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
+import { Simulator } from '../simulator'
 import { Message } from '../simulator'
-import { PeriodicSimulator } from '../simulator'
+
+import { periodic } from './periodic'
 import CompressedImage = message.output.CompressedImage
 import Projection = message.output.CompressedImage.Lens.Projection
 import Balls = message.vision.Balls
@@ -16,27 +20,31 @@ import Side = message.vision.Goal.Side
 import Team = message.vision.Goal.Team
 import Goals = message.vision.Goals
 
-export class VisionSimulator implements PeriodicSimulator {
-  constructor(private images: Uint8Array[]) {
+export class VisionSimulator extends Simulator {
+  constructor(nuclearnetClient: NUClearNetClient, private readonly images: Uint8Array[]) {
+    super(nuclearnetClient)
   }
 
-  static of(): VisionSimulator {
+  start() {
+    const stops = [
+      autorun(() => this.send(this.image)),
+      autorun(() => this.send(this.goals)),
+      autorun(() => this.send(this.balls)),
+    ]
+    return () => stops.forEach(stop => stop())
+  }
+
+  static of({ nuclearnetClient }: { nuclearnetClient: NUClearNetClient }): VisionSimulator {
     const images = Array.from(
       { length: 11 },
       (_, i) => toUint8Array(fs.readFileSync(path.join(__dirname, `images/${i}.jpg`))),
     )
-    return new VisionSimulator(images)
+    return new VisionSimulator(nuclearnetClient, images)
   }
 
-  simulate(time: number, index: number, numRobots: number): Message[] {
-    const image = this.simulateImage(time, index)
-    const balls = this.simulateBalls(time, index)
-    const goals = this.simulateGoals(time, index)
-    return [image, balls, goals]
-  }
-
-  private simulateImage(time: number, index: number): Message {
-    const t = time / 10 - index
+  private get image(): Message {
+    const time = periodic(10)
+    const t = time / 10
     const numImages = this.images.length
     const imageIndex = Math.floor((Math.cos(2 * Math.PI * t) + 1) / 2 * numImages) % numImages
     const data = this.images[imageIndex]
@@ -60,8 +68,9 @@ export class VisionSimulator implements PeriodicSimulator {
     }
   }
 
-  private simulateBalls(time: number, index: number): Message {
-    const t = time / 10 - index
+  private get balls(): Message {
+    const time = periodic(10)
+    const t = time / 10
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
     const axis = new Vector3(10, 1, 0).normalize().applyMatrix4(new Matrix4().makeRotationX(2 * Math.PI * t))
     return {
@@ -81,8 +90,9 @@ export class VisionSimulator implements PeriodicSimulator {
     }
   }
 
-  private simulateGoals(time: number, index: number): Message {
-    const t = time / 10 - index
+  private get goals(): Message {
+    const time = periodic(10)
+    const t = time / 10
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
     return {
       messageType: 'message.vision.Goals',

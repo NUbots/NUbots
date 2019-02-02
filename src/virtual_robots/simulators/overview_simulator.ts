@@ -1,34 +1,59 @@
+import { autorun } from 'mobx'
+
 import { Vector2 } from '../../client/math/vector2'
 import { Vector3 } from '../../client/math/vector3'
 import { SeededRandom } from '../../shared/base/random/seeded_random'
 import { FieldDimensions } from '../../shared/field/dimensions'
+import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { message } from '../../shared/proto/messages'
 import { Ivec2 } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
-import { PeriodicSimulator } from '../simulator'
+import { Simulator } from '../simulator'
 import { Message } from '../simulator'
+
+import { periodic } from './periodic'
 import State = message.behaviour.Behaviour.State
 import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason
 import Phase = message.input.GameState.Data.Phase
 import Overview = message.support.nusight.Overview
 
-export class OverviewSimulator implements PeriodicSimulator {
-  constructor(private field: FieldDimensions,
-              private random: SeededRandom) {
+export class OverviewSimulator extends Simulator {
+  constructor(
+    nuclearnetClient: NUClearNetClient,
+    private readonly robotIndex: number,
+    private readonly numRobots: number,
+    private readonly field: FieldDimensions,
+    private readonly random: SeededRandom,
+  ) {
+    super(nuclearnetClient)
   }
 
-  static of() {
+  static of({ nuclearnetClient, robotIndex, numRobots }: {
+    nuclearnetClient: NUClearNetClient,
+    robotIndex: number,
+    numRobots: number
+  }) {
     return new OverviewSimulator(
+      nuclearnetClient,
+      robotIndex,
+      numRobots,
       FieldDimensions.postYear2017(),
       SeededRandom.of('overview_simulator'),
     )
   }
 
-  simulate(time: number, index: number, numRobots: number): Message[] {
+  start() {
+    return autorun(() => this.send(this.overview))
+  }
+
+  get overview(): Message {
+
+    const time = periodic(2)
+
     const messageType = 'message.support.nusight.Overview'
 
-    const t = time / 10 - index
+    const t = time / 10 - this.robotIndex
 
     const fieldLength = this.field.fieldLength
     const fieldWidth = this.field.fieldWidth
@@ -48,7 +73,7 @@ export class OverviewSimulator implements PeriodicSimulator {
 
     const buffer = Overview.encode({
       timestamp: toTimestamp(time),
-      robotId: index + 1,
+      robotId: this.robotIndex + 1,
       roleName: 'Overview Simulator',
       battery: this.random.float(),
       voltage: this.randomFloat(10, 13),
@@ -72,9 +97,9 @@ export class OverviewSimulator implements PeriodicSimulator {
       lastSeenBall: toTimestamp(this.randomSeconds(time, -30)),
       lastSeenGoal: toTimestamp(this.randomSeconds(time, -30)),
       walkCommand: {
-        x: Math.cos(time / 3 + index),
-        y: Math.cos(time / 5 + index),
-        z: Math.cos(time / 7 + index),
+        x: Math.cos(time / 3 + this.robotIndex),
+        y: Math.cos(time / 5 + this.robotIndex),
+        z: Math.cos(time / 7 + this.robotIndex),
       },
       walkPathPlan: [
         robotPosition,
@@ -87,7 +112,7 @@ export class OverviewSimulator implements PeriodicSimulator {
 
     const message = { messageType, buffer }
 
-    return [message]
+    return message
   }
 
   private randomFieldPosition(): Ivec2 {

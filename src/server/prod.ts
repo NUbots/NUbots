@@ -7,10 +7,6 @@ import * as favicon from 'serve-favicon'
 import * as sio from 'socket.io'
 
 import * as NUClearNetProxyParser from '../shared/nuclearnet/nuclearnet_proxy_parser'
-import { ChartSimulator } from '../virtual_robots/simulators/chart_data_simulator'
-import { OverviewSimulator } from '../virtual_robots/simulators/overview_simulator'
-import { SensorDataSimulator } from '../virtual_robots/simulators/sensor_data_simulator'
-import { VisionSimulator } from '../virtual_robots/simulators/vision_simulator'
 import { VirtualRobots } from '../virtual_robots/virtual_robots'
 
 import { WebSocketProxyNUClearNetServer } from './nuclearnet/web_socket_proxy_nuclearnet_server'
@@ -41,18 +37,8 @@ server.listen(port, () => {
 })
 
 if (withVirtualRobots) {
-  const virtualRobots = VirtualRobots.of({
-    fakeNetworking: true,
-    numRobots: 3,
-    periodicSimulators: [
-      { frequency: 1, simulator: OverviewSimulator.of() },
-      { frequency: 10, simulator: SensorDataSimulator.of() },
-      { frequency: 10, simulator: ChartSimulator.of() },
-      { frequency: 5, simulator: VisionSimulator.of() },
-    ],
-    simulators: [],
-  })
-  virtualRobots.startSimulators()
+  const virtualRobots = VirtualRobots.of({ fakeNetworking: true, numRobots: 3 })
+  virtualRobots.start()
 }
 
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {

@@ -1,28 +1,51 @@
+import { autorun } from 'mobx'
 import { Matrix4 } from 'three'
 import { Vector3 } from 'three'
 import { Quaternion } from 'three'
 
+import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { message } from '../../shared/proto/messages'
 import { Imat4 } from '../../shared/proto/messages'
-import { PeriodicSimulator } from '../simulator'
-import { Message } from '../simulator'
+import { Message, Simulator } from '../simulator'
+
+import { periodic } from './periodic'
 import Sensors = message.input.Sensors
 
 export const HIP_TO_FOOT = 0.2465
 
-export class SensorDataSimulator implements PeriodicSimulator {
-  static of() {
-    return new SensorDataSimulator()
+export class SensorsSimulator extends Simulator {
+  constructor(
+    nuclearnetClient: NUClearNetClient,
+    private readonly robotIndex: number,
+    private readonly numRobots: number,
+  ) {
+    super(nuclearnetClient)
   }
 
-  simulate(time: number, index: number, numRobots: number): Message[] {
+  static of({ nuclearnetClient, robotIndex, numRobots }: {
+    nuclearnetClient: NUClearNetClient,
+    robotIndex: number,
+    numRobots: number
+  }) {
+    return new SensorsSimulator(nuclearnetClient, robotIndex, numRobots)
+  }
+
+  start() {
+    return autorun(() => this.send(this.sensors))
+  }
+
+  get sensors(): Message {
+
     const messageType = 'message.input.Sensors'
 
     // Simulate a walk
-    const t = time * 5 + index
+    // TODO maybe move this rate somewhere else
+    const time = periodic(60)
 
-    const angle = index * (2 * Math.PI) / numRobots + time / 40
-    const distance = Math.cos(time + 4 * index) * 0.3 + 1
+    const t = time * 5 + this.robotIndex
+
+    const angle = this.robotIndex * (2 * Math.PI) / this.numRobots + time / 40
+    const distance = Math.cos(time + 4 * this.robotIndex) * 0.3 + 1
     const x = distance * Math.cos(angle)
     const y = distance * Math.sin(angle)
     const heading = angle + Math.PI
@@ -60,7 +83,7 @@ export class SensorDataSimulator implements PeriodicSimulator {
 
     const message = { messageType, buffer }
 
-    return [message]
+    return message
   }
 }
 
