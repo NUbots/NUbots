@@ -21,7 +21,7 @@ export class SeededRandom {
     return Math.floor(this.prng() * (max - min) + min)
   }
 
-  choice<T>(arr: T[]): T {
+  choice<T>(arr: ReadonlyArray<T>): T {
     const index = this.integer(0, arr.length)
     return arr[index]
   }
