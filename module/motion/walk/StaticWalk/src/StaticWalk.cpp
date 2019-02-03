@@ -125,7 +125,7 @@ namespace motion {
 
                             // Maintain left foot position while the torso moves over the right foot
                             emit(std::make_unique<FootTarget>(
-                                start_phase + phase_time, false, Hff_s.inverse().matrix(), false, subsumptionId));
+                                start_phase + phase_time, false, Hff_s.matrix(), false, subsumptionId));
 
                         } break;
                         case RIGHT_STEP: {

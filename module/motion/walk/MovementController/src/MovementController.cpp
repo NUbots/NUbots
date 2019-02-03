@@ -158,7 +158,6 @@ namespace motion {
 
             // Vector to the swing foot in ground space
             Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
-            log(rF_wGg.transpose(), Htt_t.translation().transpose());
             // Vector from ground to target
             // Hgf_s * rAF_sf_s
             Eigen::Vector3d rAGg = (Htg.inverse() * Htf_s) * -Haf_s.translation();
@@ -229,7 +228,6 @@ namespace motion {
             // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
             // Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
             Htf_t.translation() = rF_tTt;  // Translation to foot target
-            log(rF_tTt.transpose());
             return Htf_t;
         }
 
@@ -261,12 +259,8 @@ namespace motion {
 
                     Eigen::Affine3d swing_Htf_t;
                     swing_Htf_t = plan_swing(sensors, foot_target, torso_Htf_t);
-                    log("Torso:",
-                        torso_Htf_t.translation().transpose(),
-                        "\n Swing:",
-                        swing_Htf_t.translation().transpose());
-                    // MOVE TORSO
 
+                    // MOVE TORSO
                     Transform3D t_t = convert<double, 4, 4>(torso_Htf_t.matrix());
                     auto joints_t   = calculateLegJoints(
                         model, t_t, torso_target.isRightFootSupport ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
@@ -285,8 +279,7 @@ namespace motion {
                     emit(waypoints_t);
 
                     // MOVE FOOT
-
-                    Transform3D t_f = convert<double, 4, 4>(torso_Htf_t.matrix());
+                    Transform3D t_f = convert<double, 4, 4>(swing_Htf_t.matrix());
                     auto joints_f   = calculateLegJoints(
                         model, t_f, foot_target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
                     auto waypoints_f = std::make_unique<std::vector<ServoCommand>>();
