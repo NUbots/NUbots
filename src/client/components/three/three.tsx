@@ -13,7 +13,6 @@ import { WebGLRenderer } from 'three'
 import { Scene } from 'three'
 import { Camera } from 'three'
 
-import { reconcile } from './reconcile'
 import * as styles from './styles.css'
 
 export type Stage = { scene: Scene, camera: Camera }
@@ -29,12 +28,6 @@ export class Three extends Component<{
   @observable private canvas: Canvas = { width: 0, height: 0 }
   private ref: HTMLCanvasElement | null = null
   private renderer?: WebGLRenderer
-  /**
-   * Internally, three.js keeps various mappings between objects and webgl resources, e.g. [1].
-   * So instead we maintain our own permanent stage object and copy any updated values into it every render.
-   * [1]: https://goo.gl/81PqNi
-   */
-  private stage: Stage = { camera: new PerspectiveCamera(), scene: new Scene() }
 
   componentDidMount() {
     this.renderer = new WebGLRenderer({ canvas: this.ref!, antialias: true })
@@ -62,9 +55,8 @@ export class Three extends Component<{
   }
 
   private renderStage(stage: Stage) {
-    reconcile(stage, this.stage)
     this.renderer!.setSize(this.canvas.width, this.canvas.height, false)
-    this.renderer!.render(this.stage.scene, this.stage.camera)
+    this.renderer!.render(stage.scene, stage.camera)
   }
 
   @action.bound
