@@ -4,25 +4,23 @@ import { computed } from 'mobx'
 import { reaction } from 'mobx'
 import { observable } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
-import { expr } from 'mobx-utils'
 import { createTransformer } from 'mobx-utils'
 import { now } from 'mobx-utils'
 import { Component } from 'react'
 import * as React from 'react'
+import { Color } from 'three'
 import { Geometry } from 'three'
-import { Material } from 'three'
-import { Scene } from 'three'
-import { Camera } from 'three'
 import { PointLight } from 'three'
-import { MeshPhongMaterial } from 'three'
-import { Mesh } from 'three'
 import { BoxGeometry } from 'three'
-import { PerspectiveCamera } from 'three'
 import { Light } from 'three'
 
 import { disposableComputed } from '../../../base/disposable_computed'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
+import { scene } from '../builders'
+import { perspectiveCamera } from '../builders'
+import { meshPhongMaterial } from '../builders'
+import { mesh } from '../builders'
 import { Stage } from '../three'
 import { Canvas } from '../three'
 import { Three } from '../three'
@@ -85,31 +83,30 @@ class ViewModel {
 
   @computed
   get stage(): Stage {
-    return { camera: this.camera, scene: this.scene }
+    return { camera: this.camera.get(), scene: this.scene.get() }
   }
 
   @computed
   private get light(): Light {
     const light = new PointLight()
-    light.position.copy(this.camera.position)
+    light.position.copy(this.camera.get().position)
     return light
   }
 
-  @computed
-  private get camera(): Camera {
-    const aspect = expr(() => this.canvas.width / this.canvas.height)
-    const camera = new PerspectiveCamera(60, aspect, 0.5, 10)
-    camera.position.z = 4
-    return camera
-  }
+  private camera = perspectiveCamera(() => ({
+    fov: 60,
+    aspect: this.canvas.width / this.canvas.height,
+    near: 0.5,
+    far: 10,
+    position: Vector3.from({ x: 0, y: 0, z: 4 }),
+  }))
 
-  @computed
-  private get scene(): Scene {
-    const scene = new Scene()
-    scene.add(...this.boxes.map(boxViewModel => boxViewModel.box))
-    scene.add(this.light)
-    return scene
-  }
+  private scene = scene(() => ({
+    children: [
+      ...this.boxes.map(boxViewModel => boxViewModel.box.get()),
+      this.light,
+    ],
+  }))
 
   @computed
   private get boxes() {
@@ -131,17 +128,16 @@ class BoxViewModel {
     return new BoxViewModel(model)
   }
 
-  @computed
-  get box(): Mesh {
-    const mesh = new Mesh(BoxViewModel.geometry.get(), this.material)
-    mesh.position.set(this.model.position.x, this.model.position.y, this.model.position.z)
-    mesh.rotation.set(this.model.rotation.x, this.model.rotation.y, this.model.rotation.z)
-    mesh.scale.setScalar(this.model.size)
-    return mesh
-  }
+  readonly box = mesh(() => ({
+    geometry: BoxViewModel.geometry.get(),
+    material: this.material.get(),
+    position: this.model.position,
+    rotation: this.model.rotation,
+    scale: Vector3.fromScalar(this.model.size),
+  }))
 
-  @disposableComputed
-  private get material(): Material {
-    return new MeshPhongMaterial({ color: this.model.color })
-  }
+  // @disposableComputed
+  private material = meshPhongMaterial(() => ({
+    color: new Color(this.model.color),
+  }))
 }

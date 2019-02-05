@@ -8,7 +8,6 @@ import { MouseEvent } from 'react'
 import * as React from 'react'
 import { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
-import { PerspectiveCamera } from 'three'
 import { WebGLRenderer } from 'three'
 import { Scene } from 'three'
 import { Camera } from 'three'
@@ -20,6 +19,7 @@ export type Canvas = { width: number, height: number }
 
 export class Three extends Component<{
   stage(canvas: Canvas): IComputedValue<Stage>,
+  onClick?({ button }: { button: number }): void
   onMouseDown?(x: number, y: number): void
   onMouseMove?(x: number, y: number): void
   onMouseUp?(x: number, y: number): void
@@ -45,6 +45,7 @@ export class Three extends Component<{
         <canvas
           ref={this.setRef}
           className={styles.canvas}
+          onClick={this.props.onClick}
           onMouseDown={this.onMouseDown}
           onMouseMove={this.onMouseMove}
           onMouseUp={this.onMouseUp}
@@ -52,6 +53,14 @@ export class Three extends Component<{
         />
       </div>
     </ReactResizeDetector>
+  }
+
+  requestPointerLock() {
+    this.ref!.requestPointerLock()
+  }
+
+  isPointerLocked() {
+    return document.pointerLockElement === this.ref!
   }
 
   private renderStage(stage: Stage) {

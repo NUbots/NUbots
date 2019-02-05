@@ -23,6 +23,10 @@ export class Vector3 {
     return new Vector3(vec.x || 0, vec.y || 0, vec.z || 0)
   }
 
+  static fromScalar(scalar: number) {
+    return new Vector3(scalar, scalar, scalar)
+  }
+
   @computed get length(): number {
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
   }

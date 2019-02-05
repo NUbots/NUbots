@@ -1,10 +1,13 @@
 import { computed } from 'mobx'
-import { createTransformer } from 'mobx-utils'
-import { Scene } from 'three'
 import { HemisphereLight } from 'three'
 import { PointLight } from 'three'
-import { PerspectiveCamera } from 'three'
 import { Object3D } from 'three'
+
+import { Vector3 } from '../../math/vector3'
+import { scene } from '../three/builders'
+import { perspectiveCamera } from '../three/builders'
+import { Stage } from '../three/three'
+import { Canvas } from '../three/three'
 
 import { RobotViewModel } from './darwin_robot/view_model'
 import { FieldViewModel } from './field/view_model'
@@ -12,33 +15,42 @@ import { LocalisationModel } from './model'
 import { SkyboxViewModel } from './skybox/view_model'
 
 export class LocalisationViewModel {
-  constructor(private model: LocalisationModel) {
+  constructor(private readonly canvas: Canvas, private readonly model: LocalisationModel) {
   }
 
-  static of = createTransformer((model: LocalisationModel) => {
-    return new LocalisationViewModel(model)
-  })
-
-  @computed
-  get scene(): Scene {
-    const scene = new Scene()
-    this.robots.forEach(robot => scene.add(robot))
-
-    scene.add(this.field)
-    scene.add(this.skybox)
-    scene.add(this.hemisphereLight)
-    scene.add(this.pointLight)
-    return scene
+  static of(canvas: Canvas, model: LocalisationModel) {
+    return new LocalisationViewModel(canvas, model)
   }
 
   @computed
-  get camera(): PerspectiveCamera {
-    const camera = new PerspectiveCamera(75, this.model.aspect, 0.01, 100)
-    camera.position.set(this.model.camera.position.x, this.model.camera.position.y, this.model.camera.position.z)
-    camera.rotation.set(Math.PI / 2 + this.model.camera.pitch, 0, -Math.PI / 2 + this.model.camera.yaw, 'ZXY')
-    camera.up.set(0, 0, 1)
-    return camera
+  get stage(): Stage {
+    return { camera: this.camera.get(), scene: this.scene.get() }
   }
+
+  private readonly camera = perspectiveCamera(() => ({
+    fov: 75,
+    aspect: this.canvas.width / this.canvas.height,
+    near: 0.01,
+    far: 100,
+    position: this.model.camera.position,
+    rotation: Vector3.from({
+      x: Math.PI / 2 + this.model.camera.pitch,
+      y: 0,
+      z: -Math.PI / 2 + this.model.camera.yaw,
+    }),
+    rotationOrder: 'ZXY',
+    up: Vector3.from({ x: 0, y: 0, z: 1 }),
+  }))
+
+  private readonly scene = scene(() => ({
+    children: [
+      ...this.robots,
+      this.field,
+      this.skybox,
+      this.hemisphereLight,
+      this.pointLight,
+    ],
+  }))
 
   @computed
   private get field() {

@@ -96,7 +96,6 @@ export class ControlsModel {
 
 export class LocalisationModel {
   @observable private appModel: AppModel
-  @observable aspect: number
   @observable field: FieldModel
   @observable skybox: SkyboxModel
   @observable camera: CameraModel
@@ -106,8 +105,7 @@ export class LocalisationModel {
   @observable target?: LocalisationRobotModel
   @observable time: TimeModel
 
-  constructor(appModel: AppModel, { aspect, field, skybox, camera, locked, controls, viewMode, target, time }: {
-    aspect: number,
+  constructor(appModel: AppModel, { field, skybox, camera, locked, controls, viewMode, target, time }: {
     field: FieldModel,
     skybox: SkyboxModel,
     camera: CameraModel,
@@ -118,7 +116,6 @@ export class LocalisationModel {
     time: TimeModel
   }) {
     this.appModel = appModel
-    this.aspect = aspect
     this.field = field
     this.skybox = skybox
     this.camera = camera
@@ -131,7 +128,6 @@ export class LocalisationModel {
 
   static of = memoize((appModel: AppModel): LocalisationModel => {
     return new LocalisationModel(appModel, {
-      aspect: 300 / 150,
       field: FieldModel.of(),
       skybox: SkyboxModel.of(),
       camera: CameraModel.of(),

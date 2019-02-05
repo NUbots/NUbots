@@ -27,6 +27,7 @@
 }
 
 .header__item {
+  white-space: nowrap;
 }
 
 .header__link {

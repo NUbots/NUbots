@@ -1,10 +1,13 @@
-import { autorun } from 'mobx'
-import { runInAction } from 'mobx'
-import { IReactionDisposer } from 'mobx'
+import { reaction } from 'mobx'
+import { computed } from 'mobx'
+import { disposeOnUnmount } from 'mobx-react'
 import { observer } from 'mobx-react'
+import { now } from 'mobx-utils'
 import * as React from 'react'
 import { ComponentType } from 'react'
-import { WebGLRenderer } from 'three'
+
+import { Canvas } from '../three/three'
+import { Three } from '../three/three'
 
 import { LocalisationController } from './controller'
 import { LocalisationModel } from './model'
@@ -22,39 +25,23 @@ type LocalisationViewProps = {
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
-  private canvas?: HTMLCanvasElement
-  private renderer?: WebGLRenderer
-  private stopAutorun?: IReactionDisposer
-  private rafId: number = 0
+  private readonly canvas = React.createRef<Three>()
 
   componentDidMount(): void {
-    this.renderer = new WebGLRenderer({
-      canvas: this.canvas,
-      antialias: true,
-    })
-    this.stopAutorun = autorun(() => this.renderScene(), {
-      scheduler: requestAnimationFrame,
-    })
-    this.canvas!.addEventListener('click', this.onClick, false)
     document.addEventListener('pointerlockchange', this.onPointerLockChange, false)
     document.addEventListener('mousemove', this.onMouseMove, false)
     document.addEventListener('keydown', this.onKeyDown, false)
     document.addEventListener('keyup', this.onKeyUp, false)
     document.addEventListener('wheel', this.onWheel, false)
-    this.rafId = requestAnimationFrame(this.onAnimationFrame)
+    disposeOnUnmount(this, reaction(() => now('frame'), this.onAnimationFrame))
   }
 
   componentWillUnmount(): void {
-    if (this.stopAutorun) {
-      this.stopAutorun()
-    }
-    this.canvas!.removeEventListener('click', this.onClick, false)
     document.removeEventListener('pointerlockchange', this.onPointerLockChange, false)
     document.removeEventListener('mousemove', this.onMouseMove, false)
     document.removeEventListener('keydown', this.onKeyDown, false)
     document.removeEventListener('keyup', this.onKeyUp, false)
     document.removeEventListener('wheel', this.onWheel, false)
-    cancelAnimationFrame(this.rafId)
     this.props.network.destroy()
   }
 
@@ -63,42 +50,29 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
       <div className={style.localisation}>
         <LocalisationMenuBar menu={this.props.menu} onHawkEyeClick={this.onHawkEyeClick}/>
         <div className={style.localisation__canvasContainer}>
-          <canvas className={style.localisation__canvas} ref={canvas => {
-            if (canvas) {
-              this.canvas = canvas
-            }
-          }}/>
+          <div className={style.localisation__canvasInnerContainer}>
+            <Three ref={this.canvas} onClick={this.onClick} stage={this.stage}/>
+          </div>
         </div>
         <StatusBar model={this.props.model}/>
       </div>
     )
   }
 
+  private stage = (canvas: Canvas) => {
+    const viewModel = LocalisationViewModel.of(canvas, this.props.model)
+    return computed(() => viewModel.stage)
+  }
+
   requestPointerLock() {
-    this.canvas!.requestPointerLock()
+    this.canvas.current!.requestPointerLock()
   }
 
   private onAnimationFrame = (time: number) => {
-    this.rafId = requestAnimationFrame(this.onAnimationFrame)
     this.props.controller.onAnimationFrame(this.props.model, time)
   }
 
-  private renderScene(): void {
-    const canvas = this.canvas!
-
-    if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
-      this.renderer!.setSize(canvas.clientWidth, canvas.clientHeight, false)
-      runInAction(() => this.props.model.aspect = canvas.clientWidth / canvas.clientHeight)
-    }
-
-    const viewModel = LocalisationViewModel.of(this.props.model)
-
-    this.renderer!.render(viewModel.scene, viewModel.camera)
-
-    runInAction(() => this.props.model.time.lastRenderTime = this.props.model.time.time)
-  }
-
-  private onClick = (e: MouseEvent) => {
+  private onClick = (e: { button: number }) => {
     if (e.button === 0) {
       this.props.controller.onLeftClick(this.props.model, () => this.requestPointerLock())
     } else if (e.button === 2) {
@@ -107,7 +81,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   }
 
   private onPointerLockChange = () => {
-    this.props.controller.onPointerLockChange(this.props.model, document.pointerLockElement === this.canvas)
+    this.props.controller.onPointerLockChange(this.props.model, this.canvas.current!.isPointerLocked())
   }
 
   private onMouseMove = (e: MouseEvent) => {
@@ -137,6 +111,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
 interface LocalisationMenuBarProps {
   menu: ComponentType<{}>
+
   onHawkEyeClick(): void
 }
 
