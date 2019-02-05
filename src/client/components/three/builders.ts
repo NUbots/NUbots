@@ -63,8 +63,8 @@ export const perspectiveCamera = createUpdatableComputed(
     camera.near = opts.near
     camera.far = opts.far
     camera.updateProjectionMatrix()
-    opts.lookAt && camera.lookAt(new THREE.Vector3(opts.lookAt.x, opts.lookAt.y, opts.lookAt.z))
     updateObject3D(camera, opts)
+    opts.lookAt && camera.lookAt(new THREE.Vector3(opts.lookAt.x, opts.lookAt.y, opts.lookAt.z))
   },
 )
 

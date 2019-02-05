@@ -1,22 +1,20 @@
 import { computed } from 'mobx'
-import { expr } from 'mobx-utils'
-import { Vector3 } from 'three'
 import { Points } from 'three'
 import { BufferAttribute } from 'three'
 import { BufferGeometry } from 'three'
-import { PerspectiveCamera } from 'three'
-import { Scene } from 'three'
-import { Material } from 'three'
 import { LinearFilter } from 'three'
 import { ClampToEdgeWrapping } from 'three'
 import { UnsignedByteType } from 'three'
 import { LuminanceFormat } from 'three'
-import { DataTexture } from 'three'
 import { Texture } from 'three'
-import { ShaderMaterial } from 'three'
-import { Camera } from 'three'
 
 import { disposableComputed } from '../../../base/disposable_computed'
+import { Vector3 } from '../../../math/vector3'
+import { dataTexture } from '../../three/builders'
+import { shaderMaterial } from '../../three/builders'
+import { perspectiveCamera } from '../../three/builders'
+import { scene } from '../../three/builders'
+import { Stage } from '../../three/three'
 import { Canvas } from '../../three/three'
 
 import { VisualizerModel } from './model'
@@ -32,37 +30,45 @@ export class VisualizerViewModel {
   }
 
   @computed
-  get scene(): Scene {
-    const scene = new Scene()
-    scene.add(this.points)
-    return scene
+  get stage(): Stage {
+    return { camera: this.camera.get(), scene: this.scene.get() }
   }
 
+  private readonly scene = scene(() => ({
+    children: [this.points],
+  }))
+
+  private readonly camera = perspectiveCamera(() => ({
+    fov: 75,
+    aspect: this.canvas.width / this.canvas.height,
+    near: 0.01,
+    far: 15,
+    up: Vector3.from({ x: 0, y: 0, z: 1 }),
+    position: this.cameraPosition,
+    lookAt: Vector3.of(),
+  }))
+
   @computed
-  get camera(): Camera {
-    const aspect = expr(() => this.canvas.width / this.canvas.height)
-    const camera = new PerspectiveCamera(75, aspect, 0.01, 15)
-    camera.up.set(0, 0, 1)
+  private get cameraPosition() {
     const r = this.model.camera.distance
     const azimuth = this.model.camera.azimuth
     const elevation = this.model.camera.elevation
-    const x = r * Math.sin(Math.PI / 2 + elevation) * Math.cos(azimuth)
-    const y = r * Math.sin(Math.PI / 2 + elevation) * Math.sin(azimuth)
-    const z = r * Math.cos(Math.PI / 2 + elevation)
-    camera.position.set(x, y, z)
-    camera.lookAt(new Vector3(0, 0, 0))
-    return camera
+    return Vector3.from({
+      x: r * Math.sin(Math.PI / 2 + elevation) * Math.cos(azimuth),
+      y: r * Math.sin(Math.PI / 2 + elevation) * Math.sin(azimuth),
+      z: r * Math.cos(Math.PI / 2 + elevation),
+    })
   }
 
   @computed
-  get points(): Points {
-    const points = new Points(this.pointsGeometry, this.planeMaterial)
+  private get points(): Points {
+    const points = new Points(this.pointsGeometry, this.planeMaterial.get())
     points.frustumCulled = false
     return points
   }
 
   @disposableComputed
-  get pointsGeometry(): BufferGeometry {
+  private get pointsGeometry(): BufferGeometry {
     const lutSize = this.model.lut.data.length
     const geometry = new BufferGeometry()
     const vertices = new Float32Array(lutSize * 3)
@@ -84,44 +90,36 @@ export class VisualizerViewModel {
     return geometry
   }
 
-  @disposableComputed
-  get planeMaterial(): Material {
-    return new ShaderMaterial({
-      vertexShader: String(vertexShader),
-      fragmentShader: String(fragmentShader),
-      uniforms: {
-        lut: { value: this.lutTexture },
-        lutSize: { value: this.lutSize },
-        bitsX: { value: this.model.lut.size.x },
-        bitsY: { value: this.model.lut.size.y },
-        bitsZ: { value: this.model.lut.size.z },
-        scale: { value: 1 },
-        size: { value: this.canvas.height / this.model.lut.size.z / 7 },
-      },
-    })
-  }
+  private readonly planeMaterial = shaderMaterial(() => ({
+    vertexShader: String(vertexShader),
+    fragmentShader: String(fragmentShader),
+    uniforms: {
+      lut: { value: this.lutTexture.get() },
+      lutSize: { value: this.lutSize },
+      bitsX: { value: this.model.lut.size.x },
+      bitsY: { value: this.model.lut.size.y },
+      bitsZ: { value: this.model.lut.size.z },
+      scale: { value: 1 },
+      size: { value: this.canvas.height / this.model.lut.size.z / 7 },
+    },
+  }))
 
   @computed
   get lutSize() {
     return Math.ceil(Math.sqrt(this.model.lut.data.length))
   }
 
-  @disposableComputed
-  get lutTexture(): Texture {
-    const texture = new DataTexture(
-      this.model.lut.data,
-      this.lutSize,
-      this.lutSize,
-      LuminanceFormat,
-      UnsignedByteType,
-      Texture.DEFAULT_MAPPING,
-      ClampToEdgeWrapping,
-      ClampToEdgeWrapping,
-      LinearFilter,
-      LinearFilter,
-    )
-    texture.flipY = true
-    texture.needsUpdate = true
-    return texture
-  }
+  private readonly lutTexture = dataTexture(() => ({
+    data: this.model.lut.data,
+    width: this.lutSize,
+    height: this.lutSize,
+    format: LuminanceFormat,
+    type: UnsignedByteType,
+    mapping: Texture.DEFAULT_MAPPING,
+    wrapS: ClampToEdgeWrapping,
+    wrapT: ClampToEdgeWrapping,
+    magFilter: LinearFilter,
+    minFilter: LinearFilter,
+    flipY: true,
+  }))
 }

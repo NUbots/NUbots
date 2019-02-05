@@ -1,15 +1,15 @@
 import { IComputedValue } from 'mobx'
 import { computed } from 'mobx'
-import { expr } from 'mobx-utils'
 import { Component } from 'react'
 import * as React from 'react'
-import { PerspectiveCamera } from 'three'
 import { SpotLight } from 'three'
 import { PointLight } from 'three'
 import { Object3D } from 'three'
 import { AxesHelper } from 'three'
-import { Scene } from 'three'
 
+import { Vector3 } from '../../../../math/vector3'
+import { scene } from '../../../three/builders'
+import { perspectiveCamera } from '../../../three/builders'
 import { Stage } from '../../../three/three'
 import { Canvas } from '../../../three/three'
 import { Three } from '../../../three/three'
@@ -31,28 +31,27 @@ class ViewModel {
 
   @computed
   get stage(): Stage {
-    return { camera: this.camera, scene: this.scene }
+    return { camera: this.camera.get(), scene: this.scene.get() }
   }
 
-  @computed
-  private get camera() {
-    const aspect = expr(() => this.canvas.width / this.canvas.height)
-    const camera = new PerspectiveCamera(75, aspect, 0.01, 100)
-    camera.position.set(0.4, 0.3, 0.3)
-    camera.up.set(0, 0, 1)
-    camera.lookAt(0, 0, 0)
-    return camera
-  }
+  private readonly camera = perspectiveCamera(() => ({
+    fov: 75,
+    aspect: this.canvas.width / this.canvas.height,
+    near: 0.01,
+    far: 100,
+    position: Vector3.from({ x: 0.4, y: 0.3, z: 0.3 }),
+    up: Vector3.from({ x: 0, y: 0, z: 1 }),
+    lookAt: Vector3.of(),
+  }))
 
-  @computed
-  private get scene(): Scene {
-    const scene = new Scene()
-    scene.add(this.helper)
-    scene.add(this.spotlight)
-    scene.add(this.pointlight)
-    scene.add(this.model.get())
-    return scene
-  }
+  private readonly scene = scene(() => ({
+    children: [
+      this.helper,
+      this.spotlight,
+      this.pointlight,
+      this.model.get(),
+    ],
+  }))
 
   @computed
   private get helper() {
@@ -69,7 +68,7 @@ class ViewModel {
   @computed
   private get pointlight() {
     const light = new PointLight('#fff')
-    light.position.copy(this.camera.position)
+    light.position.copy(this.camera.get().position)
     return light
   }
 }

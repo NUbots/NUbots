@@ -3,6 +3,7 @@ import { createTransformer } from 'mobx-utils'
 import { Mesh } from 'three'
 import { Object3D } from 'three'
 
+import { disposableComputed } from '../../../../base/disposable_computed'
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
 
@@ -54,17 +55,17 @@ export class RightArmViewModel {
     return mesh
   }
 
-  @computed
+  @disposableComputed
   private get rightShoulderGeometryAndMaterial() {
     return geometryAndMaterial(RightShoulderConfig, this.model.color)
   }
 
-  @computed
+  @disposableComputed
   private get rightUpperArmGeometryAndMaterial() {
     return geometryAndMaterial(RightUpperArmConfig, this.model.color)
   }
 
-  @computed
+  @disposableComputed
   private get rightLowerArmGeometryAndMaterial() {
     return geometryAndMaterial(RightLowerArmConfig, this.model.color)
   }

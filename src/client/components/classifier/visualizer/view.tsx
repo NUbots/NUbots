@@ -32,6 +32,6 @@ export class VisualizerView extends Component<{
 
   private stage = (canvas: Canvas) => {
     const viewModel = VisualizerViewModel.of(canvas, this.props.model)
-    return computed(() => ({ scene: viewModel.scene, camera: viewModel.camera }))
+    return computed(() => viewModel.stage)
   }
 }

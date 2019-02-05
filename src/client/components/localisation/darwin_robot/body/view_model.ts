@@ -2,6 +2,7 @@ import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
 import { Mesh } from 'three'
 
+import { disposableComputed } from '../../../../base/disposable_computed'
 import { geometryAndMaterial } from '../../utils'
 import { HeadViewModel } from '../head/view_model'
 import { LeftArmViewModel } from '../left_arm/view_model'
@@ -35,7 +36,7 @@ export class BodyViewModel {
     return mesh
   }
 
-  @computed
+  @disposableComputed
   private get bodyGeometryAndMaterial() {
     return geometryAndMaterial(BodyConfig, this.model.color)
   }

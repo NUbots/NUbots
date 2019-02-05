@@ -3,6 +3,7 @@ import { createTransformer } from 'mobx-utils'
 import { Mesh } from 'three'
 import { Object3D } from 'three'
 
+import { disposableComputed } from '../../../../base/disposable_computed'
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
 
@@ -66,27 +67,27 @@ export class HeadViewModel {
     return new Mesh(geometry, materials)
   }
 
-  @computed
+  @disposableComputed
   private get neckGeometryAndMaterial() {
     return geometryAndMaterial(NeckConfig, this.model.color)
   }
 
-  @computed
+  @disposableComputed
   private get skullGeometryAndMaterial() {
     return geometryAndMaterial(HeadConfig, this.model.color)
   }
 
-  @computed
+  @disposableComputed
   private get headLEDGeometryAndMaterial() {
     return geometryAndMaterial(HeadLEDConfig, this.model.color)
   }
 
-  @computed
+  @disposableComputed
   private get eyeLEDGeometryAndMaterial() {
     return geometryAndMaterial(EyeLEDConfig, this.model.color)
   }
 
-  @computed
+  @disposableComputed
   private get cameraGeometryAndMaterial() {
     return geometryAndMaterial(CameraConfig, this.model.color)
   }

@@ -8,7 +8,7 @@ import { RobotModel } from '../../../robot/model'
 import { LocalisationRobotModel } from '../model'
 import { RobotViewModel } from '../view_model'
 
-import { ModelVisualiser } from './model_visualiser'
+import { ModelVisualiser } from './model_visualizer'
 
 function createModel(animate?: 'animate') {
   const robotModel = RobotModel.of({

@@ -12,7 +12,14 @@ export function geometryAndMaterial(config: any, color?: string) {
   if (materials !== undefined) {
     materials = materials.map(material => coloredMaterial(material, color))
   }
-  return { geometry, materials }
+  return {
+    geometry, materials, dispose() {
+      this.geometry.dispose()
+      if (this.materials) {
+        this.materials.forEach(material => material.dispose())
+      }
+    },
+  }
 }
 
 const coloredMaterial = (material: Material, color?: string) => {
