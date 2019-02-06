@@ -25,7 +25,6 @@ namespace motion {
             // Plans where the swing foot will move to next
             Eigen::Affine3d plan_swing(const Sensors& sensors, const FootTarget& target, const Eigen::Affine3d& Htf_s);
 
-
             double step_height;
             double step_steep;
             double well_width;

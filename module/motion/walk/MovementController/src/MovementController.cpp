@@ -101,8 +101,7 @@ namespace motion {
             Rf_tt = Rft.slerp(1, Rat).toRotationMatrix();
 
             Eigen::Affine3d Htf_t;
-            Htf_t.linear() = Htf.linear();
-            // Htf_t.linear() = Eigen::Matrix3d::Identity();
+            Htf_t.linear() = Htf.linear();  // No rotation
             // Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
             Htf_t.translation() = rF_tTt;  // Translation to foot target
             return Htf_t;
@@ -135,7 +134,7 @@ namespace motion {
 
             // Get orientation for world (Rotation of world->torso)
             Eigen::Matrix3d Rtw;
-            // (Htw.inverse() * Htt_t).inverse()
+            // Ht_tt * Htw = Ht_tw
             Rtw = (Htt_t.inverse() * Eigen::Affine3d(sensors.world)).rotation();
 
             // Convert Rtw and Htf_s rotation into euler angles to get pitch and roll from Rtw and yaw from
@@ -224,10 +223,9 @@ namespace motion {
             Rf_tt = Rf_wt.slerp(1, Rat).toRotationMatrix();
 
             Eigen::Affine3d Htf_t;
-            Htf_t.linear() = Htf_w.linear();
-            // Htf_t.linear() = Eigen::Matrix3d::Identity();  // No rotation
-            // Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
-            Htf_t.translation() = rF_tTt;  // Translation to foot target
+            // Htf_t.linear() = Htf_w.linear(); // No rotation
+            Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
+            Htf_t.translation() = rF_tTt;           // Translation to foot target
             return Htf_t;
         }
 
@@ -237,10 +235,10 @@ namespace motion {
 
             on<Configuration>("MovementController.yaml").then([this](const Configuration& config) {
                 // Use configuration here from file MovementController.yaml
-                step_height  = config["step_height"];
-                well_width   = config["well_width"];
-                step_steep   = config["step_steep"];
-                time_horizon = config["time_horizon"];
+                step_height  = config["step_height"].as<double>();
+                well_width   = config["well_width"].as<double>();
+                step_steep   = config["step_steep"].as<double>();
+                time_horizon = config["time_horizon"].as<double>();
                 offset_time  = std::chrono::milliseconds(config["offset_time"].as<int>());
 
                 // Constant for f_x and f_y

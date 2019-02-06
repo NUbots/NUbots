@@ -136,11 +136,20 @@ namespace motion {
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance,
                                 0);
-                            Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
-                                           * Eigen::Matrix3d::Identity();
-                            Haf.linear() =
-                                Eigen::Matrix3d::Identity()
-                                * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
+                            // Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
+                            //                * Eigen::Matrix3d::Identity();
+                            // Haf.linear() =
+                            //     Eigen::Matrix3d::Identity()
+                            //     * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(),
+                            //     Eigen::Vector3d::UnitZ());
+
+                            Eigen::Matrix3d Raf;
+                            Raf = Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
+                                  * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
+                                  * Eigen::AngleAxisd(walkcommand.command.z() * 2 / (phase_time.count() / 1000000000),
+                                                      Eigen::Vector3d::UnitZ());
+
+                            Haf.linear() = Raf;
 
                             // Move the right foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(
@@ -155,11 +164,20 @@ namespace motion {
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) + feet_distance,
                                 0);
-                            Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
-                                           * Eigen::Matrix3d::Identity();
-                            Haf.linear() =
-                                Eigen::Matrix3d::Identity()
-                                * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(), Eigen::Vector3d::UnitZ());
+                            // Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
+                            //                * Eigen::Matrix3d::Identity();
+                            // Haf.linear() =
+                            //     Eigen::Matrix3d::Identity()
+                            //     * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(),
+                            //     Eigen::Vector3d::UnitZ());
+
+                            Eigen::Matrix3d Raf;
+                            Raf = Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
+                                  * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
+                                  * Eigen::AngleAxisd(walkcommand.command.z() * 2 / (phase_time.count() / 1000000000),
+                                                      Eigen::Vector3d::UnitZ());
+
+                            Haf.linear() = Raf;
 
                             // Move the left foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(
