@@ -119,9 +119,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   }
 
   send(options: NUClearNetSend): void {
-    if (typeof options.type === 'string') {
-      this.socket.send(options.type, options)
-    }
+    this.socket.send('packet', options)
   }
 
   private onReconnect = (options: NUClearNetOptions) => {

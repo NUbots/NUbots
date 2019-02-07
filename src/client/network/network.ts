@@ -1,3 +1,5 @@
+import { NUClearNetSend } from 'nuclearnet.js'
+
 import { NUsightNetwork } from './nusight_network'
 import { MessageType } from './nusight_network'
 import { MessageCallback } from './nusight_network'
@@ -43,5 +45,12 @@ export class Network {
       offNUClearMessage()
     }
     this.offNUClearMessages.clear()
+  }
+
+  /**
+   * Send the given message on the network
+   */
+  send(opts: NUClearNetSend): void {
+    this.nusightNetwork.send(opts)
   }
 }

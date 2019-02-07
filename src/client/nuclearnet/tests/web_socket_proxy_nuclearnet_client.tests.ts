@@ -88,7 +88,7 @@ describe('WebSocketProxyNUClearNetClient', () => {
         payload: Buffer.alloc(8),
       }
       client.send(opts)
-      expect(mockWebSocket.send).toHaveBeenCalledWith('foo', opts)
+      expect(mockWebSocket.send).toHaveBeenCalledWith('packet', opts)
     })
   })
 })

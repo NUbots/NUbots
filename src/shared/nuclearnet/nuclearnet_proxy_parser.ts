@@ -1,6 +1,7 @@
 import * as Emitter from 'component-emitter'
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
+import { NUClearNetSend } from 'nuclearnet.js'
 
 import { Packet } from './nuclearnet_proxy_parser_socketio'
 import { TYPES } from './nuclearnet_proxy_parser_socketio'
@@ -35,8 +36,16 @@ export class Encoder {
           case 'unlisten':
             return callback([JSON.stringify(packet)])
 
+          case 'packet': {
+            const { id, data: [key, { target, type, payload, reliable }] } = packet
+            return callback([
+              JSON.stringify({ id, nsp, key, header: { target, type, reliable } }),
+              payload,
+            ])
+          }
+
           // For NUClearNet packets, we send the payload separately to avoid array slicing later
-          default:
+          default: {
             const { id, data: [key, { peer, hash, payload, reliable }] } = packet
 
             // Send the header as a JSON and then the payload as binary
@@ -45,6 +54,7 @@ export class Encoder {
               hash,
               payload,
             ])
+          }
         }
       default:
         return callback([JSON.stringify(packet)])
@@ -58,7 +68,7 @@ export class Decoder extends Emitter {
   private nuclearPacket?: {
     nsp: string,
     type: TYPES.EVENT,
-    data: [string, Partial<NUClearNetPacket>],
+    data: [string, Partial<NUClearNetPacket> | Partial<NUClearNetSend>],
     id: number
   }
 
@@ -85,10 +95,19 @@ export class Decoder extends Emitter {
       }
     } else {
       switch (this.state) {
-        // State 1 means we are getting a hash
+        // State 1 means we are getting a payload or hash
         case 1:
-          this.nuclearPacket!.data[1].hash = obj
-          this.state = 2
+          if (this.nuclearPacket!.data[0] === 'packet') {
+            // 'packet' messages are sent using NUClearNetSend which doesn't have a hash,
+            // so here we get the payload and emit
+            this.nuclearPacket!.data[1].payload = obj
+            this.emit('decoded', this.nuclearPacket)
+            this.state = 0
+          } else {
+            // For NUClearNetPackets we get a hash in state 1 and move to state 2 for the payload
+            (this.nuclearPacket!.data[1] as NUClearNetPacket).hash = obj
+            this.state = 2
+          }
           break
 
         // State 2 means we are getting a packet

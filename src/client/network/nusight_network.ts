@@ -1,6 +1,7 @@
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
+import { NUClearNetSend } from 'nuclearnet.js'
 
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { AppModel } from '../components/app/model'
@@ -28,6 +29,10 @@ export class NUsightNetwork {
 
   connect(opts: NUClearNetOptions): () => void {
     return this.nuclearnetClient.connect(opts)
+  }
+
+  send(opts: NUClearNetSend) {
+    this.nuclearnetClient.send(opts)
   }
 
   onNUClearMessage<T>(messageType: MessageType<T>, cb: MessageCallback<T>) {

@@ -1,3 +1,4 @@
+import { NUClearNetSend } from 'nuclearnet.js'
 import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetPacket } from 'nuclearnet.js'
@@ -52,6 +53,7 @@ class WebSocketServerClient {
     this.offLeave = this.nuclearnetClient.onLeave(this.onLeave)
     this.offListenMap = new Map()
 
+    this.socket.on('packet', this.onClientPacket)
     this.socket.on('listen', this.onListen)
     this.socket.on('unlisten', this.onUnlisten)
     this.socket.on('nuclear_connect', this.onConnect)
@@ -85,7 +87,7 @@ class WebSocketServerClient {
   }
 
   private onListen = (event: string, requestToken: string) => {
-    const off = this.nuclearnetClient.on(event, this.onPacket.bind(this, event))
+    const off = this.nuclearnetClient.on(event, this.onServerPacket.bind(this, event))
     this.offListenMap.set(requestToken, off)
   }
 
@@ -101,8 +103,12 @@ class WebSocketServerClient {
     this.offLeave()
   }
 
-  private onPacket = (event: string, packet: NUClearNetPacket) => {
+  private onServerPacket = (event: string, packet: NUClearNetPacket) => {
     this.processor.onPacket(event, packet)
+  }
+
+  private onClientPacket = (options: NUClearNetSend) => {
+    this.nuclearnetClient.send(options)
   }
 }
 
