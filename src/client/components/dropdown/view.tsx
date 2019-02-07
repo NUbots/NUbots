@@ -8,17 +8,22 @@ import * as style from './style.css'
 
 export interface DropdownProps {
   children: ReactNode
-  dropdownMenuClassName?: string
+  className?: string
   dropdownToggle: ReactNode
   isOpen: boolean
-  onRef(dropdown: HTMLDivElement): void
+  isFullwidth?: boolean
+  dropdownPosition?: 'left' | 'right'
+  onRef?(dropdown: HTMLDivElement): void
   onToggleClick?(event: MouseEvent<HTMLSpanElement>): void
 }
 
 export const Dropdown: StatelessComponent<DropdownProps> = (props: DropdownProps) => {
-  const dropdownMenuClassName = classNames(style.dropdownMenu, props.dropdownMenuClassName)
+  const fullwidth = props.isFullwidth ? style.dropdownMenuFullwidth : ''
+  const position = props.dropdownPosition === 'right' ? style.dropdownMenuRight : ''
+  const dropdownMenuClassName = classNames(style.dropdownMenu, fullwidth, position)
+
   return (
-    <div className={style.dropdown} ref={props.onRef}>
+    <div className={classNames([style.dropdown, props.className])} ref={props.onRef}>
       <span className={style.dropdownToggle}
             onClick={props.onToggleClick}>
         {props.dropdownToggle}

@@ -9,8 +9,8 @@ import { DropdownProps } from '../dropdown/view'
 import { Dropdown } from '../dropdown/view'
 
 export type DropdownContainerProps = {
-  dropdownMenuClassName?: string
   dropdownToggle: ReactNode
+  dropdownPosition?: 'left' | 'right'
 }
 
 enum KeyCode {

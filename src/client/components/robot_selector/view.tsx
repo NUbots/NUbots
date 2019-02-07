@@ -24,10 +24,9 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
     </button>
   )
   const onChange = (robot: RobotModel) => () => selectRobot(robot)
-  const dropdownMenuClassName = props.dropdownMenuPosition === 'right' ? style.rightDropdownMenu : ''
   return (
     <div className={style.robotSelector}>
-      <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownMenuClassName={dropdownMenuClassName}>
+      <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
         <div className={style.robots}>
           {robots.length === 0 &&
             <div className={style.empty}>

@@ -2,7 +2,8 @@
   "defaultSeverity": "error",
   "extends": [
     "tslint:latest",
-    "tslint-eslint-rules"
+    "tslint-eslint-rules",
+    "tslint-react"
   ],
   "rules": {
     "array-bracket-spacing": [
@@ -128,7 +129,22 @@
     ],
     "triple-equals": [true, "allow-null-check"],
     "use-isnan": true,
-    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case"]
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case"],
+    "jsx-alignment": false,
+    "jsx-ban-elements": false,
+    "jsx-ban-props": false,
+    "jsx-boolean-value": false,
+    "jsx-curly-spacing": false,
+    "jsx-equals-spacing": false,
+    "jsx-key": false,
+    "jsx-no-bind": false,
+    "jsx-no-lambda": true,
+    "jsx-no-multiline-js": false,
+    "jsx-no-string-ref": false,
+    "jsx-use-translation-function": false,
+    "jsx-self-close": false,
+    "jsx-space-before-trailing-slash": false,
+    "jsx-wrap-multiline": false
   },
   "rulesDirectory": []
 }

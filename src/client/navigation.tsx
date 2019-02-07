@@ -1,7 +1,7 @@
 import { ComponentType } from 'react'
 import * as React from 'react'
 
-type Route = {
+export type Route = {
   exact?: boolean
   path: string
   Icon: any,
