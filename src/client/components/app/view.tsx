@@ -6,7 +6,6 @@ import { Route } from 'react-router'
 import { BrowserRouter } from 'react-router-dom'
 
 import { NavigationConfiguration } from '../../navigation'
-import { Route as RouteConfig } from '../../navigation'
 import { NavigationView } from '../navigation/view'
 
 import { installNav } from './install'
@@ -23,24 +22,18 @@ class AppView extends Component {
           <div className={style.app__container}>
             <div className={style.app__content}>
               <Switch>
-                {...this.nav.getRoutes().map(config => <RouteView key={config.path} config={config}/>)}
+                {...this.nav.getRoutes().map(config => <Route
+                  key={config.path}
+                  exact={config.exact}
+                  path={config.path}
+                  component={config.Content}
+                />)}
               </Switch>
             </div>
           </div>
         </div>
       </BrowserRouter>
     )
-  }
-}
-
-class RouteView extends Component<{ config: RouteConfig }> {
-  render() {
-    const { config } = this.props
-    return <Route exact={config.exact} path={config.path} render={this.renderRoute}/>
-  }
-
-  private readonly renderRoute = () => {
-    return <this.props.config.Content />
   }
 }
 
