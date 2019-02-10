@@ -79,12 +79,14 @@ namespace motion {
             Eigen::Vector3d rT_tTt = rATt.normalized() * scale;
 
             // If our scale would move us past the target, then just go to the target
-            if (scale > distance) {
+            if ((scale > distance) || (scale == 1)) {
                 rT_tTt = rATt;
             }
 
             // Create vector from torso to foot target
+            // rT_tTt ~ rF_tFf
             Eigen::Vector3d rF_tTt = Htf * -rT_tTt;
+
             // Target rotation from torso space
             Eigen::Affine3d Hat;
             Hat = Haf * Htf.inverse();
@@ -101,16 +103,16 @@ namespace motion {
             Rf_tt = Rft.slerp(1, Rat).toRotationMatrix();
 
             Eigen::Affine3d Htf_t;
-            Htf_t.linear() = Htf.linear();  // No rotation
-            // Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
-            Htf_t.translation() = rF_tTt;  // Translation to foot target
+            // Htf_t.linear() = Htf.linear();  // No rotation
+            Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
+            Htf_t.translation() = rF_tTt;           // Translation to foot target
             return Htf_t;
         }
 
         Eigen::Affine3d MovementController::plan_swing(const Sensors& sensors,
                                                        const FootTarget& target,
                                                        const Eigen::Affine3d& Htf_s) {
-            // Get support foot and swing foot coordinate systems
+            // Get swing foot coordinate system from support foot coordinate system given
             Eigen::Affine3d Htf_w;  // swing foot
             Eigen::Affine3d Htt_t;
 
@@ -201,7 +203,7 @@ namespace motion {
             }
 
             // If the scale is more than the distance, go to the target to avoid overshooting
-            if ((scale > distance) || (distance < 0.001)) {
+            if (((scale > distance) || (distance < 0.001)) || (scale == 1)) {
                 rF_tPp = Eigen::Vector3d(0, 0, 0);
             }
 
@@ -252,38 +254,35 @@ namespace motion {
                        const KinematicsModel& model,
                        const FootTarget& foot_target,
                        const TorsoTarget& torso_target) {
+                    // Determine where the torso will move to (ie where the support foot will move)
                     Eigen::Affine3d torso_Htf_t;
                     torso_Htf_t = plan_torso(sensors, torso_target);
 
+                    // Determine where the swing foot will move, using the torso's result
                     Eigen::Affine3d swing_Htf_t;
                     swing_Htf_t = plan_swing(sensors, foot_target, torso_Htf_t);
 
-                    // MOVE TORSO
+                    // Create transforms for inverse kinematics
                     Transform3D t_t = convert<double, 4, 4>(torso_Htf_t.matrix());
-                    auto joints_t   = calculateLegJoints(
-                        model, t_t, torso_target.isRightFootSupport ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
-                    auto waypoints_t = std::make_unique<std::vector<ServoCommand>>();
-
-                    for (const auto& joint : joints_t) {
-                        waypoints_t->push_back(
-                            {torso_target.subsumption_id,
-                             NUClear::clock::now()
-                                 + NUClear::clock::duration(int(time_horizon * NUClear::clock::period::den)),
-                             joint.first,
-                             joint.second,
-                             20,
-                             100});
-                    }
-                    emit(waypoints_t);
-
-                    // MOVE FOOT
                     Transform3D t_f = convert<double, 4, 4>(swing_Htf_t.matrix());
-                    auto joints_f   = calculateLegJoints(
-                        model, t_f, foot_target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
-                    auto waypoints_f = std::make_unique<std::vector<ServoCommand>>();
 
-                    for (const auto& joint : joints_f) {
-                        waypoints_f->push_back(
+                    std::vector<std::pair<ServoID, float>> joints;
+
+                    // Use inverse kinematics to calculate joint positions
+                    auto jointsSupport = torso_target.isRightFootSupport
+                                             ? calculateLegJoints(model, t_t, LimbID::RIGHT_LEG)
+                                             : calculateLegJoints(model, t_t, LimbID::LEFT_LEG);
+                    auto jointsSwing = foot_target.isRightFootSwing ? calculateLegJoints(model, t_f, LimbID::RIGHT_LEG)
+                                                                    : calculateLegJoints(model, t_f, LimbID::LEFT_LEG);
+
+                    // Combine left and right legs
+                    joints.insert(joints.end(), jointsSwing.begin(), jointsSwing.end());
+                    joints.insert(joints.end(), jointsSupport.begin(), jointsSupport.end());
+
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+
+                    for (const auto& joint : joints) {
+                        waypoints->push_back(
                             {foot_target.subsumption_id,
                              NUClear::clock::now()
                                  + NUClear::clock::duration(int(time_horizon * NUClear::clock::period::den)),
@@ -292,7 +291,7 @@ namespace motion {
                              20,
                              100});
                     }
-                    emit(waypoints_f);
+                    emit(waypoints);
                 });
         }
     }  // namespace walk

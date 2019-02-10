@@ -26,14 +26,14 @@ namespace motion {
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
             on<Configuration>("StaticWalk.yaml").then([this](const Configuration& config) {
-                // Use configuration here from file StaticWalk.yaml
-                torso_height  = config["torso_height"].as<double>();
-                feet_distance = config["feet_distance"].as<double>();
-                stance_width  = config["stance_width"].as<double>();
-                phase_time    = std::chrono::milliseconds(config["phase_time"].as<int>());
-                start_phase   = NUClear::clock::now();
-                state         = INITIAL;
+                start_phase = NUClear::clock::now();
+                state       = INITIAL;
 
+                // Use configuration here from file StaticWalk.yaml
+                torso_height   = config["torso_height"].as<double>();
+                feet_distance  = config["feet_distance"].as<double>();
+                stance_width   = config["stance_width"].as<double>();
+                phase_time     = std::chrono::milliseconds(config["phase_time"].as<int>());
                 double x_speed = config["x_speed"].as<double>();
                 double y_speed = config["y_speed"].as<double>();
                 double angle   = config["angle"].as<double>();
@@ -48,11 +48,11 @@ namespace motion {
 
             on<Trigger<Sensors>, With<WalkCommand>>().then(
                 [this](const Sensors& sensors, const WalkCommand& walkcommand) {
-                    // INITIAL state occurs only as the first state in the walk to set the matrix Hff_w
+                    // INITIAL state occurs only as the first state in the walk to set the matrix Hff_s
                     if (state == INITIAL) {
                         Hff_s = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                 * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                        Hff_s.translation().z() = 0;
+                        Hff_s.translation().y() = -stance_width;
 
                         state = RIGHT_LEAN;
                     }
@@ -70,8 +70,6 @@ namespace motion {
                                 Hff_s = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                                 Hff_s.translation().y() = -stance_width;
-                                Hff_s.translation().z() = 0;
-
 
                                 state = RIGHT_LEAN;
                             } break;
@@ -82,8 +80,6 @@ namespace motion {
                                 Hff_s = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
                                         * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
                                 Hff_s.translation().y() = stance_width;
-                                Hff_s.translation().z() = 0;
-
 
                                 state = LEFT_LEAN;
                             } break;
@@ -99,7 +95,8 @@ namespace motion {
 
                             // Create matrix for TorsoTarget
                             Eigen::Affine3d Haf;
-                            Haf.linear()      = Htf.linear();
+                            Haf.linear() = Eigen::Matrix3d::Identity();
+                            // Haf.linear()      = Htf.linear();
                             Haf.translation() = -Eigen::Vector3d(0, 0, torso_height);
 
                             // Move the COM over the left foot
@@ -116,7 +113,8 @@ namespace motion {
 
                             // Create matrix for TorsoTarget
                             Eigen::Affine3d Haf;
-                            Haf.linear()      = Htf.linear();
+                            Haf.linear() = Eigen::Matrix3d::Identity();
+                            // Haf.linear()      = Htf.linear();
                             Haf.translation() = -Eigen::Vector3d(0, 0, torso_height);
 
                             // Move the COM over the right foot
@@ -136,12 +134,6 @@ namespace motion {
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) - feet_distance,
                                 0);
-                            // Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
-                            //                * Eigen::Matrix3d::Identity();
-                            // Haf.linear() =
-                            //     Eigen::Matrix3d::Identity()
-                            //     * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(),
-                            //     Eigen::Vector3d::UnitZ());
 
                             Eigen::Matrix3d Raf;
                             Raf = Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
@@ -164,19 +156,14 @@ namespace motion {
                                 walkcommand.command.x() * 2 / (phase_time.count() / 1000000000),
                                 (walkcommand.command.y() * 2 / (phase_time.count() / 1000000000)) + feet_distance,
                                 0);
-                            // Haf.linear() = (walkcommand.command.z() * 2 / (phase_time.count() / 1000000000))
-                            //                * Eigen::Matrix3d::Identity();
-                            // Haf.linear() =
-                            //     Eigen::Matrix3d::Identity()
-                            //     * Eigen::AngleAxisd(Haf.rotation().eulerAngles(0, 2, 1).y(),
-                            //     Eigen::Vector3d::UnitZ());
 
+                            // To get the rotation, create a matrix with no pitch or roll but with yaw corresponding to
+                            // turning speed given
                             Eigen::Matrix3d Raf;
                             Raf = Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
                                   * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
                                   * Eigen::AngleAxisd(walkcommand.command.z() * 2 / (phase_time.count() / 1000000000),
                                                       Eigen::Vector3d::UnitZ());
-
                             Haf.linear() = Raf;
 
                             // Move the left foot to the location specified by the walkcommand
