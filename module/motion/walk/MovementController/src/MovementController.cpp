@@ -266,18 +266,10 @@ namespace motion {
                     Transform3D t_t = convert<double, 4, 4>(torso_Htf_t.matrix());
                     Transform3D t_f = convert<double, 4, 4>(swing_Htf_t.matrix());
 
-                    std::vector<std::pair<ServoID, float>> joints;
-
                     // Use inverse kinematics to calculate joint positions
-                    auto jointsSupport = torso_target.isRightFootSupport
-                                             ? calculateLegJoints(model, t_t, LimbID::RIGHT_LEG)
-                                             : calculateLegJoints(model, t_t, LimbID::LEFT_LEG);
-                    auto jointsSwing = foot_target.isRightFootSwing ? calculateLegJoints(model, t_f, LimbID::RIGHT_LEG)
-                                                                    : calculateLegJoints(model, t_f, LimbID::LEFT_LEG);
+                    auto joints = torso_target.isRightFootSupport ? calculateLegJoints(model, t_f, t_t)
+                                                                  : calculateLegJoints(model, t_t, t_f);
 
-                    // Combine left and right legs
-                    joints.insert(joints.end(), jointsSwing.begin(), jointsSwing.end());
-                    joints.insert(joints.end(), jointsSupport.begin(), jointsSupport.end());
 
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
