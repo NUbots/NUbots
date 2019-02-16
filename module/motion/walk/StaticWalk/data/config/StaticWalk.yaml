@@ -1,16 +1,17 @@
 # Time each phase takes to finish (milliseconds)
 phase_time: 2000
+# phase_time: 1500
 # Height of the torso from the ground when standing (m)
 torso_height: 0.2
 # torso_height: 0.55
-# Distance between the feet (m)
-feet_distance: 0.074
-# feet_distance: 0.14
+# distance forward the torso leans over the foot so as to remain in the support polygon
+foot_offset: 0.02
+# foot_offset: 0.04
 # Width between the feet wile walking (m)
 stance_width: 0.074
-# stance_width: 0.14
+# stance_width: 0.15
 # values for walkcommand (test)
-x_speed: 0.03
-# x_speed: 0.04
+x_speed: 0.01
+# x_speed: 0.03
 y_speed: 0
 angle: 0

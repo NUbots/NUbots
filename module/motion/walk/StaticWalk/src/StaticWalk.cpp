@@ -31,8 +31,8 @@ namespace motion {
 
                 // Use configuration here from file StaticWalk.yaml
                 torso_height   = config["torso_height"].as<double>();
-                feet_distance  = config["feet_distance"].as<double>();
                 stance_width   = config["stance_width"].as<double>();
+                foot_offset    = config["foot_offset"].as<double>();
                 phase_time     = std::chrono::milliseconds(config["phase_time"].as<int>());
                 double x_speed = config["x_speed"].as<double>();
                 double y_speed = config["y_speed"].as<double>();
@@ -41,26 +41,13 @@ namespace motion {
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(x_speed, y_speed, angle)));
             });
 
-            // on<ResetWalk>().then([this] {
-            //     state       = INITIAL;
-            //     start_phase = NUClear::clock::now();
-            // });
-
             on<Trigger<Sensors>, With<WalkCommand>>().then([this](const Sensors& sensors,
                                                                   const WalkCommand& walkcommand) {
                 // INITIAL state occurs only as the first state in the walk to set the matrix Hff_s
                 if (state == INITIAL) {
-                    torso_height = -Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).translation().z();
-
+                    // Set the matrix Hff_s and change the state to a lean
                     Hff_s = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                             * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                    Hff_s.translation().y() = -stance_width;
-                    // if (Hff_s.translation().norm() < stance_width) {
-                    //     double z_height = Hff_s.translation().z();
-                    //     Hff_s.translation() *= Hff_s.translation().norm() / stance_width;
-                    //     Hff_s.translation().z() = z_height;
-                    // }
-
                     state = RIGHT_LEAN;
                 }
 
@@ -72,51 +59,29 @@ namespace motion {
                     switch (state) {
                         case LEFT_LEAN: state = RIGHT_STEP; break;
                         case RIGHT_STEP: {
-                            // Store where support is relative to swing, ignoring height and setting the y to the
-                            // stance width
+                            // Store where support is relative to swing
                             Hff_s = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                                     * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-                            Hff_s.translation().y() = -stance_width;
-
-                            // if (Hff_s.translation().norm() < stance_width) {
-                            //     double z_height = Hff_s.translation().z();
-                            //     Hff_s.translation() *= Hff_s.translation().norm() / stance_width;
-                            //     Hff_s.translation().z() = z_height;
-                            // }
-
                             state = RIGHT_LEAN;
                         } break;
                         case RIGHT_LEAN: state = LEFT_STEP; break;
                         case LEFT_STEP: {
-                            // Store where support is relative to swing, ignoring height and setting the y to the
-                            // stance width
+                            // Store where support is relative to swing
                             Hff_s = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
                                     * (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-                            Hff_s.translation().y() = stance_width;
-
-                            // if (Hff_s.translation().norm() < stance_width) {
-                            //     double z_height = Hff_s.translation().z();
-                            //     Hff_s.translation() *= Hff_s.translation().norm() / stance_width;
-                            //     Hff_s.translation().z() = z_height;
-                            // }
-
                             state = LEFT_LEAN;
                         } break;
                         default: break;
                     }
                 }
 
-                // Put our COM over the correct foot or move foot to target
+                // Put our COM over the correct foot or move foot to target, based on which state we are in
                 switch (state) {
                     case LEFT_LEAN: {
-                        // Support foot to torso transform
-                        Eigen::Affine3d Htf(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
-
                         // Create matrix for TorsoTarget
                         Eigen::Affine3d Haf;
-                        Haf.linear() = Eigen::Matrix3d::Identity();
-                        // Haf.linear()      = Htf.linear();
-                        Haf.translation() = -Eigen::Vector3d(0, 0, torso_height);
+                        Haf.linear()      = Eigen::Matrix3d::Identity();
+                        Haf.translation() = -Eigen::Vector3d(foot_offset, 0, torso_height);
 
                         // Move the COM over the left foot
                         emit(std::make_unique<TorsoTarget>(
@@ -127,14 +92,10 @@ namespace motion {
                             start_phase + phase_time, true, Hff_s.matrix(), false, subsumptionId));
                     } break;
                     case RIGHT_LEAN: {
-                        // Support foot to torso transform
-                        Eigen::Affine3d Htf(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-
                         // Create matrix for TorsoTarget
                         Eigen::Affine3d Haf;
-                        Haf.linear() = Eigen::Matrix3d::Identity();
-                        // Haf.linear()      = Htf.linear();
-                        Haf.translation() = -Eigen::Vector3d(0, 0, torso_height);
+                        Haf.linear()      = Eigen::Matrix3d::Identity();
+                        Haf.translation() = -Eigen::Vector3d(foot_offset, 0, torso_height);
 
                         // Move the COM over the right foot
                         emit(
