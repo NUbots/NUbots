@@ -37,7 +37,7 @@ namespace motion {
         using utility::nusight::graph;
 
         double MovementController::f_x(const Eigen::Vector3d& pos) {
-            return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
+            return -pos.x() / std::abs(pos.x()) * std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
         }
 
         double MovementController::f_y(const Eigen::Vector3d& pos) {
