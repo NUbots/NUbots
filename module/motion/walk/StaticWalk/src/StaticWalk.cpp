@@ -150,47 +150,63 @@ namespace motion {
                         // radians/seconds
                         Eigen::Affine3d Haf;
 
+                        // If there is no rotation to be done, just set the translation to x and y, and set the rotation
+                        // to identity
                         if (walkcommand.command.z() == 0) {
                             Haf.translation() = -Eigen::Vector3d(
-                                (walkcommand.command.x() * 2)
-                                    / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
-                                (walkcommand.command.y() * 2)
-                                        / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count()
+                                walkcommand.command.x() * 2
+                                    * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
+                                walkcommand.command.y() * 2
+                                        * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count()
                                     - stance_width,
                                 0);
                             Haf.linear() = Eigen::Matrix3d::Identity();
                         }
 
+                        // If there is rotation, adjust the translation and rotation for this
                         else {
-
+                            // Multiply by 2 so that the lean states are accounted for
+                            //  Multiply by phase time so that we are moving in x metres/second and y metres/second
                             Haf.translation() = -Eigen::Vector3d(
-                                (walkcommand.command.x())
-                                    / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
-                                (walkcommand.command.y())
-                                    / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
+                                (walkcommand.command.x() * 2)
+                                    * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
+                                (walkcommand.command.y() * 2)
+                                    * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
                                 0);
 
+                            // Set rotation to given walkcommand
                             double rotation = walkcommand.command.z();
+                            // Set origin of the circle
                             Eigen::Vector3d origin(Haf.translation().y(), Haf.translation().x(), 0);
                             origin /= rotation;
+                            // Set the angle of the arc
                             double arcLength =
                                 rotation
                                 * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count();
+                            // Using the end points of the arc to create one side and radius lines to the center as two
+                            // other sides, create a triangle. arcAngle is then the angle of either of the two other
+                            // points of the triangle.
                             double arcAngle = (M_PI - arcLength) / 2;
 
+                            // Create a rotation vector which is the vector from foot to origin then rotated about
+                            // arcLength to get a vector pointing from the foot to the end of the arc (may not be the
+                            // right length)
                             Eigen::Vector3d rAFf;
                             rAFf.x() = origin.x() * cos(arcAngle) - origin.y() * sin(arcAngle);
                             rAFf.y() = origin.x() * sin(arcAngle) + origin.y() * cos(arcAngle);
                             rAFf.z() = 0;
 
+                            // Adjust the length of the vector so that it is the length to the end of the arc
                             rAFf = rAFf.normalized() * ((origin.norm() / sin(arcAngle)) * sin(arcLength));
+                            // Adjust the y since this is taken in support foot space, and we want to move the swing
+                            // foot
                             rAFf.y() -= stance_width;
 
-                            log(rAFf.transpose());
-
-                            Haf.linear()      = Eigen::Matrix3d::Identity();
+                            // Create the matrix to send the foot to the correct target
+                            Haf.linear()      = Eigen::Matrix3d::Identity();  // TODO: create the right rotation
                             Haf.translation() = -rAFf;
                         }
+
                         // Move the left foot to the location specified by the walkcommand
                         emit(std::make_unique<FootTarget>(
                             start_phase + phase_time, true, Haf.matrix(), true, subsumptionId));
@@ -200,44 +216,64 @@ namespace motion {
                         // radians/seconds
                         Eigen::Affine3d Haf;
 
+                        // If there is no rotation to be done, just set the translation to x and y, and set the rotation
+                        // to identity
                         if (walkcommand.command.z() == 0) {
+                            // Multiply by 2 so that the lean states are accounted for
+                            //  Multiply by phase time so that we are moving in x metres/second and y metres/second
                             Haf.translation() = -Eigen::Vector3d(
-                                (walkcommand.command.x() * 2)
-                                    / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
-                                (walkcommand.command.y() * 2)
-                                        / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count()
+                                walkcommand.command.x() * 2
+                                    * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
+                                walkcommand.command.y() * 2
+                                        * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count()
                                     + stance_width,
                                 0);
                             Haf.linear() = Eigen::Matrix3d::Identity();
                         }
 
+                        // If there is rotation, adjust the translation and rotation for this
                         else {
                             Haf.translation() = -Eigen::Vector3d(
                                 (walkcommand.command.x() * 2)
-                                    / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
+                                    * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
                                 (walkcommand.command.y() * 2)
-                                    / std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
+                                    * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count(),
                                 0);
 
+                            // Set rotation to given walkcommand
                             double rotation = walkcommand.command.z() * 2;
+                            // Set origin of the circle
                             Eigen::Vector3d origin(Haf.translation().y(), Haf.translation().x(), 0);
                             origin /= rotation;
+                            // Set the angle of the arc
                             double arcLength =
                                 rotation
                                 * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count();
+
+                            // Using the end points of the arc to create one side and radius lines to the center as two
+                            // other sides, create a triangle. arcAngle is then the angle of either of the two other
+                            // points of the triangle.
                             double arcAngle = (M_PI - arcLength) / 2;
 
+                            // Create a rotation vector which is the vector from foot to origin then rotated about
+                            // arcLength to get a vector pointing from the foot to the end of the arc (may not be the
+                            // right length)
                             Eigen::Vector3d rAFf;
                             rAFf.x() = origin.x() * cos(arcAngle) - origin.y() * sin(arcAngle);
                             rAFf.y() = origin.x() * sin(arcAngle) + origin.y() * cos(arcAngle);
                             rAFf.z() = 0;
 
+                            // Adjust the length of the vector so that it is the length to the end of the arc
                             rAFf = rAFf.normalized() * ((origin.norm() / sin(arcAngle)) * sin(arcLength));
+                            // Adjust the y since this is taken in support foot space, and we want to move the swing
+                            // foot
                             rAFf.y() += stance_width;
 
-                            Haf.linear()      = Eigen::Matrix3d::Identity();
+                            // Create the matrix to send the foot to the correct target
+                            Haf.linear()      = Eigen::Matrix3d::Identity();  // TODO: create the right rotation
                             Haf.translation() = -rAFf;
                         }
+
                         // Move the left foot to the location specified by the walkcommand
                         emit(std::make_unique<FootTarget>(
                             start_phase + phase_time, false, Haf.matrix(), true, subsumptionId));
