@@ -60,17 +60,16 @@ namespace motion {
 
             // Convert Rtw and Htf_s rotation into euler angles to get pitch and roll from Rtw and yaw from
             // Htf_s to create a new rotation matrix
-            Eigen::Vector3d ea_Rtw(Rtw.eulerAngles(0, 1, 2));
-            Eigen::Vector3d ea_Htf(Htf.rotation().eulerAngles(0, 1, 2));
+            // Eigen::Vector3d ea_Rtw(Rtw.eulerAngles(0, 1, 2));
 
-            // Rtg is the yawless world rotation
-            Eigen::Matrix3d Rtg(Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
-                                * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
-                                * Eigen::AngleAxisd(ea_Rtw.z() + ea_Htf.z(), Eigen::Vector3d::UnitZ()));
+            // // Rtg is the yawless world rotation
+            // Eigen::Matrix3d Rtg(Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
+            //                     * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
+            //                     * Eigen::AngleAxisd(ea_Rtw.z(), Eigen::Vector3d::UnitZ()));
 
             // Construct a torso to foot ground space (support foot centric world oriented space)
             Eigen::Affine3d Htg;
-            Htg.linear()      = Rtg;                // Rotation from Rtg
+            Htg.linear()      = Rtw;                // Rotation from Rtg
             Htg.translation() = Htf.translation();  // Translation is the same as to the support foot
 
 
@@ -90,27 +89,23 @@ namespace motion {
             // Create next torso target in torso space
             Eigen::Vector3d rT_tTt(rATt.normalized() * (horizon_distance * time_horizon));
 
-            log(time_left, horizon_distance, rATt.norm(), rT_tTt.transpose());
-
             // Create vector from foot target to torso
             Eigen::Vector3d rT_tFf(Htf.inverse() * rT_tTt);
 
             // Target rotation from torso space
             Eigen::Affine3d Hat(Haf * Htf.inverse());
             // Get support foot rotation from torso as quaternion
-            Eigen::Quaterniond Rft(Htf.inverse().linear());
+            Eigen::Quaterniond Rgt(Rtw.inverse());
             // Get target rotation from torso as quaternion
             Eigen::Quaterniond Rat(Hat.linear());
             // Create rotation of torso to torso target
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
             // Scale as above to rotate in specified time
-            Eigen::Matrix3d Rf_tt(Rft.slerp(time_horizon / time_left, Rat).toRotationMatrix());
+            Eigen::Matrix3d Rf_tt(Rgt.slerp(time_horizon / time_left, Rat).toRotationMatrix());
 
             // Create the final position matrix to return
             Eigen::Affine3d Htf_t;
-            // Htf_t.linear() = Rtg;
             Htf_t.linear() = Eigen::Matrix3d::Identity();
-            // Htf_t.linear() = Htf.linear();  // No rotation?
             // Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
             Htf_t.translation() = -rT_tFf;  // Translation to target
             return Htf_t;
@@ -144,7 +139,7 @@ namespace motion {
             // Rtg is the yawless world rotation
             Eigen::Matrix3d Rtg(Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
                                 * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
-                                * Eigen::AngleAxisd(ea_Rtw.y() + ea_Htf_s.z(), Eigen::Vector3d::UnitZ()));
+                                * Eigen::AngleAxisd(ea_Rtw.y() - ea_Htf_s.z(), Eigen::Vector3d::UnitZ()));
 
             // Construct a torso to foot ground space (support foot centric world oriented space)
             Eigen::Affine3d Htg;
@@ -152,6 +147,7 @@ namespace motion {
             Htg.translation() = Htf_s.translation();  // Translation is the same as to the support foot
 
             // Vector to the swing foot in ground space
+            // Hgt * rF_wTt = rF_wGg
             Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
             // Vector from ground to target
             // Hgf_s * rAF_sf_s
@@ -159,19 +155,18 @@ namespace motion {
 
             // Direction of the target from the swing foot
             Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
-
             // Create a rotation to the plane that cuts through the two positions
             Eigen::Matrix3d Rgp;
             // X axis is the direction towards the target. Make the z=0 so that it is at a right angle to the y-axis.
             // This makes the vector field straight rather than on a slope.
-            rAF_wg.z()        = 0;
-            Rgp.leftCols<1>() = rAF_wg.normalized();
+            rAF_wg.z() = 0;
+            Rgp.col(0) = rAF_wg.normalized();
             // Y axis is straight up
-            Rgp.middleCols<1>(1) = Eigen::Vector3d::UnitZ();
+            Rgp.col(1) = Eigen::Vector3d::UnitZ();
             // Z axis is the cross product of X and Y. This makes the z-axis at a right angle to both the x-axis and
             // y-axis
-            Rgp.rightCols<1>() = Rgp.leftCols<1>().cross(Rgp.middleCols<1>(1)).normalized();
-
+            Rgp.col(2) = Rgp.leftCols<1>().cross(Rgp.middleCols<1>(1)).normalized();
+            // Rgp.leftCols<1>()  = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>()).normalized();
             // Create transform based on above rotation
             Eigen::Affine3d Hgp;       // plane to ground transform
             Hgp.linear()      = Rgp;   // Rotation from above
@@ -224,10 +219,10 @@ namespace motion {
             Rf_tt = Rgt.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix();
 
             Eigen::Affine3d Htf_t;
-            Htf_t.linear() = Rtg;
-            // Htf_t.linear() = Htf_w.linear();  // No rotation
-            // Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
-            Htf_t.translation() = rF_tTt;  // Translation to foot target
+
+            // Htf_t.linear() = Htp.rotation();
+            Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
+            Htf_t.translation() = rF_tTt;           // Translation to foot target
             return Htf_t;
         }
 
