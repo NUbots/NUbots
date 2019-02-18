@@ -163,8 +163,14 @@ namespace motion {
                             // foot
                             rAFf.y() -= stance_width;
 
+                            Eigen::Matrix3d Raf(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
+                                                * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
+                                                * Eigen::AngleAxisd(rotation, Eigen::Vector3d::UnitZ()));
+
+
                             // Create the matrix to send the foot to the correct target
-                            Haf.linear()      = Eigen::Matrix3d::Identity();  // TODO: create the right rotation
+                            Haf.linear() = Raf;
+                            // Haf.linear()      = Eigen::Matrix3d::Identity();  // TODO: create the right rotation
                             Haf.translation() = -rAFf;
                         }
 
@@ -230,8 +236,14 @@ namespace motion {
                             // foot
                             rAFf.y() += stance_width;
 
+                            Eigen::Matrix3d Raf(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
+                                                * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
+                                                * Eigen::AngleAxisd(rotation, Eigen::Vector3d::UnitZ()));
+
+
                             // Create the matrix to send the foot to the correct target
-                            Haf.linear()      = Eigen::Matrix3d::Identity();  // TODO: create the right rotation
+                            Haf.linear() = Raf;
+                            // Haf.linear()      = Eigen::Matrix3d::Identity();  // TODO: create the right rotation
                             Haf.translation() = -rAFf;
                         }
 
