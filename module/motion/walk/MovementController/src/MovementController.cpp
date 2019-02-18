@@ -58,15 +58,6 @@ namespace motion {
             // Get orientation for world (Rotation of world->torso)
             Eigen::Matrix3d Rtw(Eigen::Affine3d(sensors.world).rotation());
 
-            // Convert Rtw and Htf_s rotation into euler angles to get pitch and roll from Rtw and yaw from
-            // Htf_s to create a new rotation matrix
-            // Eigen::Vector3d ea_Rtw(Rtw.eulerAngles(0, 1, 2));
-
-            // // Rtg is the yawless world rotation
-            // Eigen::Matrix3d Rtg(Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
-            //                     * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
-            //                     * Eigen::AngleAxisd(ea_Rtw.z(), Eigen::Vector3d::UnitZ()));
-
             // Construct a torso to foot ground space (support foot centric world oriented space)
             Eigen::Affine3d Htg;
             Htg.linear()      = Rtw;                // Rotation from Rtg
@@ -87,25 +78,26 @@ namespace motion {
             double horizon_distance((rATt.norm() / time_left) * time_horizon);
 
             // Create next torso target in torso space
-            Eigen::Vector3d rT_tTt(rATt.normalized() * (horizon_distance * time_horizon));
+            Eigen::Vector3d rT_tTt(rATt.normalized() * (horizon_distance));
 
             // Create vector from foot target to torso
             Eigen::Vector3d rT_tFf(Htf.inverse() * rT_tTt);
 
-            // Target rotation from torso space
+
+            // Torso to target transform
             Eigen::Affine3d Hat(Haf * Htf.inverse());
-            // Get support foot rotation from torso as quaternion
-            Eigen::Quaterniond Rgt(Rtw.inverse());
-            // Get target rotation from torso as quaternion
+            // Get torso to swing foot rotation as quaternion
+            Eigen::Quaterniond Rft(Htf.inverse().rotation());
+            // Create rotation of torso to target as a quaternion
             Eigen::Quaterniond Rat(Hat.linear());
-            // Create rotation of torso to torso target
+            // Create rotation matrix for foot target
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-            // Scale as above to rotate in specified time
-            Eigen::Matrix3d Rf_tt(Rgt.slerp(time_horizon / time_left, Rat).toRotationMatrix());
+            Eigen::Matrix3d Rf_tt(Rft.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix());
 
             // Create the final position matrix to return
             Eigen::Affine3d Htf_t;
-            Htf_t.linear() = Eigen::Matrix3d::Identity();
+            Htf_t.linear() = Htf.rotation();
+            // Htf_t.linear() = Eigen::Matrix3d::Identity();
             // Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
             Htf_t.translation() = -rT_tFf;  // Translation to target
             return Htf_t;
@@ -165,8 +157,9 @@ namespace motion {
             Rgp.col(1) = Eigen::Vector3d::UnitZ();
             // Z axis is the cross product of X and Y. This makes the z-axis at a right angle to both the x-axis and
             // y-axis
-            Rgp.col(2) = Rgp.leftCols<1>().cross(Rgp.middleCols<1>(1)).normalized();
+            Rgp.col(2) = Rgp.col(1).cross(Rgp.col(0)).normalized();
             // Rgp.leftCols<1>()  = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>()).normalized();
+
             // Create transform based on above rotation
             Eigen::Affine3d Hgp;       // plane to ground transform
             Hgp.linear()      = Rgp;   // Rotation from above
@@ -189,8 +182,8 @@ namespace motion {
             double horizon_distance = (distance / time_left) * time_horizon;
 
             // Swing foot's new target position on the plane, scaled for time based on the horizon
-            Eigen::Vector3d rF_tPp(
-                rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * horizon_distance * time_horizon);
+            Eigen::Vector3d rF_tPp(rF_wPp
+                                   + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * horizon_distance);
 
             // If no lift is wanted, then set the y (vertical axis in plane space) to 0
             if (!target.lift) {
@@ -205,21 +198,17 @@ namespace motion {
             // Foot target's position relative to torso
             Eigen::Vector3d rF_tTt(Htp * rF_tPp);
 
-            // TODO add slerp rotation to the ground rotation
             // Torso to target transform
             Eigen::Affine3d Hat(Haf_s * Htf_s.inverse());
             // Get torso to swing foot rotation as quaternion
             Eigen::Quaterniond Rgt(Rtg.inverse());
             // Create rotation of torso to target as a quaternion
-            Eigen::Quaterniond Rat;
-            Rat = Hat.linear();
+            Eigen::Quaterniond Rat(Hat.linear());
             // Create rotation matrix for foot target
-            Eigen::Matrix3d Rf_tt;
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-            Rf_tt = Rgt.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix();
+            Eigen::Matrix3d Rf_tt(Rgt.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix());
 
             Eigen::Affine3d Htf_t;
-
             // Htf_t.linear() = Htp.rotation();
             Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
             Htf_t.translation() = rF_tTt;           // Translation to foot target
