@@ -19,7 +19,7 @@ namespace motion {
             // Returns vector from the vector field of where the foot should move on x-axis
             double f_x(const Eigen::Vector3d& vec);
             // Returns vector from the vector field of where the foot should move on y-axis (in plane space)
-            double f_y(const Eigen::Vector3d& vec);
+            double f_z(const Eigen::Vector3d& vec);
             // Plans where the torso will move to next
             Eigen::Affine3d plan_torso(const NUClear::clock::time_point& now,
                                        const Sensors& sensors,

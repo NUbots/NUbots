@@ -40,8 +40,8 @@ namespace motion {
             return -pos.x() / std::abs(pos.x()) * std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
         }
 
-        double MovementController::f_y(const Eigen::Vector3d& pos) {
-            return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
+        double MovementController::f_z(const Eigen::Vector3d& pos) {
+            return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.z() / step_height;
         }
 
         Eigen::Affine3d MovementController::plan_torso(const NUClear::clock::time_point& now,
@@ -153,11 +153,11 @@ namespace motion {
             // This makes the vector field straight rather than on a slope.
             rAF_wg.z() = 0;
             Rgp.col(0) = rAF_wg.normalized();
-            // Y axis is straight up
-            Rgp.col(1) = Eigen::Vector3d::UnitZ();
-            // Z axis is the cross product of X and Y. This makes the z-axis at a right angle to both the x-axis and
-            // y-axis
-            Rgp.col(2) = Rgp.col(1).cross(Rgp.col(0)).normalized();
+            // Z axis is straight up
+            Rgp.col(2) = Eigen::Vector3d::UnitZ();
+            // Y axis is the cross product of X and Z. This makes the y-axis at a right angle to both the x-axis and
+            // z-axis
+            Rgp.col(1) = Rgp.col(0).cross(Rgp.col(2)).normalized();
             // Rgp.leftCols<1>()  = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>()).normalized();
 
             // Create transform based on above rotation
@@ -183,11 +183,11 @@ namespace motion {
 
             // Swing foot's new target position on the plane, scaled for time based on the horizon
             Eigen::Vector3d rF_tPp(rF_wPp
-                                   + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * horizon_distance);
+                                   + Eigen::Vector3d(f_x(rF_wPp), 0, f_z(rF_wPp)).normalized() * horizon_distance);
 
             // If no lift is wanted, then set the y (vertical axis in plane space) to 0
             if (!target.lift) {
-                rF_tPp.y() = 0;
+                rF_tPp.z() = 0;
             }
 
             // If small distance, go to target
