@@ -88,19 +88,19 @@ namespace motion {
             // Torso to target transform
             Eigen::Affine3d Hat(Haf * Htf.inverse());
             // Get torso to swing foot rotation as quaternion
-            Eigen::Quaterniond Rft(Htf.inverse().rotation());
+            Eigen::Quaterniond Rtf(Htf.rotation());
             // Create rotation of torso to target as a quaternion
-            Eigen::Quaterniond Rat(Hat.linear());
+            Eigen::Quaterniond Raf((Hat * Htf.inverse()).linear());
             // Create rotation matrix for foot target
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-            Eigen::Matrix3d Rf_tt(Rft.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix());
+            Eigen::Matrix3d Rt_tf(Rtf.inverse().slerp(time_horizon / time_left, Raf).toRotationMatrix());
 
             // Create the final position matrix to return
             Eigen::Affine3d Htf_t;
             // Htf_t.linear() = Htf.linear();
             // Htf_t.linear() = Eigen::Matrix3d::Identity();
-            Htf_t.linear()      = Rf_tt.inverse();  // Rotation as above from slerp
-            Htf_t.translation() = -rT_tFf;          // Translation to target
+            Htf_t.linear()      = Rt_tf;    // Rotation as above from slerp
+            Htf_t.translation() = -rT_tFf;  // Translation to target
             // log("\nHtf\n", convert<double, 4, 4>(Htf.matrix()));
             log("\nHtf_t\n", convert<double, 4, 4>(Htf_t.matrix()));
             return Htf_t;
