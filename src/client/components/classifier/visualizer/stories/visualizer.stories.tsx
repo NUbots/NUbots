@@ -7,6 +7,7 @@ import * as React from 'react'
 
 import { SeededRandom } from '../../../../../shared/base/random/seeded_random'
 import { range } from '../../../../../shared/base/range'
+import { fullscreen } from '../../../storybook/fullscreen'
 import { Classification } from '../../classifications'
 import { Lut } from '../../lut'
 import { VisualizerController } from '../controller'
@@ -22,25 +23,21 @@ const classifications = Object.freeze([
   Classification.Magenta,
 ])
 
-const fullscreen = { width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)' }
 storiesOf('classifier.visualizer', module)
+  .addDecorator(fullscreen)
   .add('renders statically', () => {
     const random = SeededRandom.of('classifier')
     const model = VisualizerModel.of(generateLut(random))
     const controller = VisualizerController.of(model)
-    return <div style={fullscreen}>
-      <VisualizerView model={model} controller={controller}/>
-    </div>
+    return <VisualizerView model={model} controller={controller}/>
   })
   .add('renders animated', () => {
     const random = SeededRandom.of('classifier')
     const model = VisualizerModel.of(generateLut(random))
     const controller = VisualizerController.of(model)
-    return <div style={fullscreen}>
-      <AnimatedVisualizer model={model} random={random}>
-        <VisualizerView model={model} controller={controller}/>
-      </AnimatedVisualizer>
-    </div>
+    return <AnimatedVisualizer model={model} random={random}>
+      <VisualizerView model={model} controller={controller}/>
+    </AnimatedVisualizer>
   })
 
 class AnimatedVisualizer extends React.Component<{

@@ -17,6 +17,7 @@ import { Light } from 'three'
 import { disposableComputed } from '../../../base/disposable_computed'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
+import { fullscreen } from '../../storybook/fullscreen'
 import { scene } from '../builders'
 import { perspectiveCamera } from '../builders'
 import { meshPhongMaterial } from '../builders'
@@ -25,17 +26,12 @@ import { Stage } from '../three'
 import { Canvas } from '../three'
 import { Three } from '../three'
 
-const fullscreen = { width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)' }
 storiesOf('component.three', module)
   .add('renders static scene', () => {
-    return <div style={fullscreen}>
-      <BoxVisualiser/>
-    </div>
+    return <BoxVisualiser/>
   })
   .add('renders animated scene', () => {
-    return <div style={fullscreen}>
-      <BoxVisualiser animate/>
-    </div>
+    return <BoxVisualiser animate/>
   })
 
 type Model = { boxes: BoxModel[] }
