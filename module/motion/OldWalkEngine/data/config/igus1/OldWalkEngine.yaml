@@ -9,23 +9,23 @@ stance:
         start:
             -  90 * pi / 180 # Shoulder Pitch
             -   0 * pi / 180 # Shoulder Roll
-            - -20 * pi / 180 # Elbow
+            - -30 * pi / 180 # Elbow
         end:
             -  90 * pi / 180 # Shoulder Pitch
             -   0 * pi / 180 # Shoulder Roll
-            - -20 * pi / 180 # Elbow
+            - -30 * pi / 180 # Elbow
       right:
         start:
             -  90 * pi / 180 # Shoulder Pitch
             -   0 * pi / 180 # Shoulder Roll
-            - -20 * pi / 180 # Elbow
+            - -30 * pi / 180 # Elbow
         end:
             -  90 * pi / 180 # Shoulder Pitch
             -   0 * pi / 180 # Shoulder Roll
-            - -20 * pi / 180 # Elbow
+            - -30 * pi / 180 # Elbow
 
   foot_offset:
-    - -0.095 # The distance the ankles are offset from the torso, in meters.
+    - -0.072 # The distance the ankles are offset from the torso, in meters.
     - -0.050  # How far from the center of the foot the center of mass is placed during each step.
   # The gains to use for the servos during the walk
   gains:

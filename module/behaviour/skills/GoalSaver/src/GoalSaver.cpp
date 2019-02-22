@@ -24,6 +24,7 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
+#include "message/extension/Script.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"
@@ -41,8 +42,8 @@ namespace behaviour {
         struct FinishDive {};
 
         using extension::Configuration;
-        using extension::ExecuteScriptByName;
 
+        using message::extension::ExecuteScriptByName;
         using message::localisation::Ball;
         using message::localisation::Self;
         using message::motion::DiveCommand;
@@ -75,11 +76,17 @@ namespace behaviour {
                 // assume valid at this point as this is checked on the walkcommand trigger
                 if (quadrant == 1) {
                     // side
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveLeft.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id,
+                                                               std::vector<std::string>({"DiveLeft.yaml"}),
+                                                               std::vector<double>({1.0}),
+                                                               NUClear::clock::now()));
                 }
                 else if (quadrant == 3) {
                     // side
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveRight.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id,
+                                                               std::vector<std::string>({"DiveRight.yaml"}),
+                                                               std::vector<double>({1.0}),
+                                                               NUClear::clock::now()));
                 }
 
                 updatePriority(EXECUTION_PRIORITY);

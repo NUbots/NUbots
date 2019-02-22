@@ -17,7 +17,4 @@ INCLUDE(${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/ToolchainLibraryFinder.cmake
 ToolchainLibraryFinder(NAME FSWatch
                        HEADER libfswatch/c++/monitor.hpp
                        LIBRARY fswatch
-                       BINARY fswatch
-                       VERSION_BINARY_ARGUMENTS --version
-                       VERSION_REGEX "fswatch ([0-9.]+)"
 )

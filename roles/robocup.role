@@ -23,6 +23,7 @@ NUCLEAR_ROLE(
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
+    vision::VisualMesh
     #vision::ObstacleDetector
 
     #Localisation

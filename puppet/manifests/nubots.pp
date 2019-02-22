@@ -56,12 +56,12 @@ node nubotsvmbuild {
   $archives = {
     # We need to match the protobuf version with the one we install in the python class.
     'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.6.1/protobuf-cpp-3.6.1.tar.gz',
-                       'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
-                                          'nuc7i7bnh' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
+                       'args'        => { 'native'   => [ '-Dprotobuf_BUILD_SHARED_LIBS=ON', '-Dprotobuf_WITH_ZLIB=ON', '-Dprotobuf_BUILD_EXAMPLES=OFF', '-Dprotobuf_BUILD_TESTS=OFF', '-Dprotobuf_BUILD_PROTOC_BINARIES=OFF', ],
+                                          'nuc7i7bnh' => [ '-Dprotobuf_BUILD_SHARED_LIBS=ON', '-Dprotobuf_WITH_ZLIB=ON', '-Dprotobuf_BUILD_EXAMPLES=OFF', '-Dprotobuf_BUILD_TESTS=OFF', '-Dprotobuf_BUILD_PROTOC_BINARIES=OFF', ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
-                       'prebuild'    => 'make distclean',
-                       'postbuild'   => 'rm PREFIX/lib/libprotoc* && rm PREFIX/bin/protoc',
-                       'method'      => 'autotools', },
+                       'src_dir'     => 'cmake',
+                       'creates'     => 'lib/libprotobuf.so',
+                       'method'      => 'cmake', },
     'zlib'         => {'url'         => 'http://www.zlib.net/zlib-1.2.11.tar.gz',
                        'creates'     => 'lib/libz.a',
                        'method'      => 'cmake', },
@@ -224,9 +224,19 @@ node nubotsvmbuild {
     method    => 'wget',
   }
 
+  # Manually install cmake
+  exec {'install-cmake':
+    creates => '/usr/local/bin/cmake',
+    command => '/usr/bin/wget https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.sh \
+             && /bin/sh cmake-3.12.1-Linux-x86_64.sh --prefix=/nubots/toolchain --exclude-subdir \
+             && rm cmake-3.12.1-Linux-x86_64.sh',
+    require     => [ Class['installer::prerequisites'], Class['build_tools'], ],
+  } -> Installer <| |>
+
   exec { "Intel_OpenCL_SDK":
     creates     => "/nubots/toolchain/opt/intel/opencl/libOpenCL.so",
-    command     => "mkdir intel-opencl &&
+    command     => "if [ -d \"intel-opencl\" ]; then rm -rf \"intel-opencl\"; fi &&
+                    mkdir intel-opencl &&
                     cd intel-opencl &&
                     wget http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip &&
                     unzip SRB5.0_linux64.zip &&

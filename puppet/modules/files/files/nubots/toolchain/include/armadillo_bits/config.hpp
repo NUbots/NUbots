@@ -115,7 +115,7 @@
 #if !defined(ARMA_OPTIMISE_SOLVE_SYMPD)
 #define ARMA_OPTIMISE_SOLVE_SYMPD
 //// Comment out the above line if you don't want optimised handling of symmetric/hermitian positive definite matrices
-///by solve()
+/// by solve()
 #endif
 
 /* #undef ARMA_USE_HDF5_ALT */

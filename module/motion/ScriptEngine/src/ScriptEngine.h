@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "extension/Script.h"
+#include "message/extension/Script.h"
 
 namespace module {
 namespace motion {
@@ -35,7 +35,7 @@ namespace motion {
      */
     class ScriptEngine : public NUClear::Reactor {
     private:
-        std::map<std::string, ::extension::Script> scripts;
+        std::map<std::string, message::extension::Script> scripts;
 
     public:
         explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);

@@ -19,6 +19,8 @@
 
 #include "ScriptEngine.h"
 
+#include <fmt/format.h>
+
 #include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
@@ -28,42 +30,41 @@
 namespace module {
 namespace motion {
 
-    using extension::ExecuteScript;
-    using extension::ExecuteScriptByName;
-    using extension::Script;
-
     using message::behaviour::ServoCommand;
+    using message::extension::ExecuteScript;
+    using message::extension::ExecuteScriptByName;
 
 
     ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), scripts() {
 
-        on<Script>("").then([this](const Script& script) {
+        on<::extension::Script>("").then([this](const ::extension::Script& script) {
             // Add this script to our list of scripts
             try {
-                scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, std::move(script)));
+                scripts.insert(
+                    std::make_pair(utility::file::pathSplit(script.filename).second, std::move(script.script)));
             }
             catch (const std::exception& e) {
-                log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
+                log<NUClear::ERROR>("Script is bad conversion:", script.filename, e.what());
             }
         });
 
         on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {
-            std::vector<Script> scriptList;
+            std::vector<message::extension::Script> script_list;
 
             for (size_t i = 0; i < command.scripts.size(); i++) {
-                const auto& scriptName = command.scripts[i];
-                auto script            = scripts.find(scriptName);
+                const std::string& script_name = command.scripts[i];
+                auto script                    = scripts.find(script_name);
 
                 if (script == std::end(scripts)) {
-                    throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
+                    throw std::runtime_error(fmt::format("The script {} is not loaded in the system", script_name));
                 }
                 else {
-                    scriptList.push_back(script->second);
+                    script_list.push_back(script->second);
                 }
             }
             emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(
-                command.sourceId, scriptList, command.duration_modifier, command.start));
+                command.source_id, script_list, command.duration_modifier, command.start));
         });
 
         on<Trigger<ExecuteScript>>().then([this](const ExecuteScript& command) {
@@ -81,7 +82,7 @@ namespace motion {
                     // Loop through all the motors and make a servo waypoint for it
                     for (const auto& target : frame.targets) {
                         waypoints->push_back(
-                            {command.sourceId, time, target.id, target.position, target.gain, target.torque});
+                            {command.source_id, time, target.id, target.position, target.gain, target.torque});
                     }
                 }
             }

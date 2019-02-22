@@ -1,23 +1,22 @@
 class build_tools {
 
+  # Find the codename for the currently running Ubuntu installation
+  $codename = lsb_release()
+
   # Update apt before getting any packages (if we need to)
-  exec { "apt-update":
+  exec { "apt-init":
     command => "/usr/bin/apt-key update && /usr/bin/apt-get update",
     onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
   } ->
+
   # We also need to ensure software-properties is installed for apt-add-repository
   exec { "install-software-properties":
     command => "/usr/bin/apt-get install -y software-properties-common",
     unless => '/usr/bin/dpkg -s software-properties-common',
   } ->
-  # Add the ubuntu test toolchain ppa (for modern g++ etc)
-  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ~>
-  exec { "apt-update-ppa":
-    command => "/usr/bin/apt-get update",
-    refreshonly => true
-  } -> Package <| |>
 
-  $codename = lsb_release()
+  # Add the ubuntu test toolchain ppa (for modern g++ etc)
+  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ->
 
   # Add the llvm 6.0 source
   apt::source { 'llvm-apt-repo':
@@ -33,9 +32,19 @@ class build_tools {
       'src' => true,
       'deb' => true,
     },
+  } ->
+
+  exec { "apt-update":
+    command => "/usr/bin/apt-get update"
   } -> Package <| |>
 
+  # Add this repo to get a newer version of gettext on trusty (needed for FSWatch)
+  if $codename == 'trusty' {
+    apt::ppa {'ppa:keinstein-junior/travis-ci-upgrades': before => Exec['apt-update'], }
+  }
+
   # Tools
+  package { 'unzip': ensure => latest, }
   package { 'automake': ensure => latest, }
   package { 'autoconf': ensure => latest, }
   package { 'libtool': ensure => latest, }
@@ -97,20 +106,4 @@ class build_tools {
                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
   }
-
-  # Manually install cmake
-  exec {'install-cmake':
-    creates => '/usr/local/bin/cmake',
-    command => '/usr/bin/wget https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.sh \
-             && /bin/sh cmake-3.12.1-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir \
-             && rm cmake-3.12.1-Linux-x86_64.sh',
-  }
-
-  # Fix up FindBoost.cmake
-  # file { "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake":
-  #   path    => "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake",
-  #   ensure  => present,
-  #   source  => 'puppet:///modules/files/FindBoost.cmake',
-  #   require => [ Exec['install-cmake'], ],
-  # }
 }

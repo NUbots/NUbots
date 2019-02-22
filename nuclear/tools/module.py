@@ -4,6 +4,12 @@ import b
 import os
 import sys
 import textwrap
+from subprocess import call
+
+# List of known languages and the variations with which they may be specified
+CXX = ['CPP', 'cpp', 'C++', 'c++', 'CXX', 'cxx']
+PYTHON = ['PYTHON', 'Python', 'python', 'Py', 'PY', 'py']
+KNOWN_LANGUAGES = CXX + PYTHON
 
 
 def register(command):
@@ -20,9 +26,10 @@ def register(command):
     generate_command.add_argument(
         'language',
         metavar='language',
-        choices=['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py'],
-        default='C++',
-        help='Language to use for the module, C++ or Python [default=C++]'
+        choices=KNOWN_LANGUAGES,
+        default=KNOWN_LANGUAGES[0],
+        nargs='?',
+        help='Language to use for the module, C++ or Python [default={}]'.format(KNOWN_LANGUAGES[0])
     )
 
 
@@ -48,12 +55,13 @@ def run(path, **kwargs):
         sys.stderr.write('Module generation aborted.\n')
         sys.exit(1)
 
-    if language not in ['C++', 'c++', 'cpp', 'cxx', 'Python', 'python', 'py']:
+    language = kwargs.get('language')
+    if language not in KNOWN_LANGUAGES:
         sys.stderr.write('The language provided is invalid.\n')
         sys.stderr.write('Module generation aborted.\n')
         sys.exit(1)
 
-    module_language = 'CPP' if language in ['C++', 'c++', 'cpp', 'cxx'] else 'PYTHON'
+    module_language = 'CPP' if language in CXX else 'PYTHON'
 
     print('Module directory', module_path)
     print('Creating directories')
@@ -75,7 +83,7 @@ def run(path, **kwargs):
 
     # Write all of our files
     with open(os.path.join(path, 'CMakeLists.txt'), "w") as output:
-        output.write(generate_cmake(parts))
+        output.write(generate_cmake(parts, module_language))
         print('\t', os.path.join(path, 'CMakeLists.txt'))
 
     with open(os.path.join(path, 'README.md'), "w") as output:
@@ -103,14 +111,30 @@ def run(path, **kwargs):
     with open(os.path.join(config_path, '{}.yaml'.format(module_name)), 'a'):
         print('\t', os.path.join(config_path, '{}.yaml'.format(module_name)))
 
+    print('Formatting files')
+    try:
+        if module_language is 'CPP':
+            print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
+            call(['clang-format-6.0', '-i', '-style=file', os.path.join(src_path, '{}.h'.format(module_name))])
 
-def generate_cmake(parts, language):
+            print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
+            call(['clang-format-6.0', '-i', '-style=file', os.path.join(src_path, '{}.cpp'.format(module_name))])
+
+        print('\t', os.path.join(src_path, os.path.join(tests_path, '{}.cpp'.format(module_name))))
+        call(['clang-format-6.0', '-i', '-style=file', os.path.join(tests_path, '{}.cpp'.format(module_name))])
+
+    except FileNotFoundError:
+        print('\tThe formatting tools (clang-format-6) are not installed, ignoring formatting')
+        pass
+
+
+def generate_cmake(parts, module_languge):
     return textwrap.dedent(
         """\
         # Build our NUClear module
         NUCLEAR_MODULE(LANGUAGE "{module_languge}")
         """
-    ).format(module_languge=language)
+    ).format(module_languge=module_languge)
 
 
 def generate_header(parts):
@@ -217,11 +241,17 @@ def generate_python(parts):
         #!/usr/bin/env python3
 
         from nuclear import Reactor, on, Trigger, Single, With, Every
+        import yaml
+
 
         @Reactor
         class {class_name}(object):
+
             def __init__(self):
                 # Constructor for {class_name}
+
+                # Load configuration here until extension bindings are made
+                self.config = yaml.load(open('config/{class_name}.yaml', 'r'))
 
             # Disabled until extension bindings and made
             # @on(Configuration('{class_name}.yaml'))
