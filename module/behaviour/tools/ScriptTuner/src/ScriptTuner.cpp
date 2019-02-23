@@ -19,6 +19,8 @@
 
 #include "ScriptTuner.h"
 
+#include "extension/Script.h"
+
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
@@ -30,6 +32,7 @@
 #include "utility/platform/darwin/DarwinSensors.h"
 
 #include <ncurses.h>
+#include <yaml-cpp/yaml.h>
 #include <cstdio>
 #include <sstream>
 
@@ -39,9 +42,10 @@ namespace behaviour {
 
         using NUClear::message::CommandLineArguments;
 
-        using extension::ExecuteScript;
-        using extension::Script;
+        using message::extension::Script;
 
+        using message::extension::ExecuteScript;
+        using message::extension::Script;
         using message::motion::ServoTarget;
         using message::platform::darwin::DarwinSensors;
 
@@ -580,7 +584,33 @@ namespace behaviour {
 
         // emits a message so motion can pick up the script
         void ScriptTuner::playScript() {
-            emit(std::make_unique<ExecuteScript>(id, script, NUClear::clock::now()));
+            std::unique_ptr<ExecuteScript> msg;
+
+            msg->source_id         = id;
+            msg->duration_modifier = std::vector<double>({1.0});
+
+            // Convert extension::Script into message format
+            Script s;
+            for (const auto& frame : script.frames) {
+                Script::Frame f;
+                f.duration = frame.duration;
+
+                for (const auto& target : frame.targets) {
+                    Script::Frame::Target t;
+                    t.id       = target.id;
+                    t.position = target.position;
+                    t.gain     = target.gain;
+                    t.torque   = target.torque;
+                    f.targets.push_back(t);
+                }
+
+                s.frames.push_back(f);
+            }
+
+            msg->scripts.push_back(s);
+            msg->start = NUClear::clock::now();
+
+            emit(msg);
         }
 
         // allows user to jump to a specific frame without engaging the motors
@@ -602,7 +632,7 @@ namespace behaviour {
 
                 for (auto& target : f.targets) {
 
-                    switch (target.id.value) {
+                    switch (target.id) {
                         case ServoID::HEAD_YAW:
                             newFrame.targets.push_back(
                                 {ServoID::HEAD_YAW, target.position, target.gain, target.torque});
@@ -960,7 +990,7 @@ namespace behaviour {
                 std::cout << "Hello!" << std::endl;
                 for (auto& f : script.frames) {
                     for (auto& target : f.targets) {
-                        switch (target.id.value) {
+                        switch (target.id) {
                             case ServoID::HEAD_YAW:
                             case ServoID::HEAD_PITCH:
                             case ServoID::R_SHOULDER_PITCH:
@@ -999,7 +1029,7 @@ namespace behaviour {
             // edit gains for only specifc frame
             if (editFrame) {
                 for (auto& target : script.frames[frame].targets) {
-                    switch (target.id.value) {
+                    switch (target.id) {
                         case ServoID::HEAD_YAW:
                         case ServoID::HEAD_PITCH:
                         case ServoID::R_SHOULDER_PITCH:

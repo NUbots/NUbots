@@ -22,6 +22,12 @@
 //// Without BLAS, matrix multiplication will still work, but might be slower.
 #endif
 
+#if !defined(ARMA_USE_NEWARP)
+#define ARMA_USE_NEWARP
+//// Uncomment the above line to enable the built-in partial emulation of ARPACK.
+//// This is used for eigen decompositions of real (non-complex) sparse matrices, eg. eigs_sym(), svds()
+#endif
+
 #if !defined(ARMA_USE_ARPACK)
 /* #undef ARMA_USE_ARPACK */
 //// Uncomment the above line if you have ARPACK or a high-speed replacement for ARPACK.
@@ -36,7 +42,7 @@
 #endif
 
 #if !defined(ARMA_SUPERLU_INCLUDE_DIR)
-#define ARMA_SUPERLU_INCLUDE_DIR /
+// #define ARMA_SUPERLU_INCLUDE_DIR /
 //// If you're using SuperLU and want to explicitly include the SuperLU headers,
 //// uncomment the above define and specify the appropriate include directory.
 //// Make sure the directory has a trailing /
@@ -70,15 +76,21 @@
 /// free()
 
 /* #undef ARMA_USE_ATLAS */
-#define ARMA_ATLAS_INCLUDE_DIR /
+// #define ARMA_ATLAS_INCLUDE_DIR /
 //// If you're using ATLAS and the compiler can't find cblas.h and/or clapack.h
 //// uncomment the above define and specify the appropriate include directory.
 //// Make sure the directory has a trailing /
 
 #if !defined(ARMA_USE_CXX11)
-// #define ARMA_USE_CXX11
+#define ARMA_USE_CXX11
 //// Uncomment the above line to forcefully enable use of C++11 features (eg. initialiser lists).
 //// Note that ARMA_USE_CXX11 is automatically enabled when a C++11 compiler is detected
+#endif
+
+#if !defined(ARMA_USE_OPENMP)
+// #define ARMA_USE_OPENMP
+//// Uncomment the above line to forcefully enable use of OpenMP for parallelisation.
+//// Note that ARMA_USE_OPENMP is automatically enabled when a compiler supporting OpenMP 3.1 is detected.
 #endif
 
 #if !defined(ARMA_64BIT_WORD)
@@ -93,6 +105,17 @@
 //// Uncomment the above line to allow the ability to save and load matrices stored in HDF5 format;
 //// the hdf5.h header file must be available on your system,
 //// and you will need to link with the hdf5 library (eg. -lhdf5)
+#endif
+
+#if !defined(ARMA_OPTIMISE_SOLVE_BAND)
+#define ARMA_OPTIMISE_SOLVE_BAND
+//// Comment out the above line if you don't want optimised handling of band matrices by solve()
+#endif
+
+#if !defined(ARMA_OPTIMISE_SOLVE_SYMPD)
+#define ARMA_OPTIMISE_SOLVE_SYMPD
+//// Comment out the above line if you don't want optimised handling of symmetric/hermitian positive definite matrices
+/// by solve()
 #endif
 
 /* #undef ARMA_USE_HDF5_ALT */
@@ -111,12 +134,17 @@
 //// If you mainly use lots of very small vectors (eg. <= 4 elements),
 //// change the number to the size of your vectors.
 
-#if !defined(ARMA_SPMAT_CHUNKSIZE)
-#define ARMA_SPMAT_CHUNKSIZE 256
+#if !defined(ARMA_OPENMP_THRESHOLD)
+#define ARMA_OPENMP_THRESHOLD 240
 #endif
-//// This is the minimum increase in the amount of memory (in terms of elements) allocated by a sparse matrix;
+//// The minimum number of elements in a matrix to allow OpenMP based parallelisation;
 //// it must be an integer that is at least 1.
-//// The minimum recommended size is 16.
+
+#if !defined(ARMA_OPENMP_THREADS)
+#define ARMA_OPENMP_THREADS 10
+#endif
+//// The maximum number of threads to use for OpenMP based parallelisation;
+//// it must be an integer that is at least 1.
 
 // #define ARMA_NO_DEBUG
 //// Uncomment the above line if you want to disable all run-time checks.
@@ -130,13 +158,37 @@
 //// This is mainly useful for debugging of the library.
 
 
-#if !defined(ARMA_DEFAULT_OSTREAM)
-#define ARMA_DEFAULT_OSTREAM std::cout
+#if defined(ARMA_DEFAULT_OSTREAM)
+#pragma message("WARNING: support for ARMA_DEFAULT_OSTREAM is deprecated and will be removed;")
+#pragma message("WARNING: use ARMA_COUT_STREAM and ARMA_CERR_STREAM instead")
 #endif
 
-#define ARMA_PRINT_ERRORS
-//#define ARMA_PRINT_HDF5_ERRORS
+#if !defined(ARMA_COUT_STREAM)
+#if defined(ARMA_DEFAULT_OSTREAM)
+// for compatibility with earlier versions of Armadillo
+#define ARMA_COUT_STREAM ARMA_DEFAULT_OSTREAM
+#else
+#define ARMA_COUT_STREAM std::cout
+#endif
+#endif
 
+#if !defined(ARMA_CERR_STREAM)
+#if defined(ARMA_DEFAULT_OSTREAM)
+// for compatibility with earlier versions of Armadillo
+#define ARMA_CERR_STREAM ARMA_DEFAULT_OSTREAM
+#else
+#define ARMA_CERR_STREAM std::cerr
+#endif
+#endif
+
+#if !defined(ARMA_PRINT_ERRORS)
+#define ARMA_PRINT_ERRORS
+//// Comment out the above line if you don't want errors and warnings printed (eg. failed decompositions)
+#endif
+
+#if !defined(ARMA_PRINT_HDF5_ERRORS)
+// #define ARMA_PRINT_HDF5_ERRORS
+#endif
 
 #if defined(ARMA_DONT_PRINT_ERRORS)
 #undef ARMA_PRINT_ERRORS

@@ -4,6 +4,12 @@ import re
 import os
 from textwrap import dedent
 
+# When embedded, sys has no argv, add an empty one
+import sys
+if not hasattr(sys, 'argv'):
+    sys.argv = ['']
+
+
 def indent(str, len=4):
     return '\n'.join([(' ' * len) + l for l in str.splitlines()])
 
@@ -152,11 +158,29 @@ class DSLCallback(DSLWord):
     def function(self):
         return self.func
 
+
+def is_sequence(item):
+    if not hasattr(item, "strip") and hasattr(item, "__getitem__") or hasattr(item, "__iter__"):
+        return True
+    else:
+        return False
+
+
+def bind_emit(self, msg):
+    # Iterable type
+    if is_sequence(msg):
+        return msg[0]._emit_vector(self._reactor_ptr, msg)
+
+    # String or other non-iterable type
+    else:
+        return msg._emit(self._reactor_ptr)
+
+
 # Decorator for creating instance variables/setting up reactor
 def Reactor(reactor):
 
     # Attach an emit method to the class
-    setattr(reactor, 'emit', lambda self, msg: msg._emit(self._reactor_ptr))
+    setattr(reactor, 'emit', lambda self, msg: bind_emit(self, msg))
 
     try:
         # If we can import this we are running in nuclear, so run

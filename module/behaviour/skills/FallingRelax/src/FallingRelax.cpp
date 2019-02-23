@@ -25,6 +25,7 @@
 #include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
+#include "message/extension/Script.h"
 #include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
@@ -41,8 +42,8 @@ namespace behaviour {
         struct KillFalling {};
 
         using extension::Configuration;
-        using extension::ExecuteScriptByName;
 
+        using message::extension::ExecuteScriptByName;
         using message::input::Sensors;
 
         using utility::behaviour::ActionPriorites;
@@ -109,7 +110,10 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<Falling>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Relax.yaml")); });
+            on<Trigger<Falling>>().then([this] {
+                emit(std::make_unique<ExecuteScriptByName>(
+                    id, std::vector<std::string>({"Relax.yaml"}), std::vector<double>({1.0}), NUClear::clock::now()));
+            });
 
             on<Trigger<KillFalling>>().then([this] {
                 falling = false;

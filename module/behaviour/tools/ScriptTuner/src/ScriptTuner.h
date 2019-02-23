@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "extension/Script.h"
+#include "message/extension/Script.h"
 
 namespace module {
 namespace behaviour {
@@ -39,7 +39,7 @@ namespace behaviour {
             /// The path to the script we are editing
             std::string scriptPath;
             /// The script object we are editing
-            ::extension::Script script;
+            message::extension::Script script;
             /// The index of the frame we are currently editing
             size_t frame;
             /// The index of the item we are selecting

@@ -24,6 +24,7 @@
 #include "extension/Script.h"
 
 #include "message/behaviour/Nod.h"
+#include "message/extension/Script.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -36,13 +37,13 @@ namespace behaviour {
         struct ExecuteNod {};
 
         using extension::Configuration;
-        using extension::ExecuteScriptByName;
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+        using message::extension::ExecuteScriptByName;
 
         using utility::behaviour::ActionPriorites;
         using utility::behaviour::RegisterAction;
+        using LimbID  = utility::input::LimbID;
+        using ServoID = utility::input::ServoID;
 
         Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -66,10 +67,16 @@ namespace behaviour {
                 {std::pair<float, std::set<LimbID>>(0, {LimbID::HEAD})},
                 [this](const std::set<LimbID>&) {
                     if (value) {
-                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodYes.yaml"})));
+                        emit(std::make_unique<ExecuteScriptByName>(id,
+                                                                   std::vector<std::string>({"NodYes.yaml"}),
+                                                                   std::vector<double>({1.0}),
+                                                                   NUClear::clock::now()));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodNo.yaml"})));
+                        emit(std::make_unique<ExecuteScriptByName>(id,
+                                                                   std::vector<std::string>({"NodNo.yaml"}),
+                                                                   std::vector<double>({1.0}),
+                                                                   NUClear::clock::now()));
                     }
                 },
                 [this](const std::set<LimbID>&) { updatePriority(0); },

@@ -25,6 +25,7 @@
 #include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
+#include "message/extension/Script.h"
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"
 
@@ -36,8 +37,8 @@ namespace behaviour {
     namespace skills {
 
         using extension::Configuration;
-        using extension::ExecuteScriptByName;
 
+        using message::extension::ExecuteScriptByName;
         using message::input::Sensors;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
@@ -81,11 +82,17 @@ namespace behaviour {
                 // Check with side we're getting up from
                 if (sensors.world(0, 2) < 0.0) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"}),
+                        std::vector<double>({1.0}),
+                        NUClear::clock::now()));
                 }
                 else {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"}),
+                        std::vector<double>({1.0}),
+                        NUClear::clock::now()));
                 }
                 updatePriority(EXECUTION_PRIORITY);
             });

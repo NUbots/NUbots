@@ -2,7 +2,7 @@
 class protobuf {
     # Build protobuf
     archive { 'protobuf-native':
-      url              => 'https://github.com/google/protobuf/releases/download/v3.5.0/protobuf-cpp-3.5.0.tar.gz',
+      url              => 'https://github.com/google/protobuf/releases/download/v3.6.1/protobuf-cpp-3.6.1.tar.gz',
       target           => '/nubots/toolchain/src/protobuf',
       src_target       => '/nubots/toolchain/src',
       purge_target     => true,
@@ -19,7 +19,8 @@ class protobuf {
       creates     => '/nubots/toolchain/bin/protoc',
       command     => "cp protobuf-native.tar.gz protobuf.tar.gz &&
                       cd protobuf &&
-                      ./configure --prefix=\"/nubots/toolchain\" --with-zlib &&
+                      mkdir cmake/build && cd cmake/build &&
+                      cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=\"/nubots/toolchain\" ../ &&
                       make -j\$(nproc) &&
                       make install",
       cwd         => '/nubots/toolchain/src',

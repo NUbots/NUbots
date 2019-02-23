@@ -19,8 +19,7 @@
 
 #include "ScriptOptimizer.h"
 
-#include "extension/Script.h"
-
+#include "message/extension/Script.h"
 #include "message/motion/ServoWaypoint.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/research/scriptoptimizer/OptimizeScript.h"
@@ -29,9 +28,8 @@
 namespace module {
 namespace research {
 
-    using extension::ExecuteScript;
-    using extension::Script;
-
+    using message::extension::ExecuteScript;
+    using message::extension::Script;
     using message::motion::AllServoWaypointsComplete;
     using message::platform::darwin::DarwinSensors;
     using message::research::scriptoptimizer::OptimizeScript;
@@ -64,7 +62,7 @@ namespace research {
                         for (const auto& target : frame.targets()) {
                             Script::Frame::Target t;
 
-                            t.id       = static_cast<message::input::ServoID>(target.id());
+                            t.id       = target.id();
                             t.position = target.position();
                             t.gain     = target.gain();
 

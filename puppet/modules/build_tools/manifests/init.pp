@@ -1,23 +1,22 @@
 class build_tools {
 
+  # Find the codename for the currently running Ubuntu installation
+  $codename = lsb_release()
+
   # Update apt before getting any packages (if we need to)
-  exec { "apt-update":
+  exec { "apt-init":
     command => "/usr/bin/apt-key update && /usr/bin/apt-get update",
     onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
   } ->
+
   # We also need to ensure software-properties is installed for apt-add-repository
   exec { "install-software-properties":
     command => "/usr/bin/apt-get install -y software-properties-common",
     unless => '/usr/bin/dpkg -s software-properties-common',
   } ->
-  # Add the ubuntu test toolchain ppa (for modern g++ etc)
-  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ~>
-  exec { "apt-update-ppa":
-    command => "/usr/bin/apt-get update",
-    refreshonly => true
-  } -> Package <| |>
 
-  $codename = lsb_release()
+  # Add the ubuntu test toolchain ppa (for modern g++ etc)
+  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ->
 
   # Add the llvm 6.0 source
   apt::source { 'llvm-apt-repo':
@@ -33,7 +32,16 @@ class build_tools {
       'src' => true,
       'deb' => true,
     },
+  } ->
+
+  exec { "apt-update":
+    command => "/usr/bin/apt-get update"
   } -> Package <| |>
+
+  # Add this repo to get a newer version of gettext on trusty (needed for FSWatch)
+  if $codename == 'trusty' {
+    apt::ppa {'ppa:keinstein-junior/travis-ci-upgrades': before => Exec['apt-update'], }
+  }
 
   # Tools
   package { 'unzip': ensure => latest, }
@@ -65,9 +73,19 @@ class build_tools {
   package { 'autopoint': ensure => latest, }
   package { 'gettext': ensure => latest, }
   package { 'python-pip': ensure => latest, }
-  package { 'python3-pip': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
   package { 'libjpeg-turbo8-dev': ensure => latest, }
+
+  package { 'libgdbm-dev': ensure => latest, }
+  package { 'libsqlite3-dev': ensure => latest, }
+  package { 'tk-dev': ensure => latest, }
+  package { 'libssl-dev': ensure => latest, }
+  package { 'openssl': ensure => latest, }
+  package { 'libffi-dev': ensure => latest, }
+  package { 'libz-dev': ensure => latest, }
+  package { 'libreadline-dev': ensure => latest, }
+  package { 'libncursesw5-dev': ensure => latest, }
+  package { 'libbz2-dev': ensure => latest, }
 
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }
@@ -75,22 +93,6 @@ class build_tools {
 
   # System libraries
   package { 'libasound2-dev': ensure => latest, }
-
-  # We need to match the protobuf version with the one we install in the toolchain.
-  exec {'install_python3_packages':
-    command => "pip3 install pyparsing &&
-                pip3 install pydotplus &&
-                pip3 install pygments &&
-                pip3 install stringcase &&
-                pip3 install termcolor &&
-                pip3 install protobuf==3.5.0.post1 &&
-                pip3 install pillow &&
-                pip3 install xxhash",
-    path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    timeout     => 0,
-    provider    => 'shell',
-    require => [ Package['python3-pip'], Package['zlib1g-dev'], Package['libjpeg-turbo8-dev'], ],
-  }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
@@ -103,36 +105,5 @@ class build_tools {
                                              --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
-  }
-
-  # Manually install cmake
-  exec {'install-cmake':
-    creates => '/usr/local/bin/cmake',
-    command => '/usr/bin/wget https://cmake.org/files/v3.5/cmake-3.5.1-Linux-x86_64.sh \
-             && /bin/sh cmake-3.5.1-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir \
-             && rm cmake-3.5.1-Linux-x86_64.sh',
-  }
-
-  # Fix up FindBoost.cmake
-  file { "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake":
-    path    => "/usr/local/share/cmake-3.5/Modules/FindBoost.cmake",
-    ensure  => present,
-    source  => 'puppet:///modules/files/FindBoost.cmake',
-    require => [ Exec['install-cmake'], ],
-  }
-
-  exec { "Intel_OpenCL_SDK":
-    creates     => "/opt/intel/opencl/libOpenCL.so",
-    command     => "mkdir intel-opencl &&
-                    cd intel-opencl &&
-                    wget http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip &&
-                    unzip SRB5.0_linux64.zip &&
-                    mkdir root &&
-                    for i in *.tar.xz; do tar -C root -xf \"\$i\"; done &&
-                    cp -r root/* /",
-    path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    timeout     => 0,
-    provider    => 'shell',
-    require     => [ Package['unzip'], ],
   }
 }

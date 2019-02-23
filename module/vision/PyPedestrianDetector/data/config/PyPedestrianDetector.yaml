@@ -1,0 +1,8 @@
+dump:
+  images: false
+  stats: false
+  stats_file: "pedestrian/stats.csv"
+model:
+  graph_file: "pedestrian/frozen_inference_graph.pb"
+  label_file: "pedestrian/mscoco_label_map.yaml"
+

@@ -25,10 +25,10 @@
 #include <cmath>
 
 #include "extension/Configuration.h"
-#include "extension/Script.h"
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
+#include "message/extension/Script.h"
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
@@ -40,6 +40,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
+#include "utility/support/Script.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -47,11 +48,11 @@ namespace module {
 namespace motion {
 
     using extension::Configuration;
-    using extension::Script;
 
     using message::behaviour::ServoCommand;
     using message::behaviour::WalkConfigSaved;
     using message::behaviour::WalkOptimiserCommand;
+    using message::extension::Script;
     using message::input::Sensors;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
@@ -353,10 +354,10 @@ namespace motion {
         frame.duration = std::chrono::milliseconds(int(round(1000 * STAND_SCRIPT_DURATION)));
         for (auto& waypoint : *waypoints) {
             frame.targets.push_back(
-                Script::Frame::Target({waypoint.id, waypoint.position, std::max(waypoint.gain, 60.0f), 100}));
+                Script::Frame::Target(waypoint.id, waypoint.position, std::max(waypoint.gain, 60.0f), 100));
         }
         standScript.frames.push_back(frame);
-        standScript.save("Stand.yaml");
+        utility::support::saveScript("Stand.yaml", standScript);
 
         // Try update(); ?
         reset();

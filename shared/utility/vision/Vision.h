@@ -31,6 +31,7 @@ extern "C" {
 }
 
 #include "message/input/Image.h"
+#include "message/vision/ReprojectedImage.h"
 
 namespace utility {
 namespace vision {
@@ -258,7 +259,30 @@ namespace vision {
     const Eigen::Matrix<int8_t, 5, 5> RED_AT_GREEN =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_GREEN_ARR, 5, 5);
 
-    void saveImage(const std::string& file, const message::input::Image& image);
+    template <typename T>
+    inline void saveImage(const std::string& file, const T& image, bool raw = false) {
+        std::ofstream ofs(file, std::ios::out | std::ios::binary);
+
+        if (!raw) {
+            ofs << fmt::format("P6\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
+            for (size_t row = 0; row < image.dimensions[1]; row++) {
+                for (size_t col = 0; col < image.dimensions[0]; col++) {
+                    Pixel p =
+                        getPixel(col, row, image.dimensions[0], image.dimensions[1], image.data, FOURCC(image.format));
+                    ofs.write(reinterpret_cast<char*>(&p.components.r), sizeof(p.components.r));
+                    ofs.write(reinterpret_cast<char*>(&p.components.g), sizeof(p.components.g));
+                    ofs.write(reinterpret_cast<char*>(&p.components.b), sizeof(p.components.b));
+                }
+            }
+        }
+
+        else {
+            ofs << fmt::format("P5\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
+            ofs.write(reinterpret_cast<const char*>(image.data.data()), image.data.size());
+        }
+
+        ofs.close();
+    }
 
     template <typename T>
     inline void loadImage(const std::string& file, T& image) {

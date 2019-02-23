@@ -46,6 +46,7 @@ struct FileWatch {
 
     std::string path;
     int events;
+    std::shared_ptr<void> user_data;
 
     inline operator bool() const {
         // Empty path is invalid
@@ -57,6 +58,7 @@ struct FileWatchRequest {
     std::string path;
     int events;
     std::shared_ptr<NUClear::threading::Reaction> reaction;
+    std::shared_ptr<void> user_data;
 };
 
 }  // namespace extension
@@ -71,7 +73,8 @@ namespace dsl {
             template <typename DSL>
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction,
                                     const std::string& path,
-                                    int events) {
+                                    int events,
+                                    std::shared_ptr<void> user_data = nullptr) {
 
                 // Add our unbinder
                 reaction->unbinders.emplace_back([](const threading::Reaction& r) {
@@ -80,10 +83,11 @@ namespace dsl {
                 });
 
                 // Make a request to watch our file
-                auto fw      = std::make_unique<::extension::FileWatchRequest>();
-                fw->path     = path;
-                fw->events   = events;
-                fw->reaction = reaction;
+                auto fw       = std::make_unique<::extension::FileWatchRequest>();
+                fw->path      = path;
+                fw->events    = events;
+                fw->reaction  = reaction;
+                fw->user_data = user_data;
 
                 // Send our file watcher to the extension
                 reaction->reactor.powerplant.emit<word::emit::Direct>(fw);
@@ -101,7 +105,7 @@ namespace dsl {
                 }
                 // Return an invalid file watch element
                 else {
-                    return ::extension::FileWatch{"", 0};
+                    return ::extension::FileWatch{"", 0, nullptr};
                 }
             }
         };
