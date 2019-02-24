@@ -25,7 +25,6 @@
 #include <nuclear>
 #include <string>
 #include <vector>
-#include "Joystick.h"
 
 namespace module {
 namespace behaviour {
@@ -33,41 +32,10 @@ namespace behaviour {
 
         class PS3Walk : public NUClear::Reactor {
         public:
-            // axes
-            static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
-            static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
-            static constexpr uint AXIS_L2                        = 2;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 3;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 4;
-            static constexpr uint AXIS_R2                        = 5;
-
-            // static constexpr uint AXIS_ACCEL_Y = 23;
-            // static constexpr uint AXIS_ACCEL_X = 24;
-            // static constexpr uint AXIS_ACCEL_Z = 25;
-
-            // buttons
-            static constexpr uint BUTTON_CROSS    = 0;
-            static constexpr uint BUTTON_CIRCLE   = 1;
-            static constexpr uint BUTTON_TRIANGLE = 2;
-            static constexpr uint BUTTON_SQUARE   = 3;
-            static constexpr uint BUTTON_L1       = 4;
-            static constexpr uint BUTTON_R1       = 5;
-
-            static constexpr uint BUTTON_SELECT         = 8;
-            static constexpr uint BUTTON_START          = 9;
-            static constexpr uint BUTTON_PS             = 10;
-            static constexpr uint BUTTON_LEFT_JOYSTICK  = 11;
-            static constexpr uint BUTTON_RIGHT_JOYSTICK = 12;
-            static constexpr uint BUTTON_DPAD_UP        = 13;
-            static constexpr uint BUTTON_DPAD_DOWN      = 14;
-            static constexpr uint BUTTON_DPAD_LEFT      = 15;
-            static constexpr uint BUTTON_DPAD_RIGHT     = 16;
-
             /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
             explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
 
         private:
-            Joystick joystick;  // TODO: make configurable
             size_t id;
             arma::vec strafe{0, 0};
             float rotationalSpeed = 0;
@@ -77,6 +45,16 @@ namespace behaviour {
             float headYaw         = 0;
 
             std::vector<std::string> actions;
+
+            // Joystick data
+            void connect_joystick();
+            void disconnect_joystick();
+
+            std::vector<uint8_t> event_buffer;
+            std::string joystick_path;
+            std::string joystick_acc_path;
+            int joystick_fd;
+            int joystick_acc_fd;
         };
     }  // namespace strategy
 }  // namespace behaviour
