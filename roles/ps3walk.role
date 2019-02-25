@@ -13,6 +13,7 @@ NUCLEAR_ROLE(
 
     # Hardware Interface
     input::Camera
+    input::PS3Controller
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 

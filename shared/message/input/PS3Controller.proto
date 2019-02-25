@@ -1,0 +1,246 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message.input.PS3Controller;
+
+import "google/protobuf/timestamp.proto";
+
+message CrossButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message SquareButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message TriangleButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message CircleButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message L1Button {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message R1Button {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message SelectButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message StartButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message PSButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message LeftJoystickButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message RightJoystickButton {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message DPadButton {
+    enum Direction {
+        UP    = 0;
+        DOWN  = 1;
+        LEFT  = 2;
+        RIGHT = 3;
+    }
+
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    Direction direction = 2;
+
+    // The state of the button.
+    bool pressed = 3;
+
+    // Is this an initialisation message?
+    bool init = 4;
+}
+
+message LeftJoystick {
+    enum Direction {
+        HORIZONTAL = 0;
+        VERTICAL   = 1;
+    }
+
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    Direction direction = 2;
+
+    // How far the joystick has moved [-1, 1]
+    float value = 3;
+
+    // Is this an initialisation message?
+    bool init = 4;
+}
+
+message RightJoystick {
+    enum Direction {
+        HORIZONTAL = 0;
+        VERTICAL   = 1;
+    }
+
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The state of the button.
+    Direction direction = 2;
+
+    // How far the joystick has moved [-1, 1]
+    float value = 3;
+
+    // Is this an initialisation message?
+    bool init = 4;
+}
+
+message L2Trigger {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // How far the trigger has been depressed [0, 1]
+    float value = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message R2Trigger {
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // How far the trigger has been depressed [0, 1]
+    float value = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message Accelerometer {
+    enum Axis {
+        X = 0;
+        Y = 1;
+        Z = 2;
+    }
+
+    // The timestamp of the event
+    google.protobuf.Timestamp timestamp = 1;
+
+    // The accelerometer axis this event is triggered on
+    Axis axis = 2;
+
+    // Accelerometer reading [-1, 1]
+    float value = 3;
+
+    // Is this an initialisation message?
+    bool init = 4;
+}

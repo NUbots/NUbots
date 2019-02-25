@@ -45,16 +45,6 @@ namespace behaviour {
             float headYaw         = 0;
 
             std::vector<std::string> actions;
-
-            // Joystick data
-            void connect_joystick();
-            void disconnect_joystick();
-
-            std::vector<uint8_t> event_buffer;
-            std::string joystick_path;
-            std::string joystick_acc_path;
-            int joystick_fd;
-            int joystick_acc_fd;
         };
     }  // namespace strategy
 }  // namespace behaviour

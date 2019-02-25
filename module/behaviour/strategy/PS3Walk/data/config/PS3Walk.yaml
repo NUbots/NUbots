@@ -1,3 +1,1 @@
-controller_path: "/dev/input/js1"
-accelerometer_path: "/dev/input/js0"
 action_scripts: ["WaveLeft.yaml"]
