@@ -42,8 +42,6 @@ namespace motion {
             double gain;
             // How far in the future we are sending the movements
             double time_horizon;
-            // Make the step complete slightly earlier to make sure it is at the target on time
-            NUClear::clock::duration offset_time;
 
         public:
             /// @brief Called by the powerplant to build and setup the MovementController reactor.

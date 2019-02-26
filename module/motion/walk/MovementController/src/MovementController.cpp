@@ -70,9 +70,7 @@ namespace motion {
 
             // Find scale to reach target at specified time based on distance from target, time left, and the time
             // horizon
-            double time_left(
-                std::chrono::duration_cast<std::chrono::duration<double>>(target.timestamp - now - offset_time)
-                    .count());
+            double time_left(std::chrono::duration_cast<std::chrono::duration<double>>(target.timestamp - now).count());
             // If we have less time left than our time horizon, assume we have until time horizon to finish
             time_left = time_left < time_horizon ? time_horizon : time_left;
 
@@ -160,25 +158,35 @@ namespace motion {
             Rgp.col(2) = Eigen::Vector3d::UnitZ();
             // Y axis is the cross product of X and Z. This makes the y-axis at a right angle to both the x-axis and
             // z-axis
-            Rgp.col(1) = Rgp.col(0).cross(Rgp.col(2)).normalized();
+            Rgp.col(1) = Rgp.col(2).cross(Rgp.col(0)).normalized();
             // Rgp.leftCols<1>()  = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>()).normalized();
 
             // Create transform based on above rotation
             Eigen::Affine3d Hgp;       // plane to ground transform
             Hgp.linear()      = Rgp;   // Rotation from above
             Hgp.translation() = rAGg;  // Translation to target
-
+            // if (target.lift) {
+            //     log("\nHgp:\n", convert<double, 4, 4>(Hgp.inverse().matrix()));
+            // }
             // Make a transformation matrix that goes the whole way
             Eigen::Affine3d Htp(Htg * Hgp);
+
+            // if (target.lift) {
+            //     log("\nHgp:\n",
+            //         convert<double, 4, 4>(Hgp.matrix()),
+            //         "\nHtg:\n",
+            //         convert<double, 4, 4>(Htg.matrix()),
+            //         "\nHtp:\n",
+            //         convert<double, 4, 4>(Htp.matrix()),
+            //         target.isRightFootSwing ? "\nright" : "\nleft");
+            // }
 
             // Swing foot's position on plane
             Eigen::Vector3d rF_wPp(Hgp.inverse() * rF_wGg);
 
             // Find scale to reach target at specified time based on distance from target, time left, and the
             // time horizon
-            double time_left(
-                std::chrono::duration_cast<std::chrono::duration<double>>(target.timestamp - now - offset_time)
-                    .count());
+            double time_left(std::chrono::duration_cast<std::chrono::duration<double>>(target.timestamp - now).count());
             // If we have less time left than our time horizon, assume we have until time horizon to finish
             time_left               = time_left < time_horizon ? time_horizon : time_left;
             double distance         = rF_wPp.norm();  // TODO line integral goes here!
@@ -230,7 +238,6 @@ namespace motion {
                 step_steep   = config["step_steep"].as<double>();
                 time_horizon = config["time_horizon"].as<double>();
                 gain         = config["gain"].as<double>();
-                offset_time  = std::chrono::milliseconds(config["offset_time"].as<int>());
 
                 // Constant for f_x and f_y
                 c = (std::pow(step_steep, 2 / step_steep) * std::pow(step_height, 1 / step_steep)

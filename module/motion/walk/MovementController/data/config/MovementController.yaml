@@ -9,5 +9,3 @@ well_width: 0.004
 gain: 10
 # How far in the future we are sending the movements (seconds)
 time_horizon: 0.02
-# Make the step complete slightly earlier to make sure it is at the target on time (milliseconds)
-offset_time: 0
