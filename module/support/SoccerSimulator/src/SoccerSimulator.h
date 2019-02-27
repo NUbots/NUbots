@@ -152,7 +152,7 @@ namespace support {
 
         arma::vec2 getPath(Config::Motion::Path p);
 
-        void setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals);
+        void setGoalLeftRightKnowledge(message::vision::Goals& goals);
 
         void loadFieldDescription(const std::shared_ptr<const message::support::FieldDescription> fd);
 

@@ -29,11 +29,13 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
+#include "utility/math/comparison.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 
@@ -89,10 +91,12 @@ namespace motion {
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
             goalRobotSpace = command.robotSpace;
             if (goalRobotSpace) {
-                goalAngles = {command.yaw, command.pitch};
+                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
+                              utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
             }
             else {
-                goalAngles = {command.yaw, -command.pitch};
+                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
+                              -utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
             }
         });
 

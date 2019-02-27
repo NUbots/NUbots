@@ -60,8 +60,9 @@ namespace support {
     using message::platform::darwin::DarwinSensors;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
-    using message::vision::Ball;
+    using message::vision::Balls;
     using message::vision::Goal;
+    using message::vision::Goals;
 
     using utility::math::angle::bearingToUnitVector;
     using utility::math::angle::normalizeAngle;
@@ -282,7 +283,7 @@ namespace support {
                       }
 
                       if (cfg_.simulate_goal_observations) {
-                          auto goals = std::make_unique<std::vector<message::vision::Goal>>();
+                          auto goals = std::make_unique<Goals>();
                           if (cfg_.blind_robot) {
                               emit(std::move(goals));
                               return;
@@ -298,7 +299,7 @@ namespace support {
                                   if (!cfg_.distinguish_own_and_opponent_goals) {
                                       m.team = message::vision::Goal::Team::UNKNOWN_TEAM;
                                   }
-                                  goals->push_back(m);
+                                  goals->goals.push_back(m);
                               }
                           }
 
@@ -320,7 +321,7 @@ namespace support {
 
 
                       if (cfg_.simulate_ball_observations) {
-                          auto ball_vec = std::make_unique<std::vector<message::vision::Ball>>();
+                          auto ball_vec = std::make_unique<Balls>();
                           if (cfg_.blind_robot) {
                               emit(std::move(ball_vec));
                               return;
@@ -330,7 +331,7 @@ namespace support {
 
                           // If we have measurements
                           if (!ball.edge_points.empty()) {
-                              ball_vec->push_back(ball);
+                              ball_vec->balls.push_back(ball);
                           }
 
                           emit(std::move(ball_vec));
@@ -399,12 +400,12 @@ namespace support {
         return arma::vec2({wave1, wave2});
     }
 
-    void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals) {
+    void SoccerSimulator::setGoalLeftRightKnowledge(Goals& goals) {
         // for (auto& g : goalPosts) {
         int leftGoals    = 0;
         int rightGoals   = 0;
         int unknownGoals = 0;
-        for (auto& g : goals) {
+        for (auto& g : goals.goals) {
             // Count sides
             if (g.side == Goal::Side::LEFT) {
                 leftGoals++;
@@ -423,7 +424,7 @@ namespace support {
         // pair,
         // and remove left-right labels if so
         if (totalGoals != 2 || leftGoals != 1 || rightGoals != 1) {
-            for (auto& g : goals) {
+            for (auto& g : goals.goals) {
                 g.side = Goal::Side::UNKNOWN_SIDE;
             }
         }

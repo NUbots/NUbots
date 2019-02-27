@@ -1,6 +1,7 @@
 battery:
-  max: 16.8
-  min: 14.1
+  charged_voltage: 16.8
+  nominal_voltage: 14.8
+  flat_voltage: 14.0
 
 bus_reset_wait_time_us: 0
 byte_wait: 1200

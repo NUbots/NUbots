@@ -23,7 +23,6 @@ syntax = "proto3";
 package message.vision;
 
 import "google/protobuf/timestamp.proto";
-import "Vector.proto";
 import "message/Geometry.proto";
 
 message Obstacle {
