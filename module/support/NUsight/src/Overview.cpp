@@ -44,7 +44,6 @@
 namespace module {
 namespace support {
 
-    using NUClear::message::CommandLineArguments;
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
     using message::behaviour::WalkPath;
@@ -54,6 +53,7 @@ namespace support {
     using message::localisation::Field;
     using message::support::GlobalConfig;
     using message::support::nusight::Overview;
+    using NUClear::message::CommandLineArguments;
     using LocalisationBall = message::localisation::Ball;
     using VisionBalls      = message::vision::Balls;
     using VisionGoals      = message::vision::Goals;
@@ -176,14 +176,14 @@ namespace support {
 
         handles["overview"].push_back(
             on<Trigger<VisionBalls>, Single, Priority::LOW>().then([this](const VisionBalls& balls) {
-                if (!balls.empty()) {
+                if (!balls.balls.empty()) {
                     last_seen_ball = NUClear::clock::now();
                 }
             }));
 
         handles["overview"].push_back(
             on<Trigger<VisionGoals>, Single, Priority::LOW>().then([this](const VisionGoals& goals) {
-                if (!goals.empty()) {
+                if (!goals.goals.empty()) {
                     last_seen_goal = NUClear::clock::now();
                 }
             }));

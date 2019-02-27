@@ -197,7 +197,8 @@ namespace behaviour {
                         Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
                         // Determine state transition variables
-                        bool lost = ((ballFixationObjects.size() <= 0) && (goalFixationObjects.size() <= 0));
+                        bool lost =
+                            ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
                         // Do we need to update our plan?
                         bool updatePlan =
                             !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
@@ -224,25 +225,21 @@ namespace behaviour {
                             // We need to transform our view points to orientation space
                             if (ballMaxPriority) {
                                 headToBodyRotation =
-                                    Transform3D(convert<double, 4, 4>(
-                                                    ballFixationObjects[0]
-                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
+                                    Transform3D(
+                                        convert<double, 4, 4>(
+                                            ballFixationObjects.balls[0].forwardKinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
-                                    Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->world))
-                                        .rotation()
-                                        .i();
+                                    Transform3D(convert<double, 4, 4>(ballFixationObjects.balls[0].Hcw)).rotation().i();
                             }
                             else {
                                 headToBodyRotation =
-                                    Transform3D(convert<double, 4, 4>(
-                                                    goalFixationObjects[0]
-                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
+                                    Transform3D(
+                                        convert<double, 4, 4>(
+                                            goalFixationObjects.goals[0].forwardKinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
-                                    Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->world))
-                                        .rotation()
-                                        .i();
+                                    Transform3D(convert<double, 4, 4>(goalFixationObjects.goals[0].Hcw)).rotation().i();
                             }
                         }
                         else {
@@ -257,15 +254,15 @@ namespace behaviour {
                         if (!lost) {
                             arma::vec2 currentCentroid = arma::vec2({0, 0});
                             if (ballMaxPriority) {
-                                for (auto& ob : ballFixationObjects) {
-                                    currentCentroid += convert<double, 2>(ob.visObject.screenAngular)
-                                                       / float(ballFixationObjects.size());
+                                for (auto& ob : ballFixationObjects.balls) {
+                                    currentCentroid +=
+                                        convert<double, 2>(ob.screenAngular) / float(ballFixationObjects.balls.size());
                                 }
                             }
                             else {
-                                for (auto& ob : goalFixationObjects) {
-                                    currentCentroid += convert<double, 2>(ob.visObject.screenAngular)
-                                                       / float(goalFixationObjects.size());
+                                for (auto& ob : goalFixationObjects.goals) {
+                                    currentCentroid +=
+                                        convert<double, 2>(ob.screenAngular) / float(goalFixationObjects.goals.size());
                                 }
                             }
                             arma::vec2 currentCentroid_world =
@@ -349,17 +346,18 @@ namespace behaviour {
             Balls fixationObjects;
 
             int maxPriority = std::max(std::max(ballPriority, goalPriority), 0);
-            if (ballPriority == goalPriority)
+            if (ballPriority == goalPriority) {
                 log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
+            }
 
             // TODO: make this a loop over a list of objects or something
             // Get balls
             if (ballPriority == maxPriority) {
-                if (vballs && vballs->size() > 0) {
+                if (vballs && vballs->balls.size() > 0) {
                     // Fixate on ball
                     timeLastObjectSeen = now;
-                    auto& ball         = vballs->at(0);
-                    fixationObjects.push_back(ball);
+                    auto& ball         = vballs->balls.at(0);
+                    fixationObjects.balls.push_back(ball);
                 }
                 else {
                     search = true;
@@ -375,23 +373,24 @@ namespace behaviour {
             Goals fixationObjects;
 
             int maxPriority = std::max(std::max(ballPriority, goalPriority), 0);
-            if (ballPriority == goalPriority)
+            if (ballPriority == goalPriority) {
                 log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
+            }
 
             // TODO: make this a loop over a list of objects or something
             // Get goals
             if (goalPriority == maxPriority) {
-                if (vgoals && vgoals->size() > 0) {
+                if (vgoals && vgoals->goals.size() > 0) {
                     // Fixate on goals and lines and other landmarks
                     timeLastObjectSeen = now;
                     std::set<Goal::Side> visiblePosts;
                     // TODO treat goals as one object
                     Goals goals;
-                    for (auto& goal : *vgoals) {
+                    for (auto& goal : vgoals->goals) {
                         visiblePosts.insert(goal.side);
-                        goals.push_back(goal);
+                        goals.goals.push_back(goal);
                     }
-                    fixationObjects.push_back(combineVisionObjects(goals));
+                    fixationObjects.goals.push_back(combineVisionObjects(goals));
                     search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||  // If left post not visible
                               visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());  // or right post not
                                                                                             // visible, then we need to
@@ -421,12 +420,12 @@ namespace behaviour {
             for (uint i = 0; i < fixationObjects.balls.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(arma::vec({fixationObjects.balls(i).visObject.screenAngular[0],
-                                                    fixationObjects.balls(i).visObject.screenAngular[1]}));
-                fixationSizes.push_back(arma::vec({fixationObjects.balls(i).visObject.angularSize[0],
-                                                   fixationObjects.balls(i).visObject.angularSize[1]}));
+                fixationPoints.push_back(arma::vec(
+                    {fixationObjects.balls.at(i).screenAngular[0], fixationObjects.balls.at(i).screenAngular[1]}));
+                fixationSizes.push_back(arma::vec(
+                    {fixationObjects.balls.at(i).angularSize[0], fixationObjects.balls.at(i).angularSize[1]}));
                 // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects.balls(i).visObject.screenAngular))
+                centroid += arma::vec(convert<double, 2>(fixationObjects.balls.at(i).screenAngular))
                             / (fixationObjects.balls.size());
             }
 
@@ -471,12 +470,12 @@ namespace behaviour {
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(arma::vec({fixationObjects.goals(i).visObject.screenAngular[0],
-                                                    fixationObjects.goals(i).visObject.screenAngular[1]}));
-                fixationSizes.push_back(arma::vec({fixationObjects.goals(i).visObject.angularSize[0],
-                                                   fixationObjects.goals(i).visObject.angularSize[1]}));
+                fixationPoints.push_back(arma::vec(
+                    {fixationObjects.goals.at(i).screenAngular[0], fixationObjects.goals.at(i).screenAngular[1]}));
+                fixationSizes.push_back(arma::vec(
+                    {fixationObjects.goals.at(i).angularSize[0], fixationObjects.goals.at(i).angularSize[1]}));
                 // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects.goals(i).visObject.screenAngular))
+                centroid += arma::vec(convert<double, 2>(fixationObjects.goals.at(i).screenAngular))
                             / (fixationObjects.goals.size());
             }
 
@@ -535,7 +534,7 @@ namespace behaviour {
                                                                      const Sensors&) {
             // If there is nothing of interest, we search fot points of interest
             // log("getting search points");
-            if (fixationObjects.size() == 0) {
+            if (fixationObjects.balls.size() == 0) {
                 // log("getting search points 2");
                 // Lost searches are normalised in terms of the FOV
                 std::vector<arma::vec2> scaledResults;
@@ -624,7 +623,7 @@ namespace behaviour {
                                                                      const Sensors&) {
             // If there is nothing of interest, we search fot points of interest
             // log("getting search points");
-            if (fixationObjects.size() == 0) {
+            if (fixationObjects.goals.size() == 0) {
                 // log("getting search points 2");
                 // Lost searches are normalised in terms of the FOV
                 std::vector<arma::vec2> scaledResults;
@@ -708,15 +707,15 @@ namespace behaviour {
         }
 
         Ball HeadBehaviourSoccer::combineVisionObjects(const Balls& ob) {
-            if (ob.size() == 0) {
+            if (ob.balls.size() == 0) {
                 log<NUClear::WARN>(
                     "HeadBehaviourSoccer::combineVisionBalls - Attempted to combine zero vision objects into one.");
-                return VisionObject();
+                return Ball();
             }
-            Quad q                    = getScreenAngularBoundingBox(ob);
-            Ball v                    = ob.balls(0);
-            v.visObject.screenAngular = convert<double, 2>(q.getCentre());
-            v.visObject.angularSize   = convert<double, 2>(q.getSize());
+            Quad q          = getScreenAngularBoundingBox(ob);
+            Ball v          = ob.balls.at(0);
+            v.screenAngular = convert<double, 2>(q.getCentre());
+            v.angularSize   = convert<double, 2>(q.getSize());
             return v;
         }
 
@@ -724,22 +723,22 @@ namespace behaviour {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.balls.size(); i++) {
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.balls(i).visObject.screenAngular + ob.balls(i).visObject.angularSize / 2));
+                    convert<double, 2>(ob.balls.at(i).screenAngular + ob.balls.at(i).angularSize / 2));
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.balls(i).visObject.screenAngular - ob.balls(i).visObject.angularSize / 2));
+                    convert<double, 2>(ob.balls.at(i).screenAngular - ob.balls.at(i).angularSize / 2));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
 
 
         Goal HeadBehaviourSoccer::combineVisionObjects(const Goals& ob) {
-            if (ob.size() == 0) {
+            if (ob.goals.size() == 0) {
                 log<NUClear::WARN>(
                     "HeadBehaviourSoccer::combineVisionObjects - Attempted to combine zero vision objects into one.");
-                return VisionObject();
+                return Goal();
             }
             Quad q = getScreenAngularBoundingBox(ob);
-            Goal v = ob.goals(0);
+            Goal v = ob.goals.at(0);
             return v;
         }
 
@@ -747,9 +746,9 @@ namespace behaviour {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.goals.size(); i++) {
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.goals(i).visObject.screenAngular + ob.goals(i).visObject.angularSize / 2));
+                    convert<double, 2>(ob.goals.at(i).screenAngular + ob.goals.at(i).angularSize / 2));
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.goals(i).visObject.screenAngular - ob.goals(i).visObject.angularSize / 2));
+                    convert<double, 2>(ob.goals.at(i).screenAngular - ob.goals.at(i).angularSize / 2));
             }
             return Quad::getBoundingBox(boundingPoints);
         }

@@ -76,7 +76,7 @@ namespace support {
         // Get our ball position in camera
         arma::vec3 rBCc = Hcf.rotation() * arma::vec3(rBFf - rCFf);
         if (rBCc[0] < 0.0) {
-            result.edgePoints.clear();
+            result.edge_points.clear();
             return result;
         }
 
@@ -139,13 +139,13 @@ namespace support {
                 arma::vec3 rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
 
                 // Make a rotation matrix to rotate our vector to our target
-                result.edgePoints.push_back(
+                result.edge_points.push_back(
                     convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc)));
             }
         }
 
-        result.visObject.sensors   = const_cast<Sensors*>(&sensors)->shared_from_this();
-        result.visObject.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
+        result.forwardKinematics = sensors.forwardKinematics;
+        result.timestamp         = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
 
 
         // If no measurements are in the Ball, then there it was not observed

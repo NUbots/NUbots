@@ -34,10 +34,10 @@ namespace module {
 namespace behaviour {
     namespace strategy {
 
-        using NUClear::message::LogMessage;
         using message::behaviour::MotionCommand;
         using message::motion::HeadCommand;
         using message::motion::KickCommand;
+        using NUClear::message::LogMessage;
         using utility::math::matrix::Transform2D;
 
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
@@ -57,7 +57,6 @@ namespace behaviour {
 
             // Trigger when stdin has something to read
             on<IO>(STDIN_FILENO, IO::READ).then([this] {
-
                 switch (tolower(getch())) {
                     case 'w': forward(); break;
                     case 'a': left(); break;

@@ -33,8 +33,8 @@ namespace behaviour {
 
         using extension::ExecuteScriptByName;
 
-        using NUClear::message::CommandLineArguments;
         using message::platform::darwin::DarwinSensors;
+        using NUClear::message::CommandLineArguments;
 
         using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;

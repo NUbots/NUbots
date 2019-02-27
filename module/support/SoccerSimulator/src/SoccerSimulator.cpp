@@ -329,7 +329,7 @@ namespace support {
                           auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
                           // If we have measurements
-                          if (!ball.edgePoints.empty()) {
+                          if (!ball.edge_points.empty()) {
                               ball_vec->push_back(ball);
                           }
 

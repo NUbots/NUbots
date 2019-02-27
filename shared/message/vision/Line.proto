@@ -24,38 +24,15 @@ package message.vision;
 
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
-import "message/Geometry.proto";
-import "Matrix.proto";
-import "Neutron.proto";
 
-message Ball {
-    enum MeasurementType {
-        UNKNOWN      = 0;
-        REPROJECTION = 1;
-        WIDTH_BASED  = 2;
-    }
-    message Measurement {
-        MeasurementType type = 1;
-        // Vector from camera to ball in camera coordinates
-        vec3 rBCc       = 2;
-        mat3 covariance = 3;
-    }
+message Line {
     uint32                    camera_id = 1;
     google.protobuf.Timestamp timestamp = 2;
-    mat4                      Hcw       = 3;
-    Cone                      cone      = 4;
-    repeated Measurement measurements   = 5;
-
-    // The angular position and size from the perspective of the camera
-    // Use these values to move the camera around to see this object
-    vec2 screenAngular = 6;
-    vec2 angularSize   = 7;
-
-    repeated vec3 edge_points = 9;
-
-    repeated mat4 forwardKinematics = 10 [(array_size) = 20];
+    ivec2                     start     = 3;
+    ivec2                     end       = 4;
+    vec4                      colour    = 5;
 }
 
-message Balls {
-    repeated Ball balls = 1;
+message Lines {
+    repeated Line lines = 1;
 }

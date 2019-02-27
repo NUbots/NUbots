@@ -24,6 +24,7 @@
 #include <nuclear>
 #include "message/support/nusight/DataPoint.h"
 #include "message/support/nusight/DrawObjects.h"
+#include "message/vision/Line.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -438,25 +439,26 @@ namespace nusight {
         return utility::nusight::drawPolyline(name, positions, line_width, colour, timeout);
     }
 
-    inline std::unique_ptr<std::vector<message::vision::Line>> drawVisionLines(
+    inline std::unique_ptr<message::vision::Lines> drawVisionLines(
         std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
                     Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>> lines) {
 
-        auto msg = std::make_unique<std::vector<message::vision::Line>>();
+        auto msg = std::make_unique<message::vision::Lines>();
 
         for (const auto& line : lines) {
             message::vision::Line objLine;
-            objLine.visObject.camera_id = 0;  // TODO
-            objLine.start               = std::get<0>(line);
-            objLine.end                 = std::get<1>(line);
-            objLine.colour              = std::get<2>(line);
-            msg->push_back(objLine);
+            objLine.camera_id = 0;  // TODO
+            objLine.timestamp = NUClear::clock::now();
+            objLine.start     = std::get<0>(line);
+            objLine.end       = std::get<1>(line);
+            objLine.colour    = std::get<2>(line);
+            msg->lines.push_back(objLine);
         }
 
         return std::move(msg);
     }
 
-    inline std::unique_ptr<std::vector<message::vision::Line>> drawVisionLines(
+    inline std::unique_ptr<message::vision::Lines> drawVisionLines(
         std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> lines,
         Eigen::Vector4d colour = Eigen::Vector4d({1, 1, 1, 1})) {
 
@@ -472,7 +474,7 @@ namespace nusight {
         return drawVisionLines(colouredLines);
     }
 
-    inline std::unique_ptr<std::vector<message::vision::Line>>
+    inline std::unique_ptr<message::vision::Lines>
     drawVisionLine(Eigen::Vector2i start, Eigen::Vector2i end, Eigen::Vector4d colour = Eigen::Vector4d({1, 1, 1, 1})) {
 
         return drawVisionLines({std::make_tuple(start, end, colour)});

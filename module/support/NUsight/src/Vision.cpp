@@ -23,8 +23,10 @@
 #include "message/vision/Ball.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/Goal.h"
+#include "message/vision/Line.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/LookUpTableDiff.h"
+#include "message/vision/Obstacle.h"
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
@@ -38,13 +40,9 @@ namespace support {
     using message::vision::Balls;
     using message::vision::ClassifiedImage;
     using message::vision::Goals;
-    using message::vision::Line;
+    using message::vision::Lines;
     using message::vision::LookUpTableDiff;
-    using message::vision::NUsightBalls;
-    using message::vision::NUsightGoals;
-    using message::vision::NUsightLines;
-    using message::vision::NUsightObstacles;
-    using message::vision::Obstacle;
+    using message::vision::Obstacles;
 
     void NUsight::provideVision() {
         handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then(
@@ -74,15 +72,25 @@ namespace support {
                 last_classified_image = NUClear::clock::now();
             }));
 
-        handles["vision_object"].push_back(on<Trigger<Balls>, Single, Priority::LOW>().then([this](const Balls& balls) {
-            auto nusight = std::make_unique<Balls>();
-            emit<Scope::NETWORK>(nusight, "nusight", false);
-        }));
+        handles["vision_object"].push_back(
+            on<Trigger<Balls>, Single, Priority::LOW>().then([this](std::shared_ptr<const Balls> balls) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(balls), "nusight", false);
+            }));
 
-        handles["vision_object"].push_back(on<Trigger<Goals>, Single, Priority::LOW>().then([this](const Goals& goals) {
-            auto nusight = std::make_unique<Goals>();
-            emit<Scope::NETWORK>(nusight, "nusight", false);
-        }));
+        handles["vision_object"].push_back(
+            on<Trigger<Goals>, Single, Priority::LOW>().then([this](std::shared_ptr<const Goals> goals) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(goals), "nusight", false);
+            }));
+
+        handles["vision_object"].push_back(
+            on<Trigger<Lines>, Single, Priority::LOW>().then([this](std::shared_ptr<const Lines> lines) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(lines), "nusight", false);
+            }));
+
+        handles["vision_object"].push_back(
+            on<Trigger<Obstacles>, Single, Priority::LOW>().then([this](std::shared_ptr<const Obstacles> obstacles) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(obstacles), "nusight", false);
+            }));
 
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then(
             [this](std::shared_ptr<const LookUpTableDiff> tableDiff) {

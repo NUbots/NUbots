@@ -46,20 +46,16 @@ namespace behaviour {
             // TODO: unhack?
             emit(std::make_unique<KickPlan>(KickPlan{{3, 0}}));
 
-            on<Every<30, Per<std::chrono::seconds>>, Single>().then([this] {
-
-                doBehaviour();
-
-            });
+            on<Every<30, Per<std::chrono::seconds>>, Single>().then([this] { doBehaviour(); });
 
             on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-                if (!balls.empty()) {
+                if (!balls.balls.empty()) {
                     ballLastSeen = NUClear::clock::now();
                 }
             });
 
             on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
-                if (!goals.empty()) {
+                if (!goals.goals.empty()) {
                     goalLastSeen = NUClear::clock::now();
                 }
             });

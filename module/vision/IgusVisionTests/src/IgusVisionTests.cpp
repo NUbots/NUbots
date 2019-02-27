@@ -15,8 +15,8 @@ namespace vision {
     using message::input::Image;
     using message::input::Sensors;
     using message::support::FieldDescription;
-    using message::vision::ClassifiedImage;
     using message::vision::Balls;
+    using message::vision::ClassifiedImage;
     using message::vision::Goals;
     using utility::math::vision::getImageFromCam;
     using utility::nusight::drawVisionLines;
@@ -45,22 +45,23 @@ namespace vision {
         });
 
         on<Trigger<Balls>>().then([this](const Balls& balls) {
-            for (auto& ball : balls) {
+            log("Balls: ", balls.balls.size());
+            for (auto& ball : balls.balls) {
                 for (auto& m : ball.measurements) {
                     arma::vec3 measuredPos = convert<double, 3>(m.rBCc);
                     log("Ball actual pos (x,y,z):  ", ballCentre.t());
                     log("Ball measured pos (x,y,z):", measuredPos.t());
                     log("Ball detector error =     ", (measuredPos - ballCentre).t());
                     log("Ball norm error =         ", arma::norm(measuredPos - ballCentre));
-                    // for(auto& edgePts : ball.edgePoints){
-                    //     log("Edge pts:", edgePts);
+                    // for(const auto& edge_point : ball.edge_points){
+                    //     log("Edge point:", edge_point);
                     // }
                 }
             }
         });
         on<Trigger<Goals>>().then([this](const Goals& goals) {
-            log("Goals: ", goals.size());
-            for (auto& goal : goals) {
+            log("Goals: ", goals.goals.size());
+            for (auto& goal : goals.goals) {
                 for (auto& m : goal.measurement) {
                     if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
                     arma::vec3 measuredPos = convert<double, 3>(m.position);
@@ -68,9 +69,6 @@ namespace vision {
                     log("Goal measured pos (x,y,z):", measuredPos.t());
                     log("Goal detector error =     ", (measuredPos - goal_position).t());
                     log("Goal norm error =         ", arma::norm(measuredPos - goal_position));
-                    // for(auto& edgePts : ball.edgePoints){
-                    //     log("Edge pts:", edgePts);
-                    // }
                 }
             }
         });

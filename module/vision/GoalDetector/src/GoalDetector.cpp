@@ -52,14 +52,17 @@ namespace vision {
     using extension::Configuration;
 
     using message::input::CameraParameters;
+    using message::vision::ClassifiedImage;
+    using message::vision::LookUpTable;
+    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
+    using message::support::FieldDescription;
+    using message::vision::Goal;
+    using message::vision::Goals;
 
     using utility::math::coordinates::cartesianToSpherical;
-
     using Plane = utility::math::geometry::Plane<3>;
     using utility::math::geometry::Quad;
-
     using utility::math::ransac::NPartiteRansac;
-
     using utility::math::vision::distanceToVerticalObject;
     using utility::math::vision::getCamFromImage;
     using utility::math::vision::getCamFromScreen;
@@ -71,13 +74,6 @@ namespace vision {
     using utility::math::vision::projectCamToPlane;
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::nusight::drawVisionLines;
-
-    using message::vision::ClassifiedImage;
-    using message::vision::LookUpTable;
-    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using message::support::FieldDescription;
-    using message::vision::Goal;
-    using message::vision::Goals;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the
@@ -160,8 +156,7 @@ namespace vision {
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
-                        && (segment.previous > -1)
-                        && (segment.next > -1)) {
+                        && (segment.previous > -1) && (segment.next > -1)) {
                         segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
                                                                            convert<uint, 2>(cam.imageSizePixels)),
                                                              cam),
@@ -336,7 +331,7 @@ namespace vision {
 
                     // Make a quad
                     Goal goal;
-                    goal.visObject.sensors = image.sensors;
+                    goal.forwardKinematics = image.sensors->forwardKinematics;
                     goal.side              = Goal::Side::UNKNOWN_SIDE;
 
                     // Project those points outward onto the quad
@@ -358,8 +353,7 @@ namespace vision {
                     goal.quad.tr = convert<double, 2>(getImageFromCamCts(tr, cam));
                     goal.quad.br = convert<double, 2>(getImageFromCamCts(br, cam));
 
-
-                    goals->push_back(std::move(goal));
+                    goals->goals.push_back(std::move(goal));
                 }
                 if (DEBUG_GOAL_RANSAC) {
                     emit(drawVisionLines(debug));
@@ -367,7 +361,7 @@ namespace vision {
 
 
                 // Throwout invalid quads
-                for (auto it = goals->begin(); it != goals->end();) {
+                for (auto it = goals->goals.begin(); it != goals->goals.end();) {
 
                     arma::vec3 cbl = convert<double, 3>(it->frustum.bl);
                     arma::vec3 ctl = convert<double, 3>(it->frustum.tl);
@@ -383,9 +377,9 @@ namespace vision {
                     // float dAngleVertical   = std::fabs(leftAngle - rightAngle);
                     // float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
 
-                    float vertAngle           = (leftAngle + rightAngle) / 2;
-                    float horAngle            = (topAngle + bottomAngle) / 2;
-                    it->visObject.angularSize = Eigen::Vector2d(horAngle, vertAngle);
+                    float vertAngle = (leftAngle + rightAngle) / 2;
+                    float horAngle  = (topAngle + bottomAngle) / 2;
+                    it->angularSize = Eigen::Vector2d(horAngle, vertAngle);
 
                     bool valid        = vertAngle > 0;
                     float aspectRatio = vertAngle / horAngle;
@@ -474,7 +468,7 @@ namespace vision {
                                 // log();
                             }
                         }
-                        it = goals->erase(it);
+                        it = goals->goals.erase(it);
                     }
                     else {
                         ++it;
@@ -482,13 +476,13 @@ namespace vision {
                 }
 
                 // Merge close goals
-                for (auto a = goals->begin(); a != goals->end(); ++a) {
+                for (auto a = goals->goals.begin(); a != goals->goals.end(); ++a) {
                     utility::math::geometry::Quad aquad(convert<double, 2>(a->quad.bl),
                                                         convert<double, 2>(a->quad.tl),
                                                         convert<double, 2>(a->quad.tr),
                                                         convert<double, 2>(a->quad.br));
 
-                    for (auto b = std::next(a); b != goals->end();) {
+                    for (auto b = std::next(a); b != goals->goals.end();) {
 
                         utility::math::geometry::Quad bquad(convert<double, 2>(b->quad.bl),
                                                             convert<double, 2>(b->quad.tl),
@@ -515,7 +509,7 @@ namespace vision {
                             a->quad.tl = convert<double, 2>(tl);
                             a->quad.tr = convert<double, 2>(tr);
                             a->quad.br = convert<double, 2>(br);
-                            b          = goals->erase(b);
+                            b          = goals->goals.erase(b);
                         }
                         else {
                             b++;
@@ -524,7 +518,7 @@ namespace vision {
                 }
 
                 // Store our measurements
-                for (auto it = goals->begin(); it != goals->end(); ++it) {
+                for (auto it = goals->goals.begin(); it != goals->goals.end(); ++it) {
                     utility::math::geometry::Quad quad(convert<double, 2>(it->quad.bl),
                                                        convert<double, 2>(it->quad.tl),
                                                        convert<double, 2>(it->quad.tr),
@@ -608,32 +602,28 @@ namespace vision {
                         auto top = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                     }
-
-
-                    // Add classified image corresponding to this message
-                    it->visObject.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
                 }
 
 
                 // Assign leftness and rightness to goals
-                if (goals->size() == 2) {
-                    utility::math::geometry::Quad quad0(convert<double, 2>(goals->at(0).quad.bl),
-                                                        convert<double, 2>(goals->at(0).quad.tl),
-                                                        convert<double, 2>(goals->at(0).quad.tr),
-                                                        convert<double, 2>(goals->at(0).quad.br));
+                if (goals->goals.size() == 2) {
+                    utility::math::geometry::Quad quad0(convert<double, 2>(goals->goals.at(0).quad.bl),
+                                                        convert<double, 2>(goals->goals.at(0).quad.tl),
+                                                        convert<double, 2>(goals->goals.at(0).quad.tr),
+                                                        convert<double, 2>(goals->goals.at(0).quad.br));
 
-                    utility::math::geometry::Quad quad1(convert<double, 2>(goals->at(1).quad.bl),
-                                                        convert<double, 2>(goals->at(1).quad.tl),
-                                                        convert<double, 2>(goals->at(1).quad.tr),
-                                                        convert<double, 2>(goals->at(1).quad.br));
+                    utility::math::geometry::Quad quad1(convert<double, 2>(goals->goals.at(1).quad.bl),
+                                                        convert<double, 2>(goals->goals.at(1).quad.tl),
+                                                        convert<double, 2>(goals->goals.at(1).quad.tr),
+                                                        convert<double, 2>(goals->goals.at(1).quad.br));
 
                     if (quad0.getCentre()(0) < quad1.getCentre()(0)) {
-                        goals->at(0).side = Goal::Side::LEFT;
-                        goals->at(1).side = Goal::Side::RIGHT;
+                        goals->goals.at(0).side = Goal::Side::LEFT;
+                        goals->goals.at(1).side = Goal::Side::RIGHT;
                     }
                     else {
-                        goals->at(0).side = Goal::Side::RIGHT;
-                        goals->at(1).side = Goal::Side::LEFT;
+                        goals->goals.at(0).side = Goal::Side::RIGHT;
+                        goals->goals.at(1).side = Goal::Side::LEFT;
                     }
                 }
 

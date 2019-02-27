@@ -50,14 +50,12 @@ namespace behaviour {
 
             on<Trigger<LocalisationBall>, With<VisionBalls>>().then([this](const LocalisationBall& ball,
                                                                            const VisionBalls& vision_balls) {
-
                 if (vision_balls.balls.size() > 0 &&  // It means a ball was detected.
-                    ball.position[0] > 0
-                    &&  //
+                    ball.position[0] > 0 &&           //
                     -ball.velocity[0] > SPEED_THRESHOLD
                     &&  // Negative velocity means the ball is coming towards the goalie.
                     ball.position[0] < DISTANCE_THRESHOLD  // If the ball is close enough (0.5 metres?) to the goalie.
-                    ) {
+                ) {
 
                     // NUClear::log("Ball Vel:", -ball.velocity[0] , ball.position[0]);
 

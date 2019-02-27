@@ -226,7 +226,6 @@ namespace platform {
             });
 
             on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
-
                 // Set config for the packet waiting
                 darwin.setConfig(config);
 
@@ -243,7 +242,6 @@ namespace platform {
             // This trigger gets the sensor data from the CM730
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
                 "Hardware Loop", [this] {
-
                     // Our final sensor output
                     auto sensors = std::make_unique<DarwinSensors>();
 
@@ -325,7 +323,6 @@ namespace platform {
             // This trigger writes the servo positions to the hardware
             on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
                 [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
-
                     // Loop through each of our commands
                     for (const auto& command : commands) {
                         float diff = utility::math::angle::difference(
