@@ -225,28 +225,26 @@ namespace behaviour {
                             // We need to transform our view points to orientation space
                             if (ballMaxPriority) {
                                 headToBodyRotation =
-                                    Transform3D(
-                                        convert<double, 4, 4>(
-                                            ballFixationObjects.balls[0].forwardKinematics[ServoID::HEAD_PITCH]))
+                                    Transform3D(convert<double, 4, 4>(
+                                                    ballFixationObjects.forward_kinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
-                                    Transform3D(convert<double, 4, 4>(ballFixationObjects.balls[0].Hcw)).rotation().i();
+                                    Transform3D(convert<double, 4, 4>(ballFixationObjects.Hcw)).rotation().i();
                             }
                             else {
                                 headToBodyRotation =
-                                    Transform3D(
-                                        convert<double, 4, 4>(
-                                            goalFixationObjects.goals[0].forwardKinematics[ServoID::HEAD_PITCH]))
+                                    Transform3D(convert<double, 4, 4>(
+                                                    goalFixationObjects.forward_kinematics[ServoID::HEAD_PITCH]))
                                         .rotation();
                                 orientation =
-                                    Transform3D(convert<double, 4, 4>(goalFixationObjects.goals[0].Hcw)).rotation().i();
+                                    Transform3D(convert<double, 4, 4>(goalFixationObjects.Hcw)).rotation().i();
                             }
                         }
                         else {
                             headToBodyRotation =
-                                Transform3D(convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]))
+                                Transform3D(convert<double, 4, 4>(sensors.forward_kinematics[ServoID::HEAD_PITCH]))
                                     .rotation();
-                            orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
+                            orientation = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation().i();
                         }
                         Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
@@ -256,13 +254,13 @@ namespace behaviour {
                             if (ballMaxPriority) {
                                 for (auto& ob : ballFixationObjects.balls) {
                                     currentCentroid +=
-                                        convert<double, 2>(ob.screenAngular) / float(ballFixationObjects.balls.size());
+                                        convert<double, 2>(ob.screen_angular) / float(ballFixationObjects.balls.size());
                                 }
                             }
                             else {
                                 for (auto& ob : goalFixationObjects.goals) {
                                     currentCentroid +=
-                                        convert<double, 2>(ob.screenAngular) / float(goalFixationObjects.goals.size());
+                                        convert<double, 2>(ob.screen_angular) / float(goalFixationObjects.goals.size());
                                 }
                             }
                             arma::vec2 currentCentroid_world =
@@ -308,7 +306,7 @@ namespace behaviour {
                         // If we arent getting up, then we can update the plan if necessary
                         if (updatePlan) {
                             if (lost) {
-                                lastPlanOrientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+                                lastPlanOrientation = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation();
                             }
                             if (ballMaxPriority) {
                                 updateHeadPlan(
@@ -414,24 +412,24 @@ namespace behaviour {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
             arma::vec centroid    = {0, 0};
-            arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).presentPosition,
-                                     sensors.servo.at(ServoID::HEAD_PITCH).presentPosition};
+            arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).present_position,
+                                     sensors.servo.at(ServoID::HEAD_PITCH).present_position};
 
             for (uint i = 0; i < fixationObjects.balls.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
                 fixationPoints.push_back(arma::vec(
-                    {fixationObjects.balls.at(i).screenAngular[0], fixationObjects.balls.at(i).screenAngular[1]}));
+                    {fixationObjects.balls.at(i).screen_angular[0], fixationObjects.balls.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
-                    {fixationObjects.balls.at(i).angularSize[0], fixationObjects.balls.at(i).angularSize[1]}));
+                    {fixationObjects.balls.at(i).angular_size[0], fixationObjects.balls.at(i).angular_size[1]}));
                 // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects.balls.at(i).screenAngular))
+                centroid += arma::vec(convert<double, 2>(fixationObjects.balls.at(i).screen_angular))
                             / (fixationObjects.balls.size());
             }
 
             // If there are objects to find
             if (search) {
-                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects.balls, searchType, sensors);
+                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors);
             }
 
             if (fixationPoints.size() <= 0) {
@@ -460,10 +458,10 @@ namespace behaviour {
             arma::vec2 currentPos;
             for (const auto& servo : sensors.servo) {
                 if (servo.id == ServoID::HEAD_YAW) {
-                    currentPos[0] = servo.presentPosition;
+                    currentPos[0] = servo.present_position;
                 }
                 if (servo.id == ServoID::HEAD_PITCH) {
-                    currentPos[1] = servo.presentPosition;
+                    currentPos[1] = servo.present_position;
                 }
             }
 
@@ -471,17 +469,17 @@ namespace behaviour {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
                 fixationPoints.push_back(arma::vec(
-                    {fixationObjects.goals.at(i).screenAngular[0], fixationObjects.goals.at(i).screenAngular[1]}));
+                    {fixationObjects.goals.at(i).screen_angular[0], fixationObjects.goals.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
-                    {fixationObjects.goals.at(i).angularSize[0], fixationObjects.goals.at(i).angularSize[1]}));
+                    {fixationObjects.goals.at(i).angular_size[0], fixationObjects.goals.at(i).angular_size[1]}));
                 // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects.goals.at(i).screenAngular))
+                centroid += arma::vec(convert<double, 2>(fixationObjects.goals.at(i).screen_angular))
                             / (fixationObjects.goals.size());
             }
 
             // If there are objects to find
             if (search) {
-                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects.goals, searchType, sensors);
+                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors);
             }
 
             if (fixationPoints.size() <= 0) {
@@ -550,7 +548,7 @@ namespace behaviour {
 
                     // New absolute referencing
                     arma::vec2 angles = p * M_PI / 180;
-                    // if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
+                    // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
                     // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV
 
@@ -560,7 +558,7 @@ namespace behaviour {
 
                     // arma::vec3 adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.world.rotation().pitch()) *
+                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
                     // lookVectorFromHead;
                     // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
                     // lookVectorFromHead;
@@ -639,7 +637,7 @@ namespace behaviour {
 
                     // New absolute referencing
                     arma::vec2 angles = p * M_PI / 180;
-                    // if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
+                    // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
                     // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV
 
@@ -649,7 +647,7 @@ namespace behaviour {
 
                     // arma::vec3 adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.world.rotation().pitch()) *
+                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
                     // lookVectorFromHead;
                     // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
                     // lookVectorFromHead;
@@ -712,10 +710,10 @@ namespace behaviour {
                     "HeadBehaviourSoccer::combineVisionBalls - Attempted to combine zero vision objects into one.");
                 return Ball();
             }
-            Quad q          = getScreenAngularBoundingBox(ob);
-            Ball v          = ob.balls.at(0);
-            v.screenAngular = convert<double, 2>(q.getCentre());
-            v.angularSize   = convert<double, 2>(q.getSize());
+            Quad q           = getScreenAngularBoundingBox(ob);
+            Ball v           = ob.balls.at(0);
+            v.screen_angular = convert<double, 2>(q.getCentre());
+            v.angular_size   = convert<double, 2>(q.getSize());
             return v;
         }
 
@@ -723,9 +721,9 @@ namespace behaviour {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.balls.size(); i++) {
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.balls.at(i).screenAngular + ob.balls.at(i).angularSize / 2));
+                    convert<double, 2>(ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size / 2));
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.balls.at(i).screenAngular - ob.balls.at(i).angularSize / 2));
+                    convert<double, 2>(ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
@@ -746,16 +744,16 @@ namespace behaviour {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.goals.size(); i++) {
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.goals.at(i).screenAngular + ob.goals.at(i).angularSize / 2));
+                    convert<double, 2>(ob.goals.at(i).screen_angular + ob.goals.at(i).angular_size / 2));
                 boundingPoints.push_back(
-                    convert<double, 2>(ob.goals.at(i).screenAngular - ob.goals.at(i).angularSize / 2));
+                    convert<double, 2>(ob.goals.at(i).screen_angular - ob.goals.at(i).angular_size / 2));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
 
 
         bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors) {
-            Rotation3D diff = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i() * lastPlanOrientation;
+            Rotation3D diff     = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation().i() * lastPlanOrientation;
             UnitQuaternion quat = UnitQuaternion(diff);
             float angle         = quat.getAngle();
             return std::fabs(angle) > replan_angle_threshold;

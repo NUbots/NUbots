@@ -47,12 +47,12 @@ namespace support {
 
         emitImageHandle = on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then(
             "Simulated Images (VCamera)", [this]() {
-                auto msg           = std::make_unique<message::input::Image>();
-                msg->format        = FOURCC::BGGR;
-                msg->camera_id     = 0;
-                msg->serial_number = "VirtualCamera";
-                msg->timestamp     = NUClear::clock::now();
-                msg->Hcw           = Hcw;
+                auto msg       = std::make_unique<message::input::Image>();
+                msg->format    = FOURCC::BGGR;
+                msg->camera_id = 0;
+                msg->name      = "VirtualCamera";
+                msg->timestamp = NUClear::clock::now();
+                msg->Hcw       = Hcw;
 
                 utility::vision::loadImage(imagePath, *msg);
                 emit(msg);

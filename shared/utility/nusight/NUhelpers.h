@@ -93,7 +93,6 @@ namespace nusight {
     inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint   = std::make_unique<DataPoint>();
         dataPoint->label = label;
-        dataPoint->type  = DataPoint::Type::Value::FLOAT_LIST;
         buildGraph(*dataPoint, values...);
         return dataPoint;
     }
@@ -101,7 +100,6 @@ namespace nusight {
     inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Rotation3D rotation) {
         auto dataPoint   = std::make_unique<DataPoint>();
         dataPoint->label = label;
-        dataPoint->type  = DataPoint::Type::Value::ROTATION_3D;
         for (const auto& value : rotation) {
             dataPoint->value.push_back(value);
         }

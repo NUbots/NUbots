@@ -98,7 +98,7 @@ namespace localisation {
                         filter.measurementUpdate(cartesianToSpherical(convert<double, 3, 1>(measurement.rBCc)),
                                                  convert<double, 3, 3>(measurement.covariance),
                                                  field,
-                                                 convert<double, 4, 4>(balls.balls[0].Hcw));
+                                                 convert<double, 4, 4>(balls.Hcw));
                     }
                     last_measurement_update_time = curr_time;
                 }

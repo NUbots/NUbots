@@ -146,6 +146,12 @@ namespace vision {
                 // Our segments that may be a part of a goal
                 std::vector<RansacGoalModel::GoalSegment> segments;
                 auto goals = std::make_unique<Goals>();
+
+                Eigen::Affine3d Htc(image.sensors->forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+                goals->timestamp          = NUClear::clock::now();
+                goals->forward_kinematics = image.sensors->forward_kinematics;
+                goals->Hcw                = Htc.inverse() * image.sensors->Htw;
+
                 // Get our goal segments
                 for (const auto& segment : image.horizontalSegments) {
 
@@ -327,12 +333,8 @@ namespace vision {
                     arma::vec3 midBase = arma::normalise(mid.orthogonalProjection(basePoint));
 
                     // Make a quad
-                    Eigen::Affine3d Htc(image.sensors->forwardKinematics[utility::input::ServoID::HEAD_PITCH]);
                     Goal goal;
-                    goal.timestamp         = NUClear::clock::now();
-                    goal.forwardKinematics = image.sensors->forwardKinematics;
-                    goal.Hcw               = Htc.inverse() * image.sensors->world;
-                    goal.side              = Goal::Side::UNKNOWN_SIDE;
+                    goal.side = Goal::Side::UNKNOWN_SIDE;
 
                     // Project those points outward onto the quad
                     arma::vec3 horizonScreenDir = arma::normalise(
@@ -379,11 +381,11 @@ namespace vision {
 
                     // float dAngleVertical   = std::fabs(leftAngle - rightAngle);
                     // float dAngleHorizontal = std::fabs(topAngle - bottomAngle);
-                    it->screenAngular = convert<double, 2>(cartesianToSpherical(goalCentreRay).rows(1, 2));
+                    it->screen_angular = convert<double, 2>(cartesianToSpherical(goalCentreRay).rows(1, 2));
 
-                    float vertAngle = (leftAngle + rightAngle) / 2;
-                    float horAngle  = (topAngle + bottomAngle) / 2;
-                    it->angularSize = Eigen::Vector2d(horAngle, vertAngle);
+                    float vertAngle  = (leftAngle + rightAngle) / 2;
+                    float horAngle   = (topAngle + bottomAngle) / 2;
+                    it->angular_size = Eigen::Vector2d(horAngle, vertAngle);
 
                     bool valid        = vertAngle > 0;
                     float aspectRatio = vertAngle / horAngle;
@@ -543,27 +545,17 @@ namespace vision {
 
                     // Get our four normals for each edge
                     // BL TL cross product gives left side
-                    auto left                   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
-                    Eigen::Matrix3d left_vecCov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
-                    Eigen::Vector2d left_Angles(std::atan2(left[1], left[0]),
-                                                std::atan2(left[2], std::sqrt(left[0] * left[0] + left[1] * left[1])));
-                    Eigen::Matrix2d left_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
+                    auto left                = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
+                    Eigen::Matrix3d left_cov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
 
-                    it->measurement.push_back(Goal::Measurement(
-                        Goal::MeasurementType::LEFT_NORMAL, left, left_vecCov, left_Angles, left_AngCov));
+                    it->measurements.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left, left_cov));
 
                     // TR BR cross product gives right side
-                    auto right = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
+                    auto right                = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
+                    Eigen::Matrix3d right_cov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
 
-                    Eigen::Matrix3d right_vecCov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
-                    Eigen::Vector2d right_Angles(
-                        std::atan2(right[1], right[0]),
-                        std::atan2(right[2], std::sqrt(right[0] * right[0] + right[1] * right[1])));
-                    Eigen::Matrix2d right_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
-
-
-                    it->measurement.push_back(Goal::Measurement(
-                        Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
+                    it->measurements.push_back(
+                        Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right, right_cov));
 
                     // Check that the bottom of the goal is not too close to the edges of the screen
                     if (std::min(quad.getBottomRight()[0], quad.getBottomLeft()[0]) > MEASUREMENT_LIMITS_LEFT
@@ -575,7 +567,7 @@ namespace vision {
 
                         // BR BL cross product gives the bottom side
                         auto bottom = convert<double, 3>(arma::normalise(arma::cross(cbr, cbl)));
-                        it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
+                        it->measurements.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
 
                         // Vector to the bottom centre average top and bottom distances
                         float distance_top = utility::math::vision::distanceToEquidistantCamPoints(
@@ -590,7 +582,7 @@ namespace vision {
                             convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE % covariance_amplifier));
 
                         if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
-                            it->measurement.push_back(
+                            it->measurements.push_back(
                                 Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
                         }
                     }
@@ -603,7 +595,7 @@ namespace vision {
 
                         // TL TR cross product gives the top side
                         auto top = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
-                        it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
+                        it->measurements.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                     }
                 }
 

@@ -1398,7 +1398,9 @@ namespace conversion {
 
         // Copy over
         Eigen::Map<DynamicMatProto<Proto>>(
-            const_cast<double*>(proto.mutable_v()->data()), matrix.rows(), matrix.cols()) = matrix;
+            const_cast<typename DynamicMatProto<Proto>::Scalar*>(proto.mutable_v()->data()),
+            matrix.rows(),
+            matrix.cols()) = matrix;
 
         return proto;
     }

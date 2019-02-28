@@ -39,6 +39,7 @@ namespace support {
     using message::input::Sensors;
     using message::support::FieldDescription;
     using message::vision::Goal;
+    using message::vision::Goals;
     using ServoID = utility::input::ServoID;
 
     using utility::math::geometry::Quad;
@@ -86,18 +87,19 @@ namespace support {
         team     = team_;
     }
 
-    Goal VirtualGoalPost::detect(const CameraParameters& camParams,
-                                 Transform2D& robotPose,
-                                 const Sensors& sensors,
-                                 arma::vec4& /*error*/,
-                                 const FieldDescription& field) {
-        Goal result;
+    Goals VirtualGoalPost::detect(const CameraParameters& camParams,
+                                  Transform2D& robotPose,
+                                  const Sensors& sensors,
+                                  arma::vec4& /*error*/,
+                                  const FieldDescription& field) {
+        Goals result;
+        result.goals.reserve(1);
 
         // t = torso; c = camera; g = ground; f = foot;
-        Transform3D Htc = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]);
+        Transform3D Htc = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::HEAD_PITCH]);
         // get the torso to foot transform
-        Transform3D Hgt  = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
-        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+        Transform3D Hgt  = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
 
         if (Hgt2(3, 2) < Hgt(3, 2)) {
             Hgt = Hgt2;
@@ -112,13 +114,13 @@ namespace support {
 
         arma::mat::fixed<3, 4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
-            result.measurement.push_back(
+            result.goals.at(0).measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, convert<double, 3>(goalNormals.col(0))));
-            result.measurement.push_back(
+            result.goals.at(0).measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert<double, 3>(goalNormals.col(1))));
-            result.measurement.push_back(
+            result.goals.at(0).measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, convert<double, 3>(goalNormals.col(2))));
-            result.measurement.push_back(
+            result.goals.at(0).measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, convert<double, 3>(goalNormals.col(3))));
 
             // build the predicted quad
@@ -139,7 +141,7 @@ namespace support {
                     && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < camParams.imageSizePixels[0]
                     && quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < camParams.imageSizePixels[0])) {
 
-                result.measurement.erase(result.measurement.begin() + 3);
+                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 3);
             }
             // goal top visibility check
             if (not(quad.getTopRight()[1] > 0 && quad.getTopRight()[1] < camParams.imageSizePixels[1]
@@ -147,7 +149,7 @@ namespace support {
                     && quad.getTopRight()[0] > 0 && quad.getTopRight()[0] < camParams.imageSizePixels[0]
                     && quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < camParams.imageSizePixels[0])) {
 
-                result.measurement.erase(result.measurement.begin() + 2);
+                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 2);
             }
             // goal sides visibility check
             if (not((
@@ -161,20 +163,20 @@ namespace support {
                            // the screen
                            (quad.getBottomRight()[1] < camParams.imageSizePixels[1] && quad.getTopRight()[1] > 0)
                            || (quad.getBottomLeft()[1] < camParams.imageSizePixels[1] && quad.getTopLeft()[1] > 0)))) {
-                result.measurement.erase(result.measurement.begin() + 1);
-                result.measurement.erase(result.measurement.begin());
+                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 1);
+                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin());
             }
-            if (!result.measurement.empty()) {
-                result.quad.tl = convert<double, 2>(quad.getTopLeft());
-                result.quad.tr = convert<double, 2>(quad.getTopRight());
-                result.quad.br = convert<double, 2>(quad.getBottomRight());
-                result.quad.bl = convert<double, 2>(quad.getBottomLeft());
+            if (!result.goals.at(0).measurements.empty()) {
+                result.goals.at(0).quad.tl = convert<double, 2>(quad.getTopLeft());
+                result.goals.at(0).quad.tr = convert<double, 2>(quad.getTopRight());
+                result.goals.at(0).quad.br = convert<double, 2>(quad.getBottomRight());
+                result.goals.at(0).quad.bl = convert<double, 2>(quad.getBottomLeft());
             }
         }
-        result.forwardKinematics = sensors.forwardKinematics;
-        result.timestamp         = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
-        result.side              = side;
-        result.team              = team;
+        result.forward_kinematics = sensors.forward_kinematics;
+        result.timestamp          = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
+        result.goals.at(0).side   = side;
+        result.goals.at(0).team   = team;
 
         // If no measurements are in the goal, then it was not observed
         return result;

@@ -410,9 +410,9 @@ namespace behaviour {
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
 
-            bool feetOffGround = !sensors.leftFootDown && !sensors.rightFootDown;
-            return false && feetOffGround && !isGettingUp && !isDiving && sensors.world(2, 2) < 0.92
-                   && sensors.world(2, 2) > 0.88;
+            bool feetOffGround = !sensors.left_foot_down && !sensors.right_foot_down;
+            return false && feetOffGround && !isGettingUp && !isDiving && sensors.Htw(2, 2) < 0.92
+                   && sensors.Htw(2, 2) > 0.88;
         }
 
         bool SoccerStrategy::penalised() {

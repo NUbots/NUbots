@@ -193,7 +193,7 @@ namespace behaviour {
                         return;
                     }
 
-                    Transform3D Htw = convert<double, 4, 4>(sensors.world);
+                    Transform3D Htw = convert<double, 4, 4>(sensors.Htw);
                     auto now        = NUClear::clock::now();
                     float timeSinceBallSeen =
                         std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()

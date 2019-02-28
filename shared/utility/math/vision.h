@@ -57,6 +57,9 @@ namespace math {
         inline arma::vec2 imageToScreen(const arma::ivec2& im, const arma::uvec2& imageSize) {
             return arma::vec2({double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5}) - im;
         }
+        inline arma::vec2 imageToScreen(const arma::fvec2& im, const arma::uvec2& imageSize) {
+            return arma::vec2({double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5}) - im;
+        }
         inline arma::vec2 imageToScreen(const arma::vec2& im, const arma::uvec2& imageSize) {
             return arma::vec2({double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5}) - im;
         }
@@ -145,6 +148,10 @@ namespace math {
         // END SWITCH METHODS
         /////////////////////
 
+
+        inline arma::vec3 getCamFromImage(const arma::fvec2& image, const message::input::CameraParameters& cam) {
+            return getCamFromScreen(imageToScreen(image, convert<uint, 2>(cam.imageSizePixels)), cam);
+        }
 
         inline arma::vec3 getCamFromImage(const arma::ivec2& image, const message::input::CameraParameters& cam) {
             return getCamFromScreen(imageToScreen(image, convert<uint, 2>(cam.imageSizePixels)), cam);
@@ -267,13 +274,13 @@ namespace math {
                    / divisor;
         }
 
-        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screenAngular) {
-            if (std::fmod(std::fabs(screenAngular[0]), M_PI) == M_PI_2
-                || std::fmod(std::fabs(screenAngular[1]), M_PI) == M_PI_2) {
+        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screen_angular) {
+            if (std::fmod(std::fabs(screen_angular[0]), M_PI) == M_PI_2
+                || std::fmod(std::fabs(screen_angular[1]), M_PI) == M_PI_2) {
                 return {0, 0, 0};
             }
-            double tanTheta        = std::tan(screenAngular[0]);
-            double tanPhi          = std::tan(screenAngular[1]);
+            double tanTheta        = std::tan(screen_angular[0]);
+            double tanPhi          = std::tan(screen_angular[1]);
             double x               = 0;
             double y               = 0;
             double z               = 0;

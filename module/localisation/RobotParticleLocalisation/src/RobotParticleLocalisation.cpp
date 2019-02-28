@@ -122,12 +122,12 @@ namespace localisation {
                         // Check side and team
                         std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
 
-                        for (auto& m : goal.measurement) {
+                        for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
                                 filter.ambiguousMeasurementUpdate(convert<double, 3>(m.position),
                                                                   convert<double, 3, 3>(m.covariance),
                                                                   poss,
-                                                                  convert<double, 4, 4>(goal.Hcw),
+                                                                  convert<double, 4, 4>(goals.Hcw),
                                                                   m.type,
                                                                   fd);
                             }
@@ -139,7 +139,7 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 Transform3D Hfw;
-                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                const Transform3D& Htw = convert<double, 4, 4>(sensors.Htw);
                 std::vector<arma::vec3> states;
                 std::vector<arma::mat33> cov;
 

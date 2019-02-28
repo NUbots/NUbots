@@ -106,10 +106,10 @@ namespace behaviour {
                     // Compute target in robot coords
                     // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
                     // TODO: The heading seems to judder here!!
-                    // TODO: use sensors.world instead
+                    // TODO: use sensors.Htw instead
                     Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
 
-                    Transform3D Htw         = convert<double, 4, 4>(sensors.world);
+                    Transform3D Htw         = convert<double, 4, 4>(sensors.Htw);
                     arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});
 
                     // Transform target from field to torso space

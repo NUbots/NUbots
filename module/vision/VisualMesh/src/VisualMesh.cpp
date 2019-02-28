@@ -124,30 +124,18 @@ namespace vision {
             msg->indices = std::move(results.global_indices);
 
             // Add our neighbourhood
-            msg->neighbourhood.reserve(results.neighbourhood.size());
-            for (const auto& n : results.neighbourhood) {
-                msg->neighbourhood.emplace_back(Eigen::Map<const Eigen::Matrix<int, 6, 1, Eigen::DontAlign>>(n.data()));
-            }
+            msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
+                reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
 
             // Add our classifications
-            // Add our first (the image) and last (the results) to our list
-            for (const auto& c : results.classifications) {
-                msg->classifications.emplace_back(c.first, c.second);
-            }
-
-
-            // -- Graphing for NUsight
-            msg->classifications.emplace_back(results.classifications.front().first,
-                                              results.classifications.front().second);
-            msg->classifications.emplace_back(results.classifications.back().first,
-                                              results.classifications.back().second);
+            std::vector<float> classifications = results.classifications.back().second;
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
+                reinterpret_cast<float*>(classifications.data()), classifications.size(), 2);
 
             // Add our coordinates
-            std::vector<std::array<float, 2>> pixel_coordinates = results.pixel_coordinates;
-            msg->coordinates.reserve(pixel_coordinates.size());
-            for (const auto& coord : pixel_coordinates) {
-                msg->coordinates.push_back({int(coord[0]), int(coord[1])});
-            }
+            std::vector<std::array<float, 2>> coordinates = results.pixel_coordinates;
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
+                reinterpret_cast<float*>(coordinates.data()), coordinates.size(), 2);
 
             if (draw_mesh) {
                 std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
@@ -162,9 +150,9 @@ namespace vision {
                     classification = results.classifications.back().second;
                 }
 
-                for (uint i = 0; i < msg->coordinates.size(); ++i) {
+                for (uint i = 0; i < msg->coordinates.rows(); ++i) {
 
-                    Eigen::Vector2i p1(msg->coordinates[i]);
+                    Eigen::Vector2f p1(msg->coordinates.row(i));
 
                     Eigen::Vector4d colour;
                     if (colour_type == 1) {
@@ -177,10 +165,10 @@ namespace vision {
                     }
 
                     for (const auto& n : results.neighbourhood[i]) {
-                        if (n < msg->coordinates.size()) {
-                            Eigen::Vector2i p2(msg->coordinates[n]);
-                            Eigen::Vector2i p2x = p1 + ((p2 - p1) / 2);
-                            lines.emplace_back(p1, p2x, colour);
+                        if (n < msg->coordinates.rows()) {
+                            Eigen::Vector2f p2(msg->coordinates.row(n));
+                            Eigen::Vector2f p2x = p1 + ((p2 - p1) / 2);
+                            lines.emplace_back(p1.cast<int>(), p2x.cast<int>(), colour);
                         }
                     }
                 }

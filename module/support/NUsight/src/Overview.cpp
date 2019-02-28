@@ -103,7 +103,7 @@ namespace support {
 
                     if (sensors) {
                         // Get our world transform
-                        Transform3D Htw(convert<double, 4, 4>(sensors->world));
+                        Transform3D Htw(convert<double, 4, 4>(sensors->Htw));
 
                         // If we have field information
                         if (field) {

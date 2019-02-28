@@ -53,16 +53,13 @@ namespace vision {
                     log("Ball measured pos (x,y,z):", measuredPos.t());
                     log("Ball detector error =     ", (measuredPos - ballCentre).t());
                     log("Ball norm error =         ", arma::norm(measuredPos - ballCentre));
-                    // for(const auto& edge_point : ball.edge_points){
-                    //     log("Edge point:", edge_point);
-                    // }
                 }
             }
         });
         on<Trigger<Goals>>().then([this](const Goals& goals) {
             log("Goals: ", goals.goals.size());
             for (auto& goal : goals.goals) {
-                for (auto& m : goal.measurement) {
+                for (auto& m : goal.measurements) {
                     if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
                     arma::vec3 measuredPos = convert<double, 3>(m.position);
                     log("Goal actual pos (x,y,z):  ", goal_position.t());

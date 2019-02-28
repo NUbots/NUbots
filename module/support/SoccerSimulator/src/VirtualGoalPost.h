@@ -50,11 +50,11 @@ namespace support {
         message::vision::Goal::Side side = message::vision::Goal::Side::UNKNOWN_SIDE;  // LEFT, RIGHT, or UNKNOWN
         message::vision::Goal::Team team = message::vision::Goal::Team::UNKNOWN_TEAM;  // OWN, OPPONENT, or UNKNOWN
 
-        message::vision::Goal detect(const message::input::CameraParameters& camParams,
-                                     utility::math::matrix::Transform2D& robotPose,
-                                     const message::input::Sensors& sensors,
-                                     arma::vec4& /*error*/,
-                                     const message::support::FieldDescription& field);
+        message::vision::Goals detect(const message::input::CameraParameters& camParams,
+                                      utility::math::matrix::Transform2D& robotPose,
+                                      const message::input::Sensors& sensors,
+                                      arma::vec4& /*error*/,
+                                      const message::support::FieldDescription& field);
     };
 }  // namespace support
 }  // namespace module

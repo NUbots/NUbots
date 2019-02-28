@@ -295,11 +295,17 @@ namespace support {
                               // Detect the goal:
                               auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error, *fd);
 
-                              if (!m.measurement.empty()) {
+                              // Copy across the important bits
+                              goals->camera_id          = m.camera_id;
+                              goals->timestamp          = m.timestamp;
+                              goals->Hcw                = m.Hcw;
+                              goals->forward_kinematics = m.forward_kinematics;
+
+                              if (!m.goals.at(0).measurements.empty()) {
                                   if (!cfg_.distinguish_own_and_opponent_goals) {
-                                      m.team = message::vision::Goal::Team::UNKNOWN_TEAM;
+                                      m.goals.at(0).team = message::vision::Goal::Team::UNKNOWN_TEAM;
                                   }
-                                  goals->goals.push_back(m);
+                                  goals->goals.push_back(m.goals.at(0));
                               }
                           }
 
@@ -321,20 +327,14 @@ namespace support {
 
 
                       if (cfg_.simulate_ball_observations) {
-                          auto ball_vec = std::make_unique<Balls>();
+                          // auto ball_vec = std::make_unique<Balls>();
                           if (cfg_.blind_robot) {
-                              emit(std::move(ball_vec));
+                              emit(std::make_unique<Balls>());
                               return;
                           }
 
-                          auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
-
-                          // If we have measurements
-                          if (!ball.edge_points.empty()) {
-                              ball_vec->balls.push_back(ball);
-                          }
-
-                          emit(std::move(ball_vec));
+                          emit(std::make_unique<Balls>(
+                              world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error)));
                       }
                       else {
                           // Emit current ball exactly
