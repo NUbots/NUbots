@@ -95,7 +95,12 @@ namespace support {
         result.goals.reserve(1);
 
         // t = torso; c = camera; g = ground; f = foot;
-        Transform3D Htc = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::HEAD_PITCH]);
+        Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+        result.Hcw              = Htc.inverse() * sensors.Htw;
+        result.timestamp        = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
+        result.goals.at(0).side = side;
+        result.goals.at(0).team = team;
+
         // get the torso to foot transform
         Transform3D Hgt  = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
         Transform3D Hgt2 = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
@@ -107,7 +112,7 @@ namespace support {
         Hgt.submat(0, 3, 1, 3) *= 0.0;
         Hgt.rotation() = Rotation3D::createRotationZ(-Rotation3D(Hgt.rotation()).yaw()) * Hgt.rotation();
         // create the camera to ground transform
-        Transform3D Hgc = Hgt * Htc;
+        Transform3D Hgc = Hgt * convert<double, 4, 4>(Htc.matrix());
 
         // push the new measurement types
 
@@ -168,10 +173,6 @@ namespace support {
                 result.goals.at(0).quad.bl = convert<double, 2>(quad.getBottomLeft());
             }
         }
-        result.forward_kinematics = sensors.forward_kinematics;
-        result.timestamp          = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
-        result.goals.at(0).side   = side;
-        result.goals.at(0).team   = team;
 
         // If no measurements are in the goal, then it was not observed
         return result;

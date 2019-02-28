@@ -65,6 +65,5 @@ message Goals {
     uint32                    camera_id = 1;
     google.protobuf.Timestamp timestamp = 2;
     mat4                      Hcw       = 3;
-    repeated mat4 forward_kinematics    = 4 [(array_size) = 20];
-    repeated Goal goals                 = 5;
+    repeated Goal goals                 = 4;
 }

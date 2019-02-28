@@ -284,9 +284,8 @@ namespace vision {
                 }
 
                 Eigen::Affine3d Htc(image.sensors->forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
-                balls->timestamp          = NUClear::clock::now();
-                balls->forward_kinematics = image.sensors->forward_kinematics;
-                balls->Hcw                = Htc.inverse() * image.sensors->Htw;
+                balls->timestamp = NUClear::clock::now();
+                balls->Hcw       = Htc.inverse() * image.sensors->Htw;
 
 
                 for (const auto& cluster : clusters) {

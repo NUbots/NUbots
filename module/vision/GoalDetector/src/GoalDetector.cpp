@@ -140,9 +140,8 @@ namespace vision {
                 auto goals = std::make_unique<Goals>();
 
                 Eigen::Affine3d Htc(image.sensors->forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
-                goals->timestamp          = NUClear::clock::now();
-                goals->forward_kinematics = image.sensors->forward_kinematics;
-                goals->Hcw                = Htc.inverse() * image.sensors->Htw;
+                goals->timestamp = NUClear::clock::now();
+                goals->Hcw       = Htc.inverse() * image.sensors->Htw;
 
                 // Get our goal segments
                 for (const auto& segment : image.horizontalSegments) {

@@ -291,10 +291,9 @@ namespace support {
                         auto m = g.detect(image, world.robotPose, sensors, cfg_.vision_error, *fd);
 
                         // Copy across the important bits
-                        goals->camera_id          = m.camera_id;
-                        goals->timestamp          = m.timestamp;
-                        goals->Hcw                = m.Hcw;
-                        goals->forward_kinematics = m.forward_kinematics;
+                        goals->camera_id = m.camera_id;
+                        goals->timestamp = m.timestamp;
+                        goals->Hcw       = m.Hcw;
 
                         if (!m.goals.at(0).measurements.empty()) {
                             if (!cfg_.distinguish_own_and_opponent_goals) {

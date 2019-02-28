@@ -63,6 +63,10 @@ namespace support {
         Balls result;
         result.balls.reserve(1);
 
+        Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+        result.Hcw       = Htc.inverse() * sensors.Htw;
+        result.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
+
         Transform3D Hcf = getFieldToCam(robotPose, convert<double, 4, 4>(sensors.Hgc));
         Transform3D Hfc = Hcf.i();
 
@@ -99,10 +103,7 @@ namespace support {
             result.balls.at(0).cone.gradient = std::tan(angle * 0.5);
 
             // Get our transform to world coordinates
-            const Transform3D& Htw = convert<double, 4, 4>(sensors.Htw);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::HEAD_PITCH]);
-            Transform3D Hcw        = Htc.i() * Htw;
-            Transform3D Hwc        = Hcw.i();
+            Transform3D Hwc = convert<double, 4, 4>((Htc.inverse() * sensors.Htw).inverse());
 
             arma::vec3 rBWw = Hwc.transformPoint(rBCc);
             // Attach the measurement to the object
@@ -143,9 +144,6 @@ namespace support {
             //         rEBc)));
             // }
         }
-
-        result.forward_kinematics = sensors.forward_kinematics;
-        result.timestamp          = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
 
 
         // If no measurements are in the Ball, then there it was not observed

@@ -220,27 +220,22 @@ namespace behaviour {
                         if (!lost) {
                             // We need to transform our view points to orientation space
                             if (ballMaxPriority) {
-                                headToBodyRotation =
-                                    Transform3D(convert<double, 4, 4>(
-                                                    ballFixationObjects.forward_kinematics[ServoID::HEAD_PITCH]))
-                                        .rotation();
+                                auto Htc           = sensors.Htw * ballFixationObjects.Hcw.inverse();
+                                headToBodyRotation = Transform3D(convert<double, 4, 4>(Htc)).rotation();
                                 orientation =
                                     Transform3D(convert<double, 4, 4>(ballFixationObjects.Hcw)).rotation().i();
                             }
                             else {
-                                headToBodyRotation =
-                                    Transform3D(convert<double, 4, 4>(
-                                                    goalFixationObjects.forward_kinematics[ServoID::HEAD_PITCH]))
-                                        .rotation();
+                                auto Htc           = sensors.Htw * goalFixationObjects.Hcw.inverse();
+                                headToBodyRotation = Transform3D(convert<double, 4, 4>(Htc)).rotation();
                                 orientation =
                                     Transform3D(convert<double, 4, 4>(goalFixationObjects.Hcw)).rotation().i();
                             }
                         }
                         else {
-                            headToBodyRotation =
-                                Transform3D(convert<double, 4, 4>(sensors.forward_kinematics[ServoID::HEAD_PITCH]))
-                                    .rotation();
-                            orientation = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation().i();
+                            auto Htc           = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+                            headToBodyRotation = Transform3D(convert<double, 4, 4>(Htc)).rotation();
+                            orientation        = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation().i();
                         }
                         Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
