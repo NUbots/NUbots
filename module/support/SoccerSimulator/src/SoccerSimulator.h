@@ -25,7 +25,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/motion/KickCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"

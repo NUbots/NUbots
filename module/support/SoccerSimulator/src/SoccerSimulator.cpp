@@ -24,9 +24,9 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
+#include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
@@ -46,9 +46,9 @@ namespace support {
 
     using extension::Configuration;
 
-    using message::input::CameraParameters;
     using message::input::GameEvents;
     using message::input::GameState;
+    using message::input::Image;
     using message::input::Sensors;
     using message::motion::KickCommand;
     using message::motion::KickFinished;
@@ -262,90 +262,85 @@ namespace support {
                   });
 
         // Simulate Vision
-        on<Every<30, Per<std::chrono::seconds>>,
-           With<Sensors>,
-           With<CameraParameters>,
-           Optional<With<FieldDescription>>,
-           Single>()
-            .then("Vision Simulation",
-                  [this](const Sensors& sensors,
-                         const CameraParameters& camParams,
-                         const std::shared_ptr<const FieldDescription> fd) {
-                      if (!fd) {
-                          NUClear::log<NUClear::ERROR>(
-                              __FILE__, __LINE__, "Field Description must be available for vision simulation!");
-                          powerplant.shutdown();
-                          return;
-                      }
+        // VirtualCamera is emitting images with lens parameters at 30 fps
+        on<Trigger<Image>, With<Sensors>, Optional<With<FieldDescription>>, Single>().then(
+            "Vision Simulation",
+            [this](const Image& image, const Sensors& sensors, const std::shared_ptr<const FieldDescription> fd) {
+                if (!fd) {
+                    NUClear::log<NUClear::ERROR>(
+                        __FILE__, __LINE__, "Field Description must be available for vision simulation!");
+                    powerplant.shutdown();
+                    return;
+                }
 
-                      if (goalPosts.size() == 0) {
-                          loadFieldDescription(fd);
-                      }
+                if (goalPosts.size() == 0) {
+                    loadFieldDescription(fd);
+                }
 
-                      if (cfg_.simulate_goal_observations) {
-                          auto goals = std::make_unique<Goals>();
-                          if (cfg_.blind_robot) {
-                              emit(std::move(goals));
-                              return;
-                          }
+                if (cfg_.simulate_goal_observations) {
+                    auto goals = std::make_unique<Goals>();
+                    if (cfg_.blind_robot) {
+                        emit(std::move(goals));
+                        return;
+                    }
 
 
-                          for (auto& g : goalPosts) {
+                    for (auto& g : goalPosts) {
 
-                              // Detect the goal:
-                              auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error, *fd);
+                        // Detect the goal:
+                        auto m = g.detect(image, world.robotPose, sensors, cfg_.vision_error, *fd);
 
-                              // Copy across the important bits
-                              goals->camera_id          = m.camera_id;
-                              goals->timestamp          = m.timestamp;
-                              goals->Hcw                = m.Hcw;
-                              goals->forward_kinematics = m.forward_kinematics;
+                        // Copy across the important bits
+                        goals->camera_id          = m.camera_id;
+                        goals->timestamp          = m.timestamp;
+                        goals->Hcw                = m.Hcw;
+                        goals->forward_kinematics = m.forward_kinematics;
 
-                              if (!m.goals.at(0).measurements.empty()) {
-                                  if (!cfg_.distinguish_own_and_opponent_goals) {
-                                      m.goals.at(0).team = message::vision::Goal::Team::UNKNOWN_TEAM;
-                                  }
-                                  goals->goals.push_back(m.goals.at(0));
-                              }
-                          }
+                        if (!m.goals.at(0).measurements.empty()) {
+                            if (!cfg_.distinguish_own_and_opponent_goals) {
+                                m.goals.at(0).team = message::vision::Goal::Team::UNKNOWN_TEAM;
+                            }
+                            goals->goals.push_back(m.goals.at(0));
+                        }
+                    }
 
-                          if (!cfg_.distinguish_left_and_right_goals) {
-                              setGoalLeftRightKnowledge(*goals);
-                          }
+                    if (!cfg_.distinguish_left_and_right_goals) {
+                        setGoalLeftRightKnowledge(*goals);
+                    }
 
-                          emit(std::move(goals));
-                      }
-                      else {
-                          // Emit current field exactly
-                          auto r = std::make_unique<std::vector<message::localisation::Field>>();
-                          r->push_back(message::localisation::Field());
-                          r->back().position =
-                              Eigen::Vector3d(world.robotPose.x(), world.robotPose.y(), world.robotPose.angle());
-                          r->back().covariance = Eigen::Matrix3d::Identity() * 0.00001;
-                          emit(std::move(r));
-                      }
+                    emit(std::move(goals));
+                }
+                else {
+                    // Emit current field exactly
+                    auto r = std::make_unique<std::vector<message::localisation::Field>>();
+                    r->push_back(message::localisation::Field());
+                    r->back().position =
+                        Eigen::Vector3d(world.robotPose.x(), world.robotPose.y(), world.robotPose.angle());
+                    r->back().covariance = Eigen::Matrix3d::Identity() * 0.00001;
+                    emit(std::move(r));
+                }
 
 
-                      if (cfg_.simulate_ball_observations) {
-                          // auto ball_vec = std::make_unique<Balls>();
-                          if (cfg_.blind_robot) {
-                              emit(std::make_unique<Balls>());
-                              return;
-                          }
+                if (cfg_.simulate_ball_observations) {
+                    // auto ball_vec = std::make_unique<Balls>();
+                    if (cfg_.blind_robot) {
+                        emit(std::make_unique<Balls>());
+                        return;
+                    }
 
-                          emit(std::make_unique<Balls>(
-                              world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error)));
-                      }
-                      else {
-                          // Emit current ball exactly
-                          auto b        = std::make_unique<message::localisation::Ball>();
-                          b->position   = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
-                          b->covariance = Eigen::Matrix2d::Identity() * 0.00001;
+                    emit(
+                        std::make_unique<Balls>(world.ball.detect(image, world.robotPose, sensors, cfg_.vision_error)));
+                }
+                else {
+                    // Emit current ball exactly
+                    auto b        = std::make_unique<message::localisation::Ball>();
+                    b->position   = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
+                    b->covariance = Eigen::Matrix2d::Identity() * 0.00001;
 
-                          emit(std::make_unique<std::vector<message::localisation::Ball>>(1, *b));
-                          emit(std::move(b));
-                      }
-                  });
+                    emit(std::make_unique<std::vector<message::localisation::Ball>>(1, *b));
+                    emit(std::move(b));
+                }
+            });
 
 
         // Emit exact position to NUsight

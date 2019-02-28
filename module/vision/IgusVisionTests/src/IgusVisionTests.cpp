@@ -11,7 +11,6 @@ namespace module {
 namespace vision {
 
     using extension::Configuration;
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::support::FieldDescription;
@@ -72,18 +71,16 @@ namespace vision {
 
 
         on<Every<30, Per<std::chrono::seconds>>,
-           With<CameraParameters>,
            Optional<With<Image>>,
            Optional<With<Sensors>>,
            With<FieldDescription>>()
-            .then([this](const CameraParameters& cam,
-                         std::shared_ptr<const Image> inputImage,
+            .then([this](std::shared_ptr<const Image> inputImage,
                          std::shared_ptr<const Sensors> inputSensors,
                          const FieldDescription& fd) {
                 image   = inputImage;
                 sensors = inputSensors;
                 if (image && sensors) {
-                    emitClassifiedImage(cam, fd);
+                    emitClassifiedImage(fd);
                 }
                 // arma::vec3 test_point_cam     = utility::math::vision::getCamFromScreen(test_point_screen, cam);
                 // arma::vec2 test_point_screen2 = utility::math::vision::projectCamSpaceToScreen(test_point_cam,
@@ -95,7 +92,7 @@ namespace vision {
             });
     }
 
-    void IgusVisionTests::emitClassifiedImage(const CameraParameters& cam, const FieldDescription& fd) {
+    void IgusVisionTests::emitClassifiedImage(const FieldDescription& fd) {
         // Basis of circle
         arma::vec3 p = ballCentre;
         arma::vec3 q = arma::normalise(arma::vec3({p[1], -p[0], 0}));
@@ -115,7 +112,7 @@ namespace vision {
             arma::vec3 P = p + radius * (q * cos(theta) + r * sin(theta));
             // Project to screen
             // const arma::fvec3& point, const Parameters& params = Parameters()
-            arma::vec2 pixel = utility::math::vision::projectCamSpaceToScreen(P, cam);
+            arma::vec2 pixel = utility::math::vision::projectCamSpaceToScreen(P, image->lens);
             // Screen point referenced from screen centre
             arma::vec2 screenPoint = arma::vec2({pixel[0], pixel[1]});
             // Convert to point referenced from top left
@@ -141,7 +138,7 @@ namespace vision {
         classifiedImage->image              = const_cast<Image*>(image.get())->shared_from_this();
         classifiedImage->sensors            = const_cast<Sensors*>(sensors.get())->shared_from_this();
         classifiedImage->horizon_normal     = convert<double, 3>(horizon_normal);
-        classifiedImage->horizontalSegments = getGoalSegments(cam, fd);
+        classifiedImage->horizontalSegments = getGoalSegments(fd);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
         classifiedImage->visualHorizon.push_back(
@@ -155,7 +152,6 @@ namespace vision {
 
 
     std::vector<message::vision::ClassifiedImage::Segment> IgusVisionTests::getGoalSegments(
-        const message::input::CameraParameters& cam,
         const message::support::FieldDescription& fd) {
         std::vector<message::vision::ClassifiedImage::Segment> segments;
 
@@ -173,13 +169,16 @@ namespace vision {
 
             segments.push_back(message::vision::ClassifiedImage::Segment());
             segments.back().segmentClass = message::vision::ClassifiedImage::SegmentClass::GOAL;
-            segments.back().start        = convert<int, 2>(getImageFromCam(left, cam));
-            segments.back().end          = convert<int, 2>(getImageFromCam(right, cam));
-            segments.back().midpoint     = convert<int, 2>(getImageFromCam(center, cam));
-            segments.back().next         = 0;
-            segments.back().previous     = 0;
-            segments.back().subsample    = 1;
-            segments.back().length       = arma::norm(left - right);
+            segments.back().start =
+                convert<int, 2>(getImageFromCam(left, convert<uint, 2>(image->dimensions), image->lens));
+            segments.back().end =
+                convert<int, 2>(getImageFromCam(right, convert<uint, 2>(image->dimensions), image->lens));
+            segments.back().midpoint =
+                convert<int, 2>(getImageFromCam(center, convert<uint, 2>(image->dimensions), image->lens));
+            segments.back().next      = 0;
+            segments.back().previous  = 0;
+            segments.back().subsample = 1;
+            segments.back().length    = arma::norm(left - right);
         }
         return segments;
     }

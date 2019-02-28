@@ -30,7 +30,7 @@
 namespace module {
 namespace support {
 
-    using message::input::CameraParameters;
+    using message::input::Image;
     using message::input::Sensors;
     using message::vision::Ball;
     using message::vision::Balls;
@@ -58,10 +58,7 @@ namespace support {
     // arma::vec2 position;
     float diameter;
 
-    Balls VirtualBall::detect(const CameraParameters& cam,
-                              Transform2D robotPose,
-                              const Sensors& sensors,
-                              arma::vec4 /*error*/) {
+    Balls VirtualBall::detect(const Image& image, Transform2D robotPose, const Sensors& sensors, arma::vec4 /*error*/) {
 
         Balls result;
         result.balls.reserve(1);
@@ -88,13 +85,14 @@ namespace support {
         double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
 
         // Project the centre to the screen and work out the radius as if it was in the centre
-        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam), convert<uint, 2>(cam.imageSizePixels));
+        arma::ivec2 centre =
+            screenToImage(projectCamSpaceToScreen(rBCc, image.lens), convert<uint, 2>(image.dimensions));
         // TODO actually project this
         // double radius = 100 * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
-        if (centre[0] > 0 && centre[0] < int(cam.imageSizePixels[0]) && centre[1] > 0
-            && centre[1] < int(cam.imageSizePixels[1])) {
+        if (centre[0] > 0 && centre[0] < int(image.dimensions[0]) && centre[1] > 0
+            && centre[1] < int(image.dimensions[1])) {
 
             // Set our circle parameters for simulating the ball
             result.balls.at(0).cone.axis     = convert<double, 3>(arma::normalise(rBCc));
