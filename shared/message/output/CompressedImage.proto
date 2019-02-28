@@ -19,12 +19,33 @@
 
 syntax = "proto3";
 
-package message.support.nusight;
+package message.output;
 
 import "google/protobuf/timestamp.proto";
+import "Matrix.proto";
+import "Vector.proto";
 
-message DataPoint {
-    string label = 1;
-    repeated float value = 2 [packed=true];
-    google.protobuf.Timestamp timestamp = 4;
+message CompressedImage {
+    message Lens {
+        enum Projection {
+            UNKNOWN     = 0;
+            RECTILINEAR = 1;
+            EQUIDISTANT = 2;
+            EQUISOLID   = 3;
+        }
+
+        Projection projection   = 1;
+        float      focal_length = 2;
+        float      fov          = 3;
+        fvec2      centre       = 4;
+    }
+
+    uint32                    format     = 1;
+    uvec2                     dimensions = 2;
+    bytes                     data       = 3;
+    uint32                    camera_id  = 4;
+    string                    name       = 5;
+    google.protobuf.Timestamp timestamp  = 6;
+    mat4                      Hcw        = 7;
+    Lens                      lens       = 8;
 }

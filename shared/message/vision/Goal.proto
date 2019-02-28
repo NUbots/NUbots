@@ -1,4 +1,3 @@
-
 /*
  * This file is part of the NUbots Codebase.
  *
@@ -52,27 +51,20 @@ message Goal {
         // Normal vectors point inwards towards the centre of the object
         vec3 position   = 2;
         mat3 covariance = 3;
-        // Normal vectors expressed in angles (first angle is around z axis, second is elevation)
-        vec2 normalAngles = 4;
-        mat2 normAngCov   = 5;
     }
-    uint32                    camera_id = 1;
-    google.protobuf.Timestamp timestamp = 2;
-    mat4                      Hcw       = 3;
-    Side                      side      = 4;
-    Team                      team      = 5;
-    Frustum                   frustum   = 6;
-    Quad                      quad      = 7;
-    repeated Measurement measurement    = 8;
-
-    // The angular position and size from the perspective of the camera
-    // Use these values to move the camera around to see this object
-    vec2 screenAngular = 9;
-    vec2 angularSize   = 10;
-
-    repeated mat4 forwardKinematics = 11 [(array_size) = 20];
+    Side     side                       = 1;
+    Team     team                       = 2;
+    Frustum  frustum                    = 3;
+    Quad     quad                       = 4;
+    repeated Measurement measurements   = 5;
+    vec2                 screen_angular = 6;
+    vec2                 angular_size   = 7;
 }
 
 message Goals {
-    repeated Goal goals = 1;
+    uint32                    camera_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    mat4                      Hcw       = 3;
+    repeated mat4 forward_kinematics    = 4 [(array_size) = 20];
+    repeated Goal goals                 = 5;
 }
