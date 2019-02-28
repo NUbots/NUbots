@@ -58,7 +58,6 @@ namespace behaviour {
         using message::input::Sensors;
         using message::motion::HeadCommand;
 
-        using message::input::CameraParameters;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
         using message::motion::KinematicsModel;

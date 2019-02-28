@@ -44,13 +44,14 @@ namespace vision {
                 : classifiedImage.visualHorizon.end() - 1;
 
         // Cast lines upward to find the goals starting at the lowest point of the visual horizon
-        for (int y = 0; y < maxVisualHorizon->y(); y += GOAL_LINE_SPACING) {
+        for (int y = 0; y < maxVisualHorizon->y(); y += (GOAL_LINE_SPACING * image.lens.focal_length)) {
 
             arma::ivec2 start = {0, y};
             arma::ivec2 end   = {int(image.dimensions[0] - 1), y};
 
             // Insert our segments
-            auto segments = classifier->classify(image, lut, start, end, GOAL_SUBSAMPLING);
+            auto segments = classifier->classify(
+                image, lut, start, end, std::max(1, int(image.lens.focal_length * GOAL_SUBSAMPLING)));
             insertSegments(classifiedImage, segments, false);
         }
     }

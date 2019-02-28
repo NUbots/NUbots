@@ -20,10 +20,7 @@
 #include "LUTClassifier.h"
 
 #include "utility/math/geometry/Line.h"
-
 #include "utility/math/vision.h"
-
-#include "message/input/CameraParameters.h"
 
 namespace module {
 namespace vision {
@@ -38,12 +35,7 @@ namespace vision {
     using utility::math::vision::projectWorldPointToScreen;
     using utility::math::vision::screenToImage;
 
-    using message::input::CameraParameters;
-
-    void LUTClassifier::findBall(const Image& image,
-                                 const LookUpTable& lut,
-                                 ClassifiedImage& classifiedImage,
-                                 const CameraParameters& cam) {
+    void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
         /*
             Here we cast lines to find balls.
@@ -73,8 +65,8 @@ namespace vision {
 
         // Get the positions of the top of our green horizion, and the bottom of the screen
         arma::mat44 Hgc     = convert<double, 4, 4>(classifiedImage.sensors->Hgc);
-        auto xb             = getGroundPointFromScreen({0, -double(image.dimensions[1] - 1) / 2}, Hgc, cam);
-        auto xt             = getGroundPointFromScreen(topY, Hgc, cam);
+        auto xb             = getGroundPointFromScreen({0, -double(image.dimensions[1] - 1) / 2}, Hgc, image.lens);
+        auto xt             = getGroundPointFromScreen(topY, Hgc, image.lens);
         double dx           = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
         double cameraHeight = Hgc(2, 3);
 
@@ -100,14 +92,14 @@ namespace vision {
         // Do our inital calculation to get our first Y
         arma::vec4 worldPosition = arma::ones(4);
         worldPosition.rows(0, 2) = xStart * direction;
-        auto camPoint            = projectWorldPointToScreen(worldPosition, Hgc, cam);
+        auto camPoint            = projectWorldPointToScreen(worldPosition, Hgc, image.lens);
         int y                    = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
         for (double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
             // Calculate our next Y
             worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
-            camPoint                 = projectWorldPointToScreen(worldPosition, Hgc, cam);
+            camPoint                 = projectWorldPointToScreen(worldPosition, Hgc, image.lens);
             int nextY                = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
             // Work out our details

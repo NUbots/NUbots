@@ -12,7 +12,6 @@ namespace input {
     uint Camera::cameraCount = 0;
 
     using extension::Configuration;
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
@@ -93,6 +92,7 @@ namespace input {
                 msg->camera_id  = i.camera_id;
                 msg->name       = i.serial_number;
                 msg->timestamp  = i.timestamp;
+                msg->lens       = i.lens;
 
                 // Calculate our transform if we have information
                 if (sensors && model) {

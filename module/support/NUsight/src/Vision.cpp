@@ -35,7 +35,6 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::vision::Balls;
     using message::vision::ClassifiedImage;
@@ -45,11 +44,6 @@ namespace support {
     using message::vision::Obstacles;
 
     void NUsight::provideVision() {
-        handles["camera_parameters"].push_back(on<Every<1, Per<std::chrono::seconds>>, With<CameraParameters>>().then(
-            [this](std::shared_ptr<const CameraParameters> cameraParameters) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(cameraParameters), "nusight", false);
-            }));
-
         handles["image"].push_back(
             on<Trigger<Image>, Single, Priority::LOW>().then([this](std::shared_ptr<const Image> image) {
                 if (NUClear::clock::now() - last_image < max_image_duration) {

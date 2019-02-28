@@ -22,7 +22,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/support/SaveConfiguration.h"
 #include "message/vision/LookUpTable.h"
 
@@ -36,7 +35,6 @@ namespace vision {
 
     using extension::Configuration;
 
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::support::SaveConfiguration;
@@ -143,80 +141,83 @@ namespace vision {
         });
 
         // Trigger the same function when either update
-        on<Configuration, Trigger<CameraParameters>>("LUTClassifier.yaml")
-            .then([this](const Configuration& config, const CameraParameters& cam) {
-                // Visual horizon detector
-                if (cam.lens == CameraParameters::LensType::PINHOLE) {
-                    VISUAL_HORIZON_SPACING =
-                        cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
-                    VISUAL_HORIZON_BUFFER =
-                        cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
-                    VISUAL_HORIZON_SUBSAMPLING = std::max(
-                        1,
-                        int(cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
-                    VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE =
-                        cam.pinhole.focalLengthPixels
-                        * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
-                    GOAL_LINE_SPACING = cam.pinhole.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
-                    GOAL_SUBSAMPLING  = std::max(
-                        1, int(cam.pinhole.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
-                    GOAL_MINIMUM_RANSAC_SEGMENT_SIZE =
-                        std::max(1,
-                                 int(cam.pinhole.focalLengthPixels
-                                     * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
-                }
-                else if (cam.lens == CameraParameters::LensType::RADIAL) {
-                    VISUAL_HORIZON_SPACING =
-                        config["visual_horizon"]["spacing"].as<double>() / cam.radial.radiansPerPixel;
-                    VISUAL_HORIZON_BUFFER =
-                        config["visual_horizon"]["horizon_buffer"].as<double>() / cam.radial.radiansPerPixel;
-                    VISUAL_HORIZON_SUBSAMPLING = std::max(
-                        1, int(config["visual_horizon"]["subsampling"].as<double>() / cam.radial.radiansPerPixel));
-                    VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE =
-                        config["visual_horizon"]["minimum_segment_size"].as<double>() / cam.radial.radiansPerPixel;
-                    GOAL_LINE_SPACING = config["goals"]["spacing"].as<double>() / cam.radial.radiansPerPixel;
-                    GOAL_SUBSAMPLING =
-                        std::max(1, int(config["goals"]["subsampling"].as<double>() / cam.radial.radiansPerPixel));
-                    GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(
-                        1,
-                        int(config["goals"]["minimum_ransac_segment_size"].as<double>() / cam.radial.radiansPerPixel));
-                }
+        on<Configuration>("LUTClassifier.yaml").then([this](const Configuration& config) {
+            // Visual horizon detector
+            // if (cam.lens == CameraParameters::LensType::PINHOLE) {
+            //     VISUAL_HORIZON_SPACING =
+            //         cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
+            //     VISUAL_HORIZON_BUFFER =
+            //         cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+            //     VISUAL_HORIZON_SUBSAMPLING = std::max(
+            //         1,
+            //         int(cam.pinhole.focalLengthPixels *
+            //         tan(config["visual_horizon"]["subsampling"].as<double>())));
+            //     VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE =
+            //         cam.pinhole.focalLengthPixels
+            //         * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
+            //     GOAL_LINE_SPACING = cam.pinhole.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
+            //     GOAL_SUBSAMPLING  = std::max(
+            //         1, int(cam.pinhole.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
+            //     GOAL_MINIMUM_RANSAC_SEGMENT_SIZE =
+            //         std::max(1,
+            //                  int(cam.pinhole.focalLengthPixels
+            //                      * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
+            // }
+            // else if (cam.lens == CameraParameters::LensType::RADIAL) {
+            //     VISUAL_HORIZON_SPACING =
+            //         config["visual_horizon"]["spacing"].as<double>() / cam.radial.radiansPerPixel;
+            //     VISUAL_HORIZON_BUFFER =
+            //         config["visual_horizon"]["horizon_buffer"].as<double>() / cam.radial.radiansPerPixel;
+            //     VISUAL_HORIZON_SUBSAMPLING = std::max(
+            //         1, int(config["visual_horizon"]["subsampling"].as<double>() / cam.radial.radiansPerPixel));
+            //     VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE =
+            //         config["visual_horizon"]["minimum_segment_size"].as<double>() / cam.radial.radiansPerPixel;
+            //     GOAL_LINE_SPACING = config["goals"]["spacing"].as<double>() / cam.radial.radiansPerPixel;
+            //     GOAL_SUBSAMPLING =
+            //         std::max(1, int(config["goals"]["subsampling"].as<double>() / cam.radial.radiansPerPixel));
+            //     GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(
+            //         1,
+            //         int(config["goals"]["minimum_ransac_segment_size"].as<double>() /
+            //         cam.radial.radiansPerPixel));
+            // }
 
-                // Goal detector
-                GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS =
-                    config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
-                GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING =
-                    config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
-                GOAL_RANSAC_MAXIMUM_FITTED_MODELS = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
-                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD =
-                    config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
+            VISUAL_HORIZON_SPACING              = config["visual_horizon"]["spacing"].as<double>();
+            VISUAL_HORIZON_BUFFER               = config["visual_horizon"]["horizon_buffer"].as<double>();
+            VISUAL_HORIZON_SUBSAMPLING          = int(config["visual_horizon"]["subsampling"].as<double>());
+            VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = config["visual_horizon"]["minimum_segment_size"].as<double>();
+            GOAL_LINE_SPACING                   = config["goals"]["spacing"].as<double>();
+            GOAL_SUBSAMPLING                    = int(config["goals"]["subsampling"].as<double>());
+            GOAL_MINIMUM_RANSAC_SEGMENT_SIZE    = int(config["goals"]["minimum_ransac_segment_size"].as<double>());
 
-                GOAL_MAX_HORIZON_ANGLE = std::cos(config["goals"]["max_horizon_angle"].as<Expression>());
-                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD =
-                    config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
-                GOAL_LINE_DENSITY               = config["goals"]["line_density"].as<int>();
-                GOAL_HORIZONTAL_EXTENSION_SCALE = config["goals"]["horizontal_extension_scale"].as<double>();
-                GOAL_VERTICAL_EXTENSION_SCALE   = config["goals"]["vertical_extension_scale"].as<double>();
-                GOAL_WIDTH_HEIGHT_RATIO         = config["goals"]["width_height_ratio"].as<double>();
-                GOAL_LINE_INTERSECTIONS         = config["goals"]["line_intersections"].as<uint>();
+            // Goal detector
+            GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS =
+                config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
+            GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING =
+                config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+            GOAL_RANSAC_MAXIMUM_FITTED_MODELS     = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
+            GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
 
-                // Ball Detector
-                BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
-                BALL_MINIMUM_INTERSECTIONS_FINE   = config["ball"]["intersections_fine"].as<double>();
-                BALL_SEARCH_CIRCLE_SCALE          = config["ball"]["search_circle_scale"].as<double>();
-                BALL_HORIZONTAL_SUBSAMPLE_FACTOR  = config["ball"]["horizontal_subsample_factor"].as<double>();
+            GOAL_MAX_HORIZON_ANGLE                = std::cos(config["goals"]["max_horizon_angle"].as<Expression>());
+            GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
+            GOAL_LINE_DENSITY                     = config["goals"]["line_density"].as<int>();
+            GOAL_HORIZONTAL_EXTENSION_SCALE       = config["goals"]["horizontal_extension_scale"].as<double>();
+            GOAL_VERTICAL_EXTENSION_SCALE         = config["goals"]["vertical_extension_scale"].as<double>();
+            GOAL_WIDTH_HEIGHT_RATIO               = config["goals"]["width_height_ratio"].as<double>();
+            GOAL_LINE_INTERSECTIONS               = config["goals"]["line_intersections"].as<uint>();
 
-                MAXIMUM_LIGHTNING_BOLT_LENGTH   = config["ball"]["maximum_lighting_bolt_length"].as<int>();
-                MINIMUM_LIGHTNING_BOLT_STRENGTH = config["ball"]["minimum_lighting_bolt_strength"].as<double>();
-                DRAW_LIGHTNING                  = config["ball"]["draw_lightning"];
+            // Ball Detector
+            BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
+            BALL_MINIMUM_INTERSECTIONS_FINE   = config["ball"]["intersections_fine"].as<double>();
+            BALL_SEARCH_CIRCLE_SCALE          = config["ball"]["search_circle_scale"].as<double>();
+            BALL_HORIZONTAL_SUBSAMPLE_FACTOR  = config["ball"]["horizontal_subsample_factor"].as<double>();
 
-                // Camera settings
-                FOCAL_LENGTH_PIXELS = cam.pinhole.focalLengthPixels;
-            });
+            MAXIMUM_LIGHTNING_BOLT_LENGTH   = config["ball"]["maximum_lighting_bolt_length"].as<int>();
+            MINIMUM_LIGHTNING_BOLT_STRENGTH = config["ball"]["minimum_lighting_bolt_strength"].as<double>();
+            DRAW_LIGHTNING                  = config["ball"]["draw_lightning"];
+        });
 
-        on<Trigger<Image>, With<LookUpTable>, With<Sensors>, With<CameraParameters>, Single, Priority::LOW>().then(
-            "Classify Image",
-            [this](const Image& rawImage, const LookUpTable& lut, const Sensors& sensors, const CameraParameters& cam) {
+        on<Trigger<Image>, With<LookUpTable>, With<Sensors>, Single, Priority::LOW>().then(
+            "Classify Image", [this](const Image& rawImage, const LookUpTable& lut, const Sensors& sensors) {
                 // TODO
                 // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) +
                 // std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
@@ -224,17 +225,16 @@ namespace vision {
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage>();
 
+                classifiedImage->lens = rawImage.lens;
 
                 // Set our width and height
                 classifiedImage->dimensions = rawImage.dimensions;
-
 
                 // Attach our sensors
                 // std::cout << "sensor-vision latency = " <<
                 // std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() -
                 // sensors->timestamp).count() << std::endl;
                 classifiedImage->sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
-
 
                 // Attach the image
                 classifiedImage->image = const_cast<Image*>(&rawImage)->shared_from_this();
@@ -243,19 +243,19 @@ namespace vision {
                 findHorizon(rawImage, lut, *classifiedImage);
 
                 // Find our visual horizon
-                findVisualHorizon(rawImage, lut, *classifiedImage, cam);
+                findVisualHorizon(rawImage, lut, *classifiedImage);
 
                 // Find our goals
                 findGoals(rawImage, lut, *classifiedImage);
 
                 // Enhance our goals
-                enhanceGoals(rawImage, lut, *classifiedImage, cam);
+                enhanceGoals(rawImage, lut, *classifiedImage);
 
                 // Find our ball (also helps with the bottom of goals)
-                // findBall(rawImage, lut, *classifiedImage, cam);
+                // findBall(rawImage, lut, *classifiedImage);
 
                 // // Enhance our ball
-                // enhanceBall(rawImage, lut, *classifiedImage, cam);
+                // enhanceBall(rawImage, lut, *classifiedImage);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));

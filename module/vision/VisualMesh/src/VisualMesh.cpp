@@ -6,7 +6,6 @@
 
 #include "mesh/Sphere.hpp"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
@@ -20,7 +19,6 @@ namespace vision {
 
     using extension::Configuration;
 
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::support::FieldDescription;
@@ -70,20 +68,20 @@ namespace vision {
             log("Finished loading visual mesh");
         });
 
-        // TODO: Recreate mesh when network configuration changes
-        on<Startup, With<FieldDescription>, With<CameraParameters>>().then([this](const FieldDescription& field,
-                                                                                  const CameraParameters& cam) {
-            mesh_ptr = std::make_unique<mesh::VisualMesh<float>>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
-                                                                 0.5,
-                                                                 1.0,
-                                                                 50,
-                                                                 cam.FOV.maxCoeff() / cam.imageSizePixels.maxCoeff());
-            // Make the classifier
-            classifier = mesh_ptr->make_classifier(network);
-        });
+        on<Trigger<Image>, With<FieldDescription>, Buffer<4>>().then([this](const Image& img,
+                                                                            const FieldDescription& field) {
+            // TODO: Recreate mesh when network configuration changes
+            if (!mesh_ptr) {
+                mesh_ptr =
+                    std::make_unique<mesh::VisualMesh<float>>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
+                                                              0.5,
+                                                              1.0,
+                                                              50,
+                                                              img.lens.fov.maxCoeff() / img.dimensions.maxCoeff());
+                // Make the classifier
+                classifier = mesh_ptr->make_classifier(network);
+            }
 
-        on<Trigger<Image>, With<CameraParameters>, Buffer<4>>().then([this](const Image& img,
-                                                                            const CameraParameters& cam) {
             // Get our camera to world matrix
             Eigen::Affine3f Hcw(img.Hcw.cast<float>());
 
@@ -92,18 +90,22 @@ namespace vision {
             Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
             mesh::VisualMesh<float>::Lens lens;
-            switch (cam.lens.value) {
-                case CameraParameters::LensType::RADIAL:
-                    lens.projection   = mesh::VisualMesh<float>::Lens::EQUIDISTANT;
-                    lens.focal_length = 1.0 / cam.radial.radiansPerPixel;
+
+            switch (img.lens.projection.value) {
+                case Image::Lens::Projection::RECTILINEAR:
+                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::RECTILINEAR;
                     break;
-                case CameraParameters::LensType::PINHOLE:
-                    lens.projection   = mesh::VisualMesh<float>::Lens::RECTILINEAR;
-                    lens.focal_length = cam.pinhole.focalLengthPixels;
+                case Image::Lens::Projection::EQUIDISTANT:
+                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::EQUIDISTANT;
                     break;
+                case Image::Lens::Projection::EQUISOLID:
+                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::EQUISOLID;
+                    break;
+                default: log<NUClear::WARN>("Unknown lens projection."); return;
             }
-            lens.dimensions = {{int(img.dimensions[0]), int(img.dimensions[1])}};
-            lens.fov        = cam.FOV.x();
+            lens.dimensions   = std::array<int, 2>{img.dimensions.x(), img.dimensions.y()};
+            lens.fov          = img.lens.fov.maxCoeff();
+            lens.focal_length = img.lens.focal_length;
 
             auto results = classifier(img.data.data(), mesh::VisualMesh<float>::FOURCC(img.format), Hoc, lens);
 

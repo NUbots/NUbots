@@ -23,7 +23,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
 //#include "message/localisation/ResetRobotHypotheses.h"
 #include "message/platform/darwin/DarwinSensors.h"
@@ -44,7 +43,6 @@ namespace platform {
 
         using extension::Configuration;
 
-        using message::input::CameraParameters;
         using message::input::Sensors;
         using message::motion::BodySide;
         using message::platform::darwin::ButtonLeftDown;

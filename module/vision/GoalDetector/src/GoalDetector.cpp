@@ -25,7 +25,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/Goal.h"
@@ -50,7 +49,6 @@ namespace vision {
 
     using extension::Configuration;
 
-    using message::input::CameraParameters;
     using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
@@ -97,49 +95,43 @@ namespace vision {
 
 
         // Trigger the same function when either update
-        on<Configuration, Trigger<CameraParameters>>("GoalDetector.yaml")
-            .then([this](const Configuration& config, const CameraParameters& cam) {
-                MINIMUM_POINTS_FOR_CONSENSUS   = config["ransac"]["minimum_points_for_consensus"].as<uint>();
-                CONSENSUS_ERROR_THRESHOLD      = config["ransac"]["consensus_error_threshold"].as<double>();
-                MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
-                MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<uint>();
+        on<Configuration>("GoalDetector.yaml").then([this](const Configuration& config) {
+            MINIMUM_POINTS_FOR_CONSENSUS   = config["ransac"]["minimum_points_for_consensus"].as<uint>();
+            CONSENSUS_ERROR_THRESHOLD      = config["ransac"]["consensus_error_threshold"].as<double>();
+            MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+            MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<uint>();
 
-                MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
-                MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
+            MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
+            MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
 
-                arma::vec3 horizon_buffer_height = {1, 0, tan(config["visual_horizon_buffer"].as<double>())};
-                // Max of 1 and y coordinate of cam space projection
-                VISUAL_HORIZON_BUFFER = std::max(1, int(projectCamSpaceToScreen(horizon_buffer_height, cam)[1]));
-                MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE =
-                    std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
+            VISUAL_HORIZON_BUFFER             = std::tan(config["visual_horizon_buffer"].as<double>());
+            MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE = std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
 
-                MAXIMUM_ANGLE_BETWEEN_SIDES = std::cos(config["maximum_angle_between_sides"].as<double>());
-                MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE =
-                    std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
+            MAXIMUM_ANGLE_BETWEEN_SIDES = std::cos(config["maximum_angle_between_sides"].as<double>());
+            MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE =
+                std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
 
-                MEASUREMENT_LIMITS_LEFT  = config["measurement_limits"]["left"].as<uint>();
-                MEASUREMENT_LIMITS_RIGHT = config["measurement_limits"]["right"].as<uint>();
-                MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
-                MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
+            MEASUREMENT_LIMITS_LEFT  = config["measurement_limits"]["left"].as<uint>();
+            MEASUREMENT_LIMITS_RIGHT = config["measurement_limits"]["right"].as<uint>();
+            MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
+            MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
 
-                ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL =
-                    config["angular_width_disagreement_threshold_vertical"].as<double>();
-                ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL =
-                    config["angular_width_disagreement_threshold_horizontal"].as<double>();
+            ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_VERTICAL =
+                config["angular_width_disagreement_threshold_vertical"].as<double>();
+            ANGULAR_WIDTH_DISAGREEMENT_THRESHOLD_HORIZONTAL =
+                config["angular_width_disagreement_threshold_horizontal"].as<double>();
 
-                VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
-                ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
+            VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
+            ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
 
-                DEBUG_GOAL_THROWOUTS = config["debug_goal_throwouts"].as<bool>();
-                DEBUG_GOAL_RANSAC    = config["debug_goal_ransac"].as<bool>();
-            });
+            DEBUG_GOAL_THROWOUTS = config["debug_goal_throwouts"].as<bool>();
+            DEBUG_GOAL_RANSAC    = config["debug_goal_ransac"].as<bool>();
+        });
 
-        on<Trigger<ClassifiedImage>, With<CameraParameters>, With<LookUpTable>, With<FieldDescription>, Single>().then(
+        on<Trigger<ClassifiedImage>, With<LookUpTable>, With<FieldDescription>, Single>().then(
             "Goal Detector",
-            [this](std::shared_ptr<const ClassifiedImage> rawImage,
-                   const CameraParameters& cam,
-                   const LookUpTable& lut,
-                   const FieldDescription& fd) {
+            [this](
+                std::shared_ptr<const ClassifiedImage> rawImage, const LookUpTable& lut, const FieldDescription& fd) {
                 if (DEBUG_GOAL_RANSAC) log("Detecting goals");
 
                 const auto& image = *rawImage;
@@ -161,11 +153,11 @@ namespace vision {
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
                         && (segment.previous > -1) && (segment.next > -1)) {
                         segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
-                                                                           convert<uint, 2>(cam.imageSizePixels)),
-                                                             cam),
+                                                                           convert<uint, 2>(image.dimensions)),
+                                                             image.lens),
                                             getCamFromScreen(imageToScreen(convert<int, 2>(segment.end),
-                                                                           convert<uint, 2>(cam.imageSizePixels)),
-                                                             cam)});
+                                                                           convert<uint, 2>(image.dimensions)),
+                                                             image.lens)});
                     }
                 }
                 // Is the midpoint above or below the horizon?
@@ -215,13 +207,19 @@ namespace vision {
                             arma::vec3 debugLeftPt1 = debugLeftt * alpha + (1 - alpha) * debugLeftb;
                             arma::vec3 debugLeftPt2 = debugLeftt * alphaNext + (1 - alphaNext) * debugLeftb;
 
-                            debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugRightPt1, cam)),
-                                                            convert<int, 2>(getImageFromCam(debugRightPt2, cam)),
-                                                            Eigen::Vector4d(1, 0, 0, 1)));
+                            debug.push_back(std::make_tuple(
+                                convert<int, 2>(
+                                    getImageFromCam(debugRightPt1, convert<uint, 2>(image.dimensions), image.lens)),
+                                convert<int, 2>(
+                                    getImageFromCam(debugRightPt2, convert<uint, 2>(image.dimensions), image.lens)),
+                                Eigen::Vector4d(1, 0, 0, 1)));
 
-                            debug.push_back(std::make_tuple(convert<int, 2>(getImageFromCam(debugLeftPt1, cam)),
-                                                            convert<int, 2>(getImageFromCam(debugLeftPt2, cam)),
-                                                            Eigen::Vector4d(0, 0, 1, 1)));
+                            debug.push_back(std::make_tuple(
+                                convert<int, 2>(
+                                    getImageFromCam(debugLeftPt1, convert<uint, 2>(image.dimensions), image.lens)),
+                                convert<int, 2>(
+                                    getImageFromCam(debugLeftPt2, convert<uint, 2>(image.dimensions), image.lens)),
+                                Eigen::Vector4d(0, 0, 1, 1)));
                         }
                     }
 
@@ -260,7 +258,7 @@ namespace vision {
                     arma::vec3 basePoint({1, 0, 0});
                     int notWhiteLen        = 0;
                     arma::vec3 point       = arma::normalise(mid.orthogonalProjection(midpoint));
-                    arma::ivec2 imagePoint = getImageFromCam(point, cam);
+                    arma::ivec2 imagePoint = getImageFromCam(point, convert<uint, 2>(image.dimensions), image.lens);
                     float color_intensity  = 0;
                     while ((imagePoint[0] < int(image.dimensions[0])) && (imagePoint[0] > 0)
                            && (imagePoint[1] < int(image.dimensions[1]))) {
@@ -295,7 +293,7 @@ namespace vision {
                             color_intensity = std::fmin(1, color_intensity + 0.5);
                         }
                         point += direction;
-                        imagePoint = getImageFromCam(point, cam);
+                        imagePoint = getImageFromCam(point, convert<uint, 2>(image.dimensions), image.lens);
                     }
 
 
@@ -350,10 +348,14 @@ namespace vision {
                     goal.frustum.br = convert<double, 3>(br);
 
                     // In image coords
-                    goal.quad.bl = convert<double, 2>(getImageFromCamCts(bl, cam));
-                    goal.quad.tl = convert<double, 2>(getImageFromCamCts(tl, cam));
-                    goal.quad.tr = convert<double, 2>(getImageFromCamCts(tr, cam));
-                    goal.quad.br = convert<double, 2>(getImageFromCamCts(br, cam));
+                    goal.quad.bl =
+                        convert<double, 2>(getImageFromCamCts(bl, convert<uint, 2>(image.dimensions), image.lens));
+                    goal.quad.tl =
+                        convert<double, 2>(getImageFromCamCts(tl, convert<uint, 2>(image.dimensions), image.lens));
+                    goal.quad.tr =
+                        convert<double, 2>(getImageFromCamCts(tr, convert<uint, 2>(image.dimensions), image.lens));
+                    goal.quad.br =
+                        convert<double, 2>(getImageFromCamCts(br, convert<uint, 2>(image.dimensions), image.lens));
 
                     goals->goals.push_back(std::move(goal));
                 }
@@ -361,6 +363,9 @@ namespace vision {
                     emit(drawVisionLines(debug));
                 }
 
+                // Max of 1 and y coordinate of cam space projection
+                VISUAL_HORIZON_BUFFER = projectCamSpaceToScreen(
+                    {1, 0, std::max(1, int(image.lens.focal_length * VISUAL_HORIZON_BUFFER))}, image.lens)[1];
 
                 // Throwout invalid quads
                 for (auto it = goals->goals.begin(); it != goals->goals.end();) {
@@ -560,9 +565,9 @@ namespace vision {
                     // Check that the bottom of the goal is not too close to the edges of the screen
                     if (std::min(quad.getBottomRight()[0], quad.getBottomLeft()[0]) > MEASUREMENT_LIMITS_LEFT
                         && std::min(quad.getBottomRight()[1], quad.getBottomLeft()[1]) > MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[0] - std::max(quad.getBottomRight()[0], quad.getBottomLeft()[0])
+                        && image.dimensions[0] - std::max(quad.getBottomRight()[0], quad.getBottomLeft()[0])
                                > MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[1] - std::max(quad.getBottomRight()[1], quad.getBottomLeft()[1])
+                        && image.dimensions[1] - std::max(quad.getBottomRight()[1], quad.getBottomLeft()[1])
                                > MEASUREMENT_LIMITS_BASE) {
 
                         // BR BL cross product gives the bottom side
@@ -590,8 +595,8 @@ namespace vision {
                     // Check that the points are not too close to the edges of the screen
                     if (std::min(ctr[0], ctl[0]) > MEASUREMENT_LIMITS_LEFT
                         && std::min(ctr[1], ctl[1]) > MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[0] - std::max(ctr[0], ctl[0]) < MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[1] - std::max(ctr[1], ctl[1]) < MEASUREMENT_LIMITS_BASE) {
+                        && image.dimensions[0] - std::max(ctr[0], ctl[0]) < MEASUREMENT_LIMITS_TOP
+                        && image.dimensions[1] - std::max(ctr[1], ctl[1]) < MEASUREMENT_LIMITS_BASE) {
 
                         // TL TR cross product gives the top side
                         auto top = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
