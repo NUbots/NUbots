@@ -1,3 +1,5 @@
+import { Texture } from 'three'
+import { OrthographicCamera } from 'three'
 import { PixelFormat } from 'three'
 import { PerspectiveCamera } from 'three'
 import { Scene } from 'three'
@@ -68,6 +70,29 @@ export const perspectiveCamera = createUpdatableComputed(
   },
 )
 
+type OrthographicCameraOpts = {
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+  near: number,
+  far: number
+}
+
+export const orthographicCamera = createUpdatableComputed(
+  (opts: OrthographicCameraOpts & Object3DOpts) => new OrthographicCamera(opts.left, opts.right, opts.top, opts.bottom),
+  (camera, opts) => {
+    camera.left = opts.left
+    camera.right = opts.right
+    camera.top = opts.top
+    camera.bottom = opts.bottom
+    camera.near = opts.near
+    camera.far = opts.far
+    camera.updateProjectionMatrix()
+    updateObject3D(camera, opts)
+  },
+)
+
 type MeshOpts = {
   geometry: Geometry,
   material: Material | Material[]
@@ -90,6 +115,7 @@ export const meshBasicMaterial = createUpdatableComputed(
   (opts: MeshBasicMaterialOpts) => new MeshBasicMaterial(),
   (mesh, opts) => {
     mesh.color = opts.color
+    mesh.needsUpdate = true
   },
   mesh => mesh.dispose(),
 )
@@ -165,6 +191,40 @@ export const dataTexture = createUpdatableComputed(
     texture.needsUpdate = true
   },
   texture => texture.dispose(),
+)
+
+type ImageTextureOpts = {
+  image?: HTMLImageElement
+  format: PixelFormat,
+  type: TextureDataType,
+  mapping: Mapping,
+  wrapS: Wrapping,
+  wrapT: Wrapping,
+  magFilter: TextureFilter,
+  minFilter: TextureFilter,
+  flipY: boolean
+}
+
+export const imageTexture = createUpdatableComputed(
+  // Unlike other builders in this file, `image` is optional.
+  // This is because images need to be loaded, so it is often the case the data will not exist immediately.
+  // Making it optional turns out to be very convenient as uniform values (such as textures) can be set asynchronously.
+  (opts: ImageTextureOpts) => opts.image && new Texture(),
+  (texture, opts) => {
+    if (texture) {
+      texture.image = opts.image
+      texture.format = opts.format
+      texture.type = opts.type
+      texture.mapping = opts.mapping
+      texture.wrapS = opts.wrapS
+      texture.wrapT = opts.wrapT
+      texture.magFilter = opts.magFilter
+      texture.minFilter = opts.minFilter
+      texture.flipY = opts.flipY
+      texture.needsUpdate = true
+    }
+  },
+  texture => texture && texture.dispose(),
 )
 
 function updateObject3D(object: Object3D, opts: Object3DOpts) {
