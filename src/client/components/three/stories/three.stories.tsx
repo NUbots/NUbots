@@ -27,6 +27,7 @@ import { Canvas } from '../three'
 import { Three } from '../three'
 
 storiesOf('component.three', module)
+  .addDecorator(fullscreen)
   .add('renders static scene', () => {
     return <BoxVisualiser/>
   })
