@@ -1,7 +1,7 @@
 language: node_js
-dist: trusty
+dist: xenial
 node_js:
-  - '8'
+  - '10'
 
 # Cache yarn to speed up the build
 cache:
@@ -12,18 +12,11 @@ cache:
     - node_modules
     - .awcache
 
-# We need to set this so our compiler is g++-4.9 for NUClearNet.js
 env:
-  - CXX=g++-4.9 YARN_COMMAND=build:ci
-  - CXX=g++-4.9 YARN_COMMAND=tslint
-  - CXX=g++-4.9 YARN_COMMAND=test:ci
-  - CXX=g++-4.9 YARN_COMMAND=protobuf
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.9
+  - YARN_COMMAND=build:ci
+  - YARN_COMMAND=tslint
+  - YARN_COMMAND=test:ci
+  - YARN_COMMAND=protobuf
 
 # Only build the master branch, PRs will build also due to settings in the web ui
 branches:
