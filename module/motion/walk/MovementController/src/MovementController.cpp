@@ -54,7 +54,7 @@ namespace motion {
                                           : Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]));
 
             // Target given in support foot space
-            Eigen::Affine3d Haf(target.Haf);
+            const Eigen::Affine3d Haf(target.Haf);
 
             // Get orientation for world (Rotation of world->torso)
             // Eigen::Matrix3d Rtw(Eigen::Affine3d(sensors.world).rotation());
@@ -66,7 +66,7 @@ namespace motion {
 
 
             // Position of the target in torso space
-            Eigen::Vector3d rATt(Htf * Haf.inverse().translation());
+            const Eigen::Vector3d rATt(Htf * Haf.inverse().translation());
 
             // Find scale to reach target at specified time based on distance from target, time left, and the time
             // horizon
@@ -74,33 +74,31 @@ namespace motion {
             // If we have less time left than our time horizon, assume we have until time horizon to finish
             time_left = time_left < time_horizon ? time_horizon : time_left;
 
-            double horizon_distance((rATt.norm() / time_left) * time_horizon);
+            const double horizon_distance((rATt.norm() / time_left) * time_horizon);
 
             // Create next torso target in torso space
-            Eigen::Vector3d rT_tTt(rATt.normalized() * (horizon_distance));
+            const Eigen::Vector3d rT_tTt(rATt.normalized() * (horizon_distance));
 
             // Create vector from foot target to torso
-            Eigen::Vector3d rT_tFf(Htf.inverse() * rT_tTt);
+            const Eigen::Vector3d rT_tFf(Htf.inverse() * rT_tTt);
 
 
             // Torso to target transform
-            Eigen::Affine3d Hat(Haf * Htf.inverse());
+            const Eigen::Affine3d Hat(Haf * Htf.inverse());
             // Get torso to swing foot rotation as quaternion
-            Eigen::Quaterniond Rtf(Htf.rotation());
+            const Eigen::Quaterniond Rtf(Htf.rotation());
             // Create rotation of torso to target as a quaternion
-            Eigen::Quaterniond Raf((Hat * Htf.inverse()).linear());
+            const Eigen::Quaterniond Raf((Hat * Htf.inverse()).linear());
             // Create rotation matrix for foot target
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-            Eigen::Matrix3d Rt_tf(Rtf.inverse().slerp(time_horizon / time_left, Raf).toRotationMatrix());
+            const Eigen::Matrix3d Rt_tf(Rtf.inverse().slerp(time_horizon / time_left, Raf).toRotationMatrix());
 
             // Create the final position matrix to return
             Eigen::Affine3d Htf_t;
-            // Htf_t.linear() = Htf.linear();
             // Htf_t.linear() = Eigen::Matrix3d::Identity();
             Htf_t.linear()      = Rt_tf;    // Rotation as above from slerp
             Htf_t.translation() = -rT_tFf;  // Translation to target
-            // log("\nHtf\n", convert<double, 4, 4>(Htf.matrix()));
-            log("\nHtf_t\n", convert<double, 4, 4>(Htf_t.matrix()));
+
             return Htf_t;
         }
 
@@ -110,29 +108,29 @@ namespace motion {
                                                        const Eigen::Affine3d& Htf_s) {
             // Get swing foot coordinate system from support foot coordinate system given
             // And get the new torso space compared to old
-            Eigen::Affine3d Htt_t =
+            const Eigen::Affine3d Htt_t =
                 target.isRightFootSwing
                     ? Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]) * Htf_s.inverse()
                     : Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]) * Htf_s.inverse();
-            Eigen::Affine3d Htf_w =
+            const Eigen::Affine3d Htf_w =
                 target.isRightFootSwing
                     ? Htt_t.inverse() * Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL])
                     : Htt_t.inverse() * Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
 
-            Eigen::Affine3d Haf_s(target.Haf_s);
+            const Eigen::Affine3d Haf_s(target.Haf_s);
 
             // Get orientation for world (Rotation of world->torso) relative to new torso space
-            Eigen::Matrix3d Rtw((Htt_t.inverse() * Eigen::Affine3d(sensors.world)).rotation());
+            const Eigen::Matrix3d Rtw((Htt_t.inverse() * Eigen::Affine3d(sensors.world)).rotation());
 
             // Convert Rtw and Htf_s rotation into euler angles to get pitch and roll from Rtw and yaw from
             // Htf_s to create a new rotation matrix
-            Eigen::Vector3d ea_Rtw(Rtw.eulerAngles(0, 1, 2));
-            Eigen::Vector3d ea_Htf_s(Htf_s.rotation().eulerAngles(0, 1, 2));
+            const Eigen::Vector3d ea_Rtw(Rtw.eulerAngles(0, 1, 2));
+            const Eigen::Vector3d ea_Htf_s(Htf_s.rotation().eulerAngles(0, 1, 2));
 
             // Rtg is the yawless world rotation
-            Eigen::Matrix3d Rtg(Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
-                                * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
-                                * Eigen::AngleAxisd(ea_Rtw.y() - ea_Htf_s.z(), Eigen::Vector3d::UnitZ()));
+            const Eigen::Matrix3d Rtg(Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
+                                      * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
+                                      * Eigen::AngleAxisd(ea_Rtw.y() - ea_Htf_s.z(), Eigen::Vector3d::UnitZ()));
 
             // Construct a torso to foot ground space (support foot centric world oriented space)
             Eigen::Affine3d Htg;
@@ -141,10 +139,10 @@ namespace motion {
 
             // Vector to the swing foot in ground space
             // Hgt * rF_wTt = rF_wGg
-            Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
+            const Eigen::Vector3d rF_wGg = Htg.inverse() * Htf_w.translation();
             // Vector from ground to target
             // Hgf_s * rAF_sf_s
-            Eigen::Vector3d rAGg = (Htg.inverse() * Htf_s) * -Haf_s.translation();
+            const Eigen::Vector3d rAGg = (Htg.inverse() * Htf_s) * Haf_s.inverse().translation();
 
             // Direction of the target from the swing foot
             Eigen::Vector3d rAF_wg = rAGg - rF_wGg;
@@ -159,38 +157,25 @@ namespace motion {
             // Y axis is the cross product of X and Z. This makes the y-axis at a right angle to both the x-axis and
             // z-axis
             Rgp.col(1) = Rgp.col(2).cross(Rgp.col(0)).normalized();
-            // Rgp.leftCols<1>()  = Rgp.middleCols<1>(1).cross(Rgp.rightCols<1>()).normalized();
 
             // Create transform based on above rotation
             Eigen::Affine3d Hgp;       // plane to ground transform
             Hgp.linear()      = Rgp;   // Rotation from above
             Hgp.translation() = rAGg;  // Translation to target
-            // if (target.lift) {
-            //     log("\nHgp:\n", convert<double, 4, 4>(Hgp.inverse().matrix()));
-            // }
-            // Make a transformation matrix that goes the whole way
-            Eigen::Affine3d Htp(Htg * Hgp);
 
-            // if (target.lift) {
-            //     log("\nHgp:\n",
-            //         convert<double, 4, 4>(Hgp.matrix()),
-            //         "\nHtg:\n",
-            //         convert<double, 4, 4>(Htg.matrix()),
-            //         "\nHtp:\n",
-            //         convert<double, 4, 4>(Htp.matrix()),
-            //         target.isRightFootSwing ? "\nright" : "\nleft");
-            // }
+            // Make a transformation matrix that goes the whole way
+            const Eigen::Affine3d Htp(Htg * Hgp);
 
             // Swing foot's position on plane
-            Eigen::Vector3d rF_wPp(Hgp.inverse() * rF_wGg);
+            const Eigen::Vector3d rF_wPp(Hgp.inverse() * rF_wGg);
 
             // Find scale to reach target at specified time based on distance from target, time left, and the
             // time horizon
             double time_left(std::chrono::duration_cast<std::chrono::duration<double>>(target.timestamp - now).count());
             // If we have less time left than our time horizon, assume we have until time horizon to finish
-            time_left               = time_left < time_horizon ? time_horizon : time_left;
-            double distance         = rF_wPp.norm();  // TODO line integral goes here!
-            double horizon_distance = (distance / time_left) * time_horizon;
+            time_left                     = time_left < time_horizon ? time_horizon : time_left;
+            const double distance         = rF_wPp.norm();  // TODO line integral goes here!
+            const double horizon_distance = (distance / time_left) * time_horizon;
 
             // Swing foot's new target position on the plane, scaled for time based on the horizon
             Eigen::Vector3d rF_tPp(rF_wPp
@@ -207,20 +192,19 @@ namespace motion {
             }
 
             // Foot target's position relative to torso
-            Eigen::Vector3d rF_tTt(Htp * rF_tPp);
+            const Eigen::Vector3d rF_tTt(Htp * rF_tPp);
 
             // Torso to target transform
-            Eigen::Affine3d Hat(Haf_s * Htf_s.inverse());
+            const Eigen::Affine3d Hat(Haf_s * Htf_s.inverse());
             // Get torso to swing foot rotation as quaternion
-            Eigen::Quaterniond Rgt(Rtg.inverse());
+            const Eigen::Quaterniond Rgt(Rtg.inverse());
             // Create rotation of torso to target as a quaternion
-            Eigen::Quaterniond Rat(Hat.linear());
+            const Eigen::Quaterniond Rat(Hat.linear());
             // Create rotation matrix for foot target
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-            Eigen::Matrix3d Rf_tt(Rgt.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix());
+            const Eigen::Matrix3d Rf_tt(Rgt.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix());
 
             Eigen::Affine3d Htf_t;
-            // Htf_t.linear() = Rtg;
             Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above
             Htf_t.translation() = rF_tTt;           // Translation to foot target
 
@@ -253,53 +237,52 @@ namespace motion {
                     using namespace std::chrono;
 
                     // Set the time now so the calculations are consistent across the methods
-                    auto now = NUClear::clock::now();
+                    const auto now = NUClear::clock::now();
 
                     // Determine where the torso will move to (ie where the support foot will move)
-                    Eigen::Affine3d torso_Htf_t = plan_torso(now, sensors, torso_target);
+                    const Eigen::Affine3d torso_Htf_t = plan_torso(now, sensors, torso_target);
 
                     // Determine where the swing foot will move, using the torso's result
-                    Eigen::Affine3d swing_Htf_t = plan_swing(now, sensors, foot_target, torso_Htf_t);
+                    const Eigen::Affine3d swing_Htf_t = plan_swing(now, sensors, foot_target, torso_Htf_t);
 
                     // Create transforms for inverse kinematics
-                    Transform3D t_t               = convert<double, 4, 4>(torso_Htf_t.matrix());
-                    Transform3D t_f               = convert<double, 4, 4>(swing_Htf_t.matrix());
+                    const Transform3D t_t         = convert<double, 4, 4>(torso_Htf_t.matrix());
+                    const Transform3D t_f         = convert<double, 4, 4>(swing_Htf_t.matrix());
                     const Transform3D& left_foot  = torso_target.isRightFootSupport ? t_f : t_t;
                     const Transform3D& right_foot = torso_target.isRightFootSupport ? t_t : t_f;
-                    bool left_valid               = legPoseValid(model, left_foot, LimbID::LEFT_LEG);
-                    bool right_valid              = legPoseValid(model, right_foot, LimbID::RIGHT_LEG);
+                    const bool left_valid         = legPoseValid(model, left_foot, LimbID::LEFT_LEG);
+                    const bool right_valid        = legPoseValid(model, right_foot, LimbID::RIGHT_LEG);
                     if (!left_valid) {
-                        log("invalid pose on left leg\n", left_foot);
+                        // log("invalid pose on left leg\n", left_foot);
                     }
                     if (!right_valid) {
-                        log("invalid pose on right leg\n", right_foot);
+                        // log("invalid pose on right leg\n", right_foot);
                     }
-                    if (left_valid && right_valid) {
-                        log("both leg poses are valid\n", left_foot, "\n", right_foot);
+                    // if (left_valid && right_valid) {
+                    //     log("both leg poses are valid\n", left_foot, "\n", right_foot);
 
-                        // Use inverse kinematics to calculate joint positions
-                        auto joints    = calculateLegJoints(model, left_foot, right_foot);
-                        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                    // Use inverse kinematics to calculate joint positions
+                    auto joints    = calculateLegJoints(model, left_foot, right_foot);
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
-                        // Create the target time based on the time horizon
-                        NUClear::clock::time_point target_time =
-                            time_point_cast<NUClear::clock::duration>(now + duration<double>(time_horizon));
+                    // Create the target time based on the time horizon
+                    const NUClear::clock::time_point target_time =
+                        time_point_cast<NUClear::clock::duration>(now + duration<double>(time_horizon));
 
-                        // HACK: By putting these waypoints first, we trick the Controller into dumping future commands
-                        // (previous horizon)
-                        for (const auto& joint : joints) {
-                            waypoints->emplace_back(
-                                foot_target.subsumption_id, now, joint.first, joint.second, gain, 100);
-                        }
-
-                        for (const auto& joint : joints) {
-                            waypoints->emplace_back(
-                                foot_target.subsumption_id, target_time, joint.first, joint.second, gain, 100);
-                        }
-                        emit(waypoints);
+                    // HACK: By putting these waypoints first, we trick the Controller into dumping future commands
+                    // (previous horizon)
+                    for (const auto& joint : joints) {
+                        waypoints->emplace_back(foot_target.subsumption_id, now, joint.first, joint.second, gain, 100);
                     }
-                    else {
+
+                    for (const auto& joint : joints) {
+                        waypoints->emplace_back(
+                            foot_target.subsumption_id, target_time, joint.first, joint.second, gain, 100);
                     }
+                    emit(waypoints);
+                    // }
+                    // else {
+                    // }
                 });
         }
     }  // namespace walk

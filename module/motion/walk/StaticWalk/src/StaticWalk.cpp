@@ -48,6 +48,8 @@ namespace motion {
                     // Set the matrix Hff_s and change the state to a lean
                     Hff_s = (sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]).inverse()
                             * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                    // torso_height =
+                    // -Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).translation().z();
                     state = RIGHT_LEAN;
                 }
 
@@ -64,7 +66,7 @@ namespace motion {
                                     * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                             state = RIGHT_LEAN;
                         } break;
-                        case RIGHT_LEAN: state = LEFT_STEP; break;
+                        case RIGHT_LEAN: state = RIGHT_LEAN; break;
                         case LEFT_STEP: {
                             // Store where support is relative to swing
                             Hff_s = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
@@ -136,18 +138,18 @@ namespace motion {
                                 0);
 
                             // Set rotation to given walkcommand
-                            double rotation = walkcommand.command.z();
+                            const double rotation = walkcommand.command.z();
                             // Set origin of the circle
                             Eigen::Vector3d origin(Haf.translation().y(), Haf.translation().x(), 0);
                             origin /= rotation;
                             // Set the angle of the arc
-                            double arcLength =
+                            const double arcLength =
                                 rotation
                                 * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count();
                             // Using the end points of the arc to create one side and radius lines to the center as two
                             // other sides, create a triangle. arcAngle is then the angle of either of the two other
                             // points of the triangle.
-                            double arcAngle = (M_PI - arcLength) / 2;
+                            const double arcAngle = (M_PI - arcLength) / 2;
 
                             // Create a rotation vector which is the vector from foot to origin then rotated about
                             // arcLength to get a vector pointing from the foot to the end of the arc (may not be the
@@ -163,9 +165,9 @@ namespace motion {
                             // foot
                             rAFf.y() -= stance_width;
 
-                            Eigen::Matrix3d Raf(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
-                                                * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
-                                                * Eigen::AngleAxisd(rotation, Eigen::Vector3d::UnitZ()));
+                            const Eigen::Matrix3d Raf(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
+                                                      * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
+                                                      * Eigen::AngleAxisd(rotation, Eigen::Vector3d::UnitZ()));
 
 
                             // Create the matrix to send the foot to the correct target
@@ -208,19 +210,19 @@ namespace motion {
                                 0);
 
                             // Set rotation to given walkcommand
-                            double rotation = walkcommand.command.z() * 2;
+                            const double rotation = walkcommand.command.z() * 2;
                             // Set origin of the circle
                             Eigen::Vector3d origin(Haf.translation().y(), Haf.translation().x(), 0);
                             origin /= rotation;
                             // Set the angle of the arc
-                            double arcLength =
+                            const double arcLength =
                                 rotation
                                 * std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count();
 
                             // Using the end points of the arc to create one side and radius lines to the center as two
                             // other sides, create a triangle. arcAngle is then the angle of either of the two other
                             // points of the triangle.
-                            double arcAngle = (M_PI - arcLength) / 2;
+                            const double arcAngle = (M_PI - arcLength) / 2;
 
                             // Create a rotation vector which is the vector from foot to origin then rotated about
                             // arcLength to get a vector pointing from the foot to the end of the arc (may not be the
@@ -236,9 +238,9 @@ namespace motion {
                             // foot
                             rAFf.y() += stance_width;
 
-                            Eigen::Matrix3d Raf(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
-                                                * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
-                                                * Eigen::AngleAxisd(rotation, Eigen::Vector3d::UnitZ()));
+                            const Eigen::Matrix3d Raf(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX())
+                                                      * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
+                                                      * Eigen::AngleAxisd(rotation, Eigen::Vector3d::UnitZ()));
 
 
                             // Create the matrix to send the foot to the correct target
