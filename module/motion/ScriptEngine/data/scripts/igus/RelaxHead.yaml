@@ -1,9 +1,16 @@
-[
-    {
-        "duration": 25,
-        "targets": [
-            { "id": "HEAD_YAW", "position": 0, "gain": .NaN, "torque": 0  },
-            { "id": "HEAD_PITCH", "position": 0, "gain": .NaN, "torque": 0  }
-        ]
-    }
-]
+- id: HEAD_YAW
+  frames:
+    - time: 25
+      angle: 0
+      pGain: 0
+      iGain: 0
+      dGain: 0
+      torque: 0
+- id: HEAD_PITCH
+  frames:
+    - time: 25
+      angle: 0
+      pGain: 0
+      iGain: 0
+      dGain: 0
+      torque: 0
