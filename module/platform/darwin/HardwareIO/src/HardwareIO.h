@@ -104,6 +104,13 @@ namespace platform {
             float chargedVoltage;
             float flatVoltage;
 
+            // Coefficient values for Low Pass Filtering
+            float lpfAlpha;
+            float lpfBeta;
+
+            // Vector to hold previous filtered angle servo values for filtering
+            std::vector<uint16_t> previousPositions;
+
         public:
             /// @brief called by a Powerplant to construct this reactor
             explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);

@@ -7,6 +7,12 @@ bus_reset_wait_time_us: 0
 byte_wait: 1200
 packet_wait: 100000
 
+# Low Pass Filter transfer function: (1/LC)/(s^2 + (R/L) * s + (1/LC))
+# Alpha calculated as (2 * LC * delta_t + RC * delta_t^2) / (delta_t^3)
+lpf_alpha: 16380
+# Beta calculated as (-LC) / (delta_t^2)
+lpf_beta: -8100
+
 servos:
   -  # [0]  R_SHOULDER_PITCH
     direction: -1

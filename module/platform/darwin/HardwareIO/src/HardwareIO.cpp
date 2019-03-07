@@ -274,26 +274,38 @@ namespace platform {
                                     darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
                                 }
 
+                                // Filter angular position by LPF
+                                float delta_t                 = 1 / UPDATE_FREQUENCY;
+                                float filteredAngularPosition = servoState[i].goalPosition
+                                                                + lpfAlpha * previousPositions[0]
+                                                                + lpfBeta * previousPositions[1];
+
                                 // Get our goal position and speed
-                                uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                                uint16_t goalPosition = Convert::servoPositionInverse(i, filteredAngularPosition);
                                 uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
                                 uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
 
-                                // Add to our sync write command
-                                command.insert(command.end(),
-                                               {
-                                                   uint8_t(i + 1),
-                                                   Convert::gainInverse(servoState[i].dGain),  // D Gain
-                                                   Convert::gainInverse(servoState[i].iGain),  // I Gain
-                                                   Convert::gainInverse(servoState[i].pGain),  // P Gain
-                                                   0,                                          // Reserved
-                                                   uint8_t(0xFF & goalPosition),               // Goal Position L
-                                                   uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
-                                                   uint8_t(0xFF & movingSpeed),                // Goal Speed L
-                                                   uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
-                                                   uint8_t(0xFF & torque),                     // Torque Limit L
-                                                   uint8_t(0xFF & (torque >> 8))               // Torque Limit H
-                                               });
+                                // Place new value at end of queue
+                                previousPositions.push_back(filteredAngularPosition);
+
+                                if (previousPositions.size() == 2) {
+                                    previousPositions.erase(previousPositions.begin());
+                                    // Add to our sync write command
+                                    command.insert(command.end(),
+                                                   {
+                                                       uint8_t(i + 1),
+                                                       Convert::gainInverse(servoState[i].dGain),  // D Gain
+                                                       Convert::gainInverse(servoState[i].iGain),  // I Gain
+                                                       Convert::gainInverse(servoState[i].pGain),  // P Gain
+                                                       0,                                          // Reserved
+                                                       uint8_t(0xFF & goalPosition),               // Goal Position L
+                                                       uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
+                                                       uint8_t(0xFF & movingSpeed),                // Goal Speed L
+                                                       uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
+                                                       uint8_t(0xFF & torque),                     // Torque Limit L
+                                                       uint8_t(0xFF & (torque >> 8))               // Torque Limit H
+                                                   });
+                                }
                             }
                         }
                     }
