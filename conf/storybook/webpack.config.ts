@@ -2,7 +2,7 @@ import * as HtmlWebpackPlugin from 'html-webpack-plugin'
 import * as webpack from 'webpack'
 import config from '../../webpack.config'
 
-export default (storybookConfig: webpack.Configuration) => {
+export default ({ config: storybookConfig }: { config: webpack.Configuration }) => {
   return {
     ...config,
     ...storybookConfig,
