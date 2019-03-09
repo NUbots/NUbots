@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# Change few bits of the source between being useful for the VM and on the
+# physical robot
+
+if grep -q "HardwareIO" "../roles/staticwalktest.role"; then
+  echo "Toggling from physical robot to VM..."
+  current_role="HardwareIO"
+  new_role="HardwareSimulator"
+  commenting_command="^/\/\/"
+else
+  echo "Toggling from VM to physical robot..."
+  current_role="HardwareSimulator"
+  new_role="HardwareIO"
+  commenting_command="^\/\//"
+fi
+
+changed_role=$(sed "s/$current_role/$new_role/" "../roles/staticwalktest.role")
+echo "$changed_role" > "../roles/staticwalktest.role"
+
+sensor_filter_file="../module/platform/darwin/SensorFilter/src/SensorFilter.cpp"
+
+change_sensor_filter=$(cat "$sensor_filter_file")
+
+start_line=$(( $(grep -n "Foot down information" "$sensor_filter_file" |\
+  cut -f1 -d:) + 2 ))
+end_line=$(( $(grep -n "Motion (IMU+Odometry)" "$sensor_filter_file" |\
+  cut -f1 -d:) - 2 ))
+
+for i in $(seq "$start_line" "$end_line"); do
+  change_sensor_filter=$(echo "$change_sensor_filter" |\
+    sed "${i}s/$commenting_command/")
+done
+
+echo "$change_sensor_filter" > "$sensor_filter_file"
+
+echo "Done."
