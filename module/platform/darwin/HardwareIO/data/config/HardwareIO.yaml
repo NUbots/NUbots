@@ -1,17 +1,17 @@
 battery:
-  charged_voltage: 12.6
-  nominal_voltage: 11.1
-  flat_voltage: 10.7
+  charged_voltage: 16.8
+  nominal_voltage: 14.8
+  flat_voltage: 14.0
 
 bus_reset_wait_time_us: 0
 byte_wait: 1200
 packet_wait: 100000
 
-# Low Pass Filter transfer function: (1/LC)/(s^2 + (R/L) * s + (1/LC))
-# Alpha calculated as (2 * LC * delta_t + RC * delta_t^2) / (delta_t^3)
-lpf_alpha: 16380
-# Beta calculated as (-LC) / (delta_t^2)
-lpf_beta: -8100
+# Low Pass Filter transfer function:
+#  y_i = alpha * x_i + beta * y_i-1 + gamma * y_i-2
+lpfAlpha: 0.3
+lpfBeta: 0.6
+lpfGamma: 0.1
 
 servos:
   -  # [0]  R_SHOULDER_PITCH

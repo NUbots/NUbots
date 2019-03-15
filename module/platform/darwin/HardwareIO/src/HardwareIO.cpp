@@ -223,6 +223,10 @@ namespace platform {
                 version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
                 log<NUClear::INFO>("CM730 Model:", model.str());
                 log<NUClear::INFO>("CM730 Firmware Version:", version.str());
+
+                for (uint i = 0; i < servoState.size(); ++i) {
+                    previousPositions[i] = {0.0, 0.0};
+                }
             });
 
             on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
@@ -237,6 +241,10 @@ namespace platform {
 
                 chargedVoltage = config["battery"]["charged_voltage"].as<float>();
                 flatVoltage    = config["battery"]["flat_voltage"].as<float>();
+
+                lpfAlpha = config["lpfAlpha"].as<float>();
+                lpfBeta  = config["lpfBeta"].as<float>();
+                lpfGamma = config["lpfGamma"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
@@ -275,10 +283,9 @@ namespace platform {
                                 }
 
                                 // Filter angular position by LPF
-                                float delta_t                 = 1 / UPDATE_FREQUENCY;
-                                float filteredAngularPosition = servoState[i].goalPosition
-                                                                + lpfAlpha * previousPositions[0]
-                                                                + lpfBeta * previousPositions[1];
+                                float filteredAngularPosition = lpfAlpha * servoState[i].goalPosition
+                                                                + lpfBeta * previousPositions[i][0]
+                                                                + lpfGamma * previousPositions[i][1];
 
                                 // Get our goal position and speed
                                 uint16_t goalPosition = Convert::servoPositionInverse(i, filteredAngularPosition);
@@ -286,26 +293,24 @@ namespace platform {
                                 uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
 
                                 // Place new value at end of queue
-                                previousPositions.push_back(filteredAngularPosition);
+                                previousPositions[i].push_back(filteredAngularPosition);
 
-                                if (previousPositions.size() == 2) {
-                                    previousPositions.erase(previousPositions.begin());
-                                    // Add to our sync write command
-                                    command.insert(command.end(),
-                                                   {
-                                                       uint8_t(i + 1),
-                                                       Convert::gainInverse(servoState[i].dGain),  // D Gain
-                                                       Convert::gainInverse(servoState[i].iGain),  // I Gain
-                                                       Convert::gainInverse(servoState[i].pGain),  // P Gain
-                                                       0,                                          // Reserved
-                                                       uint8_t(0xFF & goalPosition),               // Goal Position L
-                                                       uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
-                                                       uint8_t(0xFF & movingSpeed),                // Goal Speed L
-                                                       uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
-                                                       uint8_t(0xFF & torque),                     // Torque Limit L
-                                                       uint8_t(0xFF & (torque >> 8))               // Torque Limit H
-                                                   });
-                                }
+                                previousPositions[i].erase(previousPositions[i].begin());
+                                // Add to our sync write command
+                                command.insert(command.end(),
+                                               {
+                                                   uint8_t(i + 1),
+                                                   Convert::gainInverse(servoState[i].dGain),  // D Gain
+                                                   Convert::gainInverse(servoState[i].iGain),  // I Gain
+                                                   Convert::gainInverse(servoState[i].pGain),  // P Gain
+                                                   0,                                          // Reserved
+                                                   uint8_t(0xFF & goalPosition),               // Goal Position L
+                                                   uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
+                                                   uint8_t(0xFF & movingSpeed),                // Goal Speed L
+                                                   uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
+                                                   uint8_t(0xFF & torque),                     // Torque Limit L
+                                                   uint8_t(0xFF & (torque >> 8))               // Torque Limit H
+                                               });
                             }
                         }
                     }
@@ -333,8 +338,8 @@ namespace platform {
                         std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
                     // cm730 leds to display battery voltage
-                    uint32_t ledl            = 0;
-                    uint32_t ledr            = 0;
+                    uint32_t ledl = 0;
+                    uint32_t ledr = 0;
                     std::array<bool, 3> ledp = {false, false, false};
 
                     if (sensors->battery > 0.9) {
@@ -382,45 +387,44 @@ namespace platform {
                 });
 
             // This trigger writes the servo positions to the hardware
-            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
-                [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
-                    // Loop through each of our commands
-                    for (const auto& command : commands) {
-                        float diff = utility::math::angle::difference(
-                            command.position,
-                            utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
-                        NUClear::clock::duration duration = command.time - NUClear::clock::now();
+            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
+                const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
+                // Loop through each of our commands
+                for (const auto& command : commands) {
+                    float diff = utility::math::angle::difference(
+                        command.position,
+                        utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
+                    NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                        float speed;
-                        if (duration.count() > 0) {
-                            speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                        }
-                        else {
-                            speed = 0;
-                        }
-
-                        // Update our internal state
-                        if (servoState[command.id].pGain != command.gain
-                            || servoState[command.id].iGain != command.gain * 0
-                            || servoState[command.id].dGain != command.gain * 0
-                            || servoState[command.id].movingSpeed != speed
-                            || servoState[command.id].goalPosition != command.position
-                            || servoState[command.id].torque != command.torque) {
-
-                            servoState[command.id].dirty = true;
-
-                            servoState[command.id].pGain = command.gain;
-                            servoState[command.id].iGain = command.gain * 0;
-                            servoState[command.id].dGain = command.gain * 0;
-
-                            servoState[command.id].movingSpeed  = speed;
-                            servoState[command.id].goalPosition = command.position;
-
-                            servoState[command.id].torque       = command.torque;
-                            servoState[uint(command.id)].torque = command.torque;
-                        }
+                    float speed;
+                    if (duration.count() > 0) {
+                        speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                     }
-                });
+                    else {
+                        speed = 0;
+                    }
+
+                    // Update our internal state
+                    if (servoState[command.id].pGain != command.gain || servoState[command.id].iGain != command.gain * 0
+                        || servoState[command.id].dGain != command.gain * 0
+                        || servoState[command.id].movingSpeed != speed
+                        || servoState[command.id].goalPosition != command.position
+                        || servoState[command.id].torque != command.torque) {
+
+                        servoState[command.id].dirty = true;
+
+                        servoState[command.id].pGain = command.gain;
+                        servoState[command.id].iGain = command.gain * 0;
+                        servoState[command.id].dGain = command.gain * 0;
+
+                        servoState[command.id].movingSpeed  = speed;
+                        servoState[command.id].goalPosition = command.position;
+
+                        servoState[command.id].torque       = command.torque;
+                        servoState[uint(command.id)].torque = command.torque;
+                    }
+                }
+            });
 
             on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
                 auto commandList = std::make_unique<std::vector<ServoTarget>>();

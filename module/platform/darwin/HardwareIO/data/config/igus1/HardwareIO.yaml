@@ -7,6 +7,12 @@ bus_reset_wait_time_us: 0
 byte_wait: 1200
 packet_wait: 100000
 
+# Low Pass Filter transfer function:
+#  y_i = alpha * x_i + beta * y_i-1 + gamma * y_i-2
+lpfAlpha: 0.3
+lpfBeta: 0.6
+lpfGamma: 0.1
+
 servos:
   -  # [0]  R_SHOULDER_PITCH
     direction: -1

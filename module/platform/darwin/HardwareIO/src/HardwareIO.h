@@ -107,9 +107,10 @@ namespace platform {
             // Coefficient values for Low Pass Filtering
             float lpfAlpha;
             float lpfBeta;
+            float lpfGamma;
 
             // Vector to hold previous filtered angle servo values for filtering
-            std::vector<uint16_t> previousPositions;
+            std::array<std::vector<float>, 20> previousPositions;
 
         public:
             /// @brief called by a Powerplant to construct this reactor
