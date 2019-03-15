@@ -86,12 +86,12 @@ namespace motion {
             // Torso to target transform
             const Eigen::Affine3d Hat(Haf * Htf.inverse());
             // Get torso to swing foot rotation as quaternion
-            const Eigen::Quaterniond Rtf(Htf.rotation());
+            const Eigen::Quaterniond Rtf(Htf.linear());
             // Create rotation of torso to target as a quaternion
-            const Eigen::Quaterniond Raf((Hat * Htf.inverse()).linear());
+            const Eigen::Quaterniond Raf((Hat * Htf).linear());
             // Create rotation matrix for foot target
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-            const Eigen::Matrix3d Rt_tf(Rtf.inverse().slerp(time_horizon / time_left, Raf).toRotationMatrix());
+            const Eigen::Matrix3d Rt_tf(Rtf.slerp(time_horizon / time_left, Raf).toRotationMatrix());
 
             // Create the final position matrix to return
             Eigen::Affine3d Htf_t;
@@ -130,7 +130,7 @@ namespace motion {
             // Rtg is the yawless world rotation
             const Eigen::Matrix3d Rtg(Eigen::AngleAxisd(ea_Rtw.x(), Eigen::Vector3d::UnitX())
                                       * Eigen::AngleAxisd(ea_Rtw.y(), Eigen::Vector3d::UnitY())
-                                      * Eigen::AngleAxisd(ea_Rtw.y() - ea_Htf_s.z(), Eigen::Vector3d::UnitZ()));
+                                      * Eigen::AngleAxisd(ea_Rtw.z() - ea_Htf_s.z(), Eigen::Vector3d::UnitZ()));
 
             // Construct a torso to foot ground space (support foot centric world oriented space)
             Eigen::Affine3d Htg;
@@ -194,15 +194,13 @@ namespace motion {
             // Foot target's position relative to torso
             const Eigen::Vector3d rF_tTt(Htp * rF_tPp);
 
-            // Torso to target transform
-            const Eigen::Affine3d Hat(Haf_s * Htf_s.inverse());
             // Get torso to swing foot rotation as quaternion
             const Eigen::Quaterniond Rgt(Rtg.inverse());
             // Create rotation of torso to target as a quaternion
-            const Eigen::Quaterniond Rat(Hat.linear());
+            const Eigen::Quaterniond Rat((Haf_s * Htf_s.inverse()).linear());
             // Create rotation matrix for foot target
             // Slerp the above two Quaternions and switch to rotation matrix to get the rotation
-            const Eigen::Matrix3d Rf_tt(Rgt.inverse().slerp(time_horizon / time_left, Rat).toRotationMatrix());
+            const Eigen::Matrix3d Rf_tt(Rgt.slerp(time_horizon / time_left, Rat).toRotationMatrix());
 
             Eigen::Affine3d Htf_t;
             Htf_t.linear()      = Rf_tt.inverse();  // Rotation from above

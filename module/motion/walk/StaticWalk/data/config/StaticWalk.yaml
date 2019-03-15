@@ -5,7 +5,7 @@ phase_time: 2000
 torso_height: 0.2
 # torso_height: 0.55
 # distance forward the torso leans over the foot so as to remain in the support polygon
-foot_offset: 0.02
+foot_offset: 0
 # foot_offset: 0.04
 # Width between the feet wile walking (m)
 stance_width: 0.074

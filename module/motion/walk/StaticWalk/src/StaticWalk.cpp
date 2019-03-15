@@ -66,7 +66,7 @@ namespace motion {
                                     * (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
                             state = RIGHT_LEAN;
                         } break;
-                        case RIGHT_LEAN: state = RIGHT_LEAN; break;
+                        case RIGHT_LEAN: state = LEFT_STEP; break;
                         case LEFT_STEP: {
                             // Store where support is relative to swing
                             Hff_s = (sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]).inverse()
