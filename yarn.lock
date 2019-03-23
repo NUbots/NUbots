@@ -9825,10 +9825,10 @@ pixi-gl-core@^1.1.4:
   resolved "https://registry.yarnpkg.com/pixi-gl-core/-/pixi-gl-core-1.1.4.tgz#8b4b5c433b31e419bc379dc565ce1b835a91b372"
   integrity sha1-i0tcQzsx5Bm8N53FZc4bg1qRs3I=
 
-pixi.js@^4.8.4:
-  version "4.8.4"
-  resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-4.8.4.tgz#364da0f814a7aea47b1f795a23b3d9ebddef3838"
-  integrity sha512-syTQP77SLiJ8H3ARlffBj+XLxC8cyBJIk4cdQCaVZXRqLqlMT4PWeVMeYEQ5UBnMyNqTT4WvO/KtMo/nGHHQ1g==
+pixi.js@^4.8.7:
+  version "4.8.7"
+  resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-4.8.7.tgz#a45c59cdb4dda71f471ecc588301f5ba0f4b77ab"
+  integrity sha512-mx7YbHPkkWoj8FT3qBMkieAjBuuJ4yZWU7rq9NnCSUGpNrVlocrW179xrJQPVR2Q7JZ73ZGTwH7NOUZ9wgh7wA==
   dependencies:
     bit-twiddle "^1.0.2"
     earcut "^2.1.4"

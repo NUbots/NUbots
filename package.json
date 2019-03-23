@@ -132,7 +132,7 @@
     "mobx-react": "^5.4.3",
     "mobx-utils": "^5.1.0",
     "nuclearnet.js": "^1.5.3",
-    "pixi.js": "^4.8.4",
+    "pixi.js": "^4.8.7",
     "protobufjs": "^6.8.8",
     "react": "^16.8.3",
     "react-color": "^2.17.0",
