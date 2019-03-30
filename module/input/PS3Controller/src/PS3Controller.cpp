@@ -15,21 +15,20 @@ namespace input {
 
     enum class EventType : uint8_t { BUTTON = 0x01, AXIS = 0x02, INIT = 0x80 };
     enum class Button : uint8_t {
-        CROSS = 0,
-        CIRCLE,
-        TRIANGLE,
-        SQUARE,
-        L1,
-        R1,
-        SELECT,
-        START,
-        PS,
-        JOYSTICK_LEFT,
-        JOYSTICK_RIGHT,
-        DPAD_UP,
-        DPAD_DOWN,
-        DPAD_LEFT,
-        DPAD_RIGHT
+        CIRCLE         = 1,
+        TRIANGLE       = 2,
+        SQUARE         = 3,
+        L1             = 4,
+        R1             = 5,
+        SELECT         = 8,
+        START          = 9,
+        PS             = 10,
+        JOYSTICK_LEFT  = 11,
+        JOYSTICK_RIGHT = 12,
+        DPAD_UP        = 13,
+        DPAD_DOWN      = 14,
+        DPAD_LEFT      = 15,
+        DPAD_RIGHT     = 16
     };
     enum class Axis : uint8_t {
         JOYSTICK_LEFT_HORIZONTAL = 0,
