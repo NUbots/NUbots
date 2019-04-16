@@ -9,10 +9,7 @@ and right upper arms (for example)
 """
 import yaml
 import numpy as np
-
-# TODO: Weigh these and incorporate them with the shelf CoM for the torso
-NUC = 0.300
-NUSENSE = 0.060
+import sys
 
 # CoM for each particle in the system
 particles = {
@@ -28,7 +25,7 @@ particles = {
 }
 
 # Load CoM data for all particles and their components
-with open("COM.yaml") as f:
+with open(sys.argv[1]) as f:
     data = yaml.load(f)
 
 # Combine particle component CoMs into a single CoM for each particle
@@ -58,8 +55,6 @@ print(
         + 2.0 * particles["leg_lower"][3]
         + 2.0 * particles["foot"][3]
         + 2.0 * particles["ankle_block"][3]
-        + 2.0 * particles["hip_block"][3]
-        + NUC
-        + NUSENSE,
+        + 2.0 * particles["hip_block"][3],
     )
 )
