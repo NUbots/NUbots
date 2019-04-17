@@ -20,6 +20,8 @@ syntax = "proto3";
 
 package message.motion.script;
 
+import "google/protobuf/timestamp.proto";
+
 message Script {
     message Frame {
         uint64 time   = 1;
@@ -35,8 +37,8 @@ message Script {
         repeated Frame frames = 2;
     }
 
-    string   path         = 1;
-    repeated Servo servos = 2;
+    string         filename = 1;
+    repeated Servo servos   = 2;
 }
 
 message ExecuteScriptByName {
