@@ -349,13 +349,20 @@ namespace motion {
         auto waypoints = updateStillWayPoints(sensors);
 
         Script standScript;
-        Script::Frame frame;
-        frame.duration = std::chrono::milliseconds(int(round(1000 * STAND_SCRIPT_DURATION)));
+
+        auto waypointTime = std::chrono::milliseconds(int(round(1000 * STAND_SCRIPT_DURATION)));
+
         for (auto& waypoint : *waypoints) {
-            frame.targets.push_back(
-                Script::Frame::Target({waypoint.id, waypoint.position, std::max(waypoint.gain, 60.0f), 100}));
+            Script::Servo servo;
+
+            servo.id = waypoint.id;
+            servo.frames.push_back(
+                Script::Servo::Frame({ waypointTime, waypoint.position, std::max(waypoint.gain, 60.0f), 100 })
+            );
+
+            standScript.servos.push_back(servo);
         }
-        standScript.frames.push_back(frame);
+
         standScript.save("Stand.yaml");
 
         // Try update(); ?
