@@ -21,6 +21,7 @@ syntax = "proto3";
 package message.motion;
 
 import "Vector.proto";
+import "Matrix.proto";
 
 enum BodySide {
     LEFT  = 0;
@@ -95,9 +96,22 @@ message KinematicsModel {
         vec4 foot        = 9;
     }
 
-    Leg       leg                       = 1;
-    Head      head                      = 2;
-    Arm       arm                       = 3;
-    MassModel massModel                 = 4;
-    float     TEAMDARWINCHEST_TO_ORIGIN = 5;
+    message TensorModel {
+        mat3 head        = 1;
+        mat3 arm_upper   = 2;
+        mat3 arm_lower   = 3;
+        mat3 torso       = 4;
+        mat3 hip_block   = 5;
+        mat3 leg_upper   = 6;
+        mat3 leg_lower   = 7;
+        mat3 ankle_block = 8;
+        mat3 foot        = 9;
+    }
+
+    Leg         leg                       = 1;
+    Head        head                      = 2;
+    Arm         arm                       = 3;
+    MassModel   massModel                 = 4;
+    TensorModel tensorModel               = 5;
+    float       TEAMDARWINCHEST_TO_ORIGIN = 6;
 }

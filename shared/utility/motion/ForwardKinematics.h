@@ -385,6 +385,108 @@ namespace motion {
             return Eigen::Vector4d{robot_com.first.x(), robot_com.first.y(), robot_com.first.z(), robot_com.second};
         }  // namespace kinematics
 
+        /*! @brief Transforms inertial tensors for each robot particle into torso space and sums to find the total
+           inertial tensor
+            @return [[xx, xy, xz], relative to the torso basis
+                     [xy, yy, yz],
+                     [xz, yz, zz]]
+        */
+        inline Eigen::Matrix3d calculateInertialTensor(
+            const message::motion::KinematicsModel& model,
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics,
+            bool include_torso) {
+
+            // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
+            // Htp - transform from particle space to torso space
+            // particle - CoM coordinates in particle space
+            auto translateTensor = [](
+                const Eigen::Matrix4d& Htp, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
+
+                Eigen::Vector4d com;
+                com << com_mass.x(), com_mass.y(), com_mass.z();
+                // TODO: Check if parallel axis thm holds under transform
+                // (https://hepweb.ucsd.edu/ph110b/110b_notes/node24.html)
+                com = Htp * com;
+
+                // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
+                double x = com.x(), y = com.y(), z = com.z();
+                Eigen::Matrix3d d;
+                // clang-format off
+                d << y * y + z * z, -x * y,         -x * z,
+                    -x * y,         x * x + z * z,  -y * z,
+                    -x * z,         -y * z,         x * x + y * y;
+                // clang-format on
+
+                // Translate tensor using the parallel axis theorem
+                Eigen::Matrix3d tensor_com = com_mass.w() * (tensor - d);
+
+                return tensor_com;
+            };
+
+            // Get the centre of mass for each particle in torso space
+            // There are 16 particles in total
+            std::array<Eigen::Matrix3d, 16> particles = {
+                translateTensor(forward_kinematics[utility::input::ServoID::HEAD_PITCH],
+                                model.tensorModel.head,
+                                model.massModel.head),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH],
+                                model.tensorModel.arm_upper,
+                                model.massModel.arm_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH],
+                                model.tensorModel.arm_upper,
+                                model.massModel.arm_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL],
+                                model.tensorModel.arm_lower,
+                                model.massModel.arm_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL],
+                                model.tensorModel.arm_lower,
+                                model.massModel.arm_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_ROLL],
+                                model.tensorModel.hip_block,
+                                model.massModel.hip_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_ROLL],
+                                model.tensorModel.hip_block,
+                                model.massModel.hip_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_PITCH],
+                                model.tensorModel.leg_upper,
+                                model.massModel.leg_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_PITCH],
+                                model.tensorModel.leg_upper,
+                                model.massModel.leg_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                                model.tensorModel.leg_lower,
+                                model.massModel.leg_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                                model.tensorModel.leg_lower,
+                                model.massModel.leg_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                                model.tensorModel.ankle_block,
+                                model.massModel.ankle_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                                model.tensorModel.ankle_block,
+                                model.massModel.ankle_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL],
+                                model.tensorModel.foot,
+                                model.massModel.foot),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL],
+                                model.tensorModel.foot,
+                                model.massModel.foot),
+                Eigen::Matrix3d::Zero()};
+
+            // Add the torso into the list of particles, if requested
+            if (include_torso) {
+                particles[15] = model.tensorModel.torso;
+            }
+
+            // Calculate the inertial tensor for the entire robot
+            Eigen::Matrix3d inertial_tensor = Eigen::Matrix3d::Zero();
+            for (const auto& particle : particles) {
+                inertial_tensor += particle;
+            }
+
+            return inertial_tensor;
+        }  // namespace kinematics
+
         inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D Rcw,
                                                               double cameraDistancePixels) {
 

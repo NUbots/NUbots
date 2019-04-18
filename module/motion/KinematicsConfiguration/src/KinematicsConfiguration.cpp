@@ -51,6 +51,8 @@ namespace motion {
         configureArm(model, objDarwinModel["arm"]);
 
         configureMassModel(model, objDarwinModel["mass_model"]);
+        configureTensorModel(model, objDarwinModel["tensor_model"]);
+
         model.TEAMDARWINCHEST_TO_ORIGIN =
             objDarwinModel["team_darwin_chest_to_origin"].as<float>() - model.leg.HIP_OFFSET_Z;
     }
@@ -142,6 +144,19 @@ namespace motion {
         model.massModel.leg_lower   = convert<double, 4>(objMassModel["particles"]["leg_lower"].as<arma::vec4>());
         model.massModel.ankle_block = convert<double, 4>(objMassModel["particles"]["ankle_block"].as<arma::vec4>());
         model.massModel.foot        = convert<double, 4>(objMassModel["particles"]["foot"].as<arma::vec4>());
+    }
+
+    void KinematicsConfiguration::configureTensorModel(KinematicsModel& model, const YAML::Node& objTensorModel) {
+        model.tensorModel.head      = convert<double, 3, 3>(objTensorModel["particles"]["head"].as<arma::mat33>());
+        model.tensorModel.arm_upper = convert<double, 3, 3>(objTensorModel["particles"]["arm_upper"].as<arma::mat33>());
+        model.tensorModel.arm_lower = convert<double, 3, 3>(objTensorModel["particles"]["arm_lower"].as<arma::mat33>());
+        model.tensorModel.torso     = convert<double, 3, 3>(objTensorModel["particles"]["torso"].as<arma::mat33>());
+        model.tensorModel.hip_block = convert<double, 3, 3>(objTensorModel["particles"]["hip_block"].as<arma::mat33>());
+        model.tensorModel.leg_upper = convert<double, 3, 3>(objTensorModel["particles"]["leg_upper"].as<arma::mat33>());
+        model.tensorModel.leg_lower = convert<double, 3, 3>(objTensorModel["particles"]["leg_lower"].as<arma::mat33>());
+        model.tensorModel.ankle_block =
+            convert<double, 3, 3>(objTensorModel["particles"]["ankle_block"].as<arma::mat33>());
+        model.tensorModel.foot = convert<double, 3, 3>(objTensorModel["particles"]["foot"].as<arma::mat33>());
     }
 }  // namespace motion
 }  // namespace module
