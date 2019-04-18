@@ -227,7 +227,23 @@ namespace platform {
                 for (uint i = 0; i < servoState.size(); ++i) {
                     previousPositions[i] = {0.0, 0.0};
                 }
+
+                outputFile.open("walklog.csv");
+                outputFile << "accelerometer.x"
+                           << ","
+                           << "accelerometer.y"
+                           << ","
+                           << "accelerometer.z"
+                           << ","
+                           << "gyroscope.x"
+                           << ","
+                           << "gyroscope.y"
+                           << ","
+                           << "gyroscope.z" << std::endl;
+
             });
+
+            on<Shutdown>().then("HardwareIO Shutdown", [this] { outputFile.close(); });
 
             on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
                 // Set config for the packet waiting
@@ -332,6 +348,10 @@ namespace platform {
 
                     // Parse our data
                     *sensors = parseSensors(data);
+
+                    outputFile << sensors->accelerometer.x << "," << sensors->accelerometer.y << ","
+                               << sensors->accelerometer.z << "," << sensors->gyroscope.x << "," << sensors->gyroscope.y
+                               << "," << sensors->gyroscope.z << std::endl;
 
                     // Work out a battery charged percentage
                     sensors->battery =

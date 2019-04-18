@@ -168,8 +168,22 @@ namespace motion {
         //     }
         // }));
 
-        on<Startup, Trigger<KinematicsModel>>().then("Update Kin Model",
-                                                     [this](const KinematicsModel& model) { kinematicsModel = model; });
+        on<Startup, Trigger<KinematicsModel>>().then("Update Kin Model", [this](const KinematicsModel& model) {
+            kinematicsModel = model;
+            outputFile.open("torso_log.csv");
+            outputFile << "uTorsoSource.x,"
+                       << "uTorsoSource.y,"
+                       << "uTorsoSource.z,"
+                       << "uTorsoDestination.x,"
+                       << "uTorsoDestination.y,"
+                       << "uTorsoDestination.z,"
+                       << "uTorso.x,"
+                       << "uTorso.y,"
+                       << "uTorso.z,"
+                       << "uTorsoActual.x,"
+                       << "uTorsoActual.y,"
+                       << "uTorsoActual.z," << std::endl;
+        });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;
@@ -186,10 +200,15 @@ namespace motion {
         });
 
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-                           .then([this](const Sensors& sensors) { update(sensors); })
+                           .then([this](const Sensors& sensors) {
+                               std::cout << "Updating sensors" << std::endl;
+                               update(sensors);
+                           })
                            .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
+            std::cout << "Walk command" << std::endl;
+
             Transform2D velocity = convert<double, 3>(walkCommand.command);
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();
@@ -566,6 +585,11 @@ namespace motion {
                              swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG,
                              sensors);
         }
+
+        outputFile << uTorsoSource.x() << "," << uTorsoSource.y() << "," << uTorsoSource.angle() << ","
+                   << uTorsoDestination.x() << "," << uTorsoDestination.y() << "," << uTorsoDestination.angle() << ","
+                   << uTorso.x() << "," << uTorso.y() << "," << uTorso.angle() << "," << uTorsoActual.x() << ","
+                   << uTorsoActual.y() << "," << uTorsoActual.angle() << "," << std::endl;
 
         // emit(graph("Right foot pos", rightFootTorso.translation()));
         // emit(graph("Left foot pos", leftFootTorso.translation()));

@@ -22,6 +22,8 @@
 
 #include <nuclear>
 
+#include <fstream>
+
 #include <yaml-cpp/yaml.h>
 
 #include "darwin/Darwin.h"
@@ -108,6 +110,8 @@ namespace platform {
             float lpfAlpha;
             float lpfBeta;
             float lpfGamma;
+
+            std::ofstream outputFile;
 
             // Vector to hold previous filtered angle servo values for filtering
             std::array<std::vector<float>, 20> previousPositions;

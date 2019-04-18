@@ -23,6 +23,8 @@
 #include <armadillo>
 #include <nuclear>
 
+#include <fstream>
+
 #include <yaml-cpp/yaml.h>
 
 #include "message/behaviour/ServoCommand.h"
@@ -197,6 +199,7 @@ namespace motion {
 
         message::motion::KinematicsModel kinematicsModel;
 
+        std::ofstream outputFile;
 
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
