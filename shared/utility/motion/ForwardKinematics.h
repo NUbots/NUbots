@@ -399,29 +399,28 @@ namespace motion {
             // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
             // Htp - transform from particle space to torso space
             // particle - CoM coordinates in particle space
-            auto translateTensor = [](
-                const Eigen::Matrix4d& Htp, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
+            auto translateTensor =
+                [](const Eigen::Matrix4d& Htp, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
+                    Eigen::Vector4d com;
+                    com << com_mass.x(), com_mass.y(), com_mass.z();
+                    // TODO: Check if parallel axis thm holds under transform
+                    // (https://hepweb.ucsd.edu/ph110b/110b_notes/node24.html)
+                    com = Htp * com;
 
-                Eigen::Vector4d com;
-                com << com_mass.x(), com_mass.y(), com_mass.z();
-                // TODO: Check if parallel axis thm holds under transform
-                // (https://hepweb.ucsd.edu/ph110b/110b_notes/node24.html)
-                com = Htp * com;
-
-                // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
-                double x = com.x(), y = com.y(), z = com.z();
-                Eigen::Matrix3d d;
-                // clang-format off
+                    // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
+                    double x = com.x(), y = com.y(), z = com.z();
+                    Eigen::Matrix3d d;
+                    // clang-format off
                 d << y * y + z * z, -x * y,         -x * z,
                     -x * y,         x * x + z * z,  -y * z,
                     -x * z,         -y * z,         x * x + y * y;
-                // clang-format on
+                    // clang-format on
 
-                // Translate tensor using the parallel axis theorem
-                Eigen::Matrix3d tensor_com = com_mass.w() * (tensor - d);
+                    // Translate tensor using the parallel axis theorem
+                    Eigen::Matrix3d tensor_com = com_mass.w() * (tensor - d);
 
-                return tensor_com;
-            };
+                    return tensor_com;
+                };
 
             // Get the centre of mass for each particle in torso space
             // There are 16 particles in total
