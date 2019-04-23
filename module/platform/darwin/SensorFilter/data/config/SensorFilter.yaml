@@ -1,5 +1,7 @@
 nominal_z: 0.01
 
+debug: False
+
 buttons:
   debounce_threshold : 7
 
@@ -74,4 +76,3 @@ motion_filter:
       velocity: [1e-3, 1e-3, 1e-3]    # We are unsure of our velocity
       rotation: [0.1, 0.1, 0.1, 0.1]  # Not very sure of rotation
       rotational_velocity: [1, 1, 1]  # Fairly unsure about our rotational velocity
-

@@ -53,6 +53,8 @@ namespace platform {
 
                 float nominal_z;
 
+                bool debug;
+
                 struct MotionFilter {
                     MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
 

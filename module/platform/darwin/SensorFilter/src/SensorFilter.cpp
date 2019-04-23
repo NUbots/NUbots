@@ -115,6 +115,8 @@ namespace platform {
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
                 this->config.nominal_z = config["nominal_z"].as<float>();
 
+                this->config.debug = config["debug"].as<bool>();
+
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
@@ -565,10 +567,12 @@ namespace platform {
                         }
                     }
 
-                    // emit(graph("LeftFootDown", sensors->leftFootDown));
-                    // emit(graph("RightFootDown", sensors->rightFootDown));
-                    // emit(graph("LeftLoadState", leftFootDown.state));
-                    // emit(graph("RightLoadState", rightFootDown.state));
+                    if (this->config.debug) {
+                        emit(graph("LeftFootDown", sensors->leftFootDown));
+                        emit(graph("RightFootDown", sensors->rightFootDown));
+                        emit(graph("LeftLoadState", leftFootDown.state));
+                        emit(graph("RightLoadState", rightFootDown.state));
+                    }
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
@@ -590,6 +594,27 @@ namespace platform {
                     sensors->centreOfMass = calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true);
                     sensors->inertialTensor =
                         calculateInertialTensor(kinematicsModel, sensors->forwardKinematics, true);
+
+                    if (this->config.debug) {
+                        Eigen::Vector4d com =
+                            sensors->world.inverse()
+                            * Eigen::Vector4d(
+                                  sensors->centreOfMass.x(), sensors->centreOfMass.y(), sensors->centreOfMass.z(), 1.0);
+
+                        // Fix mass after transform
+                        com.w() = sensors->centreOfMass.w();
+
+                        // Log CoM in both torso and world spaces
+                        log("CoM Torso space:", sensors->centreOfMass.transpose());
+                        log("CoM World space:", com.transpose());
+
+                        Eigen::Matrix3d tensor = sensors->world.topLeftCorner<3, 3>() * sensors->inertialTensor
+                                                 * sensors->world.topLeftCorner<3, 3>().transpose();
+
+                        // Log inertial tensor in both torso and world spaces
+                        log("Inertia Torso space:", sensors->inertialTensor);
+                        log("Inertia World space:", tensor);
+                    }
 
                     /************************************************
                      *                  Kinematics Horizon          *
