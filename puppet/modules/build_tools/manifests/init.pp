@@ -84,7 +84,7 @@ class build_tools {
                 pip3 install stringcase &&
                 pip3 install termcolor &&
                 pip3 install protobuf==3.5.0.post1 &&
-                pip3 install pillow==5.4.1 &&
+                pip3 install pillow &&
                 pip3 install xxhash",
     path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout     => 0,
