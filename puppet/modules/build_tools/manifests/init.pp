@@ -17,13 +17,11 @@ class build_tools {
     refreshonly => true
   } -> Package <| |>
 
-  $codename = lsb_release()
-
   # Add the llvm 6.0 source
   apt::source { 'llvm-apt-repo':
     comment  => 'The LLVM 6.0 apt repository',
-    location => "http://apt.llvm.org/${codename}",
-    release  => "llvm-toolchain-${codename}-6.0",
+    location => "http://apt.llvm.org/xenial",
+    release  => "llvm-toolchain-xenial-6.0",
     repos    => 'main',
     key      => {
       'id'      => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
