@@ -64,6 +64,8 @@ class build_tools {
   package { 'gettext': ensure => latest, }
   package { 'python-pip': ensure => latest, }
   package { 'python3-pip': ensure => latest, }
+  package { 'python-setuptools': ensure => latest, }
+  package { 'python3-setuptools': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
   package { 'libjpeg-turbo8-dev': ensure => latest, }
 
@@ -87,7 +89,7 @@ class build_tools {
     path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout     => 0,
     provider    => 'shell',
-    require => [ Package['python3-pip'], Package['zlib1g-dev'], Package['libjpeg-turbo8-dev'], ],
+    require => [ Package['python3-pip'], Package['python3-setuptools'], Package['zlib1g-dev'], Package['libjpeg-turbo8-dev'], ],
   }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
