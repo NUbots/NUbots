@@ -84,4 +84,5 @@ message Sensors {
     vec4          centreOfMass      = 17;
     mat4          bodyToGround      = 18;
     mat4          camToGround       = 19;
+    mat3          inertialTensor    = 20;
 }

@@ -402,22 +402,25 @@ namespace motion {
             auto translateTensor =
                 [](const Eigen::Matrix4d& Htp, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
                     Eigen::Vector4d com;
-                    com << com_mass.x(), com_mass.y(), com_mass.z();
-                    // TODO: Check if parallel axis thm holds under transform
-                    // (https://hepweb.ucsd.edu/ph110b/110b_notes/node24.html)
+                    com << com_mass.x(), com_mass.y(), com_mass.z(), 1.0;
                     com = Htp * com;
 
                     // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
                     double x = com.x(), y = com.y(), z = com.z();
                     Eigen::Matrix3d d;
                     // clang-format off
-                d << y * y + z * z, -x * y,         -x * z,
-                    -x * y,         x * x + z * z,  -y * z,
-                    -x * z,         -y * z,         x * x + y * y;
+                    d <<  y * y + z * z, -x * y,         -x * z,
+                         -x * y,          x * x + z * z, -y * z,
+                         -x * z,         -y * z,          x * x + y * y;
                     // clang-format on
 
+                    // We need to rotate the tensor into our torso reference frame
+                    // https://en.wikipedia.org/wiki/Moment_of_inertia#Body_frame
+                    Eigen::Matrix3d torso_tensor =
+                        Htp.topLeftCorner<3, 3>() * tensor * Htp.topLeftCorner<3, 3>().transpose();
+
                     // Translate tensor using the parallel axis theorem
-                    Eigen::Matrix3d tensor_com = com_mass.w() * (tensor - d);
+                    Eigen::Matrix3d tensor_com = com_mass.w() * (torso_tensor - d);
 
                     return tensor_com;
                 };

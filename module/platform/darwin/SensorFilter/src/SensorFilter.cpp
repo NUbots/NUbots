@@ -64,6 +64,7 @@ namespace platform {
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
+        using utility::motion::kinematics::calculateInertialTensor;
         using utility::motion::kinematics::calculateRobotToIMU;
         using utility::nusight::drawArrow;
         using utility::nusight::drawSphere;
@@ -587,6 +588,8 @@ namespace platform {
                      *                  Mass Model                  *
                      ************************************************/
                     sensors->centreOfMass = calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true);
+                    sensors->inertialTensor =
+                        calculateInertialTensor(kinematicsModel, sensors->forwardKinematics, true);
 
                     /************************************************
                      *                  Kinematics Horizon          *
