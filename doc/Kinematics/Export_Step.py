@@ -56,7 +56,7 @@ def properties_run(context):
             # t_mm = t_com * 1000 * 10 * 10
 
             # kg.cm^2 to m^2 (unit mass)
-            t_com = (t_com / physicalProperties.mass) * 100 * 100
+            t_com = (t_com / physicalProperties.mass) / 100 / 100
 
             data[name] = {
                 "Area": physicalProperties.area / 100 / 100,
