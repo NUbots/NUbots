@@ -43,19 +43,22 @@ using ServoID = utility::input::ServoID;
 struct Script {
     struct Servo {
         struct Frame {
-            Frame() : time(), angle(0.0f), p_gain(0.0f), i_gain(0.0f), d_gain(0.0f), torque(0.0f) {}
+            Frame() : time(), angle(0.0f), pGain(0.0f), iGain(0.0f), dGain(0.0f), torque(0.0f) {}
 
-            Frame(const NUClear::clock::duration& time, float angle, float p_gain, float i_gain, float d_gain, float torque)
-                : time(time), angle(angle), p_gain(p_gain), i_gain(i_gain), d_gain(d_gain), torque(torque) {}
+            Frame(const NUClear::clock::duration& time, float angle, float pGain, float torque)
+                : time(time), angle(angle), pGain(pGain), iGain(0.0f), dGain(0.0f), torque(torque) {}
+
+            Frame(const NUClear::clock::duration& time, float angle, float pGain, float iGain, float dGain, float torque)
+                : time(time), angle(angle), pGain(pGain), iGain(iGain), dGain(dGain), torque(torque) {}
 
             Frame(const Frame& other)
-                : time(other.time), angle(other.angle), p_gain(other.p_gain), i_gain(other.i_gain), d_gain(other.d_gain), torque(other.torque) {}
+                : time(other.time), angle(other.angle), pGain(other.pGain), iGain(other.iGain), dGain(other.dGain), torque(other.torque) {}
 
             NUClear::clock::duration time;
             float angle;
-            float p_gain;
-            float i_gain;
-            float d_gain;
+            float pGain;
+            float iGain;
+            float dGain;
             float torque;
         };
 
@@ -210,31 +213,31 @@ struct ExecuteScriptByName {
     ExecuteScriptByName(const size_t& id,
                         const std::string& script,
                         const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start){};
+        : sourceId(id), scripts(1, script), durationModifier(1, 1.0), start(start){};
     ExecuteScriptByName(const size_t& id,
                         const std::string& script,
-                        const double& duration_mod,
+                        const double& durationMod,
                         const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start){};
+        : sourceId(id), scripts(1, script), durationModifier(1, durationMod), start(start){};
     ExecuteScriptByName(const size_t& id,
                         const std::vector<std::string>& scripts,
                         const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
+        : sourceId(id), scripts(scripts), durationModifier(scripts.size(), 1.0), start(start){};
     ExecuteScriptByName(const size_t& id,
                         const std::vector<std::string>& scripts,
-                        const std::vector<double>& duration_mod,
+                        const std::vector<double>& durationMod,
                         const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
-        while (scripts.size() > duration_modifier.size()) {
-            duration_modifier.push_back(1.0);
+        : sourceId(id), scripts(scripts), durationModifier(durationMod), start(start) {
+        while (scripts.size() > durationModifier.size()) {
+            durationModifier.push_back(1.0);
         }
-        while (scripts.size() < duration_modifier.size()) {
-            duration_modifier.pop_back();
+        while (scripts.size() < durationModifier.size()) {
+            durationModifier.pop_back();
         }
     };
     size_t sourceId;
     std::vector<std::string> scripts;
-    std::vector<double> duration_modifier;
+    std::vector<double> durationModifier;
     NUClear::clock::time_point start;
 };
 
@@ -245,31 +248,31 @@ struct ExecuteScriptByName {
  */
 struct ExecuteScript {
     ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start){};
+        : sourceId(id), scripts(1, script), durationModifier(1, 1.0), start(start){};
     ExecuteScript(const size_t& id,
                   const Script& script,
-                  double duration_mod              = 1.0,
+                  double durationMod              = 1.0,
                   NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start){};
+        : sourceId(id), scripts(1, script), durationModifier(1, durationMod), start(start){};
     ExecuteScript(const size_t& id,
                   const std::vector<Script>& scripts,
                   NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
+        : sourceId(id), scripts(scripts), durationModifier(scripts.size(), 1.0), start(start){};
     ExecuteScript(const size_t& id,
                   const std::vector<Script>& scripts,
-                  const std::vector<double>& duration_mod,
+                  const std::vector<double>& durationMod,
                   NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
-        while (scripts.size() > duration_modifier.size()) {
-            duration_modifier.push_back(1.0);
+        : sourceId(id), scripts(scripts), durationModifier(durationMod), start(start) {
+        while (scripts.size() > durationModifier.size()) {
+            durationModifier.push_back(1.0);
         }
-        while (scripts.size() < duration_modifier.size()) {
-            duration_modifier.pop_back();
+        while (scripts.size() < durationModifier.size()) {
+            durationModifier.pop_back();
         }
     };
     size_t sourceId;
     std::vector<Script> scripts;
-    std::vector<double> duration_modifier;
+    std::vector<double> durationModifier;
     NUClear::clock::time_point start;
 };
 
@@ -302,6 +305,7 @@ namespace dsl {
 
                 // The platform script is the default script. This must exist!
                 if (!utility::file::exists(platformScript)) {
+                    NUClear::log<NUClear::ERROR>("Failed to find script: ", platformScript);
                     throw std::runtime_error("Script file '" + platformScript + "' does not exist.");
                 }
 
@@ -350,6 +354,7 @@ namespace dsl {
                         return std::make_shared<::extension::Script>(relativePath, hostname, platform);
                     }
                     catch (const YAML::ParserException& e) {
+                        NUClear::log<NUClear::ERROR>("Error parsing script yaml file:", watch.path, "YAML ParserException:", std::string(e.what()));
                         throw std::runtime_error(watch.path + " " + std::string(e.what()));
                     }
                 }
@@ -377,9 +382,9 @@ struct convert<::extension::Script::Servo::Frame> {
 
         node["time"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.time).count();
         node["angle"] = rhs.angle;
-        node["p_gain"] = rhs.p_gain;
-        node["i_gain"] = rhs.i_gain;
-        node["d_gain"] = rhs.d_gain;
+        node["pGain"] = rhs.pGain;
+        node["iGain"] = rhs.iGain;
+        node["dGain"] = rhs.dGain;
         node["torque"] = rhs.torque;
 
         return node;
@@ -392,13 +397,13 @@ struct convert<::extension::Script::Servo::Frame> {
 
             rhs = {_time,
                    node["angle"].as<float>(),
-                   node["p_gain"].as<float>(),
-                   node["i_gain"].as<float>(),
-                   node["d_gain"].as<float>(),
+                   node["pGain"].as<float>(),
+                   node["iGain"].as<float>(),
+                   node["dGain"].as<float>(),
                    node["torque"] ? node["torque"].as<float>() : 100};
         }
         catch (const YAML::Exception& e) {
-            NUClear::log<NUClear::ERROR>("Error parsing script -",
+            NUClear::log<NUClear::ERROR>("Error decoding Script::Servo::Frame in script -",
                                          "Line:",
                                          e.mark.line,
                                          "Column:",
@@ -433,7 +438,7 @@ struct convert<::extension::Script::Servo> {
             rhs = {node["id"].as<std::string>(), std::move(frames)};
         }
         catch (const YAML::Exception& e) {
-            NUClear::log<NUClear::ERROR>("Error parsing script -",
+            NUClear::log<NUClear::ERROR>("Error decoding Script::Servo in script -",
                                          "Line:",
                                          e.mark.line,
                                          "Column:",
@@ -465,7 +470,7 @@ struct convert<::extension::Script> {
             rhs                                            = {std::move(servos)};
         }
         catch (const YAML::Exception& e) {
-            NUClear::log<NUClear::ERROR>("Error parsing script -",
+            NUClear::log<NUClear::ERROR>("Error decoding Script in script -",
                                          "Line:",
                                          e.mark.line,
                                          "Column:",

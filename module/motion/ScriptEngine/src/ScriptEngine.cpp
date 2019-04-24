@@ -41,10 +41,10 @@ namespace motion {
         on<Script>("").then([this](const Script& script) {
             // Add this script to our list of scripts
             try {
-                scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, std::move(script)));
+                scripts.insert(std::make_pair(utility::file::pathSplit(script.filename).second, std::move(script)));
             }
             catch (const std::exception& e) {
-                log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
+                log<NUClear::ERROR>("Script is bad conversion:", script.filename, e.what());
             }
         });
 
@@ -56,33 +56,36 @@ namespace motion {
                 auto script            = scripts.find(scriptName);
 
                 if (script == std::end(scripts)) {
+                    log("The script ", scriptName, " is not loaded in the system");
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
                 }
                 else {
                     scriptList.push_back(script->second);
                 }
             }
+
             emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(
-                command.sourceId, scriptList, command.duration_modifier, command.start));
+                command.sourceId, scriptList, command.durationModifier, command.start));
         });
 
         on<Trigger<ExecuteScript>>().then([this](const ExecuteScript& command) {
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
-            auto time = command.start;
             for (size_t i = 0; i < command.scripts.size(); i++) {
                 const auto& script = command.scripts[i];
 
-                for (const auto& frame : script.frames) {
-                    // Move along our duration in time
-                    time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(
-                        frame.duration * command.duration_modifier[i]);
+                // For each servo in the script...
+                for (const auto& servo : script.servos) {
+                    // For each frame in the servo...
+                    for (const auto& frame : servo.frames) {
+                        // Scale the frame's time by the duration modifier
+                        auto frameTime = command.start + std::chrono::duration_cast<NUClear::clock::time_point::duration>(
+                            frame.time * command.durationModifier[i]);
 
-                    // Loop through all the motors and make a servo waypoint for it
-                    for (const auto& target : frame.targets) {
+                        // Create a waypoint for the frame and add it to our list of waypoints
                         waypoints->push_back(
-                            {command.sourceId, time, target.id, target.position, target.gain, target.torque});
-                    }
+                            {command.sourceId, frameTime, servo.id, frame.angle, frame.pGain, frame.torque}
+                        );}
                 }
             }
 

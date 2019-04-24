@@ -26,9 +26,9 @@ message Script {
     message Frame {
         uint64 time   = 1;
         float  angle  = 2;
-        float  p_gain = 3;
-        float  i_gain = 4;
-        float  d_gain = 5;
+        float  pGain  = 3;
+        float  iGain  = 4;
+        float  dGain  = 5;
         float  torque = 6;
     }
 
@@ -42,15 +42,15 @@ message Script {
 }
 
 message ExecuteScriptByName {
-    uint64   source_id                          = 1;
-    repeated string           scripts           = 2;
-    repeated double           duration_modifier = 3;
-    google.protobuf.Timestamp start             = 4;
+    uint64   sourceId                          = 1;
+    repeated string           scripts          = 2;
+    repeated double           durationModifier = 3;
+    google.protobuf.Timestamp start            = 4;
 }
 
 message ExecuteScript {
-    uint64   source_id                          = 1;
-    repeated Script           scripts           = 2;
-    repeated double           duration_modifier = 3;
-    google.protobuf.Timestamp start             = 4;
+    uint64   sourceId                          = 1;
+    repeated Script           scripts          = 2;
+    repeated double           durationModifier = 3;
+    google.protobuf.Timestamp start            = 4;
 }
