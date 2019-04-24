@@ -459,7 +459,11 @@ namespace platform {
                         sensors->rightFootDown = feet_down[1];
                     }
 
-                    emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
+                    if (this->config.debug) {
+                        emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
+                        emit(graph("LeftFootDown", sensors->leftFootDown));
+                        emit(graph("RightFootDown", sensors->rightFootDown));
+                    }
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -565,13 +569,6 @@ namespace platform {
                                 }
                             }
                         }
-                    }
-
-                    if (this->config.debug) {
-                        emit(graph("LeftFootDown", sensors->leftFootDown));
-                        emit(graph("RightFootDown", sensors->rightFootDown));
-                        emit(graph("LeftLoadState", leftFootDown.state));
-                        emit(graph("RightLoadState", rightFootDown.state));
                     }
 
                     // Gives us the quaternion representation
