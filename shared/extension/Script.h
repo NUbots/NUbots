@@ -27,13 +27,15 @@
 
 #include "FileWatch.h"
 
+#include "message/motion/script/Script.h"
 #include "utility/file/fileutil.h"
 #include "utility/input/ServoID.h"
 #include "utility/strutil/strutil.h"
 
 namespace extension {
 
-using ServoID = utility::input::ServoID;
+using ServoID       = utility::input::ServoID;
+using ScriptMessage = message::motion::script::Script;
 
 /**
  * TODO document
@@ -41,59 +43,29 @@ using ServoID = utility::input::ServoID;
  * @author Alex Biddulph
  */
 struct Script {
-    struct Servo {
-        struct Frame {
-            Frame() : time(), angle(0.0f), pGain(0.0f), iGain(0.0f), dGain(0.0f), torque(0.0f) {}
-
-            Frame(const NUClear::clock::duration& time, float angle, float pGain, float torque)
-                : time(time), angle(angle), pGain(pGain), iGain(0.0f), dGain(0.0f), torque(torque) {}
-
-            Frame(const NUClear::clock::duration& time, float angle, float pGain, float iGain, float dGain, float torque)
-                : time(time), angle(angle), pGain(pGain), iGain(iGain), dGain(dGain), torque(torque) {}
-
-            Frame(const Frame& other)
-                : time(other.time), angle(other.angle), pGain(other.pGain), iGain(other.iGain), dGain(other.dGain), torque(other.torque) {}
-
-            NUClear::clock::duration time;
-            float angle;
-            float pGain;
-            float iGain;
-            float dGain;
-            float torque;
-        };
-
-        Servo() : id(), frames() {}
-
-        Servo(const ServoID& id, const std::vector<Frame>& frames)
-            : id(id), frames(frames) {}
-
-        ServoID id;
-        std::vector<Frame> frames;
-    };
-
     std::string filename, hostname, platform;
-    YAML::Node config;
-    std::vector<Servo> servos;
+    YAML::Node yaml;
+    ScriptMessage message;
 
     Script()
-        : filename(), hostname(Script::getHostname()), platform(Script::getPlatform(hostname)), config(), servos() {}
+        : filename(), hostname(Script::getHostname()), platform(Script::getPlatform(hostname)), yaml(), message() {}
 
-    Script(const std::vector<Servo>& servos)
+    Script(const ScriptMessage& message)
         : filename()
         , hostname(Script::getHostname())
         , platform(Script::getPlatform(hostname))
-        , config()
-        , servos(servos) {}
+        , yaml()
+        , message(message) {}
 
     Script(const std::string& filename,
            const std::string& hostname,
            const std::string& platform,
-           const YAML::Node& config,
-           const std::vector<Servo>& servos)
-        : filename(filename), hostname(hostname), platform(platform), config(config), servos(servos) {}
+           const YAML::Node& yaml,
+           const ScriptMessage& message)
+        : filename(filename), hostname(hostname), platform(platform), yaml(yaml), message(message) {}
 
     Script(const std::string& filename, const std::string& hostname, const std::string& platform)
-        : filename(filename), hostname(hostname), platform(platform), config(), servos() {
+        : filename(filename), hostname(hostname), platform(platform), yaml(), message() {
 
         // Per robot scripts:    Scripts that are specific to a certain robot (e.g. darwin1).
         //                       These are to account for minor hardware variations in a robot and, as such, take
@@ -104,15 +76,17 @@ struct Script {
 
         if (utility::file::exists("scripts/" + hostname + "/" + filename)) {
             NUClear::log<NUClear::INFO>("Parsing robot specific script:", filename);
-            config = YAML::LoadFile("scripts/" + hostname + "/" + filename);
+            yaml = YAML::LoadFile("scripts/" + hostname + "/" + filename);
         }
 
         else if (utility::file::exists("scripts/" + platform + "/" + filename)) {
             NUClear::log<NUClear::INFO>("Parsing default platform script:", filename);
-            config = YAML::LoadFile("scripts/" + platform + "/" + filename);
+            yaml = YAML::LoadFile("scripts/" + platform + "/" + filename);
         }
 
-        servos = config.as<std::vector<Servo>>();
+        message          = ServoMessage();
+        message.filename = filename;
+        message.servos   = yaml.as<std::vector<ScriptMessage::Servo>>();
     }
 
     static inline std::string getHostname() {
@@ -143,143 +117,17 @@ struct Script {
         }
     }
 
-    Script operator[](const std::string& key) {
-        return Script(filename, hostname, platform, config[key], servos);
-    }
-
-    const Script operator[](const std::string& key) const {
-        return Script(filename, hostname, platform, config[key], servos);
-    }
-
-    Script operator[](const char* key) {
-        return Script(filename, hostname, platform, config[key], servos);
-    }
-
-    const Script operator[](const char* key) const {
-        return Script(filename, hostname, platform, config[key], servos);
-    }
-
-    Script operator[](size_t index) {
-        return Script(filename, hostname, platform, config[index], servos);
-    }
-
-    const Script operator[](size_t index) const {
-        return Script(filename, hostname, platform, config[index], servos);
-    }
-
-    Script operator[](int index) {
-        return Script(filename, hostname, platform, config[index], servos);
-    }
-
-    const Script operator[](int index) const {
-        return Script(filename, hostname, platform, config[index], servos);
-    }
-
-    template <typename T>
-    T as() const {
-        return config.as<T>();
-    }
-
-    // All of these disables for this template are because the std::string constructor is magic and screwy
-    template <
-        typename T,
-        typename Decayed = typename std::decay<T>::type,
-        typename         = typename std::enable_if<
-            !std::is_same<const char*, Decayed>::value && !std::is_same<std::allocator<char>, Decayed>::value
-            && !std::is_same<std::initializer_list<char>, Decayed>::value && !std::is_same<char, Decayed>::value>::type>
-    operator T() const {
-        return config.as<T>();
-    }
-
-    // The conversion for string is fully specialised because strings get screwy
-    // because of their auto conversion to const char* etc
-    operator std::string() const {
-        return config.as<std::string>();
-    }
-
     void save(const std::string& file) {
         std::ofstream yamlFile("scripts/" + hostname + "/" + file, std::ios::trunc | std::ios::out);
-        yamlFile << YAML::convert<std::vector<Servo>>::encode(servos);
+        yamlFile << YAML::convert<std::vector<ScriptMessage::Servo>>::encode(message.servos);
         yamlFile.close();
     }
 };
 
-/**
- * TODO document
- *
- * @author Trent Houliston
- */
-struct ExecuteScriptByName {
-    ExecuteScriptByName(const size_t& id,
-                        const std::string& script,
-                        const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), durationModifier(1, 1.0), start(start){};
-    ExecuteScriptByName(const size_t& id,
-                        const std::string& script,
-                        const double& durationMod,
-                        const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), durationModifier(1, durationMod), start(start){};
-    ExecuteScriptByName(const size_t& id,
-                        const std::vector<std::string>& scripts,
-                        const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), durationModifier(scripts.size(), 1.0), start(start){};
-    ExecuteScriptByName(const size_t& id,
-                        const std::vector<std::string>& scripts,
-                        const std::vector<double>& durationMod,
-                        const NUClear::clock::time_point& start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), durationModifier(durationMod), start(start) {
-        while (scripts.size() > durationModifier.size()) {
-            durationModifier.push_back(1.0);
-        }
-        while (scripts.size() < durationModifier.size()) {
-            durationModifier.pop_back();
-        }
-    };
-    size_t sourceId;
-    std::vector<std::string> scripts;
-    std::vector<double> durationModifier;
-    NUClear::clock::time_point start;
-};
-
-/**
- * TODO document
- *
- * @author Trent Houliston
- */
-struct ExecuteScript {
-    ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), durationModifier(1, 1.0), start(start){};
-    ExecuteScript(const size_t& id,
-                  const Script& script,
-                  double durationMod              = 1.0,
-                  NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(1, script), durationModifier(1, durationMod), start(start){};
-    ExecuteScript(const size_t& id,
-                  const std::vector<Script>& scripts,
-                  NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), durationModifier(scripts.size(), 1.0), start(start){};
-    ExecuteScript(const size_t& id,
-                  const std::vector<Script>& scripts,
-                  const std::vector<double>& durationMod,
-                  NUClear::clock::time_point start = NUClear::clock::now())
-        : sourceId(id), scripts(scripts), durationModifier(durationMod), start(start) {
-        while (scripts.size() > durationModifier.size()) {
-            durationModifier.push_back(1.0);
-        }
-        while (scripts.size() < durationModifier.size()) {
-            durationModifier.pop_back();
-        }
-    };
-    size_t sourceId;
-    std::vector<Script> scripts;
-    std::vector<double> durationModifier;
-    NUClear::clock::time_point start;
-};
-
 inline Script operator+(const Script& s1, const Script& s2) {
     Script s;
-    s.servos.insert(s.servos.end(), s1.servos.begin(), s1.servos.end());
-    s.servos.insert(s.servos.end(), s2.servos.begin(), s2.servos.end());
+    s.message.servos.insert(s.message.servos.end(), s1.message.servos.begin(), s1.message.servos.end());
+    s.message.servos.insert(s.message.servos.end(), s2.message.servos.begin(), s2.message.servos.end());
     return s;
 }
 
@@ -296,8 +144,8 @@ namespace dsl {
                 auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED | ::extension::FileWatch::CREATED
                              | ::extension::FileWatch::UPDATED | ::extension::FileWatch::MOVED_TO;
 
-                std::string hostname(extension::Script::getHostname()),
-                    platform(extension::Script::getPlatform(hostname));
+                std::string hostname(extension::Script::getHostname());
+                std::string platform(extension::Script::getPlatform(hostname));
 
                 // Set paths to the script files.
                 auto robotScript    = "scripts/" + hostname + "/" + path;
@@ -354,7 +202,10 @@ namespace dsl {
                         return std::make_shared<::extension::Script>(relativePath, hostname, platform);
                     }
                     catch (const YAML::ParserException& e) {
-                        NUClear::log<NUClear::ERROR>("Error parsing script yaml file:", watch.path, "YAML ParserException:", std::string(e.what()));
+                        NUClear::log<NUClear::ERROR>("Error parsing script yaml file:",
+                                                     watch.path,
+                                                     "YAML ParserException:",
+                                                     std::string(e.what()));
                         throw std::runtime_error(watch.path + " " + std::string(e.what()));
                     }
                 }
@@ -376,30 +227,30 @@ namespace dsl {
 
 namespace YAML {
 template <>
-struct convert<::extension::Script::Servo::Frame> {
-    static inline Node encode(const ::extension::Script::Servo::Frame& rhs) {
+struct convert<ScriptMessage::Servo::Frame> {
+    static inline Node encode(const ScriptMessage::Servo::Frame& rhs) {
         Node node;
 
-        node["time"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.time).count();
-        node["angle"] = rhs.angle;
-        node["pGain"] = rhs.pGain;
-        node["iGain"] = rhs.iGain;
-        node["dGain"] = rhs.dGain;
+        node["time"]   = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.time).count();
+        node["angle"]  = rhs.angle;
+        node["p_gain"] = rhs.p_gain;
+        node["i_gain"] = rhs.i_gain;
+        node["d_gain"] = rhs.d_gain;
         node["torque"] = rhs.torque;
 
         return node;
     }
 
-    static inline bool decode(const Node& node, ::extension::Script::Servo::Frame& rhs) {
+    static inline bool decode(const Node& node, ScriptMessage::Servo::Frame& rhs) {
         try {
             int millis = node["time"].as<int>();
             std::chrono::milliseconds _time(millis);
 
             rhs = {_time,
                    node["angle"].as<float>(),
-                   node["pGain"].as<float>(),
-                   node["iGain"].as<float>(),
-                   node["dGain"].as<float>(),
+                   node["p_gain"].as<float>(),
+                   node["i_gain"].as<float>(),
+                   node["d_gain"].as<float>(),
                    node["torque"] ? node["torque"].as<float>() : 100};
         }
         catch (const YAML::Exception& e) {
@@ -420,8 +271,8 @@ struct convert<::extension::Script::Servo::Frame> {
 };
 
 template <>
-struct convert<::extension::Script::Servo> {
-    static inline Node encode(const ::extension::Script::Servo& rhs) {
+struct convert<ScriptMessage::Servo> {
+    static inline Node encode(const ScriptMessage::Servo& rhs) {
         Node node;
 
         node["id"]     = static_cast<std::string>(rhs.id);
@@ -430,10 +281,10 @@ struct convert<::extension::Script::Servo> {
         return node;
     }
 
-    static inline bool decode(const Node& node, ::extension::Script::Servo& rhs) {
+    static inline bool decode(const Node& node, ScriptMessage::Servo& rhs) {
         try {
-            std::vector<::extension::Script::Servo::Frame> frames =
-                node["frames"].as<std::vector<::extension::Script::Servo::Frame>>();
+            std::vector<ScriptMessage::Servo::Frame> frames =
+                node["frames"].as<std::vector<ScriptMessage::Servo::Frame>>();
 
             rhs = {node["id"].as<std::string>(), std::move(frames)};
         }
@@ -455,8 +306,8 @@ struct convert<::extension::Script::Servo> {
 };
 
 template <>
-struct convert<::extension::Script> {
-    static inline Node encode(const ::extension::Script& rhs) {
+struct convert<ScriptMessage> {
+    static inline Node encode(const ScriptMessage& rhs) {
         Node node;
 
         node = rhs.servos;
@@ -464,10 +315,10 @@ struct convert<::extension::Script> {
         return node;
     }
 
-    static inline bool decode(const Node& node, ::extension::Script& rhs) {
+    static inline bool decode(const Node& node, ScriptMessage& rhs) {
         try {
-            std::vector<::extension::Script::Servo> servos = node.as<std::vector<::extension::Script::Servo>>();
-            rhs                                            = {std::move(servos)};
+            std::vector<ScriptMessage::Servo> servos = node.as<std::vector<ScriptMessage::Servo>>();
+            rhs.servos                               = {std::move(servos)};
         }
         catch (const YAML::Exception& e) {
             NUClear::log<NUClear::ERROR>("Error decoding Script in script -",
