@@ -7,25 +7,24 @@ import numpy as np
 def properties_run(context):
     try:
         app = adsk.core.Application.get()
+        design = adsk.fusion.Design.cast(app.activeProduct)
 
         if not app.activeDocument.name:
             app.userInterface.messageBox("No active Fusion product", "No product")
             return
 
-        # Get the root component of the active product.
-        rootComp = app.activeProduct.rootComponent
-
-        bodies = [body for body in rootComp.bRepBodies]
-
-        # Iterate through all of the occurrences in the assembly.
-        for occ in rootComp.allOccurrences:
-            # Iterate over all of the bodies within the component.
-            bodies += [x for x in occ.component.bRepBodies]
+        # Find all the bodies associated with all of the occurrences in the design
+        bodies = []
+        for comp in design.allComponents:
+            # Get the occurrences that reference this component.
+            for occ in design.rootComponent.allOccurrencesByComponent(comp):
+                for body in occ.bRepBodies:
+                    bodies.append((body, occ.transform))
 
         data = {}
 
         # Iterate through all of the bodies in the occurrences.
-        for body in bodies:
+        for body, transform in bodies:
             physicalProperties = body.physicalProperties
             name = body.parentComponent.name.replace(" ", "_")
 
@@ -39,6 +38,7 @@ def properties_run(context):
             t_origin = np.asarray([[xx, xy, xz], [xy, yy, yz], [xz, yz, zz]])
 
             # Get center of mass from physical properties
+
             CoM = physicalProperties.centerOfMass
             (x, y, z) = (CoM.x, CoM.y, CoM.z)
 
@@ -63,21 +63,19 @@ def properties_run(context):
                 "Volume": physicalProperties.volume / 100 / 100 / 100,
                 "bBoxMin": [bBoxMin.x / 100, bBoxMin.y / 100, bBoxMin.z / 100],
                 "bBoxMax": [bBoxMax.x / 100, bBoxMax.y / 100, bBoxMax.z / 100],
-                "CoM": [x / 100, y / 100, z / 100],
+                "CoM": [float(x / 100), float(y / 100), float(z / 100)],
                 "Tensor": t_com.tolist(),
             }
-
         with open(
             "C:/Users/fish_/Desktop/Igus_V5/Igus_{}.yaml".format(app.activeDocument.name.replace(" ", "_")), "w"
         ) as f:
-            f.write(yaml.dump(data))
+            f.write(yaml.dump(data, default_flow_style = None))
 
     except:
-        if app.userInterface:
-            app.userInterface.messageBox("Failed:\n{}".format(traceback.format_exc()))
+        if ui:
+            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
-
-def run(context):
+def export_step(context):
     ui = None
     try:
         app = adsk.core.Application.get()
@@ -131,7 +129,19 @@ def run(context):
         exportOptions.filename = filename
         exportMgr.execute(exportOptions)
 
+    except:
+        if ui:
+            ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
+
+def run(context):
+    ui = None
+    try:
+        app = adsk.core.Application.get()
+        ui = app.userInterface
+        design = adsk.fusion.Design.cast(app.activeProduct)
+
         properties_run(context)
+        # export_step(context)   
 
         ui.messageBox("Finished.")
 

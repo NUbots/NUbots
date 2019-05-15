@@ -588,7 +588,11 @@ namespace platform {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass = calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true);
+                    sensors->centreOfMass = calculateCentreOfMass(kinematicsModel,
+                                                                  sensors->forwardKinematics,
+                                                                  true,
+                                                                  sensors->world.inverse(),
+                                                                  this->config.debug);
                     sensors->inertialTensor =
                         calculateInertialTensor(kinematicsModel, sensors->forwardKinematics, true);
 
@@ -602,15 +606,15 @@ namespace platform {
                         com.w() = sensors->centreOfMass.w();
 
                         // Log CoM in both torso and world spaces
-                        log("CoM Torso space:", sensors->centreOfMass.transpose());
-                        log("CoM World space:", com.transpose());
+                        // log("CoM Torso space:", sensors->centreOfMass.transpose());
+                        // log("CoM World space:", com.transpose());
 
-                        Eigen::Matrix3d tensor = sensors->world.topLeftCorner<3, 3>() * sensors->inertialTensor
-                                                 * sensors->world.topLeftCorner<3, 3>().transpose();
+                        // Eigen::Matrix3d tensor = sensors->world.topLeftCorner<3, 3>() * sensors->inertialTensor *
+                        // sensors->world.topLeftCorner<3, 3>().transpose();
 
                         // Log inertial tensor in both torso and world spaces
-                        log("Inertia Torso space:", sensors->inertialTensor);
-                        log("Inertia World space:", tensor);
+                        // log("Inertia Torso space:", sensors->inertialTensor);
+                        // log("Inertia World space:", tensor);
                     }
 
                     /************************************************

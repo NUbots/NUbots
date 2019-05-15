@@ -109,4 +109,4 @@ print(
 )
 
 with open("COM.yaml", "w") as f:
-    f.write(yaml.dump(particles))
+    f.write(yaml.dump(particles, default_flow_style=None))
