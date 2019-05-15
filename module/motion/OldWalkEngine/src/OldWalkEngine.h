@@ -147,6 +147,7 @@ namespace motion {
 
         // start config, see config file for documentation
 
+        bool use_com;
         double stanceLimitY2;
         arma::mat::fixed<3, 2> stepLimits;
         arma::mat::fixed<3, 2> velocityLimits;
