@@ -2,999 +2,999 @@
   frames:
     - time: 1000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: -0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_ANKLE_ROLL
   frames:
     - time: 1000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_ANKLE_ROLL
   frames:
     - time: 1000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_HIP_YAW
   frames:
     - time: 1000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.5186121
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.5186121
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: -0.2516343
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: -0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: HEAD_YAW
   frames:
     - time: 1000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_HIP_ROLL
   frames:
     - time: 1000
       angle: 0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.02
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.3252833
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.02148098
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_HIP_YAW
   frames:
     - time: 1000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0
-      pGain: 20
-      iGain: 0
-      dGain: 0
+      p_gain: 20
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.8776513
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: -0.03375582
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: HEAD_PITCH
   frames:
     - time: 1000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.05063373
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_ANKLE_PITCH
   frames:
     - time: 1000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.004603066
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_ANKLE_PITCH
   frames:
     - time: 1000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.003068711
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_KNEE
   frames:
     - time: 1000
       angle: 0.1778893
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.1778893
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.1778893
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.1778893
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 1.497435
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.4279892
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 1.383893
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.08429365
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_KNEE
   frames:
     - time: 1000
       angle: 0.2070421
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.2070421
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.2070421
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.2070421
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.2070421
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.2070421
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.2070421
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.05360654
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_HIP_PITCH
   frames:
     - time: 1000
       angle: 0.1396263
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.1396263
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.1396263
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.1396263
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: -0.9436285
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: -0.9436285
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: -0.9436285
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: -0.2777183
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_HIP_PITCH
   frames:
     - time: 1000
       angle: 0.07518341
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.07518341
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.07518341
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.07518341
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.07518341
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.07518341
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.07518341
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: -0.2132754
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_ELBOW
   frames:
     - time: 1000
       angle: 0.0859239
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.0859239
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.0859239
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.0859239
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.0859239
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: -1.453035
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: -1.453035
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: -0.2991993
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_ELBOW
   frames:
     - time: 1000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.1672447
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_SHOULDER_ROLL
   frames:
     - time: 1000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 0.2008088
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_SHOULDER_ROLL
   frames:
     - time: 1000
       angle: -0.1639842
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: -1.581729
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: -1.581729
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: -0.1010757
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: -0.1639842
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: -0.1639842
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: -1.612416
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: -0.171656
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: L_SHOULDER_PITCH
   frames:
     - time: 1000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: R_SHOULDER_PITCH
   frames:
     - time: 1000
       angle: 1.546438
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 2000
       angle: 1.546438
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 3000
       angle: -1.5637
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 4000
       angle: -1.5637
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 5000
       angle: -1.559097
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 6000
       angle: -0.6308119
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 7000
       angle: -0.6308119
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 8000
       angle: 1.57866
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100

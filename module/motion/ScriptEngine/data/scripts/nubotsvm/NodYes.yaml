@@ -2,51 +2,51 @@
   frames:
     - time: 500
       angle: 0
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 650
       angle: 0
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 900
       angle: 0
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 1200
       angle: 0
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
 - id: HEAD_PITCH
   frames:
     - time: 500
       angle: 0
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 650
       angle: -0.3
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 900
       angle: 0
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100
     - time: 1200
       angle: 0
-      pGain: 30
-      iGain: 0
-      dGain: 0
+      p_gain: 30
+      i_gain: 0
+      d_gain: 0
       torque: 100

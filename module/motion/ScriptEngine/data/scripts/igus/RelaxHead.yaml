@@ -2,15 +2,15 @@
   frames:
     - time: 25
       angle: 0
-      pGain: 0
-      iGain: 0
-      dGain: 0
+      p_gain: 0
+      i_gain: 0
+      d_gain: 0
       torque: 0
 - id: HEAD_PITCH
   frames:
     - time: 25
       angle: 0
-      pGain: 0
-      iGain: 0
-      dGain: 0
+      p_gain: 0
+      i_gain: 0
+      d_gain: 0
       torque: 0
