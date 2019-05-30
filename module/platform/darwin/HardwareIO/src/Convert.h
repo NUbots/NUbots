@@ -37,9 +37,9 @@ namespace platform {
             /// This means 512 = 0
             static constexpr double ACCELEROMETER_CONVERSION_FACTOR = (4 * 9.80665) / 512.0;
 
-            /// The Gyrosocope value from the Darwin is between 0 and 1023, representing a value between -1600 and 1600
+            /// The Gyrosocope value from the Darwin is between 0 and 1023, representing a value between -500 and 500
             /// degrees per second. This means 512 = 0
-            static constexpr double GYROSCOPE_CONVERSION_FACTOR = (1800.0 * (M_PI / 180.0)) / 512.0;
+            static constexpr double GYROSCOPE_CONVERSION_FACTOR = (500.0 * (M_PI / 180.0)) / 512.0;
 
             /// The value that comes from the darwin is measured in decivolts (0.1 of a volt)
             static constexpr double VOLTAGE_CONVERSION_FACTOR = 0.1;
