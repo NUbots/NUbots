@@ -606,6 +606,21 @@ namespace motion {
         }
         auto waypoints = motionLegs(joints);
 
+        // Ankle roll compensation
+        double ankle_roll = std::atan2(sensors.world(2, 1), sensors.world(2, 2));
+        for (auto& joint : *waypoints) {
+            if (joint.id == ServoID::R_ANKLE_ROLL) {
+                // log("L Old angle:", joint.position, " New angle:", -ankle_roll);
+                joint.position = -2.0 * ankle_roll;
+                joint.gain = 30;
+            }
+            if (joint.id == ServoID::L_ANKLE_ROLL) {
+                // log("R Old angle:", joint.position, " New angle:", -ankle_roll);
+                joint.position = -2.0 * ankle_roll;
+                joint.gain = 30;
+            }
+        }
+
         auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
 
