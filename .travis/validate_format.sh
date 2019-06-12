@@ -6,7 +6,7 @@ ret=0
 while IFS= read -r -d $'\0' line; do
 
     # Get what our formatted code should be
-    fmt=$( clang-format-5.0 -style=file $line )
+    fmt=$( clang-format-6.0 -style=file $line )
 
     # Print a status message so we know what it's doing
     echo "Validating formatting for $line"

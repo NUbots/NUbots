@@ -135,7 +135,6 @@ namespace behaviour {
                 // }
 
                 updatePriority(EXECUTION_PRIORITY);
-
             });
 
             on<Trigger<FinishKick>>().then([this] {

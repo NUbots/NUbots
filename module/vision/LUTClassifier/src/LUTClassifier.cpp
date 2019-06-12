@@ -82,7 +82,6 @@ namespace vision {
         , LUT_HOST("") {
 
         on<Configuration>("LookUpTable.yaml").then([this](const Configuration& config) {
-
             LUT_PATH = config.fileName;
             LUT_HOST = config.hostname;
 
@@ -146,7 +145,6 @@ namespace vision {
         // Trigger the same function when either update
         on<Configuration, Trigger<CameraParameters>>("LUTClassifier.yaml")
             .then([this](const Configuration& config, const CameraParameters& cam) {
-
                 // Visual horizon detector
                 if (cam.lens == CameraParameters::LensType::PINHOLE) {
                     VISUAL_HORIZON_SPACING =
@@ -219,7 +217,6 @@ namespace vision {
         on<Trigger<Image>, With<LookUpTable>, With<Sensors>, With<CameraParameters>, Single, Priority::LOW>().then(
             "Classify Image",
             [this](const Image& rawImage, const LookUpTable& lut, const Sensors& sensors, const CameraParameters& cam) {
-
                 // TODO
                 // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) +
                 // std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
@@ -255,10 +252,10 @@ namespace vision {
                 enhanceGoals(rawImage, lut, *classifiedImage, cam);
 
                 // Find our ball (also helps with the bottom of goals)
-                findBall(rawImage, lut, *classifiedImage, cam);
+                // findBall(rawImage, lut, *classifiedImage, cam);
 
-                // Enhance our ball
-                enhanceBall(rawImage, lut, *classifiedImage, cam);
+                // // Enhance our ball
+                // enhanceBall(rawImage, lut, *classifiedImage, cam);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));
