@@ -258,9 +258,8 @@ namespace platform {
                 chargedVoltage = config["battery"]["charged_voltage"].as<float>();
                 flatVoltage    = config["battery"]["flat_voltage"].as<float>();
 
-                lpfAlpha = config["lpfAlpha"].as<float>();
-                lpfBeta  = config["lpfBeta"].as<float>();
-                lpfGamma = config["lpfGamma"].as<float>();
+                lpfTau   = config["lpfTau"].as<float>();
+                lpfOmega = config["lpfOmega"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
@@ -276,6 +275,14 @@ namespace platform {
                                                     Darwin::DarwinDevice::Instruction::SYNC_WRITE,
                                                     Darwin::MX28::Address::D_GAIN,
                                                     0x0A};
+
+                    // Calculate helper variables to reduce DIV/MUL
+                    float doubleTau           = 2.0 * lpfTau;
+                    float inverseOmegaSquared = 1.0 / (lpfOmega * lpfOmega);
+                    // Calculate coefficients for current input and previous two filtered outputs
+                    float alpha = 1.0 / (1.0 + doubleTau + inverseOmegaSquared);
+                    float beta  = (doubleTau + 2.0 * inverseOmegaSquared) * alpha;
+                    float gamma = inverseOmegaSquared * alpha;
 
                     for (uint i = 0; i < servoState.size(); ++i) {
 
@@ -299,9 +306,9 @@ namespace platform {
                                 }
 
                                 // Filter angular position by LPF
-                                float filteredAngularPosition = lpfAlpha * servoState[i].goalPosition
-                                                                + lpfBeta * previousPositions[i][0]
-                                                                + lpfGamma * previousPositions[i][1];
+                                float filteredAngularPosition = alpha * servoState[i].goalPosition
+                                                                + beta * previousPositions[i][0]
+                                                                + gamma * previousPositions[i][1];
 
                                 // Get our goal position and speed
                                 uint16_t goalPosition = Convert::servoPositionInverse(i, filteredAngularPosition);

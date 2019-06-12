@@ -107,9 +107,8 @@ namespace platform {
             float flatVoltage;
 
             // Coefficient values for Low Pass Filtering
-            float lpfAlpha;
-            float lpfBeta;
-            float lpfGamma;
+            float lpfOmega;  // Natural frequency omega_n
+            float lpfTau;    // Damping coefficient tau
 
             std::ofstream outputFile;
 
