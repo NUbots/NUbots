@@ -49,7 +49,6 @@ namespace research {
         : Reactor(std::move(environment)), ballProvider(), goalProvider(), fieldProvider(), lineProvider() {
 
         on<Configuration>("AutoClassifierProvider.yaml").then([this](const Configuration& config) {
-
             ballProvider.enable(config["ball"]["enabled"].as<bool>());
             ballEdgeBuffer   = config["ball"]["edge_buffer"].as<int>();
             ballLightnessMin = config["ball"]["lightness_range"][0].as<uint8_t>();
@@ -72,7 +71,6 @@ namespace research {
 
         ballProvider = on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then(
             "Auto Classifier Provider Balls", [this](const std::vector<Ball>& balls) {
-
                 auto pixels            = std::make_unique<AutoClassifierPixels>();
                 pixels->classification = Colour::ORANGE;
 
@@ -114,7 +112,6 @@ namespace research {
 
         goalProvider = on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then(
             "Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
-
                 auto pixels            = std::make_unique<AutoClassifierPixels>();
                 pixels->classification = Colour::YELLOW;
 
@@ -161,7 +158,6 @@ namespace research {
 
         fieldProvider = on<Trigger<ClassifiedImage>, Single, Priority::LOW>().then(
             "Auto Classifier Field", [this](const ClassifiedImage& classifiedImage) {
-
                 auto pixels            = std::make_unique<AutoClassifierPixels>();
                 pixels->classification = Colour::GREEN;
 

@@ -64,7 +64,6 @@ namespace input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
                   [this](const Configuration& config, const GlobalConfig& globalConfig) {
-
                       PLAYER_ID = globalConfig.playerId;
                       TEAM_ID   = globalConfig.teamId;
                       send_port = config["send_port"].as<uint>();

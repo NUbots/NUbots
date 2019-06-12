@@ -54,7 +54,6 @@ namespace tools {
         showDeviceMenu();
 
         on<IO>(STDIN_FILENO, IO::READ).then([this] {
-
             // Get input.
             std::string input;
             std::cin >> input;
@@ -136,7 +135,6 @@ namespace tools {
         });
 
         on<Trigger<FlashCM730>, Sync<FirmwareInstaller>>().then([this] {
-
             std::pair<std::string, std::string> name;
 
             switch (selected_device) {
