@@ -288,8 +288,8 @@ namespace dsl {
                 auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED | ::extension::FileWatch::CREATED
                              | ::extension::FileWatch::UPDATED | ::extension::FileWatch::MOVED_TO;
 
-                std::string hostname(extension::Script::getHostname()),
-                    platform(extension::Script::getPlatform(hostname));
+                std::string hostname(::extension::Script::getHostname()),
+                    platform(::extension::Script::getPlatform(hostname));
 
                 // Set paths to the script files.
                 auto robotScript    = "scripts/" + hostname + "/" + path;
@@ -319,8 +319,8 @@ namespace dsl {
                 if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
                     // Return our yaml file
                     try {
-                        std::string hostname(extension::Script::getHostname()),
-                            platform(extension::Script::getPlatform(hostname));
+                        std::string hostname(::extension::Script::getHostname()),
+                            platform(::extension::Script::getPlatform(hostname));
 
                         // Get relative path to script file.
                         auto components = utility::strutil::split(watch.path, '/');
