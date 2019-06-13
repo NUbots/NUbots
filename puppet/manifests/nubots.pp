@@ -31,11 +31,39 @@ node nubotsvmbuild {
   $archs = {
     'native'    => {'flags'       => ['', ],
                     'params'      => ['-m64', ],
-                    'environment' => {'TARGET' => 'GENERIC', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', 'CCAS' => '/usr/bin/gcc', 'AS' => '/usr/bin/gcc', 'CCASFLAGS' => '-m64', },
+                    'environment' => {'TARGET' => 'GENERIC',
+                                      'USE_THREAD' => '1',
+                                      'BINARY' => '64',
+                                      'NUM_THREADS' => '2',
+                                      'AUDIO' => 'PORTAUDIO',
+                                      'LDFLAGS' => '-m64',
+                                      'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig',
+                                      'CCAS' => '/usr/bin/gcc',
+                                      'AS' => '/usr/bin/gcc',
+                                      'CCASFLAGS' => '-m64', },
                    },
-    'nuc7i7bnh' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2', '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes', '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4', '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2', '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase', '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt', '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf', '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq', '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi', '-mno-clwb', '-mno-mwaitx', ],
-                    'params'      => ['-m64', '--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
-                    'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', 'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig', 'CCAS' => '/usr/bin/gcc', 'AS' => '/usr/bin/gcc', 'CCASFLAGS' => '-m64', },
+    'nuc7i7bnh' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2',
+                                      '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes',
+                                      '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4',
+                                      '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2',
+                                      '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase',
+                                      '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt',
+                                      '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf',
+                                      '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq',
+                                      '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi',
+                                      '-mno-clwb', '-mno-mwaitx', ],
+                    'params'      => ['-m64', '--param l1-cache-size=32', '--param l1-cache-line-size=64',
+                                      '--param l2-cache-size=4096', ],
+                    'environment' => {'TARGET' => 'HASWELL',
+                                      'USE_THREAD' => '1',
+                                      'BINARY' => '64',
+                                      'NUM_THREADS' => '2',
+                                      'AUDIO' => 'PORTAUDIO',
+                                      'LDFLAGS' => '-m64',
+                                      'PKG_CONFIG_PATH' => '/usr/lib/x86_64-linux-gnu/pkgconfig',
+                                      'CCAS' => '/usr/bin/gcc',
+                                      'AS' => '/usr/bin/gcc',
+                                      'CCASFLAGS' => '-m64', },
                    },
   }
 
@@ -44,13 +72,19 @@ node nubotsvmbuild {
     archs => $archs,
   }
 
-  # We need build tools to compile and we need it done before the installer
-  class {'build_tools': } -> class { 'protobuf': } -> Installer <| |>
-
   # These user tools make the shell much easier and these also should be done before installing
   class {'user_tools':
     user => 'vagrant',
   } -> Installer <| |>
+
+  # Install protobuf.
+  class { 'protobuf': }
+
+  # Install quex.
+  class { 'quex': }
+
+  # Install gazebo.
+  class { 'gazebo': }
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
@@ -95,8 +129,10 @@ node nubotsvmbuild {
                        'creates'     => 'lib/libtcmalloc_minimal.a',
                        'method'      => 'autotools', },
     'yaml-cpp'     => {'url'         => 'https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz',
-                       'args'        => { 'native'   => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
-                                          'nuc7i7bnh' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
+                       'args'        => { 'native'   => [ '-DYAML_CPP_BUILD_CONTRIB=OFF',
+                                                          '-DYAML_CPP_BUILD_TOOLS=OFF', ],
+                                          'nuc7i7bnh' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF',
+                                                           '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
                        'method'      => 'cmake', },
     'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.6-pl2.tar.gz',
                        'args'        => { 'native'   => [ '--disable-fortran', '--enable-shared', ],
@@ -197,7 +233,9 @@ node nubotsvmbuild {
         installer { "${archive}":
           archs       => $archs,
           creates     => $params['creates'],
-          require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['build_tools'], ])),
+          # Gazebo depends on some of our installed libraries
+          before      => delete_undef_values(flatten([ Class['gazebo'], ])),
+          require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['build_tools'], Class['protobuf'], ])),
           args        => $params['args'],
           src_dir     => $params['src_dir'],
           prebuild    => $params['prebuild'],
@@ -207,9 +245,6 @@ node nubotsvmbuild {
           extension   => $extension,
         }
   }
-
-  # Install quex.
-  class { 'quex': }
 
   # Install catch.
   installer { 'catch':
@@ -230,7 +265,7 @@ node nubotsvmbuild {
     }
   }
 
-  # After we have installed, create the CMake toolchain files and then build our deb.
+  # After we have installed build our deb.
   Installer <| |> ~> class { 'toolchain_deb': }
 
   # Patch some system utilities to make sure they ignore our preset LD_LIBRARY_PATH
