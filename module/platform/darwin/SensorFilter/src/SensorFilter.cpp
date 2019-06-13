@@ -389,7 +389,7 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {-input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z};
                     }
 
                     // Put in our FSR information
