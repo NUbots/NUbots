@@ -585,12 +585,18 @@ namespace platform {
                     if (this->config.debug) {
                         // Assumes roll, pitch, yaw, matrix multiplication order
                         // http://planning.cs.uiuc.edu/node103.html
-                        double roll  = std::atan2(sensors.world(2, 1), sensors.world(2, 2));
-                        double pitch = std::atan2(-sensors.world(3, 1),
-                                                  std::sqrt(sensors.world(3, 2) * sensors.world(3, 2)
-                                                            + sensors.world(3, 3) * sensors.world(3, 3)));
-                        double yaw   = std::atan2(sensors.world(3, 2), sensors.world(3, 3));
+                        double roll  = std::atan2(sensors->world(2, 1), sensors->world(2, 2));
+                        double pitch = std::atan2(-sensors->world(3, 1),
+                                                  std::sqrt(sensors->world(3, 2) * sensors->world(3, 2)
+                                                            + sensors->world(3, 3) * sensors->world(3, 3)));
+                        double yaw   = std::atan2(sensors->world(3, 2), sensors->world(3, 3));
                         log("Roll:", roll, "Pitch:", pitch, "Yaw:", yaw);
+                        log("w_x:",
+                            sensors->gyroscope[0],
+                            "w_y:",
+                            sensors->gyroscope[1],
+                            "w_z:",
+                            sensors->gyroscope[2]);
                     }
 
                     sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));
