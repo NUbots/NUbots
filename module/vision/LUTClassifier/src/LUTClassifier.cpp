@@ -143,44 +143,6 @@ namespace vision {
         // Trigger the same function when either update
         on<Configuration>("LUTClassifier.yaml").then([this](const Configuration& config) {
             // Visual horizon detector
-            // if (cam.lens == CameraParameters::LensType::PINHOLE) {
-            //     VISUAL_HORIZON_SPACING =
-            //         cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
-            //     VISUAL_HORIZON_BUFFER =
-            //         cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
-            //     VISUAL_HORIZON_SUBSAMPLING = std::max(
-            //         1,
-            //         int(cam.pinhole.focalLengthPixels *
-            //         tan(config["visual_horizon"]["subsampling"].as<double>())));
-            //     VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE =
-            //         cam.pinhole.focalLengthPixels
-            //         * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
-            //     GOAL_LINE_SPACING = cam.pinhole.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
-            //     GOAL_SUBSAMPLING  = std::max(
-            //         1, int(cam.pinhole.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
-            //     GOAL_MINIMUM_RANSAC_SEGMENT_SIZE =
-            //         std::max(1,
-            //                  int(cam.pinhole.focalLengthPixels
-            //                      * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
-            // }
-            // else if (cam.lens == CameraParameters::LensType::RADIAL) {
-            //     VISUAL_HORIZON_SPACING =
-            //         config["visual_horizon"]["spacing"].as<double>() / cam.radial.radiansPerPixel;
-            //     VISUAL_HORIZON_BUFFER =
-            //         config["visual_horizon"]["horizon_buffer"].as<double>() / cam.radial.radiansPerPixel;
-            //     VISUAL_HORIZON_SUBSAMPLING = std::max(
-            //         1, int(config["visual_horizon"]["subsampling"].as<double>() / cam.radial.radiansPerPixel));
-            //     VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE =
-            //         config["visual_horizon"]["minimum_segment_size"].as<double>() / cam.radial.radiansPerPixel;
-            //     GOAL_LINE_SPACING = config["goals"]["spacing"].as<double>() / cam.radial.radiansPerPixel;
-            //     GOAL_SUBSAMPLING =
-            //         std::max(1, int(config["goals"]["subsampling"].as<double>() / cam.radial.radiansPerPixel));
-            //     GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(
-            //         1,
-            //         int(config["goals"]["minimum_ransac_segment_size"].as<double>() /
-            //         cam.radial.radiansPerPixel));
-            // }
-
             VISUAL_HORIZON_SPACING              = config["visual_horizon"]["spacing"].as<double>();
             VISUAL_HORIZON_BUFFER               = config["visual_horizon"]["horizon_buffer"].as<double>();
             VISUAL_HORIZON_SUBSAMPLING          = int(config["visual_horizon"]["subsampling"].as<double>());

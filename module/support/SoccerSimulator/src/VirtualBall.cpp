@@ -82,7 +82,6 @@ namespace support {
             return result;
         }
 
-
         double rBCcLength = arma::norm(rBCc);
 
         // The angular width of the cone we are drawing
@@ -128,21 +127,6 @@ namespace support {
             // set rEBC to be a properly sized radius vector facing from the ball centre towards the (top or inner int
             // he case of extreme values) ball edge
             rEBc = rBCcLength * arma::normalise(rEBc - rEBc * arma::dot(rEBc, rBCc) / rBCcLength);
-
-
-            // for (int i = 0; i < 50; ++i) {
-            //     //
-            //     double radialJitter = radialDistribution(rd);
-            //     double angleOffset  = angularDistribution(rd);
-
-            //     // Get a random number for which direciton the measurement is
-            //     arma::vec3 rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
-
-            //     // Make a rotation matrix to rotate our vector to our target
-            //     result.balls.at(0).edge_points.push_back(
-            //         convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) *
-            //         rEBc)));
-            // }
         }
 
 
