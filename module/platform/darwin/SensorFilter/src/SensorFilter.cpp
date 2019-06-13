@@ -589,7 +589,7 @@ namespace platform {
                         double pitch = std::atan2(-sensors.world(3, 1),
                                                   std::sqrt(sensors.world(3, 2) * sensors.world(3, 2)
                                                             + sensors.world(3, 3) * sensors.world(3, 3)));
-                        double yaw = std::atan2(sensors.world(3, 2), sensors.world(3, 3));
+                        double yaw   = std::atan2(sensors.world(3, 2), sensors.world(3, 3));
                         log("Roll:", roll, "Pitch:", pitch, "Yaw:", yaw);
                     }
 
