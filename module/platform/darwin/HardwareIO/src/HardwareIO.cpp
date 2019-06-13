@@ -312,7 +312,6 @@ namespace platform {
 
                     // Read our data
                     Darwin::BulkReadResults data = darwin.bulkRead();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
                     // Parse our data
                     *sensors = parseSensors(data);
