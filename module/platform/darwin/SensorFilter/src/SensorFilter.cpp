@@ -379,7 +379,6 @@ namespace platform {
                     }
                     else {
                         sensors->accelerometer = {-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z};
-                        // CM730 {-input.accelerometer.y, -input.accelerometer.x, input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
@@ -393,8 +392,7 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {-input.gyroscope.y, -input.gyroscope.x, -input.gyroscope.z};
-                        // CM730 sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z};
                     }
 
                     // Put in our FSR information
