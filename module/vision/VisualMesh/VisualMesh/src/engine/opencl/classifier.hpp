@@ -72,7 +72,7 @@ namespace engine {
         code << std::setprecision(std::numeric_limits<Scalar>::digits10 + 2);
 
         auto vector_type = [](const int& size) {
-          return (size == 1 || size == 2 || size == 4 || size == 8 || size == 16) ? size : 0;
+          return (size == 1 || size == 2 || size == 4) ? size : 0;
         };
 
         for (uint conv_no = 0; conv_no < structure.size(); ++conv_no) {
@@ -260,7 +260,7 @@ namespace engine {
                 }
 
                 // Sum up all the values
-                code << "float exp_sum = 0";
+                code << "float exp_sum = 0;" << std::endl;
                 for (uint i = 0; i < biases.size(); ++i) {
                   std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
                   code << "  exp_sum += " << e << ";" << std::endl;
@@ -269,7 +269,7 @@ namespace engine {
                 // Divide all the values
                 for (uint i = 0; i < biases.size(); ++i) {
                   std::string e = "in" + std::to_string(layer_no + 1) + "[" + std::to_string(i) + "]";
-                  code << "  " << e << " /= exp_sum" << std::endl;
+                  code << "  " << e << " /= exp_sum;" << std::endl;
                 }
               }
             }

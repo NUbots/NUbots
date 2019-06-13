@@ -17,13 +17,13 @@ message fmat {
 message imat {
     uint32   rows     = 1;
     uint32   cols     = 2;
-    repeated sint32 v = 3 [packed = true];
+    repeated sfixed32 v = 3 [packed = true];
 }
 
 message umat {
     uint32   rows     = 1;
     uint32   cols     = 2;
-    repeated uint32 v = 3 [packed = true];
+    repeated fixed32 v = 3 [packed = true];
 }
 
 message cmat {

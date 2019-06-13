@@ -135,7 +135,7 @@ namespace vision {
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
                 reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
             msg->classifications =
-                Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>>(
+                Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
                     results.classifications.data(),
                     results.neighbourhood.size(),
                     results.classifications.size() / results.neighbourhood.size());
