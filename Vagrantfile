@@ -101,6 +101,9 @@ Vagrant.configure("2") do |config|
     if File.directory?("../CM730")
       nubots.vm.synced_folder "../CM730", "/home/vagrant/CM730"
     end
+    if File.directory?("../Gazebo")
+      nubots.vm.synced_folder "../Gazebo", "/home/vagrant/Gazebo"
+    end
   end
 
   # This VM will build all dependencies by source (use this to update old dependencies, or to generate a new deb file)
@@ -121,6 +124,9 @@ Vagrant.configure("2") do |config|
     end
     if File.directory?("../CM730")
       nubots.vm.synced_folder "../CM730", "/home/vagrant/CM730"
+    end
+    if File.directory?("../Gazebo")
+      nubots.vm.synced_folder "../Gazebo", "/home/vagrant/Gazebo"
     end
   end
 end
