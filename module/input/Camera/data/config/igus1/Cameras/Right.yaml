@@ -1,5 +1,5 @@
 driver: Aravis
-deviceID: 00E81B94
+deviceID: 00F7D6EC
 
 buffer_count: 4             # The number of software buffers to use.
 
