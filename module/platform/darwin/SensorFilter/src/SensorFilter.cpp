@@ -595,27 +595,6 @@ namespace platform {
                     sensors->inertialTensor =
                         calculateInertialTensor(kinematicsModel, sensors->forwardKinematics, true);
 
-                    if (this->config.debug) {
-                        Eigen::Vector4d com =
-                            sensors->world.inverse()
-                            * Eigen::Vector4d(
-                                  sensors->centreOfMass.x(), sensors->centreOfMass.y(), sensors->centreOfMass.z(), 1.0);
-
-                        // Fix mass after transform
-                        com.w() = sensors->centreOfMass.w();
-
-                        // Log CoM in both torso and world spaces
-                        // log("CoM Torso space:", sensors->centreOfMass.transpose());
-                        // log("CoM World space:", com.transpose());
-
-                        // Eigen::Matrix3d tensor = sensors->world.topLeftCorner<3, 3>() * sensors->inertialTensor *
-                        // sensors->world.topLeftCorner<3, 3>().transpose();
-
-                        // Log inertial tensor in both torso and world spaces
-                        // log("Inertia Torso space:", sensors->inertialTensor);
-                        // log("Inertia World space:", tensor);
-                    }
-
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
