@@ -32,7 +32,7 @@
 #include "message/motion/KickCommand.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
@@ -61,7 +61,7 @@ namespace behaviour {
         using message::motion::KickFinished;
         using message::motion::StopCommand;
         using message::motion::WalkCommand;
-        using VisionBall = message::vision::Ball;
+        using VisionBalls = message::vision::Balls;
         using utility::localisation::fieldStateToTransform3D;
         using utility::math::matrix::Rotation2D;
         using utility::math::matrix::Transform2D;
@@ -151,8 +151,8 @@ namespace behaviour {
             //     log("Sensors");
             // });
 
-            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
-                if (!balls.empty()) {
+            on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+                if (balls.balls.size() > 0) {
                     timeBallLastSeen = NUClear::clock::now();
                 }
             });
@@ -193,7 +193,7 @@ namespace behaviour {
                         return;
                     }
 
-                    Transform3D Htw = convert<double, 4, 4>(sensors.world);
+                    Transform3D Htw = convert<double, 4, 4>(sensors.Htw);
                     auto now        = NUClear::clock::now();
                     float timeSinceBallSeen =
                         std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()

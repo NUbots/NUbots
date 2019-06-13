@@ -318,7 +318,7 @@ namespace platform {
                     *sensors = parseSensors(data);
 
                     // Work out a battery charged percentage
-                    sensors->battery =
+                    sensors->voltage =
                         std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
                     // cm730 leds to display battery voltage
@@ -326,32 +326,32 @@ namespace platform {
                     uint32_t ledr            = 0;
                     std::array<bool, 3> ledp = {false, false, false};
 
-                    if (sensors->battery > 0.9) {
+                    if (sensors->voltage > 0.9) {
                         ledp = {true, true, true};
                         ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                         ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                     }
-                    else if (sensors->battery > 0.7) {
+                    else if (sensors->voltage > 0.7) {
                         ledp = {false, true, true};
                         ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                         ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                     }
-                    else if (sensors->battery > 0.5) {
+                    else if (sensors->voltage > 0.5) {
                         ledp = {false, false, true};
                         ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                         ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                     }
-                    else if (sensors->battery > 0.3) {
+                    else if (sensors->voltage > 0.3) {
                         ledp = {false, false, false};
                         ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                         ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                     }
-                    else if (sensors->battery > 0.2) {
+                    else if (sensors->voltage > 0.2) {
                         ledp = {false, false, false};
                         ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                         ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
                     }
-                    else if (sensors->battery > 0) {
+                    else if (sensors->voltage > 0) {
                         ledp = {false, false, false};
                         ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
                         ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);

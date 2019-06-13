@@ -23,7 +23,6 @@
 #include <armadillo>
 #include <nuclear>
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/VisualMesh.h"
@@ -81,13 +80,9 @@ namespace vision {
         bool print_mesh_debug;
         bool draw_cluster;
 
-        float approximateCircleGreenRatio(const utility::math::ransac::RansacConeModel& cone,
-                                          const message::input::Image& image,
-                                          const message::vision::LookUpTable& lut,
-                                          const message::input::CameraParameters& params);
-
         std::vector<std::vector<arma::vec4>> findClusters(const message::vision::VisualMesh& mesh,
-                                                          const message::input::CameraParameters& cam);
+                                                          const arma::uvec2& dimensions,
+                                                          const message::input::Image::Lens& cam);
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
