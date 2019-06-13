@@ -215,6 +215,7 @@ namespace behaviour {
 
                 // Emit our waypoints
                 if (waypoints) {
+                    log("Emitting servo target waypoints");
                     emit(std::move(waypoints));
                 }
 

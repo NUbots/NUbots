@@ -38,8 +38,10 @@ message Script {
         repeated Frame frames = 2;
     }
 
-    string   filename     = 1;
-    repeated Servo servos = 2;
+    string   hostname     = 1;
+    string   platform     = 2;
+    string   filename     = 3;
+    repeated Servo servos = 4;
 }
 
 message ExecuteScriptByName {

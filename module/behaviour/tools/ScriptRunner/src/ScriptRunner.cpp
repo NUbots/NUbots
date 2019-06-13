@@ -36,7 +36,7 @@ namespace behaviour {
 
         using extension::Configuration;
 
-        using extension::ExecuteScriptByName;
+        // using extension::ExecuteScriptByName;
 
         using message::platform::darwin::DarwinSensors;
         using NUClear::message::CommandLineArguments;
@@ -50,15 +50,18 @@ namespace behaviour {
         struct ExecuteNextScript {};
 
         void ScriptRunner::executeNextScript() {
+            log("executeNextScript(): before ", scripts.size());
 
             // If we have a script to execute
             if (!scripts.empty()) {
                 // Get it and emit it
-                emit(std::make_unique<ExecuteScriptByName>(id, scripts));
+                // emit(std::make_unique<ExecuteScriptByName>(id, scripts));
             }
             // Otherwise we are done, shutdown
             else {
             }
+
+            log("executeNextScript(): after", scripts.size());
         }
 
         ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment)
@@ -78,6 +81,11 @@ namespace behaviour {
                         scripts.clear();
                         std::copy(std::next(args.begin(), 1), args.end(), std::back_inserter(scripts));
                         script_delay = 0;
+
+                        std::cout << "Scripts to execute:" << std::endl;
+                        for (auto s : scripts) {
+                            std::cout << s << std::endl;
+                        }
                     }
 
                     // If scripts are in the config file
@@ -99,19 +107,19 @@ namespace behaviour {
                 {std::pair<float, std::set<LimbID>>(
                     1, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
                 [this](const std::set<LimbID>&) {
-                    on<Trigger<ButtonMiddleDown>>().then([this] {
-                        std::this_thread::sleep_for(std::chrono::seconds(script_delay));
-                        emit(std::make_unique<ExecuteNextScript>());
-                    });
+                    // on<Trigger<ButtonMiddleDown>>().then([this] {
+                    std::this_thread::sleep_for(std::chrono::seconds(script_delay));
+                    emit(std::make_unique<ExecuteNextScript>());
+                    // });
                 },
                 [this](const std::set<LimbID>&) {
                     // We should always be the only running thing
                 },
                 [this](const std::set<ServoID>&) {
-                    on<Trigger<ButtonMiddleDown>>().then([this] {
-                        std::this_thread::sleep_for(std::chrono::seconds(script_delay));
-                        emit(std::make_unique<ExecuteNextScript>());
-                    });
+                    // on<Trigger<ButtonMiddleDown>>().then([this] {
+                    std::this_thread::sleep_for(std::chrono::seconds(script_delay));
+                    emit(std::make_unique<ExecuteNextScript>());
+                    // });
                 }}));
         }
 

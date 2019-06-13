@@ -84,7 +84,7 @@ struct Script {
             yaml = YAML::LoadFile("scripts/" + platform + "/" + filename);
         }
 
-        message          = ServoMessage();
+        message          = ScriptMessage();
         message.filename = filename;
         message.servos   = yaml.as<std::vector<ScriptMessage::Servo>>();
     }
@@ -226,6 +226,8 @@ namespace dsl {
 }  // namespace NUClear
 
 namespace YAML {
+using ScriptMessage = message::motion::script::Script;
+
 template <>
 struct convert<ScriptMessage::Servo::Frame> {
     static inline Node encode(const ScriptMessage::Servo::Frame& rhs) {

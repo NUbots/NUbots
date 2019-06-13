@@ -32,6 +32,7 @@
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
+#include "message/motion/script/Script.h"
 #include "message/support/SaveConfiguration.h"
 
 #include "utility/math/angle.h"
@@ -39,6 +40,7 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
+#include "utility/motion/Script.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -47,7 +49,7 @@ namespace module {
 namespace motion {
 
     using extension::Configuration;
-    using extension::Script;
+    // using extension::Script;
 
     using message::behaviour::ServoCommand;
     using message::behaviour::WalkConfigSaved;
@@ -62,6 +64,7 @@ namespace motion {
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
     using message::motion::WalkStopped;
+    using message::motion::script::Script;
     using message::support::SaveConfiguration;
 
     using ServoID = utility::input::ServoID;
@@ -71,6 +74,8 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
+    using utility::motion::script::createScript;
+    using utility::motion::script::saveScript;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -348,7 +353,7 @@ namespace motion {
         stanceReset();
         auto waypoints = updateStillWayPoints(sensors);
 
-        Script standScript;
+        Script standScript = createScript("Stand.yaml");
 
         auto waypointTime = std::chrono::milliseconds(int(round(1000 * STAND_SCRIPT_DURATION)));
 
@@ -357,13 +362,12 @@ namespace motion {
 
             servo.id = waypoint.id;
             servo.frames.push_back(
-                Script::Servo::Frame({ waypointTime, waypoint.position, std::max(waypoint.gain, 60.0f), 100 })
-            );
+                Script::Servo::Frame({waypointTime, waypoint.position, std::max(waypoint.gain, 60.0f), 100}));
 
             standScript.servos.push_back(servo);
         }
 
-        standScript.save("Stand.yaml");
+        saveScript(standScript);
 
         // Try update(); ?
         reset();

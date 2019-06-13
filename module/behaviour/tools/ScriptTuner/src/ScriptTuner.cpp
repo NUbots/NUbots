@@ -39,7 +39,7 @@ namespace behaviour {
 
         using NUClear::message::CommandLineArguments;
 
-        using extension::ExecuteScript;
+        // using extension::ExecuteScript;
         using extension::Script;
 
         using message::motion::ServoTarget;
@@ -580,7 +580,7 @@ namespace behaviour {
 
         // emits a message so motion can pick up the script
         void ScriptTuner::playScript() {
-            emit(std::make_unique<ExecuteScript>(id, script, NUClear::clock::now()));
+            // emit(std::make_unique<ExecuteScript>(id, script, NUClear::clock::now()));
         }
 
         // allows user to jump to a specific frame without engaging the motors

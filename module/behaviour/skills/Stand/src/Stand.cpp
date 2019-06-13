@@ -22,6 +22,7 @@
 #include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
+#include "message/motion/script/Script.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -31,7 +32,7 @@ namespace module {
 namespace behaviour {
     namespace skills {
 
-        using extension::ExecuteScriptByName;
+        // using extension::ExecuteScriptByName;
 
         using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
@@ -43,7 +44,8 @@ namespace behaviour {
         Stand::Stand(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
-            on<Trigger<ExecuteStand>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml")); });
+            // on<Trigger<ExecuteStand>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml"));
+            // });
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
                 RegisterAction{id,

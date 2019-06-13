@@ -36,7 +36,7 @@ namespace behaviour {
     namespace skills {
 
         using extension::Configuration;
-        using extension::ExecuteScriptByName;
+        // using extension::ExecuteScriptByName;
 
         using message::input::Sensors;
         using message::motion::ExecuteGetup;
@@ -80,12 +80,12 @@ namespace behaviour {
 
                 // Check with side we're getting up from
                 if (sensors.world(0, 2) < 0.0) {
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
+                    // emit(std::make_unique<ExecuteScriptByName>(
+                    // id, std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
                 }
                 else {
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
+                    // emit(std::make_unique<ExecuteScriptByName>(
+                    // id, std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
                 }
                 updatePriority(EXECUTION_PRIORITY);
             });
