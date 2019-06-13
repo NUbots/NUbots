@@ -26,7 +26,6 @@
 namespace module {
 namespace vision {
 
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
@@ -241,10 +240,7 @@ namespace vision {
         return std::make_pair(strength, greenNormal);
     }
 
-    void LUTClassifier::enhanceBall(const Image& image,
-                                    const LookUpTable& lut,
-                                    ClassifiedImage& classifiedImage,
-                                    const CameraParameters& cam) {
+    void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
         // Loop through all of our possible ball segments
         std::vector<Eigen::Vector2i> points;
@@ -272,8 +268,11 @@ namespace vision {
         for (auto& point : points) {
             // Project up to horizon
             int horizon_Y = getImageFromCam(
-                horizon.directionalProjection(getCamFromImage(convert<int, 2>(point), cam), arma::vec3({0, 0, 1})),
-                cam)[1];
+                horizon.directionalProjection(
+                    getCamFromImage(convert<int, 2>(point), convert<uint, 2>(image.dimensions), image.lens),
+                    arma::vec3({0, 0, 1})),
+                convert<uint, 2>(image.dimensions),
+                image.lens)[1];
 
             int minY = int(std::max(3.0, double(horizon_Y)));
 

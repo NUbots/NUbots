@@ -19,12 +19,35 @@
 
 syntax = "proto3";
 
-package message.support.nusight;
+package message.vision;
 
 import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+import "message/Geometry.proto";
+import "Matrix.proto";
+import "Neutron.proto";
 
-message DataPoint {
-    string                    label     = 1;
-    repeated float            value     = 2 [packed = true];
-    google.protobuf.Timestamp timestamp = 4;
+message Ball {
+    enum MeasurementType {
+        UNKNOWN      = 0;
+        REPROJECTION = 1;
+        WIDTH_BASED  = 2;
+    }
+    message Measurement {
+        MeasurementType type = 1;
+        // Vector from camera to ball in camera coordinates
+        vec3 rBCc       = 2;
+        mat3 covariance = 3;
+    }
+    Cone     cone                       = 1;
+    repeated Measurement measurements   = 2;
+    vec2                 screen_angular = 3;
+    vec2                 angular_size   = 4;
+}
+
+message Balls {
+    uint32                    camera_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    mat4                      Hcw       = 3;
+    repeated Ball balls                 = 4;
 }

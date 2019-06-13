@@ -31,7 +31,6 @@
 namespace module {
 namespace vision {
 
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
@@ -44,27 +43,33 @@ namespace vision {
 
     void LUTClassifier::findVisualHorizon(const Image& image,
                                           const LookUpTable& lut,
-                                          ClassifiedImage& classifiedImage,
-                                          const CameraParameters& cam) {
+                                          ClassifiedImage& classifiedImage) {
 
         // Get some local references to class variables to make text shorter
         Plane<3> horizon(convert<double, 3>(classifiedImage.horizon_normal));
         auto& visualHorizon = classifiedImage.visualHorizon;
 
         // Cast lines to find our visual horizon
-        for (uint x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
+        for (uint x = 0; x < image.dimensions[0]; x += (image.lens.focal_length * VISUAL_HORIZON_SPACING)) {
             // Find our point to classify from (slightly above the horizon)
             int horizon_Y = getImageFromCam(
                 // Project down to horizon
-                horizon.directionalProjection(getCamFromImage(arma::ivec2({int(x), 0}), cam), arma::vec({0, 0, 1})),
-                cam)[1];
+                horizon.directionalProjection(
+                    getCamFromImage(arma::ivec2({int(x), 0}), convert<uint, 2>(image.dimensions), image.lens),
+                    arma::vec({0, 0, 1})),
+                convert<uint, 2>(image.dimensions),
+                image.lens)[1];
             // Find our point to classify from (slightly above the horizon)
-            int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
+            int top = std::max(int(horizon_Y - (image.lens.focal_length * VISUAL_HORIZON_BUFFER)), int(0));
             top     = std::min(top, int(image.dimensions[1] - 1));
 
             // Classify our segments
-            auto segments = classifier->classify(
-                image, lut, {int(x), top}, {int(x), int(image.dimensions[1] - 1)}, VISUAL_HORIZON_SUBSAMPLING);
+            auto segments =
+                classifier->classify(image,
+                                     lut,
+                                     {int(x), top},
+                                     {int(x), int(image.dimensions[1] - 1)},
+                                     std::max(1, int(image.lens.focal_length * VISUAL_HORIZON_SUBSAMPLING)));
 
             // Our default green point is the bottom of the screen
             arma::ivec2 greenPoint = {int(x), int(image.dimensions[1])};
@@ -74,13 +79,16 @@ namespace vision {
 
                 // If this a valid green point update our information
                 if (it->segmentClass == ClassifiedImage::SegmentClass::FIELD
-                    && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
+                    && it->length >= (image.lens.focal_length * VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE)) {
 
                     greenPoint = convert<int, 2>(it->start);
 
                     // We move our green point up by the scanning size if possible (assume more green horizon rather
                     // then less)
-                    greenPoint[1] = std::max(int(greenPoint[1] - (VISUAL_HORIZON_SUBSAMPLING / 2)), 0);
+                    greenPoint[1] =
+                        std::max(int(greenPoint[1]
+                                     - (std::max(1, int(image.lens.focal_length * VISUAL_HORIZON_SUBSAMPLING)) / 2)),
+                                 0);
 
                     // We found our green
                     break;
@@ -96,22 +104,26 @@ namespace vision {
         }
 
         // If we don't have a line on the right of the image, make one
-        if (image.dimensions[0] - 1 % VISUAL_HORIZON_SPACING != 0) {
+        if (image.dimensions[0] - 1 % int(image.lens.focal_length * VISUAL_HORIZON_SPACING) != 0) {
 
             // Find our point to classify from (slightly above the horizon)
             int horizon_Y = getImageFromCam(
                 // Project down to horizon
-                horizon.directionalProjection(getCamFromImage(arma::ivec2({int(image.dimensions[0] - 1), 0}), cam),
-                                              arma::vec({0, 0, 1})),
-                cam)[1];
-            int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
+                horizon.directionalProjection(
+                    getCamFromImage(
+                        arma::ivec2({int(image.dimensions[0] - 1), 0}), convert<uint, 2>(image.dimensions), image.lens),
+                    arma::vec({0, 0, 1})),
+                convert<uint, 2>(image.dimensions),
+                image.lens)[1];
+            int top = std::max(int(horizon_Y - (image.lens.focal_length * VISUAL_HORIZON_BUFFER)), int(0));
             top     = std::min(top, int(image.dimensions[1] - 1));
 
             arma::ivec2 start = {int(image.dimensions[0] - 1), top};
             arma::ivec2 end   = {int(image.dimensions[0] - 1), int(image.dimensions[1] - 1)};
 
             // Classify our segments
-            auto segments = classifier->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
+            auto segments = classifier->classify(
+                image, lut, start, end, std::max(1, int(image.lens.focal_length * VISUAL_HORIZON_SUBSAMPLING)));
 
             // Our default green point is the bottom of the screen
             arma::ivec2 greenPoint = {int(image.dimensions[0] - 1), int(image.dimensions[1])};
@@ -121,7 +133,7 @@ namespace vision {
 
                 // If this a valid green point update our information
                 if (it->segmentClass == ClassifiedImage::SegmentClass::FIELD
-                    && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
+                    && it->length >= (image.lens.focal_length * VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE)) {
                     greenPoint = convert<int, 2>(it->start);
                     // We found our green
                     break;
@@ -168,7 +180,8 @@ namespace vision {
                 auto& a = visualHorizon.front();
 
                 // Insert this new point at the front
-                Eigen::Vector2i p(std::max(0, int(a[0] - VISUAL_HORIZON_SPACING)), int(image.dimensions[1] - 1));
+                Eigen::Vector2i p(std::max(0, int(a[0] - (image.lens.focal_length * VISUAL_HORIZON_SPACING))),
+                                  int(image.dimensions[1] - 1));
                 visualHorizon.insert(visualHorizon.begin(), p);
 
                 // If this new point wasn't at 0, then add a new one there too
@@ -182,7 +195,8 @@ namespace vision {
                 auto& a = visualHorizon.back();
 
                 // Insert this new point at the end
-                Eigen::Vector2i p(std::min(int(image.dimensions[0]) - 1, int(a[0] + VISUAL_HORIZON_SPACING)),
+                Eigen::Vector2i p(std::min(int(image.dimensions[0]) - 1,
+                                           int(a[0] + (image.lens.focal_length * VISUAL_HORIZON_SPACING))),
                                   int(image.dimensions[1]) - 1);
                 visualHorizon.insert(visualHorizon.end(), p);
 

@@ -67,22 +67,22 @@ namespace motion {
                     // Right foot is the swing foot
                     if (target.isRightFootSwing) {
                         // Transform of left foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
                         // Transform of right foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
                     }
                     // Left foot is the swing foot
                     else {
                         // Transform of right foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
                         // Transform of left foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
                     }
                     Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;
                     // Get orientation for world (Rotation of world->torso)
                     Eigen::Affine3d Rtw;
-                    Rtw.linear() = Eigen::Affine3d(sensors.world).rotation();
+                    Rtw.linear() = Eigen::Affine3d(sensors.Htw).rotation();
 
                     // Get the yawless world rotation
                     Eigen::Affine3d Rtg =

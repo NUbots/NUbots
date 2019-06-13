@@ -84,11 +84,11 @@ namespace behaviour {
                 imageFragment->end   = image.data.size();
 
                 Transform3D cam_to_right_foot =
-                    convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL].inverse()
-                                          * sensors.forwardKinematics[ServoID::HEAD_PITCH]);
+                    convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()
+                                          * sensors.forward_kinematics[ServoID::HEAD_PITCH]);
                 Transform3D cam_to_left_foot =
-                    convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL].inverse()
-                                          * sensors.forwardKinematics[ServoID::HEAD_PITCH]);
+                    convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL].inverse()
+                                          * sensors.forward_kinematics[ServoID::HEAD_PITCH]);
 
                 Transform3D cam_to_feet   = cam_to_left_foot;
                 cam_to_feet.translation() = 0.5 * (cam_to_left_foot.translation() + cam_to_right_foot.translation());

@@ -147,7 +147,7 @@ public:
     using mat4 = std::array<vec4, 4>;
 
     struct Lens {
-        enum Projection { RECTILINEAR, EQUISOLID, EQUIDISTANT };
+        enum Projection { RECTILINEAR = 1, EQUIDISTANT = 2, EQUISOLID = 3 };
 
         Projection projection;
         std::array<int, 2> dimensions;

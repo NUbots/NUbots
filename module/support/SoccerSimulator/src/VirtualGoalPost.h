@@ -22,10 +22,10 @@
 
 #include <armadillo>
 
-#include "message/input/CameraParameters.h"
+#include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Goal.h"
 
 #include "utility/math/matrix/Transform2D.h"
 
@@ -36,8 +36,8 @@ namespace support {
     private:
         arma::vec2 getCamRay(const arma::vec3& norm1,
                              const arma::vec3& norm2,
-                             const message::input::CameraParameters& params,
-                             arma::uvec2 imSize);
+                             const message::input::Image::Lens& lens,
+                             arma::uvec2 dimensions);
 
     public:
         VirtualGoalPost(arma::vec3 position_,
@@ -50,11 +50,11 @@ namespace support {
         message::vision::Goal::Side side = message::vision::Goal::Side::UNKNOWN_SIDE;  // LEFT, RIGHT, or UNKNOWN
         message::vision::Goal::Team team = message::vision::Goal::Team::UNKNOWN_TEAM;  // OWN, OPPONENT, or UNKNOWN
 
-        message::vision::Goal detect(const message::input::CameraParameters& camParams,
-                                     utility::math::matrix::Transform2D& robotPose,
-                                     const message::input::Sensors& sensors,
-                                     arma::vec4& /*error*/,
-                                     const message::support::FieldDescription& field);
+        message::vision::Goals detect(const message::input::Image& image,
+                                      utility::math::matrix::Transform2D& robotPose,
+                                      const message::input::Sensors& sensors,
+                                      arma::vec4& /*error*/,
+                                      const message::support::FieldDescription& field);
     };
 }  // namespace support
 }  // namespace module

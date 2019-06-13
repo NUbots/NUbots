@@ -32,7 +32,6 @@ namespace vision {
     using message::vision::ClassifiedImage;
     using message::vision::LookUpTable;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
-    using message::input::CameraParameters;
     using utility::math::geometry::Line;
     using utility::math::geometry::Plane;
     using utility::math::ransac::NPartiteRansac;
@@ -81,10 +80,7 @@ namespace vision {
         void refineModel(Iterator& /*begin*/, Iterator& /*end*/, const double& /*threshold*/) {}
     };
 
-    void LUTClassifier::enhanceGoals(const Image& image,
-                                     const LookUpTable& lut,
-                                     ClassifiedImage& classifiedImage,
-                                     const CameraParameters& cam) {
+    void LUTClassifier::enhanceGoals(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
         /*
             Here we improve the classification of goals.
@@ -103,7 +99,7 @@ namespace vision {
         for (const auto& segment : classifiedImage.horizontalSegments) {
             // Insert all our points
             if ((segment.segmentClass.value == SegmentClass::GOAL)
-                && (segment.length > GOAL_MINIMUM_RANSAC_SEGMENT_SIZE)) {
+                && (segment.length > std::max(1, int(image.lens.focal_length * GOAL_MINIMUM_RANSAC_SEGMENT_SIZE)))) {
                 points.push_back({{double(segment.midpoint[0]), double(segment.midpoint[1])}, segment.length});
             }
         }
@@ -111,7 +107,9 @@ namespace vision {
         // Partition our segments so that they are split between above and below the horizon
         auto split = std::partition(std::begin(points), std::end(points), [&](const GoalPOI& point) {
             // Is the midpoint above or below the horizon?
-            arma::vec3 camPoint = getCamFromImage(arma::ivec({int(point.midpoint[0]), int(point.midpoint[1])}), cam);
+            arma::vec3 camPoint = getCamFromImage(arma::ivec({int(point.midpoint[0]), int(point.midpoint[1])}),
+                                                  convert<uint, 2>(image.dimensions),
+                                                  image.lens);
             return arma::dot(horizon_normal, camPoint) > 0;
         });
 

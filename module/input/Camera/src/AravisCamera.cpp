@@ -10,8 +10,11 @@
 
 namespace module {
 namespace input {
+
     using extension::Configuration;
-    using message::input::CameraParameters;
+
+    using message::input::Image;
+
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
 
@@ -60,14 +63,20 @@ namespace input {
                         ArvStream* stream = arv_camera_create_stream(newCamera, NULL, NULL);
 
                         // Add camera to list.
-                        CameraContext context = {static_cast<uint32_t>(utility::vision::getFourCCFromDescription(
-                                                     config["format"]["pixel"].as<std::string>())),
-                                                 deviceID,
-                                                 cameraCount,
-                                                 config["is_left"].as<bool>(),
-                                                 newCamera,
-                                                 stream,
-                                                 *this};
+                        CameraContext context = {
+                            static_cast<uint32_t>(
+                                utility::vision::getFourCCFromDescription(config["format"]["pixel"].as<std::string>())),
+                            deviceID,
+                            cameraCount,
+                            config["is_left"].as<bool>(),
+                            Image::Lens(
+                                Image::Lens::Projection::EQUIDISTANT,
+                                1.0f / config["lens"]["radiansPerPixel"].as<float>(),
+                                Eigen::Vector2f(config["lens"]["FOV"].as<float>(), config["lens"]["FOV"].as<float>()),
+                                convert<float, 2>(config["lens"]["centreOffset"].as<arma::fvec>())),
+                            newCamera,
+                            stream,
+                            *this};
 
                         camera = AravisCameras.insert(std::make_pair(deviceID, context)).first;
                     }
@@ -75,21 +84,6 @@ namespace input {
 
                 resetAravisCamera(camera, config);
 
-                auto cameraParameters = std::make_unique<CameraParameters>();
-
-                // Generic camera parameters
-                cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
-                    config["format"]["height"].as<uint>();
-                cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
-
-                // Radial specific
-                cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
-                cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
-                cameraParameters->centreOffset = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
-
-                emit<Scope::DIRECT>(std::move(cameraParameters));
-
-                log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
                 return;
             }
         }
@@ -171,6 +165,7 @@ namespace input {
             msg->serial_number = context->deviceID;
             msg->camera_id     = context->cameraID;
             msg->isLeft        = context->isLeft;
+            msg->lens          = context->lens;
 
             context->reactor.emit<Scope::DIRECT>(msg);
             arv_stream_push_buffer(stream, buffer);
