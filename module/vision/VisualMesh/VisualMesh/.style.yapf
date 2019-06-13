@@ -1,0 +1,11 @@
+[style]
+based_on_style = chromium
+coalesce_brackets = true
+column_limit = 120
+continuation_indent_width = 2
+dedent_closing_brackets = true
+each_dict_entry_on_separate_line = true
+indent_width = 2
+join_multiple_lines = true
+spaces_before_comment = 2
+use_tabs = false

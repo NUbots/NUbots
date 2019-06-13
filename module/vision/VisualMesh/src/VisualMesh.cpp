@@ -4,8 +4,11 @@
 
 #include "extension/Configuration.h"
 
-#include "mesh/Sphere.hpp"
+#include "geometry/Circle.hpp"
+#include "geometry/Cylinder.hpp"
+#include "geometry/Sphere.hpp"
 
+#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
@@ -19,20 +22,18 @@ namespace vision {
 
     using extension::Configuration;
 
+    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::support::FieldDescription;
 
     using VisualMeshMsg = message::vision::VisualMesh;
 
-    VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), mesh_ptr(nullptr) {
+    VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
-            log("Loading visual mesh");
-            network.clear();
-
             // Load our weights and biases
+            std::vector<std::vector<std::pair<std::vector<std::vector<float>>, std::vector<float>>>> network;
             for (const auto& conv : config["network"].config) {
 
                 // New conv layer
@@ -62,26 +63,39 @@ namespace vision {
                 }
             }
 
-            draw_mesh   = config["debug"]["draw_mesh"].as<bool>();
-            colour_type = config["debug"]["colour_type"].as<int>();
-
-            log("Finished loading visual mesh");
-        });
-
-        on<Trigger<Image>, With<FieldDescription>, Buffer<4>>().then([this](const Image& img,
-                                                                            const FieldDescription& field) {
-            // TODO: Recreate mesh when network configuration changes
-            if (!mesh_ptr) {
-                mesh_ptr =
-                    std::make_unique<mesh::VisualMesh<float>>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
-                                                              0.5,
-                                                              1.0,
-                                                              50,
-                                                              img.lens.fov.maxCoeff() / img.dimensions.maxCoeff());
-                // Make the classifier
-                classifier = mesh_ptr->make_classifier(network);
+            if (config["geometry"]["shape"].as<std::string>() == "SPHERE") {
+                auto shape = visualmesh::geometry::Sphere<float>(config["geometry"]["radius"].as<float>(),
+                                                                 config["geometry"]["intersections"].as<float>(),
+                                                                 config["geometry"]["max_distance"].as<float>());
+                mesh       = std::make_unique<VM>(shape,
+                                            config["height"]["minimum"].as<float>(),
+                                            config["height"]["maximum"].as<float>(),
+                                            config["height"]["steps"].as<int>());
+            }
+            else if (config["geometry"]["shape"].as<std::string>() == "CIRCLE") {
+                auto shape = visualmesh::geometry::Circle<float>(config["geometry"]["radius"].as<float>(),
+                                                                 config["geometry"]["intersections"].as<float>(),
+                                                                 config["geometry"]["max_distance"].as<float>());
+                mesh       = std::make_unique<VM>(shape,
+                                            config["height"]["minimum"].as<float>(),
+                                            config["height"]["maximum"].as<float>(),
+                                            config["height"]["steps"].as<int>());
+            }
+            else if (config["geometry"]["shape"].as<std::string>() == "CYLINDER") {
+                auto shape = visualmesh::geometry::Cylinder<float>(config["geometry"]["height"].as<float>(),
+                                                                   config["geometry"]["radius"].as<float>(),
+                                                                   config["geometry"]["intersections"].as<float>(),
+                                                                   config["geometry"]["max_distance"].as<float>());
+                mesh       = std::make_unique<VM>(shape,
+                                            config["height"]["minimum"].as<float>(),
+                                            config["height"]["maximum"].as<float>(),
+                                            config["height"]["steps"].as<int>());
             }
 
+            classifier = std::make_unique<Classifier>(mesh->make_classifier(network));
+        });
+
+        on<Trigger<Image>, Buffer<4>>().then([this](const Image& img) {
             // Get our camera to world matrix
             Eigen::Affine3f Hcw(img.Hcw.cast<float>());
 
@@ -89,95 +103,45 @@ namespace vision {
             std::array<std::array<float, 4>, 4> Hoc;
             Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
-            mesh::VisualMesh<float>::Lens lens;
-
-            switch (img.lens.projection.value) {
-                case Image::Lens::Projection::RECTILINEAR:
-                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::RECTILINEAR;
-                    break;
-                case Image::Lens::Projection::EQUIDISTANT:
-                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::EQUIDISTANT;
-                    break;
-                case Image::Lens::Projection::EQUISOLID:
-                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::EQUISOLID;
-                    break;
-                default: log<NUClear::WARN>("Unknown lens projection."); return;
-            }
-            lens.dimensions   = std::array<int, 2>{img.dimensions.x(), img.dimensions.y()};
-            lens.fov          = img.lens.fov.maxCoeff();
+            // Build our lens object
+            visualmesh::Lens<float> lens;
+            lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
             lens.focal_length = img.lens.focal_length;
-
-            auto results = classifier(img.data.data(), mesh::VisualMesh<float>::FOURCC(img.format), Hoc, lens);
+            lens.fov          = img.lens.fov[0];
+            lens.centre       = {img.lens.centre[0], img.lens.centre[1]};
+            switch (img.lens.projection.value) {
+                case Image::Lens::Projection::EQUIDISTANT: lens.projection = visualmesh::EQUIDISTANT; break;
+                case Image::Lens::Projection::EQUISOLID: lens.projection = visualmesh::EQUISOLID; break;
+                case Image::Lens::Projection::RECTILINEAR: lens.projection = visualmesh::RECTILINEAR; break;
+                default: throw std::runtime_error("Unknown lens projection");
+            }
 
             // Get the mesh that was used so we can make our message
-            const auto& m = mesh_ptr->height(Hoc[2][3]);
+            const auto& m = mesh->height(Hoc[2][3]);
 
-            auto msg = std::make_unique<VisualMeshMsg>();
+            // Perform the classification
+            auto results = (*classifier)(m, img.data.data(), img.format, Hoc, lens);
 
-            // Pass through our camera id
+            // Copy the data into the message
+            auto msg       = std::make_unique<VisualMeshMsg>();
             msg->camera_id = img.camera_id;
-
-            // Add our description
             for (const auto& r : m.rows) {
                 msg->mesh.emplace_back(r.phi, r.end - r.begin);
             }
 
-            // Add our indices
-            msg->indices = std::move(results.global_indices);
-
-            // Add our neighbourhood
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
+                reinterpret_cast<float*>(results.pixel_coordinates.data()), results.pixel_coordinates.size(), 2);
+            msg->indices       = std::move(results.global_indices);
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
                 reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
+            msg->classifications =
+                Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::DontAlign>>(
+                    results.classifications.data(),
+                    results.neighbourhood.size(),
+                    results.classifications.size() / results.neighbourhood.size());
 
-            // Add our classifications
-            std::vector<float> classifications = results.classifications.back().second;
-            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
-                reinterpret_cast<float*>(classifications.data()), classifications.size(), 2);
-
-            // Add our coordinates
-            std::vector<std::array<float, 2>> coordinates = results.pixel_coordinates;
-            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
-                reinterpret_cast<float*>(coordinates.data()), coordinates.size(), 2);
-
-            if (draw_mesh) {
-                std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
-                            Eigen::aligned_allocator<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>>>
-                    lines;
-
-                std::vector<float> classification;
-                if (colour_type == 0) {
-                    classification = results.classifications.front().second;
-                }
-                if (colour_type == 1) {
-                    classification = results.classifications.back().second;
-                }
-
-                for (uint i = 0; i < msg->coordinates.rows(); ++i) {
-
-                    Eigen::Vector2f p1(msg->coordinates.row(i));
-
-                    Eigen::Vector4d colour;
-                    if (colour_type == 1) {
-                        colour << double(classification[i * 2 + 1] > 0.5), 0.0, double(classification[i * 2 + 0] > 0.5),
-                            1.0;
-                    }
-
-                    if (colour_type == 0) {
-                        colour << classification[i * 4 + 0], classification[i * 4 + 1], classification[i * 4 + 2], 1.0;
-                    }
-
-                    for (const auto& n : results.neighbourhood[i]) {
-                        if (n < msg->coordinates.rows()) {
-                            Eigen::Vector2f p2(msg->coordinates.row(n));
-                            Eigen::Vector2f p2x = p1 + ((p2 - p1) / 2);
-                            lines.emplace_back(p1.cast<int>(), p2x.cast<int>(), colour);
-                        }
-                    }
-                }
-                emit(utility::nusight::drawVisionLines(lines));
-            }
             emit(msg);
         });
-    }
+    }  // namespace vision
 }  // namespace vision
 }  // namespace module

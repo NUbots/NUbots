@@ -1,0 +1,25 @@
+{
+    "folders":
+    [
+        {
+            "folder_exclude_patterns":
+            [
+                "VisualMesh/build*",
+                "training"
+            ],
+            "path": "."
+        }
+    ],
+    "settings": {
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true,
+        "trim_trailing_white_space_on_save": true,
+        "ensure_newline_at_eof_on_save": true,
+        "detect_indentation": false,
+        "default_line_ending": "unix",
+        "ClangFormat": {
+            "style": "File",
+            "format_on_save": true
+        }
+    }
+}
