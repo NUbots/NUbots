@@ -27,7 +27,7 @@
 #include "message/behaviour/MotionCommand.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/WalkCommand.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
 
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -56,7 +56,6 @@ namespace behaviour {
         using LocalisationBall = message::localisation::Ball;
         using Self             = message::localisation::Self;
         using VisionBall       = message::vision::Ball;
-        using VisionObstacle   = message::vision::Obstacle;
 
         using utility::behaviour::ActionPriorites;
         using utility::behaviour::RegisterAction;
@@ -141,7 +140,6 @@ namespace behaviour {
             on<Every<20, Per<std::chrono::seconds>>,
                With<message::localisation::Ball>,
                With<std::vector<message::localisation::Self>>,
-               Optional<With<std::vector<message::vision::Obstacle>>>,
                Sync<BezierWalkPathPlanner>,
                Single>()
                 .then(

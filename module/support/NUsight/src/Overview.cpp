@@ -30,7 +30,8 @@
 #include "message/motion/WalkCommand.h"
 #include "message/support/GlobalConfig.h"
 #include "message/support/nusight/Overview.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -54,8 +55,8 @@ namespace support {
     using message::support::nusight::Overview;
     using NUClear::message::CommandLineArguments;
     using LocalisationBall = message::localisation::Ball;
-    using VisionBall       = message::vision::Ball;
-    using VisionGoal       = message::vision::Goal;
+    using VisionBalls      = message::vision::Balls;
+    using VisionGoals      = message::vision::Goals;
     using message::motion::WalkCommand;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
@@ -102,7 +103,7 @@ namespace support {
 
                     if (sensors) {
                         // Get our world transform
-                        Transform3D Htw(convert<double, 4, 4>(sensors->world));
+                        Transform3D Htw(convert<double, 4, 4>(sensors->Htw));
 
                         // If we have field information
                         if (field) {
@@ -173,16 +174,16 @@ namespace support {
         handles["overview"].push_back(
             on<Trigger<Image>, Single, Priority::LOW>().then([this] { last_camera_image = NUClear::clock::now(); }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<VisionBall>>, Single, Priority::LOW>().then(
-            [this](const std::vector<VisionBall>& balls) {
-                if (!balls.empty()) {
+        handles["overview"].push_back(
+            on<Trigger<VisionBalls>, Single, Priority::LOW>().then([this](const VisionBalls& balls) {
+                if (!balls.balls.empty()) {
                     last_seen_ball = NUClear::clock::now();
                 }
             }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<VisionGoal>>, Single, Priority::LOW>().then(
-            [this](const std::vector<VisionGoal>& goals) {
-                if (!goals.empty()) {
+        handles["overview"].push_back(
+            on<Trigger<VisionGoals>, Single, Priority::LOW>().then([this](const VisionGoals& goals) {
+                if (!goals.goals.empty()) {
                     last_seen_goal = NUClear::clock::now();
                 }
             }));

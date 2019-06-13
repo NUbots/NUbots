@@ -2,6 +2,8 @@
 
 #include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -9,11 +11,12 @@ namespace module {
 namespace vision {
 
     using extension::Configuration;
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::support::FieldDescription;
+    using message::vision::Balls;
     using message::vision::ClassifiedImage;
+    using message::vision::Goals;
     using utility::math::vision::getImageFromCam;
     using utility::nusight::drawVisionLines;
 
@@ -40,51 +43,44 @@ namespace vision {
             visual_horizon_height = config["visual_horizon_height"].as<float>();
         });
 
-        on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls) {
-            for (auto& ball : balls) {
+        on<Trigger<Balls>>().then([this](const Balls& balls) {
+            log("Balls: ", balls.balls.size());
+            for (auto& ball : balls.balls) {
                 for (auto& m : ball.measurements) {
                     arma::vec3 measuredPos = convert<double, 3>(m.rBCc);
                     log("Ball actual pos (x,y,z):  ", ballCentre.t());
                     log("Ball measured pos (x,y,z):", measuredPos.t());
                     log("Ball detector error =     ", (measuredPos - ballCentre).t());
                     log("Ball norm error =         ", arma::norm(measuredPos - ballCentre));
-                    // for(auto& edgePts : ball.edgePoints){
-                    //     log("Edge pts:", edgePts);
-                    // }
                 }
             }
         });
-        on<Trigger<std::vector<message::vision::Goal>>>().then([this](const std::vector<message::vision::Goal>& goals) {
-            log("Goals: ", goals.size());
-            for (auto& goal : goals) {
-                for (auto& m : goal.measurement) {
+        on<Trigger<Goals>>().then([this](const Goals& goals) {
+            log("Goals: ", goals.goals.size());
+            for (auto& goal : goals.goals) {
+                for (auto& m : goal.measurements) {
                     if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
                     arma::vec3 measuredPos = convert<double, 3>(m.position);
                     log("Goal actual pos (x,y,z):  ", goal_position.t());
                     log("Goal measured pos (x,y,z):", measuredPos.t());
                     log("Goal detector error =     ", (measuredPos - goal_position).t());
                     log("Goal norm error =         ", arma::norm(measuredPos - goal_position));
-                    // for(auto& edgePts : ball.edgePoints){
-                    //     log("Edge pts:", edgePts);
-                    // }
                 }
             }
         });
 
 
         on<Every<30, Per<std::chrono::seconds>>,
-           With<CameraParameters>,
            Optional<With<Image>>,
            Optional<With<Sensors>>,
            With<FieldDescription>>()
-            .then([this](const CameraParameters& cam,
-                         std::shared_ptr<const Image> inputImage,
+            .then([this](std::shared_ptr<const Image> inputImage,
                          std::shared_ptr<const Sensors> inputSensors,
                          const FieldDescription& fd) {
                 image   = inputImage;
                 sensors = inputSensors;
                 if (image && sensors) {
-                    emitClassifiedImage(cam, fd);
+                    emitClassifiedImage(fd);
                 }
                 // arma::vec3 test_point_cam     = utility::math::vision::getCamFromScreen(test_point_screen, cam);
                 // arma::vec2 test_point_screen2 = utility::math::vision::projectCamSpaceToScreen(test_point_cam,
@@ -96,7 +92,7 @@ namespace vision {
             });
     }
 
-    void IgusVisionTests::emitClassifiedImage(const CameraParameters& cam, const FieldDescription& fd) {
+    void IgusVisionTests::emitClassifiedImage(const FieldDescription& fd) {
         // Basis of circle
         arma::vec3 p = ballCentre;
         arma::vec3 q = arma::normalise(arma::vec3({p[1], -p[0], 0}));
@@ -116,7 +112,7 @@ namespace vision {
             arma::vec3 P = p + radius * (q * cos(theta) + r * sin(theta));
             // Project to screen
             // const arma::fvec3& point, const Parameters& params = Parameters()
-            arma::vec2 pixel = utility::math::vision::projectCamSpaceToScreen(P, cam);
+            arma::vec2 pixel = utility::math::vision::projectCamSpaceToScreen(P, image->lens);
             // Screen point referenced from screen centre
             arma::vec2 screenPoint = arma::vec2({pixel[0], pixel[1]});
             // Convert to point referenced from top left
@@ -142,7 +138,7 @@ namespace vision {
         classifiedImage->image              = const_cast<Image*>(image.get())->shared_from_this();
         classifiedImage->sensors            = const_cast<Sensors*>(sensors.get())->shared_from_this();
         classifiedImage->horizon_normal     = convert<double, 3>(horizon_normal);
-        classifiedImage->horizontalSegments = getGoalSegments(cam, fd);
+        classifiedImage->horizontalSegments = getGoalSegments(fd);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
         classifiedImage->visualHorizon.push_back(
@@ -156,7 +152,6 @@ namespace vision {
 
 
     std::vector<message::vision::ClassifiedImage::Segment> IgusVisionTests::getGoalSegments(
-        const message::input::CameraParameters& cam,
         const message::support::FieldDescription& fd) {
         std::vector<message::vision::ClassifiedImage::Segment> segments;
 
@@ -174,13 +169,16 @@ namespace vision {
 
             segments.push_back(message::vision::ClassifiedImage::Segment());
             segments.back().segmentClass = message::vision::ClassifiedImage::SegmentClass::GOAL;
-            segments.back().start        = convert<int, 2>(getImageFromCam(left, cam));
-            segments.back().end          = convert<int, 2>(getImageFromCam(right, cam));
-            segments.back().midpoint     = convert<int, 2>(getImageFromCam(center, cam));
-            segments.back().next         = 0;
-            segments.back().previous     = 0;
-            segments.back().subsample    = 1;
-            segments.back().length       = arma::norm(left - right);
+            segments.back().start =
+                convert<int, 2>(getImageFromCam(left, convert<uint, 2>(image->dimensions), image->lens));
+            segments.back().end =
+                convert<int, 2>(getImageFromCam(right, convert<uint, 2>(image->dimensions), image->lens));
+            segments.back().midpoint =
+                convert<int, 2>(getImageFromCam(center, convert<uint, 2>(image->dimensions), image->lens));
+            segments.back().next      = 0;
+            segments.back().previous  = 0;
+            segments.back().subsample = 1;
+            segments.back().length    = arma::norm(left - right);
         }
         return segments;
     }

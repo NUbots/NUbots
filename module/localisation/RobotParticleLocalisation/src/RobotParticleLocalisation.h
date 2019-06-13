@@ -6,7 +6,7 @@
 #include "utility/math/filter/ParticleFilter.h"
 
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Goal.h"
 
 namespace module {
 namespace localisation {

@@ -4,6 +4,7 @@
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
 #include "message/localisation/ResetRobotHypotheses.h"
+#include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
 
 #include "utility/math/geometry/Circle.h"
@@ -19,7 +20,12 @@ namespace localisation {
 
     using message::input::Sensors;
     using message::localisation::Field;
+    using message::localisation::ResetRobotHypotheses;
+    using message::support::FieldDescription;
+    using VisionGoal  = message::vision::Goal;
+    using VisionGoals = message::vision::Goals;
 
+    using utility::localisation::transform3DToFieldState;
     using utility::math::geometry::Circle;
     using utility::math::matrix::Rotation2D;
     using utility::math::matrix::Transform2D;
@@ -27,11 +33,6 @@ namespace localisation {
     using utility::nusight::drawCircle;
     using utility::nusight::graph;
     using utility::time::TimeDifferenceSeconds;
-
-    using message::localisation::ResetRobotHypotheses;
-    using message::support::FieldDescription;
-    using message::vision::Goal;
-    using utility::localisation::transform3DToFieldState;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -106,9 +107,9 @@ namespace localisation {
                 emit(field);
             });
 
-        on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
-            "Measurement Update", [this](const std::vector<Goal>& goals, const FieldDescription& fd) {
-                if (!goals.empty()) {
+        on<Trigger<VisionGoals>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
+            "Measurement Update", [this](const VisionGoals& goals, const FieldDescription& fd) {
+                if (!goals.goals.empty()) {
                     /* Perform time update */
                     auto curr_time        = NUClear::clock::now();
                     double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
@@ -116,20 +117,19 @@ namespace localisation {
 
                     filter.timeUpdate(seconds);
 
-                    for (auto goal : goals) {
+                    for (auto goal : goals.goals) {
 
                         // Check side and team
                         std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
 
-                        for (auto& m : goal.measurement) {
-                            if (m.type == Goal::MeasurementType::CENTRE) {
-                                filter.ambiguousMeasurementUpdate(
-                                    convert<double, 3>(m.position),
-                                    convert<double, 3, 3>(m.covariance),
-                                    poss,
-                                    convert<double, 4, 4>(goals[0].visObject.classifiedImage->image->Hcw),
-                                    m.type,
-                                    fd);
+                        for (auto& m : goal.measurements) {
+                            if (m.type == VisionGoal::MeasurementType::CENTRE) {
+                                filter.ambiguousMeasurementUpdate(convert<double, 3>(m.position),
+                                                                  convert<double, 3, 3>(m.covariance),
+                                                                  poss,
+                                                                  convert<double, 4, 4>(goals.Hcw),
+                                                                  m.type,
+                                                                  fd);
                             }
                         }
                     }
@@ -139,7 +139,7 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 Transform3D Hfw;
-                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                const Transform3D& Htw = convert<double, 4, 4>(sensors.Htw);
                 std::vector<arma::vec3> states;
                 std::vector<arma::mat33> cov;
 
@@ -163,14 +163,14 @@ namespace localisation {
     }
 
     std::vector<arma::vec> RobotParticleLocalisation::getPossibleFieldPositions(
-        const message::vision::Goal& goal,
+        const VisionGoal& goal,
         const message::support::FieldDescription& fd) const {
         std::vector<arma::vec> possibilities;
 
-        bool left  = (goal.side != Goal::Side::RIGHT);
-        bool right = (goal.side != Goal::Side::LEFT);
-        bool own   = (goal.team != Goal::Team::OPPONENT);
-        bool opp   = (goal.team != Goal::Team::OWN);
+        bool left  = (goal.side != VisionGoal::Side::RIGHT);
+        bool right = (goal.side != VisionGoal::Side::LEFT);
+        bool own   = (goal.team != VisionGoal::Team::OPPONENT);
+        bool opp   = (goal.team != VisionGoal::Team::OWN);
 
         if (own && left) {
             possibilities.push_back(arma::vec3({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0}));

@@ -30,7 +30,6 @@
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 
-#include "message/input/CameraParameters.h"
 #include "utility/input/ServoID.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/LookUpTable.h"
@@ -80,8 +79,6 @@ namespace vision {
         double BALL_HORIZONTAL_SUBSAMPLE_FACTOR  = 1;
         double BALL_RADIUS                       = 0.05;
 
-        double FOCAL_LENGTH_PIXELS = 2.0;
-
         int MAXIMUM_LIGHTNING_BOLT_LENGTH   = 10;
         int MINIMUM_LIGHTNING_BOLT_STRENGTH = 10;
 
@@ -97,13 +94,11 @@ namespace vision {
 
         void findVisualHorizon(const message::input::Image& image,
                                const message::vision::LookUpTable& lut,
-                               message::vision::ClassifiedImage& classifiedImage,
-                               const message::input::CameraParameters& cam);
+                               message::vision::ClassifiedImage& classifiedImage);
 
         void findBall(const message::input::Image& image,
                       const message::vision::LookUpTable& lut,
-                      message::vision::ClassifiedImage& classifiedImage,
-                      const message::input::CameraParameters& cam);
+                      message::vision::ClassifiedImage& classifiedImage);
 
         void findGoals(const message::input::Image& image,
                        const message::vision::LookUpTable& lut,
@@ -111,13 +106,11 @@ namespace vision {
 
         void enhanceBall(const message::input::Image& image,
                          const message::vision::LookUpTable& lut,
-                         message::vision::ClassifiedImage& classifiedImage,
-                         const message::input::CameraParameters& cam);
+                         message::vision::ClassifiedImage& classifiedImage);
 
         void enhanceGoals(const message::input::Image& image,
                           const message::vision::LookUpTable& lut,
-                          message::vision::ClassifiedImage& classifiedImage,
-                          const message::input::CameraParameters& cam);
+                          message::vision::ClassifiedImage& classifiedImage);
 
     public:
         bool DRAW_LIGHTNING = false;

@@ -6,7 +6,6 @@
 
 #include "mesh/Sphere.hpp"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
@@ -20,7 +19,6 @@ namespace vision {
 
     using extension::Configuration;
 
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::support::FieldDescription;
@@ -70,20 +68,20 @@ namespace vision {
             log("Finished loading visual mesh");
         });
 
-        // TODO: Recreate mesh when network configuration changes
-        on<Startup, With<FieldDescription>, With<CameraParameters>>().then([this](const FieldDescription& field,
-                                                                                  const CameraParameters& cam) {
-            mesh_ptr = std::make_unique<mesh::VisualMesh<float>>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
-                                                                 0.5,
-                                                                 1.0,
-                                                                 50,
-                                                                 cam.FOV.maxCoeff() / cam.imageSizePixels.maxCoeff());
-            // Make the classifier
-            classifier = mesh_ptr->make_classifier(network);
-        });
+        on<Trigger<Image>, With<FieldDescription>, Buffer<4>>().then([this](const Image& img,
+                                                                            const FieldDescription& field) {
+            // TODO: Recreate mesh when network configuration changes
+            if (!mesh_ptr) {
+                mesh_ptr =
+                    std::make_unique<mesh::VisualMesh<float>>(mesh::Sphere<float>(0, field.ball_radius, 4, 10),
+                                                              0.5,
+                                                              1.0,
+                                                              50,
+                                                              img.lens.fov.maxCoeff() / img.dimensions.maxCoeff());
+                // Make the classifier
+                classifier = mesh_ptr->make_classifier(network);
+            }
 
-        on<Trigger<Image>, With<CameraParameters>, Buffer<4>>().then([this](const Image& img,
-                                                                            const CameraParameters& cam) {
             // Get our camera to world matrix
             Eigen::Affine3f Hcw(img.Hcw.cast<float>());
 
@@ -92,18 +90,22 @@ namespace vision {
             Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
             mesh::VisualMesh<float>::Lens lens;
-            switch (cam.lens.value) {
-                case CameraParameters::LensType::RADIAL:
-                    lens.projection   = mesh::VisualMesh<float>::Lens::EQUIDISTANT;
-                    lens.focal_length = 1.0 / cam.radial.radiansPerPixel;
+
+            switch (img.lens.projection.value) {
+                case Image::Lens::Projection::RECTILINEAR:
+                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::RECTILINEAR;
                     break;
-                case CameraParameters::LensType::PINHOLE:
-                    lens.projection   = mesh::VisualMesh<float>::Lens::RECTILINEAR;
-                    lens.focal_length = cam.pinhole.focalLengthPixels;
+                case Image::Lens::Projection::EQUIDISTANT:
+                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::EQUIDISTANT;
                     break;
+                case Image::Lens::Projection::EQUISOLID:
+                    lens.projection = mesh::VisualMesh<float>::Lens::Projection::EQUISOLID;
+                    break;
+                default: log<NUClear::WARN>("Unknown lens projection."); return;
             }
-            lens.dimensions = {{int(img.dimensions[0]), int(img.dimensions[1])}};
-            lens.fov        = cam.FOV.x();
+            lens.dimensions   = std::array<int, 2>{img.dimensions.x(), img.dimensions.y()};
+            lens.fov          = img.lens.fov.maxCoeff();
+            lens.focal_length = img.lens.focal_length;
 
             auto results = classifier(img.data.data(), mesh::VisualMesh<float>::FOURCC(img.format), Hoc, lens);
 
@@ -124,30 +126,18 @@ namespace vision {
             msg->indices = std::move(results.global_indices);
 
             // Add our neighbourhood
-            msg->neighbourhood.reserve(results.neighbourhood.size());
-            for (const auto& n : results.neighbourhood) {
-                msg->neighbourhood.emplace_back(Eigen::Map<const Eigen::Matrix<int, 6, 1, Eigen::DontAlign>>(n.data()));
-            }
+            msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
+                reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
 
             // Add our classifications
-            // Add our first (the image) and last (the results) to our list
-            for (const auto& c : results.classifications) {
-                msg->classifications.emplace_back(c.first, c.second);
-            }
-
-
-            // -- Graphing for NUsight
-            msg->classifications.emplace_back(results.classifications.front().first,
-                                              results.classifications.front().second);
-            msg->classifications.emplace_back(results.classifications.back().first,
-                                              results.classifications.back().second);
+            std::vector<float> classifications = results.classifications.back().second;
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
+                reinterpret_cast<float*>(classifications.data()), classifications.size(), 2);
 
             // Add our coordinates
-            std::vector<std::array<float, 2>> pixel_coordinates = results.pixel_coordinates;
-            msg->coordinates.reserve(pixel_coordinates.size());
-            for (const auto& coord : pixel_coordinates) {
-                msg->coordinates.push_back({int(coord[0]), int(coord[1])});
-            }
+            std::vector<std::array<float, 2>> coordinates = results.pixel_coordinates;
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
+                reinterpret_cast<float*>(coordinates.data()), coordinates.size(), 2);
 
             if (draw_mesh) {
                 std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>,
@@ -162,9 +152,9 @@ namespace vision {
                     classification = results.classifications.back().second;
                 }
 
-                for (uint i = 0; i < msg->coordinates.size(); ++i) {
+                for (uint i = 0; i < msg->coordinates.rows(); ++i) {
 
-                    Eigen::Vector2i p1(msg->coordinates[i]);
+                    Eigen::Vector2f p1(msg->coordinates.row(i));
 
                     Eigen::Vector4d colour;
                     if (colour_type == 1) {
@@ -177,10 +167,10 @@ namespace vision {
                     }
 
                     for (const auto& n : results.neighbourhood[i]) {
-                        if (n < msg->coordinates.size()) {
-                            Eigen::Vector2i p2(msg->coordinates[n]);
-                            Eigen::Vector2i p2x = p1 + ((p2 - p1) / 2);
-                            lines.emplace_back(p1, p2x, colour);
+                        if (n < msg->coordinates.rows()) {
+                            Eigen::Vector2f p2(msg->coordinates.row(n));
+                            Eigen::Vector2f p2x = p1 + ((p2 - p1) / 2);
+                            lines.emplace_back(p1.cast<int>(), p2x.cast<int>(), colour);
                         }
                     }
                 }
