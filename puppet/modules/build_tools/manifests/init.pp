@@ -76,6 +76,34 @@ class build_tools {
   # System libraries
   package { 'libasound2-dev': ensure => latest, }
 
+  # Gazebo dependencies
+  package { 'libtinyxml-dev': ensure => latest, }
+  package { 'uuid-dev': ensure => latest, }
+  package { 'libfreeimage-dev': ensure => latest, }
+  package { 'libgts-dev': ensure => latest, }
+  package { 'libavdevice-dev': ensure => latest, }
+  package { 'libavformat-dev': ensure => latest, }
+  package { 'libavcodec-dev': ensure => latest, }
+  package { 'libswscale-dev': ensure => latest, }
+  package { 'libavutil-dev': ensure => latest, }
+  package { 'libzip-dev': ensure => latest, }
+  package { 'libjsoncpp-dev': ensure => latest, }
+  package { 'libcurl4-openssl-dev': ensure => latest, }
+  package { 'libyaml-dev': ensure => latest, }
+  package { 'libtbb-dev': ensure => latest, }
+  package { 'freeglut3-dev': ensure => latest, }
+  package { 'libogre-1.9-dev': ensure => latest, }
+  package { 'libtar-dev': ensure => latest, }
+  package { 'libqwt-qt5-dev': ensure => latest, }
+  package { 'libqt5core5a': ensure => latest, }
+  package { 'libqt5opengl5-dev': ensure => latest, }
+  package { 'libqt5test5': ensure => latest, }
+  package { 'libqt5opengl5': ensure => latest, }
+  package { 'libqt5widgets5': ensure => latest, }
+  package { 'libxi-dev': ensure => latest, }
+  package { 'libxmu-dev': ensure => latest, require => [ Package['libxmu-headers'], ], }
+  package { 'libxmu-headers': ensure => latest, }
+
   # We need to match the protobuf version with the one we install in the toolchain.
   exec {'install_python3_packages':
     command => "pip3 install pyparsing &&
