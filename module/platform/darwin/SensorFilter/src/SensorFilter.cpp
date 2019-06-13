@@ -582,6 +582,17 @@ namespace platform {
                     // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
                     sensors->world = convert<double, 4, 4>(world);
 
+                    if (this->config.debug) {
+                        // Assumes roll, pitch, yaw, matrix multiplication order
+                        // http://planning.cs.uiuc.edu/node103.html
+                        double roll  = std::atan2(sensors.world(2, 1), sensors.world(2, 2));
+                        double pitch = std::atan2(-sensors.world(3, 1),
+                                                  std::sqrt(sensors.world(3, 2) * sensors.world(3, 2)
+                                                            + sensors.world(3, 3) * sensors.world(3, 3)));
+                        double yaw = std::atan2(sensors.world(3, 2), sensors.world(3, 3));
+                        log("Roll:", roll, "Pitch:", pitch, "Yaw:", yaw);
+                    }
+
                     sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));
 
                     /************************************************
@@ -594,27 +605,6 @@ namespace platform {
                                                                   this->config.debug);
                     sensors->inertialTensor =
                         calculateInertialTensor(kinematicsModel, sensors->forwardKinematics, true);
-
-                    if (this->config.debug) {
-                        Eigen::Vector4d com =
-                            sensors->world.inverse()
-                            * Eigen::Vector4d(
-                                  sensors->centreOfMass.x(), sensors->centreOfMass.y(), sensors->centreOfMass.z(), 1.0);
-
-                        // Fix mass after transform
-                        com.w() = sensors->centreOfMass.w();
-
-                        // Log CoM in both torso and world spaces
-                        // log("CoM Torso space:", sensors->centreOfMass.transpose());
-                        // log("CoM World space:", com.transpose());
-
-                        // Eigen::Matrix3d tensor = sensors->world.topLeftCorner<3, 3>() * sensors->inertialTensor *
-                        // sensors->world.topLeftCorner<3, 3>().transpose();
-
-                        // Log inertial tensor in both torso and world spaces
-                        // log("Inertia Torso space:", sensors->inertialTensor);
-                        // log("Inertia World space:", tensor);
-                    }
 
                     /************************************************
                      *                  Kinematics Horizon          *

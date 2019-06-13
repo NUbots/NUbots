@@ -606,18 +606,25 @@ namespace motion {
         }
         auto waypoints = motionLegs(joints);
 
-        // Ankle roll compensation
-        double ankle_roll = std::atan2(sensors.world(2, 1), sensors.world(2, 2));
+        /* Ankle roll compensation */
+        // Assumes roll, pitch, yaw, matrix multiplication order
+        // http://planning.cs.uiuc.edu/node103.html
+        double ankle_roll  = std::atan2(sensors.world(1, 0), sensors.world(1, 1));
+        double ankle_pitch = std::atan2(
+            -sensors.world(2, 0),
+            std::sqrt(sensors.world(2, 1) * sensors.world(2, 1) + sensors.world(2, 2) * sensors.world(2, 2)));
+        double ankle_yaw = std::atan2(sensors.world(2, 1), sensors.world(2, 2));
+
         for (auto& joint : *waypoints) {
             if (joint.id == ServoID::R_ANKLE_ROLL) {
                 // log("L Old angle:", joint.position, " New angle:", -ankle_roll);
                 joint.position = -2.0 * ankle_roll;
-                joint.gain = 30;
+                joint.gain     = 30;
             }
             if (joint.id == ServoID::L_ANKLE_ROLL) {
                 // log("R Old angle:", joint.position, " New angle:", -ankle_roll);
                 joint.position = -2.0 * ankle_roll;
-                joint.gain = 30;
+                joint.gain     = 30;
             }
         }
 
