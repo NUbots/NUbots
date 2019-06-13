@@ -180,8 +180,8 @@ namespace motion {
         utility::math::matrix::Transform3D getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? convert<double, 4, 4>(sensors.forwardKinematics[utility::input::ServoID::L_ANKLE_ROLL])
-                        : convert<double, 4, 4>(sensors.forwardKinematics[utility::input::ServoID::R_ANKLE_ROLL]));
+                        ? convert<double, 4, 4>(sensors.forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL])
+                        : convert<double, 4, 4>(sensors.forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL]));
         }
 
         utility::math::matrix::Transform3D getFootPose(const message::input::Sensors& sensors) {
@@ -201,8 +201,9 @@ namespace motion {
                 for (auto& servo : sensors.servo) {
                     if (int(servo.id) >= 6         // R_HIP_YAW
                         && int(servo.id) <= 17) {  // L_ANKLE_ROLL
-                        servosAtGoal = servosAtGoal
-                                       && std::fabs(servo.goalPosition - servo.presentPosition) < servo_angle_threshold;
+                        servosAtGoal =
+                            servosAtGoal
+                            && std::fabs(servo.goal_position - servo.present_position) < servo_angle_threshold;
                     }
                 }
 
