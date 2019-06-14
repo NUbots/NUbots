@@ -110,7 +110,8 @@ namespace platform {
             , load_sensor()
             , footlanding_rFWw()
             , footlanding_Rfw()
-            , footlanding_Rwf() {
+            , footlanding_Rwf()
+            , theta(arma::fill::zeros) {
 
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
                 this->config.nominal_z = config["nominal_z"].as<float>();
@@ -582,21 +583,11 @@ namespace platform {
                     // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
                     sensors->world = convert<double, 4, 4>(world);
 
+                    // Integrate gyro to get angular positions
+                    theta += o.rows(MotionModel::WX, MotionModel::WZ) * 1.0 / 90.0;
+
                     if (this->config.debug) {
-                        // Assumes roll, pitch, yaw, matrix multiplication order
-                        // http://planning.cs.uiuc.edu/node103.html
-                        double roll  = std::atan2(sensors->world(2, 1), sensors->world(2, 2));
-                        double pitch = std::atan2(-sensors->world(3, 1),
-                                                  std::sqrt(sensors->world(3, 2) * sensors->world(3, 2)
-                                                            + sensors->world(3, 3) * sensors->world(3, 3)));
-                        double yaw   = std::atan2(sensors->world(3, 2), sensors->world(3, 3));
-                        log("Roll:", roll, "Pitch:", pitch, "Yaw:", yaw);
-                        log("w_x:",
-                            sensors->gyroscope[0],
-                            "w_y:",
-                            sensors->gyroscope[1],
-                            "w_z:",
-                            sensors->gyroscope[2]);
+                        log("p_x:", theta[0], "p_y:", theta[1], "p_z:", theta[2]);
                     }
 
                     sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));

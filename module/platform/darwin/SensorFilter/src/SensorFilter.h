@@ -139,6 +139,9 @@ namespace platform {
 
             // World to foot in foot-flat rotation when the foot landed
             std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
+
+            // Storage for previous gyroscope values
+            arma::vec3 theta;
         };
     }  // namespace darwin
 }  // namespace platform
