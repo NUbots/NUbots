@@ -20,6 +20,7 @@
 #include "NUsight.h"
 
 #include "message/input/Image.h"
+#include "message/output/CompresssedImage.h"
 #include "message/vision/Ball.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/Goal.h"
@@ -36,6 +37,7 @@ namespace support {
     using utility::time::getUtcTimestamp;
 
     using message::input::Image;
+    using message::output::CompressedImage;
     using message::vision::Balls;
     using message::vision::ClassifiedImage;
     using message::vision::Goals;
@@ -51,7 +53,16 @@ namespace support {
                 }
 
                 powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
+                last_image = NUClear::clock::now();
+            }));
 
+        handles["compressed_image"].push_back(on<Trigger<CompressedImage>, Single, Priority::LOW>().then(
+            [this](std::shared_ptr<const CompressedImage> image) {
+                if (NUClear::clock::now() - last_image < max_image_duration) {
+                    return;
+                }
+
+                powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
                 last_image = NUClear::clock::now();
             }));
 
