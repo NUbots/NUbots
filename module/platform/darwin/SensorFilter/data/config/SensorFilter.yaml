@@ -62,6 +62,7 @@ motion_filter:
       velocity: [1e-6, 1e-6, 1e-6]
       rotational_velocity: [1e-8, 1e-8, 1e-8]
       rotation: [1e-12, 1e-12, 1e-12, 1e-12]
+      gyroscope_bias: [1e-12, 1e-12, 1e-12] # should be very small
 
   initial:
     mean:
@@ -69,9 +70,11 @@ motion_filter:
       velocity: [0, 0, 0]             # Not moving
       rotational_velocity: [0, 0, 0]  # Not spinning
       rotation: [1, 0, 0, 0]          # Upright
+      gyroscope_bias: [0, 0, 0]       # No bias
     covariance:
       position: [1e-3, 1e-3, 1]       # We are pretty sure of our x,y when we start
       velocity: [1e-3, 1e-3, 1e-3]    # We are unsure of our velocity
       rotation: [0.1, 0.1, 0.1, 0.1]  # Not very sure of rotation
-      rotational_velocity: [1, 1, 1]  # Fairly unsure about our rotational velocity
+      rotational_velocity: [0.1, 0.1, 0.1]  # Fairly unsure about our rotational velocity
+      gyroscope_bias: [1, 1, 1] # Very unsure about our gyroscope bias
 

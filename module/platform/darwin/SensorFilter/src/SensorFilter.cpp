@@ -147,6 +147,8 @@ namespace platform {
                     config["motion_filter"]["noise"]["process"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.noise.process.rotationalVelocity =
                     config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.noise.process.gyroscopeBias =
+                    config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<arma::vec3>();
 
                 // Set our process noise in our filter
                 arma::vec::fixed<MotionModel::size> processNoise;
@@ -155,6 +157,8 @@ namespace platform {
                 processNoise.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.noise.process.rotation;
                 processNoise.rows(MotionModel::WX, MotionModel::WZ) =
                     this->config.motionFilter.noise.process.rotationalVelocity;
+                processNoise.rows(MotionModel::BX, MotionModel::BZ) =
+                    this->config.motionFilter.noise.process.gyroscopeBias;
                 motionFilter.model.processNoiseMatrix = arma::diagmat(processNoise);
 
                 // Update our mean configs and if it changed, reset the filter
@@ -166,6 +170,8 @@ namespace platform {
                     config["motion_filter"]["initial"]["mean"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.initial.mean.rotationalVelocity =
                     config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.initial.mean.gyroscopeBias =
+                    config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<arma::vec3>();
 
                 this->config.motionFilter.initial.covariance.position =
                     config["motion_filter"]["initial"]["covariance"]["position"].as<arma::vec3>();
@@ -175,6 +181,8 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.initial.covariance.rotationalVelocity =
                     config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.initial.covariance.gyroscopeBias =
+                    config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<arma::vec3>();
 
                 // Calculate our mean and covariance
                 arma::vec::fixed<MotionModel::size> mean;
@@ -182,6 +190,7 @@ namespace platform {
                 mean.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.mean.velocity;
                 mean.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.mean.rotation;
                 mean.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.mean.rotationalVelocity;
+                mean.rows(MotionModel::BX, MotionModel::BZ) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
                 arma::vec::fixed<MotionModel::size> covariance;
                 covariance.rows(MotionModel::PX, MotionModel::PZ) =
@@ -192,6 +201,8 @@ namespace platform {
                     this->config.motionFilter.initial.covariance.rotation;
                 covariance.rows(MotionModel::WX, MotionModel::WZ) =
                     this->config.motionFilter.initial.covariance.rotationalVelocity;
+                covariance.rows(MotionModel::BX, MotionModel::BZ) =
+                    this->config.motionFilter.initial.covariance.gyroscopeBias;
                 motionFilter.setState(mean, arma::diagmat(covariance));
             });
 
