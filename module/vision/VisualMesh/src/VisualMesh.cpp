@@ -8,7 +8,6 @@
 #include "geometry/Cylinder.hpp"
 #include "geometry/Sphere.hpp"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
@@ -22,7 +21,6 @@ namespace vision {
 
     using extension::Configuration;
 
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::support::FieldDescription;
