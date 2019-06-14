@@ -5,7 +5,7 @@
   "private": true,
   "repository": "github:NUbots/NUsight2",
   "engines": {
-    "node": ">=4.X.X",
+    "node": ">=10.0.0 <11.0.0",
     "yarn": "1.x"
   },
   "scripts": {
