@@ -46,6 +46,12 @@ foot_load_sensor:
       - [-3.4065611362457275, 3.483449697494507, 2.7328274250030518, -2.3506267070770264]
     bias: [-0.30051207542419434, -0.3846372961997986, -0.5939099192619324, -0.28444257378578186]
 
+1e-10 ps
+1e-6 v
+1e-8 rotation
+rvel = 1e-10
+gby = 1e-12
+
 motion_filter:
   update:
     velocity_decay: [0.98, 0.98, 0.98]
@@ -62,6 +68,7 @@ motion_filter:
       velocity: [1e-6, 1e-6, 1e-6]
       rotational_velocity: [1e-8, 1e-8, 1e-8]
       rotation: [1e-12, 1e-12, 1e-12, 1e-12]
+      gyroscope_bias: [1e-12, 1e-12, 1e-12] # should be very small
 
   initial:
     mean:
@@ -69,9 +76,11 @@ motion_filter:
       velocity: [0, 0, 0]             # Not moving
       rotational_velocity: [0, 0, 0]  # Not spinning
       rotation: [1, 0, 0, 0]          # Upright
+      gyroscope_bias: [0, 0, 0]       # No bias
     covariance:
       position: [1e-3, 1e-3, 1]       # We are pretty sure of our x,y when we start
       velocity: [1e-3, 1e-3, 1e-3]    # We are unsure of our velocity
       rotation: [0.1, 0.1, 0.1, 0.1]  # Not very sure of rotation
-      rotational_velocity: [1, 1, 1]  # Fairly unsure about our rotational velocity
+      rotational_velocity: [0.1, 0.1, 0.1]  # Fairly unsure about our rotational velocity
+      gyroscope_bias: [1, 1, 1] # Very unsure about our gyroscope bias
 
