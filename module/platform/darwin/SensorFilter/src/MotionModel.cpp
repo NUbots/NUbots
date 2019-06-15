@@ -81,7 +81,7 @@ namespace platform {
         // Gyroscope
         arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
                                                      const MeasurementType::GYROSCOPE&) {
-            return state.rows(WX, WZ);
+            return state.rows(WX, WZ) + state.rows(BX, BZ);
         }
 
         // Foot up with z

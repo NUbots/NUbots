@@ -54,8 +54,13 @@ namespace platform {
             static constexpr uint WY = 11;
             static constexpr uint WZ = 12;
 
+            // Gyroscope Bias
+            static constexpr uint BX = 13;
+            static constexpr uint BY = 14;
+            static constexpr uint BZ = 15;
+
             // The size of our state
-            static constexpr size_t size = 13;
+            static constexpr size_t size = 16;
 
             // Our static process noise matrix
             arma::mat::fixed<size, size> processNoiseMatrix;
