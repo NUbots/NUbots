@@ -21,10 +21,7 @@ syntax = "proto3";
 
 package message.vision;
 
-import "Vector.proto";
-
 message GreenHorizon {
-
-    repeated int32 horizon_indices  = 1;
+    repeated int32 horizon_indices = 1;
     repeated int32 cluster_indices = 2;
 }
