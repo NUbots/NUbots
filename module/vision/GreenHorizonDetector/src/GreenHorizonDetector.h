@@ -20,8 +20,6 @@ namespace vision {
             float end_confidence;
             float cluster_points;
         } config;
-
-        std::vector<int> graham_scan(const std::vector<int>& indices, const Eigen::MatrixXf& coords);
     };
 
 }  // namespace vision
