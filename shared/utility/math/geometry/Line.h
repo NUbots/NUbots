@@ -100,6 +100,14 @@ namespace math {
                     distance = arma::dot(average, normal);
                 }
             }
+
+            // Calculate the angle between two lines
+            // This is the dihedral angle: https://en.wikipedia.org/wiki/Dihedral_angle
+            double angleBetween(const Line& line) const {
+                const arma::vec2 n1 = arma::normalise(normal);
+                const arma::vec2 n2 = arma::normalise(line.normal);
+                return std::acos(arma::dot(n1, n2));
+            }
         };
     }  // namespace geometry
 }  // namespace math
