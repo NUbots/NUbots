@@ -7,7 +7,7 @@
 #include "message/input/Sensors.h"
 #include "message/localisation/Ball.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
@@ -82,9 +82,9 @@ namespace localisation {
             });
 
         /* To run whenever a ball has been detected */
-        on<Trigger<std::vector<message::vision::Ball>>, With<FieldDescription>>().then(
-            [this](const std::vector<message::vision::Ball>& balls, const FieldDescription& field) {
-                if (balls.size() > 0) {
+        on<Trigger<message::vision::Balls>, With<FieldDescription>>().then(
+            [this](const message::vision::Balls& balls, const FieldDescription& field) {
+                if (balls.balls.size() > 0) {
                     /* Call Time Update first */
                     auto curr_time        = NUClear::clock::now();
                     double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
@@ -94,11 +94,11 @@ namespace localisation {
                     /* Now call Measurement Update. Supports multiple measurement methods
                      * and will treat them as
                      * separate measurements */
-                    for (auto& measurement : balls[0].measurements) {
+                    for (auto& measurement : balls.balls[0].measurements) {
                         filter.measurementUpdate(cartesianToSpherical(convert<double, 3, 1>(measurement.rBCc)),
                                                  convert<double, 3, 3>(measurement.covariance),
                                                  field,
-                                                 convert<double, 4, 4>(balls[0].visObject.classifiedImage->image->Hcw));
+                                                 convert<double, 4, 4>(balls.Hcw));
                     }
                     last_measurement_update_time = curr_time;
                 }

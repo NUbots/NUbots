@@ -24,7 +24,6 @@ extern "C" {
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 
 #include "utility/input/ServoID.h"
@@ -44,6 +43,7 @@ namespace input {
         std::string deviceID;
         uint cameraID;
         bool isLeft;
+        message::input::Image::Lens lens;
         ArvCamera* camera;
         ArvStream* stream;
         NUClear::Reactor& reactor;

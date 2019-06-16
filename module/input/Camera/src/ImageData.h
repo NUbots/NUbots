@@ -4,6 +4,8 @@
 #include <Eigen/Core>
 #include <string>
 
+#include "message/input/Image.h"
+
 namespace module {
 namespace input {
 
@@ -15,6 +17,7 @@ namespace input {
         std::string serial_number;
         NUClear::clock::time_point timestamp;
         bool isLeft;
+        message::input::Image::Lens lens;
     };
 
 }  // namespace input

@@ -96,8 +96,8 @@ namespace motion {
         inline std::map<ServoID, utility::math::matrix::Transform3D>
         calculateHeadJointPosition(const KinematicsModel& model, const Sensors& sensors, ServoID servoID) {
             return calculateHeadJointPosition(model,
-                                              sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
-                                              sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].presentPosition,
+                                              sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position,
+                                              sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].present_position,
                                               servoID);
         }
         /*! @brief
@@ -142,7 +142,7 @@ namespace motion {
             // Rotate to face down the leg (see above for definitions of terms, including 'facing')
             runningTransform = runningTransform.rotateY(M_PI_2);
             // Using right hand rule along global z gives positive direction of yaw:
-            runningTransform = runningTransform.rotateX(-sensors.servo[static_cast<int>(HIP_YAW)].presentPosition);
+            runningTransform = runningTransform.rotateX(-sensors.servo[static_cast<int>(HIP_YAW)].present_position);
             // Return basis facing from body to hip centre (down) with z aligned with the axis of the hip roll motor
             // axis. Position at hip joint
             positions[HIP_YAW] = runningTransform;
@@ -150,7 +150,7 @@ namespace motion {
                 return positions;
             }
 
-            runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(HIP_ROLL)].presentPosition);
+            runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(HIP_ROLL)].present_position);
             // Return basis facing down leg plane, with z oriented through axis of roll motor. Position still hip joint
             positions[HIP_ROLL] = runningTransform;
             if (servoID == HIP_ROLL) {
@@ -158,7 +158,7 @@ namespace motion {
             }
 
             // Rotate to face down upper leg
-            runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(HIP_PITCH)].presentPosition);
+            runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(HIP_PITCH)].present_position);
             // Translate down upper leg
             runningTransform = runningTransform.translateX(model.leg.UPPER_LEG_LENGTH);
             // Return basis faces down upper leg, with z out of front of thigh. Pos = knee axis centre
@@ -169,7 +169,7 @@ namespace motion {
 
 
             // Rotate to face down lower leg
-            runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(KNEE)].presentPosition);
+            runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(KNEE)].present_position);
             // Translate down lower leg
             runningTransform = runningTransform.translateX(model.leg.LOWER_LEG_LENGTH);
             // Return basis facing down lower leg, with z out of front of shin. Pos = ankle axis centre
@@ -180,7 +180,7 @@ namespace motion {
 
 
             // Rotate to face down foot (pitch)
-            runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(ANKLE_PITCH)].presentPosition);
+            runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(ANKLE_PITCH)].present_position);
             // Return basis facing pitch down to foot with z out the front of the foot. Pos = ankle axis centre
             positions[ANKLE_PITCH] = runningTransform;
             if (servoID == ANKLE_PITCH) {
@@ -188,7 +188,7 @@ namespace motion {
             }
 
             // Rotate to face down foot (roll)
-            runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(ANKLE_ROLL)].presentPosition);
+            runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(ANKLE_ROLL)].present_position);
             // Rotate so x faces toward toes
             runningTransform = runningTransform.rotateY(-M_PI_2);
             // Translate to ground
@@ -229,9 +229,9 @@ namespace motion {
                 negativeIfRight = -1;
             }
 
-            float shoulder_pitch = sensors.servo[static_cast<int>(SHOULDER_PITCH)].presentPosition;
-            float shoulder_roll  = sensors.servo[static_cast<int>(SHOULDER_ROLL)].presentPosition;
-            float elbow          = sensors.servo[static_cast<int>(ELBOW)].presentPosition;
+            float shoulder_pitch = sensors.servo[static_cast<int>(SHOULDER_PITCH)].present_position;
+            float shoulder_roll  = sensors.servo[static_cast<int>(SHOULDER_ROLL)].present_position;
+            float elbow          = sensors.servo[static_cast<int>(ELBOW)].present_position;
 
             // Translate to shoulder
             runningTransform = runningTransform.translate({model.arm.SHOULDER_X_OFFSET,
@@ -570,7 +570,7 @@ namespace motion {
                                                 const Sensors& sensors,
                                                 const arma::vec2& foot,
                                                 bool left) {
-            // sensors.bodyToGround
+            // sensors.Hgt
 
             int negativeIfRight = left ? 1 : -1;
 
@@ -578,19 +578,19 @@ namespace motion {
             arma::vec4 centerFoot =
                 arma::vec4({position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1});
 
-            return ((left) ? convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL]) * centerFoot
-                           : convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]) * centerFoot);
+            return ((left) ? convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]) * centerFoot
+                           : convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]) * centerFoot);
         }
 
         inline arma::vec3 calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
             arma::vec4 CoP            = {0, 0, 0, 1};
             float number_of_feet_down = 0;
-            if (sensors.leftFootDown) {
+            if (sensors.left_foot_down) {
                 CoP += fsrCentreInBodyCoords(
                     model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG - 1].centre), true);
                 number_of_feet_down += 1.0f;
             }
-            if (sensors.rightFootDown) {
+            if (sensors.right_foot_down) {
                 CoP += fsrCentreInBodyCoords(
                     model, sensors, convert<double, 2>(sensors.fsr[LimbID::RIGHT_LEG - 1].centre), false);
                 number_of_feet_down += 1.0f;
@@ -600,7 +600,7 @@ namespace motion {
             }
             // reset homogeneous coordinate
             CoP(3)              = 1;
-            arma::vec4 CoP_body = convert<double, 4, 4>(sensors.bodyToGround) * CoP;
+            arma::vec4 CoP_body = convert<double, 4, 4>(sensors.Hgt) * CoP;
             return CoP_body.rows(0, 2);
         }
 

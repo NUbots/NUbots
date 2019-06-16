@@ -87,6 +87,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } process;
                     } noise;
                     struct Initial {
@@ -101,6 +102,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } mean;
                         struct Covariance {
                             Covariance()
@@ -112,6 +114,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } covariance;
                     } initial;
                 } motionFilter;

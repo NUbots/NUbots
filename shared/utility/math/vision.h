@@ -22,7 +22,7 @@
 #include <armadillo>
 #include <cmath>
 #include <nuclear>
-#include "message/input/CameraParameters.h"
+#include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 #include "utility/input/ServoID.h"
@@ -57,6 +57,9 @@ namespace math {
         inline arma::vec2 imageToScreen(const arma::ivec2& im, const arma::uvec2& imageSize) {
             return arma::vec2({double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5}) - im;
         }
+        inline arma::vec2 imageToScreen(const arma::fvec2& im, const arma::uvec2& imageSize) {
+            return arma::vec2({double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5}) - im;
+        }
         inline arma::vec2 imageToScreen(const arma::vec2& im, const arma::uvec2& imageSize) {
             return arma::vec2({double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5}) - im;
         }
@@ -68,45 +71,42 @@ namespace math {
             /*! @brief uses pinhole cam model
                 @param point - Point in camera space (x along view axis, y to left of screen, z up along screen)
             */
-            inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point,
-                                                      const message::input::CameraParameters& cam) {
-                const double& camFocalLengthPixels = cam.pinhole.focalLengthPixels;
-                return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
+            inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point, const message::input::Image::Lens& cam) {
+                return {double(cam.focal_length) * point[1] / point[0], double(cam.focal_length) * point[2] / point[0]};
             }
 
-            inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const message::input::CameraParameters& cam) {
-                const double& camFocalLengthPixels = cam.pinhole.focalLengthPixels;
-                return arma::normalise(arma::vec3{camFocalLengthPixels, screen[0], screen[1]});
+            inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const message::input::Image::Lens& cam) {
+                return arma::normalise(arma::vec3{double(cam.focal_length), screen[0], screen[1]});
             }
         }  // namespace pinhole
 
         // Radial methods
         namespace radial {
 
-            inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point,
-                                                      const message::input::CameraParameters& cam) {
+            inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point, const message::input::Image::Lens& cam) {
                 arma::vec3 p = arma::normalise(point);
                 float theta  = std::acos(p[0]);
                 if (theta == 0) {
                     return arma::vec2({0, 0});
                 }
-                float r         = theta / cam.radial.radiansPerPixel;
+                float r         = theta * cam.focal_length;
                 float sin_theta = std::sin(theta);
                 float px        = r * p[1] / (sin_theta);
                 float py        = r * p[2] / (sin_theta);
 
-                return arma::vec2({px, py}) + arma::vec2({double(cam.centreOffset[0]), double(cam.centreOffset[1])});
+                return arma::vec2({px, py}) + arma::vec2({double(cam.centre[0]), double(cam.centre[1])});
             }
 
-            inline arma::vec3 getCamFromScreen(const arma::vec2& p, const message::input::CameraParameters& cam) {
-                arma::vec2 px = p - arma::vec2({double(cam.centreOffset[0]), double(cam.centreOffset[1])});
+            inline arma::vec3 getCamFromScreen(const arma::vec2& p, const message::input::Image::Lens& cam) {
+                arma::vec2 px = p - arma::vec2({double(cam.centre[0]), double(cam.centre[1])});
                 float r       = std::sqrt(std::pow(px[0], 2) + std::pow(px[1], 2));
                 if (r == 0) {
                     return {1, 0, 0};
                 }
-                float sx = (std::cos(cam.radial.radiansPerPixel * r));
-                float sy = std::sin(cam.radial.radiansPerPixel * r) * (float(px[0]) / r);
-                float sz = std::sin(cam.radial.radiansPerPixel * r) * (float(px[1]) / r);
+                float r_fl = r / cam.focal_length;
+                float sx   = (std::cos(r_fl));
+                float sy   = std::sin(r_fl) * (float(px[0]) / r);
+                float sz   = std::sin(r_fl) * (float(px[1]) / r);
 
                 // Swizzle components so x is out of camera, y is to the left, z is up
                 // Matches input of pointToPixel
@@ -122,47 +122,62 @@ namespace math {
         /*! @brief uses pinhole cam model
             @param point - Point in camera space (x along view axis, y to left of screen, z up along screen)
         */
-        inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point,
-                                                  const message::input::CameraParameters& cam) {
-            switch (message::input::CameraParameters::LensType::Value(cam.lens)) {
-                case (message::input::CameraParameters::LensType::PINHOLE):
+        inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point, const message::input::Image::Lens& cam) {
+            switch (cam.projection.value) {
+                case message::input::Image::Lens::Projection::RECTILINEAR:
                     return pinhole::projectCamSpaceToScreen(point, cam);
-                case (message::input::CameraParameters::LensType::RADIAL):
+                case message::input::Image::Lens::Projection::EQUIDISTANT:
+                case message::input::Image::Lens::Projection::EQUISOLID:  // TODO: do this properly
                     return radial::projectCamSpaceToScreen(point, cam);
+                case message::input::Image::Lens::Projection::UNKNOWN:
+                default: return arma::vec2();
             }
-            return arma::vec2();
         }
 
-        inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const message::input::CameraParameters& cam) {
-            switch (message::input::CameraParameters::LensType::Value(cam.lens)) {
-                case (message::input::CameraParameters::LensType::PINHOLE):
+        inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const message::input::Image::Lens& cam) {
+            switch (cam.projection.value) {
+                case message::input::Image::Lens::Projection::RECTILINEAR:
                     return pinhole::getCamFromScreen(screen, cam);
-                case (message::input::CameraParameters::LensType::RADIAL): return radial::getCamFromScreen(screen, cam);
+                case message::input::Image::Lens::Projection::EQUIDISTANT:
+                case message::input::Image::Lens::Projection::EQUISOLID:  // TODO: do this properly
+                    return radial::getCamFromScreen(screen, cam);
+                case message::input::Image::Lens::Projection::UNKNOWN:
+                default: return arma::vec3();
             }
-            return arma::vec2();
         }
         /////////////////////
         // END SWITCH METHODS
         /////////////////////
 
 
-        inline arma::vec3 getCamFromImage(const arma::ivec2& image, const message::input::CameraParameters& cam) {
-            return getCamFromScreen(imageToScreen(image, convert<uint, 2>(cam.imageSizePixels)), cam);
+        inline arma::vec3 getCamFromImage(const arma::fvec2& image,
+                                          const arma::uvec2& dimensions,
+                                          const message::input::Image::Lens& cam) {
+            return getCamFromScreen(imageToScreen(image, dimensions), cam);
         }
 
-        inline arma::ivec2 getImageFromCam(const arma::vec3& unit_vector, const message::input::CameraParameters& cam) {
-            return screenToImage(projectCamSpaceToScreen(unit_vector, cam), convert<uint, 2>(cam.imageSizePixels));
+        inline arma::vec3 getCamFromImage(const arma::ivec2& image,
+                                          const arma::uvec2& dimensions,
+                                          const message::input::Image::Lens& cam) {
+            return getCamFromScreen(imageToScreen(image, dimensions), cam);
+        }
+
+        inline arma::ivec2 getImageFromCam(const arma::vec3& unit_vector,
+                                           const arma::uvec2& dimensions,
+                                           const message::input::Image::Lens& cam) {
+            return screenToImage(projectCamSpaceToScreen(unit_vector, cam), dimensions);
         }
 
         inline arma::vec2 getImageFromCamCts(const arma::vec3& unit_vector,
-                                             const message::input::CameraParameters& cam) {
-            return screenToImageCts(projectCamSpaceToScreen(unit_vector, cam), convert<uint, 2>(cam.imageSizePixels));
+                                             const arma::uvec2& dimensions,
+                                             const message::input::Image::Lens& cam) {
+            return screenToImageCts(projectCamSpaceToScreen(unit_vector, cam), dimensions);
         }
 
 
         inline double getParallaxAngle(const arma::vec2& screen1,
                                        const arma::vec2& screen2,
-                                       const message::input::CameraParameters& cam) {
+                                       const message::input::Image::Lens& cam) {
             arma::vec3 camSpaceP1 = getCamFromScreen(screen1, cam);
             arma::vec3 camSpaceP2 = getCamFromScreen(screen2, cam);
 
@@ -170,10 +185,7 @@ namespace math {
                                                       / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
         }
 
-        inline double widthBasedDistanceToCircle(const double& radius,
-                                                 const arma::vec3& c1,
-                                                 const arma::vec3& c2,
-                                                 const message::input::CameraParameters&) {
+        inline double widthBasedDistanceToCircle(const double& radius, const arma::vec3& c1, const arma::vec3& c2) {
             double parallaxAngle                = utility::math::angle::acos_clamped(arma::norm_dot(c1, c2));
             double correctionForClosenessEffect = radius * std::sin(parallaxAngle / 2.0);
 
@@ -187,7 +199,7 @@ namespace math {
         inline double distanceToEquidistantPoints(const double& separation,
                                                   const arma::vec2& s1,
                                                   const arma::vec2& s2,
-                                                  const message::input::CameraParameters& cam) {
+                                                  const message::input::Image::Lens& cam) {
             double parallaxAngle = getParallaxAngle(s1, s2, cam);
             return (separation / 2) / std::tan(parallaxAngle / 2);
         }
@@ -205,24 +217,24 @@ namespace math {
 
 
         inline arma::vec2 projectWorldPointToScreen(const arma::vec4& point,
-                                                    const utility::math::matrix::Transform3D& camToGround,
-                                                    const message::input::CameraParameters& cam) {
-            arma::vec4 camSpacePoint = camToGround.i() * point;
+                                                    const utility::math::matrix::Transform3D& Hgc,
+                                                    const message::input::Image::Lens& cam) {
+            arma::vec4 camSpacePoint = Hgc.i() * point;
             return projectCamSpaceToScreen(camSpacePoint.rows(0, 2), cam);
         }
         inline arma::vec2 projectWorldPointToScreen(const arma::vec3& point,
-                                                    const utility::math::matrix::Transform3D& camToGround,
-                                                    const message::input::CameraParameters& cam) {
+                                                    const utility::math::matrix::Transform3D& Hgc,
+                                                    const message::input::Image::Lens& cam) {
             arma::vec4 point_ = arma::ones(4);
             point_.rows(0, 2) = point;
-            return projectWorldPointToScreen(point_, camToGround, cam);
+            return projectWorldPointToScreen(point_, Hgc, cam);
         }
 
         inline arma::vec3 projectCamToPlane(const arma::vec3& cam,
-                                            const utility::math::matrix::Transform3D& camToGround,
+                                            const utility::math::matrix::Transform3D& Hgc,
                                             const utility::math::geometry::Plane<3>& plane) {
-            arma::vec3 lineDirection = camToGround.submat(0, 0, 2, 2) * cam;
-            arma::vec3 linePosition  = camToGround.submat(0, 3, 2, 3);
+            arma::vec3 lineDirection = Hgc.submat(0, 0, 2, 2) * cam;
+            arma::vec3 linePosition  = Hgc.submat(0, 3, 2, 3);
 
             utility::math::geometry::ParametricLine<3> line;
             line.setFromDirection(lineDirection, linePosition);
@@ -231,17 +243,17 @@ namespace math {
         }
 
         inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos,
-                                                   const utility::math::matrix::Transform3D& camToGround,
-                                                   const message::input::CameraParameters& cam) {
+                                                   const utility::math::matrix::Transform3D& Hgc,
+                                                   const message::input::Image::Lens& cam) {
             return projectCamToPlane(
-                getCamFromScreen(screenPos, cam), camToGround, utility::math::geometry::Plane<3>({0, 0, 1}, {0, 0, 0}));
+                getCamFromScreen(screenPos, cam), Hgc, utility::math::geometry::Plane<3>({0, 0, 1}, {0, 0, 0}));
         }
 
         inline double distanceToVerticalObject(const arma::vec2& top,
                                                const arma::vec2& base,
                                                const double& objectHeight,
                                                const double& robotHeight,
-                                               const message::input::CameraParameters& cam) {
+                                               const message::input::Image::Lens& cam) {
 
             // Parallax from top to base
             double theta = getParallaxAngle(top, base, cam);
@@ -261,19 +273,19 @@ namespace math {
             const double h2 = h * h;
 
             double innerExpr =
-                std::abs(c) * sqrt(H2 * (4.0 * H * h + H2 * c2 + 4.0 * h2 * c2 - 4.0 * h2 - 4.0 * H * h * c2));
+                std::abs(c) * std::sqrt(H2 * (4.0 * H * h + H2 * c2 + 4.0 * h2 * c2 - 4.0 * h2 - 4.0 * H * h * c2));
             double divisor = 2 * std::abs(std::sin(theta));
-            return M_SQRT2 * sqrt(2.0 * H * h + H2 * c2 + 2.0 * h2 * c2 + innerExpr - 2.0 * h2 - 2.0 * H * h * c2)
+            return M_SQRT2 * std::sqrt(2.0 * H * h + H2 * c2 + 2.0 * h2 * c2 + innerExpr - 2.0 * h2 - 2.0 * H * h * c2)
                    / divisor;
         }
 
-        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screenAngular) {
-            if (std::fmod(std::fabs(screenAngular[0]), M_PI) == M_PI_2
-                || std::fmod(std::fabs(screenAngular[1]), M_PI) == M_PI_2) {
+        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screen_angular) {
+            if (std::fmod(std::fabs(screen_angular[0]), M_PI) == M_PI_2
+                || std::fmod(std::fabs(screen_angular[1]), M_PI) == M_PI_2) {
                 return {0, 0, 0};
             }
-            double tanTheta        = std::tan(screenAngular[0]);
-            double tanPhi          = std::tan(screenAngular[1]);
+            double tanTheta        = std::tan(screen_angular[0]);
+            double tanPhi          = std::tan(screen_angular[1]);
             double x               = 0;
             double y               = 0;
             double z               = 0;
@@ -313,11 +325,11 @@ namespace math {
             const arma::vec3& robotPose,
             const arma::vec3& goalLocation,
             const message::support::FieldDescription& field,
-            const utility::math::matrix::Transform3D& camToGround,
+            const utility::math::matrix::Transform3D& Hgc,
             const bool& failIfNegative =
                 true)  // camtoground is either camera to ground or camera to world, depending on application
         {
-            utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose, camToGround);
+            utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose, Hgc);
             // NOTE: this code assumes that goalposts are boxes with width and high of goalpost_diameter
             // make the base goal corners
             arma::mat goalBaseCorners(4, 4);

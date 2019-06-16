@@ -25,7 +25,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/motion/KickCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
@@ -152,7 +151,7 @@ namespace support {
 
         arma::vec2 getPath(Config::Motion::Path p);
 
-        void setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals);
+        void setGoalLeftRightKnowledge(message::vision::Goals& goals);
 
         void loadFieldDescription(const std::shared_ptr<const message::support::FieldDescription> fd);
 

@@ -6,11 +6,9 @@
 #include "utility/math/vision.h"
 #include "utility/support/eigen_armadillo.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/vision/ClassifiedImage.h"
-#include "message/vision/VisionObjects.h"
 
 namespace module {
 namespace vision {
@@ -39,10 +37,8 @@ namespace vision {
     public:
         /// @brief Called by the powerplant to build and setup the IgusVisionTests reactor.
         explicit IgusVisionTests(std::unique_ptr<NUClear::Environment> environment);
-        void emitClassifiedImage(const message::input::CameraParameters& cam,
-                                 const message::support::FieldDescription& fd);
+        void emitClassifiedImage(const message::support::FieldDescription& fd);
         std::vector<message::vision::ClassifiedImage::Segment> getGoalSegments(
-            const message::input::CameraParameters& cam,
             const message::support::FieldDescription& fd);
     };
 }  // namespace vision

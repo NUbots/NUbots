@@ -159,7 +159,7 @@ namespace debug {
 
                             std::tie(servoID, position) = legJoint;
 
-                            sensors->servo[servoID].presentPosition = position;
+                            sensors->servo[servoID].present_position = position;
                         }
                     }
 
@@ -172,7 +172,7 @@ namespace debug {
 
                             std::tie(servoID, position) = legJoint;
 
-                            sensors->servo[servoID].presentPosition = position;
+                            sensors->servo[servoID].present_position = position;
                         }
                     }
                     std::cout << "KinematicsNULLTest -calculating forward kinematics." << std::endl;
@@ -213,7 +213,7 @@ namespace debug {
                     if (lmax_error >= ERROR_THRESHOLD or rmax_error >= ERROR_THRESHOLD) {
                         numberOfFails++;
                     }
-                    sensors->world.setIdentity();
+                    sensors->Htw.setIdentity();
                     emit(std::move(sensors));
                 }
                 std::cout << "IK Leg NULL Test : " << numberOfFails << " Total Failures " << std::endl;
@@ -252,7 +252,7 @@ namespace debug {
 
                         std::tie(servoID, position) = angle;
 
-                        sensors.servo[servoID].presentPosition = position;
+                        sensors.servo[servoID].present_position = position;
                     }
 
                     Transform3D fKin =

@@ -1,3 +1,4 @@
+
 /*
  * This file is part of the NUbots Codebase.
  *
@@ -19,12 +20,19 @@
 
 syntax = "proto3";
 
-package message.support.nusight;
+package message.vision;
 
 import "google/protobuf/timestamp.proto";
+import "Vector.proto";
 
-message DataPoint {
-    string                    label     = 1;
-    repeated float            value     = 2 [packed = true];
-    google.protobuf.Timestamp timestamp = 4;
+message Line {
+    uint32                    camera_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    ivec2                     start     = 3;
+    ivec2                     end       = 4;
+    vec4                      colour    = 5;
+}
+
+message Lines {
+    repeated Line lines = 1;
 }

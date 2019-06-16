@@ -28,17 +28,24 @@ import "Vector.proto";
 message Image {
     message Lens {
         enum Projection {
-            RECTILINEAR = 0;
-            EQUIDISTANT = 1;
+            UNKNOWN     = 0;
+            RECTILINEAR = 1;
+            EQUIDISTANT = 2;
+            EQUISOLID   = 3;
         }
+
+        Projection projection   = 1;
+        float      focal_length = 2;
+        fvec2      fov          = 3;
+        fvec2      centre       = 4;
     }
 
-    uint32                    format        = 1;
-    uvec2                     dimensions    = 2;
-    bytes                     data          = 3;
-    uint32                    camera_id     = 4;
-    string                    serial_number = 5;
-    google.protobuf.Timestamp timestamp     = 6;
-    mat4                      Hcw           = 7;
-    Lens                      lens          = 8;
+    uint32                    format     = 1;
+    uvec2                     dimensions = 2;
+    bytes                     data       = 3;
+    uint32                    camera_id  = 4;
+    string                    name       = 5;
+    google.protobuf.Timestamp timestamp  = 6;
+    mat4                      Hcw        = 7;
+    Lens                      lens       = 8;
 }

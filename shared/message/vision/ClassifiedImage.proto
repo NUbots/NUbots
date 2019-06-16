@@ -82,4 +82,6 @@ message ClassifiedImage {
 
     // Old horizon TODO: phase out
     Line horizon = 10;
+
+    input.Image.Lens lens = 11;
 }
