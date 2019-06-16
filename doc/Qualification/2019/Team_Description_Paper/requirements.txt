@@ -1,0 +1,16 @@
+A team description paper (TDP) must be submitted which
+
+1) fully describes the scientific aspects of your humanoid robot system and your research interests,
+2) includes a summary of previous relevant achievements in research and development as well as publications,
+3) mentions prior performance in RoboCup competitions
+4) points out enhancements of the robots’ hardware or software compared to the previous year
+5) states explicitly whether software and hardware from other teams is used and if yes, which parts are used and what the team’s own contributions are
+The TDP is limited to 8 pages maximum and must be submitted in PDF format. Material from last years TDP may be used if cited appropriately. However, teams that demonstrate significant development compared to the previous year are qualified preferentially. Resubmitting of last year’s TDP and self-plagiarism will prevent qualification. ‘Self-plagiarism’ refers to using parts of previous TDPs without proper identification of the source material.
+
+Contributions to the RoboCup community, e.g. software releases, paper publications, provision of league infrastructure or data sets  (e.g. via the image tagger) should be included in the TDP and will benefit the team’s application.
+
+The quality of the TDP and the robot video will be decisive for qualification.
+
+The TDP must follow the LNCS format which can be downloaded from http://www.springer.com/computer/lncs?SGWID=0-164-6-793341-0. Please pay special attention to the “Author guidelines” that you’ll be able to find there. Teams that do to follow the LNCS formatting and style guidelines will not be qualified.
+
+If a team that applied for team competition fails to qualify, the Technical Committee may allow the team to participate in the drop-in competition. In this case, the team will be informed and can then decide whether they would like to participate in the drop-in competition only or withdraw.

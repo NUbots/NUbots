@@ -4,7 +4,7 @@ sudo: required
 # C++ code on trusty
 language: cpp
 os: linux
-dist: trusty
+dist: xenial
 
 # Don't spam people with emails but do spam slack!
 notifications:

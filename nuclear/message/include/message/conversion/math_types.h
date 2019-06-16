@@ -73,10 +73,10 @@ namespace conversion {
         using ivec16 = Eigen::Matrix<int, 16, 1, Eigen::DontAlign>;
         using uvec16 = Eigen::Matrix<unsigned int, 16, 1, Eigen::DontAlign>;
 
-        using mat    = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
-        using fmat   = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
-        using imat   = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>;
-        using umat   = Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic>;
+        using mat    = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+        using fmat   = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+        using imat   = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+        using umat   = Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
         using cmat   = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
         using mat2   = Eigen::Matrix<double, 2, 2, Eigen::DontAlign>;
         using fmat2  = Eigen::Matrix<float, 2, 2, Eigen::DontAlign>;

@@ -570,11 +570,12 @@ namespace motion {
         if (swingLeg == LimbID::LEFT_LEG) {
             rightFootTorso =
                 rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp,
-                                            convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_HIP_ROLL]));
+                                            convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootTorso = leftFootTorso.rotateZLocal(
-                hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_HIP_ROLL]));
+            leftFootTorso =
+                leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp,
+                                           convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {

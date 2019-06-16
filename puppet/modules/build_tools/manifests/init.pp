@@ -17,13 +17,11 @@ class build_tools {
     refreshonly => true
   } -> Package <| |>
 
-  $codename = lsb_release()
-
   # Add the llvm 6.0 source
   apt::source { 'llvm-apt-repo':
     comment  => 'The LLVM 6.0 apt repository',
-    location => "http://apt.llvm.org/${codename}",
-    release  => "llvm-toolchain-${codename}-6.0",
+    location => "http://apt.llvm.org/xenial",
+    release  => "llvm-toolchain-xenial-6.0",
     repos    => 'main',
     key      => {
       'id'      => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
@@ -66,6 +64,8 @@ class build_tools {
   package { 'gettext': ensure => latest, }
   package { 'python-pip': ensure => latest, }
   package { 'python3-pip': ensure => latest, }
+  package { 'python-setuptools': ensure => latest, }
+  package { 'python3-setuptools': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
   package { 'libjpeg-turbo8-dev': ensure => latest, }
 
@@ -89,7 +89,7 @@ class build_tools {
     path        =>  [ '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout     => 0,
     provider    => 'shell',
-    require => [ Package['python3-pip'], Package['zlib1g-dev'], Package['libjpeg-turbo8-dev'], ],
+    require => [ Package['python3-pip'], Package['python3-setuptools'], Package['zlib1g-dev'], Package['libjpeg-turbo8-dev'], ],
   }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER

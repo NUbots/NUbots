@@ -1,3 +1,4 @@
+
 /*
  * This file is part of the NUbots Codebase.
  *
@@ -16,36 +17,27 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
+
 syntax = "proto3";
 
-package message.input;
+package message.vision;
 
-import "Vector.proto";
+import "google/protobuf/timestamp.proto";
+import "message/Geometry.proto";
 
-
-message CameraParameters {
-    enum LensType {
-        PINHOLE = 0;
-        RADIAL  = 1;
+message Obstacle {
+    enum Team {
+        UNKNOWN_TEAM = 0;
+        MAGENTA      = 1;
+        CYAN         = 2;
     }
 
-    message Pinhole {
-        vec2   pixelsToTanThetaFactor = 1;
-        double focalLengthPixels      = 2;
-        double distortionFactor       = 3;
-    }
+    uint32                    camera_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    Polygon                   shape     = 3;
+    Team                      team      = 4;
+}
 
-    message Radial {
-        double radiansPerPixel = 1;  // AKA lambda to some
-    }
-
-    // Common
-    uvec2 imageSizePixels = 1;
-    vec2  FOV             = 2;
-    ivec2 centreOffset    = 3;
-    // Lens specific
-    Pinhole pinhole = 4;
-    Radial  radial  = 5;
-    // Lens type
-    LensType lens = 6;
+message Obstacles {
+    repeated Obstacle lines = 1;
 }

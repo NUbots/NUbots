@@ -445,40 +445,40 @@ namespace conversion {
         // mat2 - mat4
         template <typename Proto, typename Matrix>
         inline auto x(Proto& proto, const Matrix& matrix) -> decltype(proto.x(), void()) {
-            set_protobuf_from_vector::x(*proto.mutable_x(), matrix.col(0));
-            set_protobuf_from_vector::y(*proto.mutable_x(), matrix.col(0));
-            set_protobuf_from_vector::z(*proto.mutable_x(), matrix.col(0));
-            set_protobuf_from_vector::t(*proto.mutable_x(), matrix.col(0));
+            set_protobuf_from_vector::x(*proto.mutable_x(), matrix.row(0));
+            set_protobuf_from_vector::y(*proto.mutable_x(), matrix.row(0));
+            set_protobuf_from_vector::z(*proto.mutable_x(), matrix.row(0));
+            set_protobuf_from_vector::t(*proto.mutable_x(), matrix.row(0));
         }
         template <typename... Args>
         inline void x(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto y(Proto& proto, const Matrix& matrix) -> decltype(proto.y(), void()) {
-            set_protobuf_from_vector::x(*proto.mutable_y(), matrix.col(1));
-            set_protobuf_from_vector::y(*proto.mutable_y(), matrix.col(1));
-            set_protobuf_from_vector::z(*proto.mutable_y(), matrix.col(1));
-            set_protobuf_from_vector::t(*proto.mutable_y(), matrix.col(1));
+            set_protobuf_from_vector::x(*proto.mutable_y(), matrix.row(1));
+            set_protobuf_from_vector::y(*proto.mutable_y(), matrix.row(1));
+            set_protobuf_from_vector::z(*proto.mutable_y(), matrix.row(1));
+            set_protobuf_from_vector::t(*proto.mutable_y(), matrix.row(1));
         }
         template <typename... Args>
         inline void y(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto z(Proto& proto, const Matrix& matrix) -> decltype(proto.z(), void()) {
-            set_protobuf_from_vector::x(*proto.mutable_z(), matrix.col(2));
-            set_protobuf_from_vector::y(*proto.mutable_z(), matrix.col(2));
-            set_protobuf_from_vector::z(*proto.mutable_z(), matrix.col(2));
-            set_protobuf_from_vector::t(*proto.mutable_z(), matrix.col(2));
+            set_protobuf_from_vector::x(*proto.mutable_z(), matrix.row(2));
+            set_protobuf_from_vector::y(*proto.mutable_z(), matrix.row(2));
+            set_protobuf_from_vector::z(*proto.mutable_z(), matrix.row(2));
+            set_protobuf_from_vector::t(*proto.mutable_z(), matrix.row(2));
         }
         template <typename... Args>
         inline void z(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto t(Proto& proto, const Matrix& matrix) -> decltype(proto.t(), void()) {
-            set_protobuf_from_vector::x(*proto.mutable_t(), matrix.col(3));
-            set_protobuf_from_vector::y(*proto.mutable_t(), matrix.col(3));
-            set_protobuf_from_vector::z(*proto.mutable_t(), matrix.col(3));
-            set_protobuf_from_vector::t(*proto.mutable_t(), matrix.col(3));
+            set_protobuf_from_vector::x(*proto.mutable_t(), matrix.row(3));
+            set_protobuf_from_vector::y(*proto.mutable_t(), matrix.row(3));
+            set_protobuf_from_vector::z(*proto.mutable_t(), matrix.row(3));
+            set_protobuf_from_vector::t(*proto.mutable_t(), matrix.row(3));
         }
         template <typename... Args>
         inline void t(const Args&...) {}
@@ -486,352 +486,352 @@ namespace conversion {
         // mat5 - mat16
         template <typename Proto, typename Matrix>
         inline auto s0(Proto& proto, const Matrix& matrix) -> decltype(proto.s0(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s1(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s2(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s3(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s4(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s5(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s6(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s7(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s8(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::s9(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::sa(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::sb(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::sc(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::sd(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::se(*proto.mutable_s0(), matrix.col(0));
-            set_protobuf_from_vector::sf(*proto.mutable_s0(), matrix.col(0));
+            set_protobuf_from_vector::s0(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s1(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s2(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s3(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s4(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s5(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s6(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s7(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s8(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::s9(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::sa(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::sb(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::sc(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::sd(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::se(*proto.mutable_s0(), matrix.row(0));
+            set_protobuf_from_vector::sf(*proto.mutable_s0(), matrix.row(0));
         }
         template <typename... Args>
         inline void s0(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s1(Proto& proto, const Matrix& matrix) -> decltype(proto.s1(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s1(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s2(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s3(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s4(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s5(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s6(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s7(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s8(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::s9(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::sa(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::sb(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::sc(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::sd(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::se(*proto.mutable_s1(), matrix.col(1));
-            set_protobuf_from_vector::sf(*proto.mutable_s1(), matrix.col(1));
+            set_protobuf_from_vector::s0(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s1(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s2(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s3(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s4(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s5(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s6(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s7(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s8(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::s9(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::sa(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::sb(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::sc(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::sd(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::se(*proto.mutable_s1(), matrix.row(1));
+            set_protobuf_from_vector::sf(*proto.mutable_s1(), matrix.row(1));
         }
         template <typename... Args>
         inline void s1(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s2(Proto& proto, const Matrix& matrix) -> decltype(proto.s2(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s1(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s2(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s3(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s4(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s5(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s6(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s7(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s8(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::s9(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::sa(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::sb(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::sc(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::sd(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::se(*proto.mutable_s2(), matrix.col(2));
-            set_protobuf_from_vector::sf(*proto.mutable_s2(), matrix.col(2));
+            set_protobuf_from_vector::s0(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s1(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s2(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s3(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s4(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s5(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s6(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s7(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s8(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::s9(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::sa(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::sb(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::sc(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::sd(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::se(*proto.mutable_s2(), matrix.row(2));
+            set_protobuf_from_vector::sf(*proto.mutable_s2(), matrix.row(2));
         }
         template <typename... Args>
         inline void s2(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s3(Proto& proto, const Matrix& matrix) -> decltype(proto.s3(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s1(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s2(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s3(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s4(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s5(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s6(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s7(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s8(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::s9(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::sa(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::sb(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::sc(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::sd(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::se(*proto.mutable_s3(), matrix.col(3));
-            set_protobuf_from_vector::sf(*proto.mutable_s3(), matrix.col(3));
+            set_protobuf_from_vector::s0(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s1(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s2(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s3(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s4(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s5(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s6(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s7(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s8(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::s9(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::sa(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::sb(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::sc(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::sd(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::se(*proto.mutable_s3(), matrix.row(3));
+            set_protobuf_from_vector::sf(*proto.mutable_s3(), matrix.row(3));
         }
         template <typename... Args>
         inline void s3(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s4(Proto& proto, const Matrix& matrix) -> decltype(proto.s4(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s1(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s2(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s3(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s4(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s5(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s6(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s7(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s8(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::s9(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::sa(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::sb(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::sc(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::sd(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::se(*proto.mutable_s4(), matrix.col(4));
-            set_protobuf_from_vector::sf(*proto.mutable_s4(), matrix.col(4));
+            set_protobuf_from_vector::s0(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s1(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s2(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s3(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s4(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s5(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s6(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s7(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s8(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::s9(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::sa(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::sb(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::sc(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::sd(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::se(*proto.mutable_s4(), matrix.row(4));
+            set_protobuf_from_vector::sf(*proto.mutable_s4(), matrix.row(4));
         }
         template <typename... Args>
         inline void s4(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s5(Proto& proto, const Matrix& matrix) -> decltype(proto.s5(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s1(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s2(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s3(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s4(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s5(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s6(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s7(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s8(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::s9(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::sa(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::sb(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::sc(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::sd(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::se(*proto.mutable_s5(), matrix.col(5));
-            set_protobuf_from_vector::sf(*proto.mutable_s5(), matrix.col(5));
+            set_protobuf_from_vector::s0(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s1(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s2(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s3(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s4(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s5(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s6(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s7(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s8(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::s9(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::sa(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::sb(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::sc(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::sd(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::se(*proto.mutable_s5(), matrix.row(5));
+            set_protobuf_from_vector::sf(*proto.mutable_s5(), matrix.row(5));
         }
         template <typename... Args>
         inline void s5(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s6(Proto& proto, const Matrix& matrix) -> decltype(proto.s6(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s1(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s2(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s3(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s4(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s5(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s6(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s7(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s8(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::s9(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::sa(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::sb(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::sc(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::sd(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::se(*proto.mutable_s6(), matrix.col(6));
-            set_protobuf_from_vector::sf(*proto.mutable_s6(), matrix.col(6));
+            set_protobuf_from_vector::s0(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s1(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s2(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s3(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s4(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s5(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s6(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s7(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s8(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::s9(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::sa(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::sb(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::sc(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::sd(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::se(*proto.mutable_s6(), matrix.row(6));
+            set_protobuf_from_vector::sf(*proto.mutable_s6(), matrix.row(6));
         }
         template <typename... Args>
         inline void s6(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s7(Proto& proto, const Matrix& matrix) -> decltype(proto.s7(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s1(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s2(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s3(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s4(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s5(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s6(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s7(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s8(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::s9(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::sa(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::sb(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::sc(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::sd(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::se(*proto.mutable_s7(), matrix.col(7));
-            set_protobuf_from_vector::sf(*proto.mutable_s7(), matrix.col(7));
+            set_protobuf_from_vector::s0(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s1(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s2(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s3(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s4(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s5(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s6(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s7(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s8(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::s9(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::sa(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::sb(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::sc(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::sd(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::se(*proto.mutable_s7(), matrix.row(7));
+            set_protobuf_from_vector::sf(*proto.mutable_s7(), matrix.row(7));
         }
         template <typename... Args>
         inline void s7(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s8(Proto& proto, const Matrix& matrix) -> decltype(proto.s8(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s1(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s2(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s3(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s4(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s5(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s6(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s7(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s8(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::s9(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::sa(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::sb(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::sc(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::sd(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::se(*proto.mutable_s8(), matrix.col(8));
-            set_protobuf_from_vector::sf(*proto.mutable_s8(), matrix.col(8));
+            set_protobuf_from_vector::s0(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s1(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s2(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s3(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s4(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s5(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s6(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s7(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s8(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::s9(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::sa(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::sb(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::sc(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::sd(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::se(*proto.mutable_s8(), matrix.row(8));
+            set_protobuf_from_vector::sf(*proto.mutable_s8(), matrix.row(8));
         }
         template <typename... Args>
         inline void s8(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s9(Proto& proto, const Matrix& matrix) -> decltype(proto.s9(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s1(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s2(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s3(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s4(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s5(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s6(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s7(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s8(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::s9(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::sa(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::sb(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::sc(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::sd(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::se(*proto.mutable_s9(), matrix.col(9));
-            set_protobuf_from_vector::sf(*proto.mutable_s9(), matrix.col(9));
+            set_protobuf_from_vector::s0(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s1(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s2(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s3(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s4(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s5(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s6(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s7(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s8(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::s9(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::sa(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::sb(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::sc(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::sd(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::se(*proto.mutable_s9(), matrix.row(9));
+            set_protobuf_from_vector::sf(*proto.mutable_s9(), matrix.row(9));
         }
         template <typename... Args>
         inline void s9(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sa(Proto& proto, const Matrix& matrix) -> decltype(proto.sa(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s1(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s2(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s3(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s4(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s5(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s6(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s7(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s8(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::s9(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::sa(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::sb(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::sc(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::sd(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::se(*proto.mutable_sa(), matrix.col(10));
-            set_protobuf_from_vector::sf(*proto.mutable_sa(), matrix.col(10));
+            set_protobuf_from_vector::s0(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s1(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s2(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s3(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s4(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s5(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s6(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s7(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s8(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::s9(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::sa(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::sb(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::sc(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::sd(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::se(*proto.mutable_sa(), matrix.row(10));
+            set_protobuf_from_vector::sf(*proto.mutable_sa(), matrix.row(10));
         }
         template <typename... Args>
         inline void sa(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sb(Proto& proto, const Matrix& matrix) -> decltype(proto.sb(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s1(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s2(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s3(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s4(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s5(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s6(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s7(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s8(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::s9(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::sa(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::sb(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::sc(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::sd(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::se(*proto.mutable_sb(), matrix.col(11));
-            set_protobuf_from_vector::sf(*proto.mutable_sb(), matrix.col(11));
+            set_protobuf_from_vector::s0(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s1(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s2(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s3(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s4(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s5(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s6(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s7(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s8(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::s9(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::sa(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::sb(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::sc(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::sd(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::se(*proto.mutable_sb(), matrix.row(11));
+            set_protobuf_from_vector::sf(*proto.mutable_sb(), matrix.row(11));
         }
         template <typename... Args>
         inline void sb(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sc(Proto& proto, const Matrix& matrix) -> decltype(proto.sc(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s1(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s2(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s3(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s4(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s5(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s6(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s7(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s8(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::s9(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::sa(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::sb(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::sc(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::sd(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::se(*proto.mutable_sc(), matrix.col(12));
-            set_protobuf_from_vector::sf(*proto.mutable_sc(), matrix.col(12));
+            set_protobuf_from_vector::s0(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s1(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s2(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s3(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s4(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s5(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s6(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s7(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s8(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::s9(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::sa(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::sb(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::sc(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::sd(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::se(*proto.mutable_sc(), matrix.row(12));
+            set_protobuf_from_vector::sf(*proto.mutable_sc(), matrix.row(12));
         }
         template <typename... Args>
         inline void sc(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sd(Proto& proto, const Matrix& matrix) -> decltype(proto.sd(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s1(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s2(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s3(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s4(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s5(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s6(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s7(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s8(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::s9(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::sa(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::sb(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::sc(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::sd(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::se(*proto.mutable_sd(), matrix.col(13));
-            set_protobuf_from_vector::sf(*proto.mutable_sd(), matrix.col(13));
+            set_protobuf_from_vector::s0(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s1(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s2(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s3(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s4(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s5(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s6(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s7(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s8(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::s9(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::sa(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::sb(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::sc(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::sd(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::se(*proto.mutable_sd(), matrix.row(13));
+            set_protobuf_from_vector::sf(*proto.mutable_sd(), matrix.row(13));
         }
         template <typename... Args>
         inline void sd(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto se(Proto& proto, const Matrix& matrix) -> decltype(proto.se(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s1(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s2(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s3(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s4(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s5(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s6(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s7(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s8(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::s9(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::sa(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::sb(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::sc(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::sd(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::se(*proto.mutable_se(), matrix.col(14));
-            set_protobuf_from_vector::sf(*proto.mutable_se(), matrix.col(14));
+            set_protobuf_from_vector::s0(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s1(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s2(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s3(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s4(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s5(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s6(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s7(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s8(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::s9(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::sa(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::sb(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::sc(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::sd(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::se(*proto.mutable_se(), matrix.row(14));
+            set_protobuf_from_vector::sf(*proto.mutable_se(), matrix.row(14));
         }
         template <typename... Args>
         inline void se(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sf(Proto& proto, const Matrix& matrix) -> decltype(proto.sf(), void()) {
-            set_protobuf_from_vector::s0(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s1(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s2(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s3(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s4(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s5(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s6(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s7(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s8(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::s9(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::sa(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::sb(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::sc(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::sd(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::se(*proto.mutable_sf(), matrix.col(15));
-            set_protobuf_from_vector::sf(*proto.mutable_sf(), matrix.col(15));
+            set_protobuf_from_vector::s0(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s1(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s2(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s3(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s4(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s5(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s6(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s7(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s8(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::s9(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::sa(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::sb(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::sc(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::sd(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::se(*proto.mutable_sf(), matrix.row(15));
+            set_protobuf_from_vector::sf(*proto.mutable_sf(), matrix.row(15));
         }
         template <typename... Args>
         inline void sf(const Args&...) {}
@@ -845,40 +845,40 @@ namespace conversion {
         // mat2 - mat4
         template <typename Proto, typename Matrix>
         inline auto x(Matrix& matrix, const Proto& proto) -> decltype(proto.x(), void()) {
-            set_vector_from_protobuf::x(matrix.col(0), proto.x());
-            set_vector_from_protobuf::y(matrix.col(0), proto.x());
-            set_vector_from_protobuf::z(matrix.col(0), proto.x());
-            set_vector_from_protobuf::t(matrix.col(0), proto.x());
+            set_vector_from_protobuf::x(matrix.row(0), proto.x());
+            set_vector_from_protobuf::y(matrix.row(0), proto.x());
+            set_vector_from_protobuf::z(matrix.row(0), proto.x());
+            set_vector_from_protobuf::t(matrix.row(0), proto.x());
         }
         template <typename... Args>
         inline void x(Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto y(Matrix& matrix, const Proto& proto) -> decltype(proto.y(), void()) {
-            set_vector_from_protobuf::x(matrix.col(1), proto.y());
-            set_vector_from_protobuf::y(matrix.col(1), proto.y());
-            set_vector_from_protobuf::z(matrix.col(1), proto.y());
-            set_vector_from_protobuf::t(matrix.col(1), proto.y());
+            set_vector_from_protobuf::x(matrix.row(1), proto.y());
+            set_vector_from_protobuf::y(matrix.row(1), proto.y());
+            set_vector_from_protobuf::z(matrix.row(1), proto.y());
+            set_vector_from_protobuf::t(matrix.row(1), proto.y());
         }
         template <typename... Args>
         inline void y(Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto z(Matrix& matrix, const Proto& proto) -> decltype(proto.z(), void()) {
-            set_vector_from_protobuf::x(matrix.col(2), proto.z());
-            set_vector_from_protobuf::y(matrix.col(2), proto.z());
-            set_vector_from_protobuf::z(matrix.col(2), proto.z());
-            set_vector_from_protobuf::t(matrix.col(2), proto.z());
+            set_vector_from_protobuf::x(matrix.row(2), proto.z());
+            set_vector_from_protobuf::y(matrix.row(2), proto.z());
+            set_vector_from_protobuf::z(matrix.row(2), proto.z());
+            set_vector_from_protobuf::t(matrix.row(2), proto.z());
         }
         template <typename... Args>
         inline void z(Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto t(Matrix& matrix, const Proto& proto) -> decltype(proto.t(), void()) {
-            set_vector_from_protobuf::x(matrix.col(3), proto.t());
-            set_vector_from_protobuf::y(matrix.col(3), proto.t());
-            set_vector_from_protobuf::z(matrix.col(3), proto.t());
-            set_vector_from_protobuf::t(matrix.col(3), proto.t());
+            set_vector_from_protobuf::x(matrix.row(3), proto.t());
+            set_vector_from_protobuf::y(matrix.row(3), proto.t());
+            set_vector_from_protobuf::z(matrix.row(3), proto.t());
+            set_vector_from_protobuf::t(matrix.row(3), proto.t());
         }
         template <typename... Args>
         inline void t(Args&...) {}
@@ -886,352 +886,352 @@ namespace conversion {
         // mat5 - mat16
         template <typename Proto, typename Matrix>
         inline auto s0(Matrix& matrix, const Proto& proto) -> decltype(proto.s0(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s1(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s2(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s3(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s4(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s5(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s6(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s7(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s8(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::s9(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::sa(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::sb(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::sc(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::sd(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::se(matrix.col(0), proto.s0());
-            set_vector_from_protobuf::sf(matrix.col(0), proto.s0());
+            set_vector_from_protobuf::s0(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s1(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s2(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s3(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s4(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s5(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s6(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s7(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s8(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::s9(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::sa(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::sb(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::sc(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::sd(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::se(matrix.row(0), proto.s0());
+            set_vector_from_protobuf::sf(matrix.row(0), proto.s0());
         }
         template <typename... Args>
         inline void s0(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s1(Matrix& matrix, const Proto& proto) -> decltype(proto.s1(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s1(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s2(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s3(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s4(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s5(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s6(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s7(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s8(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::s9(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::sa(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::sb(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::sc(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::sd(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::se(matrix.col(1), proto.s1());
-            set_vector_from_protobuf::sf(matrix.col(1), proto.s1());
+            set_vector_from_protobuf::s0(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s1(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s2(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s3(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s4(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s5(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s6(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s7(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s8(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::s9(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::sa(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::sb(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::sc(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::sd(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::se(matrix.row(1), proto.s1());
+            set_vector_from_protobuf::sf(matrix.row(1), proto.s1());
         }
         template <typename... Args>
         inline void s1(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s2(Matrix& matrix, const Proto& proto) -> decltype(proto.s2(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s1(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s2(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s3(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s4(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s5(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s6(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s7(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s8(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::s9(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::sa(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::sb(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::sc(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::sd(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::se(matrix.col(2), proto.s2());
-            set_vector_from_protobuf::sf(matrix.col(2), proto.s2());
+            set_vector_from_protobuf::s0(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s1(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s2(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s3(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s4(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s5(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s6(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s7(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s8(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::s9(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::sa(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::sb(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::sc(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::sd(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::se(matrix.row(2), proto.s2());
+            set_vector_from_protobuf::sf(matrix.row(2), proto.s2());
         }
         template <typename... Args>
         inline void s2(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s3(Matrix& matrix, const Proto& proto) -> decltype(proto.s3(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s1(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s2(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s3(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s4(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s5(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s6(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s7(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s8(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::s9(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::sa(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::sb(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::sc(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::sd(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::se(matrix.col(3), proto.s3());
-            set_vector_from_protobuf::sf(matrix.col(3), proto.s3());
+            set_vector_from_protobuf::s0(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s1(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s2(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s3(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s4(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s5(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s6(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s7(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s8(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::s9(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::sa(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::sb(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::sc(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::sd(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::se(matrix.row(3), proto.s3());
+            set_vector_from_protobuf::sf(matrix.row(3), proto.s3());
         }
         template <typename... Args>
         inline void s3(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s4(Matrix& matrix, const Proto& proto) -> decltype(proto.s4(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s1(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s2(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s3(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s4(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s5(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s6(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s7(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s8(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::s9(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::sa(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::sb(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::sc(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::sd(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::se(matrix.col(4), proto.s4());
-            set_vector_from_protobuf::sf(matrix.col(4), proto.s4());
+            set_vector_from_protobuf::s0(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s1(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s2(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s3(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s4(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s5(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s6(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s7(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s8(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::s9(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::sa(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::sb(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::sc(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::sd(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::se(matrix.row(4), proto.s4());
+            set_vector_from_protobuf::sf(matrix.row(4), proto.s4());
         }
         template <typename... Args>
         inline void s4(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s5(Matrix& matrix, const Proto& proto) -> decltype(proto.s5(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s1(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s2(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s3(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s4(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s5(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s6(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s7(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s8(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::s9(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::sa(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::sb(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::sc(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::sd(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::se(matrix.col(5), proto.s5());
-            set_vector_from_protobuf::sf(matrix.col(5), proto.s5());
+            set_vector_from_protobuf::s0(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s1(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s2(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s3(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s4(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s5(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s6(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s7(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s8(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::s9(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::sa(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::sb(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::sc(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::sd(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::se(matrix.row(5), proto.s5());
+            set_vector_from_protobuf::sf(matrix.row(5), proto.s5());
         }
         template <typename... Args>
         inline void s5(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s6(Matrix& matrix, const Proto& proto) -> decltype(proto.s6(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s1(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s2(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s3(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s4(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s5(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s6(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s7(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s8(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::s9(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::sa(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::sb(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::sc(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::sd(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::se(matrix.col(6), proto.s6());
-            set_vector_from_protobuf::sf(matrix.col(6), proto.s6());
+            set_vector_from_protobuf::s0(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s1(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s2(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s3(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s4(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s5(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s6(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s7(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s8(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::s9(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::sa(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::sb(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::sc(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::sd(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::se(matrix.row(6), proto.s6());
+            set_vector_from_protobuf::sf(matrix.row(6), proto.s6());
         }
         template <typename... Args>
         inline void s6(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s7(Matrix& matrix, const Proto& proto) -> decltype(proto.s7(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s1(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s2(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s3(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s4(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s5(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s6(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s7(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s8(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::s9(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::sa(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::sb(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::sc(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::sd(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::se(matrix.col(7), proto.s7());
-            set_vector_from_protobuf::sf(matrix.col(7), proto.s7());
+            set_vector_from_protobuf::s0(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s1(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s2(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s3(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s4(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s5(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s6(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s7(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s8(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::s9(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::sa(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::sb(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::sc(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::sd(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::se(matrix.row(7), proto.s7());
+            set_vector_from_protobuf::sf(matrix.row(7), proto.s7());
         }
         template <typename... Args>
         inline void s7(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s8(Matrix& matrix, const Proto& proto) -> decltype(proto.s8(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s1(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s2(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s3(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s4(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s5(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s6(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s7(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s8(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::s9(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::sa(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::sb(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::sc(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::sd(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::se(matrix.col(8), proto.s8());
-            set_vector_from_protobuf::sf(matrix.col(8), proto.s8());
+            set_vector_from_protobuf::s0(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s1(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s2(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s3(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s4(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s5(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s6(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s7(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s8(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::s9(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::sa(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::sb(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::sc(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::sd(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::se(matrix.row(8), proto.s8());
+            set_vector_from_protobuf::sf(matrix.row(8), proto.s8());
         }
         template <typename... Args>
         inline void s8(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto s9(Matrix& matrix, const Proto& proto) -> decltype(proto.s9(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s1(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s2(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s3(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s4(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s5(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s6(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s7(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s8(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::s9(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::sa(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::sb(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::sc(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::sd(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::se(matrix.col(9), proto.s9());
-            set_vector_from_protobuf::sf(matrix.col(9), proto.s9());
+            set_vector_from_protobuf::s0(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s1(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s2(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s3(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s4(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s5(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s6(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s7(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s8(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::s9(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::sa(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::sb(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::sc(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::sd(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::se(matrix.row(9), proto.s9());
+            set_vector_from_protobuf::sf(matrix.row(9), proto.s9());
         }
         template <typename... Args>
         inline void s9(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sa(Matrix& matrix, const Proto& proto) -> decltype(proto.sa(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s1(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s2(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s3(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s4(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s5(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s6(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s7(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s8(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::s9(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::sa(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::sb(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::sc(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::sd(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::se(matrix.col(10), proto.sa());
-            set_vector_from_protobuf::sf(matrix.col(10), proto.sa());
+            set_vector_from_protobuf::s0(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s1(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s2(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s3(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s4(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s5(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s6(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s7(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s8(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::s9(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::sa(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::sb(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::sc(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::sd(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::se(matrix.row(10), proto.sa());
+            set_vector_from_protobuf::sf(matrix.row(10), proto.sa());
         }
         template <typename... Args>
         inline void sa(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sb(Matrix& matrix, const Proto& proto) -> decltype(proto.sb(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s1(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s2(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s3(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s4(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s5(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s6(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s7(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s8(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::s9(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::sa(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::sb(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::sc(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::sd(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::se(matrix.col(11), proto.sb());
-            set_vector_from_protobuf::sf(matrix.col(11), proto.sb());
+            set_vector_from_protobuf::s0(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s1(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s2(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s3(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s4(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s5(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s6(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s7(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s8(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::s9(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::sa(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::sb(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::sc(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::sd(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::se(matrix.row(11), proto.sb());
+            set_vector_from_protobuf::sf(matrix.row(11), proto.sb());
         }
         template <typename... Args>
         inline void sb(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sc(Matrix& matrix, const Proto& proto) -> decltype(proto.sc(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s1(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s2(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s3(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s4(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s5(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s6(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s7(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s8(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::s9(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::sa(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::sb(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::sc(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::sd(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::se(matrix.col(12), proto.sc());
-            set_vector_from_protobuf::sf(matrix.col(12), proto.sc());
+            set_vector_from_protobuf::s0(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s1(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s2(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s3(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s4(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s5(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s6(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s7(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s8(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::s9(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::sa(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::sb(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::sc(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::sd(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::se(matrix.row(12), proto.sc());
+            set_vector_from_protobuf::sf(matrix.row(12), proto.sc());
         }
         template <typename... Args>
         inline void sc(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sd(Matrix& matrix, const Proto& proto) -> decltype(proto.sd(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s1(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s2(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s3(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s4(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s5(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s6(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s7(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s8(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::s9(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::sa(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::sb(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::sc(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::sd(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::se(matrix.col(13), proto.sd());
-            set_vector_from_protobuf::sf(matrix.col(13), proto.sd());
+            set_vector_from_protobuf::s0(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s1(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s2(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s3(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s4(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s5(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s6(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s7(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s8(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::s9(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::sa(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::sb(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::sc(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::sd(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::se(matrix.row(13), proto.sd());
+            set_vector_from_protobuf::sf(matrix.row(13), proto.sd());
         }
         template <typename... Args>
         inline void sd(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto se(Matrix& matrix, const Proto& proto) -> decltype(proto.se(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s1(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s2(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s3(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s4(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s5(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s6(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s7(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s8(matrix.col(14), proto.se());
-            set_vector_from_protobuf::s9(matrix.col(14), proto.se());
-            set_vector_from_protobuf::sa(matrix.col(14), proto.se());
-            set_vector_from_protobuf::sb(matrix.col(14), proto.se());
-            set_vector_from_protobuf::sc(matrix.col(14), proto.se());
-            set_vector_from_protobuf::sd(matrix.col(14), proto.se());
-            set_vector_from_protobuf::se(matrix.col(14), proto.se());
-            set_vector_from_protobuf::sf(matrix.col(14), proto.se());
+            set_vector_from_protobuf::s0(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s1(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s2(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s3(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s4(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s5(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s6(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s7(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s8(matrix.row(14), proto.se());
+            set_vector_from_protobuf::s9(matrix.row(14), proto.se());
+            set_vector_from_protobuf::sa(matrix.row(14), proto.se());
+            set_vector_from_protobuf::sb(matrix.row(14), proto.se());
+            set_vector_from_protobuf::sc(matrix.row(14), proto.se());
+            set_vector_from_protobuf::sd(matrix.row(14), proto.se());
+            set_vector_from_protobuf::se(matrix.row(14), proto.se());
+            set_vector_from_protobuf::sf(matrix.row(14), proto.se());
         }
         template <typename... Args>
         inline void se(const Args&...) {}
 
         template <typename Proto, typename Matrix>
         inline auto sf(Matrix& matrix, const Proto& proto) -> decltype(proto.sf(), void()) {
-            set_vector_from_protobuf::s0(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s1(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s2(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s3(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s4(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s5(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s6(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s7(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s8(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::s9(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::sa(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::sb(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::sc(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::sd(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::se(matrix.col(15), proto.sf());
-            set_vector_from_protobuf::sf(matrix.col(15), proto.sf());
+            set_vector_from_protobuf::s0(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s1(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s2(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s3(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s4(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s5(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s6(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s7(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s8(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::s9(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::sa(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::sb(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::sc(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::sd(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::se(matrix.row(15), proto.sf());
+            set_vector_from_protobuf::sf(matrix.row(15), proto.sf());
         }
         template <typename... Args>
         inline void sf(const Args&...) {}
@@ -1367,10 +1367,10 @@ namespace conversion {
         // Reserve enough space
         proto.mutable_v()->Reserve(vector.size());
 
-        // Populate the data
-        for (int i = 0; i < vector.size(); ++i) {
-            proto.add_v(vector[i]);
-        }
+        // Copy across
+        Eigen::Map<DynamicVecProto<Proto>>(
+            const_cast<typename DynamicVecProto<Proto>::Scalar*>(proto.mutable_v()->data()), vector.size()) = vector;
+
         return proto;
     }
     template <typename Vector>
@@ -1379,10 +1379,9 @@ namespace conversion {
         // Reserve enough space
         vector.resize(proto.v_size());
 
-        // Populate the data
-        for (int i = 0; i < proto.v_size(); ++i) {
-            vector[i] = proto.v(i);
-        }
+        // Copy across
+        vector = Eigen::Map<const Vector>(proto.v().data(), proto.v_size());
+
         return vector;
     }
 
@@ -1398,7 +1397,9 @@ namespace conversion {
 
         // Copy over
         Eigen::Map<DynamicMatProto<Proto>>(
-            const_cast<double*>(proto.mutable_v()->data()), matrix.rows(), matrix.cols()) = matrix;
+            const_cast<typename DynamicMatProto<Proto>::Scalar*>(proto.mutable_v()->data()),
+            matrix.rows(),
+            matrix.cols()) = matrix;
 
         return proto;
     }

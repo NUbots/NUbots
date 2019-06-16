@@ -21,6 +21,7 @@ syntax = "proto3";
 
 package message.vision;
 
+import "Matrix.proto";
 import "Vector.proto";
 
 message VisualMesh {
@@ -30,15 +31,10 @@ message VisualMesh {
         int32 segments = 2;
     }
 
-    message Classification {
-        int32          dimensions = 1;
-        repeated float values     = 2;
-    }
-
-    uint32   camera_id                      = 1;
-    repeated Row mesh                       = 2;
-    repeated int32 indices                  = 3;
-    repeated ivec6 neighbourhood            = 4;
-    repeated ivec2 coordinates              = 5;
-    repeated Classification classifications = 6;
+    uint32   camera_id             = 1;
+    repeated Row mesh              = 2;
+    repeated int32 indices         = 3;
+    imat           neighbourhood   = 4;
+    fmat           coordinates     = 5;
+    fmat           classifications = 6;
 }

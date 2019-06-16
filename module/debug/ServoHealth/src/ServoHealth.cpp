@@ -83,8 +83,8 @@ namespace debug {
 
             // Set up initial state.
 
-            if (fabs(sensors.world(2, 2)) < fallen_angle) {
-                if (sensors.world(0, 2) < 0.0) {
+            if (fabs(sensors.Htw(2, 2)) < fallen_angle) {
+                if (sensors.Htw(0, 2) < 0.0) {
                     emit(std::make_unique<ExecuteScriptByName>(
                         id,
                         std::vector<std::string>(

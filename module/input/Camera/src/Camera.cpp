@@ -12,7 +12,6 @@ namespace input {
     uint Camera::cameraCount = 0;
 
     using extension::Configuration;
-    using message::input::CameraParameters;
     using message::input::Image;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
@@ -86,21 +85,22 @@ namespace input {
                 ImageData& i = const_cast<ImageData&>(image_data);
 
                 // Copy across our data
-                auto msg           = std::make_unique<Image>();
-                msg->format        = i.format;
-                msg->dimensions    = i.dimensions;
-                msg->data          = std::move(i.data);
-                msg->camera_id     = i.camera_id;
-                msg->serial_number = i.serial_number;
-                msg->timestamp     = i.timestamp;
+                auto msg        = std::make_unique<Image>();
+                msg->format     = i.format;
+                msg->dimensions = i.dimensions;
+                msg->data       = std::move(i.data);
+                msg->camera_id  = i.camera_id;
+                msg->name       = i.serial_number;
+                msg->timestamp  = i.timestamp;
+                msg->lens       = i.lens;
 
                 // Calculate our transform if we have information
                 if (sensors && model) {
 
-                    Eigen::Affine3d Htc(sensors->forwardKinematics[utility::input::ServoID::HEAD_PITCH]);
+                    Eigen::Affine3d Htc(sensors->forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
                     Htc(1, 3) += model->head.INTERPUPILLARY_DISTANCE * 0.5f * (i.isLeft ? 1.0f : -1.0f);
 
-                    msg->Hcw = Htc.inverse() * sensors->world;
+                    msg->Hcw = Htc.inverse() * sensors->Htw;
                 }
                 else {
                     msg->Hcw.setIdentity();

@@ -23,7 +23,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
 //#include "message/localisation/ResetRobotHypotheses.h"
 #include "message/platform/darwin/DarwinSensors.h"
@@ -44,7 +43,6 @@ namespace platform {
 
         using extension::Configuration;
 
-        using message::input::CameraParameters;
         using message::input::Sensors;
         using message::motion::BodySide;
         using message::platform::darwin::ButtonLeftDown;
@@ -149,6 +147,8 @@ namespace platform {
                     config["motion_filter"]["noise"]["process"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.noise.process.rotationalVelocity =
                     config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.noise.process.gyroscopeBias =
+                    config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<arma::vec3>();
 
                 // Set our process noise in our filter
                 arma::vec::fixed<MotionModel::size> processNoise;
@@ -157,6 +157,8 @@ namespace platform {
                 processNoise.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.noise.process.rotation;
                 processNoise.rows(MotionModel::WX, MotionModel::WZ) =
                     this->config.motionFilter.noise.process.rotationalVelocity;
+                processNoise.rows(MotionModel::BX, MotionModel::BZ) =
+                    this->config.motionFilter.noise.process.gyroscopeBias;
                 motionFilter.model.processNoiseMatrix = arma::diagmat(processNoise);
 
                 // Update our mean configs and if it changed, reset the filter
@@ -168,6 +170,8 @@ namespace platform {
                     config["motion_filter"]["initial"]["mean"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.initial.mean.rotationalVelocity =
                     config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.initial.mean.gyroscopeBias =
+                    config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<arma::vec3>();
 
                 this->config.motionFilter.initial.covariance.position =
                     config["motion_filter"]["initial"]["covariance"]["position"].as<arma::vec3>();
@@ -177,6 +181,8 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.initial.covariance.rotationalVelocity =
                     config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.initial.covariance.gyroscopeBias =
+                    config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<arma::vec3>();
 
                 // Calculate our mean and covariance
                 arma::vec::fixed<MotionModel::size> mean;
@@ -184,6 +190,7 @@ namespace platform {
                 mean.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.mean.velocity;
                 mean.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.mean.rotation;
                 mean.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.mean.rotationalVelocity;
+                mean.rows(MotionModel::BX, MotionModel::BZ) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
                 arma::vec::fixed<MotionModel::size> covariance;
                 covariance.rows(MotionModel::PX, MotionModel::PZ) =
@@ -194,6 +201,8 @@ namespace platform {
                     this->config.motionFilter.initial.covariance.rotation;
                 covariance.rows(MotionModel::WX, MotionModel::WZ) =
                     this->config.motionFilter.initial.covariance.rotationalVelocity;
+                covariance.rows(MotionModel::BX, MotionModel::BZ) =
+                    this->config.motionFilter.initial.covariance.gyroscopeBias;
                 motionFilter.setState(mean, arma::diagmat(covariance));
             });
 
@@ -277,7 +286,7 @@ namespace platform {
                     // Set our timestamp to when the data was read
                     sensors->timestamp = input.timestamp;
 
-                    sensors->battery = input.battery;
+                    sensors->voltage = input.voltage;
 
 
                     // This checks for an error on the CM730 and reports it
@@ -342,8 +351,8 @@ namespace platform {
                                                       original.dGain,
                                                       original.goalPosition,
                                                       original.movingSpeed,
-                                                      previousSensors->servo[i].presentPosition,
-                                                      previousSensors->servo[i].presentVelocity,
+                                                      previousSensors->servo[i].present_position,
+                                                      previousSensors->servo[i].present_velocity,
                                                       previousSensors->servo[i].load,
                                                       previousSensors->servo[i].voltage,
                                                       previousSensors->servo[i].temperature});
@@ -367,13 +376,20 @@ namespace platform {
                         }
                     }
 
+                    // gyro_x to the right
+                    // gyro_y to the back
+                    // gyro_z down
+
+                    // acc_x to the back
+                    // acc_y to the left
+                    // acc_z up
+
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
                     if (previousSensors && (input.cm730ErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
                     else {
-                        sensors->accelerometer = {
-                            -input.accelerometer.y, -input.accelerometer.x, input.accelerometer.z};
+                        sensors->accelerometer = {-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
@@ -387,7 +403,7 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z};
                     }
 
                     // Put in our FSR information
@@ -425,38 +441,38 @@ namespace platform {
                      *                  Kinematics                  *
                      ************************************************/
 
-                    auto forwardKinematics = calculateAllPositions(kinematicsModel, *sensors);
-                    for (const auto& entry : forwardKinematics) {
-                        sensors->forwardKinematics[entry.first] = convert<double, 4, 4>(entry.second);
+                    auto forward_kinematics = calculateAllPositions(kinematicsModel, *sensors);
+                    for (const auto& entry : forward_kinematics) {
+                        sensors->forward_kinematics[entry.first] = convert<double, 4, 4>(entry.second);
                     }
 
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    sensors->rightFootDown = false;
-                    sensors->leftFootDown  = false;
+                    sensors->right_foot_down = false;
+                    sensors->left_foot_down  = false;
 
                     if (previousSensors) {
                         // Use our virtual load sensor class to work out which feet are down
-                        arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].presentVelocity,
+                        arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].present_velocity,
                                                              sensors->servo[ServoID::R_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::L_HIP_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::L_HIP_PITCH].present_velocity,
                                                              sensors->servo[ServoID::L_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::R_KNEE].presentVelocity,
+                                                             sensors->servo[ServoID::R_KNEE].present_velocity,
                                                              sensors->servo[ServoID::R_KNEE].load,
-                                                             sensors->servo[ServoID::L_KNEE].presentVelocity,
+                                                             sensors->servo[ServoID::L_KNEE].present_velocity,
                                                              sensors->servo[ServoID::L_KNEE].load,
-                                                             sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::R_ANKLE_PITCH].present_velocity,
                                                              sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                                                             sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity,
+                                                             sensors->servo[ServoID::L_ANKLE_PITCH].present_velocity,
                                                              sensors->servo[ServoID::L_ANKLE_PITCH].load};
 
-                        auto feet_down         = load_sensor.updateFeet(features);
-                        sensors->leftFootDown  = feet_down[0];
-                        sensors->rightFootDown = feet_down[1];
+                        auto feet_down           = load_sensor.updateFeet(features);
+                        sensors->left_foot_down  = feet_down[0];
+                        sensors->right_foot_down = feet_down[1];
                     }
 
-                    emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
+                    emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -483,7 +499,7 @@ namespace platform {
                                                    config.motionFilter.noise.measurement.gyroscope,
                                                    MotionModel::MeasurementType::GYROSCOPE());
 
-                    if (sensors->leftFootDown or sensors->rightFootDown) {
+                    if (sensors->left_foot_down or sensors->right_foot_down) {
                         // pre-calculate common foot-down variables - these are the torso to world transforms.
                         arma::vec3 rTWw = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
                         Rotation3D Rtw(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)));
@@ -496,15 +512,15 @@ namespace platform {
                             auto servoid = side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL;
 
                             const bool& footDown =
-                                side == ServoSide::LEFT ? sensors->leftFootDown : sensors->rightFootDown;
+                                side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
 
                             const bool& prevFootDown = previousSensors ? side == ServoSide::LEFT
-                                                                             ? previousSensors->leftFootDown
-                                                                             : previousSensors->rightFootDown
+                                                                             ? previousSensors->left_foot_down
+                                                                             : previousSensors->right_foot_down
                                                                        : false;
 
                             if (footDown) {
-                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics[servoid]);
+                                Transform3D Htf = convert<double, 4, 4>(sensors->forward_kinematics[servoid]);
                                 Transform3D Hft = Htf.i();
 
                                 Rotation3D Rtf  = Htf.rotation();
@@ -564,60 +580,60 @@ namespace platform {
                         }
                     }
 
-                    // emit(graph("LeftFootDown", sensors->leftFootDown));
-                    // emit(graph("RightFootDown", sensors->rightFootDown));
-                    // emit(graph("LeftLoadState", leftFootDown.state));
-                    // emit(graph("RightLoadState", rightFootDown.state));
+                    // emit(graph("LeftFootDown", sensors->left_foot_down));
+                    // emit(graph("RightFootDown", sensors->right_foot_down));
+                    // emit(graph("LeftLoadState", left_foot_down.state));
+                    // emit(graph("RightLoadState", right_foot_down.state));
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
 
                     // Map from world to torso coordinates (Rtw)
-                    Transform3D world;
-                    world.eye();
-                    world.rotation()    = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
-                    world.translation() = -(world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+                    Transform3D Htw;
+                    Htw.eye();
+                    Htw.rotation()    = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
+                    Htw.translation() = -(Htw.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
 
-                    // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
-                    sensors->world = convert<double, 4, 4>(world);
+                    // Htw.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
+                    sensors->Htw = convert<double, 4, 4>(Htw);
 
-                    sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));
+                    sensors->robot_to_IMU = convert<double, 2, 2>(calculateRobotToIMU(Htw.rotation()));
 
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
                     // FIXME: Causes crashes
-                    // sensors->centreOfMass =
-                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
+                    // sensors->centre_of_mass =
+                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics,
+                    //     true));
 
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-                    sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
+                    sensors->body_centre_height = motionFilter.get()[MotionModel::PZ];
 
-                    Rotation3D Rwt = world.rotation().t();  // remove translation components from the transform
-                    Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
-                    // sensors->bodyToGround : Mat size [4x4] (default identity)
+                    Rotation3D Rwt = Htw.rotation().t();  // remove translation components from the transform
+                    Rotation3D Rgt = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
+                    // sensors->Hgt : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
-                    sensors->bodyToGround    = convert<double, 4, 4>(Transform3D(oBodyToGround));
-                    auto headPitchKinematics = sensors->forwardKinematics[ServoID::HEAD_PITCH];
+                    sensors->Hgt = convert<double, 4, 4>(Transform3D(Rgt));
+                    auto Htc     = sensors->forward_kinematics[ServoID::HEAD_PITCH];
 
                     // Get torso to world transform
-                    Transform3D worldInv = world.i();
+                    Transform3D Hwt = Htw.i();
 
                     Rotation3D yawlessWorldInvR =
-                        Rotation3D::createRotationZ(-Rotation3D(worldInv.rotation()).yaw()) * worldInv.rotation();
-                    Transform3D torsoToGround   = worldInv;
-                    torsoToGround.translation() = arma::vec3({0, 0, torsoToGround.translation()[2]});
-                    torsoToGround.rotation()    = yawlessWorldInvR;
-                    sensors->camToGround        = convert<double, 4, 4>(
-                        Transform3D(torsoToGround * convert<double, 4, 4>(headPitchKinematics)));  // Rwt * Rth
+                        Rotation3D::createRotationZ(-Rotation3D(Hwt.rotation()).yaw()) * Hwt.rotation();
+                    Transform3D Hgt   = Hwt;
+                    Hgt.translation() = arma::vec3({0, 0, Hgt.translation()[2]});
+                    Hgt.rotation()    = yawlessWorldInvR;
+                    sensors->Hgc = convert<double, 4, 4>(Transform3D(Hgt * convert<double, 4, 4>(Htc)));  // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centreOfPressure = convert<double, 3>(
+                    sensors->centre_of_pressure = convert<double, 3>(
                         utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
 
                     emit(std::move(sensors));
