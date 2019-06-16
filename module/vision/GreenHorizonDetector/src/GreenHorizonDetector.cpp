@@ -182,8 +182,9 @@ namespace vision {
             msg->horizon_indices = utility::math::geometry::graham_scan(cluster, coords);
 
             // Create vision lines for debugging purposes
-            if (config.draw_convex_hull) {
+            if (config.draw_convex_hull && (msg->horizon_indices.size() > 1)) {
                 auto lines_msg = std::make_unique<Lines>();
+                // Make a line from each pair of points
                 for (auto it = std::next(msg->horizon_indices.begin()); it != msg->horizon_indices.end();
                      it      = std::next(it)) {
                     lines_msg->lines.emplace_back(mesh.camera_id,
@@ -192,9 +193,16 @@ namespace vision {
                                                   coords.row(*it).cast<int>(),
                                                   Eigen::Vector4d{0.0, 1.0, 0.0, 1.0});
                 }
-                if (lines_msg->lines.size() > 0) {
-                    emit(std::move(lines_msg));
+                // Add a line closing the convex hull
+                // Only add it if we have more than 2 points in the convex hull
+                if (msg->horizon_indices.size() > 2) {
+                    lines_msg->lines.emplace_back(mesh.camera_id,
+                                                  NUClear::clock::now(),
+                                                  coords.row(msg->horizon_indices.back()).cast<int>(),
+                                                  coords.row(msg->horizon_indices.front()).cast<int>(),
+                                                  Eigen::Vector4d{0.0, 1.0, 0.0, 1.0});
                 }
+                emit(std::move(lines_msg));
             }
 
             emit(std::move(msg));
