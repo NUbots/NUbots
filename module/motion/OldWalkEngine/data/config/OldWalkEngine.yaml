@@ -1,60 +1,60 @@
 stance:
   # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
-  body_height: 0.265
+  body_height: 0.45
   # The angle of the torso when walking
-  body_tilt: 25 * pi / 180
+  body_tilt: 13 * pi / 180
   # Default arm positions while walking
   arms:
       left:
         start:
-          -  135 * pi / 180 # Shoulder Pitch
+          -  120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
+          -  120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
       right:
         start:
-          -   135 * pi / 180 # Shoulder Pitch
+          -   120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
+          -  120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
 
   foot_offset:
-    - -0.025 # The distance the ankles are offset from the torso, in meters.
-    - 0.0 # How far from the center of the foot the center of mass is placed during each step.
+    - -0.05 # The distance the ankles are offset from the torso, in meters.
+    - -0.05 # How far from the center of the foot the center of mass is placed during each step.
   # The gains to use for the servos during the walk
   gains:
-    arms: 30
-    legs: 30
+    arms: 15
+    legs: 10
   # ???
-  limit_margin_y: 0.015
+  limit_margin_y: -0.15
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
-  step_time: 0.30
+  step_time: 0.6
   # ???
-  zmp_time: 0.310
-  hip_roll_compensation: 4 * pi / 180
+  zmp_time: 0.48
+  hip_roll_compensation: 4 * pi / 180 #4
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-    height: 0.040
+    height: 0.09
     # height of foot as a fraction of height
     height_slow_fraction: 0.5
     height_fast_fraction: 1.5
     # These limit the distance a footstep will take
     limits:
-      - [-0.1, 0.15] # [min_x, max_x]
-      - [0.0, 0.3] # [min_y, max_y]
+      - [-0.1, 0.3] # [min_x, max_x]
+      - [0.0 , 0.3] # [min_y, max_y]
       - [0, 15 * pi / 180] # [min_angle, max_angle]
   velocity:
     # Velocity limits for the walk
     limits:
-      - [-0.027, 0.03] # [min_x, max_x]
+      - [-0.0027, 0.3] # [min_x, max_x]
       - [-0.01, 0.01] # [min_y, max_y]
       - [-0.8, 0.8] # [min_angle, max_angle]
     # This defines a 'fast' speed in the forward direction
@@ -68,8 +68,8 @@ walk_cycle:
     turning_factor: 0.6
   # When to begin and end the single support phase. Range: [0,1]
   single_support_phase:
-    start: 0.1
-    end: 0.9
+    start: 0.3 #0.3
+    end: 0.6 #0.6
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: false
