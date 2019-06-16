@@ -27,11 +27,14 @@ namespace vision {
     using utility::math::ransac::RansacLineModel;
     using utility::math::ransac::RansacResult;
 
+    static constexpr int LINE_INDEX = 2;
+
     FieldLineDetector::FieldLineDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Configuration>("FieldLineDetector.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file FieldLineDetector.yaml
+            config.confidence_threshold       = cfg["confidence_threshold"].as<double>();
             config.min_points_for_consensus   = cfg["min_points_for_consensus"].as<uint>();
             config.max_iterations_per_fitting = cfg["max_iterations_per_fitting"].as<uint>();
             config.max_fitted_models          = cfg["max_fitted_models"].as<uint>();
@@ -43,9 +46,8 @@ namespace vision {
         // TODO: Replace VisualMesh with GreenHorizon
         on<Trigger<VisualMesh>>().then("Field Line Detector", [this](const VisualMesh& mesh) {
             // Convinence variables
-            const auto& cls        = mesh.classifications;
-            const auto& neighbours = mesh.neighbourhood;
-            const auto& coords     = mesh.coordinates;
+            const auto& cls    = mesh.classifications;
+            const auto& coords = mesh.coordinates;
 
             // List of clusters
             std::vector<RansacLineModel::DataPoint> line_points;
@@ -53,8 +55,8 @@ namespace vision {
             // Find all field line points
             // TODO: Filter this through the green horizon
             for (size_t i = 0; i < mesh.indices.size(); ++i) {
-                if (cls.col(LINE_INDEX) > config.seed_confidence) {
-                    line_points.emplace_back({coords(i, 0), coords(i, 1)});
+                if (cls(i, LINE_INDEX) > config.confidence_threshold) {
+                    line_points.emplace_back(RansacLineModel::DataPoint{coords(i, 0), coords(i, 1)});
                 }
             }
 
@@ -95,8 +97,8 @@ namespace vision {
                 // Add line to message
                 msg->lines.emplace_back(mesh.camera_id,
                                         NUClear::clock::now(),
-                                        convert<double, 2>(points.front()),
-                                        convert<double, 2>(points.back()),
+                                        convert<double, 2>(points.front()).cast<int>(),
+                                        convert<double, 2>(points.back()).cast<int>(),
                                         Eigen::Vector4d{1.0, 1.0, 1.0, 1.0});
             }
 
@@ -104,5 +106,4 @@ namespace vision {
         });
     }
 }  // namespace vision
-}  // namespace module
 }  // namespace module

@@ -14,6 +14,7 @@ namespace vision {
 
     private:
         struct {
+            double confidence_threshold;
             uint min_points_for_consensus;
             uint max_iterations_per_fitting;
             uint max_fitted_models;
