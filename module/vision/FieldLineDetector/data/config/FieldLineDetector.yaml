@@ -1,0 +1,6 @@
+min_points_for_consensus: 15
+max_iterations_per_fitting: 40
+max_fitted_models: 15
+consensus_error_threshold: 4.0
+max_angle_difference: 0.1
+max_line_distance: 10
