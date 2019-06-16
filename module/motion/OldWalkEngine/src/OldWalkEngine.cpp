@@ -191,15 +191,10 @@ namespace motion {
         });
 
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-                           .then([this](const Sensors& sensors) {
-                               std::cout << "Updating sensors" << std::endl;
-                               update(sensors);
-                           })
+                           .then([this](const Sensors& sensors) { update(sensors); })
                            .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            std::cout << "Walk command" << std::endl;
-
             Transform2D velocity = convert<double, 3>(walkCommand.command);
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();
@@ -645,7 +640,6 @@ namespace motion {
             // Filter desired joint position using second order LPF
             float filteredPosition =
                 lpfAlpha * joint.second + lpfBeta * previousPositions[i][0] + lpfGamma * previousPositions[i][1];
-            log("R:", joint.second, "F:", filteredPosition);
             waypoints->push_back({subsumptionId,
                                   time,
                                   joint.first,
