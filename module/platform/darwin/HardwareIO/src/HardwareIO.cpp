@@ -223,27 +223,7 @@ namespace platform {
                 version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
                 log<NUClear::INFO>("CM730 Model:", model.str());
                 log<NUClear::INFO>("CM730 Firmware Version:", version.str());
-
-                for (uint i = 0; i < servoState.size(); ++i) {
-                    previousPositions[i] = {0.0, 0.0};
-                }
-
-                outputFile.open("walklog.csv");
-                outputFile << "accelerometer.x"
-                           << ","
-                           << "accelerometer.y"
-                           << ","
-                           << "accelerometer.z"
-                           << ","
-                           << "gyroscope.x"
-                           << ","
-                           << "gyroscope.y"
-                           << ","
-                           << "gyroscope.z" << std::endl;
-
             });
-
-            on<Shutdown>().then("HardwareIO Shutdown", [this] { outputFile.close(); });
 
             on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
                 // Set config for the packet waiting
@@ -257,9 +237,6 @@ namespace platform {
 
                 chargedVoltage = config["battery"]["charged_voltage"].as<float>();
                 flatVoltage    = config["battery"]["flat_voltage"].as<float>();
-
-                lpfTau   = config["lpfTau"].as<float>();
-                lpfOmega = config["lpfOmega"].as<float>();
             });
 
             // This trigger gets the sensor data from the CM730
@@ -276,13 +253,6 @@ namespace platform {
                                                     Darwin::MX28::Address::D_GAIN,
                                                     0x0A};
 
-                    // Calculate helper variables to reduce DIV/MUL
-                    float doubleTau           = 2.0 * lpfTau;
-                    float inverseOmegaSquared = 1.0 / (lpfOmega * lpfOmega);
-                    // Calculate coefficients for current input and previous two filtered outputs
-                    float alpha = 1.0 / (1.0 + doubleTau + inverseOmegaSquared);
-                    float beta  = (doubleTau + 2.0 * inverseOmegaSquared) * alpha;
-                    float gamma = inverseOmegaSquared * alpha;
 
                     for (uint i = 0; i < servoState.size(); ++i) {
 
@@ -305,20 +275,11 @@ namespace platform {
                                     darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
                                 }
 
-                                // Filter angular position by LPF
-                                float filteredAngularPosition = alpha * servoState[i].goalPosition
-                                                                + beta * previousPositions[i][0]
-                                                                + gamma * previousPositions[i][1];
-
                                 // Get our goal position and speed
-                                uint16_t goalPosition = Convert::servoPositionInverse(i, filteredAngularPosition);
+                                uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
                                 uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
                                 uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
 
-                                // Place new value at end of queue
-                                previousPositions[i].push_back(filteredAngularPosition);
-
-                                previousPositions[i].erase(previousPositions[i].begin());
                                 // Add to our sync write command
                                 command.insert(command.end(),
                                                {
@@ -356,17 +317,13 @@ namespace platform {
                     // Parse our data
                     *sensors = parseSensors(data);
 
-                    outputFile << sensors->accelerometer.x << "," << sensors->accelerometer.y << ","
-                               << sensors->accelerometer.z << "," << sensors->gyroscope.x << "," << sensors->gyroscope.y
-                               << "," << sensors->gyroscope.z << std::endl;
-
                     // Work out a battery charged percentage
                     sensors->battery =
                         std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
                     // cm730 leds to display battery voltage
-                    uint32_t ledl = 0;
-                    uint32_t ledr = 0;
+                    uint32_t ledl            = 0;
+                    uint32_t ledr            = 0;
                     std::array<bool, 3> ledp = {false, false, false};
 
                     if (sensors->battery > 0.9) {
@@ -414,44 +371,45 @@ namespace platform {
                 });
 
             // This trigger writes the servo positions to the hardware
-            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
-                const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
-                // Loop through each of our commands
-                for (const auto& command : commands) {
-                    float diff = utility::math::angle::difference(
-                        command.position,
-                        utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
-                    NUClear::clock::duration duration = command.time - NUClear::clock::now();
+            on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
+                [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
+                    // Loop through each of our commands
+                    for (const auto& command : commands) {
+                        float diff = utility::math::angle::difference(
+                            command.position,
+                            utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
+                        NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                    float speed;
-                    if (duration.count() > 0) {
-                        speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                        float speed;
+                        if (duration.count() > 0) {
+                            speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                        }
+                        else {
+                            speed = 0;
+                        }
+
+                        // Update our internal state
+                        if (servoState[command.id].pGain != command.gain
+                            || servoState[command.id].iGain != command.gain * 0
+                            || servoState[command.id].dGain != command.gain * 0
+                            || servoState[command.id].movingSpeed != speed
+                            || servoState[command.id].goalPosition != command.position
+                            || servoState[command.id].torque != command.torque) {
+
+                            servoState[command.id].dirty = true;
+
+                            servoState[command.id].pGain = command.gain;
+                            servoState[command.id].iGain = command.gain * 0;
+                            servoState[command.id].dGain = command.gain * 0;
+
+                            servoState[command.id].movingSpeed  = speed;
+                            servoState[command.id].goalPosition = command.position;
+
+                            servoState[command.id].torque       = command.torque;
+                            servoState[uint(command.id)].torque = command.torque;
+                        }
                     }
-                    else {
-                        speed = 0;
-                    }
-
-                    // Update our internal state
-                    if (servoState[command.id].pGain != command.gain || servoState[command.id].iGain != command.gain * 0
-                        || servoState[command.id].dGain != command.gain * 0
-                        || servoState[command.id].movingSpeed != speed
-                        || servoState[command.id].goalPosition != command.position
-                        || servoState[command.id].torque != command.torque) {
-
-                        servoState[command.id].dirty = true;
-
-                        servoState[command.id].pGain = command.gain;
-                        servoState[command.id].iGain = command.gain * 0;
-                        servoState[command.id].dGain = command.gain * 0;
-
-                        servoState[command.id].movingSpeed  = speed;
-                        servoState[command.id].goalPosition = command.position;
-
-                        servoState[command.id].torque       = command.torque;
-                        servoState[uint(command.id)].torque = command.torque;
-                    }
-                }
-            });
+                });
 
             on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
                 auto commandList = std::make_unique<std::vector<ServoTarget>>();

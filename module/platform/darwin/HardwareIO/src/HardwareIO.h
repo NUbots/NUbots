@@ -106,15 +106,6 @@ namespace platform {
             float chargedVoltage;
             float flatVoltage;
 
-            // Coefficient values for Low Pass Filtering
-            float lpfOmega;  // Natural frequency omega_n
-            float lpfTau;    // Damping coefficient tau
-
-            std::ofstream outputFile;
-
-            // Vector to hold previous filtered angle servo values for filtering
-            std::array<std::vector<float>, 20> previousPositions;
-
         public:
             /// @brief called by a Powerplant to construct this reactor
             explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
