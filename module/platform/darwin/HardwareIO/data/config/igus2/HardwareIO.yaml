@@ -7,11 +7,6 @@ bus_reset_wait_time_us: 0
 byte_wait: 1200
 packet_wait: 100000
 
-# Second Order Low Pass Filter difference equation:
-#  x[n] = (1 + 2*tau + 1/omega^2)y[n] - (2*tau + 2/omega^2)y[n-1] - (1/omega^2)y[n-2]
-lpfTau : 1.0
-lpfOmega : 10.0
-
 servos:
   -  # [0]  R_SHOULDER_PITCH
     direction: -1
