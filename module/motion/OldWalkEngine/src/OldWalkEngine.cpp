@@ -171,9 +171,7 @@ namespace motion {
         on<Startup, Trigger<KinematicsModel>>().then("Update Kin Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
             // Initialise previous positions for servo (20) LPFs
-            for (uint i = 0; i < 20; ++i) {
-                previousPositions[i] = {0.0, 0.0};
-            }
+            previousPositions.fill(std::vector<float>(2, 0.0f));
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
