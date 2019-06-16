@@ -608,16 +608,16 @@ namespace motion {
 
         double l_roll, r_roll;
         double corrected_ankle;
-        log(sensors.angularPosition);
+        log(sensors.angular_position);
         for (auto& joint : *waypoints) {
-            corrected_ankle = joint.position - sensors.angularPosition[0];
+            corrected_ankle = joint.position - sensors.angular_position[0];
             // Compensate right ankle roll
             if (joint.id == ServoID::R_ANKLE_ROLL) {
-                joint.position -= 0.8 * (joint.position + sensors.angularPosition[0]);
+                joint.position -= 0.8 * (joint.position + sensors.angular_position[0]);
             }
             // Compensate left ankle roll
             if (joint.id == ServoID::L_ANKLE_ROLL) {
-                joint.position -= 0.8 * (joint.position - sensors.angularPosition[0]);
+                joint.position -= 0.8 * (joint.position - sensors.angular_position[0]);
             }
         }
 
