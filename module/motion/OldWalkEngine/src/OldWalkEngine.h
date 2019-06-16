@@ -23,8 +23,6 @@
 #include <armadillo>
 #include <nuclear>
 
-#include <fstream>
-
 #include <yaml-cpp/yaml.h>
 
 #include "message/behaviour/ServoCommand.h"

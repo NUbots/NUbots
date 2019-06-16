@@ -22,8 +22,6 @@
 
 #include <nuclear>
 
-#include <fstream>
-
 #include <yaml-cpp/yaml.h>
 
 #include "darwin/Darwin.h"
