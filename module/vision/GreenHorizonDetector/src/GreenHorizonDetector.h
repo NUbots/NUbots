@@ -19,6 +19,7 @@ namespace vision {
             float seed_confidence;
             float end_confidence;
             float cluster_points;
+            bool draw_convex_hull;
         } config;
     };
 

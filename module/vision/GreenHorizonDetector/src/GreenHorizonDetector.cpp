@@ -5,6 +5,7 @@
 #include "extension/Configuration.h"
 
 #include "message/vision/GreenHorizon.h"
+#include "message/vision/Line.h"
 #include "message/vision/VisualMesh.h"
 
 #include "utility/math/geometry/ConvexHull.h"
@@ -14,6 +15,8 @@ namespace vision {
 
     using extension::Configuration;
 
+    using message::vision::Line;
+    using message::vision::Lines;
     using message::vision::VisualMesh;
     using GreenHorizonMsg = message::vision::GreenHorizon;
 
@@ -25,9 +28,10 @@ namespace vision {
 
         on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file GreenHorizonDetector.yaml
-            config.seed_confidence = cfg["seed_confidence"].as<float>();
-            config.end_confidence  = cfg["end_confidence"].as<float>();
-            config.cluster_points  = cfg["cluster_points"].as<int>();
+            config.seed_confidence  = cfg["seed_confidence"].as<float>();
+            config.end_confidence   = cfg["end_confidence"].as<float>();
+            config.cluster_points   = cfg["cluster_points"].as<int>();
+            config.draw_convex_hull = cfg["debug"]["draw_convex_hull"].as<bool>();
         });
 
         on<Trigger<VisualMesh>>().then("Green Horizon", [this](const VisualMesh& mesh) {
@@ -177,16 +181,24 @@ namespace vision {
             msg->cluster_indices = cluster;
             msg->horizon_indices = utility::math::geometry::graham_scan(cluster, coords);
 
+            // Create vision lines for debugging purposes
+            if (config.draw_convex_hull) {
+                auto lines_msg = std::make_unique<Lines>();
+                for (auto it = std::next(msg->horizon_indices.begin()); it != msg->horizon_indices.end();
+                     it      = std::next(it)) {
+                    lines_msg->lines.emplace_back(mesh.camera_id,
+                                                  NUClear::clock::now(),
+                                                  coords.row(*std::prev(it)).cast<int>(),
+                                                  coords.row(*it).cast<int>(),
+                                                  Eigen::Vector4d{0.0, 1.0, 0.0, 1.0});
+                }
+                if (lines_msg->lines.size() > 0) {
+                    emit(std::move(lines_msg));
+                }
+            }
+
             emit(std::move(msg));
         });
-    }
-
-    // Finds the convex hull of a set of points using the Graham Scan algorithm
-            }
-        }
-
-        // Move bottom left to front of list
-                  });
     }
 }  // namespace vision
 }  // namespace module
