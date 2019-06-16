@@ -123,9 +123,10 @@ namespace math {
                             return consensusErrorThreshold
                                    > bestModel.calculateError(std::forward<const DataPoint&>(point));
                         });
-                    first = newFirst;
 
-                    return std::make_pair(true, RansacResult<Iterator, Model>(bestModel, first, newFirst));
+                    auto result = std::make_pair(true, RansacResult<Iterator, Model>(bestModel, first, newFirst));
+                    first       = newFirst;
+                    return result;
                 }
                 else {
                     return std::make_pair(false, RansacResult<Iterator, Model>());
