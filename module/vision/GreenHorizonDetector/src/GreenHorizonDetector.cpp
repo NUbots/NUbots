@@ -170,6 +170,9 @@ namespace vision {
 
             auto msg = std::make_unique<GreenHorizonMsg>();
 
+            // Preserve mesh so that anyone using the GreenHorizon can access the original data
+            msg->mesh = mesh;
+
             // Find the convex hull of the cluster
             msg->cluster_indices = cluster;
             msg->horizon_indices = utility::math::geometry::graham_scan(cluster, coords);

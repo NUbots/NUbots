@@ -21,7 +21,10 @@ syntax = "proto3";
 
 package message.vision;
 
+import "message/vision/VisualMesh.proto";
+
 message GreenHorizon {
-    repeated int32 horizon_indices = 1;
-    repeated int32 cluster_indices = 2;
+    VisualMesh mesh = 1;
+    repeated int32 horizon_indices = 2;
+    repeated int32 cluster_indices = 3;
 }
