@@ -70,6 +70,11 @@ walk_cycle:
   single_support_phase:
     start: 0.25
     end: 0.75
+  # Second Order Low Pass Filter difference equation:
+  #  x[n] = (1 + 2*tau + 1/omega^2)y[n] - (2*tau + 2/omega^2)y[n-1] - (1/omega^2)y[n-2]
+  filter:
+    lpfTau : 1.0
+    lpfOmega : 10.0
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: false

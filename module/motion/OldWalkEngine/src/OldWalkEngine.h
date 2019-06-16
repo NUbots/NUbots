@@ -199,8 +199,6 @@ namespace motion {
 
         message::motion::KinematicsModel kinematicsModel;
 
-        std::ofstream outputFile;
-
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
         arma::vec4 kneeImuParamX;
@@ -225,6 +223,14 @@ namespace motion {
 
         double STAND_SCRIPT_DURATION;
         ReactionHandle generateStandScriptReaction;
+
+        // Vector to hold previous filtered angle servo values for filtering
+        std::array<std::vector<float>, 20> previousPositions;
+
+        // Coefficient values for Low Pass Filtering
+        float lpfAlpha;
+        float lpfBeta;
+        float lpfGamma;
 
         void generateAndSaveStandScript(const Sensors& sensors);
         void configure(const YAML::Node& config);

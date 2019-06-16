@@ -170,19 +170,10 @@ namespace motion {
 
         on<Startup, Trigger<KinematicsModel>>().then("Update Kin Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
-            outputFile.open("torso_log.csv");
-            outputFile << "uTorsoSource.x,"
-                       << "uTorsoSource.y,"
-                       << "uTorsoSource.z,"
-                       << "uTorsoDestination.x,"
-                       << "uTorsoDestination.y,"
-                       << "uTorsoDestination.z,"
-                       << "uTorso.x,"
-                       << "uTorso.y,"
-                       << "uTorso.z,"
-                       << "uTorsoActual.x,"
-                       << "uTorsoActual.y,"
-                       << "uTorsoActual.z," << std::endl;
+            // Initialise previous positions for servo (20) LPFs
+            for (uint i = 0; i < 20; ++i) {
+                previousPositions[i] = {0.0, 0.0};
+            }
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
@@ -335,6 +326,19 @@ namespace motion {
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
+
+        /* Low-Pass Filtering */
+        // Read Low-Pass Filter coefficients
+        float lpfTau   = config["filter"]["lpfTau"].as<float>();
+        float lpfOmega = config["filter"]["lpfOmega"].as<float>();
+        // Calculate helper variables to reduce DIV/MUL
+        float doubleTau           = 2.0 * lpfTau;
+        float inverseOmegaSquared = 1.0 / (lpfOmega * lpfOmega);
+        // Calculate coefficients for current input and previous two filtered outputs
+        lpfAlpha = 1.0 / (1.0 + doubleTau + inverseOmegaSquared);
+        lpfBeta  = (doubleTau + 2.0 * inverseOmegaSquared) * lpfAlpha;
+        lpfGamma = inverseOmegaSquared * lpfAlpha;
+
         /* TODO
         // gCompensation parameters
         toeTipCompensation = config["toeTipCompensation"].as<Expression>();
@@ -586,11 +590,6 @@ namespace motion {
                              sensors);
         }
 
-        outputFile << uTorsoSource.x() << "," << uTorsoSource.y() << "," << uTorsoSource.angle() << ","
-                   << uTorsoDestination.x() << "," << uTorsoDestination.y() << "," << uTorsoDestination.angle() << ","
-                   << uTorso.x() << "," << uTorso.y() << "," << uTorso.angle() << "," << uTorsoActual.x() << ","
-                   << uTorsoActual.y() << "," << uTorsoActual.angle() << "," << std::endl;
-
         // emit(graph("Right foot pos", rightFootTorso.translation()));
         // emit(graph("Left foot pos", leftFootTorso.translation()));
 
@@ -641,13 +640,23 @@ namespace motion {
         NUClear::clock::time_point time =
             NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
+        int i = 0;
         for (auto& joint : joints) {
+            // Filter desired joint position using second order LPF
+            float filteredPosition =
+                lpfAlpha * joint.second + lpfBeta * previousPositions[i][0] + lpfGamma * previousPositions[i][1];
+            log("R:", joint.second, "F:", filteredPosition);
             waypoints->push_back({subsumptionId,
                                   time,
                                   joint.first,
-                                  joint.second,
+                                  filteredPosition,
                                   jointGains[joint.first],
                                   100});  // TODO: support separate gains for each leg
+            // Store filtered position for next sample
+            previousPositions[i].push_back(filteredPosition);
+            // Remove oldest filtered position
+            previousPositions[i].erase(previousPositions[i].begin());
+            i++;
         }
 
         return std::move(waypoints);
