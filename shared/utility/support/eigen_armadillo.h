@@ -66,8 +66,8 @@ inline Eigen::Matrix<Scalar, Eigen::Dynamic, 1> convert(const arma::Col<Scalar>&
     return (Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>(const_cast<Scalar*>(avec.memptr()), avec.n_elem));
 }
 
-template <typename Scalar>
-inline arma::Mat<Scalar> convert(const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& emat) {
+template <typename Scalar, int rows = Eigen::Dynamic, int cols = Eigen::Dynamic>
+inline arma::Mat<Scalar> convert(const Eigen::Matrix<Scalar, rows, cols>& emat) {
     typename arma::Mat<Scalar> amat;
     Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>(amat.memptr(), emat.rows(), emat.cols()) = emat;
     return (amat);
