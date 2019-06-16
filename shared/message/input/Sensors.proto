@@ -85,4 +85,6 @@ message Sensors {
     mat4          bodyToGround      = 18;
     mat4          camToGround       = 19;
     mat3          inertialTensor    = 20;
+
+    vec3          angularPosition   = 21;
 }
