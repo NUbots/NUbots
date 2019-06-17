@@ -140,6 +140,6 @@ namespace vision {
 
             emit(msg);
         });
-    }  // namespace vision
+    }
 }  // namespace vision
 }  // namespace module
