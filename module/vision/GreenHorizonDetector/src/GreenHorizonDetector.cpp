@@ -161,6 +161,25 @@ namespace vision {
                 }
             }
             else {
+                // Purge all interior points
+                std::cout << "\t\tBefore purge: " << clusters.front().size() << std::endl;
+                for (auto it = clusters.front().begin(); it != clusters.front().end();) {
+                    bool interior = true;
+                    for (int j = 0; j < 6; ++j) {
+                        int neighbour_idx = neighbours(*it, j);
+                        if ((cls(neighbour_idx, LINE_INDEX) + cls(neighbour_idx, FIELD_INDEX))
+                            < config.end_confidence) {
+                            interior = false;
+                        }
+                    }
+                    if (interior) {
+                        it = clusters.front().erase(it);
+                    }
+                    else {
+                        it = std::next(it);
+                    }
+                }
+
                 // Sort remaining cluster from left to right
                 std::sort(clusters.front().begin(), clusters.front().end(), [&](const int& a, const int& b) {
                     return coords(a, 0) < coords(b, 0);
