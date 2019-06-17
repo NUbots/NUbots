@@ -4,5 +4,4 @@ end_confidence: 0.9
 # How many cluster points form a cluster
 cluster_points: 100
 
-debug:
-  draw_convex_hull: False
+debug: false

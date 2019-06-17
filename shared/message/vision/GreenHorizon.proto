@@ -21,10 +21,15 @@ syntax = "proto3";
 
 package message.vision;
 
+import "Neutron.proto";
+import "Matrix.proto";
+import "Vector.proto";
+
 import "message/vision/VisualMesh.proto";
 
 message GreenHorizon {
-    VisualMesh mesh = 1;
-    repeated int32 horizon_indices = 2;
-    repeated int32 cluster_indices = 3;
+    repeated fvec3 horizon   = 1;
+    mat4           Hcw       = 2;
+    uint32         camera_id = 3;
+    VisualMesh     mesh      = 4 [(pointer) = SHARED];
 }
