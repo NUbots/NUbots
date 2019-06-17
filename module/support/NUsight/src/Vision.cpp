@@ -92,8 +92,8 @@ namespace support {
             [this](std::shared_ptr<const LookUpTableDiff> tableDiff) {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(tableDiff), "nusight", true);
             }));
-        handles["visual_mesh"].push_back(on<Trigger<VisualMesh>, Single, Priority::LOW>().then(
-            [this](std::shared_ptr<const VisualMesh> vm) {
+        handles["visual_mesh"].push_back(
+            on<Trigger<VisualMesh>, Single, Priority::LOW>().then([this](std::shared_ptr<const VisualMesh> vm) {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(vm), "nusight", false);
             }));
     }
