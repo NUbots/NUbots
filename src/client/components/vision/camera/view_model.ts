@@ -1,14 +1,14 @@
 import { observable } from 'mobx'
-import { computed } from 'mobx'
 import { autorun } from 'mobx'
+import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
-import { Matrix4 } from 'three'
+import { InterleavedBuffer, InterleavedBufferAttribute, Matrix4 } from 'three'
 import { Float32BufferAttribute } from 'three'
 import { LineSegments } from 'three'
 import { BufferGeometry } from 'three'
 import { Object3D } from 'three'
 import { PlaneBufferGeometry } from 'three'
-import { Mesh } from 'three'
+import { MeshBasicMaterial } from 'three'
 import { Scene } from 'three'
 import { Vector2 } from 'three'
 import { WebGLRenderer } from 'three'
@@ -17,7 +17,7 @@ import { Camera } from 'three'
 import { Vector4 } from 'three'
 import { RawShaderMaterial } from 'three'
 import { Vector3 } from 'three'
-import { MeshBasicMaterial } from 'three'
+import { Mesh } from 'three'
 
 import { ImageDecoder } from '../../../image_decoder/image_decoder'
 import { Matrix4 as Matrix4Model } from '../../../math/matrix4'
@@ -158,13 +158,26 @@ export class CameraViewModel {
 
     // Calculate our triangle indexes
     const nElem = mesh.coordinates.length / 2
-    const triangles: number[] = []
-    for (let i = 0; i < nElem; ++i) {
-      const idx = i * 6
-      for (let j = 0; j < 6; ++j) {
-        const nIdx = idx + j
-        if (neighbours[nIdx] < nElem) {
-          triangles.push(i, neighbours[nIdx])
+    // const triangles: number[] = []
+    // for (let i = 0; i < nElem; ++i) {
+    //   const idx = i * 6
+    //   for (let j = 0; j < 6; ++j) {
+    //     const nIdx = idx + j
+    //     if (neighbours[nIdx] < nElem) {
+    //       triangles.push(i, neighbours[nIdx])
+    //     }
+    //   }
+    // }
+    // Calculate our triangle indexes
+    const triangles = []
+    for (let i = 0; i < nElem; i++) {
+      const ni = i * 6
+      if (neighbours[ni + 0] < nElem) {
+        if (neighbours[ni + 2] < nElem) {
+          triangles.push(i, neighbours[ni + 0], neighbours[ni + 2])
+        }
+        if (neighbours[ni + 1] < nElem) {
+          triangles.push(i, neighbours[ni + 1], neighbours[ni + 0])
         }
       }
     }
@@ -172,7 +185,16 @@ export class CameraViewModel {
     const geometry = new BufferGeometry()
     geometry.setIndex(triangles)
     geometry.addAttribute('position', new Float32BufferAttribute(coordinates, 2))
-    geometry.addAttribute('classification', new Float32BufferAttribute(classifications.values, classifications.dim))
+
+    // Read each class into a separate attribute
+    const buffer = new InterleavedBuffer(
+      new Float32Array(classifications.values.slice(0, -classifications.dim)),
+      classifications.dim,
+    )
+    for (let i = 0; i < classifications.dim; ++i) {
+      geometry.addAttribute(`class${i}`, new InterleavedBufferAttribute(buffer, 1, i))
+    }
+
     return geometry
   }, (geom?: BufferGeometry) => geom && geom.dispose())
 
@@ -193,7 +215,7 @@ export class CameraViewModel {
   private visualmesh = createTransformer((mesh: VisualMesh) => {
     const material = this.meshMaterial.clone()
     material.uniforms.dimensions.value = new Vector2(this.model.image!.width, this.model.image!.height)
-    const lines = new LineSegments(this.meshGeometry(mesh), material)
+    const lines = new Mesh(this.meshGeometry(mesh), material)
     lines.frustumCulled = false
     return lines
   })
@@ -330,7 +352,7 @@ export class CameraViewModel {
 
   private horizon = createTransformer((m: Matrix4Model) => {
     return this.makePlane({
-      axis: new Vector3(m.z.x, m.z.y, m.z.z),
+      axis: new Vector3(m.x.z, m.y.z, m.z.z),
       colour: new Vector4(0, 0, 1, 0.7),
       lineWidth: 10,
     })
@@ -341,29 +363,29 @@ export class CameraViewModel {
     const o3d = new Object3D()
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(m.x.x, m.x.y, m.x.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+      start: new Vector3(m.x.x, m.y.x, m.z.x),
+      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
       colour: new Vector4(1, 0, 0, 0.5),
       lineWidth: 5,
     }))
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(-m.x.x, -m.x.y, -m.x.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+      start: new Vector3(-m.x.x, -m.y.x, -m.z.x),
+      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
       colour: new Vector4(0, 1, 1, 0.5),
       lineWidth: 5,
     }))
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(m.y.x, m.y.y, m.y.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+      start: new Vector3(m.x.y, m.y.y, m.z.y),
+      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
       colour: new Vector4(0, 1, 0, 0.5),
       lineWidth: 5,
     }))
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(-m.y.x, -m.y.y, -m.y.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+      start: new Vector3(-m.x.y, -m.y.y, -m.z.y),
+      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
       colour: new Vector4(1, 0, 1, 0.5),
       lineWidth: 5,
     }))
@@ -385,10 +407,10 @@ export class CameraViewModel {
 
 function toThreeMatrix4(mat4: Matrix4Model): Matrix4 {
   return new Matrix4().set(
-    mat4.x.x, mat4.y.x, mat4.z.x, mat4.t.x,
-    mat4.x.y, mat4.y.y, mat4.z.y, mat4.t.y,
-    mat4.x.z, mat4.y.z, mat4.z.z, mat4.t.z,
-    mat4.x.t, mat4.y.t, mat4.z.t, mat4.t.t,
+    mat4.x.x, mat4.x.y, mat4.x.z, mat4.x.t,
+    mat4.y.x, mat4.y.y, mat4.y.z, mat4.y.t,
+    mat4.z.x, mat4.z.y, mat4.z.z, mat4.z.t,
+    mat4.t.x, mat4.t.y, mat4.t.z, mat4.t.t,
   )
 }
 

@@ -54,7 +54,7 @@ export class VisionNetwork {
       data,
       lens: {
         projection: projection || 0,
-        focalLength: focalLength || 0,
+        focalLength: focalLength! / dimensions!.x!,
         centre: Vector2.from(centre),
       },
       Hcw: Matrix4.from(Hcw),

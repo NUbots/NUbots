@@ -20,32 +20,32 @@ void main(void) {
   vec2 alternate = mod(floor(center.zw), 2.0);
 
   vec4 Dvec = vec4(
-    fetch(xCoord[1], yCoord[1]), // (-1,-1)
-    fetch(xCoord[1], yCoord[2]), // (-1, 1)
-    fetch(xCoord[2], yCoord[1]), // ( 1,-1)
-    fetch(xCoord[2], yCoord[2])  // ( 1, 1)
+    fetch(xCoord.y, yCoord.y), // (-1,-1)
+    fetch(xCoord.y, yCoord.z), // (-1, 1)
+    fetch(xCoord.z, yCoord.y), // ( 1,-1)
+    fetch(xCoord.z, yCoord.z)  // ( 1, 1)
   );
 
   vec4 PATTERN = (kC.xyz * C).xyzz;
 
   // Can also be a dot product with (1,1,1,1) on hardware where that is
   // specially optimized.
-  // Equivalent to: D = Dvec[0] + Dvec[1] + Dvec[2] + Dvec[3];
+  // Equivalent to: D = Dvec.x + Dvec.y + Dvec.z + Dvec.w;
   Dvec.xy += Dvec.zw;
   Dvec.x += Dvec.y;
 
   vec4 value = vec4(
-    fetch(center.x, yCoord[0]), // ( 0,-2)
-    fetch(center.x, yCoord[1]), // ( 0,-1)
-    fetch(xCoord[0], center.y), // ( 1, 0)
-    fetch(xCoord[1], center.y)  // ( 2, 0)
+    fetch(center.x, yCoord.x), // ( 0,-2)
+    fetch(center.x, yCoord.y), // ( 0,-1)
+    fetch(xCoord.x, center.y), // ( 1, 0)
+    fetch(xCoord.y, center.y)  // ( 2, 0)
   );
 
   vec4 temp = vec4(
-    fetch(center.x, yCoord[3]), // ( 0, 2)
-    fetch(center.x, yCoord[2]), // ( 0, 1)
-    fetch(xCoord[3], center.y), // ( 2, 0)
-    fetch(xCoord[2], center.y)  // ( 1, 0)
+    fetch(center.x, yCoord.w), // ( 0, 2)
+    fetch(center.x, yCoord.z), // ( 0, 1)
+    fetch(xCoord.w, center.y), // ( 2, 0)
+    fetch(xCoord.z, center.y)  // ( 1, 0)
   );
 
   // Even the simplest compilers should be able to constant-fold these to avoid the division.
@@ -70,11 +70,11 @@ void main(void) {
   // z theta (e.g., EO R)
   // w phi (e.g., EO R)
 
-  #define A (value[0])
-  #define B (value[1])
+  #define A (value.x)
+  #define B (value.y)
   #define D (Dvec.x)
-  #define E (value[2])
-  #define F (value[3])
+  #define E (value.z)
+  #define F (value.w)
 
   // Avoid zero elements. On a scalar processor this saves two MADDs and it has no
   // effect on a vector processor.
