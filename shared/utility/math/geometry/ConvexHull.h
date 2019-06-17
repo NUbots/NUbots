@@ -79,8 +79,9 @@ namespace math {
             // Find the bottom left point
             size_t bottom_left = 0;
             for (size_t idx = 1; idx < indices.size(); ++idx) {
-                const Eigen::Vector2f& min_p = coords.row(local_indices[bottom_left]);
-                const Eigen::Vector2f& p     = coords.row(local_indices[idx]);
+                const Eigen::Vector2f min_p(coords(local_indices[bottom_left], 0),
+                                            coords(local_indices[bottom_left], 1));
+                const Eigen::Vector2f p(coords(local_indices[idx], 0), coords(local_indices[idx], 1));
 
                 if ((p.y() < min_p.y()) || ((p.y() == min_p.y()) && (p.x() < min_p.x()))) {
                     bottom_left = idx;
@@ -98,9 +99,9 @@ namespace math {
             std::sort(std::next(local_indices.begin()),
                       local_indices.end(),
                       [&bottom_left, &coords](const int& a, const int& b) {
-                          const Eigen::Vector2f& p0 = coords.row(bottom_left);
-                          const Eigen::Vector2f& p1 = coords.row(a);
-                          const Eigen::Vector2f& p2 = coords.row(b);
+                          const Eigen::Vector2f p0(coords(bottom_left, 0), coords(bottom_left, 1));
+                          const Eigen::Vector2f p1(coords(a, 0), coords(a, 1));
+                          const Eigen::Vector2f p2(coords(b, 0), coords(b, 1));
 
                           int direction = turn_direction(p0, p1, p2);
 
@@ -115,18 +116,16 @@ namespace math {
                       });
 
             // Remove all colinear triples
-            for (auto it = std::next(local_indices.begin()); it != local_indices.end(); it = std::next(it)) {
-                for (auto it2 = std::next(it); it != std::prev(local_indices.end());) {
-                    const Eigen::Vector2f& p0 = coords.row(bottom_left);
-                    const Eigen::Vector2f& p1 = coords.row(*it2);
-                    const Eigen::Vector2f& p2 = coords.row(*std::next(it2));
+            for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
+                const Eigen::Vector2f p0(coords(*std::prev(it, 2), 0), coords(*std::prev(it, 2), 1));
+                const Eigen::Vector2f p1(coords(*std::prev(it), 0), coords(*std::prev(it), 1));
+                const Eigen::Vector2f p2(coords(*it, 0), coords(*it, 1));
 
-                    if (turn_direction(p0, p1, p2) == 0) {
-                        it2 = local_indices.erase(it2);
-                    }
-                    else {
-                        it2 = std::next(it2);
-                    }
+                if (turn_direction(p0, p1, p2) == 0) {
+                    it = local_indices.erase(it);
+                }
+                else {
+                    it = std::next(it);
                 }
             }
 
@@ -144,11 +143,10 @@ namespace math {
             // anti-clockwise turn
             for (auto it = std::next(local_indices.begin(), 3); it != local_indices.end(); it = std::next(it)) {
                 // Triple does not make an anti-clockwise turn, replace the last element in the list
-                while ((hull_indices.size() > 1)
-                       && (turn_direction(coords.row(*std::prev(hull_indices.end(), 2)),
-                                          coords.row(*std::prev(hull_indices.end(), 1)),
-                                          coords.row(*it))
-                           >= 0)) {
+                const Eigen::Vector2f p0(coords(*std::prev(it, 2), 0), coords(*std::prev(it, 2), 1));
+                const Eigen::Vector2f p1(coords(*std::prev(it, 1), 0), coords(*std::prev(it, 1), 1));
+                const Eigen::Vector2f p2(coords(*it, 0), coords(*it, 1));
+                while ((hull_indices.size() > 2) && (turn_direction(p0, p1, p2) >= 0)) {
                     // Remove the offending point from the convex hull
                     hull_indices.pop_back();
                 }
