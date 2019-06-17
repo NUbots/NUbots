@@ -13,6 +13,7 @@ export interface DropdownProps {
   isOpen: boolean
   isFullwidth?: boolean
   dropdownPosition?: 'left' | 'right'
+  dropDirection?: 'up' | 'down'
   onRef?(dropdown: HTMLDivElement): void
   onToggleClick?(event: MouseEvent<HTMLSpanElement>): void
 }
@@ -20,7 +21,8 @@ export interface DropdownProps {
 export const Dropdown: StatelessComponent<DropdownProps> = (props: DropdownProps) => {
   const fullwidth = props.isFullwidth ? style.dropdownMenuFullwidth : ''
   const position = props.dropdownPosition === 'right' ? style.dropdownMenuRight : ''
-  const dropdownMenuClassName = classNames(style.dropdownMenu, fullwidth, position)
+  const direction = props.dropDirection === 'up' ? style.dropdownMenuUp : style.dropdownMenuDown
+  const dropdownMenuClassName = classNames(style.dropdownMenu, fullwidth, position, direction)
 
   return (
     <div className={classNames([style.dropdown, props.className])} ref={props.onRef}>

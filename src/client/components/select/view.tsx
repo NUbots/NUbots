@@ -24,6 +24,7 @@ export type SelectProps = {
   selectedOption?: Option
   icon?: ReactNode
   empty?: ReactNode
+  dropDirection?: 'up' | 'down'
   onChange(option: Option): void
 }
 
@@ -48,7 +49,7 @@ export class Select extends React.Component<SelectProps> {
   }
 
   render(): JSX.Element {
-    const { className, icon, placeholder, empty, options, selectedOption } = this.props
+    const { className, icon, placeholder, dropDirection, empty, options, selectedOption } = this.props
 
     const button = (
       <Button
@@ -64,6 +65,7 @@ export class Select extends React.Component<SelectProps> {
       <Dropdown
         className={className}
         dropdownToggle={button}
+        dropDirection={dropDirection}
         isOpen={this.isOpen}
         isFullwidth={true}
         onToggleClick={this.onToggleClick}

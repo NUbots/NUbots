@@ -4,7 +4,6 @@
 
 .dropdownMenu {
   position: absolute;
-  top: 100%;
   z-index: 1;
 }
 
@@ -14,4 +13,12 @@
 
 .dropdownMenuRight {
   right: 0;
+}
+
+.dropdownMenuUp {
+  bottom: 100%;
+}
+
+.dropdownMenuDown {
+  top: 100%;
 }
