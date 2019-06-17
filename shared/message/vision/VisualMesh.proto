@@ -21,7 +21,10 @@ syntax = "proto3";
 
 package message.vision;
 
+import "Neutron.proto";
 import "Matrix.proto";
+
+import "message/input/Image.proto";
 
 message VisualMesh {
 
@@ -36,4 +39,6 @@ message VisualMesh {
     imat           neighbourhood   = 4;
     fmat           coordinates     = 5;
     fmat           classifications = 6;
+    mat4           Hcw             = 7;
+    input.Image    image           = 8 [(pointer) = SHARED];
 }

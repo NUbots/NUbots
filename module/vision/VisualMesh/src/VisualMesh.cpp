@@ -138,6 +138,11 @@ namespace vision {
                     results.neighbourhood.size(),
                     results.classifications.size() / results.neighbourhood.size());
 
+            // Preserve image so that anyone using the GreenHorizon can access the original data
+            msg->image = const_cast<Image*>(&img)->shared_from_this();
+
+            msg->Hcw = img.Hcw;
+
             emit(msg);
         });
     }  // namespace vision
