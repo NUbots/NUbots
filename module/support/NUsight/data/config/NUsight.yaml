@@ -19,6 +19,8 @@ reaction_handles:
   classified_image: false
   # Vision objects including goals, balls and debugging lines
   vision_object: false
+  # Visual mesh data
+  visual_mesh: true
   # Localisation state estimates and uncertainties
   localisation: false
   # Data for chart tool in NUsight
