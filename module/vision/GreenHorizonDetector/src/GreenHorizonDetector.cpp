@@ -50,11 +50,12 @@ namespace vision {
                     return false;
                 }
                 // If at least one neighbour is not a field or a field line then this point should be on the edge
-                for (int n = 0; n < 6; ++n) {
+                for (int n = 4; n < 6; ++n) {
                     const int neighbour_idx = neighbours(idx, n);
-                    if ((neighbour_idx == indices.size())
-                        || ((cls(neighbour_idx, FIELD_INDEX) + cls(neighbour_idx, LINE_INDEX))
-                            < config.end_confidence)) {
+                    if (neighbour_idx == indices.size()) {
+                        continue;
+                    }
+                    if ((cls(neighbour_idx, FIELD_INDEX) + cls(neighbour_idx, LINE_INDEX)) < config.end_confidence) {
                         return true;
                     }
                 }
@@ -71,7 +72,7 @@ namespace vision {
             }
             else {
                 // Find the convex hull of the cluster
-                std::vector<int> horizon_indices(utility::math::geometry::graham_scan(indices, coords));
+                std::vector<int> horizon_indices(utility::math::geometry::upper_convex_hull(indices, coords));
 
                 if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
