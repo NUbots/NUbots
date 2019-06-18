@@ -38,6 +38,10 @@ def run(workspace_command, static=False, cmake_args=None, **kwargs):
     if workspace_command == 'select':
         platform = kwargs['platform']
 
+        # init and update submodules just in case
+        os.system('git submodule init')
+        os.system('git submodule update')
+
         print('Activating workspace as platform {}'.format(platform))
         path = os.path.join(b.project_dir, 'build_{}'.format(platform))
 
