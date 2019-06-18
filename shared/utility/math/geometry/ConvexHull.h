@@ -139,7 +139,9 @@ namespace math {
 
         // Finds the convex hull of a set of points using the Graham Scan algorithm
         // https://en.wikipedia.org/wiki/Graham_scan
-        std::vector<int> graham_scan(const std::vector<int>& indices, const Eigen::MatrixXf& coords) {
+        std::vector<int> graham_scan(const std::vector<int>& indices,
+                                     const Eigen::MatrixXf& coords,
+                                     const bool& cycle = false) {
             // The convex hull indices
             std::vector<int> hull_indices;
 
@@ -209,7 +211,9 @@ namespace math {
             hull_indices.push_back(local_indices[2]);
 
             // Add first point on to the end of the list to make a complete cycle
-            local_indices.push_back(local_indices[0]);
+            if (cycle) {
+                local_indices.push_back(local_indices[0]);
+            }
 
             // Now go through the rest of the points and add them to the convex hull if each triple makes an
             // anti-clockwise turn
