@@ -22,8 +22,8 @@ import { Camera } from 'three'
 
 import { fourccToString } from './fourcc'
 import { fourcc } from './fourcc'
-import * as bayerFragmentShader from './shaders/bayer.frag'
-import * as bayerVertexShader from './shaders/bayer.vert'
+import bayerFragmentShader from './shaders/bayer.frag'
+import bayerVertexShader from './shaders/bayer.vert'
 
 export interface Image {
   readonly width: number
@@ -109,8 +109,8 @@ export class ImageDecoder {
       camera: new OrthographicCamera(-1, 1, 1, -1, 0, 1),
       geometry: new PlaneBufferGeometry(2, 2),
       shader: new RawShaderMaterial({
-        vertexShader: String(bayerVertexShader),
-        fragmentShader: String(bayerFragmentShader),
+        vertexShader: bayerVertexShader,
+        fragmentShader: bayerFragmentShader,
         depthTest: false,
         depthWrite: false,
       }),

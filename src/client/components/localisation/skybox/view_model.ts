@@ -10,8 +10,8 @@ import { Vector3 } from 'three'
 import { PlaneBufferGeometry } from 'three'
 
 import { SkyboxModel } from './model'
-import * as SkyboxFrag from './skybox.frag'
-import * as SkyboxVert from './skybox.vert'
+import SkyboxFrag from './skybox.frag'
+import SkyboxVert from './skybox.vert'
 
 export class SkyboxViewModel {
 
@@ -41,8 +41,8 @@ export class SkyboxViewModel {
   private get sky() {
     const geo = new SphereBufferGeometry(40, 32, 15)
     const mat = new ShaderMaterial({
-      fragmentShader: String(SkyboxFrag),
-      vertexShader: String(SkyboxVert),
+      fragmentShader: SkyboxFrag,
+      vertexShader: SkyboxVert,
       uniforms: {
         luminance: { value: this.model.luminance },
         turbidity: { value: this.model.turbidity },

@@ -18,8 +18,8 @@ import { ImageDecoder } from '../../../image_decoder/image_decoder'
 
 import { CameraModel } from './model'
 import { VisualMesh } from './model'
-import * as meshFragmentShader from './shaders/mesh.frag'
-import * as meshVertexShader from './shaders/mesh.vert'
+import meshFragmentShader from './shaders/mesh.frag'
+import meshVertexShader from './shaders/mesh.vert'
 
 export class CameraViewModel {
 
@@ -98,8 +98,8 @@ export class CameraViewModel {
   @computed
   get meshMaterial(): RawShaderMaterial {
     return new RawShaderMaterial({
-      vertexShader: String(meshVertexShader),
-      fragmentShader: String(meshFragmentShader),
+      vertexShader: meshVertexShader,
+      fragmentShader: meshFragmentShader,
       uniforms: {
         image: { type: 't' },
         dimensions: { value: new Vector2() },

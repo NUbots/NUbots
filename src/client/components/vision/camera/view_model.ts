@@ -27,10 +27,10 @@ import { Goal } from './model'
 import { Ball } from './model'
 import { CameraModel } from './model'
 import { VisualMesh } from './model'
-import * as meshFragmentShader from './shaders/mesh.frag'
-import * as meshVertexShader from './shaders/mesh.vert'
-import * as worldLineFragmentShader from './shaders/world_line.frag'
-import * as worldLineVertexShader from './shaders/world_line.vert'
+import meshFragmentShader from './shaders/mesh.frag'
+import meshVertexShader from './shaders/mesh.vert'
+import worldLineFragmentShader from './shaders/world_line.frag'
+import worldLineVertexShader from './shaders/world_line.vert'
 
 
 export class CameraViewModel {
@@ -201,8 +201,8 @@ export class CameraViewModel {
   @computed
   private get meshMaterial() {
     return new RawShaderMaterial({
-      vertexShader: String(meshVertexShader),
-      fragmentShader: String(meshFragmentShader),
+      vertexShader: meshVertexShader,
+      fragmentShader: meshFragmentShader,
       depthTest: false,
       depthWrite: false,
       transparent: true,
@@ -396,8 +396,8 @@ export class CameraViewModel {
   @computed
   private get worldLineShader() {
     return new RawShaderMaterial({
-      vertexShader: String(worldLineVertexShader),
-      fragmentShader: String(worldLineFragmentShader),
+      vertexShader: worldLineVertexShader,
+      fragmentShader: worldLineFragmentShader,
       depthTest: false,
       depthWrite: false,
       transparent: true,

@@ -18,8 +18,8 @@ import { orthographicCamera } from '../../three/builders'
 import { Stage } from '../../three/three'
 
 import { ClassifiedImageModel } from './model'
-import * as fragmentShader from './shaders/classify.frag'
-import * as vertexShader from './shaders/classify.vert'
+import fragmentShader from './shaders/classify.frag'
+import vertexShader from './shaders/classify.vert'
 
 export class ClassifiedImageViewModel {
   constructor(private readonly model: ClassifiedImageModel) {
