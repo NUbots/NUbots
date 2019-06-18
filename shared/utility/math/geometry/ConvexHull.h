@@ -142,6 +142,12 @@ namespace math {
         std::vector<int> graham_scan(const std::vector<int>& indices,
                                      const Eigen::MatrixXf& coords,
                                      const bool& cycle = false) {
+
+            // We need a minimum of 3 non-colinear points to calculate the convex hull
+            if (indices.size() < 3) {
+                return std::vector<int>();
+            }
+
             // The convex hull indices
             std::vector<int> hull_indices;
 
