@@ -193,17 +193,16 @@ namespace math {
                       });
 
             // Remove all colinear points
-            const Eigen::Vector2f p0(coords.row(local_indices[bottom_left]));
-            for (auto it = std::next(local_indices.begin()); it != std::prev(local_indices.end());) {
-                const Eigen::Vector2f p1(coords.row(*it));
-                const Eigen::Vector2f p2(coords.row(*std::next(it)));
+            for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
+                const Eigen::Vector2f p0(coords.row(*std::prev(it, 2)));
+                const Eigen::Vector2f p1(coords.row(*std::prev(it, 1)));
+                Eigen::Vector2f p2(coords.row(*it));
 
-                if (turn_direction(p0, p1, p2) == 0) {
+                while (turn_direction(p0, p1, p2) == 0) {
                     it = local_indices.erase(it);
+                    Eigen::Vector2f p2(coords.row(*it));
                 }
-                else {
-                    it = std::next(it);
-                }
+                it = std::next(it);
             }
 
             // We need a minimum of 3 non-colinear points to calculate the convex hull
