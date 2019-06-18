@@ -67,6 +67,76 @@ namespace math {
             return true;
         }
 
+        std::vector<int> upper_convex_hull(const std::vector<int>& indices,
+                                           const Eigen::MatrixXf& coords,
+                                           const bool& cycle = false) {
+            // We need a minimum of 3 non-colinear points to calculate the convex hull
+            if (indices.size() < 3) {
+                return std::vector<int>();
+            }
+
+            // The convex hull indices
+            std::vector<int> hull_indices;
+
+            // Make a local copy of indices so we can mutate it
+            std::vector<int> local_indices(indices.begin(), indices.end());
+
+            // Sort by increasing x, then by decreasing y
+            std::sort(local_indices.begin(), local_indices.end(), [&coords](const int& a, const int& b) {
+                const Eigen::Vector2f p0(coords.row(a));
+                const Eigen::Vector2f p1(coords.row(b));
+
+                return ((p0.x() < p1.x()) || ((p0.x() == p1.x()) && (p0.y() > p1.y())));
+            });
+
+            // Remove all colinear points
+            for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
+                const Eigen::Vector2f p0(coords.row(*std::prev(it, 2)));
+                const Eigen::Vector2f p1(coords.row(*std::prev(it, 1)));
+                Eigen::Vector2f p2(coords.row(*it));
+
+                while (turn_direction(p0, p1, p2) == 0) {
+                    it = local_indices.erase(it);
+                    Eigen::Vector2f p2(coords.row(*it));
+                }
+                it = std::next(it);
+            }
+
+            // We need a minimum of 3 non-colinear points to calculate the convex hull
+            if (local_indices.size() < 3) {
+                return std::vector<int>();
+            }
+
+            // Add the initial points to the convex hull
+            hull_indices.push_back(local_indices[0]);
+            hull_indices.push_back(local_indices[1]);
+
+            // Add first point on to the end of the list to make a complete cycle
+            if (cycle) {
+                local_indices.push_back(local_indices[0]);
+            }
+
+            // Now go through the rest of the points and add them to the convex hull if each triple makes an
+            // clockwise turn
+            for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
+                // Triple does not make an clockwise turn, replace the last element in the list
+                Eigen::Vector2f p0(coords.row(*std::prev(hull_indices.end(), 2)));
+                Eigen::Vector2f p1(coords.row(*std::prev(hull_indices.end(), 1)));
+                const Eigen::Vector2f p2(coords.row(*it));
+                while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
+                    // Remove the offending point from the convex hull
+                    hull_indices.pop_back();
+                    p0 = coords.row(*std::prev(hull_indices.end(), 2));
+                    p1 = coords.row(*std::prev(hull_indices.end(), 1));
+                }
+
+                // Add the new point to the convex hull
+                hull_indices.push_back(*it);
+            }
+
+            return hull_indices;
+        }
+
         // Finds the convex hull of a set of points using the Graham Scan algorithm
         // https://en.wikipedia.org/wiki/Graham_scan
         std::vector<int> graham_scan(const std::vector<int>& indices, const Eigen::MatrixXf& coords) {
