@@ -2,7 +2,7 @@
 
 #include "extension/Configuration.h"
 #include "message/output/CompressedImage.h"
-#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace output {
@@ -53,12 +53,29 @@ namespace output {
     }
 
     ImageCompressor::ImageCompressor(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)), quality(100), method(DEBAYER_METHOD::SIMPLE) {
 
 
         on<Configuration>("ImageCompressor.yaml").then([this](const Configuration& config) {
             // Store our config
             quality = config["quality"];
+
+            std::string method_str = config["method"].as<std::string>();
+            if (method_str.compare("SIMPLE") == 0) {
+                method = DEBAYER_METHOD::SIMPLE;
+            }
+            else if (method_str.compare("BILINEAR") == 0) {
+                method = DEBAYER_METHOD::BILINEAR;
+            }
+            else if (method_str.compare("HQLINEAR") == 0) {
+                method = DEBAYER_METHOD::HQLINEAR;
+            }
+            else if (method_str.compare("EDGESENSE") == 0) {
+                method = DEBAYER_METHOD::EDGESENSE;
+            }
+            else {
+                throw std::runtime_error("Invalid Bayer method requested");
+            }
         });
 
         on<Trigger<Image>, Buffer<4>>().then([this](const Image& image) {
@@ -68,9 +85,7 @@ namespace output {
                 case fourcc("BGGR"):
                 case fourcc("RGGB"):
                 case fourcc("GRBG"):
-                case fourcc("GBRG"): {
-                    // TODO compress 4 JPEG images, one for each quadrant
-                } break;
+                case fourcc("GBRG"): compress(debayer_frames(image, method), TJPF_RGB); break;
 
                 // Regular convertible formats
                 case fourcc("RGB3"):

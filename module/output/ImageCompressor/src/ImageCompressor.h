@@ -1,9 +1,10 @@
-#ifndef MODULE_SUPPORT_LOGGING_IMAGECOMPRESSOR_H
-#define MODULE_SUPPORT_LOGGING_IMAGECOMPRESSOR_H
+#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_H
+#define MODULE_OUTPUT_IMAGECOMPRESSOR_H
 
 #include <turbojpeg.h>
 #include <cstdint>
 #include <nuclear>
+#include "bayer.h"
 #include "message/input/Image.h"
 
 namespace module {
@@ -11,7 +12,10 @@ namespace output {
 
     class ImageCompressor : public NUClear::Reactor {
     private:
-        int quality = 75;
+        // Quality of compressed image
+        int quality;
+        // Method of which to perform debayering
+        DEBAYER_METHOD method;
 
         void compress(const message::input::Image& image, const TJPF& format);
 
@@ -23,4 +27,4 @@ namespace output {
 }  // namespace output
 }  // namespace module
 
-#endif  // MODULE_SUPPORT_LOGGING_IMAGECOMPRESSOR_H
+#endif  // MODULE_OUTPUT_IMAGECOMPRESSOR_H
