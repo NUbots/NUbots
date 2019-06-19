@@ -28,6 +28,7 @@
 #include "message/vision/LookUpTable.h"
 #include "message/vision/LookUpTableDiff.h"
 #include "message/vision/Obstacle.h"
+#include "message/vision/VisualMesh.h"
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
@@ -44,6 +45,7 @@ namespace support {
     using message::vision::Lines;
     using message::vision::LookUpTableDiff;
     using message::vision::Obstacles;
+    using message::vision::VisualMesh;
 
     void NUsight::provideVision() {
         handles["image"].push_back(
@@ -100,6 +102,10 @@ namespace support {
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then(
             [this](std::shared_ptr<const LookUpTableDiff> tableDiff) {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(tableDiff), "nusight", true);
+            }));
+        handles["visual_mesh"].push_back(
+            on<Trigger<VisualMesh>, Single, Priority::LOW>().then([this](std::shared_ptr<const VisualMesh> vm) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(vm), "nusight", false);
             }));
     }
 }  // namespace support
