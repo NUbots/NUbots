@@ -324,8 +324,9 @@ namespace motion {
 
         /* Low-Pass Filtering */
         // Read Low-Pass Filter coefficients
-        float lpfTau   = config["filter"]["lpfTau"].as<float>();
-        float lpfOmega = config["filter"]["lpfOmega"].as<float>();
+        lpfEnabled     = walkCycle["filter"]["enabled"].as<bool>();
+        float lpfTau   = walkCycle["filter"]["lpfTau"].as<float>();
+        float lpfOmega = walkCycle["filter"]["lpfOmega"].as<float>();
         // Calculate helper variables to reduce DIV/MUL
         float doubleTau           = 2.0 * lpfTau;
         float inverseOmegaSquared = 1.0 / (lpfOmega * lpfOmega);
@@ -697,16 +698,17 @@ namespace motion {
         int i = 0;
         for (auto& joint : joints) {
             // Filter desired joint position using second order LPF
-            float filteredPosition =
-                lpfAlpha * joint.second + lpfBeta * previousPositions[i][0] + lpfGamma * previousPositions[i][1];
+            float targetPosition = (lpfEnabled) ? lpfAlpha * joint.second + lpfBeta * previousPositions[i][0]
+                                                      + lpfGamma * previousPositions[i][1]
+                                                : joint.second;
             waypoints->push_back({subsumptionId,
                                   time,
                                   joint.first,
-                                  filteredPosition,
+                                  targetPosition,
                                   jointGains[joint.first],
                                   100});  // TODO: support separate gains for each leg
             // Store filtered position for next sample
-            previousPositions[i].push_back(filteredPosition);
+            previousPositions[i].push_back(targetPosition);
             // Remove oldest filtered position
             previousPositions[i].erase(previousPositions[i].begin());
             i++;

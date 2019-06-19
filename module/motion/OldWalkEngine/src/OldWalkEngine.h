@@ -230,6 +230,7 @@ namespace motion {
         float lpfAlpha;
         float lpfBeta;
         float lpfGamma;
+        bool lpfEnabled;
 
         void generateAndSaveStandScript(const Sensors& sensors);
         void configure(const YAML::Node& config);
