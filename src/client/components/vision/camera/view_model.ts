@@ -191,9 +191,13 @@ export class CameraViewModel {
       new Float32Array(classifications.values.slice(0, -classifications.dim)),
       classifications.dim,
     )
-    for (let i = 0; i < classifications.dim; ++i) {
-      geometry.addAttribute(`class${i}`, new InterleavedBufferAttribute(buffer, 1, i))
-    }
+
+    // Add our classification objects
+    geometry.addAttribute(`ball`, new InterleavedBufferAttribute(buffer, 1, 0))
+    geometry.addAttribute(`goal`, new InterleavedBufferAttribute(buffer, 1, 1))
+    geometry.addAttribute(`fieldLine`, new InterleavedBufferAttribute(buffer, 1, 2))
+    geometry.addAttribute(`field`, new InterleavedBufferAttribute(buffer, 1, 3))
+    geometry.addAttribute(`environment`, new InterleavedBufferAttribute(buffer, 1, 4))
 
     return geometry
   }, (geom?: BufferGeometry) => geom && geom.dispose())

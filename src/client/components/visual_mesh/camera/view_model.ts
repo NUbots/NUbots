@@ -3,7 +3,7 @@ import { autorun } from 'mobx'
 import { observable } from 'mobx'
 import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
-import { Object3D } from 'three'
+import { InterleavedBuffer, InterleavedBufferAttribute, Object3D } from 'three'
 import { RawShaderMaterial } from 'three'
 import { Float32BufferAttribute } from 'three'
 import { Scene } from 'three'
@@ -150,8 +150,20 @@ export class CameraViewModel {
     const geometry = new BufferGeometry()
     geometry.setIndex(triangles)
     geometry.addAttribute('position', new Float32BufferAttribute(position, 2))
-    geometry.addAttribute('classification', new Float32BufferAttribute(classifications.values, classifications.dim))
     geometry.addAttribute('uv', new Float32BufferAttribute(uvs, 2))
+
+    // Read each class into a separate attribute
+    const buffer = new InterleavedBuffer(
+      new Float32Array(classifications.values.slice(0, -classifications.dim)),
+      classifications.dim,
+    )
+
+    // Add our classification objects
+    geometry.addAttribute(`ball`, new InterleavedBufferAttribute(buffer, 1, 0))
+    geometry.addAttribute(`goal`, new InterleavedBufferAttribute(buffer, 1, 1))
+    geometry.addAttribute(`fieldLine`, new InterleavedBufferAttribute(buffer, 1, 2))
+    geometry.addAttribute(`field`, new InterleavedBufferAttribute(buffer, 1, 3))
+    geometry.addAttribute(`environment`, new InterleavedBufferAttribute(buffer, 1, 4))
 
     return geometry
   }, (geometry?: BufferGeometry) => geometry && geometry.dispose())

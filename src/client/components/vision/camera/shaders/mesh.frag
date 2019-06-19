@@ -3,12 +3,19 @@ precision lowp int;
 
 uniform vec2 dimensions;
 
-varying float vClass0;
-varying float vClass1;
-varying float vClass2;
-varying float vClass3;
-varying float vClass4;
+varying float vBall;
+varying float vGoal;
+varying float vFieldLine;
+varying float vField;
+varying float vEnvironment;
 
 void main() {
-  gl_FragColor = vec4(vClass0, vClass3, vClass2, 0.5);
+
+  vec3 colour = vec3(1.0, 0.0, 0.0) * vBall
+    + vec3(1.0, 1.0, 0.0) * vGoal
+    + vec3(0.0, 0.0, 1.0) * vFieldLine
+    + vec3(0.0, 1.0, 0.0) * vField
+    + vec3(0.0, 0.0, 0.0) * vEnvironment;
+
+  gl_FragColor = vec4(colour, 0.5 * (1.0 - vEnvironment));
 }
