@@ -321,12 +321,6 @@ namespace vision {
         }
     }
 
-    constexpr FOURCC fourcc(const char (&code)[5]) {
-        uint32_t cc =
-            (((code[0]) & 255) | (((code[1]) & 255) << 8) | (((code[2]) & 255) << 16) | (((code[3]) & 255) << 24));
-        return ((FOURCC) cc);
-    }
-
     FOURCC getFourCCFromDescription(const std::string& code) {
         if (code.compare("Mono8") == 0) {
             return (fourcc("GREY"));
