@@ -123,13 +123,13 @@ namespace vision {
             // Copy the data into the message
             auto msg       = std::make_unique<VisualMeshMsg>();
             msg->camera_id = img.camera_id;
-            for (const auto& r : m.rows) {
-                msg->mesh.emplace_back(r.phi, r.end - r.begin);
+
+            // Get all the rays
+            msg->rays.resize(results.global_indices.size(), 3);
+            for (const auto& i : results.global_indices) {
+                msg->rays.row(i) << m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2];
             }
 
-            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
-                reinterpret_cast<float*>(results.pixel_coordinates.data()), results.pixel_coordinates.size(), 2);
-            msg->indices       = std::move(results.global_indices);
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
                 reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
             msg->classifications =
@@ -137,11 +137,14 @@ namespace vision {
                     results.classifications.data(),
                     results.neighbourhood.size(),
                     results.classifications.size() / results.neighbourhood.size());
+            msg->indices = std::move(results.global_indices);
+
+
+            msg->Hcw = img.Hcw;
 
             // Preserve image so that anyone using the GreenHorizon can access the original data
             msg->image = const_cast<Image*>(&img)->shared_from_this();
 
-            msg->Hcw = img.Hcw;
 
             emit(msg);
         });
