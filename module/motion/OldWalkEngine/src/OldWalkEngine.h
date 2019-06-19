@@ -167,6 +167,10 @@ namespace motion {
         double phase1Single;
         double phase2Single;
         arma::vec2 footOffset;
+        double legYaw;
+        // Ankle feedback parameters
+        double ankleRollComp;
+        double anklePitchComp;
         // standard offset
         Transform2D uLRFootOffset;
         // arm poses

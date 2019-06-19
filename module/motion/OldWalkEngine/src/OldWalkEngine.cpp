@@ -120,6 +120,7 @@ namespace motion {
         , phase1Single(0.0)
         , phase2Single(0.0)
         , footOffset(arma::fill::zeros)
+        , legYaw(0.0)
         , uLRFootOffset()
         , qLArmStart(arma::fill::zeros)
         , qLArmEnd(arma::fill::zeros)
@@ -287,6 +288,9 @@ namespace motion {
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight          = walkCycle["step"]["height"].as<Expression>();
         stepLimits          = walkCycle["step"]["limits"].as<arma::mat::fixed<3, 2>>();
+        legYaw              = walkCycle["step"]["leg_yaw"].as<Expression>();
+        ankleRollComp       = walkCycle["step"]["ankle_roll_comp"].as<Expression>();
+        anklePitchComp      = walkCycle["step"]["ankle_pitch_comp"].as<Expression>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
@@ -589,6 +593,13 @@ namespace motion {
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
+
+        leftFootTorso = leftFootTorso.rotateX(ankleRollComp * sensors.angular_position[0])
+                            .rotateY(anklePitchComp * sensors.angular_position[1])
+                            .rotateZ(legYaw);
+        rightFootTorso = rightFootTorso.rotateX(-ankleRollComp * sensors.angular_position[0])
+                             .rotateY(anklePitchComp * sensors.angular_position[1])
+                             .rotateZ(-legYaw);
 
         // log("Left Foot Torso", leftFootTorso.translation().t());
         // log("Right Foot Torso", rightFootTorso.translation().t());
