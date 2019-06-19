@@ -34,10 +34,10 @@ namespace vision {
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
-            // Convinence variables
-            const auto& cls        = mesh.classifications;
-            const auto& neighbours = mesh.neighbourhood;
-            const auto& coords     = mesh.coordinates;
+            // Convenience variables
+            const auto& cls                                     = mesh.classifications;
+            const auto& neighbours                              = mesh.neighbourhood;
+            const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = mesh.rays;
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
@@ -72,13 +72,7 @@ namespace vision {
             }
             else {
                 // Find the convex hull of the cluster
-                std::vector<int> horizon_indices(utility::math::geometry::upper_convex_hull(indices, coords));
-
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
-                                                    horizon_indices.size(),
-                                                    indices.size()));
-                }
+                auto hull_indices = utility::math::geometry::upper_convex_hull(indices, rays);
 
                 auto msg = std::make_unique<GreenHorizonMsg>();
 
@@ -88,13 +82,16 @@ namespace vision {
                 msg->camera_id = mesh.camera_id;
                 msg->Hcw       = mesh.Hcw;
 
-                // Convert indices to cam space unit vectors
-                msg->horizon.reserve(horizon_indices.size());
-                for (const auto& index : horizon_indices) {
-                    auto unit = utility::math::vision::getCamFromImage(convert<float, 2>(coords.row(index)),
-                                                                       convert<unsigned int, 2>(mesh.image->dimensions),
-                                                                       mesh.image->lens);
-                    msg->horizon.emplace_back(convert<double, 3>(unit).cast<float>());
+                // Find the convex hull of the cluster
+                msg->horizon.reserve(hull_indices.size());
+                for (const auto& idx : hull_indices) {
+                    msg->horizon.emplace_back(rays.row(idx));
+                }
+
+                if (config.debug) {
+                    log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
+                                                    hull_indices.size(),
+                                                    indices.size()));
                 }
 
                 emit(std::move(msg));
