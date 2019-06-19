@@ -126,8 +126,9 @@ namespace vision {
 
             // Get all the rays
             msg->rays.resize(results.global_indices.size(), 3);
+            int row = 0;
             for (const auto& i : results.global_indices) {
-                msg->rays.row(i) << m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2];
+                msg->rays.row(row++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
             }
 
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
