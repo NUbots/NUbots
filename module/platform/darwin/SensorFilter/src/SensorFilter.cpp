@@ -477,9 +477,9 @@ namespace platform {
                     }
 
                     if (this->config.debug) {
-                        emit(graph("Foot Down", sensors->leftFootDown ? 1 : 0, sensors->rightFootDown ? 1 : 0));
-                        emit(graph("LeftFootDown", sensors->leftFootDown));
-                        emit(graph("RightFootDown", sensors->rightFootDown));
+                        emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
+                        emit(graph("LeftFootDown", sensors->left_foot_down));
+                        emit(graph("RightFootDown", sensors->right_foot_down));
                     }
 
                     /************************************************
@@ -609,18 +609,15 @@ namespace platform {
                         log("p_x:", theta[0], "p_y:", theta[1], "p_z:", theta[2]);
                     }
 
-                    sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));
+                    sensors->robot_to_IMU = convert<double, 2, 2>(calculateRobotToIMU(Htw.rotation()));
 
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass = calculateCentreOfMass(kinematicsModel,
-                                                                  sensors->forwardKinematics,
-                                                                  true,
-                                                                  sensors->world.inverse(),
-                                                                  this->config.debug);
-                    sensors->inertialTensor =
-                        calculateInertialTensor(kinematicsModel, sensors->forwardKinematics, true);
+                    sensors->centre_of_mass = calculateCentreOfMass(
+                        kinematicsModel, sensors->forward_kinematics, true, sensors->Htw.inverse(), this->config.debug);
+                    sensors->inertial_tensor =
+                        calculateInertialTensor(kinematicsModel, sensors->forward_kinematics, true);
 
                     /************************************************
                      *                  Kinematics Horizon          *

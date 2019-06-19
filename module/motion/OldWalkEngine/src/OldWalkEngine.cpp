@@ -543,7 +543,7 @@ namespace motion {
         Transform3D torso =
             arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
-        // log("COM", sensors.centreOfMass.head<3>().transpose());
+        // log("COM", sensors.centre_of_mass.head<3>().transpose());
         // log("Foot", foot.t());
         // log("Left Foot\n", leftFoot);
         // log("Right Foot\n", rightFoot);
@@ -560,11 +560,12 @@ namespace motion {
         if (swingLeg == LimbID::LEFT_LEG) {
             rightFootCOM =
                 rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp,
-                                          convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_HIP_ROLL]));
+                                          convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootCOM = leftFootCOM.rotateZLocal(
-                hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_HIP_ROLL]));
+            leftFootCOM =
+                leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp,
+                                         convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
         }
 
         // log("Left Foot COM", leftFootCOM.translation().t());
@@ -583,7 +584,7 @@ namespace motion {
             // log("Transforming COM");
             // Assume the previous calculations were done in CoM space, now convert them to torso space
             // Height of CoM is assumed to be constant
-            Htc = Transform3D::createTranslation({-sensors.centreOfMass.x(), -sensors.centreOfMass.y(), 0.0});
+            Htc = Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
         }
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
@@ -606,11 +607,7 @@ namespace motion {
         }
         auto waypoints = motionLegs(joints);
 
-        double l_roll, r_roll;
-        double corrected_ankle;
-        log(sensors.angular_position);
         for (auto& joint : *waypoints) {
-            corrected_ankle = joint.position - sensors.angular_position[0];
             // Compensate right ankle roll
             if (joint.id == ServoID::R_ANKLE_ROLL) {
                 joint.position -= 0.8 * (joint.position + sensors.angular_position[0]);
@@ -648,7 +645,7 @@ namespace motion {
         if (use_com) {
             // Assume the previous calculations were done in CoM space, now convert them to torso space
             // Height of CoM is assumed to be constant
-            Htc = Transform3D::createTranslation({-sensors.centreOfMass.x(), -sensors.centreOfMass.y(), 0.0});
+            Htc = Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
         }
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
