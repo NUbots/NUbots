@@ -27,6 +27,13 @@ namespace utility {
 namespace math {
     namespace geometry {
 
+        // Convert a vec3 to a vec2
+        // vec2.x = vec3.x / vec3.z
+        // vec2.y = vec3.y / vec3.y
+        Eigen::Vector2f toVector2(const Eigen::Vector3f& v) {
+            return Eigen::Vector2f(v.x() / v.z(), v.y() / v.z());
+        }
+
         // Calculates the turning direction of 3 points
         // Returns -1 indicating an anti-clockwise turn
         // Returns  0 indicating a colinear set of points (no turn)
@@ -105,11 +112,9 @@ namespace math {
                 return false;
             }
             else {
-                const Eigen::Vector3f& p0_3(rays.row(*std::prev(it)));
-                const Eigen::Vector2f p0 = Eigen::Vector2f(p0_3.x() / p0_3.z(), p0_3.y() / p0_3.z());
-                const Eigen::Vector3f& p1_3(rays.row(*it));
-                const Eigen::Vector2f p1 = Eigen::Vector2f(p1_3.x() / p1_3.z(), p1_3.y() / p1_3.z());
-                const Eigen::Vector2f p2 = Eigen::Vector2f(point.x() / point.z(), point.y() / point.z());
+                const Eigen::Vector2f p0 = toVector2(rays.row(*std::prev(it)));
+                const Eigen::Vector2f p1 = toVector2(rays.row(*it));
+                const Eigen::Vector2f p2 = toVector2(point);
 
                 // Point should make a clockwise turn if it is under the convex hull.
                 // It should be colinear if it is on the convex hull
@@ -213,17 +218,13 @@ namespace math {
 
             // Remove all colinear points
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-                const Eigen::Vector3f p0_3 = Eigen::Vector3f(rays.row(*std::prev(local_indices.end(), 2)));
-                const Eigen::Vector3f p1_3 = Eigen::Vector3f(rays.row(*std::prev(local_indices.end(), 1)));
-                const Eigen::Vector2f p0   = Eigen::Vector2f(p0_3.x() / p0_3.z(), p0_3.y() / p0_3.z());
-                const Eigen::Vector2f p1   = Eigen::Vector2f(p1_3.x() / p1_3.z(), p1_3.y() / p1_3.z());
-                Eigen::Vector3f p2_3       = Eigen::Vector3f(rays.row(*it));
-                Eigen::Vector2f p2         = Eigen::Vector2f(p2_3.x() / p2_3.z(), p2_3.y() / p2_3.z());
+                const Eigen::Vector2f p0 = toVector2(rays.row(*std::prev(local_indices.end(), 2)));
+                const Eigen::Vector2f p1 = toVector2(rays.row(*std::prev(local_indices.end(), 1)));
+                Eigen::Vector2f p2       = toVector2(rays.row(*it));
 
                 while ((it != local_indices.end()) && turn_direction(p0, p1, p2) == 0) {
-                    it   = local_indices.erase(it);
-                    p2_3 = Eigen::Vector3f(rays.row(*it));
-                    p2   = Eigen::Vector2f(p2_3.x() / p2_3.z(), p2_3.y() / p2_3.z());
+                    it = local_indices.erase(it);
+                    p2 = toVector2(rays.row(*it));
                 }
                 if (it != local_indices.end()) {
                     it = std::next(it);
@@ -247,20 +248,15 @@ namespace math {
             // Now go through the rest of the points and add them to the convex hull if each triple makes an
             // clockwise turn
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
-                Eigen::Vector3f p0_3       = Eigen::Vector3f(rays.row(*std::prev(hull_indices.end(), 2)));
-                Eigen::Vector3f p1_3       = Eigen::Vector3f(rays.row(*std::prev(hull_indices.end(), 1)));
-                Eigen::Vector2f p0         = Eigen::Vector2f(p0_3.x() / p0_3.z(), p0_3.y() / p0_3.z());
-                Eigen::Vector2f p1         = Eigen::Vector2f(p1_3.x() / p1_3.z(), p1_3.y() / p1_3.z());
-                const Eigen::Vector3f p2_3 = Eigen::Vector3f(rays.row(*it));
-                const Eigen::Vector2f p2   = Eigen::Vector2f(p2_3.x() / p2_3.z(), p2_3.y() / p2_3.z());
+                Eigen::Vector2f p0       = toVector2(rays.row(*std::prev(hull_indices.end(), 2)));
+                Eigen::Vector2f p1       = toVector2(rays.row(*std::prev(hull_indices.end(), 1)));
+                const Eigen::Vector2f p2 = toVector2(rays.row(*it));
                 // Triple does not make an clockwise turn, replace the last element in the list
                 while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
                     // Remove the offending point from the convex hull
                     hull_indices.pop_back();
-                    p0_3 = Eigen::Vector3f(rays.row(*std::prev(hull_indices.end(), 2)));
-                    p1_3 = Eigen::Vector3f(rays.row(*std::prev(hull_indices.end(), 1)));
-                    p0   = Eigen::Vector2f(p0_3.x() / p0_3.z(), p0_3.y() / p0_3.z());
-                    p1   = Eigen::Vector2f(p1_3.x() / p1_3.z(), p1_3.y() / p1_3.z());
+                    p0 = toVector2(rays.row(*std::prev(hull_indices.end(), 2)));
+                    p1 = toVector2(rays.row(*std::prev(hull_indices.end(), 1)));
                 }
 
                 // Add the new point to the convex hull
