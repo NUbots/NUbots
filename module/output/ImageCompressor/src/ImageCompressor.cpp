@@ -85,7 +85,7 @@ namespace output {
                 case fourcc("BGGR"):
                 case fourcc("RGGB"):
                 case fourcc("GRBG"):
-                case fourcc("GBRG"): compress(debayer_frames(image, method), TJPF_RGB); break;
+                case fourcc("GBRG"): compress(debayer(image, method), TJPF_RGB); break;
 
                 // Regular convertible formats
                 case fourcc("RGB3"):

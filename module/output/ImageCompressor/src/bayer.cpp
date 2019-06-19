@@ -41,7 +41,7 @@ namespace output {
         return v < 0 ? 0 : v > 255 ? 255 : v;
     }
 
-    void ClearBorders(uint8_t* rgb, int sx, int sy, int w) {
+    void clear_borders(uint8_t* rgb, int sx, int sy, int w) {
         int i, j;
         // black edges are added with a width w:
         i = 3 * sx * w - 1;
@@ -74,7 +74,7 @@ namespace output {
      **************************************************************/
 
     /* OpenCV's Bayer decoding */
-    std::vector<uint8_t> bayer_Bilinear(const uint8_t* bayer, int sx, int sy, uint32_t tile) {
+    std::vector<uint8_t> debayer_bilinear(const uint8_t* bayer, int sx, int sy, uint32_t tile) {
         std::vector<uint8_t> output(sx * sy * 3);
         auto rgb = output.data();
 
@@ -97,7 +97,7 @@ namespace output {
         int blue = tile == utility::vision::fourcc("BGGR") || tile == utility::vision::fourcc("GBRG") ? -1 : 1;
         int start_with_green = tile == utility::vision::fourcc("GBRG") || tile == utility::vision::fourcc("GRBG");
 
-        ClearBorders(rgb, sx, sy, 1);
+        clear_borders(rgb, sx, sy, 1);
         rgb += rgbStep + 3 + 1;
         height -= 2;
         width -= 2;
@@ -171,7 +171,7 @@ namespace output {
     /* High-Quality Linear Interpolation For Demosaicing Of
        Bayer-Patterned Color Images, by Henrique S. Malvar, Li-wei He, and
        Ross Cutler, in ICASSP'04 */
-    std::vector<uint8_t> bayer_HQLinear(const uint8_t* bayer, int sx, int sy, int tile) {
+    std::vector<uint8_t> debayer_hqlinear(const uint8_t* bayer, int sx, int sy, int tile) {
         std::vector<uint8_t> output(sx * sy * 3);
         auto rgb = output.data();
 
@@ -182,7 +182,7 @@ namespace output {
         int blue = tile == utility::vision::fourcc("BGGR") || tile == utility::vision::fourcc("GBRG") ? -1 : 1;
         int start_with_green = tile == utility::vision::fourcc("GBRG") || tile == utility::vision::fourcc("GRBG");
 
-        ClearBorders(rgb, sx, sy, 2);
+        clear_borders(rgb, sx, sy, 2);
         rgb += 2 * rgbStep + 6 + 1;
         height -= 4;
         width -= 4;
@@ -320,7 +320,7 @@ namespace output {
     /*   (Laroche,Claude A.  "Apparatus and method for adaptively
          interpolating a full color image utilizing chrominance gradients"
          U.S. Patent 5,373,322) */
-    std::vector<uint8_t> bayer_EdgeSense(const uint8_t* bayer, int sx, int sy, int tile) {
+    std::vector<uint8_t> debayer_edgesense(const uint8_t* bayer, int sx, int sy, int tile) {
         std::vector<uint8_t> output(sx * sy * 3);
         auto rgb = output.data();
 
@@ -527,13 +527,13 @@ namespace output {
                 break;
         }
 
-        ClearBorders(rgb, sx, sy, 3);
+        clear_borders(rgb, sx, sy, 3);
 
         return output;
     }
 
     /* this is the method used inside AVT cameras. See AVT docs. */
-    std::vector<uint8_t> bayer_Simple(const uint8_t* bayer, int sx, int sy, int tile) {
+    std::vector<uint8_t> debayer_simple(const uint8_t* bayer, int sx, int sy, int tile) {
         std::vector<uint8_t> output(sx * sy * 3);
         auto rgb = output.data();
 
@@ -613,23 +613,26 @@ namespace output {
         return output;
     }
 
-    message::input::Image debayer_frames(const message::input::Image& image, DEBAYER_METHOD method) {
+    message::input::Image debayer(const message::input::Image& image, DEBAYER_METHOD method) {
 
         message::input::Image rgb_image;
         // Convert from bayer to RGB
         std::vector<uint8_t> rgb_data(image.dimensions.x() * image.dimensions.y());
         switch (method) {
             case DEBAYER_METHOD::SIMPLE:
-                rgb_data = bayer_Simple(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
+                rgb_data = debayer_simple(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
                 break;
             case DEBAYER_METHOD::BILINEAR:
-                rgb_data = bayer_Bilinear(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
+                rgb_data =
+                    debayer_bilinear(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
                 break;
             case DEBAYER_METHOD::HQLINEAR:
-                rgb_data = bayer_HQLinear(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
+                rgb_data =
+                    debayer_hqlinear(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
                 break;
             case DEBAYER_METHOD::EDGESENSE:
-                rgb_data = bayer_EdgeSense(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
+                rgb_data =
+                    debayer_edgesense(image.data.data(), image.dimensions.x(), image.dimensions.y(), image.format);
                 break;
             default: throw new std::runtime_error("Invalid demosaicing method");
         }

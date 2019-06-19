@@ -6,7 +6,7 @@ namespace module {
 namespace output {
     enum DEBAYER_METHOD { SIMPLE = 0, BILINEAR = 1, HQLINEAR = 2, EDGESENSE = 3 };
 
-    message::input::Image debayer_frames(const message::input::Image& image, DEBAYER_METHOD method);
+    message::input::Image debayer(const message::input::Image& image, DEBAYER_METHOD method);
 }  // namespace output
 }  // namespace module
 
