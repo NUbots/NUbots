@@ -1,0 +1,65 @@
+MX-106R_Ankle_Pitch_Left: 0.153
+MX-106R_Ankle_Roll_Left:  0.153
+
+Arm_Lower_Inside_Left:  0.038
+Arm_Lower_Outside_Left: 0.085
+Arm_lower_bar:  0.002
+MX-64AT_AR_Elbow_Left:  0.135
+
+Arm_Upper_Back_Left:  0.062
+Arm_Upper_Bar_1:  0.002
+Arm_Upper_Bar_2:  0.002
+Arm_Upper_Front_Left: 0.096
+MX-64AT_AR_Shoulder_Roll_Left:  0.135
+
+CS-C_Mount_Left:  0.01
+CS-C_Mount__Right:  0.01
+FL2-002-R6_Left:  0.036
+FL2-002-R6_Right: 0.036
+FaceMask: 0.029
+Head_Back:  0.056
+Head_Front: 0.115
+Head_Left:  0.046
+Head_Right: 0.046
+Head_bar: 0.015
+Lens_Left:  0.01
+Lens_Right: 0.01
+
+Foot: 0.196
+Foot_heel:  0.007
+Foot_toe_left:  0.002
+
+MX-106R_Hip_Pitch_Left: 0.153
+MX-106R_Hip_Roll_Left:  0.153
+
+Ankle_cover_left: 0.002
+Leg_Lower_Outside_Left: 0.088
+Leg_Lower_Bar:  0.003
+Leg_Lower_Inside_Left:  0.084
+
+Leg_upper_bar:  0.005
+Leg_upper_inside_left:  0.117
+Leg_upper_outside_left: 0.112
+MX-106R_Knee_Left:  0.153
+
+Battery:  0.405
+Battery_Cover_Back_Plate: 0.033
+Handle: 0.027
+Hip_left: 0.067
+Hip_right:  0.067
+MX-106R_Hip_Yaw_Left: 0.153
+MX-106R_Hip_Yaw_Right:  0.153
+MX-64AT_AR_Head_Pitch:  0.135
+MX-64AT_AR_Head_Yaw:  0.135
+MX-64AT_AR_Left_Pitch:  0.135
+MX-64AT_AR_Right_Pitch: 0.135
+NUC_Shelf:  0.440
+Servo_support:  0.013
+Shoulder_Cover_Left:  0.004
+Shoulder_Cover_Right: 0.004
+Shoulder_left:  0.060
+Shoulder_right: 0.060
+Speaker_Plug: 0.002
+Top_Back_Cover: 0.020
+Torso_bottom: 0.240
+Torso_top:  0.251

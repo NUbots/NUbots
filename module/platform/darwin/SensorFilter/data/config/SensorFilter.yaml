@@ -1,5 +1,7 @@
 nominal_z: 0.01
 
+debug: False
+
 buttons:
   debounce_threshold : 7
 
@@ -77,4 +79,3 @@ motion_filter:
       rotation: [0.1, 0.1, 0.1, 0.1]  # Not very sure of rotation
       rotational_velocity: [0.1, 0.1, 0.1]  # Fairly unsure about our rotational velocity
       gyroscope_bias: [1, 1, 1] # Very unsure about our gyroscope bias
-

@@ -51,6 +51,8 @@ namespace motion {
         configureArm(model, objDarwinModel["arm"]);
 
         configureMassModel(model, objDarwinModel["mass_model"]);
+        configureTensorModel(model, objDarwinModel["tensor_model"]);
+
         model.TEAMDARWINCHEST_TO_ORIGIN =
             objDarwinModel["team_darwin_chest_to_origin"].as<float>() - model.leg.HIP_OFFSET_Z;
     }
@@ -114,24 +116,9 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureArm(KinematicsModel& model, const YAML::Node& objArm) {
-        // arm.distanceBetweenShoulders = objArm["distance_between_shoulders"].as<float>();
-
-        // auto& shoulder = arm.shoulder;
         auto& objShoulder = objArm["shoulder"];
-        // shoulder.length = objShoulder["length"].as<float>();
-        // shoulder.width = objShoulder["width"].as<float>();
-        // shoulder.height = objShoulder["height"].as<float>();
-        // shoulder.offset = objShoulder["offset"].as<arma::vec2>();
-
-        // auto& upperArm = arm.upperArm;
         auto& objUpperArm = objArm["upper_arm"];
-        // upperArm.length = objUpperArm["length"].as<float>();
-        // upperArm.offset = objUpperArm["offset"].as<arma::vec2>();
-
-        // auto& lowerArm = arm.lowerArm;
         auto& objLowerArm = objArm["lower_arm"];
-        // lowerArm.length = objLowerArm["length"].as<float>();
-        // lowerArm.offset = objLowerArm["offset"].as<arma::vec2>();
 
         model.arm.DISTANCE_BETWEEN_SHOULDERS = objArm["distance_between_shoulders"].as<float>();
         model.arm.SHOULDER_Z_OFFSET          = objShoulder["offset"].as<arma::vec2>()[1];
@@ -148,14 +135,28 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureMassModel(KinematicsModel& model, const YAML::Node& objMassModel) {
+        model.massModel.head        = convert<double, 4>(objMassModel["particles"]["head"].as<arma::vec4>());
+        model.massModel.arm_upper   = convert<double, 4>(objMassModel["particles"]["arm_upper"].as<arma::vec4>());
+        model.massModel.arm_lower   = convert<double, 4>(objMassModel["particles"]["arm_lower"].as<arma::vec4>());
+        model.massModel.torso       = convert<double, 4>(objMassModel["particles"]["torso"].as<arma::vec4>());
+        model.massModel.hip_block   = convert<double, 4>(objMassModel["particles"]["hip_block"].as<arma::vec4>());
+        model.massModel.leg_upper   = convert<double, 4>(objMassModel["particles"]["leg_upper"].as<arma::vec4>());
+        model.massModel.leg_lower   = convert<double, 4>(objMassModel["particles"]["leg_lower"].as<arma::vec4>());
+        model.massModel.ankle_block = convert<double, 4>(objMassModel["particles"]["ankle_block"].as<arma::vec4>());
+        model.massModel.foot        = convert<double, 4>(objMassModel["particles"]["foot"].as<arma::vec4>());
+    }
 
-        auto& objMasses = objMassModel["masses"];
-
-        auto masses = objMasses.as<std::vector<arma::vec4>>();
-        model.massModel.masses.reserve(masses.size());
-        for (const auto& mass : masses) {
-            model.massModel.masses.push_back(convert<double, 4>(mass));
-        }
+    void KinematicsConfiguration::configureTensorModel(KinematicsModel& model, const YAML::Node& objTensorModel) {
+        model.tensorModel.head      = convert<double, 3, 3>(objTensorModel["particles"]["head"].as<arma::mat33>());
+        model.tensorModel.arm_upper = convert<double, 3, 3>(objTensorModel["particles"]["arm_upper"].as<arma::mat33>());
+        model.tensorModel.arm_lower = convert<double, 3, 3>(objTensorModel["particles"]["arm_lower"].as<arma::mat33>());
+        model.tensorModel.torso     = convert<double, 3, 3>(objTensorModel["particles"]["torso"].as<arma::mat33>());
+        model.tensorModel.hip_block = convert<double, 3, 3>(objTensorModel["particles"]["hip_block"].as<arma::mat33>());
+        model.tensorModel.leg_upper = convert<double, 3, 3>(objTensorModel["particles"]["leg_upper"].as<arma::mat33>());
+        model.tensorModel.leg_lower = convert<double, 3, 3>(objTensorModel["particles"]["leg_lower"].as<arma::mat33>());
+        model.tensorModel.ankle_block =
+            convert<double, 3, 3>(objTensorModel["particles"]["ankle_block"].as<arma::mat33>());
+        model.tensorModel.foot = convert<double, 3, 3>(objTensorModel["particles"]["foot"].as<arma::mat33>());
     }
 }  // namespace motion
 }  // namespace module

@@ -21,6 +21,7 @@ syntax = "proto3";
 package message.motion;
 
 import "Vector.proto";
+import "Matrix.proto";
 
 enum BodySide {
     LEFT  = 0;
@@ -84,36 +85,33 @@ message KinematicsModel {
     }
 
     message MassModel {
-        repeated vec4 masses = 1;
-
-        /*
-        vec4 R_SHOULDER_PITCH = masses[ 0];
-        vec4 L_SHOULDER_PITCH = masses[ 1];
-        vec4 R_SHOULDER_ROLL  = masses[ 2];
-        vec4 L_SHOULDER_ROLL  = masses[ 3];
-        vec4 R_ELBOW          = masses[ 4];
-        vec4 L_ELBOW          = masses[ 5];
-        vec4 R_HIP_YAW        = masses[ 6];
-        vec4 L_HIP_YAW        = masses[ 7];
-        vec4 R_HIP_ROLL       = masses[ 8];
-        vec4 L_HIP_ROLL       = masses[ 9];
-        vec4 R_HIP_PITCH      = masses[10];
-        vec4 L_HIP_PITCH      = masses[11];
-        vec4 R_KNEE           = masses[12];
-        vec4 L_KNEE           = masses[13];
-        vec4 R_ANKLE_PITCH    = masses[14];
-        vec4 L_ANKLE_PITCH    = masses[15];
-        vec4 R_ANKLE_ROLL     = masses[16];
-        vec4 L_ANKLE_ROLL     = masses[17];
-        vec4 HEAD_YAW         = masses[18];
-        vec4 HEAD_PITCH       = masses[19];
-        vec4 TORSO            = masses[20];
-        */
+        vec4 head        = 1;
+        vec4 arm_upper   = 2;
+        vec4 arm_lower   = 3;
+        vec4 torso       = 4;
+        vec4 hip_block   = 5;
+        vec4 leg_upper   = 6;
+        vec4 leg_lower   = 7;
+        vec4 ankle_block = 8;
+        vec4 foot        = 9;
     }
 
-    Leg       leg                       = 1;
-    Head      head                      = 2;
-    Arm       arm                       = 3;
-    MassModel massModel                 = 4;
-    float     TEAMDARWINCHEST_TO_ORIGIN = 5;
+    message TensorModel {
+        mat3 head        = 1;
+        mat3 arm_upper   = 2;
+        mat3 arm_lower   = 3;
+        mat3 torso       = 4;
+        mat3 hip_block   = 5;
+        mat3 leg_upper   = 6;
+        mat3 leg_lower   = 7;
+        mat3 ankle_block = 8;
+        mat3 foot        = 9;
+    }
+
+    Leg         leg                       = 1;
+    Head        head                      = 2;
+    Arm         arm                       = 3;
+    MassModel   massModel                 = 4;
+    TensorModel tensorModel               = 5;
+    float       TEAMDARWINCHEST_TO_ORIGIN = 6;
 }

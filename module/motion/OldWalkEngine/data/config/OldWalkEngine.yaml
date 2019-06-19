@@ -1,3 +1,4 @@
+use_com: True
 stance:
   # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
   body_height: 0.45
@@ -167,5 +168,3 @@ STAND_SCRIPT_DURATION: 1
 # Use this to emit fake localisation Self objects based on the walk engine's blind belief
 # Note: This is really only useful as a debugging tool
 emit_localisation: true
-
-

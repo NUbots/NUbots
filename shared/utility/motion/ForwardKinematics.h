@@ -171,7 +171,7 @@ namespace motion {
             // Rotate to face down lower leg
             runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(KNEE)].present_position);
             // Translate down lower leg
-            runningTransform = runningTransform.translateX(model.leg.UPPER_LEG_LENGTH);
+            runningTransform = runningTransform.translateX(model.leg.LOWER_LEG_LENGTH);
             // Return basis facing down lower leg, with z out of front of shin. Pos = ankle axis centre
             positions[KNEE] = runningTransform;
             if (servoID == KNEE) {
@@ -232,10 +232,6 @@ namespace motion {
             float shoulder_pitch = sensors.servo[static_cast<int>(SHOULDER_PITCH)].present_position;
             float shoulder_roll  = sensors.servo[static_cast<int>(SHOULDER_ROLL)].present_position;
             float elbow          = sensors.servo[static_cast<int>(ELBOW)].present_position;
-
-            // std::cout << "shoulder_pitch = " << shoulder_pitch << std::endl;
-            // std::cout << "shoulder_roll = " << shoulder_roll << std::endl;
-            // std::cout << "elbow = " << elbow << std::endl;
 
             // Translate to shoulder
             runningTransform = runningTransform.translate({model.arm.SHOULDER_X_OFFSET,
@@ -312,8 +308,6 @@ namespace motion {
                                                                                            const Sensors& sensors) {
             std::map<ServoID, utility::math::matrix::Transform3D> result =
                 calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL);
-            std::map<ServoID, utility::math::matrix::Transform3D> leftLegPositions =
-                calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL);
             std::map<ServoID, utility::math::matrix::Transform3D> rightLegPositions =
                 calculatePosition(model, sensors, ServoID::R_ANKLE_ROLL);
             std::map<ServoID, utility::math::matrix::Transform3D> headPositions =
@@ -324,7 +318,6 @@ namespace motion {
                 calculatePosition(model, sensors, ServoID::R_ELBOW);
             result.insert(leftArm.begin(), leftArm.end());
             result.insert(rightArm.begin(), rightArm.end());
-            result.insert(leftLegPositions.begin(), leftLegPositions.end());
             result.insert(rightLegPositions.begin(), rightLegPositions.end());
             result.insert(headPositions.begin(), headPositions.end());
             return result;
@@ -332,53 +325,195 @@ namespace motion {
         /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
             @return [x_com, y_com, z_com, total_mass] relative to the torso basis
         */
-        inline arma::vec4 calculateCentreOfMass(
+        inline Eigen::Vector4d calculateCentreOfMass(
             const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& jointPositions,
-            bool includeTorso) {
-            arma::vec4 totalMassVector = arma::zeros(4);
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics,
+            bool include_torso,
+            const Eigen::Matrix4d& Hwt,
+            bool debug = false) {
 
-            for (size_t j = 0; j < 20; j++) {
-                const auto& joint = jointPositions[j];
-                arma::vec4 massVector;
-                for (size_t i = 0; i < 4; i++) {
-                    massVector[i] = model.massModel.masses[j][i];
-                }
-                // NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ",
-                // message::input::stringFromId(j), massVector);
-                double jointMass = massVector[3];
+            // Convenience function to transform particle-space CoM to torso-space CoM
+            // Htp - transform from particle space to torso space
+            // particle - CoM coordinates in particle space
+            // invert - (TODO) in case left/right symmetry is broken
+            auto com = [&Hwt](const std::string& name,
+                              const Eigen::Matrix4d& Htp,
+                              const Eigen::Vector4d& particle,
+                              const bool& invert = false) {
+                // Split out CoM and mass
+                Eigen::Vector4d com;
+                com << particle.x(), particle.y(), particle.z(), 1.0;
+                double mass = particle.w();
 
-                utility::math::matrix::Transform3D massScaler;
-                massScaler.submat(0, 0, 2, 2) *= jointMass;
+                // Calculate CoM in torso space
+                // NUClear::log<NUClear::INFO>("Htp", name, Htp.topRightCorner<3, 1>().transpose());
+                // NUClear::log<NUClear::INFO>("CoM", nam:, com.head<3>().transpose());
+                com = Htp * com;
+                // NUClear::log<NUClear::INFO>("CoM", nam:, com.head<3>().transpose());
+                Eigen::Vector4d com_world = Hwt * com;
+                // NUClear::log<NUClear::INFO>("CoM World", name, com_world.head<3>().transpose());
 
-                // = m * local centre of mass in global robot coords
-                totalMassVector += convert<double, 4, 4>(joint) * massScaler * massVector;
+                return std::pair<Eigen::Vector3d, double>{Eigen::Vector3d(com.x(), com.y(), com.z()), mass};
+            };
+
+            // Get the centre of mass for each particle in torso space
+            // There are 16 particles in total
+            std::array<std::pair<Eigen::Vector3d, double>, 16> particles = {
+                com("Head", forward_kinematics[utility::input::ServoID::HEAD_PITCH], model.massModel.head),
+                com("Left Upper Arm",
+                    forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH],
+                    model.massModel.arm_upper),
+                com("Right Upper Arm",
+                    forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH],
+                    model.massModel.arm_upper),
+                com("Left Lower Arm",
+                    forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL],
+                    model.massModel.arm_lower),
+                com("Right Lower Arm",
+                    forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL],
+                    model.massModel.arm_lower),
+                com("Left Hip", forward_kinematics[utility::input::ServoID::L_HIP_ROLL], model.massModel.hip_block),
+                com("Right Hip", forward_kinematics[utility::input::ServoID::R_HIP_ROLL], model.massModel.hip_block),
+                com("Left Upper Leg",
+                    forward_kinematics[utility::input::ServoID::L_HIP_PITCH],
+                    model.massModel.leg_upper),
+                com("Right Upper Leg",
+                    forward_kinematics[utility::input::ServoID::R_HIP_PITCH],
+                    model.massModel.leg_upper),
+                com("Left Lower Leg", forward_kinematics[utility::input::ServoID::L_KNEE], model.massModel.leg_lower),
+                com("Right Lower Leg", forward_kinematics[utility::input::ServoID::R_KNEE], model.massModel.leg_lower),
+                com("Left Ankle",
+                    forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                    model.massModel.ankle_block),
+                com("Right Ankle",
+                    forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                    model.massModel.ankle_block),
+                com("Left Foot", forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL], model.massModel.foot),
+                com("Right Foot", forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL], model.massModel.foot),
+                std::pair<Eigen::Vector3d, double>{Eigen::Vector3d::Zero(), 0.0},
+            };
+
+            // Add the torso into the list of particles, if requested
+            if (include_torso) {
+                particles[15] = std::pair<Eigen::Vector3d, double>{
+                    Eigen::Vector3d{model.massModel.torso.x(), model.massModel.torso.y(), model.massModel.torso.z()},
+                    model.massModel.torso.w()};
             }
 
-            if (includeTorso) {
-                arma::vec4 massVector;
-                for (size_t i = 0; i < 4; i++) {
-                    massVector[i] = model.massModel.masses[20][i];
-                }
-                // NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass Torso", massVector);
-                double jointMass = massVector[3];
-                utility::math::matrix::Transform3D massScaler;
-                massScaler.submat(0, 0, 2, 2) *= jointMass;
-                totalMassVector += massScaler * massVector;  // = m * local centre of mass in global robot coords
+            // Calculate the CoM for the entire robot
+            std::pair<Eigen::Vector3d, double> robot_com = {Eigen::Vector3d::Zero(), 0.0};
+            for (const auto& particle : particles) {
+                robot_com.first = (robot_com.first * robot_com.second + particle.first * particle.second)
+                                  / (robot_com.second + particle.second);
+                robot_com.second = robot_com.second + particle.second;
             }
 
-            utility::math::matrix::Transform3D normaliser;
-            if (totalMassVector[3] > 0) {
-                normaliser.submat(0, 0, 2, 2) *= 1 / totalMassVector[3];
-                return normaliser * totalMassVector;
+            return Eigen::Vector4d{robot_com.first.x(), robot_com.first.y(), robot_com.first.z(), robot_com.second};
+        }  // namespace kinematics
+
+        /*! @brief Transforms inertial tensors for each robot particle into torso space and sums to find the total
+           inertial tensor
+            @return [[xx, xy, xz], relative to the torso basis
+                     [xy, yy, yz],
+                     [xz, yz, zz]]
+        */
+        inline Eigen::Matrix3d calculateInertialTensor(
+            const message::motion::KinematicsModel& model,
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics,
+            bool include_torso) {
+
+            // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
+            // Htp - transform from particle space to torso space
+            // particle - CoM coordinates in particle space
+            auto translateTensor =
+                [](const Eigen::Matrix4d& Htp, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
+                    Eigen::Vector4d com;
+                    com << com_mass.x(), com_mass.y(), com_mass.z(), 1.0;
+                    com = Htp * com;
+
+                    // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
+                    double x = com.x(), y = com.y(), z = com.z();
+                    Eigen::Matrix3d d;
+                    // clang-format off
+                    d <<  y * y + z * z, -x * y,         -x * z,
+                         -x * y,          x * x + z * z, -y * z,
+                         -x * z,         -y * z,          x * x + y * y;
+                    // clang-format on
+
+                    // We need to rotate the tensor into our torso reference frame
+                    // https://en.wikipedia.org/wiki/Moment_of_inertia#Body_frame
+                    Eigen::Matrix3d torso_tensor =
+                        Htp.topLeftCorner<3, 3>() * tensor * Htp.topLeftCorner<3, 3>().transpose();
+
+                    // Translate tensor using the parallel axis theorem
+                    Eigen::Matrix3d tensor_com = com_mass.w() * (torso_tensor - d);
+
+                    return tensor_com;
+                };
+
+            // Get the centre of mass for each particle in torso space
+            // There are 16 particles in total
+            std::array<Eigen::Matrix3d, 16> particles = {
+                translateTensor(forward_kinematics[utility::input::ServoID::HEAD_PITCH],
+                                model.tensorModel.head,
+                                model.massModel.head),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH],
+                                model.tensorModel.arm_upper,
+                                model.massModel.arm_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH],
+                                model.tensorModel.arm_upper,
+                                model.massModel.arm_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL],
+                                model.tensorModel.arm_lower,
+                                model.massModel.arm_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL],
+                                model.tensorModel.arm_lower,
+                                model.massModel.arm_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_ROLL],
+                                model.tensorModel.hip_block,
+                                model.massModel.hip_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_ROLL],
+                                model.tensorModel.hip_block,
+                                model.massModel.hip_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_PITCH],
+                                model.tensorModel.leg_upper,
+                                model.massModel.leg_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_PITCH],
+                                model.tensorModel.leg_upper,
+                                model.massModel.leg_upper),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                                model.tensorModel.leg_lower,
+                                model.massModel.leg_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                                model.tensorModel.leg_lower,
+                                model.massModel.leg_lower),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                                model.tensorModel.ankle_block,
+                                model.massModel.ankle_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                                model.tensorModel.ankle_block,
+                                model.massModel.ankle_block),
+                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL],
+                                model.tensorModel.foot,
+                                model.massModel.foot),
+                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL],
+                                model.tensorModel.foot,
+                                model.massModel.foot),
+                Eigen::Matrix3d::Zero()};
+
+            // Add the torso into the list of particles, if requested
+            if (include_torso) {
+                particles[15] = model.tensorModel.torso;
             }
-            else {
-                NUClear::log<NUClear::ERROR>(
-                    "ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass "
-                    "model.");
-                return arma::vec4();
+
+            // Calculate the inertial tensor for the entire robot
+            Eigen::Matrix3d inertial_tensor = Eigen::Matrix3d::Zero();
+            for (const auto& particle : particles) {
+                inertial_tensor += particle;
             }
-        }
+
+            return inertial_tensor;
+        }  // namespace kinematics
 
         inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D Rcw,
                                                               double cameraDistancePixels) {

@@ -186,7 +186,22 @@ namespace motion {
 
         // Start feet collision detection:
         // Uses a rough measure to detect collision and move feet apart if too close
-        double overlap     = kinematicsModel.leg.FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
+        double length_factor = kinematicsModel.leg.TOE_LENGTH;
+        double width_factor  = kinematicsModel.leg.FOOT_WIDTH * 0.5;
+        // Shift from foot center to ankle center
+        if (LimbID::RIGHT_LEG) {
+            width_factor += kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE;
+        }
+        else {
+            width_factor -= kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE;
+        }
+
+        double overlap = std::sqrt(length_factor * length_factor + width_factor * width_factor)
+                             * std::atan(width_factor / length_factor)
+                         + feetDifference.angle();
+        double old_overlap = kinematicsModel.leg.FOOT_LENGTH * 0.5 * std::abs(feetDifference.angle());
+        // log("Old overlap:", old_overlap, " New overlap:", overlap, " feetDifference:", feetDifference.t());
+
         feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 
