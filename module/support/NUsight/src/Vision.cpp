@@ -20,7 +20,7 @@
 #include "NUsight.h"
 
 #include "message/input/Image.h"
-#include "message/output/CompresssedImage.h"
+#include "message/output/CompressedImage.h"
 #include "message/vision/Ball.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/Goal.h"
