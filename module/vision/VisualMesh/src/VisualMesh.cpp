@@ -131,6 +131,13 @@ namespace vision {
                 msg->rays.row(row++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
             }
 
+            for (const auto& r : m.rows) {
+                msg->mesh.emplace_back(r.phi, r.end - r.begin);
+            }
+
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
+                reinterpret_cast<float*>(results.pixel_coordinates.data()), results.pixel_coordinates.size(), 2);
+            msg->indices       = std::move(results.global_indices);
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
                 reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
             msg->classifications =
@@ -138,8 +145,6 @@ namespace vision {
                     results.classifications.data(),
                     results.neighbourhood.size(),
                     results.classifications.size() / results.neighbourhood.size());
-            msg->indices = std::move(results.global_indices);
-
 
             msg->Hcw = img.Hcw;
 
