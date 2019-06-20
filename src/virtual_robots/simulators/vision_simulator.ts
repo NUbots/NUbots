@@ -61,7 +61,7 @@ export class VisionSimulator extends Simulator {
         Hcw: toProtoMat44(Hcw),
         lens: {
           projection: Projection.RECTILINEAR,
-          focalLength: 1,
+          focalLength: 712,
           fov: { x: 1, y: 1 },
         },
       }).finish(),

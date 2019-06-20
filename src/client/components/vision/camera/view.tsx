@@ -5,6 +5,8 @@ import * as React from 'react'
 import { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
 
+import { SwitchesMenu, SwitchesMenuOption } from '../../switches_menu/view'
+
 import { CameraViewModel } from './view_model'
 
 @observer
@@ -22,7 +24,7 @@ export class CameraView extends Component<{ viewModel: CameraViewModel }> {
   }
 
   render() {
-    const { imageWidth, imageHeight } = this.props.viewModel
+    const { imageWidth, imageHeight, drawOptions } = this.props.viewModel
 
     if (!imageWidth || !imageHeight) {
       return null
@@ -30,6 +32,7 @@ export class CameraView extends Component<{ viewModel: CameraViewModel }> {
 
     const aspectRatio = imageWidth / imageHeight
     const percentage = 60
+
     return (
       <div
         style={{
@@ -37,9 +40,16 @@ export class CameraView extends Component<{ viewModel: CameraViewModel }> {
           height: `${percentage / aspectRatio}vw`,
           maxHeight: `${percentage}vh`,
           maxWidth: `${percentage * aspectRatio}vh`,
+          position: 'relative',
         }}>
         <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
         <canvas ref={this.onRef} />
+        <div style={{ position: 'absolute', top: '0', right: '0' }}>
+          <SwitchesMenu
+            dropdownMenuPosition='right'
+            options={drawOptions}
+          />
+        </div>
       </div>
     )
   }

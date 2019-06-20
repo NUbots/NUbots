@@ -1,3 +1,5 @@
+import { action } from 'mobx'
+import { computed } from 'mobx'
 import { observable } from 'mobx'
 
 import { Image } from '../../../image_decoder/image_decoder'
@@ -49,6 +51,50 @@ export class CameraModel {
   @observable.ref balls: Ball[]
   @observable.ref goals: Goal[]
   @observable.ref name: string
+  @observable draw = {
+    image: true,
+    compass: true,
+    horizon: true,
+    visualmesh: true,
+    balls: true,
+    goals: true,
+  }
+
+  @computed
+  get drawOptions() {
+    return [
+      {
+        label: 'Image',
+        enabled: this.draw.image,
+        toggle: action(() => this.draw.image = !this.draw.image),
+      },
+      {
+        label: 'Compass',
+        enabled: this.draw.compass,
+        toggle: action(() => this.draw.compass = !this.draw.compass),
+      },
+      {
+        label: 'Horizon',
+        enabled: this.draw.horizon,
+        toggle: action(() => this.draw.horizon = !this.draw.horizon),
+      },
+      {
+        label: 'Visual Mesh',
+        enabled: this.draw.visualmesh,
+        toggle: action(() => this.draw.visualmesh = !this.draw.visualmesh),
+      },
+      {
+        label: 'Balls',
+        enabled: this.draw.balls,
+        toggle: action(() => this.draw.balls = !this.draw.balls),
+      },
+      {
+        label: 'Goals',
+        enabled: this.draw.goals,
+        toggle: action(() => this.draw.goals = !this.draw.goals),
+      },
+    ]
+  }
 
   constructor(private model: VisionRobotModel, { id, name, balls, goals }: {
     id: number
