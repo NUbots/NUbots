@@ -16,9 +16,7 @@ namespace vision {
 
     private:
         struct {
-            float seed_confidence;
-            float end_confidence;
-            float cluster_points;
+            float confidence_threshold;
             bool debug;
         } config;
     };

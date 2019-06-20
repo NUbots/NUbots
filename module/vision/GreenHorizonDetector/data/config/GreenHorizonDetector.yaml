@@ -1,7 +1,3 @@
-seed_confidence: 0.9
-end_confidence: 0.9
-
-# How many cluster points form a cluster
-cluster_points: 100
+confidence_threshold: 0.7
 
 debug: false

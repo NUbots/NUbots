@@ -27,10 +27,8 @@ namespace vision {
 
         on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file GreenHorizonDetector.yaml
-            config.seed_confidence = cfg["seed_confidence"].as<float>();
-            config.end_confidence  = cfg["end_confidence"].as<float>();
-            config.cluster_points  = cfg["cluster_points"].as<int>();
-            config.debug           = cfg["debug"].as<bool>();
+            config.confidence_threshold = cfg["confidence_threshold"].as<float>();
+            config.debug                = cfg["debug"].as<bool>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
@@ -46,7 +44,7 @@ namespace vision {
             // Partition the indices such that we only have the field points that dont have field surrounding them
             auto boundary = std::partition(indices.begin(), indices.end(), [&](const int& idx) {
                 // If point is not a field or field line point then we also ignore it
-                if ((cls(idx, FIELD_INDEX) + cls(idx, LINE_INDEX)) < config.end_confidence) {
+                if ((cls(idx, FIELD_INDEX) + cls(idx, LINE_INDEX)) < config.confidence_threshold) {
                     return false;
                 }
                 // If at least one neighbour is not a field or a field line then this point should be on the edge
@@ -55,7 +53,8 @@ namespace vision {
                     if (neighbour_idx == indices.size()) {
                         continue;
                     }
-                    if ((cls(neighbour_idx, FIELD_INDEX) + cls(neighbour_idx, LINE_INDEX)) < config.end_confidence) {
+                    if ((cls(neighbour_idx, FIELD_INDEX) + cls(neighbour_idx, LINE_INDEX))
+                        < config.confidence_threshold) {
                         return true;
                     }
                 }
