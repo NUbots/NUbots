@@ -54,7 +54,7 @@ namespace support {
                 if (last_image.count(image->camera_id) == 0
                     || (NUClear::clock::now() - last_image[image->camera_id] > max_image_duration)) {
                     powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-                    last_image = NUClear::clock::now();
+                    last_image[image->camera_id] = NUClear::clock::now();
                 }
             }));
 
