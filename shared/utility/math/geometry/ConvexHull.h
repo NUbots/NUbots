@@ -195,6 +195,7 @@ namespace math {
 
         std::vector<int> upper_convex_hull(const std::vector<int>& indices,
                                            const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
+                                           const float world_offset,
                                            const bool& cycle = false) {
             // We need a minimum of 3 non-colinear points to calculate the convex hull
             if (rays.size() < 3) {
@@ -211,8 +212,8 @@ namespace math {
                 const Eigen::Vector3f& p0(rays.row(a));
                 const Eigen::Vector3f& p1(rays.row(b));
 
-                float theta0 = std::atan2(p0.y(), p0.x());
-                float theta1 = std::atan2(p1.y(), p1.x());
+                float theta0 = std::fmod(std::atan2(p0.y(), p0.x()) - world_offset + M_PI, 2.0f * M_PI);
+                float theta1 = std::fmod(std::atan2(p1.y(), p1.x()) - world_offset + M_PI, 2.0f * M_PI);
                 return theta0 < theta1;
             });
 

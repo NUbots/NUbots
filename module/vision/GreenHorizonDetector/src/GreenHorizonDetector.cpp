@@ -72,7 +72,8 @@ namespace vision {
             }
             else {
                 // Find the convex hull of the cluster
-                auto hull_indices = utility::math::geometry::upper_convex_hull(indices, rays);
+                auto hull_indices = utility::math::geometry::upper_convex_hull(
+                    indices, rays, std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0)));
 
                 auto msg = std::make_unique<GreenHorizonMsg>();
 
