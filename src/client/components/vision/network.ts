@@ -16,6 +16,7 @@ import CompressedImage = message.output.CompressedImage
 import Balls = message.vision.Balls
 import Goals = message.vision.Goals
 import VisualMesh = message.vision.VisualMesh
+import GreenHorizon = message.vision.GreenHorizon
 
 export class VisionNetwork {
 
@@ -25,6 +26,7 @@ export class VisionNetwork {
     this.network.on(VisualMesh, this.onMesh)
     this.network.on(Balls, this.onBalls)
     this.network.on(Goals, this.onGoals)
+    this.network.on(GreenHorizon, this.onGreenHorizon)
   }
 
   static of(nusightNetwork: NUsightNetwork): VisionNetwork {
@@ -119,5 +121,20 @@ export class VisionNetwork {
         br: Vector3.from(goal.frustum!.br),
       },
     }))
+  }
+
+  @action
+  private onGreenHorizon(robotModel: RobotModel, packet: GreenHorizon) {
+    const robot = VisionRobotModel.of(robotModel)
+    const { horizon, Hcw, cameraId } = packet
+    let camera = robot.cameras.get(cameraId)
+    if (!camera) {
+      camera = CameraModel.of(robot, { id: cameraId, name })
+      robot.cameras.set(cameraId, camera)
+    }
+    camera.greenhorizon = {
+      horizon: horizon!.map(v => Vector3.from(v)),
+      Hcw: Matrix4.from(Hcw),
+    }
   }
 }

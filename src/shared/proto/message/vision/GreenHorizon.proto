@@ -19,12 +19,17 @@
 
 syntax = "proto3";
 
-package message.support.nusight;
+package message.vision;
 
-import "google/protobuf/timestamp.proto";
+import "Neutron.proto";
+import "Matrix.proto";
+import "Vector.proto";
 
-message DataPoint {
-    string                    label     = 1;
-    repeated float            value     = 2 [packed = true];
-    google.protobuf.Timestamp timestamp = 4;
+import "message/vision/VisualMesh.proto";
+
+message GreenHorizon {
+    repeated fvec3 horizon   = 1;
+    mat4           Hcw       = 2;
+    uint32         camera_id = 3;
+    VisualMesh     mesh      = 4 [(pointer) = SHARED];
 }

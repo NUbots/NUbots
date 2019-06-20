@@ -32,7 +32,7 @@ export class LocalisationNetwork {
   private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
     const robot = LocalisationRobotModel.of(robotModel)
 
-    const { translation: rWTt, rotation: Rwt } = decompose(new Matrix4().getInverse(fromProtoMat44(sensors.world!)))
+    const { translation: rWTt, rotation: Rwt } = decompose(new Matrix4().getInverse(fromProtoMat44(sensors.Htw!)))
     robot.rWTt.set(rWTt.x, rWTt.y, rWTt.z)
     robot.Rwt.set(Rwt.x, Rwt.y, Rwt.z, Rwt.w)
 

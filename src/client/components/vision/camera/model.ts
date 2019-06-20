@@ -8,6 +8,11 @@ import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
 import { VisionRobotModel } from '../model'
 
+export interface GreenHorizon {
+  readonly horizon: Vector3[]
+  readonly Hcw: Matrix4
+}
+
 export interface VisualMesh {
   readonly neighbours: number[]
   readonly coordinates: number[]
@@ -46,6 +51,7 @@ export interface Goal {
 export class CameraModel {
   readonly id: number
 
+  @observable.ref greenhorizon?: GreenHorizon
   @observable.ref visualmesh?: VisualMesh
   @observable.ref image?: VisionImage
   @observable.ref balls: Ball[]
@@ -56,6 +62,7 @@ export class CameraModel {
     compass: true,
     horizon: true,
     visualmesh: true,
+    greenhorizon: true,
     balls: true,
     goals: true,
   }
@@ -82,6 +89,11 @@ export class CameraModel {
         label: 'Visual Mesh',
         enabled: this.draw.visualmesh,
         toggle: action(() => this.draw.visualmesh = !this.draw.visualmesh),
+      },
+      {
+        label: 'Green Horizon',
+        enabled: this.draw.greenhorizon,
+        toggle: action(() => this.draw.greenhorizon = !this.draw.greenhorizon),
       },
       {
         label: 'Balls',

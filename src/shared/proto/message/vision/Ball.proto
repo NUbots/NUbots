@@ -25,6 +25,7 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "message/Geometry.proto";
 import "Matrix.proto";
+import "Neutron.proto";
 
 message Ball {
     enum MeasurementType {
@@ -38,8 +39,10 @@ message Ball {
         vec3 rBCc       = 2;
         mat3 covariance = 3;
     }
-    Cone                      cone    = 1;
-    repeated Measurement measurements = 2;
+    Cone     cone                       = 1;
+    repeated Measurement measurements   = 2;
+    vec2                 screen_angular = 3;
+    vec2                 angular_size   = 4;
 }
 
 message Balls {

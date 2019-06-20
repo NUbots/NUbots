@@ -52,10 +52,13 @@ message Goal {
         vec3 position   = 2;
         mat3 covariance = 3;
     }
-    Side                      side    = 1;
-    Team                      team    = 2;
-    Frustum                   frustum = 3;
-    repeated Measurement measurements = 4;
+    Side     side                       = 1;
+    Team     team                       = 2;
+    Frustum  frustum                    = 3;
+    Quad     quad                       = 4;
+    repeated Measurement measurements   = 5;
+    vec2                 screen_angular = 6;
+    vec2                 angular_size   = 7;
 }
 
 message Goals {

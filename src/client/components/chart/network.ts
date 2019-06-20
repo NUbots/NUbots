@@ -119,7 +119,7 @@ export class ChartNetwork {
 
   @action
   private onSensorData = (robotModel: RobotModel, sensorData: Sensors) => {
-    const { accelerometer, gyroscope, world, fsr, battery, voltage, led, servo } = sensorData
+    const { accelerometer, gyroscope, Htw, fsr, battery, voltage, led, servo } = sensorData
     const timestamp = sensorData.timestamp!
 
     if (accelerometer) {
@@ -250,4 +250,3 @@ export class ChartNetwork {
     }
   }
 }
-

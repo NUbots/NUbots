@@ -27,6 +27,7 @@ import { Goal } from './model'
 import { Ball } from './model'
 import { CameraModel } from './model'
 import { VisualMesh } from './model'
+import { GreenHorizon } from './model'
 import meshFragmentShader from './shaders/mesh.frag'
 import meshVertexShader from './shaders/mesh.vert'
 import worldLineFragmentShader from './shaders/world_line.frag'
@@ -102,6 +103,9 @@ export class CameraViewModel {
     if (this.model.visualmesh && this.model.draw.visualmesh) {
       scene.add(this.visualmesh(this.model.visualmesh))
     }
+    if (this.model.greenhorizon && this.model.draw.greenhorizon) {
+      scene.add(this.greenhorizon(this.model.greenhorizon))
+    }
     this.model.draw.balls && this.model.balls.forEach(ball => scene.add(this.ball(ball)))
     this.model.draw.goals && this.model.goals.forEach(goal => scene.add(this.goal(goal)))
     return scene
@@ -134,6 +138,19 @@ export class CameraViewModel {
     goal.add(this.makePlaneSegment({ start: br, end: tr, colour, lineWidth: 10 }))
     goal.add(this.makePlaneSegment({ start: tr, end: tl, colour, lineWidth: 10 }))
     return goal
+  })
+
+  private greenhorizon = createTransformer((m: GreenHorizon) => {
+    const greenhorizon = new Object3D()
+    const Hcw = this.model.image ? new Matrix4().extractRotation(toThreeMatrix4(this.model.image.Hcw)) : new Matrix4()
+    const rays = m.horizon.map(v => toThreeVector3(v).applyMatrix4(Hcw))
+
+    const colour = new Vector4(0, 0.8, 0, 0.8)
+    const nElem = m.horizon.length
+    for (let i = 1; i < nElem; i++) {
+      greenhorizon.add(this.makePlaneSegment({ start: rays[i - 1], end: rays[i], colour, lineWidth: 10 }))
+    }
+    return greenhorizon
   })
 
   @computed
