@@ -55,8 +55,11 @@ walk_cycle:
     # Angle in which the leg will be rotated about z when walking
     leg_yaw: 0 * pi / 180
     # Compensation factors for roll and pitch (<factor> * (current_pos - compensated_pos))
-    ankle_roll_comp: 0.8
-    ankle_pitch_comp: 0.8
+    compensation:
+      roll_coef: 0.8
+      roll_limit: 10 * pi / 180
+      pitch_coef: 0.5
+      pitch_limit: 10 * pi / 180
   velocity:
     # Velocity limits for the walk
     limits:

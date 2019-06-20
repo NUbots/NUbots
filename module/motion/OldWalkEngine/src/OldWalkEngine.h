@@ -170,7 +170,9 @@ namespace motion {
         double legYaw;
         // Ankle feedback parameters
         double ankleRollComp;
+        double ankleRollLimit;
         double anklePitchComp;
+        double anklePitchLimit;
         // standard offset
         Transform2D uLRFootOffset;
         // arm poses

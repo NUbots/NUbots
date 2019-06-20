@@ -289,8 +289,10 @@ namespace motion {
         stepHeight          = walkCycle["step"]["height"].as<Expression>();
         stepLimits          = walkCycle["step"]["limits"].as<arma::mat::fixed<3, 2>>();
         legYaw              = walkCycle["step"]["leg_yaw"].as<Expression>();
-        ankleRollComp       = walkCycle["step"]["ankle_roll_comp"].as<Expression>();
-        anklePitchComp      = walkCycle["step"]["ankle_pitch_comp"].as<Expression>();
+        ankleRollComp       = walkCycle["step"]["compensation"]["roll_coef"].as<Expression>();
+        ankleRollLimit      = walkCycle["step"]["compensation"]["roll_limit"].as<Expression>();
+        anklePitchComp      = walkCycle["step"]["compensation"]["pitch_coef"].as<Expression>();
+        anklePitchLimit     = walkCycle["step"]["compensation"]["pitch_limit"].as<Expression>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
@@ -594,12 +596,13 @@ namespace motion {
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
 
-        leftFootTorso = leftFootTorso.rotateX(ankleRollComp * sensors.angular_position[0])
-                            .rotateY(anklePitchComp * sensors.angular_position[1])
-                            .rotateZ(legYaw);
-        rightFootTorso = rightFootTorso.rotateX(-ankleRollComp * sensors.angular_position[0])
-                             .rotateY(anklePitchComp * sensors.angular_position[1])
-                             .rotateZ(-legYaw);
+        float rollComp =
+            std::min(ankleRollLimit, std::max(-ankleRollLimit, ankleRollComp * sensors.angular_position[0]));
+        float pitchComp =
+            std::min(anklePitchLimit, std::max(-anklePitchLimit, anklePitchComp * sensors.angular_position[1]));
+
+        leftFootTorso  = leftFootTorso.rotateX(rollComp).rotateY(pitchComp).rotateZ(legYaw);
+        rightFootTorso = rightFootTorso.rotateX(-rollComp).rotateY(pitchComp).rotateZ(-legYaw);
 
         // log("Left Foot Torso", leftFootTorso.translation().t());
         // log("Right Foot Torso", rightFootTorso.translation().t());
@@ -618,16 +621,27 @@ namespace motion {
         }
         auto waypoints = motionLegs(joints);
 
-        for (auto& joint : *waypoints) {
-            // Compensate right ankle roll
-            if (joint.id == ServoID::R_ANKLE_ROLL) {
-                joint.position -= 0.8 * (joint.position + sensors.angular_position[0]);
-            }
-            // Compensate left ankle roll
-            if (joint.id == ServoID::L_ANKLE_ROLL) {
-                joint.position -= 0.8 * (joint.position - sensors.angular_position[0]);
-            }
-        }
+        // for (auto& joint : *waypoints) {
+        //     // Compensate right ankle roll
+        //     if (joint.id == ServoID::R_ANKLE_ROLL) {
+        //         joint.position -= ankleRollComp * (joint.position + sensors.angular_position[0]);
+        //     }
+        //     // Compensate left ankle roll
+        //     if (joint.id == ServoID::L_ANKLE_ROLL) {
+        //         joint.position -= ankleRollComp * (joint.position - sensors.angular_position[0]);
+        //     }
+        //     // Compensate right ankle pitch
+        //     if (joint.id == ServoID::R_ANKLE_PITCH) {
+        //         joint.position -= anklePitchComp * (joint.position - sensors.angular_position[1]);
+        //     }
+        //     // Compensate left ankle pitch
+        //     if (joint.id == ServoID::L_ANKLE_PITCH) {
+        //         joint.position -= anklePitchComp * (joint.position - sensors.angular_position[1]);
+        //     }
+        //     // if (joint.id == ServoID::L_ANKLE_PITCH) {
+        //     //     log("Bodytilt:", bodyTilt, "Pitch:", joint.position, "Theta", sensors.angular_position[1]);
+        //     // }
+        // }
 
         auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
