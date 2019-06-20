@@ -52,9 +52,9 @@ namespace support {
 
         std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
 
-        NUClear::clock::time_point last_camera_image = NUClear::clock::time_point(0);
-        NUClear::clock::time_point last_seen_ball    = NUClear::clock::time_point(0);
-        NUClear::clock::time_point last_seen_goal    = NUClear::clock::time_point(0);
+        NUClear::clock::time_point last_camera_image = NUClear::clock::time_point(NUClear::clock::duration(0));
+        NUClear::clock::time_point last_seen_ball    = NUClear::clock::time_point(NUClear::clock::duration(0));
+        NUClear::clock::time_point last_seen_goal    = NUClear::clock::time_point(NUClear::clock::duration(0));
 
         void provideOverview();
         void provideDataPoints();
