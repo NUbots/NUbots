@@ -66,7 +66,7 @@ void NBSPlayAction::HandleProgressCallback(const Packet* packet, size_t size) {
 
     // This means we reached the end of the file
     if (packet->payload == nullptr) {
-        player->packet_callback->Call(0, nullptr);
+        Nan::Call(*player->packet_callback, 0, nullptr);
     }
     else {
         v8::Local<v8::Value> argv[3] = {
@@ -79,7 +79,7 @@ void NBSPlayAction::HandleProgressCallback(const Packet* packet, size_t size) {
                 .ToLocalChecked()
                 .As<v8::Value>()};
 
-        player->packet_callback->Call(3, argv);
+        Nan::Call(*player->packet_callback, 3, argv);
     }
 }
 

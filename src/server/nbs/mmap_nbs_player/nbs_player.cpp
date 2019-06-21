@@ -129,7 +129,7 @@ void NBSPlayer::Step(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     // Get the mutex and then tell it it is playing
     std::lock_guard<std::mutex> lock(bind->play_action->mutex);
-    bind->play_action->steps = info[0]->IntegerValue();
+    bind->play_action->steps = Nan::To<int32_t>(info[0]).ToChecked();
     bind->play_action->wait.notify_all();
 }
 
@@ -138,7 +138,7 @@ void NBSPlayer::Seek(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     NBSPlayer* bind = ObjectWrap::Unwrap<NBSPlayer>(info.Holder());
 
     // Timestamp to seek to
-    uint32_t timestamp = info[0]->IntegerValue();
+    uint32_t timestamp = Nan::To<uint32_t>(info[0]).ToChecked();
 
     // Get the mutex and then tell it it is playing
     std::lock_guard<std::mutex> lock(bind->play_action->mutex);
@@ -205,8 +205,9 @@ void NBSPlayer::Init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module
     Nan::SetPrototypeMethod(tpl, "step", Step);
     Nan::SetPrototypeMethod(tpl, "seek", Seek);
 
-    constructor.Reset(tpl->GetFunction());
-    module->Set(Nan::New("exports").ToLocalChecked(), tpl->GetFunction());
+    constructor.Reset();
+    auto ctx = Nan::GetCurrentContext();
+    module->Set(ctx, Nan::New("exports").ToLocalChecked(), tpl->GetFunction(ctx).ToLocalChecked()).ToChecked();
 }
 
 Nan::Persistent<v8::Function> NBSPlayer::constructor;

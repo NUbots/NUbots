@@ -6,7 +6,7 @@
 
 
 ## Dependencies
-- [Node v10.16](https://nodejs.org/en/download/)
+- [Node](https://nodejs.org/en/download/)
 - [Yarn](https://yarnpkg.com/en/docs/install)
 
 ## Installing

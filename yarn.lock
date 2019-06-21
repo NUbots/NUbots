@@ -3460,11 +3460,6 @@ binary@^0.3.0:
     buffers "~0.1.1"
     chainsaw "~0.1.0"
 
-bindings@^1.2.1:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.3.0.tgz#b346f6ecf6a95f5a815c5839fc7cdb22502f1ed7"
-  integrity sha512-DpLh5EzMR2kzvX1KIlVC0VkC3iZtHKTgdtZ0a3pglBZdaQFjt5S9g9xd1lE+YvXyfd6mtCeRnrUfOLYiTMlNSw==
-
 bindings@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.5.0.tgz#10353c9e945334bc0511a6d90b38fbc7c9c504df"
@@ -9093,7 +9088,12 @@ mute-stream@0.0.7:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
   integrity sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
 
-nan@^2.0.0, nan@^2.3.0:
+nan@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.0.tgz#7818f722027b2459a86f0295d434d1fc2336c52c"
+  integrity sha512-INOFj37C7k3AfaNTtX8RhsTw7qRy7eLET14cROi9+5HAVbbHuIWUHEauBv5qT4Av2tWasiTY1Jw6puUNqRJXQg==
+
+nan@^2.3.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.8.0.tgz#ed715f3fe9de02b57a5e6252d90a96675e1f085a"
   integrity sha1-7XFfP+neArV6XmJS2QqWZ14fCFo=
@@ -9386,13 +9386,13 @@ nth-check@~1.0.1:
   dependencies:
     boolbase "~1.0.0"
 
-nuclearnet.js@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/nuclearnet.js/-/nuclearnet.js-1.5.3.tgz#73b86a1024c62e0a20e8b8034ac77220019b5f0c"
-  integrity sha512-Hqt630rNGHGJkQ/fVsZa62/HSeSadan2GM6104wsBZJpWXHoKrv02snFO0v0JUxaUZy4TgU8b3K8sxVmRCPmoA==
+nuclearnet.js@^1.5.4:
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/nuclearnet.js/-/nuclearnet.js-1.5.4.tgz#1d155ef2f1183ff81d511f4850ef1277ac7fa154"
+  integrity sha512-ZsAyWw6BuKi21vwBCpCMpmFJeFZGsFOyaiDmTSZPqiBedgJ69BCyzplorpbMFLqgfrQxhghXMJIzh68a6Fq2FA==
   dependencies:
-    bindings "^1.2.1"
-    nan "^2.0.0"
+    bindings "^1.5.0"
+    nan "^2.14.0"
 
 num2fraction@^1.2.2:
   version "1.2.2"
