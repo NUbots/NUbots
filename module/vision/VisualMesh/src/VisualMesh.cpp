@@ -93,7 +93,7 @@ namespace vision {
             classifier = std::make_unique<Classifier>(mesh->make_classifier(network));
         });
 
-        on<Trigger<Image>, Buffer<4>>().then([this](const Image& img) {
+        on<Trigger<Image>, Buffer<2>>().then([this](const Image& img) {
             // Get our camera to world matrix
             Eigen::Affine3f Hcw(img.Hcw.cast<float>());
 
