@@ -146,11 +146,8 @@ namespace vision {
                     results.neighbourhood.size(),
                     results.classifications.size() / results.neighbourhood.size());
 
-            msg->Hcw = img.Hcw;
-
-            // Preserve image so that anyone using the GreenHorizon can access the original data
-            msg->image = const_cast<Image*>(&img)->shared_from_this();
-
+            msg->Hcw       = img.Hcw;
+            msg->timestamp = img.timestamp;
 
             emit(msg);
         });
