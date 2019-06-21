@@ -97,26 +97,36 @@ namespace math {
             return true;
         }
 
+        template <typename Iterator>
         bool point_under_hull(const Eigen::Vector3f& point,
-                              const std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>>& rays,
+                              const Iterator rays_begin,
+                              const Iterator rays_end,
                               const bool& allow_boundary = false) {
             const float theta = std::atan2(point.y(), point.x());
-            auto it = std::lower_bound(rays.begin(), rays.end(), theta, [&](const Eigen::Vector3f& p0, const float& b) {
-                return std::atan2(p0.y(), p0.x()) < b;
-            });
+            auto lower_it =
+                std::lower_bound(rays_begin, rays_end, theta, [&](const Eigen::Vector3f& p0, const float& b) {
+                    return std::atan2(p0.y(), p0.x()) < b;
+                });
+            auto upper_it =
+                std::upper_bound(rays_begin, rays_end, theta, [&](const float& b, const Eigen::Vector3f& p0) {
+                    return b < std::atan2(p0.y(), p0.x());
+                });
 
-            if (it == rays.end()) {
+            if ((lower_it == rays_end) || (upper_it == rays_end)) {
                 return false;
             }
             else {
-                const Eigen::Vector2f p0 = project_vector(*std::prev(it));
-                const Eigen::Vector2f p1 = project_vector(*it);
-                const Eigen::Vector2f p2 = project_vector(point);
+                // lower_bound returns the first ray that has a theta value that is >= our point_theta value
+                // taking the ray immediately before the lower_bound should give us a ray with theta < point_theta
+                // upper_bound returns the first ray that has a theta value that is > our point_theta value
+                const Eigen::Vector2f p0 = project_vector(lower_it == rays_begin ? *lower_it : *std::prev(lower_it));
+                const Eigen::Vector2f p1 = project_vector(point);
+                const Eigen::Vector2f p2 = project_vector(*upper_it);
 
                 // Point should make a clockwise turn if it is under the convex hull.
                 // It should be colinear if it is on the convex hull
-                int threhold = allow_boundary ? -1 : 0;
-                return (turn_direction(p0, p1, p2) > threhold);
+                const int threshold = allow_boundary ? -1 : 0;
+                return (turn_direction(p0, p1, p2) > threshold);
             }
         }
 
