@@ -34,6 +34,24 @@ namespace math {
             return Eigen::Vector2f(v.x() / v.z(), v.y() / v.z());
         }
 
+        // Sort a list of indices by increasing theta order
+        template <typename Iterator>
+        void sort_by_theta(Iterator first,
+                           Iterator last,
+                           const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
+                           const float& world_offset) {
+            std::sort(first, last, [&](const int& a, const int& b) {
+                const Eigen::Vector3f& p0(rays.row(a));
+                const Eigen::Vector3f& p1(rays.row(b));
+
+                float theta0 =
+                    std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
+                float theta1 =
+                    std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
+                return theta0 < theta1;
+            });
+        }
+
         // Calculates the turning direction of 3 points
         // Returns -1 indicating an anti-clockwise turn
         // Returns  0 indicating a colinear set of points (no turn)
@@ -208,14 +226,7 @@ namespace math {
             std::vector<int> local_indices(indices.begin(), indices.end());
 
             // Sort by increasing theta
-            std::sort(local_indices.begin(), local_indices.end(), [&](const int& a, const int& b) {
-                const Eigen::Vector3f& p0(rays.row(a));
-                const Eigen::Vector3f& p1(rays.row(b));
-
-                float theta0 = std::fmod(std::atan2(p0.y(), p0.x()) - world_offset + M_PI, 2.0f * M_PI);
-                float theta1 = std::fmod(std::atan2(p1.y(), p1.x()) - world_offset + M_PI, 2.0f * M_PI);
-                return theta0 < theta1;
-            });
+            sort_by_theta(local_indices.begin(), local_indices.end(), rays, world_offset);
 
             // Remove all colinear points
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
