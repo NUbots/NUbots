@@ -98,35 +98,14 @@ namespace math {
         }
 
         bool point_under_hull(const Eigen::Vector3f& point,
-                              const std::vector<int>& hull_indices,
-                              const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
+                              const std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>>& rays,
                               const bool& allow_boundary = false) {
-
-            std::vector<int> local_indices(hull_indices.begin(), hull_indices.end());
-
-            auto comp = [&](const int& a, const int& b) {
-                const Eigen::Vector3f& p0(rays.row(a));
-                const Eigen::Vector3f& p1(rays.row(b));
-
-                float theta0 = std::atan2(p0.y(), p0.x());
-                float theta1 = std::atan2(p1.y(), p1.x());
-                return theta0 < theta1;
-            };
-
-            // Make sure the indices are sorted
-            if (!std::is_sorted(local_indices.begin(), local_indices.end(), comp)) {
-                std::sort(local_indices.begin(), local_indices.end(), comp);
-            }
-
             const float theta = std::atan2(point.y(), point.x());
-            auto it =
-                std::lower_bound(local_indices.begin(), local_indices.end(), theta, [&](const int& a, const float& b) {
-                    const Eigen::Vector3f& p0(rays.row(a));
-                    float theta0 = std::atan2(p0.y(), p0.x());
-                    return theta0 < b;
-                });
+            auto it = std::lower_bound(rays.begin(), rays.end(), theta, [&](const Eigen::Vector3f& p0, const float& b) {
+                return std::atan2(p0.y(), p0.x()) < b;
+            });
 
-            if (it == local_indices.end()) {
+            if (it == rays.end()) {
                 return false;
             }
             else {
