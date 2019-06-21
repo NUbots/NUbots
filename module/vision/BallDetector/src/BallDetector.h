@@ -20,7 +20,7 @@
 #ifndef MODULES_VISION_BALLDETECTOR_H
 #define MODULES_VISION_BALLDETECTOR_H
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "message/input/Image.h"
@@ -39,50 +39,14 @@ namespace vision {
 
     class BallDetector : public NUClear::Reactor {
     private:
-        uint MINIMUM_POINTS_FOR_CONSENSUS;
-        uint MAXIMUM_ITERATIONS_PER_FITTING;
-        uint MAXIMUM_FITTED_MODELS;
-
-        const double LAMBDA = 8.3116883;
-
-        double CONSENSUS_ERROR_THRESHOLD;
-        double MAXIMUM_DISAGREEMENT_RATIO;
-
-        double mesh_seed_confidence_threshold;
-        double mesh_branch_confidence_threshold;
-
-        double maximum_relative_seed_point_distance;
-
-        double measurement_distance_variance_factor;
-        double measurement_bearing_variance;
-        double measurement_elevation_variance;
-
-        double green_ratio_threshold;
-        double green_radial_samples;
-        double green_angular_samples;
-
-        arma::vec3 ball_angular_cov;
-
-        utility::learning::KMeans kmeansClusterer;
-
-        struct Frame {
-            Frame() : time(), widthBall(arma::fill::zeros), projBall(arma::fill::zeros) {}
-            Frame(const NUClear::clock::time_point& time, const arma::vec3& width, const arma::vec3& proj)
-                : time(time), widthBall(width), projBall(proj) {}
-
-            NUClear::clock::time_point time;
-            arma::vec3 widthBall;
-            arma::vec3 projBall;
-        };
-        Frame lastFrame;
-
-        bool print_throwout_logs;
-        bool print_mesh_debug;
-        bool draw_cluster;
-
-        std::vector<std::vector<arma::vec4>> findClusters(const message::vision::VisualMesh& mesh,
-                                                          const arma::uvec2& dimensions,
-                                                          const message::input::Image::Lens& cam);
+        struct {
+            float confidence_threshold;
+            float maximum_cone_radius;
+            float minimum_ball_distance;
+            float distance_disagreement;
+            message::conversion::math::mat3 ball_angular_cov;
+            bool debug;
+        } config;
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
