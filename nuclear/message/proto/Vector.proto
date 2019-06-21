@@ -9,11 +9,11 @@ message fvec {
 }
 
 message ivec {
-    repeated sint32 v = 1 [packed = true];
+    repeated sfixed32 v = 1 [packed = true];
 }
 
 message uvec {
-    repeated uint32 v = 1 [packed = true];
+    repeated fixed32 v = 1 [packed = true];
 }
 
 message cvec {
