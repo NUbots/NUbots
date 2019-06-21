@@ -79,7 +79,7 @@ namespace vision {
             //    d) Repeat a-c for all points that were not partitioned
             // 2) Discard all partitions smaller than a given threshold
             //    This also copies the indices for partitions larger than the threshold into separate vectors
-            // 3) Merge the clusters down into a single clulster
+            // 3) Merge the clusters down into a single cluster
             //    Clusters are merged when they are not overlapping
             //    If the clusters do overlap then we keep the largest one
             auto first                                         = indices.begin();
@@ -105,10 +105,6 @@ namespace vision {
                             const int neighbour_idx = neighbours(search_idx, n);
                             // Make sure we haven't already considered this point
                             if (std::find(cluster.begin(), cluster.end(), idx) != cluster.end()) {
-                                return true;
-                            }
-                            if (neighbour_idx == indices.size()) {
-                                cluster.push_back(idx);
                                 return true;
                             }
                             if (neighbour_idx == idx) {
@@ -195,6 +191,7 @@ namespace vision {
 
                 msg->camera_id = mesh.camera_id;
                 msg->Hcw       = mesh.Hcw;
+                msg->timestamp = mesh.timestamp;
 
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
