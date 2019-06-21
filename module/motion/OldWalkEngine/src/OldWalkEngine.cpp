@@ -35,6 +35,7 @@
 #include "message/support/SaveConfiguration.h"
 
 #include "utility/math/angle.h"
+#include "utility/math/matrix/Comparison.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -53,8 +54,6 @@ namespace motion {
     using message::behaviour::WalkConfigSaved;
     using message::behaviour::WalkOptimiserCommand;
     using message::input::Sensors;
-    // using message::behaviour::RegisterAction;
-    // using message::behaviour::ActionPriorites;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::KinematicsModel;
@@ -66,6 +65,7 @@ namespace motion {
 
     using ServoID = utility::input::ServoID;
     using LimbID  = utility::input::LimbID;
+    using utility::math::clamp;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
@@ -549,12 +549,6 @@ namespace motion {
         Transform3D torso =
             arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
-        // log("COM", sensors.centre_of_mass.head<3>().transpose());
-        // log("Foot", foot.t());
-        // log("Left Foot\n", leftFoot);
-        // log("Right Foot\n", rightFoot);
-        // log("Torso\n", torso);
-
         // Transform feet targets to be relative to the torso
         Transform3D leftFootCOM  = leftFoot.worldToLocal(torso);
         Transform3D rightFootCOM = rightFoot.worldToLocal(torso);
@@ -574,9 +568,6 @@ namespace motion {
                                          convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
         }
 
-        // log("Left Foot COM", leftFootCOM.translation().t());
-        // log("Right Foot COM", rightFootCOM.translation().t());
-
         if (balanceEnabled) {
             // Apply balance to our support foot
             balancer.balance(kinematicsModel,
@@ -587,7 +578,6 @@ namespace motion {
 
         Transform3D Htc;
         if (use_com) {
-            // log("Transforming COM");
             // Assume the previous calculations were done in CoM space, now convert them to torso space
             // Height of CoM is assumed to be constant
             Htc = Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
@@ -596,21 +586,12 @@ namespace motion {
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
 
-        float rollComp =
-            std::min(ankleRollLimit, std::max(-ankleRollLimit, ankleRollComp * sensors.angular_position[0]));
-        float pitchComp =
-            std::min(anklePitchLimit, std::max(-anklePitchLimit, anklePitchComp * sensors.angular_position[1]));
-
+        // Calculate roll and pitch compensation based on limits and compensation factors
+        float rollComp  = clamp(-ankleRollLimit, ankleRollComp * sensors.angular_position[0], ankleRollLimit);
+        float pitchComp = clamp(-anklePitchLimit, anklePitchComp * sensors.angular_position[1], anklePitchLimit);
+        // Apply compensation to left and right feet positions
         leftFootTorso  = leftFootTorso.rotateX(rollComp).rotateY(pitchComp).rotateZ(legYaw);
         rightFootTorso = rightFootTorso.rotateX(-rollComp).rotateY(pitchComp).rotateZ(-legYaw);
-
-        // log("Left Foot Torso", leftFootTorso.translation().t());
-        // log("Right Foot Torso", rightFootTorso.translation().t());
-
-        // emit(graph("Right foot torso pos", rightFootCOM.translation()));
-        // emit(graph("Left foot torso pos", leftFootCOM.translation()));
-        // emit(graph("Right foot CoM pos", rightFootTorso.translation()));
-        // emit(graph("Left foot CoM pos", leftFootTorso.translation()));
 
         std::vector<std::pair<ServoID, float>> joints;
         if (use_com) {
@@ -619,33 +600,11 @@ namespace motion {
         else {
             joints = calculateLegJointsTeamDarwin(kinematicsModel, leftFootTorso, rightFootTorso);
         }
+
         auto waypoints = motionLegs(joints);
+        auto arms      = motionArms(phase);
 
-        // for (auto& joint : *waypoints) {
-        //     // Compensate right ankle roll
-        //     if (joint.id == ServoID::R_ANKLE_ROLL) {
-        //         joint.position -= ankleRollComp * (joint.position + sensors.angular_position[0]);
-        //     }
-        //     // Compensate left ankle roll
-        //     if (joint.id == ServoID::L_ANKLE_ROLL) {
-        //         joint.position -= ankleRollComp * (joint.position - sensors.angular_position[0]);
-        //     }
-        //     // Compensate right ankle pitch
-        //     if (joint.id == ServoID::R_ANKLE_PITCH) {
-        //         joint.position -= anklePitchComp * (joint.position - sensors.angular_position[1]);
-        //     }
-        //     // Compensate left ankle pitch
-        //     if (joint.id == ServoID::L_ANKLE_PITCH) {
-        //         joint.position -= anklePitchComp * (joint.position - sensors.angular_position[1]);
-        //     }
-        //     // if (joint.id == ServoID::L_ANKLE_PITCH) {
-        //     //     log("Bodytilt:", bodyTilt, "Pitch:", joint.position, "Theta", sensors.angular_position[1]);
-        //     // }
-        // }
-
-        auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
-
         emit(std::move(waypoints));
     }
 

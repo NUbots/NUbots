@@ -65,28 +65,6 @@ namespace motion {
             else {
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
-
-            // velocity-based support point modulation
-            /*toeTipCompensation = 0;
-            if (velocityDifference[0] > 0) {
-                // accelerating to front
-                supportMod[0] = supportFront2;
-            } else if (velocityCurrent[0] > velFastForward) {
-                supportMod[0] = supportFront;
-                toeTipCompensation = ankleMod[0];
-            } else if (velocityCurrent[0] < 0) {
-                supportMod[0] = supportBack;
-            } else if (std::abs(velocityCurrent[2]) > velFastTurn) {
-                supportMod[0] = supportTurn;
-            } else {
-                if (velocityCurrent[1] > 0.015) {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = supportSideY;
-                } else if (velocityCurrent[1] < -0.015) {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = -supportSideY;
-                }
-            }*/
         }
 
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
@@ -199,9 +177,6 @@ namespace motion {
         double overlap = std::sqrt(length_factor * length_factor + width_factor * width_factor)
                              * std::atan(width_factor / length_factor)
                          + feetDifference.angle();
-        double old_overlap = kinematicsModel.leg.FOOT_LENGTH * 0.5 * std::abs(feetDifference.angle());
-        // log("Old overlap:", old_overlap, " New overlap:", overlap, " feetDifference:", feetDifference.t());
-
         feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 

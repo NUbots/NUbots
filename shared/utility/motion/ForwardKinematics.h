@@ -346,12 +346,8 @@ namespace motion {
                 double mass = particle.w();
 
                 // Calculate CoM in torso space
-                // NUClear::log<NUClear::INFO>("Htp", name, Htp.topRightCorner<3, 1>().transpose());
-                // NUClear::log<NUClear::INFO>("CoM", nam:, com.head<3>().transpose());
-                com = Htp * com;
-                // NUClear::log<NUClear::INFO>("CoM", nam:, com.head<3>().transpose());
+                com                       = Htp * com;
                 Eigen::Vector4d com_world = Hwt * com;
-                // NUClear::log<NUClear::INFO>("CoM World", name, com_world.head<3>().transpose());
 
                 return std::pair<Eigen::Vector3d, double>{Eigen::Vector3d(com.x(), com.y(), com.z()), mass};
             };
@@ -570,8 +566,6 @@ namespace motion {
                                                 const Sensors& sensors,
                                                 const arma::vec2& foot,
                                                 bool left) {
-            // sensors.Hgt
-
             int negativeIfRight = left ? 1 : -1;
 
             arma::vec2 position = foot % arma::vec2({model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2});
