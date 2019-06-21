@@ -1,3 +1,4 @@
+import * as classNames from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
 
@@ -42,8 +43,13 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
             </div>
           }
           {robots.map(robot => {
+            const indicatorClassName = classNames(style.robotConnectionIndicator, {
+              [style.robotConnected]: robot.connected,
+              [style.robotDisconnected]: !robot.connected,
+            })
             return (
               <label key={robot.id} className={style.robot}>
+                <span className={indicatorClassName} title={robot.connected ? 'Connected' : 'Disconnected'}></span>
                 <span className={style.robotLabel}>{robot.name}</span>
                 <Switch on={robot.enabled} onChange={onChange(robot)} />
               </label>

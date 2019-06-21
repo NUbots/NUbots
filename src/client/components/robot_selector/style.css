@@ -84,6 +84,22 @@
   cursor: pointer;
 }
 
+.robotConnectionIndicator {
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 0.75em;
+}
+
+.robotConnected {
+  background-color: #00de46;
+}
+
+.robotDisconnected {
+  border: 2px solid #ccc;
+}
+
 .robotLabel {
   margin-right: 1em;
   white-space: nowrap;
