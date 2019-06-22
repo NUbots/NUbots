@@ -11,22 +11,22 @@ import { SkyboxModel } from './skybox/model'
 
 export class TimeModel {
   @observable time: number // seconds
-  @observable lastRenderTime: number // seconds
+  @observable lastPhysicsUpdate: number // seconds
 
-  constructor({ time, lastRenderTime }: { time: number, lastRenderTime: number }) {
+  constructor({ time, lastPhysicsUpdate }: { time: number, lastPhysicsUpdate: number }) {
     this.time = time
-    this.lastRenderTime = lastRenderTime
+    this.lastPhysicsUpdate = lastPhysicsUpdate
   }
 
   static of() {
     return new TimeModel({
       time: 0,
-      lastRenderTime: 0,
+      lastPhysicsUpdate: 0,
     })
   }
 
-  @computed get timeSinceLastRender() {
-    return this.time - this.lastRenderTime
+  @computed get timeSinceLastPhysicsUpdate() {
+    return this.time - this.lastPhysicsUpdate
   }
 }
 

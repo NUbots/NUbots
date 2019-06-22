@@ -1,12 +1,8 @@
 import { action } from 'mobx'
 import * as THREE from 'three'
-import { Euler } from 'three'
-import { Quaternion } from 'three'
-import { Matrix4 } from 'three'
 
 import { Vector3 } from '../../math/vector3'
 
-import { HIP_TO_FOOT } from './darwin_robot/view_model'
 import { KeyCode } from './keycodes'
 import { LocalisationModel } from './model'
 import { ViewMode } from './model'
@@ -25,6 +21,7 @@ export class LocalisationController {
   onAnimationFrame(model: LocalisationModel, time: number) {
     model.time.time = time / 1000
     this.updatePosition(model)
+    model.time.lastPhysicsUpdate = time / 1000
   }
 
   @action
@@ -164,7 +161,7 @@ export class LocalisationController {
   }
 
   private updatePositionNoClip(model: LocalisationModel) {
-    const delta = model.time.timeSinceLastRender
+    const delta = model.time.timeSinceLastPhysicsUpdate
     // TODO (Annable): remove THREE dependency from controller.
     const movement = new THREE.Vector3()
     const movementSpeed = 1
@@ -221,8 +218,8 @@ export class LocalisationController {
     // This camera position hack will not work with orientation/head movement.
     // TODO (Annable): Sync camera position/rotation properly using kinematic chain.
     model.camera.position.set(target.rWTt.x, target.rWTt.y, target.rWTt.z + 0.15)
-    const Rwt = new Quaternion(target.Rwt.x, target.Rwt.y, target.Rwt.z, target.Rwt.w)
-    const heading = new Euler().setFromQuaternion(Rwt).z
+    const Rwt = new THREE.Quaternion(target.Rwt.x, target.Rwt.y, target.Rwt.z, target.Rwt.w)
+    const heading = new THREE.Euler().setFromQuaternion(Rwt).z
     model.camera.yaw = heading// - Math.PI // TODO (Annable): Find why offset by PI is needed.
     model.camera.pitch = 0
   }
