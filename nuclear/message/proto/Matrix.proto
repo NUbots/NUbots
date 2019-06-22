@@ -21,8 +21,8 @@ message imat {
 }
 
 message umat {
-    uint32   rows       = 1;
-    uint32   cols       = 2;
+    uint32   rows      = 1;
+    uint32   cols      = 2;
     repeated fixed32 v = 3 [packed = true];
 }
 
