@@ -41,10 +41,11 @@ namespace vision {
     private:
         struct {
             float confidence_threshold;
+            int cluster_points;
             float maximum_cone_radius;
             float minimum_ball_distance;
             float distance_disagreement;
-            message::conversion::math::mat3 ball_angular_cov;
+            message::conversion::math::fmat3 ball_angular_cov;
             bool debug;
         } config;
 
