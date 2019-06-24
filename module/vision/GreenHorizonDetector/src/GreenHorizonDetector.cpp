@@ -10,6 +10,7 @@
 
 #include "utility/math/geometry/ConvexHull.h"
 #include "utility/math/vision.h"
+#include "utility/vision/visualmesh/VisualMesh.h"
 
 namespace module {
 namespace vision {
@@ -44,93 +45,39 @@ namespace vision {
             std::iota(indices.begin(), indices.end(), 0);
 
             // Partition the indices such that we only have the field points that dont have field surrounding them
-            auto boundary = std::partition(indices.begin(), indices.end(), [&](const int& idx) {
-                // If point is not a field or field line point then we also ignore it
-                if ((cls(idx, FIELD_INDEX) + cls(idx, LINE_INDEX)) < config.confidence_threshold) {
-                    return false;
-                }
-                // If at least one neighbour is not a field or a field line then this point should be on the edge
-                for (int n = 4; n < 6; ++n) {
-                    const int neighbour_idx = neighbours(idx, n);
-                    if (neighbour_idx == indices.size()) {
-                        continue;
-                    }
-                    if ((cls(neighbour_idx, FIELD_INDEX) + cls(neighbour_idx, LINE_INDEX))
-                        < config.confidence_threshold) {
-                        return true;
-                    }
-                }
-                return false;
-            });
+            auto boundary = utility::vision::visualmesh::partition_points(
+                indices.begin(),
+                indices.end(),
+                neighbours,
+                [&](const int& idx) {
+                    return idx == indices.size()
+                           || (cls(idx, FIELD_INDEX) + cls(idx, LINE_INDEX) >= config.confidence_threshold);
+                },
+                {4, 5});
+
 
             // Discard indices that are not on the boundary
             indices.resize(std::distance(indices.begin(), boundary));
 
-            // Sort indices by increasing theta
-            utility::math::geometry::sort_by_theta(indices.begin(), indices.end(), rays, world_offset);
+            if (config.debug) {
+                log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
+            }
 
             // Cluster the points
             // Points are clustered based on their connectivity to other field points
-            // Clustering is down in three steps
+            // Clustering is down in two steps
             // 1) We take the set of field points found above and partition them into potential clusters by
             //    a) Add the first point and its field neighbours to a cluster
             //    b) Find all other field points who are neighbours of the points in the cluster
             //    c) Partition all of the indices that are in the cluster
             //    d) Repeat a-c for all points that were not partitioned
-            // 2) Discard all partitions smaller than a given threshold
-            //    This also copies the indices for partitions larger than the threshold into separate vectors
-            // 3) Merge the clusters down into a single cluster
+            //    e) Delete all partitions smaller than a given threshold
+            // 2) Merge the clusters down into a single cluster
             //    Clusters are merged when they are not overlapping
             //    If the clusters do overlap then we keep the largest one
-            auto first                                         = indices.begin();
-            std::vector<std::vector<int>::iterator> partitions = {first};
-
-            while (first != indices.end()) {
-                // Add the first point and all of its neighbours to the cluster
-                std::vector<int> cluster = {*first};
-                for (int n = 0; n < 6; ++n) {
-                    const int neighbour_idx = neighbours(*first, n);
-                    if (neighbour_idx == indices.size()) {
-                        continue;
-                    }
-                    if (std::find(indices.begin(), indices.end(), neighbour_idx) == cluster.end()) {
-                        cluster.push_back(neighbour_idx);
-                    }
-                }
-                partitions.push_back(std::partition(std::next(first), indices.end(), [&](const int& idx) {
-                    // At least one neighbour of the current point must be a neighbour of one of the points in the
-                    // current cluster
-                    for (const auto& search_idx : cluster) {
-                        for (int n = 0; n < 6; ++n) {
-                            const int neighbour_idx = neighbours(search_idx, n);
-                            // Make sure we haven't already considered this point
-                            if (std::find(cluster.begin(), cluster.end(), idx) != cluster.end()) {
-                                return true;
-                            }
-                            if (neighbour_idx == idx) {
-                                cluster.push_back(idx);
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                }));
-
-                first = partitions.back();
-            }
-
-            if (config.debug) {
-                log<NUClear::DEBUG>(fmt::format("Found {} partitions", partitions.size()));
-            }
-
-            // Discard all partitions smaller than a given size
-            // Copy the indices of the large clusters into separate vectors
             std::vector<std::vector<int>> clusters;
-            for (int i = 1; i < partitions.size(); ++i) {
-                if (std::distance(partitions[i - 1], partitions[i]) >= config.cluster_points) {
-                    clusters.emplace_back(partitions[i - 1], partitions[i]);
-                }
-            }
+            utility::vision::visualmesh::cluster_points(
+                indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
 
             if (config.debug) {
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
@@ -175,7 +122,12 @@ namespace vision {
                 }
             }
 
-            if (clusters.front().size() < 3) {
+            if (clusters.size() < 1) {
+                if (config.debug) {
+                    log<NUClear::DEBUG>("Found no clusters to make a convex hull from");
+                }
+            }
+            else if (clusters.front().size() < 3) {
                 if (config.debug) {
                     log<NUClear::DEBUG>("Unable to make a convex hull with less than 3 points");
                 }
