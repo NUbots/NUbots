@@ -46,6 +46,9 @@ namespace support {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::vision::cameraSpaceGoalProjection;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::imageToScreen;
+    using utility::math::coordinates::cartesianToSpherical;
 
     arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1,
                                           const arma::vec3& norm2,
@@ -134,19 +137,46 @@ namespace support {
                 getCamRay(goalNormals.col(1), goalNormals.col(2), image.lens, convert<uint, 2>(image.dimensions)),
                 getCamRay(goalNormals.col(1), goalNormals.col(3), image.lens, convert<uint, 2>(image.dimensions)));
 
+            // Get the quad points in screen coords
+            arma::vec2 bl = imageToScreen(quad.getBottomLeft(), convert<uint, 2>(image.dimensions));
+            arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
+            arma::vec2 screenGoalBottomCentre = (bl + br) * 0.5;
+
+            // Get vectors for BL BR;
+            arma::vec3 cbl       = getCamFromScreen(bl, image.lens);
+            arma::vec3 cbr       = getCamFromScreen(br, image.lens);
+            arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
+
+            // rGCc_sphr and rGCc_cov
+            float distance =
+                utility::math::vision::distanceToEquidistantCamPoints(field.dimensions.goalpost_width, cbl, cbr);
+            auto rGCc_sphr                = convert<double, 3>(cartesianToSpherical(distance * rGCc_norm));
+            arma::vec3 VECTOR3_COVARIANCE = {0.1, 0.001, 0.001};  // Taken from GoalDetector.yaml on June 2019
+            arma::vec3 covariance_amplifier({distance, 1, 1});
+            Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE % covariance_amplifier));
+
+            if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
+                result.goals.at(0).measurements.push_back(
+                    Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
+            }
 
             // goal base visibility check
             if (not(quad.getBottomRight()[1] > 0 && quad.getBottomRight()[1] < image.dimensions[1]
-                    && quad.getBottomLeft()[1] > 0 && quad.getBottomLeft()[1] < image.dimensions[1]
-                    && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < image.dimensions[0]
-                    && quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < image.dimensions[0])) {
+                    && quad.getBottomLeft()[1] > 0
+                    && quad.getBottomLeft()[1] < image.dimensions[1]
+                    && quad.getBottomRight()[0] > 0
+                    && quad.getBottomRight()[0] < image.dimensions[0]
+                    && quad.getBottomLeft()[0] > 0
+                    && quad.getBottomLeft()[0] < image.dimensions[0])) {
 
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 3);
             }
             // goal top visibility check
             if (not(quad.getTopRight()[1] > 0 && quad.getTopRight()[1] < image.dimensions[1] && quad.getTopLeft()[1] > 0
-                    && quad.getTopLeft()[1] < image.dimensions[1] && quad.getTopRight()[0] > 0
-                    && quad.getTopRight()[0] < image.dimensions[0] && quad.getTopLeft()[0] > 0
+                    && quad.getTopLeft()[1] < image.dimensions[1]
+                    && quad.getTopRight()[0] > 0
+                    && quad.getTopRight()[0] < image.dimensions[0]
+                    && quad.getTopLeft()[0] > 0
                     && quad.getTopLeft()[0] < image.dimensions[0])) {
 
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 2);
@@ -155,9 +185,11 @@ namespace support {
             if (not((
                         // One of the top or the bottom are in the screen coordinates of x
                         (quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < image.dimensions[0]
-                         && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < image.dimensions[0])
+                         && quad.getBottomRight()[0] > 0
+                         && quad.getBottomRight()[0] < image.dimensions[0])
                         || (quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < image.dimensions[0]
-                            && quad.getTopRight()[0] > 0 && quad.getTopRight()[0] < image.dimensions[0]))
+                            && quad.getTopRight()[0] > 0
+                            && quad.getTopRight()[0] < image.dimensions[0]))
                     && (
                            // Check that the bottom is below the top of the screen and the top is below the bottom of
                            // the screen
