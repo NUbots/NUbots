@@ -107,26 +107,26 @@ namespace vision {
 
             using value_type = typename std::iterator_traits<Iterator>::value_type;
 
+            auto success = [&](const bool& a, const bool& b) {
+                return (up && a && !down)     // We were looking for above and found them, we weren't looking for below
+                       || (down && b && !up)  // We were looking for below and found them, we weren't looking for above
+                       || (up && a && down && b);  // We were looking for everything and we found it
+            };
+
             // Move any clusters that dont intersect the green horizon to the end of the list
             // We need to find one point above the green horizon and one below it
             return std::partition(first, last, [&](const value_type& cluster) {
-                bool above = !up, below = !down;
-                for (int idx = 0; idx < cluster.size(); ++idx) {
+                bool above = false, below = false;
+                for (int idx = 0; idx < cluster.size() && !success(above, below); ++idx) {
                     if (utility::math::geometry::point_under_hull(
                             rays.row(cluster[idx]), horizon_first, horizon_last)) {
-                        if (above) {
-                            return true;
-                        }
-                        below = true;
-                    }
-                    else {
-                        if (below) {
-                            return true;
-                        }
                         above = true;
                     }
+                    else {
+                        below = true;
+                    }
                 }
-                return false;
+                return success(above, below);
             });
         }
     }  // namespace visualmesh
