@@ -121,6 +121,7 @@ namespace vision {
                     auto balls = std::make_unique<Balls>();
                     balls->balls.reserve(clusters.size());
 
+                    balls->camera_id = horizon.camera_id;
                     balls->timestamp = horizon.timestamp;
                     balls->Hcw       = horizon.Hcw;
 
