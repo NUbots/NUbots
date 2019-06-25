@@ -60,4 +60,6 @@ message Frustum {
 message Cone {
     fvec3 axis     = 1;
     float gradient = 2;
+    float radius   = 3;
+    int32 points   = 4;
 }
