@@ -121,6 +121,7 @@ namespace vision {
                     auto balls = std::make_unique<Balls>();
                     balls->balls.reserve(clusters.size());
 
+                    balls->camera_id = horizon.camera_id;
                     balls->timestamp = horizon.timestamp;
                     balls->Hcw       = horizon.Hcw;
 
@@ -150,6 +151,8 @@ namespace vision {
                         b.cone.axis     = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * axis;
                         float proj      = 1.0f / radius;
                         b.cone.gradient = std::sqrt(proj * proj - 1.0f);
+                        b.cone.radius   = radius;
+                        b.cone.points   = cluster.size();
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
                         float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
@@ -163,23 +166,17 @@ namespace vision {
                         b.screen_angular = cartesianToSpherical(axis).tail<2>();
                         b.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
 
-                        if (config.debug) {
-                            log<NUClear::DEBUG>(
-                                fmt::format("\nGradient {}\nAxis {}\ncos(theta) {}\nDistance {}\nrBCc "
-                                            "{}\nscreen_angular {}\nangular_size {}",
-                                            b.cone.gradient,
-                                            b.cone.axis.transpose(),
-                                            radius,
-                                            distance,
-                                            b.measurements.back().rBCc.transpose(),
-                                            b.screen_angular.transpose(),
-                                            b.angular_size.transpose()));
-                        }
 
                         /***********************************************
                          *                  THROWOUTS                  *
                          ***********************************************/
 
+                        if (config.debug) {
+                            log<NUClear::DEBUG>("**************************************************");
+                            log<NUClear::DEBUG>("*                    THROWOUTS                   *");
+                            log<NUClear::DEBUG>("**************************************************");
+                        }
+                        bool keep = true;
                         // DISTANCE IS TOO CLOSE
                         if (distance < config.minimum_ball_distance) {
                             if (config.debug) {
@@ -187,8 +184,9 @@ namespace vision {
                                     fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
                                                 distance,
                                                 config.minimum_ball_distance));
+                                log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            continue;
+                            keep = false;
                         }
 
                         // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
@@ -212,8 +210,9 @@ namespace vision {
                                                 "{}, proj = {}",
                                                 distance,
                                                 projection_distance));
+                                log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            continue;
+                            keep = false;
                         }
 
                         // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
@@ -224,11 +223,31 @@ namespace vision {
                                     "{}, field length = {}",
                                     distance,
                                     field.dimensions.field_length));
+                                log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            continue;
+                            keep = false;
                         }
 
-                        balls->balls.push_back(std::move(b));
+                        if (keep) {
+                            if (config.debug) {
+                                log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
+                                log<NUClear::DEBUG>(
+                                    fmt::format("Gradient {} - cos(theta) {}", b.cone.gradient, b.cone.radius));
+                                log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
+                                log<NUClear::DEBUG>(fmt::format(
+                                    "Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));
+                                log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
+                                                                b.screen_angular.transpose(),
+                                                                b.angular_size.transpose()));
+                                log<NUClear::DEBUG>(fmt::format("Points {}", b.cone.points));
+                                log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
+                                log<NUClear::DEBUG>(fmt::format(
+                                    "Distance Throwout {}", std::abs(projection_distance - distance) / max_distance));
+                                log<NUClear::DEBUG>("**************************************************");
+                            }
+
+                            balls->balls.push_back(std::move(b));
+                        }
                     }
                     emit(std::move(balls));
                 }
