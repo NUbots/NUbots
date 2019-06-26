@@ -260,24 +260,24 @@ namespace vision {
                             keep     = false;
                         }
 
-                        if (keep) {
-                            if (config.debug) {
-                                log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
-                                log<NUClear::DEBUG>(
-                                    fmt::format("Gradient {} - cos(theta) {}", b.cone.gradient, b.cone.radius));
-                                log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));
-                                log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
-                                                                b.screen_angular.transpose(),
-                                                                b.angular_size.transpose()));
-                                log<NUClear::DEBUG>(fmt::format("Points {}", b.cone.points));
-                                log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Distance Throwout {}", std::abs(projection_distance - distance) / max_distance));
-                                log<NUClear::DEBUG>("**************************************************");
-                            }
+                        if (config.debug) {
+                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Gradient {} - cos(theta) {}", b.cone.gradient, b.cone.radius));
+                            log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));
+                            log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
+                                                            b.screen_angular.transpose(),
+                                                            b.angular_size.transpose()));
+                            log<NUClear::DEBUG>(fmt::format("Points {}", b.cone.points));
+                            log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
+                            log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
+                                                            std::abs(projection_distance - distance) / max_distance));
+                            log<NUClear::DEBUG>("**************************************************");
+                        }
 
+                        if (config.debug || keep) {
                             balls->balls.push_back(std::move(b));
                         }
                     }
