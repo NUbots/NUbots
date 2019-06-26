@@ -56,7 +56,7 @@ namespace vision {
         on<Configuration>("GoalDetector.yaml").then([this](const Configuration& cfg) {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<int>();
-            config.ball_angular_cov =
+            config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
             config.goal_angular_cov =
                 convert<double, 3>(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
             config.debug = cfg["debug"].as<bool>();
@@ -205,31 +205,63 @@ namespace vision {
                         g.screen_angular = cartesianToSpherical(bottom_point).tail<2>();
                         g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
                     }
+
+                    // We can see two goal posts, check to make sure they belong to the same goals and then assign left
+                    // and right sides
+                    if (goals->goals.size() == 2) {
+                        // Divide by distance to get back to unit vectors
+                        const Eigen::Vector3f rGCc0 =
+                            goals->goals[0].measurements.back().position / goals->goals[0].center_line.distance;
+                        const Eigen::Vector3f rGCc1 =
+                            goals->goals[1].measurements.back().position / goals->goals[1].center_line.distance;
+                        const Eigen::Vector3f cam_space_z =
+                            horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * Eigen::Vector3f::UnitZ();
+
+                        // Law of consines
+                        const float a = goals->goals[0].center_line.distance * goals->goals[0].center_line.distance;
+                        const float b = goals->goals[1].center_line.distance * goals->goals[1].center_line.distance;
+                        const float cos_gamma    = rGCc0.dot(rGCc1);
+                        const float goal_width   = a + b - 2 * a * b * cos_gamma;
+                        const float actual_width = field.dimensions.goal_width * field.dimensions.goal_width;
+
+                        // Check the width between the posts, if they are close enough then assign left and right sides
+                        if (std::abs(goal_width - actual_width) / std::max(goal_width, actual_width)
+                            < config.disagreement_ratio) {
+                            // Direction (determined by RHR) needed to turn to get from one post to the other
+                            const float direction = rGCc0.cross(rGCc1).dot(cam_space_z);
+
+                            // Anti-clockwise turn from rGCc0 to rGCc1 around cam_space_z
+                            // ==> rGCc1 is to the left of rGCc0
+                            if (direction > 0.0f) {
+                                goals->goals.at(0).side = Goal::Side::RIGHT;
+                                goals->goals.at(1).side = Goal::Side::LEFT;
+                            }
+                            // Clockwise turn from rGCc0 to rGCc1 around cam_space_z
+                            // ==> rGCc0 is to the left of rGCc1
+                            else if (direction < 0.0f) {
+                                goals->goals.at(0).side = Goal::Side::LEFT;
+                                goals->goals.at(1).side = Goal::Side::RIGHT;
+                            }
+
+                            // If direction is 0 then rGCc0 is parallel to rGCc1
+                            // This either means that the two goal posts are on top of each (rGCc0 == rGCc1), or
+                            // they are anti-parallel and the two goal posts are at opposite ends of the field
+                            //
+                            // Because of clustering, it should not be possible that rGCc0 and rGCc1 are equal
+                        }
+                    }
+                    // We can see three goal posts
+                    // Two probably belong to one set of goals and the third to a different set
+                    // Figure out which is which
+                    else if (goals->goals.size() == 3) {
+                    }
+                    // We can see four goal posts
+                    // We can probably see two sets of goal posts, figure out the pairs
+                    else if (goals->goals.size() == 4) {
+                    }
+
+                    emit(std::move(goals));
                 }
-
-                // Assign leftness and rightness to goals
-                // if (goals->goals.size() == 2) {
-                //     utility::math::geometry::Quad quad0(convert<double, 2>(goals->goals.at(0).quad.bl),
-                //                                         convert<double, 2>(goals->goals.at(0).quad.tl),
-                //                                         convert<double, 2>(goals->goals.at(0).quad.tr),
-                //                                         convert<double, 2>(goals->goals.at(0).quad.br));
-
-                //     utility::math::geometry::Quad quad1(convert<double, 2>(goals->goals.at(1).quad.bl),
-                //                                         convert<double, 2>(goals->goals.at(1).quad.tl),
-                //                                         convert<double, 2>(goals->goals.at(1).quad.tr),
-                //                                         convert<double, 2>(goals->goals.at(1).quad.br));
-
-                //     if (quad0.getCentre()(0) < quad1.getCentre()(0)) {
-                //         goals->goals.at(0).side = Goal::Side::LEFT;
-                //         goals->goals.at(1).side = Goal::Side::RIGHT;
-                //     }
-                //     else {
-                //         goals->goals.at(0).side = Goal::Side::RIGHT;
-                //         goals->goals.at(1).side = Goal::Side::LEFT;
-                //     }
-                // }
-
-                emit(std::move(goals));
             });
     }
 }  // namespace vision
