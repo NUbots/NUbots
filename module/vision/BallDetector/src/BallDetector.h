@@ -23,16 +23,7 @@
 #include <Eigen/Core>
 #include <nuclear>
 
-#include "message/input/Image.h"
-#include "message/vision/LookUpTable.h"
-#include "message/vision/VisualMesh.h"
-
-#include "utility/learning/KMeans.h"
-#include "utility/math/geometry/Circle.h"
-#include "utility/math/ransac/RansacConeModel.h"
-#include "utility/math/ransac/RansacVisualMeshModel.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/vision/LookUpTable.h"
+#include "message/conversion/math_types.h"
 
 namespace module {
 namespace vision {

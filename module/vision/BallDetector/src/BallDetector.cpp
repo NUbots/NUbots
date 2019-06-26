@@ -28,14 +28,10 @@
 #include "message/vision/Ball.h"
 #include "message/vision/GreenHorizon.h"
 
-#include "utility/math/comparison.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/geometry/Cone.h"
-#include "utility/math/geometry/ConvexHull.h"
-#include "utility/math/vision.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
-#include "utility/vision/Vision.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
 namespace module {
