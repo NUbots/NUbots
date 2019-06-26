@@ -45,6 +45,7 @@ namespace vision {
             float maximum_cone_radius;
             float minimum_ball_distance;
             float distance_disagreement;
+            float maximum_deviation;
             message::conversion::math::fmat3 ball_angular_cov;
             bool debug;
         } config;

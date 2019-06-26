@@ -60,6 +60,7 @@ namespace vision {
             config.maximum_cone_radius   = std::cos(cfg["maximum_cone_radius"].as<float>());
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
+            config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
             config.ball_angular_cov =
                 convert<double, 3>(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
             config.debug = cfg["debug"].as<bool>();
@@ -178,6 +179,38 @@ namespace vision {
                         }
                         bool keep = true;
                         b.colour.fill(1.0f);
+
+                        // CALCULATE DEGREE OF FIT
+                        // Degree of fit defined as the standard deviation of angle between every rays on the cluster /
+                        // and the cone axis. If the standard deviation exceeds a given threshold then we have a bad
+                        // fit
+                        std::vector<float> angles;
+                        float mean             = 0.0f;
+                        const float max_radius = std::acos(radius);
+                        for (const auto& idx : cluster) {
+                            const float angle = std::acos(axis.dot(rays.row(idx))) / max_radius;
+                            angles.emplace_back(angle);
+                            mean += angle;
+                        }
+                        mean /= angles.size();
+                        float deviation = 0.0f;
+                        for (const auto& angle : angles) {
+                            deviation += (mean - angle) * (mean - angle);
+                        }
+                        deviation = std::sqrt(deviation / (angles.size() - 1));
+
+                        if (deviation > config.maximum_deviation) {
+                            if (config.debug) {
+                                log<NUClear::DEBUG>(
+                                    fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
+                                                deviation,
+                                                config.maximum_deviation));
+                                log<NUClear::DEBUG>("--------------------------------------------------");
+                            }
+                            b.colour = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
+                            keep     = false;
+                        }
+
                         // DISTANCE IS TOO CLOSE
                         if (distance < config.minimum_ball_distance) {
                             if (config.debug) {
