@@ -148,7 +148,6 @@ namespace vision {
                         float proj      = 1.0f / radius;
                         b.cone.gradient = std::sqrt(proj * proj - 1.0f);
                         b.cone.radius   = radius;
-                        b.cone.points   = cluster.size();
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
                         float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
@@ -270,7 +269,6 @@ namespace vision {
                             log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
                                                             b.screen_angular.transpose(),
                                                             b.angular_size.transpose()));
-                            log<NUClear::DEBUG>(fmt::format("Points {}", b.cone.points));
                             log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
                             log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
                                                             std::abs(projection_distance - distance) / max_distance));
