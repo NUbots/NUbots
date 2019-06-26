@@ -177,6 +177,7 @@ namespace vision {
                             log<NUClear::DEBUG>("**************************************************");
                         }
                         bool keep = true;
+                        b.colour.fill(1.0f);
                         // DISTANCE IS TOO CLOSE
                         if (distance < config.minimum_ball_distance) {
                             if (config.debug) {
@@ -186,7 +187,8 @@ namespace vision {
                                                 config.minimum_ball_distance));
                                 log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            keep = false;
+                            b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
+                            keep     = false;
                         }
 
                         // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
@@ -212,7 +214,8 @@ namespace vision {
                                                 projection_distance));
                                 log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            keep = false;
+                            b.colour = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                            keep     = false;
                         }
 
                         // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
@@ -225,7 +228,8 @@ namespace vision {
                                     field.dimensions.field_length));
                                 log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            keep = false;
+                            b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                            keep     = false;
                         }
 
                         if (keep) {

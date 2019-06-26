@@ -43,6 +43,7 @@ message Ball {
     repeated Measurement measurements   = 2;
     fvec2                screen_angular = 3;
     fvec2                angular_size   = 4;
+    fvec4                colour         = 5;
 }
 
 message Balls {
