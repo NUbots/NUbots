@@ -35,7 +35,7 @@ message Goal {
     }
     enum MeasurementType {
         UNKNOWN_MEASUREMENT = 0;
-        CENTRE              = 5;
+        CENTRE              = 1;
     }
     message Measurement {
         MeasurementType type = 1;
