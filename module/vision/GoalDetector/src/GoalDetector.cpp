@@ -120,28 +120,24 @@ namespace vision {
                     for (auto& cluster : clusters) {
                         Goal g;
                         // Split cluster into left-side and right-side
-                        auto right = std::partition(cluster.begin(), cluster.end(), [&](const int& idx) {
-                            // Return true if the left neighbour is NOT a goal point
-                            const int neighbour_idx = neighbours(idx, 2);
-                            if (neighbour_idx == indices.size()) {
-                                return true;
-                            }
-                            if (cls(neighbour_idx, GOAL_INDEX) < config.confidence_threshold) {
-                                return true;
-                            }
-                            return false;
-                        });
-                        auto other = std::partition(right, cluster.end(), [&](const int& idx) {
-                            // Return true if the right neighbour is NOT a goal point
-                            const int neighbour_idx = neighbours(idx, 3);
-                            if (neighbour_idx == indices.size()) {
-                                return true;
-                            }
-                            if (cls(neighbour_idx, GOAL_INDEX) < config.confidence_threshold) {
-                                return true;
-                            }
-                            return false;
-                        });
+                        // Return true if the left neighbour is NOT a goal point
+                        auto right = utility::vision::visualmesh::partition_points(
+                            cluster.begin(),
+                            cluster.end(),
+                            neighbours,
+                            [&](const int& idx) {
+                                return idx == indices.size() || (cls(idx, GOAL_INDEX) >= config.confidence_threshold);
+                            },
+                            {2});
+                        // Return true if the right neighbour is NOT a goal point
+                        auto other = utility::vision::visualmesh::partition_points(
+                            cluster.begin(),
+                            cluster.end(),
+                            neighbours,
+                            [&](const int& idx) {
+                                return idx == indices.size() || (cls(idx, GOAL_INDEX) >= config.confidence_threshold);
+                            },
+                            {3});
 
                         if (config.debug) {
                             log<NUClear::DEBUG>(
