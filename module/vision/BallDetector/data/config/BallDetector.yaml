@@ -1,7 +1,7 @@
 confidence_threshold: 0.7
-maximum_cone_radius: 60
+cluster_points: 3
 minimum_ball_distance: 0.20
-distance_disagreement: 0.8
+distance_disagreement: 0.30
 maximum_deviation: 0.15
 ball_angular_cov: [0.1, 0.01, 0.01]
 debug: false

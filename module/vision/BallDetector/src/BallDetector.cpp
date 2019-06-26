@@ -53,7 +53,6 @@ namespace vision {
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& cfg) {
             config.confidence_threshold  = cfg["confidence_threshold"].as<float>();
             config.cluster_points        = cfg["cluster_points"].as<int>();
-            config.maximum_cone_radius   = std::cos(cfg["maximum_cone_radius"].as<float>());
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
             config.maximum_deviation     = cfg["maximum_deviation"].as<float>();

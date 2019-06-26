@@ -33,7 +33,6 @@ namespace vision {
         struct {
             float confidence_threshold;
             int cluster_points;
-            float maximum_cone_radius;
             float minimum_ball_distance;
             float distance_disagreement;
             float maximum_deviation;
