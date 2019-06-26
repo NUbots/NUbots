@@ -35,7 +35,7 @@
 #include "message/support/SaveConfiguration.h"
 
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Comparison.h"
+#include "utility/math/comparison.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
