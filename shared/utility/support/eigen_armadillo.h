@@ -40,8 +40,9 @@ inline Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign> convert(
 }
 
 template <typename Scalar, int rows, int cols>
-inline typename arma::Mat<Scalar>::template fixed<rows, cols> convert(
-    const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& emat) {
+inline typename std::enable_if_t<rows != Eigen::Dynamic && cols != Eigen::Dynamic,
+                                 typename arma::Mat<Scalar>::template fixed<rows, cols>>
+convert(const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& emat) {
     typename arma::Mat<Scalar>::template fixed<rows, cols> amat;
     Eigen::Map<Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(amat.memptr(), rows, cols) = emat;
     return (amat);
@@ -67,7 +68,8 @@ inline Eigen::Matrix<Scalar, Eigen::Dynamic, 1> convert(const arma::Col<Scalar>&
 }
 
 template <typename Scalar, int rows = Eigen::Dynamic, int cols = Eigen::Dynamic>
-inline arma::Mat<Scalar> convert(const Eigen::Matrix<Scalar, rows, cols>& emat) {
+inline typename std::enable_if_t<rows == Eigen::Dynamic && cols == Eigen::Dynamic, typename arma::Mat<Scalar>> convert(
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& emat) {
     typename arma::Mat<Scalar> amat;
     Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>(amat.memptr(), emat.rows(), emat.cols()) = emat;
     return (amat);
