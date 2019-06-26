@@ -29,8 +29,10 @@
 #include "message/vision/Goal.h"
 #include "message/vision/GreenHorizon.h"
 
+#include "utility/math/coordinates.h"
 #include "utility/math/vision.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
@@ -40,8 +42,8 @@ namespace vision {
     using extension::Configuration;
 
     using message::support::FieldDescription;
-    using message::vision::Ball;
-    using message::vision::Balls;
+    using message::vision::Goal;
+    using message::vision::Goals;
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
@@ -51,19 +53,17 @@ namespace vision {
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // Trigger the same function when either update
-        on<Configuration>("GoalDetector.yaml").then([this](const Configuration& config) {
+        on<Configuration>("GoalDetector.yaml").then([this](const Configuration& cfg) {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<int>();
             config.ball_angular_cov =
+            config.goal_angular_cov =
                 convert<double, 3>(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
             config.debug = cfg["debug"].as<bool>();
-
-            // VECTOR3_COVARIANCE = config["vector3_covariance"].as<arma::vec>();
-            // ANGLE_COVARIANCE   = config["angle_covariance"].as<arma::vec>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>>().then(
-            "Goal Detector", [this](const GreenHorizon& horizon, const FieldDescription& fd) {
+            "Goal Detector", [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
@@ -103,9 +103,9 @@ namespace vision {
 
                 auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(
                     clusters.begin(), clusters.end(), horizon.horizon.begin(), horizon.horizon.end(), rays, true, true);
-                clusters.resize(std::distance(clusters.begin(), green_boundary))
+                clusters.resize(std::distance(clusters.begin(), green_boundary));
 
-                    if (config.debug) {
+                if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
                 }
 
@@ -126,7 +126,7 @@ namespace vision {
                             if (neighbour_idx == indices.size()) {
                                 return true;
                             }
-                            if (cls(neighbour_idx, GOAL_INDEX) < config.goal_confidence_threshold) {
+                            if (cls(neighbour_idx, GOAL_INDEX) < config.confidence_threshold) {
                                 return true;
                             }
                             return false;
@@ -137,7 +137,7 @@ namespace vision {
                             if (neighbour_idx == indices.size()) {
                                 return true;
                             }
-                            if (cls(neighbour_idx, GOAL_INDEX) < config.goal_confidence_threshold) {
+                            if (cls(neighbour_idx, GOAL_INDEX) < config.confidence_threshold) {
                                 return true;
                             }
                             return false;
@@ -158,19 +158,20 @@ namespace vision {
                         for (auto it = cluster.begin(); it != right; it = std::next(it)) {
                             const Eigen::Vector3f& p0(rays.row(*it));
                             left_side += p0;
-                            if (p0.z() < min_point.z()) {
+                            if (p0.z() < bottom_point.z()) {
                                 bottom_point = p0;
                             }
                         }
                         for (auto it = right; it != other; it = std::next(it)) {
                             const Eigen::Vector3f& p0(rays.row(*it));
                             right_side += p0;
-                            if (p0.z() < min_point.z()) {
+                            if (p0.z() < bottom_point.z()) {
                                 bottom_point = p0;
                             }
                         }
                         for (auto it = other; it != cluster.end(); it = std::next(it)) {
-                            if (p0.z() < min_point.z()) {
+                            const Eigen::Vector3f& p0(rays.row(*it));
+                            if (p0.z() < bottom_point.z()) {
                                 bottom_point = p0;
                             }
                         }
@@ -188,19 +189,21 @@ namespace vision {
                         float distance =
                             field.dimensions.goalpost_width * radius * 0.5f / std::sqrt(1.0f - radius * radius);
 
-                        g.center_line.normal   = bottom_point.cross(Eigen::Vector3f::UnitZ());
+                        // Normal should be orthogonal to both the viewing direction (bottom_point) and world z
+                        g.center_line.normal   = bottom_point.cross(horizon.Hcw.topLeftCorner<3, 3>().cast<float>()
+                                                                  * Eigen::Vector3f::UnitZ());
                         g.center_line.distance = distance;
 
                         // Attach the measurement to the object (distance from camera to bottom center of post)
                         g.measurements.push_back(Goal::Measurement());
                         g.measurements.back().type     = Goal::MeasurementType::CENTRE;
-                        g.measurements.back().position = bottom_point * distance;
+                        g.measurements.back().position = cartesianToSpherical(Eigen::Vector3f(bottom_point * distance));
                         g.measurements.back().covariance =
                             config.goal_angular_cov * Eigen::Vector3f(distance, 1, 1).asDiagonal();
 
                         // Angular positions from the camera
                         g.screen_angular = cartesianToSpherical(bottom_point).tail<2>();
-                        g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius))
+                        g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
                     }
                 }
 

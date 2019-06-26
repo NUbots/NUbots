@@ -20,8 +20,9 @@
 #ifndef MODULES_VISION_GOALDETECTOR_H
 #define MODULES_VISION_GOALDETECTOR_H
 
-#include <armadillo>
 #include <nuclear>
+
+#include "message/conversion/math_types.h"
 
 namespace module {
 namespace vision {
