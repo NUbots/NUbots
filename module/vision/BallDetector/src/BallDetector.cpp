@@ -56,9 +56,8 @@ namespace vision {
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
             config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
-            config.ball_angular_cov =
-                convert<double, 3>(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
-            config.debug = cfg["debug"].as<bool>();
+            config.ball_angular_cov      = convert(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.debug                 = cfg["debug"].as<bool>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
@@ -154,7 +153,7 @@ namespace vision {
 
                         // Attach the measurement to the object (distance from camera to ball)
                         b.measurements.push_back(Ball::Measurement());
-                        b.measurements.back().rBCc       = b.cone.axis * distance;
+                        b.measurements.back().rBCc       = cartesianToSpherical(b.cone.axis * distance);
                         b.measurements.back().covariance = config.ball_angular_cov;
 
                         // Angular positions from the camera
