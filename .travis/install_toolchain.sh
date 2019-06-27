@@ -2,8 +2,8 @@
 
 # Download and install our current toolchain version
 cd $TRAVIS_BUILD_DIR/toolchain
-sudo wget -N http://nubots.net/debs/nubots-toolchain-3.0.1.deb
-sudo dpkg -i nubots-toolchain-3.0.1.deb
+sudo wget -N http://nubots.net/debs/nubots-toolchain-3.0.4.deb
+sudo dpkg -i nubots-toolchain-3.0.4.deb
 
 # Setup ruby so puppet works
 rvm install ruby --latest
