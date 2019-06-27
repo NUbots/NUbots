@@ -107,9 +107,9 @@ namespace behaviour {
                     // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
                     // TODO: The heading seems to judder here!!
                     // TODO: use sensors.Htw instead
-                    Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+                    Transform3D Hfw = fieldStateToTransform3D(convert(field.position));
 
-                    Transform3D Htw         = convert<double, 4, 4>(sensors.Htw);
+                    Transform3D Htw         = convert(sensors.Htw);
                     arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});
 
                     // Transform target from field to torso space
@@ -117,7 +117,7 @@ namespace behaviour {
                     arma::vec3 kickTarget = Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
                     float KickAngle       = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
-                    // log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
+                    // log("KickPlan target global",convert(kickPlan.target).t());
                     // log("Target of Kick",kickTarget.t());
                     // log("KickAngle",KickAngle);
 

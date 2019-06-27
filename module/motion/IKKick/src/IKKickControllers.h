@@ -180,8 +180,8 @@ namespace motion {
         utility::math::matrix::Transform3D getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? convert<double, 4, 4>(sensors.forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL])
-                        : convert<double, 4, 4>(sensors.forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL]));
+                        ? convert(sensors.forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL])
+                        : convert(sensors.forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL]));
         }
 
         utility::math::matrix::Transform3D getFootPose(const message::input::Sensors& sensors) {

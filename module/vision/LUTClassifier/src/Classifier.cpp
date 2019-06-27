@@ -72,9 +72,9 @@ namespace vision {
                         output.push_back(ClassifiedImage::Segment(classifySegment(colour),
                                                                   segmentLength,
                                                                   subsample,
-                                                                  convert<int, 2>(s),
-                                                                  convert<int, 2>(position),
-                                                                  convert<int, 2>(m),
+                                                                  convert(s),
+                                                                  convert(position),
+                                                                  convert(m),
                                                                   -1,
                                                                   -1));
                     }
@@ -109,9 +109,9 @@ namespace vision {
                         output.push_back(ClassifiedImage::Segment(classifySegment(colour),
                                                                   segmentLength,
                                                                   subsample,
-                                                                  convert<int, 2>(s),
-                                                                  convert<int, 2>(position),
-                                                                  convert<int, 2>(m),
+                                                                  convert(s),
+                                                                  convert(position),
+                                                                  convert(m),
                                                                   -1,
                                                                   -1));
                     }
@@ -133,14 +133,8 @@ namespace vision {
             position[1] += segmentLength;
             arma::ivec2 m = (s + position) / 2;
 
-            output.push_back(ClassifiedImage::Segment(classifySegment(colour),
-                                                      segmentLength,
-                                                      subsample,
-                                                      convert<int, 2>(s),
-                                                      convert<int, 2>(position),
-                                                      convert<int, 2>(m),
-                                                      -1,
-                                                      -1));
+            output.push_back(ClassifiedImage::Segment(
+                classifySegment(colour), segmentLength, subsample, convert(s), convert(position), convert(m), -1, -1));
         }
         // Add final segment for horizontal runs
         else if (start[1] == end[1]) {
@@ -149,14 +143,8 @@ namespace vision {
             position[0] += segmentLength;
             arma::ivec2 m = (s + position) / 2;
 
-            output.push_back(ClassifiedImage::Segment(classifySegment(colour),
-                                                      segmentLength,
-                                                      subsample,
-                                                      convert<int, 2>(s),
-                                                      convert<int, 2>(position),
-                                                      convert<int, 2>(m),
-                                                      -1,
-                                                      -1));
+            output.push_back(ClassifiedImage::Segment(
+                classifySegment(colour), segmentLength, subsample, convert(s), convert(position), convert(m), -1, -1));
         }
 
 

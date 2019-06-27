@@ -44,10 +44,9 @@ namespace behaviour {
                     doThings = true;
                 }
                 else {
-                    emit(std::make_unique<KickCommand>(
-                        KickCommand(convert<double, 3>(config["target"].as<arma::vec3>()),
-                                    convert<double, 3>(config["direction"].as<arma::vec3>()),
-                                    KickCommandType::NORMAL)));
+                    emit(std::make_unique<KickCommand>(KickCommand(convert(config["target"].as<arma::vec3>()),
+                                                                   convert(config["direction"].as<arma::vec3>()),
+                                                                   KickCommandType::NORMAL)));
                 }
             });
         }
