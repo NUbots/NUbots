@@ -443,7 +443,7 @@ namespace platform {
 
                     auto forward_kinematics = calculateAllPositions(kinematicsModel, *sensors);
                     for (const auto& entry : forward_kinematics) {
-                        sensors->forward_kinematics[entry.first] = convert<double, 4, 4>(entry.second);
+                        sensors->forward_kinematics[entry.first] = convert(entry.second);
                     }
 
                     /************************************************
@@ -488,14 +488,14 @@ namespace platform {
 
                     // Accelerometer measurment update
                     motionFilter.measurementUpdate(
-                        convert<double, 3>(sensors->accelerometer),
+                        convert(sensors->accelerometer),
                         config.motionFilter.noise.measurement.accelerometer
-                            + arma::norm(convert<double, 3>(sensors->accelerometer))
+                            + arma::norm(convert(sensors->accelerometer))
                                   * config.motionFilter.noise.measurement.accelerometerMagnitude,
                         MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
-                    motionFilter.measurementUpdate(convert<double, 3>(sensors->gyroscope),
+                    motionFilter.measurementUpdate(convert(sensors->gyroscope),
                                                    config.motionFilter.noise.measurement.gyroscope,
                                                    MotionModel::MeasurementType::GYROSCOPE());
 
@@ -520,7 +520,7 @@ namespace platform {
                                                                        : false;
 
                             if (footDown) {
-                                Transform3D Htf = convert<double, 4, 4>(sensors->forward_kinematics[servoid]);
+                                Transform3D Htf = convert(sensors->forward_kinematics[servoid]);
                                 Transform3D Hft = Htf.i();
 
                                 Rotation3D Rtf  = Htf.rotation();
@@ -595,16 +595,16 @@ namespace platform {
                     Htw.translation() = -(Htw.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
 
                     // Htw.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
-                    sensors->Htw = convert<double, 4, 4>(Htw);
+                    sensors->Htw = convert(Htw);
 
-                    sensors->robot_to_IMU = convert<double, 2, 2>(calculateRobotToIMU(Htw.rotation()));
+                    sensors->robot_to_IMU = convert(calculateRobotToIMU(Htw.rotation()));
 
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
                     // FIXME: Causes crashes
                     // sensors->centre_of_mass =
-                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics,
+                    //     convert(calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics,
                     //     true));
 
                     /************************************************
@@ -617,7 +617,7 @@ namespace platform {
                     // sensors->Hgt : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
-                    sensors->Hgt = convert<double, 4, 4>(Transform3D(Rgt));
+                    sensors->Hgt = convert(Transform3D(Rgt));
                     auto Htc     = sensors->forward_kinematics[ServoID::HEAD_PITCH];
 
                     // Get torso to world transform
@@ -628,13 +628,13 @@ namespace platform {
                     Transform3D Hgt   = Hwt;
                     Hgt.translation() = arma::vec3({0, 0, Hgt.translation()[2]});
                     Hgt.rotation()    = yawlessWorldInvR;
-                    sensors->Hgc = convert<double, 4, 4>(Transform3D(Hgt * convert<double, 4, 4>(Htc)));  // Rwt * Rth
+                    sensors->Hgc      = convert(Transform3D(Hgt * convert(Htc)));  // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centre_of_pressure = convert<double, 3>(
-                        utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
+                    sensors->centre_of_pressure =
+                        convert(utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
 
                     emit(std::move(sensors));
                 });

@@ -60,11 +60,11 @@ namespace vision {
             visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
         arma::vec2 topY = imageToScreen(arma::ivec2({maxVisualHorizon->x(), int(maxVisualHorizon->y())}),
-                                        convert<uint, 2>(classifiedImage.dimensions));
+                                        convert(classifiedImage.dimensions));
         topY[0]         = 0;  // Choose centre of screen
 
         // Get the positions of the top of our green horizion, and the bottom of the screen
-        arma::mat44 Hgc     = convert<double, 4, 4>(classifiedImage.sensors->Hgc);
+        arma::mat44 Hgc     = convert(classifiedImage.sensors->Hgc);
         auto xb             = getGroundPointFromScreen({0, -double(image.dimensions[1] - 1) / 2}, Hgc, image.lens);
         auto xt             = getGroundPointFromScreen(topY, Hgc, image.lens);
         double dx           = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
@@ -93,14 +93,14 @@ namespace vision {
         arma::vec4 worldPosition = arma::ones(4);
         worldPosition.rows(0, 2) = xStart * direction;
         auto camPoint            = projectWorldPointToScreen(worldPosition, Hgc, image.lens);
-        int y                    = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+        int y                    = screenToImage(camPoint, convert(classifiedImage.dimensions))[1];
 
         for (double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
             // Calculate our next Y
             worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
             camPoint                 = projectWorldPointToScreen(worldPosition, Hgc, image.lens);
-            int nextY                = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+            int nextY                = screenToImage(camPoint, convert(classifiedImage.dimensions))[1];
 
             // Work out our details
             arma::ivec2 start = {0, y};

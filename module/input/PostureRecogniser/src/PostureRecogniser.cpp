@@ -76,7 +76,7 @@ namespace input {
 
             // Gyroscope (in radians/second)
             // Capture axis differences in gyroscope data...
-            arma::vec3 gyroDiff   = convert<double, 3>(sensors[0]->gyroscope - sensors[1]->gyroscope);
+            arma::vec3 gyroDiff   = convert(sensors[0]->gyroscope - sensors[1]->gyroscope);
             arma::vec2 xzGyroDiff = {gyroDiff(0), gyroDiff(2)};
             arma::vec2 yzGyroDiff = {gyroDiff(1), gyroDiff(2)};
             arma::vec2 xyGyroDiff = {gyroDiff(0), gyroDiff(1)};
@@ -90,7 +90,7 @@ namespace input {
 
             // Accelerometer (in m/s^2)
             // Capture axis differences in accelerometer data...
-            arma::vec3 accelDiff   = convert<double, 3>(sensors[0]->accelerometer - sensors[1]->accelerometer);
+            arma::vec3 accelDiff   = convert(sensors[0]->accelerometer - sensors[1]->accelerometer);
             arma::vec2 xzAccelDiff = {accelDiff(0), accelDiff(2)};
             arma::vec2 yzAccelDiff = {accelDiff(1), accelDiff(2)};
             arma::vec2 xyAccelDiff = {accelDiff(0), accelDiff(1)};
