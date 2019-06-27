@@ -103,12 +103,11 @@ namespace support {
 
                     if (sensors) {
                         // Get our world transform
-                        Transform3D Htw(convert<double, 4, 4>(sensors->Htw));
+                        Transform3D Htw(convert(sensors->Htw));
 
                         // If we have field information
                         if (field) {
-                            Transform3D Hfw =
-                                utility::localisation::fieldStateToTransform3D(convert<double, 3>(field->position));
+                            Transform3D Hfw = utility::localisation::fieldStateToTransform3D(convert(field->position));
 
                             // Get our torso in field space
                             Transform3D Hft = Hfw * Htw.i();
@@ -123,7 +122,7 @@ namespace support {
 
                             if (loc_ball) {
                                 // Get our ball in field space
-                                arma::vec2 rBWw_2d = convert<double, 2>(loc_ball->position);
+                                arma::vec2 rBWw_2d = convert(loc_ball->position);
                                 arma::vec4 rBWw    = {rBWw_2d[0], rBWw_2d[1], 0, 1};
                                 arma::vec4 rBFf    = Hfw * rBWw;
 

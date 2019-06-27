@@ -49,12 +49,12 @@ namespace support {
             on<Trigger<Sensors>>().then("Leg Loads Logger Sensor Update", [this](const Sensors& sensors) {
                 // RightFootDisplacement FK -> RightAnkleRoll -> inverse -> translation -> negate
                 // LeftFootDisplacement  FK -> LeftAnkleRoll  -> inverse -> translation -> negate
-                arma::vec3 RightFootDisplacement =
-                    -Transform3D(convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()))
-                         .translation();
-                arma::vec3 LeftFootDisplacement =
-                    -Transform3D(convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL].inverse()))
-                         .translation();
+                Eigen::Vector3d r_ankle =
+                    sensors.forward_kinematics[ServoID::R_ANKLE_ROLL].inverse().topRightCorner<3, 1>();
+                Eigen::Vector3d l_ankle =
+                    sensors.forward_kinematics[ServoID::L_ANKLE_ROLL].inverse().topRightCorner<3, 1>();
+                arma::vec3 RightFootDisplacement     = convert(r_ankle);
+                arma::vec3 LeftFootDisplacement      = convert(l_ankle);
                 float RightHipPitchPresentVelocity   = sensors.servo[ServoID::R_HIP_PITCH].present_velocity;
                 float RightHipPitchLoad              = sensors.servo[ServoID::R_HIP_PITCH].load;
                 float LeftHipPitchPresentVelocity    = sensors.servo[ServoID::L_HIP_PITCH].present_velocity;

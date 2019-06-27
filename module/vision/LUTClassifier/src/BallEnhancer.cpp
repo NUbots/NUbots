@@ -264,14 +264,13 @@ namespace vision {
         std::vector<Eigen::Vector2i> edges;
 
         // For each of these points move upward until we find a strong transition to green
-        Plane<3> horizon(convert<double, 3>(classifiedImage.horizon_normal));
+        Plane<3> horizon(convert(classifiedImage.horizon_normal));
         for (auto& point : points) {
             // Project up to horizon
             int horizon_Y = getImageFromCam(
-                horizon.directionalProjection(
-                    getCamFromImage(convert<int, 2>(point), convert<uint, 2>(image.dimensions), image.lens),
-                    arma::vec3({0, 0, 1})),
-                convert<uint, 2>(image.dimensions),
+                horizon.directionalProjection(getCamFromImage(convert(point), convert(image.dimensions), image.lens),
+                                              arma::vec3({0, 0, 1})),
+                convert(image.dimensions),
                 image.lens)[1];
 
             int minY = int(std::max(3.0, double(horizon_Y)));
