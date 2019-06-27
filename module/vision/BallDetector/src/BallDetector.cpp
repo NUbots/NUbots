@@ -109,7 +109,7 @@ namespace vision {
                     }
 
                     // FIXME: Because trent can't document (rows vs cols??)
-                    arma::fvec2 seed_coord = convert<float, 2>(mesh.coordinates.row(i - 1));
+                    arma::fvec2 seed_coord = convert(Eigen::Vector2f(mesh.coordinates.row(i - 1)));
                     // Transform our point into cam space
                     auto seed_cam = getCamFromImage(seed_coord, dimensions, cam);
 
@@ -142,7 +142,8 @@ namespace vision {
 
                         // Populate the neighbours
                         // FIXME: Because trent can't document (rows vs cols??)
-                        arma::ivec6 n = convert<int, 6>(mesh.neighbourhood.row(curr_index));
+                        arma::ivec6 n =
+                            convert(Eigen::Matrix<int, 6, 1>(mesh.neighbourhood.transpose().col(curr_index)));
 
                         // Loop through current index and add neighbours onto queue if they are above confidence
                         // threshold
@@ -168,7 +169,8 @@ namespace vision {
                                 // Try to determine if we are on an edge point
                                 bool edge = true;
                                 // FIXME: Because trent can't document (rows vs cols??)
-                                arma::ivec6 local_n = convert<int, 6>(mesh.neighbourhood.row(n[j]));
+                                arma::ivec6 local_n =
+                                    convert(Eigen::Matrix<int, 6, 1>(mesh.neighbourhood.transpose().col(n[j])));
                                 for (const auto& l : local_n) {
                                     // Don't TODO if the point is in our list
                                     if ((visited_indices.find(l) == visited_indices.end())
@@ -183,7 +185,8 @@ namespace vision {
 
                                 if (edge) {
                                     // FIXME: Because trent can't document (rows vs cols??)
-                                    arma::fvec2 point_coord = convert<float, 2>(mesh.coordinates.row(n[j] - 1));
+                                    arma::fvec2 point_coord =
+                                        convert(Eigen::Matrix<float, 2, 1>(mesh.coordinates.transpose().col(n[j] - 1)));
 
                                     auto point_cam = getCamFromImage(point_coord, dimensions, cam);
                                     cluster.push_back(
@@ -272,7 +275,7 @@ namespace vision {
 
                 // Get our coordinate clusters in camera space
                 std::vector<std::vector<arma::vec4>> clusters =
-                    findClusters(mesh, convert<uint, 2>(image.dimensions), image.lens);
+                    findClusters(mesh, convert(image.dimensions), image.lens);
 
                 if (print_mesh_debug) {
                     log("Number of clusters found:", clusters.size());
@@ -332,11 +335,11 @@ namespace vision {
 
                     // Attach the measurement to the object
                     b.measurements.push_back(Ball::Measurement());
-                    b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
-                    b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
+                    b.measurements.back().rBCc       = convert(rBCc);
+                    b.measurements.back().covariance = convert(ball_angular_cov).asDiagonal();
 
                     // Ball cam space info
-                    b.cone.axis     = convert<double, 3>(center);
+                    b.cone.axis     = convert(center);
                     b.cone.gradient = -std::numeric_limits<double>::max();
 
                     // Percentage of green classified points in cluster
@@ -349,7 +352,7 @@ namespace vision {
                     for (const auto& point : cluster) {
                         // Calculate image space pixel coordinate of point
                         auto pixel = screenToImage(projectCamSpaceToScreen(point.head(3), image.lens),
-                                                   convert<uint, 2>((*pixelImage).dimensions));
+                                                   convert((*pixelImage).dimensions));
 
                         // Check our cluster pointer for the maximum gradient
                         b.cone.gradient = std::tan(std::acos(arma::dot(center, point.head(3))));
@@ -375,7 +378,7 @@ namespace vision {
 
 
                     // Angular positions from the camera
-                    b.screen_angular = convert<double, 2>(cartesianToSpherical(center).rows(1, 2));
+                    b.screen_angular = convert(arma::vec2(cartesianToSpherical(center).rows(1, 2)));
                     b.angular_size << getParallaxAngle(left, right, image.lens),
                         getParallaxAngle(top, base, image.lens);
                     // b.classifiedImage = const_cast<ClassifiedImage*>(rawImage.get())->shared_from_this();
@@ -403,9 +406,9 @@ namespace vision {
                      ***********************************************/
 
                     // CENTRE OF BALL IS ABOVE THE VISUAL HORIZON
-                    arma::ivec2 centre_im = getImageFromCam(center, convert<uint, 2>(image.dimensions), image.lens);
+                    arma::ivec2 centre_im = getImageFromCam(center, convert(image.dimensions), image.lens);
                     if (utility::vision::visualHorizonAtPoint(image, centre_im[0]) > centre_im[1]
-                        || arma::dot(convert<double, 3>(image.horizon_normal), center) > 0) {
+                        || arma::dot(convert(image.horizon_normal), center) > 0) {
                         if (print_throwout_logs) {
                             log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
                             log("Horizon normal = ", image.horizon_normal.transpose());
@@ -416,7 +419,7 @@ namespace vision {
 
                     // DISTANCE IS LESS THAN HALF OF CAM HEIGHT
                     const auto& sensors       = *image.sensors;
-                    const arma::mat44& Hgc    = convert<double, 4, 4>(sensors.Hgc);
+                    const arma::mat44& Hgc    = convert(sensors.Hgc);
                     const double cameraHeight = Hgc(2, 3);
 
                     if (distance < cameraHeight * 0.5) {
@@ -488,16 +491,16 @@ namespace vision {
                         axis /= clusters[i].size();
                         axis = arma::normalise(axis);
 
-                        Eigen::Vector2i center = convert<int, 2>(screenToImage(
-                            projectCamSpaceToScreen(axis, image.lens), convert<uint, 2>(image.dimensions)));
+                        Eigen::Vector2i center = convert(
+                            screenToImage(projectCamSpaceToScreen(axis, image.lens), convert(image.dimensions)));
 
                         // Average all the points in the cluster to find the center
                         for (size_t j = 0; j < (clusters[i].size()); ++j) {
                             Eigen::Vector4d colour(clusters[i][j][3] >= 0.5, 0.50, clusters[i][j][3] < 0.5, 1);
 
-                            Eigen::Vector2i point = convert<int, 2>(
-                                screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), image.lens),
-                                              convert<uint, 2>(image.dimensions)));
+                            Eigen::Vector2i point =
+                                convert(screenToImage(projectCamSpaceToScreen(clusters[i][j].head(3), image.lens),
+                                                      convert(image.dimensions)));
 
                             lines.emplace_back(center.cast<int>(), point.cast<int>(), colour);
                         }

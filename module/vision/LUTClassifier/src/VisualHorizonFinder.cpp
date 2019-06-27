@@ -46,7 +46,7 @@ namespace vision {
                                           ClassifiedImage& classifiedImage) {
 
         // Get some local references to class variables to make text shorter
-        Plane<3> horizon(convert<double, 3>(classifiedImage.horizon_normal));
+        Plane<3> horizon(convert(classifiedImage.horizon_normal));
         auto& visualHorizon = classifiedImage.visualHorizon;
 
         // Cast lines to find our visual horizon
@@ -55,9 +55,9 @@ namespace vision {
             int horizon_Y = getImageFromCam(
                 // Project down to horizon
                 horizon.directionalProjection(
-                    getCamFromImage(arma::ivec2({int(x), 0}), convert<uint, 2>(image.dimensions), image.lens),
+                    getCamFromImage(arma::ivec2({int(x), 0}), convert(image.dimensions), image.lens),
                     arma::vec({0, 0, 1})),
-                convert<uint, 2>(image.dimensions),
+                convert(image.dimensions),
                 image.lens)[1];
             // Find our point to classify from (slightly above the horizon)
             int top = std::max(int(horizon_Y - (image.lens.focal_length * VISUAL_HORIZON_BUFFER)), int(0));
@@ -81,7 +81,7 @@ namespace vision {
                 if (it->segmentClass == ClassifiedImage::SegmentClass::FIELD
                     && it->length >= (image.lens.focal_length * VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE)) {
 
-                    greenPoint = convert<int, 2>(it->start);
+                    greenPoint = convert(it->start);
 
                     // We move our green point up by the scanning size if possible (assume more green horizon rather
                     // then less)
@@ -97,7 +97,7 @@ namespace vision {
 
             // Only put the green point in if it's on the screen
             if (greenPoint[1] < int(image.dimensions[1])) {
-                visualHorizon.push_back(std::move(convert<int, 2>(greenPoint)));
+                visualHorizon.push_back(std::move(convert(greenPoint)));
             }
 
             insertSegments(classifiedImage, segments, true);
@@ -111,9 +111,9 @@ namespace vision {
                 // Project down to horizon
                 horizon.directionalProjection(
                     getCamFromImage(
-                        arma::ivec2({int(image.dimensions[0] - 1), 0}), convert<uint, 2>(image.dimensions), image.lens),
+                        arma::ivec2({int(image.dimensions[0] - 1), 0}), convert(image.dimensions), image.lens),
                     arma::vec({0, 0, 1})),
-                convert<uint, 2>(image.dimensions),
+                convert(image.dimensions),
                 image.lens)[1];
             int top = std::max(int(horizon_Y - (image.lens.focal_length * VISUAL_HORIZON_BUFFER)), int(0));
             top     = std::min(top, int(image.dimensions[1] - 1));
@@ -134,7 +134,7 @@ namespace vision {
                 // If this a valid green point update our information
                 if (it->segmentClass == ClassifiedImage::SegmentClass::FIELD
                     && it->length >= (image.lens.focal_length * VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE)) {
-                    greenPoint = convert<int, 2>(it->start);
+                    greenPoint = convert(it->start);
                     // We found our green
                     break;
                 }
@@ -142,7 +142,7 @@ namespace vision {
 
             // Only put the green point in if it's on the screen
             if (greenPoint[1] < int(image.dimensions[1])) {
-                visualHorizon.push_back(std::move(convert<int, 2>(greenPoint)));
+                visualHorizon.push_back(std::move(convert(greenPoint)));
             }
 
             insertSegments(classifiedImage, segments, true);
