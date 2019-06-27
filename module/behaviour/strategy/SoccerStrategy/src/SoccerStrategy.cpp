@@ -268,10 +268,10 @@ namespace behaviour {
 
             on<Trigger<Field>, With<FieldDescription>>().then(
                 [this](const Field& field, const FieldDescription& fieldDescription) {
-                    auto kickTarget = convert<double, 2>(getKickPlan(field, fieldDescription));
+                    Eigen::Vector2d kickTarget = convert(getKickPlan(field, fieldDescription));
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
                     emit(utility::nusight::drawCircle(
-                        "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.3, {0, 0, 0}));
+                        "SocStrat_kickTarget", Circle(0.05, convert(kickTarget)), 0.3, {0, 0, 0}));
                 });
         }
 

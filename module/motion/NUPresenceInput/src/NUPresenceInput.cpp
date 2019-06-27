@@ -144,7 +144,7 @@ namespace motion {
         on<Network<PresenceUserState>, Sync<NUPresenceInput>>().then(
             "NUPresenceInput Network Input", [this](const PresenceUserState& user) {
                 // Rotate to robot coordinate system
-                goalCamPose = arma::conv_to<arma::mat>::from(convert<float, 4, 4>(user.head_pose));
+                goalCamPose = arma::conv_to<arma::mat>::from(convert(user.head_pose));
                 goalCamPose = camera_to_robot * goalCamPose.i() * camera_to_robot.t();
                 goalCamPose.translation() *= oculus_to_robot_scale;
 
@@ -208,9 +208,8 @@ namespace motion {
                 // 3DoF
                 arma::vec3 gaze = currentCamPose.rotation().col(0);
                 Rotation3D yawlessOrientation =
-                    Rotation3D::createRotationZ(
-                        Rotation3D(Transform3D(convert<double, 4, 4>(-sensors.Htw)).rotation()).yaw())
-                    * Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation();
+                    Rotation3D::createRotationZ(Rotation3D(Transform3D(-convert(sensors.Htw)).rotation()).yaw())
+                    * Transform3D(convert(sensors.Htw)).rotation();
 
                 if (gyro_compensation) {
                     gaze = yawlessOrientation * gaze;
@@ -223,7 +222,7 @@ namespace motion {
 
                 // Adjust arm position
                 // int max_number_of_iterations = 20;
-                Transform3D camToBody = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::HEAD_PITCH]);
+                Transform3D camToBody = convert(sensors.forward_kinematics[ServoID::HEAD_PITCH]);
                 arma::vec3 kneckPos   = {kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                        kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                        kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Z};

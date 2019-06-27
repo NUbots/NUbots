@@ -48,7 +48,7 @@ namespace support {
         //         });
 
         on<Trigger<Sensors>, Single, Priority::HIGH>().then(
-            [this](const Sensors& sensors) { emit(graph("world", convert<double, 4, 4>(sensors.Htw))); });
+            [this](const Sensors& sensors) { emit(graph("world", convert(sensors.Htw))); });
     }
 }  // namespace support
 }  // namespace module

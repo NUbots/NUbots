@@ -77,7 +77,7 @@ namespace research {
                 // Loop through our balls
                 for (auto& ball : balls) {
                     auto& image = *ball.visObject.classifiedImage->image;
-                    Circle circle(ball.circle.radius, convert<double, 2>(ball.circle.centre));
+                    Circle circle(ball.circle.radius, convert(ball.circle.centre));
 
                     double radius     = circle.radius;
                     arma::vec2 centre = circle.centre;
@@ -117,10 +117,8 @@ namespace research {
 
                 for (auto& goal : goals) {
                     auto& image = *goal.visObject.classifiedImage->image;
-                    Quad quad(convert<double, 2>(goal.quad.bl),
-                              convert<double, 2>(goal.quad.tl),
-                              convert<double, 2>(goal.quad.tr),
-                              convert<double, 2>(goal.quad.br));
+                    Quad quad(
+                        convert(goal.quad.bl), convert(goal.quad.tl), convert(goal.quad.tr), convert(goal.quad.br));
 
                     // find the min and max y points on the quad
                     // capped at the bounds of the image

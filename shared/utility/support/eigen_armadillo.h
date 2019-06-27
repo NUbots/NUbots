@@ -21,141 +21,234 @@
 #define UTILITY_SUPPORT_EIGEN_ARMADILLO_H
 
 #include <armadillo>
+#include <type_traits>
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
-template <typename Scalar, int elems>
-inline typename arma::Col<Scalar>::template fixed<elems> convert(
-    const Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>& evec) {
-    typename arma::Col<Scalar>::template fixed<elems> avec;
-    Eigen::Map<Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>>(avec.memptr(), elems) = evec;
+#include "utility/math/matrix/Rotation2D.h"
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
+
+// We officially hate armadillo from this point on
+
+
+// FLOAT
+template <int... Args>
+auto convert(const typename arma::Col<float>::template fixed<2>& avec) {
+    return (Eigen::Map<Eigen::Matrix<float, 2, 1, Args...>>(const_cast<float*>(avec.memptr()), 2));
+}
+template <int... Args>
+auto convert(const typename arma::Col<float>::template fixed<3>& avec) {
+    return (Eigen::Map<Eigen::Matrix<float, 3, 1, Args...>>(const_cast<float*>(avec.memptr()), 3));
+}
+template <int... Args>
+auto convert(const typename arma::Col<float>::template fixed<4>& avec) {
+    return (Eigen::Map<Eigen::Matrix<float, 4, 1, Args...>>(const_cast<float*>(avec.memptr()), 4));
+}
+template <int... Args>
+auto convert(const typename arma::Col<float>& avec) {
+    return (
+        Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 1, Args...>>(const_cast<float*>(avec.memptr()), avec.n_elem));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<float>::template fixed<2, 2>& amat) {
+    return (Eigen::Map<Eigen::Matrix<float, 2, 2, Args...>>(const_cast<float*>(amat.memptr()), 2, 2));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<float>::template fixed<3, 3>& amat) {
+    return (Eigen::Map<Eigen::Matrix<float, 3, 3, Args...>>(const_cast<float*>(amat.memptr()), 3, 3));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<float>::template fixed<4, 4>& amat) {
+    return (Eigen::Map<Eigen::Matrix<float, 4, 4, Args...>>(const_cast<float*>(amat.memptr()), 4, 4));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<float>& amat) {
+    return (Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
+        const_cast<float*>(amat.memptr()), amat.n_rows, amat.n_cols));
+}
+// DOUBLE
+template <int... Args>
+auto convert(const typename arma::Col<double>::template fixed<2>& avec) {
+    return (Eigen::Map<Eigen::Matrix<double, 2, 1, Args...>>(const_cast<double*>(avec.memptr()), 2));
+}
+template <int... Args>
+auto convert(const typename arma::Col<double>::template fixed<3>& avec) {
+    return (Eigen::Map<Eigen::Matrix<double, 3, 1, Args...>>(const_cast<double*>(avec.memptr()), 3));
+}
+template <int... Args>
+auto convert(const utility::math::matrix::Transform2D& avec) {
+    return (Eigen::Map<Eigen::Matrix<double, 3, 1, Args...>>(const_cast<double*>(avec.memptr()), 3));
+}
+template <int... Args>
+auto convert(const typename arma::Col<double>::template fixed<4>& avec) {
+    return (Eigen::Map<Eigen::Matrix<double, 4, 1, Args...>>(const_cast<double*>(avec.memptr()), 4));
+}
+template <int... Args>
+auto convert(const typename arma::Col<double>& avec) {
+    return (
+        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1, Args...>>(const_cast<double*>(avec.memptr()), avec.n_elem));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<double>::template fixed<2, 2>& amat) {
+    return (Eigen::Map<Eigen::Matrix<double, 2, 2, Args...>>(const_cast<double*>(amat.memptr()), 2, 2));
+}
+template <int... Args>
+auto convert(const utility::math::matrix::Rotation2D& amat) {
+    return (Eigen::Map<Eigen::Matrix<double, 2, 2, Args...>>(const_cast<double*>(amat.memptr()), 2, 2));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<double>::template fixed<3, 3>& amat) {
+    return (Eigen::Map<Eigen::Matrix<double, 3, 3, Args...>>(const_cast<double*>(amat.memptr()), 3, 3));
+}
+template <int... Args>
+auto convert(const utility::math::matrix::Rotation3D& amat) {
+    return (Eigen::Map<Eigen::Matrix<double, 3, 3, Args...>>(const_cast<double*>(amat.memptr()), 3, 3));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<double>::template fixed<4, 4>& amat) {
+    return (Eigen::Map<Eigen::Matrix<double, 4, 4, Args...>>(const_cast<double*>(amat.memptr()), 4, 4));
+}
+template <int... Args>
+auto convert(const utility::math::matrix::Transform3D& amat) {
+    return (Eigen::Map<Eigen::Matrix<double, 4, 4, Args...>>(const_cast<double*>(amat.memptr()), 4, 4));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<double>& amat) {
+    return (Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
+        const_cast<double*>(amat.memptr()), amat.n_rows, amat.n_cols));
+}
+// INT
+template <int... Args>
+auto convert(const typename arma::Col<int>::template fixed<2>& avec) {
+    return (Eigen::Map<Eigen::Matrix<int, 2, 1, Args...>>(const_cast<int*>(avec.memptr()), 2));
+}
+template <int... Args>
+auto convert(const typename arma::Col<int>::template fixed<3>& avec) {
+    return (Eigen::Map<Eigen::Matrix<int, 3, 1, Args...>>(const_cast<int*>(avec.memptr()), 3));
+}
+template <int... Args>
+auto convert(const typename arma::Col<int>::template fixed<4>& avec) {
+    return (Eigen::Map<Eigen::Matrix<int, 4, 1, Args...>>(const_cast<int*>(avec.memptr()), 4));
+}
+template <int... Args>
+auto convert(const typename arma::Col<int>& avec) {
+    return (Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1, Args...>>(const_cast<int*>(avec.memptr()), avec.n_elem));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<int>::template fixed<2, 2>& amat) {
+    return (Eigen::Map<Eigen::Matrix<int, 2, 2, Args...>>(const_cast<int*>(amat.memptr()), 2, 2));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<int>::template fixed<3, 3>& amat) {
+    return (Eigen::Map<Eigen::Matrix<int, 3, 3, Args...>>(const_cast<int*>(amat.memptr()), 3, 3));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<int>::template fixed<4, 4>& amat) {
+    return (Eigen::Map<Eigen::Matrix<int, 4, 4, Args...>>(const_cast<int*>(amat.memptr()), 4, 4));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<int>& amat) {
+    return (Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
+        const_cast<int*>(amat.memptr()), amat.n_rows, amat.n_cols));
+}
+// UINT
+template <int... Args>
+auto convert(const typename arma::Col<uint>::template fixed<2>& avec) {
+    return (Eigen::Map<Eigen::Matrix<uint, 2, 1, Args...>>(const_cast<uint*>(avec.memptr()), 2));
+}
+template <int... Args>
+auto convert(const typename arma::Col<uint>::template fixed<3>& avec) {
+    return (Eigen::Map<Eigen::Matrix<uint, 3, 1, Args...>>(const_cast<uint*>(avec.memptr()), 3));
+}
+template <int... Args>
+auto convert(const typename arma::Col<uint>::template fixed<4>& avec) {
+    return (Eigen::Map<Eigen::Matrix<uint, 4, 1, Args...>>(const_cast<uint*>(avec.memptr()), 4));
+}
+template <int... Args>
+auto convert(const typename arma::Col<uint>& avec) {
+    return (Eigen::Map<Eigen::Matrix<uint, Eigen::Dynamic, 1, Args...>>(const_cast<uint*>(avec.memptr()), avec.n_elem));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<uint>::template fixed<2, 2>& amat) {
+    return (Eigen::Map<Eigen::Matrix<uint, 2, 2, Args...>>(const_cast<uint*>(amat.memptr()), 2, 2));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<uint>::template fixed<3, 3>& amat) {
+    return (Eigen::Map<Eigen::Matrix<uint, 3, 3, Args...>>(const_cast<uint*>(amat.memptr()), 3, 3));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<uint>::template fixed<4, 4>& amat) {
+    return (Eigen::Map<Eigen::Matrix<uint, 4, 4, Args...>>(const_cast<uint*>(amat.memptr()), 4, 4));
+}
+template <int... Args>
+auto convert(const typename arma::Mat<uint>& amat) {
+    return (Eigen::Map<Eigen::Matrix<uint, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
+        const_cast<uint*>(amat.memptr()), amat.n_rows, amat.n_cols));
+}
+
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 2, 1, O, MR, MC>& evec) {
+    typename arma::Col<Scalar>::template fixed<2> avec;
+    Eigen::Map<Eigen::Matrix<Scalar, 2, 1, O, MR, MC>>(avec.memptr(), 2) = evec;
     return (avec);
 }
-
-template <typename Scalar, int elems>
-inline Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign> convert(
-    const typename arma::Col<Scalar>::template fixed<elems>& avec) {
-    return (Eigen::Map<Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>>(const_cast<Scalar*>(avec.memptr()), elems));
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 3, 1, O, MR, MC>& evec) {
+    typename arma::Col<Scalar>::template fixed<3> avec;
+    Eigen::Map<Eigen::Matrix<Scalar, 3, 1, O, MR, MC>>(avec.memptr(), 3) = evec;
+    return (avec);
 }
-
-template <typename Scalar, int rows, int cols>
-inline typename arma::Mat<Scalar>::template fixed<rows, cols> convert(
-    const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& emat) {
-    typename arma::Mat<Scalar>::template fixed<rows, cols> amat;
-    Eigen::Map<Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(amat.memptr(), rows, cols) = emat;
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 4, 1, O, MR, MC>& evec) {
+    typename arma::Col<Scalar>::template fixed<4> avec;
+    Eigen::Map<Eigen::Matrix<Scalar, 4, 1, O, MR, MC>>(avec.memptr(), 4) = evec;
+    return (avec);
+}
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 6, 1, O, MR, MC>& evec) {
+    typename arma::Col<Scalar>::template fixed<4> avec;
+    Eigen::Map<Eigen::Matrix<Scalar, 6, 1, O, MR, MC>>(avec.memptr(), 6) = evec;
+    return (avec);
+}
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, Eigen::Dynamic, 1, O, MR, MC>& evec) {
+    typename arma::Col<Scalar> avec;
+    Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, 1, O, MR, MC>>(avec.memptr(), evec.rows()) = evec;
+    return (avec);
+}
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 1, Eigen::Dynamic, O, MR, MC>& evec) {
+    typename arma::Row<Scalar> avec;
+    Eigen::Map<Eigen::Matrix<Scalar, 1, Eigen::Dynamic, O, MR, MC>>(avec.memptr(), evec.cols()) = evec;
+    return (avec);
+}
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 2, 2, O, MR, MC>& evec) {
+    typename arma::Mat<Scalar>::template fixed<2, 2> avec;
+    Eigen::Map<Eigen::Matrix<Scalar, 2, 2, O, MR, MC>>(avec.memptr(), 2, 2) = evec;
+    return (avec);
+}
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 3, 3, O, MR, MC>& emat) {
+    typename arma::Mat<Scalar>::template fixed<3, 3> amat;
+    Eigen::Map<Eigen::Matrix<Scalar, 3, 3, O, MR, MC>>(amat.memptr(), 3, 3) = emat;
     return (amat);
 }
-
-template <typename Scalar, int rows, int cols>
-inline Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign> convert(
-    const typename arma::Mat<Scalar>::template fixed<rows, cols>& amat) {
-    return (Eigen::Map<Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(
-        const_cast<Scalar*>(amat.memptr()), rows, cols));
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, 4, 4, O, MR, MC>& emat) {
+    typename arma::Mat<Scalar>::template fixed<4, 4> amat;
+    Eigen::Map<Eigen::Matrix<Scalar, 4, 4, O, MR, MC>>(amat.memptr(), 4, 4) = emat;
+    return (amat);
 }
-
-template <typename Scalar>
-inline arma::Col<Scalar> convert(const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& evec) {
-    arma::Col<Scalar> avec;
-    Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>(avec.memptr(), evec.rows(), 1) = evec;
-    return (avec);
-}
-
-template <typename Scalar>
-inline Eigen::Matrix<Scalar, Eigen::Dynamic, 1> convert(const arma::Col<Scalar>& avec) {
-    return (Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>(const_cast<Scalar*>(avec.memptr()), avec.n_elem));
-}
-
-template <typename Scalar, int rows = Eigen::Dynamic, int cols = Eigen::Dynamic>
-inline arma::Mat<Scalar> convert(const Eigen::Matrix<Scalar, rows, cols>& emat) {
+template <typename Scalar, int O, int MR, int MC>
+auto convert(const typename Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>& emat) {
     typename arma::Mat<Scalar> amat;
-    Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>(amat.memptr(), emat.rows(), emat.cols()) = emat;
+    Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>>(
+        amat.memptr(), emat.rows(), emat.cols()) = emat;
     return (amat);
 }
 
-template <typename Scalar>
-inline Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> convert(const arma::Mat<Scalar>& amat) {
-    return (Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>(
-        const_cast<Scalar*>(amat.memptr()), amat.n_rows, amat.n_cols));
-}
-
-/**
- * @brief Generalised function for streaming Armadillo vectors into Eigen vectors.
- *
- * @details This uses the above templated convert functions to set the components of an Eigen vector.
- *
- * @param emat The Eigen vector
- * @param ama The Armadillo vector
- *
- * @return The original protocol buffer instance
- */
-template <typename Scalar, int elems>
-inline Eigen::Matrix<Scalar, elems, 1>& operator<<(Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>& evec,
-                                                   const typename arma::Col<Scalar>::template fixed<elems>& avec) {
-    evec = convert(avec);
-    return (evec);
-}
-
-template <typename Scalar, int elems>
-inline typename arma::Col<Scalar>::template fixed<elems>& operator<<(
-    typename arma::Col<Scalar>::template fixed<elems>& avec,
-    const Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>& evec) {
-    avec = convert(evec);
-    return (avec);
-}
-
-template <typename Scalar>
-inline Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& operator<<(Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& evec,
-                                                            const arma::Col<Scalar>& avec) {
-    evec = convert(avec);
-    return (evec);
-}
-
-template <typename Scalar, int elems>
-inline arma::Col<Scalar>& operator<<(arma::Col<Scalar>& avec, const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& evec) {
-    avec = convert(evec);
-    return (avec);
-}
-
-/**
- * @brief Generalised function for streaming Armadillo square matricies into Eigen square matrices
- *
- * @details This uses the above templated convert functions to set the components of an Eigen matrix.
- *
- * @param emat The Eigen matrix
- * @param ama The Armadillo matrix
- *
- * @return The converted matrix instance
- */
-template <typename Scalar, int rows, int cols>
-inline Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& operator<<(
-    Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& evec,
-    const typename arma::Mat<Scalar>::template fixed<rows, cols>& avec) {
-    evec = convert(avec);
-    return (evec);
-}
-
-template <typename Scalar, int rows, int cols>
-inline typename arma::Mat<Scalar>::template fixed<rows, cols>& operator<<(
-    typename arma::Mat<Scalar>::template fixed<rows, cols>& avec,
-    const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& evec) {
-    avec = convert(evec);
-    return (avec);
-}
-
-template <typename Scalar>
-inline Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& operator<<(
-    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& evec,
-    const arma::Mat<Scalar>& avec) {
-    evec = convert(avec);
-    return (evec);
-}
-
-template <typename Scalar>
-inline arma::Mat<Scalar>& operator<<(arma::Mat<Scalar>& avec,
-                                     const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& evec) {
-    avec = convert(evec);
-    return (avec);
-}
-
-#endif
+#endif  // UTILITY_SUPPORT_EIGEN_ARMADILLO_H
