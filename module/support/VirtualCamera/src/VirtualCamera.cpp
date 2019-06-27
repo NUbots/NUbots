@@ -83,7 +83,7 @@ namespace support {
                 lens.projection = Image::Lens::Projection::EQUIDISTANT;
                 lens.fov << config["FOV_X"].as<float>(), config["FOV_Y"].as<float>();
                 lens.focal_length = 1.0f / config["lens"]["radiansPerPixel"].as<float>();
-                lens.centre       = convert<float, 2>(config["lens"]["centreOffset"].as<arma::fvec>());
+                lens.centre       = convert(config["lens"]["centreOffset"].as<arma::fvec>());
             }
             else {
                 log<NUClear::ERROR>("LENS TYPE UNDEFINED: choose from 'pinhole' or 'radial'");

@@ -101,7 +101,7 @@ namespace localisation {
                 auto field = std::make_unique<Field>();
                 field->position =
                     Eigen::Vector3d(state[RobotModel::kX], state[RobotModel::kY], state[RobotModel::kAngle]);
-                field->covariance = convert<double, 3, 3>(filter.getCovariance());
+                field->covariance = convert(filter.getCovariance());
 
                 emit(std::make_unique<std::vector<Field>>(1, *field));
                 emit(field);
@@ -124,12 +124,8 @@ namespace localisation {
 
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                                filter.ambiguousMeasurementUpdate(convert<double, 3>(m.position),
-                                                                  convert<double, 3, 3>(m.covariance),
-                                                                  poss,
-                                                                  convert<double, 4, 4>(goals.Hcw),
-                                                                  m.type,
-                                                                  fd);
+                                filter.ambiguousMeasurementUpdate(
+                                    convert(m.position), convert(m.covariance), poss, convert(goals.Hcw), m.type, fd);
                             }
                         }
                     }
@@ -139,7 +135,7 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 Transform3D Hfw;
-                const Transform3D& Htw = convert<double, 4, 4>(sensors.Htw);
+                const Transform3D& Htw = convert(sensors.Htw);
                 std::vector<arma::vec3> states;
                 std::vector<arma::mat33> cov;
 
@@ -152,7 +148,7 @@ namespace localisation {
                     states.push_back(transform3DToFieldState(Hfw));
 
                     Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0})).rotation();
-                    arma::mat22 pos_cov   = Hfw_xy * convert<double, 2, 2>(s.position_cov) * Hfw_xy.t();
+                    arma::mat22 pos_cov   = Hfw_xy * convert(s.position_cov) * Hfw_xy.t();
                     arma::mat33 state_cov = arma::eye(3, 3);
                     state_cov.submat(0, 0, 1, 1) = pos_cov;
                     state_cov(2, 2)              = s.heading_var;

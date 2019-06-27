@@ -154,7 +154,7 @@ namespace motion {
         auto masses = objMasses.as<std::vector<arma::vec4>>();
         model.massModel.masses.reserve(masses.size());
         for (const auto& mass : masses) {
-            model.massModel.masses.push_back(convert<double, 4>(mass));
+            model.massModel.masses.push_back(convert(mass));
         }
     }
 }  // namespace motion

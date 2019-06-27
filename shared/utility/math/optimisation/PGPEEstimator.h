@@ -70,8 +70,8 @@ namespace math {
             OptimiserEstimate updateEstimate(const arma::mat& samples,
                                              const arma::vec& fitnesses,
                                              OptimiserEstimate& previousEstimate) {
-                arma::vec bestEstimate = convert<double>(previousEstimate.estimate);
-                arma::vec covEstimate  = arma::diagvec(convert<double>(previousEstimate.covariance));
+                arma::vec bestEstimate = convert(previousEstimate.estimate);
+                arma::vec covEstimate  = arma::diagvec(convert(previousEstimate.covariance));
 
                 if (firstRun) {
                     firstRun = false;
@@ -94,9 +94,8 @@ namespace math {
                 bestEstimate += update;
                 covEstimate += updateCov;
 
-                return OptimiserEstimate(previousEstimate.generation + 1,
-                                         convert<double>(bestEstimate),
-                                         convert<double>(arma::mat(diagmat(covEstimate))));
+                return OptimiserEstimate(
+                    previousEstimate.generation + 1, convert(bestEstimate), convert(arma::mat(diagmat(covEstimate))));
             }
         };
     }  // namespace optimisation
