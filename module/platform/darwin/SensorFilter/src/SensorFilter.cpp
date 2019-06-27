@@ -614,10 +614,9 @@ namespace platform {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centre_of_mass = calculateCentreOfMass(
-                        kinematicsModel, sensors->forward_kinematics, true, sensors->Htw.inverse(), this->config.debug);
-                    sensors->inertial_tensor =
-                        calculateInertialTensor(kinematicsModel, sensors->forward_kinematics, true);
+                    sensors->centre_of_mass =
+                        calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics, sensors->Htw.inverse());
+                    sensors->inertial_tensor = calculateInertialTensor(kinematicsModel, sensors->forward_kinematics);
 
                     /************************************************
                      *                  Kinematics Horizon          *

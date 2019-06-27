@@ -328,26 +328,18 @@ namespace motion {
         inline Eigen::Vector4d calculateCentreOfMass(
             const message::motion::KinematicsModel& model,
             const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics,
-            bool include_torso,
-            const Eigen::Matrix4d& Hwt,
-            bool debug = false) {
+            const Eigen::Matrix4d& Hwt) {
 
             // Convenience function to transform particle-space CoM to torso-space CoM
             // Htp - transform from particle space to torso space
             // particle - CoM coordinates in particle space
-            // invert - (TODO) in case left/right symmetry is broken
-            auto com = [&Hwt](const std::string& name,
-                              const Eigen::Matrix4d& Htp,
-                              const Eigen::Vector4d& particle,
-                              const bool& invert = false) {
+            auto com = [&Hwt](const Eigen::Matrix4d& Htp, const Eigen::Vector4d& particle) {
                 // Split out CoM and mass
-                Eigen::Vector4d com;
-                com << particle.x(), particle.y(), particle.z(), 1.0;
+                Eigen::Vector4d com(particle.x(), particle.y(), particle.z(), 1.0);
                 double mass = particle.w();
 
                 // Calculate CoM in torso space
-                com                       = Htp * com;
-                Eigen::Vector4d com_world = Hwt * com;
+                com = Htp * com;
 
                 return std::pair<Eigen::Vector3d, double>{Eigen::Vector3d(com.x(), com.y(), com.z()), mass};
             };
@@ -355,46 +347,25 @@ namespace motion {
             // Get the centre of mass for each particle in torso space
             // There are 16 particles in total
             std::array<std::pair<Eigen::Vector3d, double>, 16> particles = {
-                com("Head", forward_kinematics[utility::input::ServoID::HEAD_PITCH], model.massModel.head),
-                com("Left Upper Arm",
-                    forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH],
-                    model.massModel.arm_upper),
-                com("Right Upper Arm",
-                    forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH],
-                    model.massModel.arm_upper),
-                com("Left Lower Arm",
-                    forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL],
-                    model.massModel.arm_lower),
-                com("Right Lower Arm",
-                    forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL],
-                    model.massModel.arm_lower),
-                com("Left Hip", forward_kinematics[utility::input::ServoID::L_HIP_ROLL], model.massModel.hip_block),
-                com("Right Hip", forward_kinematics[utility::input::ServoID::R_HIP_ROLL], model.massModel.hip_block),
-                com("Left Upper Leg",
-                    forward_kinematics[utility::input::ServoID::L_HIP_PITCH],
-                    model.massModel.leg_upper),
-                com("Right Upper Leg",
-                    forward_kinematics[utility::input::ServoID::R_HIP_PITCH],
-                    model.massModel.leg_upper),
-                com("Left Lower Leg", forward_kinematics[utility::input::ServoID::L_KNEE], model.massModel.leg_lower),
-                com("Right Lower Leg", forward_kinematics[utility::input::ServoID::R_KNEE], model.massModel.leg_lower),
-                com("Left Ankle",
-                    forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
-                    model.massModel.ankle_block),
-                com("Right Ankle",
-                    forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
-                    model.massModel.ankle_block),
-                com("Left Foot", forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL], model.massModel.foot),
-                com("Right Foot", forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL], model.massModel.foot),
-                std::pair<Eigen::Vector3d, double>{Eigen::Vector3d::Zero(), 0.0},
-            };
-
-            // Add the torso into the list of particles, if requested
-            if (include_torso) {
-                particles[15] = std::pair<Eigen::Vector3d, double>{
+                com(forward_kinematics[utility::input::ServoID::HEAD_PITCH], model.massModel.head),
+                com(forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH], model.massModel.arm_upper),
+                com(forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH], model.massModel.arm_upper),
+                com(forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL], model.massModel.arm_lower),
+                com(forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL], model.massModel.arm_lower),
+                com(forward_kinematics[utility::input::ServoID::L_HIP_ROLL], model.massModel.hip_block),
+                com(forward_kinematics[utility::input::ServoID::R_HIP_ROLL], model.massModel.hip_block),
+                com(forward_kinematics[utility::input::ServoID::L_HIP_PITCH], model.massModel.leg_upper),
+                com(forward_kinematics[utility::input::ServoID::R_HIP_PITCH], model.massModel.leg_upper),
+                com(forward_kinematics[utility::input::ServoID::L_KNEE], model.massModel.leg_lower),
+                com(forward_kinematics[utility::input::ServoID::R_KNEE], model.massModel.leg_lower),
+                com(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH], model.massModel.ankle_block),
+                com(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH], model.massModel.ankle_block),
+                com(forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL], model.massModel.foot),
+                com(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL], model.massModel.foot),
+                std::pair<Eigen::Vector3d, double>{
                     Eigen::Vector3d{model.massModel.torso.x(), model.massModel.torso.y(), model.massModel.torso.z()},
-                    model.massModel.torso.w()};
-            }
+                    model.massModel.torso.w()},
+            };
 
             // Calculate the CoM for the entire robot
             std::pair<Eigen::Vector3d, double> robot_com = {Eigen::Vector3d::Zero(), 0.0};
@@ -415,16 +386,14 @@ namespace motion {
         */
         inline Eigen::Matrix3d calculateInertialTensor(
             const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics,
-            bool include_torso) {
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics) {
 
             // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
             // Htp - transform from particle space to torso space
             // particle - CoM coordinates in particle space
             auto translateTensor =
                 [](const Eigen::Matrix4d& Htp, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
-                    Eigen::Vector4d com;
-                    com << com_mass.x(), com_mass.y(), com_mass.z(), 1.0;
+                    Eigen::Vector4d com(com_mass.x(), com_mass.y(), com_mass.z(), 1.0);
                     com = Htp * com;
 
                     // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
@@ -495,12 +464,7 @@ namespace motion {
                 translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL],
                                 model.tensorModel.foot,
                                 model.massModel.foot),
-                Eigen::Matrix3d::Zero()};
-
-            // Add the torso into the list of particles, if requested
-            if (include_torso) {
-                particles[15] = model.tensorModel.torso;
-            }
+                model.tensorModel.torso};
 
             // Calculate the inertial tensor for the entire robot
             Eigen::Matrix3d inertial_tensor = Eigen::Matrix3d::Zero();
