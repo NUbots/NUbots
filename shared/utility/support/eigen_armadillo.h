@@ -250,3 +250,5 @@ auto convert(const typename Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic
         amat.memptr(), emat.rows(), emat.cols()) = emat;
     return (amat);
 }
+
+#endif  // UTILITY_SUPPORT_EIGEN_ARMADILLO_H
