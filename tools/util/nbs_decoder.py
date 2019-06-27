@@ -12,18 +12,18 @@ import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
 
 # Open up our message output directory to get our protobuf types
-shared_path = os.path.join(b.binary_dir, "shared")
+if b.binary_dir and os.path.isdir(b.binary_dir):
+    shared_path = os.path.join(b.binary_dir, "shared")
+    sys.path.append(shared_path)
 
-sys.path.append(shared_path)
+    # Load all of the protobuf files as modules to use
+    for dir_name, subdir, files in os.walk(shared_path):
+        modules = pkgutil.iter_modules(path=[dir_name])
+        for loader, module_name, ispkg in modules:
+            if module_name.endswith("pb2"):
 
-# Load all of the protobuf files as modules to use
-for dir_name, subdir, files in os.walk(shared_path):
-    modules = pkgutil.iter_modules(path=[dir_name])
-    for loader, module_name, ispkg in modules:
-        if module_name.endswith("pb2"):
-
-            # Load our protobuf module
-            module = loader.find_module(module_name).load_module(module_name)
+                # Load our protobuf module
+                module = loader.find_module(module_name).load_module(module_name)
 
 decoders = {}
 
