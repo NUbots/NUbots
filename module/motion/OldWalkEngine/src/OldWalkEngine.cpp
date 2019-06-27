@@ -576,12 +576,10 @@ namespace motion {
                              sensors);
         }
 
-        Transform3D Htc;
-        if (use_com) {
-            // Assume the previous calculations were done in CoM space, now convert them to torso space
-            // Height of CoM is assumed to be constant
-            Htc = Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
-        }
+        // Assume the previous calculations were done in CoM space, now convert them to torso space
+        // Height of CoM is assumed to be constant
+        Transform3D Htc =
+            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
@@ -594,12 +592,7 @@ namespace motion {
         rightFootTorso = rightFootTorso.rotateX(-rollComp).rotateY(pitchComp).rotateZ(-legYaw);
 
         std::vector<std::pair<ServoID, float>> joints;
-        if (use_com) {
-            joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
-        }
-        else {
-            joints = calculateLegJointsTeamDarwin(kinematicsModel, leftFootTorso, rightFootTorso);
-        }
+        joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
 
         auto waypoints = motionLegs(joints);
         auto arms      = motionArms(phase);
@@ -625,23 +618,17 @@ namespace motion {
             balancer.balance(kinematicsModel, rightFootCOM, LimbID::RIGHT_LEG, sensors);
         }
 
-        Transform3D Htc;
-        if (use_com) {
-            // Assume the previous calculations were done in CoM space, now convert them to torso space
-            // Height of CoM is assumed to be constant
-            Htc = Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
-        }
+        // Assume the previous calculations were done in CoM space, now convert them to torso space
+        // Height of CoM is assumed to be constant
+        Transform3D Htc =
+            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
 
         std::vector<std::pair<ServoID, float>> joints;
-        if (use_com) {
-            joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
-        }
-        else {
-            joints = calculateLegJointsTeamDarwin(kinematicsModel, leftFootTorso, rightFootTorso);
-        }
+        joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
+
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms(0.5);
