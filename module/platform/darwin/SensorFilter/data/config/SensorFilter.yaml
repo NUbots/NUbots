@@ -3,6 +3,10 @@ nominal_z: 0.01
 buttons:
   debounce_threshold : 7
 
+foot_down:
+  from_load: true
+  certainty_threshold: 0.05
+
 foot_load_sensor:
   noise_factor: 1e-4
   certainty_threshold: 0.5

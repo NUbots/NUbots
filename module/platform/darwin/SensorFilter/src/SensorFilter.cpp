@@ -115,6 +115,10 @@ namespace platform {
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
+                // Foot down config
+                this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
+                this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<int>();
+
                 // Foot load sensor config
                 load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
 
@@ -453,21 +457,42 @@ namespace platform {
                     sensors->left_foot_down  = false;
 
                     if (previousSensors) {
-                        // Use our virtual load sensor class to work out which feet are down
-                        arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::R_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::L_HIP_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::L_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::R_KNEE].present_velocity,
-                                                             sensors->servo[ServoID::R_KNEE].load,
-                                                             sensors->servo[ServoID::L_KNEE].present_velocity,
-                                                             sensors->servo[ServoID::L_KNEE].load,
-                                                             sensors->servo[ServoID::R_ANKLE_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                                                             sensors->servo[ServoID::L_ANKLE_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::L_ANKLE_PITCH].load};
 
-                        auto feet_down           = load_sensor.updateFeet(features);
+
+                        std::array<bool, 2> feet_down = {false};
+                        if (config.footDown.fromLoad) {
+                            // Use our virtual load sensor class to work out which feet are down
+                            arma::frowvec::fixed<12> features = {
+                                sensors->servo[ServoID::R_HIP_PITCH].present_velocity,
+                                sensors->servo[ServoID::R_HIP_PITCH].load,
+                                sensors->servo[ServoID::L_HIP_PITCH].present_velocity,
+                                sensors->servo[ServoID::L_HIP_PITCH].load,
+                                sensors->servo[ServoID::R_KNEE].present_velocity,
+                                sensors->servo[ServoID::R_KNEE].load,
+                                sensors->servo[ServoID::L_KNEE].present_velocity,
+                                sensors->servo[ServoID::L_KNEE].load,
+                                sensors->servo[ServoID::R_ANKLE_PITCH].present_velocity,
+                                sensors->servo[ServoID::R_ANKLE_PITCH].load,
+                                sensors->servo[ServoID::L_ANKLE_PITCH].present_velocity,
+                                sensors->servo[ServoID::L_ANKLE_PITCH].load};
+
+                            feet_down = load_sensor.updateFeet(features);
+                        }
+                        else {
+                            auto rightFootDisplacement =
+                                sensors->forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
+                            auto leftFootDisplacement =
+                                sensors->forward_kinematics[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
+
+                            if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
+                                feet_down[0] = true;
+                            }
+                            else if (leftFootDisplacement
+                                     < rightFootDisplacement - config.footDown.certaintyThreshold) {
+                                feet_down[1] = true;
+                            }
+                        }
+
                         sensors->left_foot_down  = feet_down[0];
                         sensors->right_foot_down = feet_down[1];
                     }
