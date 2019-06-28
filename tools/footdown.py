@@ -2,6 +2,7 @@
 
 import os
 import tensorflow as tf
+from tensorflow import keras
 import yaml
 from tqdm import tqdm
 from util import nbs_decoder
@@ -57,9 +58,11 @@ def displacement(fk):
     return -(np.linalg.inv(Htf)[2, 3])
 
 
-def dataset(path, state, foot_delta):
+def dataset(path, state, servos, keys, foot_delta, accelerometer, gryoscope):
+    xs = []
+    ys = []
     for type_name, timestamp, msg in tqdm(
-        nbs_decoder.decode(path), dynamic_ncols=True, unit="packets"
+        nbs_decoder.decode(path), dynamic_ncols=True, unit="packet"
     ):
         if type_name == "message.input.Sensors":
 
@@ -79,11 +82,9 @@ def dataset(path, state, foot_delta):
                 r_load = msg.servo[SERVO_ID["L_KNEE"]].load
 
                 y = (
-                    1 if l_height < r_height or delta < foot_delta else 0,
-                    1 if r_height < l_height or delta < foot_delta else 0,
+                    1 if l_height - foot_delta < r_height else 0,
+                    1 if r_height - foot_delta < l_height else 0,
                 )
-
-                tqdm.write("{},{},{},{}".format(l_height, r_height, l_load, r_load))
 
             elif state == "UP":
                 y = (0, 0)
@@ -91,7 +92,28 @@ def dataset(path, state, foot_delta):
                 y = (1, 1)
             else:
                 raise RuntimeError("The state must be UP DOWN or WALK")
-    exit(0)
+
+            x = []
+            for servo in servos:
+                s = msg.servo[SERVO_ID[servo]]
+                values = {
+                    "LOAD": s.load,
+                    "POSITION": s.present_position,
+                    "VELOCITY": s.present_velocity,
+                }
+
+                for key in keys:
+                    x.append(values[key])
+            if accelerometer:
+                x.extend(
+                    [msg.accelerometer.x, msg.accelerometer.y, msg.accelerometer.z]
+                )
+            if gryoscope:
+                x.extend([msg.gyroscope.x, msg.gyroscope.y, msg.gyroscope.z])
+            ys.append(y)
+            xs.append(x)
+
+    return np.array(xs), np.array(ys)
 
 
 def register(command):
@@ -112,11 +134,95 @@ def run(config, **kwargs):
     # Load our configuration file to get the individual nbs files
     data_path = os.path.dirname(config)
     with open(config, "r") as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
 
     foot_delta = config["config"]["foot_delta"]
+    servos = config["config"]["servos"]
+    keys = config["config"]["keys"]
+    use_accel = config["config"]["accelerometer"]
+    use_gyro = config["config"]["gyroscope"]
 
     print("Loading data from NBS files")
+    group_xs = []
+    group_ys = []
     for group in tqdm(config["data"], dynamic_ncols=True, unit="group"):
+
+        # Gather all groups into a single dataset for this specific type
+        xs = []
+        ys = []
         for f in tqdm(group["files"], dynamic_ncols=True, unit="file"):
-            data = dataset(os.path.join(data_path, f), group["state"], foot_delta)
+
+            # Load the file
+            x, y = dataset(
+                os.path.join(data_path, f),
+                group["state"],
+                servos,
+                keys,
+                foot_delta,
+                use_accel,
+                use_gyro,
+            )
+
+            # Cut off the end 10% to account for nonsense setup and teardown
+            x = x[len(x) // 10 : -len(x) // 10]
+            y = y[len(y) // 10 : -len(y) // 10]
+
+            xs.append(x)
+            ys.append(y)
+
+        group_xs.append(np.concatenate(xs, axis=0))
+        group_ys.append(np.concatenate(ys, axis=0))
+
+    # Find the largest size we have and replicate random elements in the other dataset to fill
+    mx = max([x.shape[0] for x in group_xs])
+
+    # Oversample our categories so they are the same size
+    xs = []
+    ys = []
+    for x, y in zip(group_xs, group_ys):
+        idx = np.random.randint(0, len(x), mx)
+        xs.append(x[idx])
+        ys.append(y[idx])
+    xs = np.concatenate(xs)
+    ys = np.concatenate(ys)
+
+    # Random shuffle the data
+    idx = np.arange(len(xs))
+    np.random.shuffle(idx)
+    xs = xs[idx]
+    ys = ys[idx]
+
+    # Split into training and validation
+    split = int(len(xs) * 0.8)
+    train_x = xs[:split]
+    train_y = ys[:split]
+    valid_x = xs[split:]
+    valid_y = ys[split:]
+
+    # Build our model
+    model = keras.Sequential(
+        [
+            keras.layers.Dense(8, activation=tf.nn.relu),
+            keras.layers.Dense(8, activation=tf.nn.relu),
+            keras.layers.Dense(2, activation=tf.nn.sigmoid),
+        ]
+    )
+
+    model.compile(
+        optimizer=keras.optimizers.Adam(),
+        loss=keras.losses.BinaryCrossentropy(),
+        metrics=[keras.metrics.BinaryAccuracy()],
+    )
+
+    history = model.fit(
+        train_x,
+        train_y,
+        batch_size=4096,
+        epochs=1000,
+        validation_data=(valid_x, valid_y),
+        callbacks=[keras.callbacks.EarlyStopping(patience=5)],
+    )
+
+    import pdb
+
+    pdb.set_trace()
