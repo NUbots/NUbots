@@ -185,20 +185,22 @@ namespace vision {
                         float distance =
                             field.dimensions.goalpost_width * radius * 0.5f / std::sqrt(1.0f - radius * radius);
 
-                        // Normal should be orthogonal to both the viewing direction (bottom_point) and world z
-                        g.center_line.normal   = bottom_point.cross(horizon.Hcw.topLeftCorner<3, 3>().cast<float>()
-                                                                  * Eigen::Vector3f::UnitZ());
-                        g.center_line.distance = distance;
+                        Eigen::Vector3f top_point(bottom_point * distance);
+                        top_point.z() += field.dimensions.goal_crossbar_height;
+                        g.post.top      = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * top_point.normalized();
+                        g.post.bottom   = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * bottom_point.normalized();
+                        g.post.distance = distance;
 
                         // Attach the measurement to the object (distance from camera to bottom center of post)
                         g.measurements.push_back(Goal::Measurement());
-                        g.measurements.back().type     = Goal::MeasurementType::CENTRE;
-                        g.measurements.back().position = cartesianToSpherical(Eigen::Vector3f(bottom_point * distance));
+                        g.measurements.back().type = Goal::MeasurementType::CENTRE;
+                        g.measurements.back().position =
+                            cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
                         g.measurements.back().covariance =
                             config.goal_angular_cov * Eigen::Vector3f(distance, 1, 1).asDiagonal();
 
                         // Angular positions from the camera
-                        g.screen_angular = cartesianToSpherical(bottom_point).tail<2>();
+                        g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
                         g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
                     }
 

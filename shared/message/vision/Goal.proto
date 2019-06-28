@@ -24,7 +24,6 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "Neutron.proto";
 import "Vector.proto";
-import "message/Geometry.proto";
 import "Matrix.proto";
 
 message Goal {
@@ -43,8 +42,13 @@ message Goal {
         fvec3 position   = 2;
         fmat3 covariance = 3;
     }
+    message Post {
+        fvec3 top      = 1;
+        fvec3 bottom   = 2;
+        float distance = 3;
+    }
     Side     side                       = 1;
-    Line     center_line                = 3;
+    Post     post                       = 3;
     repeated Measurement measurements   = 4;
     fvec2                screen_angular = 5;
     fvec2                angular_size   = 6;
