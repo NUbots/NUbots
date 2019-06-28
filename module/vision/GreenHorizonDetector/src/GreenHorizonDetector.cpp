@@ -148,7 +148,12 @@ namespace vision {
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
                 for (const auto& idx : hull_indices) {
-                    msg->horizon.emplace_back(rays.row(idx));
+                    const Eigen::Vector3f ray      = rays.row(idx);
+                    const float d                  = mesh.Hcw(2, 3) / ray.z();
+                    Eigen::Vector3f ray_projection = ray * d;
+                    const float norm               = ray_projection.head<2>().norm();
+                    ray_projection.head<2>() *= 1.0f + config.fudge_factor / norm;
+                    msg->horizon.emplace_back(ray_projection.normalized());
                 }
 
                 if (config.debug) {
