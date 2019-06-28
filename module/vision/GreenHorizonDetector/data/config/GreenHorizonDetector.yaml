@@ -1,3 +1,4 @@
 confidence_threshold: 0.7
 cluster_points: 5
+fudge_factor: 1.0
 debug: false
