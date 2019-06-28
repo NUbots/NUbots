@@ -239,14 +239,14 @@ namespace vision {
                     };
 
                     std::map<std::vector<Goal>::iterator, std::pair<std::vector<Goal>::iterator, float>> pairs;
-                    const float actual_width = field.dimensions.goal_width * field.dimensions.goal_width;
+                    const float actual_width = field.dimensions.goal_width;
                     for (auto it1 = goals->goals.begin(); it1 != goals->goals.end(); it1 = std::next(it1)) {
                         for (auto it2 = std::next(it1); it2 != goals->goals.end(); it2 = std::next(it2)) {
-                            // Divide by distance to get back to unit vectors
-                            const Eigen::Vector3f rGCc0 = it1->measurements.back().position / it1->center_line.distance;
+                            const Eigen::Vector3f& rGCc0 = it1->post.bottom;
+                            const Eigen::Vector3f& rGCc1 = it2->post.bottom;
                             const Eigen::Vector3f rGCc1 = it2->measurements.back().position / it2->center_line.distance;
 
-                            const float width =
+                            const float width = distance_between(rGCc0, it1->post.distance, rGCc1, it2->post.distance);
                                 distance_between(rGCc0, it1->center_line.distance, rGCc1, it2->center_line.distance);
 
                             const float disagreement = std::abs(width - actual_width) / std::max(width, actual_width);
@@ -270,8 +270,8 @@ namespace vision {
                     // We now have all the valid goal post pairs, determine left and right
                     for (const auto& pair : pairs) {
                         // Divide by distance to get back to unit vectors
-                        const Eigen::Vector3f rGCc0 =
-                            pair.first->measurements.back().position / pair.first->center_line.distance;
+                        const Eigen::Vector3f& rGCc0 = pair.first->post.bottom;
+                        const Eigen::Vector3f& rGCc1 = pair.second.first->post.bottom;
                         const Eigen::Vector3f rGCc1 =
                             pair.second.first->measurements.back().position / pair.second.first->center_line.distance;
 
