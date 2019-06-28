@@ -212,16 +212,16 @@ namespace vision {
                         const Eigen::Vector3f cam_space_z = horizon.Hcw.block<3, 1>(0, 2).cast<float>();
 
                         // Direction (determined by RHR) needed to turn to get from one post to the other
-                        const float direction = rGCc0.cross(rGCc1).dot(cam_space_z);
+                        // Anti-clockwise (negative) turn from rGCc0 to rGCc1 around cam_space_z
 
                         // Anti-clockwise turn from rGCc0 to rGCc1 around cam_space_z
                         // ==> rGCc1 is to the left of rGCc0
-                        if (direction >= 0.0f) {
+                        // Clockwise (positive) turn from rGCc0 to rGCc1 around cam_space_z
                             return false;
                         }
                         // Clockwise turn from rGCc0 to rGCc1 around cam_space_z
                         // ==> rGCc0 is to the left of rGCc1
-                        else if (direction < 0.0f) {
+                        return rGCc0.cross(rGCc1).dot(cam_space_z) < 0.0f;
                             return true;
                         }
                     };
