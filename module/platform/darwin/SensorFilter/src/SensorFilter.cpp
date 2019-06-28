@@ -603,13 +603,13 @@ namespace platform {
                     // Integrate gyro to get angular positions
                     theta += o.rows(MotionModel::WX, MotionModel::WZ) * 1.0 / 90.0;
 
-                    sensors->angular_position = convert<double, 3>(theta);
+                    sensors->angular_position = convert(theta);
 
                     if (this->config.debug) {
                         log("p_x:", theta[0], "p_y:", theta[1], "p_z:", theta[2]);
                     }
 
-                    sensors->robot_to_IMU = convert<double, 2, 2>(calculateRobotToIMU(Htw.rotation()));
+                    sensors->robot_to_IMU = convert(calculateRobotToIMU(Htw.rotation()));
 
                     /************************************************
                      *                  Mass Model                  *
