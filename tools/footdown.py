@@ -203,7 +203,6 @@ def run(config, **kwargs):
     model = keras.Sequential(
         [
             keras.layers.Dense(8, activation=tf.nn.relu),
-            keras.layers.Dense(8, activation=tf.nn.relu),
             keras.layers.Dense(2, activation=tf.nn.sigmoid),
         ]
     )
@@ -223,6 +222,4 @@ def run(config, **kwargs):
         callbacks=[keras.callbacks.EarlyStopping(patience=5)],
     )
 
-    import pdb
-
-    pdb.set_trace()
+    print(history.history["val_binary_accuracy"][-1])
