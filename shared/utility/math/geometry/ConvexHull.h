@@ -38,11 +38,11 @@ namespace math {
         template <typename Iterator>
         void sort_by_theta(Iterator first,
                            Iterator last,
-                           const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
+                           const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
                            const float& world_offset) {
             std::sort(first, last, [&](const int& a, const int& b) {
-                const Eigen::Vector3f& p0(rays.row(a));
-                const Eigen::Vector3f& p1(rays.row(b));
+                const Eigen::Vector3f& p0(rays.col(a));
+                const Eigen::Vector3f& p1(rays.col(b));
 
                 float theta0 =
                     std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
@@ -87,8 +87,8 @@ namespace math {
                                   const bool& allow_boundary = false) {
             const int8_t threshold = (allow_boundary) ? -1 : 0;
             for (auto it = std::next(hull_indices.begin()); it != hull_indices.end(); it = std::next(it)) {
-                Eigen::Vector2f p0(coords.row(*std::prev(it)));
-                Eigen::Vector2f p1(coords.row(*it));
+                Eigen::Vector2f p0(coords.col(*std::prev(it)));
+                Eigen::Vector2f p1(coords.col(*it));
                 if (turn_direction(p0, p1, point) > threshold) {
                     return false;
                 }
@@ -146,21 +146,21 @@ namespace math {
 
             // Sort by increasing x, then by decreasing y
             std::sort(local_indices.begin(), local_indices.end(), [&coords](const int& a, const int& b) {
-                const Eigen::Vector2f p0(coords.row(a));
-                const Eigen::Vector2f p1(coords.row(b));
+                const Eigen::Vector2f p0(coords.col(a));
+                const Eigen::Vector2f p1(coords.col(b));
 
                 return ((p0.x() < p1.x()) || ((p0.x() == p1.x()) && (p0.y() > p1.y())));
             });
 
             // Remove all colinear points
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-                const Eigen::Vector2f p0(coords.row(*std::prev(it, 2)));
-                const Eigen::Vector2f p1(coords.row(*std::prev(it, 1)));
-                Eigen::Vector2f p2(coords.row(*it));
+                const Eigen::Vector2f p0(coords.col(*std::prev(it, 2)));
+                const Eigen::Vector2f p1(coords.col(*std::prev(it, 1)));
+                Eigen::Vector2f p2(coords.col(*it));
 
                 while (turn_direction(p0, p1, p2) == 0) {
                     it = local_indices.erase(it);
-                    p2 = coords.row(*it);
+                    p2 = coords.col(*it);
                 }
                 it = std::next(it);
             }
@@ -183,14 +183,14 @@ namespace math {
             // clockwise turn
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
                 // Triple does not make an clockwise turn, replace the last element in the list
-                Eigen::Vector2f p0(coords.row(*std::prev(hull_indices.end(), 2)));
-                Eigen::Vector2f p1(coords.row(*std::prev(hull_indices.end(), 1)));
-                const Eigen::Vector2f p2(coords.row(*it));
+                Eigen::Vector2f p0(coords.col(*std::prev(hull_indices.end(), 2)));
+                Eigen::Vector2f p1(coords.col(*std::prev(hull_indices.end(), 1)));
+                const Eigen::Vector2f p2(coords.col(*it));
                 while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
                     // Remove the offending point from the convex hull
                     hull_indices.pop_back();
-                    p0 = coords.row(*std::prev(hull_indices.end(), 2));
-                    p1 = coords.row(*std::prev(hull_indices.end(), 1));
+                    p0 = coords.col(*std::prev(hull_indices.end(), 2));
+                    p1 = coords.col(*std::prev(hull_indices.end(), 1));
                 }
 
                 // Add the new point to the convex hull
@@ -201,11 +201,11 @@ namespace math {
         }
 
         std::vector<int> upper_convex_hull(const std::vector<int>& indices,
-                                           const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
+                                           const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
                                            const float world_offset,
                                            const bool& cycle = false) {
             // We need a minimum of 3 non-colinear points to calculate the convex hull
-            if (rays.size() < 3) {
+            if (rays.cols() < 3) {
                 return std::vector<int>();
             }
 
@@ -219,13 +219,13 @@ namespace math {
 
             // Remove all colinear points
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-                const Eigen::Vector2f p0 = project_vector(rays.row(*std::prev(local_indices.end(), 2)));
-                const Eigen::Vector2f p1 = project_vector(rays.row(*std::prev(local_indices.end(), 1)));
-                Eigen::Vector2f p2       = project_vector(rays.row(*it));
+                const Eigen::Vector2f p0 = project_vector(rays.col(*std::prev(local_indices.end(), 2)));
+                const Eigen::Vector2f p1 = project_vector(rays.col(*std::prev(local_indices.end(), 1)));
+                Eigen::Vector2f p2       = project_vector(rays.col(*it));
 
                 while ((it != local_indices.end()) && turn_direction(p0, p1, p2) == 0) {
                     it = local_indices.erase(it);
-                    p2 = project_vector(rays.row(*it));
+                    p2 = project_vector(rays.col(*it));
                 }
                 if (it != local_indices.end()) {
                     it = std::next(it);
@@ -249,15 +249,15 @@ namespace math {
             // Now go through the rest of the points and add them to the convex hull if each triple makes an
             // clockwise turn
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
-                Eigen::Vector2f p0       = project_vector(rays.row(*std::prev(hull_indices.end(), 2)));
-                Eigen::Vector2f p1       = project_vector(rays.row(*std::prev(hull_indices.end(), 1)));
-                const Eigen::Vector2f p2 = project_vector(rays.row(*it));
+                Eigen::Vector2f p0       = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
+                Eigen::Vector2f p1       = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
+                const Eigen::Vector2f p2 = project_vector(rays.col(*it));
                 // Triple does not make an clockwise turn, replace the last element in the list
                 while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
                     // Remove the offending point from the convex hull
                     hull_indices.pop_back();
-                    p0 = project_vector(rays.row(*std::prev(hull_indices.end(), 2)));
-                    p1 = project_vector(rays.row(*std::prev(hull_indices.end(), 1)));
+                    p0 = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
+                    p1 = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
                 }
 
                 // Add the new point to the convex hull
@@ -270,7 +270,7 @@ namespace math {
         // Finds the convex hull of a set of points using the Graham Scan algorithm
         // https://en.wikipedia.org/wiki/Graham_scan
         std::vector<int> graham_scan(const std::vector<int>& indices,
-                                     const Eigen::Matrix<float, Eigen::Dynamic, 2>& coords,
+                                     const Eigen::Matrix<float, 2, Eigen::Dynamic>& coords,
                                      const bool& cycle = false) {
 
             // We need a minimum of 3 non-colinear points to calculate the convex hull
@@ -287,8 +287,8 @@ namespace math {
             // Find the bottom left point
             size_t bottom_left = 0;
             for (size_t idx = 1; idx < indices.size(); ++idx) {
-                const Eigen::Vector2f min_p(coords.row(local_indices[bottom_left]));
-                const Eigen::Vector2f p(coords.row(local_indices[idx]));
+                const Eigen::Vector2f min_p(coords.col(local_indices[bottom_left]));
+                const Eigen::Vector2f p(coords.col(local_indices[idx]));
 
                 if ((p.y() > min_p.y()) || ((p.y() == min_p.y()) && (p.x() < min_p.x()))) {
                     bottom_left = idx;
@@ -306,9 +306,9 @@ namespace math {
             std::sort(std::next(local_indices.begin()),
                       local_indices.end(),
                       [&bottom_left, &coords](const int& a, const int& b) {
-                          const Eigen::Vector2f p0(coords.row(bottom_left));
-                          const Eigen::Vector2f p1(coords.row(a));
-                          const Eigen::Vector2f p2(coords.row(b));
+                          const Eigen::Vector2f p0(coords.col(bottom_left));
+                          const Eigen::Vector2f p1(coords.col(a));
+                          const Eigen::Vector2f p2(coords.col(b));
 
                           int direction = turn_direction(p0, p1, p2);
 
@@ -324,13 +324,13 @@ namespace math {
 
             // Remove all colinear points
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-                const Eigen::Vector2f p0(coords.row(*std::prev(it, 2)));
-                const Eigen::Vector2f p1(coords.row(*std::prev(it, 1)));
-                Eigen::Vector2f p2(coords.row(*it));
+                const Eigen::Vector2f p0(coords.col(*std::prev(it, 2)));
+                const Eigen::Vector2f p1(coords.col(*std::prev(it, 1)));
+                Eigen::Vector2f p2(coords.col(*it));
 
                 while (turn_direction(p0, p1, p2) == 0) {
                     it = local_indices.erase(it);
-                    Eigen::Vector2f p2(coords.row(*it));
+                    Eigen::Vector2f p2(coords.col(*it));
                 }
                 it = std::next(it);
             }
@@ -354,14 +354,14 @@ namespace math {
             // anti-clockwise turn
             for (auto it = std::next(local_indices.begin(), 3); it != local_indices.end(); it = std::next(it)) {
                 // Triple does not make an anti-clockwise turn, replace the last element in the list
-                Eigen::Vector2f p0(coords.row(*std::prev(hull_indices.end(), 2)));
-                Eigen::Vector2f p1(coords.row(*std::prev(hull_indices.end(), 1)));
-                const Eigen::Vector2f p2(coords.row(*it));
+                Eigen::Vector2f p0(coords.col(*std::prev(hull_indices.end(), 2)));
+                Eigen::Vector2f p1(coords.col(*std::prev(hull_indices.end(), 1)));
+                const Eigen::Vector2f p2(coords.col(*it));
                 while (turn_direction(p0, p1, p2) >= 0) {
                     // Remove the offending point from the convex hull
                     hull_indices.pop_back();
-                    p0 = coords.row(*std::prev(hull_indices.end(), 2));
-                    p1 = coords.row(*std::prev(hull_indices.end(), 1));
+                    p0 = coords.col(*std::prev(hull_indices.end(), 2));
+                    p1 = coords.col(*std::prev(hull_indices.end(), 1));
                 }
 
                 // Add the new point to the convex hull

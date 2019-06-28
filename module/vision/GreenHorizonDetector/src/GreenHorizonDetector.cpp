@@ -37,7 +37,7 @@ namespace vision {
             // Convenience variables
             const auto& cls                                     = mesh.classifications;
             const auto& neighbours                              = mesh.neighbourhood;
-            const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = mesh.rays;
+            const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
             const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
 
             // Get some indices to partition
@@ -51,7 +51,7 @@ namespace vision {
                 neighbours,
                 [&](const int& idx) {
                     return idx == indices.size()
-                           || (cls(idx, FIELD_INDEX) + cls(idx, LINE_INDEX) >= config.confidence_threshold);
+                           || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
                 },
                 {4, 5});
 
@@ -88,7 +88,7 @@ namespace vision {
                 for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
                     // Get the largest and smallest theta values
                     auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const auto& a, const auto& b) {
-                        return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 2));
+                        return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
                     });
 
                     const float min_a = std::atan2(rays(*range_a.first, 1), rays(*range_a.first, 0));
@@ -98,7 +98,7 @@ namespace vision {
                         // Get the largest and smallest theta values
                         auto range_b =
                             std::minmax_element(it2->begin(), it2->end(), [&rays](const auto& a, const auto& b) {
-                                return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 2));
+                                return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
                             });
 
                         const float min_b = std::atan2(rays(*range_b.first, 1), rays(*range_b.first, 0));

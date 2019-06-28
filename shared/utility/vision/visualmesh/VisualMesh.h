@@ -39,7 +39,7 @@ namespace vision {
             using value_type = typename std::iterator_traits<Iterator>::value_type;
             return std::partition(first, last, [&](const value_type& idx) {
                 return pred(idx) && std::any_of(search_space.begin(), search_space.end(), [&](const auto& n) {
-                           return !pred(neighbours(idx, n));
+                           return !pred(neighbours(n, idx));
                        });
             });
         }
@@ -79,13 +79,11 @@ namespace vision {
 
                         // Find the current points neighbours
                         for (int n = 0; n < 6; ++n) {
-                            const value_type neighbour_idx = neighbours(*current, n);
-                            // if (neighbour_idx < std::distance(first, last)) {
-                            Iterator neighbour = std::find(first, last, neighbour_idx);
+                            const value_type neighbour_idx = neighbours(n, *current);
+                            Iterator neighbour             = std::find(first, last, neighbour_idx);
                             if ((neighbour != last) && (!visited[std::distance(first, neighbour)])) {
                                 q.push_back(neighbour);
                             }
-                            // }
                         }
                     }
                 }
@@ -101,7 +99,7 @@ namespace vision {
                                           Iterator last,
                                           HorizonIt horizon_first,
                                           HorizonIt horizon_last,
-                                          const Eigen::MatrixXf& rays,
+                                          const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
                                           const bool& up   = true,
                                           const bool& down = true) {
 
@@ -119,7 +117,7 @@ namespace vision {
                 bool above = false, below = false;
                 for (int idx = 0; idx < cluster.size() && !success(above, below); ++idx) {
                     if (utility::math::geometry::point_under_hull(
-                            rays.row(cluster[idx]), horizon_first, horizon_last)) {
+                            rays.col(cluster[idx]), horizon_first, horizon_last)) {
                         above = true;
                     }
                     else {
