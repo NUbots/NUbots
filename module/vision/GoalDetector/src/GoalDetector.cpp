@@ -131,7 +131,7 @@ namespace vision {
                             {2});
                         // Return true if the right neighbour is NOT a goal point
                         auto other = utility::vision::visualmesh::partition_points(
-                            cluster.begin(),
+                            right,
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
