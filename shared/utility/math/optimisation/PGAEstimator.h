@@ -78,7 +78,7 @@ namespace math {
                 arma::mat covmat = s2 * s2.t();
 
                 return OptimiserEstimate(
-                    previousEstimate.generation + 1, convert<double>(bestEstimate), previousEstimate.covariance);
+                    previousEstimate.generation + 1, convert(bestEstimate), previousEstimate.covariance);
             }
         };
     }  // namespace optimisation

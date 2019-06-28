@@ -182,84 +182,82 @@ namespace support {
         on<Trigger<StopCommand>>().then("Sim walk start", [this] { walking = false; });
 
         on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Optional<With<WalkCommand>>>()
-            .then("Robot motion simulation",
-                  [this](const Sensors& /*sensors*/, std::shared_ptr<const WalkCommand> walkCommand) {
-                      NUClear::clock::time_point now = NUClear::clock::now();
-                      double deltaT =
-                          1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
-                      Transform2D diff;
+            .then(
+                "Robot motion simulation",
+                [this](const Sensors& /*sensors*/, std::shared_ptr<const WalkCommand> walkCommand) {
+                    NUClear::clock::time_point now = NUClear::clock::now();
+                    double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
+                    Transform2D diff;
 
-                      switch (cfg_.robot.motion_type) {
-                          case MotionType::NONE: world.robotVelocity = Transform2D({0, 0, 0}); break;
+                    switch (cfg_.robot.motion_type) {
+                        case MotionType::NONE: world.robotVelocity = Transform2D({0, 0, 0}); break;
 
-                          case MotionType::PATH:
+                        case MotionType::PATH:
 
-                              world.robotPose.xy() = getPath(cfg_.robot.path);
+                            world.robotPose.xy() = getPath(cfg_.robot.path);
 
-                              diff = world.robotPose - oldRobotPose;
-                              // Face along direction of movement
-                              world.robotPose.angle() = vectorToBearing(diff.xy());
+                            diff = world.robotPose - oldRobotPose;
+                            // Face along direction of movement
+                            world.robotPose.angle() = vectorToBearing(diff.xy());
 
-                              world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0});  // Robot
-                                                                                                     // coordinates
-                              break;
+                            world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0});  // Robot
+                                                                                                   // coordinates
+                            break;
 
-                          case MotionType::MOTION:
+                        case MotionType::MOTION:
 
-                              // Update based on walk engine
-                              if (walking && walkCommand && !kicking) {
-                                  world.robotVelocity.xy() =
-                                      Transform2D(convert<double, 3>(walkCommand->command)).xy() * 0.15;
-                                  // world.robotVelocity.xy() = sensors.odometry;
-                                  // angle from command:
-                                  world.robotVelocity.angle() =
-                                      Transform2D(convert<double, 3>(walkCommand->command)).angle() * 1.0;
-                              }
-                              else {
-                                  world.robotVelocity = utility::math::matrix::Transform2D({0, 0, 0});
-                              }
-                              world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
-                              world.robotPose += world.robotVelocity * deltaT;
-                              break;
-                      }
-                      // Update ball position
-                      switch (cfg_.ball.motion_type) {
-                          case MotionType::NONE: world.ball.velocity = {0, 0, 0}; break;
+                            // Update based on walk engine
+                            if (walking && walkCommand && !kicking) {
+                                world.robotVelocity.xy() = Transform2D(convert(walkCommand->command)).xy() * 0.15;
+                                // world.robotVelocity.xy() = sensors.odometry;
+                                // angle from command:
+                                world.robotVelocity.angle() = Transform2D(convert(walkCommand->command)).angle() * 1.0;
+                            }
+                            else {
+                                world.robotVelocity = utility::math::matrix::Transform2D({0, 0, 0});
+                            }
+                            world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
+                            world.robotPose += world.robotVelocity * deltaT;
+                            break;
+                    }
+                    // Update ball position
+                    switch (cfg_.ball.motion_type) {
+                        case MotionType::NONE: world.ball.velocity = {0, 0, 0}; break;
 
-                          case MotionType::PATH:
+                        case MotionType::PATH:
 
-                              world.ball.position.rows(0, 1) = getPath(cfg_.ball.path);
+                            world.ball.position.rows(0, 1) = getPath(cfg_.ball.path);
 
-                              world.ball.velocity = (world.ball.position - oldBallPose) / deltaT;  // world coordinates
-                              break;
+                            world.ball.velocity = (world.ball.position - oldBallPose) / deltaT;  // world coordinates
+                            break;
 
-                          case MotionType::MOTION:
-                              // log("check kick:", !kickQueue.empty(), !kicking, lastKicking);
-                              if (!kickQueue.empty() && !kicking && lastKicking) {
-                                  // Get last queue
-                                  KickCommand lastKickCommand = kickQueue.back();
-                                  // Empty queue
-                                  std::queue<KickCommand>().swap(kickQueue);
-                                  // Check if kick worked:
-                                  Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
+                        case MotionType::MOTION:
+                            // log("check kick:", !kickQueue.empty(), !kicking, lastKicking);
+                            if (!kickQueue.empty() && !kicking && lastKicking) {
+                                // Get last queue
+                                KickCommand lastKickCommand = kickQueue.back();
+                                // Empty queue
+                                std::queue<KickCommand>().swap(kickQueue);
+                                // Check if kick worked:
+                                Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                                  world.ball.position.rows(0, 1) +=
-                                      world.robotPose.rotation()
-                                      * convert<double, 2>(lastKickCommand.direction.head<2>().normalized());
-                              }
-                              break;
-                      }
+                                world.ball.position.rows(0, 1) +=
+                                    world.robotPose.rotation()
+                                    * convert(lastKickCommand.direction.head<2>().normalized());
+                            }
+                            break;
+                    }
 
 
-                      // Emit the change in orientation as a DarwinSensors::Gyroscope,
-                      // to be handled by HardwareSimulator.
-                      emit(computeGyro(world.robotPose.angle(), oldRobotPose.angle()));
+                    // Emit the change in orientation as a DarwinSensors::Gyroscope,
+                    // to be handled by HardwareSimulator.
+                    emit(computeGyro(world.robotPose.angle(), oldRobotPose.angle()));
 
-                      oldRobotPose = world.robotPose;
-                      oldBallPose  = world.ball.position;
-                      lastNow      = now;
-                      lastKicking  = kicking;
-                  });
+                    oldRobotPose = world.robotPose;
+                    oldBallPose  = world.ball.position;
+                    lastNow      = now;
+                    lastKicking  = kicking;
+                });
 
         // Simulate Vision
         // VirtualCamera is emitting images with lens parameters at 30 fps
@@ -333,7 +331,7 @@ namespace support {
                 else {
                     // Emit current ball exactly
                     auto b        = std::make_unique<message::localisation::Ball>();
-                    b->position   = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
+                    b->position   = convert(arma::vec2(world.robotPose.worldToLocal(world.ball.position).xy()));
                     b->covariance = Eigen::Matrix2d::Identity() * 0.00001;
 
                     emit(std::make_unique<std::vector<message::localisation::Ball>>(1, *b));

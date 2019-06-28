@@ -36,13 +36,13 @@ namespace localisation {
             [this](const Sensors& sensors) {
                 NUClear::log("Localisation Orientation reset. This direction is now forward.");
                 emit(std::make_unique<Nod>(true));
-                Transform2D Trw    = Transform3D(convert<double, 4, 4>(sensors.Htw)).projectTo2D();
+                Transform2D Trw    = Transform3D(convert(sensors.Htw)).projectTo2D();
                 localisationOffset = Trw;
             });
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
-            Transform2D Trw = Transform3D(convert<double, 4, 4>(sensors.Htw)).projectTo2D();
+            Transform2D Trw = Transform3D(convert(sensors.Htw)).projectTo2D();
             Transform2D Twr = Trw.i();
 
             Transform2D state = localisationOffset.localToWorld(Twr);

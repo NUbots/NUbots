@@ -193,7 +193,7 @@ namespace behaviour {
                         return;
                     }
 
-                    Transform3D Htw = convert<double, 4, 4>(sensors.Htw);
+                    Transform3D Htw = convert(sensors.Htw);
                     auto now        = NUClear::clock::now();
                     float timeSinceBallSeen =
                         std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
@@ -213,7 +213,7 @@ namespace behaviour {
                     if (useLocalisation) {
 
                         // Transform kick target to torso space
-                        Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+                        Transform3D Hfw = fieldStateToTransform3D(convert(field.position));
                         Transform3D Htf = (Htw * Hfw.i());
                         arma::vec3 kickTarget =
                             Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
@@ -260,8 +260,8 @@ namespace behaviour {
 
 
                     std::unique_ptr<WalkCommand> command =
-                        std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
-                    command->command = convert<double, 3>(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
+                        std::make_unique<WalkCommand>(subsumptionId, convert(Transform2D({0, 0, 0})));
+                    command->command = convert(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
 
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));

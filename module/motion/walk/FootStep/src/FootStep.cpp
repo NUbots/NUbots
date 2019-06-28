@@ -151,7 +151,7 @@ namespace motion {
                     Htf_t.linear()      = Rf_tt;   // Rotation from above
                     Htf_t.translation() = rF_tTt;  // Translation to foot target
 
-                    Transform3D t = convert<double, 4, 4>(Htf_t.matrix());
+                    Transform3D t = convert(Htf_t.matrix());
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
 

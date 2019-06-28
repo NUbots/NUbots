@@ -58,10 +58,9 @@ namespace vision {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<int>();
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
-            config.goal_angular_cov =
-                convert<double, 3>(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
-            config.use_median = cfg["use_median"].as<bool>();
-            config.debug      = cfg["debug"].as<bool>();
+            config.goal_angular_cov     = convert(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.use_median           = cfg["use_median"].as<bool>();
+            config.debug                = cfg["debug"].as<bool>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>>().then(

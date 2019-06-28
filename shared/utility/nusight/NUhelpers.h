@@ -116,8 +116,8 @@ namespace nusight {
         object.name      = name;
         object.shape     = DrawObject::Shape::ARROW;
         object.timeout   = timeout;
-        object.position  = convert<double, 3>(position);
-        object.direction = convert<double, 3>(direction);
+        object.position  = convert(position);
+        object.direction = convert(direction);
         object.length    = length;
 
         auto drawObjects = std::make_unique<DrawObjects>();
@@ -135,8 +135,8 @@ namespace nusight {
         object.name     = name;
         object.shape    = DrawObject::Shape::ARROW;
         object.timeout  = timeout;
-        object.position = convert<double, 3>(position);
-        object.target   = convert<double, 3>(target);
+        object.position = convert(position);
+        object.target   = convert(target);
 
         auto drawObjects = std::make_unique<DrawObjects>();
         drawObjects->objects.push_back(object);
@@ -175,7 +175,7 @@ namespace nusight {
         object.timeout   = timeout;
         object.position  = Eigen::Vector3d(position.x(), position.y(), 0);
         object.direction = Eigen::Vector3d(std::cos(position.angle()), std::sin(position.angle()), 0);
-        object.colour    = convert<double, 3>(colour);
+        object.colour    = convert(colour);
         object.length    = length;
 
         auto drawObjects = std::make_unique<DrawObjects>();
@@ -195,7 +195,7 @@ namespace nusight {
         object.name     = name;
         object.shape    = DrawObject::Shape::BOX;
         object.timeout  = timeout;
-        object.position = convert<double, 3>(position);
+        object.position = convert(position);
         object.width    = width;
         object.height   = height;
         object.depth    = depth;
@@ -217,8 +217,8 @@ namespace nusight {
         object.name     = name;
         object.shape    = DrawObject::Shape::CIRCLE;
         object.timeout  = timeout;
-        object.position = convert<double, 3>(position);
-        object.rotation = convert<double, 3>(rotation);
+        object.position = convert(position);
+        object.rotation = convert(rotation);
         object.width    = width;
         object.height   = height;
 
@@ -240,7 +240,7 @@ namespace nusight {
         object.timeout  = timeout;
         object.position = Eigen::Vector3d(circle.centre(0), circle.centre(1), z);
         object.rotation = Eigen::Vector3d(0.0, 0.0, 0.0);
-        object.colour   = convert<double, 3>(colour);
+        object.colour   = convert(colour);
         object.width    = circle.radius * 2.0f;
         object.height   = circle.radius * 2.0f;
 
@@ -262,8 +262,8 @@ namespace nusight {
         object.name          = name;
         object.shape         = DrawObject::Shape::CYLINDER;
         object.timeout       = timeout;
-        object.position      = convert<double, 3>(position);
-        object.rotation      = convert<double, 3>(rotation);
+        object.position      = convert(position);
+        object.rotation      = convert(rotation);
         object.height        = height;
         object.top_radius    = topRadius;
         object.bottom_radius = bottomRadius;
@@ -285,8 +285,8 @@ namespace nusight {
         object.name     = name;
         object.shape    = DrawObject::Shape::PYRAMID;
         object.timeout  = timeout;
-        object.position = convert<double, 3>(position);
-        object.rotation = convert<double, 3>(rotation);
+        object.position = convert(position);
+        object.rotation = convert(rotation);
         object.height   = height;
         object.faces    = faces;
 
@@ -306,7 +306,7 @@ namespace nusight {
         object.name     = name;
         object.shape    = DrawObject::Shape::RECTANGLE;
         object.timeout  = timeout;
-        object.position = convert<double, 3>(position);
+        object.position = convert(position);
         object.height   = height;
         object.length   = length;
 
@@ -343,7 +343,7 @@ namespace nusight {
                                                       float timeout = TIMEOUT) {
 
         auto drawObjects               = drawRectangle(name, rect, z, timeout);
-        drawObjects->objects[0].colour = convert<double, 3>(colour);
+        drawObjects->objects[0].colour = convert(colour);
 
         return std::move(drawObjects);
     }
@@ -357,7 +357,7 @@ namespace nusight {
         object.name     = name;
         object.shape    = DrawObject::Shape::SPHERE;
         object.timeout  = timeout;
-        object.position = convert<double, 3>(position);
+        object.position = convert(position);
         object.radius   = radius;
 
         auto drawObjects = std::make_unique<DrawObjects>();
@@ -373,7 +373,7 @@ namespace nusight {
                                                    float timeout = TIMEOUT) {
 
         auto drawObjects               = drawSphere(name, position, radius, timeout);
-        drawObjects->objects[0].colour = convert<double, 3>(colour);
+        drawObjects->objects[0].colour = convert(colour);
 
         return std::move(drawObjects);
     }
@@ -390,12 +390,12 @@ namespace nusight {
         object.shape   = DrawObject::Shape::POLYLINE;
         object.timeout = timeout;
         object.width   = line_width;
-        object.colour  = convert<double, 3>(colour);
+        object.colour  = convert(colour);
 
         for (uint i = 0; i < positions.size(); i++) {
 
             DrawObject::Path node;
-            node.position     = convert<double, 2>(positions[i]);
+            node.position     = convert(positions[i]);
             node.parent_index = parentIndices[i];
             object.path.push_back(node);
         }

@@ -178,9 +178,9 @@ namespace platform {
                 [this](std::shared_ptr<const Sensors> previousSensors) {
                     if (previousSensors) {
                         Transform3D rightFootPose =
-                            convert<double, 4, 4>(previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL));
+                            convert(previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL));
                         Transform3D leftFootPose =
-                            convert<double, 4, 4>(previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL));
+                            convert(previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL));
                         arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
                         arma::vec3 torsoFromLeftFoot  = -leftFootPose.rotation().i() * leftFootPose.translation();
                         // emit(graph("torsoFromRightFoot", torsoFromRightFoot));

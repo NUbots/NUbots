@@ -60,9 +60,8 @@ namespace vision {
             config.maximum_cone_radius   = std::cos(cfg["maximum_cone_radius"].as<float>());
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
-            config.ball_angular_cov =
-                convert<double, 3>(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
-            config.debug = cfg["debug"].as<bool>();
+            config.ball_angular_cov      = convert(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.debug                 = cfg["debug"].as<bool>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(

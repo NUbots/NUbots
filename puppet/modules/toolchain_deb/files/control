@@ -1,5 +1,5 @@
 Package: nubots-toolchain
-Version: 3.0.1
+Version: 3.0.4
 Section: base
 Priority: optional
 Architecture: amd64
