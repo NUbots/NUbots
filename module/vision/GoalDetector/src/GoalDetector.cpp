@@ -19,7 +19,7 @@
 
 #include "GoalDetector.h"
 
-#include <cmath>
+#include <fmt/format.h>
 
 #include "RansacGoalModel.h"
 
@@ -251,8 +251,16 @@ namespace vision {
 
                             const float disagreement = std::abs(width - actual_width) / std::max(width, actual_width);
 
-                            // Check the width between the posts, if they are close enough then assign left and right
-                            // sides
+                            // Check the width between the posts
+                            // If they are close enough then assign left and right sides
+                            if (config.debug) {
+                                log<NUClear::DEBUG>(fmt::format(
+                                    "Camera {}: Goal post 0 distance = {}", horizon.camera_id, it1->post.distance));
+                                log<NUClear::DEBUG>(fmt::format(
+                                    "Camera {}: Goal post 1 distance = {}", horizon.camera_id, it2->post.distance));
+                                log<NUClear::DEBUG>(fmt::format(
+                                    "Camera {}: Goal width = {} ({})", horizon.camera_id, width, disagreement));
+                            }
                             if (disagreement < config.disagreement_ratio) {
                                 auto it = pairs.find(it1);
                                 if (it != pairs.end()) {
@@ -284,6 +292,10 @@ namespace vision {
                             pair.first->side        = Goal::Side::RIGHT;
                             pair.second.first->side = Goal::Side::LEFT;
                         }
+                    }
+
+                    if (config.debug) {
+                        log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
                     }
 
                     emit(std::move(goals));
