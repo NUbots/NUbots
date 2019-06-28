@@ -213,17 +213,10 @@ namespace vision {
 
                         // Direction (determined by RHR) needed to turn to get from one post to the other
                         // Anti-clockwise (negative) turn from rGCc0 to rGCc1 around cam_space_z
-
-                        // Anti-clockwise turn from rGCc0 to rGCc1 around cam_space_z
                         // ==> rGCc1 is to the left of rGCc0
                         // Clockwise (positive) turn from rGCc0 to rGCc1 around cam_space_z
-                            return false;
-                        }
-                        // Clockwise turn from rGCc0 to rGCc1 around cam_space_z
                         // ==> rGCc0 is to the left of rGCc1
                         return rGCc0.cross(rGCc1).dot(cam_space_z) < 0.0f;
-                            return true;
-                        }
                     };
 
                     // Calculate the distance between 2 goal posts using the law of cosines
@@ -244,10 +237,8 @@ namespace vision {
                         for (auto it2 = std::next(it1); it2 != goals->goals.end(); it2 = std::next(it2)) {
                             const Eigen::Vector3f& rGCc0 = it1->post.bottom;
                             const Eigen::Vector3f& rGCc1 = it2->post.bottom;
-                            const Eigen::Vector3f rGCc1 = it2->measurements.back().position / it2->center_line.distance;
 
                             const float width = distance_between(rGCc0, it1->post.distance, rGCc1, it2->post.distance);
-                                distance_between(rGCc0, it1->center_line.distance, rGCc1, it2->center_line.distance);
 
                             const float disagreement = std::abs(width - actual_width) / std::max(width, actual_width);
 
@@ -280,8 +271,6 @@ namespace vision {
                         // Divide by distance to get back to unit vectors
                         const Eigen::Vector3f& rGCc0 = pair.first->post.bottom;
                         const Eigen::Vector3f& rGCc1 = pair.second.first->post.bottom;
-                        const Eigen::Vector3f rGCc1 =
-                            pair.second.first->measurements.back().position / pair.second.first->center_line.distance;
 
                         // Determine which post is the left one
                         if (is_left_of(rGCc0, rGCc1)) {
