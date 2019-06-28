@@ -233,7 +233,9 @@ namespace vision {
                                                 const Eigen::Vector3f& rGCc1,
                                                 const float& rGCc1_norm) {
                         // Law of consines
-                        return rGCc0_norm + rGCc1_norm - 2 * rGCc0_norm * rGCc1_norm * rGCc0.dot(rGCc1);
+                        const float a2 = rGCc0_norm * rGCc0_norm;
+                        const float b2 = rGCc1_norm * rGCc1_norm;
+                        return std::sqrt(a2 + b2 - 2.0f * rGCc0_norm * rGCc1_norm * rGCc0.dot(rGCc1));
                     };
 
                     std::map<std::vector<Goal>::iterator, std::pair<std::vector<Goal>::iterator, float>> pairs;
