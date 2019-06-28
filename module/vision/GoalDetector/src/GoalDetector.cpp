@@ -202,6 +202,8 @@ namespace vision {
                         // Angular positions from the camera
                         g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
                         g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
+
+                        goals->goals.push_back(std::move(g));
                     }
 
                     // Returns true if rGCc0 is to the left of rGCc1, with respect to camera z
