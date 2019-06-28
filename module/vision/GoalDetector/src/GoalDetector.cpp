@@ -30,6 +30,7 @@
 #include "message/vision/GreenHorizon.h"
 
 #include "utility/math/coordinates.h"
+#include "utility/math/geometry/ConvexHull.h"
 #include "utility/math/vision.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
@@ -59,7 +60,8 @@ namespace vision {
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
             config.goal_angular_cov =
                 convert<double, 3>(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
-            config.debug = cfg["debug"].as<bool>();
+            config.use_median = cfg["use_median"].as<bool>();
+            config.debug      = cfg["debug"].as<bool>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>>().then(
@@ -147,37 +149,54 @@ namespace vision {
                                             std::distance(other, cluster.end())));
                         }
 
-                        // Calculate average of left_xy and right_xy and find lowest z point
                         Eigen::Vector3f left_side    = Eigen::Vector3f::Zero();
                         Eigen::Vector3f right_side   = Eigen::Vector3f::Zero();
                         Eigen::Vector3f bottom_point = Eigen::Vector3f::Zero();
-                        for (auto it = cluster.begin(); it != right; it = std::next(it)) {
-                            const Eigen::Vector3f& p0(rays.row(*it));
-                            left_side += p0;
-                            if (p0.z() < bottom_point.z()) {
-                                bottom_point = p0;
+
+                        // Find the median of the left side and the right side
+                        if (config.use_median) {
+                            utility::math::geometry::sort_by_theta(cluster.begin(), right, rays, world_offset);
+                            utility::math::geometry::sort_by_theta(right, other, rays, world_offset);
+                            left_side =
+                                rays.row(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
+                            right_side = rays.row(*std::next(right, std::distance(right, other) / 2));
+                            for (auto it = cluster.begin(); it != cluster.end(); it = std::next(it)) {
+                                const Eigen::Vector3f& p0(rays.row(*it));
+                                if (p0.z() < bottom_point.z()) {
+                                    bottom_point = p0;
+                                }
                             }
                         }
-                        for (auto it = right; it != other; it = std::next(it)) {
-                            const Eigen::Vector3f& p0(rays.row(*it));
-                            right_side += p0;
-                            if (p0.z() < bottom_point.z()) {
-                                bottom_point = p0;
+                        // Find the average of the left side and the right side
+                        else {
+                            // Calculate average of left_xy and right_xy and find lowest z point
+                            for (auto it = cluster.begin(); it != right; it = std::next(it)) {
+                                const Eigen::Vector3f& p0(rays.row(*it));
+                                left_side += p0;
+                                if (p0.z() < bottom_point.z()) {
+                                    bottom_point = p0;
+                                }
                             }
-                        }
-                        for (auto it = other; it != cluster.end(); it = std::next(it)) {
-                            const Eigen::Vector3f& p0(rays.row(*it));
-                            if (p0.z() < bottom_point.z()) {
-                                bottom_point = p0;
+                            for (auto it = right; it != other; it = std::next(it)) {
+                                const Eigen::Vector3f& p0(rays.row(*it));
+                                right_side += p0;
+                                if (p0.z() < bottom_point.z()) {
+                                    bottom_point = p0;
+                                }
                             }
+                            for (auto it = other; it != cluster.end(); it = std::next(it)) {
+                                const Eigen::Vector3f& p0(rays.row(*it));
+                                if (p0.z() < bottom_point.z()) {
+                                    bottom_point = p0;
+                                }
+                            }
+                            left_side /= std::distance(cluster.begin(), right);
+                            right_side /= std::distance(right, other);
                         }
-                        left_side /= std::distance(cluster.begin(), right);
-                        right_side /= std::distance(right, other);
 
                         // Calculate bottom middle of goal post, z is calculated above
                         bottom_point.x() = (left_side.x() + right_side.x()) * 0.5f;
                         bottom_point.y() = (left_side.y() + right_side.y()) * 0.5f;
-                        bottom_point     = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * bottom_point;
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
                         Eigen::Vector3f middle = ((left_side + right_side) * 0.5f).normalized();

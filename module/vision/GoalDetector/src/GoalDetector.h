@@ -34,6 +34,7 @@ namespace vision {
             int cluster_points;
             float disagreement_ratio;
             message::conversion::math::fmat3 goal_angular_cov;
+            bool use_median;
             bool debug;
         } config;
 

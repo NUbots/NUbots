@@ -2,4 +2,5 @@ confidence_threshold: 0.7
 cluster_points: 5
 disagreement_ratio: 0.20
 goal_angular_cov: [0.1, 0.001, 0.001]
+use_median: false
 debug: false
