@@ -63,7 +63,7 @@ namespace support {
             e->values     = current.estimate;
             e->covariance = current.covariance;
 
-            log<NUClear::FATAL>("Current Estimate", convert<double>(current.estimate).t());
+            log<NUClear::FATAL>("Current Estimate", convert(current.estimate).t());
 
             // Add our episodes
             for (auto& episode : opt.episodes) {
@@ -320,7 +320,7 @@ namespace support {
 
                         p->group      = request.group;
                         p->generation = opt.optimiser->estimate().generation;
-                        p->samples    = convert<double>(opt.optimiser->getSamples(request.nSamples));
+                        p->samples    = convert(opt.optimiser->getSamples(request.nSamples));
                         p->covariance = opt.optimiser->estimate().covariance;
 
                         log<NUClear::DEBUG>(fmt::format(

@@ -192,7 +192,7 @@ namespace motion {
                            .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            Transform2D velocity = convert<double, 3>(walkCommand.command);
+            Transform2D velocity = convert(walkCommand.command);
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();
             }

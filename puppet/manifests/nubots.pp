@@ -14,7 +14,7 @@ node default {
   }
 
   # Get and install our toolchain
-  $toolchain_version = '3.0.1'
+  $toolchain_version = '3.0.4'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain-${toolchain_version}.deb",
     source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
@@ -326,6 +326,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+set(OpenCL_INCLUDE_DIR \"/opt/intel/opencl/include\")
+set(OpenCL_LIBRARY \"/opt/intel/opencl/libOpenCL.so\")
 
 ${compile_options}
 

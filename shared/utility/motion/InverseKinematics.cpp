@@ -291,8 +291,7 @@ namespace motion {
 
         arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors) {
             arma::vec3 groundPos_ground = {gpos[0], gpos[1], 0};
-            return calculateHeadJointsToLookAt(
-                groundPos_ground, convert<double, 4, 4>(sensors.Hgc), convert<double, 4, 4>(sensors.Hgt));
+            return calculateHeadJointsToLookAt(groundPos_ground, convert(sensors.Hgc), convert(sensors.Hgt));
         }
 
         std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(

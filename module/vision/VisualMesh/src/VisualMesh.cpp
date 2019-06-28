@@ -127,16 +127,15 @@ namespace vision {
                 msg->mesh.emplace_back(r.phi, r.end - r.begin);
             }
 
-            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
-                reinterpret_cast<float*>(results.pixel_coordinates.data()), results.pixel_coordinates.size(), 2);
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, 2, Eigen::Dynamic>>(
+                reinterpret_cast<float*>(results.pixel_coordinates.data()), 2, results.pixel_coordinates.size());
             msg->indices       = std::move(results.global_indices);
-            msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
-                reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
-            msg->classifications =
-                Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
-                    results.classifications.data(),
-                    results.neighbourhood.size(),
-                    results.classifications.size() / results.neighbourhood.size());
+            msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, 6, Eigen::Dynamic>>(
+                reinterpret_cast<int*>(results.neighbourhood.data()), 6, results.neighbourhood.size());
+            msg->classifications = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>>(
+                results.classifications.data(),
+                results.classifications.size() / results.neighbourhood.size(),
+                results.neighbourhood.size());
 
             emit(msg);
         });

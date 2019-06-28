@@ -45,8 +45,8 @@ namespace math {
             CholeskySampler(const OptimiserParameters& params)
                 : batchSize(params.batchSize)
                 , generation(params.initial.generation)
-                , upperBound(convert<double>(params.upperBound))
-                , lowerBound(convert<double>(params.lowerBound))
+                , upperBound(convert(params.upperBound))
+                , lowerBound(convert(params.lowerBound))
                 , samples() {}
 
             void clear() {
@@ -55,9 +55,9 @@ namespace math {
 
             arma::mat getSamples(const OptimiserEstimate& bestParams, uint64_t numSamples) {
                 if (bestParams.generation != generation || sampleCount + numSamples > batchSize) {
-                    arma::mat projection = arma::chol(convert<double>(bestParams.covariance));
-                    samples = (arma::randn(convert<double>(bestParams.estimate).n_elem, batchSize) * projection).t();
-                    samples.each_col() += convert<double>(bestParams.estimate);
+                    arma::mat projection = arma::chol(convert(bestParams.covariance));
+                    samples = (arma::randn(convert(bestParams.estimate).n_elem, batchSize) * projection).t();
+                    samples.each_col() += convert(bestParams.estimate);
 
                     // out of bounds check
                     if (lowerBound.n_elem > 0 and upperBound.n_elem > 0) {
@@ -66,10 +66,9 @@ namespace math {
                         samples = samples.rows(arma::find(outOfBounds == 0));
 
                         while (samples.n_rows < batchSize) {
-                            arma::mat samples2 = arma::randn(convert<double>(bestParams.estimate).n_elem, batchSize);
-                            samples2 =
-                                (arma::randn(convert<double>(bestParams.estimate).n_elem, batchSize) * projection).t();
-                            samples2.each_col() += convert<double>(bestParams.estimate);
+                            arma::mat samples2 = arma::randn(convert(bestParams.estimate).n_elem, batchSize);
+                            samples2 = (arma::randn(convert(bestParams.estimate).n_elem, batchSize) * projection).t();
+                            samples2.each_col() += convert(bestParams.estimate);
 
                             outOfBounds = arma::sum(samples2 > arma::repmat(upperBound, samples2.n_cols, 1), 1);
                             outOfBounds += arma::sum(samples2 < arma::repmat(lowerBound, samples2.n_cols, 1), 1);

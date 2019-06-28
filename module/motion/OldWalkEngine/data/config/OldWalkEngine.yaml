@@ -33,7 +33,7 @@ stance:
     arms: 15
     legs: 10
   # ???
-  limit_margin_y: -0.15
+  limit_margin_y: -0.05
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
