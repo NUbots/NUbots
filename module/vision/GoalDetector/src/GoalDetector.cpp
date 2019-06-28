@@ -48,7 +48,7 @@ namespace vision {
 
     using utility::math::coordinates::cartesianToSpherical;
 
-    static constexpr int GOAL_INDEX = 0;
+    static constexpr int GOAL_INDEX = 1;
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
