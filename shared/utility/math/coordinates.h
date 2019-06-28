@@ -68,17 +68,17 @@ namespace math {
             return result;
         }
 
-        template <typename T>
-        inline Eigen::Matrix<T, 3, 1> cartesianToSpherical(const Eigen::Matrix<T, 3, 1>& cartesianCoordinates) {
-            T x = cartesianCoordinates.x();
-            T y = cartesianCoordinates.y();
-            T z = cartesianCoordinates.z();
-            Eigen::Matrix<T, 3, 1> result;
+        template <typename T, typename U = typename T::Scalar>
+        inline Eigen::Matrix<U, 3, 1> cartesianToSpherical(const Eigen::MatrixBase<T>& cartesianCoordinates) {
+            U x = cartesianCoordinates.x();
+            U y = cartesianCoordinates.y();
+            U z = cartesianCoordinates.z();
+            Eigen::Matrix<U, 3, 1> result;
 
             result.x() = std::sqrt(x * x + y * y + z * z);  // r
             result.y() = std::atan2(y, x);                  // theta
-            if (result.x() == static_cast<T>(0)) {
-                result.z() = static_cast<T>(0);
+            if (result.x() == static_cast<U>(0)) {
+                result.z() = static_cast<U>(0);
             }
             else {
                 result.z() = std::asin(z / (result.x()));  // phi
