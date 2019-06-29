@@ -37,7 +37,7 @@ namespace vision {
             // Convenience variables
             const auto& cls                                     = mesh.classifications;
             const auto& neighbours                              = mesh.neighbourhood;
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
+            const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = mesh.rays;
             const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
 
             // Get some indices to partition

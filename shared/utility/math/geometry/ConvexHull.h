@@ -38,11 +38,11 @@ namespace math {
         template <typename Iterator>
         void sort_by_theta(Iterator first,
                            Iterator last,
-                           const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
+                           const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
                            const float& world_offset) {
             std::sort(first, last, [&](const int& a, const int& b) {
-                const Eigen::Vector3f& p0(rays.col(a));
-                const Eigen::Vector3f& p1(rays.col(b));
+                const Eigen::Vector3f& p0(rays.row(a));
+                const Eigen::Vector3f& p1(rays.row(b));
 
                 float theta0 =
                     std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
@@ -201,11 +201,11 @@ namespace math {
         }
 
         std::vector<int> upper_convex_hull(const std::vector<int>& indices,
-                                           const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
+                                           const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
                                            const float world_offset,
                                            const bool& cycle = false) {
             // We need a minimum of 3 non-colinear points to calculate the convex hull
-            if (rays.cols() < 3) {
+            if (rays.rows() < 3) {
                 return std::vector<int>();
             }
 
@@ -219,13 +219,13 @@ namespace math {
 
             // Remove all colinear points
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-                const Eigen::Vector2f p0 = project_vector(rays.col(*std::prev(local_indices.end(), 2)));
-                const Eigen::Vector2f p1 = project_vector(rays.col(*std::prev(local_indices.end(), 1)));
-                Eigen::Vector2f p2       = project_vector(rays.col(*it));
+                const Eigen::Vector2f p0 = project_vector(rays.row(*std::prev(local_indices.end(), 2)));
+                const Eigen::Vector2f p1 = project_vector(rays.row(*std::prev(local_indices.end(), 1)));
+                Eigen::Vector2f p2       = project_vector(rays.row(*it));
 
                 while ((it != local_indices.end()) && turn_direction(p0, p1, p2) == 0) {
                     it = local_indices.erase(it);
-                    p2 = project_vector(rays.col(*it));
+                    p2 = project_vector(rays.row(*it));
                 }
                 if (it != local_indices.end()) {
                     it = std::next(it);
@@ -249,15 +249,15 @@ namespace math {
             // Now go through the rest of the points and add them to the convex hull if each triple makes an
             // clockwise turn
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
-                Eigen::Vector2f p0       = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
-                Eigen::Vector2f p1       = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
-                const Eigen::Vector2f p2 = project_vector(rays.col(*it));
+                Eigen::Vector2f p0       = project_vector(rays.row(*std::prev(hull_indices.end(), 2)));
+                Eigen::Vector2f p1       = project_vector(rays.row(*std::prev(hull_indices.end(), 1)));
+                const Eigen::Vector2f p2 = project_vector(rays.row(*it));
                 // Triple does not make an clockwise turn, replace the last element in the list
                 while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
                     // Remove the offending point from the convex hull
                     hull_indices.pop_back();
-                    p0 = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
-                    p1 = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
+                    p0 = project_vector(rays.row(*std::prev(hull_indices.end(), 2)));
+                    p1 = project_vector(rays.row(*std::prev(hull_indices.end(), 1)));
                 }
 
                 // Add the new point to the convex hull
