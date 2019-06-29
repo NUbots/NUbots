@@ -246,14 +246,30 @@ def run(config, **kwargs):
 
     print("Final Accuracy", history.history["val_binary_accuracy"][-1])
 
-    output = {
-        "network": [],
+    # Load the old configuration so we don't overwrite config we don't use
+    config_path = os.path.join(
+        os.path.dirname(__file__),
+        os.path.pardir,
+        "module",
+        "platform",
+        "darwin",
+        "SensorFilter",
+        "data",
+        "config",
+        "FootDownNetwork.yaml",
+    )
+
+    with open(config_path, "r") as f:
+        output = yaml.safe_load(f)
+
+    output["network"] = {
         "input": {
             "servos": servos,
             "fields": keys,
             "accelerometer": use_accel,
             "gyroscope": use_gyro,
         },
+        "layers": [],
     }
 
     for layer in model.layers:
@@ -262,23 +278,7 @@ def run(config, **kwargs):
         weights = np.array(h[0]).tolist()
         biases = np.array(h[1]).tolist()
 
-        output["network"].append({"weights": weights, "biases": biases})
+        output["network"]["layers"].append({"weights": weights, "biases": biases})
 
-    with open(
-        os.path.join(
-            data_path,
-            os.path.join(
-                os.path.dirname(__file__),
-                os.path.pardir,
-                "module",
-                "platform",
-                "darwin",
-                "SensorFilter",
-                "data",
-                "config",
-                "FootDownNetwork.yaml",
-            ),
-        ),
-        "w",
-    ) as f:
+    with open(config_path, "w") as f:
         f.write(yaml.dump(output, width=120))

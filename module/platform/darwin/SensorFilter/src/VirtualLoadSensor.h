@@ -22,8 +22,9 @@
 
 #include <Eigen/Core>
 
-#include <extension/Configuration.h>
-#include <message/input/Sensors.h>
+#include "extension/Configuration.h"
+#include "message/input/Sensors.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace platform {
@@ -38,18 +39,71 @@ namespace platform {
                 , certainty_threshold(0.0f)
                 , uncertainty_threshold(0.0f)
                 ) {}
-            VirtualLoadSensor(const ::extension::Configuration& network) {
-                // TODO load the weights and biases into the layers object
+            VirtualLoadSensor(const ::extension::Configuration& config) {
+                // Bayes settings
+                noise_factor          = config["filter"]["noise_factor"].as<Scalar>();
+                certainty_threshold   = config["filter"]["certainty_threshold"].as<Scalar>();
+                uncertainty_threshold = config["filter"]["uncertainty_threshold"].as<Scalar>();
+
+                // Add the servos
+                for (const auto& field : config["network"]["input"]["servos"]) {
+                    servos.emplace_back("L_" + field.as<std::string>());
+                    servos.emplace_back("R_" + field.as<std::string>());
+                }
+
+                // Add the fields
+                for (const auto& field : config["network"]["input"]["fields"]) {
+                    if (field.as<std::string>() == "POSITION") {
+                        fields.emplace_back(POSITION);
+                    }
+                    else if (field.as<std::string>() == "LOAD") {
+                        fields.emplace_back(LOAD);
+                    }
+                    else if (field.as<std::string>() == "VELOCITY") {
+                        fields.emplace_back(VELOCITY);
+                    }
+                }
+
+                accelerometer = config["network"]["input"]["accelerometer"].as<bool>();
+                gyroscope     = config["network"]["input"]["accelerometer"].as<bool>();
+
+                for (const auto& layer : config["network"]["input"]["layers"]) {
+                    // TODO load the layers into Eigen::Matrix
+                }
             }
 
             static constexpr Scalar sigmoid(const Scalar& value) {
                 return 1.0 / (1.0 + std::exp(-value));
             }
 
-            std::array<bool, 2> updateFeet(const ::message::input::Sensors& input) {
+            std::array<bool, 2> updateFeet(const ::message::input::Sensors& sensors) {
 
                 // TODO based on configuration grab the sensor readings we are using
-                Eigen::Matrix<Scalar, Eigen::Dynamic, 1> logits;
+                Eigen::Matrix<Scalar, Eigen::Dynamic, 1> logits(
+                    servos.size() * fields.size() + accelerometer ? 3 : 0 + gyroscope ? 3 : 0);
+
+                // Build our input data
+                int index = 0;
+                for (const auto& servo_id : servos) {
+                    const auto& s = sensors.servo[servo_id];
+                    for (const auto& f : fields) {
+                        switch (f) {
+                            case POSITION: logits[index++] = s.present_position; break;
+                            case LOAD: logits[index++] = s.load; break;
+                            case VELOCITY: logits[index++] = s.present_velocity; break;
+                        }
+                    }
+                }
+                if (accelerometer) {
+                    logits[i++] = sensors.accelerometer.x();
+                    logits[i++] = sensors.accelerometer.y();
+                    logits[i++] = sensors.accelerometer.z();
+                }
+                if (gyroscope) {
+                    logits[i++] = sensors.gyroscope.x();
+                    logits[i++] = sensors.gyroscope.y();
+                    logits[i++] = sensors.gyroscope.z();
+                }
 
                 // Run the neural network
                 for (int i = 0; i < layers.size(); ++i) {
@@ -85,10 +139,18 @@ namespace platform {
             }
 
         private:
+            enum Field { POSITION, VELOCITY, LOAD };
+
             Scalar noise_factor;
             Scalar current_noise;
             Scalar certainty_threshold;
             Scalar uncertainty_threshold;
+
+            std::vector<::utility::input::ServoID> servos;
+            std::vector<Field> fields;
+
+            bool accelerometer;
+            bool gyroscope;
 
             std::vector<std::pair<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>,
                                   Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>>

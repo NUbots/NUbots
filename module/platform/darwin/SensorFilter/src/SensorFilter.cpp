@@ -115,9 +115,6 @@ namespace platform {
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
-                // Foot load sensor config
-                load_sensor = VirtualLoadSensor<float>(config["foot_load_sensor"]);
-
                 // Motion filter config
                 // Update our velocity timestep dekay
                 this->config.motionFilter.velocityDecay =
@@ -204,6 +201,12 @@ namespace platform {
                 covariance.rows(MotionModel::BX, MotionModel::BZ) =
                     this->config.motionFilter.initial.covariance.gyroscopeBias;
                 motionFilter.setState(mean, arma::diagmat(covariance));
+            });
+
+            on<Configuration>("FootDownNetwork.yaml").then([this] (const Configuration& config) {
+
+                // Foot load sensor config
+                load_sensor = VirtualLoadSensor<float>(config);
             });
 
 
