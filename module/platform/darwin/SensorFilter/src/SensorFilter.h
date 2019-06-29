@@ -49,7 +49,7 @@ namespace platform {
             utility::math::filter::UKF<MotionModel> motionFilter;
 
             struct Config {
-                Config() : nominal_z(0.0f), motionFilter(), buttons() {}
+                Config() : nominal_z(0.0f), motionFilter(), buttons(), footDown() {}
 
                 float nominal_z;
 
@@ -126,7 +126,7 @@ namespace platform {
                 struct FootDown {
                     FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
                     bool fromLoad;
-                    int certaintyThreshold;
+                    float certaintyThreshold;
                 } footDown;
             } config;
 

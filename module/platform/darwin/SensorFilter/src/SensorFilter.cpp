@@ -117,7 +117,7 @@ namespace platform {
 
                 // Foot down config
                 this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
-                this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<int>();
+                this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
 
                 // Foot load sensor config
                 load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
@@ -498,6 +498,7 @@ namespace platform {
                     }
 
                     emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
+                    log("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0);
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *

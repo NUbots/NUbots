@@ -4,7 +4,7 @@ buttons:
   debounce_threshold : 7
 
 foot_down:
-  from_load: true
+  from_load: false
   certainty_threshold: 0.05
 
 foot_load_sensor:
