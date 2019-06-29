@@ -246,7 +246,15 @@ def run(config, **kwargs):
 
     print("Final Accuracy", history.history["val_binary_accuracy"][-1])
 
-    net = []
+    output = {
+        "network": [],
+        "input": {
+            "servos": servos,
+            "fields": keys,
+            "accelerometer": use_accel,
+            "gyroscope": use_gyro,
+        },
+    }
 
     for layer in model.layers:
         h = layer.get_weights()
@@ -254,7 +262,7 @@ def run(config, **kwargs):
         weights = np.array(h[0]).tolist()
         biases = np.array(h[1]).tolist()
 
-        net.append({"weights": weights, "biases": biases})
+        output["network"].append({"weights": weights, "biases": biases})
 
     with open(
         os.path.join(
@@ -273,4 +281,4 @@ def run(config, **kwargs):
         ),
         "w",
     ) as f:
-        f.write(yaml.dump(net, width=120))
+        f.write(yaml.dump(output, width=120))

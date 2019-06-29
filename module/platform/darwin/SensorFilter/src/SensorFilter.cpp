@@ -116,7 +116,7 @@ namespace platform {
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
                 // Foot load sensor config
-                load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
+                load_sensor = VirtualLoadSensor<float>(config["foot_load_sensor"]);
 
                 // Motion filter config
                 // Update our velocity timestep dekay
@@ -478,7 +478,7 @@ namespace platform {
                         // sensors->servo[ServoID::L_ANKLE_PITCH].present_velocity,
                         // sensors->servo[ServoID::L_ANKLE_PITCH].load};
 
-                        auto feet_down           = load_sensor.updateFeet(features);
+                        auto feet_down           = load_sensor.updateFeet(sensors);
                         sensors->left_foot_down  = feet_down[0];
                         sensors->right_foot_down = feet_down[1];
                     }
