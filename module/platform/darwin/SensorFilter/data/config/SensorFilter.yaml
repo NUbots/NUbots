@@ -5,7 +5,7 @@ buttons:
 
 foot_down:
   from_load: false
-  certainty_threshold: 0.05
+  certainty_threshold: 0.01
 
 foot_load_sensor:
   noise_factor: 1e-4

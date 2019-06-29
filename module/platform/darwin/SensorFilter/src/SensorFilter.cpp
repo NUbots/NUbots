@@ -453,13 +453,13 @@ namespace platform {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    sensors->right_foot_down = false;
-                    sensors->left_foot_down  = false;
+                    sensors->right_foot_down = true;
+                    sensors->left_foot_down  = true;
 
                     if (previousSensors) {
 
 
-                        std::array<bool, 2> feet_down = {false};
+                        std::array<bool, 2> feet_down = {true};
                         if (config.footDown.fromLoad) {
                             // Use our virtual load sensor class to work out which feet are down
                             arma::frowvec::fixed<12> features = {
@@ -486,9 +486,15 @@ namespace platform {
 
                             if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
                                 feet_down[0] = true;
+                                feet_down[1] = false;
                             }
                             else if (leftFootDisplacement
                                      < rightFootDisplacement - config.footDown.certaintyThreshold) {
+                                feet_down[0] = false;
+                                feet_down[1] = true;
+                            }
+                            else {
+                                feet_down[0] = true;
                                 feet_down[1] = true;
                             }
                         }
@@ -498,7 +504,6 @@ namespace platform {
                     }
 
                     emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
-                    log("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0);
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
