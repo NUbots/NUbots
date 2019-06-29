@@ -43,22 +43,13 @@ namespace platform {
                 b1(row) = network["input_layer"]["bias"][row].as<float>();
             }
 
-            for (size_t row = 0; row < network["hidden_layer"]["weights"].config.size(); row++) {
-                for (size_t col = 0; col < network["hidden_layer"]["weights"][row].config.size(); col++) {
-                    W2(row, col) = network["hidden_layer"]["weights"][row][col].as<float>();
-                }
-            }
-            for (size_t row = 0; row < network["hidden_layer"]["bias"].config.size(); row++) {
-                b2(row) = network["hidden_layer"]["bias"][row].as<float>();
-            }
-
             for (size_t row = 0; row < network["output_layer"]["weights"].config.size(); row++) {
                 for (size_t col = 0; col < network["output_layer"]["weights"][row].config.size(); col++) {
-                    W3(row, col) = network["output_layer"]["weights"][row][col].as<float>();
+                    W2(row, col) = network["output_layer"]["weights"][row][col].as<float>();
                 }
             }
             for (size_t row = 0; row < network["output_layer"]["bias"].config.size(); row++) {
-                b3(row) = network["output_layer"]["bias"][row].as<float>();
+                b2(row) = network["output_layer"]["bias"][row].as<float>();
             }
         }
 
@@ -67,7 +58,12 @@ namespace platform {
             return {expx(0) / arma::sum(expx.head(2)), expx(2) / arma::sum(expx.tail(2))};
         }
 
-        std::array<bool, 2> VirtualLoadSensor::updateFeet(const arma::frowvec::fixed<12>& input) {
+        arma::frowvec::fixed<2> VirtualLoadSensor::sigmoid(const arma::frowvec::fixed<2>& x) {
+            arma::frowvec::fixed<2> expx = arma::exp(x);
+            return {expx / (expx + 1.0f)};
+        }
+
+        std::array<bool, 2> VirtualLoadSensor::updateFeet(const arma::frowvec::fixed<9>& input) {
 
             auto SELU = [](float x) -> float {
                 static constexpr float alpha  = 1.6732632423543772848170429916717;
@@ -82,7 +78,12 @@ namespace platform {
                 }
             };
 
-            auto out = softmax(((input * W1 + b1).eval().for_each(SELU) * W2 + b2).eval().for_each(SELU) * W3 + b3);
+            auto RELU = [](float x) -> float { return std::max(0.0f, x); };
+
+            auto out = sigmoid(((input * W1 + b1).eval().for_each(RELU) * W2 + b2).eval());
+
+            NUClear::log("Output", out);
+            NUClear::log("State", state);
 
             // Do the bayes update (1D kalman filter thing)
             float k = current_noise / (current_noise + noise_factor);

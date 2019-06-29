@@ -37,12 +37,10 @@ namespace platform {
             float certainty_threshold;
             float uncertainty_threshold;
 
-            arma::fmat::fixed<12, 8> W1;
+            arma::fmat::fixed<9, 8> W1;
             arma::frowvec::fixed<8> b1;
-            arma::fmat::fixed<8, 8> W2;
-            arma::frowvec::fixed<8> b2;
-            arma::fmat::fixed<8, 4> W3;
-            arma::frowvec::fixed<4> b3;
+            arma::fmat::fixed<8, 2> W2;
+            arma::frowvec::fixed<2> b2;
 
             arma::frowvec::fixed<2> state;
             std::array<bool, 2> output_state;
@@ -59,13 +57,12 @@ namespace platform {
                 , b1(arma::fill::zeros)
                 , W2(arma::fill::zeros)
                 , b2(arma::fill::zeros)
-                , W3(arma::fill::zeros)
-                , b3(arma::fill::zeros)
                 , state(arma::fill::zeros)
                 , output_state({true, true}) {}
             VirtualLoadSensor(const ::extension::Configuration& network);
 
-            std::array<bool, 2> updateFeet(const arma::frowvec::fixed<12>& features);
+            std::array<bool, 2> updateFeet(const arma::frowvec::fixed<9>& features);
+            arma::frowvec::fixed<2> sigmoid(const arma::frowvec::fixed<2>& x);
         };
     }  // namespace darwin
 }  // namespace platform
