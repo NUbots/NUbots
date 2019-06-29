@@ -1,9 +1,9 @@
 import { createTransformer } from 'mobx-utils'
 import { MeshLambertMaterial } from 'three'
 import { Color } from 'three'
-import { JSONLoader } from 'three'
 import { Geometry } from 'three'
 import { Material } from 'three'
+import { LegacyJSONLoader } from 'three/examples/jsm/loaders/deprecated/LegacyJSONLoader'
 
 export function geometryAndMaterial(config: any, color?: string) {
   const geometryAndMaterial = parseConfig(config)
@@ -33,7 +33,7 @@ const coloredMaterial = (material: Material, color?: string) => {
 }
 
 const parseConfig = createTransformer((config: any) => {
-  const { geometry, materials } = new JSONLoader().parse(config)
+  const { geometry, materials } = new LegacyJSONLoader().parse(config, '/')
   // Compute vertex normals with a crease angle of 0.52
   computeVertexNormals(geometry, 0.52)
   return { geometry, materials }

@@ -2262,13 +2262,6 @@
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.2.tgz#e13182e1b69871a422d7863e11a4a6f5b814a4bd"
   integrity sha512-42zEJkBpNfMEAvWR5WlwtTH22oDzcMjFsL9gDGExwF8X8WvAiw7Vwop7hPw03QT8TKfec83LwbHj6SvpqM4ELQ==
 
-"@types/three@^0.91.0":
-  version "0.91.14"
-  resolved "https://registry.yarnpkg.com/@types/three/-/three-0.91.14.tgz#9c3c006c880997933d217ccfe1419c605912fb45"
-  integrity sha512-xwhFFjUsSIPL9SnXy7eJdzP1DeJ8lmRQk1LwYoye3ud/IC9k8UKqQzyu/xxcURT3sgib9GbXpa2jBFFD8F9uLQ==
-  dependencies:
-    "@types/webvr-api" "*"
-
 "@types/uglify-js@*":
   version "2.6.30"
   resolved "https://registry.yarnpkg.com/@types/uglify-js/-/uglify-js-2.6.30.tgz#257d2b6dd86673d60da476680fba90f2e30c6eef"
@@ -2340,11 +2333,6 @@
     "@types/tapable" "*"
     "@types/uglify-js" "*"
     source-map "^0.6.0"
-
-"@types/webvr-api@*":
-  version "0.0.31"
-  resolved "https://registry.yarnpkg.com/@types/webvr-api/-/webvr-api-0.0.31.tgz#f6061fe88a035d34a8b6a0c55f8758901ec8a08e"
-  integrity sha1-9gYf6IoDXTSotqDFX4dYkB7IoI4=
 
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
@@ -13349,10 +13337,10 @@ text-table@0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-three@^0.91.0:
-  version "0.91.0"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.91.0.tgz#033fe745b64e56e679a86581957cfd1c5f9fe284"
-  integrity sha512-dzikzdcddNROFZi3vkbV8YonBmqnonbJv2FxlQBEE2wKzZutddnjiS8qBZG2+EB40l505Xw8OMClQm+GmbwI/g==
+three@^0.106.2:
+  version "0.106.2"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.106.2.tgz#6752d304c470e4df230944ecd45325e7bf79e1f8"
+  integrity sha512-4Tlx43uoxnIaZFW2Bzkd1rXsatvVHEWAZJy8LuE+s6Q8c66ogNnhfq1bHiBKPAnXP230LD11H/ScIZc2LZMviA==
 
 throat@^4.0.0:
   version "4.1.0"

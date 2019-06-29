@@ -152,8 +152,7 @@ export const shaderMaterial = createUpdatableComputed(
 )
 
 type TypedArray
-  = ArrayBuffer
-  | Int8Array
+  = Int8Array
   | Uint8Array
   | Uint8ClampedArray
   | Int16Array

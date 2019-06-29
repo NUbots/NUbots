@@ -53,6 +53,7 @@
     "no-reference-import": true,
     "no-require-imports": true,
     "no-shadowed-variable": false,
+    "no-submodule-imports": [true, "three/examples/jsm"],
     "no-string-literal": true,
     "no-string-throw": true,
     "no-trailing-whitespace": true,
