@@ -58,7 +58,9 @@ def displacement(fk):
     return -(np.linalg.inv(Htf)[2, 3])
 
 
-def dataset(path, state, servos, keys, foot_delta, accelerometer, gryoscope):
+def dataset(
+    path, state, servos, keys, lr_duplicate, foot_delta, accelerometer, gryoscope
+):
     xs = []
     ys = []
     for type_name, timestamp, msg in tqdm(
@@ -81,37 +83,51 @@ def dataset(path, state, servos, keys, foot_delta, accelerometer, gryoscope):
                 l_load = msg.servo[SERVO_ID["R_KNEE"]].load
                 r_load = msg.servo[SERVO_ID["L_KNEE"]].load
 
-                y = (
-                    1 if l_height - foot_delta < r_height else 0,
-                    1 if r_height - foot_delta < l_height else 0,
-                )
+                y = {
+                    "L_": 1 if l_height - foot_delta < r_height else 0,
+                    "R_": 1 if r_height - foot_delta < l_height else 0,
+                }
 
             elif state == "UP":
-                y = (0, 0)
+                y = {"L_": 0, "R_": 0}
             elif state == "DOWN":
-                y = (1, 1)
+                y = {"L_": 1, "R_": 1}
             else:
                 raise RuntimeError("The state must be UP DOWN or WALK")
 
-            x = []
-            for servo in servos:
-                s = msg.servo[SERVO_ID[servo]]
-                values = {
-                    "LOAD": s.load,
-                    "POSITION": s.present_position,
-                    "VELOCITY": s.present_velocity,
-                }
+            # If we are duplicating left right/right left do that here
+            for sides in (
+                [("L_", "R_"), ("R_", "L_")] if lr_duplicate else [("L_", "R_")]
+            ):
+                x = []
+                for servo in servos:
+                    for s in sides:
+                        s = msg.servo[SERVO_ID[s + servo]]
+                        values = {
+                            "LOAD": s.load,
+                            "POSITION": s.present_position,
+                            "VELOCITY": s.present_velocity,
+                        }
 
-                for key in keys:
-                    x.append(values[key])
-            if accelerometer:
-                x.extend(
-                    [msg.accelerometer.x, msg.accelerometer.y, msg.accelerometer.z]
-                )
-            if gryoscope:
-                x.extend([msg.gyroscope.x, msg.gyroscope.y, msg.gyroscope.z])
-            ys.append(y)
-            xs.append(x)
+                        for key in keys:
+                            x.append(values[key])
+                if accelerometer:
+                    # If we mirror the robot, it means we mirror the y axis
+                    x.extend(
+                        [
+                            msg.accelerometer.x,
+                            msg.accelerometer.y
+                            if sides[0] == "L_"
+                            else -msg.accelerometer.y,
+                            msg.accelerometer.z,
+                        ]
+                    )
+                if gryoscope:
+                    x.extend([msg.gyroscope.x, msg.gyroscope.y, msg.gyroscope.z])
+
+                # Swap the truth values if we are swap
+                ys.append((y[sides[0]], y[sides[1]]))
+                xs.append(x)
 
     return np.array(xs), np.array(ys)
 
@@ -141,10 +157,12 @@ def run(config, **kwargs):
     keys = config["config"]["keys"]
     use_accel = config["config"]["accelerometer"]
     use_gyro = config["config"]["gyroscope"]
+    lr_duplicate = config["config"]["lr_duplicate"]
 
     print("Loading data from NBS files")
     group_xs = []
     group_ys = []
+    group_desc = []
     for group in tqdm(config["data"], dynamic_ncols=True, unit="group"):
 
         # Gather all groups into a single dataset for this specific type
@@ -158,6 +176,7 @@ def run(config, **kwargs):
                 group["state"],
                 servos,
                 keys,
+                lr_duplicate,
                 foot_delta,
                 use_accel,
                 use_gyro,
@@ -170,6 +189,7 @@ def run(config, **kwargs):
             xs.append(x)
             ys.append(y)
 
+        group_desc.append(group["desc"])
         group_xs.append(np.concatenate(xs, axis=0))
         group_ys.append(np.concatenate(ys, axis=0))
 
@@ -183,6 +203,8 @@ def run(config, **kwargs):
         idx = np.random.randint(0, len(x), mx)
         xs.append(x[idx])
         ys.append(y[idx])
+
+    # Join into single dataset
     xs = np.concatenate(xs)
     ys = np.concatenate(ys)
 
@@ -222,19 +244,17 @@ def run(config, **kwargs):
         callbacks=[keras.callbacks.EarlyStopping(patience=5)],
     )
 
-    print(history.history["val_binary_accuracy"][-1])
+    print("Final Accuracy", history.history["val_binary_accuracy"][-1])
 
-    net = {"layers":[]}
+    net = []
 
     for layer in model.layers:
-        g = layer.get_config()
         h = layer.get_weights()
 
         weights = np.array(h[0]).tolist()
-        biases  = np.array(h[1]).tolist()
+        biases = np.array(h[1]).tolist()
 
-        net["layers"].append({"config":g, "weights":weights, "biases":biases})
+        net.append({"weights": weights, "biases": biases})
 
-
-    with open(os.path.join(data_path, 'model.yaml'), 'w') as f:
+    with open(os.path.join(data_path, "FootDownNetwork.yaml"), "w") as f:
         f.write(yaml.dump(net, width=120))
