@@ -223,3 +223,18 @@ def run(config, **kwargs):
     )
 
     print(history.history["val_binary_accuracy"][-1])
+
+    net = {"layers":[]}
+
+    for layer in model.layers:
+        g = layer.get_config()
+        h = layer.get_weights()
+
+        weights = np.array(h[0]).tolist()
+        biases  = np.array(h[1]).tolist()
+
+        net["layers"].append({"config":g, "weights":weights, "biases":biases})
+
+
+    with open(os.path.join(data_path, 'model.yaml'), 'w') as f:
+        f.write(yaml.dump(net, width=120))
