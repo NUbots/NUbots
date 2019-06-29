@@ -49,9 +49,7 @@ namespace platform {
             utility::math::filter::UKF<MotionModel> motionFilter;
 
             struct Config {
-                Config() : nominal_z(0.0f), motionFilter(), buttons(), footDown() {}
-
-                float nominal_z;
+                Config() : motionFilter(), buttons(), footDown() {}
 
                 struct MotionFilter {
                     MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
