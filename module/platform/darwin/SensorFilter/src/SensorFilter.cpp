@@ -110,8 +110,6 @@ namespace platform {
             , footlanding_Rwf() {
 
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
-                this->config.nominal_z = config["nominal_z"].as<float>();
-
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
