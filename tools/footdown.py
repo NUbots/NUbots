@@ -256,5 +256,21 @@ def run(config, **kwargs):
 
         net.append({"weights": weights, "biases": biases})
 
-    with open(os.path.join(data_path, "FootDownNetwork.yaml"), "w") as f:
+    with open(
+        os.path.join(
+            data_path,
+            os.path.join(
+                os.path.dirname(__file__),
+                os.path.pardir,
+                "module",
+                "platform",
+                "darwin",
+                "SensorFilter",
+                "data",
+                "config",
+                "FootDownNetwork.yaml",
+            ),
+        ),
+        "w",
+    ) as f:
         f.write(yaml.dump(net, width=120))
