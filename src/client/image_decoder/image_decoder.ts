@@ -155,6 +155,7 @@ export class ImageDecoder {
 
       this.renderer.setRenderTarget(target)
       this.renderer.render(scene, this.bayerDecoder!.camera)
+      this.renderer.setRenderTarget(null)
 
       // We don't need the raw texture anymore since we already rendered the bayer
       rawTexture.dispose()
