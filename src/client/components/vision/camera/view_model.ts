@@ -378,7 +378,7 @@ export class CameraViewModel {
 
   private horizon = createTransformer((m: Matrix4Model) => {
     return this.makePlane({
-      axis: new Vector3(m.x.z, m.y.z, m.z.z),
+      axis: new Vector3(m.z.x, m.z.y, m.z.z),
       colour: new Vector4(0, 0, 1, 0.7),
       lineWidth: 10,
     })
@@ -389,29 +389,29 @@ export class CameraViewModel {
     const o3d = new Object3D()
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(m.x.x, m.y.x, m.z.x),
-      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
+      start: new Vector3(m.x.x, m.x.y, m.x.z),
+      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
       colour: new Vector4(1, 0, 0, 0.5),
       lineWidth: 5,
     }))
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(-m.x.x, -m.y.x, -m.z.x),
-      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
+      start: new Vector3(-m.x.x, -m.x.y, -m.x.z),
+      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
       colour: new Vector4(0, 1, 1, 0.5),
       lineWidth: 5,
     }))
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(m.x.y, m.y.y, m.z.y),
-      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
+      start: new Vector3(m.y.x, m.y.y, m.y.z),
+      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
       colour: new Vector4(0, 1, 0, 0.5),
       lineWidth: 5,
     }))
 
     o3d.add(this.makePlaneSegment({
-      start: new Vector3(-m.x.y, -m.y.y, -m.z.y),
-      end: new Vector3(-m.x.z, -m.y.z, -m.z.z),
+      start: new Vector3(-m.y.x, -m.y.y, -m.y.z),
+      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
       colour: new Vector4(1, 0, 1, 0.5),
       lineWidth: 5,
     }))
@@ -433,10 +433,10 @@ export class CameraViewModel {
 
 function toThreeMatrix4(mat4: Matrix4Model): Matrix4 {
   return new Matrix4().set(
-    mat4.x.x, mat4.x.y, mat4.x.z, mat4.x.t,
-    mat4.y.x, mat4.y.y, mat4.y.z, mat4.y.t,
-    mat4.z.x, mat4.z.y, mat4.z.z, mat4.z.t,
-    mat4.t.x, mat4.t.y, mat4.t.z, mat4.t.t,
+    mat4.x.x, mat4.y.x, mat4.z.x, mat4.t.x,
+    mat4.x.y, mat4.y.y, mat4.z.y, mat4.t.y,
+    mat4.x.z, mat4.y.z, mat4.z.z, mat4.t.z,
+    mat4.x.t, mat4.y.t, mat4.z.t, mat4.t.t,
   )
 }
 

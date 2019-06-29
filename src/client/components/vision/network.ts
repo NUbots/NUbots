@@ -79,7 +79,7 @@ export class VisionNetwork {
     camera.visualmesh = {
       neighbours: neighbourhood!.v!,
       coordinates: coordinates!.v!,
-      classifications: { dim: classifications!.cols!, values: classifications!.v! },
+      classifications: { dim: classifications!.rows!, values: classifications!.v! },
     }
   }
 
