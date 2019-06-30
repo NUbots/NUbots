@@ -18,7 +18,7 @@ namespace vision {
         struct {
             float confidence_threshold;
             uint cluster_points;
-            float fudge_factor;
+            float distance_offset;
             bool debug;
         } config;
     };

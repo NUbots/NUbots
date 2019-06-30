@@ -47,7 +47,7 @@ namespace vision {
             log("Balls: ", balls.balls.size());
             for (auto& ball : balls.balls) {
                 for (auto& m : ball.measurements) {
-                    arma::vec3 measuredPos = convert(m.rBCc);
+                    arma::fvec3 measuredPos = convert(m.rBCc);
                     log("Ball actual pos (x,y,z):  ", ballCentre.t());
                     log("Ball measured pos (x,y,z):", measuredPos.t());
                     log("Ball detector error =     ", (measuredPos - ballCentre).t());

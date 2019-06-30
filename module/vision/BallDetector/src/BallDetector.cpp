@@ -28,14 +28,9 @@
 #include "message/vision/Ball.h"
 #include "message/vision/GreenHorizon.h"
 
-#include "utility/math/comparison.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/geometry/Cone.h"
-#include "utility/math/geometry/ConvexHull.h"
-#include "utility/math/vision.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
-#include "utility/vision/Vision.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
 namespace module {
@@ -57,9 +52,9 @@ namespace vision {
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& cfg) {
             config.confidence_threshold  = cfg["confidence_threshold"].as<float>();
             config.cluster_points        = cfg["cluster_points"].as<int>();
-            config.maximum_cone_radius   = std::cos(cfg["maximum_cone_radius"].as<float>());
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
+            config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
             config.ball_angular_cov      = convert(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
             config.debug                 = cfg["debug"].as<bool>();
         });
@@ -79,7 +74,7 @@ namespace vision {
                 // Partition the indices such that we only have the ball points that dont have ball surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
                     indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == indices.size() || (cls(idx, BALL_INDEX) >= config.confidence_threshold);
+                        return idx == indices.size() || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -137,10 +132,9 @@ namespace vision {
 
                         // Find the ray with the greatest distance from the axis
                         // Should we use the average distance instead?
-                        Eigen::Vector3f ray(axis);
                         float radius = 1.0f;
                         for (const auto& idx : cluster) {
-                            ray = rays.row(idx);
+                            const Eigen::Vector3f& ray(rays.row(idx));
                             if (axis.dot(ray) < radius) {
                                 radius = axis.dot(ray);
                             }
@@ -151,14 +145,13 @@ namespace vision {
                         float proj      = 1.0f / radius;
                         b.cone.gradient = std::sqrt(proj * proj - 1.0f);
                         b.cone.radius   = radius;
-                        b.cone.points   = cluster.size();
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
                         float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
 
                         // Attach the measurement to the object (distance from camera to ball)
                         b.measurements.push_back(Ball::Measurement());
-                        b.measurements.back().rBCc       = b.cone.axis * distance;
+                        b.measurements.back().rBCc       = cartesianToSpherical(b.cone.axis * distance);
                         b.measurements.back().covariance = config.ball_angular_cov;
 
                         // Angular positions from the camera
@@ -176,6 +169,39 @@ namespace vision {
                             log<NUClear::DEBUG>("**************************************************");
                         }
                         bool keep = true;
+                        b.colour.fill(1.0f);
+
+                        // CALCULATE DEGREE OF FIT
+                        // Degree of fit defined as the standard deviation of angle between every rays on the cluster /
+                        // and the cone axis. If the standard deviation exceeds a given threshold then we have a bad
+                        // fit
+                        std::vector<float> angles;
+                        float mean             = 0.0f;
+                        const float max_radius = std::acos(radius);
+                        for (const auto& idx : cluster) {
+                            const float angle = std::acos(axis.dot(rays.row(idx))) / max_radius;
+                            angles.emplace_back(angle);
+                            mean += angle;
+                        }
+                        mean /= angles.size();
+                        float deviation = 0.0f;
+                        for (const auto& angle : angles) {
+                            deviation += (mean - angle) * (mean - angle);
+                        }
+                        deviation = std::sqrt(deviation / (angles.size() - 1));
+
+                        if (deviation > config.maximum_deviation) {
+                            if (config.debug) {
+                                log<NUClear::DEBUG>(
+                                    fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
+                                                deviation,
+                                                config.maximum_deviation));
+                                log<NUClear::DEBUG>("--------------------------------------------------");
+                            }
+                            b.colour = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
+                            keep     = false;
+                        }
+
                         // DISTANCE IS TOO CLOSE
                         if (distance < config.minimum_ball_distance) {
                             if (config.debug) {
@@ -185,7 +211,8 @@ namespace vision {
                                                 config.minimum_ball_distance));
                                 log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            keep = false;
+                            b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
+                            keep     = false;
                         }
 
                         // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
@@ -211,7 +238,8 @@ namespace vision {
                                                 projection_distance));
                                 log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            keep = false;
+                            b.colour = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                            keep     = false;
                         }
 
                         // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
@@ -224,27 +252,27 @@ namespace vision {
                                     field.dimensions.field_length));
                                 log<NUClear::DEBUG>("--------------------------------------------------");
                             }
-                            keep = false;
+                            b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                            keep     = false;
                         }
 
-                        if (keep) {
-                            if (config.debug) {
-                                log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
-                                log<NUClear::DEBUG>(
-                                    fmt::format("Gradient {} - cos(theta) {}", b.cone.gradient, b.cone.radius));
-                                log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));
-                                log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
-                                                                b.screen_angular.transpose(),
-                                                                b.angular_size.transpose()));
-                                log<NUClear::DEBUG>(fmt::format("Points {}", b.cone.points));
-                                log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Distance Throwout {}", std::abs(projection_distance - distance) / max_distance));
-                                log<NUClear::DEBUG>("**************************************************");
-                            }
+                        if (config.debug) {
+                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Gradient {} - cos(theta) {}", b.cone.gradient, b.cone.radius));
+                            log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));
+                            log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
+                                                            b.screen_angular.transpose(),
+                                                            b.angular_size.transpose()));
+                            log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
+                            log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
+                                                            std::abs(projection_distance - distance) / max_distance));
+                            log<NUClear::DEBUG>("**************************************************");
+                        }
 
+                        if (config.debug || keep) {
                             balls->balls.push_back(std::move(b));
                         }
                     }

@@ -30,7 +30,7 @@ namespace vision {
             // Use configuration here from file GreenHorizonDetector.yaml
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<uint>();
-            config.fudge_factor         = cfg["fudge_factor"].as<float>();
+            config.distance_offset      = cfg["distance_offset"].as<float>();
             config.debug                = cfg["debug"].as<bool>();
         });
 
@@ -52,7 +52,7 @@ namespace vision {
                 neighbours,
                 [&](const int& idx) {
                     return idx == indices.size()
-                           || (cls(idx, FIELD_INDEX) + cls(idx, LINE_INDEX) >= config.confidence_threshold);
+                           || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
                 },
                 {4, 5});
 
@@ -88,8 +88,8 @@ namespace vision {
             while (clusters.size() > 1) {
                 for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
                     // Get the largest and smallest theta values
-                    auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const auto& a, const auto& b) {
-                        return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 2));
+                    auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const int& a, const int& b) {
+                        return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 0));
                     });
 
                     const float min_a = std::atan2(rays(*range_a.first, 1), rays(*range_a.first, 0));
@@ -98,8 +98,8 @@ namespace vision {
                     for (auto it2 = std::next(it); it2 != clusters.end();) {
                         // Get the largest and smallest theta values
                         auto range_b =
-                            std::minmax_element(it2->begin(), it2->end(), [&rays](const auto& a, const auto& b) {
-                                return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 2));
+                            std::minmax_element(it2->begin(), it2->end(), [&rays](const int& a, const int& b) {
+                                return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 0));
                             });
 
                         const float min_b = std::atan2(rays(*range_b.first, 1), rays(*range_b.first, 0));
@@ -115,9 +115,25 @@ namespace vision {
                         }
                         // Second cluster is overlapping first cluster either on the left or the right
                         // Keep the largest cluster
-                        else if (((min_a < min_b) && (min_b < max_a)) || ((min_b < min_a) && (min_a < max_b))) {
+                        else if (((min_a <= min_b) && (min_b <= max_a)) || ((min_b <= min_a) && (min_a <= max_b))) {
                             // Delete the second cluster
                             it2 = clusters.erase(it2);
+                        }
+                        else {
+                            if (config.debug) {
+                                log<NUClear::DEBUG>(
+                                    "The clusters are neither overlapping, nor are they not overlapping. What have you "
+                                    "done???");
+                                log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
+                                                                *range_a.first,
+                                                                *range_a.second,
+                                                                min_a,
+                                                                max_a,
+                                                                *range_b.first,
+                                                                *range_b.second,
+                                                                min_b,
+                                                                max_b));
+                            }
                         }
                     }
                 }
@@ -134,6 +150,9 @@ namespace vision {
                 }
             }
             else {
+                if (config.debug) {
+                    log<NUClear::DEBUG>(fmt::format("Making a convex hull from {} points", clusters.front().size()));
+                }
                 // Find the convex hull of the cluster
                 auto hull_indices = utility::math::geometry::upper_convex_hull(clusters.front(), rays, world_offset);
 
@@ -153,7 +172,7 @@ namespace vision {
                     const float d                  = mesh.Hcw(2, 3) / ray.z();
                     Eigen::Vector3f ray_projection = ray * d;
                     const float norm               = ray_projection.head<2>().norm();
-                    ray_projection.head<2>() *= 1.0f + config.fudge_factor / norm;
+                    ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
                     msg->horizon.emplace_back(ray_projection.normalized());
                 }
 

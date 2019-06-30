@@ -242,14 +242,14 @@ namespace behaviour {
                               arma::vec2 currentCentroid = arma::vec2({0, 0});
                               if (ballMaxPriority) {
                                   for (auto& ob : ballFixationObjects.balls) {
-                                      currentCentroid +=
-                                          convert(ob.screen_angular) / float(ballFixationObjects.balls.size());
+                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
+                                                         / float(ballFixationObjects.balls.size());
                                   }
                               }
                               else {
                                   for (auto& ob : goalFixationObjects.goals) {
-                                      currentCentroid +=
-                                          convert(ob.screen_angular) / float(goalFixationObjects.goals.size());
+                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
+                                                         / float(goalFixationObjects.goals.size());
                                   }
                               }
                               arma::vec2 currentCentroid_world =
@@ -410,7 +410,6 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec centroid    = {0, 0};
             arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).present_position,
                                      sensors.servo.at(ServoID::HEAD_PITCH).present_position};
 
@@ -421,9 +420,6 @@ namespace behaviour {
                     {fixationObjects.balls.at(i).screen_angular[0], fixationObjects.balls.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
                     {fixationObjects.balls.at(i).angular_size[0], fixationObjects.balls.at(i).angular_size[1]}));
-                // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid +=
-                    arma::vec(convert(fixationObjects.balls.at(i).screen_angular)) / (fixationObjects.balls.size());
             }
 
             // If there are objects to find
@@ -454,7 +450,6 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec centroid = {0, 0};
             arma::vec2 currentPos;
             for (const auto& servo : sensors.servo) {
                 if (servo.id == ServoID::HEAD_YAW) {
@@ -472,9 +467,6 @@ namespace behaviour {
                     {fixationObjects.goals.at(i).screen_angular[0], fixationObjects.goals.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
                     {fixationObjects.goals.at(i).angular_size[0], fixationObjects.goals.at(i).angular_size[1]}));
-                // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid +=
-                    arma::vec(convert(fixationObjects.goals.at(i).screen_angular)) / (fixationObjects.goals.size());
             }
 
             // If there are objects to find
@@ -714,18 +706,18 @@ namespace behaviour {
             }
             Quad q           = getScreenAngularBoundingBox(ob);
             Ball v           = ob.balls.at(0);
-            v.screen_angular = convert(q.getCentre());
-            v.angular_size   = convert(q.getSize());
+            v.screen_angular = convert(q.getCentre()).cast<float>();
+            v.angular_size   = convert(q.getSize()).cast<float>();
             return v;
         }
 
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.balls.size(); i++) {
-                boundingPoints.push_back(
-                    convert(Eigen::Vector2d(ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size / 2)));
-                boundingPoints.push_back(
-                    convert(Eigen::Vector2d(ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2)));
+                boundingPoints.push_back(arma::conv_to<arma::vec>::from(
+                    convert(Eigen::Vector2f(ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size / 2))));
+                boundingPoints.push_back(arma::conv_to<arma::vec>::from(
+                    convert(Eigen::Vector2f(ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2))));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
