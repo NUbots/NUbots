@@ -61,7 +61,7 @@ namespace platform {
                 }
 
                 accelerometer = config["network"]["input"]["accelerometer"].as<bool>();
-                gyroscope     = config["network"]["input"]["accelerometer"].as<bool>();
+                gyroscope     = config["network"]["input"]["gyroscope"].as<bool>();
 
                 for (const auto& layer : config["network"]["input"]["layers"].config) {
                     // TODO load the layers into Eigen::Matrix
@@ -74,12 +74,20 @@ namespace platform {
 
             std::array<bool, 2> updateFeet(const ::message::input::Sensors& sensors) {
 
+                NUClear::log("Servos size", servos.size());
+                NUClear::log("fields size", fields.size());
+                NUClear::log("accelerometer", accelerometer ? 1 : 0);
+                NUClear::log("gyroscope", gyroscope ? 1 : 0);
+
                 // TODO based on configuration grab the sensor readings we are using
-                Eigen::Matrix<Scalar, Eigen::Dynamic, 1> logits(
-                    servos.size() * fields.size() + accelerometer ? 3 : 0 + gyroscope ? 3 : 0);
+                Eigen::Matrix<Scalar, Eigen::Dynamic, 1> logits((servos.size() * fields.size())
+                                                                + (accelerometer ? 3 : 0) + (gyroscope ? 3 : 0));
 
                 // Build our input data
                 int index = 0;
+
+                NUClear::log("Logits rows", logits.rows());
+
                 for (const auto& servo_id : servos) {
                     const auto& s = sensors.servo[servo_id];
                     for (const auto& f : fields) {
@@ -89,6 +97,7 @@ namespace platform {
                             case VELOCITY: logits[index++] = s.present_velocity; break;
                         }
                     }
+                    NUClear::log("Index for", index);
                 }
                 if (accelerometer) {
                     logits[index++] = sensors.accelerometer.x();
@@ -100,9 +109,15 @@ namespace platform {
                     logits[index++] = sensors.gyroscope.y();
                     logits[index++] = sensors.gyroscope.z();
                 }
+                NUClear::log("Index if", index);
 
                 // Run the neural network
                 for (int i = 0; i < layers.size(); ++i) {
+
+                    NUClear::log("i", i);
+                    NUClear::log("Rows Cols First", layers[i].first.rows(), layers[i].first.cols());
+                    NUClear::log("Rows Cols Second", layers[i].second.rows(), layers[i].second.cols());
+
 
                     // Weights and bias
                     logits = logits * layers[i].first + layers[i].second;

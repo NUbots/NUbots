@@ -80,12 +80,12 @@ def dataset(
                 delta = abs(l_height - r_height)
 
                 # Get the load on the knee
-                l_load = msg.servo[SERVO_ID["R_KNEE"]].load
-                r_load = msg.servo[SERVO_ID["L_KNEE"]].load
+                r_load = msg.servo[SERVO_ID["R_KNEE"]].load
+                l_load = msg.servo[SERVO_ID["L_KNEE"]].load
 
                 y = {
-                    "L_": 1 if l_height - foot_delta < r_height else 0,
                     "R_": 1 if r_height - foot_delta < l_height else 0,
+                    "L_": 1 if l_height - foot_delta < r_height else 0,
                 }
 
             elif state == "UP":

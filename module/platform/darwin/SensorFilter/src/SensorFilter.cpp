@@ -456,17 +456,6 @@ namespace platform {
 
                     if (previousSensors) {
                         // Use our virtual load sensor class to work out which feet are down
-                        arma::frowvec::fixed<9> features = {
-                            sensors->servo[ServoID::R_HIP_PITCH].load,
-                            sensors->servo[ServoID::L_HIP_PITCH].load,
-                            sensors->servo[ServoID::R_KNEE].load,
-                            sensors->servo[ServoID::L_KNEE].load,
-                            sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                            sensors->servo[ServoID::L_ANKLE_PITCH].load,
-                            sensors->accelerometer.x(),
-                            sensors->accelerometer.y(),
-                            sensors->accelerometer.z(),
-                        };
 
                         auto feet_down           = load_sensor.updateFeet(*sensors);
                         sensors->left_foot_down  = feet_down[0];
