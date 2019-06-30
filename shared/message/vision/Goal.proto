@@ -32,9 +32,18 @@ message Goal {
         LEFT         = 1;
         RIGHT        = 2;
     }
+    enum Team {
+        UNKNOWN_TEAM = 0;
+        OWN          = 1;
+        OPPONENT     = 2;
+    }
     enum MeasurementType {
         UNKNOWN_MEASUREMENT = 0;
         CENTRE              = 1;
+        LEFT_NORMAL         = 2;
+        RIGHT_NORMAL        = 3;
+        TOP_NORMAL          = 4;
+        BASE_NORMAL         = 5;
     }
     message Measurement {
         MeasurementType type = 1;
@@ -52,6 +61,7 @@ message Goal {
     repeated Measurement measurements   = 4;
     fvec2                screen_angular = 5;
     fvec2                angular_size   = 6;
+    Team                 team           = 7;
 }
 
 message Goals {
