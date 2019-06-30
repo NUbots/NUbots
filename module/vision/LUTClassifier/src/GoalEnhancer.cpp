@@ -91,7 +91,7 @@ namespace vision {
 
         Line horizon(convert(Eigen::Vector2d(classifiedImage.horizon.normal.head<2>().cast<double>())),
                      classifiedImage.horizon.distance);
-        arma::vec3 horizon_normal = convert(Eigen::Vector2d(classifiedImage.horizon_normal.cast<double>()));
+        arma::vec3 horizon_normal = convert(Eigen::Vector3d(classifiedImage.horizon_normal));
 
         // Get our goal segments
         std::vector<GoalPOI> points;
