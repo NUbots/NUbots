@@ -34,11 +34,7 @@ namespace platform {
         class VirtualLoadSensor {
         public:
             VirtualLoadSensor()
-                : noise_factor(0.0f)
-                , current_noise(0.0f)
-                , certainty_threshold(0.0f)
-                , uncertainty_threshold(0.0f)
-                ) {}
+                : noise_factor(0.0f), current_noise(0.0f), certainty_threshold(0.0f), uncertainty_threshold(0.0f) {}
             VirtualLoadSensor(const ::extension::Configuration& config) {
                 // Bayes settings
                 noise_factor          = config["filter"]["noise_factor"].as<Scalar>();
@@ -46,13 +42,13 @@ namespace platform {
                 uncertainty_threshold = config["filter"]["uncertainty_threshold"].as<Scalar>();
 
                 // Add the servos
-                for (const auto& field : config["network"]["input"]["servos"]) {
-                    servos.emplace_back("L_" + field.as<std::string>());
+                for (const auto& field : config["network"]["input"]["servos"].config) {
                     servos.emplace_back("R_" + field.as<std::string>());
+                    servos.emplace_back("L_" + field.as<std::string>());
                 }
 
                 // Add the fields
-                for (const auto& field : config["network"]["input"]["fields"]) {
+                for (const auto& field : config["network"]["input"]["fields"].config) {
                     if (field.as<std::string>() == "POSITION") {
                         fields.emplace_back(POSITION);
                     }
@@ -67,7 +63,7 @@ namespace platform {
                 accelerometer = config["network"]["input"]["accelerometer"].as<bool>();
                 gyroscope     = config["network"]["input"]["accelerometer"].as<bool>();
 
-                for (const auto& layer : config["network"]["input"]["layers"]) {
+                for (const auto& layer : config["network"]["input"]["layers"].config) {
                     // TODO load the layers into Eigen::Matrix
                 }
             }
@@ -95,29 +91,29 @@ namespace platform {
                     }
                 }
                 if (accelerometer) {
-                    logits[i++] = sensors.accelerometer.x();
-                    logits[i++] = sensors.accelerometer.y();
-                    logits[i++] = sensors.accelerometer.z();
+                    logits[index++] = sensors.accelerometer.x();
+                    logits[index++] = sensors.accelerometer.y();
+                    logits[index++] = sensors.accelerometer.z();
                 }
                 if (gyroscope) {
-                    logits[i++] = sensors.gyroscope.x();
-                    logits[i++] = sensors.gyroscope.y();
-                    logits[i++] = sensors.gyroscope.z();
+                    logits[index++] = sensors.gyroscope.x();
+                    logits[index++] = sensors.gyroscope.y();
+                    logits[index++] = sensors.gyroscope.z();
                 }
 
                 // Run the neural network
                 for (int i = 0; i < layers.size(); ++i) {
 
                     // Weights and bias
-                    logits = logits * l.first + l.second;
+                    logits = logits * layers[i].first + layers[i].second;
 
                     // RELU except last layer
                     if (i < layers.size() - 1) {
-                        logits = (logits > 0).select(logits, 0.0);
+                        logits = (logits.array() > 0.0f).select(logits, 0.0f);
                     }
                     // Sigmoid final layer
                     else {
-                        logits = logits.unaryExp(sigmoid);
+                        logits = logits.unaryExpr(std::ptr_fun(sigmoid));
                     }
                 }
 
@@ -136,6 +132,7 @@ namespace platform {
                         output_state[leg] = false;
                     }
                 }
+                return output_state;
             }
 
         private:
