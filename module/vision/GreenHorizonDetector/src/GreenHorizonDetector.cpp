@@ -30,7 +30,7 @@ namespace vision {
             // Use configuration here from file GreenHorizonDetector.yaml
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<uint>();
-            config.distance_factor      = cfg["distance_factor"].as<float>();
+            config.distance_offset      = cfg["distance_offset"].as<float>();
             config.debug                = cfg["debug"].as<bool>();
         });
 
@@ -172,7 +172,7 @@ namespace vision {
                     const float d                  = mesh.Hcw(2, 3) / ray.z();
                     Eigen::Vector3f ray_projection = ray * d;
                     const float norm               = ray_projection.head<2>().norm();
-                    ray_projection.head<2>() *= 1.0f + config.distance_factor / norm;
+                    ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
                     msg->horizon.emplace_back(ray_projection.normalized());
                 }
 
