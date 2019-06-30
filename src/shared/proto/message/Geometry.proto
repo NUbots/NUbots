@@ -58,6 +58,7 @@ message Frustum {
 }
 
 message Cone {
-    vec3   axis     = 1;
-    double gradient = 2;
+    fvec3 axis     = 1;
+    float gradient = 2;
+    float radius   = 3;
 }

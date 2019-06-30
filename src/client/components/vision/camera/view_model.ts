@@ -22,6 +22,7 @@ import { Mesh } from 'three'
 import { ImageDecoder } from '../../../image_decoder/image_decoder'
 import { Matrix4 as Matrix4Model } from '../../../math/matrix4'
 import { Vector3 as Vector3Model } from '../../../math/vector3'
+import { Vector4 as Vector4Model } from '../../../math/vector4'
 
 import { Goal } from './model'
 import { Ball } from './model'
@@ -117,8 +118,8 @@ export class CameraViewModel {
     const Hcc = imageHcw.multiply(Hwc)
     return this.makeCone({
       axis: toThreeVector3(m.cone.axis).applyMatrix4(Hcc),
-      gradient: m.cone.gradient,
-      colour: new Vector4(0, 0, 1, 0.7),
+      gradient: m.cone.radius,
+      colour: toThreeVector4(m.colour),
       lineWidth: 10,
     })
   })
@@ -442,4 +443,8 @@ function toThreeMatrix4(mat4: Matrix4Model): Matrix4 {
 
 function toThreeVector3(vec3: Vector3Model): Vector3 {
   return new Vector3(vec3.x, vec3.y, vec3.z)
+}
+
+function toThreeVector4(vec4: Vector4Model): Vector4 {
+  return new Vector4(vec4.x, vec4.y, vec4.z, vec4.t)
 }
