@@ -25,6 +25,7 @@ const compiler = webpack(webpackConfig)
 const args = minimist(process.argv.slice(2))
 const withVirtualRobots = args['virtual-robots'] || false
 const nbsFile = args.play
+const nuclearnetAddress = args.address || '10.1.255.255'
 
 const app = express()
 const server = http.createServer(app)
@@ -33,6 +34,7 @@ const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 // Initialize socket.io namespace immediately to catch reconnections.
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
   fakeNetworking: withVirtualRobots,
+  nuclearnetAddress,
 })
 
 const devMiddleware = webpackDevMiddleware(compiler, {

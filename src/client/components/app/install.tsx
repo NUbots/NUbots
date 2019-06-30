@@ -15,7 +15,7 @@ export function installNav() {
   const nav = NavigationConfiguration.of()
   const appModel = AppModel.of()
   const nusightNetwork = NUsightNetwork.of(appModel)
-  nusightNetwork.connect({ name: 'nusight', address: '10.1.255.255' })
+  nusightNetwork.connect({ name: 'nusight' })
 
   const appController = AppController.of()
   AppNetwork.of(nusightNetwork, appModel)

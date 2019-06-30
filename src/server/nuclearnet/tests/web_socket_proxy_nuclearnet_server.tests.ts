@@ -22,7 +22,7 @@ describe('WebSocketProxyNUClearNetServer', () => {
     nuclearnetServer = new FakeNUClearNetServer()
     nuclearnetClient = new FakeNUClearNetClient(nuclearnetServer)
     nuclearnetClient.connect({ name: 'bob' })
-    server = new WebSocketProxyNUClearNetServer(webSocketServer, nuclearnetClient)
+    server = new WebSocketProxyNUClearNetServer(webSocketServer, nuclearnetClient, '10.1.255.255')
   })
 
   it('listens to new connections', () => {

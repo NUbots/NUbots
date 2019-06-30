@@ -26,3 +26,7 @@
 
 ## Testing
 `yarn test`
+
+## Configure the nuclearnet connection address
+`yarn start --address 192.168.1.255`
+`yarn prod --address 192.168.1.255`
