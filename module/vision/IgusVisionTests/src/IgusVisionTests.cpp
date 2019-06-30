@@ -60,7 +60,7 @@ namespace vision {
             for (auto& goal : goals.goals) {
                 for (auto& m : goal.measurements) {
                     if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
-                    arma::vec3 measuredPos = convert(m.position);
+                    arma::vec3 measuredPos = convert(Eigen::Vector3d(m.position.cast<double>()));
                     log("Goal actual pos (x,y,z):  ", goal_position.t());
                     log("Goal measured pos (x,y,z):", measuredPos.t());
                     log("Goal detector error =     ", (measuredPos - goal_position).t());

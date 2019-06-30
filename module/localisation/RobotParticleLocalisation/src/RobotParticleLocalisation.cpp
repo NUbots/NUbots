@@ -124,8 +124,12 @@ namespace localisation {
 
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                                filter.ambiguousMeasurementUpdate(
-                                    convert(m.position), convert(m.covariance), poss, convert(goals.Hcw), m.type, fd);
+                                filter.ambiguousMeasurementUpdate(arma::conv_to<arma::vec>::from(convert(m.position)),
+                                                                  arma::conv_to<arma::mat>::from(convert(m.covariance)),
+                                                                  poss,
+                                                                  convert(goals.Hcw),
+                                                                  m.type,
+                                                                  fd);
                             }
                         }
                     }
