@@ -737,10 +737,10 @@ namespace behaviour {
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.goals.size(); i++) {
-                boundingPoints.push_back(
-                    convert(Eigen::Vector2d(ob.goals.at(i).screen_angular + ob.goals.at(i).angular_size / 2)));
-                boundingPoints.push_back(
-                    convert(Eigen::Vector2d(ob.goals.at(i).screen_angular - ob.goals.at(i).angular_size / 2)));
+                boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
+                                                                 + ob.goals.at(i).angular_size.cast<double>() / 2)));
+                boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
+                                                                 - ob.goals.at(i).angular_size.cast<double>() / 2)));
             }
             return Quad::getBoundingBox(boundingPoints);
         }

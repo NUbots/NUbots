@@ -118,14 +118,14 @@ namespace support {
 
         arma::mat::fixed<3, 4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, convert(arma::vec3(goalNormals.col(0)))));
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert(arma::vec3(goalNormals.col(1)))));
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, convert(arma::vec3(goalNormals.col(2)))));
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, convert(arma::vec3(goalNormals.col(3)))));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::LEFT_NORMAL, convert(arma::vec3(goalNormals.col(0))).cast<float>()));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::RIGHT_NORMAL, convert(arma::vec3(goalNormals.col(1))).cast<float>()));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::TOP_NORMAL, convert(arma::vec3(goalNormals.col(2))).cast<float>()));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::BASE_NORMAL, convert(arma::vec3(goalNormals.col(3))).cast<float>()));
 
             // build the predicted quad
             utility::math::geometry::Quad quad(
@@ -166,12 +166,11 @@ namespace support {
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 1);
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin());
             }
-            if (!result.goals.at(0).measurements.empty()) {
-                result.goals.at(0).quad.tl = convert(quad.getTopLeft());
-                result.goals.at(0).quad.tr = convert(quad.getTopRight());
-                result.goals.at(0).quad.br = convert(quad.getBottomRight());
-                result.goals.at(0).quad.bl = convert(quad.getBottomLeft());
-            }
+            // if (!result.goals.at(0).measurements.empty()) {
+            //     result.goals.at(0).post.top    = (convert(quad.getTopLeft()) + convert(quad.getTopRight()) * 0.5);
+            //     result.goals.at(0).post.bottom = (convert(quad.getBottomLeft()) + convert(quad.getBottomRight()) *
+            //     0.5);
+            // }
         }
 
         // If no measurements are in the goal, then it was not observed
