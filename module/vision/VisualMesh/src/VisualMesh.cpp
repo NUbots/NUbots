@@ -93,7 +93,7 @@ namespace vision {
             classifier = std::make_unique<Classifier>(mesh->make_classifier(network));
         });
 
-        on<Trigger<Image>, Buffer<4>>().then([this](const Image& img) {
+        on<Trigger<Image>, Buffer<2>>().then([this](const Image& img) {
             // Get our camera to world matrix
             Eigen::Affine3f Hcw(img.Hcw.cast<float>());
 
@@ -123,6 +123,14 @@ namespace vision {
             // Copy the data into the message
             auto msg       = std::make_unique<VisualMeshMsg>();
             msg->camera_id = img.camera_id;
+
+            // Get all the rays
+            msg->rays.resize(results.global_indices.size(), 3);
+            int row = 0;
+            for (const auto& i : results.global_indices) {
+                msg->rays.row(row++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
+            }
+
             for (const auto& r : m.rows) {
                 msg->mesh.emplace_back(r.phi, r.end - r.begin);
             }
@@ -137,8 +145,11 @@ namespace vision {
                 results.classifications.size() / results.neighbourhood.size(),
                 results.neighbourhood.size());
 
+            msg->Hcw       = img.Hcw;
+            msg->timestamp = img.timestamp;
+
             emit(msg);
         });
-    }
+    }  // namespace vision
 }  // namespace vision
 }  // namespace module
