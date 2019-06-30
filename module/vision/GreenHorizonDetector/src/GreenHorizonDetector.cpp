@@ -29,6 +29,7 @@ namespace vision {
         on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file GreenHorizonDetector.yaml
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
+            config.fudge_factor         = cfg["fudge_factor"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<uint>();
             config.debug                = cfg["debug"].as<bool>();
         });
