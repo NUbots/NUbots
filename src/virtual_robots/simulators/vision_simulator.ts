@@ -17,7 +17,6 @@ import CompressedImage = message.output.CompressedImage
 import Projection = message.output.CompressedImage.Lens.Projection
 import Balls = message.vision.Balls
 import Side = message.vision.Goal.Side
-import Team = message.vision.Goal.Team
 import Goals = message.vision.Goals
 
 export class VisionSimulator extends Simulator {
@@ -101,13 +100,24 @@ export class VisionSimulator extends Simulator {
         timestamp: toTimestamp(time),
         Hcw: toProtoMat44(Hcw),
         goals: [{
+          side: Side.RIGHT,
+          post: {
+            top: new Vector3(10, -2, 2).normalize(),
+            bottom: new Vector3(10, -2, -2).normalize(),
+          },
+          measurements: [],
+        }, {
+          side: Side.LEFT,
+          post: {
+            top: new Vector3(10, 2, 2).normalize(),
+            bottom: new Vector3(10, 2, -2).normalize(),
+          },
+          measurements: [],
+        }, {
           side: Side.UNKNOWN_SIDE,
-          team: Team.UNKNOWN_TEAM,
-          frustum: {
-            tl: new Vector3(10, 1, 2).normalize(),
-            tr: new Vector3(10, -1, 2).normalize(),
-            bl: new Vector3(10, 1, -2).normalize(),
-            br: new Vector3(10, -1, -2).normalize(),
+          post: {
+            top: new Vector3(10, 0, 2).normalize(),
+            bottom: new Vector3(10, 0, -2).normalize(),
           },
           measurements: [],
         }],

@@ -42,11 +42,10 @@ export interface Ball {
 export interface Goal {
   readonly timestamp: number
   readonly Hcw: Matrix4
-  readonly frustum: {
-    readonly tl: Vector3
-    readonly tr: Vector3
-    readonly bl: Vector3
-    readonly br: Vector3
+  readonly side: 'left' | 'right' | 'unknown'
+  readonly post: {
+    readonly top: Vector3
+    readonly bottom: Vector3
   }
 }
 

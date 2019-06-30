@@ -125,20 +125,22 @@ export class CameraViewModel {
   })
 
   private goal = createTransformer((m: Goal) => {
-    const goal = new Object3D()
     const Hwc = new Matrix4().getInverse(toThreeMatrix4(m.Hcw))
     const imageHcw = this.model.image ? toThreeMatrix4(this.model.image.Hcw) : new Matrix4()
     const Hcc = imageHcw.multiply(Hwc)
-    const tl = toThreeVector3(m.frustum.tl).applyMatrix4(Hcc)
-    const tr = toThreeVector3(m.frustum.tr).applyMatrix4(Hcc)
-    const bl = toThreeVector3(m.frustum.bl).applyMatrix4(Hcc)
-    const br = toThreeVector3(m.frustum.br).applyMatrix4(Hcc)
-    const colour = new Vector4(0.8, 0.8, 0, 0.5)
-    goal.add(this.makePlaneSegment({ start: tl, end: bl, colour, lineWidth: 10 }))
-    goal.add(this.makePlaneSegment({ start: bl, end: br, colour, lineWidth: 10 }))
-    goal.add(this.makePlaneSegment({ start: br, end: tr, colour, lineWidth: 10 }))
-    goal.add(this.makePlaneSegment({ start: tr, end: tl, colour, lineWidth: 10 }))
-    return goal
+    let colour: Vector4 = new Vector4(1.0, 0.0, 1.0, 1.0)
+    if (m.side === 'left') {
+      colour = new Vector4(1.0, 1.0, 0, 1.0)
+    }
+    if (m.side === 'right') {
+      colour = new Vector4(0.0, 1.0, 1.0, 1.0)
+    }
+    return this.makePlaneSegment({
+      start: toThreeVector3(m.post.bottom).applyMatrix4(Hcc),
+      end: toThreeVector3(m.post.top).applyMatrix4(Hcc),
+      colour,
+      lineWidth: 10,
+    })
   })
 
   private greenhorizon = createTransformer((m: GreenHorizon) => {

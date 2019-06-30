@@ -16,6 +16,7 @@ import Image = message.input.Image
 import CompressedImage = message.output.CompressedImage
 import Balls = message.vision.Balls
 import Goals = message.vision.Goals
+import Goal = message.vision.Goal
 import VisualMesh = message.vision.VisualMesh
 import GreenHorizon = message.vision.GreenHorizon
 
@@ -116,11 +117,10 @@ export class VisionNetwork {
     camera.goals = goals.map(goal => ({
       timestamp: toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
-      frustum: {
-        tl: Vector3.from(goal.frustum!.tl),
-        tr: Vector3.from(goal.frustum!.tr),
-        bl: Vector3.from(goal.frustum!.bl),
-        br: Vector3.from(goal.frustum!.br),
+      side: goal.side === Goal.Side.LEFT ? 'left' : goal.side === Goal.Side.RIGHT ? 'right' : 'unknown',
+      post: {
+        top: Vector3.from(goal.post!.top),
+        bottom: Vector3.from(goal.post!.bottom),
       },
     }))
   }

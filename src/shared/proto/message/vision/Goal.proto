@@ -24,7 +24,6 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "Neutron.proto";
 import "Vector.proto";
-import "message/Geometry.proto";
 import "Matrix.proto";
 
 message Goal {
@@ -40,25 +39,29 @@ message Goal {
     }
     enum MeasurementType {
         UNKNOWN_MEASUREMENT = 0;
-        LEFT_NORMAL         = 1;
-        RIGHT_NORMAL        = 2;
-        TOP_NORMAL          = 3;
-        BASE_NORMAL         = 4;
-        CENTRE              = 5;
+        CENTRE              = 1;
+        LEFT_NORMAL         = 2;
+        RIGHT_NORMAL        = 3;
+        TOP_NORMAL          = 4;
+        BASE_NORMAL         = 5;
     }
     message Measurement {
         MeasurementType type = 1;
         // Normal vectors point inwards towards the centre of the object
-        vec3 position   = 2;
-        mat3 covariance = 3;
+        fvec3 position   = 2;
+        fmat3 covariance = 3;
+    }
+    message Post {
+        fvec3 top      = 1;
+        fvec3 bottom   = 2;
+        float distance = 3;
     }
     Side     side                       = 1;
-    Team     team                       = 2;
-    Frustum  frustum                    = 3;
-    Quad     quad                       = 4;
-    repeated Measurement measurements   = 5;
-    vec2                 screen_angular = 6;
-    vec2                 angular_size   = 7;
+    Post     post                       = 3;
+    repeated Measurement measurements   = 4;
+    fvec2                screen_angular = 5;
+    fvec2                angular_size   = 6;
+    Team                 team           = 7;
 }
 
 message Goals {
