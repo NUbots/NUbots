@@ -63,7 +63,7 @@ namespace vision {
             config.debug                = cfg["debug"].as<bool>();
         });
 
-        on<Trigger<GreenHorizon>, With<FieldDescription>>().then(
+        on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
             "Goal Detector", [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
@@ -78,7 +78,7 @@ namespace vision {
                 // Partition the indices such that we only have the goal points that dont have goal surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
                     indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == indices.size() || (cls(idx, GOAL_INDEX) >= config.confidence_threshold);
+                        return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -127,7 +127,7 @@ namespace vision {
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == indices.size() || (cls(idx, GOAL_INDEX) >= config.confidence_threshold);
+                                return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
                             {2});
                         // Return true if the right neighbour is NOT a goal point
@@ -136,7 +136,7 @@ namespace vision {
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == indices.size() || (cls(idx, GOAL_INDEX) >= config.confidence_threshold);
+                                return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
                             {3});
 
