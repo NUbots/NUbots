@@ -203,8 +203,7 @@ namespace platform {
                 motionFilter.setState(mean, arma::diagmat(covariance));
             });
 
-            on<Configuration>("FootDownNetwork.yaml").then([this] (const Configuration& config) {
-
+            on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
                 // Foot load sensor config
                 load_sensor = VirtualLoadSensor<float>(config);
             });
@@ -468,20 +467,8 @@ namespace platform {
                             sensors->accelerometer.y(),
                             sensors->accelerometer.z(),
                         };
-                        // features = {sensors->servo[ServoID::R_HIP_PITCH].present_velocity,
-                        // sensors->servo[ServoID::R_HIP_PITCH].load,
-                        // sensors->servo[ServoID::L_HIP_PITCH].present_velocity,
-                        // sensors->servo[ServoID::L_HIP_PITCH].load,
-                        // sensors->servo[ServoID::R_KNEE].present_velocity,
-                        // sensors->servo[ServoID::R_KNEE].load,
-                        // sensors->servo[ServoID::L_KNEE].present_velocity,
-                        // sensors->servo[ServoID::L_KNEE].load,
-                        // sensors->servo[ServoID::R_ANKLE_PITCH].present_velocity,
-                        // sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                        // sensors->servo[ServoID::L_ANKLE_PITCH].present_velocity,
-                        // sensors->servo[ServoID::L_ANKLE_PITCH].load};
 
-                        auto feet_down           = load_sensor.updateFeet(sensors);
+                        auto feet_down           = load_sensor.updateFeet(*sensors);
                         sensors->left_foot_down  = feet_down[0];
                         sensors->right_foot_down = feet_down[1];
                     }
