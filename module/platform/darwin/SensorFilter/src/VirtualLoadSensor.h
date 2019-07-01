@@ -41,11 +41,13 @@ namespace platform {
                 certainty_threshold   = config["filter"]["certainty_threshold"].as<Scalar>();
                 uncertainty_threshold = config["filter"]["uncertainty_threshold"].as<Scalar>();
 
+
                 // Add the servos
                 for (const auto& field : config["network"]["input"]["servos"].config) {
                     servos.emplace_back("R_" + field.as<std::string>());
                     servos.emplace_back("L_" + field.as<std::string>());
                 }
+
 
                 // Add the fields
                 for (const auto& field : config["network"]["input"]["fields"].config) {
@@ -63,21 +65,28 @@ namespace platform {
                 accelerometer = config["network"]["input"]["accelerometer"].as<bool>();
                 gyroscope     = config["network"]["input"]["gyroscope"].as<bool>();
 
-                for (const auto& layer : config["network"]["input"]["layers"].config) {
-                    // TODO load the layers into Eigen::Matrix
+
+                for (const auto& layer : config["network"]["layers"].config) {
+
+                    auto weight_rows = layer["weights"].size();
+                    auto weight_cols = layer["weights"][0].size();
+
+
+                    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> weights(weight_rows, weight_cols);
+                    Eigen::Matrix<Scalar, Eigen::Dynamic, 1> bias(weight_cols);
+
+                    for (int col = 0; col < weight_cols; col++) {
+                        for (int row = 0; row < weight_rows; row++) {
+                            weights(row, col) = layer["weights"][row][col].as<Scalar>();
+                        }
+                        bias[col] = layer["biases"][col].as<Scalar>();
+                    }
+
+                    layers.emplace_back(weights, bias);
                 }
             }
 
-            static constexpr Scalar sigmoid(const Scalar& value) {
-                return 1.0 / (1.0 + std::exp(-value));
-            }
-
             std::array<bool, 2> updateFeet(const ::message::input::Sensors& sensors) {
-
-                NUClear::log("Servos size", servos.size());
-                NUClear::log("fields size", fields.size());
-                NUClear::log("accelerometer", accelerometer ? 1 : 0);
-                NUClear::log("gyroscope", gyroscope ? 1 : 0);
 
                 // TODO based on configuration grab the sensor readings we are using
                 Eigen::Matrix<Scalar, Eigen::Dynamic, 1> logits((servos.size() * fields.size())
@@ -85,8 +94,6 @@ namespace platform {
 
                 // Build our input data
                 int index = 0;
-
-                NUClear::log("Logits rows", logits.rows());
 
                 for (const auto& servo_id : servos) {
                     const auto& s = sensors.servo[servo_id];
@@ -97,7 +104,6 @@ namespace platform {
                             case VELOCITY: logits[index++] = s.present_velocity; break;
                         }
                     }
-                    NUClear::log("Index for", index);
                 }
                 if (accelerometer) {
                     logits[index++] = sensors.accelerometer.x();
@@ -109,26 +115,22 @@ namespace platform {
                     logits[index++] = sensors.gyroscope.y();
                     logits[index++] = sensors.gyroscope.z();
                 }
-                NUClear::log("Index if", index);
+
 
                 // Run the neural network
                 for (int i = 0; i < layers.size(); ++i) {
 
-                    NUClear::log("i", i);
-                    NUClear::log("Rows Cols First", layers[i].first.rows(), layers[i].first.cols());
-                    NUClear::log("Rows Cols Second", layers[i].second.rows(), layers[i].second.cols());
-
-
                     // Weights and bias
-                    logits = logits * layers[i].first + layers[i].second;
+                    logits = logits.transpose() * layers[i].first + layers[i].second.transpose();
 
                     // RELU except last layer
-                    if (i < layers.size() - 1) {
+                    if (i + 1 < layers.size()) {
                         logits = (logits.array() > 0.0f).select(logits, 0.0f);
                     }
                     // Sigmoid final layer
                     else {
-                        logits = logits.unaryExpr(std::ptr_fun(sigmoid));
+                        logits = logits.unaryExpr(
+                            [](const Scalar& value) { return Scalar(1.0 / (1.0 + std::exp(-value))); });
                     }
                 }
 
