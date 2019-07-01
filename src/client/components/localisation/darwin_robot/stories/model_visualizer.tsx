@@ -14,19 +14,26 @@ import { Stage } from '../../../three/three'
 import { Canvas } from '../../../three/three'
 import { Three } from '../../../three/three'
 
-export class ModelVisualiser extends Component<{ model: IComputedValue<Object3D>; }> {
+export class ModelVisualiser extends Component<{
+  model: IComputedValue<Object3D>,
+  cameraPosition: Vector3
+}> {
   render() {
     return <Three stage={this.stage}/>
   }
 
   private stage = (canvas: Canvas) => {
-    const viewModel = new ViewModel(canvas, this.props.model)
+    const viewModel = new ViewModel(canvas, this.props.model, this.props.cameraPosition)
     return computed(() => viewModel.stage)
   }
 }
 
 class ViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: IComputedValue<Object3D>) {
+  constructor(
+    private readonly canvas: Canvas,
+    private readonly model: IComputedValue<Object3D>,
+    private readonly cameraPosition: Vector3,
+  ) {
   }
 
   @computed
@@ -39,7 +46,7 @@ class ViewModel {
     aspect: this.canvas.width / this.canvas.height,
     near: 0.01,
     far: 100,
-    position: Vector3.from({ x: 0.4, y: 0.3, z: 0.3 }),
+    position: this.cameraPosition,
     up: Vector3.from({ x: 0, y: 0, z: 1 }),
     lookAt: Vector3.of(),
   }))

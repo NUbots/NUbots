@@ -4,6 +4,7 @@ import { reaction } from 'mobx'
 import { now } from 'mobx-utils'
 import * as React from 'react'
 
+import { Vector3 } from '../../../../math/vector3'
 import { RobotModel } from '../../../robot/model'
 import { LocalisationRobotModel } from '../model'
 import { RobotViewModel } from '../view_model'
@@ -29,15 +30,17 @@ function createModel(animate?: 'animate') {
   return computed(() => viewModel.robot)
 }
 
+const cameraPosition = new Vector3(0.3, 0.4, 0.4)
+
 storiesOf('component.localisation.darwin_robot', module)
   .add('renders statically', () => {
     return <div style={{ width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)' }}>
-      <ModelVisualiser model={createModel()}/>
+      <ModelVisualiser model={createModel()} cameraPosition={cameraPosition}/>
     </div>
   })
   .add('renders animated', () => {
     return <div style={{ width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)' }}>
-      <ModelVisualiser model={createModel('animate')}/>
+      <ModelVisualiser model={createModel('animate')} cameraPosition={cameraPosition}/>
     </div>
   })
 

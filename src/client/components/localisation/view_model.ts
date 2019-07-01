@@ -9,13 +9,16 @@ import { perspectiveCamera } from '../three/builders'
 import { Stage } from '../three/three'
 import { Canvas } from '../three/three'
 
-import { RobotViewModel } from './darwin_robot/view_model'
 import { FieldViewModel } from './field/view_model'
 import { LocalisationModel } from './model'
+import { NUgusViewModel } from './nugus_robot/view_model'
 import { SkyboxViewModel } from './skybox/view_model'
 
 export class LocalisationViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: LocalisationModel) {
+  constructor(
+    private readonly canvas: Canvas,
+    private readonly model: LocalisationModel,
+  ) {
   }
 
   static of(canvas: Canvas, model: LocalisationModel) {
@@ -61,7 +64,7 @@ export class LocalisationViewModel {
   private get robots(): Object3D[] {
     return this.model.robots
       .filter(robotModel => robotModel.visible)
-      .map(robotModel => RobotViewModel.of(robotModel).robot)
+      .map(robotModel => NUgusViewModel.of(robotModel).robot)
   }
 
   @computed
