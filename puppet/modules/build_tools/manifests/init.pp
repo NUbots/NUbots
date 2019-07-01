@@ -82,6 +82,7 @@ class build_tools {
                 pip3 install pydotplus &&
                 pip3 install pygments &&
                 pip3 install stringcase &&
+                pip3 install tensorflow-gpu &&
                 pip3 install termcolor &&
                 pip3 install protobuf==3.5.0.post1 &&
                 pip3 install pillow &&
