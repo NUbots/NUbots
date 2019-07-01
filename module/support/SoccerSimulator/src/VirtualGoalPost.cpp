@@ -96,13 +96,13 @@ namespace support {
                                   const FieldDescription& field) {
         Goals result;
         result.goals.reserve(1);
-
+        Goal goal;
         // t = torso; c = camera; g = ground; f = foot;
         Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
-        result.Hcw              = Htc.inverse() * sensors.Htw;
-        result.timestamp        = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
-        result.goals.at(0).side = side;
-        result.goals.at(0).team = team;
+        result.Hcw       = Htc.inverse() * sensors.Htw;
+        result.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
+        goal.side        = side;
+        goal.team        = team;
 
         // get the torso to foot transform
         Transform3D Hgt  = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
@@ -115,19 +115,21 @@ namespace support {
         Hgt.submat(0, 3, 1, 3) *= 0.0;
         Hgt.rotation() = Rotation3D::createRotationZ(-Rotation3D(Hgt.rotation()).yaw()) * Hgt.rotation();
         // create the camera to ground transform
-        Transform3D Hgc = Hgt * convert<double, 4, 4>(Htc.matrix());
+        Eigen::MatrixXd Htc_standardMatrix = Htc.matrix();
+        Transform3D Htc_transform3D        = convert<double, 4, 4>(Htc_standardMatrix);
+        Transform3D Hgc                    = Hgt * Htc_transform3D;
 
         // push the new measurement types
 
         arma::mat::fixed<3, 4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
-            result.goals.at(0).measurements.push_back(
+            goal.measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, convert<double, 3>(goalNormals.col(0))));
-            result.goals.at(0).measurements.push_back(
+            goal.measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert<double, 3>(goalNormals.col(1))));
-            result.goals.at(0).measurements.push_back(
+            goal.measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, convert<double, 3>(goalNormals.col(2))));
-            result.goals.at(0).measurements.push_back(
+            goal.measurements.push_back(
                 Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, convert<double, 3>(goalNormals.col(3))));
 
             // build the predicted quad
@@ -156,8 +158,7 @@ namespace support {
             Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE % covariance_amplifier));
 
             if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
-                result.goals.at(0).measurements.push_back(
-                    Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
+                goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
             }
 
             // goal base visibility check
@@ -169,7 +170,7 @@ namespace support {
                     && quad.getBottomLeft()[0] > 0
                     && quad.getBottomLeft()[0] < image.dimensions[0])) {
 
-                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 3);
+                goal.measurements.erase(goal.measurements.begin() + 3);
             }
             // goal top visibility check
             if (not(quad.getTopRight()[1] > 0 && quad.getTopRight()[1] < image.dimensions[1] && quad.getTopLeft()[1] > 0
@@ -179,8 +180,9 @@ namespace support {
                     && quad.getTopLeft()[0] > 0
                     && quad.getTopLeft()[0] < image.dimensions[0])) {
 
-                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 2);
+                goal.measurements.erase(goal.measurements.begin() + 2);
             }
+
             // goal sides visibility check
             if (not((
                         // One of the top or the bottom are in the screen coordinates of x
@@ -195,16 +197,18 @@ namespace support {
                            // the screen
                            (quad.getBottomRight()[1] < image.dimensions[1] && quad.getTopRight()[1] > 0)
                            || (quad.getBottomLeft()[1] < image.dimensions[1] && quad.getTopLeft()[1] > 0)))) {
-                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 1);
-                result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin());
+                goal.measurements.erase(goal.measurements.begin() + 1);
+                goal.measurements.erase(goal.measurements.begin());
             }
-            if (!result.goals.at(0).measurements.empty()) {
-                result.goals.at(0).quad.tl = convert<double, 2>(quad.getTopLeft());
-                result.goals.at(0).quad.tr = convert<double, 2>(quad.getTopRight());
-                result.goals.at(0).quad.br = convert<double, 2>(quad.getBottomRight());
-                result.goals.at(0).quad.bl = convert<double, 2>(quad.getBottomLeft());
+
+            if (!goal.measurements.empty()) {
+                goal.quad.tl = convert<double, 2>(quad.getTopLeft());
+                goal.quad.tr = convert<double, 2>(quad.getTopRight());
+                goal.quad.br = convert<double, 2>(quad.getBottomRight());
+                goal.quad.bl = convert<double, 2>(quad.getBottomLeft());
             }
         }
+        result.goals.push_back(goal);
 
         // If no measurements are in the goal, then it was not observed
         return result;
