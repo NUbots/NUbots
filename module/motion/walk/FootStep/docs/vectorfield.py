@@ -33,18 +33,7 @@ ax = fig.add_subplot(111)
 
 # Plot the streamlines with an appropriate colormap and arrow style
 color = np.hypot(dx, dy)
-ax.streamplot(
-    xs,
-    ys,
-    dx,
-    dy,
-    color=color,
-    linewidth=1,
-    cmap=plt.cm.jet,
-    density=2,
-    arrowstyle="->",
-    arrowsize=1.5,
-)
+ax.streamplot(xs, ys, dx, dy, color=color, linewidth=1, cmap=plt.cm.jet, density=2, arrowstyle="->", arrowsize=1.5)
 
 ax.axhline(y=h)
 ax.axhline(y=0)

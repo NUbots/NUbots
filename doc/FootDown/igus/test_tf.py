@@ -34,18 +34,10 @@ def load_yaml_model(model):
 
 # Convert the csv row into an example
 def parse_row(line, truth):
-    cols = tf.decode_csv(
-        records=line, record_defaults=[[0.0]] * (csv_data_cols + 2)
-    )  # +2 for the foot heights
+    cols = tf.decode_csv(records=line, record_defaults=[[0.0]] * (csv_data_cols + 2))  # +2 for the foot heights
     data = tf.stack(cols[2:])
     foot_on_ground = tf.cast(
-        tf.stack(
-            [
-                cols[0] < (cols[1] + max_height_delta),
-                cols[1] < (cols[0] + max_height_delta),
-            ]
-        ),
-        tf.float32,
+        tf.stack([cols[0] < (cols[1] + max_height_delta), cols[1] < (cols[0] + max_height_delta)]), tf.float32
     )
     truth = tf.cond(
         tf.reduce_all(tf.equal(truth, -1)),
@@ -72,9 +64,7 @@ structure = load_yaml_model("best_vloss.yaml")
 
 # Build the network using the provided structure
 line = tf.placeholder(tf.string, [])
-iterator = tf.data.Iterator.from_string_handle(
-    line, dataset.output_types, dataset.output_shapes
-)
+iterator = tf.data.Iterator.from_string_handle(line, dataset.output_types, dataset.output_shapes)
 logits, labels = iterator.get_next()
 logits = tf.reshape(logits, [-1, csv_data_cols])
 for i, out_s in enumerate(network_structure):
@@ -82,12 +72,8 @@ for i, out_s in enumerate(network_structure):
         in_s = logits.get_shape()[1].value
 
         # Create weights and biases
-        W = tf.get_variable(
-            "Weights", initializer=structure[i]["weights"], dtype=tf.float32
-        )
-        b = tf.get_variable(
-            "Biases", initializer=structure[i]["biases"], dtype=tf.float32
-        )
+        W = tf.get_variable("Weights", initializer=structure[i]["weights"], dtype=tf.float32)
+        b = tf.get_variable("Biases", initializer=structure[i]["biases"], dtype=tf.float32)
 
         # Apply our weights and biases
         logits = tf.matmul(logits, W)
@@ -98,13 +84,7 @@ for i, out_s in enumerate(network_structure):
             logits = tf.nn.selu(logits)
         else:
             logits = tf.reshape(
-                tf.stack(
-                    [
-                        tf.nn.softmax(logits=logits[:, 0:2]),
-                        tf.nn.softmax(logits=logits[:, 2:4]),
-                    ]
-                ),
-                [4],
+                tf.stack([tf.nn.softmax(logits=logits[:, 0:2]), tf.nn.softmax(logits=logits[:, 2:4])]), [4]
             )
 
 with tf.Session() as sess:
@@ -116,21 +96,10 @@ with tf.Session() as sess:
     count = 0
     while True:
         try:
-            out, truth = sess.run(
-                [tf.squeeze(logits), tf.squeeze(labels)], feed_dict={line: valid_handle}
-            )
-            thresholded = [
-                out[0] > out[1],
-                out[0] < out[1],
-                out[2] > out[3],
-                out[2] < out[3],
-            ]
+            out, truth = sess.run([tf.squeeze(logits), tf.squeeze(labels)], feed_dict={line: valid_handle})
+            thresholded = [out[0] > out[1], out[0] < out[1], out[2] > out[3], out[2] < out[3]]
 
-            print(
-                "Batch: {} -> Truth: {} Prediction: {} Thresholded: {}".format(
-                    count, truth, out, thresholded
-                )
-            )
+            print("Batch: {} -> Truth: {} Prediction: {} Thresholded: {}".format(count, truth, out, thresholded))
 
             # Left
             if (truth[0] == 1) and (thresholded[0] == 1) and (thresholded[1] == 0):
@@ -164,43 +133,17 @@ with tf.Session() as sess:
 
         except tf.errors.OutOfRangeError:
             print(confusion)
+            print("TPR: {}".format(confusion[0, 0] / float(confusion[0, 0] + confusion[1, 0])))
+            print("TNR: {}".format(confusion[1, 1] / float(confusion[0, 1] + confusion[1, 1])))
+            print("PPV: {}".format(confusion[0, 0] / float(confusion[0, 0] + confusion[0, 1])))
+            print("NPV: {}".format(confusion[1, 1] / float(confusion[1, 0] + confusion[1, 1])))
+            print("ACC: {}".format((confusion[0, 0] + confusion[1, 1]) / float(confusion.sum())))
             print(
-                "TPR: {}".format(
-                    confusion[0, 0] / float(confusion[0, 0] + confusion[1, 0])
-                )
-            )
-            print(
-                "TNR: {}".format(
-                    confusion[1, 1] / float(confusion[0, 1] + confusion[1, 1])
-                )
-            )
-            print(
-                "PPV: {}".format(
-                    confusion[0, 0] / float(confusion[0, 0] + confusion[0, 1])
-                )
-            )
-            print(
-                "NPV: {}".format(
-                    confusion[1, 1] / float(confusion[1, 0] + confusion[1, 1])
-                )
-            )
-            print(
-                "ACC: {}".format(
-                    (confusion[0, 0] + confusion[1, 1]) / float(confusion.sum())
-                )
-            )
-            print(
-                "F1.: {}".format(
-                    (2 * confusion[0, 0])
-                    / float(2 * confusion[0, 0] + confusion[0, 1] + confusion[1, 0])
-                )
+                "F1.: {}".format((2 * confusion[0, 0]) / float(2 * confusion[0, 0] + confusion[0, 1] + confusion[1, 0]))
             )
             print(
                 "MCC: {}".format(
-                    (
-                        confusion[0, 0] * confusion[1, 1]
-                        - confusion[0, 1] * confusion[1, 0]
-                    )
+                    (confusion[0, 0] * confusion[1, 1] - confusion[0, 1] * confusion[1, 0])
                     / math.sqrt(
                         float(confusion[0, 0] + confusion[0, 1])
                         * float(confusion[1, 0] + confusion[1, 1])

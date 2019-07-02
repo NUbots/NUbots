@@ -90,12 +90,7 @@ class SymbolParser:
 
         # Type modifier, e.g. const volatile && * etc
         typeModifiers = pp.Group(
-            pp.ZeroOrMore(
-                pp.Literal("const")
-                | pp.Literal("volatile")
-                | pp.Literal("&")
-                | pp.Literal("*")
-            )
+            pp.ZeroOrMore(pp.Literal("const") | pp.Literal("volatile") | pp.Literal("&") | pp.Literal("*"))
         )
 
         # Match a cType alphanum string, also matches int constants since we don't restrict the forst char
@@ -108,9 +103,7 @@ class SymbolParser:
         funcOrArrayModifier = pp.Regex(r"\([&*]+\)")
 
         # trailing information of form [clone .lto_priv.1145]
-        trailingInfo = pp.ZeroOrMore(
-            pp.Suppress(pp.Literal("[") + pp.Regex(r"[^\]]+") + pp.Literal("]"))
-        )
+        trailingInfo = pp.ZeroOrMore(pp.Suppress(pp.Literal("[") + pp.Regex(r"[^\]]+") + pp.Literal("]")))
 
         # A locator system that can be turned on to put the char index in the parsed output
         locator = pp.Empty().setParseAction(self.locator)
@@ -126,25 +119,17 @@ class SymbolParser:
         # Match a template (list of types, enums and empties)
         templateType = (
             pp.Suppress("<")
-            + pp.Optional(
-                pp.Group(pp.delimitedList(pp.Group(enumType | nsType | pp.Empty())))
-            )
+            + pp.Optional(pp.Group(pp.delimitedList(pp.Group(enumType | nsType | pp.Empty()))))
             + pp.Suppress(">")
         )
 
         # A function call e.g. (list, of, args)
-        funcCall = (
-            pp.Suppress("(")
-            + pp.Optional(pp.Group(pp.delimitedList(pp.Group(nsType))))
-            + pp.Suppress(")")
-        )
+        funcCall = pp.Suppress("(") + pp.Optional(pp.Group(pp.delimitedList(pp.Group(nsType)))) + pp.Suppress(")")
 
         # A lambda type e.g. {lambda(a,b,c)#1} or {parm#2}
         lambdaType = (
             pp.Suppress("{")
-            + pp.Group(
-                cType + pp.Optional(funcCall) + pp.Suppress("#") + pp.Word(pp.nums)
-            )
+            + pp.Group(cType + pp.Optional(funcCall) + pp.Suppress("#") + pp.Word(pp.nums))
             + pp.Suppress("}")
         )
 

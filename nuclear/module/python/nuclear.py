@@ -24,18 +24,11 @@ class SingleTypeDSLWord(DSLWord):
 
     def template_args(self):
         return "{}<::{}::{}>".format(
-            self._name,
-            self._t.__module__.replace(".", "::"),
-            self._t.__name__.replace(".", "::"),
+            self._name, self._t.__module__.replace(".", "::"), self._t.__name__.replace(".", "::")
         )
 
     def input_types(self):
-        return [
-            "const {}::{}&".format(
-                self._t.__module__.replace(".", "::"),
-                self._t.__name__.replace(".", "::"),
-            )
-        ]
+        return ["const {}::{}&".format(self._t.__module__.replace(".", "::"), self._t.__name__.replace(".", "::"))]
 
     def include_paths(self):
         return self._include_paths
@@ -169,30 +162,14 @@ class DSLCallback(DSLWord):
     def __init__(self, func, *dsl):
         self.func = func
 
-        self._t_args = ", ".join(
-            w.template_args()
-            for w in dsl
-            if hasattr(w, "template_args") and w.template_args()
-        )
+        self._t_args = ", ".join(w.template_args() for w in dsl if hasattr(w, "template_args") and w.template_args())
 
-        self._r_args = ", ".join(
-            w.runtime_args()
-            for w in dsl
-            if hasattr(w, "runtime_args") and w.runtime_args()
-        )
+        self._r_args = ", ".join(w.runtime_args() for w in dsl if hasattr(w, "runtime_args") and w.runtime_args())
 
-        paths = [
-            w.include_paths()
-            for w in dsl
-            if hasattr(w, "include_paths") and w.include_paths()
-        ]
+        paths = [w.include_paths() for w in dsl if hasattr(w, "include_paths") and w.include_paths()]
         self._include_paths = [b for a in paths for b in a]
 
-        inputs = [
-            w.input_types()
-            for w in dsl
-            if hasattr(w, "input_types") and w.input_types()
-        ]
+        inputs = [w.input_types() for w in dsl if hasattr(w, "input_types") and w.input_types()]
         self._i_args = [b for a in inputs for b in a]
 
     def template_args(self):
@@ -226,13 +203,9 @@ def Reactor(reactor):
         setattr(instance, "_reactor_ptr", nuclear_reactor.bind_self(instance))
 
         # Go through all of our DSL callbacks to bind them
-        reactions = inspect.getmembers(
-            reactor, predicate=lambda x: isinstance(x, DSLCallback)
-        )
+        reactions = inspect.getmembers(reactor, predicate=lambda x: isinstance(x, DSLCallback))
         for reaction in reactions:
-            func_name = "bind_{}".format(
-                re.sub(r"(?:\W|^(?=\d))+", "_", reaction[1].template_args())
-            )
+            func_name = "bind_{}".format(re.sub(r"(?:\W|^(?=\d))+", "_", reaction[1].template_args()))
             getattr(nuclear_reactor, func_name)(reaction[1].function())
 
     # If we don't have nuclear_reactor defined, we generate the c++
@@ -248,17 +221,13 @@ def Reactor(reactor):
         # Strip to the src directory
         reactor_dir = os.path.dirname(reactor_path)
         # Strip to the name of the module
-        reactor_namespace = os.path.join(
-            "module", os.path.dirname(os.path.dirname(reactor_dir))
-        )
+        reactor_namespace = os.path.join("module", os.path.dirname(os.path.dirname(reactor_dir)))
 
         # Get the reactor name (the name of the class)
         reactor_name = reactor.__name__
 
         # Get our reactions
-        reactions = inspect.getmembers(
-            reactor, predicate=lambda x: isinstance(x, DSLCallback)
-        )
+        reactions = inspect.getmembers(reactor, predicate=lambda x: isinstance(x, DSLCallback))
 
         binder_impl = dedent(
             """\
@@ -298,9 +267,7 @@ def Reactor(reactor):
 
             input_types = reaction[1].input_types()
             input_vars = ["var{}".format(i) for i in range(len(input_types))]
-            input_args = [
-                "{} {}".format(arg, var) for arg, var in zip(input_types, input_vars)
-            ]
+            input_args = ["{} {}".format(arg, var) for arg, var in zip(input_types, input_vars)]
 
             binders.add(
                 binder_impl.format(
@@ -318,13 +285,8 @@ def Reactor(reactor):
 
         macro_guard = "{}_H".format(reactor_name.upper())
         header_file = "{}.h".format(reactor_name)
-        open_namespace = "\n".join(
-            "namespace {} {{".format(n) for n in reactor_namespace.split(os.path.sep)
-        )
-        close_namespace = "\n".join(
-            "}}  // namespace {}".format(n)
-            for n in reactor_namespace.split(os.path.sep)
-        )
+        open_namespace = "\n".join("namespace {} {{".format(n) for n in reactor_namespace.split(os.path.sep))
+        close_namespace = "\n".join("}}  // namespace {}".format(n) for n in reactor_namespace.split(os.path.sep))
 
         header_template = dedent(
             """\

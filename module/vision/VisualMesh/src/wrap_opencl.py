@@ -18,9 +18,7 @@ with open(input_path, "r") as input_file:
 
         # Work out what our define will be
         define = os.path.basename(input_path)[:-3].replace(os.sep, "_").upper()
-        output = [
-            l.rstrip("\n").replace("\\", "\\\\").replace('"', '\\"') for l in input_file
-        ]
+        output = [l.rstrip("\n").replace("\\", "\\\\").replace('"', '\\"') for l in input_file]
         output.append("")
 
         output = '#define {}_CL "{}"'.format(define, "\\n\\\n".join(output))

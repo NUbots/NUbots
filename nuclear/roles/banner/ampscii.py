@@ -276,33 +276,13 @@ tile_map = [
     ((0, 0), (1, 1), u"\u2584", u"\u2580"),  # |▄| Lower half block
     ((0, 1), (0, 1), u"\u2590", u"\u258C"),  # |▐| Right half block
     ((0, 1), (1, 0), u"\u259E", u"\u259A"),  # |▞| Quadrant upper right and lower left
-    (
-        (0, 1),
-        (1, 1),
-        u"\u259F",
-        u"\u2598",
-    ),  # |▟| Quadrant upper right and lower left and lower right
+    ((0, 1), (1, 1), u"\u259F", u"\u2598"),  # |▟| Quadrant upper right and lower left and lower right
     ((1, 0), (0, 1), u"\u259A", u"\u259E"),  # |▚| Quadrant upper left and lower right
     ((1, 0), (1, 0), u"\u258C", u"\u2590"),  # |▌| Left half block
-    (
-        (1, 0),
-        (1, 1),
-        u"\u2599",
-        u"\u259D",
-    ),  # |▙| Quadrant upper left and lower left and lower right
+    ((1, 0), (1, 1), u"\u2599", u"\u259D"),  # |▙| Quadrant upper left and lower left and lower right
     ((1, 1), (0, 0), u"\u2580", u"\u2584"),  # |▀| Upper half block
-    (
-        (1, 1),
-        (0, 1),
-        u"\u259C",
-        u"\u2596",
-    ),  # |▜| Quadrant upper left and upper right and lower right
-    (
-        (1, 1),
-        (1, 0),
-        u"\u259B",
-        u"\u2597",
-    ),  # |▛| Quadrant upper left and upper right and lower left
+    ((1, 1), (0, 1), u"\u259C", u"\u2596"),  # |▜| Quadrant upper left and upper right and lower right
+    ((1, 1), (1, 0), u"\u259B", u"\u2597"),  # |▛| Quadrant upper left and upper right and lower left
 ]
 
 
