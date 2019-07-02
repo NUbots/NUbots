@@ -464,8 +464,6 @@ namespace platform {
 
                     emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
 
-                    log("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0);
-
                     /************************************************
                      *             Motion (IMU+Odometry)            *
                      ************************************************/
