@@ -63,19 +63,21 @@ namespace input {
                         ArvStream* stream = arv_camera_create_stream(newCamera, NULL, NULL);
 
                         // Add camera to list.
-                        CameraContext context = {static_cast<uint32_t>(utility::vision::getFourCCFromDescription(
-                                                     config["format"]["pixel"].as<std::string>())),
-                                                 deviceID,
-                                                 cameraCount,
-                                                 config["is_left"].as<bool>(),
-                                                 Image::Lens(Image::Lens::Projection::EQUIDISTANT,
-                                                             1.0f / config["lens"]["radiansPerPixel"].as<float>(),
-                                                             Eigen::Vector2f(config["lens"]["FOV"].as<float>(),
-                                                                             config["lens"]["FOV"].as<float>()),
-                                                             convert(config["lens"]["centreOffset"].as<arma::fvec>())),
-                                                 newCamera,
-                                                 stream,
-                                                 *this};
+                        CameraContext context = {
+                            static_cast<uint32_t>(
+                                utility::vision::getFourCCFromDescription(config["format"]["pixel"].as<std::string>())),
+                            deviceID,
+                            cameraCount,
+                            config["is_left"].as<bool>(),
+                            Image::Lens(
+                                Image::Lens::Projection::EQUIDISTANT,
+                                config["lens"]["focal_length"].as<float>(),
+                                Eigen::Vector2f(config["lens"]["fov"].as<float>(), config["lens"]["fov"].as<float>()),
+                                Eigen::Vector2f(config["lens"]["centreOffset"][0].as<float>(),
+                                                config["lens"]["centreOffset"][1].as<float>())),
+                            newCamera,
+                            stream,
+                            *this};
 
                         camera = AravisCameras.insert(std::make_pair(deviceID, context)).first;
 
