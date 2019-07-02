@@ -606,7 +606,7 @@
       position: -0.6398262
       gain: 30
       torque: 100
-  - duration: 1000
+- duration: 1000
   targets:
     - id: HEAD_YAW
       position: -0.001534355
