@@ -12,18 +12,18 @@ import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
 
 # Open up our message output directory to get our protobuf types
-shared_path = os.path.join(b.binary_dir, "shared")
+if b.binary_dir and os.path.isdir(b.binary_dir):
+    shared_path = os.path.join(b.binary_dir, "shared")
+    sys.path.append(shared_path)
 
-sys.path.append(shared_path)
+    # Load all of the protobuf files as modules to use
+    for dir_name, subdir, files in os.walk(shared_path):
+        modules = pkgutil.iter_modules(path=[dir_name])
+        for loader, module_name, ispkg in modules:
+            if module_name.endswith("pb2"):
 
-# Load all of the protobuf files as modules to use
-for dir_name, subdir, files in os.walk(shared_path):
-    modules = pkgutil.iter_modules(path=[dir_name])
-    for loader, module_name, ispkg in modules:
-        if module_name.endswith("pb2"):
-
-            # Load our protobuf module
-            module = loader.find_module(module_name).load_module(module_name)
+                # Load our protobuf module
+                module = loader.find_module(module_name).load_module(module_name)
 
 decoders = {}
 
@@ -40,9 +40,7 @@ for message in google.protobuf.message.Message.__subclasses__():
 def decode(path):
 
     # Now open the passed file
-    with gzip.open(path, "rb") if path.endswith("nbz") or path.endswith(
-        ".gz"
-    ) else open(path, "rb") as f:
+    with gzip.open(path, "rb") if path.endswith("nbz") or path.endswith(".gz") else open(path, "rb") as f:
 
         # NBS File Format:
         # 3 Bytes - NUClear radiation symbol header, useful for synchronisation when attaching to an existing stream
@@ -69,8 +67,8 @@ def decode(path):
             # If we know how to parse this type, parse it
             if type_hash in decoders:
                 # Yield a message
-                yield (
-                    decoders[type_hash][0],
-                    timestamp,
-                    decoders[type_hash][1].FromString(payload[16:]),
-                )
+                try:
+                    packet = (decoders[type_hash][0], timestamp, decoders[type_hash][1].FromString(payload[16:]))
+                    yield packet
+                except:
+                    pass

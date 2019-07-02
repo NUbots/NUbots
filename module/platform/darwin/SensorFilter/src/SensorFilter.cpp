@@ -117,9 +117,6 @@ namespace platform {
                 this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
                 this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
 
-                // Foot load sensor config
-                load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
-
                 // Motion filter config
                 // Update our velocity timestep dekay
                 this->config.motionFilter.velocityDecay =
@@ -206,6 +203,11 @@ namespace platform {
                 covariance.rows(MotionModel::BX, MotionModel::BZ) =
                     this->config.motionFilter.initial.covariance.gyroscopeBias;
                 motionFilter.setState(mean, arma::diagmat(covariance));
+            });
+
+            on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
+                // Foot load sensor config
+                load_sensor = VirtualLoadSensor<float>(config);
             });
 
 
@@ -456,25 +458,10 @@ namespace platform {
 
                     if (previousSensors) {
 
-
                         std::array<bool, 2> feet_down = {true};
                         if (config.footDown.fromLoad) {
                             // Use our virtual load sensor class to work out which feet are down
-                            arma::frowvec::fixed<12> features = {
-                                sensors->servo[ServoID::R_HIP_PITCH].present_velocity,
-                                sensors->servo[ServoID::R_HIP_PITCH].load,
-                                sensors->servo[ServoID::L_HIP_PITCH].present_velocity,
-                                sensors->servo[ServoID::L_HIP_PITCH].load,
-                                sensors->servo[ServoID::R_KNEE].present_velocity,
-                                sensors->servo[ServoID::R_KNEE].load,
-                                sensors->servo[ServoID::L_KNEE].present_velocity,
-                                sensors->servo[ServoID::L_KNEE].load,
-                                sensors->servo[ServoID::R_ANKLE_PITCH].present_velocity,
-                                sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                                sensors->servo[ServoID::L_ANKLE_PITCH].present_velocity,
-                                sensors->servo[ServoID::L_ANKLE_PITCH].load};
-
-                            feet_down = load_sensor.updateFeet(features);
+                            feet_down = load_sensor.updateFeet(*sensors);
                         }
                         else {
                             auto rightFootDisplacement =
