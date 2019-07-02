@@ -64,7 +64,7 @@ def dataset(
     left_state,
     right_state,
     servos,
-    keys,
+    fields,
     lr_duplicate,
     foot_delta,
     accelerometer,
@@ -110,8 +110,8 @@ def dataset(
                             "VELOCITY": s.present_velocity,
                         }
 
-                        for key in keys:
-                            x.append(values[key])
+                        for field in fields:
+                            x.append(values[field])
                 if accelerometer:
                     # If we mirror the robot, it means we mirror the y axis
                     x.extend(
@@ -148,16 +148,27 @@ def register(command):
 
 def run(data_dir, **kwargs):
 
-    # Load our configuration file to get the individual nbs files
-    with open(os.path.join(data_dir, "config.yaml"), "r") as f:
+    # Load configuration file for the FootDownNetwork
+    config_path = os.path.join(
+        os.path.dirname(__file__),
+        os.path.pardir,
+        "module",
+        "platform",
+        "darwin",
+        "SensorFilter",
+        "data",
+        "config",
+        "FootDownNetwork.yaml",
+    )
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-        foot_delta = config["config"]["foot_delta"]
-        servos = config["config"]["servos"]
-        keys = config["config"]["keys"]
-        use_accel = config["config"]["accelerometer"]
-        use_gyro = config["config"]["gyroscope"]
-        lr_duplicate = config["config"]["lr_duplicate"]
+        lr_duplicate = config["train"]["lr_duplicate"]
+        foot_delta = config["train"]["foot_delta"]
+        servos = config["network"]["input"]["servos"]
+        fields = config["network"]["input"]["fields"]
+        use_accel = config["network"]["input"]["accelerometer"]
+        use_gyro = config["network"]["input"]["gyroscope"]
 
     print("Loading data from NBS files")
     group_xs = []
@@ -193,7 +204,7 @@ def run(data_dir, **kwargs):
                                     r_state,
                                     l_state,
                                     servos,
-                                    keys,
+                                    fields,
                                     lr_duplicate,
                                     foot_delta,
                                     use_accel,
@@ -268,26 +279,10 @@ def run(data_dir, **kwargs):
         print("Evaluating", desc)
         model.evaluate(x, y)
 
-    # Load the old configuration so we don't overwrite config we don't use
-    config_path = os.path.join(
-        os.path.dirname(__file__),
-        os.path.pardir,
-        "module",
-        "platform",
-        "darwin",
-        "SensorFilter",
-        "data",
-        "config",
-        "FootDownNetwork.yaml",
-    )
-
-    with open(config_path, "r") as f:
-        output = yaml.safe_load(f)
-
-    output["network"] = {
+    config["network"] = {
         "input": {
             "servos": servos,
-            "fields": keys,
+            "fields": fields,
             "accelerometer": use_accel,
             "gyroscope": use_gyro,
         },
@@ -300,7 +295,7 @@ def run(data_dir, **kwargs):
         weights = np.array(h[0]).tolist()
         biases = np.array(h[1]).tolist()
 
-        output["network"]["layers"].append({"weights": weights, "biases": biases})
+        config["network"]["layers"].append({"weights": weights, "biases": biases})
 
     with open(config_path, "w") as f:
-        f.write(yaml.dump(output, width=120))
+        f.write(yaml.dump(config, width=120))
