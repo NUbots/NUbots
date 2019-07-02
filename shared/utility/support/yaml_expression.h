@@ -82,7 +82,7 @@ namespace support {
 
             for (size_t row = 0; row < rows; row++) {
                 for (size_t col = 0; col < cols; col++) {
-                    matrix(row, col) = node[row][col].as<std::string>();
+                    matrix(row, col) = parse<typename T::Scalar>(node[row][col].as<std::string>());
                 }
             }
 
@@ -109,7 +109,7 @@ namespace support {
             T matrix;
 
             for (size_t i = 0; i < node.size(); i++) {
-                matrix(i) = node[i].as<std::string>();
+                matrix(i) = parse<typename T::Scalar>(node[i].as<std::string>());
             }
 
             return matrix;
@@ -149,7 +149,7 @@ namespace support {
 
             for (size_t row = 0; row < rows; row++) {
                 for (size_t col = 0; col < cols; col++) {
-                    matrix(col, row) = node[row][col].as<std::string>();
+                    matrix(col, row) = parse<typename T::Scalar>(node[row][col].as<std::string>());
                 }
             }
 
@@ -181,7 +181,7 @@ namespace support {
 
             for (size_t row = 0; row < rows; row++) {
                 for (size_t col = 0; col < cols; col++) {
-                    matrix(row, col) = node[row][col].as<std::string>();
+                    matrix(row, col) = parse<typename T::Scalar>(node[row][col].as<std::string>());
                 }
             }
 
@@ -212,7 +212,7 @@ namespace support {
             T matrix(rows, std::max(cols, size_t(1)));
 
             for (size_t i = 0; i < rows; i++) {
-                matrix(i) = node[i].as<std::string>();
+                matrix(i) = parse<typename T::Scalar>(node[i].as<std::string>());
             }
 
             return matrix;
@@ -242,7 +242,7 @@ namespace support {
             T matrix(cols, rows);
 
             for (size_t i = 0; i < rows; i++) {
-                matrix(i) = node[i][0].as<std::string>();
+                matrix(i) = parse<typename T::Scalar>(node[i][0].as<std::string>());
             }
 
             return matrix;
