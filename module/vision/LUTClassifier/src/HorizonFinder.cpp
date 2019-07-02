@@ -40,22 +40,21 @@ namespace vision {
         auto& sensors = *classifiedImage.sensors;
 
         // Get our transform to world coordinates
-        const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation();
-        const Rotation3D& Rtc =
-            Transform3D(convert<double, 4, 4>(sensors.forward_kinematics[ServoID::HEAD_PITCH])).rotation();
-        Rotation3D Rcw = Rtc.i() * Rtw;
+        const Rotation3D& Rtw = Transform3D(convert(sensors.Htw)).rotation();
+        const Rotation3D& Rtc = Transform3D(convert(sensors.forward_kinematics[ServoID::HEAD_PITCH])).rotation();
+        Rotation3D Rcw        = Rtc.i() * Rtw;
 
         // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
 
         // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
         // camera transform, pos[1] is along the z axis (x points out of the camera)
-        auto horizon                   = utility::motion::kinematics::calculateHorizon(Rcw, image.lens.focal_length);
-        classifiedImage.horizon.normal = convert<double, 2>(horizon.normal);
+        auto horizon = utility::motion::kinematics::calculateHorizon(Rcw, image.lens.focal_length);
+        classifiedImage.horizon.normal.head<2>() = convert(horizon.normal).cast<float>();
 
         // Move our axis to be at the top left of the screen
         classifiedImage.horizon.distance =
             -horizon.distanceToPoint({-double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5});
-        classifiedImage.horizon_normal = convert<double, 3>(Rcw.z());
+        classifiedImage.horizon_normal = convert(arma::vec3(Rcw.z()));
     }
 
 }  // namespace vision

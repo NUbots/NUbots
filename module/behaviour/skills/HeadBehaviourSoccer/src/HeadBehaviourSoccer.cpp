@@ -161,181 +161,179 @@ namespace behaviour {
                With<Image>,
                Single,
                Sync<HeadBehaviourSoccer>>()
-                .then(
-                    "Head Behaviour Main Loop",
-                    [this](const Sensors& sensors,
-                           std::shared_ptr<const Balls> vballs,
-                           std::shared_ptr<const Goals> vgoals,
-                           std::shared_ptr<const LocBall> locBall,
-                           const KinematicsModel& kinematicsModel,
-                           const Image& image) {
-                        max_yaw   = kinematicsModel.head.MAX_YAW;
-                        min_yaw   = kinematicsModel.head.MIN_YAW;
-                        max_pitch = kinematicsModel.head.MAX_PITCH;
-                        min_pitch = kinematicsModel.head.MIN_PITCH;
+                .then("Head Behaviour Main Loop",
+                      [this](const Sensors& sensors,
+                             std::shared_ptr<const Balls> vballs,
+                             std::shared_ptr<const Goals> vgoals,
+                             std::shared_ptr<const LocBall> locBall,
+                             const KinematicsModel& kinematicsModel,
+                             const Image& image) {
+                          max_yaw   = kinematicsModel.head.MAX_YAW;
+                          min_yaw   = kinematicsModel.head.MIN_YAW;
+                          max_pitch = kinematicsModel.head.MAX_PITCH;
+                          min_pitch = kinematicsModel.head.MIN_PITCH;
 
-                        // std::cout << "Seen: Balls: " <<
-                        // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
-                        // "Goals: " <<
-                        // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) <<
-                        // std::endl;
+                          // std::cout << "Seen: Balls: " <<
+                          // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
+                          // "Goals: " <<
+                          // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) <<
+                          // std::endl;
 
-                        if (locBall) {
-                            locBallReceived = true;
-                            lastLocBall     = *locBall;
-                        }
-                        auto now = NUClear::clock::now();
+                          if (locBall) {
+                              locBallReceived = true;
+                              lastLocBall     = *locBall;
+                          }
+                          auto now = NUClear::clock::now();
 
-                        bool objectsMissing = false;
+                          bool objectsMissing = false;
 
-                        // Get the list of objects which are currently visible
-                        Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
-                        Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
+                          // Get the list of objects which are currently visible
+                          Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
+                          Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
-                        // Determine state transition variables
-                        bool lost =
-                            ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
-                        // Do we need to update our plan?
-                        bool updatePlan =
-                            !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
-                        // Has it been a long time since we have seen anything of interest?
-                        bool searchTimedOut =
-                            std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
-                            > search_timeout_ms;
-                        // Did the object move in IMUspace?
-                        bool objectMoved = false;
+                          // Determine state transition variables
+                          bool lost =
+                              ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
+                          // Do we need to update our plan?
+                          bool updatePlan =
+                              !isGettingUp
+                              && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
+                          // Has it been a long time since we have seen anything of interest?
+                          bool searchTimedOut =
+                              std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
+                              > search_timeout_ms;
+                          // Did the object move in IMUspace?
+                          bool objectMoved = false;
 
-                        bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
+                          bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
 
-                        // log("updatePlan", updatePlan);
-                        // log("lost", lost);
-                        // log("isGettingUp", isGettingUp);
-                        // log("searchType", int(searchType));
-                        // log("headSearcher.size()", headSearcher.size());
+                          // log("updatePlan", updatePlan);
+                          // log("lost", lost);
+                          // log("isGettingUp", isGettingUp);
+                          // log("searchType", int(searchType));
+                          // log("headSearcher.size()", headSearcher.size());
 
-                        // State execution
+                          // State execution
 
-                        // Get robot heat to body transform
-                        Rotation3D orientation, headToBodyRotation;
-                        if (!lost) {
-                            // We need to transform our view points to orientation space
-                            if (ballMaxPriority) {
-                                auto Htc           = sensors.Htw * ballFixationObjects.Hcw.inverse();
-                                headToBodyRotation = Transform3D(convert<double, 4, 4>(Htc)).rotation();
-                                orientation =
-                                    Transform3D(convert<double, 4, 4>(ballFixationObjects.Hcw)).rotation().i();
-                            }
-                            else {
-                                auto Htc           = sensors.Htw * goalFixationObjects.Hcw.inverse();
-                                headToBodyRotation = Transform3D(convert<double, 4, 4>(Htc)).rotation();
-                                orientation =
-                                    Transform3D(convert<double, 4, 4>(goalFixationObjects.Hcw)).rotation().i();
-                            }
-                        }
-                        else {
-                            auto Htc           = sensors.forward_kinematics[ServoID::HEAD_PITCH];
-                            headToBodyRotation = Transform3D(convert<double, 4, 4>(Htc)).rotation();
-                            orientation        = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation().i();
-                        }
-                        Rotation3D headToIMUSpace = orientation * headToBodyRotation;
+                          // Get robot heat to body transform
+                          Rotation3D orientation, headToBodyRotation;
+                          if (!lost) {
+                              // We need to transform our view points to orientation space
+                              if (ballMaxPriority) {
+                                  Eigen::Matrix4d Htc = sensors.Htw * ballFixationObjects.Hcw.inverse();
+                                  headToBodyRotation  = Transform3D(convert(Htc)).rotation();
+                                  orientation         = Transform3D(convert(ballFixationObjects.Hcw)).rotation().i();
+                              }
+                              else {
+                                  Eigen::Matrix4d Htc = sensors.Htw * goalFixationObjects.Hcw.inverse();
+                                  headToBodyRotation  = Transform3D(convert(Htc)).rotation();
+                                  orientation         = Transform3D(convert(goalFixationObjects.Hcw)).rotation().i();
+                              }
+                          }
+                          else {
+                              Eigen::Matrix4d Htc = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+                              headToBodyRotation  = Transform3D(convert(Htc)).rotation();
+                              orientation         = Transform3D(convert(sensors.Htw)).rotation().i();
+                          }
+                          Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
-                        // If objects visible, check current centroid to see if it moved
-                        if (!lost) {
-                            arma::vec2 currentCentroid = arma::vec2({0, 0});
-                            if (ballMaxPriority) {
-                                for (auto& ob : ballFixationObjects.balls) {
-                                    currentCentroid +=
-                                        convert<double, 2>(ob.screen_angular) / float(ballFixationObjects.balls.size());
-                                }
-                            }
-                            else {
-                                for (auto& ob : goalFixationObjects.goals) {
-                                    currentCentroid +=
-                                        convert<double, 2>(ob.screen_angular) / float(goalFixationObjects.goals.size());
-                                }
-                            }
-                            arma::vec2 currentCentroid_world =
-                                getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
-                            // If our objects have moved, we need to replan
-                            if (arma::norm(currentCentroid_world - lastCentroid)
-                                >= fractional_angular_update_threshold * std::fmax(image.lens.fov[0], image.lens.fov[1])
-                                       / 2.0) {
-                                objectMoved  = true;
-                                lastCentroid = currentCentroid_world;
-                            }
-                        }
+                          // If objects visible, check current centroid to see if it moved
+                          if (!lost) {
+                              arma::vec2 currentCentroid = arma::vec2({0, 0});
+                              if (ballMaxPriority) {
+                                  for (auto& ob : ballFixationObjects.balls) {
+                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
+                                                         / float(ballFixationObjects.balls.size());
+                                  }
+                              }
+                              else {
+                                  for (auto& ob : goalFixationObjects.goals) {
+                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
+                                                         / float(goalFixationObjects.goals.size());
+                                  }
+                              }
+                              arma::vec2 currentCentroid_world =
+                                  getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
+                              // If our objects have moved, we need to replan
+                              if (arma::norm(currentCentroid_world - lastCentroid)
+                                  >= fractional_angular_update_threshold
+                                         * std::fmax(image.lens.fov[0], image.lens.fov[1]) / 2.0) {
+                                  objectMoved  = true;
+                                  lastCentroid = currentCentroid_world;
+                              }
+                          }
 
-                        // State Transitions
-                        if (!isGettingUp) {
-                            switch (state) {
-                                case FIXATION:
-                                    if (lost) {
-                                        state = WAIT;
-                                    }
-                                    else if (objectMoved) {
-                                        updatePlan = true;
-                                    }
-                                    break;
-                                case WAIT:
-                                    if (!lost) {
-                                        state      = FIXATION;
-                                        updatePlan = true;
-                                    }
-                                    else if (searchTimedOut) {
-                                        state      = SEARCH;
-                                        updatePlan = true;
-                                    }
-                                    break;
-                                case SEARCH:
-                                    if (!lost) {
-                                        state      = FIXATION;
-                                        updatePlan = true;
-                                    }
-                                    break;
-                            }
-                        }
+                          // State Transitions
+                          if (!isGettingUp) {
+                              switch (state) {
+                                  case FIXATION:
+                                      if (lost) {
+                                          state = WAIT;
+                                      }
+                                      else if (objectMoved) {
+                                          updatePlan = true;
+                                      }
+                                      break;
+                                  case WAIT:
+                                      if (!lost) {
+                                          state      = FIXATION;
+                                          updatePlan = true;
+                                      }
+                                      else if (searchTimedOut) {
+                                          state      = SEARCH;
+                                          updatePlan = true;
+                                      }
+                                      break;
+                                  case SEARCH:
+                                      if (!lost) {
+                                          state      = FIXATION;
+                                          updatePlan = true;
+                                      }
+                                      break;
+                              }
+                          }
 
-                        // If we arent getting up, then we can update the plan if necessary
-                        if (updatePlan) {
-                            if (lost) {
-                                lastPlanOrientation = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation();
-                            }
-                            if (ballMaxPriority) {
-                                updateHeadPlan(kinematicsModel,
-                                               ballFixationObjects,
-                                               objectsMissing,
-                                               sensors,
-                                               headToIMUSpace,
-                                               image.lens);
-                            }
+                          // If we arent getting up, then we can update the plan if necessary
+                          if (updatePlan) {
+                              if (lost) {
+                                  lastPlanOrientation = Transform3D(convert(sensors.Htw)).rotation();
+                              }
+                              if (ballMaxPriority) {
+                                  updateHeadPlan(kinematicsModel,
+                                                 ballFixationObjects,
+                                                 objectsMissing,
+                                                 sensors,
+                                                 headToIMUSpace,
+                                                 image.lens);
+                              }
 
-                            else {
-                                updateHeadPlan(kinematicsModel,
-                                               goalFixationObjects,
-                                               objectsMissing,
-                                               sensors,
-                                               headToIMUSpace,
-                                               image.lens);
-                            }
-                        }
+                              else {
+                                  updateHeadPlan(kinematicsModel,
+                                                 goalFixationObjects,
+                                                 objectsMissing,
+                                                 sensors,
+                                                 headToIMUSpace,
+                                                 image.lens);
+                              }
+                          }
 
-                        // Update searcher
-                        headSearcher.update(oscillate_search);
-                        // Emit new result if possible
-                        if (headSearcher.newGoal()) {
-                            // Emit result
-                            arma::vec2 direction                 = headSearcher.getState();
-                            std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
-                            command->yaw                         = direction[0];
-                            command->pitch                       = direction[1];
-                            command->robotSpace                  = (state == SEARCH);
-                            // log("head angles robot space :", command->robotSpace);
-                            emit(std::move(command));
-                        }
+                          // Update searcher
+                          headSearcher.update(oscillate_search);
+                          // Emit new result if possible
+                          if (headSearcher.newGoal()) {
+                              // Emit result
+                              arma::vec2 direction                 = headSearcher.getState();
+                              std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
+                              command->yaw                         = direction[0];
+                              command->pitch                       = direction[1];
+                              command->robotSpace                  = (state == SEARCH);
+                              // log("head angles robot space :", command->robotSpace);
+                              emit(std::move(command));
+                          }
 
-                        lastGoalPriority = goalPriority;
-                        lastBallPriority = ballPriority;
-                    });
+                          lastGoalPriority = goalPriority;
+                          lastBallPriority = ballPriority;
+                      });
         }
 
         Balls HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Balls> vballs, bool& search) {
@@ -412,7 +410,6 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec centroid    = {0, 0};
             arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).present_position,
                                      sensors.servo.at(ServoID::HEAD_PITCH).present_position};
 
@@ -423,9 +420,6 @@ namespace behaviour {
                     {fixationObjects.balls.at(i).screen_angular[0], fixationObjects.balls.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
                     {fixationObjects.balls.at(i).angular_size[0], fixationObjects.balls.at(i).angular_size[1]}));
-                // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects.balls.at(i).screen_angular))
-                            / (fixationObjects.balls.size());
             }
 
             // If there are objects to find
@@ -456,7 +450,6 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec centroid = {0, 0};
             arma::vec2 currentPos;
             for (const auto& servo : sensors.servo) {
                 if (servo.id == ServoID::HEAD_YAW) {
@@ -474,9 +467,6 @@ namespace behaviour {
                     {fixationObjects.goals.at(i).screen_angular[0], fixationObjects.goals.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
                     {fixationObjects.goals.at(i).angular_size[0], fixationObjects.goals.at(i).angular_size[1]}));
-                // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects.goals.at(i).screen_angular))
-                            / (fixationObjects.goals.size());
             }
 
             // If there are objects to find
@@ -594,13 +584,13 @@ namespace behaviour {
             float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
             arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert<float, 2>(lens.fov) / 2.0;
+            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert(lens.fov) / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
             arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = boundingBox.getTopRight() - padding - convert<float, 2>(lens.fov) / 2.0;
+            arma::vec2 bl = boundingBox.getTopRight() - padding - convert(lens.fov) / 2.0;
             // 4
             padding       = {-view_padding_radians, view_padding_radians};
             arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
@@ -684,13 +674,13 @@ namespace behaviour {
             float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
             arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert<float, 2>(lens.fov) / 2.0;
+            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert(lens.fov) / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
             arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = boundingBox.getTopRight() - padding - convert<float, 2>(lens.fov) / 2.0;
+            arma::vec2 bl = boundingBox.getTopRight() - padding - convert(lens.fov) / 2.0;
             // 4
             padding       = {-view_padding_radians, view_padding_radians};
             arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
@@ -716,18 +706,18 @@ namespace behaviour {
             }
             Quad q           = getScreenAngularBoundingBox(ob);
             Ball v           = ob.balls.at(0);
-            v.screen_angular = convert<double, 2>(q.getCentre());
-            v.angular_size   = convert<double, 2>(q.getSize());
+            v.screen_angular = convert(q.getCentre()).cast<float>();
+            v.angular_size   = convert(q.getSize()).cast<float>();
             return v;
         }
 
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.balls.size(); i++) {
-                boundingPoints.push_back(
-                    convert<double, 2>(ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size / 2));
-                boundingPoints.push_back(
-                    convert<double, 2>(ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2));
+                boundingPoints.push_back(arma::conv_to<arma::vec>::from(
+                    convert(Eigen::Vector2f(ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size / 2))));
+                boundingPoints.push_back(arma::conv_to<arma::vec>::from(
+                    convert(Eigen::Vector2f(ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2))));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
@@ -747,17 +737,17 @@ namespace behaviour {
         Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.goals.size(); i++) {
-                boundingPoints.push_back(
-                    convert<double, 2>(ob.goals.at(i).screen_angular + ob.goals.at(i).angular_size / 2));
-                boundingPoints.push_back(
-                    convert<double, 2>(ob.goals.at(i).screen_angular - ob.goals.at(i).angular_size / 2));
+                boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
+                                                                 + ob.goals.at(i).angular_size.cast<double>() / 2)));
+                boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
+                                                                 - ob.goals.at(i).angular_size.cast<double>() / 2)));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
 
 
         bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors) {
-            Rotation3D diff     = Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation().i() * lastPlanOrientation;
+            Rotation3D diff     = Transform3D(convert(sensors.Htw)).rotation().i() * lastPlanOrientation;
             UnitQuaternion quat = UnitQuaternion(diff);
             float angle         = quat.getAngle();
             return std::fabs(angle) > replan_angle_threshold;

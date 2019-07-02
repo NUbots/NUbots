@@ -27,7 +27,7 @@ namespace vision {
             // Use configuration here from file IgusVisionTests.yaml
 
             // arma::fvec3 ballCentreTemp = config["ballCentre"].as<arma::fvec>();
-            // ballCentre = convert<float,3>(ballCentreTemp);
+            // ballCentre = convert(ballCentreTemp);
             ballCentre = config["ballCentre"].as<arma::vec>();
             radius     = config["radius"].as<float>();
 
@@ -47,7 +47,7 @@ namespace vision {
             log("Balls: ", balls.balls.size());
             for (auto& ball : balls.balls) {
                 for (auto& m : ball.measurements) {
-                    arma::vec3 measuredPos = convert<double, 3>(m.rBCc);
+                    arma::fvec3 measuredPos = convert(m.rBCc);
                     log("Ball actual pos (x,y,z):  ", ballCentre.t());
                     log("Ball measured pos (x,y,z):", measuredPos.t());
                     log("Ball detector error =     ", (measuredPos - ballCentre).t());
@@ -60,7 +60,7 @@ namespace vision {
             for (auto& goal : goals.goals) {
                 for (auto& m : goal.measurements) {
                     if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
-                    arma::vec3 measuredPos = convert<double, 3>(m.position);
+                    arma::vec3 measuredPos = convert(Eigen::Vector3d(m.position.cast<double>()));
                     log("Goal actual pos (x,y,z):  ", goal_position.t());
                     log("Goal measured pos (x,y,z):", measuredPos.t());
                     log("Goal detector error =     ", (measuredPos - goal_position).t());
@@ -118,7 +118,7 @@ namespace vision {
             // Convert to point referenced from top left
             arma::ivec2 imagePoint = utility::math::vision::screenToImage(
                 screenPoint, arma::uvec2({uint(image->dimensions[0]), uint(image->dimensions[1])}));
-            imagePoints.push_back(convert<int, 2>(imagePoint));
+            imagePoints.push_back(convert(imagePoint));
             lines.push_back(std::make_pair(imagePoints.back(), imagePoints.back() + Eigen::Vector2i(1, 1)));
             // Increment theta
             // std::cout << "theta: " << theta << " rad, " << theta * (180/M_PI) << " deg:" <<
@@ -137,7 +137,7 @@ namespace vision {
         classifiedImage->ballSeedPoints[2]  = imagePoints;
         classifiedImage->image              = const_cast<Image*>(image.get())->shared_from_this();
         classifiedImage->sensors            = const_cast<Sensors*>(sensors.get())->shared_from_this();
-        classifiedImage->horizon_normal     = convert<double, 3>(horizon_normal);
+        classifiedImage->horizon_normal     = convert(horizon_normal);
         classifiedImage->horizontalSegments = getGoalSegments(fd);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
@@ -169,16 +169,13 @@ namespace vision {
 
             segments.push_back(message::vision::ClassifiedImage::Segment());
             segments.back().segmentClass = message::vision::ClassifiedImage::SegmentClass::GOAL;
-            segments.back().start =
-                convert<int, 2>(getImageFromCam(left, convert<uint, 2>(image->dimensions), image->lens));
-            segments.back().end =
-                convert<int, 2>(getImageFromCam(right, convert<uint, 2>(image->dimensions), image->lens));
-            segments.back().midpoint =
-                convert<int, 2>(getImageFromCam(center, convert<uint, 2>(image->dimensions), image->lens));
-            segments.back().next      = 0;
-            segments.back().previous  = 0;
-            segments.back().subsample = 1;
-            segments.back().length    = arma::norm(left - right);
+            segments.back().start        = convert(getImageFromCam(left, convert(image->dimensions), image->lens));
+            segments.back().end          = convert(getImageFromCam(right, convert(image->dimensions), image->lens));
+            segments.back().midpoint     = convert(getImageFromCam(center, convert(image->dimensions), image->lens));
+            segments.back().next         = 0;
+            segments.back().previous     = 0;
+            segments.back().subsample    = 1;
+            segments.back().length       = arma::norm(left - right);
         }
         return segments;
     }

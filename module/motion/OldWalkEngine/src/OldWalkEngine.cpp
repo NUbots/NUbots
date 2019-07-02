@@ -190,7 +190,7 @@ namespace motion {
                            .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            Transform2D velocity = convert<double, 3>(walkCommand.command);
+            Transform2D velocity = convert(walkCommand.command);
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();
             }
@@ -550,14 +550,12 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootTorso =
-                rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp,
-                                            convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
+            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp,
+                                                         convert(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootTorso =
-                leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp,
-                                           convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
+            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp,
+                                                       convert(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {

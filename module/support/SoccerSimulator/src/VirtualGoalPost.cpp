@@ -50,8 +50,8 @@ namespace support {
     using utility::math::vision::imageToScreen;
     using utility::math::coordinates::cartesianToSpherical;
 
-    arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1,
-                                          const arma::vec3& norm2,
+    arma::vec2 VirtualGoalPost::getCamRay(const arma::fvec3& norm1,
+                                          const arma::fvec3& norm2,
                                           const Image::Lens& lens,
                                           arma::uvec2 dimensions) {
         // Solve the vector intersection between two planes to get the camera ray of the quad corner
@@ -105,8 +105,8 @@ namespace support {
         goal.team        = team;
 
         // get the torso to foot transform
-        Transform3D Hgt  = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
-        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+        Transform3D Hgt  = convert(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+        Transform3D Hgt2 = convert(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
 
         if (Hgt2(3, 2) < Hgt(3, 2)) {
             Hgt = Hgt2;
@@ -115,47 +115,57 @@ namespace support {
         Hgt.submat(0, 3, 1, 3) *= 0.0;
         Hgt.rotation() = Rotation3D::createRotationZ(-Rotation3D(Hgt.rotation()).yaw()) * Hgt.rotation();
         // create the camera to ground transform
-        Eigen::MatrixXd Htc_standardMatrix = Htc.matrix();
-        Transform3D Htc_transform3D        = convert<double, 4, 4>(Htc_standardMatrix);
-        Transform3D Hgc                    = Hgt * Htc_transform3D;
+        Eigen::Matrix4d Htc_standardMatrix = Htc.matrix();
+
+        Transform3D Htc_transform3D = convert(Htc_standardMatrix);
+        Transform3D Hgc             = Hgt * Htc_transform3D;
 
         // push the new measurement types
-
-        arma::mat::fixed<3, 4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
-        if (arma::any(arma::any(goalNormals > 0.0))) {
-            goal.measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, convert<double, 3>(goalNormals.col(0))));
-            goal.measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert<double, 3>(goalNormals.col(1))));
-            goal.measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, convert<double, 3>(goalNormals.col(2))));
-            goal.measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, convert<double, 3>(goalNormals.col(3))));
+        // arma::mat::fixed<3, 4>
+        Eigen::Matrix<float, 3, 4> goalNormals =
+            convert(arma::conv_to<arma::fmat>::from(cameraSpaceGoalProjection(robotPose, this->position, field, Hgc)));
+        if (goalNormals.any() > 0.0) {
+            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, goalNormals.col(0)));
+            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, goalNormals.col(1)));
+            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, goalNormals.col(2)));
+            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, goalNormals.col(3)));
 
             // build the predicted quad
-            utility::math::geometry::Quad quad(
-                getCamRay(goalNormals.col(0), goalNormals.col(3), image.lens, convert<uint, 2>(image.dimensions)),
-                getCamRay(goalNormals.col(0), goalNormals.col(2), image.lens, convert<uint, 2>(image.dimensions)),
-                getCamRay(goalNormals.col(1), goalNormals.col(2), image.lens, convert<uint, 2>(image.dimensions)),
-                getCamRay(goalNormals.col(1), goalNormals.col(3), image.lens, convert<uint, 2>(image.dimensions)));
+            utility::math::geometry::Quad quad(getCamRay(convert(Eigen::Vector3f(goalNormals.col(0))),
+                                                         convert(Eigen::Vector3f(goalNormals.col(3))),
+                                                         image.lens,
+                                                         convert(image.dimensions)),
+                                               getCamRay(convert(Eigen::Vector3f(goalNormals.col(0))),
+                                                         convert(Eigen::Vector3f(goalNormals.col(2))),
+                                                         image.lens,
+                                                         convert(image.dimensions)),
+                                               getCamRay(convert(Eigen::Vector3f(goalNormals.col(1))),
+                                                         convert(Eigen::Vector3f(goalNormals.col(2))),
+                                                         image.lens,
+                                                         convert(image.dimensions)),
+                                               getCamRay(convert(Eigen::Vector3f(goalNormals.col(1))),
+                                                         convert(Eigen::Vector3f(goalNormals.col(3))),
+                                                         image.lens,
+                                                         convert(image.dimensions)));
 
             // Get the quad points in screen coords
-            arma::vec2 bl = imageToScreen(quad.getBottomLeft(), convert<uint, 2>(image.dimensions));
-            arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
-            arma::vec2 screenGoalBottomCentre = (bl + br) * 0.5;
+            arma::vec2 bl = imageToScreen(quad.getBottomLeft(), convert(image.dimensions));
+            arma::vec2 br = imageToScreen(quad.getBottomRight(), convert(image.dimensions));
 
             // Get vectors for BL BR;
-            arma::vec3 cbl       = getCamFromScreen(bl, image.lens);
-            arma::vec3 cbr       = getCamFromScreen(br, image.lens);
-            arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
+            arma::vec3 cbl            = getCamFromScreen(bl, image.lens);
+            arma::vec3 cbr            = getCamFromScreen(br, image.lens);
+            Eigen::Vector3f rGCc_norm = convert(arma::conv_to<arma::fvec>::from(
+                arma::normalise((cbl + cbr) * 0.5)));  // vector to bottom centre of goal post
 
             // rGCc_sphr and rGCc_cov
             float distance =
                 utility::math::vision::distanceToEquidistantCamPoints(field.dimensions.goalpost_width, cbl, cbr);
-            auto rGCc_sphr                = convert<double, 3>(cartesianToSpherical(distance * rGCc_norm));
-            arma::vec3 VECTOR3_COVARIANCE = {0.1, 0.001, 0.001};  // Taken from GoalDetector.yaml on June 2019
-            arma::vec3 covariance_amplifier({distance, 1, 1});
-            Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE % covariance_amplifier));
+            auto rGCc_sphr = cartesianToSpherical(distance * rGCc_norm);
+            Eigen::Vector3f VECTOR3_COVARIANCE({0.1, 0.001, 0.001});  // Taken from GoalDetector.yaml on June 2019
+
+            Eigen::Vector3f covariance_amplifier({distance, 1, 1});
+            Eigen::Matrix3f rGCc_cov = VECTOR3_COVARIANCE.cwiseProduct(covariance_amplifier).asDiagonal();
 
             if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
                 goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
@@ -194,6 +204,7 @@ namespace support {
                             && quad.getTopRight()[0] < image.dimensions[0]))
                     && (
                            // Check that the bottom is below the top of the screen and the top is below the bottom of
+
                            // the screen
                            (quad.getBottomRight()[1] < image.dimensions[1] && quad.getTopRight()[1] > 0)
                            || (quad.getBottomLeft()[1] < image.dimensions[1] && quad.getTopLeft()[1] > 0)))) {
@@ -201,13 +212,14 @@ namespace support {
                 goal.measurements.erase(goal.measurements.begin());
             }
 
-            if (!goal.measurements.empty()) {
-                goal.quad.tl = convert<double, 2>(quad.getTopLeft());
-                goal.quad.tr = convert<double, 2>(quad.getTopRight());
-                goal.quad.br = convert<double, 2>(quad.getBottomRight());
-                goal.quad.bl = convert<double, 2>(quad.getBottomLeft());
-            }
+            // if (!goal.measurements.empty()) {
+            //    goal.quad.tl = convert(quad.getTopLeft());
+            //    goal.quad.tr = convert(quad.getTopRight());
+            //    goal.quad.br = convert(quad.getBottomRight());
+            //    goal.quad.bl = convert(quad.getBottomLeft());
+            //}
         }
+
         result.goals.push_back(goal);
 
         // If no measurements are in the goal, then it was not observed

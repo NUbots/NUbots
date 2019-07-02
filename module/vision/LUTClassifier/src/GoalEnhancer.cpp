@@ -89,8 +89,9 @@ namespace vision {
             We first generate segments above and below that are 2x the width of the segment
          */
 
-        Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
-        arma::vec3 horizon_normal = convert<double, 3>(classifiedImage.horizon_normal);
+        Line horizon(convert(Eigen::Vector2d(classifiedImage.horizon.normal.head<2>().cast<double>())),
+                     classifiedImage.horizon.distance);
+        arma::vec3 horizon_normal = convert(Eigen::Vector3d(classifiedImage.horizon_normal));
 
         // Get our goal segments
         std::vector<GoalPOI> points;
@@ -107,9 +108,8 @@ namespace vision {
         // Partition our segments so that they are split between above and below the horizon
         auto split = std::partition(std::begin(points), std::end(points), [&](const GoalPOI& point) {
             // Is the midpoint above or below the horizon?
-            arma::vec3 camPoint = getCamFromImage(arma::ivec({int(point.midpoint[0]), int(point.midpoint[1])}),
-                                                  convert<uint, 2>(image.dimensions),
-                                                  image.lens);
+            arma::vec3 camPoint = getCamFromImage(
+                arma::ivec({int(point.midpoint[0]), int(point.midpoint[1])}), convert(image.dimensions), image.lens);
             return arma::dot(horizon_normal, camPoint) > 0;
         });
 

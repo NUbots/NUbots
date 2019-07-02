@@ -46,8 +46,8 @@ namespace math {
             GaussianSampler(const OptimiserParameters& params)
                 : batchSize(params.batchSize)
                 , generation(params.initial.generation)
-                , upperBound(convert<double>(params.upperBound))
-                , lowerBound(convert<double>(params.lowerBound))
+                , upperBound(convert(params.upperBound))
+                , lowerBound(convert(params.lowerBound))
                 , samples() {}
 
             void clear() {
@@ -60,10 +60,10 @@ namespace math {
                     || samples.n_cols == 0) {
 
                     // generate initial data
-                    arma::vec weights = arma::diagvec(convert<double>(bestParams.covariance));
-                    samples           = arma::randn(convert<double>(bestParams.estimate).n_elem, batchSize);
+                    arma::vec weights = arma::diagvec(convert(bestParams.covariance));
+                    samples           = arma::randn(convert(bestParams.estimate).n_elem, batchSize);
                     samples.each_col() %= weights;
-                    samples.each_col() += convert<double>(bestParams.estimate);
+                    samples.each_col() += convert(bestParams.estimate);
 
 
                     // out of bounds check
@@ -73,9 +73,9 @@ namespace math {
                         samples = samples.cols(arma::find(outOfBounds == 0));
 
                         while (samples.n_cols < batchSize) {
-                            arma::mat samples2 = arma::randn(convert<double>(bestParams.estimate).n_elem, batchSize);
+                            arma::mat samples2 = arma::randn(convert(bestParams.estimate).n_elem, batchSize);
                             samples2.each_col() %= weights;
-                            samples2.each_col() += convert<double>(bestParams.estimate);
+                            samples2.each_col() += convert(bestParams.estimate);
 
                             outOfBounds = arma::sum(samples2 > arma::repmat(upperBound, 1, samples2.n_cols), 1);
                             outOfBounds += arma::sum(samples2 < arma::repmat(lowerBound, 1, samples2.n_cols), 1);
@@ -94,7 +94,7 @@ namespace math {
                     // reset required variables
                     sampleCount           = 0;
                     arma::mat covariance  = arma::diagmat(weights);
-                    bestParams.covariance = convert<double>(covariance);
+                    bestParams.covariance = convert(covariance);
                 }
                 sampleCount += numSamples;
                 return samples.cols(sampleCount - numSamples, sampleCount - 1);
