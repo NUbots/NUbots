@@ -83,4 +83,6 @@ message Sensors {
     vec4          centre_of_mass     = 17;
     mat4          Hgt                = 18;
     mat4          Hgc                = 19;
+    mat3          inertial_tensor    = 20;
+    vec3          angular_position   = 21;
 }
