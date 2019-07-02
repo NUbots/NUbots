@@ -32,13 +32,14 @@ namespace vision {
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
             // Load our weights and biases
             std::vector<std::vector<std::pair<std::vector<std::vector<float>>, std::vector<float>>>> network;
+
+            bool first_loop = true;
+
             for (const auto& conv : config["network"].config) {
 
                 // New conv layer
                 network.emplace_back();
                 auto& net_conv = network.back();
-
-                bool first_loop = true;
 
                 for (const auto& layer : conv) {
 
@@ -56,7 +57,7 @@ namespace vision {
                         for (const auto& v : l) {
                             weight.push_back(v.as<float>());
                         }
-                        if (first_loop && i % 3 == 0) {
+                        if (first_loop && i % 3 == 2) {
                             int size = net_layer.first.back().size();
 
                             net_layer.first.emplace_back();
