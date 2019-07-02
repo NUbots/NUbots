@@ -120,9 +120,6 @@ namespace platform {
                 this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
                 this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
 
-                // Foot load sensor config
-                load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
-
                 // Motion filter config
                 // Update our velocity timestep dekay
                 this->config.motionFilter.velocityDecay =
