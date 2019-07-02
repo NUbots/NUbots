@@ -85,13 +85,13 @@ def dataset(
             # Calculate what our foot down should be for each foot based on the state
             y = {
                 "R_": {
-                    "up": 1,
-                    "down": 0,
+                    "up": 0,
+                    "down": 1,
                     "mixed": 1 if r_height - foot_delta < l_height else 0,
                 }[right_state],
                 "L_": {
-                    "up": 1,
-                    "down": 0,
+                    "up": 0,
+                    "down": 1,
                     "mixed": 1 if l_height - foot_delta < r_height else 0,
                 }[left_state],
             }
