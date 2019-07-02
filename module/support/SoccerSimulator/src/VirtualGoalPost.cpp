@@ -162,20 +162,18 @@ namespace support {
             Eigen::Vector3f covariance_amplifier({distance, 1, 1});
             Eigen::Matrix3f rGCc_cov = VECTOR3_COVARIANCE.cwiseProduct(covariance_amplifier).asDiagonal();
 
-            if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
-                goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
-            }
-
             // goal base visibility check
-            if (not(quad.getBottomRight()[1] > 0 && quad.getBottomRight()[1] < image.dimensions[1]
-                    && quad.getBottomLeft()[1] > 0
-                    && quad.getBottomLeft()[1] < image.dimensions[1]
-                    && quad.getBottomRight()[0] > 0
-                    && quad.getBottomRight()[0] < image.dimensions[0]
-                    && quad.getBottomLeft()[0] > 0
-                    && quad.getBottomLeft()[0] < image.dimensions[0])) {
+            if (quad.getBottomRight()[1] > 0 && quad.getBottomRight()[1] < image.dimensions[1]
+                && quad.getBottomLeft()[1] > 0
+                && quad.getBottomLeft()[1] < image.dimensions[1]
+                && quad.getBottomRight()[0] > 0
+                && quad.getBottomRight()[0] < image.dimensions[0]
+                && quad.getBottomLeft()[0] > 0
+                && quad.getBottomLeft()[0] < image.dimensions[0]) {
 
-                goal.measurements.erase(goal.measurements.begin());
+                if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
+                    goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
+                }
             }
         }
 
