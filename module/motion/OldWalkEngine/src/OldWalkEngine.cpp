@@ -35,6 +35,7 @@
 #include "message/support/SaveConfiguration.h"
 
 #include "utility/math/angle.h"
+#include "utility/math/comparison.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -53,8 +54,6 @@ namespace motion {
     using message::behaviour::WalkConfigSaved;
     using message::behaviour::WalkOptimiserCommand;
     using message::input::Sensors;
-    // using message::behaviour::RegisterAction;
-    // using message::behaviour::ActionPriorites;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::KinematicsModel;
@@ -66,10 +65,12 @@ namespace motion {
 
     using ServoID = utility::input::ServoID;
     using LimbID  = utility::input::LimbID;
+    using utility::math::clamp;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
+    using utility::motion::kinematics::calculateLegJoints;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -119,6 +120,7 @@ namespace motion {
         , phase1Single(0.0)
         , phase2Single(0.0)
         , footOffset(arma::fill::zeros)
+        , legYaw(0.0)
         , uLRFootOffset()
         , qLArmStart(arma::fill::zeros)
         , qLArmEnd(arma::fill::zeros)
@@ -255,6 +257,7 @@ namespace motion {
     }
 
     void OldWalkEngine::configure(const YAML::Node& config) {
+        use_com      = config["use_com"].as<bool>();
         auto& stance = config["stance"];
         bodyHeight   = stance["body_height"].as<Expression>();
         bodyTilt     = stance["body_tilt"].as<Expression>();
@@ -286,6 +289,11 @@ namespace motion {
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight          = walkCycle["step"]["height"].as<Expression>();
         stepLimits          = walkCycle["step"]["limits"].as<arma::mat::fixed<3, 2>>();
+        legYaw              = walkCycle["step"]["leg_yaw"].as<Expression>();
+        ankleRollComp       = walkCycle["step"]["compensation"]["roll_coef"].as<Expression>();
+        ankleRollLimit      = walkCycle["step"]["compensation"]["roll_limit"].as<Expression>();
+        anklePitchComp      = walkCycle["step"]["compensation"]["pitch_coef"].as<Expression>();
+        anklePitchLimit     = walkCycle["step"]["compensation"]["pitch_limit"].as<Expression>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
@@ -543,60 +551,83 @@ namespace motion {
             arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        Transform3D leftFootTorso  = leftFoot.worldToLocal(torso);
-        Transform3D rightFootTorso = rightFoot.worldToLocal(torso);
+        Transform3D leftFootCOM  = leftFoot.worldToLocal(torso);
+        Transform3D rightFootCOM = rightFoot.worldToLocal(torso);
 
         // TODO: what is this magic?
         double phaseComp = std::min({1.0, foot[1] / 0.1, (1 - foot[1]) / 0.1});
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp,
-                                                         convert(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
+            rightFootCOM = rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp,
+                                                     convert(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp,
-                                                       convert(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
+            leftFootCOM = leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp,
+                                                   convert(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {
             // Apply balance to our support foot
             balancer.balance(kinematicsModel,
-                             swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso,
+                             swingLeg == LimbID::LEFT_LEG ? rightFootCOM : leftFootCOM,
                              swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG,
                              sensors);
         }
 
-        // emit(graph("Right foot pos", rightFootTorso.translation()));
-        // emit(graph("Left foot pos", leftFootTorso.translation()));
+        // Assume the previous calculations were done in CoM space, now convert them to torso space
+        // Height of CoM is assumed to be constant
+        Transform3D Htc =
+            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
 
-        auto joints    = calculateLegJointsTeamDarwin(kinematicsModel, leftFootTorso, rightFootTorso);
+        Transform3D leftFootTorso  = Htc * leftFootCOM;
+        Transform3D rightFootTorso = Htc * rightFootCOM;
+
+        // Calculate roll and pitch compensation based on limits and compensation factors
+        float rollComp  = clamp(-ankleRollLimit, ankleRollComp * sensors.angular_position[0], ankleRollLimit);
+        float pitchComp = clamp(-anklePitchLimit, anklePitchComp * sensors.angular_position[1], anklePitchLimit);
+        // Apply compensation to left and right feet positions
+        leftFootTorso  = leftFootTorso.rotateX(rollComp).rotateY(pitchComp).rotateZ(legYaw);
+        rightFootTorso = rightFootTorso.rotateX(-rollComp).rotateY(pitchComp).rotateZ(-legYaw);
+
+        std::vector<std::pair<ServoID, float>> joints;
+        joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
+
         auto waypoints = motionLegs(joints);
+        auto arms      = motionArms(phase);
 
-        auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
-
         emit(std::move(waypoints));
     }
 
     std::unique_ptr<std::vector<ServoCommand>> OldWalkEngine::updateStillWayPoints(const Sensors& sensors) {
-        uTorso                   = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
+        uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
 
+        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
         Transform3D torso =
             arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        Transform3D leftFootTorso  = Transform3D(uLeftFoot).worldToLocal(torso);
-        Transform3D rightFootTorso = Transform3D(uRightFoot).worldToLocal(torso);
+        Transform3D leftFootCOM  = Transform3D(uLeftFoot).worldToLocal(torso);
+        Transform3D rightFootCOM = Transform3D(uRightFoot).worldToLocal(torso);
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            balancer.balance(kinematicsModel, leftFootTorso, LimbID::LEFT_LEG, sensors);
-            balancer.balance(kinematicsModel, rightFootTorso, LimbID::RIGHT_LEG, sensors);
+            balancer.balance(kinematicsModel, leftFootCOM, LimbID::LEFT_LEG, sensors);
+            balancer.balance(kinematicsModel, rightFootCOM, LimbID::RIGHT_LEG, sensors);
         }
 
-        auto joints    = calculateLegJointsTeamDarwin(kinematicsModel, leftFootTorso, rightFootTorso);
+        // Assume the previous calculations were done in CoM space, now convert them to torso space
+        // Height of CoM is assumed to be constant
+        Transform3D Htc =
+            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+
+        Transform3D leftFootTorso  = Htc * leftFootCOM;
+        Transform3D rightFootTorso = Htc * rightFootCOM;
+
+        std::vector<std::pair<ServoID, float>> joints;
+        joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
+
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms(0.5);

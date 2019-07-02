@@ -62,6 +62,7 @@ namespace platform {
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
+        using utility::motion::kinematics::calculateInertialTensor;
         using utility::motion::kinematics::calculateRobotToIMU;
         using utility::nusight::drawArrow;
         using utility::nusight::drawSphere;
@@ -107,9 +108,11 @@ namespace platform {
             , load_sensor()
             , footlanding_rFWw()
             , footlanding_Rfw()
-            , footlanding_Rwf() {
+            , footlanding_Rwf()
+            , theta(arma::fill::zeros) {
 
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
+                this->config.debug = config["debug"].as<bool>();
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
@@ -488,7 +491,11 @@ namespace platform {
                         sensors->right_foot_down = feet_down[1];
                     }
 
-                    emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
+                    if (this->config.debug) {
+                        emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
+                        emit(graph("LeftFootDown", sensors->left_foot_down));
+                        emit(graph("RightFootDown", sensors->right_foot_down));
+                    }
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -596,11 +603,6 @@ namespace platform {
                         }
                     }
 
-                    // emit(graph("LeftFootDown", sensors->left_foot_down));
-                    // emit(graph("RightFootDown", sensors->right_foot_down));
-                    // emit(graph("LeftLoadState", left_foot_down.state));
-                    // emit(graph("RightLoadState", right_foot_down.state));
-
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
 
@@ -613,15 +615,23 @@ namespace platform {
                     // Htw.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
                     sensors->Htw = convert(Htw);
 
+                    // Integrate gyro to get angular positions
+                    theta += o.rows(MotionModel::WX, MotionModel::WZ) * 1.0 / 90.0;
+
+                    sensors->angular_position = convert(theta);
+
+                    if (this->config.debug) {
+                        log("p_x:", theta[0], "p_y:", theta[1], "p_z:", theta[2]);
+                    }
+
                     sensors->robot_to_IMU = convert(calculateRobotToIMU(Htw.rotation()));
 
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    // FIXME: Causes crashes
-                    // sensors->centre_of_mass =
-                    //     convert(calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics,
-                    //     true));
+                    sensors->centre_of_mass =
+                        calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics, sensors->Htw.inverse());
+                    sensors->inertial_tensor = calculateInertialTensor(kinematicsModel, sensors->forward_kinematics);
 
                     /************************************************
                      *                  Kinematics Horizon          *
