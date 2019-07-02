@@ -18,30 +18,14 @@ def parse_dsl_type(dsl, binder_args):
                 if el[0] == "Trigger":
                     return {
                         "input_data": [
-                            {
-                                "scope": "type",
-                                "type": v,
-                                "modifiers": {"execution": True, "data": True},
-                            }
-                            for v in el[1]
+                            {"scope": "type", "type": v, "modifiers": {"execution": True, "data": True}} for v in el[1]
                         ]
                     }
                 elif el[0] == "With":
-                    return {
-                        "input_data": [
-                            {"scope": "type", "type": v, "modifiers": {"data": True}}
-                            for v in el[1]
-                        ]
-                    }
+                    return {"input_data": [{"scope": "type", "type": v, "modifiers": {"data": True}} for v in el[1]]}
                 elif el[0] == "IO":
                     return {
-                        "input_data": [
-                            {
-                                "scope": "io",
-                                "type": None,
-                                "modifiers": {"execution": True, "data": True},
-                            }
-                        ]
+                        "input_data": [{"scope": "io", "type": None, "modifiers": {"execution": True, "data": True}}]
                     }
 
                 # Type Modifiers
@@ -61,36 +45,16 @@ def parse_dsl_type(dsl, binder_args):
                 # Global Events
                 elif el[0] == "Startup":
                     return {
-                        "input_data": [
-                            {
-                                "scope": "system_event",
-                                "type": "Startup",
-                                "modifiers": {"execution": True},
-                            }
-                        ]
+                        "input_data": [{"scope": "system_event", "type": "Startup", "modifiers": {"execution": True}}]
                     }
                 elif el[0] == "Shutdown":
                     return {
-                        "input_data": [
-                            {
-                                "scope": "system_event",
-                                "type": "Shutdown",
-                                "modifiers": {"execution": True},
-                            }
-                        ]
+                        "input_data": [{"scope": "system_event", "type": "Shutdown", "modifiers": {"execution": True}}]
                     }
 
                 # Timing
                 elif el[0] == "Always":
-                    return {
-                        "input_data": [
-                            {
-                                "scope": "always",
-                                "type": True,
-                                "modifiers": {"execution": True},
-                            }
-                        ]
-                    }
+                    return {"input_data": [{"scope": "always", "type": True, "modifiers": {"execution": True}}]}
                 elif el[0] == "Every":
 
                     ticks = float("".join(c for c in el[1][0][0] if c.isdigit()))
@@ -112,25 +76,13 @@ def parse_dsl_type(dsl, binder_args):
 
                         timing = num / (ticks * den)
 
-                    return {
-                        "input_data": [
-                            {
-                                "scope": "every",
-                                "type": timing,
-                                "modifiers": {"execution": True},
-                            }
-                        ]
-                    }
+                    return {"input_data": [{"scope": "every", "type": timing, "modifiers": {"execution": True}}]}
 
                 # Network
                 elif el[0] == "Network":
                     return {
                         "input_data": [
-                            {
-                                "scope": "network",
-                                "type": v,
-                                "modifiers": {"execution": True, "data": True},
-                            }
+                            {"scope": "network", "type": v, "modifiers": {"execution": True, "data": True}}
                             for v in el[1]
                         ]
                     }
@@ -139,33 +91,21 @@ def parse_dsl_type(dsl, binder_args):
                         # Plain UDP
                         return {
                             "input_data": [
-                                {
-                                    "scope": "udp",
-                                    "type": None,
-                                    "modifiers": {"execution": True, "data": True},
-                                }
+                                {"scope": "udp", "type": None, "modifiers": {"execution": True, "data": True}}
                             ]
                         }
                     elif el[1] == "Broadcast":
                         # UDP broadcast
                         return {
                             "input_data": [
-                                {
-                                    "scope": "udp_broadcast",
-                                    "type": None,
-                                    "modifiers": {"execution": True, "data": True},
-                                }
+                                {"scope": "udp_broadcast", "type": None, "modifiers": {"execution": True, "data": True}}
                             ]
                         }
                     elif el[1] == "Multicast":
                         # UDP multicast
                         return {
                             "input_data": [
-                                {
-                                    "scope": "udp_multicast",
-                                    "type": None,
-                                    "modifiers": {"execution": True, "data": True},
-                                }
+                                {"scope": "udp_multicast", "type": None, "modifiers": {"execution": True, "data": True}}
                             ]
                         }
                     else:
@@ -173,13 +113,7 @@ def parse_dsl_type(dsl, binder_args):
 
                 elif el[0] == "TCP":
                     return {
-                        "input_data": [
-                            {
-                                "scope": "tcp",
-                                "type": None,
-                                "modifiers": {"execution": True, "data": True},
-                            }
-                        ]
+                        "input_data": [{"scope": "tcp", "type": None, "modifiers": {"execution": True, "data": True}}]
                     }
 
                 # Modifiers

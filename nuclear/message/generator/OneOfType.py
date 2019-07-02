@@ -117,21 +117,13 @@ class OneOfType:
         )
 
         python_bindings = [
-            binding_template.format(
-                field_name=v.name, type_name=v.cpp_type, fqn=self.fqn.replace(".", "::")
-            )
+            binding_template.format(field_name=v.name, type_name=v.cpp_type, fqn=self.fqn.replace(".", "::"))
             for v in self.fields
         ]
 
-        member_list = [
-            "Proxy<{}, {}> {};".format(v.cpp_type, v.number, v.name)
-            for v in self.fields
-        ]
+        member_list = ["Proxy<{}, {}> {};".format(v.cpp_type, v.number, v.name) for v in self.fields]
         initialiser_list = ["{}(this)".format(v.name) for v in self.fields]
-        cases = [
-            "case {0}: return {1} == other.{1};".format(v.number, v.name)
-            for v in self.fields
-        ]
+        cases = ["case {0}: return {1} == other.{1};".format(v.number, v.name) for v in self.fields]
 
         return (
             header_template.format(
@@ -142,8 +134,6 @@ class OneOfType:
             ),
             impl_template,
             python_template.format(
-                bindings="\n\n".join(python_bindings),
-                fqn=self.fqn.replace(".", "::"),
-                name=self.name,
+                bindings="\n\n".join(python_bindings), fqn=self.fqn.replace(".", "::"), name=self.name
             ),
         )

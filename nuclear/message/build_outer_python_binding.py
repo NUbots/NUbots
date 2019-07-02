@@ -18,19 +18,9 @@ for dep_file in sys.argv[3:]:
         # Make all paths relative to the root mesage directory and remove any unwanted characters.
         # Also remove Matrix.proto, Neutron.proto, and Vector.proto from the list and anything to do with google.
         dependencies = [
-            os.path.relpath(s.strip("\\ \n\t"), message_dir)
-            .replace("/", "_")
-            .replace(".proto", "_proto")
+            os.path.relpath(s.strip("\\ \n\t"), message_dir).replace("/", "_").replace(".proto", "_proto")
             for s in deps.readlines()
-            if not any(
-                exclude in s
-                for exclude in [
-                    "google/protobuf",
-                    "Matrix.proto",
-                    "Neutron.proto",
-                    "Vector.proto",
-                ]
-            )
+            if not any(exclude in s for exclude in ["google/protobuf", "Matrix.proto", "Neutron.proto", "Vector.proto"])
         ]
 
         # Finally, remove duplicates. We must keep the first instance of every message in the list.
@@ -65,11 +55,8 @@ with open(base_file, "w") as f:
         """
         ).format(
             function_declarations="\n".join(
-                "void init_message_{}(pybind11::module& module);".format(f)
-                for f in functions
+                "void init_message_{}(pybind11::module& module);".format(f) for f in functions
             ),
-            function_calls=indent(
-                "\n".join("init_message_{}(module);".format(f) for f in functions)
-            ),
+            function_calls=indent("\n".join("init_message_{}(module);".format(f) for f in functions)),
         )
     )

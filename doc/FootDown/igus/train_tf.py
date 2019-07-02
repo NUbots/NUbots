@@ -20,11 +20,7 @@ learning_rate = 0.0001
 def save_yaml_model(sess, output_path, global_step, loss, variables=None, name=None):
 
     # Run tf to get all our variables
-    variables = (
-        {v.name: sess.run(v) for v in tf.trainable_variables()}
-        if variables is None
-        else variables
-    )
+    variables = {v.name: sess.run(v) for v in tf.trainable_variables()} if variables is None else variables
     output = []
     output.append({"loss": loss})
 
@@ -53,27 +49,17 @@ def save_yaml_model(sess, output_path, global_step, loss, variables=None, name=N
 
     # Print as yaml
     os.makedirs(os.path.join(output_path, "yaml_models"), exist_ok=True)
-    output_name = (
-        "model_{}.yaml".format(global_step) if name is None else "{}.yaml".format(name)
-    )
+    output_name = "model_{}.yaml".format(global_step) if name is None else "{}.yaml".format(name)
     with open(os.path.join(output_path, "yaml_models", output_name), "w") as f:
         f.write(yaml.dump(output, width=120))
 
 
 # Convert the csv row into an example
 def parse_row(line, truth):
-    cols = tf.decode_csv(
-        records=line, record_defaults=[[0.0]] * (csv_data_cols + 2)
-    )  # +2 for the foot heights
+    cols = tf.decode_csv(records=line, record_defaults=[[0.0]] * (csv_data_cols + 2))  # +2 for the foot heights
     data = tf.stack(cols[2:])
     foot_on_ground = tf.cast(
-        tf.stack(
-            [
-                cols[0] < (cols[1] + max_height_delta),
-                cols[1] < (cols[0] + max_height_delta),
-            ]
-        ),
-        tf.float32,
+        tf.stack([cols[0] < (cols[1] + max_height_delta), cols[1] < (cols[0] + max_height_delta)]), tf.float32
     )
     truth = tf.cond(
         tf.reduce_all(tf.equal(truth, -1)),
@@ -96,23 +82,13 @@ for f in [
     "walk_load_datasets/walking_laying_front.csv",
 ]:
     datasets.append(
-        tf.data.Dataset.zip(
-            (
-                tf.data.TextLineDataset(f).skip(1),
-                tf.data.Dataset.from_tensors([0, 0]).repeat(),
-            )
-        )
+        tf.data.Dataset.zip((tf.data.TextLineDataset(f).skip(1), tf.data.Dataset.from_tensors([0, 0]).repeat()))
     )
 
 # Positive files
 for f in ["walk_load_datasets/standing.csv"]:
     datasets.append(
-        tf.data.Dataset.zip(
-            (
-                tf.data.TextLineDataset(f).skip(1),
-                tf.data.Dataset.from_tensors([1, 1]).repeat(),
-            )
-        )
+        tf.data.Dataset.zip((tf.data.TextLineDataset(f).skip(1), tf.data.Dataset.from_tensors([1, 1]).repeat()))
     )
 
 # Files that have the feet changing based on the walk
@@ -123,12 +99,7 @@ for f in [
     "walk_load_datasets/walking4.csv",
 ]:
     datasets.append(
-        tf.data.Dataset.zip(
-            (
-                tf.data.TextLineDataset(f).skip(1),
-                tf.data.Dataset.from_tensors([-1, -1]).repeat(),
-            )
-        )
+        tf.data.Dataset.zip((tf.data.TextLineDataset(f).skip(1), tf.data.Dataset.from_tensors([-1, -1]).repeat()))
     )
 
 dataset = datasets[0]
@@ -142,10 +113,7 @@ dataset = dataset.batch(batch_size)
 train_iterator = dataset.make_initializable_iterator()
 
 valid_dataset = tf.data.Dataset.zip(
-    (
-        tf.data.TextLineDataset("walk_load_datasets/long_walk.csv").skip(1),
-        tf.data.Dataset.from_tensors([-1, -1]),
-    )
+    (tf.data.TextLineDataset("walk_load_datasets/long_walk.csv").skip(1), tf.data.Dataset.from_tensors([-1, -1]))
 )
 valid_dataset = valid_dataset.map(parse_row)
 valid_dataset = valid_dataset.repeat(epochs)
@@ -155,9 +123,7 @@ valid_iterator = valid_dataset.make_initializable_iterator()
 
 # Build the network using the provided structure
 line = tf.placeholder(tf.string, [])
-iterator = tf.data.Iterator.from_string_handle(
-    line, dataset.output_types, dataset.output_shapes
-)
+iterator = tf.data.Iterator.from_string_handle(line, dataset.output_types, dataset.output_shapes)
 logits, labels = iterator.get_next()
 logits = tf.reshape(logits, [-1, csv_data_cols])
 for i, out_s in enumerate(network_structure):
@@ -190,26 +156,17 @@ for i, out_s in enumerate(network_structure):
 # Optimiser
 global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name="global_step")
 loss = tf.reduce_mean(
-    tf.nn.softmax_cross_entropy_with_logits_v2(
-        logits=logits[:, 0:2], labels=labels[:, 0:2], dim=1
-    )
-    + tf.nn.softmax_cross_entropy_with_logits_v2(
-        logits=logits[:, 2:4], labels=labels[:, 2:4], dim=1
-    )
+    tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits[:, 0:2], labels=labels[:, 0:2], dim=1)
+    + tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits[:, 2:4], labels=labels[:, 2:4], dim=1)
 )
 
-optimiser = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(
-    loss, global_step=global_step
-)
+optimiser = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     sess.run([train_iterator.initializer, valid_iterator.initializer])
     train_handle, valid_handle = sess.run(
-        [
-            train_iterator.string_handle("train_dataset"),
-            valid_iterator.string_handle("valid_dataset"),
-        ]
+        [train_iterator.string_handle("train_dataset"), valid_iterator.string_handle("valid_dataset")]
     )
 
     best_loss = np.inf
@@ -229,11 +186,7 @@ with tf.Session() as sess:
             if step and (step % 100) == 0:
                 tloss /= 100
                 duration /= 100
-                print(
-                    "Batch {:5d}: duration (avg) {:6f}, train loss (avg) {:6f}".format(
-                        step, duration, tloss
-                    )
-                )
+                print("Batch {:5d}: duration (avg) {:6f}, train loss (avg) {:6f}".format(step, duration, tloss))
                 tloss = 0
                 duration = 0
 
@@ -251,18 +204,12 @@ with tf.Session() as sess:
                         if vloss < best_loss:
                             best_vloss = loss
                             save_yaml_model(
-                                sess,
-                                ".",
-                                tf.train.global_step(sess, global_step),
-                                vloss,
-                                name="best_vloss",
+                                sess, ".", tf.train.global_step(sess, global_step), vloss, name="best_vloss"
                             )
 
                         print("Batch {:5d}: valid loss (avg) {:6f}".format(step, vloss))
                         sess.run(valid_iterator.initializer)
-                        valid_handle = sess.run(
-                            valid_iterator.string_handle("valid_dataset")
-                        )
+                        valid_handle = sess.run(valid_iterator.string_handle("valid_dataset"))
                         break
 
             if step and (step % 5000) == 0:

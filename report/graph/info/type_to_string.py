@@ -12,12 +12,7 @@ def type_to_string(type_list):
 
         # Extract our period information
         period = type_list[4][1]
-        is_per = len(type_list[4][1]) > 4 and period[:4] == [
-            "NUClear",
-            "dsl",
-            "word",
-            "Per",
-        ]
+        is_per = len(type_list[4][1]) > 4 and period[:4] == ["NUClear", "dsl", "word", "Per"]
         if is_per:
             period = period[4][0]
         period = period[3][-1][-1]
@@ -32,9 +27,7 @@ def type_to_string(type_list):
         }[float(period[0][0][:-2]) / float(period[1][0][:-2])]
 
         if is_per:
-            type_list = type_list[:4] + [
-                [[str(ticks)], ["NUClear", "dsl", "word", "Per", [period]]]
-            ]
+            type_list = type_list[:4] + [[[str(ticks)], ["NUClear", "dsl", "word", "Per", [period]]]]
         else:
             type_list = type_list[:4] + [[[str(ticks)], period]]
             pass
@@ -44,9 +37,7 @@ def type_to_string(type_list):
     previous = type_list[0]
 
     for item in type_list:
-        if isinstance(item, basestring) and (
-            short_type or (item[0].isupper() and item != "NUClear")
-        ):
+        if isinstance(item, basestring) and (short_type or (item[0].isupper() and item != "NUClear")):
             short_type = True
             flat_list.append(item)
         elif not isinstance(item, basestring):
@@ -54,9 +45,7 @@ def type_to_string(type_list):
             if not short_type:
                 flat_list.append(previous)
                 short_type = True
-            flat_list.append(
-                "<{}>".format(", ".join([type_to_string(subitem) for subitem in item]))
-            )
+            flat_list.append("<{}>".format(", ".join([type_to_string(subitem) for subitem in item])))
         else:
             previous = item
 

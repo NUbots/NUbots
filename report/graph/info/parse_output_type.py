@@ -10,17 +10,9 @@ def parse_output_type(output):
             o.append({"scope": "type", "type": output["type"], "modifiers": {}})
             pass
         elif scope == "Direct":
-            o.append(
-                {"scope": "type", "type": output["type"], "modifiers": {"direct": True}}
-            )
+            o.append({"scope": "type", "type": output["type"], "modifiers": {"direct": True}})
         elif scope == "Initialize":
-            o.append(
-                {
-                    "scope": "type",
-                    "type": output["type"],
-                    "modifiers": {"initialize": True},
-                }
-            )
+            o.append({"scope": "type", "type": output["type"], "modifiers": {"initialize": True}})
         elif scope == "Network":
             o.append({"scope": "network", "type": output["type"], "modifiers": {}})
         elif scope == "UDP":

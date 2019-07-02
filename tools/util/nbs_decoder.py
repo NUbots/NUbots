@@ -40,9 +40,7 @@ for message in google.protobuf.message.Message.__subclasses__():
 def decode(path):
 
     # Now open the passed file
-    with gzip.open(path, "rb") if path.endswith("nbz") or path.endswith(
-        ".gz"
-    ) else open(path, "rb") as f:
+    with gzip.open(path, "rb") if path.endswith("nbz") or path.endswith(".gz") else open(path, "rb") as f:
 
         # NBS File Format:
         # 3 Bytes - NUClear radiation symbol header, useful for synchronisation when attaching to an existing stream
@@ -69,8 +67,4 @@ def decode(path):
             # If we know how to parse this type, parse it
             if type_hash in decoders:
                 # Yield a message
-                yield (
-                    decoders[type_hash][0],
-                    timestamp,
-                    decoders[type_hash][1].FromString(payload[16:]),
-                )
+                yield (decoders[type_hash][0], timestamp, decoders[type_hash][1].FromString(payload[16:]))
