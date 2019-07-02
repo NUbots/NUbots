@@ -21,9 +21,7 @@ class File:
 
     def generate_cpp(self):
 
-        define = "{}_H".format(
-            "_".join([s.upper() for s in self.name[:-6].strip().split("/")])
-        )
+        define = "{}_H".format("_".join([s.upper() for s in self.name[:-6].strip().split("/")]))
         parts = self.package.split(".")
         ns_open = "\n".join(["namespace {} {{".format(x) for x in parts])
         ns_close = "\n".join("}" * len(parts))
@@ -62,18 +60,13 @@ class File:
                 includes.add('4"message/conversion/proto_matrix.h"')
             elif d in ["Neutron.proto"]:
                 pass  # We don't need to do anything for these ones
-            elif d in [
-                "google/protobuf/timestamp.proto",
-                "google/protobuf/duration.proto",
-            ]:
+            elif d in ["google/protobuf/timestamp.proto", "google/protobuf/duration.proto"]:
                 includes.add('4"message/conversion/proto_time.h"')
             else:
                 includes.add('4"{}"'.format(d[:-6] + ".h"))
 
         # Don't forget to remove the first character
-        includes = "\n".join(
-            ["#include {}".format(i[1:]) for i in sorted(list(includes))]
-        )
+        includes = "\n".join(["#include {}".format(i[1:]) for i in sorted(list(includes))])
 
         header_template = dedent(
             """\
@@ -130,9 +123,7 @@ class File:
             """
         )
 
-        python_submodules = "".join(
-            '.def_submodule("{}")'.format(m) for m in self.fqn.split(".")[2:]
-        )
+        python_submodules = "".join('.def_submodule("{}")'.format(m) for m in self.fqn.split(".")[2:])
 
         return (
             header_template.format(
@@ -144,9 +135,7 @@ class File:
                 close_namespace=ns_close,
             ),
             impl_template.format(
-                include='#include "{}"'.format(self.name[:-6] + ".h"),
-                enums=enum_impls,
-                messages=message_impls,
+                include='#include "{}"'.format(self.name[:-6] + ".h"), enums=enum_impls, messages=message_impls
             ),
             python_template.format(
                 include='#include "{}"'.format(self.name[:-6] + ".h"),

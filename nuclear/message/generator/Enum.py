@@ -14,29 +14,17 @@ class Enum:
     def generate_cpp(self):
 
         # Make our value pairs
-        values = indent(
-            "\n".join(["{} = {}".format(v[0], v[1]) for v in self.values]), 8
-        )
+        values = indent("\n".join(["{} = {}".format(v[0], v[1]) for v in self.values]), 8)
         values = ",\n".join([v for v in values.splitlines()])
 
         scope_name = "_".join(self.fqn.split("."))
 
         # Make our switch statement pairs
-        switches = indent(
-            "\n".join(
-                ['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]
-            ),
-            8,
-        )
+        switches = indent("\n".join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
 
         # Make our if chain
         if_chain = indent(
-            "\nelse ".join(
-                [
-                    'if (str == "{}") value = Value::{};'.format(v[0], v[0])
-                    for v in self.values
-                ]
-            )
+            "\nelse ".join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values])
         )
 
         # Get our default value
@@ -230,9 +218,7 @@ class Enum:
 
         return (
             header_template.format(
-                name=self.name,
-                protobuf_name="::".join((".protobuf" + self.fqn).split(".")),
-                values=values,
+                name=self.name, protobuf_name="::".join((".protobuf" + self.fqn).split(".")), values=values
             ),
             impl_template.format(
                 fqn="::".join(self.fqn.split(".")),
@@ -250,9 +236,7 @@ class Enum:
                 include_path=self.include_path,
                 value_list=indent(
                     "\n".join(
-                        '.value("{name}", {fqn}::{name})'.format(
-                            name=v[0], fqn=self.fqn.replace(".", "::")
-                        )
+                        '.value("{name}", {fqn}::{name})'.format(name=v[0], fqn=self.fqn.replace(".", "::"))
                         for v in self.values
                     ),
                     8,

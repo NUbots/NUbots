@@ -47,9 +47,7 @@ class NUClearGraphBuilder:
                         "dst": '"{}"'.format(input_id),
                         "label": '"{}"'.format(type_name),
                         # Red for triggering edges, blue for data only edges
-                        "color": "#FF0000"
-                        if input["modifiers"].get("execution", False)
-                        else "#0000FF",
+                        "color": "#FF0000" if input["modifiers"].get("execution", False) else "#0000FF",
                     }
 
                     if input["modifiers"].get("optional", False):
@@ -202,11 +200,7 @@ class NUClearGraphBuilder:
 
             # Add a node for our module itself
             if m1["output_data"]:
-                node = {
-                    "name": '"{}"'.format(m1["name"]),
-                    "label": '"{}"'.format(m1["name"]),
-                    "shape": "rect",
-                }
+                node = {"name": '"{}"'.format(m1["name"]), "label": '"{}"'.format(m1["name"]), "shape": "rect"}
                 cluster.add_node(Node(**node))
 
                 for outputs in m1["output_data"]:
@@ -217,16 +211,12 @@ class NUClearGraphBuilder:
 
                                 # Get our destination fqn
                                 dst_text_dsl = type_to_string(["DSL", r2["dsl"]])[4:-1]
-                                dst_reaction_identifier = "0x{0:x}<{1}>".format(
-                                    r2["address"], dst_text_dsl
-                                )
+                                dst_reaction_identifier = "0x{0:x}<{1}>".format(r2["address"], dst_text_dsl)
                                 dst_fqn = m2["name"] + "::" + dst_reaction_identifier
 
                                 for input in r2["input_data"]:
 
-                                    edge = self.make_edge(
-                                        m1["name"], output, dst_fqn, input
-                                    )
+                                    edge = self.make_edge(m1["name"], output, dst_fqn, input)
                                     if edge:
                                         graph.add_edge(edge)
 
@@ -235,19 +225,13 @@ class NUClearGraphBuilder:
 
                 # Get identifiers for this reaction
                 src_text_dsl = type_to_string(["DSL", r1["dsl"]])[4:-1]
-                src_reaction_identifier = "0x{0:x}<{1}>".format(
-                    r1["address"], src_text_dsl
-                )
+                src_reaction_identifier = "0x{0:x}<{1}>".format(r1["address"], src_text_dsl)
                 src_fqn = m1["name"] + "::" + src_reaction_identifier
                 label = r1["name"] if r1["name"] else src_text_dsl
 
                 # TODO if the label is Configuration, we need to get the .yaml file to help the label
 
-                node = {
-                    "name": '"{}"'.format(src_fqn),
-                    "label": '"{}"'.format(label),
-                    "shape": "rect",
-                }
+                node = {"name": '"{}"'.format(src_fqn), "label": '"{}"'.format(label), "shape": "rect"}
 
                 # If we are not grouping clusters, put the owner module here
                 if not group_clusters:
@@ -287,15 +271,11 @@ class NUClearGraphBuilder:
 
                                 # Get our destination fqn
                                 dst_text_dsl = type_to_string(["DSL", r2["dsl"]])[4:-1]
-                                dst_reaction_identifier = "0x{0:x}<{1}>".format(
-                                    r2["address"], dst_text_dsl
-                                )
+                                dst_reaction_identifier = "0x{0:x}<{1}>".format(r2["address"], dst_text_dsl)
                                 dst_fqn = m2["name"] + "::" + dst_reaction_identifier
 
                                 for input in r2["input_data"]:
-                                    edge = self.make_edge(
-                                        src_fqn, output, dst_fqn, input
-                                    )
+                                    edge = self.make_edge(src_fqn, output, dst_fqn, input)
                                     if edge:
                                         graph.add_edge(edge)
 
@@ -345,11 +325,7 @@ class NUClearGraphBuilder:
         for m1 in compressed_modules:
 
             # Add a node for our module itself
-            node = {
-                "name": '"{}"'.format(m1["name"]),
-                "label": '"{}"'.format(m1["name"]),
-                "shape": "rect",
-            }
+            node = {"name": '"{}"'.format(m1["name"]), "label": '"{}"'.format(m1["name"]), "shape": "rect"}
             graph.add_node(Node(**node))
 
             # Loop through our outputs
@@ -396,44 +372,14 @@ class NUClearGraphBuilder:
         info = {
             "number_of_modules": 0,
             "lmb": {
-                "reactions": {
-                    "histogram": {},
-                    "mean": 0,
-                    "mode": 0,
-                    "median": 0,
-                    "stddev": 0,
-                },
-                "inputs": {
-                    "histogram": {},
-                    "mean": 0,
-                    "mode": 0,
-                    "median": 0,
-                    "stddev": 0,
-                },
-                "unused_messages": {
-                    "histogram": {},
-                    "mean": 0,
-                    "mode": 0,
-                    "median": 0,
-                    "stddev": 0,
-                },
+                "reactions": {"histogram": {}, "mean": 0, "mode": 0, "median": 0, "stddev": 0},
+                "inputs": {"histogram": {}, "mean": 0, "mode": 0, "median": 0, "stddev": 0},
+                "unused_messages": {"histogram": {}, "mean": 0, "mode": 0, "median": 0, "stddev": 0},
             },
             "message_lmb_complexity": [],
             "message": {
-                "reactions": {
-                    "histogram": {},
-                    "mean": 0,
-                    "mode": 0,
-                    "median": 0,
-                    "stddev": 0,
-                },
-                "induced_cache_variables": {
-                    "histogram": {},
-                    "mean": 0,
-                    "mode": 0,
-                    "median": 0,
-                    "stddev": 0,
-                },
+                "reactions": {"histogram": {}, "mean": 0, "mode": 0, "median": 0, "stddev": 0},
+                "induced_cache_variables": {"histogram": {}, "mean": 0, "mode": 0, "median": 0, "stddev": 0},
             },
             "blackboard": {"types": 0},
         }
@@ -521,21 +467,15 @@ class NUClearGraphBuilder:
 
         # Calculate our histogram information
         h = info["lmb"]["reactions"]
-        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(
-            h["histogram"]
-        )
+        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(h["histogram"])
 
         # Calculate our histogram information
         h = info["lmb"]["inputs"]
-        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(
-            h["histogram"]
-        )
+        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(h["histogram"])
 
         # Calculate our histogram information
         h = info["lmb"]["unused_messages"]
-        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(
-            h["histogram"]
-        )
+        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(h["histogram"])
 
         # Process the transformation for Message Passing
         for module in self.modules:
@@ -555,12 +495,7 @@ class NUClearGraphBuilder:
                         data_types.append(t)
 
             info["message_lmb_complexity"].append(
-                (
-                    module["name"],
-                    len(module["reactions"]),
-                    len(data_types) + len(exec_types),
-                    len(data_types),
-                )
+                (module["name"], len(module["reactions"]), len(data_types) + len(exec_types), len(data_types))
             )
 
             h = info["message"]["reactions"]["histogram"]
@@ -573,14 +508,10 @@ class NUClearGraphBuilder:
 
         # Calculate our histogram information
         h = info["message"]["reactions"]
-        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(
-            h["histogram"]
-        )
+        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(h["histogram"])
 
         h = info["message"]["induced_cache_variables"]
-        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(
-            h["histogram"]
-        )
+        h["mean"], h["mode"], h["median"], h["stddev"] = self.histogram_information(h["histogram"])
 
         # Calculate blackboard information (get number of unique "types")
         types = []
@@ -649,9 +580,7 @@ if __name__ == "__main__":
     filenames = sys.argv[2:]
 
     converter.build_module_graph().write("{}_module.dot".format(out))
-    converter.build_reaction_graph(group_clusters=False).write(
-        "{}_reaction.dot".format(out)
-    )
+    converter.build_reaction_graph(group_clusters=False).write("{}_reaction.dot".format(out))
 
     # Add all of our modules
     for filename in filenames:
@@ -659,19 +588,7 @@ if __name__ == "__main__":
 
     # Build our graph and save
     with open("{}_info.json".format(out), "w") as file:
-        json.dump(
-            converter.extract_graph_information(),
-            file,
-            sort_keys=True,
-            indent=4,
-            separators=(",", ": "),
-        )
+        json.dump(converter.extract_graph_information(), file, sort_keys=True, indent=4, separators=(",", ": "))
 
     with open("{}_types.json".format(out), "w") as file:
-        json.dump(
-            converter.get_unique_input_output(),
-            file,
-            sort_keys=True,
-            indent=4,
-            separators=(",", ": "),
-        )
+        json.dump(converter.get_unique_input_output(), file, sort_keys=True, indent=4, separators=(",", ": "))

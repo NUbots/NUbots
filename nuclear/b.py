@@ -57,9 +57,7 @@ for l in cmake_cache_text:
         g = re.match(r"([a-zA-Z_$][a-zA-Z_.$0-9-]*):(\w+)=(.*)", l).groups()
 
         # Store our value and split it into a list if it is a list
-        cmake_cache[g[0]] = (
-            g[2] if ";" not in g[2].strip(";") else g[2].strip(";").split(";")
-        )
+        cmake_cache[g[0]] = g[2] if ";" not in g[2].strip(";") else g[2].strip(";").split(";")
 
 # Try to find our source and binary directories
 try:
@@ -77,12 +75,8 @@ if __name__ == "__main__":
     if binary_dir is not None:
         # Print some information for the user
         print("b script for", cmake_cache["CMAKE_PROJECT_NAME"])
-        print(
-            "\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"]
-        )
-        print(
-            "\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_BINARY_DIR"]
-        )
+        print("\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"])
+        print("\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_BINARY_DIR"])
         print()
 
     # Add our builtin tools to the path and user tools
@@ -94,9 +88,7 @@ if __name__ == "__main__":
         description="This script is an optional helper script for performing common tasks for working with the NUClear roles system."
     )
     subcommands = command.add_subparsers(dest="command")
-    subcommands.help = (
-        "The command to run from the script. See each help for more information."
-    )
+    subcommands.help = "The command to run from the script. See each help for more information."
 
     # Get all of the packages that are in the build tools
     modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])

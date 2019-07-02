@@ -20,10 +20,7 @@ if __name__ == "__main__":
             if module_name.endswith("pb2"):
 
                 # Work out what header file this came from
-                include = os.path.join(
-                    os.path.relpath(dir_name, shared_folder),
-                    "{}.h".format(module_name[:-4]),
-                )
+                include = os.path.join(os.path.relpath(dir_name, shared_folder), "{}.h".format(module_name[:-4]))
 
                 # If it's one of ours include it
                 if include.startswith("message"):
@@ -40,10 +37,7 @@ if __name__ == "__main__":
         pb_type = ".".join(message.DESCRIPTOR.full_name.split(".")[1:])
 
         # Only include our own messages
-        if (
-            pb_type.startswith("message.")
-            and not message.DESCRIPTOR.GetOptions().map_entry
-        ):
+        if pb_type.startswith("message.") and not message.DESCRIPTOR.GetOptions().map_entry:
             messages.add(pb_type)
 
     messages = list(messages)
@@ -192,16 +186,10 @@ if __name__ == "__main__":
 
     # Make our recording handles
     handle_template = '            handles["{0}"] = on<Trigger<{1}>>().then([this](const {1}& d) {{ emit(log_encode(d)); }}).disable();'
-    handles = [
-        handle_template.format(m, m.replace(".", "::")) for m in sorted(messages)
-    ]
+    handles = [handle_template.format(m, m.replace(".", "::")) for m in sorted(messages)]
 
     with open(cpp_file, "w") as f:
-        f.write(
-            source.format(
-                includes="\n".join(includes), record_handles="\n".join(handles)
-            )
-        )
+        f.write(source.format(includes="\n".join(includes), record_handles="\n".join(handles)))
 
     # Now generate our yaml file
     yaml_template = dedent(

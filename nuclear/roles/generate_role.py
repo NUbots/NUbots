@@ -73,9 +73,7 @@ with open(role_name, "w") as file:
     file.write("\n    // Print the name of the role in big letters\n")
 
     # Insert banner for the name of the executing role
-    role_banner_lines = bigtext(os.path.splitext(os.path.basename(role_name))[0]).split(
-        "\n"
-    )[:-1]
+    role_banner_lines = bigtext(os.path.splitext(os.path.basename(role_name))[0]).split("\n")[:-1]
     for l in role_banner_lines:
         file.write('    std::cerr << R"({})" << std::endl;\n'.format(l))
 
@@ -90,9 +88,7 @@ with open(role_name, "w") as file:
     file.write(start)
 
     for module in role_modules:
-        file.write(
-            '    std::cerr << "Installing " << "{0}" << std::endl;\n'.format(module)
-        )
+        file.write('    std::cerr << "Installing " << "{0}" << std::endl;\n'.format(module))
         file.write("    plant.install<module::{0}>();\n".format(module))
 
     end = """
