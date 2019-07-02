@@ -88,13 +88,11 @@ namespace platform {
 
             std::array<bool, 2> updateFeet(const ::message::input::Sensors& sensors) {
 
-                // TODO based on configuration grab the sensor readings we are using
-                Eigen::Matrix<Scalar, Eigen::Dynamic, 1> logits((servos.size() * fields.size())
-                                                                + (accelerometer ? 3 : 0) + (gyroscope ? 3 : 0));
 
                 // Build our input data
                 int index = 0;
-
+                Eigen::Matrix<Scalar, Eigen::Dynamic, 1> logits((servos.size() * fields.size())
+                                                                + (accelerometer ? 3 : 0) + (gyroscope ? 3 : 0));
                 for (const auto& servo_id : servos) {
                     const auto& s = sensors.servo[servo_id];
                     for (const auto& f : fields) {
