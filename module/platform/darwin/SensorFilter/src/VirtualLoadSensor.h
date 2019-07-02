@@ -25,6 +25,7 @@
 #include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "utility/input/ServoID.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace platform {
@@ -48,7 +49,6 @@ namespace platform {
                     servos.emplace_back("L_" + field.as<std::string>());
                 }
 
-
                 // Add the fields
                 for (const auto& field : config["network"]["input"]["fields"].config) {
                     if (field.as<std::string>() == "POSITION") {
@@ -68,26 +68,14 @@ namespace platform {
 
                 for (const auto& layer : config["network"]["layers"].config) {
 
-                    auto weight_rows = layer["weights"].size();
-                    auto weight_cols = layer["weights"][0].size();
-
-
-                    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> weights(weight_rows, weight_cols);
-                    Eigen::Matrix<Scalar, Eigen::Dynamic, 1> bias(weight_cols);
-
-                    for (int col = 0; col < weight_cols; col++) {
-                        for (int row = 0; row < weight_rows; row++) {
-                            weights(row, col) = layer["weights"][row][col].as<Scalar>();
-                        }
-                        bias[col] = layer["biases"][col].as<Scalar>();
-                    }
+                    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> weights = layer["weights"].as<Expression>();
+                    Eigen::Matrix<Scalar, Eigen::Dynamic, 1> bias                 = layer["biases"].as<Expression>();
 
                     layers.emplace_back(weights, bias);
                 }
             }
 
             std::array<bool, 2> updateFeet(const ::message::input::Sensors& sensors) {
-
 
                 // Build our input data
                 int index = 0;
@@ -113,7 +101,6 @@ namespace platform {
                     logits[index++] = sensors.gyroscope.y();
                     logits[index++] = sensors.gyroscope.z();
                 }
-
 
                 // Run the neural network
                 for (int i = 0; i < layers.size(); ++i) {
