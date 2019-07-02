@@ -7,6 +7,7 @@ import yaml
 from tqdm import tqdm
 from util import nbs_decoder
 import numpy as np
+import re
 
 SERVO_ID = {
     "R_SHOULDER_PITCH": 0,
@@ -59,7 +60,15 @@ def displacement(fk):
 
 
 def dataset(
-    path, state, servos, keys, lr_duplicate, foot_delta, accelerometer, gryoscope
+    path,
+    left_state,
+    right_state,
+    servos,
+    keys,
+    lr_duplicate,
+    foot_delta,
+    accelerometer,
+    gryoscope,
 ):
     xs = []
     ys = []
@@ -68,36 +77,28 @@ def dataset(
     ):
         if type_name == "message.input.Sensors":
 
-            # Work out the class
-            if state == "WALK":
-                # Work out how far the foot is from the torso
-                l_height = displacement(
-                    msg.forward_kinematics[SERVO_ID["L_ANKLE_ROLL"]]
-                )
-                r_height = displacement(
-                    msg.forward_kinematics[SERVO_ID["R_ANKLE_ROLL"]]
-                )
-                delta = abs(l_height - r_height)
+            # Work out how far the foot is from the torso
+            l_height = displacement(msg.forward_kinematics[SERVO_ID["L_ANKLE_ROLL"]])
+            r_height = displacement(msg.forward_kinematics[SERVO_ID["R_ANKLE_ROLL"]])
+            delta = abs(l_height - r_height)
 
-                # Get the load on the knee
-                r_load = msg.servo[SERVO_ID["R_KNEE"]].load
-                l_load = msg.servo[SERVO_ID["L_KNEE"]].load
-
-                y = {
-                    "R_": 1 if r_height - foot_delta < l_height else 0,
-                    "L_": 1 if l_height - foot_delta < r_height else 0,
-                }
-
-            elif state == "UP":
-                y = {"L_": 0, "R_": 0}
-            elif state == "DOWN":
-                y = {"L_": 1, "R_": 1}
-            else:
-                raise RuntimeError("The state must be UP DOWN or WALK")
+            # Calculate what our foot down should be for each foot based on the state
+            y = {
+                "R_": {
+                    "up": 1,
+                    "down": 0,
+                    "mixed": 1 if r_height - foot_delta < l_height else 0,
+                }[right_state],
+                "L_": {
+                    "up": 1,
+                    "down": 0,
+                    "mixed": 1 if l_height - foot_delta < r_height else 0,
+                }[left_state],
+            }
 
             # If we are duplicating left right/right left do that here
             for sides in (
-                [("L_", "R_"), ("R_", "L_")] if lr_duplicate else [("L_", "R_")]
+                [("R_", "L_"), ("L_", "R_")] if lr_duplicate else [("R_", "L_")]
             ):
                 x = []
                 for servo in servos:
@@ -117,7 +118,7 @@ def dataset(
                         [
                             msg.accelerometer.x,
                             msg.accelerometer.y
-                            if sides[0] == "L_"
+                            if sides[0] == "R_"
                             else -msg.accelerometer.y,
                             msg.accelerometer.z,
                         ]
@@ -139,59 +140,76 @@ def register(command):
 
     # Drone arguments
     command.add_argument(
-        "config",
-        metavar="config",
-        help="The configuration file specifying groups of data files",
+        "data_dir",
+        metavar="data_dir",
+        help="The foldering containing the segmented training data and configuration file",
     )
 
 
-def run(config, **kwargs):
+def run(data_dir, **kwargs):
 
     # Load our configuration file to get the individual nbs files
-    data_path = os.path.dirname(config)
-    with open(config, "r") as f:
+    with open(os.path.join(data_dir, "config.yaml"), "r") as f:
         config = yaml.safe_load(f)
 
-    foot_delta = config["config"]["foot_delta"]
-    servos = config["config"]["servos"]
-    keys = config["config"]["keys"]
-    use_accel = config["config"]["accelerometer"]
-    use_gyro = config["config"]["gyroscope"]
-    lr_duplicate = config["config"]["lr_duplicate"]
+        foot_delta = config["config"]["foot_delta"]
+        servos = config["config"]["servos"]
+        keys = config["config"]["keys"]
+        use_accel = config["config"]["accelerometer"]
+        use_gyro = config["config"]["gyroscope"]
+        lr_duplicate = config["config"]["lr_duplicate"]
 
     print("Loading data from NBS files")
     group_xs = []
     group_ys = []
     group_desc = []
-    for group in tqdm(config["data"], dynamic_ncols=True, unit="group"):
+    for state in tqdm(os.listdir(data_dir), dynamic_ncols=True, unit="dir"):
+        state_dir = os.path.join(data_dir, state)
+        if os.path.isdir(state_dir):
+            state_info = re.match("left_(up|down|mixed)_right_(up|down|mixed)", state)
+            if state_info is not None:
+                l_state = state_info.group(1)
+                r_state = state_info.group(2)
 
-        # Gather all groups into a single dataset for this specific type
-        xs = []
-        ys = []
-        for f in tqdm(group["files"], dynamic_ncols=True, unit="file"):
+                for group in tqdm(
+                    os.listdir(state_dir), dynamic_ncols=True, unit="group"
+                ):
+                    group_dir = os.path.join(state_dir, group)
+                    if os.path.isdir(group_dir):
 
-            # Load the file
-            x, y = dataset(
-                os.path.join(data_path, f),
-                group["state"],
-                servos,
-                keys,
-                lr_duplicate,
-                foot_delta,
-                use_accel,
-                use_gyro,
-            )
+                        # Gather all groups into a single dataset for this specific type
+                        xs = []
+                        ys = []
 
-            # Cut off the end 10% to account for nonsense setup and teardown
-            x = x[len(x) // 10 : -len(x) // 10]
-            y = y[len(y) // 10 : -len(y) // 10]
+                        for nbs in tqdm(
+                            os.listdir(group_dir), dynamic_ncols=True, unit="file"
+                        ):
+                            nbs_path = os.path.join(group_dir, nbs)
+                            if nbs_path.endswith((".nbs.gz", ".nbs", ".nbz")):
 
-            xs.append(x)
-            ys.append(y)
+                                # Load the file
+                                x, y = dataset(
+                                    nbs_path,
+                                    r_state,
+                                    l_state,
+                                    servos,
+                                    keys,
+                                    lr_duplicate,
+                                    foot_delta,
+                                    use_accel,
+                                    use_gyro,
+                                )
 
-        group_desc.append(group["desc"])
-        group_xs.append(np.concatenate(xs, axis=0))
-        group_ys.append(np.concatenate(ys, axis=0))
+                                # Cut off the end 10% to account for nonsense setup and teardown
+                                x = x[len(x) // 10 : -len(x) // 10]
+                                y = y[len(y) // 10 : -len(y) // 10]
+
+                                xs.append(x)
+                                ys.append(y)
+
+                        group_desc.append(group)
+                        group_xs.append(np.concatenate(xs, axis=0))
+                        group_ys.append(np.concatenate(ys, axis=0))
 
     # Find the largest size we have and replicate random elements in the other dataset to fill
     mx = max([x.shape[0] for x in group_xs])
@@ -245,6 +263,10 @@ def run(config, **kwargs):
     )
 
     print("Final Accuracy", history.history["val_binary_accuracy"][-1])
+
+    for desc, x, y in zip(group_desc, group_xs, group_ys):
+        print("Evaluating", desc)
+        model.evaluate(x, y)
 
     # Load the old configuration so we don't overwrite config we don't use
     config_path = os.path.join(

@@ -69,8 +69,12 @@ def decode(path):
             # If we know how to parse this type, parse it
             if type_hash in decoders:
                 # Yield a message
-                yield (
-                    decoders[type_hash][0],
-                    timestamp,
-                    decoders[type_hash][1].FromString(payload[16:]),
-                )
+                try:
+                    packet = (
+                        decoders[type_hash][0],
+                        timestamp,
+                        decoders[type_hash][1].FromString(payload[16:]),
+                    )
+                    yield packet
+                except:
+                    pass
