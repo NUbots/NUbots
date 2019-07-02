@@ -73,8 +73,8 @@ namespace input {
                                 Image::Lens::Projection::EQUIDISTANT,
                                 config["lens"]["focal_length"].as<float>(),
                                 Eigen::Vector2f(config["lens"]["fov"].as<float>(), config["lens"]["fov"].as<float>()),
-                                Eigen::Vector2f(config["lens"]["centreOffset"][0].as<float>(),
-                                                config["lens"]["centreOffset"][1].as<float>())),
+                                Eigen::Vector2f(config["lens"]["centre_offset"][0].as<float>(),
+                                                config["lens"]["centre_offset"][1].as<float>())),
                             newCamera,
                             stream,
                             *this};
