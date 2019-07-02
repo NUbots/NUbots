@@ -38,6 +38,8 @@ namespace vision {
                 network.emplace_back();
                 auto& net_conv = network.back();
 
+                bool first_loop = true;
+
                 for (const auto& layer : conv) {
 
                     // New network layer
@@ -45,12 +47,23 @@ namespace vision {
                     auto& net_layer = net_conv.back();
 
                     // Copy across our weights
-                    for (const auto& l : layer["weights"]) {
+                    for (int i = 0; i < layer["weights"].size(); i++) {
+                        const auto& l = layer["weights"][i];
+
                         net_layer.first.emplace_back();
                         auto& weight = net_layer.first.back();
 
                         for (const auto& v : l) {
                             weight.push_back(v.as<float>());
+                        }
+                        if (first_loop && i % 3 == 0) {
+                            int size = net_layer.first.back().size();
+
+                            net_layer.first.emplace_back();
+                            auto& weight = net_layer.first.back();
+                            for (int j = 0; j < size; ++j) {
+                                weight.push_back(0.0f);
+                            }
                         }
                     }
 
@@ -58,6 +71,8 @@ namespace vision {
                     for (const auto& v : layer["biases"]) {
                         net_layer.second.push_back(v.as<float>());
                     }
+
+                    first_loop = false;
                 }
             }
 
