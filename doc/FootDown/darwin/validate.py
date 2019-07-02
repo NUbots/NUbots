@@ -69,30 +69,12 @@ right_predict, right_state = bayesian_filter(right_probability)
 
 # Calculate our confusion matrices
 left_tp, left_fp, left_tn, left_fn = calculate_confusion_matrix(left_truth, left_state)
-right_tp, right_fp, right_tn, right_fn = calculate_confusion_matrix(
-    right_truth, right_state
-)
+right_tp, right_fp, right_tn, right_fn = calculate_confusion_matrix(right_truth, right_state)
 
-print(
-    "Left False Positive.: {:5.2f}%".format(
-        100.0 * float(left_fp) / float(left_fp + left_fn + left_tp + left_tn)
-    )
-)
-print(
-    "Left False Negative.: {:5.2f}%".format(
-        100.0 * float(left_fn) / float(left_fp + left_fn + left_tp + left_tn)
-    )
-)
-print(
-    "Left True Positive..: {:5.2f}%".format(
-        100.0 * float(left_tp) / float(left_fp + left_fn + left_tp + left_tn)
-    )
-)
-print(
-    "Left True Negative..: {:5.2f}%".format(
-        100.0 * float(left_tn) / float(left_fp + left_fn + left_tp + left_tn)
-    )
-)
+print("Left False Positive.: {:5.2f}%".format(100.0 * float(left_fp) / float(left_fp + left_fn + left_tp + left_tn)))
+print("Left False Negative.: {:5.2f}%".format(100.0 * float(left_fn) / float(left_fp + left_fn + left_tp + left_tn)))
+print("Left True Positive..: {:5.2f}%".format(100.0 * float(left_tp) / float(left_fp + left_fn + left_tp + left_tn)))
+print("Left True Negative..: {:5.2f}%".format(100.0 * float(left_tn) / float(left_fp + left_fn + left_tp + left_tn)))
 print(
     "Left Accuracy.......: {:5.2f}%".format(
         100.0 * float(left_tp + left_tn) / float(left_fp + left_fn + left_tp + left_tn)
@@ -102,30 +84,20 @@ print(
 print()
 
 print(
-    "Right False Positive: {:5.2f}%".format(
-        100.0 * float(right_fp) / float(right_fp + right_fn + right_tp + right_tn)
-    )
+    "Right False Positive: {:5.2f}%".format(100.0 * float(right_fp) / float(right_fp + right_fn + right_tp + right_tn))
 )
 print(
-    "Right False Negative: {:5.2f}%".format(
-        100.0 * float(right_fn) / float(right_fp + right_fn + right_tp + right_tn)
-    )
+    "Right False Negative: {:5.2f}%".format(100.0 * float(right_fn) / float(right_fp + right_fn + right_tp + right_tn))
 )
 print(
-    "Right True Positive.: {:5.2f}%".format(
-        100.0 * float(right_tp) / float(right_fp + right_fn + right_tp + right_tn)
-    )
+    "Right True Positive.: {:5.2f}%".format(100.0 * float(right_tp) / float(right_fp + right_fn + right_tp + right_tn))
 )
 print(
-    "Right True Negative.: {:5.2f}%".format(
-        100.0 * float(right_tn) / float(right_fp + right_fn + right_tp + right_tn)
-    )
+    "Right True Negative.: {:5.2f}%".format(100.0 * float(right_tn) / float(right_fp + right_fn + right_tp + right_tn))
 )
 print(
     "Right Accuracy......: {:5.2f}%".format(
-        100.0
-        * float(right_tp + right_tn)
-        / float(right_fp + right_fn + right_tp + right_tn)
+        100.0 * float(right_tp + right_tn) / float(right_fp + right_fn + right_tp + right_tn)
     )
 )
 
@@ -134,16 +106,7 @@ print(
     "Total Accuracy......: {:5.2f}%".format(
         100.0
         * float(right_tp + right_tn + left_tp + left_tn)
-        / float(
-            left_fp
-            + left_fn
-            + left_tp
-            + left_tn
-            + right_fp
-            + right_fn
-            + right_tp
-            + right_tn
-        )
+        / float(left_fp + left_fn + left_tp + left_tn + right_fp + right_fn + right_tp + right_tn)
     )
 )
 

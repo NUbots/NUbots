@@ -16,16 +16,11 @@ class Message:
         self.enums = [Enum(e, self) for e in m.enum_type]
 
         # Get all the submessages that are not map entries
-        self.submessages = [
-            Message(n, self) for n in m.nested_type if not n.options.map_entry
-        ]
+        self.submessages = [Message(n, self) for n in m.nested_type if not n.options.map_entry]
 
         for n in m.nested_type:
             if n.options.map_entry:
-                Field.map_types["{}.{}".format(self.fqn, n.name)] = (
-                    Field(n.field[0], self),
-                    Field(n.field[1], self),
-                )
+                Field.map_types["{}.{}".format(self.fqn, n.name)] = (Field(n.field[0], self), Field(n.field[1], self))
 
         self.fields = []
         for f in m.field:
@@ -47,22 +42,13 @@ class Message:
 
         # If we are empty it's easy
         if not self.fields:
-            return (
-                "{}();".format(self.name),
-                "{}::{}() {{}}".format(cpp_fqn, self.name),
-            )
+            return ("{}();".format(self.name), "{}::{}() {{}}".format(cpp_fqn, self.name))
         else:
-            field_list = ", ".join(
-                ["{} const& _{}".format(v.cpp_type, v.name) for v in self.fields]
-            )
+            field_list = ", ".join(["{} const& _{}".format(v.cpp_type, v.name) for v in self.fields])
             default_field_list = ", ".join(
                 [
                     "{} const& _{} = {}".format(
-                        v.cpp_type,
-                        v.name,
-                        v.default_value
-                        if v.default_value
-                        else "{}()".format(v.cpp_type),
+                        v.cpp_type, v.name, v.default_value if v.default_value else "{}()".format(v.cpp_type)
                     )
                     for v in self.fields
                 ]
@@ -71,9 +57,7 @@ class Message:
 
             return (
                 "{}({});".format(self.name, default_field_list),
-                "{}::{}({}) : {} {{}}".format(
-                    cpp_fqn, self.name, field_list, field_set
-                ),
+                "{}::{}({}) : {} {{}}".format(cpp_fqn, self.name, field_list, field_set),
             )
 
     def generate_equality_operator(self):
@@ -85,14 +69,10 @@ class Message:
         if not self.fields:
             return (
                 "bool operator== (const {}&) const;".format(self.name),
-                "bool {}::operator== (const {}&) const {{ return true; }}".format(
-                    cpp_fqn, self.name
-                ),
+                "bool {}::operator== (const {}&) const {{ return true; }}".format(cpp_fqn, self.name),
             )
         else:
-            equality_test = " && ".join(
-                ["{0} == other.{0}".format(v.name) for v in self.fields]
-            )
+            equality_test = " && ".join(["{0} == other.{0}".format(v.name) for v in self.fields])
 
             return (
                 "bool operator== (const {}& other) const;".format(self.name),
@@ -103,9 +83,7 @@ class Message:
 
     def generate_rule_of_five(self):
 
-        raw_pointer = [
-            v.name for v in self.fields if v.pointer and v.pointer == PointerType["RAW"]
-        ]
+        raw_pointer = [v.name for v in self.fields if v.pointer and v.pointer == PointerType["RAW"]]
         raw_pointer_warning = '#pragma message ( "WARNING: The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}") \n'.format(
             self.name, ", ".join(raw_pointer)
         )
@@ -120,12 +98,7 @@ class Message:
             {name}& operator=({name}&&) = default;"""
         )
 
-        return (
-            rule_of_five.format(
-                name=self.name, warning=raw_pointer_warning if raw_pointer else ""
-            ),
-            "",
-        )
+        return (rule_of_five.format(name=self.name, warning=raw_pointer_warning if raw_pointer else ""), "")
 
     def generate_protobuf_constructor(self):
 
@@ -142,9 +115,7 @@ class Message:
                 "{}::{}(const {}&) {{}}".format(cpp_fqn, self.name, protobuf_name),
             )
         else:
-            lines = [
-                "{}::{}(const {}& proto) {{".format(cpp_fqn, self.name, protobuf_name)
-            ]
+            lines = ["{}::{}(const {}& proto) {{".format(cpp_fqn, self.name, protobuf_name)]
 
             for v in self.fields:
                 if v.pointer:
@@ -152,9 +123,7 @@ class Message:
 
                 elif v.map_type:
                     if v.type[1].bytes_type:
-                        lines.append(
-                            indent("for (auto& _v : proto.{}()) {{".format(v.name))
-                        )
+                        lines.append(indent("for (auto& _v : proto.{}()) {{".format(v.name)))
                         lines.append(
                             indent(
                                 "{0}[_v.first].insert(std::end({0}[_v.first]), std::begin(_v.second), std::end(_v.second));".format(
@@ -166,19 +135,8 @@ class Message:
                         lines.append(indent("}"))
 
                     elif v.type[1].special_cpp_type:
-                        lines.append(
-                            indent(
-                                "for (auto& _v : proto.{}()) {{".format(v.name.lower())
-                            )
-                        )
-                        lines.append(
-                            indent(
-                                "message::conversion::convert({}[_v.first], _v.second);".format(
-                                    v.name
-                                ),
-                                8,
-                            )
-                        )
+                        lines.append(indent("for (auto& _v : proto.{}()) {{".format(v.name.lower())))
+                        lines.append(indent("message::conversion::convert({}[_v.first], _v.second);".format(v.name), 8))
                         lines.append(indent("}"))
 
                     else:  # Basic and other types are handled the same
@@ -193,18 +151,8 @@ class Message:
 
                 elif v.repeated:
                     if v.bytes_type:
-                        lines.append(
-                            indent(
-                                "{0}.resize(proto.{0}_size());".format(v.name.lower())
-                            )
-                        )
-                        lines.append(
-                            indent(
-                                "for (size_t _i = 0; _i < {0}.size(); ++_i) {{".format(
-                                    v.name
-                                )
-                            )
-                        )
+                        lines.append(indent("{0}.resize(proto.{0}_size());".format(v.name.lower())))
+                        lines.append(indent("for (size_t _i = 0; _i < {0}.size(); ++_i) {{".format(v.name)))
                         lines.append(
                             indent(
                                 "{0}[_i].insert(std::end({0}[_i]), std::begin(proto.{1}(_i)), std::end(proto.{1}(_i)));".format(
@@ -235,20 +183,8 @@ class Message:
                             lines.append(indent("}"))
                         else:
                             # Add the top of our for loop for the repeated field
-                            lines.append(
-                                indent(
-                                    "{0}.resize(proto.{1}_size());".format(
-                                        v.name, v.name.lower()
-                                    )
-                                )
-                            )
-                            lines.append(
-                                indent(
-                                    "for (size_t _i = 0; _i < {0}.size(); ++_i) {{".format(
-                                        v.name
-                                    )
-                                )
-                            )
+                            lines.append(indent("{0}.resize(proto.{1}_size());".format(v.name, v.name.lower())))
+                            lines.append(indent("for (size_t _i = 0; _i < {0}.size(); ++_i) {{".format(v.name)))
                             lines.append(
                                 indent(
                                     "message::conversion::convert({0}[_i], proto.{1}(_i));".format(
@@ -268,14 +204,7 @@ class Message:
                                     )
                                 )
                             )
-                            lines.append(
-                                indent(
-                                    "{0}[_i] = proto.{1}(_i);".format(
-                                        v.name, v.name.lower()
-                                    ),
-                                    8,
-                                )
-                            )
+                            lines.append(indent("{0}[_i] = proto.{1}(_i);".format(v.name, v.name.lower()), 8))
                             lines.append(indent("}"))
                         else:
                             lines.append(
@@ -287,13 +216,9 @@ class Message:
                             )
 
                 elif v.one_of:
-                    lines.append(
-                        indent("switch (proto.{}_case()) {{").format(v.name.lower())
-                    )
+                    lines.append(indent("switch (proto.{}_case()) {{").format(v.name.lower()))
                     for oneof_field in v.oneof_fields:
-                        lines.append(
-                            indent("case {}: {{".format(oneof_field.number), 8)
-                        )
+                        lines.append(indent("case {}: {{".format(oneof_field.number), 8))
 
                         if oneof_field.bytes_type:
                             lines.append(
@@ -332,11 +257,7 @@ class Message:
                         else:  # Basic and other types are handled the same
                             lines.append(
                                 indent(
-                                    "{0}.{1} = proto.{2}();".format(
-                                        v.name,
-                                        oneof_field.name,
-                                        oneof_field.name.lower(),
-                                    ),
+                                    "{0}.{1} = proto.{2}();".format(v.name, oneof_field.name, oneof_field.name.lower()),
                                     12,
                                 )
                             )
@@ -357,24 +278,15 @@ class Message:
 
                     elif v.special_cpp_type:
                         lines.append(
-                            indent(
-                                "message::conversion::convert({}, proto.{}());".format(
-                                    v.name, v.name.lower()
-                                )
-                            )
+                            indent("message::conversion::convert({}, proto.{}());".format(v.name, v.name.lower()))
                         )
 
                     else:  # Basic and other types are handled the same
-                        lines.append(
-                            indent("{} = proto.{}();".format(v.name, v.name.lower()))
-                        )
+                        lines.append(indent("{} = proto.{}();".format(v.name, v.name.lower())))
 
             lines.append("}")
 
-            return (
-                "{}(const {}& proto);".format(self.name, protobuf_name),
-                "\n".join(lines),
-            )
+            return ("{}(const {}& proto);".format(self.name, protobuf_name), "\n".join(lines))
 
     def generate_protobuf_converter(self):
 
@@ -388,9 +300,7 @@ class Message:
         if not self.fields:
             return (
                 "operator {0}() const;".format(protobuf_name),
-                "{0}::operator {1}() const {{\n    return {1}();\n}}".format(
-                    cpp_fqn, protobuf_name
-                ),
+                "{0}::operator {1}() const {{\n    return {1}();\n}}".format(cpp_fqn, protobuf_name),
             )
         else:
             lines = [
@@ -426,66 +336,39 @@ class Message:
                             )
                         )
                     else:  # Basic and others are handled the same
-                        lines.append(
-                            indent(
-                                "(*proto.mutable_{}())[_v.first] = _v.second;".format(
-                                    v.name.lower()
-                                ),
-                                8,
-                            )
-                        )
+                        lines.append(indent("(*proto.mutable_{}())[_v.first] = _v.second;".format(v.name.lower()), 8))
 
                     lines.append(indent("}"))
 
-                elif (
-                    v.repeated
-                ):  # We don't need to handle array here specially because it's the same
+                elif v.repeated:  # We don't need to handle array here specially because it's the same
                     # Add the top of our for loop for the repeated field
                     lines.append(indent("for (auto& _v : {}) {{".format(v.name)))
 
                     if v.bytes_type:
                         lines.append(
-                            indent(
-                                "proto.add_{}()->append(std::begin(_v), std::end(_v));".format(
-                                    v.name.lower()
-                                ),
-                                8,
-                            )
+                            indent("proto.add_{}()->append(std::begin(_v), std::end(_v));".format(v.name.lower()), 8)
                         )
                     elif v.special_cpp_type:
                         lines.append(
-                            indent(
-                                "message::conversion::convert(*proto.add_{}(), _v);".format(
-                                    v.name.lower()
-                                ),
-                                8,
-                            )
+                            indent("message::conversion::convert(*proto.add_{}(), _v);".format(v.name.lower()), 8)
                         )
                     elif v.basic:
-                        lines.append(
-                            indent("proto.add_{}(_v);".format(v.name.lower()), 8)
-                        )
+                        lines.append(indent("proto.add_{}(_v);".format(v.name.lower()), 8))
                     else:
-                        lines.append(
-                            indent("*proto.add_{}() = _v;".format(v.name.lower()), 8)
-                        )
+                        lines.append(indent("*proto.add_{}() = _v;".format(v.name.lower()), 8))
 
                     lines.append(indent("}"))
 
                 elif v.one_of:
                     lines.append(indent("switch ({}.val_index) {{").format(v.name))
                     for oneof_field in v.oneof_fields:
-                        lines.append(
-                            indent("case {}: {{".format(oneof_field.number), 8)
-                        )
+                        lines.append(indent("case {}: {{".format(oneof_field.number), 8))
 
                         if oneof_field.bytes_type:
                             lines.append(
                                 indent(
                                     "proto.mutable_{0}()->append(std::begin({1}.{2}.get()), std::end({1}.{2}.get()));".format(
-                                        oneof_field.name.lower(),
-                                        v.name,
-                                        oneof_field.name,
+                                        oneof_field.name.lower(), v.name, oneof_field.name
                                     ),
                                     12,
                                 )
@@ -494,9 +377,7 @@ class Message:
                             lines.append(
                                 indent(
                                     "message::conversion::convert(*proto.mutable_{0}(), {1}.{2}.get());".format(
-                                        oneof_field.name.lower(),
-                                        v.name,
-                                        oneof_field.name,
+                                        oneof_field.name.lower(), v.name, oneof_field.name
                                     ),
                                     12,
                                 )
@@ -505,9 +386,7 @@ class Message:
                             lines.append(
                                 indent(
                                     "proto.set_{0}({1}.{2}.get());".format(
-                                        oneof_field.name.lower(),
-                                        v.name,
-                                        oneof_field.name,
+                                        oneof_field.name.lower(), v.name, oneof_field.name
                                     ),
                                     12,
                                 )
@@ -516,9 +395,7 @@ class Message:
                             lines.append(
                                 indent(
                                     "*proto.mutable_{0}() = {1}.{2}.get();".format(
-                                        oneof_field.name.lower(),
-                                        v.name,
-                                        oneof_field.name,
+                                        oneof_field.name.lower(), v.name, oneof_field.name
                                     ),
                                     12,
                                 )
@@ -541,23 +418,13 @@ class Message:
                     elif v.special_cpp_type:
                         lines.append(
                             indent(
-                                "message::conversion::convert(*proto.mutable_{}(), {});".format(
-                                    v.name.lower(), v.name
-                                )
+                                "message::conversion::convert(*proto.mutable_{}(), {});".format(v.name.lower(), v.name)
                             )
                         )
                     elif v.basic:
-                        lines.append(
-                            indent("proto.set_{}({});".format(v.name.lower(), v.name))
-                        )
+                        lines.append(indent("proto.set_{}({});".format(v.name.lower(), v.name)))
                     else:
-                        lines.append(
-                            indent(
-                                "*proto.mutable_{}() = {};".format(
-                                    v.name.lower(), v.name
-                                )
-                            )
-                        )
+                        lines.append(indent("*proto.mutable_{}() = {};".format(v.name.lower(), v.name)))
 
             lines.append(indent("return proto;"))
             lines.append("}")
@@ -567,9 +434,7 @@ class Message:
     def generate_cpp(self):
 
         # Make our value pairs
-        fields = indent(
-            "\n".join(["{}".format(v.generate_cpp_header()) for v in self.fields])
-        )
+        fields = indent("\n".join(["{}".format(v.generate_cpp_header()) for v in self.fields]))
 
         # Generate our protobuf class name
         protobuf_type = "::".join((".protobuf" + self.fqn).split("."))
@@ -594,18 +459,9 @@ class Message:
         equality_operator = self.generate_equality_operator()
 
         constructor_headers = indent(
-            "\n\n".join(
-                [
-                    default_constructor[0],
-                    rule_of_five[0],
-                    protobuf_constructor[0],
-                    equality_operator[0],
-                ]
-            )
+            "\n\n".join([default_constructor[0], rule_of_five[0], protobuf_constructor[0], equality_operator[0]])
         )
-        constructor_impl = "\n\n".join(
-            [default_constructor[1], protobuf_constructor[1], equality_operator[1]]
-        )
+        constructor_impl = "\n\n".join([default_constructor[1], protobuf_constructor[1], equality_operator[1]])
         converter_headers = indent("\n\n".join([protobuf_converter[0]]))
         converter_impl = "\n\n".join([protobuf_converter[1]])
 
@@ -677,21 +533,16 @@ class Message:
         )
 
         python_constructor_args = ["{}& self".format(self.fqn.replace(".", "::"))]
-        python_constructor_args.extend(
-            ["{} const& _{}".format(t.cpp_type, t.name) for t in self.fields]
-        )
+        python_constructor_args.extend(["{} const& _{}".format(t.cpp_type, t.name) for t in self.fields])
         python_members = "\n".join(
-            '.def_readwrite("{field}", &{fqn}::{field})'.format(
-                field=f.name, fqn=self.fqn.replace(".", "::")
-            )
+            '.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace(".", "::"))
             for f in self.fields
         )
         python_constructor_default_args = [""]
         python_constructor_default_args.extend(
             [
                 'pybind11::arg("{}") = {}'.format(
-                    t.name,
-                    t.default_value if t.default_value else "{}()".format(t.cpp_type),
+                    t.name, t.default_value if t.default_value else "{}()".format(t.cpp_type)
                 )
                 for t in self.fields
             ]
@@ -720,10 +571,7 @@ class Message:
                 fields=fields,
             ),
             impl_template.format(
-                constructors=constructor_impl,
-                converters=converter_impl,
-                enums=enum_impls,
-                submessages=submessage_impls,
+                constructors=constructor_impl, converters=converter_impl, enums=enum_impls, submessages=submessage_impls
             ),
             python_template.format(
                 constructor=indent(python_constructor, 8),

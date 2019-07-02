@@ -18,11 +18,7 @@ def loadfile(path, label=None, max_height_delta=0.008):
             # Left
             output.append(
                 (
-                    int(
-                        label
-                        if label != None
-                        else point[1][1] < point[1][0] + max_height_delta
-                    ),
+                    int(label if label != None else point[1][1] < point[1][0] + max_height_delta),
                     point[1][4],  # L_HIP_PITCH_PRESENT_VELOCITY
                     point[1][4] - point[0][4],  # L_HIP_PITCH_ACCELERATION
                     point[1][5],  # L_HIP_PITCH_LOAD
@@ -38,11 +34,7 @@ def loadfile(path, label=None, max_height_delta=0.008):
             # Right
             output.append(
                 (
-                    int(
-                        label
-                        if label != None
-                        else point[1][0] < point[1][1] + max_height_delta
-                    ),
+                    int(label if label != None else point[1][0] < point[1][1] + max_height_delta),
                     point[1][2],  # R_HIP_PITCH_PRESENT_VELOCITY
                     point[1][2] - point[0][2],  # R_HIP_PITCH_ACCELERATION
                     point[1][3],  # R_HIP_PITCH_LOAD
@@ -78,29 +70,17 @@ negative_files = [
 positive_files = [loadfile(f, 1) for f in ["standing.csv"]]
 
 # Files that have the feet changing based on the walk
-mixed_files = [
-    loadfile(f) for f in ["walking.csv", "walking2.csv", "walking3.csv", "walking4.csv"]
-]
+mixed_files = [loadfile(f) for f in ["walking.csv", "walking2.csv", "walking3.csv", "walking4.csv"]]
 
 # The file we will use for validation
 test_files = [loadfile(f) for f in ["long_walk.csv"]]
 
 # Flatten the data
-training_data = np.array(
-    [
-        item
-        for sub_list in (negative_files + positive_files + mixed_files)
-        for item in sub_list
-    ]
-)
+training_data = np.array([item for sub_list in (negative_files + positive_files + mixed_files) for item in sub_list])
 test_data = np.array([item for sub_list in test_files for item in sub_list])
 
 clf = MLPClassifier(
-    alpha=1e-3,
-    hidden_layer_sizes=(5),
-    max_iter=5000,
-    verbose=True,
-    random_state=np.random.RandomState(1),
+    alpha=1e-3, hidden_layer_sizes=(5), max_iter=5000, verbose=True, random_state=np.random.RandomState(1)
 )
 clf.fit(training_data[:, 1:], training_data[:, 0])
 
