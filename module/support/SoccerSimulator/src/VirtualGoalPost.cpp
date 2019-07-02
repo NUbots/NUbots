@@ -125,11 +125,6 @@ namespace support {
         Eigen::Matrix<float, 3, 4> goalNormals =
             convert(arma::conv_to<arma::fmat>::from(cameraSpaceGoalProjection(robotPose, this->position, field, Hgc)));
         if (goalNormals.any() > 0.0) {
-            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, goalNormals.col(0)));
-            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, goalNormals.col(1)));
-            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, goalNormals.col(2)));
-            goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, goalNormals.col(3)));
-
             // build the predicted quad
             utility::math::geometry::Quad quad(getCamRay(convert(Eigen::Vector3f(goalNormals.col(0))),
                                                          convert(Eigen::Vector3f(goalNormals.col(3))),
@@ -180,44 +175,8 @@ namespace support {
                     && quad.getBottomLeft()[0] > 0
                     && quad.getBottomLeft()[0] < image.dimensions[0])) {
 
-                goal.measurements.erase(goal.measurements.begin() + 3);
-            }
-            // goal top visibility check
-            if (not(quad.getTopRight()[1] > 0 && quad.getTopRight()[1] < image.dimensions[1] && quad.getTopLeft()[1] > 0
-                    && quad.getTopLeft()[1] < image.dimensions[1]
-                    && quad.getTopRight()[0] > 0
-                    && quad.getTopRight()[0] < image.dimensions[0]
-                    && quad.getTopLeft()[0] > 0
-                    && quad.getTopLeft()[0] < image.dimensions[0])) {
-
-                goal.measurements.erase(goal.measurements.begin() + 2);
-            }
-
-            // goal sides visibility check
-            if (not((
-                        // One of the top or the bottom are in the screen coordinates of x
-                        (quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < image.dimensions[0]
-                         && quad.getBottomRight()[0] > 0
-                         && quad.getBottomRight()[0] < image.dimensions[0])
-                        || (quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < image.dimensions[0]
-                            && quad.getTopRight()[0] > 0
-                            && quad.getTopRight()[0] < image.dimensions[0]))
-                    && (
-                           // Check that the bottom is below the top of the screen and the top is below the bottom of
-
-                           // the screen
-                           (quad.getBottomRight()[1] < image.dimensions[1] && quad.getTopRight()[1] > 0)
-                           || (quad.getBottomLeft()[1] < image.dimensions[1] && quad.getTopLeft()[1] > 0)))) {
-                goal.measurements.erase(goal.measurements.begin() + 1);
                 goal.measurements.erase(goal.measurements.begin());
             }
-
-            // if (!goal.measurements.empty()) {
-            //    goal.quad.tl = convert(quad.getTopLeft());
-            //    goal.quad.tr = convert(quad.getTopRight());
-            //    goal.quad.br = convert(quad.getBottomRight());
-            //    goal.quad.bl = convert(quad.getBottomLeft());
-            //}
         }
 
         result.goals.push_back(goal);
