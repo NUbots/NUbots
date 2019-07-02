@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import b
@@ -19,9 +19,10 @@ def register(command):
 
     toolchains = []
     # Work out what platforms are available
-    for f in os.listdir("/nubots/toolchain/"):
-        if f.endswith(".cmake"):
-            toolchains.append(f[:-6])
+    if os.path.isdir("/nubots/toolchain"):
+        for f in os.listdir("/nubots/toolchain/"):
+            if f.endswith(".cmake"):
+                toolchains.append(f[:-6])
 
     init_command.add_argument(
         "platform", metavar="platform", choices=toolchains, help="the platform to select as the primary workspace"
