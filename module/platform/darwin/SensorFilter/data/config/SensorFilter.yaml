@@ -1,9 +1,12 @@
-nominal_z: 0.01
-
 debug: False
+
 
 buttons:
   debounce_threshold : 7
+
+foot_down:
+  from_load: false
+  certainty_threshold: 0.01
 
 foot_load_sensor:
   noise_factor: 1e-4

@@ -89,8 +89,9 @@ namespace vision {
             We first generate segments above and below that are 2x the width of the segment
          */
 
-        Line horizon(convert(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
-        arma::vec3 horizon_normal = convert(classifiedImage.horizon_normal);
+        Line horizon(convert(Eigen::Vector2d(classifiedImage.horizon.normal.head<2>().cast<double>())),
+                     classifiedImage.horizon.distance);
+        arma::vec3 horizon_normal = convert(Eigen::Vector3d(classifiedImage.horizon_normal));
 
         // Get our goal segments
         std::vector<GoalPOI> points;

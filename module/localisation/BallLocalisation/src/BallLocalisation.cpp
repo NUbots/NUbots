@@ -95,8 +95,8 @@ namespace localisation {
                      * and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls.balls[0].measurements) {
-                        filter.measurementUpdate(cartesianToSpherical(convert(measurement.rBCc)),
-                                                 convert(measurement.covariance),
+                        filter.measurementUpdate(arma::conv_to<arma::vec>::from(convert(measurement.rBCc)),
+                                                 arma::conv_to<arma::mat>::from(convert(measurement.covariance)),
                                                  field,
                                                  convert(balls.Hcw));
                     }

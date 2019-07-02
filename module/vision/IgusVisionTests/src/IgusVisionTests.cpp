@@ -47,7 +47,7 @@ namespace vision {
             log("Balls: ", balls.balls.size());
             for (auto& ball : balls.balls) {
                 for (auto& m : ball.measurements) {
-                    arma::vec3 measuredPos = convert(m.rBCc);
+                    arma::fvec3 measuredPos = convert(m.rBCc);
                     log("Ball actual pos (x,y,z):  ", ballCentre.t());
                     log("Ball measured pos (x,y,z):", measuredPos.t());
                     log("Ball detector error =     ", (measuredPos - ballCentre).t());
@@ -60,7 +60,7 @@ namespace vision {
             for (auto& goal : goals.goals) {
                 for (auto& m : goal.measurements) {
                     if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
-                    arma::vec3 measuredPos = convert(m.position);
+                    arma::vec3 measuredPos = convert(Eigen::Vector3d(m.position.cast<double>()));
                     log("Goal actual pos (x,y,z):  ", goal_position.t());
                     log("Goal measured pos (x,y,z):", measuredPos.t());
                     log("Goal detector error =     ", (measuredPos - goal_position).t());

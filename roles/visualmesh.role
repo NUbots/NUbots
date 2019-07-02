@@ -21,6 +21,9 @@ NUCLEAR_ROLE(
 
     #Vision
     vision::VisualMesh
+    vision::GreenHorizonDetector
+    vision::BallDetector
+    vision::GoalDetector
     output::ImageCompressor
 
     # Data logger
