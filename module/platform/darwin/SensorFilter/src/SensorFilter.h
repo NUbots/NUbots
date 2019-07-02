@@ -137,7 +137,7 @@ namespace platform {
             bool middleDown = false;
 
             // Our sensor for foot down
-            VirtualLoadSensor load_sensor;
+            VirtualLoadSensor<float> load_sensor;
 
             // World to foot in world rotation when the foot landed
             std::array<arma::vec3, 2> footlanding_rFWw;
