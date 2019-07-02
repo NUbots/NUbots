@@ -68,8 +68,9 @@ namespace platform {
 
                 for (const auto& layer : config["network"]["layers"].config) {
 
-                    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> weights = layer["weights"].as<Expression>();
-                    Eigen::Matrix<Scalar, Eigen::Dynamic, 1> bias                 = layer["biases"].as<Expression>();
+                    Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> weights =
+                        layer["weights"].as<utility::support::Expression>();
+                    Eigen::Matrix<Scalar, Eigen::Dynamic, 1> bias = layer["biases"].as<utility::support::Expression>();
 
                     layers.emplace_back(weights, bias);
                 }
