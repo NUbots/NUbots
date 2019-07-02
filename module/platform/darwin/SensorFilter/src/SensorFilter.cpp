@@ -110,10 +110,15 @@ namespace platform {
             , footlanding_Rwf() {
 
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
-                this->config.nominal_z = config["nominal_z"].as<float>();
-
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
+
+                // Foot down config
+                this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
+                this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
+
+                // Foot load sensor config
+                load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
 
                 // Motion filter config
                 // Update our velocity timestep dekay
@@ -451,13 +456,37 @@ namespace platform {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    sensors->right_foot_down = false;
-                    sensors->left_foot_down  = false;
+                    sensors->right_foot_down = true;
+                    sensors->left_foot_down  = true;
 
                     if (previousSensors) {
-                        // Use our virtual load sensor class to work out which feet are down
 
-                        auto feet_down           = load_sensor.updateFeet(*sensors);
+                        std::array<bool, 2> feet_down = {true};
+                        if (config.footDown.fromLoad) {
+                            // Use our virtual load sensor class to work out which feet are down
+                            feet_down = load_sensor.updateFeet(*sensors);
+                        }
+                        else {
+                            auto rightFootDisplacement =
+                                sensors->forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
+                            auto leftFootDisplacement =
+                                sensors->forward_kinematics[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
+
+                            if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
+                                feet_down[0] = true;
+                                feet_down[1] = false;
+                            }
+                            else if (leftFootDisplacement
+                                     < rightFootDisplacement - config.footDown.certaintyThreshold) {
+                                feet_down[0] = false;
+                                feet_down[1] = true;
+                            }
+                            else {
+                                feet_down[0] = true;
+                                feet_down[1] = true;
+                            }
+                        }
+
                         sensors->left_foot_down  = feet_down[0];
                         sensors->right_foot_down = feet_down[1];
                     }

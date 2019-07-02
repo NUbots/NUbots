@@ -36,13 +36,14 @@ message Ball {
     message Measurement {
         MeasurementType type = 1;
         // Vector from camera to ball in camera coordinates
-        vec3 rBCc       = 2;
-        mat3 covariance = 3;
+        fvec3 rBCc       = 2;
+        fmat3 covariance = 3;
     }
     Cone     cone                       = 1;
     repeated Measurement measurements   = 2;
-    vec2                 screen_angular = 3;
-    vec2                 angular_size   = 4;
+    fvec2                screen_angular = 3;
+    fvec2                angular_size   = 4;
+    fvec4                colour         = 5;
 }
 
 message Balls {

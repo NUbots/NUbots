@@ -97,7 +97,7 @@ namespace support {
             && centre[1] < int(image.dimensions[1])) {
 
             // Set our circle parameters for simulating the ball
-            result.balls.at(0).cone.axis     = convert(arma::vec3(arma::normalise(rBCc)));
+            result.balls.at(0).cone.axis     = convert(arma::vec3(arma::normalise(rBCc))).cast<float>();
             result.balls.at(0).cone.gradient = std::tan(angle * 0.5);
 
             // Get our transform to world coordinates
@@ -106,8 +106,8 @@ namespace support {
             arma::vec3 rBWw = Hwc.transformPoint(rBCc);
             // Attach the measurement to the object
             result.balls.at(0).measurements.push_back(Ball::Measurement());
-            result.balls.at(0).measurements.back().rBCc =
-                convert(rBWw);  // TODO: This needs updating to actually provide rBCc
+            // TODO: This needs updating to actually provide rBCc
+            result.balls.at(0).measurements.back().rBCc = convert(rBWw).cast<float>();
 
             // Measure points around the ball as a normal distribution
             arma::vec3 rEBc;

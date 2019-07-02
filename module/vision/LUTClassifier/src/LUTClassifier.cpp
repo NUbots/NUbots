@@ -159,7 +159,8 @@ namespace vision {
             GOAL_RANSAC_MAXIMUM_FITTED_MODELS     = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
             GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
 
-            GOAL_MAX_HORIZON_ANGLE                = std::cos(config["goals"]["max_horizon_angle"].as<Expression>());
+            GOAL_MAX_HORIZON_ANGLE =
+                std::cos(static_cast<double>(config["goals"]["max_horizon_angle"].as<Expression>()));
             GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
             GOAL_LINE_DENSITY                     = config["goals"]["line_density"].as<int>();
             GOAL_HORIZONTAL_EXTENSION_SCALE       = config["goals"]["horizontal_extension_scale"].as<double>();

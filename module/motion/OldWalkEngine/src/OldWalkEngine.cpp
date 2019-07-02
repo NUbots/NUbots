@@ -264,7 +264,8 @@ namespace motion {
         qRArmEnd     = stance["arms"]["right"]["end"].as<arma::vec>();
         footOffset   = stance["foot_offset"].as<arma::vec>();
         // gToe/heel overlap checking values
-        stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
+        stanceLimitY2 = stance["limit_margin_y"].as<Expression>();
+        stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stanceLimitY2;
 
         auto& gains = stance["gains"];
         gainArms    = gains["arms"].as<Expression>();

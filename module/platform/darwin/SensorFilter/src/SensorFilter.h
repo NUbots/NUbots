@@ -49,9 +49,7 @@ namespace platform {
             utility::math::filter::UKF<MotionModel> motionFilter;
 
             struct Config {
-                Config() : nominal_z(0.0f), motionFilter(), buttons() {}
-
-                float nominal_z;
+                Config() : motionFilter(), buttons(), footDown() {}
 
                 struct MotionFilter {
                     MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
@@ -121,6 +119,13 @@ namespace platform {
                     Button() : debounceThreshold(0) {}
                     int debounceThreshold;
                 } buttons;
+
+
+                struct FootDown {
+                    FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
+                    bool fromLoad;
+                    float certaintyThreshold;
+                } footDown;
             } config;
 
         private:

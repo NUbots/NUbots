@@ -119,7 +119,7 @@ namespace input {
                               config["format"]["height"].as<size_t>());
 
         // Set exposure.
-        auto exposure = config["settings"]["exposure"].as<Expression>();
+        double exposure = config["settings"]["exposure"].as<Expression>();
         if (std::isfinite(exposure)) {
             arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_exposure_time(camera->second.camera, exposure);
@@ -130,7 +130,7 @@ namespace input {
         }
 
         // Set gain.
-        auto gain = config["settings"]["gain"].as<Expression>();
+        double gain = config["settings"]["gain"].as<Expression>();
         if (std::isfinite(gain)) {
             arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_gain(camera->second.camera, gain);

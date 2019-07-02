@@ -93,7 +93,7 @@ namespace vision {
             classifier = std::make_unique<Classifier>(mesh->make_classifier(network));
         });
 
-        on<Trigger<Image>, Buffer<4>>().then([this](const Image& img) {
+        on<Trigger<Image>, Buffer<2>>().then([this](const Image& img) {
             // Get our camera to world matrix
             Eigen::Affine3f Hcw(img.Hcw.cast<float>());
 
@@ -123,23 +123,33 @@ namespace vision {
             // Copy the data into the message
             auto msg       = std::make_unique<VisualMeshMsg>();
             msg->camera_id = img.camera_id;
+
+            // Get all the rays
+            msg->rays.resize(results.global_indices.size(), 3);
+            int row = 0;
+            for (const auto& i : results.global_indices) {
+                msg->rays.row(row++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
+            }
+
             for (const auto& r : m.rows) {
                 msg->mesh.emplace_back(r.phi, r.end - r.begin);
             }
 
-            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
-                reinterpret_cast<float*>(results.pixel_coordinates.data()), results.pixel_coordinates.size(), 2);
+            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, 2, Eigen::Dynamic>>(
+                reinterpret_cast<float*>(results.pixel_coordinates.data()), 2, results.pixel_coordinates.size());
             msg->indices       = std::move(results.global_indices);
-            msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 6, Eigen::RowMajor>>(
-                reinterpret_cast<int*>(results.neighbourhood.data()), results.neighbourhood.size(), 6);
-            msg->classifications =
-                Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
-                    results.classifications.data(),
-                    results.neighbourhood.size(),
-                    results.classifications.size() / results.neighbourhood.size());
+            msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, 6, Eigen::Dynamic>>(
+                reinterpret_cast<int*>(results.neighbourhood.data()), 6, results.neighbourhood.size());
+            msg->classifications = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>>(
+                results.classifications.data(),
+                results.classifications.size() / results.neighbourhood.size(),
+                results.neighbourhood.size());
+
+            msg->Hcw       = img.Hcw;
+            msg->timestamp = img.timestamp;
 
             emit(msg);
         });
-    }
+    }  // namespace vision
 }  // namespace vision
 }  // namespace module
