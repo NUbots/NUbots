@@ -10,7 +10,4 @@
         120
     ],
     "python.formatting.provider": "black",
-    "python.formatting.blackArgs": [
-        "-l120"
-    ]
 }
