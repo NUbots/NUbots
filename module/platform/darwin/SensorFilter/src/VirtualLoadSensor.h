@@ -65,7 +65,6 @@ namespace platform {
                 accelerometer = config["network"]["input"]["accelerometer"].as<bool>();
                 gyroscope     = config["network"]["input"]["gyroscope"].as<bool>();
 
-
                 for (const auto& layer : config["network"]["layers"].config) {
 
                     Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> weights =
