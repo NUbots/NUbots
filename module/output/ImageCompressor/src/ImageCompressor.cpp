@@ -44,6 +44,7 @@ namespace output {
         msg->lens.projection   = int(image.lens.projection);
         msg->lens.focal_length = image.lens.focal_length;
         msg->lens.fov          = image.lens.fov;
+        msg->lens.centre       = image.lens.centre;
 
         msg->data.assign(compressed, compressed + jpeg_size);
 
