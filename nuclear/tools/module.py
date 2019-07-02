@@ -15,14 +15,8 @@ def register(command):
     subcommands = command.add_subparsers(dest="module_command")
 
     # Generate module subcommand
-    generate_command = subcommands.add_parser(
-        "generate", help="Generate a new NUClear module based on a template"
-    )
-    generate_command.add_argument(
-        "path",
-        metavar="path",
-        help="a path to the new module (from the module directory)",
-    )
+    generate_command = subcommands.add_parser("generate", help="Generate a new NUClear module based on a template")
+    generate_command.add_argument("path", metavar="path", help="a path to the new module (from the module directory)")
 
 
 def run(path, **kwargs):
@@ -180,9 +174,7 @@ def generate_readme(parts):
     )
 
     return template.format(
-        className=parts[-1],
-        classNameTitle=len(parts[-1]) * "=",
-        closeNamespace="\n".join(["}" for x in parts[:-1]]),
+        className=parts[-1], classNameTitle=len(parts[-1]) * "=", closeNamespace="\n".join(["}" for x in parts[:-1]])
     )
 
 

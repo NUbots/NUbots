@@ -460,10 +460,10 @@ namespace platform {
                     sensors->left_foot_down  = true;
 
                     if (previousSensors) {
+
                         std::array<bool, 2> feet_down = {true};
                         if (config.footDown.fromLoad) {
                             // Use our virtual load sensor class to work out which feet are down
-
                             feet_down = load_sensor.updateFeet(*sensors);
                         }
                         else {

@@ -15,9 +15,7 @@ def register(command):
     # Module subcommands
     subcommands = command.add_subparsers(dest="workspace_command")
 
-    init_command = subcommands.add_parser(
-        "select", help="Choose a specific platform as the main platform"
-    )
+    init_command = subcommands.add_parser("select", help="Choose a specific platform as the main platform")
 
     toolchains = []
     # Work out what platforms are available
@@ -27,23 +25,14 @@ def register(command):
                 toolchains.append(f[:-6])
 
     init_command.add_argument(
-        "platform",
-        metavar="platform",
-        choices=toolchains,
-        help="the platform to select as the primary workspace",
+        "platform", metavar="platform", choices=toolchains, help="the platform to select as the primary workspace"
     )
 
     init_command.add_argument(
-        "-s",
-        "--static",
-        dest="static",
-        action="store_true",
-        help="perform a static build to get maximum performance",
+        "-s", "--static", dest="static", action="store_true", help="perform a static build to get maximum performance"
     )
 
-    init_command.add_argument(
-        "cmake_args", nargs=argparse.REMAINDER, help="Extra arguments to pass to cmake"
-    )
+    init_command.add_argument("cmake_args", nargs=argparse.REMAINDER, help="Extra arguments to pass to cmake")
 
 
 def run(workspace_command, static=False, cmake_args=None, **kwargs):
@@ -80,12 +69,7 @@ def run(workspace_command, static=False, cmake_args=None, **kwargs):
         os.chdir(path)
 
         # Build our default args
-        args = [
-            "cmake",
-            b.project_dir,
-            "-GNinja",
-            "-DCMAKE_TOOLCHAIN_FILE=/nubots/toolchain/{}.cmake".format(platform),
-        ]
+        args = ["cmake", b.project_dir, "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/nubots/toolchain/{}.cmake".format(platform)]
 
         if static:
             args.append("-DSTATIC_LIBRARIES=ON")
@@ -99,8 +83,9 @@ def run(workspace_command, static=False, cmake_args=None, **kwargs):
 
         # Yell at windows users for having a crappy OS
         if not symlink_success:
+            cprint("Windows does not support symlinks so we can't link to the build directory", "red", attrs=["bold"])
             cprint(
-                "Windows does not support symlinks so we can't link to the build directory",
+                "Instead you will need to change to the build_{} directory to build".format(platform),
                 "red",
                 attrs=["bold"],
             )
