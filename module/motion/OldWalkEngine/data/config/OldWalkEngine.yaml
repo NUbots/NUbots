@@ -1,7 +1,7 @@
 use_com: True
 stance:
   # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
-  body_height: 0.63
+  body_height: 0.45
   # The angle of the torso when walking
   body_tilt: 13 * pi / 180
   # Default arm positions while walking
@@ -9,21 +9,21 @@ stance:
       left:
         start:
           -  120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+          -  0 * pi / 180 # Shoulder Roll
+          - -50 * pi / 180 # Elbow
         end:
           -  120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+          -  0 * pi / 180 # Shoulder Roll
+          - -50 * pi / 180 # Elbow
       right:
         start:
-          -   120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+          -  120 * pi / 180 # Shoulder Pitch
+          -  0 * pi / 180 # Shoulder Roll
+          - -50 * pi / 180 # Elbow
         end:
           -  120 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -90 * pi / 180 # Elbow
+          -  0 * pi / 180 # Shoulder Roll
+          - -50 * pi / 180 # Elbow
 
   foot_offset:
     - -0.05 # The distance the ankles are offset from the torso, in meters.
@@ -56,9 +56,9 @@ walk_cycle:
     leg_yaw: 0 * pi / 180
     # Compensation factors for roll and pitch (<factor> * (current_pos - compensated_pos))
     compensation:
-      roll_coef: 0.8
+      roll_coef: 0.0
       roll_limit: 10 * pi / 180
-      pitch_coef: 0.5
+      pitch_coef: 0.0
       pitch_limit: 10 * pi / 180
   velocity:
     # Velocity limits for the walk
