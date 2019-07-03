@@ -11,6 +11,7 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
     input::Camera
     support::NUsight
+    output::ImageCompressor
 
     support::configuration::SoccerConfig
 )
