@@ -41,6 +41,7 @@ namespace support {
     using message::vision::Goals;
     using ServoID = utility::input::ServoID;
 
+    using utility::math::coordinates::cartesianToSpherical;
     using utility::math::geometry::Quad;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
@@ -48,7 +49,6 @@ namespace support {
     using utility::math::vision::cameraSpaceGoalProjection;
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::imageToScreen;
-    using utility::math::coordinates::cartesianToSpherical;
 
     arma::vec2 VirtualGoalPost::getCamRay(const arma::fvec3& norm1,
                                           const arma::fvec3& norm2,
@@ -164,12 +164,9 @@ namespace support {
 
             // goal base visibility check
             if (quad.getBottomRight()[1] > 0 && quad.getBottomRight()[1] < image.dimensions[1]
-                && quad.getBottomLeft()[1] > 0
-                && quad.getBottomLeft()[1] < image.dimensions[1]
-                && quad.getBottomRight()[0] > 0
-                && quad.getBottomRight()[0] < image.dimensions[0]
-                && quad.getBottomLeft()[0] > 0
-                && quad.getBottomLeft()[0] < image.dimensions[0]) {
+                && quad.getBottomLeft()[1] > 0 && quad.getBottomLeft()[1] < image.dimensions[1]
+                && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < image.dimensions[0]
+                && quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < image.dimensions[0]) {
 
                 if (std::isfinite(rGCc_sphr[0]) && std::isfinite(rGCc_sphr[1]) && std::isfinite(rGCc_sphr[2])) {
                     goal.measurements.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
