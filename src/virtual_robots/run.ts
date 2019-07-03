@@ -13,6 +13,7 @@ import { VirtualRobots } from './virtual_robots'
 
 function main() {
   const args = minimist(process.argv.slice(2))
+  const nuclearnetAddress = args.address || '10.1.255.255'
 
   const numRobots = 6
   const virtualRobots = new VirtualRobots({
@@ -21,6 +22,7 @@ function main() {
       return VirtualRobot.of({
         name: `Virtual Robot ${i + 1}`,
         nuclearnetClient,
+        nuclearnetAddress,
         simulators: getSimulators(args, nuclearnetClient, i, numRobots),
       })
     }),

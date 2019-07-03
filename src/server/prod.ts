@@ -38,7 +38,7 @@ server.listen(port, () => {
 })
 
 if (withVirtualRobots) {
-  const virtualRobots = VirtualRobots.of({ fakeNetworking: true, numRobots: 3 })
+  const virtualRobots = VirtualRobots.of({ fakeNetworking: true, nuclearnetAddress, numRobots: 3 })
   virtualRobots.start()
 }
 
