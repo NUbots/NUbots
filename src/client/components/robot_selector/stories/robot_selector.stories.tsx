@@ -1,9 +1,12 @@
 import { action } from '@storybook/addon-actions'
 import { storiesOf } from '@storybook/react'
-import { action as mobxAction, observable } from 'mobx'
-import { observer } from 'mobx-react'
+import { action as mobxAction, observable, reaction } from 'mobx'
+import { disposeOnUnmount, observer } from 'mobx-react'
+import { now } from 'mobx-utils'
 import * as React from 'react'
 
+import { SeededRandom } from '../../../../shared/base/random/seeded_random'
+import { RobotNetworkStatsModel } from '../../../network/model'
 import { RobotModel } from '../../robot/model'
 import { RobotSelector } from '../view'
 
@@ -25,6 +28,13 @@ storiesOf('components.robot_selector', module)
       robots={robots}
       selectRobot={actions.selectRobot}
     />
+  })
+  .add('renders with updating stats', () => {
+    const robots = getRobots()
+    const model = observable({
+      robots,
+    })
+    return <UpdatingStatsStory robots={model.robots} />
   })
   .add('interactive', () => {
     const robots = getRobots()
@@ -66,4 +76,41 @@ function getRobots(): RobotModel[] {
       port: 0,
     },
   ]
+}
+
+const random = SeededRandom.of('random-stats')
+
+@observer
+export class UpdatingStatsStory extends React.Component<{ robots: RobotModel[] }> {
+  render() {
+    const { robots } = this.props
+
+    return <RobotSelector
+      robots={robots}
+      selectRobot={actions.selectRobot}
+    />
+  }
+
+  @mobxAction
+  updateStats = () => {
+    this.props.robots
+      .filter(robotModel => robotModel.connected)
+      .forEach(robotModel => {
+        const stats = RobotNetworkStatsModel.of(robotModel)
+        const packets = random.integer(1, 3)
+        stats.packets += packets
+        stats.packetsPerSecond.update(packets)
+        const bytes = random.integer(1, 2e3)
+        stats.bytes += bytes
+        stats.bytesPerSecond.update(bytes)
+      })
+  }
+
+  componentDidMount() {
+    disposeOnUnmount(this, reaction(
+      () => now('frame'),
+      this.updateStats,
+      { fireImmediately: true },
+    ))
+  }
 }

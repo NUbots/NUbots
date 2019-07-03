@@ -4,10 +4,10 @@ import * as React from 'react'
 
 import { dropdownContainer } from '../dropdown_container/view'
 import { RobotModel } from '../robot/model'
-import { Switch } from '../switch/view'
 
 import PlugIcon from './plug.svg'
 import RobotIcon from './robot.svg'
+import { RobotLabel } from './robot_label/view'
 import * as style from './style.css'
 
 export type RobotSelectorProps = {
@@ -24,7 +24,6 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
       Select robots
     </button>
   )
-  const onChange = (robot: RobotModel) => () => selectRobot(robot)
   return (
     <div className={style.robotSelector}>
       <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
@@ -42,19 +41,9 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
               </span>
             </div>
           }
-          {robots.map(robot => {
-            const indicatorClassName = classNames(style.robotConnectionIndicator, {
-              [style.robotConnected]: robot.connected,
-              [style.robotDisconnected]: !robot.connected,
-            })
-            return (
-              <label key={robot.id} className={style.robot}>
-                <span className={indicatorClassName} title={robot.connected ? 'Connected' : 'Disconnected'}></span>
-                <span className={style.robotLabel}>{robot.name}</span>
-                <Switch on={robot.enabled} onChange={onChange(robot)} />
-              </label>
-            )
-          })}
+          {
+            robots.map(robot => <RobotLabel key={robot.id} robot={robot} selectRobot={selectRobot} />)
+          }
         </div>
       </EnhancedDropdown>
     </div>

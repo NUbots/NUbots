@@ -8,4 +8,3 @@ export interface Clock {
 }
 
 export type CancelTimer = () => void
-
