@@ -215,13 +215,13 @@ auto convert(const typename Eigen::Matrix<Scalar, 6, 1, O, MR, MC>& evec) {
 }
 template <typename Scalar, int O, int MR, int MC>
 auto convert(const typename Eigen::Matrix<Scalar, Eigen::Dynamic, 1, O, MR, MC>& evec) {
-    typename arma::Col<Scalar> avec;
+    typename arma::Col<Scalar> avec(evec.rows());
     Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, 1, O, MR, MC>>(avec.memptr(), evec.rows()) = evec;
     return (avec);
 }
 template <typename Scalar, int O, int MR, int MC>
 auto convert(const typename Eigen::Matrix<Scalar, 1, Eigen::Dynamic, O, MR, MC>& evec) {
-    typename arma::Row<Scalar> avec;
+    typename arma::Row<Scalar> avec(evec.cols());
     Eigen::Map<Eigen::Matrix<Scalar, 1, Eigen::Dynamic, O, MR, MC>>(avec.memptr(), evec.cols()) = evec;
     return (avec);
 }
@@ -245,7 +245,7 @@ auto convert(const typename Eigen::Matrix<Scalar, 4, 4, O, MR, MC>& emat) {
 }
 template <typename Scalar, int O, int MR, int MC>
 auto convert(const typename Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>& emat) {
-    typename arma::Mat<Scalar> amat;
+    typename arma::Mat<Scalar> amat(emat.rows(), emat.cols());
     Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>>(
         amat.memptr(), emat.rows(), emat.cols()) = emat;
     return (amat);
