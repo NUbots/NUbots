@@ -123,7 +123,7 @@ namespace localisation {
                     arma::mat22 pos_cov   = Hfw_xy * convert(s.position_cov) * Hfw_xy.t();
                     arma::mat33 state_cov = arma::eye(3, 3);
                     state_cov.submat(0, 0, 1, 1) = pos_cov;
-                    state_cov(2, 2) = s.heading_var;
+                    state_cov(2, 2)              = s.heading_var;
                     cov.push_back(state_cov);
                 }
                 filter.resetAmbiguous(states, cov, n_particles);
