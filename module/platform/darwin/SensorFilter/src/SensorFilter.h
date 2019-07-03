@@ -20,6 +20,8 @@
 #ifndef MODULES_PLATFORM_DARWIN_SENSORFILTER_H
 #define MODULES_PLATFORM_DARWIN_SENSORFILTER_H
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "utility/math/filter/UKF.h"
@@ -65,13 +67,11 @@ namespace platform {
                                 : accelerometer(arma::fill::eye)
                                 , accelerometerMagnitude(arma::fill::eye)
                                 , gyroscope(arma::fill::eye)
-                                , footUpWithZ(arma::fill::eye)
                                 , flatFootOdometry(arma::fill::eye)
                                 , flatFootOrientation(arma::fill::eye) {}
                             arma::mat33 accelerometer;
                             arma::mat33 accelerometerMagnitude;
                             arma::mat33 gyroscope;
-                            arma::mat44 footUpWithZ;
                             arma::mat33 flatFootOdometry;
                             arma::mat44 flatFootOrientation;
                         } measurement;
@@ -139,14 +139,9 @@ namespace platform {
             // Our sensor for foot down
             VirtualLoadSensor<float> load_sensor;
 
-            // World to foot in world rotation when the foot landed
-            std::array<arma::vec3, 2> footlanding_rFWw;
-
             // Foot to world in foot-flat rotation when the foot landed
-            std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rfw;
-
-            // World to foot in foot-flat rotation when the foot landed
-            std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
+            std::array<bool, 2> previous_foot_down = {false, false};
+            std::array<Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>, 2> footlanding_Hwf;
 
             // Storage for previous gyroscope values
             arma::vec3 theta;

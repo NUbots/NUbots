@@ -72,34 +72,16 @@ namespace platform {
                                                      const MeasurementType::ACCELEROMETER&) {
 
             // Extract our rotation quaternion
-            UnitQuaternion rotation(state.rows(QW, QZ));
+            UnitQuaternion Rwt(state.rows(QW, QZ));
 
-            // Make a gravity vector and return it
-            return rotation.rotateVector(arma::vec3({0, 0, G}));
+            // Make a world gravity vector and rotate it into torso space
+            return Rwt.i().rotateVector(arma::vec3({0, 0, G}));
         }
 
         // Gyroscope
         arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
                                                      const MeasurementType::GYROSCOPE&) {
             return state.rows(WX, WZ) + state.rows(BX, BZ);
-        }
-
-        // Foot up with z
-        arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
-                                                     const MeasurementType::FOOT_UP_WITH_Z&) {
-
-            arma::vec4 prediction;
-
-            // Extract our rotation quaternion
-            UnitQuaternion rotation(state.rows(QW, QZ));
-
-            // First 3 is the up vector in torso space
-            prediction.rows(0, 2) = rotation.rotateVector(arma::vec3({0, 0, 1}));
-
-            // 4th component is our z height
-            prediction[3] = state[PZ];
-
-            return prediction;
         }
 
         arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
