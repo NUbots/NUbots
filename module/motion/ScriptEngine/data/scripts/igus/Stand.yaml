@@ -1,13 +1,5 @@
 - duration: 1000
   targets:
-    - id: HEAD_YAW
-      position: -0.001534355
-      gain: 30
-      torque: 100
-    - id: HEAD_PITCH
-      position: 0.5308869
-      gain: 30
-      torque: 100
     - id: R_HIP_YAW
       position: -0.02915275
       gain: 30
