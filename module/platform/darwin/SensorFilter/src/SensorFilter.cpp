@@ -475,9 +475,8 @@ namespace platform {
                     sensors->right_foot_down = feet_down[1];
 
                     if (this->config.debug) {
-                        emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
-                        emit(graph("LeftFootDown", sensors->left_foot_down));
-                        emit(graph("RightFootDown", sensors->right_foot_down));
+                        emit(graph("LeftFootDown", load_sensor.state[0]));
+                        emit(graph("RightFootDown", load_sensor.state[1]));
                     }
 
                     /************************************************
@@ -508,7 +507,7 @@ namespace platform {
 
                     for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
                         bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
-                        bool& prev_foot_down = previous_foot_down[side];
+                        bool prev_foot_down = previous_foot_down[side];
                         Eigen::Affine3d Htf(
                             sensors->forward_kinematics[side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL
                                                                                 : ServoID::R_ANKLE_ROLL]);
@@ -549,19 +548,20 @@ namespace platform {
                             Htg.linear()      = Rtg;
                             Htg.translation() = Htf.translation();
 
-                            footlanding_Hwf[side]                   = Hwt * Htg;
-                            footlanding_Hwf[side].translation().z() = 0.0;
+                            footlanding_Hwf[side] = Hwt * Htg;
+
+                            previous_foot_down[side] = true;
                         }
-                        else {
+                        else if (foot_down && prev_foot_down) {
                             // Use stored Hwf and Htf to calculate Hwt
                             // TODO probably do something to enforce the "foot is flat on ground" (ground space?)
                             // Measurement update using Hwt
                             Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
 
                             // do a foot based position update
-                            // motionFilter.measurementUpdate(convert(Eigen::Vector3d(footlanding_Hwt.translation())),
-                            //                                config.motionFilter.noise.measurement.flatFootOdometry,
-                            //                                MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
+                            motionFilter.measurementUpdate(convert(Eigen::Vector3d(footlanding_Hwt.translation())),
+                                                           config.motionFilter.noise.measurement.flatFootOdometry,
+                                                           MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
 
                             Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
                             Eigen::Vector4d Rwt_vec(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
@@ -582,6 +582,9 @@ namespace platform {
                             motionFilter.measurementUpdate(convert(Rwt_vec),
                                                            config.motionFilter.noise.measurement.flatFootOrientation,
                                                            MotionModel::MeasurementType::FLAT_FOOT_ORIENTATION());
+                        }
+                        else if (!foot_down) {
+                            previous_foot_down[side] = false;
                         }
                     }
 

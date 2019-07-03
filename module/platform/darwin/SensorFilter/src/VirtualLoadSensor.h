@@ -137,7 +137,7 @@ namespace platform {
                 return output_state;
             }
 
-        private:
+        public:
             enum Field { POSITION, VELOCITY, LOAD };
 
             Scalar noise_factor;
