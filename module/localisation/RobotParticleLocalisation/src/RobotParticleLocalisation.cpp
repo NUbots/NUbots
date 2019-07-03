@@ -40,41 +40,9 @@ namespace localisation {
         last_measurement_update_time = NUClear::clock::now();
         last_time_update_time        = NUClear::clock::now();
 
-        on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
-            filter.model.n_rogues             = config["n_rogues"].as<int>();
-            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
-            n_particles                       = config["n_particles"].as<int>();
-            draw_particles                    = config["draw_particles"].as<int>();
-
-            arma::vec3 start_state    = config["start_state"].as<arma::vec>();
-            arma::vec3 start_variance = config["start_variance"].as<arma::vec>();
-
-            auto reset = std::make_unique<ResetRobotHypotheses>();
-            ResetRobotHypotheses::Self leftSide;
-            // Start on goal line
-            leftSide.position     = Eigen::Vector2d(start_state[0], start_state[1]);
-            leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            leftSide.heading      = start_state[2];
-            leftSide.heading_var  = 0.005;
-
-            reset->hypotheses.push_back(leftSide);
-            ResetRobotHypotheses::Self rightSide;
-            // Start on goal line
-            rightSide.position     = Eigen::Vector2d(start_state[0], -start_state[1]);
-            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            rightSide.heading      = -start_state[2];
-            rightSide.heading_var  = 0.005;
-
-            reset->hypotheses.push_back(rightSide);
-            emit(std::move(reset));
-        });
-
         on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
             "Particle Debug", [this]() {
                 arma::mat particles = filter.getParticles();
-
                 for (int i = 0; i < std::min(draw_particles, int(particles.n_cols)); i++) {
                     emit(drawCircle("particle" + std::to_string(i),
                                     Circle(0.01, particles.submat(0, i, 1, i)),
@@ -155,11 +123,42 @@ namespace localisation {
                     arma::mat22 pos_cov   = Hfw_xy * convert(s.position_cov) * Hfw_xy.t();
                     arma::mat33 state_cov = arma::eye(3, 3);
                     state_cov.submat(0, 0, 1, 1) = pos_cov;
-                    state_cov(2, 2)              = s.heading_var;
+                    state_cov(2, 2) = s.heading_var;
                     cov.push_back(state_cov);
                 }
                 filter.resetAmbiguous(states, cov, n_particles);
             });
+
+        on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file RobotParticleLocalisation.yaml
+            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
+            filter.model.n_rogues             = config["n_rogues"].as<int>();
+            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
+            n_particles                       = config["n_particles"].as<int>();
+            draw_particles                    = config["draw_particles"].as<int>();
+
+            arma::vec3 start_state    = config["start_state"].as<arma::vec>();
+            arma::vec3 start_variance = config["start_variance"].as<arma::vec>();
+
+            auto reset = std::make_unique<ResetRobotHypotheses>();
+            ResetRobotHypotheses::Self leftSide;
+            // Start on goal line
+            leftSide.position     = Eigen::Vector2d(start_state[0], start_state[1]);
+            leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            leftSide.heading      = start_state[2];
+            leftSide.heading_var  = 0.005;
+
+            reset->hypotheses.push_back(leftSide);
+            ResetRobotHypotheses::Self rightSide;
+            // Start on goal line
+            rightSide.position     = Eigen::Vector2d(start_state[0], -start_state[1]);
+            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            rightSide.heading      = -start_state[2];
+            rightSide.heading_var  = 0.005;
+
+            reset->hypotheses.push_back(rightSide);
+            emit<Scope::DELAY>(reset, std::chrono::seconds(1));
+        });
     }
 
     std::vector<arma::vec> RobotParticleLocalisation::getPossibleFieldPositions(
