@@ -17,4 +17,4 @@ lens:
 
 settings:
   exposure: 33333                     # The shutter time in microseconds (1/fps).
-  gain: 10                            # The gain of the camera in dB.
+  gain: 15                            # The gain of the camera in dB.
