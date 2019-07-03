@@ -345,8 +345,12 @@ namespace support {
             arma::vec2 bearingVector      = world.robotPose.rotation() * arma::vec2({1, 0});
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
-
             emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1, 0));
+            // Graph statistics for plotting in NUsight2
+            emit(graph("x_true", world.robotPose.x()));
+            emit(graph("y_true", world.robotPose.y()));
+            emit(graph("heading_x_true", bearingVector[0]));
+            emit(graph("heading_y_true", bearingVector[1]));
         });
 
         on<Startup>().then("SoccerSimulator Startup", [this] {
