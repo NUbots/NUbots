@@ -452,7 +452,11 @@ namespace platform {
                     if (config.footDown.fromLoad) {
                         // Use our virtual load sensor class to work out which feet are down
                         feet_down = load_sensor.updateFeet(*sensors);
-                        emit(graph("Sensors/FootDown/Load/Foot State", load_sensor.state[0], load_sensor.state[1]));
+
+                        if (this->config.debug) {
+                            emit(graph("Sensor/FootDown/Load/Left", load_sensor.state[1]));
+                            emit(graph("Sensor/FootDown/Load/Right", load_sensor.state[0]));
+                        }
                     }
                     else {
                         auto rightFootDisplacement = sensors->forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
@@ -470,15 +474,15 @@ namespace platform {
                             feet_down[0] = true;
                             feet_down[1] = true;
                         }
+
+                        if (this->config.debug) {
+                            emit(graph("Sensor/FootDown/Z/Left", feet_down[1]));
+                            emit(graph("Sensor/FootDown/Z/Right", feet_down[0]));
+                        }
                     }
 
                     sensors->right_foot_down = feet_down[0];
                     sensors->left_foot_down  = feet_down[1];
-
-                    if (this->config.debug) {
-                        emit(graph("Sensors/FootDown/Load/Left", load_sensor.state[0]));
-                        emit(graph("Sensors/FootDown/Load/Right", load_sensor.state[1]));
-                    }
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
