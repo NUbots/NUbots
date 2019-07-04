@@ -202,7 +202,7 @@ namespace behaviour {
 
                     arma::vec3 rBWw_temp = {ball.position[0], ball.position[1], fieldDescription.ball_radius};
                     rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
-                               Htw.x() + Htw.translation();                                  // In front of the robot
+                               Htw.i().x() + Htw.i().translation();                                  // In front of the robot
                     arma::vec3 pos = Htw.transformPoint(rBWw);
                     position       = pos.rows(0, 1);
 
@@ -262,7 +262,7 @@ namespace behaviour {
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, convert(Transform2D({0, 0, 0})));
                     command->command = convert(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
-
+                    log("x speed:", finalForwardSpeed, "\ny speed:", finalSideSpeed, "\nangle/:", angle);
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
                 });
