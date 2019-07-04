@@ -678,8 +678,7 @@ namespace platform {
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
-                    log("Filter output:", o);
-
+                    
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
                     Hwt.linear() = Eigen::Quaterniond(
