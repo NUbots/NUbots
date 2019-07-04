@@ -137,6 +137,8 @@ namespace platform {
                 return output_state;
             }
 
+            Eigen::Matrix<Scalar, 2, 1, Eigen::DontAlign> state;
+
         public:
             enum Field { POSITION, VELOCITY, LOAD };
 
@@ -155,7 +157,6 @@ namespace platform {
                                   Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>>
                 layers;
 
-            Eigen::Matrix<Scalar, 2, 1, Eigen::DontAlign> state;
             std::array<bool, 2> output_state;
         };
     }  // namespace darwin

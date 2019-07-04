@@ -53,13 +53,14 @@ namespace platform {
             static constexpr uint QZ = 9;
 
             // Our rotational velocity in robot space
-            // omegaTTt????
+            // Gyroscope measures the angular velocity of the torso in torso space
+            // omegaTTt
             static constexpr uint WX = 10;
             static constexpr uint WY = 11;
             static constexpr uint WZ = 12;
 
             // Gyroscope Bias
-            // omegaTTt????
+            // omegaTTt
             static constexpr uint BX = 13;
             static constexpr uint BY = 14;
             static constexpr uint BZ = 15;

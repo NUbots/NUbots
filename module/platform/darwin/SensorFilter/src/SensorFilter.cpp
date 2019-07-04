@@ -452,6 +452,11 @@ namespace platform {
                     if (config.footDown.fromLoad) {
                         // Use our virtual load sensor class to work out which feet are down
                         feet_down = load_sensor.updateFeet(*sensors);
+
+                        if (this->config.debug) {
+                            emit(graph("Sensor/FootDown/Load/Left", load_sensor.state[1]));
+                            emit(graph("Sensor/FootDown/Load/Right", load_sensor.state[0]));
+                        }
                     }
                     else {
                         auto rightFootDisplacement = sensors->forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
@@ -469,15 +474,15 @@ namespace platform {
                             feet_down[0] = true;
                             feet_down[1] = true;
                         }
+
+                        if (this->config.debug) {
+                            emit(graph("Sensor/FootDown/Z/Left", feet_down[1]));
+                            emit(graph("Sensor/FootDown/Z/Right", feet_down[0]));
+                        }
                     }
 
-                    sensors->left_foot_down  = feet_down[0];
-                    sensors->right_foot_down = feet_down[1];
-
-                    if (this->config.debug) {
-                        emit(graph("LeftFootDown", load_sensor.state[0]));
-                        emit(graph("RightFootDown", load_sensor.state[1]));
-                    }
+                    sensors->right_foot_down = feet_down[0];
+                    sensors->left_foot_down  = feet_down[1];
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -491,13 +496,15 @@ namespace platform {
                     // Time update
                     motionFilter.timeUpdate(deltaT);
 
+                    // Calculate accelerometer noise factor
+                    auto acc_noise = config.motionFilter.noise.measurement.accelerometer
+                                     + ((sensors->accelerometer.norm() - std::abs(MotionModel::G))
+                                        * (sensors->accelerometer.norm() - std::abs(MotionModel::G)))
+                                           * config.motionFilter.noise.measurement.accelerometerMagnitude;
+
                     // Accelerometer measurment update
                     motionFilter.measurementUpdate(
-                        convert(sensors->accelerometer),
-                        config.motionFilter.noise.measurement.accelerometer
-                            + arma::norm(convert(sensors->accelerometer))
-                                  * config.motionFilter.noise.measurement.accelerometerMagnitude,
-                        MotionModel::MeasurementType::ACCELEROMETER());
+                        convert(sensors->accelerometer), acc_noise, MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
                     motionFilter.measurementUpdate(convert(sensors->gyroscope),
@@ -529,26 +536,26 @@ namespace platform {
                             // Retrieve rotations needed for creating the space
                             // support foot to torso rotation, and world to torso rotation
                             Eigen::Matrix3d Rtf = Htf.rotation();
-                            Eigen::Matrix3d Rtw = (Eigen::Affine3d(Hwt.inverse())).rotation();
 
-                            // World to foot
-                            Eigen::Matrix3d Rfw = Rtf.transpose() * Rtw;
+                            // Fix the foot in world space
+                            Eigen::Matrix3d Rwf = Hwt.rotation() * Rtf;
 
-                            // Dot product of z with identity z
-                            double alpha = std::acos(Rfw(2, 2));
+                            // Dot product of foot z (in world space) with world z
+                            double alpha = std::acos(Rwf(2, 2));
 
-                            Eigen::Vector3d axis = Eigen::Vector3d::UnitZ().cross(Rfw.col(2)).normalized();
+                            Eigen::Vector3d axis = Rwf.col(2).cross(Eigen::Vector3d::UnitZ()).normalized();
 
-                            // Axis angle is ground to support foot
-                            Eigen::Matrix3d Rfg = Eigen::AngleAxisd(alpha, axis).toRotationMatrix();
-                            Eigen::Matrix3d Rtg = Rtf * Rfg;
+                            // Axis angle is foot to ground
+                            Eigen::Matrix3d Rwg = Eigen::AngleAxisd(alpha, axis).toRotationMatrix() * Rwf;
+                            Eigen::Matrix3d Rtg = Hwt.rotation().transpose() * Rwg;
 
                             // Ground space assemble!
                             Eigen::Affine3d Htg;
                             Htg.linear()      = Rtg;
                             Htg.translation() = Htf.translation();
 
-                            footlanding_Hwf[side] = Hwt * Htg;
+                            footlanding_Hwf[side]                   = Hwt * Htg;
+                            footlanding_Hwf[side].translation().z() = 0.0;
 
                             previous_foot_down[side] = true;
                         }
@@ -588,97 +595,9 @@ namespace platform {
                         }
                     }
 
-                    // if (sensors->left_foot_down or sensors->right_foot_down) {
-                    //     // pre-calculate common foot-down variables - these are the torso to world transforms.
-                    //     arma::vec3 rTWw = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
-                    //     Rotation3D Rwt(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)));
-                    //     Rotation3D Rtw = Rwt.t();
-
-                    //     Transform3D Htw;
-                    //     Htw.rotation()    = Rtw;
-                    //     Htw.translation() = rTWw;
-
-                    //     // 3 points on the ground mean that we can assume this foot is flat
-                    //     // We also have to ensure that the previous foot was also down for this to be valid
-                    //     // Check if our foot is flat on the ground
-                    //     for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
-
-                    //         auto servoid = side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL;
-
-                    //         const bool& footDown =
-                    //             side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
-
-                    //         const bool& prevFootDown = previousSensors ? side == ServoSide::LEFT
-                    //                                                          ? previousSensors->left_foot_down
-                    //                                                          : previousSensors->right_foot_down
-                    //                                                    : false;
-
-                    //         if (footDown) {
-                    //             Transform3D Htf = convert(sensors->forward_kinematics[servoid]);
-                    //             Transform3D Hft = Htf.i();
-                    //             Transform3D Hwf = Htw.i() * Htf;
-
-                    //             Rotation3D Rtf  = Htf.rotation();
-                    //             arma::vec3 rFTt = Htf.translation();
-
-                    //             Rotation3D Rft  = Hft.rotation();
-                    //             arma::vec3 rTFf = Hft.translation();
-
-
-                    //             if (!prevFootDown) {
-                    //                 // NOTE: footflat measurements assume the foot is flat on the ground. These
-                    //                 // decorrelate the accelerometer and gyro from translation.
-                    //                 Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rwt.yaw());
-                    //                 Rotation3D footflat_Rtf = Rotation3D::createRotationZ(Rtf.yaw());
-
-                    //                 // Store the robot foot to world transform
-                    //                 footlanding_Rfw[side] = footflat_Rtf.i() * footflat_Rwt.i();
-                    //                 // Store robot foot in world-delta coordinates
-                    //                 footlanding_Rwf[side]  = footlanding_Rfw[side].i();
-                    //                 footlanding_rFWw[side] = Hwf.translation();
-
-                    //                 // Z is an absolute measurement, so we make sure it is an absolute offset
-                    //                 footlanding_rFWw[side][2] = 0.0;
-
-                    //                 // NOTE: an optional foot up with Z calculation can be done here
-                    //             }
-                    //             else {
-                    //                 // NOTE: translation and rotation updates are performed separately so that they
-                    //                 can
-                    //                 // be turned off independently for debugging
-
-                    //                 // encode the old->new torso-world rotation as a quaternion
-                    //                 UnitQuaternion Rtw_new(Rotation3D(Rtf * footlanding_Rfw[side]));
-
-                    //                 // check if we need to reverse our quaternion
-                    //                 if (arma::norm(Rtw_new + motionFilter.get().rows(MotionModel::QW,
-                    //                 MotionModel::QZ))
-                    //                     < 1.) {
-                    //                     Rtw_new *= -1;
-                    //                 }
-
-                    //                 // do a foot based orientation update
-                    //                 // motionFilter.measurementUpdate(
-                    //                 //     Rtw_new,
-                    //                 //     config.motionFilter.noise.measurement.flatFootOrientation,
-                    //                 //     MotionModel::MeasurementType::FLAT_FOOT_ORIENTATION());
-
-                    //                 // calculate the old -> new world foot position updates
-                    //                 arma::vec3 rFWw = Hwf.translation();
-
-                    //                 // do a foot based position update
-                    //                 motionFilter.measurementUpdate(
-                    //                     rFWw,
-                    //                     config.motionFilter.noise.measurement.flatFootOdometry,
-                    //                     MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
-                    
+
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
                     Hwt.linear() = Eigen::Quaterniond(
