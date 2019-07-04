@@ -1,6 +1,6 @@
-forwardSpeed: 0.8
-sideSpeed: 0.8
-turnSpeed : 0.3
+forwardSpeed: 0.1
+sideSpeed: 0.1
+turnSpeed : 0.05
 slow_approach_factor: 0.2
 a: 7
 b: 0
