@@ -531,26 +531,26 @@ namespace platform {
                             // Retrieve rotations needed for creating the space
                             // support foot to torso rotation, and world to torso rotation
                             Eigen::Matrix3d Rtf = Htf.rotation();
-                            Eigen::Matrix3d Rtw = (Eigen::Affine3d(Hwt.inverse())).rotation();
 
-                            // World to foot
-                            Eigen::Matrix3d Rfw = Rtf.transpose() * Rtw;
+                            // Fix the foot in world space
+                            Eigen::Matrix3d Rwf = Hwt.rotation() * Rtf;
 
-                            // Dot product of z with identity z
-                            double alpha = std::acos(Rfw(2, 2));
+                            // Dot product of foot z (in world space) with world z
+                            double alpha = std::acos(Rwf(2, 2));
 
-                            Eigen::Vector3d axis = Eigen::Vector3d::UnitZ().cross(Rfw.col(2)).normalized();
+                            Eigen::Vector3d axis = Rwf.col(2).cross(Eigen::Vector3d::UnitZ()).normalized();
 
-                            // Axis angle is ground to support foot
-                            Eigen::Matrix3d Rfg = Eigen::AngleAxisd(alpha, axis).toRotationMatrix();
-                            Eigen::Matrix3d Rtg = Rtf * Rfg;
+                            // Axis angle is foot to ground
+                            Eigen::Matrix3d Rwg = Eigen::AngleAxisd(alpha, axis).toRotationMatrix() * Rwf;
+                            Eigen::Matrix3d Rtg = Hwt.rotation().transpose() * Rwg;
 
                             // Ground space assemble!
                             Eigen::Affine3d Htg;
                             Htg.linear()      = Rtg;
                             Htg.translation() = Htf.translation();
 
-                            footlanding_Hwf[side] = Hwt * Htg;
+                            footlanding_Hwf[side]                   = Hwt * Htg;
+                            footlanding_Hwf[side].translation().z() = 0.0;
 
                             previous_foot_down[side] = true;
                         }
