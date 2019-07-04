@@ -262,7 +262,7 @@ namespace behaviour {
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, convert(Transform2D({0, 0, 0})));
                     command->command = convert(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
-                    log("x speed:", finalForwardSpeed, "\ny speed:", finalSideSpeed, "\nangle/:", angle);
+                    // log("x speed:", finalForwardSpeed, "\ny speed:", finalSideSpeed, "\nangle/:", angle);
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
                 });
