@@ -65,7 +65,7 @@ namespace vision {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
-                const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = horizon.mesh->rays;
+                const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
 
                 // Get some indices to partition
@@ -126,7 +126,7 @@ namespace vision {
                         // Average the cluster to get the cones axis
                         Eigen::Vector3f axis = Eigen::Vector3f::Zero();
                         for (const auto& idx : cluster) {
-                            axis += rays.row(idx);
+                            axis += rays.col(idx);
                         }
                         axis /= cluster.size();
                         axis.normalize();
@@ -135,7 +135,7 @@ namespace vision {
                         // Should we use the average distance instead?
                         float radius = 1.0f;
                         for (const auto& idx : cluster) {
-                            const Eigen::Vector3f& ray(rays.row(idx));
+                            const Eigen::Vector3f& ray(rays.col(idx));
                             if (axis.dot(ray) < radius) {
                                 radius = axis.dot(ray);
                             }
@@ -180,7 +180,7 @@ namespace vision {
                         float mean             = 0.0f;
                         const float max_radius = std::acos(radius);
                         for (const auto& idx : cluster) {
-                            const float angle = std::acos(axis.dot(rays.row(idx))) / max_radius;
+                            const float angle = std::acos(axis.dot(rays.col(idx))) / max_radius;
                             angles.emplace_back(angle);
                             mean += angle;
                         }

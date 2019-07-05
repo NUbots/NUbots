@@ -3,34 +3,34 @@ NUCLEAR_ROLE(
     extension::FileWatcher
     support::SignalCatcher
     support::logging::ConsoleLogHandler
+
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
     motion::KinematicsConfiguration
+
     #Support
     support::configuration::GlobalConfig
     support::configuration::NetworkConfiguration
     support::NUsight
     support::configuration::SoccerConfig
 
-    #input
+    # Input
     input::GameController
 
-    #Sensors
+    # Sensors
     input::Camera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
-    #Vision
-    vision::LUTClassifier
+    # Vision
     vision::GoalDetector
     vision::BallDetector
     vision::VisualMesh
-    #vision::ObstacleDetector
 
-    #Localisation
+    # Localisation
     localisation::BallLocalisation
     localisation::RobotParticleLocalisation
 
-    #Behaviour
+    # Behaviour
     behaviour::Controller
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
@@ -38,16 +38,15 @@ NUCLEAR_ROLE(
     behaviour::skills::KickScript
     behaviour::skills::HeadBehaviourSoccer
     behaviour::planning::KickPlanner
-    behaviour::planning::SimpleWalkPathPlanner  # Creates WalkPaths.
-    #behaviour::planning::BezierWalkPathPlanner  # Creates WalkPaths.
+    behaviour::planning::SimpleWalkPathPlanner
     behaviour::strategy::SoccerStrategy
     behaviour::skills::Nod
 
-    #Motion
+    # Motion
     motion::ScriptEngine
     motion::OldWalkEngine
     motion::HeadController
 
-    #Output
+    # Output
     #output::eSpeak
 )
