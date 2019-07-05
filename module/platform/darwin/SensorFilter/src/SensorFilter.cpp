@@ -497,10 +497,10 @@ namespace platform {
                     motionFilter.timeUpdate(deltaT);
 
                     // Calculate accelerometer noise factor
-                    auto acc_noise = config.motionFilter.noise.measurement.accelerometer
-                                     + ((sensors->accelerometer.norm() - std::abs(MotionModel::G))
-                                        * (sensors->accelerometer.norm() - std::abs(MotionModel::G)))
-                                           * config.motionFilter.noise.measurement.accelerometerMagnitude;
+                    arma::mat33 acc_noise = config.motionFilter.noise.measurement.accelerometer
+                                            + ((sensors->accelerometer.norm() - std::abs(MotionModel::G))
+                                               * (sensors->accelerometer.norm() - std::abs(MotionModel::G)))
+                                                  * config.motionFilter.noise.measurement.accelerometerMagnitude;
 
                     // Accelerometer measurment update
                     motionFilter.measurementUpdate(
