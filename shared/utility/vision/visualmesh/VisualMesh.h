@@ -99,7 +99,7 @@ namespace vision {
                                           Iterator last,
                                           HorizonIt horizon_first,
                                           HorizonIt horizon_last,
-                                          const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
+                                          const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
                                           const bool& up   = true,
                                           const bool& down = true) {
 
@@ -117,7 +117,7 @@ namespace vision {
                 bool above = false, below = false;
                 for (int idx = 0; idx < cluster.size() && !success(above, below); ++idx) {
                     if (utility::math::geometry::point_under_hull(
-                            rays.row(cluster[idx]), horizon_first, horizon_last)) {
+                            rays.col(cluster[idx]), horizon_first, horizon_last)) {
                         above = true;
                     }
                     else {
