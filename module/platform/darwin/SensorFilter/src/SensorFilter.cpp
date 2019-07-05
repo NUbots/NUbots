@@ -454,8 +454,8 @@ namespace platform {
                         feet_down = load_sensor.updateFeet(*sensors);
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/FootDown/Load/Left", load_sensor.state[1]));
-                            emit(graph("Sensor/FootDown/Load/Right", load_sensor.state[0]));
+                            emit(graph("Sensor/Foot Down/Load/Left", load_sensor.state[1]));
+                            emit(graph("Sensor/Foot Down/Load/Right", load_sensor.state[0]));
                         }
                     }
                     else {
@@ -476,8 +476,8 @@ namespace platform {
                         }
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/FootDown/Z/Left", feet_down[1]));
-                            emit(graph("Sensor/FootDown/Z/Right", feet_down[0]));
+                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[1]));
+                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[0]));
                         }
                     }
 
