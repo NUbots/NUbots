@@ -69,7 +69,7 @@ export class VisionNetwork {
   @action
   private onMesh(robotModel: RobotModel, packet: VisualMesh) {
     const robot = VisionRobotModel.of(robotModel)
-    const { cameraId, neighbourhood, coordinates, classifications } = packet
+    const { cameraId, neighbourhood, rays, classifications } = packet
 
     let camera = robot.cameras.get(cameraId)
     if (!camera) {
@@ -80,7 +80,7 @@ export class VisionNetwork {
     // We don't need to know phi, just how many items are in each ring
     camera.visualmesh = {
       neighbours: neighbourhood!.v!,
-      coordinates: coordinates!.v!,
+      rays: rays!.v!,
       classifications: { dim: classifications!.rows!, values: classifications!.v! },
     }
   }

@@ -16,7 +16,7 @@ export interface GreenHorizon {
 
 export interface VisualMesh {
   readonly neighbours: number[]
-  readonly coordinates: number[]
+  readonly rays: number[]
   readonly classifications: { dim: number, values: number[] }
 }
 

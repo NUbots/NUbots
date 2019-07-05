@@ -179,21 +179,10 @@ export class CameraViewModel {
 
   private meshGeometry = createTransformer((mesh: VisualMesh): BufferGeometry => {
 
-    const { neighbours, coordinates, classifications } = mesh
+    const { neighbours, rays, classifications } = mesh
 
     // Calculate our triangle indexes
-    const nElem = mesh.coordinates.length / 2
-    // const triangles: number[] = []
-    // for (let i = 0; i < nElem; ++i) {
-    //   const idx = i * 6
-    //   for (let j = 0; j < 6; ++j) {
-    //     const nIdx = idx + j
-    //     if (neighbours[nIdx] < nElem) {
-    //       triangles.push(i, neighbours[nIdx])
-    //     }
-    //   }
-    // }
-    // Calculate our triangle indexes
+    const nElem = mesh.rays.length / 3
     const triangles = []
     for (let i = 0; i < nElem; i++) {
       const ni = i * 6
@@ -209,7 +198,7 @@ export class CameraViewModel {
 
     const geometry = new BufferGeometry()
     geometry.setIndex(triangles)
-    geometry.addAttribute('position', new Float32BufferAttribute(coordinates, 2))
+    geometry.addAttribute('position', new Float32BufferAttribute(rays, 3))
 
     // Read each class into a separate attribute
     const buffer = new InterleavedBuffer(
@@ -235,15 +224,19 @@ export class CameraViewModel {
       depthTest: false,
       depthWrite: false,
       transparent: true,
-      uniforms: {
-        dimensions: { value: new Vector2() },
-      },
     })
   }
 
   private visualmesh = createTransformer((mesh: VisualMesh) => {
     const material = this.meshMaterial.clone()
-    material.uniforms.dimensions.value = new Vector2(this.model.image!.width, this.model.image!.height)
+    const { centre, focalLength, projection } = this.model.image!.lens
+    material.uniforms = {
+      Hcw: { value: this.model.image ? toThreeMatrix4(this.model.image.Hcw) : new Matrix4() },
+      viewSize: { value: new Vector2(this.viewWidth, this.viewHeight) },
+      focalLength: { value: focalLength },
+      centre: { value: new Vector2(centre.x, centre.y) },
+      projection: { value: projection },
+    }
     const lines = new Mesh(this.meshGeometry(mesh), material)
     lines.frustumCulled = false
     return lines
