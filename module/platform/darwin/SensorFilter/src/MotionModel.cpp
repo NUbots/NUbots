@@ -71,7 +71,7 @@ namespace platform {
             qGyro.imaginary() = state.rows(WX, WZ) * t_2;
             qGyro.real()      = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
 
-            newState.rows(QW, QZ) = (qGyro.i() * Rwt.i()).i();
+            newState.rows(QW, QZ) = Rwt * qGyro;
 
             return newState;
         }
