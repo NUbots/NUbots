@@ -141,10 +141,10 @@ namespace vision {
             msg->camera_id = img.camera_id;
 
             // Get all the rays
-            msg->rays.resize(results.global_indices.size(), 3);
-            int row = 0;
+            msg->rays.resize(3, results.global_indices.size());
+            int col = 0;
             for (const auto& i : results.global_indices) {
-                msg->rays.row(row++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
+                msg->rays.col(col++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
             }
 
             for (const auto& r : m.rows) {
