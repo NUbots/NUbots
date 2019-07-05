@@ -539,8 +539,6 @@ namespace platform {
                         }
                         else if (foot_down && prev_foot_down) {
                             // Use stored Hwf and Htf to calculate Hwt
-                            // TODO probably do something to enforce the "foot is flat on ground" (ground space?)
-                            // Measurement update using Hwt
                             Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
 
                             // do a foot based position update
