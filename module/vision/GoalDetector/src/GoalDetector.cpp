@@ -68,7 +68,7 @@ namespace vision {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
-                const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = horizon.mesh->rays;
+                const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
 
                 // Get some indices to partition
@@ -157,10 +157,10 @@ namespace vision {
                             utility::math::geometry::sort_by_theta(cluster.begin(), right, rays, world_offset);
                             utility::math::geometry::sort_by_theta(right, other, rays, world_offset);
                             left_side =
-                                rays.row(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
-                            right_side = rays.row(*std::next(right, std::distance(right, other) / 2));
+                                rays.col(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
+                            right_side = rays.col(*std::next(right, std::distance(right, other) / 2));
                             for (auto it = cluster.begin(); it != cluster.end(); it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
+                                const Eigen::Vector3f& p0(rays.col(*it));
                                 if (p0.z() < bottom_point.z()) {
                                     bottom_point = p0;
                                 }
@@ -170,21 +170,21 @@ namespace vision {
                         else {
                             // Calculate average of left_xy and right_xy and find lowest z point
                             for (auto it = cluster.begin(); it != right; it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
+                                const Eigen::Vector3f& p0(rays.col(*it));
                                 left_side += p0;
                                 if (p0.z() < bottom_point.z()) {
                                     bottom_point = p0;
                                 }
                             }
                             for (auto it = right; it != other; it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
+                                const Eigen::Vector3f& p0(rays.col(*it));
                                 right_side += p0;
                                 if (p0.z() < bottom_point.z()) {
                                     bottom_point = p0;
                                 }
                             }
                             for (auto it = other; it != cluster.end(); it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
+                                const Eigen::Vector3f& p0(rays.col(*it));
                                 if (p0.z() < bottom_point.z()) {
                                     bottom_point = p0;
                                 }
