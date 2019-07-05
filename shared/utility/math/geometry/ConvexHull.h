@@ -30,7 +30,7 @@ namespace math {
         // Convert a vec3 to a vec2
         // vec2.x = vec3.x / vec3.z
         // vec2.y = vec3.y / vec3.y
-        Eigen::Vector2f project_vector(const Eigen::Vector3f& v) {
+        inline Eigen::Vector2f project_vector(const Eigen::Vector3f& v) {
             return Eigen::Vector2f(v.x() / v.z(), v.y() / v.z());
         }
 
@@ -38,11 +38,11 @@ namespace math {
         template <typename Iterator>
         void sort_by_theta(Iterator first,
                            Iterator last,
-                           const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
+                           const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
                            const float& world_offset) {
             std::sort(first, last, [&](const int& a, const int& b) {
-                const Eigen::Vector3f& p0(rays.row(a));
-                const Eigen::Vector3f& p1(rays.row(b));
+                const Eigen::Vector3f& p0(rays.col(a));
+                const Eigen::Vector3f& p1(rays.col(b));
 
                 float theta0 =
                     std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
@@ -81,10 +81,10 @@ namespace math {
         // the given point
         // If the point is allowed to be on the boundary the, for every pair of points in the convex hull, the given
         // point is allowed to be colinear
-        bool point_in_convex_hull(const Eigen::Vector2f& point,
-                                  const std::vector<int>& hull_indices,
-                                  const Eigen::Matrix<float, Eigen::Dynamic, 2>& coords,
-                                  const bool& allow_boundary = false) {
+        inline bool point_in_convex_hull(const Eigen::Vector2f& point,
+                                         const std::vector<int>& hull_indices,
+                                         const Eigen::Matrix<float, Eigen::Dynamic, 2>& coords,
+                                         const bool& allow_boundary = false) {
             const int8_t threshold = (allow_boundary) ? -1 : 0;
             for (auto it = std::next(hull_indices.begin()); it != hull_indices.end(); it = std::next(it)) {
                 Eigen::Vector2f p0(coords.col(*std::prev(it)));
@@ -98,10 +98,10 @@ namespace math {
         }
 
         template <typename Iterator>
-        bool point_under_hull(const Eigen::Vector3f& point,
-                              const Iterator rays_begin,
-                              const Iterator rays_end,
-                              const bool& allow_boundary = false) {
+        inline bool point_under_hull(const Eigen::Vector3f& point,
+                                     const Iterator rays_begin,
+                                     const Iterator rays_end,
+                                     const bool& allow_boundary = false) {
             const float theta = std::atan2(point.y(), point.x());
             auto lower_it =
                 std::lower_bound(rays_begin, rays_end, theta, [&](const Eigen::Vector3f& p0, const float& b) {
@@ -130,9 +130,9 @@ namespace math {
             }
         }
 
-        std::vector<int> upper_convex_hull(const std::vector<int>& indices,
-                                           const Eigen::Matrix<float, Eigen::Dynamic, 2>& coords,
-                                           const bool& cycle = false) {
+        inline std::vector<int> upper_convex_hull(const std::vector<int>& indices,
+                                                  const Eigen::Matrix<float, Eigen::Dynamic, 2>& coords,
+                                                  const bool& cycle = false) {
             // We need a minimum of 3 non-colinear points to calculate the convex hull
             if (indices.size() < 3) {
                 return std::vector<int>();
@@ -200,12 +200,12 @@ namespace math {
             return hull_indices;
         }
 
-        std::vector<int> upper_convex_hull(const std::vector<int>& indices,
-                                           const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays,
-                                           const float world_offset,
-                                           const bool& cycle = false) {
+        inline std::vector<int> upper_convex_hull(const std::vector<int>& indices,
+                                                  const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
+                                                  const float world_offset,
+                                                  const bool& cycle = false) {
             // We need a minimum of 3 non-colinear points to calculate the convex hull
-            if (rays.rows() < 3) {
+            if (rays.cols() < 3) {
                 return std::vector<int>();
             }
 
@@ -219,13 +219,13 @@ namespace math {
 
             // Remove all colinear points
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-                const Eigen::Vector2f p0 = project_vector(rays.row(*std::prev(local_indices.end(), 2)));
-                const Eigen::Vector2f p1 = project_vector(rays.row(*std::prev(local_indices.end(), 1)));
-                Eigen::Vector2f p2       = project_vector(rays.row(*it));
+                const Eigen::Vector2f p0 = project_vector(rays.col(*std::prev(local_indices.end(), 2)));
+                const Eigen::Vector2f p1 = project_vector(rays.col(*std::prev(local_indices.end(), 1)));
+                Eigen::Vector2f p2       = project_vector(rays.col(*it));
 
                 while ((it != local_indices.end()) && turn_direction(p0, p1, p2) == 0) {
                     it = local_indices.erase(it);
-                    p2 = project_vector(rays.row(*it));
+                    p2 = project_vector(rays.col(*it));
                 }
                 if (it != local_indices.end()) {
                     it = std::next(it);
@@ -249,15 +249,15 @@ namespace math {
             // Now go through the rest of the points and add them to the convex hull if each triple makes an
             // clockwise turn
             for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
-                Eigen::Vector2f p0       = project_vector(rays.row(*std::prev(hull_indices.end(), 2)));
-                Eigen::Vector2f p1       = project_vector(rays.row(*std::prev(hull_indices.end(), 1)));
-                const Eigen::Vector2f p2 = project_vector(rays.row(*it));
+                Eigen::Vector2f p0       = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
+                Eigen::Vector2f p1       = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
+                const Eigen::Vector2f p2 = project_vector(rays.col(*it));
                 // Triple does not make an clockwise turn, replace the last element in the list
                 while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
                     // Remove the offending point from the convex hull
                     hull_indices.pop_back();
-                    p0 = project_vector(rays.row(*std::prev(hull_indices.end(), 2)));
-                    p1 = project_vector(rays.row(*std::prev(hull_indices.end(), 1)));
+                    p0 = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
+                    p1 = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
                 }
 
                 // Add the new point to the convex hull
@@ -269,9 +269,9 @@ namespace math {
 
         // Finds the convex hull of a set of points using the Graham Scan algorithm
         // https://en.wikipedia.org/wiki/Graham_scan
-        std::vector<int> graham_scan(const std::vector<int>& indices,
-                                     const Eigen::Matrix<float, 2, Eigen::Dynamic>& coords,
-                                     const bool& cycle = false) {
+        inline std::vector<int> graham_scan(const std::vector<int>& indices,
+                                            const Eigen::Matrix<float, 2, Eigen::Dynamic>& coords,
+                                            const bool& cycle = false) {
 
             // We need a minimum of 3 non-colinear points to calculate the convex hull
             if (indices.size() < 3) {
