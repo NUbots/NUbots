@@ -520,9 +520,6 @@ namespace platform {
                                                                                 : ServoID::R_ANKLE_ROLL]);
 
                         if (foot_down && !prev_foot_down) {
-                            // --------------------------------------------------------------------------------
-                            // ----------------------- CREATE GROUND SPACE ------------------------------------
-                            // --------------------------------------------------------------------------------
                             Eigen::Affine3d Hwt;
                             Hwt.linear() = Eigen::Quaterniond(motionFilter.get()[MotionModel::QW],
                                                               motionFilter.get()[MotionModel::QX],
@@ -533,26 +530,7 @@ namespace platform {
                                                                 motionFilter.get()[MotionModel::PY],
                                                                 motionFilter.get()[MotionModel::PZ]);
 
-                            // Retrieve rotations needed for creating the space
-                            // support foot to torso rotation, and world to torso rotation
-                            Eigen::Matrix3d Rtf = Htf.rotation();
-
-                            // Fix the foot in world space
-                            Eigen::Matrix3d Rwf = Hwt.rotation() * Rtf;
-
-                            // Dot product of foot z (in world space) with world z
-                            double alpha = std::acos(Rwf(2, 2));
-
-                            Eigen::Vector3d axis = Rwf.col(2).cross(Eigen::Vector3d::UnitZ()).normalized();
-
-                            // Axis angle is foot to ground
-                            Eigen::Matrix3d Rwg = Eigen::AngleAxisd(alpha, axis).toRotationMatrix() * Rwf;
-                            Eigen::Matrix3d Rtg = Hwt.rotation().transpose() * Rwg;
-
-                            // Ground space assemble!
-                            Eigen::Affine3d Htg;
-                            Htg.linear()      = Rtg;
-                            Htg.translation() = Htf.translation();
+                            Eigen::Affine3d Htg = utility::motion::kinematics::calculateGroundSpace(Htf, Hwt);
 
                             footlanding_Hwf[side]                   = Hwt * Htg;
                             footlanding_Hwf[side].translation().z() = 0.0;
