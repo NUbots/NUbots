@@ -13,5 +13,7 @@ NUCLEAR_ROLE(
     support::NUsight
     output::ImageCompressor
 
+    tools::HDRCapture
+
     support::configuration::SoccerConfig
 )
