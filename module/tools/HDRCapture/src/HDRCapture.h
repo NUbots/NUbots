@@ -67,7 +67,7 @@ namespace tools {
         int gain_min;
         int gain_max;
 
-        int exp_brackets;
+        int exposure_brackets;
         int gain_brackets;
 
         int exposure;
