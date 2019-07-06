@@ -99,8 +99,10 @@ const config: webpack.Configuration = {
         ],
         use: ['style-loader', 'css-loader'],
       },
+      { test: /\.file.svg$/, use: 'url-loader' },
       {
         test: /\.svg$/,
+        exclude: /\.file.svg$/,
         use: [
           'babel-loader',
           {

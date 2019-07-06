@@ -1,3 +1,15 @@
+import { PlaneGeometry } from 'three'
+import { PointLight } from 'three'
+import { AmbientLight } from 'three'
+import { BoxGeometry } from 'three'
+import { Camera } from 'three'
+import { LinearFilter } from 'three'
+import { ClampToEdgeWrapping } from 'three'
+import { UnsignedByteType } from 'three'
+import { RGBAFormat } from 'three'
+import { MultiplyOperation } from 'three'
+import { Combine } from 'three'
+import { WebGLRenderTarget } from 'three'
 import { Texture } from 'three'
 import { OrthographicCamera } from 'three'
 import { PixelFormat } from 'three'
@@ -31,6 +43,21 @@ type Object3DOpts = {
   children?: Object3D[]
 }
 
+export type StageOpts = {
+  scene: Scene,
+  camera: Camera,
+  target?: WebGLRenderTarget
+}
+
+export const stage = createUpdatableComputed(
+  ({ scene, camera, target }: StageOpts) => ({ scene, camera, target }),
+  (stage, opts) => {
+    stage.scene = opts.scene
+    stage.camera = opts.camera
+    stage.target = opts.target
+  },
+)
+
 export const scene = createUpdatableComputed(
   (opts: Object3DOpts) => new Scene(),
   (scene, opts) => {
@@ -38,14 +65,15 @@ export const scene = createUpdatableComputed(
     opts.children && scene.add(...opts.children)
     updateObject3D(scene, opts)
   },
+  scene => scene.dispose(),
 )
 
 export const group = createUpdatableComputed(
   (opts: Object3DOpts) => new Object3D(),
-  (scene, opts) => {
-    scene.remove(...scene.children)
-    opts.children && scene.add(...opts.children)
-    updateObject3D(scene, opts)
+  (group, opts) => {
+    group.remove(...group.children)
+    opts.children && group.add(...opts.children)
+    updateObject3D(group, opts)
   },
 )
 
@@ -108,26 +136,39 @@ export const mesh = createUpdatableComputed(
 )
 
 type MeshBasicMaterialOpts = {
-  color: Color
+  color?: Color,
+  map?: Texture,
+  transparent?: boolean,
+  combine?: Combine
 }
 
+const defaultColor = new Color(0xffffff)
+const defaultCombine = MultiplyOperation
 export const meshBasicMaterial = createUpdatableComputed(
   (opts: MeshBasicMaterialOpts) => new MeshBasicMaterial(),
-  (mesh, opts) => {
-    mesh.color = opts.color
-    mesh.needsUpdate = true
+  (material, opts) => {
+    material.color = opts.color || defaultColor
+    material.combine = opts.combine || defaultCombine
+    material.map = opts.map || null
+    material.transparent = opts.transparent != null ? opts.transparent : false
+    material.needsUpdate = true
   },
   mesh => mesh.dispose(),
 )
 
 type MeshPhongMaterialOpts = {
-  color: Color
+  color?: Color,
+  map?: Texture,
+  transparent?: boolean
 }
 
 export const meshPhongMaterial = createUpdatableComputed(
   (opts: MeshPhongMaterialOpts) => new MeshPhongMaterial(),
   (material, opts) => {
-    material.color = opts.color
+    material.color = opts.color || defaultColor
+    material.map = opts.map || null
+    material.transparent = opts.transparent != null ? opts.transparent : false
+    material.needsUpdate = true
   },
   material => material.dispose(),
 )
@@ -192,15 +233,18 @@ export const dataTexture = createUpdatableComputed(
   texture => texture.dispose(),
 )
 
-type ImageTextureOpts = {
-  image?: HTMLImageElement
-  format: PixelFormat,
-  type: TextureDataType,
+type TextureOpts = {
+  format?: PixelFormat,
+  type?: TextureDataType,
+  wrapS?: Wrapping,
+  wrapT?: Wrapping,
+  magFilter?: TextureFilter,
+  minFilter?: TextureFilter
+}
+
+type ImageTextureOpts = TextureOpts & {
+  image?: HTMLImageElement,
   mapping: Mapping,
-  wrapS: Wrapping,
-  wrapT: Wrapping,
-  magFilter: TextureFilter,
-  minFilter: TextureFilter,
   flipY: boolean
 }
 
@@ -212,18 +256,87 @@ export const imageTexture = createUpdatableComputed(
   (texture, opts) => {
     if (texture) {
       texture.image = opts.image
-      texture.format = opts.format
-      texture.type = opts.type
-      texture.mapping = opts.mapping
-      texture.wrapS = opts.wrapS
-      texture.wrapT = opts.wrapT
-      texture.magFilter = opts.magFilter
-      texture.minFilter = opts.minFilter
       texture.flipY = opts.flipY
+      updateTexture(texture, opts)
       texture.needsUpdate = true
     }
   },
   texture => texture && texture.dispose(),
+)
+
+type RenderTargetOpts = TextureOpts & {
+  width: number,
+  height: number,
+  anisotropy?: number;
+  depthBuffer?: boolean;
+  stencilBuffer?: boolean;
+}
+
+export const renderTarget = createUpdatableComputed(
+  (opts: RenderTargetOpts) => new WebGLRenderTarget(opts.width, opts.height),
+  (renderTarget, opts) => {
+    renderTarget.setSize(opts.width, opts.height)
+    renderTarget.texture.anisotropy = opts.anisotropy != null ? opts.anisotropy : 1
+    renderTarget.depthBuffer = opts.depthBuffer != null ? opts.depthBuffer : true
+    renderTarget.stencilBuffer = opts.stencilBuffer != null ? opts.stencilBuffer : true
+    updateTexture(renderTarget.texture, opts)
+  },
+  renderTarget => renderTarget.dispose(),
+)
+
+function updateTexture(texture: Texture, opts: TextureOpts) {
+  texture.format = opts.format || RGBAFormat
+  texture.type = opts.type || UnsignedByteType
+  texture.wrapS = opts.wrapS || ClampToEdgeWrapping
+  texture.wrapT = opts.wrapT || ClampToEdgeWrapping
+  texture.magFilter = opts.magFilter || LinearFilter
+  texture.minFilter = opts.minFilter || LinearFilter
+}
+
+type BoxGeometryOpts = { width: number, height: number, depth: number }
+
+export const boxGeometry = createUpdatableComputed(
+  (opts: BoxGeometryOpts) => new BoxGeometry(opts.width, opts.height, opts.depth),
+  (geometry, opts) => {
+    const { width, height, depth } = geometry.parameters
+    if (opts.width !== width || opts.height !== height || opts.depth !== depth) {
+      geometry.copy(new BoxGeometry(opts.width, opts.height, opts.depth))
+    }
+  },
+  box => box.dispose(),
+)
+
+type PlaneGeometryOpts = { width: number, height: number }
+
+export const planeGeometry = createUpdatableComputed(
+  (opts: PlaneGeometryOpts) => new PlaneGeometry(opts.width, opts.height),
+  (geometry, opts) => {
+    const { width, height } = geometry.parameters
+    if (opts.width !== width || opts.height !== height) {
+      geometry.copy(new PlaneGeometry(opts.width, opts.height))
+    }
+  },
+  plane => plane.dispose(),
+)
+
+type LightOpts = Object3DOpts & { color?: Color, intensity?: number }
+
+export const ambientLight = createUpdatableComputed(
+  (opts: LightOpts) => new AmbientLight(opts.color, opts.intensity),
+  (light, opts) => {
+    light.color = opts.color != null ? opts.color : defaultColor
+    light.intensity = opts.intensity != null ? opts.intensity : 1
+    updateObject3D(light, opts)
+  },
+)
+
+export const pointLight = createUpdatableComputed(
+  (opts: LightOpts) => new PointLight(opts.color, opts.intensity),
+  (light, opts) => {
+    light.color = opts.color != null ? opts.color : defaultColor
+    light.intensity = opts.intensity != null ? opts.intensity : 1
+    updateObject3D(light, opts)
+  },
 )
 
 function updateObject3D(object: Object3D, opts: Object3DOpts) {
@@ -232,4 +345,3 @@ function updateObject3D(object: Object3D, opts: Object3DOpts) {
   opts.scale && object.scale.set(opts.scale.x, opts.scale.y, opts.scale.z)
   opts.up && object.up.set(opts.up.x, opts.up.y, opts.up.z)
 }
-
