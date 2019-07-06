@@ -102,7 +102,7 @@ namespace localisation {
                                         fd);
                                 }
                                 else {
-                                    log("Received non-finite measurements from vision. Discarding...");
+                                    log("Received non-finite measurements from vision. Discarding ...");
                                 }
                             }
                         }
