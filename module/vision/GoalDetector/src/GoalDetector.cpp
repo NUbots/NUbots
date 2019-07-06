@@ -307,9 +307,7 @@ namespace vision {
                         log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
                     }
 
-                    if (goals->goals.size() > 0) {
-                        emit(std::move(goals));
-                    }
+                    emit(std::move(goals));
                 }
             });
     }
