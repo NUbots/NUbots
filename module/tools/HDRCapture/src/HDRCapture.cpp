@@ -44,8 +44,14 @@ namespace tools {
         on<Configuration>("HDRCapture.yaml").then([this](const Configuration& config) {
             // Use configuration here from file HDRCapture.yaml
 
-            // TODO read in the gain and exposure ranges
-            // TODO read in number of brackets
+            // Read in the gain and exposure ranges
+            exposure_min = config["settings"]["exposure"]["min"].as<int>();
+            exposure_max = config["settings"]["exposure"]["max"].as<int>();
+            gain_min     = config["settings"]["gain"]["min"].as<int>();
+            gain_max     = config["settings"]["gain"]["max"].as<int>();
+
+            exp_brackets  = config["brackets"]["exposure"].as<int>();
+            gain_brackets = config["brackets"]["gain"].as<int>();
         });
 
         on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
@@ -70,6 +76,48 @@ namespace tools {
                     resetAravisCamera(cam, config);
                 }
             }
+        });
+
+        on<Every<1, std::chrono::seconds>>().then([this] {
+            // TODO update camera configs
+            // capture an image
+            // emit(Image)
+
+            if (exposure >= exposure_max) {
+                exposure = exposure_min;
+                gain += (gain_max - gain_min) / (float) gain_brackets;
+            }
+            else {
+                exposure += (exposure_max - exposure_min) / (float) exposure_brackets;
+            }
+
+            // Set exposure.
+            if (std::isfinite(exposure)) {
+                arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_OFF);
+                arv_camera_set_exposure_time(camera->second.camera, exposure);
+            }
+            else {
+                arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_CONTINUOUS);
+                // exposure = (1.0 / 30.0) * 1e6;  // Default to 30 fps
+            }
+
+            // Set gain.
+            if (std::isfinite(gain)) {
+                arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_OFF);
+                arv_camera_set_gain(camera->second.camera, gain);
+            }
+            else {
+                arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_CONTINUOUS);
+            }
+
+            arv_camera_set_acquisition_mode(camera->second.camera, ARV_ACQUISITION_MODE_SINGLE_FRAME);
+
+            arv_camera_start_acquisition(camera->second.camera);
+
+            g_signal_connect(
+                camera->second.stream, "new-buffer", G_CALLBACK(&HDRCapture::emitAravisImage), &camera->second);
+
+            arv_stream_set_emit_signals(camera->second.stream, TRUE);
         });
 
         on<Trigger<ImageData>, Optional<With<Sensors>>, Optional<With<KinematicsModel>>>().then(

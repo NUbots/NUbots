@@ -61,6 +61,17 @@ namespace tools {
 
         // Static count of all cameras in the system.
         static uint cameraCount;
+
+        int exposure_min;
+        int exposure_max;
+        int gain_min;
+        int gain_max;
+
+        int exp_brackets;
+        int gain_brackets;
+
+        int exposure;
+        float gain;
     };
 
 }  // namespace tools
