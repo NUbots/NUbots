@@ -49,10 +49,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     return (
       <div className={style.localisation}>
         <LocalisationMenuBar menu={this.props.menu} onHawkEyeClick={this.onHawkEyeClick}/>
-        <div className={style.localisation__canvasContainer}>
-          <div className={style.localisation__canvasInnerContainer}>
-            <Three ref={this.canvas} onClick={this.onClick} stage={this.stage}/>
-          </div>
+        <div className={style.localisation__canvas}>
+          <Three ref={this.canvas} onClick={this.onClick} stage={this.stage}/>
         </div>
         <StatusBar model={this.props.model}/>
       </div>
