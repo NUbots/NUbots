@@ -49,12 +49,6 @@ namespace output {
 
         msg->data.assign(compressed, compressed + jpeg_size);
 
-        log("[ImageCompressor] emitting CompressedImage");
-        log("camera_id", msg->camera_id);
-        log("name", msg->name);
-        log("is_left", msg->is_left);
-        log(" ");
-
         emit(msg);
 
         tjFree(compressed);

@@ -66,11 +66,6 @@ namespace support {
                 if (last_image.count(image->camera_id) == 0
                     || (NUClear::clock::now() - last_image[image->camera_id] > max_image_duration)) {
 
-                    // log("[Vision]: emitting CompressedImage to nusight");
-                    // log("camera_id", image->camera_id);
-                    // log("name", image->name);
-                    // log("is_left", image->is_left);
-
                     powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
                     last_image[image->camera_id] = NUClear::clock::now();
                 }
