@@ -93,6 +93,7 @@ namespace input {
                 msg->name       = i.serial_number;
                 msg->timestamp  = i.timestamp;
                 msg->lens       = i.lens;
+                msg->is_left    = i.isLeft;
 
                 // Calculate our transform if we have information
                 if (sensors && model) {

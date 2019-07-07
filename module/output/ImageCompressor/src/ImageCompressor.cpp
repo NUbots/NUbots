@@ -39,6 +39,7 @@ namespace output {
         msg->dimensions.y()    = image.dimensions.y();
         msg->camera_id         = image.camera_id;
         msg->name              = image.name;
+        msg->is_left           = image.is_left;
         msg->timestamp         = image.timestamp;
         msg->Hcw               = image.Hcw;
         msg->lens.projection   = int(image.lens.projection);
@@ -47,6 +48,12 @@ namespace output {
         msg->lens.centre       = image.lens.centre;
 
         msg->data.assign(compressed, compressed + jpeg_size);
+
+        log("[ImageCompressor] emitting CompressedImage");
+        log("camera_id", msg->camera_id);
+        log("name", msg->name);
+        log("is_left", msg->is_left);
+        log(" ");
 
         emit(msg);
 

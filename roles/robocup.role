@@ -51,4 +51,5 @@ NUCLEAR_ROLE(
 
     #Output
     #output::eSpeak
+    output::ImageCompressor
 )

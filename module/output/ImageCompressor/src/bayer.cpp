@@ -644,6 +644,7 @@ namespace output {
         rgb_image.timestamp  = image.timestamp;
         rgb_image.Hcw        = image.Hcw;
         rgb_image.lens       = image.lens;
+        rgb_image.is_left    = image.is_left;
         // Set output image to converted RGB image
         rgb_image.format = utility::vision::fourcc("RGB8");
         rgb_image.data   = rgb_data;

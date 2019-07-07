@@ -48,4 +48,5 @@ message CompressedImage {
     google.protobuf.Timestamp timestamp  = 6;
     mat4                      Hcw        = 7;
     Lens                      lens       = 8;
+    bool                      is_left    = 9;
 }

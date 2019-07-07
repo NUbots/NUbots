@@ -81,7 +81,12 @@ namespace input {
 
                         camera = AravisCameras.insert(std::make_pair(deviceID, context)).first;
 
-                        log<NUClear::DEBUG>("Found camera", config.fileName, "with serial number", deviceID);
+                        log<NUClear::DEBUG>("Found camera",
+                                            config.fileName,
+                                            "with serial number",
+                                            deviceID,
+                                            "is_left",
+                                            config["is_left"].as<bool>());
                     }
                 }
 
