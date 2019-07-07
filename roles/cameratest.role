@@ -7,9 +7,9 @@ NUCLEAR_ROLE(
     motion::KinematicsConfiguration
     support::configuration::NetworkConfiguration
     support::configuration::GlobalConfig
-    platform::darwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
-    input::Camera
+    #input::Camera
     support::NUsight
     output::ImageCompressor
 

@@ -70,8 +70,15 @@ namespace tools {
         int exposure_brackets;
         int gain_brackets;
 
-        int exposure;
+        float exposure_step;
+        float gain_step;
+
+        float exposure;
         float gain;
+
+        int image_count;
+
+        ReactionHandle process_handle;
     };
 
 }  // namespace tools

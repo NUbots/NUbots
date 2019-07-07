@@ -41,6 +41,9 @@ namespace tools {
         // Needed for Aravis cameras.
         arv_g_type_init();
 
+        // Counter for the number of images
+        image_count = 0;
+
         on<Configuration>("HDRCapture.yaml").then([this](const Configuration& config) {
             // Use configuration here from file HDRCapture.yaml
 
@@ -52,6 +55,15 @@ namespace tools {
 
             exposure_brackets = config["brackets"]["exposure"].as<int>();
             gain_brackets     = config["brackets"]["gain"].as<int>();
+
+            exposure_step = static_cast<float>(exposure_max - exposure_min) / static_cast<float>(exposure_brackets);
+            gain_step     = static_cast<float>(gain_max - gain_min) / static_cast<float>(gain_brackets);
+
+            log("Exposure Step...:", exposure_step);
+            log("Gain Step.......:", gain_step);
+
+            exposure = exposure_min;
+            gain     = gain_min;
         });
 
         on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
@@ -78,47 +90,50 @@ namespace tools {
             }
         });
 
-        on<Every<1, std::chrono::seconds>>().then([this] {
+        process_handle = on<Every<1, std::chrono::seconds>>().then([this] {
             // TODO update camera configs
             // capture an image
             // emit(Image)
+            process_handle.disable();
 
             if (exposure >= exposure_max) {
                 exposure = exposure_min;
-                gain += (gain_max - gain_min) / (float) gain_brackets;
+                gain += gain_step;
             }
             else {
-                exposure += (exposure_max - exposure_min) / (float) exposure_brackets;
+                exposure += exposure_step;
             }
+            log("Current Exposure:", exposure);
+            log("Current Gain....:", gain);
+            log("Image Count.....:", image_count, "/", (exposure_brackets * gain_brackets));
 
-            for (auto& camera : AravisCameras) {
-                // Set exposure.
-                if (std::isfinite(exposure)) {
+            if (image_count >= (exposure_brackets * gain_brackets)) {
+                powerplant.shutdown();
+            }
+            else {
+                for (auto& camera : AravisCameras) {
+                    // trigger mode can be activated before or after start_acquisition
+                    arv_camera_set_trigger(camera.second.camera, "Software");
+
+                    arv_camera_start_acquisition(camera.second.camera);
+
+                    g_signal_connect(
+                        camera.second.stream, "new-buffer", G_CALLBACK(&HDRCapture::emitAravisImage), &camera.second);
+
+                    arv_stream_set_emit_signals(camera.second.stream, TRUE);
+
+                    // Set exposure.
                     arv_camera_set_exposure_time_auto(camera.second.camera, ARV_AUTO_OFF);
                     arv_camera_set_exposure_time(camera.second.camera, exposure);
-                }
-                else {
-                    arv_camera_set_exposure_time_auto(camera.second.camera, ARV_AUTO_CONTINUOUS);
-                    // exposure = (1.0 / 30.0) * 1e6;  // Default to 30 fps
-                }
 
-                // Set gain.
-                if (std::isfinite(gain)) {
+                    // Set gain.
                     arv_camera_set_gain_auto(camera.second.camera, ARV_AUTO_OFF);
                     arv_camera_set_gain(camera.second.camera, gain);
+
+                    log("Triggering");
+                    arv_camera_software_trigger(camera.second.camera);
                 }
-                else {
-                    arv_camera_set_gain_auto(camera.second.camera, ARV_AUTO_CONTINUOUS);
-                }
-
-                arv_camera_set_acquisition_mode(camera.second.camera, ARV_ACQUISITION_MODE_SINGLE_FRAME);
-
-                arv_camera_start_acquisition(camera.second.camera);
-
-                g_signal_connect(
-                    camera.second.stream, "new-buffer", G_CALLBACK(&HDRCapture::emitAravisImage), &camera.second);
-
-                arv_stream_set_emit_signals(camera.second.stream, TRUE);
+                image_count++;
             }
         });
 
@@ -159,6 +174,8 @@ namespace tools {
                 utility::vision::saveImage(fmt::format("image-{}.ppm", count++), *msg);
 
                 emit(msg);
+                log("Enabling");
+                process_handle.enable();
             });
 
         on<Shutdown>().then([this] { shutdownAravisCamera(); });
@@ -264,36 +281,6 @@ namespace tools {
                               0,
                               config["format"]["width"].as<size_t>(),
                               config["format"]["height"].as<size_t>());
-
-        // Set exposure.
-        double exposure = config["settings"]["exposure"].as<Expression>();
-        if (std::isfinite(exposure)) {
-            arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_OFF);
-            arv_camera_set_exposure_time(camera->second.camera, exposure);
-        }
-        else {
-            arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_CONTINUOUS);
-            // exposure = (1.0 / 30.0) * 1e6;  // Default to 30 fps
-        }
-
-        // Set gain.
-        double gain = config["settings"]["gain"].as<Expression>();
-        if (std::isfinite(gain)) {
-            arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_OFF);
-            arv_camera_set_gain(camera->second.camera, gain);
-        }
-        else {
-            arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_CONTINUOUS);
-        }
-
-        arv_camera_set_acquisition_mode(camera->second.camera, ARV_ACQUISITION_MODE_SINGLE_FRAME);
-
-        arv_camera_start_acquisition(camera->second.camera);
-
-        g_signal_connect(
-            camera->second.stream, "new-buffer", G_CALLBACK(&HDRCapture::emitAravisImage), &camera->second);
-
-        arv_stream_set_emit_signals(camera->second.stream, TRUE);
     }
 
     void HDRCapture::emitAravisImage(ArvStream* stream, CameraContext* context) {
@@ -322,6 +309,7 @@ namespace tools {
             msg->lens.centre       = context->lens.centre;
 
             context->reactor.emit<Scope::DIRECT>(msg);
+            context->reactor.log("Emitting");
             arv_stream_push_buffer(stream, buffer);
         }
     }

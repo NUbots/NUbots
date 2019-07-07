@@ -1,9 +1,11 @@
 settings:
-  exposure_min: 6000
-  exposure_max: 33333                     
-  gain_min: 0
-  gain_max: 15
+  exposure:
+    min: 6000
+    max: 33333
+  gain:
+    min: 0
+    max: 15
 
 brackets:
-  exposure: 1
+  exposure: 10
   gain: 1
