@@ -64,8 +64,6 @@ namespace platform {
         using utility::motion::kinematics::calculateCentreOfMass;
         using utility::motion::kinematics::calculateInertialTensor;
         using utility::motion::kinematics::calculateRobotToIMU;
-        using utility::nusight::drawArrow;
-        using utility::nusight::drawSphere;
         using utility::nusight::graph;
 
         std::string makeErrorString(const std::string& src, uint errorCode) {
