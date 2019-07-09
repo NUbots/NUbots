@@ -42,7 +42,6 @@
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace behaviour {
@@ -83,7 +82,6 @@ namespace behaviour {
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
-        using utility::time::durationFromSeconds;
 
         SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -95,11 +93,16 @@ namespace behaviour {
             , goalLastMeasured() {
 
             on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
-                cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
-                cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
+                using namespace std::chrono;
+                cfg_.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["ball_last_seen_max_time"].as<double>()));
+                cfg_.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["goal_last_seen_max_time"].as<double>()));
 
-                cfg_.localisation_interval = durationFromSeconds(config["localisation_interval"].as<double>());
-                cfg_.localisation_duration = durationFromSeconds(config["localisation_duration"].as<double>());
+                cfg_.localisation_interval = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["localisation_interval"].as<double>()));
+                cfg_.localisation_duration = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["localisation_duration"].as<double>()));
 
                 cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
                 cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();

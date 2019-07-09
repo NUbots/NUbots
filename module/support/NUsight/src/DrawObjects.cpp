@@ -20,11 +20,9 @@
 #include "NUsight.h"
 
 #include "message/support/nusight/DrawObjects.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
 
     using message::support::nusight::DrawObject;
     using message::support::nusight::DrawObjects;

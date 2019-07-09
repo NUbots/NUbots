@@ -11,7 +11,6 @@
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace localisation {
@@ -32,7 +31,6 @@ namespace localisation {
     using utility::math::matrix::Transform3D;
     using utility::nusight::drawCircle;
     using utility::nusight::graph;
-    using utility::time::TimeDifferenceSeconds;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -55,8 +53,9 @@ namespace localisation {
         on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
             "Time Update", [this]() {
                 /* Perform time update */
+                using namespace std::chrono;
                 auto curr_time        = NUClear::clock::now();
-                double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
 
                 filter.timeUpdate(seconds);
@@ -79,8 +78,9 @@ namespace localisation {
             "Measurement Update", [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.goals.empty()) {
                     /* Perform time update */
+                    using namespace std::chrono;
                     auto curr_time        = NUClear::clock::now();
-                    double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                    double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
 
                     filter.timeUpdate(seconds);
