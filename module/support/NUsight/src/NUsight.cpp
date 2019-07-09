@@ -48,7 +48,6 @@ namespace support {
         // These go first so the config can do things with them
         provideOverview();
         provideDataPoints();
-        provideDrawObjects();
         provideSubsumption();
         provideGameController();
         provideLocalisation();

@@ -21,8 +21,6 @@
 
 #include <fmt/format.h>
 
-#include "RansacGoalModel.h"
-
 #include "extension/Configuration.h"
 
 #include "message/support/FieldDescription.h"

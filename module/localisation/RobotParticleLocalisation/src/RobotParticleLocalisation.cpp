@@ -7,7 +7,6 @@
 #include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
 
-#include "utility/math/geometry/Circle.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
@@ -25,11 +24,9 @@ namespace localisation {
     using VisionGoals = message::vision::Goals;
 
     using utility::localisation::transform3DToFieldState;
-    using utility::math::geometry::Circle;
     using utility::math::matrix::Rotation2D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::nusight::drawCircle;
     using utility::nusight::graph;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
@@ -37,18 +34,6 @@ namespace localisation {
 
         last_measurement_update_time = NUClear::clock::now();
         last_time_update_time        = NUClear::clock::now();
-
-        on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
-            "Particle Debug", [this]() {
-                arma::mat particles = filter.getParticles();
-                for (int i = 0; i < std::min(draw_particles, int(particles.n_cols)); i++) {
-                    emit(drawCircle("particle" + std::to_string(i),
-                                    Circle(0.01, particles.submat(0, i, 1, i)),
-                                    0.05,
-                                    {0, 0, 0},
-                                    PARTICLE_UPDATE_FREQUENCY));
-                }
-            });
 
         on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
             "Time Update", [this]() {
