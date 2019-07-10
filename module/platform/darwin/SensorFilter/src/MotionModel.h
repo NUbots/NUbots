@@ -34,27 +34,33 @@ namespace platform {
             static constexpr double G = -9.80665;
 
             // Our position in global space
+            // rTWw
             static constexpr uint PX = 0;
             static constexpr uint PY = 1;
             static constexpr uint PZ = 2;
 
             // Our velocity in global space
+            // rTWw
             static constexpr uint VX = 3;
             static constexpr uint VY = 4;
             static constexpr uint VZ = 5;
 
             // Our orientation from robot to world
+            // Rwt
             static constexpr uint QW = 6;
             static constexpr uint QX = 7;
             static constexpr uint QY = 8;
             static constexpr uint QZ = 9;
 
             // Our rotational velocity in robot space
+            // Gyroscope measures the angular velocity of the torso in torso space
+            // omegaTTt
             static constexpr uint WX = 10;
             static constexpr uint WY = 11;
             static constexpr uint WZ = 12;
 
             // Gyroscope Bias
+            // omegaTTt
             static constexpr uint BX = 13;
             static constexpr uint BY = 14;
             static constexpr uint BZ = 15;
