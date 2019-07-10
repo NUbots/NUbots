@@ -21,8 +21,6 @@
 
 #include <fmt/format.h>
 
-#include "RansacGoalModel.h"
-
 #include "extension/Configuration.h"
 
 #include "message/support/FieldDescription.h"
@@ -31,7 +29,6 @@
 
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/ConvexHull.h"
-#include "utility/math/vision.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/vision/Vision.h"
