@@ -10,8 +10,8 @@ connection between NUbots and NUsight.
 
 Include the module in a role, and it will automatically emit messages.
 
-Also ensure that sending data points are enabled it config/NUsight.yaml
+Also ensure that sending data points are enabled in `config/NUsight.yaml`
 
 ## Emits
 
-* message::support::nusight::DataPoint
+* `message::support::nusight::DataPoint`
