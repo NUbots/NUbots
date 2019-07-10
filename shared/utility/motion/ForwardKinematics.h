@@ -31,7 +31,6 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
-#include "utility/math/geometry/Line.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
@@ -475,15 +474,6 @@ namespace motion {
             return inertial_tensor;
         }  // namespace kinematics
 
-        inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D Rcw,
-                                                              double cameraDistancePixels) {
-
-            // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
-            arma::vec2 normal = -arma::normalise(Rcw.submat(1, 2, 2, 2));
-            double distance   = cameraDistancePixels * std::tan(utility::math::angle::acos_clamped(Rcw(0, 2)) - M_PI_2);
-
-            return utility::math::geometry::Line(normal, distance);
-        }
 
         inline utility::math::matrix::Transform3D calculateBodyToGround(arma::vec3 groundNormal_body,
                                                                         double bodyHeight) {
@@ -621,7 +611,31 @@ namespace motion {
             return pos;
         }
 
+        template <typename T, typename Scalar = typename T::Scalar, typename MatrixType = typename T::LinearMatrixType>
+        T calculateGroundSpace(const T& Htf, const T& Hwt) {
+            // Retrieve rotations needed for creating the space
+            // support foot to torso rotation, and world to torso rotation
+            MatrixType Rtf = Htf.rotation();
 
+            // Fix the foot in world space
+            MatrixType Rwf = Hwt.rotation() * Rtf;
+
+            // Dot product of foot z (in world space) with world z
+            Scalar alpha = std::acos(Rwf(2, 2));
+
+            Eigen::Matrix<Scalar, 3, 1> axis = Rwf.col(2).cross(Eigen::Matrix<Scalar, 3, 1>::UnitZ()).normalized();
+
+            // Axis angle is foot to ground
+            MatrixType Rwg = Eigen::AngleAxis<Scalar>(alpha, axis).toRotationMatrix() * Rwf;
+            MatrixType Rtg = Hwt.rotation().transpose() * Rwg;
+
+            // Ground space assemble!
+            T Htg;
+            Htg.linear()      = Rtg;
+            Htg.translation() = Htf.translation();
+
+            return Htg;
+        }
     }  // namespace kinematics
 }  // namespace motion
 }  // namespace utility

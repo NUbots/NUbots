@@ -34,7 +34,6 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/math/vision.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
@@ -68,14 +67,35 @@ namespace behaviour {
         using utility::math::geometry::UnitQuaternion;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
-        using utility::math::vision::objectDirectionFromScreenAngular;
-        using utility::math::vision::screenAngularFromObjectDirection;
         using utility::motion::kinematics::calculateCameraLookJoints;
 
         using ServoID = utility::input::ServoID;
 
         using message::behaviour::SoccerObjectPriority;
         using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
+
+        inline arma::vec screenAngularFromObjectDirection(const arma::vec& v) {
+            return {std::atan2(v[1], v[0]), std::atan2(v[2], v[0])};
+        }
+
+        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screen_angular) {
+            if (std::fmod(std::fabs(screen_angular[0]), M_PI) == M_PI_2
+                || std::fmod(std::fabs(screen_angular[1]), M_PI) == M_PI_2) {
+                return {0, 0, 0};
+            }
+            double tanTheta        = std::tan(screen_angular[0]);
+            double tanPhi          = std::tan(screen_angular[1]);
+            double x               = 0;
+            double y               = 0;
+            double z               = 0;
+            double denominator_sqr = 1 + tanTheta * tanTheta + tanPhi * tanPhi;
+            // Assume facing forward st x>0 (which is fine for screen angular)
+            x = 1 / std::sqrt(denominator_sqr);
+            y = x * tanTheta;
+            z = x * tanPhi;
+
+            return {x, y, z};
+        }
 
         HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
