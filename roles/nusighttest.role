@@ -7,5 +7,5 @@ NUCLEAR_ROLE(
     support::configuration::NetworkConfiguration
 
     support::NUsight
-    debug::NUsight
+    support::NUsightHarness
 )

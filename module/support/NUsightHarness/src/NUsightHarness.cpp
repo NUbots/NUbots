@@ -17,24 +17,18 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsightHarness.h"
 
-#include <random>
-
-#include "message/input/Sensors.h"
-#include "message/platform/darwin/DarwinSensors.h"
-
-#include "utility/input/ServoID.h"
 #include "utility/nusight/NUhelpers.h"
 
 namespace module {
-namespace debug {
+namespace support {
 
     using NUClear::DEBUG;
     using std::chrono::milliseconds;
     using utility::nusight::graph;
 
-    NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    NUsightHarness::NUsightHarness(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Every<50, milliseconds>>().then([this] {
             double period = 10;
@@ -49,5 +43,5 @@ namespace debug {
         });
     }
 
-}  // namespace debug
+}  // namespace support
 }  // namespace module

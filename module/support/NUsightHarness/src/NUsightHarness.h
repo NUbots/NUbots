@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_DEBUG_NUSIGHT_H
-#define MODULES_DEBUG_NUSIGHT_H
+#ifndef MODULES_SUPPORT_NUSIGHTHARNESS_H
+#define MODULES_SUPPORT_NUSIGHTHARNESS_H
 
 #include <nuclear>
 
 namespace module {
-namespace debug {
+namespace support {
 
-    class NUsight : public NUClear::Reactor {
+    class NUsightHarness : public NUClear::Reactor {
     public:
-        explicit NUsight(std::unique_ptr<NUClear::Environment> environment);
+        explicit NUsightHarness(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace debug
+}  // namespace support
 }  // namespace module
 
-#endif  // MODULES_SUPPORT_NUSIGHT_H
+#endif  // MODULES_SUPPORT_NUSIGHTHARNESS_H
