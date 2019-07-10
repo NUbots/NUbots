@@ -30,15 +30,9 @@
 namespace module {
 namespace debug {
 
-    using message::input::Sensors;
-    using message::platform::darwin::DarwinSensors;
     using NUClear::DEBUG;
     using std::chrono::milliseconds;
-    using utility::nusight::drawArrow;
-    using utility::nusight::drawSphere;
     using utility::nusight::graph;
-    using ServoID = utility::input::ServoID;
-    using message::support::nusight::DrawObjects;
 
     NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -52,30 +46,6 @@ namespace debug {
             float dcosine = 4 * cosine;
 
             emit(graph("Debug Waves", sine, cosine, dsine, dcosine));
-        });
-
-        on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
-            emit(graph(
-                "Servo " + static_cast<std::string>(static_cast<ServoID>(sensors.servo.at(ServoID::L_HIP_ROLL).id)),
-                sensors.servo.at(ServoID::L_HIP_ROLL).present_position));
-        });
-
-        on<Every<1, std::chrono::seconds>>().then([this] {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(-2, 2);
-            double x = dis(gen);
-            double y = dis(gen);
-            double z = dis(gen);
-
-            double period = 10;
-            double freq   = 1 / period;
-            double t      = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
-            float sine    = sin(2 * M_PI * freq * t);
-            float cosine  = cos(2 * M_PI * freq * t);
-
-            emit(drawArrow("arrow", arma::vec3({x, y, std::abs(z)}), arma::vec3({sine, cosine, 0}), sine));
-            emit(drawSphere("sphere", arma::vec3({x, z, std::abs(z)}), std::abs(sine)));
         });
     }
 
