@@ -20,7 +20,6 @@
 #include "NUsight.h"
 
 #include "message/support/nuclear/ReactionStatistics.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace support {
@@ -28,7 +27,6 @@ namespace support {
     using NUClear::message::ReactionStatistics;
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
-    using utility::time::getUtcTimestamp;
 
     void NUsight::provideReactionStatistics() {
         // handles["reaction_statistics"].push_back(on<Trigger<ReactionStatistics>>().then([this](const

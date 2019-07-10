@@ -65,28 +65,6 @@ namespace motion {
             else {
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
-
-            // velocity-based support point modulation
-            /*toeTipCompensation = 0;
-            if (velocityDifference[0] > 0) {
-                // accelerating to front
-                supportMod[0] = supportFront2;
-            } else if (velocityCurrent[0] > velFastForward) {
-                supportMod[0] = supportFront;
-                toeTipCompensation = ankleMod[0];
-            } else if (velocityCurrent[0] < 0) {
-                supportMod[0] = supportBack;
-            } else if (std::abs(velocityCurrent[2]) > velFastTurn) {
-                supportMod[0] = supportTurn;
-            } else {
-                if (velocityCurrent[1] > 0.015) {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = supportSideY;
-                } else if (velocityCurrent[1] < -0.015) {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = -supportSideY;
-                }
-            }*/
         }
 
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
@@ -186,7 +164,19 @@ namespace motion {
 
         // Start feet collision detection:
         // Uses a rough measure to detect collision and move feet apart if too close
-        double overlap     = kinematicsModel.leg.FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
+        double length_factor = kinematicsModel.leg.TOE_LENGTH;
+        double width_factor  = kinematicsModel.leg.FOOT_WIDTH * 0.5;
+        // Shift from foot center to ankle center
+        if (LimbID::RIGHT_LEG) {
+            width_factor += kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE;
+        }
+        else {
+            width_factor -= kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE;
+        }
+
+        double overlap = std::sqrt(length_factor * length_factor + width_factor * width_factor)
+                             * std::atan(width_factor / length_factor)
+                         + feetDifference.angle();
         feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 

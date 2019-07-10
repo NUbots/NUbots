@@ -1,1 +1,20 @@
+driver: Aravis
+
+buffer_count: 4             # The number of software buffers to use.
+
 is_left: false
+
+format:
+  width: 1280
+  height: 1024
+  pixel: BayerRG8
+
+lens:
+  # focal_length_in_pixels = camera_focal_length / camera_pixel_size = 1.98mm / 4.8um
+  focal_length: 412.507218876330336
+  centre_offset: [0, 0]
+  fov: 3.14
+
+settings:
+  exposure: 33333                     # The shutter time in microseconds (1/fps).
+  gain: 15                            # The gain of the camera in dB.

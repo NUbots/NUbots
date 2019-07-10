@@ -49,9 +49,9 @@ namespace platform {
             utility::math::filter::UKF<MotionModel> motionFilter;
 
             struct Config {
-                Config() : nominal_z(0.0f), motionFilter(), buttons() {}
+                Config() : motionFilter(), buttons(), footDown() {}
 
-                float nominal_z;
+                bool debug;
 
                 struct MotionFilter {
                     MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
@@ -85,6 +85,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } process;
                     } noise;
                     struct Initial {
@@ -99,6 +100,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } mean;
                         struct Covariance {
                             Covariance()
@@ -110,6 +112,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } covariance;
                     } initial;
                 } motionFilter;
@@ -118,6 +121,13 @@ namespace platform {
                     Button() : debounceThreshold(0) {}
                     int debounceThreshold;
                 } buttons;
+
+
+                struct FootDown {
+                    FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
+                    bool fromLoad;
+                    float certaintyThreshold;
+                } footDown;
             } config;
 
         private:
@@ -127,7 +137,7 @@ namespace platform {
             bool middleDown = false;
 
             // Our sensor for foot down
-            VirtualLoadSensor load_sensor;
+            VirtualLoadSensor<float> load_sensor;
 
             // World to foot in world rotation when the foot landed
             std::array<arma::vec3, 2> footlanding_rFWw;
@@ -137,6 +147,9 @@ namespace platform {
 
             // World to foot in foot-flat rotation when the foot landed
             std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
+
+            // Storage for previous gyroscope values
+            arma::vec3 theta;
         };
     }  // namespace darwin
 }  // namespace platform

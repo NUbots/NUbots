@@ -2,19 +2,15 @@
 
 # Download and install our current toolchain version
 cd $TRAVIS_BUILD_DIR/toolchain
-sudo wget -N http://nubots.net/debs/nubots-toolchain-3.0.1-travis.deb
-sudo dpkg -i nubots-toolchain-3.0.1-travis.deb
+sudo wget -N http://nubots.net/debs/nubots-toolchain-3.0.4.deb
+sudo dpkg -i nubots-toolchain-3.0.4.deb
 
 # Setup ruby so puppet works
 rvm install ruby --latest
 
-# Download the puppetlabs deb file to install their apt repo
-sudo wget -N http://apt.puppetlabs.com/puppetlabs-release-trusty.deb
-sudo dpkg -i puppetlabs-release-trusty.deb
-
 # Update, and then install puppet
 sudo apt-get update
-sudo apt-get install puppet
+sudo apt-get install -y --reinstall puppet
 
 # Install the puppet modules that are required for this install
 sudo mkdir -p /etc/puppet/modules;

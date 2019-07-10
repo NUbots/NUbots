@@ -59,7 +59,7 @@ namespace support {
 
                     // Print our exception details
                     std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                              << Colour::brightred << "Exception:"
+                              << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
                               << " " << Colour::brightred << utility::support::evil::exception_name << " "
                               << exception_what << std::endl;
 
@@ -78,7 +78,7 @@ namespace support {
 
                         std::cerr << reactor << " "
                                   << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                                  << Colour::brightred << "Exception:"
+                                  << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
                                   << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
                     }
                     // We don't actually want to crash
@@ -86,7 +86,7 @@ namespace support {
 
                         std::cerr << reactor << " "
                                   << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                                  << Colour::brightred << "Exception of unknown type" << std::endl;
+                                  << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻" << std::endl;
                     }
 #endif
                 }
@@ -119,8 +119,8 @@ namespace support {
                     case NUClear::DEBUG: std::cerr << source << Colour::green << "DEBUG: "; break;
                     case NUClear::INFO: std::cerr << source << Colour::brightblue << "INFO: "; break;
                     case NUClear::WARN: std::cerr << source << Colour::yellow << "WARN: "; break;
-                    case NUClear::ERROR: std::cerr << source << Colour::brightred << "ERROR: "; break;
-                    case NUClear::FATAL: std::cerr << source << Colour::brightred << "FATAL: "; break;
+                    case NUClear::ERROR: std::cerr << source << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
+                    case NUClear::FATAL: std::cerr << source << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
                 }
 
                 // Output the message
