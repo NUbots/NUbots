@@ -31,7 +31,6 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
-#include "utility/math/geometry/Line.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
@@ -475,15 +474,6 @@ namespace motion {
             return inertial_tensor;
         }  // namespace kinematics
 
-        inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D Rcw,
-                                                              double cameraDistancePixels) {
-
-            // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
-            arma::vec2 normal = -arma::normalise(Rcw.submat(1, 2, 2, 2));
-            double distance   = cameraDistancePixels * std::tan(utility::math::angle::acos_clamped(Rcw(0, 2)) - M_PI_2);
-
-            return utility::math::geometry::Line(normal, distance);
-        }
 
         inline utility::math::matrix::Transform3D calculateBodyToGround(arma::vec3 groundNormal_body,
                                                                         double bodyHeight) {

@@ -15,7 +15,6 @@
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace localisation {
@@ -24,7 +23,6 @@ namespace localisation {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::support::FieldDescription;
-    using utility::time::TimeDifferenceSeconds;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::matrix::Transform3D;
@@ -63,8 +61,9 @@ namespace localisation {
         on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>, With<FieldDescription>, With<Sensors>>().then(
             "BallLocalisation Time", [this](const FieldDescription& field, const Sensors& sensors) {
                 /* Perform time update */
+                using namespace std::chrono;
                 auto curr_time        = NUClear::clock::now();
-                double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
                 filter.timeUpdate(seconds);
 
@@ -86,8 +85,9 @@ namespace localisation {
             [this](const message::vision::Balls& balls, const FieldDescription& field) {
                 if (balls.balls.size() > 0) {
                     /* Call Time Update first */
+                    using namespace std::chrono;
                     auto curr_time        = NUClear::clock::now();
-                    double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                    double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
                     filter.timeUpdate(seconds);
 
