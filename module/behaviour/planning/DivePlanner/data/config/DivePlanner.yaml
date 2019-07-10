@@ -1,5 +1,0 @@
-
-# Basically means the ball is moving
-SPEED_THRESHOLD : 0.01
-DISTANCE_THRESHOLD: 0.5
-#DISTANCE_THRESHOLD: 1.0   1.0 metre

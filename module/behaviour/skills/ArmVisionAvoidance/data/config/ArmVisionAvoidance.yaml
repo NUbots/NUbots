@@ -1,8 +1,0 @@
-head_limits:
-    yaw:
-        min: pi / 4
-        max: pi / 2
-    pitch: 0.0
-
-gain: 30.0
-torque: 100

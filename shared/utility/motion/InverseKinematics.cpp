@@ -278,12 +278,12 @@ namespace motion {
         }
 
         arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint,
-                                               const utility::math::matrix::Transform3D& camToGround,
-                                               const utility::math::matrix::Transform3D& bodyToGround) {
+                                               const utility::math::matrix::Transform3D& Hgc,
+                                               const utility::math::matrix::Transform3D& Hgt) {
             // TODO: Find point that is invariant under head position.
-            arma::vec3 cameraPosition        = camToGround.submat(0, 3, 2, 3);
+            arma::vec3 cameraPosition        = Hgc.submat(0, 3, 2, 3);
             arma::vec3 groundSpaceLookVector = groundPoint - cameraPosition;
-            arma::vec3 lookVector            = bodyToGround.submat(0, 0, 2, 2).t() * groundSpaceLookVector;
+            arma::vec3 lookVector            = Hgt.submat(0, 0, 2, 2).t() * groundSpaceLookVector;
             arma::vec3 lookVectorSpherical   = utility::math::coordinates::cartesianToSpherical(lookVector);
 
             return lookVectorSpherical.rows(1, 2);
@@ -291,9 +291,7 @@ namespace motion {
 
         arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors) {
             arma::vec3 groundPos_ground = {gpos[0], gpos[1], 0};
-            return calculateHeadJointsToLookAt(groundPos_ground,
-                                               convert<double, 4, 4>(sensors.camToGround),
-                                               convert<double, 4, 4>(sensors.bodyToGround));
+            return calculateHeadJointsToLookAt(groundPos_ground, convert(sensors.Hgc), convert(sensors.Hgt));
         }
 
         std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(

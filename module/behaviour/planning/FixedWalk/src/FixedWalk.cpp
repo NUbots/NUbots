@@ -66,7 +66,7 @@ namespace behaviour {
                             active = false;
                             return;
                         }
-                        beginningOrientation = sensors.world.rotation();
+                        beginningOrientation = sensors.Htw.rotation();
                     }
                     // Emit command
                     if (!walkSegments.empty()) {
@@ -94,7 +94,7 @@ namespace behaviour {
                     if (!active && !command.segments.empty()) {
                         active               = true;
                         segmentStart         = NUClear::clock::now();
-                        beginningOrientation = sensors.world.rotation();
+                        beginningOrientation = sensors.Htw.rotation();
                     }
                     for (auto& segment : command.segments) {
                         walkSegments.push_back(segment);
