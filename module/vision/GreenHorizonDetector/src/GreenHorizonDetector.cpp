@@ -1,6 +1,7 @@
 #include "GreenHorizonDetector.h"
 
 #include <fmt/format.h>
+#include <numeric>
 #include <set>
 
 #include "extension/Configuration.h"
@@ -9,7 +10,6 @@
 #include "message/vision/VisualMesh.h"
 
 #include "utility/math/geometry/ConvexHull.h"
-#include "utility/math/vision.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
 namespace module {

@@ -5,23 +5,24 @@ NUCLEAR_ROLE(
     support::logging::ConsoleLogHandler
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
     motion::KinematicsConfiguration
-    #Support
+    support::configuration::SoccerConfig
+
+    # Support
     support::configuration::GlobalConfig
     support::configuration::NetworkConfiguration
     support::NUsight
 
-    #Sensors
+    # Sensors
     input::Camera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
-    #Vision
-    vision::LUTClassifier
-    #vision::GoalDetector
+    # Vision
+    vision::VisualMesh
+    vision::GreenHorizonDetector
     vision::BallDetector
 
-    #Localisation
+    # Localisation
     localisation::BallLocalisation
 
-    support::configuration::SoccerConfig
 )

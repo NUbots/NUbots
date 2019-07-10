@@ -21,12 +21,8 @@
 
 #include "message/support/nusight/DataPoint.h"
 
-#include "utility/time/time.h"
-
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
-
     using message::support::nusight::DataPoint;
 
     void NUsight::provideDataPoints() {

@@ -66,7 +66,6 @@ namespace behaviour {
         using utility::math::matrix::Rotation2D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
-        using utility::nusight::drawSphere;
         using utility::nusight::graph;
 
         using utility::behaviour::ActionPriorites;
