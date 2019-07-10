@@ -28,7 +28,8 @@ namespace support {
     using std::chrono::milliseconds;
     using utility::nusight::graph;
 
-    NUsightHarness::NUsightHarness(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    NUsightHarness::NUsightHarness(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
 
         on<Every<50, milliseconds>>().then([this] {
             double period = 10;
