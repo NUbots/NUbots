@@ -34,7 +34,7 @@ storiesOf('components.robot_selector', module)
     const model = observable({
       robots,
     })
-    return <UpdatingStatsStory robots={model.robots} />
+    return <UpdatingStatsStory robots={model.robots}/>
   })
   .add('interactive', () => {
     const robots = getRobots()

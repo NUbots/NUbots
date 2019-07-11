@@ -32,9 +32,9 @@ export class Dashboard extends Component<DashboardProps> {
       <div className={style.page}>
         <Menu>
           <ul className={style.menu}>
-              <li className={style.menuItem}>
-                <button className={style.menuButton} onClick={this.onToggleOrientationClick}>Flip Orientation</button>
-              </li>
+            <li className={style.menuItem}>
+              <button className={style.menuButton} onClick={this.onToggleOrientationClick}>Flip Orientation</button>
+            </li>
           </ul>
         </Menu>
         <div className={style.dashboard}>

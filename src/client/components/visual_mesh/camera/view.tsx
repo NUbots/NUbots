@@ -24,8 +24,8 @@ export class CameraView extends Component<{ viewModel: CameraViewModel }> {
   render() {
     return (
       <div className={styles.viewport}>
-        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
-        <canvas ref={this.onRef} />
+        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize}/>
+        <canvas ref={this.onRef}/>
       </div>
     )
   }

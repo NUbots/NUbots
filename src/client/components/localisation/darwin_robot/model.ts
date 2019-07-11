@@ -41,27 +41,27 @@ export class DarwinMotorSet {
   @observable headTilt: DarwinMotor
 
   constructor({
-    rightShoulderPitch,
-    leftShoulderPitch,
-    rightShoulderRoll,
-    leftShoulderRoll,
-    rightElbow,
-    leftElbow,
-    rightHipYaw,
-    leftHipYaw,
-    rightHipRoll,
-    leftHipRoll,
-    rightHipPitch,
-    leftHipPitch,
-    rightKnee,
-    leftKnee,
-    rightAnklePitch,
-    leftAnklePitch,
-    rightAnkleRoll,
-    leftAnkleRoll,
-    headPan,
-    headTilt,
-  }: DarwinMotorSet) {
+                rightShoulderPitch,
+                leftShoulderPitch,
+                rightShoulderRoll,
+                leftShoulderRoll,
+                rightElbow,
+                leftElbow,
+                rightHipYaw,
+                leftHipYaw,
+                rightHipRoll,
+                leftHipRoll,
+                rightHipPitch,
+                leftHipPitch,
+                rightKnee,
+                leftKnee,
+                rightAnklePitch,
+                leftAnklePitch,
+                rightAnkleRoll,
+                leftAnkleRoll,
+                headPan,
+                headTilt,
+              }: DarwinMotorSet) {
     this.rightShoulderPitch = rightShoulderPitch
     this.leftShoulderPitch = leftShoulderPitch
     this.rightShoulderRoll = rightShoulderRoll

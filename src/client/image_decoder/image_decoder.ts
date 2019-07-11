@@ -47,11 +47,13 @@ export class ImageDecoder {
 
   constructor(private renderer: WebGLRenderer) {
 
-    this.atom = createAtom('ImageDecoder', () => {}, this.destroy)
+    this.atom = createAtom('ImageDecoder', () => {
+    }, this.destroy)
 
     this.cache = {
       get: () => new Texture(),
-      destroy: () => {},
+      destroy: () => {
+      },
     }
   }
 
@@ -80,14 +82,21 @@ export class ImageDecoder {
   // Update our stored texture
   update(image: Image): void {
     switch (image.format) {
-      case fourcc('JPEG'): return this.jpeg(image)
-      case fourcc('GRBG'): return this.bayer(image, [1, 0])
-      case fourcc('RGGB'): return this.bayer(image, [0, 0])
-      case fourcc('GBRG'): return this.bayer(image, [0, 1])
-      case fourcc('BGGR'): return this.bayer(image, [1, 1])
-      case fourcc('RGB3'): return this.dataTexture(image, RGBFormat)
+      case fourcc('JPEG'):
+        return this.jpeg(image)
+      case fourcc('GRBG'):
+        return this.bayer(image, [1, 0])
+      case fourcc('RGGB'):
+        return this.bayer(image, [0, 0])
+      case fourcc('GBRG'):
+        return this.bayer(image, [0, 1])
+      case fourcc('BGGR'):
+        return this.bayer(image, [1, 1])
+      case fourcc('RGB3'):
+        return this.dataTexture(image, RGBFormat)
       case fourcc('GREY'):
-      case fourcc('GRAY'): return this.dataTexture(image, LuminanceFormat)
+      case fourcc('GRAY'):
+        return this.dataTexture(image, LuminanceFormat)
       default:
         throw Error(`Unsupported image format ${fourccToString(image.format)}`)
     }
@@ -228,7 +237,8 @@ export class ImageDecoder {
 
       return texture
     },
-      () => {},
+      () => {
+      },
     )
 
     // This is ready immediately

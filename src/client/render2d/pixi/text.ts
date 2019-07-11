@@ -1,14 +1,9 @@
 import { createTransformer } from 'mobx-utils'
 import { Text } from 'pixi.js'
-import { TextStyle } from 'pixi.js'
 
-import { Transform } from '../../math/transform'
-import { Vector2 } from '../../math/vector2'
 import { BasicAppearance } from '../appearance/basic_appearance'
 import { TextGeometry } from '../geometry/text_geometry'
 import { Shape } from '../object/shape'
-
-import { applyAppearance } from './rendering'
 
 export const renderText = createTransformer((shape: Shape<TextGeometry>): Text => {
 

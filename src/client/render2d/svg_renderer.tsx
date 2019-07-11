@@ -23,7 +23,7 @@ export class SVGRenderer extends Component<RendererProps> {
     const cam = this.resolution.inverse().then(camera)
     return (
       <div className={classNames(className, style.container)}>
-        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
+        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize}/>
         <svg className={style.container}>
           <g transform={toSvgTransform(cam)}>
             <Group model={scene} world={cam}/>

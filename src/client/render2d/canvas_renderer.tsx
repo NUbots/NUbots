@@ -38,7 +38,7 @@ export class CanvasRenderer extends Component<RendererProps> {
   render() {
     return (
       <div className={classNames(this.props.className, style.container)}>
-        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
+        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize}/>
         <canvas
           className={style.container}
           width={-this.resolution.translate.x * 2}

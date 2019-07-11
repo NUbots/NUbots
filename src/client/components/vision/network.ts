@@ -15,10 +15,10 @@ import { VisionRobotModel } from './model'
 import Image = message.input.Image
 import CompressedImage = message.output.CompressedImage
 import Balls = message.vision.Balls
-import Goals = message.vision.Goals
 import Goal = message.vision.Goal
-import VisualMesh = message.vision.VisualMesh
+import Goals = message.vision.Goals
 import GreenHorizon = message.vision.GreenHorizon
+import VisualMesh = message.vision.VisualMesh
 
 export class VisionNetwork {
 

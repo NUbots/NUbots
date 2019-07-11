@@ -21,7 +21,7 @@ export class SelectOption extends React.Component<SelectOptionProps> {
     return <div
       className={classNames([className, style.option, isSelected ? style.optionSelected : ''])}
       onClick={this.onSelect}
-    >{ option.label }</div>
+    >{option.label}</div>
   }
 
   @action.bound

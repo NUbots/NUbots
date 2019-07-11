@@ -1,6 +1,5 @@
 import * as Emitter from 'component-emitter'
 import { NUClearNetPacket } from 'nuclearnet.js'
-import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetSend } from 'nuclearnet.js'
 
 import { Packet } from './nuclearnet_proxy_parser_socketio'

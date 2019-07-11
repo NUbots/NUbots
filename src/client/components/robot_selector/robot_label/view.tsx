@@ -38,11 +38,11 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
         />
         <span className={style.robotName}>{robot.name}</span>
         <span className={style.robotSwitch}>
-          <Switch on={robot.enabled} onChange={toggleRobot(robot)} />
+          <Switch on={robot.enabled} onChange={toggleRobot(robot)}/>
         </span>
       </label>
       <button className={dropdownButtonClassNames} onClick={toggleStats}>
-        <DropdownIcon />
+        <DropdownIcon/>
       </button>
     </div>
     <Collapsible open={model.statsOpen} className={style.dataTable}>

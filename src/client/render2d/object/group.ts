@@ -20,9 +20,9 @@ export class Group {
   }
 
   static of({
-    children = [],
-    transform = Transform.of(),
-  }: Partial<GroupOpts> = {}): Group {
+              children = [],
+              transform = Transform.of(),
+            }: Partial<GroupOpts> = {}): Group {
     return new Group({
       children,
       transform,

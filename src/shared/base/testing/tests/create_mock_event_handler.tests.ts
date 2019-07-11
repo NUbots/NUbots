@@ -1,6 +1,5 @@
 import { createMockEventHandler } from '../create_mock_event_handler'
 import { createMockInstance } from '../create_mock_instance'
-import Mocked = jest.Mocked
 
 describe('createMockEventHandler', () => {
   it('calls all registered callbacks when a mock event is fired', () => {

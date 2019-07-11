@@ -66,7 +66,7 @@ export function applyTransform(ctx: CanvasRenderingContext2D, transform: Transfo
 }
 
 // e.g. '#ff0000' → { r: 255, g: 0, b: 0 }
-export const hexToRGB = (hex: string): { r: number, g: number, b: number} => {
+export const hexToRGB = (hex: string): { r: number, g: number, b: number } => {
   const result = /^#([A-Fa-f0-9]{2})([A-Fa-f0-9]{2})([A-Fa-f0-9]{2})/.exec(hex)
 
   if (result === null) {

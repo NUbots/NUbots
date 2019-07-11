@@ -13,10 +13,10 @@ const actions = {
 storiesOf('components.switches_menu', module)
   .addDecorator(story => <div style={{ maxWidth: '350px' }}>{story()}</div>)
   .add('renders empty', () => {
-    return <SwitchesMenu options={[]} />
+    return <SwitchesMenu options={[]}/>
   })
   .add('renders with options', () => {
-    return <SwitchesMenu options={getOptions()} />
+    return <SwitchesMenu options={getOptions()}/>
   })
   .add('dropdown right', () => {
     const style = { backgroundColor: '#eee', display: 'flex', justifyContent: 'flex-end' }
@@ -39,9 +39,9 @@ storiesOf('components.switches_menu', module)
         }
       }),
     })
-    const Component = observer(() => <SwitchesMenu options={model.options} />)
+    const Component = observer(() => <SwitchesMenu options={model.options}/>)
 
-    return <Component />
+    return <Component/>
   })
 
 function getOptions(): SwitchesMenuOption[] {

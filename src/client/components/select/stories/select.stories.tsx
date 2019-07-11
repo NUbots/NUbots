@@ -59,7 +59,7 @@ storiesOf('components.select', module)
       options={options}
       onChange={actions.onChange}
       placeholder='Select a color...'
-      icon={<Icon />}
+      icon={<Icon/>}
     />
   })
   .add('interactive', () => {
@@ -74,10 +74,10 @@ storiesOf('components.select', module)
       selectedOption={model.selectedOption}
       onChange={onChange}
       placeholder='Select a color...'
-      icon={<Icon />}
+      icon={<Icon/>}
     />)
 
-    return <Component />
+    return <Component/>
   })
 
 function getOptions(): Option[] {

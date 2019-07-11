@@ -24,7 +24,7 @@ export class Field extends Component<FieldProps> {
         className={style.field}
         scene={viewModel.scene}
         camera={viewModel.camera}
-        aspectRatio={viewModel.aspectRatio} />
+        aspectRatio={viewModel.aspectRatio}/>
     </div>
   }
 }

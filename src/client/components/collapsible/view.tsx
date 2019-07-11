@@ -18,7 +18,7 @@ export const Collapsible = observer((props: CollapsibleProps) => {
   const { open, className, header, children, onToggle, animate = true } = props
   return (
     <div>
-      { header && <button className={style.collapsibleHeader} onClick={onToggle}>{ header }</button> }
+      {header && <button className={style.collapsibleHeader} onClick={onToggle}>{header}</button>}
       <CSSTransition
         in={open}
         timeout={200}
@@ -32,7 +32,7 @@ export const Collapsible = observer((props: CollapsibleProps) => {
         unmountOnExit
       >
         <div className={style.collapsibleTransition}>
-          <div className={classNames(style.collapsibleBody, className)}>{ children }</div>
+          <div className={classNames(style.collapsibleBody, className)}>{children}</div>
         </div>
       </CSSTransition>
     </div>

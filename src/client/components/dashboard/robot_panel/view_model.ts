@@ -5,12 +5,12 @@ import { message } from '../../../../shared/proto/messages'
 import { Vector3 } from '../../../math/vector3'
 import { DashboardRobotModel } from '../dashboard_robot/model'
 
+import { LastStatus } from './view'
+
 const State = message.behaviour.Behaviour.State
 const Mode = message.input.GameState.Data.Mode
 const PenaltyReason = message.input.GameState.Data.PenaltyReason
 const Phase = message.input.GameState.Data.Phase
-
-import { LastStatus } from './view'
 
 export class RobotPanelViewModel {
   constructor(private model: DashboardRobotModel) {

@@ -47,9 +47,9 @@ export const dropdownContainer = (WrappedComponent: ComponentType<DropdownProps>
     render(): JSX.Element {
       return (
         <WrappedComponent {...this.props}
-          isOpen={this.isOpen}
-          onRef={this.onRef}
-          onToggleClick={this.onToggleClick}>
+                          isOpen={this.isOpen}
+                          onRef={this.onRef}
+                          onToggleClick={this.onToggleClick}>
           {this.props.children}
         </WrappedComponent>
       )

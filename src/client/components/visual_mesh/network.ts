@@ -7,9 +7,9 @@ import { RobotModel } from '../robot/model'
 
 import { CameraModel } from './camera/model'
 import { VisualMeshRobotModel } from './model'
-import VisualMesh = message.vision.VisualMesh
 import Image = message.input.Image
 import CompressedImage = message.output.CompressedImage
+import VisualMesh = message.vision.VisualMesh
 
 export class VisualMeshNetwork {
   constructor(private network: Network) {

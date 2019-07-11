@@ -2,8 +2,8 @@ import { createMockInstance } from '../../../shared/base/testing/create_mock_ins
 import { message } from '../../../shared/proto/messages'
 import { Network } from '../network'
 import { NUsightNetwork } from '../nusight_network'
-import Sensors = message.input.Sensors
 import Mocked = jest.Mocked
+import Sensors = message.input.Sensors
 
 describe('Network', () => {
   let nusightNetwork: Mocked<NUsightNetwork>

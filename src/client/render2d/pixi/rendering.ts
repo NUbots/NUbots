@@ -3,7 +3,6 @@ import { Graphics } from 'pixi.js'
 import { Container } from 'pixi.js'
 import { DisplayObject } from 'pixi.js'
 
-import { Transform } from '../../math/transform'
 import { Appearance } from '../appearance/appearance'
 import { BasicAppearance } from '../appearance/basic_appearance'
 import { LineAppearance } from '../appearance/line_appearance'

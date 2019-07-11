@@ -13,8 +13,8 @@ export const Text = observer(({ model: { geometry, appearance }, world }: Props)
 
   const t = Transform.of({
     translate: { x, y },
-    scale:  worldScale ? { x: 1 / world.scale.x, y: 1 / world.scale.y }
-                       : { x: Math.sign(world.scale.x), y: Math.sign(world.scale.y) },
+    scale: worldScale ? { x: 1 / world.scale.x, y: 1 / world.scale.y }
+      : { x: Math.sign(world.scale.x), y: Math.sign(world.scale.y) },
     rotate: worldAlignment ? -world.rotate : 0,
   })
 

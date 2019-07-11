@@ -2,7 +2,6 @@ import { SeededRandom } from '../../../shared/base/random/seeded_random'
 import { google } from '../../proto/messages'
 import { toTimestamp } from '../timestamp'
 import { toSeconds } from '../timestamp'
-import Timestamp = google.protobuf.ITimestamp
 
 describe('protobuf timestamp', () => {
 

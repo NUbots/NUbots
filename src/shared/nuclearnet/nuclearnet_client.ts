@@ -9,9 +9,14 @@ export type NUClearEventListener = (peer: NUClearNetPeer) => void
 
 export interface NUClearNetClient {
   connect(options: NUClearNetOptions): () => void
+
   onJoin(cb: NUClearEventListener): () => void
+
   onLeave(cb: NUClearEventListener): () => void
+
   on(event: string, cb: NUClearPacketListener): () => void
+
   onPacket(cb: NUClearPacketListener): () => void
+
   send(options: NUClearNetSend): void
 }

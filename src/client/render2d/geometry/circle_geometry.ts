@@ -12,10 +12,10 @@ export class CircleGeometry {
   }
 
   static of({
-    radius = 1,
-    x = 0,
-    y = 0,
-  }: Partial<CircleGeometry> = {}): CircleGeometry {
+              radius = 1,
+              x = 0,
+              y = 0,
+            }: Partial<CircleGeometry> = {}): CircleGeometry {
     return new CircleGeometry({
       radius,
       x,
