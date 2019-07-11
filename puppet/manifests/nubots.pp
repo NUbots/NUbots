@@ -14,7 +14,7 @@ node default {
   }
 
   # Get and install our toolchain
-  $toolchain_version = '3.0.4'
+  $toolchain_version = '3.0.5'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain-${toolchain_version}.deb",
     source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
@@ -126,8 +126,10 @@ node nubotsvmbuild {
                        'prebuild'    => 'cp portaudio19.h portaudio.h',
                        'method'      => 'make',
                        'require'     => [ Installer['portaudio'], ], },
-    'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz',
-                       'method'      => 'autotools', },
+    'libuv'        => {'url'         => 'https://github.com/libuv/libuv/archive/v1.30.1.tar.gz',
+                       'args'        => { 'native'   => [ '-DBUILD_TESTING=OFF', ],
+                                          'nuc7i7bnh' => [ '-DBUILD_TESTING=OFF', ], },
+                       'method'      => 'cmake', },
     'ffi'          => {'url'         => 'https://github.com/libffi/libffi/archive/v3.2.1.tar.gz',
                        'postbuild'   => 'if [ -e PREFIX/lib32/libffi.a ]; then cp PREFIX/lib32/libffi* PREFIX/lib/; fi',
                        'method'      => 'autotools', },
@@ -213,7 +215,7 @@ node nubotsvmbuild {
 
   # Install catch.
   installer { 'catch':
-    url       => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp',
+    url       => 'https://github.com/catchorg/Catch2/releases/download/v2.9.1/catch.hpp',
     archs     => $archs,
     extension => 'hpp',
     method    => 'wget',
