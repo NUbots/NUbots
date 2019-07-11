@@ -5,8 +5,8 @@ buttons:
   debounce_threshold : 7
 
 foot_down:
-  from_load: true
-  certainty_threshold: 0.01
+  from_load: true             # If true uses the virtual load foot down, if false use the Z height method
+  certainty_threshold: 0.01   # Height difference of the Z for the Z height method
 
 foot_load_sensor:
   noise_factor: 1e-4
