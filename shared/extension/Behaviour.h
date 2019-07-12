@@ -1,6 +1,9 @@
 #ifndef EXTENSION_BEHAVIOUR_H
 #define EXTENSION_BEHAVIOUR_H
 
+#include <memory>
+#include <nuclear>
+
 namespace extension {
 namespace behaviour {
 
@@ -8,38 +11,44 @@ namespace behaviour {
         struct EnteringReaction {
             EnteringReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction, const std::type_index& type)
                 : reaction(reaction), type(type) {}
-            std::shared_ptr<threading::Reaction> reaction;
+            std::shared_ptr<NUClear::threading::Reaction> reaction;
             std::type_index type;
         };
 
         struct LeavingReaction {
             LeavingReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction, const std::type_index& type)
                 : reaction(reaction), type(type) {}
-            std::shared_ptr<threading::Reaction> reaction;
+            std::shared_ptr<NUClear::threading::Reaction> reaction;
             std::type_index type;
         };
 
         struct ProvidesReaction {
             ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction, const std::type_index& type)
                 : reaction(reaction), type(type) {}
-            std::shared_ptr<threading::Reaction> reaction;
+            std::shared_ptr<NUClear::threading::Reaction> reaction;
             std::type_index type;
         };
 
         struct WhenExpression {
             WhenExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
-                           std::function<void()> expression)
-                : reaction(reaction), expression(expression) {}
-            std::shared_ptr<threading::Reaction> reaction;
-            std::function<void()> expression;
+                           const std::type_index& type,
+                           bool (*expr)(const int&),
+                           int (*current)())
+                : reaction(reaction), type(type), expr(expr), current(current) {}
+            std::shared_ptr<NUClear::threading::Reaction> reaction;
+            std::type_index type;
+            bool (*expr)(const int&);  // Expression to determine if the state is valid
+            int (*current)();          // Function to get the current state from the global cache
         };
 
         struct CausingExpression {
             CausingExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
-                              std::function<void()> expression)
-                : reaction(reaction), expression(expression) {}
-            std::shared_ptr<threading::Reaction> reaction;
-            std::function<void()> expression;
+                              const std::type_index& type,
+                              const int& resulting_state)
+                : reaction(reaction), type(type), resulting_state(resulting_state) {}
+            std::shared_ptr<NUClear::threading::Reaction> reaction;
+            std::type_index type;
+            int resulting_state;
         };
 
         struct DirectorTask {
@@ -70,15 +79,15 @@ namespace behaviour {
     struct Entering {
 
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director
             reaction->reactor.powerplant.emit(std::make_unique<commands::EnteringReaction>(reaction, typeid(T)));
 
             // Add our unbinder
-            reaction->unbinders.emplace_back([](const threading::Reaction& r) {
-                r.reactor.emit<word::emit::Direct>(
-                    std::make_unique<operation::Unbind<commands::ProvidesReaction>>(r.id));
+            reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
+                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
             });
         }
     };
@@ -96,15 +105,15 @@ namespace behaviour {
     struct Leaving {
 
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director
             reaction->reactor.powerplant.emit(std::make_unique<commands::LeavingReaction>(reaction, typeid(T)));
 
             // Add our unbinder
-            reaction->unbinders.emplace_back([](const threading::Reaction& r) {
-                r.reactor.emit<word::emit::Direct>(
-                    std::make_unique<operation::Unbind<commands::ProvidesReaction>>(r.id));
+            reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
+                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
             });
         }
     };
@@ -121,20 +130,20 @@ namespace behaviour {
     struct Provides {
 
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director
             reaction->reactor.powerplant.emit(std::make_unique<commands::ProvidesReaction>(reaction, typeid(T)));
 
             // Add our unbinder
-            reaction->unbinders.emplace_back([](const threading::Reaction& r) {
-                r.reactor.emit<word::emit::Direct>(
-                    std::make_unique<operation::Unbind<commands::ProvidesReaction>>(r.id));
+            reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
+                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
             });
         }
 
         template <typename DSL>
-        static inline std::shared_ptr<T> get(threading::Reaction& t) {
+        static inline std::shared_ptr<T> get(NUClear::threading::Reaction& t) {
 
             // TODO get the instance of the task command data from the director
             return nullptr;
@@ -149,21 +158,18 @@ namespace behaviour {
      *
      * @tparam T the condition expression that must be true in order to execute this task.
      */
-    template <typename State, typename Condition>
+    template <typename State, template <typename> class expr, enum State::Value value>
     struct When {
 
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
-            // TODO the statement would look something like this for example
-            // on<Provides<Kick>, When<Stability, GreaterEqual<StaticallyStable>>>().then([this] {});
-            // Whatever function is generated off this needs to be able to both accept the current state as well as
-            // predicted states from any causes statements
-
-
-            // Tell the director
-            // TODO find a way to encode these expressions in the DSL
-            reaction->reactor.powerplant.emit(std::make_unique<commands::WhenExpression>(reaction, T::expression));
+            // Tell the director about this when condition
+            reaction->reactor.powerplant.emit(std::make_unique<commands::WhenExpression>(
+                reaction,
+                typeid(State),
+                [](const int& v) { return expr<int>()(v, value); },
+                [] { return NUClear::dsl::operation::CacheGet<State>::get(); }));
         }
     };
 
@@ -174,18 +180,16 @@ namespace behaviour {
      *
      * @tparam T the condition expression that this reaction will make true before leaving.
      */
-    template <typename T>
+    template <typename State, enum State::Value value>
     struct Causing {
 
         template <typename DSL>
-        static inline void bind(const std::shared_ptr<threading::Reaction>& reaction) {
-
-            on<Provides<Getup>, Causes<Stability, Stability::Standing>>().then([this] {});
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
-            // TODO find a way to encode these expressions in the DSL
-            reaction->reactor.powerplant.emit(std::make_unique<commands::CausingExpression>(reaction, T::expression));
+            reaction->reactor.powerplant.emit(
+                std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
         }
-    };
+    };  // namespace behaviour
 
     /**
      * A Task to be executed by the director, and a priority with which to execute this task.
@@ -205,13 +209,16 @@ namespace behaviour {
      */
     template <typename T>
     struct Task {
-        static void emit(PowerPlant& powerplant, std::shared_ptr<T> data, int priority, const std::string& name = "") {
+        static void emit(NUClear::PowerPlant& powerplant,
+                         std::shared_ptr<T> data,
+                         int priority,
+                         const std::string& name = "") {
 
             // Work out who is sending the task
             auto* task  = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t id = task ? task->reaction->id : -1;
+            uint64_t id = task ? task->parent.id : -1;
 
-            NUClear::dsl::word::emit::Direct::emit(
+            NUClear::dsl::word::emit::Direct<T>::emit(
                 powerplant, std::make_shared<commands::DirectorTask>(typeid(T), id, data, priority, name));
         }
     };
