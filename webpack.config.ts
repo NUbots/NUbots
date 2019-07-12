@@ -43,16 +43,13 @@ const config: webpack.Configuration = {
         exclude: [
           path.resolve(__dirname, 'node_modules'),
         ],
-        use: [{
-          loader: 'awesome-typescript-loader',
+        use: {
+          loader: 'ts-loader',
           options: {
-            useBabel: true,
-            useCache: true,
-            forceIsolatedModules: true,
+            onlyCompileBundledFiles: true,
             transpileOnly,
-            babelCore: '@babel/core',
           },
-        }],
+        },
       },
       // local css
       {
@@ -103,19 +100,16 @@ const config: webpack.Configuration = {
       {
         test: /\.svg$/,
         exclude: /\.file.svg$/,
-        use: [
-          'babel-loader',
-          {
-            loader: 'react-svg-loader',
-            query: {
-              svgo: {
-                // svgo options
-                plugins: [{ removeTitle: true }],
-                floatPrecision: 2,
-              },
+        use: {
+          loader: 'react-svg-loader',
+          query: {
+            svgo: {
+              // svgo options
+              plugins: [{ removeTitle: true }],
+              floatPrecision: 2,
             },
           },
-        ],
+        },
       },
       // static assets
       { test: /\.html$/, use: 'html-loader' },

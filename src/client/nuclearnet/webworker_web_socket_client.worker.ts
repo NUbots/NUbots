@@ -98,3 +98,5 @@ addEventListener('message', (e: MessageEvent) => {
       break
   }
 })
+
+export default {} as any as new() => Worker

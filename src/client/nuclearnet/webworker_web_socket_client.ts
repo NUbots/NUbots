@@ -1,11 +1,9 @@
 import Emitter from 'component-emitter'
 
 import { WebSocketClient } from './web_socket_client'
-import WebSocketWorker from './webworker_web_socket_client.worker.ts'
+import WebSocketWorker from './webworker_web_socket_client.worker'
 
 export class WebWorkerWebSocketClient extends Emitter implements WebSocketClient {
-
-
   constructor(private worker: Worker) {
     super()
     worker.addEventListener('message', this.handleMessage)
