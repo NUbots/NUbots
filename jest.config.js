@@ -1,6 +1,9 @@
 module.exports = {
   coverageDirectory: 'coverage',
-  coveragePathIgnorePatterns: ['/node_modules/', 'src/global.d.ts'],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    'src/global.d.ts',
+  ],
   collectCoverageFrom: [
     '**/*.{ts,tsx}',
     '!src/shared/proto/**',
@@ -9,8 +12,7 @@ module.exports = {
   ],
   globals: {
     'ts-jest': {
-      'tsConfigFile': './tsconfig.test.json',
-      'skipBabel': true,
+      tsConfig: './tsconfig.test.json',
     },
   },
   moduleDirectories: [
@@ -36,8 +38,5 @@ module.exports = {
   testMatch: [
     '**/tests/**/*.tests.{ts,tsx}',
   ],
-  transform: {
-    '.(ts|tsx)': 'ts-jest',
-  },
+  preset: 'ts-jest',
 }
-

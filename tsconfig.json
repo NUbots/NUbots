@@ -18,14 +18,16 @@
       "ES2018",
       "dom",
       "webworker"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./typings"
     ]
   },
   "include": [
-    "declarations",
-    "src/**/*"
+    "./src/**/*"
   ],
   "exclude": [
-    "build",
-    "node_modules"
+    "**/tests/**/*"
   ]
 }
