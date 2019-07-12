@@ -7,9 +7,9 @@ import { disposableComputed } from '../../../../base/disposable_computed'
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
 
-import * as LeftLowerArmConfig from './config/left_lower_arm.json'
-import * as LeftShoulderConfig from './config/left_shoulder.json'
-import * as LeftUpperArmConfig from './config/left_upper_arm.json'
+import LeftLowerArmConfig from './config/left_lower_arm.json'
+import LeftShoulderConfig from './config/left_shoulder.json'
+import LeftUpperArmConfig from './config/left_upper_arm.json'
 
 export class LeftArmViewModel {
   constructor(private model: LocalisationRobotModel) {

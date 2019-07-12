@@ -1,6 +1,6 @@
-import * as fs from 'fs'
+import fs from 'fs'
 import { autorun } from 'mobx'
-import * as path from 'path'
+import path from 'path'
 import { Vector3 } from 'three'
 import { Matrix4 } from 'three'
 

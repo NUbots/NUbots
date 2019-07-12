@@ -1,9 +1,6 @@
 module.exports = {
   coverageDirectory: 'coverage',
-  coveragePathIgnorePatterns: [
-    '/node_modules/',
-    'src/global.d.ts',
-  ],
+  coveragePathIgnorePatterns: ['/node_modules/'],
   collectCoverageFrom: [
     '**/*.{ts,tsx}',
     '!src/shared/proto/**',

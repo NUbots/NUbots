@@ -7,11 +7,11 @@ import { disposableComputed } from '../../../../base/disposable_computed'
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
 
-import * as CameraConfig from './config/camera.json'
-import * as EyeLEDConfig from './config/eye_led.json'
-import * as HeadConfig from './config/head.json'
-import * as HeadLEDConfig from './config/head_led.json'
-import * as NeckConfig from './config/neck.json'
+import CameraConfig from './config/camera.json'
+import EyeLEDConfig from './config/eye_led.json'
+import HeadConfig from './config/head.json'
+import HeadLEDConfig from './config/head_led.json'
+import NeckConfig from './config/neck.json'
 
 export class HeadViewModel {
   constructor(private model: LocalisationRobotModel) {

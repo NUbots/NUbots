@@ -1,7 +1,7 @@
 import { action } from 'mobx'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 import { ComponentType } from 'react'
 import { ReactNode } from 'react'
 

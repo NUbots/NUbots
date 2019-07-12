@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 import { Component } from 'react'
 import { ComponentType } from 'react'
 
@@ -12,7 +12,7 @@ import { LineChartProps } from './line_chart/view'
 import { LineChart } from './line_chart/view'
 import { ChartModel } from './model'
 import { ChartNetwork } from './network'
-import * as style from './style.css'
+import style from './style.css'
 import { TreeLabel } from './tree_label/view'
 
 @observer

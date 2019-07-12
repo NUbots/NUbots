@@ -1,4 +1,4 @@
-import * as SocketIO from 'socket.io-client'
+import SocketIO from 'socket.io-client'
 
 import * as NUClearNetProxyParser from '../../shared/nuclearnet/nuclearnet_proxy_parser'
 

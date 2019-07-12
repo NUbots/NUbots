@@ -7,12 +7,12 @@ import { disposableComputed } from '../../../../base/disposable_computed'
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
 
-import * as LeftAnkleConfig from './config/left_ankle.json'
-import * as LeftFootConfig from './config/left_foot.json'
-import * as LeftLowerLegConfig from './config/left_lower_leg.json'
-import * as LeftPelvisConfig from './config/left_pelvis.json'
-import * as LeftPelvisYConfig from './config/left_pelvis_y.json'
-import * as LeftUpperLegConfig from './config/left_upper_leg.json'
+import LeftAnkleConfig from './config/left_ankle.json'
+import LeftFootConfig from './config/left_foot.json'
+import LeftLowerLegConfig from './config/left_lower_leg.json'
+import LeftPelvisConfig from './config/left_pelvis.json'
+import LeftPelvisYConfig from './config/left_pelvis_y.json'
+import LeftUpperLegConfig from './config/left_upper_leg.json'
 
 export class LeftLegViewModel {
   constructor(private model: LocalisationRobotModel) {

@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 
 import { dropdownContainer } from '../dropdown_container/view'
 import { Switch } from '../switch/view'
 
 import MenuIcon from './menu_icon.svg'
-import * as style from './style.css'
+import style from './style.css'
 
 export type SwitchesMenuOption = {
   label: string

@@ -1,4 +1,4 @@
-import * as bounds from 'binary-search-bounds'
+import bounds from 'binary-search-bounds'
 import { autorun } from 'mobx'
 import { observable } from 'mobx'
 import { computed } from 'mobx'

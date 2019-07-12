@@ -1,4 +1,4 @@
-import * as bounds from 'binary-search-bounds'
+import bounds from 'binary-search-bounds'
 import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
 import { now } from 'mobx-utils'

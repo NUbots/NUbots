@@ -1,5 +1,5 @@
 import { Component } from 'react'
-import * as React from 'react'
+import React from 'react'
 import { hot } from 'react-hot-loader'
 import { Switch } from 'react-router'
 import { Route } from 'react-router'
@@ -9,7 +9,7 @@ import { NavigationConfiguration } from '../../navigation'
 import { NavigationView } from '../navigation/view'
 
 import { installNav } from './install'
-import * as style from './style.css'
+import style from './style.css'
 
 class AppView extends Component {
   private readonly nav: NavigationConfiguration = installNav()

@@ -1,5 +1,5 @@
-import * as classNames from 'classnames'
-import * as React from 'react'
+import classNames from 'classnames'
+import React from 'react'
 
 import { Vector3 } from '../../../math/vector3'
 
@@ -8,7 +8,7 @@ import BatteryIcon from './icon/battery.svg'
 import CameraIcon from './icon/camera.svg'
 import GoalIcon from './icon/goal.svg'
 import WarningIcon from './icon/warning.svg'
-import * as style from './style.css'
+import style from './style.css'
 
 export type LastStatus = 'okay' | 'warning' | 'danger'
 

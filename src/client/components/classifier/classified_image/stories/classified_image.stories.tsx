@@ -6,7 +6,7 @@ import { disposeOnUnmount } from 'mobx-react'
 import { observer } from 'mobx-react'
 import { now } from 'mobx-utils'
 import { Component } from 'react'
-import * as React from 'react'
+import React from 'react'
 
 import { SeededRandom } from '../../../../../shared/base/random/seeded_random'
 import { range } from '../../../../../shared/base/range'
@@ -16,7 +16,7 @@ import { Lut } from '../../lut'
 import { ClassifiedImageModel } from '../model'
 import { ClassifiedImageView } from '../view'
 
-import * as imageUrl from './image.jpg'
+import imageUrl from './image.jpg'
 
 storiesOf('classifier.classified_image', module)
   .addDecorator(fullscreen)

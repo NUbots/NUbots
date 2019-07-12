@@ -1,6 +1,6 @@
-import * as bindings from 'bindings'
+import bindings from 'bindings'
 import { EventEmitter } from 'events'
-import * as fs from 'fs'
+import fs from 'fs'
 
 const MMapNBSPlayer = bindings('nbs_player') as MMapNBSPlayerConstructor
 

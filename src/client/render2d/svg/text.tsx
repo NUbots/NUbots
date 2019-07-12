@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 
 import { Transform } from '../../math/transform'
 import { TextGeometry } from '../geometry/text_geometry'

@@ -1,4 +1,4 @@
-import * as bounds from 'binary-search-bounds'
+import bounds from 'binary-search-bounds'
 import { action } from 'mobx'
 
 import { BrowserSystemClock } from '../../../client/time/browser_clock'

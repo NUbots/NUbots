@@ -3,7 +3,7 @@ import { storiesOf } from '@storybook/react'
 import { action as mobxAction, observable, reaction } from 'mobx'
 import { disposeOnUnmount, observer } from 'mobx-react'
 import { now } from 'mobx-utils'
-import * as React from 'react'
+import React from 'react'
 
 import { SeededRandom } from '../../../../shared/base/random/seeded_random'
 import { RobotNetworkStatsModel } from '../../../network/model'

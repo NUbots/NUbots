@@ -1,4 +1,4 @@
-import * as seedrandom from 'seedrandom'
+import seedrandom from 'seedrandom'
 
 /**
  * A seeded pseudo-random number generator. When given the same seed, it will always produce the same set of values.

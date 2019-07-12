@@ -11,7 +11,7 @@ import { LocalisationRobotModel } from '../model'
 import { RightArmViewModel } from '../right_arm/view_model'
 import { RightLegViewModel } from '../right_leg/view_model'
 
-import * as BodyConfig from './config/body.json'
+import BodyConfig from './config/body.json'
 
 export class BodyViewModel {
   constructor(private model: LocalisationRobotModel) {

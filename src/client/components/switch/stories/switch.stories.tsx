@@ -2,7 +2,7 @@ import { action } from '@storybook/addon-actions'
 import { storiesOf } from '@storybook/react'
 import { action as mobxAction, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 
 import { Switch } from '../view'
 

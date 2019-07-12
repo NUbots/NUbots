@@ -1,18 +1,18 @@
-import * as classnames from 'classnames'
+import classNames from 'classnames'
 import { autorun } from 'mobx'
 import { IReactionDisposer } from 'mobx'
 import { observer } from 'mobx-react'
 import { ChangeEvent } from 'react'
 import { Component } from 'react'
 import { MouseEvent } from 'react'
-import * as React from 'react'
+import React from 'react'
 
 import { CheckedState } from '../model'
 import { TreeNodeModel } from '../model'
 
 import IconChevronDown from './chevron_down.svg'
 import IconChevronRight from './chevron_right.svg'
-import * as style from './style.css'
+import style from './style.css'
 
 export interface TreeNodeProps {
   node: TreeNodeModel
@@ -50,7 +50,7 @@ export class TreeNode extends Component<TreeNodeProps> {
     const children = this.props.node.children
     const hasChildren = children.length > 0
     const level = this.props.level || 0
-    const classes = classnames(style.treenode)
+    const classes = classNames(style.treenode)
     const renderLabel = this.props.renderLabel
 
     // Using inline paddingLeft to indent so that the hover and selected background indicators

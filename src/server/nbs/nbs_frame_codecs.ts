@@ -1,6 +1,6 @@
-import * as assert from 'assert'
-import * as binary from 'binary'
-import * as Long from 'long'
+import assert from 'assert'
+import binary from 'binary'
+import Long from 'long'
 import { NUClearNetPacket } from 'nuclearnet.js'
 
 export type NbsFrame = {

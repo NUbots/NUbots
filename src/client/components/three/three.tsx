@@ -7,7 +7,7 @@ import { disposeOnUnmount } from 'mobx-react'
 import { observer } from 'mobx-react'
 import { WheelEvent } from 'react'
 import { MouseEvent } from 'react'
-import * as React from 'react'
+import React from 'react'
 import { Component } from 'react'
 import { ContentRect } from 'react-measure'
 import Measure from 'react-measure'
@@ -18,7 +18,7 @@ import { Scene } from 'three'
 import { Camera } from 'three'
 import { debounce } from 'throttle-debounce'
 
-import * as styles from './styles.css'
+import styles from './styles.css'
 
 export type Stage = { scene: Scene, camera: Camera, target?: WebGLRenderTarget }
 export type Canvas = { width: number, height: number }

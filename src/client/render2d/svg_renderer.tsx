@@ -1,15 +1,15 @@
-import * as classNames from 'classnames'
+import classNames from 'classnames'
 import { observable } from 'mobx'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 import { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
 
 import { Transform } from '../math/transform'
 
 import { RendererProps } from './renderer_props'
-import * as style from './style.css'
+import style from './style.css'
 import { Group } from './svg/group'
 import { toSvgTransform } from './svg/rendering'
 

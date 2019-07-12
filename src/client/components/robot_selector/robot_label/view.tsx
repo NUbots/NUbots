@@ -1,7 +1,7 @@
-import * as classNames from 'classnames'
+import classNames from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 
 import { Collapsible } from '../../collapsible/view'
 import { RobotModel } from '../../robot/model'
@@ -11,7 +11,7 @@ import { StatusIndicator } from '../status_indicator/view'
 import DropdownIcon from './dropdown.svg'
 import { formatSI } from './format-si'
 import { RobotLabelModel } from './model'
-import * as style from './style.css'
+import style from './style.css'
 
 export type RobotLabelProps = {
   robot: RobotModel

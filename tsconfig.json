@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "sourceMap": true,
     "target": "ES2017",
     "jsx": "react",

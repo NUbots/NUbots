@@ -1,4 +1,4 @@
-import * as Emitter from 'component-emitter'
+import Emitter from 'component-emitter'
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetSend } from 'nuclearnet.js'
 

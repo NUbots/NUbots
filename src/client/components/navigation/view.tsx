@@ -1,9 +1,9 @@
-import * as React from 'react'
+import React from 'react'
 import { NavLink } from 'react-router-dom'
 
 import { NavigationConfiguration } from '../../navigation'
 
-import * as style from './style.css'
+import style from './style.css'
 
 interface NavigationItemViewProps {
   exact?: boolean

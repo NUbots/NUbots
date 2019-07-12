@@ -1,10 +1,10 @@
-import * as classNames from 'classnames'
-import * as React from 'react'
+import classNames from 'classnames'
+import React from 'react'
 import { ReactNode } from 'react'
 import { MouseEvent } from 'react'
 import { StatelessComponent } from 'react'
 
-import * as style from './style.css'
+import style from './style.css'
 
 export interface DropdownProps {
   children: ReactNode

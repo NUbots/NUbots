@@ -1,4 +1,4 @@
-import * as stream from 'stream'
+import stream from 'stream'
 
 import { NbsFrame } from './nbs_frame_codecs'
 import { encodeFrame } from './nbs_frame_codecs'

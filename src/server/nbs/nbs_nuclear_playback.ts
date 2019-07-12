@@ -1,6 +1,6 @@
 import { ReadStream } from 'fs'
-import * as fs from 'fs'
-import * as stream from 'stream'
+import fs from 'fs'
+import stream from 'stream'
 import { PassThrough } from 'stream'
 import { createGunzip } from 'zlib'
 

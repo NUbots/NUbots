@@ -1,7 +1,7 @@
 import { IComputedValue } from 'mobx'
 import { computed } from 'mobx'
 import { Component } from 'react'
-import * as React from 'react'
+import React from 'react'
 import { SpotLight } from 'three'
 import { PointLight } from 'three'
 import { Object3D } from 'three'

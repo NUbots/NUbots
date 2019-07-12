@@ -1,7 +1,7 @@
 import { action } from 'mobx'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 import { ReactNode } from 'react'
 import OutsideClickHandler from 'react-outside-click-handler'
 
@@ -10,7 +10,7 @@ import { Dropdown } from '../dropdown/view'
 
 import DropdownIcon from './dropdown.svg'
 import { SelectOption } from './option'
-import * as style from './style.css'
+import style from './style.css'
 
 export interface Option {
   id: string | number

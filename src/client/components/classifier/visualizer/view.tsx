@@ -1,14 +1,14 @@
 import { computed } from 'mobx'
 import { observer } from 'mobx-react'
 import { Component } from 'react'
-import * as React from 'react'
+import React from 'react'
 
 import { Canvas } from '../../three/three'
 import { Three } from '../../three/three'
 
 import { VisualizerController } from './controller'
 import { VisualizerModel } from './model'
-import * as styles from './styles.css'
+import styles from './styles.css'
 import { VisualizerViewModel } from './view_model'
 
 @observer

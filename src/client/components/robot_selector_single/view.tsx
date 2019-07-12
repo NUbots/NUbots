@@ -1,13 +1,13 @@
 import { computed } from 'mobx'
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 
 import { RobotModel } from '../robot/model'
 import { Option, Select } from '../select/view'
 
 import PlugIcon from './plug.svg'
 import RobotIcon from './robot.svg'
-import * as style from './style.css'
+import style from './style.css'
 
 export type RobotSelectorSingleProps = {
   robots: RobotModel[]

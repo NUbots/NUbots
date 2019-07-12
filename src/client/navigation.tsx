@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import * as React from 'react'
+import React from 'react'
 
 export type Route = {
   exact?: boolean

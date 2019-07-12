@@ -10,7 +10,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { LocalisationRobotModel } from '../darwin_robot/model'
 
-import * as url from './config/nugus.glb'
+import url from './config/nugus.glb'
 
 export class NUgusViewModel {
   constructor(private readonly model: LocalisationRobotModel) {

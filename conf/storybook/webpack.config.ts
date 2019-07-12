@@ -1,5 +1,5 @@
-import * as HtmlWebpackPlugin from 'html-webpack-plugin'
-import * as webpack from 'webpack'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import webpack from 'webpack'
 import config from '../../webpack.config'
 
 export default ({ config: storybookConfig }: { config: webpack.Configuration }) => {

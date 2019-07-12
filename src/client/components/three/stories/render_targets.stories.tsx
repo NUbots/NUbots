@@ -6,7 +6,7 @@ import { computed } from 'mobx'
 import { observable } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { now } from 'mobx-utils'
-import * as React from 'react'
+import React from 'react'
 import { WebGLRenderTarget } from 'three'
 import { TextureLoader } from 'three'
 import { LinearFilter } from 'three'
@@ -32,7 +32,7 @@ import { orthographicCamera } from '../builders'
 import { Canvas } from '../three'
 import { Three } from '../three'
 
-import * as robotSvgUrl from './robot.file.svg'
+import robotSvgUrl from './robot.file.svg'
 
 storiesOf('component.three', module)
   .addDecorator(fullscreen)

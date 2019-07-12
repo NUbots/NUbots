@@ -1,4 +1,4 @@
-import * as stream from 'stream'
+import stream from 'stream'
 
 import { NBS_HEADER } from './nbs_frame_codecs'
 import { PACKET_SIZE_SIZE } from './nbs_frame_codecs'

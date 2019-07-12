@@ -3,7 +3,7 @@ import { computed } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { observer } from 'mobx-react'
 import { now } from 'mobx-utils'
-import * as React from 'react'
+import React from 'react'
 import { ComponentType } from 'react'
 
 import { Canvas } from '../three/three'
@@ -13,7 +13,7 @@ import { LocalisationController } from './controller'
 import { LocalisationModel } from './model'
 import { ViewMode } from './model'
 import { LocalisationNetwork } from './network'
-import * as style from './style.css'
+import style from './style.css'
 import { LocalisationViewModel } from './view_model'
 
 type LocalisationViewProps = {

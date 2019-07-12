@@ -1,5 +1,5 @@
 import { ComponentType } from 'react'
-import * as React from 'react'
+import React from 'react'
 
 import { NavigationConfiguration } from '../../navigation'
 import { NUsightNetwork } from '../../network/nusight_network'

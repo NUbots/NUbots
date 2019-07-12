@@ -1,4 +1,4 @@
-import * as SocketIO from 'socket.io'
+import SocketIO from 'socket.io'
 
 /**
  * The thinnest wrapper possible around the Socket IO server interface. This exists to assist testing

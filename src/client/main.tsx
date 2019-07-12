@@ -1,6 +1,6 @@
 import { configure } from 'mobx'
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import React from 'react'
+import ReactDOM from 'react-dom'
 
 import AppView from './components/app/view'
 

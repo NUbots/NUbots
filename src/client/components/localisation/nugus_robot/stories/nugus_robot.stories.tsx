@@ -3,7 +3,7 @@ import { computed } from 'mobx'
 import { reaction } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { now } from 'mobx-utils'
-import * as React from 'react'
+import React from 'react'
 
 import { Vector3 } from '../../../../math/vector3'
 import { RobotModel } from '../../../robot/model'

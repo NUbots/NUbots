@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import React from 'react'
 import { Component } from 'react'
 import { ColorResult } from 'react-color'
 import { TwitterPicker } from 'react-color'
@@ -7,7 +7,7 @@ import { TwitterPicker } from 'react-color'
 import { TreeNodeModel } from '../../checkbox_tree/model'
 import { TreeViewModel } from '../view_model'
 
-import * as style from './style.css'
+import style from './style.css'
 
 type TreeLabelProps = {
   node: TreeNodeModel

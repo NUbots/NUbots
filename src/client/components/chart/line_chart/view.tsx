@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import { ChangeEvent } from 'react'
 import { ComponentType } from 'react'
-import * as React from 'react'
+import React from 'react'
 import { Component } from 'react'
 
 import { Renderer } from '../../../render2d/renderer'
@@ -9,7 +9,7 @@ import { ChartModel } from '../model'
 
 import { LineChartController } from './controller'
 import { LineChartModel } from './model'
-import * as style from './style.css'
+import style from './style.css'
 import { LineChartViewModel } from './view_model'
 
 export type LineChartProps = {}

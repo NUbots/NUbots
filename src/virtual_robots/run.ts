@@ -1,4 +1,4 @@
-import * as minimist from 'minimist'
+import minimist from 'minimist'
 
 import { DirectNUClearNetClient } from '../server/nuclearnet/direct_nuclearnet_client'
 import { NUClearNetClient } from '../shared/nuclearnet/nuclearnet_client'

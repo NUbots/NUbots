@@ -1,6 +1,6 @@
-import * as React from 'react'
+import React from 'react'
 
-import * as styles from './styles.css'
+import styles from './styles.css'
 
 export class LoadingIcon extends React.PureComponent<{ size?: number }> {
   render() {

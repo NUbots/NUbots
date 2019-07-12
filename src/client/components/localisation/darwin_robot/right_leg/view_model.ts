@@ -7,12 +7,12 @@ import { disposableComputed } from '../../../../base/disposable_computed'
 import { geometryAndMaterial } from '../../utils'
 import { LocalisationRobotModel } from '../model'
 
-import * as RightAnkleConfig from './config/right_ankle.json'
-import * as RightFootConfig from './config/right_foot.json'
-import * as RightLowerLegConfig from './config/right_lower_leg.json'
-import * as RightPelvisConfig from './config/right_pelvis.json'
-import * as RightPelvisYConfig from './config/right_pelvis_y.json'
-import * as RightUpperLegConfig from './config/right_upper_leg.json'
+import RightAnkleConfig from './config/right_ankle.json'
+import RightFootConfig from './config/right_foot.json'
+import RightLowerLegConfig from './config/right_lower_leg.json'
+import RightPelvisConfig from './config/right_pelvis.json'
+import RightPelvisYConfig from './config/right_pelvis_y.json'
+import RightUpperLegConfig from './config/right_upper_leg.json'
 
 export class RightLegViewModel {
   constructor(private model: LocalisationRobotModel) {
