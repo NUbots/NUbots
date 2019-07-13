@@ -1,0 +1,120 @@
+walk:
+  # Full walk cycle frequency
+  # (in Hz, > 0)
+  freq: 1.3
+  # Length of double support phase in half cycle
+  # (ratio, [0:1])
+  double_support_ratio: 0.05
+  # Give extra swing to first step for better start
+  # (in ?, [0:10])
+  first_step_swing_factor: 1.0
+  pause:
+    # Time that the walking is paused when becoming unstable
+    # (in s, [0:10])
+    duration: 0.5
+  foot:
+    # Lateral distance between the feet center
+    # (in m, >= 0)
+    distance: 0.2
+    # Maximum flying foot height
+    # (in m, >= 0)
+    rise: 0.06
+    # Pause of Z movement on highest point
+    # (single support cycle ratio, [0,1])
+    z_pause: 0.0
+    put_down:
+      # Let the foot's downward trajectory end above the ground
+      # this is helpful if the support leg bends
+      # (in m, >= 0)
+      z_offset: 0.0
+      # Phase time for moving the foot from Z offset to ground
+      # (in half cycle ratio [0:1])
+      phase: 1.0
+      # Roll offset on flying foot at put down
+      # (in rad, [-1,1])
+      roll_offset:
+    # Phase of flying foot apex
+    # (single support cycle phase, [0:1])
+    apex_phase: 0.5
+    overshoot:
+      # Foot X/Y overshoot in ratio of step length
+      # (ratio, >= 0)
+      ratio: 0.1
+      # Foot X/Y overshoot phase
+      # (single support cycle phase, [footApexPhase:1]
+      phase: 0.85
+  trunk:
+    # Height of the trunk from ground
+    # (in m, > 0)
+    height: 0.45
+    # Trunk pitch orientation
+    # (in rad)
+    pitch: 0.18
+    # Phase offset of trunk oscillation
+    # (half cycle phase, [-1:1])
+    phase: -0.1
+    # Trunk forward offset
+    # (in m)
+    x_offset: 0.0
+    # Trunk lateral offset
+    # (in m)
+    y_offset: 0.0
+    # Trunk lateral oscillation amplitude ratio
+    # (ratio, >= 0)
+    swing: 0.2
+    # Trunk swing pause length in phase at apex
+    # (half cycle ratio, [0:1])
+    pause: 0.0
+    x_offset_p_coef:
+      # Trunk forward offset proportional to forward step
+      # (in 1)
+      Forward: 0.0
+      # Trunk forward offset proportional to rotation step
+      # (in m/rad)
+      Turn: 0.0
+    pitch_p_coef:
+      # Trunk pitch orientation proportional to forward step
+      # (in rad/m)
+      forward: 1.2
+      # Trunk pitch orientation proportional to rotation step
+      # (in 1)
+      turn: -0.05
+  kick:
+    # Length of kick movement
+    # (in m, [0:1])
+    length: 0.09
+    # Time of kick apex
+    # (ratio of single support phase, [0:1])
+    phase: 0.75
+    # Kick velocity
+    # (in m/s, > 0)
+    vel: 0.2
+
+max_step:
+  # Maximal step length in X
+  # (in m, [0:1])
+  X: 0.06
+  # Maximal step length in Y
+  # (in m, [0:1])
+  Y: 0.05
+  # Maximal step turn in yaw
+  # (in rad, [0:1.5])
+  Z: 0.50
+  # Maximal step length in X and Y combined
+  # (in m, [0:1])
+  XY: 0.09
+
+imu:
+  # Activates the IMU to stop the walking when the robot gets unstable
+  active: false
+  pitch:
+    # Threshold for stopping for the robot pitch
+    # (in rad, [0:1])
+    threshold: 0.5
+  roll:
+    # Threshold for stopping for the robot roll
+    # (in rad, [0:1])
+    threshold: 0.4
+
+gains:
+  legs: 10

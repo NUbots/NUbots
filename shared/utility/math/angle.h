@@ -39,13 +39,14 @@ namespace math {
          *
          * @return the angle between -pi and pi
          */
-        inline double normalizeAngle(const double value) {
+        template <typename T>
+        inline T normalizeAngle(const T value) {
 
-            double angle = std::fmod(value, 2 * M_PI);
+            T angle = std::fmod(value, static_cast<T>(2.0 * M_PI));
 
-            if (angle <= -M_PI) angle += M_PI * 2;
+            if (angle <= -M_PI) angle += static_cast<T>(M_PI * 2.0);
 
-            if (angle > M_PI) angle -= 2 * M_PI;
+            if (angle > M_PI) angle -= static_cast<T>(M_PI * 2.0);
 
             return angle;
         }
@@ -84,6 +85,48 @@ namespace math {
 
             return d;
         }
+
+        /**
+         * Compute the oriented distance between the two given angle
+         * in the range -PI/2:PI/2 radian from angleSrc to angleDst
+         * (Better than doing angleDst-angleSrc)
+         */
+        template <typename Scalar>
+        inline double angleDistance(Scalar angleSrc, Scalar angleDst) {
+            angleSrc = normalizeAngle(angleSrc);
+            angleDst = normalizeAngle(angleDst);
+
+            Scalar max, min;
+            if (angleSrc > angleDst) {
+                max = angleSrc;
+                min = angleDst;
+            }
+            else {
+                max = angleDst;
+                min = angleSrc;
+            }
+
+            Scalar dist1 = max - min;
+            Scalar dist2 = 2.0 * M_PI - max + min;
+
+            if (dist1 < dist2) {
+                if (angleSrc > angleDst) {
+                    return -dist1;
+                }
+                else {
+                    return dist1;
+                }
+            }
+            else {
+                if (angleSrc > angleDst) {
+                    return dist2;
+                }
+                else {
+                    return -dist2;
+                }
+            }
+        }
+
 
         inline double vectorToBearing(arma::vec2 dirVec) {
             return std::atan2(dirVec(1), dirVec(0));
