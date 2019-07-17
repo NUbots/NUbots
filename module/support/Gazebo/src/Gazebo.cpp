@@ -106,7 +106,6 @@ namespace support {
 
             std::function<void(const ignition::msgs::StringMsg& _msg)> JointStatusCb(
                 [this](const ignition::msgs::StringMsg& _msg) -> void {
-
                     std::unique_ptr<DarwinSensors> sensors = std::make_unique<DarwinSensors>();
                     std::stringstream ss(_msg.data());
                     std::string line;
@@ -210,7 +209,6 @@ namespace support {
 
             std::function<void(const ignition::msgs::StringMsg& _msg)> BallStatusCb(
                 [this](const ignition::msgs::StringMsg& _msg) -> void {
-
                     // GET BALL updates
                     std::unique_ptr<GazeboBallLocation> location = std::make_unique<GazeboBallLocation>();
                     std::stringstream ss(_msg.data());
@@ -327,7 +325,6 @@ namespace support {
 
         on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
             [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
-
                 if (!this->pub.Publish(this->parseServos(commands, sensors)))
                     std::cout << "Error publishing to topic [topicCtrl]" << std::endl;
             });

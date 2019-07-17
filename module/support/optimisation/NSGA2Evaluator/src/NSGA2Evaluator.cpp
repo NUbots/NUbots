@@ -187,8 +187,6 @@ namespace support {
                     else if (ballVelocity[0] == 0.0 && ballVelocity[1] == 0.0 && ballVelocity[2] == 0.0)
                         BeginTermination();
                 }
-
-
             });
 
             on<Trigger<GazeboWorldStatus>, Single>().then([this](const GazeboWorldStatus& status) {
@@ -217,13 +215,11 @@ namespace support {
                     terminating = false;
                     SendFitnessScores();
                 }
-
             });
 
             on<Trigger<NSGA2Terminate>, Single>().then([this](const NSGA2Terminate& terminate) {
                 // Get the sim time
                 finished = true;
-
             });
 
             on<Trigger<GazeboBallLocation>, Single>().then([this](const GazeboBallLocation& location) {
@@ -244,7 +240,6 @@ namespace support {
             });
 
             on<Trigger<GazeboRobotLocation>, Single>().then([this](const GazeboRobotLocation& location) {
-
                 // distanceTravelled += location.x + 1;//std::pow(std::pow(location.x - robotLocation[0], 2) +
                 // std::pow(location.y - robotLocation[1], 2), 0.5);
                 robotLocationDelta[0] = location.x - robotLocationDelta[0];

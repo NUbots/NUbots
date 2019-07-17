@@ -185,7 +185,6 @@ namespace support {
                         0, nsga2Algorithm.parentPop->generation, nsga2Algorithm.parentPop->GetIndReals(0));
                     // nsga2Algorithm.Evolve();
                 }
-
             });
 
             on<Trigger<NSGA2FitnessScores>, Single>().then([this](const NSGA2FitnessScores& scores) {
