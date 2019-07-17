@@ -58,7 +58,6 @@ if __name__ == "__main__":
             namespace logging {{
 
                 using extension::Configuration;
-                using message::support::ServoHealthTestData;
 
                 DataLogging::DataLogging(std::unique_ptr<NUClear::Environment> environment)
                     : Reactor(std::move(environment)), fd(-1), output_file(), handles() {{
