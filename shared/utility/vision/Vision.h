@@ -320,10 +320,13 @@ namespace vision {
     Pixel getUYVYPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
     Pixel getYUV12Pixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
     Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc);
-    constexpr FOURCC fourcc(const char (&code)[5]);
     FOURCC getFourCCFromDescription(const std::string& code);
     uint32_t getAravisPixelFormat(const std::string& code);
-
+    constexpr FOURCC fourcc(const char (&code)[5]) {
+        uint32_t cc =
+            (((code[0]) & 255) | (((code[1]) & 255) << 8) | (((code[2]) & 255) << 16) | (((code[3]) & 255) << 24));
+        return ((FOURCC) cc);
+    }
 
 }  // namespace vision
 }  // namespace utility

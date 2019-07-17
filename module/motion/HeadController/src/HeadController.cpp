@@ -112,9 +112,9 @@ namespace motion {
                 // The goal angles are for the neck directly, so we have to offset the camera declination again
                 arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
                 // Convert to robot space
-                arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world
-                                                           : Transform3D(convert<double, 4, 4>(sensors.Htw)).rotation()
-                                                                 * goalHeadUnitVector_world;
+                arma::vec3 headUnitVector =
+                    goalRobotSpace ? goalHeadUnitVector_world
+                                   : Transform3D(convert(sensors.Htw)).rotation() * goalHeadUnitVector_world;
                 // Compute inverse kinematics for head
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!

@@ -71,14 +71,17 @@ namespace input {
                             config["is_left"].as<bool>(),
                             Image::Lens(
                                 Image::Lens::Projection::EQUIDISTANT,
-                                1.0f / config["lens"]["radiansPerPixel"].as<float>(),
-                                Eigen::Vector2f(config["lens"]["FOV"].as<float>(), config["lens"]["FOV"].as<float>()),
-                                convert<float, 2>(config["lens"]["centreOffset"].as<arma::fvec>())),
+                                config["lens"]["focal_length"].as<float>(),
+                                Eigen::Vector2f(config["lens"]["fov"].as<float>(), config["lens"]["fov"].as<float>()),
+                                Eigen::Vector2f(config["lens"]["centre_offset"][0].as<float>(),
+                                                config["lens"]["centre_offset"][1].as<float>())),
                             newCamera,
                             stream,
                             *this};
 
                         camera = AravisCameras.insert(std::make_pair(deviceID, context)).first;
+
+                        log<NUClear::DEBUG>("Found camera", config.fileName, "with serial number", deviceID);
                     }
                 }
 
@@ -118,7 +121,7 @@ namespace input {
                               config["format"]["height"].as<size_t>());
 
         // Set exposure.
-        auto exposure = config["settings"]["exposure"].as<Expression>();
+        double exposure = config["settings"]["exposure"].as<Expression>();
         if (std::isfinite(exposure)) {
             arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_exposure_time(camera->second.camera, exposure);
@@ -129,7 +132,7 @@ namespace input {
         }
 
         // Set gain.
-        auto gain = config["settings"]["gain"].as<Expression>();
+        double gain = config["settings"]["gain"].as<Expression>();
         if (std::isfinite(gain)) {
             arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_gain(camera->second.camera, gain);

@@ -15,7 +15,6 @@
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace localisation {
@@ -24,7 +23,6 @@ namespace localisation {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::support::FieldDescription;
-    using utility::time::TimeDifferenceSeconds;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::matrix::Transform3D;
@@ -63,15 +61,16 @@ namespace localisation {
         on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>, With<FieldDescription>, With<Sensors>>().then(
             "BallLocalisation Time", [this](const FieldDescription& field, const Sensors& sensors) {
                 /* Perform time update */
+                using namespace std::chrono;
                 auto curr_time        = NUClear::clock::now();
-                double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
                 filter.timeUpdate(seconds);
 
                 /* Creating ball state vector and covariance matrix for emission */
                 auto ball        = std::make_unique<Ball>();
-                ball->position   = convert<double, 2>(filter.get());
-                ball->covariance = convert<double, 2, 2>(filter.getCovariance());
+                ball->position   = convert(filter.get());
+                ball->covariance = convert(filter.getCovariance());
 
                 if (ball_pos_log) {
                     emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
@@ -86,8 +85,9 @@ namespace localisation {
             [this](const message::vision::Balls& balls, const FieldDescription& field) {
                 if (balls.balls.size() > 0) {
                     /* Call Time Update first */
+                    using namespace std::chrono;
                     auto curr_time        = NUClear::clock::now();
-                    double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                    double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
                     filter.timeUpdate(seconds);
 
@@ -95,10 +95,10 @@ namespace localisation {
                      * and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls.balls[0].measurements) {
-                        filter.measurementUpdate(cartesianToSpherical(convert<double, 3, 1>(measurement.rBCc)),
-                                                 convert<double, 3, 3>(measurement.covariance),
+                        filter.measurementUpdate(arma::conv_to<arma::vec>::from(convert(measurement.rBCc)),
+                                                 arma::conv_to<arma::mat>::from(convert(measurement.covariance)),
                                                  field,
-                                                 convert<double, 4, 4>(balls.Hcw));
+                                                 convert(balls.Hcw));
                     }
                     last_measurement_update_time = curr_time;
                 }

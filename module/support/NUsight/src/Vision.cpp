@@ -20,50 +20,47 @@
 #include "NUsight.h"
 
 #include "message/input/Image.h"
+#include "message/output/CompressedImage.h"
 #include "message/vision/Ball.h"
-#include "message/vision/ClassifiedImage.h"
 #include "message/vision/Goal.h"
+#include "message/vision/GreenHorizon.h"
 #include "message/vision/Line.h"
-#include "message/vision/LookUpTable.h"
-#include "message/vision/LookUpTableDiff.h"
 #include "message/vision/Obstacle.h"
+#include "message/vision/VisualMesh.h"
 
 #include "utility/support/eigen_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
 
     using message::input::Image;
+    using message::output::CompressedImage;
     using message::vision::Balls;
-    using message::vision::ClassifiedImage;
     using message::vision::Goals;
+    using message::vision::GreenHorizon;
     using message::vision::Lines;
-    using message::vision::LookUpTableDiff;
     using message::vision::Obstacles;
+    using message::vision::VisualMesh;
 
     void NUsight::provideVision() {
         handles["image"].push_back(
             on<Trigger<Image>, Single, Priority::LOW>().then([this](std::shared_ptr<const Image> image) {
-                if (NUClear::clock::now() - last_image < max_image_duration) {
-                    return;
+                // If we have never sent an image from this camera, or we
+                if (last_image.count(image->camera_id) == 0
+                    || (NUClear::clock::now() - last_image[image->camera_id] > max_image_duration)) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
+                    last_image[image->camera_id] = NUClear::clock::now();
                 }
-
-                powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-
-                last_image = NUClear::clock::now();
             }));
 
-        handles["classified_image"].push_back(on<Trigger<ClassifiedImage>, Single, Priority::LOW>().then(
-            [this](std::shared_ptr<const ClassifiedImage> image) {
-                if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
-                    return;
+        handles["compressed_image"].push_back(on<Trigger<CompressedImage>, Single, Priority::LOW>().then(
+            [this](std::shared_ptr<const CompressedImage> image) {
+                // If we have never sent an image from this camera, or we
+                if (last_image.count(image->camera_id) == 0
+                    || (NUClear::clock::now() - last_image[image->camera_id] > max_image_duration)) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
+                    last_image[image->camera_id] = NUClear::clock::now();
                 }
-
-                powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-
-                last_classified_image = NUClear::clock::now();
             }));
 
         handles["vision_object"].push_back(
@@ -86,9 +83,14 @@ namespace support {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(obstacles), "nusight", false);
             }));
 
-        handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then(
-            [this](std::shared_ptr<const LookUpTableDiff> tableDiff) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(tableDiff), "nusight", true);
+        handles["visual_mesh"].push_back(
+            on<Trigger<VisualMesh>, Single, Priority::LOW>().then([this](std::shared_ptr<const VisualMesh> vm) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(vm), "nusight", false);
+            }));
+
+        handles["green_horizon"].push_back(
+            on<Trigger<GreenHorizon>, Single, Priority::LOW>().then([this](std::shared_ptr<const GreenHorizon> gh) {
+                powerplant.emit_shared<Scope::NETWORK>(std::move(gh), "nusight", false);
             }));
     }
 }  // namespace support

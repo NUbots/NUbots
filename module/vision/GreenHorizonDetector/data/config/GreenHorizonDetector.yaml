@@ -1,0 +1,4 @@
+confidence_threshold: 0.7       # How confident do we need to be that this is a green horizon point
+cluster_points: 5               # How many points do we need to claim this cluster is a viable part of the green horizon
+distance_offset: 1.0            # Push the green horizon radially outwards by this distance (in m)
+debug: false                    # Turn on debug outputs

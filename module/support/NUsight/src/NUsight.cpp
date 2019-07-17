@@ -20,33 +20,19 @@
 #include "NUsight.h"
 
 #include "extension/Configuration.h"
-
 #include "message/support/SaveConfiguration.h"
 #include "message/support/nusight/Command.h"
-#include "message/support/nusight/ReactionHandles.h"
-#include "message/vision/LookUpTable.h"
-
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace support {
 
     using extension::Configuration;
-
     using message::support::SaveConfiguration;
     using message::support::nusight::Command;
-    using message::support::nusight::ReactionHandles;
-    using message::vision::LookUpTable;
-    using message::vision::SaveLookUpTable;
-
     using utility::nusight::graph;
-    using utility::time::durationFromSeconds;
-
-    // Flag struct to upload a lut
-    struct UploadLUT {};
 
     NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -58,7 +44,6 @@ namespace support {
         // These go first so the config can do things with them
         provideOverview();
         provideDataPoints();
-        provideDrawObjects();
         provideSubsumption();
         provideGameController();
         provideLocalisation();
@@ -67,9 +52,11 @@ namespace support {
         provideVision();
 
         on<Configuration>("NUsight.yaml").then([this](const Configuration& config) {
-            max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
-            max_classified_image_duration =
-                durationFromSeconds(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>());
+            using namespace std::chrono;
+            max_image_duration = duration_cast<NUClear::clock::duration>(
+                duration<double>(1.0 / config["output"]["network"]["max_image_fps"].as<double>()));
+            max_classified_image_duration = duration_cast<NUClear::clock::duration>(
+                duration<double>(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>()));
 
             for (auto& setting : config["reaction_handles"].config) {
                 // Lowercase the name
@@ -102,77 +89,14 @@ namespace support {
             }
         });
 
-        on<Trigger<UploadLUT>, With<LookUpTable>>().then([this](std::shared_ptr<const LookUpTable> lut) {
-            powerplant.emit_shared<Scope::NETWORK>(std::move(lut), "nusight", true);
-        });
 
         on<Network<Command>>().then("Network Command", [this](const Command& message) {
             std::string command = message.command;
             log<NUClear::INFO>("Received command:", command);
-            if (command == "download_lut") {
-
-                // Emit something to make it upload the lut
-                emit<Scope::DIRECT>(std::make_unique<UploadLUT>());
-            }
-            else if (command == "get_reaction_handles") {
-                sendReactionHandles();
-            }
-            else if (command == "get_subsumption") {
+            if (command == "get_subsumption") {
                 sendSubsumption();
             }
         });
-
-        on<Network<LookUpTable>>().then([this](const LookUpTable& lut) {
-            log<NUClear::INFO>("Loading LUT");
-            emit<Scope::DIRECT>(std::make_unique<LookUpTable>(lut));
-
-            log<NUClear::INFO>("Saving LUT to file");
-            emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
-        });
-
-        on<Network<ReactionHandles>>().then(
-            [this](const NetworkSource& /*source*/, const ReactionHandles& /*command*/) {
-                // auto config = std::make_unique<SaveConfiguration>();
-                // config->config = currentConfig->config;
-
-                // for (const auto& command : message.reaction_handles().handles()) {
-
-                //     Message::Type type = command.type();
-                //     bool enabled = command.enabled();
-                //     std::string key = getStringFromMessageType(type);
-
-                //     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-
-                //     config->path = CONFIGURATION_PATH;
-                //     config->config["reaction_handles"][key] = enabled;
-                //     for (auto& handle : handles[type]) {
-                //         handle.enable(enabled);
-                //     }
-                // }
-
-                // emit(std::move(config));
-            });
-
-        sendReactionHandles();
-
-        on<Trigger<SaveConfiguration>>().then("Save Config", [this](const SaveConfiguration& config) {
-            saveConfigurationFile(config.path, config.config);
-        });
-    }
-
-    void NUsight::sendReactionHandles() {
-
-        auto reactionHandles = std::make_unique<ReactionHandles>();
-
-        for (auto& handle : handles) {
-            ReactionHandles::Handle objHandle;
-            objHandle.type    = handle.first;
-            auto& value       = handle.second;
-            objHandle.enabled = (value.empty()) ? true : value.front().enabled();
-            reactionHandles->handles.push_back(objHandle);
-        }
-
-        emit<Scope::NETWORK>(reactionHandles, "nusight", true);
     }
 
 }  // namespace support

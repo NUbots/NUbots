@@ -74,6 +74,4 @@ tags
 .DS_Store
 .idea
 *.sublime-workspace
-
-
-\.vscode/ipch/
+\.vscode/ipch

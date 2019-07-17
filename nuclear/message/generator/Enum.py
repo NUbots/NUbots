@@ -7,29 +7,32 @@ class Enum:
     def __init__(self, e, context):
         self.package = context.package
         self.name = e.name
-        self.fqn = '{}.{}'.format(context.fqn, self.name)
+        self.fqn = "{}.{}".format(context.fqn, self.name)
         self.values = [(v.name, v.number) for v in e.value]
         self.include_path = context.include_path
 
     def generate_cpp(self):
 
         # Make our value pairs
-        values = indent('\n'.join(['{} = {}'.format(v[0], v[1]) for v in self.values]), 8)
-        values = ',\n'.join([v for v in values.splitlines()])
+        values = indent("\n".join(["{} = {}".format(v[0], v[1]) for v in self.values]), 8)
+        values = ",\n".join([v for v in values.splitlines()])
 
-        scope_name='_'.join(self.fqn.split('.'))
+        scope_name = "_".join(self.fqn.split("."))
 
         # Make our switch statement pairs
-        switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
+        switches = indent("\n".join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
 
         # Make our if chain
-        if_chain = indent('\nelse '.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values]))
+        if_chain = indent(
+            "\nelse ".join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values])
+        )
 
         # Get our default value
         default_value = dict([reversed(v) for v in self.values])[0]
 
         # Make our fancy enums
-        header_template = dedent("""\
+        header_template = dedent(
+            """\
             struct {name} : public ::message::MessageBase<{name}> {{
                 enum Value {{
             {values}
@@ -82,9 +85,11 @@ class Enum:
                 operator {protobuf_name}() const;
 
                 friend std::ostream& operator<< (std::ostream& out, const {name}& val);
-            }};""")
+            }};"""
+        )
 
-        impl_template = dedent("""\
+        impl_template = dedent(
+            """\
             typedef {fqn} T{scope_name};
 
             {fqn}::{name}() : value(Value::{default_value}) {{}}
@@ -172,9 +177,11 @@ class Enum:
 
             std::ostream& {namespace}::operator<< (std::ostream& out, const {fqn}& val) {{
                 return out << static_cast<std::string>(val);
-            }}""")
+            }}"""
+        )
 
-        python_template = dedent("""\
+        python_template = dedent(
+            """\
             // Local scope for this enum
             {{
                 auto enumclass = pybind11::class_<{fqn}, std::shared_ptr<{fqn}>>(context, "{name}")
@@ -206,25 +213,33 @@ class Enum:
                 pybind11::enum_<{fqn}::Value>(enumclass, "Value")
             {value_list}
                     .export_values();
-            }}""")
-
-        return header_template.format(
-            name=self.name,
-            protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
-            values=values
-        ), impl_template.format(
-            fqn='::'.join(self.fqn.split('.')),
-            namespace='::'.join(self.package.split('.')),
-            name=self.name,
-            protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
-            default_value=default_value,
-            if_chain=if_chain,
-            switches=switches,
-            scope_name=scope_name,
-        ), python_template.format(
-            fqn='::'.join(self.fqn.split('.')),
-            name=self.name,
-            include_path=self.include_path,
-            value_list=indent('\n'.join('.value("{name}", {fqn}::{name})'.format(name=v[0], fqn=self.fqn.replace('.', '::')) for v in self.values), 8)
+            }}"""
         )
 
+        return (
+            header_template.format(
+                name=self.name, protobuf_name="::".join((".protobuf" + self.fqn).split(".")), values=values
+            ),
+            impl_template.format(
+                fqn="::".join(self.fqn.split(".")),
+                namespace="::".join(self.package.split(".")),
+                name=self.name,
+                protobuf_name="::".join((".protobuf" + self.fqn).split(".")),
+                default_value=default_value,
+                if_chain=if_chain,
+                switches=switches,
+                scope_name=scope_name,
+            ),
+            python_template.format(
+                fqn="::".join(self.fqn.split(".")),
+                name=self.name,
+                include_path=self.include_path,
+                value_list=indent(
+                    "\n".join(
+                        '.value("{name}", {fqn}::{name})'.format(name=v[0], fqn=self.fqn.replace(".", "::"))
+                        for v in self.values
+                    ),
+                    8,
+                ),
+            ),
+        )

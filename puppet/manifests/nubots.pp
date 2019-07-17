@@ -362,6 +362,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
+set(OpenCL_INCLUDE_DIR \"/opt/intel/opencl/include\")
+set(OpenCL_LIBRARY \"/opt/intel/opencl/libOpenCL.so\")
+
 ${compile_options}
 
 include_directories(SYSTEM \"${prefix}/${arch}/include\")

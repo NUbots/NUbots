@@ -147,6 +147,7 @@ namespace motion {
 
         // start config, see config file for documentation
 
+        bool use_com;
         double stanceLimitY2;
         arma::mat::fixed<3, 2> stepLimits;
         arma::mat::fixed<3, 2> velocityLimits;
@@ -166,6 +167,12 @@ namespace motion {
         double phase1Single;
         double phase2Single;
         arma::vec2 footOffset;
+        double legYaw;
+        // Ankle feedback parameters
+        double ankleRollComp;
+        double ankleRollLimit;
+        double anklePitchComp;
+        double anklePitchLimit;
         // standard offset
         Transform2D uLRFootOffset;
         // arm poses

@@ -102,8 +102,8 @@ namespace support {
         result.goals.at(0).team = team;
 
         // get the torso to foot transform
-        Transform3D Hgt  = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
-        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+        Transform3D Hgt  = convert(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+        Transform3D Hgt2 = convert(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
 
         if (Hgt2(3, 2) < Hgt(3, 2)) {
             Hgt = Hgt2;
@@ -112,27 +112,27 @@ namespace support {
         Hgt.submat(0, 3, 1, 3) *= 0.0;
         Hgt.rotation() = Rotation3D::createRotationZ(-Rotation3D(Hgt.rotation()).yaw()) * Hgt.rotation();
         // create the camera to ground transform
-        Transform3D Hgc = Hgt * convert<double, 4, 4>(Htc.matrix());
+        Transform3D Hgc = Hgt * convert(Htc.matrix());
 
         // push the new measurement types
 
         arma::mat::fixed<3, 4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, convert<double, 3>(goalNormals.col(0))));
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert<double, 3>(goalNormals.col(1))));
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, convert<double, 3>(goalNormals.col(2))));
-            result.goals.at(0).measurements.push_back(
-                Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, convert<double, 3>(goalNormals.col(3))));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::LEFT_NORMAL, convert(arma::vec3(goalNormals.col(0))).cast<float>()));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::RIGHT_NORMAL, convert(arma::vec3(goalNormals.col(1))).cast<float>()));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::TOP_NORMAL, convert(arma::vec3(goalNormals.col(2))).cast<float>()));
+            result.goals.at(0).measurements.push_back(Goal::Measurement(
+                Goal::MeasurementType::BASE_NORMAL, convert(arma::vec3(goalNormals.col(3))).cast<float>()));
 
             // build the predicted quad
             utility::math::geometry::Quad quad(
-                getCamRay(goalNormals.col(0), goalNormals.col(3), image.lens, convert<uint, 2>(image.dimensions)),
-                getCamRay(goalNormals.col(0), goalNormals.col(2), image.lens, convert<uint, 2>(image.dimensions)),
-                getCamRay(goalNormals.col(1), goalNormals.col(2), image.lens, convert<uint, 2>(image.dimensions)),
-                getCamRay(goalNormals.col(1), goalNormals.col(3), image.lens, convert<uint, 2>(image.dimensions)));
+                getCamRay(goalNormals.col(0), goalNormals.col(3), image.lens, convert(image.dimensions)),
+                getCamRay(goalNormals.col(0), goalNormals.col(2), image.lens, convert(image.dimensions)),
+                getCamRay(goalNormals.col(1), goalNormals.col(2), image.lens, convert(image.dimensions)),
+                getCamRay(goalNormals.col(1), goalNormals.col(3), image.lens, convert(image.dimensions)));
 
 
             // goal base visibility check
@@ -166,12 +166,11 @@ namespace support {
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 1);
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin());
             }
-            if (!result.goals.at(0).measurements.empty()) {
-                result.goals.at(0).quad.tl = convert<double, 2>(quad.getTopLeft());
-                result.goals.at(0).quad.tr = convert<double, 2>(quad.getTopRight());
-                result.goals.at(0).quad.br = convert<double, 2>(quad.getBottomRight());
-                result.goals.at(0).quad.bl = convert<double, 2>(quad.getBottomLeft());
-            }
+            // if (!result.goals.at(0).measurements.empty()) {
+            //     result.goals.at(0).post.top    = (convert(quad.getTopLeft()) + convert(quad.getTopRight()) * 0.5);
+            //     result.goals.at(0).post.bottom = (convert(quad.getBottomLeft()) + convert(quad.getBottomRight()) *
+            //     0.5);
+            // }
         }
 
         // If no measurements are in the goal, then it was not observed

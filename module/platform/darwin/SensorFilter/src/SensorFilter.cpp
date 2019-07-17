@@ -19,8 +19,6 @@
 
 #include "SensorFilter.h"
 
-#include <Eigen/Core>
-
 #include "extension/Configuration.h"
 
 #include "message/input/Sensors.h"
@@ -62,9 +60,8 @@ namespace platform {
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
+        using utility::motion::kinematics::calculateInertialTensor;
         using utility::motion::kinematics::calculateRobotToIMU;
-        using utility::nusight::drawArrow;
-        using utility::nusight::drawSphere;
         using utility::nusight::graph;
 
         std::string makeErrorString(const std::string& src, uint errorCode) {
@@ -101,22 +98,16 @@ namespace platform {
         }
 
         SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , motionFilter()
-            , config()
-            , load_sensor()
-            , footlanding_rFWw()
-            , footlanding_Rfw()
-            , footlanding_Rwf() {
+            : Reactor(std::move(environment)), theta(arma::fill::zeros) {
 
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
-                this->config.nominal_z = config["nominal_z"].as<float>();
-
+                this->config.debug = config["debug"].as<bool>();
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
-                // Foot load sensor config
-                load_sensor = VirtualLoadSensor(config["foot_load_sensor"]);
+                // Foot down config
+                this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
+                this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
 
                 // Motion filter config
                 // Update our velocity timestep dekay
@@ -131,8 +122,6 @@ namespace platform {
                     config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<arma::vec3>());
                 this->config.motionFilter.noise.measurement.gyroscope =
                     arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
-                this->config.motionFilter.noise.measurement.footUpWithZ =
-                    arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
                 this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(
                     config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec3>());
                 this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(
@@ -147,6 +136,8 @@ namespace platform {
                     config["motion_filter"]["noise"]["process"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.noise.process.rotationalVelocity =
                     config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.noise.process.gyroscopeBias =
+                    config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<arma::vec3>();
 
                 // Set our process noise in our filter
                 arma::vec::fixed<MotionModel::size> processNoise;
@@ -155,6 +146,8 @@ namespace platform {
                 processNoise.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.noise.process.rotation;
                 processNoise.rows(MotionModel::WX, MotionModel::WZ) =
                     this->config.motionFilter.noise.process.rotationalVelocity;
+                processNoise.rows(MotionModel::BX, MotionModel::BZ) =
+                    this->config.motionFilter.noise.process.gyroscopeBias;
                 motionFilter.model.processNoiseMatrix = arma::diagmat(processNoise);
 
                 // Update our mean configs and if it changed, reset the filter
@@ -166,6 +159,8 @@ namespace platform {
                     config["motion_filter"]["initial"]["mean"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.initial.mean.rotationalVelocity =
                     config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.initial.mean.gyroscopeBias =
+                    config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<arma::vec3>();
 
                 this->config.motionFilter.initial.covariance.position =
                     config["motion_filter"]["initial"]["covariance"]["position"].as<arma::vec3>();
@@ -175,6 +170,8 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["rotation"].as<arma::vec4>();
                 this->config.motionFilter.initial.covariance.rotationalVelocity =
                     config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<arma::vec3>();
+                this->config.motionFilter.initial.covariance.gyroscopeBias =
+                    config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<arma::vec3>();
 
                 // Calculate our mean and covariance
                 arma::vec::fixed<MotionModel::size> mean;
@@ -182,6 +179,7 @@ namespace platform {
                 mean.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.mean.velocity;
                 mean.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.mean.rotation;
                 mean.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.mean.rotationalVelocity;
+                mean.rows(MotionModel::BX, MotionModel::BZ) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
                 arma::vec::fixed<MotionModel::size> covariance;
                 covariance.rows(MotionModel::PX, MotionModel::PZ) =
@@ -192,7 +190,14 @@ namespace platform {
                     this->config.motionFilter.initial.covariance.rotation;
                 covariance.rows(MotionModel::WX, MotionModel::WZ) =
                     this->config.motionFilter.initial.covariance.rotationalVelocity;
+                covariance.rows(MotionModel::BX, MotionModel::BZ) =
+                    this->config.motionFilter.initial.covariance.gyroscopeBias;
                 motionFilter.setState(mean, arma::diagmat(covariance));
+            });
+
+            on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
+                // Foot load sensor config
+                load_sensor = VirtualLoadSensor<float>(config);
             });
 
 
@@ -432,36 +437,50 @@ namespace platform {
 
                     auto forward_kinematics = calculateAllPositions(kinematicsModel, *sensors);
                     for (const auto& entry : forward_kinematics) {
-                        sensors->forward_kinematics[entry.first] = convert<double, 4, 4>(entry.second);
+                        sensors->forward_kinematics[entry.first] = convert(entry.second);
                     }
 
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    sensors->right_foot_down = false;
-                    sensors->left_foot_down  = false;
+                    sensors->right_foot_down = true;
+                    sensors->left_foot_down  = true;
 
-                    if (previousSensors) {
+                    std::array<bool, 2> feet_down = {true};
+                    if (config.footDown.fromLoad) {
                         // Use our virtual load sensor class to work out which feet are down
-                        arma::frowvec::fixed<12> features = {sensors->servo[ServoID::R_HIP_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::R_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::L_HIP_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::L_HIP_PITCH].load,
-                                                             sensors->servo[ServoID::R_KNEE].present_velocity,
-                                                             sensors->servo[ServoID::R_KNEE].load,
-                                                             sensors->servo[ServoID::L_KNEE].present_velocity,
-                                                             sensors->servo[ServoID::L_KNEE].load,
-                                                             sensors->servo[ServoID::R_ANKLE_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::R_ANKLE_PITCH].load,
-                                                             sensors->servo[ServoID::L_ANKLE_PITCH].present_velocity,
-                                                             sensors->servo[ServoID::L_ANKLE_PITCH].load};
+                        feet_down = load_sensor.updateFeet(*sensors);
 
-                        auto feet_down           = load_sensor.updateFeet(features);
-                        sensors->left_foot_down  = feet_down[0];
-                        sensors->right_foot_down = feet_down[1];
+                        if (this->config.debug) {
+                            emit(graph("Sensor/Foot Down/Load/Left", load_sensor.state[1]));
+                            emit(graph("Sensor/Foot Down/Load/Right", load_sensor.state[0]));
+                        }
+                    }
+                    else {
+                        auto rightFootDisplacement = sensors->forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
+                        auto leftFootDisplacement  = sensors->forward_kinematics[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
+
+                        if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
+                            feet_down[0] = true;
+                            feet_down[1] = false;
+                        }
+                        else if (leftFootDisplacement < rightFootDisplacement - config.footDown.certaintyThreshold) {
+                            feet_down[0] = false;
+                            feet_down[1] = true;
+                        }
+                        else {
+                            feet_down[0] = true;
+                            feet_down[1] = true;
+                        }
+
+                        if (this->config.debug) {
+                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[1]));
+                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[0]));
+                        }
                     }
 
-                    emit(graph("Foot Down", sensors->left_foot_down ? 1 : 0, sensors->right_foot_down ? 1 : 0));
+                    sensors->right_foot_down = feet_down[0];
+                    sensors->left_foot_down  = feet_down[1];
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -475,155 +494,140 @@ namespace platform {
                     // Time update
                     motionFilter.timeUpdate(deltaT);
 
+                    // Calculate accelerometer noise factor
+                    arma::mat33 acc_noise = config.motionFilter.noise.measurement.accelerometer
+                                            + ((sensors->accelerometer.norm() - std::abs(MotionModel::G))
+                                               * (sensors->accelerometer.norm() - std::abs(MotionModel::G)))
+                                                  * config.motionFilter.noise.measurement.accelerometerMagnitude;
+
                     // Accelerometer measurment update
                     motionFilter.measurementUpdate(
-                        convert<double, 3>(sensors->accelerometer),
-                        config.motionFilter.noise.measurement.accelerometer
-                            + arma::norm(convert<double, 3>(sensors->accelerometer))
-                                  * config.motionFilter.noise.measurement.accelerometerMagnitude,
-                        MotionModel::MeasurementType::ACCELEROMETER());
+                        convert(sensors->accelerometer), acc_noise, MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
-                    motionFilter.measurementUpdate(convert<double, 3>(sensors->gyroscope),
+                    motionFilter.measurementUpdate(convert(sensors->gyroscope),
                                                    config.motionFilter.noise.measurement.gyroscope,
                                                    MotionModel::MeasurementType::GYROSCOPE());
 
-                    if (sensors->left_foot_down or sensors->right_foot_down) {
-                        // pre-calculate common foot-down variables - these are the torso to world transforms.
-                        arma::vec3 rTWw = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
-                        Rotation3D Rtw(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)));
 
-                        // 3 points on the ground mean that we can assume this foot is flat
-                        // We also have to ensure that the previous foot was also down for this to be valid
-                        // Check if our foot is flat on the ground
-                        for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
+                    for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
+                        bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
+                        bool prev_foot_down = previous_foot_down[side];
+                        Eigen::Affine3d Htf(
+                            sensors->forward_kinematics[side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL
+                                                                                : ServoID::R_ANKLE_ROLL]);
 
-                            auto servoid = side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL;
+                        if (foot_down && !prev_foot_down) {
+                            Eigen::Affine3d Hwt;
+                            Hwt.linear() = Eigen::Quaterniond(motionFilter.get()[MotionModel::QW],
+                                                              motionFilter.get()[MotionModel::QX],
+                                                              motionFilter.get()[MotionModel::QY],
+                                                              motionFilter.get()[MotionModel::QZ])
+                                               .toRotationMatrix();
+                            Hwt.translation() = Eigen::Vector3d(motionFilter.get()[MotionModel::PX],
+                                                                motionFilter.get()[MotionModel::PY],
+                                                                motionFilter.get()[MotionModel::PZ]);
 
-                            const bool& footDown =
-                                side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
+                            Eigen::Affine3d Htg = utility::motion::kinematics::calculateGroundSpace(Htf, Hwt);
 
-                            const bool& prevFootDown = previousSensors ? side == ServoSide::LEFT
-                                                                             ? previousSensors->left_foot_down
-                                                                             : previousSensors->right_foot_down
-                                                                       : false;
+                            footlanding_Hwf[side]                   = Hwt * Htg;
+                            footlanding_Hwf[side].translation().z() = 0.0;
 
-                            if (footDown) {
-                                Transform3D Htf = convert<double, 4, 4>(sensors->forward_kinematics[servoid]);
-                                Transform3D Hft = Htf.i();
+                            previous_foot_down[side] = true;
+                        }
+                        else if (foot_down && prev_foot_down) {
+                            // Use stored Hwf and Htf to calculate Hwt
+                            Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
 
-                                Rotation3D Rtf  = Htf.rotation();
-                                arma::vec3 rFTt = Htf.translation();
+                            // do a foot based position update
+                            motionFilter.measurementUpdate(convert(Eigen::Vector3d(footlanding_Hwt.translation())),
+                                                           config.motionFilter.noise.measurement.flatFootOdometry,
+                                                           MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
 
-                                Rotation3D Rft  = Hft.rotation();
-                                arma::vec3 rTFf = Hft.translation();
+                            Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
+                            Eigen::Vector4d Rwt_vec(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
 
+                            // check if we need to reverse our quaternion
+                            Eigen::Quaterniond Rwt_filter = Eigen::Quaterniond(motionFilter.get()[MotionModel::QW],
+                                                                               motionFilter.get()[MotionModel::QX],
+                                                                               motionFilter.get()[MotionModel::QY],
+                                                                               motionFilter.get()[MotionModel::QZ]);
+                            Eigen::Vector4d Rwt_filter_vec(
+                                Rwt_filter.w(), Rwt_filter.x(), Rwt_filter.y(), Rwt_filter.z());
 
-                                if (!prevFootDown) {
-                                    // NOTE: footflat measurements assume the foot is flat on the ground. These
-                                    // decorrelate the accelerometer and gyro from translation.
-                                    Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rtw.i().yaw());
-                                    Rotation3D footflat_Rtf = Rotation3D::createRotationZ(Rtf.yaw());
+                            // Get the quaternion with the smallest norm
+                            Rwt_vec = (Rwt_vec - Rwt_filter_vec).norm() < (Rwt_vec + Rwt_filter_vec).norm() ? Rwt_vec
+                                                                                                            : -Rwt_vec;
 
-                                    // Store the robot foot to world transform
-                                    footlanding_Rfw[side] = footflat_Rtf.i() * footflat_Rwt.i();
-                                    // Store robot foot in world-delta coordinates
-                                    footlanding_Rwf[side]  = footflat_Rwt * footflat_Rtf;
-                                    footlanding_rFWw[side] = footlanding_Rwf[side] * rTFf - rTWw;
-
-                                    // Z is an absolute measurement, so we make sure it is an absolute offset
-                                    footlanding_rFWw[side][2] = 0.;
-
-                                    // NOTE: an optional foot up with Z calculation can be done here
-                                }
-                                else {
-                                    // NOTE: translation and rotation updates are performed separately so that they can
-                                    // be turned off independently for debugging
-
-                                    // encode the old->new torso-world rotation as a quaternion
-                                    UnitQuaternion Rtw_new(Rotation3D(Rtf * footlanding_Rfw[side]));
-
-                                    // check if we need to reverse our quaternion
-                                    if (arma::norm(Rtw_new + motionFilter.get().rows(MotionModel::QW, MotionModel::QZ))
-                                        < 1.) {
-                                        Rtw_new *= -1;
-                                    }
-
-                                    // do a foot based orientation update
-                                    motionFilter.measurementUpdate(
-                                        Rtw_new,
-                                        config.motionFilter.noise.measurement.flatFootOrientation,
-                                        MotionModel::MeasurementType::FLAT_FOOT_ORIENTATION());
-
-                                    // calculate the old -> new world foot position updates
-                                    arma::vec3 rFWw = footlanding_Rwf[side] * rTFf - footlanding_rFWw[side];
-
-
-                                    // do a foot based position update
-                                    motionFilter.measurementUpdate(
-                                        rFWw,
-                                        config.motionFilter.noise.measurement.flatFootOdometry,
-                                        MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
-                                }
-                            }
+                            // do a foot based orientation update
+                            motionFilter.measurementUpdate(convert(Rwt_vec),
+                                                           config.motionFilter.noise.measurement.flatFootOrientation,
+                                                           MotionModel::MeasurementType::FLAT_FOOT_ORIENTATION());
+                        }
+                        else if (!foot_down) {
+                            previous_foot_down[side] = false;
                         }
                     }
-
-                    // emit(graph("LeftFootDown", sensors->left_foot_down));
-                    // emit(graph("RightFootDown", sensors->right_foot_down));
-                    // emit(graph("LeftLoadState", left_foot_down.state));
-                    // emit(graph("RightLoadState", right_foot_down.state));
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
 
                     // Map from world to torso coordinates (Rtw)
-                    Transform3D Htw;
-                    Htw.eye();
-                    Htw.rotation()    = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
-                    Htw.translation() = -(Htw.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+                    Eigen::Affine3d Hwt;
+                    Hwt.linear() = Eigen::Quaterniond(
+                                       o[MotionModel::QW], o[MotionModel::QX], o[MotionModel::QY], o[MotionModel::QZ])
+                                       .toRotationMatrix();
+                    Hwt.translation() = Eigen::Vector3d(o[MotionModel::PX], o[MotionModel::PY], o[MotionModel::PZ]);
+                    sensors->Htw      = Hwt.inverse().matrix();
 
-                    // Htw.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
-                    sensors->Htw = convert<double, 4, 4>(Htw);
+                    // Integrate gyro to get angular positions
+                    theta += o.rows(MotionModel::WX, MotionModel::WZ) * 1.0 / 90.0;
 
-                    sensors->robot_to_IMU = convert<double, 2, 2>(calculateRobotToIMU(Htw.rotation()));
+                    sensors->angular_position = convert(theta);
+
+                    if (this->config.debug) {
+                        log("p_x:", theta[0], "p_y:", theta[1], "p_z:", theta[2]);
+                    }
+
+                    sensors->robot_to_IMU = convert(calculateRobotToIMU(Transform3D(convert(sensors->Htw)).rotation()));
 
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    // FIXME: Causes crashes
-                    // sensors->centre_of_mass =
-                    //     convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics,
-                    //     true));
+                    sensors->centre_of_mass =
+                        calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics, sensors->Htw.inverse());
+                    sensors->inertial_tensor = calculateInertialTensor(kinematicsModel, sensors->forward_kinematics);
 
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-                    sensors->body_centre_height = motionFilter.get()[MotionModel::PZ];
+                    sensors->body_centre_height = o[MotionModel::PZ];
 
-                    Rotation3D Rwt = Htw.rotation().t();  // remove translation components from the transform
+                    Rotation3D Rwt = Transform3D(convert(sensors->Htw))
+                                         .rotation()
+                                         .t();  // remove translation components from the transform
                     Rotation3D Rgt = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
                     // sensors->Hgt : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
-                    sensors->Hgt = convert<double, 4, 4>(Transform3D(Rgt));
+                    sensors->Hgt = convert(Transform3D(Rgt));
                     auto Htc     = sensors->forward_kinematics[ServoID::HEAD_PITCH];
 
                     // Get torso to world transform
-                    Transform3D Hwt = Htw.i();
+                    Transform3D Hwt_a = convert(Hwt.matrix());
 
                     Rotation3D yawlessWorldInvR =
-                        Rotation3D::createRotationZ(-Rotation3D(Hwt.rotation()).yaw()) * Hwt.rotation();
-                    Transform3D Hgt   = Hwt;
+                        Rotation3D::createRotationZ(-Rotation3D(Hwt_a.rotation()).yaw()) * Hwt_a.rotation();
+                    Transform3D Hgt   = Hwt_a;
                     Hgt.translation() = arma::vec3({0, 0, Hgt.translation()[2]});
                     Hgt.rotation()    = yawlessWorldInvR;
-                    sensors->Hgc = convert<double, 4, 4>(Transform3D(Hgt * convert<double, 4, 4>(Htc)));  // Rwt * Rth
+                    sensors->Hgc      = convert(Transform3D(Hgt * convert(Htc)));  // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centre_of_pressure = convert<double, 3>(
-                        utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
+                    sensors->centre_of_pressure =
+                        convert(utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
 
                     emit(std::move(sensors));
                 });

@@ -41,7 +41,7 @@ namespace support {
     class NUsight : public NUClear::Reactor {
     private:
         NUClear::clock::duration max_image_duration;
-        NUClear::clock::time_point last_image = NUClear::clock::now();
+        std::map<uint32_t, NUClear::clock::time_point> last_image;
         NUClear::clock::duration max_classified_image_duration;
         NUClear::clock::time_point last_classified_image = NUClear::clock::now();
 
@@ -52,9 +52,9 @@ namespace support {
 
         std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
 
-        NUClear::clock::time_point last_camera_image = NUClear::clock::now();
-        NUClear::clock::time_point last_seen_ball    = NUClear::clock::now();
-        NUClear::clock::time_point last_seen_goal    = NUClear::clock::now();
+        NUClear::clock::time_point last_camera_image = NUClear::clock::time_point(NUClear::clock::duration(0));
+        NUClear::clock::time_point last_seen_ball    = NUClear::clock::time_point(NUClear::clock::duration(0));
+        NUClear::clock::time_point last_seen_goal    = NUClear::clock::time_point(NUClear::clock::duration(0));
 
         void provideOverview();
         void provideDataPoints();
@@ -66,10 +66,7 @@ namespace support {
         void provideSensors();
         void provideVision();
 
-        void sendReactionHandles();
-
         void sendGameState(std::string event, std::shared_ptr<const message::input::GameState> gameState);
-
         void saveConfigurationFile(std::string path, const std::string& root);
         void sendSubsumption();
 

@@ -15,10 +15,16 @@ reaction_handles:
   sensor_data: false
   # Raw image
   image: false
+  # compressed image
+  compressed_image: false
   # Classified image
   classified_image: false
   # Vision objects including goals, balls and debugging lines
   vision_object: false
+  # Visual mesh data
+  visual_mesh: true
+  # Green horizon data
+  green_horizon: true
   # Localisation state estimates and uncertainties
   localisation: false
   # Data for chart tool in NUsight
@@ -50,4 +56,3 @@ reaction_handles:
   lookup_table_diff: false
   # Camera parameters
   camera_parameters: true
-

@@ -18,7 +18,6 @@
  */
 
 #include "Quad.h"
-#include "utility/math/geometry/ParametricLine.h"
 
 namespace utility {
 namespace math {
@@ -190,76 +189,6 @@ namespace math {
 
         bool Quad::checkCornersValid() const {
             return br.size() == 2 && bl.size() == 2 && tr.size() == 2 && tl.size() == 2;
-        }
-
-        arma::vec2 Quad::getEdgePoints(uint y) const {
-            auto edgePoints = getEdgePoints(double(y));
-            return {std::round(edgePoints[0]), std::round(edgePoints[1])};
-        }
-
-        arma::vec2 Quad::getEdgePoints(double y) const {
-            // create the horizontal intersection line
-            ParametricLine<> scanLine;
-            scanLine.setFromDirection({1, 0}, {0, y});
-
-            // create a line-segment for each side of the quad
-            std::vector<ParametricLine<>> lines = {ParametricLine<>(tl, tr, true),
-                                                   ParametricLine<>(tr, br, true),
-                                                   ParametricLine<>(bl, br, true),
-                                                   ParametricLine<>(bl, tl, true)};
-
-            // loop through lines and intersect it with the horizontal scan line
-            std::vector<double> values;
-            for (auto& line : lines) {
-                try {
-                    values.push_back(scanLine.intersect(line)[0]);
-                }
-                catch (std::domain_error&) {
-                    // did not intersect, ignore
-                }
-            }
-
-            // only two should intersect if there is a solution
-            if (values.size() != 2) {
-                throw std::domain_error("Could not find the edges points");
-            }
-
-            // return the minX and maxX
-            return {std::min(values[0], values[1]), std::max(values[0], values[1])};
-        }
-
-        std::pair<arma::vec2, arma::vec2> Quad::getIntersectionPoints(Line line) const {
-
-            std::pair<arma::vec2, arma::vec2> points;
-
-            std::vector<ParametricLine<>> quadLines = {ParametricLine<>(tl, tr, true),
-                                                       ParametricLine<>(tr, br, true),
-                                                       ParametricLine<>(bl, br, true),
-                                                       ParametricLine<>(bl, tl, true)};
-
-            int counter = 0;
-            ParametricLine<> pLine(line.pointFromTangentialDistance(0), line.pointFromTangentialDistance(1));
-            for (auto& quadLine : quadLines) {
-                try {
-                    if (counter == 0) {
-                        points.first = pLine.intersect(quadLine);
-                        counter++;
-                    }
-                    else {
-                        points.second = pLine.intersect(quadLine);
-                        counter++;
-                        break;
-                    }
-                }
-                catch (std::domain_error&) {
-                    // did not intersect, ignore
-                }
-            }
-            if (counter < 2) {
-                throw std::domain_error("Quad::intersect - Line does not not intersect quad");
-            }
-
-            return points;
         }
 
         Quad Quad::getBoundingBox(const std::vector<arma::vec2>& points) {

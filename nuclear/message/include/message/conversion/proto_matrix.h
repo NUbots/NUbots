@@ -1367,10 +1367,10 @@ namespace conversion {
         // Reserve enough space
         proto.mutable_v()->Reserve(vector.size());
 
-        // Populate the data
-        for (int i = 0; i < vector.size(); ++i) {
-            proto.add_v(vector[i]);
-        }
+        // Copy across
+        Eigen::Map<DynamicVecProto<Proto>>(
+            const_cast<typename DynamicVecProto<Proto>::Scalar*>(proto.mutable_v()->data()), vector.size()) = vector;
+
         return proto;
     }
     template <typename Vector>
@@ -1379,10 +1379,9 @@ namespace conversion {
         // Reserve enough space
         vector.resize(proto.v_size());
 
-        // Populate the data
-        for (int i = 0; i < proto.v_size(); ++i) {
-            vector[i] = proto.v(i);
-        }
+        // Copy across
+        vector = Eigen::Map<const Vector>(proto.v().data(), proto.v_size());
+
         return vector;
     }
 
