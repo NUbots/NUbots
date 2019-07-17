@@ -51,7 +51,6 @@ for l in cmake_cache_text:
     # Remove whitespace at the ends and start
     l = l.strip()
 
-    print(l)
     # Remove lines that are comments
     if len(l) > 0 and not l.startswith("//") and not l.startswith("#"):
         # Extract our variable name from our values
