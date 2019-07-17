@@ -374,6 +374,10 @@ set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\")
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\")
 
 set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
+
+# Set cmake up to look in our pkgconfig directories
+set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON CACHE STRING \"\")
+set(CMAKE_PREFIX_PATH \"${prefix}/${arch};${prefix}/${arch}/lib/pkgconfig\" CACHE STRING \"\")
 ",
       ensure  => present,
       path    => "${prefix}/${arch}.cmake",
