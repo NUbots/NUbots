@@ -181,8 +181,10 @@ define installer (
       $env10 = $env9
     }
 
-    $environment = ['CC=/usr/bin/gcc', 'CXX=/usr/bin/g++', $cflags, $cxxflags, $common_opt, $fcommon_opt,
-                    $ldflags, $ccas, $ccasflags, $pkgconfig, $cmake_prefix,
+    $environment = ['CC=/usr/bin/gcc', 'CXX=/usr/bin/g++',
+                    regsubst($cflags, 'PREFIX', "${prefix}/${arch}", 'G'),
+                    regsubst($cxxflags, 'PREFIX', "${prefix}/${arch}", 'G'),
+                    $common_opt, $fcommon_opt, $ldflags, $ccas, $ccasflags, $pkgconfig, $cmake_prefix,
                     $ltsyslibpath, $ldlibrarypath,
                     $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env10, "=")
 
