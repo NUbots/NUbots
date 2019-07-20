@@ -4,3 +4,22 @@ gazeboNUclear:
 # Change this to match nubots_ign_namespace in gazebo client plugin.
 # Change it from nubots to avoid conflicts
 ignition_namespace: "nubots"
+
+topic:
+  Ctrl: "NubotsIgusCtrl"
+  Status: "NubotsIgusStatus"
+  WorldCtrl: "NubotsWorldCtrl"
+  WorldStatus: "NubotsWorldStatus"
+  BallStatus: "NubotsBallStatus"
+
+address:
+  host: "10.1.0.92"
+  ctrl: "10.1.0.92"
+
+gazebo:
+  msg_port: 11319
+
+partition:
+  joint: "Igus"
+  world: "World"
+  ball: "Ball"

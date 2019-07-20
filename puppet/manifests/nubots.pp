@@ -421,7 +421,6 @@ node nubotsvmbuild {
         installer { "${archive}":
           archs       => $archs,
           creates     => $params['creates'],
-          # Gazebo depends on some of our installed libraries
           require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['build_tools'], Class['protobuf'], ])),
           args        => $params['args'],
           src_dir     => $params['src_dir'],

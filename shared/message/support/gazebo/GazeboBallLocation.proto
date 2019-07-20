@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package message.support.gazebo;
+
+import "Vector.proto";
+
+message GazeboBallLocation {
+    vec3   pos         = 1;
+    vec3   vel         = 2;
+    string source_name = 3;
+}

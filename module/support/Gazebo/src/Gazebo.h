@@ -1,18 +1,11 @@
 #ifndef MODULE_SUPPORT_GAZEBO_H
 #define MODULE_SUPPORT_GAZEBO_H
 
+#include <memory>
 #include <nuclear>
 
-//#include <ignition/msgs1/ignition/msgs.hh>
 #include <ignition/msgs.hh>
 #include <ignition/transport.hh>
-//#include <gazebo/gazebo_config.h>
-//#include <gazebo/msgs/msgs.hh>
-//#include <gazebo/transport/transport.hh>
-
-// ZeroMQ_libzmq _VERSION:INTERNAL= git add . / git commit -am "message" git push
-// ADVANCED       ^ space breaks ./b module generate   property for variable: _GFORTRAN_EXECUTABLE
-
 
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
@@ -28,34 +21,37 @@ namespace support {
         /// @brief Called by the powerplant to build and setup the gazebo reactor.
         explicit Gazebo(std::unique_ptr<NUClear::Environment> environment);
 
-        ignition::transport::MsgDiscovery* discoveryNode;
-        ignition::transport::MessagePublisher* msgPublisher;
-        ignition::transport::MessagePublisher* msgPubWorld;
-        ignition::transport::Node* node;
-        ignition::transport::Node* jointCtrl;
-        ignition::transport::Node* jointStatus;
-        ignition::transport::Node* worldCtrl;
-        ignition::transport::Node* worldStatus;
-        ignition::transport::Node* ballStatus;
-        ignition::transport::Node* spareNode;
+    private:
+        std::unique_ptr<ignition::transport::MsgDiscovery> discovery_node;
+        std::unique_ptr<ignition::transport::MessagePublisher> msg_publisher;
+        std::unique_ptr<ignition::transport::MessagePublisher> msg_pub_world;
+        std::unique_ptr<ignition::transport::Node> node;
+        std::unique_ptr<ignition::transport::Node> joint_ctrl;
+        std::unique_ptr<ignition::transport::Node> joint_status;
+        std::unique_ptr<ignition::transport::Node> world_ctrl;
+        std::unique_ptr<ignition::transport::Node> world_status;
+        std::unique_ptr<ignition::transport::Node> ball_status;
+        std::unique_ptr<ignition::transport::Node> spare_node;
         ignition::transport::Node::Publisher pub;
-        ignition::transport::Node::Publisher worldPub;
+        ignition::transport::Node::Publisher world_pub;
+
+        void JointStatusCB(const ignition::msgs::StringMsg& msg);
+        void WorldStatusCB(const ignition::msgs::StringMsg& msg);
+        void BallStatusCB(const ignition::msgs::StringMsg& msg);
+
         const ignition::msgs::StringMsg parseServos(const std::vector<message::motion::ServoTarget>& commands,
                                                     const message::platform::darwin::DarwinSensors& sensors);
         const ignition::msgs::StringMsg GenerateMsg();
-        static const int g_msgPort = 11319;
 
-        double currentRealTime;
-        double currentSimTime;
-        double realDelta;
-        double simDelta;
+        double current_real_time;
+        double current_sim_time;
+        double real_delta;
+        double sim_delta;
 
         bool connected;
 
         // Remote simulators
         std::unordered_set<std::string> remotes;
-
-    private:
     };
 }  // namespace support
 }  // namespace module

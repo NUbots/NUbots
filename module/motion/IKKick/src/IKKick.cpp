@@ -114,7 +114,6 @@ namespace motion {
             emit(std::make_unique<StopCommand>(subsumptionId));  // Stop the walk
 
             updatePriority(KICK_PRIORITY);
-            log("RUNNING ON TRIGGER KICK");
         });
 
         on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then(
@@ -123,7 +122,6 @@ namespace motion {
                 updater.enable();
                 updatePriority(EXECUTION_PRIORITY);
 
-                log("RUNNING");
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
                 Transform3D leftFoot  = convert(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
                 Transform3D rightFoot = convert(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
