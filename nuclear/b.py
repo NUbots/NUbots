@@ -54,7 +54,7 @@ for l in cmake_cache_text:
     # Remove lines that are comments
     if len(l) > 0 and not l.startswith("//") and not l.startswith("#"):
         # Extract our variable name from our values
-        g = re.match(r"([a-zA-Z_$][a-zA-Z_.$0-9-]*):(\w+)=(.*)", l).groups()
+        g = re.match(r"([a-zA-Z_$][a-zA-Z_ .$0-9-]*):(\w+)=(.*)", l).groups()
 
         # Store our value and split it into a list if it is a list
         cmake_cache[g[0]] = g[2] if ";" not in g[2].strip(";") else g[2].strip(";").split(";")
