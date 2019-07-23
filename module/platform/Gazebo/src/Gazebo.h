@@ -11,7 +11,16 @@ namespace platform {
     public:
         /// @brief Called by the powerplant to build and setup the Gazebo reactor.
         explicit Gazebo(std::unique_ptr<NUClear::Environment> environment);
+
+    private:
+        struct {
+            std::string simulator_name;
+            double clock_smoothing;
+        } config;
+        double sim_time;
+        double real_time;
     };
+
 
 }
 }

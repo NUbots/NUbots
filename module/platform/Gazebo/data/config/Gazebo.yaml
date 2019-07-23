@@ -1,0 +1,2 @@
+simulator_name: gazebo
+clock_smoothing: 0.6
