@@ -2,12 +2,15 @@
 
 #include "extension/Configuration.h"
 #include "message/input/gazebo/Simulation.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "utility/clock/CustomClock.h"
 
 namespace module {
 namespace platform {
 
     using extension::Configuration;
     using message::input::gazebo::Simulation;
+    using message::platform::darwin::DarwinSensors;
 
     Gazebo::Gazebo(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)), sim_time(0), real_time(0) {
@@ -26,9 +29,13 @@ namespace platform {
                                                  (1.0 - config.clock_smoothing) * (real_delta / sim_delta);
                 }
 
-                sim_time = simulation.sim_time
-                real_time = simulation.real_time
+                sim_time = simulation.sim_time;
+                real_time = simulation.real_time;
             }
+        });
+
+        on<Network<DarwinSensors>>().then([this] (const NetworkSource& network_source, const DarwinSensors& sensors) {
+            emit(std::make_unique<DarwinSensors>(sensors));
         });
     }
 }

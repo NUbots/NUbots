@@ -1,4 +1,4 @@
-#include "CustomClock.hpp"
+#include "CustomClock.h"
 #include <chrono>
 
 namespace utility {
