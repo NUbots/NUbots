@@ -176,8 +176,6 @@ namespace input {
         else {
             // In the case where it fails, reinsert the Buffer back into the stream, so we don't run out.
             if (buffer != NULL) {
-                // std::cout << "Buffer Failed: " << context->cameraID << " " << arv_buffer_get_status(buffer) <<
-                // std::endl;
                 arv_stream_push_buffer(stream, buffer);
             }
         }
