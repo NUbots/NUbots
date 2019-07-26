@@ -24,7 +24,6 @@
 
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
-#include "utility/time/time.h"
 
 /**
  * @author Monica Olejniczak
@@ -33,8 +32,6 @@ namespace module {
 namespace support {
     using utility::file::listFiles;
     using utility::strutil::split;
-    using utility::time::getUtcTimestamp;
-
 
     /**
      * @brief Saves the configuration file using the root YAML node.

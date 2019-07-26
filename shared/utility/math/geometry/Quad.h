@@ -24,8 +24,6 @@
 #include <ostream>
 #include <vector>
 
-#include "Line.h"
-
 namespace utility {
 namespace math {
     namespace geometry {
@@ -92,22 +90,6 @@ namespace math {
             bool overlapsHorizontally(const Quad& other) const;
 
             bool checkCornersValid() const;
-
-            /**
-             * Finds and returns the two rounded intersections points on x given a y
-             * @param y The horizonal line to solve the 2 x-axis intersections with
-             * @return The minX and maxX rounded that intersect given y
-             */
-            arma::vec2 getEdgePoints(uint y) const;
-
-            std::pair<arma::vec2, arma::vec2> getIntersectionPoints(Line line) const;
-
-            /**
-             * Finds and returns the two intersections points on x given a y
-             * @param y The horizonal line to solve the 2 x-axis intersections with
-             * @return The minX and maxX that intersect given y
-             */
-            arma::vec2 getEdgePoints(double y) const;
 
             static Quad getBoundingBox(const std::vector<arma::vec2>& points);
 

@@ -1,5 +1,0 @@
-debugging:
-  enabled: false  # Determine whether or not to include NUclear trace logs during execution...
-  emit_accelerometer: false
-  emit_gyroscope: false
-  emit_falling_scale_factor: true

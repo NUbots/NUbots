@@ -7,11 +7,9 @@
 #include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
 
-#include "utility/math/geometry/Circle.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace localisation {
@@ -26,13 +24,10 @@ namespace localisation {
     using VisionGoals = message::vision::Goals;
 
     using utility::localisation::transform3DToFieldState;
-    using utility::math::geometry::Circle;
     using utility::math::matrix::Rotation2D;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
-    using utility::nusight::drawCircle;
     using utility::nusight::graph;
-    using utility::time::TimeDifferenceSeconds;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -40,23 +35,12 @@ namespace localisation {
         last_measurement_update_time = NUClear::clock::now();
         last_time_update_time        = NUClear::clock::now();
 
-        on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
-            "Particle Debug", [this]() {
-                arma::mat particles = filter.getParticles();
-                for (int i = 0; i < std::min(draw_particles, int(particles.n_cols)); i++) {
-                    emit(drawCircle("particle" + std::to_string(i),
-                                    Circle(0.01, particles.submat(0, i, 1, i)),
-                                    0.05,
-                                    {0, 0, 0},
-                                    PARTICLE_UPDATE_FREQUENCY));
-                }
-            });
-
         on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
             "Time Update", [this]() {
                 /* Perform time update */
+                using namespace std::chrono;
                 auto curr_time        = NUClear::clock::now();
-                double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
 
                 filter.timeUpdate(seconds);
@@ -79,8 +63,9 @@ namespace localisation {
             "Measurement Update", [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.goals.empty()) {
                     /* Perform time update */
+                    using namespace std::chrono;
                     auto curr_time        = NUClear::clock::now();
-                    double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
+                    double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
 
                     filter.timeUpdate(seconds);
@@ -92,12 +77,18 @@ namespace localisation {
 
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                                filter.ambiguousMeasurementUpdate(arma::conv_to<arma::vec>::from(convert(m.position)),
-                                                                  arma::conv_to<arma::mat>::from(convert(m.covariance)),
-                                                                  poss,
-                                                                  convert(goals.Hcw),
-                                                                  m.type,
-                                                                  fd);
+                                if (m.position.allFinite() && m.covariance.allFinite()) {
+                                    filter.ambiguousMeasurementUpdate(
+                                        arma::conv_to<arma::vec>::from(convert(m.position)),
+                                        arma::conv_to<arma::mat>::from(convert(m.covariance)),
+                                        poss,
+                                        convert(goals.Hcw),
+                                        m.type,
+                                        fd);
+                                }
+                                else {
+                                    log("Received non-finite measurements from vision. Discarding ...");
+                                }
                             }
                         }
                     }
