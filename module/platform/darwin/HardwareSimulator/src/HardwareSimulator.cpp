@@ -246,13 +246,18 @@ namespace platform {
                         }
                     }
                     sumGyro             = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0, 0, imu_drift_rate}));
-                    sensors.gyroscope.x = sumGyro[0];
+                    sensors.gyroscope.x = -sumGyro[0];
                     sensors.gyroscope.y = sumGyro[1];
                     sensors.gyroscope.z = sumGyro[2];
 
-                    sensors.accelerometer.x = 0;
-                    sensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
-                    sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
+                    // sensors.accelerometer.x = 0;
+                    // sensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
+                    // sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
+
+                    sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
+                    sensors.accelerometer.y = 0;
+                    sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
+
 
                     sensors.timestamp = NUClear::clock::now();
 
