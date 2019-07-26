@@ -18,11 +18,16 @@
  */
 syntax = "proto3";
 
-package message.input.gazebo;
+package message.platform.gazebo;
 
-import "Vector.proto";
+import "google/protobuf/timestamp.proto";
+import "message/motion/ServoTarget.proto";
 
-message Ball {
-    vec3 rBWw = 1;
-    vec3 vBWw = 2;
+message ServoTargets {
+    // The name of the model in the simulation that these servo targets are for
+    string model = 1;
+    // The current time on the client computer so that we can use it to calculate velocities from the command
+    google.protobuf.Timestamp time = 2;
+    // The targets for servos
+    motion.ServoTargets targets = 3;
 }

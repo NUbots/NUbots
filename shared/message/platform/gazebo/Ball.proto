@@ -18,9 +18,13 @@
  */
 syntax = "proto3";
 
-package message.input.gazebo;
+package message.platform.gazebo;
 
-message Simulation {
-    double sim_time  = 1;
-    double real_time = 2;
+import "Vector.proto";
+
+message Ball {
+    // Vector from world origin to ball in world space
+    vec3 rBWw = 1;
+    // Velocity vector for the ball in world space
+    vec3 vBw = 2;
 }
