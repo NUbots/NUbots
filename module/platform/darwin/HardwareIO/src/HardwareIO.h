@@ -20,11 +20,14 @@
 #ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 #define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 
+#include <Eigen/Core>
+#include <mutex>
 #include <nuclear>
 
 #include <yaml-cpp/yaml.h>
 
 #include "darwin/Darwin.h"
+#include "extension/Configuration.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
@@ -41,15 +44,38 @@ namespace platform {
         class HardwareIO : public NUClear::Reactor {
         private:
             // How often we read the servos
-            static constexpr int UPDATE_FREQUENCY = 90;
+            static constexpr int UPDATE_FREQUENCY  = 90;
+            static constexpr int CM730_POLL_PERIOD = 1;  // seconds
 
             /// @brief Our internal darwin class that is used for interacting with the hardware
-            Darwin::Darwin darwin;
+            std::unique_ptr<Darwin::Darwin> darwin;
             message::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
             float dGain = 0;
             float iGain = 0;
             float pGain = 0;
 
+            // Hardware Simulation member variables
+            std::queue<message::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
+            std::mutex gyroQueueMutex;
+            message::platform::darwin::DarwinSensors simulatedSensors;
+            void addNoise(std::unique_ptr<message::platform::darwin::DarwinSensors>& sensors);
+            void setRightFootDown(bool down);
+            void setLeftFootDown(bool down);
+            struct NoiseConfig {
+                NoiseConfig() : accelerometer(), gyroscope() {}
+                struct Vec3Noise {
+                    float x = 0.001;
+                    float y = 0.001;
+                    float z = 0.001;
+                };
+                Vec3Noise accelerometer;
+                Vec3Noise gyroscope;
+            } noise;
+            float imu_drift_rate                 = 0;
+            double bodyTilt                      = 0;
+            Eigen::Vector3f integrated_gyroscope = Eigen::Vector3f({0, 0, 0});
+
+            ReactionHandle realHardwareHandle, simulatedHardwareHandle, cm730PollHandle;
 
             struct CM730State {
                 message::platform::darwin::DarwinSensors::LEDPanel ledPanel = {false, false, false};
@@ -57,6 +83,8 @@ namespace platform {
                 message::platform::darwin::DarwinSensors::HeadLED headLED = {0x0000FF00};
                 message::platform::darwin::DarwinSensors::EyeLED eyeLED   = {0x000000FF};
             };
+
+            ::extension::Configuration darwinConfiguration;
 
             struct Config {
                 Config() : battery() {}

@@ -22,13 +22,16 @@
 
 #include <iomanip>
 
-#include "extension/Configuration.h"
 
+#include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/platform/darwin/DarwinSensors.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 
@@ -36,10 +39,20 @@ namespace module {
 namespace platform {
     namespace darwin {
 
+        // Declaration of static member variable to avoid linking error
+        constexpr int HardwareIO::UPDATE_FREQUENCY;
+
         using extension::Configuration;
+        using message::input::Sensors;
         using message::motion::ServoTarget;
         using message::platform::darwin::DarwinSensors;
+        using utility::math::matrix::Transform3D;
         using utility::support::Expression;
+        using ServoID = utility::input::ServoID;
+
+        /**********************
+         *    REAL HARDWARE   *
+         **********************/
 
         DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
             DarwinSensors sensors;
@@ -185,6 +198,7 @@ namespace platform {
                 // If we are using real data, get it from the packet
                 else {
                     // Error code
+
                     servo.errorFlags = data.servoErrorCodes[i] == 0xFF
                                            ? DarwinSensors::Error::TIMEOUT
                                            : DarwinSensors::Error(data.servoErrorCodes[i]).value;
@@ -207,28 +221,162 @@ namespace platform {
             return sensors;
         }
 
+        /**********************
+         * SIMULATED HARDWARE *
+         **********************/
+
+        void HardwareIO::addNoise(std::unique_ptr<DarwinSensors>& sensors) {
+            auto centered_noise = [] { return rand() / float(RAND_MAX) - 0.5f; };
+
+            // TODO: Use a more standard c++ random generator.
+            sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
+            sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
+            sensors->accelerometer.z += noise.accelerometer.z * centered_noise();
+
+            sensors->gyroscope.x += noise.gyroscope.x * centered_noise();
+            sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
+            sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
+        }
+
+        void HardwareIO::setRightFootDown(bool down) {
+            // Sensors
+            simulatedSensors.fsr.right.fsr1 = down ? 1 : 0;
+            simulatedSensors.fsr.right.fsr2 = down ? 1 : 0;
+            simulatedSensors.fsr.right.fsr3 = down ? 1 : 0;
+            simulatedSensors.fsr.right.fsr4 = down ? 1 : 0;
+
+            // Set the knee loads to something huge to be foot down
+            utility::platform::darwin::getDarwinServo(ServoID::R_KNEE, simulatedSensors).load = down ? 1.0 : -1.0;
+
+            // Centre
+            simulatedSensors.fsr.right.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+            simulatedSensors.fsr.right.centreY = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        }
+
+        void HardwareIO::setLeftFootDown(bool down) {
+            // simulatedSensors
+            simulatedSensors.fsr.left.fsr1 = down ? 1 : 0;
+            simulatedSensors.fsr.left.fsr2 = down ? 1 : 0;
+            simulatedSensors.fsr.left.fsr3 = down ? 1 : 0;
+            simulatedSensors.fsr.left.fsr4 = down ? 1 : 0;
+
+            // Set the knee loads to something huge to be foot down
+            utility::platform::darwin::getDarwinServo(ServoID::L_KNEE, simulatedSensors).load = down ? 1.0 : -1.0;
+
+            // Centre
+            simulatedSensors.fsr.left.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+            simulatedSensors.fsr.left.centreY = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        }
+
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , darwin("/dev/CM730")
+            , darwin(nullptr)
             , cm730State()
             , servoState()
             , chargedVoltage(0.0f)
             , flatVoltage(0.0f) {
 
-            on<Startup>().then("HardwareIO Startup", [this] {
-                uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
-                uint8_t CM730Version = darwin.cm730.read<uint8_t>(Darwin::CM730::Address::VERSION);
-                std::stringstream version, model;
-                model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM730Model);
-                version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
-                log<NUClear::INFO>("CM730 Model:", model.str());
-                log<NUClear::INFO>("CM730 Firmware Version:", version.str());
-            });
+            /*
+             CM730 Data
+            */
+            // Read our Error code
+            simulatedSensors.cm730ErrorFlags = 0;
+
+            // LED Panel
+            simulatedSensors.ledPanel.led2 = 0;
+            simulatedSensors.ledPanel.led3 = 0;
+            simulatedSensors.ledPanel.led4 = 0;
+
+            // Head LED
+            simulatedSensors.headLED.RGB = 0;
+
+            // Head LED
+            simulatedSensors.eyeLED.RGB = 0;
+
+            // Buttons
+            simulatedSensors.buttons.left   = 0;
+            simulatedSensors.buttons.middle = 0;
+
+            // Voltage (in volts)
+            simulatedSensors.voltage = 0;
+
+            // Gyroscope (in radians/second)
+            simulatedSensors.gyroscope.x = 0;
+            simulatedSensors.gyroscope.y = 0;
+            simulatedSensors.gyroscope.z = 0;
+
+            /*
+             Force Sensitive Resistor Data
+             */
+
+            // Right Sensor
+            // Error
+            simulatedSensors.fsr.right.errorFlags = 0;
+
+            // Sensors
+            simulatedSensors.fsr.right.fsr1 = 1;
+            simulatedSensors.fsr.right.fsr2 = 1;
+            simulatedSensors.fsr.right.fsr3 = 1;
+            simulatedSensors.fsr.right.fsr4 = 1;
+
+            // Centre
+            simulatedSensors.fsr.right.centreX = 0;
+            simulatedSensors.fsr.right.centreY = 0;
+
+            // Left Sensor
+            // Error
+            simulatedSensors.fsr.left.errorFlags = 0;
+
+            // Sensors
+            simulatedSensors.fsr.left.fsr1 = 1;
+            simulatedSensors.fsr.left.fsr2 = 1;
+            simulatedSensors.fsr.left.fsr3 = 1;
+            simulatedSensors.fsr.left.fsr4 = 1;
+
+            // Centre
+            simulatedSensors.fsr.left.centreX = 0;
+            simulatedSensors.fsr.left.centreY = 0;
+
+            /*
+             Servos
+             */
+
+            for (int i = 0; i < 20; ++i) {
+                // Get a reference to the servo we are populating
+                DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(i, simulatedSensors);
+
+                // Error code
+                servo.errorFlags = 0;
+
+                // Booleans
+                servo.torqueEnabled = true;
+
+                // Gain
+                servo.dGain = 0;
+                servo.iGain = 0;
+                servo.pGain = 0;
+
+                // Torque
+                servo.torque = 0;
+
+                // Targets
+                servo.goalPosition = 0;
+                servo.movingSpeed  = M_PI_4;
+
+                // Present Data
+                servo.presentPosition = 0;
+                servo.presentSpeed    = 0;
+                servo.load            = 0;
+
+                // Diagnostic Information
+                servo.voltage     = 0;
+                servo.temperature = 0;
+            }
 
             on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
-                // Set config for the packet waiting
-                darwin.setConfig(config);
+                darwinConfiguration = config;
 
+                // Real configuration parameters
                 for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                     Convert::SERVO_OFFSET[i]    = config["servos"][i]["offset"].as<Expression>();
                     Convert::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
@@ -237,10 +385,24 @@ namespace platform {
 
                 chargedVoltage = config["battery"]["charged_voltage"].as<float>();
                 flatVoltage    = config["battery"]["flat_voltage"].as<float>();
+
+                // Simulation configuration parameters
+                imu_drift_rate = config["simulated"]["imu_drift_rate"].as<float>();
+
+                noise.accelerometer.x = config["simulated"]["noise"]["accelerometer"]["x"].as<float>();
+                noise.accelerometer.y = config["simulated"]["noise"]["accelerometer"]["y"].as<float>();
+                noise.accelerometer.z = config["simulated"]["noise"]["accelerometer"]["z"].as<float>();
+
+                noise.gyroscope.x = config["simulated"]["noise"]["gyroscope"]["x"].as<float>();
+                noise.gyroscope.y = config["simulated"]["noise"]["gyroscope"]["y"].as<float>();
+                noise.gyroscope.z = config["simulated"]["noise"]["gyroscope"]["z"].as<float>();
+
+                bodyTilt = config["simulated"]["bodyTilt"].as<Expression>();
             });
 
+
             // This trigger gets the sensor data from the CM730
-            on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
+            realHardwareHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
                 "Hardware Loop", [this] {
                     // Our final sensor output
                     auto sensors = std::make_unique<DarwinSensors>();
@@ -264,14 +426,14 @@ namespace platform {
                             if (servoState[i].torqueEnabled
                                 && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
                                 servoState[i].torqueEnabled = false;
-                                darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                                (*darwin)[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                             }
                             else {
                                 // If our torque was disabled but is now enabled
                                 if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
                                     && servoState[i].torque != 0) {
                                     servoState[i].torqueEnabled = true;
-                                    darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
+                                    (*darwin)[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
                                 }
 
                                 // Get our goal position and speed
@@ -307,11 +469,11 @@ namespace platform {
                         command.push_back(0);
                         command.back() = Darwin::calculateChecksum(command.data());
 
-                        darwin.sendRawCommand(command);
+                        darwin->sendRawCommand(command);
                     }
 
                     // Read our data
-                    Darwin::BulkReadResults data = darwin.bulkRead();
+                    Darwin::BulkReadResults data = darwin->bulkRead();
 
                     // Parse our data
                     *sensors = parseSensors(data);
@@ -369,46 +531,186 @@ namespace platform {
                     emit(std::move(sensors));
                 });
 
+            simulatedHardwareHandle =
+                on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
+                    [this](std::shared_ptr<const Sensors> previousSensors) {
+                        if (previousSensors) {
+                            Eigen::Matrix4d rightFootPose =
+                                previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL);
+                            Eigen::Matrix4d leftFootPose =
+                                previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL);
+                            Eigen::Vector3d torsoFromRightFoot =
+                                -rightFootPose.topLeftCorner<3, 3>().transpose() * rightFootPose.topRightCorner<3, 1>();
+                            Eigen::Vector3d torsoFromLeftFoot =
+                                -leftFootPose.topLeftCorner<3, 3>().transpose() * leftFootPose.topRightCorner<3, 1>();
+
+                            if (torsoFromRightFoot(2) > torsoFromLeftFoot(2)) {
+                                setLeftFootDown(false);
+                                setRightFootDown(true);
+                            }
+                            else if (torsoFromRightFoot(2) < torsoFromLeftFoot(2)) {
+                                setLeftFootDown(true);
+                                setRightFootDown(false);
+                            }
+                            else {
+                                setLeftFootDown(true);
+                                setRightFootDown(true);
+                            }
+                        }
+
+                        for (int i = 0; i < 20; ++i) {
+
+                            auto& servo       = utility::platform::darwin::getDarwinServo(i, simulatedSensors);
+                            float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
+                            movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
+
+
+                            if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
+                                servo.presentPosition = servo.goalPosition;
+                            }
+                            else {
+                                Eigen::Vector3f present(cos(servo.presentPosition), sin(servo.presentPosition), 0);
+                                Eigen::Vector3f goal(cos(servo.goalPosition), sin(servo.goalPosition), 0);
+
+                                Eigen::Vector3f cross = present.cross(goal);
+                                if (cross[2] > 0) {
+                                    servo.presentPosition =
+                                        utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
+                                }
+                                else {
+                                    servo.presentPosition =
+                                        utility::math::angle::normalizeAngle(servo.presentPosition - movingSpeed);
+                                }
+                            }
+                        }
+
+                        // Gyro:
+                        // Note: This reaction is not (and should not be) synced with the
+                        // 'Receive Simulated Gyroscope' reaction above, so we can't
+                        // reliably query the size of the gyroQueue.
+                        Eigen::Vector3f sumGyro = Eigen::Vector3f::Zero();
+                        {
+                            // std::lock_guard<std::mutex> lock(gyroQueueMutex);
+                            while (!gyroQueue.empty()) {
+                                DarwinSensors::Gyroscope g = gyroQueue.front();
+                                sumGyro += Eigen::Vector3f(g.x, g.y, g.z);
+
+                                std::lock_guard<std::mutex> lock(gyroQueueMutex);
+                                gyroQueue.pop();
+                            }
+                        }
+                        sumGyro = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3f(0, 0, imu_drift_rate));
+                        simulatedSensors.gyroscope.x = sumGyro[0];
+                        simulatedSensors.gyroscope.y = sumGyro[1];
+                        simulatedSensors.gyroscope.z = sumGyro[2];
+
+                        simulatedSensors.accelerometer.x = 0;
+                        simulatedSensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
+                        simulatedSensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
+
+                        simulatedSensors.timestamp = NUClear::clock::now();
+
+                        // Add some noise so that sensor fusion doesnt converge to a singularity
+                        auto sensors_message = std::make_unique<DarwinSensors>(simulatedSensors);
+                        addNoise(sensors_message);
+                        // Send our nicely computed sensor data out to the world
+                        emit(std::move(sensors_message));
+                    });
+
             // This trigger writes the servo positions to the hardware
             on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
                 [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
-                    // Loop through each of our commands
-                    for (const auto& command : commands) {
-                        float diff = utility::math::angle::difference(
-                            command.position,
-                            utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
-                        NUClear::clock::duration duration = command.time - NUClear::clock::now();
+                    if (darwin) {
+                        // Loop through each of our commands
+                        for (const auto& command : commands) {
+                            float diff = utility::math::angle::difference(
+                                command.position,
+                                utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
+                            NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                        float speed;
-                        if (duration.count() > 0) {
-                            speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                            float speed;
+                            if (duration.count() > 0) {
+                                speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                            }
+                            else {
+                                speed = 0;
+                            }
+
+                            // Update our internal state
+                            if (servoState[command.id].pGain != command.gain
+                                || servoState[command.id].iGain != command.gain * 0
+                                || servoState[command.id].dGain != command.gain * 0
+                                || servoState[command.id].movingSpeed != speed
+                                || servoState[command.id].goalPosition != command.position
+                                || servoState[command.id].torque != command.torque) {
+
+                                servoState[command.id].dirty = true;
+
+                                servoState[command.id].pGain = command.gain;
+                                servoState[command.id].iGain = command.gain * 0;
+                                servoState[command.id].dGain = command.gain * 0;
+
+                                servoState[command.id].movingSpeed  = speed;
+                                servoState[command.id].goalPosition = command.position;
+
+                                servoState[command.id].torque       = command.torque;
+                                servoState[uint(command.id)].torque = command.torque;
+                            }
                         }
-                        else {
-                            speed = 0;
-                        }
+                    }
+                    else {
+                        for (auto& command : commands) {
 
-                        // Update our internal state
-                        if (servoState[command.id].pGain != command.gain
-                            || servoState[command.id].iGain != command.gain * 0
-                            || servoState[command.id].dGain != command.gain * 0
-                            || servoState[command.id].movingSpeed != speed
-                            || servoState[command.id].goalPosition != command.position
-                            || servoState[command.id].torque != command.torque) {
+                            // Calculate our moving speed
+                            float diff = utility::math::angle::difference(
+                                command.position,
+                                utility::platform::darwin::getDarwinServo(command.id, simulatedSensors)
+                                    .presentPosition);
+                            NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                            servoState[command.id].dirty = true;
+                            float speed;
+                            if (duration.count() > 0) {
+                                speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                            }
+                            else {
+                                speed = 0;
+                            }
 
-                            servoState[command.id].pGain = command.gain;
-                            servoState[command.id].iGain = command.gain * 0;
-                            servoState[command.id].dGain = command.gain * 0;
-
-                            servoState[command.id].movingSpeed  = speed;
-                            servoState[command.id].goalPosition = command.position;
-
-                            servoState[command.id].torque       = command.torque;
-                            servoState[uint(command.id)].torque = command.torque;
+                            // Set our variables
+                            auto& servo       = utility::platform::darwin::getDarwinServo(command.id, simulatedSensors);
+                            servo.movingSpeed = speed;
+                            servo.goalPosition = utility::math::angle::normalizeAngle(command.position);
+                            // std::cout << __LINE__ << std::endl;
                         }
                     }
                 });
+
+            // Periodically checks connection to CM730, otherwise uses simulated hardware reaction
+            cm730PollHandle = on<Every<CM730_POLL_PERIOD, std::chrono::seconds>>().then("CM730 Device Check", [this] {
+                try {
+                    darwin = std::make_unique<Darwin::Darwin>("/dev/CM730");
+                    // Disable simulated hardware reaction if we can connect to CM730
+                    simulatedHardwareHandle.disable();
+
+                    // Set config for the packet waiting
+                    darwin->setConfig(darwinConfiguration);
+
+                    uint16_t CM730Model  = darwin->cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
+                    uint8_t CM730Version = darwin->cm730.read<uint8_t>(Darwin::CM730::Address::VERSION);
+                    std::stringstream version, model;
+                    model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM730Model);
+                    version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
+                    log<NUClear::INFO>("CM730 Model:", model.str());
+                    log<NUClear::INFO>("CM730 Firmware Version:", version.str());
+
+                    realHardwareHandle.enable();
+                }
+                catch (std::runtime_error& e) {
+                    // Disable real hardware reaction if we cannot connect to CM730
+                    realHardwareHandle.disable();
+                    simulatedHardwareHandle.enable();
+                }
+            });
 
             on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
                 auto commandList = std::make_unique<std::vector<ServoTarget>>();
@@ -423,10 +725,10 @@ namespace platform {
                 // Update our internal state
                 cm730State.headLED = led;
 
-                darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L,
-                                   Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                             static_cast<uint8_t>(led.RGB & 0x000000FF)));
+                darwin->cm730.write(Darwin::CM730::Address::LED_HEAD_L,
+                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
             });
 
             // If we get a EyeLED command then write it
@@ -434,10 +736,10 @@ namespace platform {
                 // Update our internal state
                 cm730State.eyeLED = led;
 
-                darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L,
-                                   Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                             static_cast<uint8_t>(led.RGB & 0x000000FF)));
+                darwin->cm730.write(Darwin::CM730::Address::LED_EYE_L,
+                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
             });
 
             // If we get a EyeLED command then write it
@@ -445,8 +747,8 @@ namespace platform {
                 // Update our internal state
                 cm730State.ledPanel = led;
 
-                darwin.cm730.write(Darwin::CM730::Address::LED_PANNEL,
-                                   (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
+                darwin->cm730.write(Darwin::CM730::Address::LED_PANNEL,
+                                    (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
             });
         }
     }  // namespace darwin
