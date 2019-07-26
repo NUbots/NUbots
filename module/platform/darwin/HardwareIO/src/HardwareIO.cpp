@@ -402,138 +402,142 @@ namespace platform {
 
 
             // This trigger gets the sensor data from the CM730
-            realHardwareHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
-                "Hardware Loop", [this] {
-                    // Our final sensor output
-                    auto sensors = std::make_unique<DarwinSensors>();
+            realHardwareHandle =
+                on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
+                    .then("Hardware Loop",
+                          [this] {
+                              // Our final sensor output
+                              auto sensors = std::make_unique<DarwinSensors>();
 
-                    std::vector<uint8_t> command = {0xFF,
-                                                    0xFF,
-                                                    Darwin::ID::BROADCAST,
-                                                    0x00,  // The size, fill this in later
-                                                    Darwin::DarwinDevice::Instruction::SYNC_WRITE,
-                                                    Darwin::MX28::Address::D_GAIN,
-                                                    0x0A};
+                              std::vector<uint8_t> command = {0xFF,
+                                                              0xFF,
+                                                              Darwin::ID::BROADCAST,
+                                                              0x00,  // The size, fill this in later
+                                                              Darwin::DarwinDevice::Instruction::SYNC_WRITE,
+                                                              Darwin::MX28::Address::D_GAIN,
+                                                              0x0A};
 
-                    for (uint i = 0; i < servoState.size(); ++i) {
+                              for (uint i = 0; i < servoState.size(); ++i) {
 
-                        if (servoState[i].dirty) {
+                                  if (servoState[i].dirty) {
 
-                            // Clear our dirty flag
-                            servoState[i].dirty = false;
+                                      // Clear our dirty flag
+                                      servoState[i].dirty = false;
 
-                            // If our torque should be disabled then we disable our torque
-                            if (servoState[i].torqueEnabled
-                                && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
-                                servoState[i].torqueEnabled = false;
-                                (*darwin)[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
-                            }
-                            else {
-                                // If our torque was disabled but is now enabled
-                                if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
-                                    && servoState[i].torque != 0) {
-                                    servoState[i].torqueEnabled = true;
-                                    (*darwin)[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
-                                }
+                                      // If our torque should be disabled then we disable our torque
+                                      if (servoState[i].torqueEnabled
+                                          && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                                          servoState[i].torqueEnabled = false;
+                                          (*darwin)[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                                      }
+                                      else {
+                                          // If our torque was disabled but is now enabled
+                                          if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
+                                              && servoState[i].torque != 0) {
+                                              servoState[i].torqueEnabled = true;
+                                              (*darwin)[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
+                                          }
 
-                                // Get our goal position and speed
-                                uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                                uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
-                                uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
+                                          // Get our goal position and speed
+                                          uint16_t goalPosition =
+                                              Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                                          uint16_t movingSpeed = Convert::servoSpeedInverse(servoState[i].movingSpeed);
+                                          uint16_t torque      = Convert::torqueLimitInverse(servoState[i].torque);
 
-                                // Add to our sync write command
-                                command.insert(command.end(),
-                                               {
-                                                   uint8_t(i + 1),
-                                                   Convert::gainInverse(servoState[i].dGain),  // D Gain
-                                                   Convert::gainInverse(servoState[i].iGain),  // I Gain
-                                                   Convert::gainInverse(servoState[i].pGain),  // P Gain
-                                                   0,                                          // Reserved
-                                                   uint8_t(0xFF & goalPosition),               // Goal Position L
-                                                   uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
-                                                   uint8_t(0xFF & movingSpeed),                // Goal Speed L
-                                                   uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
-                                                   uint8_t(0xFF & torque),                     // Torque Limit L
-                                                   uint8_t(0xFF & (torque >> 8))               // Torque Limit H
-                                               });
-                            }
-                        }
-                    }
+                                          // Add to our sync write command
+                                          command.insert(command.end(),
+                                                         {
+                                                             uint8_t(i + 1),
+                                                             Convert::gainInverse(servoState[i].dGain),  // D Gain
+                                                             Convert::gainInverse(servoState[i].iGain),  // I Gain
+                                                             Convert::gainInverse(servoState[i].pGain),  // P Gain
+                                                             0,                                          // Reserved
+                                                             uint8_t(0xFF & goalPosition),         // Goal Position L
+                                                             uint8_t(0xFF & (goalPosition >> 8)),  // Goal Position H
+                                                             uint8_t(0xFF & movingSpeed),          // Goal Speed L
+                                                             uint8_t(0xFF & (movingSpeed >> 8)),   // Goal Speed H
+                                                             uint8_t(0xFF & torque),               // Torque Limit L
+                                                             uint8_t(0xFF & (torque >> 8))         // Torque Limit H
+                                                         });
+                                      }
+                                  }
+                              }
 
-                    // Write our data (if we need to)
-                    if (command.size() > 7) {
-                        // Calculate our length
-                        command[Darwin::Packet::LENGTH] = command.size() - 3;
+                              // Write our data (if we need to)
+                              if (command.size() > 7) {
+                                  // Calculate our length
+                                  command[Darwin::Packet::LENGTH] = command.size() - 3;
 
-                        // Do a checksum
-                        command.push_back(0);
-                        command.back() = Darwin::calculateChecksum(command.data());
+                                  // Do a checksum
+                                  command.push_back(0);
+                                  command.back() = Darwin::calculateChecksum(command.data());
 
-                        darwin->sendRawCommand(command);
-                    }
+                                  darwin->sendRawCommand(command);
+                              }
 
-                    // Read our data
-                    Darwin::BulkReadResults data = darwin->bulkRead();
+                              // Read our data
+                              Darwin::BulkReadResults data = darwin->bulkRead();
 
-                    // Parse our data
-                    *sensors = parseSensors(data);
+                              // Parse our data
+                              *sensors = parseSensors(data);
 
-                    // Work out a battery charged percentage
-                    sensors->voltage =
-                        std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
+                              // Work out a battery charged percentage
+                              sensors->voltage =
+                                  std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
-                    // cm730 leds to display battery voltage
-                    uint32_t ledl            = 0;
-                    uint32_t ledr            = 0;
-                    std::array<bool, 3> ledp = {false, false, false};
+                              // cm730 leds to display battery voltage
+                              uint32_t ledl            = 0;
+                              uint32_t ledr            = 0;
+                              std::array<bool, 3> ledp = {false, false, false};
 
-                    if (sensors->voltage > 0.9) {
-                        ledp = {true, true, true};
-                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                    }
-                    else if (sensors->voltage > 0.7) {
-                        ledp = {false, true, true};
-                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                    }
-                    else if (sensors->voltage > 0.5) {
-                        ledp = {false, false, true};
-                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                    }
-                    else if (sensors->voltage > 0.3) {
-                        ledp = {false, false, false};
-                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                    }
-                    else if (sensors->voltage > 0.2) {
-                        ledp = {false, false, false};
-                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                        ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
-                    }
-                    else if (sensors->voltage > 0) {
-                        ledp = {false, false, false};
-                        ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
-                        ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
-                    }
-                    // Error in reading voltage blue
-                    else {
-                        ledp = {false, false, false};
-                        ledl = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
-                        ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
-                    }
-                    emit(std::make_unique<DarwinSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
-                    emit(std::make_unique<DarwinSensors::EyeLED>(ledl));
-                    emit(std::make_unique<DarwinSensors::HeadLED>(ledr));
+                              if (sensors->voltage > 0.9) {
+                                  ledp = {true, true, true};
+                                  ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                                  ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                              }
+                              else if (sensors->voltage > 0.7) {
+                                  ledp = {false, true, true};
+                                  ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                                  ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                              }
+                              else if (sensors->voltage > 0.5) {
+                                  ledp = {false, false, true};
+                                  ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                                  ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                              }
+                              else if (sensors->voltage > 0.3) {
+                                  ledp = {false, false, false};
+                                  ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                                  ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                              }
+                              else if (sensors->voltage > 0.2) {
+                                  ledp = {false, false, false};
+                                  ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
+                                  ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
+                              }
+                              else if (sensors->voltage > 0) {
+                                  ledp = {false, false, false};
+                                  ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
+                                  ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
+                              }
+                              // Error in reading voltage blue
+                              else {
+                                  ledp = {false, false, false};
+                                  ledl = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
+                                  ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
+                              }
+                              emit(std::make_unique<DarwinSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
+                              emit(std::make_unique<DarwinSensors::EyeLED>(ledl));
+                              emit(std::make_unique<DarwinSensors::HeadLED>(ledr));
 
-                    // Send our nicely computed sensor data out to the world
-                    emit(std::move(sensors));
-                });
+                              // Send our nicely computed sensor data out to the world
+                              emit(std::move(sensors));
+                          })
+                    .disable();
 
             simulatedHardwareHandle =
-                on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
-                    [this](std::shared_ptr<const Sensors> previousSensors) {
+                on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>()
+                    .then([this](std::shared_ptr<const Sensors> previousSensors) {
                         if (previousSensors) {
                             Eigen::Matrix4d rightFootPose =
                                 previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL);
@@ -615,7 +619,8 @@ namespace platform {
                         addNoise(sensors_message);
                         // Send our nicely computed sensor data out to the world
                         emit(std::move(sensors_message));
-                    });
+                    })
+                    .disable();
 
             // This trigger writes the servo positions to the hardware
             on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
