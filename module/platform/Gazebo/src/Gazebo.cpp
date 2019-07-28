@@ -34,6 +34,7 @@ namespace platform {
         on<Configuration>("Gazebo.yaml").then([this](const Configuration& cfg) {
             config.clock_smoothing = cfg["clock_smoothing"];
             config.simulator_name  = cfg["simulator_name"].as<std::string>();
+            config.model_name      = cfg["model_name"].as<std::string>();
         });
 
         on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& event) {
@@ -49,6 +50,7 @@ namespace platform {
         on<Network<Ball>>().then([this](const NetworkSource& network_source, const Ball& simulation) {});
 
         on<Network<Simulation>>().then([this](const NetworkSource& network_source, const Simulation& simulation) {
+            // Only listen to our target simulation
             if (network_source.name == config.simulator_name) {
                 if (real_time != 0 || sim_time != 0) {
                     double real_delta          = simulation.real_time - real_time;
@@ -63,14 +65,21 @@ namespace platform {
         });
 
         on<Network<RawSensors>>().then([this](const NetworkSource& network_source, const RawSensors& sensors) {
-            // Swizzle the IMU axes so that they match the CM740
-            DarwinSensors msg(sensors.sensors);
-            msg.accelerometer = {-msg.accelerometer.x, msg.accelerometer.y, -msg.accelerometer.z};
-            msg.gyroscope     = {msg.gyroscope.y, msg.gyroscope.x, -msg.gyroscope.z};
-            emit(std::make_unique<DarwinSensors>(msg));
+            // Only listen to the target model in the target simulation
+            if (network_source.name == config.simulator_name && sensors.model == config.model_name) {
+
+                // Swizzle the IMU axes so that they match the CM740
+                DarwinSensors msg(sensors.sensors);
+                msg.accelerometer = {-msg.accelerometer.x, msg.accelerometer.y, -msg.accelerometer.z};
+                msg.gyroscope     = {msg.gyroscope.y, msg.gyroscope.x, -msg.gyroscope.z};
+                emit(std::make_unique<DarwinSensors>(msg));
+            }
         });
 
-        on<Network<Torso>>().then([this](const NetworkSource& network_source, const Torso& sensors) {});
+        on<Network<Torso>>().then([this](const NetworkSource& network_source, const Torso& sensors) {
+            if (network_source.name == config.simulator_name && sensors.model == config.model_name) {
+            }
+        });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto msg = std::make_unique<ServoTargets>();
@@ -80,7 +89,7 @@ namespace platform {
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             auto msg     = std::make_unique<GazeboTargets>();
-            msg->model   = "nugus";
+            msg->model   = config.model_name;
             msg->time    = NUClear::clock::now();
             msg->targets = commands;
             emit<Scope::NETWORK>(msg, config.simulator_name, false);

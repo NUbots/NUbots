@@ -15,14 +15,15 @@ namespace platform {
     private:
         struct {
             std::string simulator_name;
+            std::string model_name;
             double clock_smoothing;
         } config;
+
         double sim_time;
         double real_time;
     };
 
-
-}
-}
+}  // namespace platform
+}  // namespace module
 
 #endif  // MODULE_PLATFORM_GAZEBO_H
