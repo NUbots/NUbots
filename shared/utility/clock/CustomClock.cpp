@@ -3,7 +3,7 @@
 
 namespace utility {
 namespace clock {
-    double custom_rtf = 1.0;  // real time factor
+    double custom_rtf                                 = 1.0;  // real time factor
     std::chrono::steady_clock::time_point last_update = std::chrono::steady_clock::now();
 }  // namespace clock
 }  // namespace utility
