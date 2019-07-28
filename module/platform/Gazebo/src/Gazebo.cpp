@@ -67,7 +67,6 @@ namespace platform {
         on<Network<RawSensors>>().then([this](const NetworkSource& network_source, const RawSensors& sensors) {
             // Only listen to the target model in the target simulation
             if (network_source.name == config.simulator_name && sensors.model == config.model_name) {
-
                 // Swizzle the IMU axes so that they match the CM740
                 DarwinSensors msg(sensors.sensors);
                 msg.accelerometer = {-msg.accelerometer.x, msg.accelerometer.y, -msg.accelerometer.z};
@@ -84,6 +83,14 @@ namespace platform {
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto msg = std::make_unique<ServoTargets>();
             msg->targets.push_back(command);
+            emit(msg);
+        });
+
+        on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
+            auto msg = std::make_unique<ServoTargets>();
+            for (const auto& command : commands) {
+                msg->targets.push_back(command);
+            }
             emit(msg);
         });
 
