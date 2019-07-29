@@ -152,26 +152,32 @@ namespace input {
         ArvBuffer* buffer;
         buffer = arv_stream_try_pop_buffer(stream);
 
-        if ((buffer != NULL) && (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS)) {
-            int width, height;
-            size_t buffSize;
-            arv_buffer_get_image_region(buffer, NULL, NULL, &width, &height);
-            const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
+        if (buffer != NULL) {
+            if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
+                int width, height;
+                size_t buffSize;
+                arv_buffer_get_image_region(buffer, NULL, NULL, &width, &height);
+                const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
 
-            auto msg = std::make_unique<ImageData>();
-            msg->data.insert(msg->data.end(), buff, buff + buffSize);
+                auto msg = std::make_unique<ImageData>();
+                msg->data.insert(msg->data.end(), buff, buff + buffSize);
 
-            msg->dimensions << (unsigned int) (width), (unsigned int) (height);
-            msg->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(arv_buffer_get_timestamp(buffer)));
+                msg->dimensions << (unsigned int) (width), (unsigned int) (height);
+                msg->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(arv_buffer_get_timestamp(buffer)));
 
-            msg->format        = context->fourcc;
-            msg->serial_number = context->deviceID;
-            msg->camera_id     = context->cameraID;
-            msg->isLeft        = context->isLeft;
-            msg->lens          = context->lens;
+                msg->format        = context->fourcc;
+                msg->serial_number = context->deviceID;
+                msg->camera_id     = context->cameraID;
+                msg->isLeft        = context->isLeft;
+                msg->lens          = context->lens;
 
-            context->reactor.emit<Scope::DIRECT>(msg);
-            arv_stream_push_buffer(stream, buffer);
+                context->reactor.emit<Scope::DIRECT>(msg);
+                arv_stream_push_buffer(stream, buffer);
+            }
+            else {
+                // In the case where it fails, reinsert the Buffer back into the stream, so we don't run out.
+                arv_stream_push_buffer(stream, buffer);
+            }
         }
     }
 
