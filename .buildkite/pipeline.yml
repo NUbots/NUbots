@@ -1,15 +1,18 @@
 steps:
   - label: "Validate Clang Format"
-    command: "/NUbots/.travis/validate_format.sh"
+    command: "/code/NUbots/.travis/validate_format.sh"
     plugins:
       - docker#v3.3.0:
-          image: "nubots/buildkite:0.1"
-          workdir: "/NUbots"
+          image: "nubots/buildkite:0.2"
+          workdir: "/code/NUbots"
+          propagate-uid-gid: true
   - label: "Build for NUC"
-    command: "/NUbots/.travis/build_code.sh"
+    command: "/code/NUbots/.travis/build_code.sh"
     plugins:
       - docker#v3.3.0:
-          image: "nubots/buildkite:0.1"
-          workdir: "/NUbots"
+          image: "nubots/buildkite:0.2"
+          workdir: "/code/NUbots"
+          propagate-uid-gid: true
           environment:
             - "PLATFORM=nuc7i7bnh"
+            - "CCACHE_DIR=/code"
