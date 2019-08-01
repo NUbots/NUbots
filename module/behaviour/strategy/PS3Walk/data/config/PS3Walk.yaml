@@ -1,1 +1,4 @@
 action_scripts: ["WaveLeft.yaml"]
+max_speed:
+  linear: 0.2
+  rotational: 0.5

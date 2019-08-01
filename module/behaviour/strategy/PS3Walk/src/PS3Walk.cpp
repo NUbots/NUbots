@@ -168,8 +168,8 @@ namespace behaviour {
                 if (moving) {
                     // TODO: hacked to not allow backwards movement for stability
                     // arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
-                    auto transform = Transform2D(strafe, rotationalSpeed);
-                    emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(transform)));
+                        auto transform = Transform2D(strafe * max_speed, rotationalSpeed * max_rotational_speed);
+                        emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(transform)));
                 }
             });
 

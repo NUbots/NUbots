@@ -43,6 +43,8 @@ namespace behaviour {
             bool headLocked       = false;
             float headPitch       = 0;
             float headYaw         = 0;
+            float max_speed;
+            float max_rotational_speed;
 
             std::vector<std::string> actions;
         };
