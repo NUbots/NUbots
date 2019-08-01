@@ -15,6 +15,7 @@ namespace input {
 
     enum class EventType : uint8_t { BUTTON = 0x01, AXIS = 0x02, INIT = 0x80 };
     enum class Button : uint8_t {
+        CROSS          = 0,
         CIRCLE         = 1,
         TRIANGLE       = 2,
         SQUARE         = 3,
