@@ -20,6 +20,8 @@
 #ifndef MODULES_PLATFORM_DARWIN_SENSORFILTER_H
 #define MODULES_PLATFORM_DARWIN_SENSORFILTER_H
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "utility/math/filter/UKF.h"
@@ -49,9 +51,9 @@ namespace platform {
             utility::math::filter::UKF<MotionModel> motionFilter;
 
             struct Config {
-                Config() : nominal_z(0.0f), motionFilter(), buttons() {}
+                Config() : motionFilter(), buttons(), footDown() {}
 
-                float nominal_z;
+                bool debug;
 
                 struct MotionFilter {
                     MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
@@ -65,13 +67,11 @@ namespace platform {
                                 : accelerometer(arma::fill::eye)
                                 , accelerometerMagnitude(arma::fill::eye)
                                 , gyroscope(arma::fill::eye)
-                                , footUpWithZ(arma::fill::eye)
                                 , flatFootOdometry(arma::fill::eye)
                                 , flatFootOrientation(arma::fill::eye) {}
                             arma::mat33 accelerometer;
                             arma::mat33 accelerometerMagnitude;
                             arma::mat33 gyroscope;
-                            arma::mat44 footUpWithZ;
                             arma::mat33 flatFootOdometry;
                             arma::mat44 flatFootOrientation;
                         } measurement;
@@ -85,6 +85,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } process;
                     } noise;
                     struct Initial {
@@ -99,6 +100,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } mean;
                         struct Covariance {
                             Covariance()
@@ -110,6 +112,7 @@ namespace platform {
                             arma::vec3 velocity;
                             arma::vec4 rotation;
                             arma::vec3 rotationalVelocity;
+                            arma::vec3 gyroscopeBias;
                         } covariance;
                     } initial;
                 } motionFilter;
@@ -118,6 +121,13 @@ namespace platform {
                     Button() : debounceThreshold(0) {}
                     int debounceThreshold;
                 } buttons;
+
+
+                struct FootDown {
+                    FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
+                    bool fromLoad;
+                    float certaintyThreshold;
+                } footDown;
             } config;
 
         private:
@@ -127,16 +137,14 @@ namespace platform {
             bool middleDown = false;
 
             // Our sensor for foot down
-            VirtualLoadSensor load_sensor;
-
-            // World to foot in world rotation when the foot landed
-            std::array<arma::vec3, 2> footlanding_rFWw;
+            VirtualLoadSensor<float> load_sensor;
 
             // Foot to world in foot-flat rotation when the foot landed
-            std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rfw;
+            std::array<bool, 2> previous_foot_down = {false, false};
+            std::array<Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>, 2> footlanding_Hwf;
 
-            // World to foot in foot-flat rotation when the foot landed
-            std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
+            // Storage for previous gyroscope values
+            arma::vec3 theta;
         };
     }  // namespace darwin
 }  // namespace platform

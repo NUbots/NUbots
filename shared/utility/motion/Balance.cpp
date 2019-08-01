@@ -67,7 +67,7 @@ namespace motion {
         //------------------------------------
 
         // Robot coords in world (:Robot -> World)
-        Rotation3D orientation        = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
+        Rotation3D orientation        = Transform3D(convert(sensors.Htw)).rotation().i();
         Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-orientation.yaw()) * orientation;
 
         // Removes any yaw component
@@ -154,15 +154,16 @@ namespace motion {
         // sensors.bodyCentreHeight * dPitch));
 
         // Compute torso position adjustment
-        arma::vec3 torsoAdjustment_world = arma::vec3(
-            {-translationPGainX * sensors.bodyCentreHeight * pitch
-                 - translationDGainX * sensors.bodyCentreHeight * dPitch,
-             translationPGainY * sensors.bodyCentreHeight * roll + translationDGainY * sensors.bodyCentreHeight * dRoll,
-             -translationPGainZ * total - translationDGainY * dTotal});
+        arma::vec3 torsoAdjustment_world = arma::vec3({-translationPGainX * sensors.body_centre_height * pitch
+                                                           - translationDGainX * sensors.body_centre_height * dPitch,
+                                                       translationPGainY * sensors.body_centre_height * roll
+                                                           + translationDGainY * sensors.body_centre_height * dRoll,
+                                                       -translationPGainZ * total - translationDGainY * dTotal});
 
         // //Rotate from world space to torso space
-        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-Transform3D(convert<double, 4,
-        // 4>(sensors.world)).rotation()).yaw()) * Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+        // Rotation3D yawLessOrientation =
+        // Rotation3D::createRotationZ(-Transform3D(convert(sensors.Htw)).rotation()).yaw()) *
+        // Transform3D(convert(sensors.Htw)).rotation();
 
         arma::vec3 torsoAdjustment_torso = torsoAdjustment_world;
 

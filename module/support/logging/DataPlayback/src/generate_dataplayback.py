@@ -17,13 +17,13 @@ if __name__ == "__main__":
     for dir_name, subdir, files in os.walk(shared_folder):
         modules = pkgutil.iter_modules(path=[dir_name])
         for loader, module_name, ispkg in modules:
-            if module_name.endswith('pb2'):
+            if module_name.endswith("pb2"):
 
                 # Work out what header file this came from
-                include = os.path.join(os.path.relpath(dir_name, shared_folder), '{}.h'.format(module_name[:-4]))
+                include = os.path.join(os.path.relpath(dir_name, shared_folder), "{}.h".format(module_name[:-4]))
 
                 # If it's one of ours include it
-                if include.startswith('message'):
+                if include.startswith("message"):
                     includes.append(include)
 
                 # Load our protobuf module
@@ -34,17 +34,17 @@ if __name__ == "__main__":
     for message in google.protobuf.message.Message.__subclasses__():
 
         # Work out our original protobuf type
-        pb_type = '.'.join(message.DESCRIPTOR.full_name.split('.')[1:])
+        pb_type = ".".join(message.DESCRIPTOR.full_name.split(".")[1:])
 
         # Only include our own messages
-        if pb_type.startswith('message.') and not message.DESCRIPTOR.GetOptions().map_entry:
+        if pb_type.startswith("message.") and not message.DESCRIPTOR.GetOptions().map_entry:
             messages.add(pb_type)
 
     messages = list(messages)
 
-
     # The base of our source file we will be filling in
-    source = dedent("""\
+    source = dedent(
+        """\
         #include "DataPlayback.h"
 
         #include "extension/Configuration.h"
@@ -199,17 +199,19 @@ if __name__ == "__main__":
         }}  // namespace support
         }}  // namespace module
 
-        """)
+        """
+    )
 
     # Work out our includes and players
     includes = ['#include "{}"'.format(i) for i in includes]
-    players = ['            add_player<{}>();'.format(m.replace('.', '::')) for m in messages]
+    players = ["            add_player<{}>();".format(m.replace(".", "::")) for m in messages]
 
-    with open(cpp_file, 'w') as f:
-        f.write(source.format(includes='\n'.join(includes), players='\n'.join(players)))
+    with open(cpp_file, "w") as f:
+        f.write(source.format(includes="\n".join(includes), players="\n".join(players)))
 
     # Now generate our yaml file
-    yaml_template = dedent("""\
+    yaml_template = dedent(
+        """\
         file: ""
         loop_playback: true
         # The amount of time into the future to buffer, should be at least 1000ms
@@ -217,11 +219,11 @@ if __name__ == "__main__":
 
         messages:
         {messages}
-    """)
+    """
+    )
 
-    yaml_keys = ['  {}: false'.format(m) for m in sorted(messages)]
+    yaml_keys = ["  {}: false".format(m) for m in sorted(messages)]
 
     # and write it out
-    with open(yaml_file, 'w') as f:
-        f.write(yaml_template.format(messages='\n'.join(yaml_keys)))
-
+    with open(yaml_file, "w") as f:
+        f.write(yaml_template.format(messages="\n".join(yaml_keys)))

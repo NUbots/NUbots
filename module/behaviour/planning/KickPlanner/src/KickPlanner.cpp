@@ -28,7 +28,7 @@
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -53,7 +53,7 @@ namespace behaviour {
         using message::input::Sensors;
         using message::localisation::Ball;
         using message::localisation::Field;
-        using VisionBall = message::vision::Ball;
+        using VisionBalls = message::vision::Balls;
         using message::motion::IKKickParams;
         using message::motion::KickCommand;
         using KickCommandType = message::motion::KickCommandType;
@@ -86,8 +86,8 @@ namespace behaviour {
                 emit(std::make_unique<WantsToKick>(false));
             });
 
-            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
-                if (!balls.empty()) {
+            on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+                if (balls.balls.size() > 0) {
                     ballLastSeen = NUClear::clock::now();
                 }
             });
@@ -106,10 +106,10 @@ namespace behaviour {
                     // Compute target in robot coords
                     // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
                     // TODO: The heading seems to judder here!!
-                    // TODO: use sensors.world instead
-                    Transform3D Hfw = fieldStateToTransform3D(convert<double, 3>(field.position));
+                    // TODO: use sensors.Htw instead
+                    Transform3D Hfw = fieldStateToTransform3D(convert(field.position));
 
-                    Transform3D Htw         = convert<double, 4, 4>(sensors.world);
+                    Transform3D Htw         = convert(sensors.Htw);
                     arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});
 
                     // Transform target from field to torso space
@@ -117,7 +117,7 @@ namespace behaviour {
                     arma::vec3 kickTarget = Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
                     float KickAngle       = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
-                    // log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
+                    // log("KickPlan target global",convert(kickPlan.target).t());
                     // log("Target of Kick",kickTarget.t());
                     // log("KickAngle",KickAngle);
 

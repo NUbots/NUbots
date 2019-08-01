@@ -1,26 +1,8 @@
-ransac:
-  minimum_points_for_consensus: 10
-  maximum_iterations_per_fitting: 100
-  maximum_fitted_models: 8
-  consensus_error_threshold: 0.0001
-
-measurement_limits:
-  left:   10
-  right:  10
-  top:    10
-  base:   10
-
-aspect_ratio_range: [ 2, 20 ]
-visual_horizon_buffer: 0.02
-minimum_goal_horizon_angle: 1.3
-maximum_angle_between_sides: 0.3
-maximum_vertical_goal_perspective_angle: 0.1
-angular_width_disagreement_threshold_vertical: 0.1
-angular_width_disagreement_threshold_horizontal: 0.1
-
-# Localisation covariances
-vector3_covariance: [0.1,0.001,0.001]
-angle_covariance: [0.001,0.01]
-
-debug_goal_throwouts: false
-debug_goal_ransac: false
+confidence_threshold: 0.7              # How confident do we need to be that this is a goal point
+cluster_points: 5                      # How many points do we need to claim this cluster is a viable goal
+disagreement_ratio: 0.20               # How much can the measured goal width vary from actual goal width before we
+                                       # treat the posts as part of separate goals
+goal_angular_cov: [0.1, 0.001, 0.001]  # Measurement certainties
+use_median: false                      # Use median rather than mean we determining position of left and right goal
+                                       # post edges
+debug: false                           # Turn on debug outputs

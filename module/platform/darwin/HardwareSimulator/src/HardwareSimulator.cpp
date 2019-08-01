@@ -34,6 +34,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {
@@ -178,9 +179,9 @@ namespace platform {
                 [this](std::shared_ptr<const Sensors> previousSensors) {
                     if (previousSensors) {
                         Transform3D rightFootPose =
-                            convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+                            convert(previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL));
                         Transform3D leftFootPose =
-                            convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL));
+                            convert(previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL));
                         arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
                         arma::vec3 torsoFromLeftFoot  = -leftFootPose.rotation().i() * leftFootPose.translation();
                         // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
@@ -246,13 +247,18 @@ namespace platform {
                         }
                     }
                     sumGyro             = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0, 0, imu_drift_rate}));
-                    sensors.gyroscope.x = sumGyro[0];
+                    sensors.gyroscope.x = -sumGyro[0];
                     sensors.gyroscope.y = sumGyro[1];
                     sensors.gyroscope.z = sumGyro[2];
 
-                    sensors.accelerometer.x = 0;
-                    sensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
-                    sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
+                    // sensors.accelerometer.x = 0;
+                    // sensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
+                    // sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
+
+                    sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
+                    sensors.accelerometer.y = 0;
+                    sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
+
 
                     sensors.timestamp = NUClear::clock::now();
 

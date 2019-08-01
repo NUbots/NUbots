@@ -47,11 +47,23 @@ namespace platform {
             // Prepare our new state
             arma::vec::fixed<MotionModel::size> newState = state;
 
-            // Extract our unit quaternion rotation
-            UnitQuaternion rotation(state.rows(QW, QZ));
+            // ********************************
+            // UPDATE LINEAR POSITION/VELOCITY
+            // ********************************
 
             // Add our velocity to our position
             newState.rows(PX, PZ) += state.rows(VX, VZ) * deltaT;
+
+            // add velocity decay
+            newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
+
+
+            // ********************************
+            // UPDATE ANGULAR POSITION/VELOCITY
+            // ********************************
+
+            // Extract our unit quaternion rotation
+            UnitQuaternion Rwt(state.rows(QW, QZ));
 
             // Apply our rotational velocity to our orientation
             double t_2 = deltaT * 0.5;
@@ -59,10 +71,7 @@ namespace platform {
             qGyro.imaginary() = state.rows(WX, WZ) * t_2;
             qGyro.real()      = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
 
-            newState.rows(QW, QZ) = qGyro * rotation;
-
-            // add velocity decay
-            newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
+            newState.rows(QW, QZ) = Rwt * qGyro;
 
             return newState;
         }
@@ -72,45 +81,27 @@ namespace platform {
                                                      const MeasurementType::ACCELEROMETER&) {
 
             // Extract our rotation quaternion
-            UnitQuaternion rotation(state.rows(QW, QZ));
+            UnitQuaternion Rwt(state.rows(QW, QZ));
 
-            // Make a gravity vector and return it
-            return rotation.rotateVector(arma::vec3({0, 0, G}));
+            // Make a world gravity vector and rotate it into torso space
+            // Where is world gravity with respest to robot orientation?
+            return Rwt.i().rotateVector(arma::vec3({0, 0, G}));
         }
 
         // Gyroscope
         arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
                                                      const MeasurementType::GYROSCOPE&) {
-            return state.rows(WX, WZ);
-        }
-
-        // Foot up with z
-        arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
-                                                     const MeasurementType::FOOT_UP_WITH_Z&) {
-
-            arma::vec4 prediction;
-
-            // Extract our rotation quaternion
-            UnitQuaternion rotation(state.rows(QW, QZ));
-
-            // First 3 is the up vector in torso space
-            prediction.rows(0, 2) = rotation.rotateVector(arma::vec3({0, 0, 1}));
-
-            // 4th component is our z height
-            prediction[3] = state[PZ];
-
-            return prediction;
+            // Add predicted gyroscope bias to our predicted gyroscope
+            return state.rows(WX, WZ) + state.rows(BX, BZ);
         }
 
         arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
                                                      const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-
             return state.rows(PX, PZ);
         }
 
         arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
                                                      const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-
             return state.rows(QW, QZ);
         }
 

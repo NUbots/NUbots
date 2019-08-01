@@ -27,21 +27,19 @@
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/ResetRobotHypotheses.h"
-#include "message/motion/DiveCommand.h"
 #include "message/motion/GetupCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/behaviour/MotionCommand.h"
-#include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace behaviour {
@@ -65,24 +63,20 @@ namespace behaviour {
         using Unpenalisation = message::input::GameEvents::Unpenalisation;
         using GameMode       = message::input::GameState::Data::Mode;
         using message::input::Sensors;
-        using VisionBall = message::vision::Ball;
         using message::localisation::Ball;
         using message::localisation::Field;
         using message::localisation::ResetRobotHypotheses;
-        using message::motion::DiveCommand;
-        using message::motion::DiveFinished;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
         using message::platform::darwin::ButtonLeftDown;
         using message::platform::darwin::ButtonMiddleDown;
         using message::support::FieldDescription;
-        using message::vision::Goal;
+        using VisionBalls = message::vision::Balls;
+        using VisionGoals = message::vision::Goals;
 
-        using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
-        using utility::time::durationFromSeconds;
 
         SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -94,11 +88,16 @@ namespace behaviour {
             , goalLastMeasured() {
 
             on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
-                cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
-                cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
+                using namespace std::chrono;
+                cfg_.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["ball_last_seen_max_time"].as<double>()));
+                cfg_.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["goal_last_seen_max_time"].as<double>()));
 
-                cfg_.localisation_interval = durationFromSeconds(config["localisation_interval"].as<double>());
-                cfg_.localisation_duration = durationFromSeconds(config["localisation_duration"].as<double>());
+                cfg_.localisation_interval = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["localisation_interval"].as<double>()));
+                cfg_.localisation_duration = duration_cast<NUClear::clock::duration>(
+                    duration<double>(config["localisation_duration"].as<double>()));
 
                 cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
                 cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
@@ -123,14 +122,14 @@ namespace behaviour {
 
 
             // For checking last seen times
-            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
-                if (!balls.empty()) {
+            on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+                if (!balls.balls.empty()) {
                     ballLastMeasured = NUClear::clock::now();
                 }
             });
 
-            on<Trigger<std::vector<Goal>>>().then([this](const std::vector<Goal>& goals) {
-                if (!goals.empty()) {
+            on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
+                if (!goals.goals.empty()) {
                     goalLastMeasured = NUClear::clock::now();
                 }
             });
@@ -141,12 +140,6 @@ namespace behaviour {
 
             // Check to see if we have finished getting up.
             on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
-
-            // Check to see if we are currently in the process of diving.
-            on<Trigger<DiveCommand>>().then([this] { isDiving = true; });
-
-            // Check to see if we have finished diving.
-            on<Trigger<DiveFinished>>().then([this] { isDiving = false; });
 
             on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
                 if (selfPenalisation.context == GameEvents::Context::SELF) {
@@ -267,10 +260,8 @@ namespace behaviour {
 
             on<Trigger<Field>, With<FieldDescription>>().then(
                 [this](const Field& field, const FieldDescription& fieldDescription) {
-                    auto kickTarget = convert<double, 2>(getKickPlan(field, fieldDescription));
+                    Eigen::Vector2d kickTarget = convert(getKickPlan(field, fieldDescription));
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
-                    emit(utility::nusight::drawCircle(
-                        "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.3, {0, 0, 0}));
                 });
         }
 
@@ -409,9 +400,8 @@ namespace behaviour {
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
 
-            bool feetOffGround = !sensors.leftFootDown && !sensors.rightFootDown;
-            return false && feetOffGround && !isGettingUp && !isDiving && sensors.world(2, 2) < 0.92
-                   && sensors.world(2, 2) > 0.88;
+            bool feetOffGround = !sensors.left_foot_down && !sensors.right_foot_down;
+            return false && feetOffGround && !isGettingUp && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
         }
 
         bool SoccerStrategy::penalised() {

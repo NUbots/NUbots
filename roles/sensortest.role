@@ -12,5 +12,4 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     support::NUsight
-    debug::NUsight
 )

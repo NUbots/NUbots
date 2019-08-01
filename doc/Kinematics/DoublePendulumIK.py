@@ -24,7 +24,7 @@ J = []
 X = np.array([0,0])
 A = np.array([0,0])
 
-# dA2 
+# dA2
 
 X_goal = np.array([1,0.4])
 

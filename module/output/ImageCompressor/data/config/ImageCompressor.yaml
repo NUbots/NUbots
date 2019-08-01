@@ -1,0 +1,4 @@
+# Quality of compressed image
+quality: 75
+# Method of which to perform debayering
+method: SIMPLE

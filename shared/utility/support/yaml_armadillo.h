@@ -93,6 +93,28 @@ struct convert<arma::vec> {
     }
 };
 
+template <>
+struct convert<arma::fvec> {
+    static Node encode(const arma::fvec& rhs) {
+        Node node;
+
+        for (const float& d : rhs) {
+            node.push_back(d);
+        }
+
+        return node;
+    }
+
+    static bool decode(const Node& node, arma::fvec& rhs) {
+        rhs.resize(node.size());
+        for (uint i = 0; i < node.size(); ++i) {
+            rhs[i] = node[i].as<utility::support::Expression>();
+        }
+
+        return true;
+    }
+};
+
 template <uint size>
 struct convert<arma::vec::fixed<size>> {
     static Node encode(const arma::vec::fixed<size>& rhs) {

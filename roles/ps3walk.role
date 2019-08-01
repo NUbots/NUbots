@@ -18,14 +18,8 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
-
     motion::OldWalkEngine
     motion::ScriptEngine
-
-    # Vision
-    vision::LUTClassifier
-    vision::GoalDetector
-    vision::BallDetector
 
     # Behaviour
     behaviour::Controller
@@ -38,5 +32,4 @@ NUCLEAR_ROLE(
 
     # Motion
     motion::HeadController
-
 )

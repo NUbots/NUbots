@@ -29,6 +29,8 @@
 
 #include "ImageData.h"
 
+#include "message/input/Image.h"
+
 #include "utility/vision/Vision.h"
 
 namespace module {
@@ -95,6 +97,9 @@ namespace input {
             /// @brief the framerate we are requesting
             FRAMERATE = 30
         };
+
+        /// @brief Lens configuration for this camera
+        message::input::Image::Lens lens;
 
         /**
          * @brief Constructs a new DarwinCamera class using the passed string as the device

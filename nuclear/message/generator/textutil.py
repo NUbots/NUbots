@@ -5,7 +5,7 @@ import textwrap
 
 def indent(str, len=4):
     """Indent every line of the string by the value provided in length"""
-    return '\n'.join([(' ' * len) + l for l in str.splitlines()])
+    return "\n".join([(" " * len) + l for l in str.splitlines()])
 
 
 def dedent(str):

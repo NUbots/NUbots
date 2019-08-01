@@ -26,13 +26,14 @@
 #include "message/localisation/Field.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/HeadCommand.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/math/vision.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
@@ -47,15 +48,16 @@ namespace behaviour {
         using utility::nusight::graph;
 
         using message::vision::Ball;
+        using message::vision::Balls;
         using message::vision::Goal;
-        using message::vision::VisionObject;
+        using message::vision::Goals;
         // using message::localisation::Ball;
         using message::localisation::Field;
         using LocBall = message::localisation::Ball;
+        using message::input::Image;
         using message::input::Sensors;
         using message::motion::HeadCommand;
 
-        using message::input::CameraParameters;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
         using message::motion::KinematicsModel;
@@ -65,14 +67,35 @@ namespace behaviour {
         using utility::math::geometry::UnitQuaternion;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
-        using utility::math::vision::objectDirectionFromScreenAngular;
-        using utility::math::vision::screenAngularFromObjectDirection;
         using utility::motion::kinematics::calculateCameraLookJoints;
 
         using ServoID = utility::input::ServoID;
 
         using message::behaviour::SoccerObjectPriority;
         using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
+
+        inline arma::vec screenAngularFromObjectDirection(const arma::vec& v) {
+            return {std::atan2(v[1], v[0]), std::atan2(v[2], v[0])};
+        }
+
+        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screen_angular) {
+            if (std::fmod(std::fabs(screen_angular[0]), M_PI) == M_PI_2
+                || std::fmod(std::fabs(screen_angular[1]), M_PI) == M_PI_2) {
+                return {0, 0, 0};
+            }
+            double tanTheta        = std::tan(screen_angular[0]);
+            double tanPhi          = std::tan(screen_angular[1]);
+            double x               = 0;
+            double y               = 0;
+            double z               = 0;
+            double denominator_sqr = 1 + tanTheta * tanTheta + tanPhi * tanPhi;
+            // Assume facing forward st x>0 (which is fine for screen angular)
+            x = 1 / std::sqrt(denominator_sqr);
+            y = x * tanTheta;
+            z = x * tanPhi;
+
+            return {x, y, z};
+        }
 
         HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -82,7 +105,6 @@ namespace behaviour {
             , min_pitch(0.0f)
             , replan_angle_threshold(0.0f)
             , lastPlanOrientation()
-            , cam()
             , pitch_plan_threshold(0.0f)
             , fractional_view_padding(0.0)
             , search_timeout_ms(0.0f)
@@ -152,212 +174,206 @@ namespace behaviour {
 
 
             on<Trigger<Sensors>,
-               Optional<With<std::vector<Ball>>>,
-               Optional<With<std::vector<Goal>>>,
+               Optional<With<Balls>>,
+               Optional<With<Goals>>,
                Optional<With<LocBall>>,
                With<KinematicsModel>,
-               With<CameraParameters>,
+               With<Image>,
                Single,
                Sync<HeadBehaviourSoccer>>()
-                .then(
-                    "Head Behaviour Main Loop",
-                    [this](const Sensors& sensors,
-                           std::shared_ptr<const std::vector<Ball>> vballs,
-                           std::shared_ptr<const std::vector<Goal>> vgoals,
-                           std::shared_ptr<const LocBall> locBall,
-                           const KinematicsModel& kinematicsModel,
-                           const CameraParameters& cam_) {
-                        max_yaw   = kinematicsModel.head.MAX_YAW;
-                        min_yaw   = kinematicsModel.head.MIN_YAW;
-                        max_pitch = kinematicsModel.head.MAX_PITCH;
-                        min_pitch = kinematicsModel.head.MIN_PITCH;
+                .then("Head Behaviour Main Loop",
+                      [this](const Sensors& sensors,
+                             std::shared_ptr<const Balls> vballs,
+                             std::shared_ptr<const Goals> vgoals,
+                             std::shared_ptr<const LocBall> locBall,
+                             const KinematicsModel& kinematicsModel,
+                             const Image& image) {
+                          max_yaw   = kinematicsModel.head.MAX_YAW;
+                          min_yaw   = kinematicsModel.head.MIN_YAW;
+                          max_pitch = kinematicsModel.head.MAX_PITCH;
+                          min_pitch = kinematicsModel.head.MIN_PITCH;
 
-                        // std::cout << "Seen: Balls: " <<
-                        // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
-                        // "Goals: " <<
-                        // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) <<
-                        // std::endl;
+                          // std::cout << "Seen: Balls: " <<
+                          // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
+                          // "Goals: " <<
+                          // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) <<
+                          // std::endl;
 
-                        // TODO: pass camera parameters around instead of this hack storage
-                        cam = cam_;
+                          if (locBall) {
+                              locBallReceived = true;
+                              lastLocBall     = *locBall;
+                          }
+                          auto now = NUClear::clock::now();
 
-                        if (locBall) {
-                            locBallReceived = true;
-                            lastLocBall     = *locBall;
-                        }
-                        auto now = NUClear::clock::now();
+                          bool objectsMissing = false;
 
-                        bool objectsMissing = false;
+                          // Get the list of objects which are currently visible
+                          Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
+                          Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
-                        // Get the list of objects which are currently visible
-                        std::vector<Ball> ballFixationObjects = getFixationObjects(vballs, objectsMissing);
-                        std::vector<Goal> goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
+                          // Determine state transition variables
+                          bool lost =
+                              ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
+                          // Do we need to update our plan?
+                          bool updatePlan =
+                              !isGettingUp
+                              && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
+                          // Has it been a long time since we have seen anything of interest?
+                          bool searchTimedOut =
+                              std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
+                              > search_timeout_ms;
+                          // Did the object move in IMUspace?
+                          bool objectMoved = false;
 
-                        // Determine state transition variables
-                        bool lost = ((ballFixationObjects.size() <= 0) && (goalFixationObjects.size() <= 0));
-                        // Do we need to update our plan?
-                        bool updatePlan =
-                            !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
-                        // Has it been a long time since we have seen anything of interest?
-                        bool searchTimedOut =
-                            std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
-                            > search_timeout_ms;
-                        // Did the object move in IMUspace?
-                        bool objectMoved = false;
+                          bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
 
-                        bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
+                          // log("updatePlan", updatePlan);
+                          // log("lost", lost);
+                          // log("isGettingUp", isGettingUp);
+                          // log("searchType", int(searchType));
+                          // log("headSearcher.size()", headSearcher.size());
 
-                        // log("updatePlan", updatePlan);
-                        // log("lost", lost);
-                        // log("isGettingUp", isGettingUp);
-                        // log("searchType", int(searchType));
-                        // log("headSearcher.size()", headSearcher.size());
+                          // State execution
 
-                        // State execution
+                          // Get robot heat to body transform
+                          Rotation3D orientation, headToBodyRotation;
+                          if (!lost) {
+                              // We need to transform our view points to orientation space
+                              if (ballMaxPriority) {
+                                  Eigen::Matrix4d Htc = sensors.Htw * ballFixationObjects.Hcw.inverse();
+                                  headToBodyRotation  = Transform3D(convert(Htc)).rotation();
+                                  orientation         = Transform3D(convert(ballFixationObjects.Hcw)).rotation().i();
+                              }
+                              else {
+                                  Eigen::Matrix4d Htc = sensors.Htw * goalFixationObjects.Hcw.inverse();
+                                  headToBodyRotation  = Transform3D(convert(Htc)).rotation();
+                                  orientation         = Transform3D(convert(goalFixationObjects.Hcw)).rotation().i();
+                              }
+                          }
+                          else {
+                              Eigen::Matrix4d Htc = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+                              headToBodyRotation  = Transform3D(convert(Htc)).rotation();
+                              orientation         = Transform3D(convert(sensors.Htw)).rotation().i();
+                          }
+                          Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
-                        // Get robot heat to body transform
-                        Rotation3D orientation, headToBodyRotation;
-                        if (!lost) {
-                            // We need to transform our view points to orientation space
-                            if (ballMaxPriority) {
-                                headToBodyRotation =
-                                    Transform3D(convert<double, 4, 4>(
-                                                    ballFixationObjects[0]
-                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
-                                        .rotation();
-                                orientation =
-                                    Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->world))
-                                        .rotation()
-                                        .i();
-                            }
-                            else {
-                                headToBodyRotation =
-                                    Transform3D(convert<double, 4, 4>(
-                                                    goalFixationObjects[0]
-                                                        .visObject.sensors->forwardKinematics[ServoID::HEAD_PITCH]))
-                                        .rotation();
-                                orientation =
-                                    Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->world))
-                                        .rotation()
-                                        .i();
-                            }
-                        }
-                        else {
-                            headToBodyRotation =
-                                Transform3D(convert<double, 4, 4>(sensors.forwardKinematics[ServoID::HEAD_PITCH]))
-                                    .rotation();
-                            orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
-                        }
-                        Rotation3D headToIMUSpace = orientation * headToBodyRotation;
+                          // If objects visible, check current centroid to see if it moved
+                          if (!lost) {
+                              arma::vec2 currentCentroid = arma::vec2({0, 0});
+                              if (ballMaxPriority) {
+                                  for (auto& ob : ballFixationObjects.balls) {
+                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
+                                                         / float(ballFixationObjects.balls.size());
+                                  }
+                              }
+                              else {
+                                  for (auto& ob : goalFixationObjects.goals) {
+                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
+                                                         / float(goalFixationObjects.goals.size());
+                                  }
+                              }
+                              arma::vec2 currentCentroid_world =
+                                  getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
+                              // If our objects have moved, we need to replan
+                              if (arma::norm(currentCentroid_world - lastCentroid)
+                                  >= fractional_angular_update_threshold
+                                         * std::fmax(image.lens.fov[0], image.lens.fov[1]) / 2.0) {
+                                  objectMoved  = true;
+                                  lastCentroid = currentCentroid_world;
+                              }
+                          }
 
-                        // If objects visible, check current centroid to see if it moved
-                        if (!lost) {
-                            arma::vec2 currentCentroid = arma::vec2({0, 0});
-                            if (ballMaxPriority) {
-                                for (auto& ob : ballFixationObjects) {
-                                    currentCentroid += convert<double, 2>(ob.visObject.screenAngular)
-                                                       / float(ballFixationObjects.size());
-                                }
-                            }
-                            else {
-                                for (auto& ob : goalFixationObjects) {
-                                    currentCentroid += convert<double, 2>(ob.visObject.screenAngular)
-                                                       / float(goalFixationObjects.size());
-                                }
-                            }
-                            arma::vec2 currentCentroid_world =
-                                getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
-                            // If our objects have moved, we need to replan
-                            if (arma::norm(currentCentroid_world - lastCentroid)
-                                >= fractional_angular_update_threshold * std::fmax(cam.FOV[0], cam.FOV[1]) / 2.0) {
-                                objectMoved  = true;
-                                lastCentroid = currentCentroid_world;
-                            }
-                        }
+                          // State Transitions
+                          if (!isGettingUp) {
+                              switch (state) {
+                                  case FIXATION:
+                                      if (lost) {
+                                          state = WAIT;
+                                      }
+                                      else if (objectMoved) {
+                                          updatePlan = true;
+                                      }
+                                      break;
+                                  case WAIT:
+                                      if (!lost) {
+                                          state      = FIXATION;
+                                          updatePlan = true;
+                                      }
+                                      else if (searchTimedOut) {
+                                          state      = SEARCH;
+                                          updatePlan = true;
+                                      }
+                                      break;
+                                  case SEARCH:
+                                      if (!lost) {
+                                          state      = FIXATION;
+                                          updatePlan = true;
+                                      }
+                                      break;
+                              }
+                          }
 
-                        // State Transitions
-                        if (!isGettingUp) {
-                            switch (state) {
-                                case FIXATION:
-                                    if (lost) {
-                                        state = WAIT;
-                                    }
-                                    else if (objectMoved) {
-                                        updatePlan = true;
-                                    }
-                                    break;
-                                case WAIT:
-                                    if (!lost) {
-                                        state      = FIXATION;
-                                        updatePlan = true;
-                                    }
-                                    else if (searchTimedOut) {
-                                        state      = SEARCH;
-                                        updatePlan = true;
-                                    }
-                                    break;
-                                case SEARCH:
-                                    if (!lost) {
-                                        state      = FIXATION;
-                                        updatePlan = true;
-                                    }
-                                    break;
-                            }
-                        }
+                          // If we arent getting up, then we can update the plan if necessary
+                          if (updatePlan) {
+                              if (lost) {
+                                  lastPlanOrientation = Transform3D(convert(sensors.Htw)).rotation();
+                              }
+                              if (ballMaxPriority) {
+                                  updateHeadPlan(kinematicsModel,
+                                                 ballFixationObjects,
+                                                 objectsMissing,
+                                                 sensors,
+                                                 headToIMUSpace,
+                                                 image.lens);
+                              }
 
-                        // If we arent getting up, then we can update the plan if necessary
-                        if (updatePlan) {
-                            if (lost) {
-                                lastPlanOrientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
-                            }
-                            if (ballMaxPriority) {
-                                updateHeadPlan(
-                                    kinematicsModel, ballFixationObjects, objectsMissing, sensors, headToIMUSpace);
-                            }
+                              else {
+                                  updateHeadPlan(kinematicsModel,
+                                                 goalFixationObjects,
+                                                 objectsMissing,
+                                                 sensors,
+                                                 headToIMUSpace,
+                                                 image.lens);
+                              }
+                          }
 
-                            else {
-                                updateHeadPlan(
-                                    kinematicsModel, goalFixationObjects, objectsMissing, sensors, headToIMUSpace);
-                            }
-                        }
+                          // Update searcher
+                          headSearcher.update(oscillate_search);
+                          // Emit new result if possible
+                          if (headSearcher.newGoal()) {
+                              // Emit result
+                              arma::vec2 direction                 = headSearcher.getState();
+                              std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
+                              command->yaw                         = direction[0];
+                              command->pitch                       = direction[1];
+                              command->robotSpace                  = (state == SEARCH);
+                              // log("head angles robot space :", command->robotSpace);
+                              emit(std::move(command));
+                          }
 
-                        // Update searcher
-                        headSearcher.update(oscillate_search);
-                        // Emit new result if possible
-                        if (headSearcher.newGoal()) {
-                            // Emit result
-                            arma::vec2 direction                 = headSearcher.getState();
-                            std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
-                            command->yaw                         = direction[0];
-                            command->pitch                       = direction[1];
-                            command->robotSpace                  = (state == SEARCH);
-                            // log("head angles robot space :", command->robotSpace);
-                            emit(std::move(command));
-                        }
-
-                        lastGoalPriority = goalPriority;
-                        lastBallPriority = ballPriority;
-                    });
+                          lastGoalPriority = goalPriority;
+                          lastBallPriority = ballPriority;
+                      });
         }
 
-        std::vector<Ball> HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const std::vector<Ball>> vballs,
-                                                                  bool& search) {
+        Balls HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Balls> vballs, bool& search) {
 
             auto now = NUClear::clock::now();
-            std::vector<Ball> fixationObjects;
+            Balls fixationObjects;
 
             int maxPriority = std::max(std::max(ballPriority, goalPriority), 0);
-            if (ballPriority == goalPriority)
+            if (ballPriority == goalPriority) {
                 log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
+            }
 
             // TODO: make this a loop over a list of objects or something
             // Get balls
             if (ballPriority == maxPriority) {
-                if (vballs && vballs->size() > 0) {
+                if (vballs && vballs->balls.size() > 0) {
                     // Fixate on ball
                     timeLastObjectSeen = now;
-                    auto& ball         = vballs->at(0);
-                    fixationObjects.push_back(ball);
+                    auto& ball         = vballs->balls.at(0);
+                    fixationObjects.balls.push_back(ball);
                 }
                 else {
                     search = true;
@@ -367,30 +383,30 @@ namespace behaviour {
             return fixationObjects;
         }
 
-        std::vector<Goal> HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const std::vector<Goal>> vgoals,
-                                                                  bool& search) {
+        Goals HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Goals> vgoals, bool& search) {
 
             auto now = NUClear::clock::now();
-            std::vector<Goal> fixationObjects;
+            Goals fixationObjects;
 
             int maxPriority = std::max(std::max(ballPriority, goalPriority), 0);
-            if (ballPriority == goalPriority)
+            if (ballPriority == goalPriority) {
                 log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
+            }
 
             // TODO: make this a loop over a list of objects or something
             // Get goals
             if (goalPriority == maxPriority) {
-                if (vgoals && vgoals->size() > 0) {
+                if (vgoals && vgoals->goals.size() > 0) {
                     // Fixate on goals and lines and other landmarks
                     timeLastObjectSeen = now;
                     std::set<Goal::Side> visiblePosts;
                     // TODO treat goals as one object
-                    std::vector<Goal> goals;
-                    for (auto& goal : *vgoals) {
+                    Goals goals;
+                    for (auto& goal : vgoals->goals) {
                         visiblePosts.insert(goal.side);
-                        goals.push_back(goal);
+                        goals.goals.push_back(goal);
                     }
-                    fixationObjects.push_back(combineVisionObjects(goals));
+                    fixationObjects.goals.push_back(combineVisionObjects(goals));
                     search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||  // If left post not visible
                               visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());  // or right post not
                                                                                             // visible, then we need to
@@ -407,31 +423,28 @@ namespace behaviour {
 
 
         void HeadBehaviourSoccer::updateHeadPlan(const KinematicsModel& kinematicsModel,
-                                                 const std::vector<Ball>& fixationObjects,
+                                                 const Balls& fixationObjects,
                                                  const bool& search,
                                                  const Sensors& sensors,
-                                                 const Rotation3D& headToIMUSpace) {
+                                                 const Rotation3D& headToIMUSpace,
+                                                 const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec centroid    = {0, 0};
-            arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).presentPosition,
-                                     sensors.servo.at(ServoID::HEAD_PITCH).presentPosition};
+            arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).present_position,
+                                     sensors.servo.at(ServoID::HEAD_PITCH).present_position};
 
-            for (uint i = 0; i < fixationObjects.size(); i++) {
+            for (uint i = 0; i < fixationObjects.balls.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
                 fixationPoints.push_back(arma::vec(
-                    {fixationObjects[i].visObject.screenAngular[0], fixationObjects[i].visObject.screenAngular[1]}));
+                    {fixationObjects.balls.at(i).screen_angular[0], fixationObjects.balls.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
-                    {fixationObjects[i].visObject.angularSize[0], fixationObjects[i].visObject.angularSize[1]}));
-                // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular))
-                            / (fixationObjects.size());
+                    {fixationObjects.balls.at(i).angular_size[0], fixationObjects.balls.at(i).angular_size[1]}));
             }
 
             // If there are objects to find
             if (search) {
-                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors);
+                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors, lens);
             }
 
             if (fixationPoints.size() <= 0) {
@@ -450,38 +463,35 @@ namespace behaviour {
         }
 
         void HeadBehaviourSoccer::updateHeadPlan(const KinematicsModel& kinematicsModel,
-                                                 const std::vector<Goal>& fixationObjects,
+                                                 const Goals& fixationObjects,
                                                  const bool& search,
                                                  const Sensors& sensors,
-                                                 const Rotation3D& headToIMUSpace) {
+                                                 const Rotation3D& headToIMUSpace,
+                                                 const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec centroid = {0, 0};
             arma::vec2 currentPos;
             for (const auto& servo : sensors.servo) {
                 if (servo.id == ServoID::HEAD_YAW) {
-                    currentPos[0] = servo.presentPosition;
+                    currentPos[0] = servo.present_position;
                 }
                 if (servo.id == ServoID::HEAD_PITCH) {
-                    currentPos[1] = servo.presentPosition;
+                    currentPos[1] = servo.present_position;
                 }
             }
 
-            for (uint i = 0; i < fixationObjects.size(); i++) {
+            for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
                 fixationPoints.push_back(arma::vec(
-                    {fixationObjects[i].visObject.screenAngular[0], fixationObjects[i].visObject.screenAngular[1]}));
+                    {fixationObjects.goals.at(i).screen_angular[0], fixationObjects.goals.at(i).screen_angular[1]}));
                 fixationSizes.push_back(arma::vec(
-                    {fixationObjects[i].visObject.angularSize[0], fixationObjects[i].visObject.angularSize[1]}));
-                // Average here as it is more elegant than an if statement checking if size==0 at the end
-                centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular))
-                            / (fixationObjects.size());
+                    {fixationObjects.goals.at(i).angular_size[0], fixationObjects.goals.at(i).angular_size[1]}));
             }
 
             // If there are objects to find
             if (search) {
-                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors);
+                fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors, lens);
             }
 
             if (fixationPoints.size() <= 0) {
@@ -529,12 +539,13 @@ namespace behaviour {
         Returns vector of arma::vec2
         */
         std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                     std::vector<Ball> fixationObjects,
+                                                                     Balls fixationObjects,
                                                                      SearchType sType,
-                                                                     const Sensors&) {
+                                                                     const Sensors&,
+                                                                     const Image::Lens& lens) {
             // If there is nothing of interest, we search fot points of interest
             // log("getting search points");
-            if (fixationObjects.size() == 0) {
+            if (fixationObjects.balls.size() == 0) {
                 // log("getting search points 2");
                 // Lost searches are normalised in terms of the FOV
                 std::vector<arma::vec2> scaledResults;
@@ -550,7 +561,7 @@ namespace behaviour {
 
                     // New absolute referencing
                     arma::vec2 angles = p * M_PI / 180;
-                    // if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
+                    // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
                     // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV
 
@@ -560,7 +571,7 @@ namespace behaviour {
 
                     // arma::vec3 adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.world.rotation().pitch()) *
+                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
                     // lookVectorFromHead;
                     // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
                     // lookVectorFromHead;
@@ -586,23 +597,23 @@ namespace behaviour {
             Quad boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
             std::vector<arma::vec2> viewPoints;
-            if (cam.FOV.norm() == 0) {
+            if (lens.fov.norm() == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
-            float view_padding_radians = fractional_view_padding * std::fmax(cam.FOV[0], cam.FOV[1]);
+            float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
             arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert<double, 2>(cam.FOV) / 2.0;
+            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert(lens.fov) / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
-            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({cam.FOV[0], -cam.FOV[1]}) / 2.0;
+            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = boundingBox.getTopRight() - padding - convert<double, 2>(cam.FOV) / 2.0;
+            arma::vec2 bl = boundingBox.getTopRight() - padding - convert(lens.fov) / 2.0;
             // 4
             padding       = {-view_padding_radians, view_padding_radians};
-            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0], cam.FOV[1]}) / 2.0;
+            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<arma::vec2> searchPoints;
@@ -618,12 +629,13 @@ namespace behaviour {
         }
 
         std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                     std::vector<Goal> fixationObjects,
+                                                                     Goals fixationObjects,
                                                                      SearchType sType,
-                                                                     const Sensors&) {
+                                                                     const Sensors&,
+                                                                     const Image::Lens& lens) {
             // If there is nothing of interest, we search fot points of interest
             // log("getting search points");
-            if (fixationObjects.size() == 0) {
+            if (fixationObjects.goals.size() == 0) {
                 // log("getting search points 2");
                 // Lost searches are normalised in terms of the FOV
                 std::vector<arma::vec2> scaledResults;
@@ -639,7 +651,7 @@ namespace behaviour {
 
                     // New absolute referencing
                     arma::vec2 angles = p * M_PI / 180;
-                    // if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
+                    // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
                     // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV
 
@@ -649,7 +661,7 @@ namespace behaviour {
 
                     // arma::vec3 adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.world.rotation().pitch()) *
+                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
                     // lookVectorFromHead;
                     // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
                     // lookVectorFromHead;
@@ -675,23 +687,23 @@ namespace behaviour {
             Quad boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
             std::vector<arma::vec2> viewPoints;
-            if (cam.FOV.norm() == 0) {
+            if (lens.fov.norm() == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
-            float view_padding_radians = fractional_view_padding * std::fmax(cam.FOV[0], cam.FOV[1]);
+            float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
             arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert<double, 2>(cam.FOV) / 2.0;
+            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert(lens.fov) / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
-            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({cam.FOV[0], -cam.FOV[1]}) / 2.0;
+            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = boundingBox.getTopRight() - padding - convert<double, 2>(cam.FOV) / 2.0;
+            arma::vec2 bl = boundingBox.getTopRight() - padding - convert(lens.fov) / 2.0;
             // 4
             padding       = {-view_padding_radians, view_padding_radians};
-            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0], cam.FOV[1]}) / 2.0;
+            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<arma::vec2> searchPoints;
@@ -706,58 +718,56 @@ namespace behaviour {
             return searchPoints;
         }
 
-        Ball HeadBehaviourSoccer::combineVisionObjects(const std::vector<Ball>& ob) {
-            if (ob.size() == 0) {
+        Ball HeadBehaviourSoccer::combineVisionObjects(const Balls& ob) {
+            if (ob.balls.size() == 0) {
                 log<NUClear::WARN>(
                     "HeadBehaviourSoccer::combineVisionBalls - Attempted to combine zero vision objects into one.");
-                return VisionObject();
+                return Ball();
             }
-            Quad q                    = getScreenAngularBoundingBox(ob);
-            Ball v                    = ob[0];
-            v.visObject.screenAngular = convert<double, 2>(q.getCentre());
-            v.visObject.angularSize   = convert<double, 2>(q.getSize());
+            Quad q           = getScreenAngularBoundingBox(ob);
+            Ball v           = ob.balls.at(0);
+            v.screen_angular = convert(q.getCentre()).cast<float>();
+            v.angular_size   = convert(q.getSize()).cast<float>();
             return v;
         }
 
-        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Ball>& ob) {
+        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
             std::vector<arma::vec2> boundingPoints;
-            for (uint i = 0; i < ob.size(); i++) {
-                boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular + ob[i].visObject.angularSize / 2));
-                boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular - ob[i].visObject.angularSize / 2));
+            for (uint i = 0; i < ob.balls.size(); i++) {
+                boundingPoints.push_back(arma::conv_to<arma::vec>::from(
+                    convert(Eigen::Vector2f(ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size / 2))));
+                boundingPoints.push_back(arma::conv_to<arma::vec>::from(
+                    convert(Eigen::Vector2f(ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2))));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
 
 
-        Goal HeadBehaviourSoccer::combineVisionObjects(const std::vector<Goal>& ob) {
-            if (ob.size() == 0) {
+        Goal HeadBehaviourSoccer::combineVisionObjects(const Goals& ob) {
+            if (ob.goals.size() == 0) {
                 log<NUClear::WARN>(
                     "HeadBehaviourSoccer::combineVisionObjects - Attempted to combine zero vision objects into one.");
-                return VisionObject();
+                return Goal();
             }
-            Quad q                    = getScreenAngularBoundingBox(ob);
-            Goal v                    = ob[0];
-            v.visObject.screenAngular = convert<double, 2>(q.getCentre());
-            v.visObject.angularSize   = convert<double, 2>(q.getSize());
+            Quad q = getScreenAngularBoundingBox(ob);
+            Goal v = ob.goals.at(0);
             return v;
         }
 
-        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Goal>& ob) {
+        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
             std::vector<arma::vec2> boundingPoints;
-            for (uint i = 0; i < ob.size(); i++) {
-                boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular + ob[i].visObject.angularSize / 2));
-                boundingPoints.push_back(
-                    convert<double, 2>(ob[i].visObject.screenAngular - ob[i].visObject.angularSize / 2));
+            for (uint i = 0; i < ob.goals.size(); i++) {
+                boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
+                                                                 + ob.goals.at(i).angular_size.cast<double>() / 2)));
+                boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
+                                                                 - ob.goals.at(i).angular_size.cast<double>() / 2)));
             }
             return Quad::getBoundingBox(boundingPoints);
         }
 
 
         bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors) {
-            Rotation3D diff = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i() * lastPlanOrientation;
+            Rotation3D diff     = Transform3D(convert(sensors.Htw)).rotation().i() * lastPlanOrientation;
             UnitQuaternion quat = UnitQuaternion(diff);
             float angle         = quat.getAngle();
             return std::fabs(angle) > replan_angle_threshold;

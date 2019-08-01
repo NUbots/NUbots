@@ -10,8 +10,11 @@
 
 namespace module {
 namespace input {
+
     using extension::Configuration;
-    using message::input::CameraParameters;
+
+    using message::input::Image;
+
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
 
@@ -60,36 +63,30 @@ namespace input {
                         ArvStream* stream = arv_camera_create_stream(newCamera, NULL, NULL);
 
                         // Add camera to list.
-                        CameraContext context = {static_cast<uint32_t>(utility::vision::getFourCCFromDescription(
-                                                     config["format"]["pixel"].as<std::string>())),
-                                                 deviceID,
-                                                 cameraCount,
-                                                 config["is_left"].as<bool>(),
-                                                 newCamera,
-                                                 stream,
-                                                 *this};
+                        CameraContext context = {
+                            static_cast<uint32_t>(
+                                utility::vision::getFourCCFromDescription(config["format"]["pixel"].as<std::string>())),
+                            deviceID,
+                            cameraCount,
+                            config["is_left"].as<bool>(),
+                            Image::Lens(
+                                Image::Lens::Projection::EQUIDISTANT,
+                                config["lens"]["focal_length"].as<float>(),
+                                Eigen::Vector2f(config["lens"]["fov"].as<float>(), config["lens"]["fov"].as<float>()),
+                                Eigen::Vector2f(config["lens"]["centre_offset"][0].as<float>(),
+                                                config["lens"]["centre_offset"][1].as<float>())),
+                            newCamera,
+                            stream,
+                            *this};
 
                         camera = AravisCameras.insert(std::make_pair(deviceID, context)).first;
+
+                        log<NUClear::DEBUG>("Found camera", config.fileName, "with serial number", deviceID);
                     }
                 }
 
                 resetAravisCamera(camera, config);
 
-                auto cameraParameters = std::make_unique<CameraParameters>();
-
-                // Generic camera parameters
-                cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
-                    config["format"]["height"].as<uint>();
-                cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
-
-                // Radial specific
-                cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
-                cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
-                cameraParameters->centreOffset = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
-
-                emit<Scope::DIRECT>(std::move(cameraParameters));
-
-                log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
                 return;
             }
         }
@@ -124,7 +121,7 @@ namespace input {
                               config["format"]["height"].as<size_t>());
 
         // Set exposure.
-        auto exposure = config["settings"]["exposure"].as<Expression>();
+        double exposure = config["settings"]["exposure"].as<Expression>();
         if (std::isfinite(exposure)) {
             arv_camera_set_exposure_time_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_exposure_time(camera->second.camera, exposure);
@@ -135,7 +132,7 @@ namespace input {
         }
 
         // Set gain.
-        auto gain = config["settings"]["gain"].as<Expression>();
+        double gain = config["settings"]["gain"].as<Expression>();
         if (std::isfinite(gain)) {
             arv_camera_set_gain_auto(camera->second.camera, ARV_AUTO_OFF);
             arv_camera_set_gain(camera->second.camera, gain);
@@ -155,25 +152,32 @@ namespace input {
         ArvBuffer* buffer;
         buffer = arv_stream_try_pop_buffer(stream);
 
-        if ((buffer != NULL) && (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS)) {
-            int width, height;
-            size_t buffSize;
-            arv_buffer_get_image_region(buffer, NULL, NULL, &width, &height);
-            const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
+        if (buffer != NULL) {
+            if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
+                int width, height;
+                size_t buffSize;
+                arv_buffer_get_image_region(buffer, NULL, NULL, &width, &height);
+                const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
 
-            auto msg = std::make_unique<ImageData>();
-            msg->data.insert(msg->data.end(), buff, buff + buffSize);
+                auto msg = std::make_unique<ImageData>();
+                msg->data.insert(msg->data.end(), buff, buff + buffSize);
 
-            msg->dimensions << (unsigned int) (width), (unsigned int) (height);
-            msg->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(arv_buffer_get_timestamp(buffer)));
+                msg->dimensions << (unsigned int) (width), (unsigned int) (height);
+                msg->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(arv_buffer_get_timestamp(buffer)));
 
-            msg->format        = context->fourcc;
-            msg->serial_number = context->deviceID;
-            msg->camera_id     = context->cameraID;
-            msg->isLeft        = context->isLeft;
+                msg->format        = context->fourcc;
+                msg->serial_number = context->deviceID;
+                msg->camera_id     = context->cameraID;
+                msg->isLeft        = context->isLeft;
+                msg->lens          = context->lens;
 
-            context->reactor.emit<Scope::DIRECT>(msg);
-            arv_stream_push_buffer(stream, buffer);
+                context->reactor.emit<Scope::DIRECT>(msg);
+                arv_stream_push_buffer(stream, buffer);
+            }
+            else {
+                // In the case where it fails, reinsert the Buffer back into the stream, so we don't run out.
+                arv_stream_push_buffer(stream, buffer);
+            }
         }
     }
 
