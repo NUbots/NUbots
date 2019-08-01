@@ -38,11 +38,13 @@ namespace behaviour {
         private:
             size_t id;
             arma::vec strafe{0, 0};
-            float rotationalSpeed = 0;
-            bool moving           = false;
-            bool headLocked       = false;
-            float headPitch       = 0;
-            float headYaw         = 0;
+            arma::vec prevStrafe{0, 0};
+            float rotationalSpeed     = 0;
+            float prevRotationalSpeed = 0;
+            bool moving               = false;
+            bool headLocked           = false;
+            float headPitch           = 0;
+            float headYaw             = 0;
             float max_speed;
             float max_rotational_speed;
 

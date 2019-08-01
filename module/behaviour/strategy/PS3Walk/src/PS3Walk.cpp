@@ -70,6 +70,8 @@ namespace behaviour {
                 for (const auto& action : config["action_scripts"].as<std::vector<std::string>>()) {
                     actions.push_back(action);
                 }
+                max_speed            = config["max_speed"]["linear"].as<float>();
+                max_rotational_speed = config["max_speed"]["rotational"].as<float>();
             });
 
             on<Trigger<TriangleButton>>().then([this](const TriangleButton& button) {
@@ -77,11 +79,12 @@ namespace behaviour {
                     if (moving) {
                         NUClear::log("Stop walking");
                         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
+                        moving = false;
                     }
                     else {
                         NUClear::log("Start walking");
+                        moving = true;
                     }
-                    moving = !moving;
                 }
             });
 
@@ -166,10 +169,15 @@ namespace behaviour {
                 }
 
                 if (moving) {
-                    // TODO: hacked to not allow backwards movement for stability
-                    // arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
+                    if (arma::any(arma::abs(prevStrafe - strafe) > 0.1)
+                        || (std::abs(rotationalSpeed - prevRotationalSpeed) > 0.1)) {
+                        // TODO: hacked to not allow backwards movement for stability
+                        // arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
                         auto transform = Transform2D(strafe * max_speed, rotationalSpeed * max_rotational_speed);
                         emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(transform)));
+                        prevStrafe          = strafe;
+                        prevRotationalSpeed = rotationalSpeed;
+                    }
                 }
             });
 
