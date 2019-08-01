@@ -12,7 +12,6 @@ NUCLEAR_ROLE(
     support::NUsight
 
     # Hardware Interface
-    input::Camera
     input::PS3Controller
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
@@ -20,16 +19,14 @@ NUCLEAR_ROLE(
     # Motion
     motion::OldWalkEngine
     motion::ScriptEngine
+    motion::HeadController
 
     # Behaviour
     behaviour::Controller
     behaviour::skills::Stand
-    behaviour::skills::FallingRelax
-    behaviour::skills::Getup
+    #behaviour::skills::FallingRelax
+    #behaviour::skills::Getup
+    behaviour::skills::KickScript
     behaviour::skills::DirectWalkController
     behaviour::strategy::PS3Walk
-    behaviour::skills::KickScript
-
-    # Motion
-    motion::HeadController
 )
