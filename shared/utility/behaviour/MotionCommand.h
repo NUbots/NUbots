@@ -57,6 +57,30 @@ namespace behaviour {
         return cmd;
     }
 
+    template <int Options, int MaxRows, int MaxCols>
+    inline MotionCommand WalkToState(const Eigen::Matrix<double, 3, 1, Options, MaxRows, MaxCols>& goalState_) {
+        MotionCommand cmd;
+        cmd.type      = MotionCommand::Type::Value::WalkToState;
+        cmd.goalState = goalState_;
+        return cmd;
+    }
+
+    template <int Options, int MaxRows, int MaxCols>
+    inline MotionCommand BallApproach(const Eigen::Matrix<double, 3, 1, Options, MaxRows, MaxCols>& kickTarget_) {
+        MotionCommand cmd;
+        cmd.type       = MotionCommand::Type::Value::BallApproach;
+        cmd.kickTarget = kickTarget_;
+        return cmd;
+    }
+
+    template <int Options, int MaxRows, int MaxCols>
+    inline MotionCommand DirectCommand(const Eigen::Matrix<double, 3, 1, Options, MaxRows, MaxCols>& walkCommand_) {
+        MotionCommand cmd;
+        cmd.type        = MotionCommand::Type::Value::DirectCommand;
+        cmd.walkCommand = walkCommand_;
+        return cmd;
+    }
+
     // TODO: Create accessor methods that throw errors if the data
     // accessed does not correspond to the command type?
 
