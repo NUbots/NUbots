@@ -45,14 +45,14 @@ namespace behaviour {
         using extension::ExecuteScriptByName;
 
         using message::behaviour::MotionCommand;
-        using message::input::PS3Controller::CircleButton;
-        using message::input::PS3Controller::CrossButton;
-        using message::input::PS3Controller::L1Button;
-        using message::input::PS3Controller::LeftJoystick;
-        using message::input::PS3Controller::R1Button;
-        using message::input::PS3Controller::RightJoystick;
-        using message::input::PS3Controller::SquareButton;
-        using message::input::PS3Controller::TriangleButton;
+        using ScriptTriggerEvent = message::input::PS3Controller::CircleButton;
+        using TriggerActionEvent = message::input::PS3Controller::CrossButton;
+        using LeftKickEvent      = message::input::PS3Controller::L1Button;
+        using WalkVelocityEvent  = message::input::PS3Controller::LeftJoystick;
+        using RightKickEvent     = message::input::PS3Controller::R1Button;
+        using HeadDirectionEvent = message::input::PS3Controller::RightJoystick;
+        using HeadControlEvent   = message::input::PS3Controller::SquareButton;
+        using WalkControlEvent   = message::input::PS3Controller::TriangleButton;
         using message::motion::HeadCommand;
         using message::motion::KickScriptCommand;
 
@@ -74,8 +74,8 @@ namespace behaviour {
                     config["max_speed"]["linear"].as<float>(), config["max_speed"]["rotational"].as<float>();
             });
 
-            on<Trigger<TriangleButton>>().then([this](const TriangleButton& button) {
-                if (button.pressed) {
+            on<Trigger<WalkControlEvent>>().then([this](const WalkControlEvent& event) {
+                if (event.pressed) {
                     if (moving) {
                         NUClear::log("Stop walking");
                         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
@@ -88,8 +88,8 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<SquareButton>>().then([this](const SquareButton& button) {
-                if (button.pressed) {
+            on<Trigger<HeadControlEvent>>().then([this](const HeadControlEvent& event) {
+                if (event.pressed) {
                     if (headLocked) {
                         NUClear::log("Head unlocked");
                     }
@@ -100,8 +100,8 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<CrossButton>>().then([this](const CrossButton& button) {
-                if (button.pressed) {
+            on<Trigger<TriggerActionEvent>>().then([this](const TriggerActionEvent& event) {
+                if (event.pressed) {
                     NUClear::log("Triggering actions");
                     emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {90}}));
@@ -109,8 +109,8 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<CircleButton>>().then([this](const CircleButton& button) {
-                if (button.pressed) {
+            on<Trigger<ScriptTriggerEvent>>().then([this](const ScriptTriggerEvent& event) {
+                if (event.pressed) {
                     NUClear::log("Standing");
                     emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {90}}));
@@ -118,8 +118,8 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<L1Button>>().then([this](const L1Button& button) {
-                if (button.pressed) {
+            on<Trigger<LeftKickEvent>>().then([this](const LeftKickEvent& event) {
+                if (event.pressed) {
                     NUClear::log("Requesting Left Front Kick");
                     emit(std::make_unique<KickScriptCommand>(
                         KickScriptCommand{Eigen::Vector3d(1, 0, 0),  // vector pointing forward relative to robot
@@ -127,8 +127,8 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<R1Button>>().then([this](const R1Button& button) {
-                if (button.pressed) {
+            on<Trigger<RightKickEvent>>().then([this](const RightKickEvent& event) {
+                if (event.pressed) {
                     NUClear::log("Requesting Right Front Kick");
                     emit(std::make_unique<KickScriptCommand>(
                         KickScriptCommand(Eigen::Vector3d(1, 0, 0),  // vector pointing forward relative to robot
@@ -136,24 +136,24 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<LeftJoystick>>().then([this](const LeftJoystick& joystick) {
-                switch (joystick.direction.value) {
-                    case LeftJoystick::Direction::HORIZONTAL:
+            on<Trigger<WalkVelocityEvent>>().then([this](const WalkVelocityEvent& event) {
+                switch (event.direction.value) {
+                    case WalkVelocityEvent::Direction::HORIZONTAL:
                         // y is left relative to robot
                         // strafe[1] = -joystick.value;
                         walkCommand.z() = -event.value;
                         break;
-                    case LeftJoystick::Direction::VERTICAL:
+                    case WalkVelocityEvent::Direction::VERTICAL:
                         // x is forward relative to robot
                         walkCommand.x() = -event.value;
                         break;
                 }
             });
 
-            on<Trigger<RightJoystick>>().then([this](const RightJoystick& joystick) {
-                switch (joystick.direction.value) {
-                    case RightJoystick::Direction::HORIZONTAL: headYaw = -joystick.value; break;
-                    case RightJoystick::Direction::VERTICAL: headPitch = -joystick.value; break;
+            on<Trigger<HeadDirectionEvent>>().then([this](const HeadDirectionEvent& event) {
+                switch (event.direction.value) {
+                    case HeadDirectionEvent::Direction::HORIZONTAL: headYaw = -event.value; break;
+                    case HeadDirectionEvent::Direction::VERTICAL: headPitch = -event.value; break;
                 }
             });
 
