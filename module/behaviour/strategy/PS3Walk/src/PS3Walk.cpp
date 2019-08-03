@@ -77,12 +77,12 @@ namespace behaviour {
             on<Trigger<WalkControlEvent>>().then([this](const WalkControlEvent& event) {
                 if (event.pressed) {
                     if (moving) {
-                        NUClear::log("Stop walking");
+                        log<NUClear::INFO>("Stop walking");
                         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                         moving = false;
                     }
                     else {
-                        NUClear::log("Start walking");
+                        log<NUClear::INFO>("Start walking");
                         moving = true;
                     }
                 }
@@ -91,18 +91,19 @@ namespace behaviour {
             on<Trigger<HeadControlEvent>>().then([this](const HeadControlEvent& event) {
                 if (event.pressed) {
                     if (headLocked) {
-                        NUClear::log("Head unlocked");
+                        log<NUClear::INFO>("Head unlocked");
+                        headLocked = false;
                     }
                     else {
-                        NUClear::log("Head locked");
+                        log<NUClear::INFO>("Head locked");
+                        headLocked = true;
                     }
-                    headLocked = !headLocked;
                 }
             });
 
             on<Trigger<TriggerActionEvent>>().then([this](const TriggerActionEvent& event) {
                 if (event.pressed) {
-                    NUClear::log("Triggering actions");
+                    log<NUClear::INFO>("Triggering actions");
                     emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {90}}));
                     emit(std::make_unique<ExecuteScriptByName>(id, actions));
@@ -111,7 +112,7 @@ namespace behaviour {
 
             on<Trigger<ScriptTriggerEvent>>().then([this](const ScriptTriggerEvent& event) {
                 if (event.pressed) {
-                    NUClear::log("Standing");
+                    log<NUClear::INFO>("Standing");
                     emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {90}}));
                     emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml"));
@@ -120,19 +121,19 @@ namespace behaviour {
 
             on<Trigger<LeftKickEvent>>().then([this](const LeftKickEvent& event) {
                 if (event.pressed) {
-                    NUClear::log("Requesting Left Front Kick");
+                    log<NUClear::INFO>("Requesting Left Front Kick");
+                    // vector pointing forward relative to robot
                     emit(std::make_unique<KickScriptCommand>(
-                        KickScriptCommand{Eigen::Vector3d(1, 0, 0),  // vector pointing forward relative to robot
-                                          LimbID::LEFT_LEG}));
+                        KickScriptCommand{Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::LEFT_LEG}));
                 }
             });
 
             on<Trigger<RightKickEvent>>().then([this](const RightKickEvent& event) {
                 if (event.pressed) {
-                    NUClear::log("Requesting Right Front Kick");
+                    log<NUClear::INFO>("Requesting Right Front Kick");
+                    // vector pointing forward relative to robot
                     emit(std::make_unique<KickScriptCommand>(
-                        KickScriptCommand(Eigen::Vector3d(1, 0, 0),  // vector pointing forward relative to robot
-                                          LimbID::RIGHT_LEG)));
+                        KickScriptCommand(Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::RIGHT_LEG)));
                 }
             });
 
