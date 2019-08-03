@@ -92,10 +92,11 @@ namespace input {
             // Try to read a JoystickEvent worth of data
             std::array<uint8_t, JOYSTICK_EVENT_SIZE> buffer;
             auto num_bytes = read(controller_fd, buffer.data(), buffer.size());
-            if (num_bytes > -1) {
+            while (num_bytes > -1) {
                 for (const uint8_t& byte : buffer) {
                     event_buffer.push_back(byte);
                 }
+                num_bytes = read(controller_fd, buffer.data(), buffer.size());
             }
 
             while (event_buffer.size() >= JOYSTICK_EVENT_SIZE) {
