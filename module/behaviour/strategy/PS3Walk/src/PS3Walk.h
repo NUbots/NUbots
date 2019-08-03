@@ -21,7 +21,7 @@
 #define MODULES_BEHAVIOUR_STRATEGY_PS3WALK_H
 
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 #include <string>
 #include <vector>
@@ -37,16 +37,13 @@ namespace behaviour {
 
         private:
             size_t id;
-            arma::vec strafe{0, 0};
-            arma::vec prevStrafe{0, 0};
-            float rotationalSpeed     = 0;
-            float prevRotationalSpeed = 0;
-            bool moving               = false;
-            bool headLocked           = false;
-            float headPitch           = 0;
-            float headYaw             = 0;
-            float max_speed;
-            float max_rotational_speed;
+            Eigen::Vector3d walkCommandLimits = Eigen::Vector3d::Zero();
+            Eigen::Vector3d walkCommand       = Eigen::Vector3d::Zero();
+            Eigen::Vector3d prevWalkCommand   = Eigen::Vector3d::Zero();
+            bool moving                       = false;
+            bool headLocked                   = false;
+            float headPitch                   = 0;
+            float headYaw                     = 0;
 
             std::vector<std::string> actions;
         };

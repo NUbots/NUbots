@@ -70,8 +70,8 @@ namespace behaviour {
                 for (const auto& action : config["action_scripts"].as<std::vector<std::string>>()) {
                     actions.push_back(action);
                 }
-                max_speed            = config["max_speed"]["linear"].as<float>();
-                max_rotational_speed = config["max_speed"]["rotational"].as<float>();
+                walkCommandLimits << config["max_speed"]["linear"].as<float>(),
+                    config["max_speed"]["linear"].as<float>(), config["max_speed"]["rotational"].as<float>();
             });
 
             on<Trigger<TriangleButton>>().then([this](const TriangleButton& button) {
@@ -141,11 +141,11 @@ namespace behaviour {
                     case LeftJoystick::Direction::HORIZONTAL:
                         // y is left relative to robot
                         // strafe[1] = -joystick.value;
-                        rotationalSpeed = -joystick.value;
+                        walkCommand.z() = -event.value;
                         break;
                     case LeftJoystick::Direction::VERTICAL:
                         // x is forward relative to robot
-                        strafe[0] = -joystick.value;
+                        walkCommand.x() = -event.value;
                         break;
                 }
             });
@@ -169,14 +169,10 @@ namespace behaviour {
                 }
 
                 if (moving) {
-                    if (arma::any(arma::abs(prevStrafe - strafe) > 0.1)
-                        || (std::abs(rotationalSpeed - prevRotationalSpeed) > 0.1)) {
-                        // TODO: hacked to not allow backwards movement for stability
-                        // arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
-                        auto transform = Transform2D(strafe * max_speed, rotationalSpeed * max_rotational_speed);
-                        emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(transform)));
-                        prevStrafe          = strafe;
-                        prevRotationalSpeed = rotationalSpeed;
+                    if (((prevWalkCommand - walkCommand).array().abs() > 0.1).any()) {
+                        Eigen::Vector3d command = walkCommand.cwiseProduct(walkCommandLimits);
+                        emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(command)));
+                        prevWalkCommand = walkCommand;
                     }
                 }
             });
