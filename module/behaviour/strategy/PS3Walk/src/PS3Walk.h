@@ -37,13 +37,20 @@ namespace behaviour {
 
         private:
             size_t id;
+
             Eigen::Vector3d walkCommandLimits = Eigen::Vector3d::Zero();
             Eigen::Vector3d walkCommand       = Eigen::Vector3d::Zero();
             Eigen::Vector3d prevWalkCommand   = Eigen::Vector3d::Zero();
-            bool moving                       = false;
+
             Eigen::Vector2d headCommandLimits = Eigen::Vector2d::Zero();
             Eigen::Vector2d headCommand       = Eigen::Vector2d::Zero();
             Eigen::Vector2d prevHeadCommand   = Eigen::Vector2d::Zero();
+
+            double walk_command_threshold = 0.1;
+            double head_command_threshold = 0.1;
+
+            bool moving     = false;
+            bool headLocked = false;
 
             std::vector<std::string> actions;
         };

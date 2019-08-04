@@ -165,7 +165,7 @@ namespace behaviour {
             on<Every<20, Per<std::chrono::seconds>>>().then([this] {
                 // Output head command based on updated information from joystick
                 if (!headLocked) {
-                    if (((prevHeadCommand - headCommand).array().abs() > 0.1).any()) {
+                    if (((prevHeadCommand - headCommand).array().abs() > head_command_threshold).any()) {
                         auto command        = std::make_unique<HeadCommand>();
                         command->yaw        = headCommand.x() * headCommandLimits.x();
                         command->pitch      = headCommand.y() * headCommandLimits.y();
@@ -176,7 +176,7 @@ namespace behaviour {
 
                 // Output walk command based on updated strafe and rotation speed from joystick
                 if (moving) {
-                    if (((prevWalkCommand - walkCommand).array().abs() > 0.1).any()) {
+                    if (((prevWalkCommand - walkCommand).array().abs() > walk_command_threshold).any()) {
                         Eigen::Vector3d command = walkCommand.cwiseProduct(walkCommandLimits);
                         emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(command)));
                         prevWalkCommand = walkCommand;

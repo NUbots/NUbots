@@ -1,4 +1,11 @@
 action_scripts: ["WaveLeft.yaml"]
 max_speed:
-  linear: 0.2
-  rotational: 0.5
+  walk:
+    linear: 0.2
+    rotational: 0.5
+  head:
+    yaw: 1.5
+    pitch: 1.0
+threshold:
+  walk: 0.1
+  head: 0.1
