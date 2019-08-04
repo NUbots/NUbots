@@ -141,7 +141,6 @@ namespace behaviour {
                 switch (event.direction.value) {
                     case WalkVelocityEvent::Direction::HORIZONTAL:
                         // y is left relative to robot
-                        // strafe[1] = -joystick.value;
                         walkCommand.z() = -event.value;
                         break;
                     case WalkVelocityEvent::Direction::VERTICAL:
@@ -158,9 +157,8 @@ namespace behaviour {
                 }
             });
 
-            // output walk command based on updated strafe and rotation speed from joystick
-            // TODO: potential performance gain: ignore if value hasn't changed since last emit?
             on<Every<20, Per<std::chrono::seconds>>>().then([this] {
+                // Output head command based on updated information from joystick
                 if (!headLocked) {
                     auto headCommand        = std::make_unique<HeadCommand>();
                     headCommand->yaw        = headYaw * 1.5;
@@ -169,6 +167,7 @@ namespace behaviour {
                     emit(std::move(headCommand));
                 }
 
+                // Output walk command based on updated strafe and rotation speed from joystick
                 if (moving) {
                     if (((prevWalkCommand - walkCommand).array().abs() > 0.1).any()) {
                         Eigen::Vector3d command = walkCommand.cwiseProduct(walkCommandLimits);
