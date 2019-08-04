@@ -92,15 +92,9 @@ namespace input {
         // https://www.kernel.org/doc/Documentation/input/joystick-api.txt
         // Trigger when the joystick has an data to read
         on<IO>(controller_fd, IO::READ).then([this] {
-            std::vector<JoystickEvent> event_buffer;
-
             // Try to read a JoystickEvent worth of data
             JoystickEvent event;
             while (read(controller_fd, &event, sizeof(JoystickEvent)) == sizeof(JoystickEvent)) {
-                event_buffer.push_back(event);
-            }
-
-            for (auto& event : event_buffer) {
                 // Extract type from event buffer an unsigned 8-bit value
                 bool is_axis = false, is_button = false, is_init = false;
                 if (event.type & static_cast<uint8_t>(EventType::INIT)) {
