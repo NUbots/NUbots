@@ -1,0 +1,21 @@
+version: '3'
+services:
+  base:
+    image: nubots:base
+    build:
+      context: docker
+      dockerfile: base.Dockerfile
+  nuc7i7bnh:
+    image: nubots:nuc7i7bnh
+    build:
+      context: docker
+      dockerfile: toolchain.Dockerfile
+      args:
+        platform: nuc7i7bnh
+  native:
+    image: nubots:native
+    build:
+      context: docker
+      dockerfile: toolchain.Dockerfile
+      args:
+        platform: native
