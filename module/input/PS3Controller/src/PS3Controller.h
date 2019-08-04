@@ -22,6 +22,8 @@ namespace input {
         int accelerometer_fd;
         std::string controller_path;
         std::string accelerometer_path;
+        ReactionHandle controller_reaction;
+        ReactionHandle accelerometer_reaction;
     };
 
 }  // namespace input
