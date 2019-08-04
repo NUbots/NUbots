@@ -56,23 +56,23 @@ namespace input {
 
     using extension::Configuration;
 
-    using message::input::PS3Controller::Accelerometer;
-    using message::input::PS3Controller::CircleButton;
-    using message::input::PS3Controller::CrossButton;
-    using message::input::PS3Controller::DPadButton;
-    using message::input::PS3Controller::L1Button;
-    using message::input::PS3Controller::L2Trigger;
-    using message::input::PS3Controller::LeftJoystick;
-    using message::input::PS3Controller::LeftJoystickButton;
-    using message::input::PS3Controller::PSButton;
-    using message::input::PS3Controller::R1Button;
-    using message::input::PS3Controller::R2Trigger;
-    using message::input::PS3Controller::RightJoystick;
-    using message::input::PS3Controller::RightJoystickButton;
-    using message::input::PS3Controller::SelectButton;
-    using message::input::PS3Controller::SquareButton;
-    using message::input::PS3Controller::StartButton;
-    using message::input::PS3Controller::TriangleButton;
+    using message::input::ps3controller::Accelerometer;
+    using message::input::ps3controller::CircleButton;
+    using message::input::ps3controller::CrossButton;
+    using message::input::ps3controller::DPadButton;
+    using message::input::ps3controller::L1Button;
+    using message::input::ps3controller::L2Trigger;
+    using message::input::ps3controller::LeftJoystick;
+    using message::input::ps3controller::LeftJoystickButton;
+    using message::input::ps3controller::PSButton;
+    using message::input::ps3controller::R1Button;
+    using message::input::ps3controller::R2Trigger;
+    using message::input::ps3controller::RightJoystick;
+    using message::input::ps3controller::RightJoystickButton;
+    using message::input::ps3controller::SelectButton;
+    using message::input::ps3controller::SquareButton;
+    using message::input::ps3controller::StartButton;
+    using message::input::ps3controller::TriangleButton;
 
     PS3Controller::PS3Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package message.input.PS3Controller;
+package message.input.ps3controller;
 
 message CrossButton {
     // The timestamp of the event in milliseconds

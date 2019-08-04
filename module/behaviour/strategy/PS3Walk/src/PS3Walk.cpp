@@ -45,14 +45,14 @@ namespace behaviour {
         using extension::ExecuteScriptByName;
 
         using message::behaviour::MotionCommand;
-        using ScriptTriggerEvent = message::input::PS3Controller::CircleButton;
-        using TriggerActionEvent = message::input::PS3Controller::CrossButton;
-        using LeftKickEvent      = message::input::PS3Controller::L1Button;
-        using WalkVelocityEvent  = message::input::PS3Controller::LeftJoystick;
-        using RightKickEvent     = message::input::PS3Controller::R1Button;
-        using HeadDirectionEvent = message::input::PS3Controller::RightJoystick;
-        using HeadControlEvent   = message::input::PS3Controller::SquareButton;
-        using WalkControlEvent   = message::input::PS3Controller::TriangleButton;
+        using ScriptTriggerEvent = message::input::ps3controller::CircleButton;
+        using TriggerActionEvent = message::input::ps3controller::CrossButton;
+        using LeftKickEvent      = message::input::ps3controller::L1Button;
+        using WalkVelocityEvent  = message::input::ps3controller::LeftJoystick;
+        using RightKickEvent     = message::input::ps3controller::R1Button;
+        using HeadDirectionEvent = message::input::ps3controller::RightJoystick;
+        using HeadControlEvent   = message::input::ps3controller::SquareButton;
+        using WalkControlEvent   = message::input::ps3controller::TriangleButton;
         using message::motion::HeadCommand;
         using message::motion::KickScriptCommand;
 
