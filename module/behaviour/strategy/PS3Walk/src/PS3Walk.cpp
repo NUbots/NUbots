@@ -133,7 +133,7 @@ namespace behaviour {
                     log<NUClear::INFO>("Requesting Right Front Kick");
                     // vector pointing forward relative to robot
                     emit(std::make_unique<KickScriptCommand>(
-                        KickScriptCommand(Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::RIGHT_LEG)));
+                        KickScriptCommand{Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::RIGHT_LEG}));
                 }
             });
 
