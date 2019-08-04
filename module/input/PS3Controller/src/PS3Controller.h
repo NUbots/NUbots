@@ -22,8 +22,6 @@ namespace input {
         int accelerometer_fd;
         std::string controller_path;
         std::string accelerometer_path;
-
-        std::vector<uint8_t> event_buffer;
     };
 
 }  // namespace input

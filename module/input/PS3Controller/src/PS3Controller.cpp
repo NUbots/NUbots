@@ -43,6 +43,17 @@ namespace input {
         ACCELEROMETER_Z
     };
 
+#pragma pack(push, 1)
+    struct JoystickEvent {
+        uint32_t timestamp;  // event timestamp in milliseconds
+        int16_t value;       // value
+        uint8_t type;        // event type
+        uint8_t number;      // axis/button number
+    };
+    // Check that this struct is not cache alligned
+    static_assert(sizeof(JoystickEvent) == 8, "The compiler is adding padding to this struct, Bad compiler!");
+#pragma pack(pop)
+
     using extension::Configuration;
 
     using message::input::PS3Controller::Accelerometer;
@@ -81,127 +92,116 @@ namespace input {
         // https://www.kernel.org/doc/Documentation/input/joystick-api.txt
         // Trigger when the joystick has an data to read
         on<IO>(controller_fd, IO::READ).then([this] {
-            // JoystickEvent has
-            // Timestamp: uint32_t
-            // Value:     int16_t
-            // Type:      uint8_t
-            // Number:    uint8_t
-            constexpr size_t JOYSTICK_EVENT_SIZE =
-                sizeof(uint32_t) + sizeof(int16_t) + sizeof(uint8_t) + sizeof(uint8_t);
+            std::vector<JoystickEvent> event_buffer;
 
             // Try to read a JoystickEvent worth of data
-            std::array<uint8_t, JOYSTICK_EVENT_SIZE> buffer;
-            auto num_bytes = read(controller_fd, buffer.data(), buffer.size());
-            while (num_bytes > -1) {
-                for (const uint8_t& byte : buffer) {
-                    event_buffer.push_back(byte);
-                }
-                num_bytes = read(controller_fd, buffer.data(), buffer.size());
+            JoystickEvent event;
+            while (read(controller_fd, &event, sizeof(JoystickEvent)) == sizeof(JoystickEvent)) {
+                event_buffer.push_back(event);
             }
 
-            while (event_buffer.size() >= JOYSTICK_EVENT_SIZE) {
-                // Extract timestamp from event buffer in milliseconds and convert it to a NUClear::clock::time_point
-                auto timestamp = std::chrono::time_point<NUClear::clock, std::chrono::milliseconds>(
-                    std::chrono::milliseconds(*reinterpret_cast<uint32_t*>(event_buffer.data())));
-                // Erase timestamp from buffer
-                event_buffer.erase(event_buffer.begin(), std::next(event_buffer.begin(), sizeof(uint32_t)));
-
-                // Extract value from event buffer as a signed 16-bit value
-                int16_t value = *reinterpret_cast<int16_t*>(event_buffer.data());
-                // Erase value from buffer
-                event_buffer.erase(event_buffer.begin(), std::next(event_buffer.begin(), sizeof(int16_t)));
-
+            for (auto& event : event_buffer) {
                 // Extract type from event buffer an unsigned 8-bit value
                 bool is_axis = false, is_button = false, is_init = false;
-                uint8_t type = event_buffer.front();
-                if (type & static_cast<uint8_t>(EventType::INIT)) {
-                    type &= ~static_cast<uint8_t>(EventType::INIT);
+                if (event.type & static_cast<uint8_t>(EventType::INIT)) {
+                    event.type &= ~static_cast<uint8_t>(EventType::INIT);
                     is_init = true;
                 }
-                switch (static_cast<EventType>(type)) {
+                switch (static_cast<EventType>(event.type)) {
                     case EventType::BUTTON: is_button = true; break;
                     case EventType::AXIS: is_axis = true; break;
                     case EventType::INIT: /* This is handled above. */ break;
                 }
-                // Erase type from buffer
-                event_buffer.erase(event_buffer.begin(), std::next(event_buffer.begin(), sizeof(uint8_t)));
 
                 // Extract number from event buffer an unsigned 8-bit value
                 if (is_button) {
-                    switch (static_cast<Button>(event_buffer.front())) {
-                        case Button::CROSS: emit(std::make_unique<CrossButton>(timestamp, value > 0, is_init)); break;
-                        case Button::CIRCLE: emit(std::make_unique<CircleButton>(timestamp, value > 0, is_init)); break;
-                        case Button::TRIANGLE:
-                            emit(std::make_unique<TriangleButton>(timestamp, value > 0, is_init));
+                    switch (static_cast<Button>(event.number)) {
+                        case Button::CROSS:
+                            emit(std::make_unique<CrossButton>(event.timestamp, event.value > 0, is_init));
                             break;
-                        case Button::SQUARE: emit(std::make_unique<SquareButton>(timestamp, value > 0, is_init)); break;
-                        case Button::L1: emit(std::make_unique<L1Button>(timestamp, value > 0, is_init)); break;
-                        case Button::R1: emit(std::make_unique<R1Button>(timestamp, value > 0, is_init)); break;
-                        case Button::SELECT: emit(std::make_unique<SelectButton>(timestamp, value > 0, is_init)); break;
-                        case Button::START: emit(std::make_unique<StartButton>(timestamp, value > 0, is_init)); break;
-                        case Button::PS: emit(std::make_unique<PSButton>(timestamp, value > 0, is_init)); break;
+                        case Button::CIRCLE:
+                            emit(std::make_unique<CircleButton>(event.timestamp, event.value > 0, is_init));
+                            break;
+                        case Button::TRIANGLE:
+                            emit(std::make_unique<TriangleButton>(event.timestamp, event.value > 0, is_init));
+                            break;
+                        case Button::SQUARE:
+                            emit(std::make_unique<SquareButton>(event.timestamp, event.value > 0, is_init));
+                            break;
+                        case Button::L1:
+                            emit(std::make_unique<L1Button>(event.timestamp, event.value > 0, is_init));
+                            break;
+                        case Button::R1:
+                            emit(std::make_unique<R1Button>(event.timestamp, event.value > 0, is_init));
+                            break;
+                        case Button::SELECT:
+                            emit(std::make_unique<SelectButton>(event.timestamp, event.value > 0, is_init));
+                            break;
+                        case Button::START:
+                            emit(std::make_unique<StartButton>(event.timestamp, event.value > 0, is_init));
+                            break;
+                        case Button::PS:
+                            emit(std::make_unique<PSButton>(event.timestamp, event.value > 0, is_init));
+                            break;
                         case Button::JOYSTICK_LEFT:
-                            emit(std::make_unique<LeftJoystickButton>(timestamp, value > 0, is_init));
+                            emit(std::make_unique<LeftJoystickButton>(event.timestamp, event.value > 0, is_init));
                             break;
                         case Button::JOYSTICK_RIGHT:
-                            emit(std::make_unique<RightJoystickButton>(timestamp, value > 0, is_init));
+                            emit(std::make_unique<RightJoystickButton>(event.timestamp, event.value > 0, is_init));
                             break;
                         case Button::DPAD_UP:
-                            emit(
-                                std::make_unique<DPadButton>(timestamp, DPadButton::Direction::UP, value > 0, is_init));
+                            emit(std::make_unique<DPadButton>(
+                                event.timestamp, DPadButton::Direction::UP, event.value > 0, is_init));
                             break;
                         case Button::DPAD_DOWN:
                             emit(std::make_unique<DPadButton>(
-                                timestamp, DPadButton::Direction::DOWN, value > 0, is_init));
+                                event.timestamp, DPadButton::Direction::DOWN, event.value > 0, is_init));
                             break;
                         case Button::DPAD_LEFT:
                             emit(std::make_unique<DPadButton>(
-                                timestamp, DPadButton::Direction::LEFT, value > 0, is_init));
+                                event.timestamp, DPadButton::Direction::LEFT, event.value > 0, is_init));
                             break;
                         case Button::DPAD_RIGHT:
                             emit(std::make_unique<DPadButton>(
-                                timestamp, DPadButton::Direction::RIGHT, value > 0, is_init));
+                                event.timestamp, DPadButton::Direction::RIGHT, event.value > 0, is_init));
                             break;
                     }
                 }
                 else if (is_axis) {
                     float normalised =
-                        static_cast<float>(value) / static_cast<float>(std::numeric_limits<int16_t>::max());
-                    switch (static_cast<Axis>(event_buffer.front())) {
+                        static_cast<float>(event.value) / static_cast<float>(std::numeric_limits<int16_t>::max());
+                    switch (static_cast<Axis>(event.number)) {
                         case Axis::JOYSTICK_LEFT_HORIZONTAL:
                             emit(std::make_unique<LeftJoystick>(
-                                timestamp, LeftJoystick::Direction::HORIZONTAL, normalised, is_init));
+                                event.timestamp, LeftJoystick::Direction::HORIZONTAL, normalised, is_init));
                             break;
                         case Axis::JOYSTICK_LEFT_VERTICAL:
                             emit(std::make_unique<LeftJoystick>(
-                                timestamp, LeftJoystick::Direction::VERTICAL, normalised, is_init));
+                                event.timestamp, LeftJoystick::Direction::VERTICAL, normalised, is_init));
                             break;
-                        case Axis::L2: emit(std::make_unique<L2Trigger>(timestamp, normalised, is_init)); break;
+                        case Axis::L2: emit(std::make_unique<L2Trigger>(event.timestamp, normalised, is_init)); break;
                         case Axis::JOYSTICK_RIGHT_HORIZONTAL:
                             emit(std::make_unique<RightJoystick>(
-                                timestamp, RightJoystick::Direction::HORIZONTAL, normalised, is_init));
+                                event.timestamp, RightJoystick::Direction::HORIZONTAL, normalised, is_init));
                             break;
                         case Axis::JOYSTICK_RIGHT_VERTICAL:
                             emit(std::make_unique<RightJoystick>(
-                                timestamp, RightJoystick::Direction::VERTICAL, normalised, is_init));
+                                event.timestamp, RightJoystick::Direction::VERTICAL, normalised, is_init));
                             break;
-                        case Axis::R2: emit(std::make_unique<R2Trigger>(timestamp, normalised, is_init)); break;
-                        case Axis::ACCELEROMETER_X: /* TODO: Handle this. */ break;
-                        case Axis::ACCELEROMETER_Y: /* TODO: Handle this. */ break;
-                        case Axis::ACCELEROMETER_Z: /* TODO: Handle this. */ break;
+                        case Axis::R2: emit(std::make_unique<R2Trigger>(event.timestamp, normalised, is_init)); break;
+                        case Axis::ACCELEROMETER_X: break;
+                        case Axis::ACCELEROMETER_Y: break;
+                        case Axis::ACCELEROMETER_Z: break;
                     }
                 }
                 else {
                     log<NUClear::WARN>("Unknown event on joystick. Ignoring.");
-                    log<NUClear::WARN>(fmt::format("Timestamp: {}", timestamp.time_since_epoch().count()));
-                    log<NUClear::WARN>(fmt::format("Value....: {}", value));
-                    log<NUClear::WARN>(
-                        fmt::format("Type.....: {}", is_init ? type | static_cast<uint8_t>(EventType::INIT) : type));
-                    log<NUClear::WARN>(fmt::format("Number...: {}", static_cast<int>(event_buffer.front())));
+                    log<NUClear::WARN>(fmt::format("Timestamp: {}", event.timestamp));
+                    log<NUClear::WARN>(fmt::format("Value....: {}", event.value));
+                    log<NUClear::WARN>(fmt::format(
+                        "Type.....: {}", is_init ? event.type | static_cast<uint8_t>(EventType::INIT) : event.type));
+                    log<NUClear::WARN>(fmt::format("Number...: {}", static_cast<int>(event.number)));
                 }
-
-                // Erase axis/button from buffer
-                event_buffer.erase(event_buffer.begin(), std::next(event_buffer.begin(), sizeof(uint8_t)));
             }
         });
 
