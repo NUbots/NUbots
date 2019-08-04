@@ -41,9 +41,9 @@ namespace behaviour {
             Eigen::Vector3d walkCommand       = Eigen::Vector3d::Zero();
             Eigen::Vector3d prevWalkCommand   = Eigen::Vector3d::Zero();
             bool moving                       = false;
-            bool headLocked                   = false;
-            float headPitch                   = 0;
-            float headYaw                     = 0;
+            Eigen::Vector2d headCommandLimits = Eigen::Vector2d::Zero();
+            Eigen::Vector2d headCommand       = Eigen::Vector2d::Zero();
+            Eigen::Vector2d prevHeadCommand   = Eigen::Vector2d::Zero();
 
             std::vector<std::string> actions;
         };

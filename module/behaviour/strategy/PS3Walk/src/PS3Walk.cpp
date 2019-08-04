@@ -70,8 +70,13 @@ namespace behaviour {
                 for (const auto& action : config["action_scripts"].as<std::vector<std::string>>()) {
                     actions.push_back(action);
                 }
-                walkCommandLimits << config["max_speed"]["linear"].as<float>(),
-                    config["max_speed"]["linear"].as<float>(), config["max_speed"]["rotational"].as<float>();
+                walkCommandLimits      = Eigen::Vector3d(config["max_speed"]["walk"]["linear"].as<double>(),
+                                                    config["max_speed"]["walk"]["linear"].as<double>(),
+                                                    config["max_speed"]["walk"]["rotational"].as<double>());
+                headCommandLimits      = Eigen::Vector2d(config["max_speed"]["head"]["yaw"].as<double>(),
+                                                    config["max_speed"]["head"]["pitch"].as<double>());
+                walk_command_threshold = config["threshold"]["walk"].as<double>();
+                head_command_threshold = config["threshold"]["head"].as<double>();
             });
 
             on<Trigger<WalkControlEvent>>().then([this](const WalkControlEvent& event) {
@@ -152,19 +157,21 @@ namespace behaviour {
 
             on<Trigger<HeadDirectionEvent>>().then([this](const HeadDirectionEvent& event) {
                 switch (event.direction.value) {
-                    case HeadDirectionEvent::Direction::HORIZONTAL: headYaw = -event.value; break;
-                    case HeadDirectionEvent::Direction::VERTICAL: headPitch = -event.value; break;
+                    case HeadDirectionEvent::Direction::HORIZONTAL: headCommand.x() = -event.value; break;
+                    case HeadDirectionEvent::Direction::VERTICAL: headCommand.y() = -event.value; break;
                 }
             });
 
             on<Every<20, Per<std::chrono::seconds>>>().then([this] {
                 // Output head command based on updated information from joystick
                 if (!headLocked) {
-                    auto headCommand        = std::make_unique<HeadCommand>();
-                    headCommand->yaw        = headYaw * 1.5;
-                    headCommand->pitch      = headPitch;
-                    headCommand->robotSpace = true;
-                    emit(std::move(headCommand));
+                    if (((prevHeadCommand - headCommand).array().abs() > 0.1).any()) {
+                        auto command        = std::make_unique<HeadCommand>();
+                        command->yaw        = headCommand.x() * headCommandLimits.x();
+                        command->pitch      = headCommand.y() * headCommandLimits.y();
+                        command->robotSpace = true;
+                        emit(std::move(command));
+                    }
                 }
 
                 // Output walk command based on updated strafe and rotation speed from joystick
