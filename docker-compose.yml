@@ -13,9 +13,9 @@ services:
       args:
         platform: nuc7i7bnh
   native:
-    image: nubots:native
+    image: nubots:generic
     build:
       context: docker
       dockerfile: toolchain.Dockerfile
       args:
-        platform: native
+        platform: generic
