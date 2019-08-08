@@ -29,10 +29,14 @@ COPY --chown="nubots:nubots" "files/ssh_config" "/home/nubots/.ssh/ssh_config"
 RUN chmod 600 "/home/nubots/.ssh/id_rsa" \
     && chmod 600 "/home/nubots/.ssh/id_rsa.pub"
 
-# Copy across the same keys for use by abuild
-COPY --chown="root:root" "files/id_rsa.pub" "/etc/apk/keys/nubots@newcastle.edu.au.rsa.pub"
-COPY --chown="nubots:nubots" "files/abuild.conf" "/home/nubots/.abuild/abuild.conf"
-
 # Swap to using the nubots user from now on
 USER nubots
 WORKDIR /home/nubots
+
+# Create key for use with abuild and fix abuild.conf
+RUN abuild-keygen -a -i -n \
+    && sed 's/SRCDEST=.*/SRCDEST=$HOME\/package_sources/g' \
+    && sed 's/REPODEST=.*/REPODEST=$HOME\/packages/g' \
+    && sed 's/#PACKAGER=.*/PACKAGER="NUbots <nubots@newcastle.edu.au>"/g' \
+    && sed 's/#MAINTAINER=.*/MAINTAINER=$PACKAGER/g' \
+    && sed 's/ERROR_CLEANUP=.*/ERROR_CLEANUP="srcdir bldroot pkgdir deps"/g'
