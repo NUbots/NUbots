@@ -1,5 +1,6 @@
 # Maintainer: Natanael Copa <ncopa@alpinelinux.org>
-pkgname=zlib
+basename=zlib
+pkgname=nubots-$basename
 pkgver=1.2.11
 pkgrel=1
 pkgdesc="A compression/decompression Library"
@@ -7,10 +8,10 @@ arch="all"
 license="zlib"
 url="http://zlib.net"
 depends=""
-source="https://zlib.net/$pkgname-$pkgver.tar.gz"
+source="https://zlib.net/$basename-$pkgver.tar.gz"
 options="!fhs"
 
-builddir="$srcdir/$pkgname-$pkgver"
+builddir="$srcdir/$basename-$pkgver"
 
 build() {
 	cd "$builddir"
