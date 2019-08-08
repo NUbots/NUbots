@@ -11,8 +11,13 @@ COPY "files/find_robot_hosts.sh" "/usr/bin/find_robot_hosts.sh"
 COPY "files/hosts" "/etc/hosts"
 RUN chmod 755 "/usr/bin/find_robot_hosts.sh" && chmod 644 "/etc/hosts"
 
-# Set up user
-RUN addgroup nubots && adduser -D -G nubots -G abuild nubots
+# Set up user and set password and allow passwordless sudo
+RUN adduser -D nubots \
+    && addgroup nubots abuild \
+    && addgroup nubots wheel \
+    && echo "nubots: " | chpasswd \
+    && echo "%wheel ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers \
+    && visudo -c
 
 # Setup /usr/local owned by nubots
 RUN chown -R nubots:nubots /usr/local
