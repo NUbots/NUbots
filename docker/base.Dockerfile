@@ -3,7 +3,6 @@ FROM alpine:edge
 # Install user and build tools
 # We need the testing repository for some packages
 RUN apk update && apk add --no-cache \
-    build-base \
     alpine-sdk \
     cmake
 
