@@ -30,9 +30,7 @@ check() {
 
 package() {
 	cd "$builddir"
-	make install \
-		pkgconfigdir="/usr/lib/pkgconfig" \
-		DESTDIR="$pkgdir"
+	make install DESTDIR="$pkgdir"
 }
 
 md5sums="1c9f62f0778697a09d36121ead88e08e  zlib-1.2.11.tar.gz"

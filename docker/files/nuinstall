@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+src_dir=$1
+
+# Go to the APKBUILD folder and build
+cd $src_dir
+abuild
+
+# Find the resulting packages and install it
+find /var/tmp/abuild/ -name "*.apk" -exec sudo apk add --no-cache --allow-untrusted {} \;
+
+# Cleanup by deleting the entire temp directory
+sudo rm -rf /var/tmp/abuild
