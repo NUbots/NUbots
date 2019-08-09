@@ -4,6 +4,7 @@ FROM alpine:edge
 # We need the testing repository for some packages
 RUN apk update && apk add --no-cache \
     alpine-sdk \
+    libstdc++ \
     cmake
 
 # Add a useful utility and set up host aliases

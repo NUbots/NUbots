@@ -19,3 +19,10 @@ services:
       dockerfile: toolchain.Dockerfile
       args:
         platform: generic
+  vscode:
+    image: nubots:vscode
+    volumes:
+      - .:/home/nubots/NUbots
+    build:
+      context: docker
+      dockerfile: vscode.Dockerfile
