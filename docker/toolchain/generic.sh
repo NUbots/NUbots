@@ -1,3 +1,3 @@
-export CFLAGS="-march=generic -mtune=generic"
+export CFLAGS=$CFLAGS
 export CXXFLAGS=$CFLAGS
 export CPPFLAGS=$CFLAGS
