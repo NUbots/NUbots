@@ -13,10 +13,10 @@ RUN apt-get update \
 # Add puppet and build scripts to the image
 RUN mkdir -p /NUbots-build/toolchain/
 ADD ./puppet /NUbots-build/puppet/
-ADD ./.travis /NUbots-build/.travis/
+ADD ./.buildkite /NUbots-build/.buildkite/
 
 # Install the NUbots toolchain
-RUN TRAVIS_BUILD_DIR=/NUbots-build /NUbots-build/.travis/install_toolchain.sh
+RUN DOCKER_BUILD_DIR=/NUbots-build /NUbots-build/.buildkite/scripts/install_toolchain.sh
 
 # Remove extraneous files from the toolchain install
 RUN rm -rf /NUbots-build \
@@ -25,9 +25,8 @@ RUN rm -rf /NUbots-build \
 # Create the directory that will be used for checkouts and builds
 RUN mkdir -p /code/NUbots
 
-# Create the nubots user and group with id 1000. This will be used to map to
-# the user with id 1000 on the host (typically the first non-root user)
-# Used to fix permission issues
+# Create the nubots user and group with id 1000.
+# Used to login and run commands in the container.
 RUN groupadd -g 1000 nubots \
     && useradd -r -u 1000 -g nubots nubots
 

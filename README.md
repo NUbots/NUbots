@@ -1,4 +1,4 @@
-NUbots Codebase [![Build Status](https://travis-ci.org/NUbots/NUbots.svg?branch=master)](https://travis-ci.org/NUbots/NUbots) [![Join the chat at https://gitter.im/NUbots/NUbots](https://badges.gitter.im/NUbots/NUbots.svg)](https://gitter.im/NUbots/NUbots?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+NUbots Codebase [![Build status](https://badge.buildkite.com/55e8331e6f3f68d23b0c90e3327ed65abe9c255e96c811793b.svg?branch=master)](https://buildkite.com/nubots/nubots)
 ==========================
 
 Vagrant

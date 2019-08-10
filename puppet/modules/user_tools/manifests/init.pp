@@ -70,9 +70,6 @@ class user_tools (String $user) {
   file_line{ 'zshrc_numpad20': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Oj" "*"'} ->
   file_line{ 'zshrc_numpad21': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Oo" "/"'}
 
-  # Modify our path so ccache is in it
-  file_line{ 'path_ccache': path => "/home/${user}/.zshrc", line => 'export PATH=/usr/lib/ccache:$PATH'}
-
   # Enable the git module for zprezto
   file_line { 'zprezto_modules':
     ensure => present,
