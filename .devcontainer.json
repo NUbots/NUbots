@@ -1,7 +1,8 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "vscode",
+	"dockerFile": "docker/Dockerfile",
+	"context": "docker",
+	"workspaceMount": "type=bind,src=.,dst=/home/nubots/NUbots",
 	"workspaceFolder": "/home/nubots/NUbots",
 	"extensions": []
 }
