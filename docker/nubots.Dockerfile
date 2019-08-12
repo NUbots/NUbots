@@ -6,13 +6,13 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-FROM alpine:edge
-RUN apk update && apk add --no-cache build-base libstdc++
-RUN addgroup -S nubots && adduser -S nubots -G nubots
+# FROM alpine:edge
+# RUN apk update && apk add --no-cache build-base libstdc++
+# RUN addgroup -S nubots && adduser -S nubots -G nubots
 
-# FROM ubuntu:18.04
-# RUN apt-get update && apt-get -y install build-essential wget
-# RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
+FROM ubuntu:18.04
+RUN apt-get update && apt-get -y install build-essential wget
+RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local

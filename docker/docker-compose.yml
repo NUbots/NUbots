@@ -1,0 +1,19 @@
+version: '3'
+services:
+  clang-format:
+    image: nubots:clang_format
+    build:
+      context: .
+      dockerfile: clang_format.Dockerfile
+  nuc7i7bnh:
+    image: nubots:nuc7i7bnh
+    build:
+      context: .
+      dockerfile: nubots.Dockerfile
+      args:
+        platform: nuc7i7bnh
+  generic:
+    image: nubots:generic
+    build:
+      context: .
+      dockerfile: nubots.Dockerfile
