@@ -3,11 +3,11 @@ steps:
     command: "/code/NUbots/.buildkite/scripts/validate_format.sh"
     plugins:
       - docker-compose#v3.0.3:
-          config: docker-compose.yml
+          config: docker/docker-compose.yml
           build: clang-format
   - label: "Build for NUC"
     command: "/code/NUbots/.buildkite/scripts/build_code.sh"
     plugins:
       - docker-compose#v3.0.3:
-          config: docker-compose.yml
+          config: docker/docker-compose.yml
           build: nuc7i7bnh
