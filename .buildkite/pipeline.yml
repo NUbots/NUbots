@@ -5,11 +5,9 @@ steps:
       - docker-compose#v3.0.3:
           config: docker-compose.yml
           build: clang-format
-          run: clang-format
   - label: "Build for NUC"
     command: "/code/NUbots/.buildkite/scripts/build_code.sh"
     plugins:
       - docker-compose#v3.0.3:
           config: docker-compose.yml
           build: nuc7i7bnh
-          run: nuc7i7bnh
