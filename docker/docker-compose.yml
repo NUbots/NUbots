@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: clang_format.Dockerfile
+    volumes:
+      - .:/home/nubots/NUbots
   nuc7i7bnh:
     image: nubots:nuc7i7bnh
     build:
@@ -12,8 +14,14 @@ services:
       dockerfile: nubots.Dockerfile
       args:
         platform: nuc7i7bnh
+    volumes:
+      - .:/home/nubots/NUbots
   generic:
     image: nubots:generic
     build:
       context: .
       dockerfile: nubots.Dockerfile
+      args:
+        platform: generic
+    volumes:
+      - .:/home/nubots/NUbots

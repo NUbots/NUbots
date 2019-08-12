@@ -12,13 +12,13 @@ steps:
   - wait
 
   - label: "Validate Clang Format"
-    command: "/code/NUbots/.buildkite/scripts/validate_format.sh"
+    command: "/home/nubots/NUbots/.buildkite/scripts/validate_format.sh"
     plugins:
       - docker-compose#v3.0.3:
           config: docker/docker-compose.yml
           run: clang-format
   - label: "Build for NUC"
-    command: "/code/NUbots/.buildkite/scripts/build_code.sh"
+    command: "/home/nubots/NUbots/.buildkite/scripts/build_code.sh"
     plugins:
       - docker-compose#v3.0.3:
           config: docker/docker-compose.yml
