@@ -1,3 +1,5 @@
+#!/bin/sh
+
 export CFLAGS="-march=broadwell \
                -mtune=broadwell \
                -mmmx \
@@ -56,5 +58,5 @@ export CFLAGS="-march=broadwell \
                --param l1-cache-size=32 \
                --param l1-cache-line-size=64 \
                --param l2-cache-size=4096"
-export CXXFLAGS=$CFLAGS
-export CPPFLAGS=$CFLAGS
+export CXXFLAGS="${CFLAGS}"
+export CPPFLAGS="${CFLAGS}"
