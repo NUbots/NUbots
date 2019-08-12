@@ -1,25 +1,19 @@
 steps:
-  # Build the docker images
-  - label: "Build Docker Images"
-    plugins:
-      - docker-compose#v3.0.3:
-          config: docker/docker-compose.yml
-          build:
-           - clang-format
-           - nuc7i7bnh
-
-  # Wait until they are built
-  - wait
-
   - label: "Validate Clang Format"
     command: "/home/nubots/NUbots/.buildkite/scripts/validate_format.sh"
     plugins:
+      - docker-compose#v3.0.3:
+        config: docker/docker-compose.yml
+        build: clang-format
       - docker-compose#v3.0.3:
           config: docker/docker-compose.yml
           run: clang-format
   - label: "Build for NUC"
     command: "/home/nubots/NUbots/.buildkite/scripts/build_code.sh"
     plugins:
+      - docker-compose#v3.0.3:
+        config: docker/docker-compose.yml
+        build: nuc7i7bnh
       - docker-compose#v3.0.3:
           config: docker/docker-compose.yml
           run: nuc7i7bnh
