@@ -1,4 +1,6 @@
 FROM alpine:edge
+
+# Get clang-format
 RUN apk update && apk add --no-cache clang
 
 # Add a NUbots user
