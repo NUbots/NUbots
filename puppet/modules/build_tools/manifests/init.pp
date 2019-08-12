@@ -53,7 +53,6 @@ class build_tools {
   package { 'gcc-7': name => 'gcc-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-7': name => 'g++-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gfortran-7': name => 'gfortran-7', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'ccache': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils': name => 'binutils', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils-dev': name => 'binutils-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
