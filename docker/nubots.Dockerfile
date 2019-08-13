@@ -37,16 +37,16 @@ COPY --chown="nubots:nubots" "files/ssh_config" "/home/nubots/.ssh/ssh_config"
 ARG platform=generic
 
 # Copy across the specific toolchain files for this image
-COPY --chown=nubots:nubots toolchain/${platform}.cmake /usr/local/toolchain.cmake
 COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 
-# Copy over general install tools
-COPY --chown=nubots:nubots package/install-autotools.sh /usr/local/bin/install-autotools.sh
-COPY --chown=nubots:nubots package/install-cmake.sh /usr/local/bin/install-cmake.sh
+# Copy over a tool to install simple standard conforming libraries from source
+COPY --chown=nubots:nubots package/install-from-source /usr/local/bin/install-from-source
+RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source
 
-# Copy across the individual libraries needed and build them
-COPY --chown=nubots:nubots package/zlib.sh /usr/local/package/zlib.sh
-RUN /usr/local/package/zlib.sh
-
-COPY --chown=nubots:nubots package/protobuf.sh /usr/local/package/protobuf.sh
-RUN /usr/local/package/protobuf.sh
+# Install tools and libraries from source
+RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
+RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
+    --with-zlib

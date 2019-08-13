@@ -60,6 +60,19 @@ fi;
 if [ "${METHOD}" = 'install-autotools-from-source' ]; then
     echo "Configuring using autotools"
 
+    # Find the closest configure file to the root
+    CONFIGURE_FILE=$(find -type f -name 'configure' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+
+    # If we have no configure file we need to autogen
+    if [ -z ${CONFIGURE_FILE} ]; then
+        AUTOGEN_FILE=$(find -type f -name 'autogen.sh' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+        echo "TODO deal with this autogen file ${AUTOGEN_FILE}"
+    fi
+
+    echo "Configuring using configure file ${CONFIGURE_FILE}"
+
+    cd $(dirname ${CONFIGURE_FILE})
+
     # Run configure
     ./configure $@ --prefix="${PREFIX}"
 
@@ -116,3 +129,6 @@ elif [ "${METHOD}" = 'install-make-from-source' ]; then
     make PREFIX="${PREFIX}" install
 
 fi;
+
+# Now that we have built, cleanup the build directory
+rm -rf /var/tmp/build
