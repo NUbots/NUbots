@@ -40,6 +40,10 @@ ARG platform=generic
 COPY --chown=nubots:nubots toolchain/${platform}.cmake /usr/local/toolchain.cmake
 COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 
+# Copy over general install tools
+COPY --chown=nubots:nubots package/install-autotools.sh /usr/local/bin/install-autotools.sh
+COPY --chown=nubots:nubots package/install-cmake.sh /usr/local/bin/install-cmake.sh
+
 # Copy across the individual libraries needed and build them
 COPY --chown=nubots:nubots package/zlib.sh /usr/local/package/zlib.sh
 RUN /usr/local/package/zlib.sh
