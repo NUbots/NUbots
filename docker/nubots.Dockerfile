@@ -41,13 +41,37 @@ COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 
 # Copy over a tool to install simple standard conforming libraries from source
 COPY --chown=nubots:nubots package/install-from-source /usr/local/bin/install-from-source
-RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
+RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
-    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source \
-    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source
 
-# Install tools and libraries from source
+# Install build tools that we need from source
 RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
+# https://github.com/ninja-build/ninja/archive/v1.9.0.tar.gz
+
+# Install libraries
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
     --with-zlib
+RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz
+
+# http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip
+
+# http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz
+# https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz
+# https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
+# https://github.com/gperftools/gperftools/releases/download/gperftools-2.5.93/gperftools-2.5.93.tar.gz
+# https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz
+# http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
+# http://downloads.sourceforge.net/project/libjpeg-turbo/1.5.1/libjpeg-turbo-1.5.1.tar.gz
+# https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz
+# http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
+# http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
+# https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz
+# https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz
+# https://github.com/libffi/libffi/archive/v3.2.1.tar.gz
+# ftp://ftp.gnome.org/pub/gnome/sources/glib/2.52/glib-2.52.3.tar.xz
+# https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_9.tar.gz

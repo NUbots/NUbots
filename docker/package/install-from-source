@@ -26,7 +26,13 @@ case "${ARCHIVE_FILE}" in
   *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
   *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
   *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
+  *.tgz)     tar xf ${ARCHIVE_FILE} ;;
+  *.tbz)     tar xf ${ARCHIVE_FILE} ;;
+  *.tbz2)    tar xf ${ARCHIVE_FILE} ;;
+  *.txz)     tar xf ${ARCHIVE_FILE} ;;
   *.zip)     unzip ${ARCHIVE_FILE} ;;
+  *.h)       ;;
+  *.hpp)     ;;
   *)         exit 1 ;;
 esac
 
@@ -56,8 +62,15 @@ if [ "${METHOD}" = "install-from-source" ]; then
     exit 1
 fi;
 
+# We are installing a header
+if [ "${METHOD}" = 'install-header-from-source' ]; then
+    echo "Installing a header"
+
+    HEADER_FILE=$(find -type f -name '*.h' -o -name '*.hpp' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cp ${HEADER_FILE} /usr/local/include
+
 # We are using autotools
-if [ "${METHOD}" = 'install-autotools-from-source' ]; then
+elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
     echo "Configuring using autotools"
 
     # Find the closest configure file to the root
