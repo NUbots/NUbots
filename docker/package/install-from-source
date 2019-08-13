@@ -1,0 +1,118 @@
+#!/bin/sh
+
+# Exit immediately on error
+set -e
+
+# Get our method as the name of this script, url and args
+METHOD=$(basename "$0")
+URL="$1"
+shift
+ARGS="$@"
+PREFIX=/usr/local
+
+# Pull in the toolchain arguments
+. /usr/local/toolchain.sh
+
+# Setup the temporary build directories
+mkdir -p /var/tmp/build
+cd /var/tmp/build
+
+# Download the source code
+wget ${URL}
+
+# Extract the source code archive
+ARCHIVE_FILE=$(find . -type f | head -n 1)
+case "${ARCHIVE_FILE}" in
+  *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
+  *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
+  *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
+  *.zip)     unzip ${ARCHIVE_FILE} ;;
+  *)         exit 1 ;;
+esac
+
+# Check if we are doing a automagical determination of what build system to use go through them one by one until we decide on one
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'configure')" ]; then
+    METHOD="install-autotools-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'autogen.sh')" ]; then
+    METHOD="install-autotools-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'CMakeLists.txt')" ]; then
+    METHOD="install-cmake-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'Jamroot')" ]; then
+    METHOD="install-bjam-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'Makefile')" ]; then
+    METHOD="install-make-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ]; then
+    echo "Could not work out the build system to use to build the source"
+    exit 1
+fi;
+
+# We are using autotools
+if [ "${METHOD}" = 'install-autotools-from-source' ]; then
+    echo "Configuring using autotools"
+
+    # Run configure
+    ./configure $@ --prefix="${PREFIX}"
+
+    # Run make
+    make -j$(nproc)
+
+    # Run make install
+    make install
+
+# We are using CMake
+elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
+    echo "Configuring using cmake"
+
+    # Set our prefix so CMAKE finds things in the toolchain
+    export CMAKE_PREFIX_PATH="/usr/local"
+
+    # Do an out of source build
+    mkdir -p build
+    cd build
+
+    # Configure using cmake
+    cmake .. $@ \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DCMAKE_C_FLAGS_RELEASE="${CFLAGS}" \
+        -DCMAKE_CXX_FLAGS_RELEASE="${CXXFLAGS}" \
+        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}"
+
+    # Run make
+    make -j$(nproc)
+
+    # Run make install
+    make install
+
+# We are using Boost.Build
+elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
+    echo "Configuring using Boost.Build"
+
+    # Bootstrap b2
+    ./bootstrap.sh --prefix="${PREFIX}"
+
+    # Setup our include and library paths
+    ./bjam include="${PREFIX}/include" library-path="${PREFIX}/lib"
+
+    # Build and install
+    ./b2 $@
+    ./b2 install
+
+# We are using standard makefiles
+elif [ "${METHOD}" = 'install-make-from-source' ]; then
+    echo "Building using make"
+
+    make $@ -j$(nproc)
+
+    make PREFIX="${PREFIX}" install
+
+fi;
