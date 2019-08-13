@@ -14,6 +14,9 @@ FROM ubuntu:18.04
 RUN apt-get update && apt-get -y install build-essential wget
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
+# Create the home directory owned by nubots
+RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
+
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local
 USER nubots
