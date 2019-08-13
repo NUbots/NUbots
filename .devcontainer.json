@@ -3,5 +3,11 @@
 	"name": "NUbots",
 	"dockerComposeFile": ".vscode/docker-compose.yml",
 	"service": "vscode",
-	"workspaceFolder": "/home/nubots/NUbots"
+	"workspaceFolder": "/home/nubots/NUbots",
+	"extensions": [
+		"ms-vscode.cpptools",
+		"ms-python.python",
+		"cheshirekow.cmake-format",
+		"vector-of-bool.cmake-tools",
+	]
 }
