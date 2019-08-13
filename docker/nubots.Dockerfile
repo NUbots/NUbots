@@ -47,6 +47,7 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-s
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source
 
 # Install tools and libraries from source
+RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
     --with-zlib
