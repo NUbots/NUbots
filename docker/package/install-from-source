@@ -11,12 +11,14 @@ ARGS="$@"
 
 # Set installation prefix, default to /usr/local unless an external power says otherwise
 PREFIX=${PREFIX:-"/usr/local"}
+
+BUILD_FOLDER="/var/tmp/build"
 # Pull in the toolchain arguments
 . /usr/local/toolchain.sh
 
 # Setup the temporary build directories
-mkdir -p /var/tmp/build
-cd /var/tmp/build
+mkdir -p "${BUILD_FOLDER}"
+cd "${BUILD_FOLDER}"
 
 # Download the source code
 wget ${URL}
@@ -149,4 +151,4 @@ elif [ "${METHOD}" = 'install-make-from-source' ]; then
 fi;
 
 # Now that we have built, cleanup the build directory
-rm -rf /var/tmp/build
+rm -rf "${BUILD_FOLDER}"
