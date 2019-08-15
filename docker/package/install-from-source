@@ -13,6 +13,9 @@ ARGS="$@"
 PREFIX=${PREFIX:-"/usr/local"}
 
 BUILD_FOLDER="/var/tmp/build"
+RELEASE_CFLAGS="-O3 -DNDEBUG"
+RELEASE_CXXFLAGS="${RELEASE_CFLAGS}"
+
 # Pull in the toolchain arguments
 . /usr/local/toolchain.sh
 
@@ -96,7 +99,9 @@ elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
     cd $(dirname ${CONFIGURE_FILE})
 
     # Run configure
-    ./configure $@ --prefix="${PREFIX}"
+    CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+        ./configure $ARGS --prefix="${PREFIX}"
 
     # Run make
     make -j$(nproc)
@@ -156,7 +161,9 @@ elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
 elif [ "${METHOD}" = 'install-make-from-source' ]; then
     echo "Building using make"
 
-    make $@ -j$(nproc)
+    make "${ARGS}" -j$(nproc) \
+        CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
+        CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}"
 
     make PREFIX="${PREFIX}" install
 
