@@ -111,19 +111,20 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
     CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
     cd $(dirname ${CMAKELISTS_FILE})
 
-    # Set our prefix so CMAKE finds things in the toolchain
-    export CMAKE_PREFIX_PATH="/usr/local"
-
     # Do an out of source build
     mkdir -p build
     cd build
 
     # Configure using cmake
-    cmake .. $@ \
+    cmake .. "${ARGS}" \
         -DCMAKE_BUILD_TYPE="Release" \
         -DCMAKE_C_FLAGS_RELEASE="${CFLAGS}" \
         -DCMAKE_CXX_FLAGS_RELEASE="${CXXFLAGS}" \
-        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}"
+        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+        # Tell cmake to look in our pkgconfig directories
+        -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+        # Set our prefix so CMAKE finds things in the toolchain
+        -DCMAKE_PREFIX_PATH:PATH="${PREFIX}"
 
     # Run make
     make -j$(nproc)
