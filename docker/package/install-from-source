@@ -8,8 +8,9 @@ METHOD=$(basename "$0")
 URL="$1"
 shift
 ARGS="$@"
-PREFIX=/usr/local
 
+# Set installation prefix, default to /usr/local unless an external power says otherwise
+PREFIX=${PREFIX:-"/usr/local"}
 # Pull in the toolchain arguments
 . /usr/local/toolchain.sh
 
