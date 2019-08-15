@@ -136,15 +136,20 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
 elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
     echo "Configuring using Boost.Build"
 
-    # Bootstrap b2
-    ./bootstrap.sh --prefix="${PREFIX}"
+    # Bootstrap bjam
+    ./bootstrap.sh --prefix="${PREFIX}" --without-libraries=python
 
-    # Setup our include and library paths
-    ./bjam include="${PREFIX}/include" library-path="${PREFIX}/lib"
+    # Setup our include paths, library paths, compile flags, and then build
+    ./bjam "${ARGS}" \
+        include="${PREFIX}/include" \
+        library-path="${PREFIX}/lib" \
+        -j$(nproc) \
+        -q \
+        cflags="${RELEASE_CFLAGS} ${CFLAGS}" \
+        cxxflags="${RELEASE_CXXFLAGS} ${CXXFLAGS}"
 
-    # Build and install
-    ./b2 $@
-    ./b2 install
+    # Now install
+    ./bjam install
 
 # We are using standard makefiles
 elif [ "${METHOD}" = 'install-make-from-source' ]; then
