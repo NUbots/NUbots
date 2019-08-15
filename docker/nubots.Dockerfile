@@ -10,8 +10,12 @@
 # RUN apk update && apk add --no-cache build-base libstdc++
 # RUN addgroup -S nubots && adduser -S nubots -G nubots
 
-FROM ubuntu:18.04
-RUN apt-get update && apt-get -y install build-essential wget
+# FROM ubuntu:18.04
+# RUN apt-get update && apt-get -y install build-essential wget
+# RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
+
+FROM archlinux/base:latest
+RUN pacman -Syu --noconfirm --needed && pacman -S --noconfirm --needed base-devel wget
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Create the home directory owned by nubots
