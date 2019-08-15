@@ -58,7 +58,8 @@ RUN install-from-source https://github.com/google/protobuf/releases/download/v3.
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz
 
-# http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip
+# http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
+# or https://01.org/compute-runtime
 
 # http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz
 # https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz
