@@ -39,7 +39,8 @@ case "${ARCHIVE_FILE}" in
   *)         exit 1 ;;
 esac
 
-# Check if we are doing a automagical determination of what build system to use go through them one by one until we decide on one
+# Check if we are doing a automagical determination of what build system to use go through them one by one until we
+# decide on one
 if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'configure')" ]; then
     METHOD="install-autotools-from-source"
 fi;
