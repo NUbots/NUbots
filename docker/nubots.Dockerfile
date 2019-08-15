@@ -27,17 +27,8 @@ COPY --chown="nubots:nubots" "files/id_rsa" "/home/nubots/.ssh/id_rsa"
 COPY --chown="nubots:nubots" "files/id_rsa.pub" "/home/nubots/.ssh/id_rsa.pub"
 COPY --chown="nubots:nubots" "files/ssh_config" "/home/nubots/.ssh/ssh_config"
 
-################################################
-#  _____           _      _           _        #
-# |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
-#   | |/ _ \ / _ \| |/ __| '_ \ / _` | | '_ \  #
-#   | | (_) | (_) | | (__| | | | (_| | | | | | #
-#   |_|\___/ \___/|_|\___|_| |_|\__,_|_|_| |_| #
-################################################
-ARG platform=generic
-
-# Copy across the specific toolchain files for this image
-COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
+# Copy across the generic toolchain file for building tools
+COPY --chown=nubots:nubots toolchain/generic.sh /usr/local/toolchain.sh
 
 # Copy over a tool to install simple standard conforming libraries from source
 COPY --chown=nubots:nubots package/install-from-source /usr/local/bin/install-from-source
@@ -47,9 +38,21 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source
 
-# Install build tools that we need from source
+# Install build tools
 RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
 # https://github.com/ninja-build/ninja/archive/v1.9.0.tar.gz
+
+################################################
+#  _____           _      _           _        #
+# |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
+#   | |/ _ \ / _ \| |/ __| '_ \ / _` | | '_ \  #
+#   | | (_) | (_) | | (__| | | | (_| | | | | | #
+#   |_|\___/ \___/|_|\___|_| |_|\__,_|_|_| |_| #
+################################################
+ARG platform=generic
+
+# Copy across the specific toolchain file for this image
+COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 
 # Install libraries
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
