@@ -122,7 +122,7 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
     cd build
 
     # Configure using cmake
-    cmake .. "${ARGS}" \
+    cmake .. ${ARGS} \
         -DCMAKE_BUILD_TYPE="Release" \
         -DCMAKE_C_FLAGS_RELEASE="${CFLAGS}" \
         -DCMAKE_CXX_FLAGS_RELEASE="${CXXFLAGS}" \
@@ -146,7 +146,7 @@ elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
     ./bootstrap.sh --prefix="${PREFIX}" --without-libraries=python
 
     # Setup our include paths, library paths, compile flags, and then build
-    ./bjam "${ARGS}" \
+    ./bjam ${ARGS} \
         include="${PREFIX}/include" \
         library-path="${PREFIX}/lib" \
         -j$(nproc) \
@@ -161,7 +161,7 @@ elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
 elif [ "${METHOD}" = 'install-make-from-source' ]; then
     echo "Building using make"
 
-    make "${ARGS}" -j$(nproc) \
+    make ${ARGS} -j$(nproc) \
         CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
         CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}"
 
