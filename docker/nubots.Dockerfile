@@ -16,7 +16,7 @@
 
 FROM archlinux/base:latest
 RUN pacman -Syu --noconfirm --needed \
-    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget yasm meson \
+    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget yasm meson git \
     && rm -rf /var/cache
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
