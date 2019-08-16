@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-try:
-    import os
-    import fnmatch
-    import glob
-    import hashlib
-    import tempfile
-    import b
+import os
+import fnmatch
+import glob
+import hashlib
+import tempfile
+import b
 
-    from termcolor import cprint
-    from subprocess import call, STDOUT
+from termcolor import cprint
+from subprocess import call, STDOUT
+
+try:
 
     def register(command):
 

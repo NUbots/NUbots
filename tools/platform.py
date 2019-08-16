@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+import os
+import b
+import argparse
+from termcolor import cprint
+from subprocess import call, STDOUT
+
 try:
-    import os
-    import b
-    import argparse
-    from termcolor import cprint
-    from subprocess import call, STDOUT
 
     def register(command):
 

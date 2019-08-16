@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 try:
     import os
     import tensorflow as tf

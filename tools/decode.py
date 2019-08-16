@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
 try:
-    # Import the nbs decoder
-    import re
-    from util import nbs_decoder
-    from google.protobuf.json_format import MessageToJson
 
     def register(command):
 
@@ -15,6 +11,11 @@ try:
         command.add_argument("path", metavar="path", help="The file to decode into a series of json objects")
 
     def run(path, **kwargs):
+
+        # Import the nbs decoder
+        import re
+        from util import nbs_decoder
+        from google.protobuf.json_format import MessageToJson
 
         for type_name, timestamp, msg in nbs_decoder.decode(path):
             out = re.sub(r"\s+", " ", MessageToJson(msg, True))

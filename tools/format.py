@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-try:
-    import os
-    import b
+import os
+import b
 
-    from subprocess import call
+from subprocess import call
+
+try:
 
     def register(command):
 
