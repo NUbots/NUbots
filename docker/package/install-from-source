@@ -90,17 +90,18 @@ elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
     # If we have no configure file we need to autogen
     if [ -z ${CONFIGURE_FILE} ]; then
         AUTOGEN_FILE=$(find -type f -name 'autogen.sh' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+        cd $(dirname ${AUTOGEN_FILE})
 
         echo "Generating configuration files using file ${AUTOGEN_FILE}"
         # Some autogen scripts will automatically run configure after they have generated the configure files
         # "NOCONFIGURE=1" and "--no-configure" are two ways that we can disable this behaviour
         # (different packagers have different switches)
-        NOCONFIGURE=1 ${AUTOGEN_FILE} --no-configure
+        NOCONFIGURE=1 ./autogen.sh --no-configure
+    else
+        cd $(dirname ${CONFIGURE_FILE})
     fi
 
     echo "Configuring using configure file ${CONFIGURE_FILE}"
-
-    cd $(dirname ${CONFIGURE_FILE})
 
     # Run configure
     CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
