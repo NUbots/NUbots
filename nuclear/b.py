@@ -104,9 +104,17 @@ if __name__ == "__main__":
             continue
 
         # Get our module, class name and registration function
-        module = loader.find_module(module_name).load_module(module_name)
-        tool = getattr(module, "run")
-        register = getattr(module, "register")
+        try:
+            module = loader.find_module(module_name).load_module(module_name)
+            tool = getattr(module, "run")
+            register = getattr(module, "register")
+        except BaseException as e:
+            # Capture the exception in a variable
+            ex = e
+
+            # Swallow arguments for failed commands
+            register = lambda command: command.add_argument("_", nargs="*")
+            tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
 
         # Let the tool register it's arguments
         register(subcommands.add_parser(module_name))
