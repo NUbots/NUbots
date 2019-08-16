@@ -89,8 +89,17 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/5.3.0.tar.gz \
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
 
 # Aravis
+RUN install-from-source https://github.com/libffi/libffi/archive/v3.3-rc0.tar.gz
+RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.34/util-linux-2.34.tar.xz \
+    --disable-all-programs \
+    --enable-libblkid \
+    --enable-libmount \
+    --enable-libuuid
+COPY --chown=nubots:nubots package/${platform}_glib.cross /usr/local/temp/glib.cross
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
-    -Ddefault_library=both
+    --cross-file=/usr/local/temp/glib.cross \
+    -Ddefault_library=both \
+    -Dinternal_pcre=true
 RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_6_3.tar.gz \
     -Ddefault_library=both \
     -Dviewer=false \
@@ -113,7 +122,6 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 # http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
 # https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz
 # https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz
-# https://github.com/libffi/libffi/archive/v3.2.1.tar.gz
 
 # Go to where we will mount the NUbots volume
 WORKDIR /home/nubots/NUbots
