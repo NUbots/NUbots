@@ -61,10 +61,21 @@ COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 
 # Install libraries
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
+
 RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
     --with-zlib
+
+RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
+    -DYAML_CPP_BUILD_TESTS=OFF \
+    -DDBUILD_SHARED_LIBS=ON
+RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
+    -DYAML_CPP_BUILD_TESTS=OFF \
+    -DDBUILD_SHARED_LIBS=OFF
+
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz
+
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
+    -DBUILD_TESTS=OFF
 
 # http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
 # or https://01.org/compute-runtime
@@ -73,7 +84,6 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 # https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz
 # https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
 # https://github.com/gperftools/gperftools/releases/download/gperftools-2.5.93/gperftools-2.5.93.tar.gz
-# https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
 # http://downloads.sourceforge.net/project/libjpeg-turbo/1.5.1/libjpeg-turbo-1.5.1.tar.gz
 # https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz
