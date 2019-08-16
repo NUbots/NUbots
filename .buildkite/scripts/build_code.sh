@@ -2,9 +2,10 @@
 set -e
 
 # Make a directory to out of source build in that's in the container
-mkdir build
-cd build
+code_dir=$(pwd)
+mkdir /home/nubots/code-build
+cd /home/nubots/code-build
 
 # Build the code
-cmake .. -GNinja
+cmake ${code_dir} -GNinja
 ninja
