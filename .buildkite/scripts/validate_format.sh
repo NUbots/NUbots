@@ -2,32 +2,34 @@
 
 ret=0
 
+find . -type f \( -name *.h \
+                  -o -name *.c \
+                  -o -name *.cc \
+                  -o -name *.cxx \
+                  -o -name *.cpp \
+                  -o -name *.hpp \
+                  -o -name *.ipp \
+                  -o -name *.proto \) > files.txt
+
 # Loop through all c/cpp files
-while IFS= read -r -d $'\0' line; do
+while IFS= read -r in_file; do
 
     # Get what our formatted code should be
-    fmt=$( clang-format-6.0 -style=file $line )
+    clang-format -style=file $in_file > correctly_formatted
 
     # Print a status message so we know what it's doing
-    echo "Validating formatting for $line"
+    echo "Validating formatting for $in_file"
 
     # Check if our text is formatted incorrectly
-    if ! cmp -s $line <(echo "$fmt"); then
+    if ! cmp -s $in_file correctly_formatted; then
 
         # Flag that it is wrong and print the difference
         ret=1
-        echo "$line is incorrectly formatted"
-        colordiff -u $line <(echo "$fmt")
+        echo "$in_file is incorrectly formatted"
+        colordiff -u $in_file correctly_formatted
     fi
 # This must be at the bottom since otherwise piping into the while will make a subshell
-done < <(find . -type f \( -name *.h \
-                        -o -name *.c \
-                        -o -name *.cc \
-                        -o -name *.cxx \
-                        -o -name *.cpp \
-                        -o -name *.hpp \
-                        -o -name *.ipp \
-                        -o -name *.proto \) -print0)
+done < files.txt
 
 # If we failed somewhere this will exit 1 and fail the build
 exit $ret

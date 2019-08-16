@@ -1,7 +1,7 @@
 FROM alpine:edge
 
 # Get clang-format
-RUN apk update && apk add --no-cache clang
+RUN apk update && apk add --no-cache clang colordiff
 
 # Add a NUbots user
 RUN addgroup -S nubots && adduser -S nubots -G nubots
