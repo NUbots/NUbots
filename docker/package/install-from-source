@@ -39,7 +39,7 @@ case "${ARCHIVE_FILE}" in
   *.zip)     unzip ${ARCHIVE_FILE} ;;
   *.h)       ;;
   *.hpp)     ;;
-  *)         exit 1 ;;
+  *)         echo "Unknown archive format"; exit 1 ;;
 esac
 
 # Check if we are doing a automagical determination of what build system to use go through them one by one until we
