@@ -1,14 +1,18 @@
 #!/bin/sh
 
-ret=0
+check() {
+    echo "Validating formatting for $1"
+    clang-format -style=file "$1" | colordiff --color=yes -u "$1" -
+    return $?
+}
+export -f check
 
 # Loop through all c/cpp/proto files and check validation
-for src in $(find . -regex '.*\.\(c\|cc\|cpp\|cxx\|hpp\|ipp\|proto\)')
-do
-    echo "Validating formatting for ${src}"
-    clang-format -style=file "${src}" | colordiff -u "${src}" -
-    ret=$((ret + $?))
-done
+find . -regex '.*\.\(c\|cc\|cpp\|cxx\|hpp\|ipp\|proto\)' \
+     | parallel --joblog formatting.log -j$(nproc) check
+
+# Count how many returned a non zero exist status
+ret=$(tail -n +2 formatting.log | awk '{ sum += $7; } END {print sum}')
 
 echo "$ret files are not formatted correctly"
 if [ $ret -eq 0 ]
