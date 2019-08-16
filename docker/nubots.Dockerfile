@@ -63,6 +63,11 @@ COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
+# tcmalloc
+RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.7/gperftools-2.7.tar.gz \
+    --with-tcmalloc-pagesize=64 \
+    --enable-minimal
+
 # Protobuf
 RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
     --with-zlib
