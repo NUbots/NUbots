@@ -1,0 +1,22 @@
+--- a/CMakeLists.txt.orig
++++ b/CMakeLists.txt
+@@ -67,20 +67,6 @@
+
+ message(STATUS "Configuring Armadillo ${ARMA_VERSION_MAJOR}.${ARMA_VERSION_MINOR}.${ARMA_VERSION_PATCH}")
+
+-
+-# As Red Hat Enterprise Linux (and related systems such as Fedora)
+-# does not search /usr/local/lib by default, we need to place the
+-# library in either /usr/lib or /usr/lib64
+-
+-if(NOT APPLE)
+-  if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+-    message(STATUS "*** CMAKE_INSTALL_PREFIX was initalised by cmake to the default value of ${CMAKE_INSTALL_PREFIX}")
+-    message(STATUS "*** CMAKE_INSTALL_PREFIX changed to /usr")
+-    set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Standard install prefix" FORCE)
+-  endif()
+-endif()
+-
+-
+ # Adhere to GNU filesystem layout conventions
+ include(GNUInstallDirs)
