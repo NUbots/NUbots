@@ -105,14 +105,11 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 # https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
 # https://github.com/gperftools/gperftools/releases/download/gperftools-2.5.93/gperftools-2.5.93.tar.gz
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
-# https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz
 # http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
 # http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
 # https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz
 # https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz
 # https://github.com/libffi/libffi/archive/v3.2.1.tar.gz
-# ftp://ftp.gnome.org/pub/gnome/sources/glib/2.52/glib-2.52.3.tar.xz
-# https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_9.tar.gz
 
 # Go to where we will mount the NUbots volume
 WORKDIR /home/nubots/NUbots
