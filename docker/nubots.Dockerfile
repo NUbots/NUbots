@@ -86,6 +86,13 @@ RUN install-header-from-source https://github.com/catchorg/Catch2/releases/downl
 # Aravis
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
     -Ddefault_library=both
+RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_6_3.tar.gz \
+    -Ddefault_library=both \
+    -Dviewer=false \
+    -Dgst-plugin=false \
+    -Dusb=true \
+    -Ddocumentation=false \
+    -Dintrospection=false
 
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
