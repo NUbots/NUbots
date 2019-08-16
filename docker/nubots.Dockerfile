@@ -67,10 +67,10 @@ RUN install-from-source https://github.com/google/protobuf/releases/download/v3.
 
 RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
     -DYAML_CPP_BUILD_TESTS=OFF \
-    -DDBUILD_SHARED_LIBS=ON
+    -DBUILD_SHARED_LIBS=ON
 RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
     -DYAML_CPP_BUILD_TESTS=OFF \
-    -DDBUILD_SHARED_LIBS=OFF
+    -DBUILD_SHARED_LIBS=OFF
 
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
 
