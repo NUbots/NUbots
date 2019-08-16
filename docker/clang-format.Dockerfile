@@ -1,11 +1,10 @@
-FROM alpine:edge
+FROM archlinux/base:latest
 
-# Get clang-format
-RUN apk update && apk add --no-cache clang colordiff
-
-# Add a NUbots user
-RUN addgroup -S nubots && adduser -S nubots -G nubots
-USER nubots
+# Get packages
+RUN pacman -Syu --noconfirm --needed \
+    && pacman -S --noconfirm --needed clang colordiff \
+    && rm -rf /var/cache
+RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Create the home directory owned by nubots
 RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
