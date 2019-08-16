@@ -142,9 +142,9 @@ RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-lin
     --enable-libblkid \
     --enable-libmount \
     --enable-libuuid
-COPY --chown=nubots:nubots package/${platform}_glib.cross /usr/local/temp/glib.cross
+COPY --chown=nubots:nubots package/${platform}_glib.cross /var/tmp/glib.cross
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
-    --cross-file=/usr/local/temp/glib.cross \
+    --cross-file=/var/tmp/glib.cross \
     -Ddefault_library=both \
     -Dinternal_pcre=true
 RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_6_3.tar.gz \
