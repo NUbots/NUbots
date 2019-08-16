@@ -11,11 +11,12 @@
 # RUN addgroup -S nubots && adduser -S nubots -G nubots
 
 # FROM ubuntu:18.04
-# RUN apt-get update && apt-get -y install build-essential wget
+# RUN apt-get update && apt-get -y install build-essential autotools-dev autoconf automake g++ gdb valgrind gfortran wget
 # RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 FROM archlinux/base:latest
-RUN pacman -Syu --noconfirm --needed && pacman -S --noconfirm --needed base-devel wget
+RUN pacman -Syu --noconfirm --needed \
+    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Create the home directory owned by nubots
@@ -43,7 +44,7 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source
 
 # Install build tools
-RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
+# RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
 # https://github.com/ninja-build/ninja/archive/v1.9.0.tar.gz
 
 ################################################
