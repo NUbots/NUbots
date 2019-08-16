@@ -17,7 +17,7 @@
 FROM archlinux/base:latest
 RUN pacman -Syu --noconfirm --needed \
     && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget yasm meson \
-    && rm -rf /var/cache
+    && pacman -Scc --noconfirm
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Create the home directory owned by nubots
