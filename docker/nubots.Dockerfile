@@ -26,7 +26,6 @@ RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local
 USER nubots
-WORKDIR /home/nubots
 
 # Add ssh key for sshing into the robot
 COPY --chown="nubots:nubots" "files/id_rsa" "/home/nubots/.ssh/id_rsa"
@@ -101,3 +100,6 @@ RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/gli
 # https://github.com/libffi/libffi/archive/v3.2.1.tar.gz
 # ftp://ftp.gnome.org/pub/gnome/sources/glib/2.52/glib-2.52.3.tar.xz
 # https://github.com/AravisProject/aravis/archive/ARAVIS_0_5_9.tar.gz
+
+# Go to where we will mount the NUbots volume
+WORKDIR /home/nubots/NUbots

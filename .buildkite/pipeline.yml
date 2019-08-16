@@ -1,12 +1,12 @@
 steps:
   - label: "Validate Clang Format"
-    command: "ls -lah /home/nubots/NUbots/.buildkite/scripts/ && /home/nubots/NUbots/.buildkite/scripts/validate_format.sh"
+    command: ".buildkite/scripts/validate_format.sh"
     plugins:
       - docker-compose#v3.0.3:
           run: clang-format
           workdir: /home/nubots/NUbots/
   - label: "Build for NUC"
-    command: "/home/nubots/NUbots/.buildkite/scripts/build_code.sh"
+    command: ".buildkite/scripts/build_code.sh"
     plugins:
       - docker-compose#v3.0.3:
           run: nuc7i7bnh
