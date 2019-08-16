@@ -108,7 +108,6 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 # http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz
 # https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz
 # https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
-# https://github.com/gperftools/gperftools/releases/download/gperftools-2.5.93/gperftools-2.5.93.tar.gz
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
 # http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
 # http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
