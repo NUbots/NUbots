@@ -63,6 +63,20 @@ COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
+# OpenBLAS
+RUN if [ "${platform}" = "generic" ] ; \
+    then \
+    install-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
+    -DCORE=GENERIC \
+    -DUSE_THREAD=ON \
+    -DDYNAMIC_ARCH=ON ; \
+    else \
+    install-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
+    -DCORE=HASWELL \
+    -DUSE_THREAD=ON \
+    -DDYNAMIC_ARCH=OFF ; \
+    fi
+
 # tcmalloc
 RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.7/gperftools-2.7.tar.gz \
     --with-tcmalloc-pagesize=64 \
@@ -115,7 +129,6 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 # http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
 # or https://01.org/compute-runtime
 # http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz
-# https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz
 # https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
 # http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
