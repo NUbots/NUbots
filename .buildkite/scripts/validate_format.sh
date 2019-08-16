@@ -1,33 +1,35 @@
 #!/bin/bash
 
-ret=0
+echo "AM I A CRAZY PERSON!?!?!"
 
-# Loop through all c/cpp files
-while IFS= read -r -d $'\0' line; do
+# ret=0
 
-    # Get what our formatted code should be
-    fmt=$( clang-format-6.0 -style=file $line )
+# # Loop through all c/cpp files
+# while IFS= read -r -d $'\0' line; do
 
-    # Print a status message so we know what it's doing
-    echo "Validating formatting for $line"
+#     # Get what our formatted code should be
+#     fmt=$( clang-format-6.0 -style=file $line )
 
-    # Check if our text is formatted incorrectly
-    if ! cmp -s $line <(echo "$fmt"); then
+#     # Print a status message so we know what it's doing
+#     echo "Validating formatting for $line"
 
-        # Flag that it is wrong and print the difference
-        ret=1
-        echo "$line is incorrectly formatted"
-        colordiff -u $line <(echo "$fmt")
-    fi
-# This must be at the bottom since otherwise piping into the while will make a subshell
-done < <(find . -type f \( -name *.h \
-                        -o -name *.c \
-                        -o -name *.cc \
-                        -o -name *.cxx \
-                        -o -name *.cpp \
-                        -o -name *.hpp \
-                        -o -name *.ipp \
-                        -o -name *.proto \) -print0)
+#     # Check if our text is formatted incorrectly
+#     if ! cmp -s $line <(echo "$fmt"); then
 
-# If we failed somewhere this will exit 1 and fail the build
-exit $ret
+#         # Flag that it is wrong and print the difference
+#         ret=1
+#         echo "$line is incorrectly formatted"
+#         colordiff -u $line <(echo "$fmt")
+#     fi
+# # This must be at the bottom since otherwise piping into the while will make a subshell
+# done < <(find . -type f \( -name *.h \
+#                         -o -name *.c \
+#                         -o -name *.cc \
+#                         -o -name *.cxx \
+#                         -o -name *.cpp \
+#                         -o -name *.hpp \
+#                         -o -name *.ipp \
+#                         -o -name *.proto \) -print0)
+
+# # If we failed somewhere this will exit 1 and fail the build
+# exit $ret
