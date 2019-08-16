@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 try:
-
     import os
     import json
+    import re
+    from util import nbs_decoder
+    from google.protobuf.json_format import MessageToJson
 
     def register(command):
 
@@ -14,11 +16,6 @@ try:
         command.add_argument("path", metavar="path", help="The nbs file to extract the compressed images from")
 
     def run(path, **kwargs):
-
-        # Import the nbs decoder
-        import re
-        from util import nbs_decoder
-        from google.protobuf.json_format import MessageToJson
 
         output_path = os.path.splitext(path)[0]
         os.makedirs(output_path, exist_ok=True)
