@@ -4,7 +4,6 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           build: clang-format
-          image-name: nubots:clang-format
       - docker-compose#v3.0.3:
           run: clang-format
   - label: "Build for NUC"
@@ -12,6 +11,5 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           build: nuc7i7bnh
-          image-name: nubots:nuc7i7bnh
       - docker-compose#v3.0.3:
           run: nuc7i7bnh
