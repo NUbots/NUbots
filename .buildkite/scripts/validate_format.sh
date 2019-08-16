@@ -14,11 +14,11 @@ find . -type f \( -name *.h \
 # Loop through all c/cpp files
 while IFS= read -r in_file; do
 
-    # Get what our formatted code should be
-    clang-format -style=file $in_file > correctly_formatted
-
     # Print a status message so we know what it's doing
     echo "Validating formatting for $in_file"
+
+    # Get what our formatted code should be
+    clang-format -style=file $in_file > correctly_formatted
 
     # Check if our text is formatted incorrectly
     if ! cmp -s $in_file correctly_formatted; then
