@@ -8,7 +8,7 @@ steps:
       - docker-compose#v3.0.3:
           run: clang-format
   - label: "Build for NUC"
-    command: "ls /home/nubots && /home/nubots/NUbots/.buildkite/scripts/build_code.sh"
+    command: "/home/nubots/NUbots/.buildkite/scripts/build_code.sh"
     plugins:
       - docker-compose#v3.0.3:
           build: nuc7i7bnh
