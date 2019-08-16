@@ -161,11 +161,9 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 
 # http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
 # or https://01.org/compute-runtime
-# http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz
-# https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
+
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
 # http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
-# http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
 # https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz
 # https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz
 
