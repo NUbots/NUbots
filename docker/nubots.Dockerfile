@@ -78,10 +78,7 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
     -DBUILD_TESTS=OFF
 
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
-    -Ddefault_library=static
-
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
-    -Ddefault_library=shared
+    -Ddefault_library=both
 
 
 # http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
