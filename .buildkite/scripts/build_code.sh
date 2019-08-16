@@ -1,5 +1,10 @@
-#!/bin/bash
+#!/bin/sh
+set -e
 
-/usr/bin/python3 nuclear/b platform select $PLATFORM
+# Make a directory to out of source build in that's in the container
+mkdir build
 cd build
+
+# Build the code
+cmake .. -GNinja
 ninja
