@@ -64,6 +64,10 @@ if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'Make
     METHOD="install-make-from-source"
 fi;
 
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'meson.build')" ]; then
+    METHOD="install-meson-from-source"
+fi;
+
 if [ "${METHOD}" = "install-from-source" ]; then
     echo "Could not work out the build system to use to build the source"
     exit 1
@@ -166,6 +170,35 @@ elif [ "${METHOD}" = 'install-make-from-source' ]; then
         CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}"
 
     make PREFIX="${PREFIX}" install
+
+# We are using meson.build
+elif [ "${METHOD}" = 'install-meson-from-source' ]; then
+    echo "Building using meson"
+
+    # Find the closest configure file to the root
+    MESON_FILE=$(find -type f -name 'meson.build' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cd $(dirname ${MESON_FILE})
+
+    echo "Configuring using meson build file ${MESON_FILE}"
+
+    # Do an out of source build
+    mkdir -p build
+    cd build
+
+    # Configure using meson
+    CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    meson setup build .. \
+        $ARGS \
+        --buildtype=release \
+        --prefix="${PREFIX}" \
+        -D strip=true
+
+    # Run ninja
+    ninja -C build -j$(nproc)
+
+    # Run ninja install
+    ninja -C build install
 
 fi;
 

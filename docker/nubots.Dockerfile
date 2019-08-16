@@ -16,7 +16,7 @@
 
 FROM archlinux/base:latest
 RUN pacman -Syu --noconfirm --needed \
-    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget yasm
+    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget yasm meson
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Create the home directory owned by nubots
@@ -41,7 +41,8 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source \
-    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-meson-from-source
 
 # Install build tools
 # RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
