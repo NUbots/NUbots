@@ -96,7 +96,7 @@ if __name__ == "__main__":
     # First we try to see if sys.argv[1] gives us all the information we need
     # If it does we only need to load that module directly
     # Otherwise we load every module so we can build a help for possible tools
-    target_modules = [m for m in modules if not m.ispkg and m.name == sys.argv[1]]
+    target_modules = [m for m in modules if not m[2] and m[1] == sys.argv[1]]
     modules = target_modules if len(target_modules) > 0 else modules
 
     # Our tools dictionary
