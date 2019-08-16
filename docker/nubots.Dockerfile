@@ -11,12 +11,12 @@
 # RUN addgroup -S nubots && adduser -S nubots -G nubots
 
 # FROM ubuntu:18.04
-# RUN apt-get update && apt-get -y install build-essential autotools-dev autoconf automake g++ gdb valgrind gfortran wget
+# RUN apt-get update && apt-get -y install build-essential autotools-dev autoconf automake g++ gdb valgrind gfortran wget yasm
 # RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 FROM archlinux/base:latest
 RUN pacman -Syu --noconfirm --needed \
-    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget
+    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget yasm
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Create the home directory owned by nubots
@@ -65,6 +65,8 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
     --with-zlib
 
+RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz
+
 RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
     -DYAML_CPP_BUILD_TESTS=OFF \
     -DBUILD_SHARED_LIBS=OFF
@@ -82,7 +84,6 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 # https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
 # https://github.com/gperftools/gperftools/releases/download/gperftools-2.5.93/gperftools-2.5.93.tar.gz
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
-# http://downloads.sourceforge.net/project/libjpeg-turbo/1.5.1/libjpeg-turbo-1.5.1.tar.gz
 # https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz
 # http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
 # http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
