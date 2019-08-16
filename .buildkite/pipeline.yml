@@ -1,6 +1,6 @@
 steps:
   - label: "Validate Clang Format"
-    command: "ls /home/NUbots && /home/nubots/NUbots/.buildkite/scripts/validate_format.sh"
+    command: "ls /home/nubots && /home/nubots/NUbots/.buildkite/scripts/validate_format.sh"
     plugins:
       - docker-compose#v3.0.3:
           run: clang-format
