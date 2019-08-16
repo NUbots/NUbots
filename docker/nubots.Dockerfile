@@ -60,30 +60,39 @@ ARG platform=generic
 # Copy across the specific toolchain file for this image
 COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
 
-# Install libraries
+# zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
+# Protobuf
 RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
     --with-zlib
 
+# Libjpeg
 RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz
 
+# yaml-cpp
 RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
     -DYAML_CPP_BUILD_TESTS=OFF \
     -DBUILD_SHARED_LIBS=OFF
 
+# fmt formatting library
+RUN  install-from-source https://github.com/fmtlib/fmt/archive/5.3.0.tar.gz \
+    -DFMT_DOC=OFF \
+    -DFMT_TEST=OFF
+
+# Catch unit testing library
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
 
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
-    -DBUILD_TESTS=OFF
-
+# Aravis
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
     -Ddefault_library=both
 
+# NUClear!
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
+    -DBUILD_TESTS=OFF
 
 # http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
 # or https://01.org/compute-runtime
-
 # http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz
 # https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz
 # https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz
