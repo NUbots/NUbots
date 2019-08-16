@@ -155,6 +155,9 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
     -Ddocumentation=false \
     -Dintrospection=false
 
+# FSWatch
+RUN install-from-source https://github.com/emcrisostomo/fswatch/releases/download/1.14.0/fswatch-1.14.0.tar.gz
+
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
     -DBUILD_TESTS=OFF
@@ -165,7 +168,6 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
 # http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
 # https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz
-# https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz
 
 # Go to where we will mount the NUbots volume
 WORKDIR /home/nubots/NUbots
