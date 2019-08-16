@@ -105,11 +105,14 @@ try:
         call(["rsync", "-avzPLR", "--checksum", "-e ssh"] + ["version.txt"] + [target_dir])
 
 
-except:
-    print("Unable to load install tool")
+except BaseException as e:
+    # Capture the exception in a variable
+    ex = e
 
     def register(command):
-        pass
+        # Swallow arguments
+        command.add_argument("_", nargs="*")
 
     def run(**kwargs):
-        pass
+        print("Cannot run this command due to the following error")
+        print(ex)
