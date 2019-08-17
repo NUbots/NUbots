@@ -78,32 +78,9 @@ RUN if [ "${platform}" = "generic" ] ; \
     fi
 
 # Armadillo
-COPY --chown=nubots:nubots package/armadillo_barf.patch /var/tmp/armadillo_barf.patch
-RUN BUILD_FOLDER="/var/tmp/build" \
-    && . /usr/local/toolchain.sh \
-    && mkdir -p "${BUILD_FOLDER}" \
-    && cd "${BUILD_FOLDER}"  \
-    && wget http://sourceforge.net/projects/arma/files/armadillo-9.600.6.tar.xz \
-    && tar xf armadillo-9.600.6.tar.xz \
-    && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-    && cd $(dirname ${CMAKELISTS_FILE}) \
-    && patch -Np1 /var/tmp/armadillo_barf.patch \
-    && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
-    && mkdir -p build \
-    && cd build \
-    && cmake .. ${ARGS} \
-    -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_C_FLAGS_RELEASE="${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS_RELEASE="${CXXFLAGS}" \
-    -DCMAKE_INSTALL_PREFIX:PATH="/usr/local" \
-    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-    -DCMAKE_PREFIX_PATH:PATH="/usr/local" \
-    -DCMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT=OFF \
+RUN install-cmake-from-source http://sourceforge.net/projects/arma/files/armadillo-9.600.6.tar.xz \
     -DDETECT_HDF5=OFF \
-    -DBUILD_SHARED_LIBS=ON \
-    && make -j$(nproc) \
-    && make install \
-    && rm -rf "${BUILD_FOLDER}"
+    -DBUILD_SHARED_LIBS=ON
 COPY --chown=nubots:nubots package/armadillo_config.hpp /usr/local/include/armadillo_bits/config.hpp
 
 # Eigen3
