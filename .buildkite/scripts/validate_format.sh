@@ -12,7 +12,7 @@ check_cmake_format() {
 }
 check_python_format() {
     echo "Validating formatting for $1"
-    black "$1" | colordiff --color=yes -u "$1" -
+    cat "$1" | black -q - | colordiff --color=yes -u "$1" -
     return $?
 }
 export -f check_clang_format
