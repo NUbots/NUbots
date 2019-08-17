@@ -14,9 +14,4 @@ find . -name 'CMakeLists.txt' -o -regex '.*\.\(cmake\|role\)$' \
 ret=$(tail -n +2 formatting.log | awk '{ sum += $7; } END {print sum}')
 
 echo "$ret files are not formatted correctly"
-if [ $ret -eq 0 ]
-then
-    exit 0
-else
-    exit 1
-fi
+exit $ret
