@@ -16,7 +16,19 @@
 
 FROM archlinux/base:latest
 RUN pacman -Syu --noconfirm --needed \
-    && pacman -S --noconfirm --needed base-devel gcc-fortran gdb valgrind cmake ninja wget yasm meson git \
+    && pacman -S --noconfirm --needed \
+    wget \
+    python \
+    python-pip \
+    base-devel \
+    gcc-fortran \
+    yasm \
+    gdb \
+    valgrind \
+    ninja \
+    cmake \
+    meson \
+    git \
     && rm -rf /var/cache
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
@@ -138,6 +150,13 @@ RUN install-from-source https://github.com/emcrisostomo/fswatch/releases/downloa
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
     -DBUILD_TESTS=OFF
+
+# Setup pip to install to /usr/local and have python find packages there
+ENV PYTHONPATH=/usr/local/lib/python3.7/site-packages
+COPY --chown=root:root files/pip.conf /etc/pip.conf
+
+# Install python libraries
+RUN pip install protobuf==3.9.1
 
 # http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
 # or https://01.org/compute-runtime
