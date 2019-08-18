@@ -1,6 +1,5 @@
 import { Component } from 'react'
 import React from 'react'
-import { hot } from 'react-hot-loader'
 import { Switch } from 'react-router'
 import { Route } from 'react-router'
 import { BrowserRouter } from 'react-router-dom'
@@ -8,21 +7,18 @@ import { BrowserRouter } from 'react-router-dom'
 import { NavigationConfiguration } from '../../navigation'
 import { NavigationView } from '../navigation/view'
 
-import { installNav } from './install'
 import style from './style.css'
 
-class AppView extends Component {
-  private readonly nav: NavigationConfiguration = installNav()
-
+export class AppView extends Component<{ nav: NavigationConfiguration }> {
   render() {
     return (
       <BrowserRouter>
         <div className={style.app}>
-          <NavigationView nav={this.nav}/>
+          <NavigationView nav={this.props.nav}/>
           <div className={style.app__container}>
             <div className={style.app__content}>
               <Switch>
-                {...this.nav.getRoutes().map(config => <Route
+                {...this.props.nav.getRoutes().map(config => <Route
                   key={config.path}
                   exact={config.exact}
                   path={config.path}
@@ -36,5 +32,3 @@ class AppView extends Component {
     )
   }
 }
-
-export default hot(module)(AppView)

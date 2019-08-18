@@ -61,7 +61,6 @@
     "@types/react": "16.8.22",
     "@types/react-color": "^3.0.1",
     "@types/react-dom": "^16.8.4",
-    "@types/react-hot-loader": "^4.1.0",
     "@types/react-measure": "^2.0.5",
     "@types/react-outside-click-handler": "^1.2.0",
     "@types/react-router": "^5.0.2",
@@ -76,7 +75,6 @@
     "@types/throttle-debounce": "^1.1.1",
     "@types/webpack": "^4.4.33",
     "@types/webpack-dev-middleware": "^2.0.2",
-    "@types/webpack-hot-middleware": "^2.16.5",
     "@types/xxhashjs": "^0.2.1",
     "babel-loader": "^8.0.6",
     "caniuse-lite": "^1.0.30000983",
@@ -99,7 +97,6 @@
     "postcss-reporter": "6.0.1",
     "postcss-url": "^8.0.0",
     "raw-loader": "^3.0.0",
-    "react-hot-loader": "4.11.1",
     "react-svg-loader": "2.1.0",
     "rimraf": "^2.6.3",
     "seedrandom": "^3.0.1",
@@ -115,8 +112,7 @@
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5",
     "webpack-dev-middleware": "^3.7.0",
-    "webpack-dev-server": "^3.7.2",
-    "webpack-hot-middleware": "^2.25.0"
+    "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
     "binary": "^0.3.0",

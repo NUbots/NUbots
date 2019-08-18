@@ -7,7 +7,6 @@ import favicon from 'serve-favicon'
 import sio from 'socket.io'
 import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
-import webpackHotMiddleware from 'webpack-hot-middleware'
 
 import webpackConfig from '../../webpack.config'
 import * as NUClearNetProxyParser from '../shared/nuclearnet/nuclearnet_proxy_parser'
@@ -52,7 +51,6 @@ app.use(compression())
 app.use(devMiddleware)
 app.use(history())
 app.use(devMiddleware)
-app.use(webpackHotMiddleware(compiler))
 app.use(favicon(`${__dirname}/../assets/favicon.ico`))
 
 const port = process.env.PORT || 3000

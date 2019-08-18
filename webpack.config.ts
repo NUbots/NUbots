@@ -15,10 +15,7 @@ const config: webpack.Configuration = {
   context: sourcePath,
   devtool: isContinuousIntegration ? false : isProduction ? 'source-map' : 'eval-source-map',
   entry: {
-    main: [
-      './client/main.tsx',
-      ...(isProduction ? [] : ['webpack-hot-middleware/client?reload=true']),
-    ],
+    main: './client/main.tsx',
   },
   output: {
     path: outPath,
@@ -146,7 +143,6 @@ const config: webpack.Configuration = {
       filename: 'index.html',
       chunks: ['main'],
     }),
-    ...(isProduction ? [] : [new webpack.HotModuleReplacementPlugin()]),
   ] as any as webpack.Plugin[],
   node: {
     // workaround for webpack-dev-server issue
