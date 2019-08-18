@@ -1,4 +1,12 @@
 steps:
+  # Build for the NUC
+  - label: "Build for NUC"
+    command: ".buildkite/scripts/build_code.sh"
+    plugins:
+      - docker-compose#v3.0.3:
+          run: nuc7i7bnh
+          workdir: /home/nubots/NUbots/
+
   # Formatting
   - label: "Validate C++ and Protobuf formatting"
     command: ".buildkite/scripts/validate_clang_format.sh"
@@ -17,12 +25,4 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           run: format
-          workdir: /home/nubots/NUbots/
-
-  # Build for the NUC
-  - label: "Build for NUC"
-    command: ".buildkite/scripts/build_code.sh"
-    plugins:
-      - docker-compose#v3.0.3:
-          run: nuc7i7bnh
           workdir: /home/nubots/NUbots/
