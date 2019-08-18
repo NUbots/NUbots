@@ -146,7 +146,8 @@ COPY --chown=nubots:nubots package/${platform}_glib.cross /var/tmp/glib.cross
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
     --cross-file=/var/tmp/glib.cross \
     -Ddefault_library=both \
-    -Dinternal_pcre=true
+    -Dinternal_pcre=true \
+    && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
 RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_6_3.tar.gz \
     -Ddefault_library=both \
     -Dviewer=false \
