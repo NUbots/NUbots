@@ -166,6 +166,9 @@ elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
 elif [ "${METHOD}" = 'install-make-from-source' ]; then
     echo "Building using make"
 
+    MAKEFILE=$(find -type f -name 'Makefile' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cd $(dirname ${MAKEFILE})
+
     make ${ARGS} -j$(nproc) \
         CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
         CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}"
