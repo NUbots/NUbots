@@ -93,26 +93,39 @@ if __name__ == "__main__":
     # Get all of the packages that are in the build tools
     modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
 
+    # First we try to see if sys.argv[1] gives us all the information we need
+    # If it does we only need to load that module directly
+    # Otherwise we load every module so we can build a help for possible tools
+    target_modules = [m for m in modules if not m[2] and m[1] == sys.argv[1]]
+    modules = target_modules if len(target_modules) > 0 else modules
+
     # Our tools dictionary
     tools = {}
 
     # Loop through all the modules we have to set them up in the parser
     for loader, module_name, ispkg in modules:
 
-        # Skip any util module to make it easier to write tools
-        if module_name == "util":
-            continue
+        # Skip any packages (folders) as these are used to store useful things that are not tools
+        if not ispkg:
 
-        # Get our module, class name and registration function
-        module = loader.find_module(module_name).load_module(module_name)
-        tool = getattr(module, "run")
-        register = getattr(module, "register")
+            # Get our module, class name and registration function
+            try:
+                module = loader.find_module(module_name).load_module(module_name)
+                tool = getattr(module, "run")
+                register = getattr(module, "register")
+            except BaseException as e:
+                # Capture the exception in a variable
+                ex = e
 
-        # Let the tool register it's arguments
-        register(subcommands.add_parser(module_name))
+                # Swallow arguments for failed commands
+                register = lambda command: command.add_argument("_", nargs="*")
+                tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
 
-        # Associate our module_name with this tool
-        tools[module_name] = tool
+            # Let the tool register it's arguments
+            register(subcommands.add_parser(module_name))
+
+            # Associate our module_name with this tool
+            tools[module_name] = tool
 
     # Parse our arguments
     args = command.parse_args()
