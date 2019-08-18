@@ -156,7 +156,9 @@ ENV PYTHONPATH=/usr/local/lib/python3.7/site-packages
 COPY --chown=root:root files/pip.conf /etc/pip.conf
 
 # Install python libraries
-RUN pip install protobuf==3.9.1
+RUN pip install \
+    protobuf==3.9.1 \
+    stringcase
 
 # http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
 # or https://01.org/compute-runtime
