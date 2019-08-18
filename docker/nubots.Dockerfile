@@ -163,6 +163,12 @@ RUN install-from-source https://github.com/emcrisostomo/fswatch/releases/downloa
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
     -DBUILD_TESTS=OFF
 
+# LibBacktrace
+RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
+    --without-system-libunwind \
+    --enable-shared \
+    --enable-static
+
 # Setup pip to install to /usr/local and have python find packages there
 ENV PYTHONPATH=/usr/local/lib/python3.7/site-packages
 COPY --chown=root:root files/pip.conf /etc/pip.conf
