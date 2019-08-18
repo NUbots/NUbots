@@ -29,7 +29,8 @@ RUN pacman -Syu --noconfirm --needed \
     cmake \
     meson \
     git \
-    && rm -rf /var/cache
+    && rm -rf /var/cache \
+    && sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Create the home directory owned by nubots
