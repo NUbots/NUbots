@@ -105,28 +105,27 @@ if __name__ == "__main__":
     # Loop through all the modules we have to set them up in the parser
     for loader, module_name, ispkg in modules:
 
-        # Skip any packages (folders) as these are used to store useful things
-        if ispkg:
-            continue
+        # Skip any packages (folders) as these are used to store useful things that are not tools
+        if not ispkg:
 
-        # Get our module, class name and registration function
-        try:
-            module = loader.find_module(module_name).load_module(module_name)
-            tool = getattr(module, "run")
-            register = getattr(module, "register")
-        except BaseException as e:
-            # Capture the exception in a variable
-            ex = e
+            # Get our module, class name and registration function
+            try:
+                module = loader.find_module(module_name).load_module(module_name)
+                tool = getattr(module, "run")
+                register = getattr(module, "register")
+            except BaseException as e:
+                # Capture the exception in a variable
+                ex = e
 
-            # Swallow arguments for failed commands
-            register = lambda command: command.add_argument("_", nargs="*")
-            tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
+                # Swallow arguments for failed commands
+                register = lambda command: command.add_argument("_", nargs="*")
+                tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
 
-        # Let the tool register it's arguments
-        register(subcommands.add_parser(module_name))
+            # Let the tool register it's arguments
+            register(subcommands.add_parser(module_name))
 
-        # Associate our module_name with this tool
-        tools[module_name] = tool
+            # Associate our module_name with this tool
+            tools[module_name] = tool
 
     # Parse our arguments
     args = command.parse_args()
