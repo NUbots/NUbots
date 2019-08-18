@@ -79,15 +79,25 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 # OpenBLAS
 RUN if [ "${platform}" = "generic" ] ; \
     then \
-    install-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
-    -DCORE=GENERIC \
-    -DUSE_THREAD=ON \
-    -DDYNAMIC_ARCH=ON ; \
+    install-make-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
+    BINARY=64 \
+    SMP=1 \
+    NUM_THREADS=2 \
+    DYNAMIC_ARCH=1 \
+    TARGET=GENERIC \
+    USE_THREAD=1  \
+    NO_SHARED=0 \
+    NO_STATIC=0 ; \
     else \
-    install-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
-    -DCORE=HASWELL \
-    -DUSE_THREAD=ON \
-    -DDYNAMIC_ARCH=OFF ; \
+    install-make-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
+    CROSS=1 \
+    BINARY=64 \
+    SMP=1 \
+    NUM_THREADS=2 \
+    TARGET=HASWELL \
+    USE_THREAD=1 \
+    NO_SHARED=0 \
+    NO_STATIC=0 ; \
     fi
 
 # Armadillo
