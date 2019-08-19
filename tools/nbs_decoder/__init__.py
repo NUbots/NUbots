@@ -56,11 +56,9 @@ decoders = {}
 # Now that we've imported them all get all the subclasses of protobuf message
 for message in google.protobuf.message.Message.__subclasses__():
 
-    # Work out our original protobuf type
-    pb_type = ".".join(message.DESCRIPTOR.full_name.split(".")[1:])
     # Reverse to little endian
-    pb_hash = bytes(reversed(xxhash.xxh64(pb_type, seed=0x4E55436C).digest()))
-    decoders[pb_hash] = (pb_type, message)
+    pb_hash = bytes(reversed(xxhash.xxh64(message.DESCRIPTOR.full_name, seed=0x4E55436C).digest()))
+    decoders[pb_hash] = (message.DESCRIPTOR.full_name, message)
 
 
 def decode(path):
