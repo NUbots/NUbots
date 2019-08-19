@@ -3,7 +3,7 @@ set -e
 
 check_formatting() {
     echo "Validating formatting for $1"
-    clang-format -style=file "$1" | colordiff --color=yes -u "$1" -
+    clang-format-6.0 -style=file "$1" | colordiff --color=yes -u "$1" -
     return $?
 }
 export -f check_formatting
