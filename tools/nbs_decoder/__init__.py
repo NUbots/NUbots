@@ -73,14 +73,14 @@ def decode(path):
         # 8 Bytes - 64bit bit hash of the message type
         # N bytes - The binary packet payload
 
-        state = enum.Enum("State", "initial header_lock_1 header_lock_2 packet eof")
-        sync_state = state.initial
+        state = enum.Enum("State", "header_lock_0 header_lock_1 header_lock_2 packet eof")
+        sync_state = state.header_lock_0
 
         # While we can read a header
         while sync_state != state.eof:
             # If we reach sync state 3 we are ready to read a packet
             if sync_state == state.packet:
-                sync_state = state.initial
+                sync_state = state.header_lock_0
                 # Read our size
                 size = struct.unpack("<I", f.read(4))[0]
 
@@ -105,8 +105,10 @@ def decode(path):
                 c = f.read(1)
                 # No bytes to read we are EOF
                 if len(c) == 0:
-                    sync_state = state.eof
-                elif c == b"\xE2":  # No need to check the state here as we can step to lock2 from any state
+                    sync_state = state.EOF
+
+                # We can jump straight to lock1 from any state except the eof state
+                if sync_state != state.EOF and c == b"\xE2":
                     sync_state = state.header_lock_1
                 elif sync_state == state.header_lock_1 and c == b"\x98":
                     sync_state = state.header_lock_2
