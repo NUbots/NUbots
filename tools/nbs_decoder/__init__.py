@@ -106,9 +106,9 @@ def decode(path):
                 # No bytes to read we are EOF
                 if len(c) == 0:
                     sync_state = state.eof
-                elif c == b"\xE2":
+                elif c == b"\xE2":  # No need to check the state here as we can step to lock2 from any state
                     sync_state = state.header_lock_1
-                elif c == b"\x98":
+                elif sync_state == state.header_lock_1 and c == b"\x98":
                     sync_state = state.header_lock_2
-                elif c == b"\xA2":
+                elif sync_state == state.header_lock_2 and c == b"\xA2":
                     sync_state = state.packet
