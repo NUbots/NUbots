@@ -7,6 +7,7 @@ import sys
 import os
 import pkgutil
 import glob
+import enum
 import b
 import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
@@ -74,26 +75,42 @@ def decode(path):
         # 8 Bytes - 64bit bit hash of the message type
         # N bytes - The binary packet payload
 
+        state = enum.Enum("State", "initial header_lock_1 header_lock_2 packet eof")
+        sync_state = state.initial
+
         # While we can read a header
-        while f.read(3).decode("utf-8") == "☢":
+        while sync_state != state.eof:
+            # If we reach sync state 3 we are ready to read a packet
+            if sync_state == state.packet:
+                sync_state = state.initial
+                # Read our size
+                size = struct.unpack("<I", f.read(4))[0]
 
-            # Read our size
-            size = struct.unpack("<I", f.read(4))[0]
+                # Read our payload
+                payload = f.read(size)
 
-            # Read our payload
-            payload = f.read(size)
+                # Read our timestamp
+                timestamp = struct.unpack("<Q", payload[:8])[0]
 
-            # Read our timestamp
-            timestamp = struct.unpack("<Q", payload[:8])[0]
+                # Read our hash
+                type_hash = payload[8:16]
 
-            # Read our hash
-            type_hash = payload[8:16]
-
-            # If we know how to parse this type, parse it
-            if type_hash in decoders:
-                # Yield a message
-                try:
-                    packet = (decoders[type_hash][0], timestamp, decoders[type_hash][1].FromString(payload[16:]))
-                    yield packet
-                except:
-                    pass
+                # If we know how to parse this type, parse it
+                if type_hash in decoders:
+                    # Yield a message
+                    try:
+                        packet = (decoders[type_hash][0], timestamp, decoders[type_hash][1].FromString(payload[16:]))
+                        yield packet
+                    except:
+                        pass
+            else:
+                c = f.read(1)
+                # No bytes to read we are EOF
+                if len(c) == 0:
+                    sync_state = state.eof
+                elif c == b"\xE2":
+                    sync_state = state.header_lock_1
+                elif c == b"\x98":
+                    sync_state = state.header_lock_2
+                elif c == b"\xA2":
+                    sync_state = state.packet
