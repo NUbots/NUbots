@@ -4,7 +4,7 @@ steps:
     command: "/code/NUbots/.buildkite/scripts/build_code.sh"
     plugins:
       - docker#v3.3.0:
-          image: "nubots/buildkite:0.3"
+          image: "nubots/buildkite:0.4"
           workdir: "/code/NUbots"
           propagate-uid-gid: true
           environment:
@@ -15,13 +15,13 @@ steps:
     command: "/code/NUbots/.buildkite/scripts/validate_clang_format.sh"
     plugins:
       - docker#v3.3.0:
-          image: "nubots/buildkite:0.3"
+          image: "nubots/buildkite:0.4"
           workdir: "/code/NUbots"
           propagate-uid-gid: true
   - label: "Validate CMake formatting"
     command: "/code/NUbots/.buildkite/scripts/validate_cmake_format.sh"
     plugins:
       - docker#v3.3.0:
-          image: "nubots/buildkite:0.3"
+          image: "nubots/buildkite:0.4"
           workdir: "/code/NUbots"
           propagate-uid-gid: true
