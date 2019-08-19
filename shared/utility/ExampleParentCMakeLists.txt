@@ -2,17 +2,14 @@
 
 cmake_minimum_required(VERSION 3.4)
 
-IF(NOT MSVC)
-	# Compilation must be done with c++14 for NUClear to work
-    ADD_COMPILE_OPTIONS(-std=c++14 -fPIC -Xclang -fcolor-diagnostics)
-ENDIF()
+if(NOT MSVC)
+  # Compilation must be done with c++14 for NUClear to work
+  add_compile_options(-std=c++14 -fPIC -Xclang -fcolor-diagnostics)
+endif()
 
-FIND_PACKAGE(ARMADILLO REQUIRED)
-FIND_PACKAGE(YAML-CPP REQUIRED)
-    
-INCLUDE_DIRECTORIES(
-	${CMAKE_SOURCE_DIR}
-	${ARMADILLO_INCLUDE_DIR}
-	${YAML-CPP_INCLUDE_DIRS})
+find_package(ARMADILLO REQUIRED)
+find_package(YAML-CPP REQUIRED)
+
+include_directories(${CMAKE_SOURCE_DIR} ${ARMADILLO_INCLUDE_DIR} ${YAML-CPP_INCLUDE_DIRS})
 
 add_subdirectory(utility)
