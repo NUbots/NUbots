@@ -21,7 +21,7 @@ separate_fn_name_with_space = False
 dangle_parens = True
 
 # If the statement spelling length (including space and parenthesis is larger
-# than the tab width by more than this amount, then force reject un-nested
+# than the tab width by more than this amoung, then force reject un-nested
 # layouts.
 max_prefix_chars = 2
 
@@ -53,9 +53,6 @@ additional_commands = {
             "VERSION_REGEX": "*",
         }
     },
-    "nuclear_module": {
-        "kwargs": {"LANGUAGE": "1", "INCLUDES": "*", "LIBRARIES": "*", "SOURCES": "*", "DATA_FILES": "*"}
-    },
 }
 
 # A list of command names which should always be wrapped
@@ -79,7 +76,7 @@ hashruler_min_length = 10
 
 # A dictionary containing any per-command configuration overrides. Currently
 # only `command_case` is supported.
-per_command = {"ToolchainLibraryFinder": {"command_case": "unchanged"}}
+per_command = {}
 
 
 # --------------------------

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import re
-from util import nbs_decoder
+import nbs_decoder
 from google.protobuf.json_format import MessageToJson
 
 
