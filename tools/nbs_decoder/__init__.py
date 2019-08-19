@@ -105,10 +105,10 @@ def decode(path):
                 c = f.read(1)
                 # No bytes to read we are EOF
                 if len(c) == 0:
-                    sync_state = state.EOF
+                    sync_state = state.eof
 
                 # We can jump straight to lock1 from any state except the eof state
-                if sync_state != state.EOF and c == b"\xE2":
+                if sync_state != state.eof and c == b"\xE2":
                     sync_state = state.header_lock_1
                 elif sync_state == state.header_lock_1 and c == b"\x98":
                     sync_state = state.header_lock_2
