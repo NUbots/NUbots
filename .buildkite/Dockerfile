@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install packages needed for the build scripts
 RUN apt-get update \
-    && apt-get install -y sudo software-properties-common git wget clang-format-6.0 colordiff \
+    && apt-get install -y sudo software-properties-common git wget clang-format-6.0 colordiff parallel \
     && apt-add-repository -y ppa:rael-gc/rvm \
     && apt-get update \
     && apt-get install -y rvm \
@@ -17,6 +17,9 @@ ADD ./.buildkite /NUbots-build/.buildkite/
 
 # Install the NUbots toolchain
 RUN DOCKER_BUILD_DIR=/NUbots-build /NUbots-build/.buildkite/scripts/install_toolchain.sh
+
+# Pip install some extra packages for formatting
+RUN pip3 install cmake-format
 
 # Remove extraneous files from the toolchain install
 RUN rm -rf /NUbots-build \

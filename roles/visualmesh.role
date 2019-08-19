@@ -1,31 +1,27 @@
-NUCLEAR_ROLE(
-    # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
-    support::SignalCatcher
-    support::logging::ConsoleLogHandler
-    extension::FileWatcher
-
-    # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-    motion::KinematicsConfiguration
-
-    #Support
-    support::configuration::NetworkConfiguration
-    support::NUsight
-    #support::VirtualCamera
-    support::configuration::SoccerConfig
-
-    #Sensors
-    input::Camera
-    platform::darwin::HardwareIO
-    #platform::darwin::HardwareSimulator
-    platform::darwin::SensorFilter
-
-    #Vision
-    vision::VisualMesh
-    vision::GreenHorizonDetector
-    vision::BallDetector
-    vision::GoalDetector
-    output::ImageCompressor
-
-    # Data logger
-    # support::logging::DataLogging
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
+  # and without it many roles do not run
+  support::SignalCatcher
+  support::logging::ConsoleLogHandler
+  extension::FileWatcher
+  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+  motion::KinematicsConfiguration
+  # Support
+  support::configuration::NetworkConfiguration
+  support::NUsight
+  # support::VirtualCamera
+  support::configuration::SoccerConfig
+  # Sensors
+  input::Camera
+  platform::darwin::HardwareIO
+  # platform::darwin::HardwareSimulator
+  platform::darwin::SensorFilter
+  # Vision
+  vision::VisualMesh
+  vision::GreenHorizonDetector
+  vision::BallDetector
+  vision::GoalDetector
+  output::ImageCompressor
+  # Data logger
+  # support::logging::DataLogging
 )

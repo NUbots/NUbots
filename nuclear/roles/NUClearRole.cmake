@@ -1,59 +1,66 @@
 # We need python!
-FIND_PACKAGE(PythonInterp 3 REQUIRED)
+find_package(PythonInterp 3 REQUIRED)
 
-FUNCTION(NUCLEAR_ROLE)
+function(NUCLEAR_ROLE)
 
-    # Store our role_modules in a sane variable
-    SET(role_modules ${ARGN})
+  # Store our role_modules in a sane variable
+  set(role_modules ${ARGN})
 
-    # Include our messages extensions and utilty folders
-    INCLUDE_DIRECTORIES(${NUCLEAR_MESSAGE_INCLUDE_DIRS})
-    INCLUDE_DIRECTORIES(${NUCLEAR_UTILITY_INCLUDE_DIRS})
-    INCLUDE_DIRECTORIES(${NUCLEAR_EXTENSION_INCLUDE_DIRS})
+  # Include our messages extensions and utilty folders
+  include_directories(${NUCLEAR_MESSAGE_INCLUDE_DIRS})
+  include_directories(${NUCLEAR_UTILITY_INCLUDE_DIRS})
+  include_directories(${NUCLEAR_EXTENSION_INCLUDE_DIRS})
 
-    # Include our module directory
-    INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR})
-    INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR})
+  # Include our module directory
+  include_directories(${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR})
+  include_directories(${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR})
 
-    # Custom command that specifies how to generate ${role}.cpp
-    ADD_CUSTOM_COMMAND(
-        OUTPUT "${role}.cpp"
-        COMMAND ${PYTHON_EXECUTABLE}
-        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py"
-                "${role}.cpp"
-                "${NUCLEAR_ROLE_BANNER_FILE}"
-                "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}"
-                ${role_modules}
-        COMMENT "Generating the ${role} role"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py" ${NUCLEAR_ROLE_BANNER_FILE})
+  # Custom command that specifies how to generate ${role}.cpp
+  add_custom_command(
+    OUTPUT "${role}.cpp"
+    COMMAND
+      ${PYTHON_EXECUTABLE}
+      ARGS
+      "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py"
+      "${role}.cpp"
+      "${NUCLEAR_ROLE_BANNER_FILE}"
+      "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}"
+      ${role_modules}
+    COMMENT "Generating the ${role} role"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py" ${NUCLEAR_ROLE_BANNER_FILE}
+  )
 
-    # The role cpp files are generated
-    SET_SOURCE_FILES_PROPERTIES(${role}.cpp PROPERTIES GENERATED TRUE)
+  # The role cpp files are generated
+  set_source_files_properties(${role}.cpp PROPERTIES GENERATED TRUE)
 
-    # Remove the :: from each module to make a valid target name for the module
-    STRING(REPLACE "::" "" role_module_targets "${role_modules}")
+  # Remove the :: from each module to make a valid target name for the module
+  string(REPLACE "::" "" role_module_targets "${role_modules}")
 
-    # Build our executable from the generated role
-    ADD_EXECUTABLE(${role} "${role}.cpp")
+  # Build our executable from the generated role
+  add_executable(${role} "${role}.cpp")
 
-    # Link to the roles module libraries and the shared utility and extension libraries
-    TARGET_LINK_LIBRARIES(${role} ${role_module_targets} ${NUClear_LIBRARIES} ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
+  # Link to the roles module libraries and the shared utility and extension libraries
+  target_link_libraries(${role} ${role_module_targets} ${NUClear_LIBRARIES} ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
 
-    FOREACH(module_target ${role_module_targets})
-        INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${module_target},INCLUDE_DIRECTORIES>)
-    ENDFOREACH(module_target)
+  foreach(module_target ${role_module_targets})
+    include_directories($<TARGET_PROPERTY:${module_target},INCLUDE_DIRECTORIES>)
+  endforeach(module_target)
 
-    # Set our output directory to be bin
-    SET_PROPERTY(TARGET ${role} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/")
+  # Set our output directory to be bin
+  set_property(TARGET ${role} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/")
 
-    # IDE folder
-    SET_PROPERTY(TARGET ${role} PROPERTY FOLDER "roles/")
+  # IDE folder
+  set_property(TARGET ${role} PROPERTY FOLDER "roles/")
 
-    # Store the used NUClear modules on the target as a property
-    # This can be used later in scripts to work out what modules are used in the role
-    SET_PROPERTY(TARGET ${role} PROPERTY NUCLEAR_MODULES ${role_modules})
+  # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
+  # modules are used in the role
+  set_property(TARGET ${role} PROPERTY NUCLEAR_MODULES ${role_modules})
 
-    # We add to the global cache variable here that contains all of the module we are using
-    # Elsewhere, this is used to include the directories for these in order to build them
-    SET(NUCLEAR_MODULES ${NUCLEAR_MODULES} ${role_modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
-ENDFUNCTION(NUCLEAR_ROLE)
+  # We add to the global cache variable here that contains all of the module we are using Elsewhere, this is used to
+  # include the directories for these in order to build them
+  set(
+    NUCLEAR_MODULES
+    ${NUCLEAR_MODULES} ${role_modules}
+    CACHE INTERNAL "A list of the modules in use by the system" FORCE
+  )
+endfunction(NUCLEAR_ROLE)

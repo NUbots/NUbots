@@ -1,16 +1,13 @@
-#GetNUtilities.cmake
-MESSAGE("** Configuring NUtilities...")
+# GetNUtilities.cmake
+message("** Configuring NUtilities...")
 
-SET(NUTILITIES_SRC_FILES "")
+set(NUTILITIES_SRC_FILES "")
 
 # Get source files based on configuration of libraries and project
-IF(${PROJECT_NAME} MATCHES NUbots)
-	MESSAGE("** Using NUbots utilities...")
-	FILE(GLOB_RECURSE NUTILITIES_SRC_FILES 
-		"${NUTILITIES_DIR}/*/**.cpp" 
-		"${NUTILITIES_DIR}/*/**.c" 
-		"${NUTILITIES_DIR}/*/**.h")
-ENDIF()
+if(${PROJECT_NAME} MATCHES NUbots)
+  message("** Using NUbots utilities...")
+  file(GLOB_RECURSE NUTILITIES_SRC_FILES "${NUTILITIES_DIR}/*/**.cpp" "${NUTILITIES_DIR}/*/**.c"
+       "${NUTILITIES_DIR}/*/**.h")
+endif()
 
-MESSAGE(CURRENT_DIRECTORY ${CURRENT_DIRECTORY})
-
+message(CURRENT_DIRECTORY ${CURRENT_DIRECTORY})
