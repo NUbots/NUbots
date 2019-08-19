@@ -29,6 +29,10 @@ RUN pacman -Syu --noconfirm --needed \
     cmake \
     meson \
     git \
+    llvm \
+    clang \
+    libva \
+    libpciaccess \
     && rm -rf /var/cache \
     && sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
@@ -175,6 +179,35 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/m
     --enable-shared \
     --enable-static
 
+# Intel Compute Runtime (OpenCL) and Intel Media Driver
+RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
+    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
+    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
+    -- \
+    -Wno-dev
+RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
+    https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
+    https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
+    -- \
+    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+    -DSPIRV_TRANSLATOR_DIR=/usr/local \
+    -DLLVM_NO_DEAD_STRIP=ON \
+    -Wno-dev
+RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
+    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
+    -DIGC_PREFERRED_LLVM_VERSION='8.0.0' \
+    -Wno-dev
+RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
+    -DRUN_TEST_SUITE=OFF \
+    -Wno-dev
+RUN install-from-source \
+    https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
+    -DNEO_DRIVER_VERSION=19.32.13826
+RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
+    -DINSTALL_DRIVER_SYSCONF=OFF \
+    -Wno-dev6
+
+
 # Setup pip to install to /usr/local and have python find packages there
 ENV PYTHONPATH=/usr/local/lib/python3.7/site-packages
 COPY --chown=root:root files/pip.conf /etc/pip.conf
@@ -183,9 +216,6 @@ COPY --chown=root:root files/pip.conf /etc/pip.conf
 RUN pip install \
     protobuf==3.9.1 \
     stringcase
-
-# http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB4.1_linux64.zip
-# or https://01.org/compute-runtime
 
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
 # http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
