@@ -10,6 +10,8 @@ RUN pacman -Syu --noconfirm --needed \
     parallel \
     which \
     awk \
+    git \
+    grep \
     && rm -rf /var/cache
 
 # Install cmake-format
