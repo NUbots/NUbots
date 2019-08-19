@@ -21,7 +21,7 @@ separate_fn_name_with_space = False
 dangle_parens = True
 
 # If the statement spelling length (including space and parenthesis is larger
-# than the tab width by more than this amoung, then force reject un-nested
+# than the tab width by more than this amount, then force reject un-nested
 # layouts.
 max_prefix_chars = 2
 
@@ -52,6 +52,9 @@ additional_commands = {
             "VERSION_BINARY_ARGUMENTS": "*",
             "VERSION_REGEX": "*",
         }
+    },
+    "nuclear_module": {
+        "kwargs": {"LANGUAGE": "1", "INCLUDES": "*", "LIBRARIES": "*", "SOURCES": "*", "DATA_FILES": "*"}
     },
 }
 
