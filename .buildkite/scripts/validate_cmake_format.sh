@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 check_formatting() {
     echo "Validating formatting for $1"
@@ -9,8 +8,8 @@ check_formatting() {
 export -f check_formatting
 
 # Loop through all cmake and role files and check validation
-find . -name 'CMakeLists.txt' -o -regex '.*\.\(cmake\|role\)$' \
-     | parallel --joblog formatting.log -j$(nproc) check_formatting
+git ls-files | grep '.*\(CMakeLists\.txt\|cmake\|role\)$' \
+    | parallel --joblog formatting.log -j4 check_formatting
 # Count how many returned a non zero exist status
 ret=$(tail -n +2 formatting.log | awk '{ sum += $7; } END {print sum}')
 
