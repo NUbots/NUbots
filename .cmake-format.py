@@ -76,7 +76,7 @@ hashruler_min_length = 10
 
 # A dictionary containing any per-command configuration overrides. Currently
 # only `command_case` is supported.
-per_command = {}
+per_command = {"ToolchainLibraryFinder": {"command_case": "unchanged"}}
 
 
 # --------------------------
