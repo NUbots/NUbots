@@ -164,10 +164,8 @@ FOREACH(proto ${protobufs})
     ADD_CUSTOM_COMMAND(
         OUTPUT "${outputpath}/${file_we}.pb.cc"
                "${outputpath}/${file_we}.pb.h"
-               "${outputpath}/${file_we}_pb2.py"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
         ARGS --cpp_out=lite:${message_binary_include_dir}
-             --python_out=${message_binary_include_dir}
              -I${message_binary_include_dir}
              -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              "${outputpath}/${file_we}.proto"
