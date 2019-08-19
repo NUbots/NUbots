@@ -6,8 +6,6 @@ set -e
 # Get our method as the name of this script, url and args
 METHOD=$(basename "$0")
 URL="$1"
-shift
-ARGS="$@"
 
 # Set installation prefix, default to /usr/local unless an external power says otherwise
 PREFIX=${PREFIX:-"/usr/local"}
@@ -41,6 +39,23 @@ case "${ARCHIVE_FILE}" in
   *.hpp)     ;;
   *)         echo "Unknown archive format"; exit 1 ;;
 esac
+
+if [ "${METHOD}" = "install-from-source-with-patches" ]; then
+    shift
+    METHOD="install-from-source"
+    SOURCE_DIR=$(find . -maxdepth 1 -type d | tail -n1)
+    cd "${SOURCE_DIR}"
+
+    # Iterate through each argument until we find a --
+    while [ "$1" != "--" ]; do
+        # Download the patch file and apply it
+        wget "$1" -O - | patch -Np1
+        shift
+    done
+fi;
+
+shift
+ARGS="$@"
 
 # Check if we are doing a automagical determination of what build system to use go through them one by one until we
 # decide on one

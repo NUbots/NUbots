@@ -55,7 +55,8 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source \
-    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-meson-from-source
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-meson-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
 # Install build tools
 # RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
