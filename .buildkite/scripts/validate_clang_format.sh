@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 check_formatting() {
     echo "Validating formatting for $1"
