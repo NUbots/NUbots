@@ -5,25 +5,50 @@ import gzip
 import struct
 import sys
 import os
-import re
-import b
 import pkgutil
+import glob
+import b
 import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
 
+# Build all the protocol buffers into python messages located at out_folder
+protobuf_path = os.path.join(os.path.dirname(__file__), "protocol_buffers")
+os.makedirs(protobuf_path, exist_ok=True)
+
+# Find protobufs to build
+nuclear_proto_dir = os.path.join(b.nuclear_dir, "message", "proto")
+user_proto_dir = os.path.join(b.project_dir, "shared")
+
+proto_files = [
+    *glob.glob(os.path.join(nuclear_proto_dir, "**", "*.proto"), recursive=True),
+    *glob.glob(os.path.join(user_proto_dir, "**", "*.proto"), recursive=True),
+]
+
+# Build the protocol buffers
+if (
+    os.system(
+        "protoc --python_out={protobuf_path} -I{nuclear_dir} -I{user_dir} {proto_files}".format(
+            protobuf_path=protobuf_path,
+            nuclear_dir=nuclear_proto_dir,
+            user_dir=user_proto_dir,
+            proto_files=" ".join(proto_files),
+        )
+    )
+    != 0
+):
+    raise RuntimeError("Unable to build the protocol buffers for decoding")
+
 # Open up our message output directory to get our protobuf types
-if b.binary_dir and os.path.isdir(b.binary_dir):
-    shared_path = os.path.join(b.binary_dir, "shared")
-    sys.path.append(shared_path)
+sys.path.append(protobuf_path)
 
-    # Load all of the protobuf files as modules to use
-    for dir_name, subdir, files in os.walk(shared_path):
-        modules = pkgutil.iter_modules(path=[dir_name])
-        for loader, module_name, ispkg in modules:
-            if module_name.endswith("pb2"):
+# Load all of the protobuf files as modules to use
+for dir_name, subdir, files in os.walk(protobuf_path):
+    modules = pkgutil.iter_modules(path=[dir_name])
+    for loader, module_name, ispkg in modules:
+        if module_name.endswith("pb2"):
 
-                # Load our protobuf module
-                module = loader.find_module(module_name).load_module(module_name)
+            # Load our protobuf module
+            module = loader.find_module(module_name).load_module(module_name)
 
 decoders = {}
 
