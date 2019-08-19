@@ -1,42 +1,40 @@
 # Find our globally shared libraries:
-FIND_PACKAGE(Armadillo REQUIRED)
-FIND_PACKAGE(LibGFortran REQUIRED)
-FIND_PACKAGE(OpenBLAS)
-FIND_PACKAGE(Protobuf REQUIRED)
-FIND_PACKAGE(CATCH REQUIRED)
-FIND_PACKAGE(YAML-CPP REQUIRED)
-FIND_PACKAGE(fmt REQUIRED)
+find_package(Armadillo REQUIRED)
+find_package(LibGFortran REQUIRED)
+find_package(OpenBLAS)
+find_package(Protobuf REQUIRED)
+find_package(CATCH REQUIRED)
+find_package(YAML-CPP REQUIRED)
+find_package(fmt REQUIRED)
 
 # Resolve problems when OpenBLAS isn't found:
-IF(OpenBLAS_FOUND)
-	SET(BLAS_LIBRARIES    ${OpenBLAS_LIBRARIES})
-	SET(BLAS_INCLUDE_DIRS ${OpenBLAS_INCLUDE_DIRS})
-ELSE()
-	FIND_PACKAGE(BLAS REQUIRED)
-	MESSAGE(WARNING "OpenBLAS was not found. Using BLAS instead.")
-ENDIF()
+if(OpenBLAS_FOUND)
+  set(BLAS_LIBRARIES ${OpenBLAS_LIBRARIES})
+  set(BLAS_INCLUDE_DIRS ${OpenBLAS_INCLUDE_DIRS})
+else()
+  find_package(BLAS REQUIRED)
+  message(WARNING "OpenBLAS was not found. Using BLAS instead.")
+endif()
 
 # Some definitions for armadillo
-ADD_DEFINITIONS(-DARMA_DONT_USE_WRAPPER -DARMA_32BIT_WORD)
+add_definitions(-DARMA_DONT_USE_WRAPPER -DARMA_32BIT_WORD)
 
 # Set include directories and libraries:
-INCLUDE_DIRECTORIES(SYSTEM ${BLAS_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(SYSTEM ${CATCH_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(SYSTEM ${YAML-CPP_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(SYSTEM ${fmt_INCLUDE_DIRS})
-#INCLUDE_DIRECTORIES(SYSTEM ${OPENRAVE_INCLUDE_DIRS})
+include_directories(SYSTEM ${BLAS_INCLUDE_DIRS})
+include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
+include_directories(SYSTEM ${CATCH_INCLUDE_DIRS})
+include_directories(SYSTEM ${YAML-CPP_INCLUDE_DIRS})
+include_directories(SYSTEM ${fmt_INCLUDE_DIRS})
+# INCLUDE_DIRECTORIES(SYSTEM ${OPENRAVE_INCLUDE_DIRS})
 
-SET(NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
-    ${BLAS_LIBRARIES}
-    ${LIBGFORTRAN_LIBRARIES}
-    ${PROTOBUF_LIBRARIES}
-    ${YAML-CPP_LIBRARIES}
-    ${fmt_LIBRARIES}
-    -ldl
-    -lbacktrace
-    CACHE
-    PATH
-    "Additional libraries used when linking roles, extensions, and utilities"
-    FORCE
+set(
+  NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
+  ${BLAS_LIBRARIES}
+  ${LIBGFORTRAN_LIBRARIES}
+  ${PROTOBUF_LIBRARIES}
+  ${YAML-CPP_LIBRARIES}
+  ${fmt_LIBRARIES}
+  -ldl
+  -lbacktrace
+  CACHE PATH "Additional libraries used when linking roles, extensions, and utilities" FORCE
 )
