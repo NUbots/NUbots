@@ -2,9 +2,7 @@
 
 import os
 import json
-import re
-from util import nbs_decoder
-from google.protobuf.json_format import MessageToJson
+import nbs_decoder
 
 
 def register(command):
