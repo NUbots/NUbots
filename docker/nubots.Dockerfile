@@ -37,6 +37,12 @@ RUN pacman -Syu --noconfirm --needed \
     && sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
+# Make sure /usr/local is checked for libraries and binaries
+RUN mkdir -p "/etc/ld.so.conf.d" \
+    && echo -e "/usr/local/lib\n/usr/local/lib64" | tee "/etc/ld.so.conf.d/usrlocal.conf" \
+    && ldconfig
+ENV PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
+
 # Create the home directory owned by nubots
 RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
 
