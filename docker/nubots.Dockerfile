@@ -33,9 +33,11 @@ RUN pacman -Syu --noconfirm --needed \
     clang \
     libva \
     libpciaccess \
+    protobuf \
     ruby \
     && rm -rf /var/cache \
-    && sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py
+    && sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
+    && mkdir -p /usr/local/lib/python3.7/site-packages
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
 
 # Make sure /usr/local is checked for libraries and binaries
@@ -131,8 +133,28 @@ RUN install-from-source https://github.com/gperftools/gperftools/releases/downlo
     --enable-minimal
 
 # Protobuf
-RUN install-from-source https://github.com/google/protobuf/releases/download/v3.9.1/protobuf-cpp-3.9.1.tar.gz \
-    --with-zlib
+RUN install-from-source https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-cpp-3.7.0.tar.gz \
+    --with-zlib=/usr/local \
+    --with-protoc=/usr/bin/protoc
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-python-3.7.0.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Configuring using cmake" \
+    && SETUP_PY_FILE=$(find -type f -name 'setup.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${SETUP_PY_FILE}) \
+    && echo "Configuring using setup.py file ${SETUP_PY_FILE}" \
+    && PROTOC=/usr/bin/protoc python setup.py build --cpp_implementation \
+    && PROTOC=/usr/bin/protoc python setup.py install --cpp_implementation --prefix="${PREFIX}" \
+    && rm -rf "${BUILD_FOLDER}"
 
 # Libjpeg
 RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz
@@ -342,12 +364,10 @@ RUN PREFIX=${PREFIX:-"/usr/local"} \
     && rm -rf "${BUILD_FOLDER}"
 
 # Setup pip to install to /usr/local and have python find packages there
-ENV PYTHONPATH=/usr/local/lib/python3.7/site-packages
 COPY --chown=root:root files/pip.conf /etc/pip.conf
 
 # Install python libraries
 RUN pip install \
-    protobuf==3.9.1 \
     stringcase
 
 # http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
