@@ -13,6 +13,8 @@ PREFIX=${PREFIX:-"/usr/local"}
 BUILD_FOLDER="/var/tmp/build"
 RELEASE_CFLAGS="-O3 -DNDEBUG"
 RELEASE_CXXFLAGS="${RELEASE_CFLAGS}"
+EXTRA_CFLAGS="-fPIC"
+EXTRA_CXXFLAGS="${EXTRA_CFLAGS}"
 
 # Pull in the toolchain arguments
 . /usr/local/toolchain.sh
@@ -119,8 +121,8 @@ elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
     echo "Configuring using configure file ${CONFIGURE_FILE}"
 
     # Run configure
-    CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
-    CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
         ./configure $ARGS --prefix="${PREFIX}"
 
     # Run make
@@ -146,8 +148,8 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
     # Configure using cmake
     cmake .. ${ARGS} \
         -DCMAKE_BUILD_TYPE="Release" \
-        -DCMAKE_C_FLAGS_RELEASE="${CFLAGS}" \
-        -DCMAKE_CXX_FLAGS_RELEASE="${CXXFLAGS}" \
+        -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
+        -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
         -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
         -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
         -DCMAKE_PREFIX_PATH:PATH="${PREFIX}"
@@ -171,8 +173,8 @@ elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
         library-path="${PREFIX}/lib" \
         -j$(nproc) \
         -q \
-        cflags="${RELEASE_CFLAGS} ${CFLAGS}" \
-        cxxflags="${RELEASE_CXXFLAGS} ${CXXFLAGS}"
+        cflags="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+        cxxflags="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}"
 
     # Now install
     ./bjam install
@@ -185,8 +187,8 @@ elif [ "${METHOD}" = 'install-make-from-source' ]; then
     cd $(dirname ${MAKEFILE})
 
     make ${ARGS} -j$(nproc) \
-        CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
-        CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}"
+        CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+        CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}"
 
     make PREFIX="${PREFIX}" install
 
@@ -205,8 +207,8 @@ elif [ "${METHOD}" = 'install-meson-from-source' ]; then
     cd build
 
     # Configure using meson
-    CFLAGS="${RELEASE_CFLAGS} ${CFLAGS}" \
-    CXXFLAGS="${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
     meson setup build .. \
         $ARGS \
         --buildtype=release \

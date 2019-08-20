@@ -5,8 +5,8 @@ cpu = 'x86_64'
 endian = 'little'
 
 [properties]
-c_args = ["-O3", "-DNDEBUG", "-mtune=generic"]
-cpp_args = ["-O3", "-DNDEBUG", "-mtune=generic"]
+c_args = ["-fPIC", "-O3", "-DNDEBUG", "-mtune=generic"]
+cpp_args = ["-fPIC", "-O3", "-DNDEBUG", "-mtune=generic"]
 growing_stack = false
 
 [binaries]
