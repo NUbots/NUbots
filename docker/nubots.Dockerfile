@@ -33,6 +33,7 @@ RUN pacman -Syu --noconfirm --needed \
     clang \
     libva \
     libpciaccess \
+    ruby \
     && rm -rf /var/cache \
     && sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py
 RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
@@ -45,6 +46,10 @@ ENV PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
 
 # Create the home directory owned by nubots
 RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
+
+# Add Intel OpenCL ICD file
+RUN mkdir -p "/etc/OpenCL/vendors" && \
+    echo "/usr/local/lib/intel-opencl/libigdrcl.so" | tee "/etc/OpenCL/vendors/intel.icd"
 
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local
@@ -67,10 +72,6 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-meson-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
-
-# Add Intel OpenCL ICD file
-RUN mkdir -p "/etc/OpenCL/vendors" && \
-    echo "/usr/local/lib/intel-opencl/libigdrcl.so" | tee "/etc/OpenCL/vendors/intel.icd"
 
 # Install build tools
 # RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
@@ -279,10 +280,66 @@ RUN PREFIX=${PREFIX:-"/usr/local"} \
     && cp "bin/libigdrcl.so" "/usr/local/lib/intel-opencl/libigdrcl.so" \
     && cp "bin/ocloc" "/usr/local/bin/ocloc" \
     && rm -rf "${BUILD_FOLDER}"
-RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
-    -DINSTALL_DRIVER_SYSCONF=OFF \
-    -Wno-dev6
-
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Installing header files" \
+    && CL_FOLDER=$(find -type d -name "CL") \
+    && cd ${CL_FOLDER} \
+    && install -dm755 ${PREFIX}/include/CL \
+    && rm {cl_d3d,cl_dx9}*.h \
+    && for header in *.h; do install -m 644 ${header} ${PREFIX}/include/CL/ ; done \
+    && rm -rf "${BUILD_FOLDER}"
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Installing header files" \
+    && GEN_FILE=$(find -type f -name 'gen_cl_hpp.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${GEN_FILE}) \
+    && python gen_cl_hpp.py -i input_cl.hpp -o cl.hpp \
+    && install -m 644 cl.hpp ${PREFIX}/include/CL/ \
+    && install -m 644 input_cl2.hpp ${PREFIX}/include/CL/cl2.hpp \
+    && rm -rf "${BUILD_FOLDER}"
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && CONFIGURE_FILE=$(find -type f -name 'configure.ac' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${CONFIGURE_FILE}) \
+    && echo "Configuring using configure file ${CONFIGURE_FILE}" \
+    && autoreconf -fiv \
+    && CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    ./configure $ARGS --prefix="${PREFIX}" \
+    && make -j$(nproc) \
+    && make install \
+    && rm -rf "${BUILD_FOLDER}"
 
 # Setup pip to install to /usr/local and have python find packages there
 ENV PYTHONPATH=/usr/local/lib/python3.7/site-packages
