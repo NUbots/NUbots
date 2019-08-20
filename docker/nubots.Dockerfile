@@ -199,10 +199,42 @@ RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archi
     -DSPIRV_TRANSLATOR_DIR=/usr/local \
     -DLLVM_NO_DEAD_STRIP=ON \
     -Wno-dev
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
+COPY --chown=nubots:nubots package/IGC/*.patch /var/tmp/
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Configuring using cmake" \
+    && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${CMAKELISTS_FILE}) \
+    && patch -Np1 -i /var/tmp/Intrinsics.py.patch \
+    && patch -Np1 -i /var/tmp/resource_embedder.py.patch \
+    && patch -Np1 -i /var/tmp/sip.py.patch \
+    && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
+    && mkdir -p build \
+    && cd build \
+    && cmake .. \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='8.0.0' \
-    -Wno-dev
+    -Wno-dev \
+    -DCMAKE_BUILD_TYPE="Release" \
+    -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
+    -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
+    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    && make -j$(nproc) \
+    && make install \
+    && rm -rf "${BUILD_FOLDER}"
 RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
     -DRUN_TEST_SUITE=OFF \
     -Wno-dev
