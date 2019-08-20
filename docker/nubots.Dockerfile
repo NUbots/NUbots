@@ -68,6 +68,10 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-meson-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
+# Add Intel OpenCL ICD file
+RUN mkdir -p "/etc/OpenCL/vendors" && \
+    echo "/usr/local/lib/intel-opencl/libigdrcl.so" | tee "/etc/OpenCL/vendors/intel.icd"
+
 # Install build tools
 # RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
 # https://github.com/ninja-build/ninja/archive/v1.9.0.tar.gz
@@ -238,9 +242,43 @@ RUN PREFIX=${PREFIX:-"/usr/local"} \
 RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
     -DRUN_TEST_SUITE=OFF \
     -Wno-dev
-RUN install-from-source \
-    https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
-    -DNEO_DRIVER_VERSION=19.32.13826
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Configuring using cmake" \
+    && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${CMAKELISTS_FILE}) \
+    && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
+    && mkdir -p build \
+    && cd build \
+    && cmake .. \
+    -DNEO_DRIVER_VERSION=19.32.13826 \
+    -DSKIP_ALL_ULT=ON \
+    -DSKIP_UNIT_TESTS=ON \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib" \
+    -DCMAKE_BUILD_TYPE="Release" \
+    -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
+    -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
+    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    && make -j$(nproc) \
+    && mkdir -p "/usr/local/lib/intel-opencl" \
+    && mkdir -p "/usr/local/bin" \
+    && cp "bin/libigdrcl.so" "/usr/local/lib/intel-opencl/libigdrcl.so" \
+    && cp "bin/ocloc" "/usr/local/bin/ocloc" \
+    && rm -rf "${BUILD_FOLDER}"
 RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -Wno-dev6
