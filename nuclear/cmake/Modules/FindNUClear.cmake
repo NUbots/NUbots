@@ -1,2 +1,2 @@
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(NAME NUClear HEADER nuclear LIBRARY nuclear)
+ToolchainLibraryFinder(NAME NUClear HEADER nuclear LIBRARY nuclear)

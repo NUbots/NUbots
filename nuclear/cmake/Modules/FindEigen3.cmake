@@ -14,4 +14,4 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(NAME Eigen3 HEADER Eigen/Core PATH_SUFFIX eigen3)
+ToolchainLibraryFinder(NAME Eigen3 HEADER Eigen/Core PATH_SUFFIX eigen3)

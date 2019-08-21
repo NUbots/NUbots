@@ -1,0 +1,4 @@
+Pillow~=5.2.0
+protobuf~=3.6.1
+pybind11~=2.2.4
+stringcase~=1.2.0
