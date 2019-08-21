@@ -22,6 +22,7 @@ RUN pacman -Syu --noconfirm --needed \
     python-pip \
     base-devel \
     arm-none-eabi-gcc \
+    arm-none-eabi-newlib \
     gcc-fortran \
     yasm \
     gdb \
