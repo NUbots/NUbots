@@ -14,6 +14,7 @@ function(HeaderLibrary)
     "${PACKAGE_NAME}_INCLUDE_DIR"
     NAMES ${PACKAGE_HEADER}
     DOC "The ${PACKAGE_NAME} include directory"
+    PATHS "${CMAKE_BINARY_DIR}/include"
     PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
   )
 
