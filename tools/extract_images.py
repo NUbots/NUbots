@@ -10,21 +10,23 @@ def register(command):
     # Install help
     command.help = "Decode an nbs file into a series of json objects"
 
-    # Drone arguments
-    command.add_argument("path", metavar="path", help="The nbs file to extract the compressed images from")
+    # Command arguments
+    command.add_argument("in_file", metavar="in_file", help="The nbs file to extract the compressed images from")
+    command.add_argument(
+        "out_path", nargs="?", default=os.getcwd(), metavar="out_path", help="The folder to extract the images into"
+    )
 
 
-def run(path, **kwargs):
+def run(in_file, out_path, **kwargs):
 
-    output_path = os.path.splitext(path)[0]
+    output_path = os.path.join(out_path, os.path.basename(os.path.splitext(in_file)[0]))
     os.makedirs(output_path, exist_ok=True)
 
-    count = 0
-    for type_name, timestamp, msg in nbs_decoder.decode(path):
+    for type_name, timestamp, msg in nbs_decoder.decode(in_file):
         if type_name == "message.output.CompressedImage":
-            with open(os.path.join(output_path, "img{:08d}.jpg".format(count)), "wb") as f:
+            with open(os.path.join(output_path, "{}_{:012d}.jpg".format(msg.name, timestamp)), "wb") as f:
                 f.write(msg.data)
-            with open(os.path.join(output_path, "meta{:08d}.json".format(count)), "w") as f:
+            with open(os.path.join(output_path, "{}_{:012d}.json".format(msg.name, timestamp)), "w") as f:
                 json.dump(
                     {
                         "Hcw": [
@@ -37,9 +39,8 @@ def run(path, **kwargs):
                             "projection": msg.lens.projection,
                             "focal_length": msg.lens.focal_length,
                             "centre": [0, 0],
-                            "fov": msg.lens.fov.x,
+                            "fov": msg.lens.fov,
                         },
                     },
                     f,
                 )
-            count += 1
