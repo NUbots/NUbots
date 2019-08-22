@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 
 import re
-import nbs_decoder
+from . import decoder
 from google.protobuf.json_format import MessageToJson
 
 
 def register(command):
 
     # Install help
-    command.help = "Decode an nbs file into a series of json objects"
+    command.help = "Decode an nbs file and convert it to json"
 
-    # Drone arguments
-    command.add_argument("path", metavar="path", help="The file to decode into a series of json objects")
+    # Command arguments
+    command.add_argument("path", metavar="path", help="The nbs file to convert to json")
 
 
 def run(path, **kwargs):
 
-    for type_name, timestamp, msg in nbs_decoder.decode(path):
+    for type_name, timestamp, msg, raw in decoder.decode(path):
         out = re.sub(r"\s+", " ", MessageToJson(msg, True))
         out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(type_name, timestamp, out)
         # Print as a json object
