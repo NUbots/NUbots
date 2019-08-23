@@ -10,14 +10,14 @@ import Mocked = jest.Mocked
 
 describe('WebSocketProxyNUClearNetServer', () => {
   let webSocketServer: Mocked<WebSocketServer>
-  let onClientConnection: MockEventHandler<(socket: WebSocket) => void>
+  let onClientConnection: MockEventHandler<[WebSocket]>
   let nuclearnetServer: FakeNUClearNetServer
   let nuclearnetClient: FakeNUClearNetClient
   let server: WebSocketProxyNUClearNetServer
 
   beforeEach(() => {
     webSocketServer = createMockInstance(WebSocketServer)
-    onClientConnection = createMockEventHandler<(socket: WebSocket) => void>()
+    onClientConnection = createMockEventHandler<[WebSocket]>()
     webSocketServer.onConnection = onClientConnection
     nuclearnetServer = new FakeNUClearNetServer()
     nuclearnetClient = new FakeNUClearNetClient(nuclearnetServer)

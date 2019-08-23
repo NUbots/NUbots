@@ -6,11 +6,11 @@ import { disposableComputed } from '../disposable_computed'
 
 describe('disposableComputed', () => {
   let model: { a: number, b: number }
-  let expr: IComputedValue<{ sum: number, dispose: jest.Mock<() => void> }>
+  let expr: IComputedValue<{ sum: number, dispose: jest.Mock<void, []> }>
 
   beforeEach(() => {
     model = observable({ a: 1, b: 1 })
-    expr = disposableComputed(() => ({ sum: model.a + model.b, dispose: jest.fn<() => void>() }))
+    expr = disposableComputed(() => ({ sum: model.a + model.b, dispose: jest.fn<void, []>() }))
   })
 
   const countUnique = <T extends unknown>(arr: T[]): number => new Set(arr).size
