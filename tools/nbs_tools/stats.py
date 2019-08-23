@@ -80,18 +80,22 @@ def run(in_file, use_message_timestamp, **kwargs):
     data = []
     max_cat_len = 0
     max_subcat_len = 0
-    for type_name, timestamp, msg, raw_packet in decoder.decode(in_file):
+    for packet in decoder.decode(in_file):
 
-        # If the object has a timestamp use that for our time
-        if use_message_timestamp and hasattr(msg, "timestamp"):
-            ts = msg.timestamp.seconds * 1e9 + msg.timestamp.nanos
+        # If our object has a timestamp field of its own, we can decide to use that instead of the nbs timestamp
+        # This can sometimes give better rates but can also cause problems when the timebases aren't synchronized
+        if use_message_timestamp and hasattr(packet.msg, "timestamp"):
+            ts = packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos
         else:
-            ts = timestamp * 1e3
+            ts = packet.timestamp * 1e3
 
-        if type_name in ("message.input.Image", "message.output.CompressedImage"):
-            data.append((type_name, msg.name, ts, len(raw_packet)))
+        # Treat some objects specially as they have sub categories
+        if packet.type in ("message.input.Image", "message.output.CompressedImage"):
+            data.append((packet.type, packet.msg.name, ts, len(packet.raw)))
         else:
-            data.append((type_name, "", ts, len(raw_packet)))
+            data.append((packet.type, "", ts, len(packet.raw)))
+
+        # Work out the largest name length so we can put it into numpy
         max_cat_len = max(max_cat_len, len(data[-1][0]))
         max_subcat_len = max(max_subcat_len, len(data[-1][1]))
 

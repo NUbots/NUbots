@@ -14,8 +14,8 @@ def register(command):
 
 def run(path, **kwargs):
 
-    for type_name, timestamp, msg, raw in decoder.decode(path):
-        out = re.sub(r"\s+", " ", MessageToJson(msg, True))
-        out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(type_name, timestamp, out)
+    for packet in decoder.decode(path):
+        out = re.sub(r"\s+", " ", MessageToJson(packet.msg, True))
+        out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type, packet.timestamp, out)
         # Print as a json object
         print(out)
