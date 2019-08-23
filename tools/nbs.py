@@ -6,10 +6,7 @@ import nbs_tools.extract_images
 
 
 def register(command):
-
-    # Install help
     command.help = "Tools for working with nbs or nbz files"
-
     subcommands = command.add_subparsers(
         dest="nbs_command", required=True, help="Subcommand to call for working with nbs files"
     )

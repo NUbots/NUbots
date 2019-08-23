@@ -8,8 +8,6 @@ import numpy as np
 
 
 def register(command):
-
-    # Install help
     command.help = "Decode an nbs file into a series of file statistics"
 
     # Command arguments

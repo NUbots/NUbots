@@ -106,11 +106,7 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
 
 
 def register(command):
-
-    # Install help
     command.help = "Train a foot down network using sensor data from the legs"
-
-    # Configuration arguments
     command.add_argument(
         "data_dir",
         metavar="data_dir",

@@ -8,8 +8,6 @@ from subprocess import call, STDOUT
 
 
 def register(command):
-
-    # Install help
     command.help = "Tools to work with building the codebase"
 
     # Module subcommands

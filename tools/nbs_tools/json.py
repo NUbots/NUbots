@@ -6,8 +6,6 @@ from google.protobuf.json_format import MessageToJson
 
 
 def register(command):
-
-    # Install help
     command.help = "Decode an nbs file and convert it to json"
 
     # Command arguments

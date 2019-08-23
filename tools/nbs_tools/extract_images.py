@@ -6,8 +6,6 @@ from . import decoder
 
 
 def register(command):
-
-    # Install help
     command.help = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
 
     # Command arguments
