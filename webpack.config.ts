@@ -99,10 +99,10 @@ const config: webpack.Configuration = {
         exclude: /\.file.svg$/,
         use: {
           loader: 'react-svg-loader',
-          query: {
+          options: {
             svgo: {
               // svgo options
-              plugins: [{ removeTitle: true }],
+              plugins: [{ removeTitle: true }, { removeViewBox: false }],
               floatPrecision: 2,
             },
           },
