@@ -59,11 +59,12 @@ const config: webpack.Configuration = {
           use: [
             {
               loader: 'css-loader',
-              query: {
-                modules: true,
+              options: {
+                modules: {
+                  localIdentName: '[local]__[hash:base64:5]',
+                },
                 sourceMap: !isProduction,
                 importLoaders: 1,
-                localIdentName: '[local]__[hash:base64:5]',
               },
             },
             {
