@@ -2,6 +2,7 @@
 
 from nudocker import run_on_docker
 import os
+import pty
 
 
 @run_on_docker
@@ -12,4 +13,5 @@ def register(command):
 
 @run_on_docker
 def run(**kwargs):
-    print("I suppose now I should run a shell... like /bin/bash or something but make sure it's interactive")
+    # Run bash
+    pty.spawn("/bin/bash")

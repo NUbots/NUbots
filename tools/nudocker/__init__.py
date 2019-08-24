@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import pty
 import b
 import subprocess
 import sys
@@ -16,7 +17,7 @@ def run_on_docker(func):
     if func.__name__ == "register":
         # We only add the docker options if we are not already in docker
         if is_docker():
-            # In docker we just want to ignore the "docker" arguments
+            # In docker we just want to ignore the "docker" arguments since we pass them through
             def register(command):
                 command.add_argument("--rebuild", action="store_true")
                 command.add_argument("--platform", nargs="?")
@@ -30,10 +31,14 @@ def run_on_docker(func):
             def register(command):
                 # Get the possible services
                 services = (
-                    subprocess.Popen(
-                        ["docker-compose", "ps", "--services"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+                    subprocess.check_output(
+                        [
+                            "docker-compose",
+                            "--file={}".format(os.path.join(b.project_dir, "docker-compose.yml")),
+                            "ps",
+                            "--services",
+                        ]
                     )
-                    .communicate()[0]
                     .decode("utf-8")
                     .split()
                 )
@@ -57,14 +62,28 @@ def run_on_docker(func):
         def run(rebuild, platform, **kwargs):
             # If we are running in docker, then execute the command as normal
             if is_docker():
-                print("I'm now running in docker!")
-                func(**kwargs)
+                func(rebuild=rebuild, platform=platform, **kwargs)
             # Otherwise go and re-run the b script in docker
             else:
+                compose_file = os.path.join(b.project_dir, "docker-compose.yml")
                 # If we are requesting a rebuild, then run build
-                print("I'm not running in docker... yet!")
-                p = subprocess.Popen(["docker-compose", "run", platform, "./b", *sys.argv[1:]])
-                p.communicate()
+                if rebuild:
+                    pty.spawn(["docker-compose", "--file={}".format(compose_file), "build", platform])
+
+                # Work out what cwd we need to have on docker to mirror the cwd we have here
+                code_to_cwd = os.path.relpath(os.getcwd(), b.project_dir)
+                cwd_to_code = os.path.relpath(b.project_dir, os.getcwd())
+                pty.spawn(
+                    [
+                        "docker-compose",
+                        "--file={}".format(compose_file),
+                        "run",
+                        "--workdir=/home/nubots/NUbots/{}".format(code_to_cwd),
+                        platform,
+                        "{}/b".format(cwd_to_code),
+                        *sys.argv[1:],
+                    ]
+                )
 
         return run
 
