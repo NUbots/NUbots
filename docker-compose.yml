@@ -16,6 +16,7 @@ services:
         platform: nuc7i7bnh
     volumes:
       - .:/home/nubots/NUbots
+      - ./build/nuc7i7bnh:/home/nubots/NUbots/build
   generic:
     image: nubots:generic
     build:
@@ -25,3 +26,4 @@ services:
         platform: generic
     volumes:
       - .:/home/nubots/NUbots
+      - ./build/generic:/home/nubots/NUbots/build
