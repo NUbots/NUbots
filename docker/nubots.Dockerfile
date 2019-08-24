@@ -92,6 +92,7 @@ ARG platform=generic
 
 # Copy across the specific toolchain file for this image
 COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
+COPY --chown=nubots:nubots toolchain/${platform}.cross /usr/local/meson.cross
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
@@ -182,9 +183,8 @@ RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-lin
     --enable-libblkid \
     --enable-libmount \
     --enable-libuuid
-COPY --chown=nubots:nubots package/${platform}_glib.cross /var/tmp/glib.cross
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
-    --cross-file=/var/tmp/glib.cross \
+    --cross-file=/usr/local/meson.cross \
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h

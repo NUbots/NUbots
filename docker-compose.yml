@@ -27,3 +27,13 @@ services:
     volumes:
       - .:/home/nubots/NUbots
       - ./build/generic:/home/nubots/NUbots/build
+  native:
+    image: nubots:native
+    build:
+      context: docker
+      dockerfile: nubots.Dockerfile
+      args:
+        platform: native
+    volumes:
+      - .:/home/nubots/NUbots
+      - ./build/native:/home/nubots/NUbots/build
