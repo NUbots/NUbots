@@ -78,6 +78,7 @@ def run_on_docker(func):
                         "docker-compose",
                         "--file={}".format(compose_file),
                         "run",
+                        "--rm",
                         "--workdir=/home/nubots/NUbots/{}".format(code_to_cwd),
                         platform,
                         "{}/b".format(cwd_to_code),
