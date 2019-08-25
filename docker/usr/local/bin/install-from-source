@@ -50,8 +50,13 @@ if [ "${METHOD}" = "install-from-source-with-patches" ]; then
 
     # Iterate through each argument until we find a --
     while [ "$1" != "--" ]; do
-        # Download the patch file and apply it
-        wget "$1" -O - | patch -Np1
+        if [ "$1" = "${1#http}" ] && [ "$1" = "${1#ftp}" ]; then
+            # Patch is a local file, apply it
+            patch -Np1 -i "$1"
+        else
+            # Patch is a remote file, download and apply it
+            wget "$1" -O - | patch -Np1
+        fi;
         shift
     done
 fi;
