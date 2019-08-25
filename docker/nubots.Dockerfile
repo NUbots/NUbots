@@ -50,7 +50,7 @@ COPY --chown="nubots:nubots" home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rs
 COPY --chown="nubots:nubots" home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
 
 # Copy across the generic toolchain file for building tools
-COPY --chown=nubots:nubots usr/local/generic.toolchain.sh /usr/local/toolchain.sh
+COPY --chown=nubots:nubots usr/local/toolchain/generic.sh /usr/local/toolchain.sh
 
 # Copy over a tool to install simple standard conforming libraries from source
 COPY --chown=nubots:nubots usr/local/bin/install-from-source /usr/local/bin/install-from-source
@@ -76,15 +76,15 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
 ARG platform=generic
 
 # Copy across the specific toolchain file for this image
-COPY --chown=nubots:nubots usr/local/${platform}.toolchain.sh /usr/local/toolchain.sh
-COPY --chown=nubots:nubots usr/local/${platform}.meson.cross /usr/local/meson.cross
+COPY --chown=nubots:nubots usr/local/toolchain/${platform}.sh /usr/local/toolchain.sh
+COPY --chown=nubots:nubots usr/local/meson/${platform}.cross /usr/local/meson.cross
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # OpenBLAS
 RUN install-package gcc-fortran
-COPY --chown=nubots:nubots usr/local/package/${platform}.openblas.sh usr/local/package/openblas.sh
+COPY --chown=nubots:nubots usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 
 # Armadillo
