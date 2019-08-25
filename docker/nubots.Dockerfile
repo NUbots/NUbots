@@ -182,165 +182,166 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/m
     --enable-shared \
     --enable-static
 
-# # Intel Compute Runtime (OpenCL) and Intel Media Driver
-# RUN install-package llvm \
-#     clang \
-#     libva \
-#     libpciaccess \
-#     ruby
-# RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
-#     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
-#     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
-#     -- \
-#     -Wno-dev
-# RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
-#     https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
-#     https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
-#     -- \
-#     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-#     -DSPIRV_TRANSLATOR_DIR=/usr/local \
-#     -DLLVM_NO_DEAD_STRIP=ON \
-#     -Wno-dev
-# COPY --chown=nubots:nubots package/IGC/*.patch /var/tmp/
-# RUN PREFIX=${PREFIX:-"/usr/local"} \
-#     && BUILD_FOLDER="/var/tmp/build" \
-#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-#     && EXTRA_CFLAGS="-fPIC" \
-#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-#     && . /usr/local/toolchain.sh \
-#     && mkdir -p "${BUILD_FOLDER}" \
-#     && cd "${BUILD_FOLDER}" \
-#     && wget https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
-#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-#     && tar xf "${ARCHIVE_FILE}" \
-#     && echo "Configuring using cmake" \
-#     && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-#     && cd $(dirname ${CMAKELISTS_FILE}) \
-#     && patch -Np1 -i /var/tmp/Intrinsics.py.patch \
-#     && patch -Np1 -i /var/tmp/resource_embedder.py.patch \
-#     && patch -Np1 -i /var/tmp/sip.py.patch \
-#     && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
-#     && mkdir -p build \
-#     && cd build \
-#     && cmake .. \
-#     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-#     -DIGC_PREFERRED_LLVM_VERSION='8.0.0' \
-#     -Wno-dev \
-#     -DCMAKE_BUILD_TYPE="Release" \
-#     -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
-#     -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
-#     -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-#     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-#     -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
-#     -DCMAKE_INSTALL_LIBDIR=lib \
-#     && make -j$(nproc) \
-#     && make install \
-#     && rm -rf "${BUILD_FOLDER}"
-# RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
-#     -DRUN_TEST_SUITE=OFF \
-#     -Wno-dev
-# RUN PREFIX=${PREFIX:-"/usr/local"} \
-#     && BUILD_FOLDER="/var/tmp/build" \
-#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-#     && EXTRA_CFLAGS="-fPIC" \
-#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-#     && . /usr/local/toolchain.sh \
-#     && mkdir -p "${BUILD_FOLDER}" \
-#     && cd "${BUILD_FOLDER}" \
-#     && wget https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
-#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-#     && tar xf "${ARCHIVE_FILE}" \
-#     && echo "Configuring using cmake" \
-#     && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-#     && cd $(dirname ${CMAKELISTS_FILE}) \
-#     && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
-#     && mkdir -p build \
-#     && cd build \
-#     && cmake .. \
-#     -DNEO_DRIVER_VERSION=19.32.13826 \
-#     -DSKIP_ALL_ULT=ON \
-#     -DSKIP_UNIT_TESTS=ON \
-#     -DCMAKE_INSTALL_LIBDIR=lib \
-#     -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib" \
-#     -DCMAKE_BUILD_TYPE="Release" \
-#     -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
-#     -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
-#     -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-#     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-#     -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
-#     -DCMAKE_INSTALL_LIBDIR=lib \
-#     && make -j$(nproc) \
-#     && mkdir -p "/usr/local/lib/intel-opencl" \
-#     && mkdir -p "/usr/local/bin" \
-#     && cp "bin/libigdrcl.so" "/usr/local/lib/intel-opencl/libigdrcl.so" \
-#     && cp "bin/ocloc" "/usr/local/bin/ocloc" \
-#     && rm -rf "${BUILD_FOLDER}"
-# RUN PREFIX=${PREFIX:-"/usr/local"} \
-#     && BUILD_FOLDER="/var/tmp/build" \
-#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-#     && EXTRA_CFLAGS="-fPIC" \
-#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-#     && . /usr/local/toolchain.sh \
-#     && mkdir -p "${BUILD_FOLDER}" \
-#     && cd "${BUILD_FOLDER}" \
-#     && wget https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz \
-#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-#     && tar xf "${ARCHIVE_FILE}" \
-#     && echo "Installing header files" \
-#     && CL_FOLDER=$(find -type d -name "CL") \
-#     && cd ${CL_FOLDER} \
-#     && install -dm755 ${PREFIX}/include/CL \
-#     && rm {cl_d3d,cl_dx9}*.h \
-#     && for header in *.h; do install -m 644 ${header} ${PREFIX}/include/CL/ ; done \
-#     && rm -rf "${BUILD_FOLDER}"
-# RUN PREFIX=${PREFIX:-"/usr/local"} \
-#     && BUILD_FOLDER="/var/tmp/build" \
-#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-#     && EXTRA_CFLAGS="-fPIC" \
-#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-#     && . /usr/local/toolchain.sh \
-#     && mkdir -p "${BUILD_FOLDER}" \
-#     && cd "${BUILD_FOLDER}" \
-#     && wget https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
-#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-#     && tar xf "${ARCHIVE_FILE}" \
-#     && echo "Installing header files" \
-#     && GEN_FILE=$(find -type f -name 'gen_cl_hpp.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-#     && cd $(dirname ${GEN_FILE}) \
-#     && python gen_cl_hpp.py -i input_cl.hpp -o cl.hpp \
-#     && install -m 644 cl.hpp ${PREFIX}/include/CL/ \
-#     && install -m 644 input_cl2.hpp ${PREFIX}/include/CL/cl2.hpp \
-#     && rm -rf "${BUILD_FOLDER}"
-# RUN PREFIX=${PREFIX:-"/usr/local"} \
-#     && BUILD_FOLDER="/var/tmp/build" \
-#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-#     && EXTRA_CFLAGS="-fPIC" \
-#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-#     && . /usr/local/toolchain.sh \
-#     && mkdir -p "${BUILD_FOLDER}" \
-#     && cd "${BUILD_FOLDER}" \
-#     && wget https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
-#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-#     && tar xf "${ARCHIVE_FILE}" \
-#     && CONFIGURE_FILE=$(find -type f -name 'configure.ac' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-#     && cd $(dirname ${CONFIGURE_FILE}) \
-#     && echo "Configuring using configure file ${CONFIGURE_FILE}" \
-#     && autoreconf -fiv \
-#     && CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-#     CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
-#     ./configure $ARGS --prefix="${PREFIX}" \
-#     && make -j$(nproc) \
-#     && make install \
-#     && rm -rf "${BUILD_FOLDER}"
+# Intel Compute Runtime (OpenCL) and Intel Media Driver
+RUN install-package llvm \
+    clang \
+    libva \
+    libpciaccess \
+    ruby
+RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
+    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
+    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
+    -- \
+    -Wno-dev
+RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
+    https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
+    https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
+    -- \
+    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+    -DSPIRV_TRANSLATOR_DIR=/usr/local \
+    -DLLVM_NO_DEAD_STRIP=ON \
+    -Wno-dev
+COPY --chown=nubots:nubots package/IGC/*.patch /var/tmp/
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Configuring using cmake" \
+    && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${CMAKELISTS_FILE}) \
+    && patch -Np1 -i /var/tmp/Intrinsics.py.patch \
+    && patch -Np1 -i /var/tmp/resource_embedder.py.patch \
+    && patch -Np1 -i /var/tmp/sip.py.patch \
+    && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
+    && mkdir -p build \
+    && cd build \
+    && cmake .. \
+    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
+    -DIGC_PREFERRED_LLVM_VERSION='8.0.0' \
+    -Wno-dev \
+    -DCMAKE_BUILD_TYPE="Release" \
+    -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
+    -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
+    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    && make -j$(nproc) \
+    && make install \
+    && rm -rf "${BUILD_FOLDER}"
+RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
+    -DRUN_TEST_SUITE=OFF \
+    -Wno-dev
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Configuring using cmake" \
+    && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${CMAKELISTS_FILE}) \
+    && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
+    && mkdir -p build \
+    && cd build \
+    && cmake .. \
+    -DNEO_DRIVER_VERSION=19.32.13826 \
+    -DSKIP_ALL_ULT=ON \
+    -DSKIP_UNIT_TESTS=ON \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib" \
+    -DCMAKE_BUILD_TYPE="Release" \
+    -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
+    -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
+    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    && make -j$(nproc) \
+    && mkdir -p "/usr/local/lib/intel-opencl" \
+    && mkdir -p "/usr/local/bin" \
+    && cp "bin/libigdrcl.so" "/usr/local/lib/intel-opencl/libigdrcl.so" \
+    && cp "bin/ocloc" "/usr/local/bin/ocloc" \
+    && rm -rf "${BUILD_FOLDER}"
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Installing header files" \
+    && CL_FOLDER=$(find -type d -name "CL") \
+    && cd ${CL_FOLDER} \
+    && install -dm755 ${PREFIX}/include/CL \
+    && rm {cl_d3d,cl_dx9}*.h \
+    && for header in *.h; do install -m 644 ${header} ${PREFIX}/include/CL/ ; done \
+    && rm -rf "${BUILD_FOLDER}"
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && echo "Installing header files" \
+    && GEN_FILE=$(find -type f -name 'gen_cl_hpp.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${GEN_FILE}) \
+    && python gen_cl_hpp.py -i input_cl.hpp -o cl.hpp \
+    && install -m 644 cl.hpp ${PREFIX}/include/CL/ \
+    && install -m 644 input_cl2.hpp ${PREFIX}/include/CL/cl2.hpp \
+    && rm -rf "${BUILD_FOLDER}"
+RUN PREFIX=${PREFIX:-"/usr/local"} \
+    && BUILD_FOLDER="/var/tmp/build" \
+    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+    && EXTRA_CFLAGS="-fPIC" \
+    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+    && . /usr/local/toolchain.sh \
+    && mkdir -p "${BUILD_FOLDER}" \
+    && cd "${BUILD_FOLDER}" \
+    && wget https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
+    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+    && tar xf "${ARCHIVE_FILE}" \
+    && CONFIGURE_FILE=$(find -type f -name 'configure.ac' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+    && cd $(dirname ${CONFIGURE_FILE}) \
+    && echo "Configuring using configure file ${CONFIGURE_FILE}" \
+    && autoreconf -fiv \
+    && CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    ./configure $ARGS --prefix="${PREFIX}" \
+    && make -j$(nproc) \
+    && make install \
+    && rm -rf "${BUILD_FOLDER}"
 
 # # Install python libraries
 RUN pip install \
-    stringcase
+    stringcase \
+    protobuf==3.7.0
 
 # # Install tools needed for building individual modules as well as development tools
 RUN install-package \
