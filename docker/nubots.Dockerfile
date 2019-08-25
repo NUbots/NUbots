@@ -6,69 +6,54 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-# FROM alpine:edge
-# RUN apk update && apk add --no-cache build-base libstdc++
-# RUN addgroup -S nubots && adduser -S nubots -G nubots
-
-# FROM ubuntu:18.04
-# RUN apt-get update && apt-get -y install build-essential autotools-dev autoconf automake g++ gdb valgrind gfortran wget yasm
-# RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
-
 FROM archlinux/base:latest
-RUN pacman -Syu --noconfirm --needed \
-    && pacman -S --noconfirm --needed \
+
+# Create the nubots user, and setup sudo so no password is required
+RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
+COPY --chown=root:root etc/sudoers.d/user /etc/sudoers.d/user
+
+# Add a script that installs packages
+COPY --chown=nubots:nubots usr/local/bin/install-package /usr/local/bin/install-package
+
+# Install base packages needed for building general toolchain
+# If you have a tool that's needed for a specific module install it before that module
+RUN install-package \
+    sudo \
     wget \
     python \
     python-pip \
     base-devel \
-    arm-none-eabi-gcc \
-    arm-none-eabi-newlib \
-    gcc-fortran \
-    yasm \
-    gdb \
-    valgrind \
     ninja \
     cmake \
     meson \
-    git \
-    llvm \
-    clang \
-    libva \
-    libpciaccess \
-    protobuf \
-    ruby \
-    && rm -rf /var/cache \
-    && sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
+    git
+
+# Get python to look in /usr/local for packages
+RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
     && mkdir -p /usr/local/lib/python3.7/site-packages
-RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
+COPY --chown=root:root etc/pip.conf /etc/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
-RUN mkdir -p "/etc/ld.so.conf.d" \
-    && echo -e "/usr/local/lib\n/usr/local/lib64" | tee "/etc/ld.so.conf.d/usrlocal.conf" \
-    && ldconfig
-ENV PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
+COPY --chown=root:root etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
+RUN ldconfig
 
 # Create the home directory owned by nubots
 RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
-
-# Add Intel OpenCL ICD file
-RUN mkdir -p "/etc/OpenCL/vendors" && \
-    echo "/usr/local/lib/intel-opencl/libigdrcl.so" | tee "/etc/OpenCL/vendors/intel.icd"
 
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local
 USER nubots
 
 # Add ssh key for sshing into the robot
-COPY --chown="nubots:nubots" "files/id_rsa" "/home/nubots/.ssh/id_rsa"
-COPY --chown="nubots:nubots" "files/id_rsa.pub" "/home/nubots/.ssh/id_rsa.pub"
-COPY --chown="nubots:nubots" "files/ssh_config" "/home/nubots/.ssh/ssh_config"
+COPY --chown="nubots:nubots" home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
+COPY --chown="nubots:nubots" home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
+COPY --chown="nubots:nubots" home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
 
 # Copy across the generic toolchain file for building tools
-COPY --chown=nubots:nubots toolchain/generic.sh /usr/local/toolchain.sh
+COPY --chown=nubots:nubots usr/local/generic.toolchain.sh /usr/local/toolchain.sh
 
 # Copy over a tool to install simple standard conforming libraries from source
-COPY --chown=nubots:nubots package/install-from-source /usr/local/bin/install-from-source
+COPY --chown=nubots:nubots usr/local/bin/install-from-source /usr/local/bin/install-from-source
 RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
@@ -91,41 +76,22 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
 ARG platform=generic
 
 # Copy across the specific toolchain file for this image
-COPY --chown=nubots:nubots toolchain/${platform}.sh /usr/local/toolchain.sh
-COPY --chown=nubots:nubots toolchain/${platform}.cross /usr/local/meson.cross
+COPY --chown=nubots:nubots usr/local/${platform}.toolchain.sh /usr/local/toolchain.sh
+COPY --chown=nubots:nubots usr/local/${platform}.meson.cross /usr/local/meson.cross
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # OpenBLAS
-RUN if [ "${platform}" = "generic" ] ; \
-    then \
-    install-make-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
-    BINARY=64 \
-    SMP=1 \
-    NUM_THREADS=2 \
-    DYNAMIC_ARCH=1 \
-    TARGET=GENERIC \
-    USE_THREAD=1  \
-    NO_SHARED=0 \
-    NO_STATIC=0 ; \
-    else \
-    install-make-from-source https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz \
-    CROSS=1 \
-    BINARY=64 \
-    SMP=1 \
-    NUM_THREADS=2 \
-    TARGET=HASWELL \
-    USE_THREAD=1 \
-    NO_SHARED=0 \
-    NO_STATIC=0 ; \
-    fi
+RUN install-package gcc-fortran
+COPY --chown=nubots:nubots usr/local/package/${platform}.openblas.sh usr/local/package/openblas.sh
+RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 
 # Armadillo
-RUN install-cmake-from-source http://sourceforge.net/projects/arma/files/armadillo-9.600.6.tar.xz \
+RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.600.6.tar.xz \
     -DDETECT_HDF5=OFF \
     -DBUILD_SHARED_LIBS=ON
-COPY --chown=nubots:nubots package/armadillo_config.hpp /usr/local/include/armadillo_bits/config.hpp
+COPY --chown=nubots:nubots usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
 
 # Eigen3
 RUN install-from-source http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2
@@ -139,27 +105,29 @@ RUN install-from-source https://github.com/gperftools/gperftools/releases/downlo
 RUN install-from-source https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-cpp-3.7.0.tar.gz \
     --with-zlib=/usr/local \
     --with-protoc=/usr/bin/protoc
-RUN PREFIX=${PREFIX:-"/usr/local"} \
-    && BUILD_FOLDER="/var/tmp/build" \
-    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-    && EXTRA_CFLAGS="-fPIC" \
-    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-    && . /usr/local/toolchain.sh \
-    && mkdir -p "${BUILD_FOLDER}" \
-    && cd "${BUILD_FOLDER}" \
-    && wget https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-python-3.7.0.tar.gz \
-    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-    && tar xf "${ARCHIVE_FILE}" \
-    && echo "Configuring using cmake" \
-    && SETUP_PY_FILE=$(find -type f -name 'setup.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-    && cd $(dirname ${SETUP_PY_FILE}) \
-    && echo "Configuring using setup.py file ${SETUP_PY_FILE}" \
-    && PROTOC=/usr/bin/protoc python setup.py build --cpp_implementation \
-    && PROTOC=/usr/bin/protoc python setup.py install --cpp_implementation --prefix="${PREFIX}" \
-    && rm -rf "${BUILD_FOLDER}"
+
+# RUN PREFIX=${PREFIX:-"/usr/local"} \
+#     && BUILD_FOLDER="/var/tmp/build" \
+#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+#     && EXTRA_CFLAGS="-fPIC" \
+#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+#     && . /usr/local/toolchain.sh \
+#     && mkdir -p "${BUILD_FOLDER}" \
+#     && cd "${BUILD_FOLDER}" \
+#     && wget https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-python-3.7.0.tar.gz \
+#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+#     && tar xf "${ARCHIVE_FILE}" \
+#     && echo "Configuring using cmake" \
+#     && SETUP_PY_FILE=$(find -type f -name 'setup.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+#     && cd $(dirname ${SETUP_PY_FILE}) \
+#     && echo "Configuring using setup.py file ${SETUP_PY_FILE}" \
+#     && PROTOC=/usr/bin/protoc python setup.py build --cpp_implementation \
+#     && PROTOC=/usr/bin/protoc python setup.py install --cpp_implementation --prefix="${PREFIX}" \
+#     && rm -rf "${BUILD_FOLDER}"
 
 # Libjpeg
+RUN install-packages yasm
 RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz
 
 # yaml-cpp
@@ -214,167 +182,172 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/m
     --enable-shared \
     --enable-static
 
-# Intel Compute Runtime (OpenCL) and Intel Media Driver
-RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
-    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
-    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
-    -- \
-    -Wno-dev
-RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
-    https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
-    https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
-    -- \
-    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DSPIRV_TRANSLATOR_DIR=/usr/local \
-    -DLLVM_NO_DEAD_STRIP=ON \
-    -Wno-dev
-COPY --chown=nubots:nubots package/IGC/*.patch /var/tmp/
-RUN PREFIX=${PREFIX:-"/usr/local"} \
-    && BUILD_FOLDER="/var/tmp/build" \
-    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-    && EXTRA_CFLAGS="-fPIC" \
-    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-    && . /usr/local/toolchain.sh \
-    && mkdir -p "${BUILD_FOLDER}" \
-    && cd "${BUILD_FOLDER}" \
-    && wget https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
-    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-    && tar xf "${ARCHIVE_FILE}" \
-    && echo "Configuring using cmake" \
-    && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-    && cd $(dirname ${CMAKELISTS_FILE}) \
-    && patch -Np1 -i /var/tmp/Intrinsics.py.patch \
-    && patch -Np1 -i /var/tmp/resource_embedder.py.patch \
-    && patch -Np1 -i /var/tmp/sip.py.patch \
-    && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
-    && mkdir -p build \
-    && cd build \
-    && cmake .. \
-    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='8.0.0' \
-    -Wno-dev \
-    -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
-    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    && make -j$(nproc) \
-    && make install \
-    && rm -rf "${BUILD_FOLDER}"
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
-    -DRUN_TEST_SUITE=OFF \
-    -Wno-dev
-RUN PREFIX=${PREFIX:-"/usr/local"} \
-    && BUILD_FOLDER="/var/tmp/build" \
-    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-    && EXTRA_CFLAGS="-fPIC" \
-    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-    && . /usr/local/toolchain.sh \
-    && mkdir -p "${BUILD_FOLDER}" \
-    && cd "${BUILD_FOLDER}" \
-    && wget https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
-    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-    && tar xf "${ARCHIVE_FILE}" \
-    && echo "Configuring using cmake" \
-    && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-    && cd $(dirname ${CMAKELISTS_FILE}) \
-    && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
-    && mkdir -p build \
-    && cd build \
-    && cmake .. \
-    -DNEO_DRIVER_VERSION=19.32.13826 \
-    -DSKIP_ALL_ULT=ON \
-    -DSKIP_UNIT_TESTS=ON \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib" \
-    -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
-    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    && make -j$(nproc) \
-    && mkdir -p "/usr/local/lib/intel-opencl" \
-    && mkdir -p "/usr/local/bin" \
-    && cp "bin/libigdrcl.so" "/usr/local/lib/intel-opencl/libigdrcl.so" \
-    && cp "bin/ocloc" "/usr/local/bin/ocloc" \
-    && rm -rf "${BUILD_FOLDER}"
-RUN PREFIX=${PREFIX:-"/usr/local"} \
-    && BUILD_FOLDER="/var/tmp/build" \
-    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-    && EXTRA_CFLAGS="-fPIC" \
-    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-    && . /usr/local/toolchain.sh \
-    && mkdir -p "${BUILD_FOLDER}" \
-    && cd "${BUILD_FOLDER}" \
-    && wget https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz \
-    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-    && tar xf "${ARCHIVE_FILE}" \
-    && echo "Installing header files" \
-    && CL_FOLDER=$(find -type d -name "CL") \
-    && cd ${CL_FOLDER} \
-    && install -dm755 ${PREFIX}/include/CL \
-    && rm {cl_d3d,cl_dx9}*.h \
-    && for header in *.h; do install -m 644 ${header} ${PREFIX}/include/CL/ ; done \
-    && rm -rf "${BUILD_FOLDER}"
-RUN PREFIX=${PREFIX:-"/usr/local"} \
-    && BUILD_FOLDER="/var/tmp/build" \
-    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-    && EXTRA_CFLAGS="-fPIC" \
-    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-    && . /usr/local/toolchain.sh \
-    && mkdir -p "${BUILD_FOLDER}" \
-    && cd "${BUILD_FOLDER}" \
-    && wget https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
-    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-    && tar xf "${ARCHIVE_FILE}" \
-    && echo "Installing header files" \
-    && GEN_FILE=$(find -type f -name 'gen_cl_hpp.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-    && cd $(dirname ${GEN_FILE}) \
-    && python gen_cl_hpp.py -i input_cl.hpp -o cl.hpp \
-    && install -m 644 cl.hpp ${PREFIX}/include/CL/ \
-    && install -m 644 input_cl2.hpp ${PREFIX}/include/CL/cl2.hpp \
-    && rm -rf "${BUILD_FOLDER}"
-RUN PREFIX=${PREFIX:-"/usr/local"} \
-    && BUILD_FOLDER="/var/tmp/build" \
-    && RELEASE_CFLAGS="-O3 -DNDEBUG" \
-    && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
-    && EXTRA_CFLAGS="-fPIC" \
-    && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
-    && . /usr/local/toolchain.sh \
-    && mkdir -p "${BUILD_FOLDER}" \
-    && cd "${BUILD_FOLDER}" \
-    && wget https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
-    && ARCHIVE_FILE=$(find . -type f | head -n 1) \
-    && tar xf "${ARCHIVE_FILE}" \
-    && CONFIGURE_FILE=$(find -type f -name 'configure.ac' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
-    && cd $(dirname ${CONFIGURE_FILE}) \
-    && echo "Configuring using configure file ${CONFIGURE_FILE}" \
-    && autoreconf -fiv \
-    && CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
-    ./configure $ARGS --prefix="${PREFIX}" \
-    && make -j$(nproc) \
-    && make install \
-    && rm -rf "${BUILD_FOLDER}"
+# # Intel Compute Runtime (OpenCL) and Intel Media Driver
+# RUN install-package llvm \
+#     clang \
+#     libva \
+#     libpciaccess \
+#     ruby
+# RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
+#     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
+#     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
+#     -- \
+#     -Wno-dev
+# RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
+#     https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
+#     https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
+#     -- \
+#     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+#     -DSPIRV_TRANSLATOR_DIR=/usr/local \
+#     -DLLVM_NO_DEAD_STRIP=ON \
+#     -Wno-dev
+# COPY --chown=nubots:nubots package/IGC/*.patch /var/tmp/
+# RUN PREFIX=${PREFIX:-"/usr/local"} \
+#     && BUILD_FOLDER="/var/tmp/build" \
+#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+#     && EXTRA_CFLAGS="-fPIC" \
+#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+#     && . /usr/local/toolchain.sh \
+#     && mkdir -p "${BUILD_FOLDER}" \
+#     && cd "${BUILD_FOLDER}" \
+#     && wget https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
+#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+#     && tar xf "${ARCHIVE_FILE}" \
+#     && echo "Configuring using cmake" \
+#     && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+#     && cd $(dirname ${CMAKELISTS_FILE}) \
+#     && patch -Np1 -i /var/tmp/Intrinsics.py.patch \
+#     && patch -Np1 -i /var/tmp/resource_embedder.py.patch \
+#     && patch -Np1 -i /var/tmp/sip.py.patch \
+#     && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
+#     && mkdir -p build \
+#     && cd build \
+#     && cmake .. \
+#     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
+#     -DIGC_PREFERRED_LLVM_VERSION='8.0.0' \
+#     -Wno-dev \
+#     -DCMAKE_BUILD_TYPE="Release" \
+#     -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
+#     -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
+#     -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+#     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+#     -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+#     -DCMAKE_INSTALL_LIBDIR=lib \
+#     && make -j$(nproc) \
+#     && make install \
+#     && rm -rf "${BUILD_FOLDER}"
+# RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
+#     -DRUN_TEST_SUITE=OFF \
+#     -Wno-dev
+# RUN PREFIX=${PREFIX:-"/usr/local"} \
+#     && BUILD_FOLDER="/var/tmp/build" \
+#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+#     && EXTRA_CFLAGS="-fPIC" \
+#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+#     && . /usr/local/toolchain.sh \
+#     && mkdir -p "${BUILD_FOLDER}" \
+#     && cd "${BUILD_FOLDER}" \
+#     && wget https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
+#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+#     && tar xf "${ARCHIVE_FILE}" \
+#     && echo "Configuring using cmake" \
+#     && CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+#     && cd $(dirname ${CMAKELISTS_FILE}) \
+#     && echo "Configuring using cmake file ${CMAKELISTS_FILE}" \
+#     && mkdir -p build \
+#     && cd build \
+#     && cmake .. \
+#     -DNEO_DRIVER_VERSION=19.32.13826 \
+#     -DSKIP_ALL_ULT=ON \
+#     -DSKIP_UNIT_TESTS=ON \
+#     -DCMAKE_INSTALL_LIBDIR=lib \
+#     -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib" \
+#     -DCMAKE_BUILD_TYPE="Release" \
+#     -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
+#     -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
+#     -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+#     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+#     -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+#     -DCMAKE_INSTALL_LIBDIR=lib \
+#     && make -j$(nproc) \
+#     && mkdir -p "/usr/local/lib/intel-opencl" \
+#     && mkdir -p "/usr/local/bin" \
+#     && cp "bin/libigdrcl.so" "/usr/local/lib/intel-opencl/libigdrcl.so" \
+#     && cp "bin/ocloc" "/usr/local/bin/ocloc" \
+#     && rm -rf "${BUILD_FOLDER}"
+# RUN PREFIX=${PREFIX:-"/usr/local"} \
+#     && BUILD_FOLDER="/var/tmp/build" \
+#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+#     && EXTRA_CFLAGS="-fPIC" \
+#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+#     && . /usr/local/toolchain.sh \
+#     && mkdir -p "${BUILD_FOLDER}" \
+#     && cd "${BUILD_FOLDER}" \
+#     && wget https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz \
+#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+#     && tar xf "${ARCHIVE_FILE}" \
+#     && echo "Installing header files" \
+#     && CL_FOLDER=$(find -type d -name "CL") \
+#     && cd ${CL_FOLDER} \
+#     && install -dm755 ${PREFIX}/include/CL \
+#     && rm {cl_d3d,cl_dx9}*.h \
+#     && for header in *.h; do install -m 644 ${header} ${PREFIX}/include/CL/ ; done \
+#     && rm -rf "${BUILD_FOLDER}"
+# RUN PREFIX=${PREFIX:-"/usr/local"} \
+#     && BUILD_FOLDER="/var/tmp/build" \
+#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+#     && EXTRA_CFLAGS="-fPIC" \
+#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+#     && . /usr/local/toolchain.sh \
+#     && mkdir -p "${BUILD_FOLDER}" \
+#     && cd "${BUILD_FOLDER}" \
+#     && wget https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
+#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+#     && tar xf "${ARCHIVE_FILE}" \
+#     && echo "Installing header files" \
+#     && GEN_FILE=$(find -type f -name 'gen_cl_hpp.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+#     && cd $(dirname ${GEN_FILE}) \
+#     && python gen_cl_hpp.py -i input_cl.hpp -o cl.hpp \
+#     && install -m 644 cl.hpp ${PREFIX}/include/CL/ \
+#     && install -m 644 input_cl2.hpp ${PREFIX}/include/CL/cl2.hpp \
+#     && rm -rf "${BUILD_FOLDER}"
+# RUN PREFIX=${PREFIX:-"/usr/local"} \
+#     && BUILD_FOLDER="/var/tmp/build" \
+#     && RELEASE_CFLAGS="-O3 -DNDEBUG" \
+#     && RELEASE_CXXFLAGS="${RELEASE_CFLAGS}" \
+#     && EXTRA_CFLAGS="-fPIC" \
+#     && EXTRA_CXXFLAGS="${EXTRA_CFLAGS}" \
+#     && . /usr/local/toolchain.sh \
+#     && mkdir -p "${BUILD_FOLDER}" \
+#     && cd "${BUILD_FOLDER}" \
+#     && wget https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
+#     && ARCHIVE_FILE=$(find . -type f | head -n 1) \
+#     && tar xf "${ARCHIVE_FILE}" \
+#     && CONFIGURE_FILE=$(find -type f -name 'configure.ac' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1) \
+#     && cd $(dirname ${CONFIGURE_FILE}) \
+#     && echo "Configuring using configure file ${CONFIGURE_FILE}" \
+#     && autoreconf -fiv \
+#     && CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+#     CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+#     ./configure $ARGS --prefix="${PREFIX}" \
+#     && make -j$(nproc) \
+#     && make install \
+#     && rm -rf "${BUILD_FOLDER}"
 
-# Setup pip to install to /usr/local and have python find packages there
-COPY --chown=root:root files/pip.conf /etc/pip.conf
-
-# Install python libraries
+# # Install python libraries
 RUN pip install \
     stringcase
 
-# http://www.fftw.org/fftw-3.3.6-pl2.tar.gz
-# http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
-# https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz
+# # Install tools needed for building individual modules as well as development tools
+RUN install-package \
+    arm-none-eabi-gcc \
+    arm-none-eabi-newlib \
+    gdb \
+    valgrind
 
 # Go to where we will mount the NUbots volume
 WORKDIR /home/nubots/NUbots
