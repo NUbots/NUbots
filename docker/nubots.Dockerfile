@@ -209,12 +209,11 @@ RUN /usr/local/package/opencl-clhpp.sh https://github.com/KhronosGroup/OpenCL-CL
 COPY --chown=nubots:nubots usr/local/package/ocl-icd/install-from-source /usr/local/package/ocl-icd.sh
 RUN /usr/local/package/ocl-icd.sh https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
 
-# # Install python libraries
+# Install python libraries
 RUN pip install \
-    stringcase \
-    protobuf==3.7.0
+    stringcase
 
-# # Install tools needed for building individual modules as well as development tools
+# Install tools needed for building individual modules as well as development tools
 RUN install-package \
     arm-none-eabi-gcc \
     arm-none-eabi-newlib \
