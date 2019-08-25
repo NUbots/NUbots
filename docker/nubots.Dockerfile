@@ -127,7 +127,7 @@ RUN install-from-source https://github.com/google/protobuf/releases/download/v3.
 #     && rm -rf "${BUILD_FOLDER}"
 
 # Libjpeg
-RUN install-packages yasm
+RUN install-package yasm
 RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz
 
 # yaml-cpp
