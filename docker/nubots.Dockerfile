@@ -44,6 +44,9 @@ RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
 RUN chown -R nubots:nubots /usr/local
 USER nubots
 
+# Make a symlink from /usr/local/lib to /usr/local/lib64 so library install location is irrelevant
+RUN ln -s /usr/local/lib /usr/local/lib64
+
 # Copy across the generic toolchain file for building tools
 COPY --chown=nubots:nubots usr/local/toolchain/generic.sh /usr/local/toolchain.sh
 
