@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from nudocker import run_on_docker
+from dockerise import run_on_docker
 import os
 import pty
 
