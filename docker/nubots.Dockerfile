@@ -40,17 +40,9 @@ RUN ldconfig
 # Create the home directory owned by nubots
 RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
 
-# Make the python protobuf installation use the C++ implementation
-ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION="cpp"
-
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local
 USER nubots
-
-# Add ssh key for sshing into the robot
-COPY --chown="nubots:nubots" home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
-COPY --chown="nubots:nubots" home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
-COPY --chown="nubots:nubots" home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
 
 # Copy across the generic toolchain file for building tools
 COPY --chown=nubots:nubots usr/local/toolchain/generic.sh /usr/local/toolchain.sh
@@ -217,8 +209,14 @@ RUN pip install \
 RUN install-package \
     arm-none-eabi-gcc \
     arm-none-eabi-newlib \
+    openssh \
     gdb \
     valgrind
+
+# Copy ssh keys over to the system
+COPY home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
+COPY home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
+COPY home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
 
 # Go to where we will mount the NUbots volume
 WORKDIR /home/nubots/NUbots
