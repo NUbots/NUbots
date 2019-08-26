@@ -7,11 +7,13 @@ endian = 'little'
 [properties]
 c_args = ["-fPIC", "-O3", "-DNDEBUG", "-mtune=generic"]
 cpp_args = ["-fPIC", "-O3", "-DNDEBUG", "-mtune=generic"]
+fortran_args = ["-fPIC", "-O3", "-DNDEBUG", "-mtune=generic"]
 growing_stack = false
 
 [binaries]
 c = 'gcc'
 cpp = 'g++'
+fortran = 'gfortran'
 ar = 'ar'
 strip = 'strip'
 pkgconfig = 'pkg-config'

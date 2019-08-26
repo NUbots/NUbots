@@ -13,8 +13,10 @@ PREFIX=${PREFIX:-"/usr/local"}
 BUILD_FOLDER="/var/tmp/build"
 RELEASE_CFLAGS="-O3 -DNDEBUG"
 RELEASE_CXXFLAGS="${RELEASE_CFLAGS}"
+RELEASE_FFLAGS="${RELEASE_CFLAGS}"
 EXTRA_CFLAGS="-fPIC"
 EXTRA_CXXFLAGS="${EXTRA_CFLAGS}"
+EXTRA_FFLAGS="${EXTRA_CFLAGS}"
 
 # Pull in the toolchain arguments
 . /usr/local/toolchain.sh
@@ -132,6 +134,7 @@ elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
     # Run configure
     CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
     CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
         ./configure $ARGS --prefix="${PREFIX}"
 
     # Run make
@@ -198,7 +201,8 @@ elif [ "${METHOD}" = 'install-make-from-source' ]; then
 
     make ${ARGS} -j$(nproc) \
         CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-        CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}"
+        CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+        FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}"
 
     make PREFIX="${PREFIX}" install
 
@@ -219,6 +223,7 @@ elif [ "${METHOD}" = 'install-meson-from-source' ]; then
     # Configure using meson
     CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
     CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
     meson setup build .. \
         $ARGS \
         --buildtype=release \
@@ -244,11 +249,13 @@ elif [ "${METHOD}" = 'install-python-from-source' ]; then
     # Build using setuptools
     CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
     CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
     python setup.py build $ARGS
 
     # Install using setuptools
     CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
     CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
     python setup.py install $ARGS  --prefix="${PREFIX}"
 
 fi;
