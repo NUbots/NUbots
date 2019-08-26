@@ -1,4 +1,4 @@
-version: "3"
+version: "3.2"
 services:
   format:
     image: nubots:format
@@ -6,7 +6,11 @@ services:
       context: docker
       dockerfile: format.Dockerfile
     volumes:
-      - .:/home/nubots/NUbots
+      - type: bind
+        source: .
+        target: /root/NUbots
+        read_only: true
+        consistency: cached
   nuc7i7bnh:
     image: nubots:nuc7i7bnh
     build:
@@ -15,8 +19,15 @@ services:
       args:
         platform: nuc7i7bnh
     volumes:
-      - .:/home/nubots/NUbots
-      - ./build/nuc7i7bnh:/home/nubots/NUbots/build
+      - type: bind
+        source: .
+        target: /root/NUbots
+        read_only: true
+        consistency: cached
+      - type: volume
+        source: nuc7i7bnh_build
+        target: /root/NUbots/build
+        consistency: delegated
   generic:
     image: nubots:generic
     build:
@@ -25,8 +36,15 @@ services:
       args:
         platform: generic
     volumes:
-      - .:/home/nubots/NUbots
-      - ./build/generic:/home/nubots/NUbots/build
+      - type: bind
+        source: .
+        target: /root/NUbots
+        read_only: true
+        consistency: cached
+      - type: volume
+        source: generic_build
+        target: /root/NUbots/build
+        consistency: delegated
   native:
     image: nubots:native
     build:
@@ -35,5 +53,16 @@ services:
       args:
         platform: native
     volumes:
-      - .:/home/nubots/NUbots
-      - ./build/native:/home/nubots/NUbots/build
+      - type: bind
+        source: .
+        target: /root/NUbots
+        read_only: true
+        consistency: cached
+      - type: volume
+        source: native_build
+        target: /root/NUbots/build
+        consistency: delegated
+volumes:
+  native_build:
+  nuc7i7bnh_build:
+  generic_build:
