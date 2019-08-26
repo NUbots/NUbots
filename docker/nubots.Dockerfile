@@ -206,7 +206,8 @@ RUN /usr/local/package/ocl-icd.sh https://github.com/OCL-dev/ocl-icd/archive/v2.
 
 # Install python libraries
 RUN pip install \
-    stringcase
+    stringcase \
+    Pillow
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
