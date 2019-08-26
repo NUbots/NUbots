@@ -203,6 +203,15 @@ COPY --chown=nubots:nubots usr/local/package/opencl-clhpp/install-from-source /u
 RUN /usr/local/package/opencl-clhpp.sh https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz
 COPY --chown=nubots:nubots usr/local/package/ocl-icd/install-from-source /usr/local/package/ocl-icd.sh
 RUN /usr/local/package/ocl-icd.sh https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
+    -DINSTALL_DRIVER_SYSCONF=OFF \
+    -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
+    -DMEDIA_RUN_TEST_SUITE=OFF \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_KERNALS=ON \
+    -DENABLE_KERNELS=ON \
+    -DENABLE_NONFREE_KERNELS=ON \
+    -DBUILD_TYPE=Release
 
 # Install python libraries
 RUN pip install \
