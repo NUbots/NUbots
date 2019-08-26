@@ -221,5 +221,6 @@ COPY home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
 COPY home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
 COPY home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
 
-# Go to where we will mount the NUbots volume
+# Setup the locations where we will mount our folders
+RUN mkdir -p /home/nubots/NUbots/build
 WORKDIR /home/nubots/NUbots
