@@ -1,7 +1,7 @@
 steps:
   # Build for the NUC
   - label: "Build for NUC"
-    command: ".buildkite/scripts/build_code.sh"
+    command: "./b build"
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
