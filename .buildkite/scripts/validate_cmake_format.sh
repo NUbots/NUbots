@@ -9,15 +9,10 @@ export -f check_formatting
 
 # Loop through all cmake and role files and check validation
 git ls-files | grep '.*\(CMakeLists\.txt\|cmake\|role\)$' \
-    | parallel --joblog formatting.log -j$(nproc) check_formatting
-
-# Check that the command executed properly
-if [ $? -ne 0 ]; then
-    exit $?
-fi
+    | parallel --joblog /var/tmp/formatting.log -j$(nproc) check_formatting
 
 # Count how many returned a non zero exist status
-ret=$(tail -n +2 formatting.log | awk '{ sum += $7; } END {print sum}')
+ret=$(tail -n +2 /var/tmp/formatting.log | awk '{ sum += $7; } END {print sum}')
 
 echo "$ret files are not formatted correctly"
 exit $ret

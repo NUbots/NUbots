@@ -11,11 +11,6 @@ export -f check_formatting
 git ls-files | grep '.*\.\(c\|cc\|cpp\|cxx\|hpp\|ipp\|proto\)$' \
     | parallel --joblog /var/tmp/formatting.log -j$(nproc) check_formatting
 
-# Check that the command executed properly
-if [ $? -ne 0 ]; then
-    exit $?
-fi
-
 # Count how many returned a non zero exist status
 ret=$(tail -n +2 /var/tmp/formatting.log | awk '{ sum += $7; } END {print sum}')
 
