@@ -13,5 +13,6 @@ def register(command):
 
 @run_on_docker
 def run(**kwargs):
-    # Run bash
-    pty.spawn("/bin/bash")
+
+    # Run bash and exit with its exit code
+    exit(pty.spawn("/bin/bash") >> 8)

@@ -19,6 +19,11 @@ def run(**kwargs):
 
     # Run cmake if we haven't already
     if not os.path.isfile("CMakeCache.txt"):
-        os.system("cmake {} -GNinja".format(b.project_dir))
+        exitcode = os.system("cmake {} -GNinja".format(b.project_dir)) >> 8
 
-    os.system("ninja")
+        # If cmake errors return with its status
+        if exitcode != 0:
+            exit(exitcode)
+
+    # Return the exit code of ninja
+    exit(os.system("ninja") >> 8)

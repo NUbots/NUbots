@@ -87,7 +87,7 @@ def run_on_docker(func):
 
                     # If we are cleaning, remove this volume so we can recreate it
                     if clean:
-                        build_volume.remove()
+                        build_volume.remove(force=True)
                         build_volume = None
                 except docker.errors.NotFound:
                     build_volume = None
@@ -127,6 +127,7 @@ def run_on_docker(func):
 
                 # Attach a pty to this terminal
                 dockerpty.start(client.api, container.id)
+                exit(container.wait()["StatusCode"])
 
         return run
 
