@@ -119,7 +119,7 @@ def run_on_docker(func):
                         docker.types.Mount(
                             type="volume",
                             source=build_volume.name,
-                            target="/home/nubots/NUbots/build",
+                            target="/home/nubots/build",
                             consistency="delegated",
                         ),
                     ],
