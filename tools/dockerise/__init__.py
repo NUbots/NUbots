@@ -26,7 +26,6 @@ def run_on_docker(func):
             # Get the possible services
             services = os.listdir(os.path.join(b.project_dir, "docker", "usr", "local", "toolchain"))
             services = [s[:-3] for s in services if s.endswith(".sh")]
-            services.append("format")
 
             # Add our docker specific options
             command.add_argument("--rebuild", action="store_true", help="rebuild the docker image checking for updates")
@@ -110,7 +109,7 @@ def run_on_docker(func):
                     auto_remove=True,
                     tty=True,
                     stdin_open=True,
-                    hostname="FunTimes",
+                    hostname="docker",
                     mounts=[
                         docker.types.Mount(
                             type="bind",
