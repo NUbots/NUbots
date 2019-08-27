@@ -19,13 +19,16 @@ def register(command):
         default=False,
         help="perform an interactive configuration using ccmake",
     )
+    command.add_argument("args", nargs="...", help="the arguments to pass through to cmake")
 
 
 @run_on_docker
-def run(interactive, **kwargs):
+def run(interactive, args, **kwargs):
 
-    # If configure then run ccmake
+    os.chdir(os.path.join(b.project_dir, "..", "build"))
+
+    # If configure then run ccmake else just run cmake
     if interactive:
-        print(os.path.join(b.project_dir, "..", "build"))
-        os.chdir(os.path.join(b.project_dir, "..", "build"))
-        pty.spawn("ccmake {} -GNinja".format(b.project_dir))
+        exit(pty.spawn(["ccmake", "-GNinja", *args, b.project_dir]) << 8)
+    else:
+        exit(pty.spawn(["cmake", "-GNinja", *args, b.project_dir]) << 8)
