@@ -11,6 +11,11 @@ export -f check_formatting
 git ls-files | grep '.*\(CMakeLists\.txt\|cmake\|role\)$' \
     | parallel --joblog formatting.log -j$(nproc) check_formatting
 
+# Check that the command executed properly
+if [ $? -ne 0 ]; then
+    exit $?
+fi
+
 # Count how many returned a non zero exist status
 ret=$(tail -n +2 formatting.log | awk '{ sum += $7; } END {print sum}')
 
