@@ -6,8 +6,13 @@
 	"workspaceFolder": "/home/nubots/NUbots",
 	"extensions": [
 		"ms-vscode.cpptools",
-		"ms-python.python",
-		"cheshirekow.cmake-format",
+		"twxs.cmake",
 		"vector-of-bool.cmake-tools",
+		"maddouri.cmake-tools-helper",
+		"cheshirekow.cmake-format",
+		"ms-azuretools.vscode-docker",
+		"galarius.vscode-opencl",
+		"ms-python.python",
+		"zxh404.vscode-proto3"
 	]
 }
