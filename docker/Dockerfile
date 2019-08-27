@@ -224,7 +224,9 @@ RUN install-package \
     arm-none-eabi-newlib \
     openssh \
     gdb \
-    valgrind
+    valgrind \
+    colordiff \
+    parallel
 
 # Copy ssh keys over to the system
 COPY home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa

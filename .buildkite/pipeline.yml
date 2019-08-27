@@ -4,6 +4,7 @@ steps:
     command: ".buildkite/scripts/build_code.sh"
     plugins:
       - docker-compose#v3.0.3:
+          config: .buildkite/docker-compose.yml
           run: nuc7i7bnh
           workdir: /home/nubots/NUbots/
 
@@ -12,17 +13,20 @@ steps:
     command: ".buildkite/scripts/validate_clang_format.sh"
     plugins:
       - docker-compose#v3.0.3:
-          run: format
+          config: .buildkite/docker-compose.yml
+          run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate CMake formatting"
     command: ".buildkite/scripts/validate_cmake_format.sh"
     plugins:
       - docker-compose#v3.0.3:
-          run: format
+          config: .buildkite/docker-compose.yml
+          run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate Python formatting"
     command: ".buildkite/scripts/validate_python_format.sh"
     plugins:
       - docker-compose#v3.0.3:
-          run: format
+          config: .buildkite/docker-compose.yml
+          run: generic
           workdir: /home/nubots/NUbots/

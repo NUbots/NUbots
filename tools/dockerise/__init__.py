@@ -63,12 +63,10 @@ def run_on_docker(func):
                 # If we are requesting a rebuild, then run build
                 if rebuild:
                     dockerdir = os.path.join(b.project_dir, "docker")
-                    dockerfile = os.path.join(dockerdir, "nubots.Dockerfile")
 
                     # Build the image
                     stream = client.api.build(
                         path=dockerdir,
-                        dockerfile=dockerfile,
                         tag=tag,
                         buildargs={"platform": platform},
                         quiet=False,
