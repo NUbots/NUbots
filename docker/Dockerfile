@@ -215,8 +215,9 @@ RUN install-from-source https://github.com/intel/media-driver/archive/intel-medi
 
 # Install python libraries
 RUN pip install \
-    stringcase \
     cmake-format \
+    black \
+    stringcase \
     Pillow
 
 # Install tools needed for building individual modules as well as development tools
