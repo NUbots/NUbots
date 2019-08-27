@@ -3,6 +3,7 @@
 from dockerise import run_on_docker
 import b
 import os
+import subprocess
 
 
 @run_on_docker
@@ -10,9 +11,11 @@ def register(command):
     # Install help
     command.help = "build the NUbots codebase"
 
+    command.add_argument("args", nargs="...", help="the arguments to pass through to ninja")
+
 
 @run_on_docker
-def run(**kwargs):
+def run(args, **kwargs):
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
@@ -26,4 +29,4 @@ def run(**kwargs):
             exit(exitcode)
 
     # Return the exit code of ninja
-    exit(os.system("ninja") >> 8)
+    exit(subprocess.call(["ninja", *args]))

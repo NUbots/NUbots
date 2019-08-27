@@ -4,6 +4,7 @@ from dockerise import run_on_docker
 import b
 import os
 import pty
+import subprocess
 
 
 @run_on_docker
@@ -31,4 +32,4 @@ def run(interactive, args, **kwargs):
     if interactive:
         exit(pty.spawn(["ccmake", "-GNinja", *args, b.project_dir]) << 8)
     else:
-        exit(pty.spawn(["cmake", "-GNinja", *args, b.project_dir]) << 8)
+        exit(subprocess.call(["cmake", "-GNinja", *args, b.project_dir]))
