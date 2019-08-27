@@ -10,7 +10,6 @@ services:
       - type: bind
         source: ./..
         target: /home/nubots/NUbots
-        read_only: true
         consistency: cached
       - type: volume
         source: buildkite_generic
@@ -26,7 +25,6 @@ services:
       - type: bind
         source: ./..
         target: /home/nubots/NUbots
-        read_only: true
         consistency: cached
       - type: volume
         source: buildkite_nuc7i7bnh
