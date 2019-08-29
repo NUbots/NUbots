@@ -69,7 +69,7 @@ namespace platform {
             if (network_source.name == config.simulator_name && sensors.model == config.model_name) {
                 // Swizzle the IMU axes so that they match the CM740
                 DarwinSensors msg(sensors.sensors);
-                msg.accelerometer = {-msg.accelerometer.x, msg.accelerometer.y, -msg.accelerometer.z};
+                msg.accelerometer = {-msg.accelerometer.y, -msg.accelerometer.x, -msg.accelerometer.z};
                 msg.gyroscope     = {msg.gyroscope.y, msg.gyroscope.x, -msg.gyroscope.z};
                 emit(std::make_unique<DarwinSensors>(msg));
             }
