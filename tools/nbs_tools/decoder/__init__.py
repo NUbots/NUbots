@@ -9,6 +9,7 @@ import pkgutil
 import glob
 import enum
 import b
+from collections import namedtuple
 import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
 
@@ -62,6 +63,7 @@ for message in google.protobuf.message.Message.__subclasses__():
 
 
 def decode(path):
+    Packet = namedtuple("Packet", "type timestamp msg raw")
 
     # Now open the passed file
     with gzip.open(path, "rb") if path.endswith("nbz") or path.endswith(".gz") else open(path, "rb") as f:
@@ -97,7 +99,12 @@ def decode(path):
                 if type_hash in decoders:
                     # Yield a message
                     try:
-                        packet = (decoders[type_hash][0], timestamp, decoders[type_hash][1].FromString(payload[16:]))
+                        packet = Packet(
+                            type=decoders[type_hash][0],
+                            timestamp=timestamp,
+                            msg=decoders[type_hash][1].FromString(payload[16:]),
+                            raw=payload[16:],
+                        )
                         yield packet
                     except:
                         pass

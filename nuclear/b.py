@@ -87,8 +87,10 @@ if __name__ == "__main__":
     command = argparse.ArgumentParser(
         description="This script is an optional helper script for performing common tasks for working with the NUClear roles system."
     )
-    subcommands = command.add_subparsers(dest="command")
-    subcommands.help = "The command to run from the script. See each help for more information."
+    subcommands = command.add_subparsers(
+        dest="command", help="The command to run from the script. See each help for more information."
+    )
+    subcommands.required = True
 
     # Get all of the packages that are in the build tools
     modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     # First we try to see if sys.argv[1] gives us all the information we need
     # If it does we only need to load that module directly
     # Otherwise we load every module so we can build a help for possible tools
-    target_modules = [m for m in modules if not m[2] and m[1] == sys.argv[1]]
+    target_modules = [] if len(sys.argv) < 2 else [m for m in modules if not m[2] and m[1] == sys.argv[1]]
     modules = target_modules if len(target_modules) > 0 else modules
 
     # Our tools dictionary

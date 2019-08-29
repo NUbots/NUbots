@@ -12,11 +12,9 @@ from subprocess import call, STDOUT
 
 
 def register(command):
-
-    # Install help
     command.help = "Install the system onto the target system"
 
-    # Drone arguments
+    # Configuration
     command.add_argument("ip_addr", metavar="ip_addr", help="the IP address of the target to install to")
 
     command.add_argument("hostname", metavar="hostname", help="the hostname of the target to install to")

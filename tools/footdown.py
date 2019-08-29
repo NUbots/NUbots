@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow import keras
 import yaml
 from tqdm import tqdm
-from util import nbs_decoder
+import nbs_tools.decoder as nbs_decoder
 import numpy as np
 import re
 
@@ -62,7 +62,7 @@ def displacement(fk):
 def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_delta, accelerometer, gryoscope):
     xs = []
     ys = []
-    for type_name, timestamp, msg in tqdm(nbs_decoder.decode(path), dynamic_ncols=True, unit="packet"):
+    for type_name, timestamp, msg, raw in tqdm(nbs_decoder.decode(path), dynamic_ncols=True, unit="packet"):
         if type_name == "message.input.Sensors":
 
             # Work out how far the foot is from the torso
@@ -106,11 +106,7 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
 
 
 def register(command):
-
-    # Install help
     command.help = "Train a foot down network using sensor data from the legs"
-
-    # Drone arguments
     command.add_argument(
         "data_dir",
         metavar="data_dir",
