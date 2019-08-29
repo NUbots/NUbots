@@ -14,27 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2019 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.motion;
+package message.platform.gazebo;
 
-import "google/protobuf/timestamp.proto";
+import "message/platform/darwin/DarwinSensors.proto";
 
-/**
- * TODO document
- *
- * @author Trent Houliston
- */
-message ServoTarget {
-    google.protobuf.Timestamp time     = 1;
-    uint32                    id       = 2;
-    float                     position = 3;
-    float                     gain     = 4;
-    float                     torque   = 5;
-}
-
-message ServoTargets {
-    repeated ServoTarget targets = 1;
+message RawSensors {
+    // The name of the model in the simulation that these sensors are from
+    string model = 1;
+    // The sensors object for this model
+    platform.darwin.DarwinSensors sensors = 2;
 }
