@@ -88,8 +88,9 @@ if __name__ == "__main__":
         description="This script is an optional helper script for performing common tasks for working with the NUClear roles system."
     )
     subcommands = command.add_subparsers(
-        dest="command", required=True, help="The command to run from the script. See each help for more information."
+        dest="command", help="The command to run from the script. See each help for more information."
     )
+    subcommands.required = True
 
     # Get all of the packages that are in the build tools
     modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
