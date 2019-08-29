@@ -26,4 +26,3 @@ NUCLEAR_ROLE(
     behaviour::skills::DirectWalkController
     behaviour::strategy::KeyboardWalk
 )
-
