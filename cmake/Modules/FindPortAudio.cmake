@@ -1,5 +1,2 @@
-INCLUDE(ToolchainLibraryFinder)
-ToolchainLibraryFinder(NAME PortAudio
-                       HEADER portaudio.h
-                       LIBRARY portaudio
-)
+include(ToolchainLibraryFinder)
+ToolchainLibraryFinder(NAME PortAudio HEADER portaudio.h LIBRARY portaudio)
