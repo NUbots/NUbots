@@ -1,11 +1,11 @@
 # This directory contains our message types and other shared types
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/)
+include_directories(${CMAKE_SOURCE_DIR}/shared/)
 
 # This gets all of our source files
-FILE(GLOB_RECURSE test_src "*/**.cpp" "*/**.h")
+file(GLOB_RECURSE test_src "*/**.cpp" "*/**.h")
 
-ADD_EXECUTABLE(test_utility "${CMAKE_SOURCE_DIR}/tests/test.cpp" ${test_src})
+add_executable(test_utility "${CMAKE_SOURCE_DIR}/tests/test.cpp" ${test_src})
 
-TARGET_LINK_LIBRARIES(test_utility ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
+target_link_libraries(test_utility ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
 
-SET_PROPERTY(TARGET test_utility PROPERTY FOLDER "tests/shared/utility/")
+set_property(TARGET test_utility PROPERTY FOLDER "tests/shared/utility/")
