@@ -7,8 +7,6 @@ from subprocess import call
 
 
 def register(command):
-
-    # Install help
     command.help = "Format all the code in the codebase using clang-format"
 
 
