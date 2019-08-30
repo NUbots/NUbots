@@ -13,10 +13,53 @@ try:
 except:
     client = None
 
+repository = "nubots"
+
 
 def is_docker():
     path = "/proc/self/cgroup"
     return os.path.exists("/.dockerenv") or os.path.isfile(path) and any("docker" in line for line in open(path))
+
+
+def build_platform(platform):
+    tag = "{}:{}".format(repository, platform)
+    dockerdir = os.path.join(b.project_dir, "docker")
+
+    # Build the image
+    stream = client.api.build(
+        path=dockerdir, tag=tag, buildargs={"platform": platform}, quiet=False, pull=True, rm=True, decode=True
+    )
+
+    # Print the progress as it happens
+    for event in stream:
+        if "stream" in event:
+            sys.stdout.write(event["stream"])
+
+
+def get_selected_platform():
+    try:
+        selected = client.images.get("{}:selected".format(repository))
+        names = [
+            t.split(":")[-1]
+            for t in selected.tags
+            if t != "{}:selected".format(repository) and t.startswith("{}:".format(repository))
+        ]
+        if len(names) == 0:
+            print("ERROR the currently selected platform is a dangling tag.")
+            print("      The system is unable to work out what platform this was and will need to be reset")
+            print("      run `./b target {platform}` to correct this")
+            exit(1)
+        elif len(names) == 1:
+            return names[0]
+        else:
+            print("WARNING There are multiple platforms with the same image tag.")
+            print("        The possible tags are [{}]".format(", ".join(names)))
+            platform = list(sorted(names))[0]
+            print("        The platform chosen will be {}".format(platform))
+            return platform
+    except docker.errors.ImageNotFound:
+        print("No platform has been selected yet, defaulting to generic")
+        return "generic"
 
 
 def run_on_docker(func):
@@ -35,7 +78,7 @@ def run_on_docker(func):
             command.add_argument(
                 "--platform",
                 choices=services,
-                default="generic",
+                default="selected",
                 nargs="?",
                 help="The image to use for the docker container",
             )
@@ -52,36 +95,24 @@ def run_on_docker(func):
                 func(rebuild=rebuild, clean=clean, platform=platform, **kwargs)
             # Otherwise go and re-run the b script in docker
             else:
+                # If the platform was "selected" that means to use the currently selected platform
+                if platform == "selected":
+                    platform = get_selected_platform()
+
                 # Check if the image we want exists
-                tag = "nubots:{}".format(platform)
+                tag = "{}:{}".format(repository, platform)
                 try:
-                    img = client.images.get(tag)
+                    client.images.get(tag)
                 except docker.errors.ImageNotFound:
                     print("Could not find the image {}, rebuilding from source".format(tag))
                     rebuild = True
 
                 # If we are requesting a rebuild, then run build
                 if rebuild:
-                    dockerdir = os.path.join(b.project_dir, "docker")
-
-                    # Build the image
-                    stream = client.api.build(
-                        path=dockerdir,
-                        tag=tag,
-                        buildargs={"platform": platform},
-                        quiet=False,
-                        pull=True,
-                        rm=True,
-                        decode=True,
-                    )
-
-                    # Print the progress as it happens
-                    for event in stream:
-                        if "stream" in event:
-                            sys.stdout.write(event["stream"])
+                    build_platform(platform)
 
                 # Find the volume for this platform
-                build_volume_name = "nubots_{}_build".format(platform)
+                build_volume_name = "{}_{}_build".format(repository, platform)
                 try:
                     build_volume = client.volumes.get(build_volume_name)
 
@@ -103,7 +134,7 @@ def run_on_docker(func):
                 container = client.containers.create(
                     tag,
                     command=["{}/b".format(cwd_to_code), *sys.argv[1:]],
-                    working_dir="/home/nubots/NUbots/{}".format(code_to_cwd),
+                    working_dir="/home/{}/{}/{}".format(repository, repository.title(), code_to_cwd),
                     auto_remove=True,
                     tty=True,
                     stdin_open=True,
@@ -113,14 +144,14 @@ def run_on_docker(func):
                         docker.types.Mount(
                             type="bind",
                             source=b.project_dir,
-                            target="/home/nubots/NUbots",
+                            target="/home/{}/{}".format(repository, repository.title()),
                             read_only=True,
                             consistency="cached",
                         ),
                         docker.types.Mount(
                             type="volume",
                             source=build_volume.name,
-                            target="/home/nubots/build",
+                            target="/home/{}/build".format(repository),
                             consistency="delegated",
                         ),
                     ],
