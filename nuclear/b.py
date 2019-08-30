@@ -93,7 +93,7 @@ if __name__ == "__main__":
     subcommands.required = True
 
     # Get all of the packages that are in the build tools
-    modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
+    modules = list(pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path]))
 
     # First we try to see if sys.argv[1] gives us all the information we need
     # If it does we only need to load that module directly
