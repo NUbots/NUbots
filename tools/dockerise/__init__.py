@@ -108,6 +108,7 @@ def run_on_docker(func):
                     tty=True,
                     stdin_open=True,
                     hostname="docker",
+                    network_mode="host",
                     mounts=[
                         docker.types.Mount(
                             type="bind",
