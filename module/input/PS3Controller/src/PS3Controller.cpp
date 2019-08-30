@@ -100,6 +100,10 @@ namespace input {
                     connect();
                 }
             }
+            if ((controller_fd < 0) || (accelerometer_fd < 0)) {
+                log<NUClear::WARN>("Joystick is not valid. Reconnecting.");
+                connect();
+            }
         });
     }
 
@@ -226,20 +230,24 @@ namespace input {
                         log<NUClear::WARN>(fmt::format("Number...: {}", static_cast<int>(event.number)));
                     }
                 }
+                controller_err_reaction = on<IO>(controller_fd, IO::ERROR).then([this] { disconnect(); });
             });
         }
 
         if (accelerometer_fd > -1) {
             // Trigger when the joystick accelerometer has an event to read
-            accelerometer_reaction = on<IO>(accelerometer_fd, IO::READ).then([this] {
+            accelerometer_reaction     = on<IO>(accelerometer_fd, IO::READ).then([this] {
                 // Accelerometer comes in here .... if you know which axis is which
             });
+            accelerometer_err_reaction = on<IO>(accelerometer_fd, IO::ERROR).then([this] { disconnect(); });
         }
     }
 
     void PS3Controller::disconnect() {
         controller_reaction.unbind();
+        controller_err_reaction.unbind();
         accelerometer_reaction.unbind();
+        accelerometer_err_reaction.unbind();
         if (controller_fd != -1) {
             ::close(controller_fd);
             controller_fd = -1;
