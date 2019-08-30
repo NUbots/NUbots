@@ -26,7 +26,7 @@
 
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/input/PS3Controller.h"
+#include "message/input/PSController.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KickCommand.h"
 
@@ -45,14 +45,14 @@ namespace behaviour {
         using extension::ExecuteScriptByName;
 
         using message::behaviour::MotionCommand;
-        using ScriptTriggerEvent = message::input::ps3controller::CircleButton;
-        using TriggerActionEvent = message::input::ps3controller::CrossButton;
-        using LeftKickEvent      = message::input::ps3controller::L1Button;
-        using WalkVelocityEvent  = message::input::ps3controller::LeftJoystick;
-        using RightKickEvent     = message::input::ps3controller::R1Button;
-        using HeadDirectionEvent = message::input::ps3controller::RightJoystick;
-        using HeadControlEvent   = message::input::ps3controller::SquareButton;
-        using WalkControlEvent   = message::input::ps3controller::TriangleButton;
+        using ScriptTriggerEvent = message::input::CircleButton;
+        using TriggerActionEvent = message::input::CrossButton;
+        using LeftKickEvent      = message::input::L1Button;
+        using WalkVelocityEvent  = message::input::LeftJoystick;
+        using RightKickEvent     = message::input::R1Button;
+        using HeadDirectionEvent = message::input::RightJoystick;
+        using HeadControlEvent   = message::input::SquareButton;
+        using WalkControlEvent   = message::input::TriangleButton;
         using message::motion::HeadCommand;
         using message::motion::KickScriptCommand;
 

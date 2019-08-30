@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package message.input.ps3controller;
+package message.input;
 
 message CrossButton {
     // The timestamp of the event in milliseconds
@@ -99,6 +99,28 @@ message SelectButton {
 }
 
 message StartButton {
+    // The timestamp of the event in milliseconds
+    uint32 timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message ShareButton {
+    // The timestamp of the event in milliseconds
+    uint32 timestamp = 1;
+
+    // The state of the button.
+    bool pressed = 2;
+
+    // Is this an initialisation message?
+    bool init = 3;
+}
+
+message OptionsButton {
     // The timestamp of the event in milliseconds
     uint32 timestamp = 1;
 
@@ -238,6 +260,14 @@ message Accelerometer {
 
     // Accelerometer reading [-1, 1]
     float value = 3;
+
+    // Is this an initialisation message?
+    bool init = 4;
+}
+
+message TouchPad {
+    // The timestamp of the event in milliseconds
+    uint32 timestamp = 1;
 
     // Is this an initialisation message?
     bool init = 4;

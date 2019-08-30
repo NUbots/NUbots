@@ -1,4 +1,4 @@
-#include "PS3Controller.h"
+#include "PS4Controller.h"
 
 #include <fcntl.h>
 #include <fmt/format.h>
@@ -21,15 +21,11 @@ namespace input {
         SQUARE         = 3,
         L1             = 4,
         R1             = 5,
-        SELECT         = 8,
-        START          = 9,
+        SHARE          = 8,
+        OPTIONS        = 9,
         PS             = 10,
         JOYSTICK_LEFT  = 11,
         JOYSTICK_RIGHT = 12,
-        DPAD_UP        = 13,
-        DPAD_DOWN      = 14,
-        DPAD_LEFT      = 15,
-        DPAD_RIGHT     = 16
     };
     enum class Axis : uint8_t {
         JOYSTICK_LEFT_HORIZONTAL = 0,
@@ -38,9 +34,12 @@ namespace input {
         JOYSTICK_RIGHT_HORIZONTAL,
         JOYSTICK_RIGHT_VERTICAL,
         R2,
+        DPAD_HORIZONTAL,
+        DPAD_VERTICAL,
         ACCELEROMETER_X = 23,
         ACCELEROMETER_Y,
-        ACCELEROMETER_Z
+        ACCELEROMETER_Z,
+        TOUCHPAD
     };
 
 #pragma pack(push, 1)
@@ -64,20 +63,21 @@ namespace input {
     using message::input::L2Trigger;
     using message::input::LeftJoystick;
     using message::input::LeftJoystickButton;
+    using message::input::OptionsButton;
     using message::input::PSButton;
     using message::input::R1Button;
     using message::input::R2Trigger;
     using message::input::RightJoystick;
     using message::input::RightJoystickButton;
-    using message::input::SelectButton;
+    using message::input::ShareButton;
     using message::input::SquareButton;
-    using message::input::StartButton;
+    using message::input::TouchPad;
     using message::input::TriangleButton;
 
-    PS3Controller::PS3Controller(std::unique_ptr<NUClear::Environment> environment)
+    PS4Controller::PS4Controller(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), controller_fd(-1), accelerometer_fd(-1) {
 
-        on<Configuration>("PS3Controller.yaml").then([this](const Configuration& config) {
+        on<Configuration>("PS4Controller.yaml").then([this](const Configuration& config) {
             // Only reconnect if we are changing the path to the device
             if ((controller_path.compare(config["controller_path"]) != 0)
                 || (accelerometer_path.compare(config["accelerometer_path"]) != 0)) {
@@ -100,10 +100,14 @@ namespace input {
                     connect();
                 }
             }
+            if ((controller_fd < 0) || (accelerometer_fd < 0)) {
+                log<NUClear::WARN>("Joystick is not valid. Reconnecting.");
+                connect();
+            }
         });
     }
 
-    void PS3Controller::connect() {
+    void PS4Controller::connect() {
         // Make sure joystick file descriptors are closed.
         disconnect();
 
@@ -115,7 +119,7 @@ namespace input {
             // Details on Linux Joystick API
             // https://www.kernel.org/doc/Documentation/input/joystick-api.txt
             // Trigger when the joystick has an data to read
-            controller_reaction = on<IO>(controller_fd, IO::READ).then([this] {
+            controller_reaction     = on<IO>(controller_fd, IO::READ).then([this] {
                 // Try to read a JoystickEvent worth of data
                 for (JoystickEvent event;
                      read(controller_fd, &event, sizeof(JoystickEvent)) == sizeof(JoystickEvent);) {
@@ -152,11 +156,11 @@ namespace input {
                             case Button::R1:
                                 emit(std::make_unique<R1Button>(event.timestamp, event.value > 0, is_init));
                                 break;
-                            case Button::SELECT:
-                                emit(std::make_unique<SelectButton>(event.timestamp, event.value > 0, is_init));
+                            case Button::SHARE:
+                                emit(std::make_unique<ShareButton>(event.timestamp, event.value > 0, is_init));
                                 break;
-                            case Button::START:
-                                emit(std::make_unique<StartButton>(event.timestamp, event.value > 0, is_init));
+                            case Button::OPTIONS:
+                                emit(std::make_unique<OptionsButton>(event.timestamp, event.value > 0, is_init));
                                 break;
                             case Button::PS:
                                 emit(std::make_unique<PSButton>(event.timestamp, event.value > 0, is_init));
@@ -166,22 +170,6 @@ namespace input {
                                 break;
                             case Button::JOYSTICK_RIGHT:
                                 emit(std::make_unique<RightJoystickButton>(event.timestamp, event.value > 0, is_init));
-                                break;
-                            case Button::DPAD_UP:
-                                emit(std::make_unique<DPadButton>(
-                                    event.timestamp, DPadButton::Direction::UP, event.value > 0, is_init));
-                                break;
-                            case Button::DPAD_DOWN:
-                                emit(std::make_unique<DPadButton>(
-                                    event.timestamp, DPadButton::Direction::DOWN, event.value > 0, is_init));
-                                break;
-                            case Button::DPAD_LEFT:
-                                emit(std::make_unique<DPadButton>(
-                                    event.timestamp, DPadButton::Direction::LEFT, event.value > 0, is_init));
-                                break;
-                            case Button::DPAD_RIGHT:
-                                emit(std::make_unique<DPadButton>(
-                                    event.timestamp, DPadButton::Direction::RIGHT, event.value > 0, is_init));
                                 break;
                         }
                     }
@@ -211,9 +199,58 @@ namespace input {
                             case Axis::R2:
                                 emit(std::make_unique<R2Trigger>(event.timestamp, normalised, is_init));
                                 break;
+                            case Axis::DPAD_HORIZONTAL:
+                                if (event.value < 0) {
+                                    emit(std::make_unique<DPadButton>(
+                                        event.timestamp, DPadButton::Direction::LEFT, true, is_init));
+                                    dpad_left_pressed = true;
+                                }
+                                else if (event.value > 0) {
+                                    emit(std::make_unique<DPadButton>(
+                                        event.timestamp, DPadButton::Direction::RIGHT, true, is_init));
+                                    dpad_right_pressed = true;
+                                }
+                                else {
+                                    if (dpad_left_pressed) {
+                                        emit(std::make_unique<DPadButton>(
+                                            event.timestamp, DPadButton::Direction::LEFT, false, is_init));
+                                        dpad_left_pressed = false;
+                                    }
+                                    if (dpad_right_pressed) {
+                                        emit(std::make_unique<DPadButton>(
+                                            event.timestamp, DPadButton::Direction::RIGHT, false, is_init));
+                                        dpad_right_pressed = false;
+                                    }
+                                }
+                                break;
+                            case Axis::DPAD_VERTICAL:
+                                if (event.value < 0) {
+                                    emit(std::make_unique<DPadButton>(
+                                        event.timestamp, DPadButton::Direction::UP, true, is_init));
+                                    dpad_up_pressed = true;
+                                }
+                                else if (event.value > 0) {
+                                    emit(std::make_unique<DPadButton>(
+                                        event.timestamp, DPadButton::Direction::DOWN, true, is_init));
+                                    dpad_down_pressed = true;
+                                }
+                                else {
+                                    if (dpad_up_pressed) {
+                                        emit(std::make_unique<DPadButton>(
+                                            event.timestamp, DPadButton::Direction::UP, false, is_init));
+                                        dpad_up_pressed = false;
+                                    }
+                                    if (dpad_down_pressed) {
+                                        emit(std::make_unique<DPadButton>(
+                                            event.timestamp, DPadButton::Direction::DOWN, false, is_init));
+                                        dpad_down_pressed = false;
+                                    }
+                                }
+                                break;
                             case Axis::ACCELEROMETER_X: break;
                             case Axis::ACCELEROMETER_Y: break;
                             case Axis::ACCELEROMETER_Z: break;
+                            case Axis::TOUCHPAD: break;
                         }
                     }
                     else {
@@ -227,19 +264,23 @@ namespace input {
                     }
                 }
             });
+            controller_err_reaction = on<IO>(controller_fd, IO::ERROR).then([this] { disconnect(); });
         }
 
         if (accelerometer_fd > -1) {
             // Trigger when the joystick accelerometer has an event to read
-            accelerometer_reaction = on<IO>(accelerometer_fd, IO::READ).then([this] {
+            accelerometer_reaction     = on<IO>(accelerometer_fd, IO::READ).then([this] {
                 // Accelerometer comes in here .... if you know which axis is which
             });
+            accelerometer_err_reaction = on<IO>(accelerometer_fd, IO::ERROR).then([this] { disconnect(); });
         }
     }
 
-    void PS3Controller::disconnect() {
+    void PS4Controller::disconnect() {
         controller_reaction.unbind();
+        controller_err_reaction.unbind();
         accelerometer_reaction.unbind();
+        accelerometer_err_reaction.unbind();
         if (controller_fd != -1) {
             ::close(controller_fd);
             controller_fd = -1;
