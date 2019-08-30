@@ -21,7 +21,7 @@ def run(args, **kwargs):
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
     # Run cmake if we haven't already
-    if not os.path.isfile("CMakeCache.txt"):
+    if not os.path.isfile("build.ninja"):
         exitcode = os.system("cmake {} -GNinja".format(b.project_dir)) >> 8
 
         # If cmake errors return with its status
