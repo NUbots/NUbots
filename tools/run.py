@@ -21,7 +21,7 @@ def run(args, **kwargs):
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
     # Add 'bin/` to the command (first argument)
-    args[0] = os.path.join('bin', args[0])
+    args[0] = os.path.join("bin", args[0])
 
     # Run the command
     exit(pty.spawn(args) << 8)
