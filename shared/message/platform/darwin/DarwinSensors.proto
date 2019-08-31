@@ -143,11 +143,7 @@ message DarwinSensors {
 }
 
 // Button press events
-message ButtonLeftDown {
-}
-message ButtonLeftUp {
-}
-message ButtonMiddleDown {
-}
-message ButtonMiddleUp {
-}
+message ButtonLeftDown {}
+message ButtonLeftUp {}
+message ButtonMiddleDown {}
+message ButtonMiddleUp {}
