@@ -14,27 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2019 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.motion;
+package message.platform.gazebo;
 
-import "google/protobuf/timestamp.proto";
+import "Matrix.proto";
+import "Vector.proto";
 
-/**
- * TODO document
- *
- * @author Trent Houliston
- */
-message ServoTarget {
-    google.protobuf.Timestamp time     = 1;
-    uint32                    id       = 2;
-    float                     position = 3;
-    float                     gain     = 4;
-    float                     torque   = 5;
-}
-
-message ServoTargets {
-    repeated ServoTarget targets = 1;
+message Torso {
+    // The name of the model in the simulation that this position is for
+    string model = 1;
+    // The transform from world space to torso space
+    mat4 Htw = 2;
+    // Angular velocity of torso in world space
+    vec3 omegaTw = 3;
+    // Angular acceleration of torso in world space
+    vec3 alphaTw = 4;
+    // Linear velocity of torso in world space
+    vec3 vTw = 5;
+    // Linear acceleration of torso in world space
+    vec3 aTw = 6;
 }
