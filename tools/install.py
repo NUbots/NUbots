@@ -50,9 +50,9 @@ def run(target, user, config, toolchain, **kwargs):
         # Get all of our required shared libraries in our toolchain and send them
         # Only send toolchain files if ours are newer than the receivers.
         cprint("Installing toolchain library files", "blue", attrs=["bold"])
-        subprocess.call(["rsync", "-avzuPl", "--checksum", "-e ssh", "/usr/local" "/usr"])
+        subprocess.call(["rsync", "-avzuPl", "--checksum", "--delete", "-e ssh", "/usr/local" "/usr"])
 
-    # Get list of config files.
+    # Get list of config files
     config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]]
 
     if config in ["overwrite", "o"]:
