@@ -9,6 +9,7 @@
         "galarius.vscode-opencl",
         "ms-python.python",
         "ms-vscode-remote.remote-containers",
-        "zxh404.vscode-proto3"
+        "zxh404.vscode-proto3",
+        "redhat.vscode-yaml"
     ]
 }
