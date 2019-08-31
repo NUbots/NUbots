@@ -18,4 +18,4 @@ def run(**kwargs):
             for f in fnames:
                 if f.endswith((".h", ".c", ".cc", ".cxx", ".cpp", ".hpp", ".ipp", ".proto")):
                     print("Formatting", f)
-                    call(["clang-format-6.0", "-i", "-style=file", os.path.join(dirpath, f)])
+                    call(["clang-format", "-i", "-style=file", os.path.join(dirpath, f)])
