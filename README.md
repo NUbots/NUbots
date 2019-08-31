@@ -17,14 +17,36 @@ Below are instructions on how to setup a computer to build the codebase ready to
 
 ## Ubuntu
 
-TODO
+---
+**NOTE**
+If you are using anything other than Ubuntu (or Linux Mint) we assume that you know what you are doing and know how to modify the following commands appropriately
+
+---
+
+1. Install git, python3, and docker
+```sh
+sudo apt install python3 python3-pip git docker-compose
+```
+2. Add current user to the docker group (to allow non-root usage of docker)
+```sh
+sudo usermod -aG docker "${USER}"
+```
+Reboot to make the group change take effect
+3. Download the codebase
+```sh
+git clone https://github.com/NUbots/NUbots.git
+```
+4. Install the required python dependencies
+```sh
+sudo -H pip3 install -r NUbots/requirements.txt
+```
 
 ## Mac OSX
 
 The easiest way to install most of the requirements for developing on Mac OSX is to use [Homebrew](https://brew.sh/) to install the dependencies.
 
 1. Install homebrew by following the directions at https://brew.sh/
-2. Install git, python3 and docker
+2. Install git, python3, and docker
 ```sh
 brew install git python3
 brew cask install docker
