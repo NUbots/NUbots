@@ -2,8 +2,21 @@
 
 check_formatting() {
     echo "Validating formatting for $1"
+
+    # This option means that it will return the exit-code of the first nonzero command
+    # Or if all are 0 return 0. This ensures that if any of the commands here fail the
+    # formatting test will still fail
+    set -o pipefail
+
+    # Check the formatting
     clang-format -style=file "$1" | colordiff --color=yes -u "$1" -
-    return $?
+
+    # Return 1 on failure, 0 on success
+    if [ $? -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 export -f check_formatting
 
