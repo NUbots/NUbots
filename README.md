@@ -85,7 +85,13 @@ This will build the codebase for the currently selected platform.
 If you had not run configure first, this will also configure the code with a default set of options.
 
 ## Running the code on the local computer
-TODO
+Once you have built code in the local docker container, you may want to run binaries that do not depend on the robots hardware.
+For example those that use gazebo simulations.
+To run commands like these you use the run command of b.
+For example, to run the nusighttest binary run:
+```sh
+./b run nusighttest
+```
 
 ## Installing the code on a robot
 To install the code on a robot you should use the install command of the b script.
