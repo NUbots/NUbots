@@ -19,13 +19,23 @@ Below are instructions on how to setup a computer to build the codebase ready to
 
 ---
 **NOTE**
-If you are using anything other than Ubuntu (or Linux Mint) we assume that you know what you are doing and know how to modify the following commands appropriately
+If you are using anything other than Ubuntu we assume that you know what you are doing and know how to modify the following commands appropriately
 
 ---
 
-1. Install git, python3, and docker
+1. Install git and python3
 ```sh
-sudo apt install python3 python3-pip git docker-compose
+sudo apt install python3 python3-pip git
+```
+2. Setup the docker apt repository and install docker
+```sh
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
 2. Add current user to the docker group (to allow non-root usage of docker)
 ```sh
