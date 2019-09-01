@@ -23,30 +23,30 @@ If you are using anything other than Ubuntu we assume that you know what you are
 
 ---
 
-1. Install git and python3
-```sh
-sudo apt install python3 python3-pip git
-```
-2. Setup the docker apt repository and install docker
+1. Add the universe and docker repositories
 ```sh
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
+sudo add-apt-repository universe
 sudo apt update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
-2. Add current user to the docker group (to allow non-root usage of docker)
+2. Install docker, git, and python3
+```sh
+sudo apt install docker-ce docker-ce-cli containerd.io python3 python3-pip git
+```
+3. Add current user to the docker group (to allow non-root usage of docker)
 ```sh
 sudo usermod -aG docker "${USER}"
 ```
-Reboot to make the group change take effect
-3. Download the codebase
+4. Reboot (or log out and log back in) to make the group change take effect
+5. Download the codebase
 ```sh
 git clone https://github.com/NUbots/NUbots.git
 ```
-4. Install the required python dependencies
+6. Install the required python dependencies
 ```sh
 sudo -H pip3 install -r NUbots/requirements.txt
 ```
