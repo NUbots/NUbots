@@ -158,7 +158,8 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
     cd build
 
     # Configure using cmake
-    cmake .. ${ARGS} \
+    cmake .. -GNinja \
+        ${ARGS} \
         -DCMAKE_BUILD_TYPE="Release" \
         -DCMAKE_C_FLAGS="${EXTRA_CFLAGS} ${CFLAGS}" \
         -DCMAKE_CXX_FLAGS="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
@@ -167,11 +168,11 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
         -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
         -Wno-dev
 
-    # Run make
-    make -j$(nproc)
+    # Run ninja
+    ninja
 
-    # Run make install
-    make install
+    # Run ninja install
+    ninja install
 
 # We are using Boost.Build
 elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
