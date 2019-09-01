@@ -78,6 +78,61 @@ ARG platform=generic
 COPY --chown=nubots:nubots usr/local/toolchain/${platform}.sh /usr/local/toolchain.sh
 COPY --chown=nubots:nubots usr/local/meson/${platform}.cross /usr/local/meson.cross
 
+# Intel Compute Runtime (OpenCL) and Intel Media Driver
+RUN install-package llvm \
+    clang \
+    libva \
+    libpciaccess \
+    ruby
+RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
+    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
+    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
+    --
+RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
+    https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
+    https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
+    -- \
+    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+    -DSPIRV_TRANSLATOR_DIR=/usr/local \
+    -DLLVM_NO_DEAD_STRIP=ON
+COPY --chown=nubots:nubots usr/local/package/intel-graphics-compiler/python3.patch /usr/local/package/intel-graphics-compiler/
+RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
+    /usr/local/package/intel-graphics-compiler/python3.patch \
+    -- \
+    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
+    -DIGC_PREFERRED_LLVM_VERSION='8.0.0'
+RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
+    -DRUN_TEST_SUITE=OFF
+COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
+COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime/install-from-source /usr/local/package/intel-compute-runtime.sh
+RUN /usr/local/package/intel-compute-runtime.sh \
+    https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
+    -DNEO_DRIVER_VERSION=19.32.13826 \
+    -DSKIP_ALL_ULT=ON \
+    -DSKIP_UNIT_TESTS=ON \
+    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
+COPY --chown=nubots:nubots usr/local/package/opencl-headers/install-from-source /usr/local/package/opencl-headers.sh
+RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
+COPY --chown=nubots:nubots usr/local/package/opencl-clhpp/install-from-source /usr/local/package/opencl-clhpp.sh
+RUN /usr/local/package/opencl-clhpp.sh https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz
+COPY --chown=nubots:nubots usr/local/package/ocl-icd/install-from-source /usr/local/package/ocl-icd.sh
+RUN /usr/local/package/ocl-icd.sh https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
+    -DINSTALL_DRIVER_SYSCONF=OFF \
+    -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
+    -DMEDIA_RUN_TEST_SUITE=OFF \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_KERNELS=ON \
+    -DENABLE_KERNELS=ON \
+    -DENABLE_NONFREE_KERNELS=ON \
+    -DBUILD_TYPE=Release
+RUN install-from-source https://github.com/Intel-Media-SDK/MediaSDK/archive/intel-mediasdk-19.2.1.tar.gz \
+    -DENABLE_OPENCL=ON \
+    -DBUILD_RUNTIME=ON \
+    -DBUILD_SAMPLES=OFF \
+    -DBUILD_TESTS=OFF \
+    -DBUILD_TOOLS=OFF
+
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
@@ -163,61 +218,6 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/m
     --without-system-libunwind \
     --enable-shared \
     --enable-static
-
-# Intel Compute Runtime (OpenCL) and Intel Media Driver
-RUN install-package llvm \
-    clang \
-    libva \
-    libpciaccess \
-    ruby
-RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
-    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
-    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
-    --
-RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
-    https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
-    https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
-    -- \
-    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DSPIRV_TRANSLATOR_DIR=/usr/local \
-    -DLLVM_NO_DEAD_STRIP=ON
-COPY --chown=nubots:nubots usr/local/package/intel-graphics-compiler/python3.patch /usr/local/package/intel-graphics-compiler/
-RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
-    /usr/local/package/intel-graphics-compiler/python3.patch \
-    -- \
-    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='8.0.0'
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
-    -DRUN_TEST_SUITE=OFF
-COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
-COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime/install-from-source /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh \
-    https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
-    -DNEO_DRIVER_VERSION=19.32.13826 \
-    -DSKIP_ALL_ULT=ON \
-    -DSKIP_UNIT_TESTS=ON \
-    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
-COPY --chown=nubots:nubots usr/local/package/opencl-headers/install-from-source /usr/local/package/opencl-headers.sh
-RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
-COPY --chown=nubots:nubots usr/local/package/opencl-clhpp/install-from-source /usr/local/package/opencl-clhpp.sh
-RUN /usr/local/package/opencl-clhpp.sh https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz
-COPY --chown=nubots:nubots usr/local/package/ocl-icd/install-from-source /usr/local/package/ocl-icd.sh
-RUN /usr/local/package/ocl-icd.sh https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
-RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
-    -DINSTALL_DRIVER_SYSCONF=OFF \
-    -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
-    -DMEDIA_RUN_TEST_SUITE=OFF \
-    -DBUILD_TESTING=OFF \
-    -DBUILD_KERNELS=ON \
-    -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON \
-    -DBUILD_TYPE=Release
-RUN install-from-source https://github.com/Intel-Media-SDK/MediaSDK/archive/intel-mediasdk-19.2.1.tar.gz \
-    -DENABLE_OPENCL=ON \
-    -DBUILD_RUNTIME=ON \
-    -DBUILD_SAMPLES=OFF \
-    -DBUILD_TESTS=OFF \
-    -DBUILD_TOOLS=OFF
 
 # Install python libraries
 RUN pip install \
