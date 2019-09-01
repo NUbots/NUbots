@@ -15,7 +15,7 @@ echo "LANG=en_AU.UTF-8" > /etc/locale.conf
 echo "igus${ROBOT_NUMBER}" > /etc/hostname
 echo "127.0.0.1       localhost" >> /etc/hosts
 echo "::1             localhost" >> /etc/hosts
-echo "127.0.1.1       igus${ROBOT_NUMBER}.localdomain igus${ROBOT_NUMBER}" >> /etc/hosts
+echo "127.0.1.1       igus${ROBOT_NUMBER}" >> /etc/hosts
 
 #########
 # USERS #
@@ -34,6 +34,10 @@ echo "root: " | chpasswd
 
 # Set the user password
 echo "nubots: " | chpasswd
+
+##############
+# BOOTLOADER #
+##############
 
 # Install the intel microcode
 pacman -S --noconfirm --needed intel-ucode
@@ -192,7 +196,7 @@ pacman -Syu
 
 # Populate udev rules.
 cat << EOF > /etc/udev/rules.d/100-nubots.rules
-# Set permissions for ttyUSB0 (CM730) and video* (webcam) devices
+# Set permissions for ttyUSB0 (CM740) and video* (webcam) devices
 KERNEL=="ttyUSB*", MODE="0666"
 KERNEL=="video*", MODE="0666"
 

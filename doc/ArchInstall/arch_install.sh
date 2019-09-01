@@ -17,9 +17,9 @@ do
 done
 
 # Setup partitions
-parted ${DRIVE} mklabel gpt
-parted ${DRIVE} mkpart primary fat32 1MiB 261MiB
-parted ${DRIVE} mkpart primary ext4 261MiB 100%
+parted -s ${DRIVE} mklabel gpt
+parted -s ${DRIVE} mkpart primary fat32 1MiB 261MiB
+parted -s ${DRIVE} mkpart primary ext4 261MiB 100%
 
 # Format partitions
 mkfs.fat ${BOOT}
