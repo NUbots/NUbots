@@ -48,7 +48,7 @@ grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB 
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Install system utilities
-pacman -S --noconfirm --needed openssh vim nano screen htop gdb linux-headers-generic bluez bluez-utils
+pacman -S --noconfirm --needed wpa_supplicant openssh vim nano wget screen htop gdb linux-headers bluez bluez-utils
 
 ##############
 # NETWORKING #
@@ -66,13 +66,13 @@ wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/ampscii.py -O banner/ampscii.py
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/bigtext.py -O banner/bigtext.py
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/cmake/banner.png -O banner.png
-cat << EOF > banner.py
+cat << EOF > generate_banner.py
 from banner import ampscii
 from banner import bigtext
 
 banner = ampscii("banner.png")
 banner_lines = banner.replace("\x1b", "\\x1b").split("\n")[:-1]
-role_banner_lines = bigtext(os.path.splitext(os.path.basename(role_name))[0]).split("\n")[:-1]
+role_banner_lines = bigtext("igus${ROBOT_NUMBER}").split("\n")[:-1]
 
 with open("/etc/nubots_issue", "w") as f:
     for l in banner_lines:
@@ -80,8 +80,8 @@ with open("/etc/nubots_issue", "w") as f:
     for l in role_banner_lines:
         role_file.write('{}\n'.format(l))
 EOF
-python ./banner.py
-rm -rf banner*
+python ./generate_banner.py
+rm -rf banner* generate_banner.py
 pacman -Rs --noconfirm python-pillow
 
 # Setup the fallback ethernet DHCP connection
