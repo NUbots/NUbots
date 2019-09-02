@@ -126,12 +126,6 @@ RUN install-from-source https://github.com/intel/media-driver/archive/intel-medi
     -DENABLE_KERNELS=ON \
     -DENABLE_NONFREE_KERNELS=ON \
     -DBUILD_TYPE=Release
-RUN install-from-source https://github.com/Intel-Media-SDK/MediaSDK/archive/intel-mediasdk-19.2.1.tar.gz \
-    -DENABLE_OPENCL=ON \
-    -DBUILD_RUNTIME=ON \
-    -DBUILD_SAMPLES=OFF \
-    -DBUILD_TESTS=OFF \
-    -DBUILD_TOOLS=OFF
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
