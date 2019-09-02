@@ -22,7 +22,7 @@ echo "127.0.1.1       igus${ROBOT_NUMBER}" >> /etc/hosts
 #########
 
 # Install sudo
-pacman -S sudo
+pacman -S --noconfirm --needed sudo
 
 # Setup users of the wheel group to be able to execute sudo commands
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+ALL\)/\1/' /etc/sudoers
@@ -60,7 +60,7 @@ systemctl enable sshd@.service
 
 # Setup the ssh issue file
 echo "Banner /etc/nubots_issue" >> /etc/ssh/sshd_config
-pacman -S python-pillow
+pacman -S --noconfirm --needed python-pillow
 mkdir banner
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/__init__.py -O banner/__init__.py
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/ampscii.py -O banner/ampscii.py
@@ -82,8 +82,7 @@ with open("/etc/nubots_issue", "w") as f:
 EOF
 python ./banner.py
 rm -rf banner*
-pacman -R python-pillow
-pacman -Qdt
+pacman -Rs --noconfirm python-pillow
 
 # Setup the fallback ethernet DHCP connection
 cat << EOF > /etc/systemd/network/99-eno1-dhcp.network
@@ -189,7 +188,7 @@ systemctl enable wpa_supplicant
 systemctl enable wpa_supplicant@wlp58s0
 
 # Link to the resolve.conf from system.d
-ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 # Update pacman now that we have internet
 pacman -Syu
