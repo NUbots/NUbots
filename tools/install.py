@@ -57,6 +57,9 @@ def run(target, user, config, toolchain, **kwargs):
     # Get list of config files
     config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]]
 
+    # Change to the build directory so our relative paths are correct
+    os.chdir(build_dir)
+
     if config in ["overwrite", "o"]:
         cprint("Overwriting configuration files on target", "blue", attrs=["bold"])
         subprocess.call(["rsync", "-avzPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
