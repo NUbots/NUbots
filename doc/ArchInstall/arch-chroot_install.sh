@@ -225,6 +225,26 @@ echo -e "/usr/local/lib\n/usr/local/lib64" > /etc/ld.so.conf.d/usrlocal.conf
 sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
 ldconfig
 
+#############
+# ZSH SHELL #
+#############
+
+# Install zsh and git
+pacman -S --noconfirm --needed zsh git
+
+# Download zprezto to the nubots home directory
+cd /home/nubots
+git clone --recursive https://github.com/sorin-ionescu/prezto.git .zprezto
+for f in .zprezto/runcoms/*; do
+    ln -s $f .$(basename $f)
+done
+
+# Change nubots shell to zsh
+chsh -s /usr/bin/zsh nubots
+
+# Fix all the permissions we just broke
+chown -R nubots:nubots /home/nubots
+
 # Change ownership on /usr/local
 chown -R nubots:nubots /usr/local
 
