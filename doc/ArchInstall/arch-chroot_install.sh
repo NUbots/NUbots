@@ -12,10 +12,10 @@ locale-gen
 echo "LANG=en_AU.UTF-8" > /etc/locale.conf
 
 # Setup hostname
-echo "igus${ROBOT_NUMBER}" > /etc/hostname
+echo "nugus${ROBOT_NUMBER}" > /etc/hostname
 echo "127.0.0.1       localhost" >> /etc/hosts
 echo "::1             localhost" >> /etc/hosts
-echo "127.0.1.1       igus${ROBOT_NUMBER}" >> /etc/hosts
+echo "127.0.1.1       nugus${ROBOT_NUMBER}" >> /etc/hosts
 
 #########
 # USERS #
@@ -24,13 +24,13 @@ echo "127.0.1.1       igus${ROBOT_NUMBER}" >> /etc/hosts
 # Install sudo
 pacman -S --noconfirm --needed sudo
 
-# Setup users of the wheel group to be able to execute sudo commands
-sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+ALL\)/\1/' /etc/sudoers
-groupadd pgrimaging
-useradd -m -G wheel,lp,pgrimaging nubots
+# Setup users of the wheel group to be able to execute sudo commands with no password
+sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+groupadd u3v
+useradd -m -G wheel,lp,u3v nubots
 
-# Set the root password
-echo "root: " | chpasswd
+# Lock the root account
+passwd -l root
 
 # Set the user password
 echo "nubots: " | chpasswd
@@ -56,7 +56,6 @@ pacman -S --noconfirm --needed wpa_supplicant openssh vim nano wget screen htop 
 
 # Enable the ssh server
 systemctl enable sshd.socket
-systemctl enable sshd@.service
 
 # Setup the ssh issue file
 echo "Banner /etc/nubots_issue" >> /etc/ssh/sshd_config

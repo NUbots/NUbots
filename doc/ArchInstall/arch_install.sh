@@ -10,12 +10,6 @@ DRIVE="/dev/nvme0n1"
 BOOT="${DRIVE}p1"
 ROOT="${DRIVE}p2"
 
-# Remove all existing partitions
-for v_partition in $(parted -s ${DRIVE} print|awk '/^ / {print $1}')
-do
-    parted -s ${DRIVE} rm ${v_partition}
-done
-
 # Setup partitions
 parted -s ${DRIVE} mklabel gpt
 parted -s ${DRIVE} mkpart primary fat32 1MiB 261MiB
