@@ -230,7 +230,7 @@ ldconfig
 #############
 
 # Install zsh and git
-pacman -S --noconfirm --needed zsh git
+pacman -S --noconfirm --needed zsh zsh-completions git
 
 # Download zprezto to the nubots home directory
 cd /home/nubots
