@@ -75,9 +75,9 @@ role_banner_lines = bigtext("igus${ROBOT_NUMBER}").split("\n")[:-1]
 
 with open("/etc/nubots_issue", "w") as f:
     for l in banner_lines:
-        role_file.write('{}\n'.format(l))
+        f.write('{}\n'.format(l))
     for l in role_banner_lines:
-        role_file.write('{}\n'.format(l))
+        f.write('{}\n'.format(l))
 EOF
 python ./generate_banner.py
 rm -rf banner* generate_banner.py
