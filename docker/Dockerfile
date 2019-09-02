@@ -101,12 +101,12 @@ RUN install-from-source-with-patches https://github.com/intel/intel-graphics-com
     -- \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='8.0.0'
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.3.tar.gz \
+RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.4.tar.gz \
     -DRUN_TEST_SUITE=OFF
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime/install-from-source /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh \
-    https://github.com/intel/compute-runtime/archive/19.32.13826/intel-compute-runtime-19.32.13826.tar.gz \
+    https://github.com/intel/compute-runtime/archive/19.34.13959.tar.gz \
     -DNEO_DRIVER_VERSION=19.32.13826 \
     -DSKIP_ALL_ULT=ON \
     -DSKIP_UNIT_TESTS=ON \
@@ -142,7 +142,7 @@ COPY --chown=nubots:nubots usr/local/package/openblas/${platform}.sh usr/local/p
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 
 # Armadillo
-RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.600.6.tar.xz \
+RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.700.2.tar.xz \
     -DDETECT_HDF5=OFF \
     -DBUILD_SHARED_LIBS=ON
 COPY --chown=nubots:nubots usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
@@ -173,7 +173,7 @@ RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.
     -DBUILD_SHARED_LIBS=OFF
 
 # fmt formatting library
-RUN  install-from-source https://github.com/fmtlib/fmt/archive/5.3.0.tar.gz \
+RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.0.0.tar.gz \
     -DFMT_DOC=OFF \
     -DFMT_TEST=OFF
 
@@ -181,7 +181,7 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/5.3.0.tar.gz \
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
 
 # Aravis
-RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz --with-zlib=/usr/local --without-python
+RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.7.tar.gz --with-zlib=/usr/local --without-python
 RUN install-from-source https://github.com/libffi/libffi/archive/v3.3-rc0.tar.gz
 RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.34/util-linux-2.34.tar.xz \
     --disable-all-programs \
@@ -193,7 +193,7 @@ RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/gli
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
-RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_6_3.tar.gz \
+RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_6_4.tar.gz \
     -Ddefault_library=both \
     -Dviewer=false \
     -Dgst-plugin=false \
