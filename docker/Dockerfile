@@ -242,8 +242,8 @@ RUN install-package \
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
-COPY --chown=nubots:nubots home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
-RUN chmod 600 /home/nubots/.ssh/id_rsa
+COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
+RUN chmod 600 /home/nubots/.ssh /id_rsa/home/nubots/.ssh/config
 
 # Setup the locations where we will mount our folders
 RUN mkdir -p /home/nubots/NUbots
