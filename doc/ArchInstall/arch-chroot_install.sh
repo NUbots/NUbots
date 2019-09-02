@@ -48,7 +48,7 @@ grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB 
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Install system utilities
-pacman -S --noconfirm --needed wpa_supplicant openssh vim nano wget screen htop gdb linux-headers bluez bluez-utils
+pacman -S --noconfirm --needed wpa_supplicant openssh vim nano wget screen htop gdb linux-headers bluez bluez-utils rsync
 
 ##############
 # NETWORKING #
