@@ -27,7 +27,7 @@ if os.path.isfile("CMakeCache.txt"):
 
 # Look for a build directory
 else:
-    dirs = ["build"]
+    dirs = ["build", os.path.join(os.pardir, "build")]
     try:
         dirs.extend([os.path.join("build", f) for f in os.listdir("build")])
     except FileNotFoundError:

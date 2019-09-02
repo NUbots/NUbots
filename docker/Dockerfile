@@ -232,6 +232,7 @@ RUN install-package \
     arm-none-eabi-gcc \
     arm-none-eabi-newlib \
     openssh \
+    rsync \
     gdb \
     valgrind \
     colordiff \
