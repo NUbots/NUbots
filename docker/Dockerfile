@@ -237,9 +237,9 @@ RUN install-package \
     parallel
 
 # Copy ssh keys over to the system
-COPY home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
-COPY home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
-COPY home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
+COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
+COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
+COPY --chown=nubots:nubots home/nubots/.ssh/ssh_config /home/nubots/.ssh/ssh_config
 
 # Setup the locations where we will mount our folders
 RUN mkdir -p /home/nubots/NUbots
