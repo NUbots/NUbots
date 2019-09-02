@@ -51,7 +51,7 @@ def run(target, user, config, toolchain, **kwargs):
         # Only send toolchain files if ours are newer than the receivers.
         cprint("Installing toolchain library files", "blue", attrs=["bold"])
         subprocess.call(
-            ["rsync", "-avzPLR", "--checksum", "--delete", "-e ssh", "/usr/local", "{0}@{1}:/usr".format(user, target)]
+            ["rsync", "-avzPl", "--checksum", "--delete", "-e ssh", "/usr/local", "{0}@{1}:/usr".format(user, target)]
         )
 
     # Get list of config files
