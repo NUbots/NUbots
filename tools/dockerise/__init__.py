@@ -134,7 +134,7 @@ def run_on_docker(func):
                 container = client.containers.create(
                     tag,
                     command=["{}/b".format(cwd_to_code), *sys.argv[1:]],
-                    working_dir="/home/{}/{}/{}".format(repository, repository.title(), code_to_cwd),
+                    working_dir="/home/{}/{}/{}".format(repository, "NUbots", code_to_cwd),
                     auto_remove=True,
                     tty=True,
                     stdin_open=True,
@@ -144,7 +144,7 @@ def run_on_docker(func):
                         docker.types.Mount(
                             type="bind",
                             source=b.project_dir,
-                            target="/home/{}/{}".format(repository, repository.title()),
+                            target="/home/{}/{}".format(repository, "NUbots"),
                             read_only=True,
                             consistency="cached",
                         ),
