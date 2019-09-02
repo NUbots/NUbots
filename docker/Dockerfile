@@ -223,6 +223,7 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/m
 RUN pip install \
     cmake-format \
     black \
+    termcolor \
     stringcase \
     Pillow
 
