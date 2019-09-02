@@ -69,15 +69,10 @@ cat << EOF > generate_banner.py
 from banner import ampscii
 from banner import bigtext
 
-banner = ampscii("banner.png")
-banner_lines = banner.replace("\x1b", "\\x1b").split("\n")[:-1]
-role_banner_lines = bigtext("igus${ROBOT_NUMBER}").split("\n")[:-1]
-
 with open("/etc/nubots_issue", "w") as f:
-    for l in banner_lines:
-        f.write('{}\n'.format(l))
-    for l in role_banner_lines:
-        f.write('{}\n'.format(l))
+    f.write(ampscii("banner.png"))
+    f.write(bigtext("NUgus ${ROBOT_NUMBER}"))
+
 EOF
 python ./generate_banner.py
 rm -rf banner* generate_banner.py
@@ -186,14 +181,11 @@ systemctl enable systemd-resolved.service
 systemctl enable wpa_supplicant
 systemctl enable wpa_supplicant@wlp58s0
 
-# Link to the resolve.conf from system.d
-ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-
 # Update pacman now that we have internet
 pacman -Syu
 
 # Populate udev rules.
-cat << EOF > /etc/udev/rules.d/100-nubots.rules
+cat << EOF > /etc/udev/rules.d/10-nubots.rules
 # Set permissions for ttyUSB0 (CM740) and video* (webcam) devices
 KERNEL=="ttyUSB*", MODE="0666"
 KERNEL=="video*", MODE="0666"
@@ -201,8 +193,8 @@ KERNEL=="video*", MODE="0666"
 # Symlink the CM740 device to /dev/CM740
 KERNEL=="ttyUSB*", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666", SYMLINK+="CM740"
 
-# Make sure the USB devices end up in the pgrimaging group.
-SUBSYSTEM=="usb", GROUP="pgrimaging"
+# Make sure FLIR cameras end up in the u3v group
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1e10", GROUP="u3v"
 EOF
 
 # Install robocup.service to allow robocup to autostart
@@ -231,6 +223,7 @@ echo -e "/usr/local/lib\n/usr/local/lib64" > /etc/ld.so.conf.d/usrlocal.conf
 
 # Make sure python checks /usr/local for packages
 sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
+ldconfig
 
 # Change ownership on /usr/local
 chown -R nubots:nubots /usr/local
