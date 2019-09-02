@@ -96,7 +96,8 @@ def run_on_docker(func):
             # Otherwise go and re-run the b script in docker
             else:
                 # If the platform was "selected" that means to use the currently selected platform
-                if platform == "selected":
+                selected_platform = platform == "selected"
+                if selected_platform:
                     platform = get_selected_platform()
 
                 # Check if the image we want exists
@@ -110,6 +111,9 @@ def run_on_docker(func):
                 # If we are requesting a rebuild, then run build
                 if rebuild:
                     build_platform(platform)
+                    # If we were building the selected platform we have to move our selected tag up
+                    if selected_platform:
+                        client.images.get(tag).tag(repository, "selected")
 
                 # Find the volume for this platform
                 build_volume_name = "{}_{}_build".format(repository, platform)
