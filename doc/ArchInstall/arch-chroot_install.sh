@@ -45,6 +45,8 @@ pacman -S --noconfirm --needed intel-ucode
 # Install grub
 pacman -S --noconfirm --needed grub efibootmgr
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --removable
+sed 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' -i /etc/default/grub
+sed 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=hidden/' -i /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Install system utilities
