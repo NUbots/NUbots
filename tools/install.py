@@ -3,6 +3,7 @@
 import os
 import glob
 import b
+import re
 from dockerise import run_on_docker
 
 from termcolor import cprint
@@ -50,9 +51,27 @@ def run(target, user, config, toolchain, **kwargs):
         # Get all of our required shared libraries in our toolchain and send them
         # Only send toolchain files if ours are newer than the receivers.
         cprint("Installing toolchain library files", "blue", attrs=["bold"])
+
         subprocess.call(
-            ["rsync", "-avzPl", "--checksum", "--delete", "-e ssh", "/usr/local", "{0}@{1}:/usr".format(user, target)]
+            [
+                "rsync",
+                "-avzlP",
+                "--include=local",
+                "--include=local/lib",
+                "--include=local/lib/**/",
+                "--include=local/lib/**.so",
+                "--include=local/lib/**.so.*",
+                "--include=local/lib/python3.7/**",
+                "--exclude=*",
+                "--checksum",
+                "--delete",
+                "--prune-empty-dirs",
+                "-e ssh",
+                "/usr/local",
+                "{0}@{1}:/usr/".format(user, target),
+            ]
         )
+    exit(1)
 
     # Get list of config files
     config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]]
@@ -76,7 +95,9 @@ def run(target, user, config, toolchain, **kwargs):
         cprint("Ignoring configuration changes", "blue", attrs=["bold"])
 
     # Pipe the git commit to file
-    with open(os.path.join(build_dir, "version.txt"), "w") as f:
+    version_file = os.path.join(build_dir, "version.txt")
+    with open(version_file, "w") as f:
+        os.chdir(b.project_dir)
         subprocess.call(["git", "log", "-1"], stdout=f)
 
-    subprocess.call(["rsync", "-avzPLR", "--checksum", "-e ssh", "version.txt", target_dir])
+    subprocess.call(["scp", version_file, target_dir])
