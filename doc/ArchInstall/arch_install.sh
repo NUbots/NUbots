@@ -18,7 +18,7 @@ parted -s ${DRIVE} mkpart primary ext4 261MiB 100%
 
 # Format partitions
 mkfs.fat ${BOOT}
-mkfs.ext4 ${ROOT}
+mkfs.ext4 -F ${ROOT}
 
 #################
 # BOOTSTRAPPING #
