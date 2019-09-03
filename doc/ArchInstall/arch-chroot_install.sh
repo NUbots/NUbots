@@ -247,8 +247,13 @@ chown -R nubots:nubots /home/nubots
 # Change ownership on /usr/local
 chown -R nubots:nubots /usr/local
 
+# Download the post-install script into chroot drive
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/arch-post_install.sh \
+    -O /arch-post_install.sh
+chmod +x /arch-post_install.sh
+
 echo ""
-echo "######################################################################################"
-echo "# New system is now configured. Run the following commands then unplug the USB drive #"
-echo "# umount /mnt/boot/efi && umount /mnt && reboot                                      #"
-echo "######################################################################################"
+echo "#####################################################################################"
+echo "# New system is now configured. Run the following command then unplug the USB drive #"
+echo "# /mnt/arch-post_install.sh                                                         #"
+echo "#####################################################################################"
