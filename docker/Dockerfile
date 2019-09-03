@@ -78,6 +78,9 @@ ARG platform=generic
 COPY --chown=nubots:nubots usr/local/toolchain/${platform}.sh /usr/local/toolchain.sh
 COPY --chown=nubots:nubots usr/local/meson/${platform}.cross /usr/local/meson.cross
 
+# zlib
+RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
+
 # Intel Compute Runtime (OpenCL), libva and Intel Media Driver (VAAPI)
 RUN install-package ruby
 RUN install-cmake-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/llvm-8.0.1.src.tar.xz
@@ -129,9 +132,6 @@ RUN install-from-source https://github.com/intel/media-driver/archive/intel-medi
     -DENABLE_KERNELS=ON \
     -DENABLE_NONFREE_KERNELS=ON \
     -DBUILD_TYPE=Release
-
-# zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # OpenBLAS
 RUN install-package gcc-fortran
