@@ -71,7 +71,6 @@ def run(target, user, config, toolchain, **kwargs):
                 "{0}@{1}:/usr/".format(user, target),
             ]
         )
-    exit(1)
 
     # Get list of config files
     config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]]
