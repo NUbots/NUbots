@@ -58,7 +58,6 @@ pacman -S --noconfirm --needed wpa_supplicant openssh vim nano wget screen htop 
 systemctl enable sshd.socket
 
 # Setup the ssh issue file
-echo "Banner /etc/nubots_issue" >> /etc/ssh/sshd_config
 pacman -S --noconfirm --needed python-pillow
 mkdir banner
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/__init__.py -O banner/__init__.py
@@ -69,7 +68,7 @@ cat << EOF > generate_banner.py
 from banner import ampscii
 from banner import bigtext
 
-with open("/etc/nubots_issue", "w") as f:
+with open("/etc/motd", "w") as f:
     f.write(ampscii("banner.png"))
     f.write(bigtext("NUgus ${ROBOT_NUMBER}"))
 
