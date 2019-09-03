@@ -37,9 +37,6 @@ COPY --chown=root:root etc/pip.conf /etc/pip.conf
 COPY --chown=root:root etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
 RUN ldconfig
 
-# Create the home directory owned by nubots
-RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
-
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local
 USER nubots
