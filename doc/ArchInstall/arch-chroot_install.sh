@@ -50,7 +50,19 @@ sed 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=hidden/' -i /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Install system utilities
-pacman -S --noconfirm --needed wpa_supplicant openssh vim nano wget screen htop gdb linux-headers bluez bluez-utils rsync
+pacman -S --noconfirm --needed \
+	wpa_supplicant \
+	openssh \
+	vim \
+	nano \
+	wget \
+	screen \
+	htop \
+	gdb \
+	linux-headers \
+	bluez \
+	bluez-utils \
+	rsync
 
 ##############
 # NETWORKING #
