@@ -78,12 +78,15 @@ ARG platform=generic
 COPY --chown=nubots:nubots usr/local/toolchain/${platform}.sh /usr/local/toolchain.sh
 COPY --chown=nubots:nubots usr/local/meson/${platform}.cross /usr/local/meson.cross
 
-# Intel Compute Runtime (OpenCL) and Intel Media Driver
-RUN install-package llvm \
-    clang \
-    libva \
-    libpciaccess \
-    ruby
+# Intel Compute Runtime (OpenCL), libva and Intel Media Driver (VAAPI)
+RUN install-package ruby
+RUN install-cmake-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/llvm-8.0.1.src.tar.xz
+RUN install-cmake-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/cfe-8.0.1.src.tar.xz
+RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
+RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.99.tar.bz2 \
+    -Dudev=false \
+    -Dvalgrind=false
+RUN install-from-source https://github.com/intel/libva/releases/download/2.5.0/libva-2.5.0.tar.bz2
 RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
@@ -207,7 +210,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.31.0.tar
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
     -DBUILD_TESTS=OFF
 
-# LibBacktrace
+# libbacktrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
     --without-system-libunwind \
     --enable-shared \
