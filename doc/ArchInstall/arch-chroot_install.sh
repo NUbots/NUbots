@@ -270,11 +270,19 @@ ssh-keygen -A -f ${HOME}
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.ssh/id_rsa.pub \
     -O ${HOME}/.ssh/authorized_keys
 
+###############
+# PERMISSIONS #
+###############
+
 # Fix all the permissions we just broke
 chown -R ${USER}:${USER} ${HOME}
 
 # Change ownership on /usr/local
 chown -R ${USER}:${USER} /usr/local
+
+################
+# POST INSTALL #
+################
 
 # Download the post-install script into chroot drive
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/arch-post_install.sh \
