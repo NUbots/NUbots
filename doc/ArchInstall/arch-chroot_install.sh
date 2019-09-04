@@ -245,6 +245,19 @@ done
 
 # Change nubots shell to zsh
 chsh -s /usr/bin/zsh nubots
+############
+# SSH KEYS #
+############
+
+# Create user ssh directory
+mkdir -p ${HOME}/.ssh
+
+# Generate new keys for user
+ssh-keygen -A -f ${HOME}
+
+# Register docker client as an authorized user
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.ssh/id_rsa.pub \
+    -O ${HOME}/.ssh/authorized_keys
 
 # Fix all the permissions we just broke
 chown -R nubots:nubots /home/nubots
