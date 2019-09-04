@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_CM730_H_
-#define DARWIN_CM730_H_
+#ifndef DARWIN_CM740_H_
+#define DARWIN_CM740_H_
 
 #include "DarwinDevice.h"
 
@@ -29,18 +29,18 @@
 namespace Darwin {
 
 /**
- * @brief This represents, and gives access to the darwin's CM730 subboard
+ * @brief This represents, and gives access to the darwin's CM740 subboard
  *
  * @author Trent Houliston
  */
-class CM730 : public DarwinDevice {
+class CM740 : public DarwinDevice {
 public:
     /**
-     * @brief Holds the addresses of the various bytes in the CM730.
+     * @brief Holds the addresses of the various bytes in the CM740.
      *
      * @details
      *  for additional details see
-     * http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/sub_controller_(cm-730).htm
+     * http://support.robotis.com/en/product/robotis-op2/sub_controller(cm-740).htm
      */
     enum Address {
         MODEL_NUMBER_L    = 0,
@@ -102,7 +102,7 @@ public:
         ADC15_H           = 80
     };
 
-    CM730(UART& coms, int id);
+    CM740(UART& coms, int id);
 
     /**
      * @brief turns on the Dynamixel power (servos and foot sensors)

@@ -227,10 +227,10 @@ namespace platform {
 
                     // If we have any downs in the last 20 frames then we are button pushed
                     for (const auto& s : sensors) {
-                        if (s->buttons.left && !s->cm730ErrorFlags) {
+                        if (s->buttons.left && !s->cm740ErrorFlags) {
                             ++leftCount;
                         }
-                        if (s->buttons.middle && !s->cm730ErrorFlags) {
+                        if (s->buttons.middle && !s->cm740ErrorFlags) {
                             ++middleCount;
                         }
                     }
@@ -283,9 +283,9 @@ namespace platform {
                     sensors->voltage = input.voltage;
 
 
-                    // This checks for an error on the CM730 and reports it
-                    if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
-                        NUClear::log<NUClear::WARN>(makeErrorString("CM730", input.cm730ErrorFlags));
+                    // This checks for an error on the CM740 and reports it
+                    if (input.cm740ErrorFlags != DarwinSensors::Error::OK) {
+                        NUClear::log<NUClear::WARN>(makeErrorString("CM740", input.cm740ErrorFlags));
                     }
 
                     // Output errors on the FSRs
@@ -378,17 +378,17 @@ namespace platform {
                     // acc_y to the left
                     // acc_z up
 
-                    // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if (previousSensors && (input.cm730ErrorFlags)) {
+                    // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
+                    if (previousSensors && (input.cm740ErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
                     else {
                         sensors->accelerometer = {-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z};
                     }
 
-                    // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
+                    // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
                     if (previousSensors
-                        && (input.cm730ErrorFlags
+                        && (input.cm740ErrorFlags
                             || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2)
                                    > 4 * M_PI)) {
                         NUClear::log<NUClear::WARN>(

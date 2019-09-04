@@ -17,12 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "CM730.h"
+#include "CM740.h"
 
 namespace Darwin {
-CM730::CM730(UART& coms, int id) : DarwinDevice(coms, id) {}
+CM740::CM740(UART& coms, int id) : DarwinDevice(coms, id) {}
 
-void CM730::turnOnDynamixel() {
+void CM740::turnOnDynamixel() {
     // Write true to the DXL_POWER byte
     write(Address::DXL_POWER, true);
 }

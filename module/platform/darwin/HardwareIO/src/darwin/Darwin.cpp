@@ -33,7 +33,7 @@ Darwin::Darwin(const char* name)
     : uart(name)
     , enabledServoIds(20, true)
     , bulkReadCommand()
-    , cm730(uart, ID::CM730)
+    , cm740(uart, ID::CM740)
     , rShoulderPitch(uart, ID::R_SHOULDER_PITCH)
     , lShoulderPitch(uart, ID::L_SHOULDER_PITCH)
     , rShoulderRoll(uart, ID::R_SHOULDER_ROLL)
@@ -58,7 +58,7 @@ Darwin::Darwin(const char* name)
     , lFSR(uart, ID::L_FSR) {
 
     // Turn on the dynamixel power
-    cm730.turnOnDynamixel();
+    cm740.turnOnDynamixel();
 
     // Wait about 300ms for the dynamixels to start up
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
@@ -68,10 +68,10 @@ Darwin::Darwin(const char* name)
 
     // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been configured
     // before)
-    uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_DELAY_TIME, 0));
+    uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_DELAY_TIME, 0));
 
     // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
-    uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_LEVEL, 1));
+    uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_LEVEL, 1));
 }
 
 void Darwin::setConfig(const extension::Configuration& config) {
@@ -92,8 +92,8 @@ std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
 
     std::vector<std::pair<uint8_t, bool>> results;
 
-    // Ping our CM730
-    results.push_back(std::make_pair(ID::CM730, cm730.ping()));
+    // Ping our CM740
+    results.push_back(std::make_pair(ID::CM740, cm740.ping()));
 
     // Ping all our servos
     for (int i = 0; i < 20; ++i) {
@@ -114,8 +114,8 @@ std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
 void Darwin::buildBulkReadPacket() {
 
     // Double check that our type is big enough to hold the result
-    static_assert(sizeof(Types::CM730Data) == CM730::Address::VOLTAGE - CM730::Address::BUTTON + 1,
-                  "The CM730 type is the wrong size");
+    static_assert(sizeof(Types::CM740Data) == CM740::Address::VOLTAGE - CM740::Address::BUTTON + 1,
+                  "The CM740 type is the wrong size");
 
     // Double check that our type is big enough to hold the result
     static_assert(sizeof(Types::MX28Data) == MX28::Address::PRESENT_TEMPERATURE - MX28::Address::PRESENT_POSITION_L + 1,
@@ -139,9 +139,9 @@ void Darwin::buildBulkReadPacket() {
     for (const auto& sensor : sensors) {
         switch (sensor.first) {
 
-            // If it's the CM730
-            case ID::CM730:
-                request.push_back(std::make_tuple(CM730::Address::BUTTON, ID::CM730, sizeof(Types::CM730Data)));
+            // If it's the CM740
+            case ID::CM740:
+                request.push_back(std::make_tuple(CM740::Address::BUTTON, ID::CM740, sizeof(Types::CM740Data)));
                 break;
 
             // If it's the FSRs
@@ -231,10 +231,10 @@ BulkReadResults Darwin::bulkRead() {
                 data.fsrErrorCodes[r.header.id - ID::R_FSR] = r.header.errorcode;
             }
 
-            // Copy CM730 data
-            else if (r.header.id == ID::CM730) {
-                memcpy(&data, r.data.data(), sizeof(Types::CM730Data));
-                data.cm730ErrorCode = r.header.errorcode;
+            // Copy CM740 data
+            else if (r.header.id == ID::CM740) {
+                memcpy(&data, r.data.data(), sizeof(Types::CM740Data));
+                data.cm740ErrorCode = r.header.errorcode;
             }
         }
         // If we got an error that caused us to have no data
@@ -268,10 +268,10 @@ BulkReadResults Darwin::bulkRead() {
                 data.fsrErrorCodes[r.header.id - ID::R_FSR] = r.header.errorcode;
             }
 
-            // Set CM730 data
-            else if (r.header.id == ID::CM730) {
-                memset(&data, 0xFF, sizeof(Types::CM730Data));
-                data.cm730ErrorCode = r.header.errorcode;
+            // Set CM740 data
+            else if (r.header.id == ID::CM740) {
+                memset(&data, 0xFF, sizeof(Types::CM740Data));
+                data.cm740ErrorCode = r.header.errorcode;
             }
         }
     }
@@ -281,7 +281,7 @@ BulkReadResults Darwin::bulkRead() {
 
 DarwinDevice& Darwin::operator[](int id) {
     switch (id) {
-        case ID::CM730: return cm730;
+        case ID::CM740: return cm740;
         case ID::R_SHOULDER_PITCH: return rShoulderPitch;
         case ID::L_SHOULDER_PITCH: return lShoulderPitch;
         case ID::R_SHOULDER_ROLL: return rShoulderRoll;

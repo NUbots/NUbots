@@ -51,7 +51,7 @@ namespace platform {
             float pGain = 0;
 
 
-            struct CM730State {
+            struct CM740State {
                 message::platform::darwin::DarwinSensors::LEDPanel ledPanel = {false, false, false};
                 //  0x00, 0xRR, 0xGG, 0xBB
                 message::platform::darwin::DarwinSensors::HeadLED headLED = {0x0000FF00};
@@ -95,8 +95,8 @@ namespace platform {
                 float temperature     = 40;
             };
 
-            /// @brief Our state for our CM730 for variables we send to it
-            CM730State cm730State;
+            /// @brief Our state for our CM740 for variables we send to it
+            CM740State cm740State;
 
             /// @brief Our state for or MX28s for variables we send to it
             std::array<ServoState, 20> servoState;

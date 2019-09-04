@@ -56,10 +56,10 @@ namespace platform {
             : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
 
             /*
-             CM730 Data
+             CM740 Data
              */
             // Read our Error code
-            sensors.cm730ErrorFlags = 0;
+            sensors.cm740ErrorFlags = 0;
 
             // LED Panel
             sensors.ledPanel.led2 = 0;
