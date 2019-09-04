@@ -260,7 +260,7 @@ chsh -s /usr/bin/zsh ${USER}
 mkdir -p ${HOME}/.ssh
 
 # Generate new keys for user
-ssh-keygen -A -f ${HOME}
+ssh-keygen -q -f ${HOME} -N ""
 
 # Register docker client as an authorized user
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.ssh/id_rsa.pub \
