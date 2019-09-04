@@ -85,24 +85,20 @@ pacman -S --noconfirm --needed \
 systemctl enable sshd.socket
 
 # Setup the ssh issue file
-pacman -S --noconfirm --needed python-pillow
 mkdir banner
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/__init__.py -O banner/__init__.py
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/ampscii.py -O banner/ampscii.py
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/bigtext.py -O banner/bigtext.py
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/cmake/banner.png -O banner.png
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/motd -O /etc/motd
 cat << EOF > generate_banner.py
-from banner import ampscii
 from banner import bigtext
 
-with open("/etc/motd", "w") as f:
-    f.write(ampscii("banner.png"))
+with open("/etc/motd", "a") as f:
     f.write(bigtext("NUgus ${ROBOT_NUMBER}"))
 
 EOF
 python ./generate_banner.py
 rm -rf banner* generate_banner.py
-pacman -Rs --noconfirm python-pillow
 
 # Setup the fallback ethernet static connection
 cat << EOF > /etc/systemd/network/99-eno1-static.network
