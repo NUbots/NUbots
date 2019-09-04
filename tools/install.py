@@ -33,6 +33,18 @@ def register(command):
 @run_on_docker
 def run(target, user, config, toolchain, **kwargs):
 
+    # Mapping from known hostnames to their IP addresses
+    num_robots = 4
+    known_targets = {
+        "{}{}".format(k, num): "10.1.1.{}".format(num)
+        for num in range(1, num_robots + 1)
+        for k, v in zip(("nugus", "n", "i", "igus"), [num] * num_robots)
+    }
+
+    # Replace hostname with its IP address if the hostname is already known
+    if target in known_targets:
+        target = known_targets[target]
+
     # If no user, use our user
     if user is None:
         import getpass
