@@ -1,5 +1,13 @@
 #! /bin/bash
 
+# Prepare useful variables
+USER="nubots"
+HOME="/home/${USER}"
+
+HOST="nugus"
+HOSTNAME="${HOST}${ROBOT_NUMBER}"
+IP_ADDR="10.1.1.${ROBOT_NUMBER}"
+
 # Setup timezone information
 ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
 hwclock --systohc
@@ -12,10 +20,12 @@ locale-gen
 echo "LANG=en_AU.UTF-8" > /etc/locale.conf
 
 # Setup hostname
-echo "nugus${ROBOT_NUMBER}" > /etc/hostname
-echo "127.0.0.1       localhost" >> /etc/hosts
-echo "::1             localhost" >> /etc/hosts
-echo "127.0.1.1       nugus${ROBOT_NUMBER}" >> /etc/hosts
+echo "${HOSTNAME}" > /etc/hostname
+cat << EOF > /etc/hosts
+127.0.0.1       localhost
+::1             localhost
+127.0.1.1       ${HOSTNAME}
+EOF
 
 #########
 # USERS #
@@ -27,13 +37,13 @@ pacman -S --noconfirm --needed sudo
 # Setup users of the wheel group to be able to execute sudo commands with no password
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
 groupadd u3v
-useradd -m -G wheel,lp,u3v nubots
+useradd -m -G wheel,lp,u3v ${USER}
 
 # Lock the root account
 passwd -l root
 
 # Set the user password
-echo "nubots: " | chpasswd
+echo "${USER}: " | chpasswd
 
 ##############
 # BOOTLOADER #
@@ -100,7 +110,7 @@ cat << EOF > /etc/systemd/network/99-eno1-static.network
 Name=eno1
 
 [Network]
-Address=10.1.1.${ROBOT_NUMBER}/16
+Address=${IP_ADDR}/16
 Gateway=10.1.3.1
 DNS=10.1.3.1
 DNS=8.8.8.8
@@ -112,7 +122,7 @@ cat << EOF > /etc/systemd/network/99-wlp58s0-static.network
 Name=wlp58s0
 
 [Network]
-Address=10.1.1.${ROBOT_NUMBER}/16
+Address=${IP_ADDR}/16
 Gateway=10.1.3.1
 DNS=10.1.3.1
 DNS=8.8.8.8
@@ -157,7 +167,7 @@ cat << EOF > /etc/systemd/network/10-bond0.network
 Name=bond0
 
 [Network]
-Address=10.1.1.${ROBOT_NUMBER}/16
+Address=${IP_ADDR}/16
 Gateway=10.1.3.1
 DNS=10.1.3.1
 DNS=8.8.8.8
@@ -207,16 +217,16 @@ cat << EOF > /etc/systemd/system/robocup.service
 Description="RoboCup auto-start unit"
 Wants=network.target
 After=network.target
-RequiresMountsFor=/home/nubots
+RequiresMountsFor=${HOME}
 
 [Service]
 Type=simple
 Restart=always
-WorkingDirectory=/home/nubots
-User=nubots
-Environment=HOME="/home/nubots/"
+WorkingDirectory=${HOME}
+User=${USER}
+Environment=HOME="${HOME}/"
 PassEnvironment=HOME
-ExecStart=/home/nubots/robocup
+ExecStart=${HOME}/robocup
 
 [Install]
 WantedBy=multi-user.target
@@ -236,15 +246,16 @@ ldconfig
 # Install zsh and git
 pacman -S --noconfirm --needed zsh zsh-completions git
 
-# Download zprezto to the nubots home directory
-cd /home/nubots
+# Download zprezto to the user home directory
+cd ${HOME}
 git clone --recursive https://github.com/sorin-ionescu/prezto.git .zprezto
 for f in .zprezto/runcoms/*; do
     ln -s $f .$(basename $f)
 done
 
-# Change nubots shell to zsh
-chsh -s /usr/bin/zsh nubots
+# Change user shell to zsh
+chsh -s /usr/bin/zsh ${USER}
+
 ############
 # SSH KEYS #
 ############
@@ -260,10 +271,10 @@ wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.
     -O ${HOME}/.ssh/authorized_keys
 
 # Fix all the permissions we just broke
-chown -R nubots:nubots /home/nubots
+chown -R ${USER}:${USER} ${HOME}
 
 # Change ownership on /usr/local
-chown -R nubots:nubots /usr/local
+chown -R ${USER}:${USER} /usr/local
 
 # Download the post-install script into chroot drive
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/arch-post_install.sh \
