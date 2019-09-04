@@ -94,17 +94,8 @@ python ./generate_banner.py
 rm -rf banner* generate_banner.py
 pacman -Rs --noconfirm python-pillow
 
-# Setup the fallback ethernet DHCP connection
-cat << EOF > /etc/systemd/network/99-eno1-dhcp.network
-[Match]
-Name=eno1
-
-[Network]
-DHCP=yes
-EOF
-
 # Setup the fallback ethernet static connection
-cat << EOF > /etc/systemd/network/90-eno1-static.network
+cat << EOF > /etc/systemd/network/99-eno1-static.network
 [Match]
 Name=eno1
 
@@ -116,7 +107,7 @@ DNS=8.8.8.8
 EOF
 
 # Setup the fallback wireless static connection
-cat << EOF > /etc/systemd/network/90-wlp58s0-static.network
+cat << EOF > /etc/systemd/network/99-wlp58s0-static.network
 [Match]
 Name=wlp58s0
 
