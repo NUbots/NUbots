@@ -49,6 +49,9 @@ sed 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' -i /etc/default/grub
 sed 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=hidden/' -i /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
+# Update the system
+pacman -Syu
+
 # Install system utilities
 pacman -S --noconfirm --needed \
 	wpa_supplicant \
@@ -193,9 +196,6 @@ systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 systemctl enable wpa_supplicant
 systemctl enable wpa_supplicant@wlp58s0
-
-# Update pacman now that we have internet
-pacman -Syu
 
 # Populate udev rules.
 cat << EOF > /etc/udev/rules.d/10-nubots.rules
