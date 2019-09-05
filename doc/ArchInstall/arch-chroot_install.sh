@@ -266,6 +266,15 @@ ssh-keygen -q -f ${HOME} -N ""
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.ssh/id_rsa.pub \
     -O ${HOME}/.ssh/authorized_keys
 
+##########
+# OpenCL #
+##########
+
+# Install the OpenCL icd file
+mkdir -p /etc/OpenCL/vendors
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/etc/OpenCL/vendors/intel.icd \
+    -O /etc/OpenCL/vendors/intel.icd
+
 ###############
 # PERMISSIONS #
 ###############
