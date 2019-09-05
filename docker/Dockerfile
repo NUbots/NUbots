@@ -9,7 +9,7 @@
 FROM archlinux/base:latest
 
 # Create the nubots user, and setup sudo so no password is required
-RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
+RUN useradd --no-log-init -m -U nubots
 COPY --chown=root:root etc/sudoers.d/user /etc/sudoers.d/user
 
 # Add a script that installs packages
@@ -36,9 +36,6 @@ COPY --chown=root:root etc/pip.conf /etc/pip.conf
 # Make sure /usr/local is checked for libraries and binaries
 COPY --chown=root:root etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
 RUN ldconfig
-
-# Create the home directory owned by nubots
-RUN mkdir -p /home/nubots && chown -R nubots:nubots /home/nubots
 
 # Setup /usr/local owned by nubots and swap to the nubots user
 RUN chown -R nubots:nubots /usr/local
