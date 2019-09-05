@@ -15,5 +15,8 @@
 		"ms-python.python",
 		"zxh404.vscode-proto3",
 		"redhat.vscode-yaml"
-	]
+	],
+	"settings": {
+		"C_Cpp.clang_format_path": "/usr/local/bin/clang-format"
+	}
 }
