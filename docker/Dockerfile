@@ -9,7 +9,7 @@
 FROM archlinux/base:latest
 
 # Create the nubots user, and setup sudo so no password is required
-RUN groupadd -r nubots && useradd --no-log-init -r -g nubots nubots
+RUN useradd --no-log-init -m -U nubots
 COPY --chown=root:root etc/sudoers.d/user /etc/sudoers.d/user
 
 # Add a script that installs packages
