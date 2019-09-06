@@ -100,8 +100,6 @@ def generate_cmake_toolchain(target, output_path):
         set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "")
         set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON CACHE STRING "Should pkg-config use the cmake prefix path for finding modules")
         set(CMAKE_PREFIX_PATH "/usr/local" CACHE STRING "")
-
-        set(PLATFORM "{arch}" CACHE STRING "The platform to build for." FORCE)
         """
     )
 
