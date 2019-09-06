@@ -142,7 +142,8 @@ COPY --chown=nubots:nubots usr/local/include/armadillo_bits/config.hpp /usr/loca
 RUN install-from-source http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2
 
 # tcmalloc
-RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.7/gperftools-2.7.tar.gz \
+RUN install-from-source \
+    https://github.com/gperftools/gperftools/releases/download/gperftools-2.7/gperftools-2.7.tar.gz \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal
 
