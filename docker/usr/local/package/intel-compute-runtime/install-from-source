@@ -10,10 +10,6 @@ URL="$1"
 PREFIX=${PREFIX:-"/usr/local"}
 
 BUILD_FOLDER="/var/tmp/build"
-RELEASE_CFLAGS="-O3 -DNDEBUG"
-RELEASE_CXXFLAGS="${RELEASE_CFLAGS}"
-EXTRA_CFLAGS="-fPIC"
-EXTRA_CXXFLAGS="${EXTRA_CFLAGS}"
 
 # Pull in the toolchain arguments
 . /usr/local/toolchain.sh
