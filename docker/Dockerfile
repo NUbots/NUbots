@@ -91,13 +91,8 @@ RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-
     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
     https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
     --
-RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz \
-    https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch \
-    https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch \
-    -- \
-    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DSPIRV_TRANSLATOR_DIR=/usr/local \
-    -DLLVM_NO_DEAD_STRIP=ON
+COPY --chown=nubots:nubots usr/local/package/opencl-clang/install-from-source /usr/local/package/opencl-clang.sh
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz
 COPY --chown=nubots:nubots usr/local/package/intel-graphics-compiler/python3.patch /usr/local/package/intel-graphics-compiler/
 RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
     /usr/local/package/intel-graphics-compiler/python3.patch \
