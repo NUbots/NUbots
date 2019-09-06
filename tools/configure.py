@@ -30,6 +30,13 @@ def run(interactive, args, **kwargs):
 
     # If configure then run ccmake else just run cmake
     if interactive:
-        exit(pty.spawn(["ccmake", "-GNinja", *args, b.project_dir]) << 8)
+        exit(
+            pty.spawn(["ccmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir])
+            << 8
+        )
     else:
-        exit(subprocess.call(["cmake", "-GNinja", *args, b.project_dir]))
+        exit(
+            subprocess.call(
+                ["cmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir]
+            )
+        )
