@@ -68,9 +68,9 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
 ################################################
 ARG platform=generic
 
-# Copy across the specific toolchain file for this image
-COPY --chown=nubots:nubots usr/local/toolchain/${platform}.sh /usr/local/toolchain.sh
-COPY --chown=nubots:nubots usr/local/meson/${platform}.cross /usr/local/meson.cross
+# Generate toolchain files for the current platform
+COPY --chown=nubots:nubots usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
+RUN python /usr/local/generate_toolchains.py --prefix /usr/local --targets ${platform}
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
