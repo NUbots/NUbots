@@ -44,8 +44,9 @@ USER nubots
 # Make a symlink from /usr/local/lib to /usr/local/lib64 so library install location is irrelevant
 RUN cd /usr/local && ln -sf lib lib64
 
-# Copy across the generic toolchain file for building tools
-COPY --chown=nubots:nubots usr/local/toolchain/generic.sh /usr/local/toolchain.sh
+# Generate toolchain files for the generic platform
+COPY --chown=nubots:nubots usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
+RUN python /usr/local/generate_toolchains.py --prefix /usr/local --targets generic
 
 # Copy over a tool to install simple standard conforming libraries from source
 COPY --chown=nubots:nubots usr/local/bin/install-from-source /usr/local/bin/install-from-source
@@ -179,7 +180,6 @@ RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-lin
     --enable-libmount \
     --enable-libuuid
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
-    --cross-file=/usr/local/meson.cross \
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h

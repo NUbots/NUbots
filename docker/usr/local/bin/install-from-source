@@ -11,22 +11,16 @@ URL="$1"
 PREFIX=${PREFIX:-"/usr/local"}
 
 BUILD_FOLDER="/var/tmp/build"
-RELEASE_CFLAGS="-O3 -DNDEBUG"
-RELEASE_CXXFLAGS="${RELEASE_CFLAGS}"
-RELEASE_FFLAGS="${RELEASE_CFLAGS}"
-EXTRA_CFLAGS="-fPIC"
-EXTRA_CXXFLAGS="${EXTRA_CFLAGS}"
-EXTRA_FFLAGS="${EXTRA_CFLAGS}"
 
 # Pull in the toolchain arguments
-. /usr/local/toolchain.sh
+. "${PREFIX}/toolchain.sh"
 
 # Setup the temporary build directories
 mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code
-wget ${URL}
+wget "${URL}"
 
 # Extract the source code archive
 ARCHIVE_FILE=$(find . -type f | head -n 1)
@@ -106,7 +100,7 @@ if [ "${METHOD}" = 'install-header-from-source' ]; then
     echo "Installing a header"
 
     HEADER_FILE=$(find -type f -name '*.h' -o -name '*.hpp' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-    cp ${HEADER_FILE} "${PREFIX}/include"
+    cp "${HEADER_FILE}" "${PREFIX}/include"
 
 # We are using autotools
 elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
@@ -116,9 +110,9 @@ elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
     CONFIGURE_FILE=$(find -type f -name 'configure' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
 
     # If we have no configure file we need to autogen
-    if [ -z ${CONFIGURE_FILE} ]; then
+    if [ -z "${CONFIGURE_FILE}" ]; then
         AUTOGEN_FILE=$(find -type f -name 'autogen.sh' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-        cd $(dirname ${AUTOGEN_FILE})
+        cd $(dirname "${AUTOGEN_FILE}")
 
         echo "Generating configuration files using file ${AUTOGEN_FILE}"
         # Some autogen scripts will automatically run configure after they have generated the configure files
@@ -126,15 +120,13 @@ elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
         # (different packagers have different switches)
         NOCONFIGURE=1 ./autogen.sh --no-configure
     else
-        cd $(dirname ${CONFIGURE_FILE})
+        cd $(dirname "${CONFIGURE_FILE}")
     fi
 
     echo "Configuring using configure file ${CONFIGURE_FILE}"
 
     # Run configure
-    CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
-    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
+    CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" FFLAGS="${FFLAGS}" FCFLAGS="${FCFLAGS}" \
         ./configure $ARGS --prefix="${PREFIX}"
 
     # Run make
@@ -149,7 +141,7 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
 
     # Find the closest configure file to the root
     CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-    cd $(dirname ${CMAKELISTS_FILE})
+    cd $(dirname "${CMAKELISTS_FILE}")
 
     echo "Configuring using cmake file ${CMAKELISTS_FILE}"
 
@@ -161,11 +153,7 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
     cmake .. -GNinja \
         ${ARGS} \
         -DCMAKE_BUILD_TYPE="Release" \
-        -DCMAKE_C_FLAGS="${EXTRA_CFLAGS} ${CFLAGS}" \
-        -DCMAKE_CXX_FLAGS="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
-        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-        -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-        -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+        -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
         -Wno-dev
 
     # Run ninja
@@ -187,8 +175,8 @@ elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
         library-path="${PREFIX}/lib" \
         -j$(nproc) \
         -q \
-        cflags="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-        cxxflags="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}"
+        cflags="${CFLAGS}" \
+        cxxflags="${CXXFLAGS}"
 
     # Now install
     ./bjam install
@@ -198,12 +186,13 @@ elif [ "${METHOD}" = 'install-make-from-source' ]; then
     echo "Building using make"
 
     MAKEFILE=$(find -type f -name 'Makefile' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-    cd $(dirname ${MAKEFILE})
+    cd $(dirname "${MAKEFILE}")
 
     make ${ARGS} -j$(nproc) \
-        CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-        CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
-        FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}"
+        CFLAGS="${CFLAGS}" \
+        CXXFLAGS="${CXXFLAGS}" \
+        FFLAGS="${FFLAGS}" \
+        FCFLAGS="${FCFLAGS}"
 
     make PREFIX="${PREFIX}" install
 
@@ -213,7 +202,7 @@ elif [ "${METHOD}" = 'install-meson-from-source' ]; then
 
     # Find the closest configure file to the root
     MESON_FILE=$(find -type f -name 'meson.build' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-    cd $(dirname ${MESON_FILE})
+    cd $(dirname "${MESON_FILE}")
 
     echo "Configuring using meson build file ${MESON_FILE}"
 
@@ -222,11 +211,13 @@ elif [ "${METHOD}" = 'install-meson-from-source' ]; then
     cd build
 
     # Configure using meson
-    CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
-    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
+    CFLAGS="${CFLAGS}" \
+    CXXFLAGS="${CXXFLAGS}" \
+    FFLAGS="${FFLAGS}" \
+    FCFLAGS="${FCFLAGS}" \
     meson setup build .. \
         $ARGS \
+        --cross-file="${PREFIX}/meson.cross" \
         --buildtype=release \
         --prefix="${PREFIX}" \
         -D strip=true
@@ -243,20 +234,22 @@ elif [ "${METHOD}" = 'install-python-from-source' ]; then
 
     # Find the closest configure file to the root
     SETUP_FILE=$(find -type f -name 'setup.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-    cd $(dirname ${SETUP_FILE})
+    cd $(dirname "${SETUP_FILE}")
 
     echo "Configuring using setuptools build file ${SETUP_FILE}"
 
     # Build using setuptools
-    CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
-    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
+    CFLAGS="${CFLAGS}" \
+    CXXFLAGS="${CXXFLAGS}" \
+    FFLAGS="${FFLAGS}" \
+    FCFLAGS="${FCFLAGS}" \
     python setup.py build $ARGS
 
     # Install using setuptools
-    CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
-    CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
-    FFLAGS="${EXTRA_FFLAGS} ${RELEASE_FFLAGS} ${FFLAGS}" \
+    CFLAGS="${CFLAGS}" \
+    CXXFLAGS="${CXXFLAGS}" \
+    FFLAGS="${FFLAGS}" \
+    FCFLAGS="${FCFLAGS}" \
     python setup.py install $ARGS  --prefix="${PREFIX}"
 
 fi;
