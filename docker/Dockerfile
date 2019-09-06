@@ -78,7 +78,10 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 # Intel Compute Runtime (OpenCL), libva and Intel Media Driver (VAAPI)
 RUN install-package ruby
 RUN install-cmake-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/llvm-8.0.1.src.tar.xz
-RUN install-cmake-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/cfe-8.0.1.src.tar.xz
+RUN install-package clang llvm
+COPY --chown=nubots:nubots usr/local/package/clang/install-from-source /usr/local/package/clang.sh
+RUN /usr/local/package/clang.sh \
+    https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/cfe-8.0.1.src.tar.xz
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
 RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.99.tar.bz2 \
     -Dudev=false \
