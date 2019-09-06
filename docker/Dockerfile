@@ -58,10 +58,6 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-python-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
-# Install build tools
-# RUN install-from-source https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz
-# https://github.com/ninja-build/ninja/archive/v1.9.0.tar.gz
-
 ################################################
 #  _____           _      _           _        #
 # |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
