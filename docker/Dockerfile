@@ -60,6 +60,13 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-python-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
+# Build llvm/clang and install to /usr so we can use them from cross-compiling
+RUN sudo PREFIX="/usr" install-cmake-from-source \
+    https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/llvm-8.0.1.src.tar.xz
+COPY --chown=nubots:nubots usr/local/package/clang/install-from-source /usr/local/package/clang.sh
+RUN  sudo PREFIX="/usr" /usr/local/package/clang.sh \
+    https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/cfe-8.0.1.src.tar.xz
+
 ################################################
 #  _____           _      _           _        #
 # |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
