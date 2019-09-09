@@ -54,15 +54,14 @@ cd build
 
 # Configure using cmake
 cmake .. ${ARGS} \
-    -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_C_FLAGS="${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
-    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DLLVM_TABLEGEN=/usr/bin/llvm-tblgen \
-    -Wno-dev
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DCMAKE_C_FLAGS="${CFLAGS}" \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
+        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
+        -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+        -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
+        -DCMAKE_INSTALL_LIBDIR="lib" \
+        -Wno-dev
 
 # Run make
 make -j$(nproc)
