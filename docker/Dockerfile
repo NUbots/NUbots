@@ -46,7 +46,8 @@ RUN cd /usr/local && ln -sf lib lib64
 
 # Generate toolchain files for the generic platform
 COPY --chown=nubots:nubots usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
-RUN python /usr/local/generate_toolchains.py --prefix /usr/local --targets generic
+COPY --chown=nubots:nubots usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
+RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
 
 # Copy over a tool to install simple standard conforming libraries from source
 COPY --chown=nubots:nubots usr/local/bin/install-from-source /usr/local/bin/install-from-source
