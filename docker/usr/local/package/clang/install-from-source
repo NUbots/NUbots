@@ -12,7 +12,7 @@ PREFIX=${PREFIX:-"/usr/local"}
 BUILD_FOLDER="/var/tmp/build"
 
 # Pull in the toolchain arguments
-. /usr/local/toolchain.sh
+. ${PREFIX}/toolchain.sh
 
 # Setup the temporary build directories
 mkdir -p "${BUILD_FOLDER}"
