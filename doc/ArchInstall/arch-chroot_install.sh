@@ -86,19 +86,18 @@ systemctl enable sshd.socket
 
 # Setup the ssh issue file
 mkdir banner
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/__init__.py -O banner/__init__.py
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/bigtext.py -O banner/bigtext.py
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/bigtext.py -O bigtext.py
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/cmake/banner.png -O banner.png
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/motd -O /etc/motd
 cat << EOF > generate_banner.py
-from banner import bigtext
+import bigtext
 
 with open("/etc/motd", "a") as f:
-    f.write(bigtext("NUgus ${ROBOT_NUMBER}"))
+    f.write(bigtext.bigtext("NUgus ${ROBOT_NUMBER}"))
 
 EOF
 python ./generate_banner.py
-rm -rf banner* generate_banner.py
+rm -rf banner.png bigtext.py generate_banner.py
 
 # Setup the fallback ethernet static connection
 cat << EOF > /etc/systemd/network/99-eno1-static.network
