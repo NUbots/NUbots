@@ -1,83 +1,10 @@
 #! /usr/bin/env python3
 
 import os
-import argparse
-import sys
 from textwrap import dedent
 
-targets = {
-    "generic": {"flags": ["-fPIC", "-mtune=generic"], "release_flags": ["-O3", "-DNDEBUG"], "params": []},
-    "native": {
-        "flags": ["-fPIC", "-march=native", "-mtune=native"],
-        "release_flags": ["-O3", "-DNDEBUG"],
-        "params": [],
-    },
-    "nuc7i7bnh": {
-        "flags": [
-            "-fPIC",
-            "-march=broadwell",
-            "-mtune=broadwell",
-            "-mmmx",
-            "-mno-3dnow",
-            "-msse",
-            "-msse2",
-            "-msse3",
-            "-mssse3",
-            "-mno-sse4a",
-            "-mcx16",
-            "-msahf",
-            "-mmovbe",
-            "-maes",
-            "-mno-sha",
-            "-mpclmul",
-            "-mpopcnt",
-            "-mabm",
-            "-mno-lwp",
-            "-mfma",
-            "-mno-fma4",
-            "-mno-xop",
-            "-mbmi",
-            "-mbmi2",
-            "-mno-tbm",
-            "-mavx",
-            "-mavx2",
-            "-msse4.2",
-            "-msse4.1",
-            "-mlzcnt",
-            "-mno-rtm",
-            "-mno-hle",
-            "-mrdrnd",
-            "-mf16c",
-            "-mfsgsbase",
-            "-mrdseed",
-            "-mprfchw",
-            "-madx",
-            "-mfxsr",
-            "-mxsave",
-            "-mxsaveopt",
-            "-mno-avx512f",
-            "-mno-avx512er",
-            "-mno-avx512cd",
-            "-mno-avx512pf",
-            "-mno-prefetchwt1",
-            "-mclflushopt",
-            "-mxsavec",
-            "-mxsaves",
-            "-mno-avx512dq",
-            "-mno-avx512bw",
-            "-mno-avx512vl",
-            "-mno-avx512ifma",
-            "-mno-avx512vbmi",
-            "-mno-clwb",
-            "-mno-mwaitx",
-        ],
-        "release_flags": ["-O3", "-DNDEBUG"],
-        "params": ["--param l1-cache-size=32", "--param l1-cache-line-size=64", "--param l2-cache-size=4096"],
-    },
-}
 
-
-def generate_cmake_toolchain(target, output_path):
+def generate_cmake_toolchain(target, prefix):
 
     template = dedent(
         """\
@@ -86,6 +13,7 @@ def generate_cmake_toolchain(target, output_path):
         set(CMAKE_C_COMPILER gcc)
         set(CMAKE_CXX_COMPILER g++)
         set(CMAKE_FIND_ROOT_PATH
+               {prefix}
                "/usr/local"
                "/usr")
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
@@ -93,30 +21,41 @@ def generate_cmake_toolchain(target, output_path):
         set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
         set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-        {compile_options}
+        set(CMAKE_C_FLAGS_INIT "" CACHE STRING "Flags used by the C compiler during all built types.")
+        set(CMAKE_CXX_FLAGS_INIT "" CACHE STRING "Flags used by the CXX compiler during all built types.")
+        set(CMAKE_NASM_ASM_FLAGS_INIT "" CACHE STRING "Flags used by the ASM NASM compiler during all built types.")
 
-        set(CMAKE_C_FLAGS "{compile_params}" CACHE STRING "")
-        set(CMAKE_CXX_FLAGS "{compile_params}" CACHE STRING "")
+        {c_compile_options}
+        {cxx_compile_options}
+        {asm_compile_options}
 
-        set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "")
-        set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON CACHE STRING "Should pkg-config use the cmake prefix path for finding modules")
-        set(CMAKE_PREFIX_PATH "/usr/local" CACHE STRING "")
+        set(CMAKE_ASM_NASM_OBJECT_FORMAT "{asm_object}" CACHE STRING "Output object format of the ASM NASM compiler.")
+
+        set(CMAKE_INSTALL_PREFIX "{prefix}" CACHE STRING "Install path prefix, prepended onto install directories.")
+        set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON CACHE STRING "Should pkg-config use the cmake prefix path for finding modules.")
+        set(CMAKE_PREFIX_PATH "{prefix}" CACHE STRING "")
+        set(CMAKE_INSTALL_LIBDIR "lib" CACHE STRING "Direcxtory into which object files and object code libraries should be installed (Default: lib).")
+
+        set(CMAKE_COLOR_MAKEFILE ON CACHE STRING "Enable/Disable color output during build.")
         """
     )
 
-    with open(output_path, "w") as f:
-        f.write(
-            template.format(
-                compile_options="\n".join(
-                    ["add_compile_options({})".format(flag) for flag in targets[target]["flags"]]
-                ),
-                compile_params=" ".join(targets[target]["params"]),
-                arch=target,
-            )
-        )
+    return template.format(
+        c_compile_options="\n".join(
+            ['string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag) for flag in target["flags"]]
+        ),
+        cxx_compile_options="\n".join(
+            ['string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag) for flag in target["flags"]]
+        ),
+        asm_compile_options="\n".join(
+            ['string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag) for flag in target["asm_flags"]]
+        ),
+        asm_object=target["asm_object"],
+        prefix=prefix,
+    )
 
 
-def generate_meson_cross_file(target, output_path):
+def generate_meson_cross_file(target):
 
     template = dedent(
         """\
@@ -142,22 +81,17 @@ def generate_meson_cross_file(target, output_path):
         """
     )
 
-    with open(output_path, "w") as f:
-        f.write(
-            template.format(
-                flags=", ".join(
-                    [
-                        '"{}"'.format(flag)
-                        for flag in targets[target]["release_flags"]
-                        + targets[target]["flags"]
-                        + [param.replace(" ", '", "') for param in targets[target]["params"]]
-                    ]
-                )
-            )
+    return template.format(
+        flags=", ".join(
+            [
+                '"{}"'.format(flag)
+                for flag in target["release_flags"] + [param.replace(" ", '", "') for param in target["flags"]]
+            ]
         )
+    )
 
 
-def generate_toolchain_script(target, output_path):
+def generate_toolchain_script(target):
 
     template = dedent(
         """\
@@ -181,45 +115,18 @@ def generate_toolchain_script(target, output_path):
         """
     )
 
-    with open(output_path, "w") as f:
-        f.write(
-            template.format(
-                flags=" ".join(targets[target]["release_flags"] + targets[target]["flags"] + targets[target]["params"])
-            )
-        )
+    return template.format(flags=" ".join(target["release_flags"] + target["flags"]))
 
 
-def generate(prefix, targets=[target for target in targets.keys()]):
-    for target in targets:
-        print("Generating toolchain script for {} in {}".format(target, prefix))
-        generate_toolchain_script(target, os.path.join(prefix, "toolchain.sh"))
-        print("Generating meson cross file for {} in {}".format(target, prefix))
-        generate_meson_cross_file(target, os.path.join(prefix, "meson.cross"))
-        print("Generating cmake toolchain file for {} in {}".format(target, prefix))
-        generate_cmake_toolchain(target, os.path.join(prefix, "toolchain.cmake"))
+def generate(prefix, toolchain, target):
+    print("Generating toolchain script for {} in {}".format(toolchain, prefix))
+    with open(os.path.join(prefix, "toolchain.sh"), "w") as f:
+        f.write(generate_toolchain_script(target))
 
+    print("Generating meson cross file for {} in {}".format(toolchain, prefix))
+    with open(os.path.join(prefix, "meson.cross"), "w") as f:
+        f.write(generate_meson_cross_file(target))
 
-def list_toolchains():
-    return [target for target in targets.keys()]
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate toolchain files for the docker images")
-    parser.add_argument("--list", action="store_true", help="Print available toolchains and exit")
-    parser.add_argument(
-        "--prefix", default=os.path.join("usr", "local"), help="Prefix path to store generated files in"
-    )
-    parser.add_argument(
-        "--targets",
-        nargs="*",
-        default=[target for target in targets.keys()],
-        choices=[target for target in targets.keys()],
-        help="Targets to generate toolchain files for",
-    )
-
-    args = parser.parse_args()
-
-    if args.list:
-        print("\n".join(list_toolchains()))
-    else:
-        generate(args.prefix, args.targets)
+    print("Generating cmake toolchain file for {} in {}".format(toolchain, prefix))
+    with open(os.path.join(prefix, "toolchain.cmake"), "w") as f:
+        f.write(generate_cmake_toolchain(target, prefix))
