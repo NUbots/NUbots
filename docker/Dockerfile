@@ -162,7 +162,17 @@ RUN PROTOC=/usr/bin/protoc install-python-from-source \
 
 # Libjpeg
 RUN install-package yasm
-RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz
+RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz \
+    -DWITH_SIMD=ON \
+    -DFORCE_INLINE=ON \
+    -DINLINE_WORKS=1 \
+    -DRIGHT_SHIFT_IS_UNSIGNED_COMPILED=ON \
+    -DRIGHT_SHIFT_IS_UNSIGNED_EXITCODE=1 \
+    -DRIGHT_SHIFT_IS_UNSIGNED="" \
+    -D__CHAR_UNSIGNED___COMPILED=ON \
+    -D__CHAR_UNSIGNED___EXITCODE=1 \
+    -D__CHAR_UNSIGNED__="" \
+    -DFLOATTEST="sse"
 
 # yaml-cpp
 RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
