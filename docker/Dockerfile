@@ -77,8 +77,8 @@ RUN  sudo PREFIX="/usr" /usr/local/package/clang.sh \
 ARG platform=generic
 
 # Generate toolchain files for the current platform
-COPY --chown=nubots:nubots usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
-RUN python /usr/local/generate_toolchains.py --prefix /usr/local --targets ${platform}
+COPY --chown=nubots:nubots usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_toolchain.py
+RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
