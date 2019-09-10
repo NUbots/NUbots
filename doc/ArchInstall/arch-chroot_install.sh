@@ -265,12 +265,12 @@ echo "/usr/share/fzf/completion.zsh" >> ${HOME}/.zshrc
 # Create user ssh directory
 mkdir -p ${HOME}/.ssh
 
-# Generate new keys for user
-ssh-keygen -q -f ${HOME} -N ""
-
 # Register docker client as an authorized user
 wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.ssh/id_rsa.pub \
     -O ${HOME}/.ssh/authorized_keys
+
+# Fix permissions so ssh will accept our authorized keys
+chmod 600 ${HOME}/.ssh/authorized_keys
 
 ##########
 # OpenCL #
