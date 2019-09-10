@@ -2,6 +2,7 @@
 
 import os
 import b
+import re
 import sys
 
 # Try to import docker, if we are already in docker this will fail
@@ -36,6 +37,16 @@ def build_platform(platform):
             sys.stdout.write(event["stream"])
 
 
+def platforms():
+    # Get the possible platforms
+    p = re.compile("generate_([a-z0-9]+)_toolchain.py")
+    return [
+        m.group(1)
+        for m in [p.match(s) for s in os.listdir(os.path.join(b.project_dir, "docker", "usr", "local", "toolchain"))]
+        if m is not None
+    ]
+
+
 def get_selected_platform():
     try:
         selected = client.images.get("{}:selected".format(repository))
@@ -66,9 +77,6 @@ def run_on_docker(func):
     if func.__name__ == "register":
 
         def register(command):
-            # Get the possible services
-            services = os.listdir(os.path.join(b.project_dir, "docker", "usr", "local", "toolchain"))
-            services = [s[:-3] for s in services if s.endswith(".sh")]
 
             # Add our docker specific options
             command.add_argument("--rebuild", action="store_true", help="rebuild the docker image checking for updates")
@@ -77,7 +85,7 @@ def run_on_docker(func):
             )
             command.add_argument(
                 "--platform",
-                choices=services,
+                choices=platforms(),
                 default="selected",
                 nargs="?",
                 help="The image to use for the docker container",

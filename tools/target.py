@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import re
 import b
 import docker
 import dockerise
@@ -10,19 +9,11 @@ import dockerise
 def register(command):
     command.help = "Select the default platform to use for docker commands"
 
-    # Get the possible platforms
-    p = re.compile("generate_([a-z0-9]+)_toolchain.py")
-    platforms = [
-        m.group(1)
-        for m in [p.match(s) for s in os.listdir(os.path.join(b.project_dir, "docker", "usr", "local", "toolchain"))]
-        if m is not None
-    ]
-
     command.add_argument(
         "platform",
         metavar="platform",
         nargs="?",
-        choices=platforms,
+        choices=dockerise.platforms(),
         help="the platform to select as the default platform",
     )
 
