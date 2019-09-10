@@ -19,6 +19,7 @@
 
 #include "HeadBehaviourSoccer.h"
 
+#include <Eigen/Geometry>
 #include <string>
 
 #include "extension/Configuration.h"
@@ -31,7 +32,6 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
@@ -64,7 +64,6 @@ namespace behaviour {
 
         using utility::math::coordinates::sphericalToCartesian;
         using utility::math::geometry::Quad;
-        using utility::math::geometry::UnitQuaternion;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateCameraLookJoints;
@@ -767,9 +766,8 @@ namespace behaviour {
 
 
         bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors) {
-            Rotation3D diff     = Transform3D(convert(sensors.Htw)).rotation().i() * lastPlanOrientation;
-            UnitQuaternion quat = UnitQuaternion(diff);
-            float angle         = quat.getAngle();
+            Rotation3D diff = Transform3D(convert(sensors.Htw)).rotation().i() * lastPlanOrientation;
+            float angle     = Eigen::AngleAxisd(diff.quaternion()).angle();
             return std::fabs(angle) > replan_angle_threshold;
         }
 

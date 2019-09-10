@@ -20,6 +20,7 @@
 #ifndef UTILITY_MOTION_FORWARDKINEMATICS_H
 #define UTILITY_MOTION_FORWARDKINEMATICS_H
 
+#include <Eigen/Geometry>
 #include <armadillo>
 #include <cmath>
 #include <nuclear>
@@ -303,22 +304,44 @@ namespace motion {
         }
 
 
-        inline std::map<ServoID, utility::math::matrix::Transform3D> calculateAllPositions(const KinematicsModel& model,
-                                                                                           const Sensors& sensors) {
-            std::map<ServoID, utility::math::matrix::Transform3D> result =
-                calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL);
-            std::map<ServoID, utility::math::matrix::Transform3D> rightLegPositions =
-                calculatePosition(model, sensors, ServoID::R_ANKLE_ROLL);
-            std::map<ServoID, utility::math::matrix::Transform3D> headPositions =
-                calculatePosition(model, sensors, ServoID::HEAD_PITCH);
-            std::map<ServoID, utility::math::matrix::Transform3D> leftArm =
-                calculatePosition(model, sensors, ServoID::L_ELBOW);
-            std::map<ServoID, utility::math::matrix::Transform3D> rightArm =
-                calculatePosition(model, sensors, ServoID::R_ELBOW);
-            result.insert(leftArm.begin(), leftArm.end());
-            result.insert(rightArm.begin(), rightArm.end());
-            result.insert(rightLegPositions.begin(), rightLegPositions.end());
-            result.insert(headPositions.begin(), headPositions.end());
+        // inline std::map<ServoID, utility::math::matrix::Transform3D> calculateAllPositions(const KinematicsModel&
+        // model,
+        //                                                                                    const Sensors& sensors) {
+        //     std::map<ServoID, utility::math::matrix::Transform3D> result =
+        //         calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL);
+        //     std::map<ServoID, utility::math::matrix::Transform3D> rightLegPositions =
+        //         calculatePosition(model, sensors, ServoID::R_ANKLE_ROLL);
+        //     std::map<ServoID, utility::math::matrix::Transform3D> headPositions =
+        //         calculatePosition(model, sensors, ServoID::HEAD_PITCH);
+        //     std::map<ServoID, utility::math::matrix::Transform3D> leftArm =
+        //         calculatePosition(model, sensors, ServoID::L_ELBOW);
+        //     std::map<ServoID, utility::math::matrix::Transform3D> rightArm =
+        //         calculatePosition(model, sensors, ServoID::R_ELBOW);
+        //     result.insert(leftArm.begin(), leftArm.end());
+        //     result.insert(rightArm.begin(), rightArm.end());
+        //     result.insert(rightLegPositions.begin(), rightLegPositions.end());
+        //     result.insert(headPositions.begin(), headPositions.end());
+        //     return result;
+        // }
+        inline std::map<ServoID, Eigen::Affine3d> calculateAllPositions(const KinematicsModel& model,
+                                                                        const Sensors& sensors) {
+            std::map<ServoID, Eigen::Affine3d> result;
+            for (const auto& r : calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL)) {
+                result[r.first] = convert(r.second);
+            }
+            for (const auto& r : calculatePosition(model, sensors, ServoID::R_ANKLE_ROLL)) {
+                result[r.first] = convert(r.second);
+            }
+            for (const auto& r : calculatePosition(model, sensors, ServoID::HEAD_PITCH)) {
+                result[r.first] = convert(r.second);
+            }
+            for (const auto& r : calculatePosition(model, sensors, ServoID::L_ELBOW)) {
+                result[r.first] = convert(r.second);
+            }
+            for (const auto& r : calculatePosition(model, sensors, ServoID::R_ELBOW)) {
+                result[r.first] = convert(r.second);
+            }
+
             return result;
         }
         /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
@@ -512,6 +535,17 @@ namespace motion {
             arma::mat22 robotToImu;
             robotToImu.col(0) = projXRobot;
             robotToImu.col(1) = projYRobot;
+
+            return robotToImu;
+        }
+
+        inline Eigen::Matrix2d calculateRobotToIMU(const Eigen::Affine3d& orientation) {
+            Eigen::Vector3d xRobotImu  = orientation.rotation().topRows<1>();
+            Eigen::Vector2d projXRobot = xRobotImu.head<2>().normalized();
+            Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot.y(), projXRobot.x());
+
+            Eigen::Matrix2d robotToImu;
+            robotToImu << projXRobot, projYRobot;
 
             return robotToImu;
         }

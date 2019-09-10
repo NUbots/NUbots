@@ -20,19 +20,14 @@
 
 #include "MotionModel.h"
 
-#include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/math/matrix/Rotation3D.h"
-
 namespace module {
 namespace platform {
     namespace darwin {
 
-        using utility::math::geometry::UnitQuaternion;
-        using utility::math::matrix::Rotation3D;
-
-        arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
-            arma::vec::fixed<size> newState = state;
-            newState.rows(QW, QZ)           = arma::normalise(newState.rows(QW, QZ));
+        Eigen::Matrix<double, MotionModel::size, 1> MotionModel::limitState(
+            const Eigen::Matrix<double, MotionModel::size, 1>& state) {
+            Eigen::Matrix<double, MotionModel::size, 1> newState = state;
+            newState.segment<QW - QX + 1>(QX)                    = newState.segment<QW - QX + 1>(QX).normalized();
             return newState;
         }
 
@@ -41,21 +36,22 @@ namespace platform {
         // @param deltaT The amount of time that has passed since the previous update, in seconds.
         // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
         // @return The new estimated system state.
-        arma::vec::fixed<MotionModel::size> MotionModel::timeUpdate(const arma::vec::fixed<size>& state,
-                                                                    double deltaT) {
+        Eigen::Matrix<double, MotionModel::size, 1> MotionModel::timeUpdate(
+            const Eigen::Matrix<double, MotionModel::size, 1>& state,
+            double deltaT) {
 
             // Prepare our new state
-            arma::vec::fixed<MotionModel::size> newState = state;
+            Eigen::Matrix<double, MotionModel::size, 1> newState = state;
 
             // ********************************
             // UPDATE LINEAR POSITION/VELOCITY
             // ********************************
 
             // Add our velocity to our position
-            newState.rows(PX, PZ) += state.rows(VX, VZ) * deltaT;
+            newState.segment<PZ - PX + 1>(PX) += state.segment<VZ - VX + 1>(VX) * deltaT;
 
             // add velocity decay
-            newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
+            newState.segment<VZ - VX + 1>(VX) = newState.segment<VZ - VX + 1>(VX).cwiseProduct(timeUpdateVelocityDecay);
 
 
             // ********************************
@@ -63,53 +59,55 @@ namespace platform {
             // ********************************
 
             // Extract our unit quaternion rotation
-            UnitQuaternion Rwt(state.rows(QW, QZ));
+            Eigen::Quaterniond Rwt(state.segment<QW - QX + 1>(QX));
 
             // Apply our rotational velocity to our orientation
             double t_2 = deltaT * 0.5;
-            UnitQuaternion qGyro;
-            qGyro.imaginary() = state.rows(WX, WZ) * t_2;
-            qGyro.real()      = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
+            Eigen::Quaterniond qGyro;
+            qGyro.vec() = state.segment<WZ - WX + 1>(WX) * t_2;
+            qGyro.w()   = 1.0 - 0.5 * qGyro.vec().squaredNorm();
 
-            newState.rows(QW, QZ) = Rwt * qGyro;
+            newState.segment<QW - QX + 1>(QX) = Rwt * qGyro;
 
             return newState;
         }
 
         // Accelerometer
-        arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
-                                                     const MeasurementType::ACCELEROMETER&) {
+        Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, MotionModel::size, 1>& state,
+                                                          const MeasurementType::ACCELEROMETER&) {
 
             // Extract our rotation quaternion
-            UnitQuaternion Rwt(state.rows(QW, QZ));
+            Eigen::Quaterniond Rwt(state.segment<QW - QX + 1>(QX));
 
             // Make a world gravity vector and rotate it into torso space
             // Where is world gravity with respest to robot orientation?
-            return Rwt.i().rotateVector(arma::vec3({0, 0, G}));
+            return Rwt.i().rotateVector(Eigen::Vector3d(0.0, 0.0, G));
         }
 
         // Gyroscope
-        arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
-                                                     const MeasurementType::GYROSCOPE&) {
+        Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, MotionModel::size, 1>& state,
+                                                          const MeasurementType::GYROSCOPE&) {
             // Add predicted gyroscope bias to our predicted gyroscope
-            return state.rows(WX, WZ) + state.rows(BX, BZ);
+            return state.segment<WZ - WX + 1>(WX) + state.segment<BZ - BX + 1>(BX);
         }
 
-        arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
-                                                     const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-            return state.rows(PX, PZ);
+        Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, MotionModel::size, 1>& state,
+                                                          const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            return state.segment<PZ - PX + 1>(PX);
         }
 
-        arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
-                                                     const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-            return state.rows(QW, QZ);
+        Eigen::Vector4d MotionModel::predictedObservation(const Eigen::Matrix<double, MotionModel::size, 1>& state,
+                                                          const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            return state.segment<QW - QX + 1>(QX);
         }
 
-        arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+        template <int N>
+        Eigen::Matrix<double, N, 1> MotionModel::observationDifference(const Eigen::Matrix<double, N, 1>& a,
+                                                                       const Eigen::Matrix<double, N, 1>& b) {
             return a - b;
         }
 
-        const arma::mat::fixed<MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
+        const Eigen::Matrix<double, MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
             // Return our process noise matrix
             return processNoiseMatrix;
         }

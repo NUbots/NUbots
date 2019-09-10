@@ -21,6 +21,7 @@
 #define UTILITY_MOTION_BALANCE_H
 
 #include <yaml-cpp/yaml.h>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Configuration.h"
@@ -30,7 +31,6 @@
 
 #include "utility/input/LimbID.h"
 //#include "utility/input/ServoID.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 
@@ -61,7 +61,7 @@ namespace motion {
         float lastPitch = 0;
         float lastRoll  = 0;
 
-        utility::math::geometry::UnitQuaternion lastErrorQuaternion;
+        Eigen::Quaterniond lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
 
     public:

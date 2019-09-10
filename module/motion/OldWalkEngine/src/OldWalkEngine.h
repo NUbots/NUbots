@@ -20,6 +20,7 @@
 #ifndef MODULES_MOTION_OLDWALKENGINE_H
 #define MODULES_MOTION_OLDWALKENGINE_H
 
+#include <Eigen/Geometry>
 #include <armadillo>
 #include <nuclear>
 
@@ -32,7 +33,6 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
@@ -65,7 +65,7 @@ namespace motion {
         using ServoID        = utility::input::ServoID;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
-        using UnitQuaternion = utility::math::geometry::UnitQuaternion;
+        using UnitQuaternion = Eigen::Quaterniond;
 
         enum State {
             /**
