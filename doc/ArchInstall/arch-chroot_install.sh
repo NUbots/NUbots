@@ -244,12 +244,19 @@ pacman -S --noconfirm --needed zsh zsh-completions git
 # Download zprezto to the user home directory
 cd ${HOME}
 git clone --recursive https://github.com/sorin-ionescu/prezto.git .zprezto
-for f in .zprezto/runcoms/*; do
+for f in .zprezto/runcoms/z*; do
     ln -s $f .$(basename $f)
 done
 
 # Change user shell to zsh
 chsh -s /usr/bin/zsh ${USER}
+
+# Get fuzzy find and install it
+pacman -S fzf
+echo "" >> ${HOME}/.zshrc
+echo "# Source the fuzzy find scripts" >> ${HOME}/.zshrc
+echo "/usr/share/fzf/key-bindings.zsh" >> ${HOME}/.zshrc
+echo "/usr/share/fzf/completion.zsh" >> ${HOME}/.zshrc
 
 ############
 # SSH KEYS #
