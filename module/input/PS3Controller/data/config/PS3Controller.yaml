@@ -1,0 +1,2 @@
+controller_path: "/dev/input/js1"
+accelerometer_path: "/dev/input/js0"

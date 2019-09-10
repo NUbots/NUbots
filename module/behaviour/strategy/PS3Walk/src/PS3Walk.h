@@ -21,9 +21,10 @@
 #define MODULES_BEHAVIOUR_STRATEGY_PS3WALK_H
 
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
-#include "Joystick.h"
+#include <string>
+#include <vector>
 
 namespace module {
 namespace behaviour {
@@ -31,46 +32,27 @@ namespace behaviour {
 
         class PS3Walk : public NUClear::Reactor {
         public:
-            // axes
-            static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
-            static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 2;
-            static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 3;
-            static constexpr uint AXIS_L2                        = 12;
-            static constexpr uint AXIS_R2                        = 13;
-            static constexpr uint AXIS_ACCEL_Y                   = 23;
-            static constexpr uint AXIS_ACCEL_X                   = 24;
-            static constexpr uint AXIS_ACCEL_Z                   = 25;
-
-            // buttons
-            static constexpr uint BUTTON_SELECT         = 0;
-            static constexpr uint BUTTON_LEFT_JOYSTICK  = 1;
-            static constexpr uint BUTTON_RIGHT_JOYSTICK = 2;
-            static constexpr uint BUTTON_START          = 3;
-            static constexpr uint BUTTON_DPAD_UP        = 4;
-            static constexpr uint BUTTON_DPAD_RIGHT     = 5;
-            static constexpr uint BUTTON_DPAD_DOWN      = 6;
-            static constexpr uint BUTTON_DPAD_LEFT      = 7;
-            static constexpr uint BUTTON_L2             = 8;
-            static constexpr uint BUTTON_R2             = 9;
-            static constexpr uint BUTTON_L1             = 10;
-            static constexpr uint BUTTON_R1             = 11;
-            static constexpr uint BUTTON_TRIANGLE       = 12;
-            static constexpr uint BUTTON_CIRCLE         = 13;
-            static constexpr uint BUTTON_CROSS          = 14;
-            static constexpr uint BUTTON_SQUARE         = 15;
-
             /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
             explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
 
         private:
-            Joystick joystick;  // TODO: make configurable
-            arma::vec strafe{0, 0};
-            float rotationalSpeed = 0;
-            bool moving           = false;
-            bool headLocked       = false;
-            float headPitch       = 0;
-            float headYaw         = 0;
+            size_t id;
+
+            Eigen::Vector3d walkCommandLimits = Eigen::Vector3d::Zero();
+            Eigen::Vector3d walkCommand       = Eigen::Vector3d::Zero();
+            Eigen::Vector3d prevWalkCommand   = Eigen::Vector3d::Zero();
+
+            Eigen::Vector2d headCommandLimits = Eigen::Vector2d::Zero();
+            Eigen::Vector2d headCommand       = Eigen::Vector2d::Zero();
+            Eigen::Vector2d prevHeadCommand   = Eigen::Vector2d::Zero();
+
+            double walk_command_threshold = 0.1;
+            double head_command_threshold = 0.1;
+
+            bool moving     = false;
+            bool headLocked = false;
+
+            std::vector<std::string> actions;
         };
     }  // namespace strategy
 }  // namespace behaviour
