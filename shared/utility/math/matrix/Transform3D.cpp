@@ -19,8 +19,6 @@
 
 #include "Transform3D.h"
 
-#include "utility/math/matrix/matrix.h"
-
 namespace utility {
 namespace math {
     namespace matrix {
@@ -31,7 +29,7 @@ namespace math {
             eye();  // identity matrix by default
         }
 
-        Transform3D::Transform(const Eigen::Quaterniond& q) : Transform(Rotation3D(q)) {}
+        Transform3D::Transform(const UnitQuaternion& q) : Transform(Rotation3D(q)) {}
 
         Transform3D::Transform(const Rotation3D& rotation) : Transform() {
             submat(0, 0, 2, 2) = rotation;
@@ -150,7 +148,7 @@ namespace math {
         }
 
         Transform3D Transform3D::getRandomU(float max_angle, float max_displacement) {
-            Eigen::Quaterniond q = utility::math::matrix::randomU(max_angle);
+            UnitQuaternion q = UnitQuaternion::getRandomU(max_angle);
             Rotation3D R(q);
 
             // Get displacement:
@@ -170,7 +168,7 @@ namespace math {
         }
 
         Transform3D Transform3D::getRandomN(float stddev_angle, float stddev_disp) {
-            Eigen::Quaterniond q = utility::math::matrix::randomN(stddev_angle);
+            UnitQuaternion q = UnitQuaternion::getRandomN(stddev_angle);
             Rotation3D R(q);
 
             // Get displacement:
@@ -210,14 +208,16 @@ namespace math {
         }
 
         Transform3D Transform3D::interpolate(Transform3D T1, Transform3D T2, float alpha) {
-            Eigen::Quaterniond q1 = T1.quaternion();
-            Eigen::Quaterniond q2 = T2.quaternion();
+            Rotation3D r1     = T1.rotation();
+            UnitQuaternion q1 = UnitQuaternion(r1);
+            Rotation3D r2     = T2.rotation();
+            UnitQuaternion q2 = UnitQuaternion(r2);
 
             arma::vec3 t1 = T1.translation();
             arma::vec3 t2 = T2.translation();
 
-            Eigen::Quaterniond qResult = q1.slerp(alpha, q2);
-            arma::vec3 tResult         = alpha * (t2 - t1) + t1;
+            UnitQuaternion qResult = q1.slerp(q2, alpha);
+            arma::vec3 tResult     = alpha * (t2 - t1) + t1;
 
             Transform3D TResult   = Transform3D(Rotation3D(qResult));
             TResult.translation() = tResult;

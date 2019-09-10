@@ -20,8 +20,9 @@
 #ifndef UTILITY_MATH_MATRIX_ROTATION3D_H
 #define UTILITY_MATH_MATRIX_ROTATION3D_H
 
-#include <Eigen/Geometry>
 #include <armadillo>
+
+#include "utility/math/geometry/UnitQuaternion.h"
 
 namespace utility {
 namespace math {
@@ -55,7 +56,7 @@ namespace math {
             /**
              * @brief Convert from a quaternions vec4
              */
-            Rotation(const Eigen::Quaterniond& q);
+            Rotation(const geometry::UnitQuaternion& q);
 
             /**
              * @brief Construct an ONB using a vec3 as the X axis
@@ -215,15 +216,6 @@ namespace math {
                 double roll, pitch, yaw; // psi, theta, phi
              */
             static Rotation3D createFromEulerAngles(const arma::vec3& a);
-
-            Eigen::Quaterniond quaternion() {
-                Eigen::Quaterniond q;
-                q.w()         = std::sqrt(1.0 + at(0, 0) + at(1, 1) + at(2, 2)) * 0.5;
-                double inv_w4 = 1.0 / (4.0 * q.w());
-                q.vec()       = Eigen::Vector3d(
-                    (at(2, 1) - at(1, 2)) * inv_w4, (at(0, 2) - at(2, 0)) * inv_w4, (at(1, 0) - at(0, 1)) * inv_w4);
-                return q;
-            }
         };
 
     }  // namespace matrix
