@@ -24,7 +24,7 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
-#include "utility/math/filter/UKF.h"
+#include "utility/math/filter/eigen/UKF.h"
 
 #include "MotionModel.h"
 #include "VirtualLoadSensor.h"

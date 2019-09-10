@@ -28,85 +28,143 @@ namespace module {
 namespace platform {
     namespace darwin {
 
+        // Gravity
+        static constexpr double G = -9.80665;
+
+        namespace MeasurementType {
+            struct GYROSCOPE {};
+            struct ACCELEROMETER {};
+            struct FLAT_FOOT_ODOMETRY {};
+            struct FLAT_FOOT_ORIENTATION {};
+        };  // namespace MeasurementType
+
+        template <typename Scalar>
         class MotionModel {
 
         public:
-            // Gravity
-            static constexpr double G = -9.80665;
+            enum Values {
+                // Our position in global space
+                // rTWw
+                PX = 0,
+                PY = 1,
+                PZ = 2,
 
-            // Our position in global space
-            // rTWw
-            static constexpr uint PX = 0;
-            static constexpr uint PY = 1;
-            static constexpr uint PZ = 2;
+                // Our velocity in global space
+                // rTWw
+                VX = 3,
+                VY = 4,
+                VZ = 5,
 
-            // Our velocity in global space
-            // rTWw
-            static constexpr uint VX = 3;
-            static constexpr uint VY = 4;
-            static constexpr uint VZ = 5;
+                // Our orientation from robot to world
+                // Rwt
+                QX = 6,
+                QY = 7,
+                QZ = 8,
+                QW = 9,
 
-            // Our orientation from robot to world
-            // Rwt
-            static constexpr uint QX = 6;
-            static constexpr uint QY = 7;
-            static constexpr uint QZ = 8;
-            static constexpr uint QW = 9;
+                // Our rotational velocity in robot space
+                // Gyroscope measures the angular velocity of the torso in torso space
+                // omegaTTt
+                WX = 10,
+                WY = 11,
+                WZ = 12,
 
-            // Our rotational velocity in robot space
-            // Gyroscope measures the angular velocity of the torso in torso space
-            // omegaTTt
-            static constexpr uint WX = 10;
-            static constexpr uint WY = 11;
-            static constexpr uint WZ = 12;
-
-            // Gyroscope Bias
-            // omegaTTt
-            static constexpr uint BX = 13;
-            static constexpr uint BY = 14;
-            static constexpr uint BZ = 15;
+                // Gyroscope Bias
+                // omegaTTt
+                BX = 13,
+                BY = 14,
+                BZ = 15,
+            };
 
             // The size of our state
             static constexpr size_t size = 16;
 
+            using State      = Eigen::Matrix<Scalar, size, 1>;
+            using Covariance = Eigen::Matrix<Scalar, size, size>;
+
             // Our static process noise matrix
-            Eigen::Matrix<double, size, size> processNoiseMatrix;
+            State process_noise;
 
             // The velocity decay for x/y/z velocities (1.0 = no decay)
-            Eigen::Vector3d timeUpdateVelocityDecay = Eigen::Vector3d::Ones();
+            Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-            struct MeasurementType {
-                struct GYROSCOPE {};
-                struct ACCELEROMETER {};
-                struct FOOT_UP_WITH_Z {};
-                struct FLAT_FOOT_ODOMETRY {};
-                struct FLAT_FOOT_ORIENTATION {};
-            };
+            State time(const State& state, Scalar deltaT) {
 
-            MotionModel() : processNoiseMatrix(Eigen::Matrix<double, size, size>::Identity()) {}
+                // Prepare our new state
+                State newState = state;
 
-            Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
+                // ********************************
+                // UPDATE LINEAR POSITION/VELOCITY
+                // ********************************
 
-            Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
-                                                 const MeasurementType::ACCELEROMETER&);
-            Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
-                                                 const MeasurementType::GYROSCOPE&);
-            Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
-                                                 const MeasurementType::FOOT_UP_WITH_Z&);
-            Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
-                                                 const MeasurementType::FLAT_FOOT_ODOMETRY&);
-            Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
-                                                 const MeasurementType::FLAT_FOOT_ORIENTATION&);
+                // Add our velocity to our position
+                newState.template segment<3>(PX) += state.template segment<3>(VX) * deltaT;
 
-            template <int N>
-            Eigen::Matrix<double, N, 1> observationDifference(const Eigen::Matrix<double, N, 1>& a,
-                                                              const Eigen::Matrix<double, N, 1>& b);
+                // add velocity decay
+                newState.template segment<3>(VX) =
+                    newState.template segment<3>(VX).cwiseProduct(timeUpdateVelocityDecay);
 
-            Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
-            const Eigen::Matrix<double, size, size>& processNoise();
-        };
-    }  // namespace darwin
+                // ********************************
+                // UPDATE ANGULAR POSITION/VELOCITY
+                // ********************************
+
+                // Extract our unit quaternion rotation
+                Eigen::Quaterniond Rwt(state.template segment<4>(QX));
+
+                // Apply our rotational velocity to our orientation
+                Scalar t_2 = deltaT * 0.5;
+                Eigen::Quaterniond qGyro;
+                qGyro.vec() = state.template segment<3>(WX) * t_2;
+                qGyro.w()   = 1.0 - 0.5 * qGyro.vec().squaredNorm();
+                qGyro       = Rwt * qGyro;
+
+                newState(QW)                     = qGyro.w();
+                newState.template segment<3>(QX) = qGyro.vec();
+
+                return newState;
+            }
+
+            auto predict(const State& state, const MeasurementType::ACCELEROMETER&) {
+
+                // Extract our rotation quaternion
+                Eigen::Quaterniond Rwt(state.template segment<4>(QX));
+
+                // Make a world gravity vector and rotate it into torso space
+                // Where is world gravity with respest to robot orientation?
+                return Rwt.inverse()._transformVector(Eigen::Vector3d(0.0, 0.0, G));
+            }
+
+            auto predict(const State& state, const MeasurementType::GYROSCOPE&) {
+                // Add predicted gyroscope bias to our predicted gyroscope
+                return state.template segment<3>(WX) + state.template segment<3>(BX);
+            }
+
+            auto predict(const State& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+                return state.template segment<3>(PX);
+            }
+
+            auto predict(const State& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+                return state.template segment<4>(QX);
+            }
+
+            template <typename T, typename U>
+            auto difference(const T& a, const U& b) {
+                return a - b;
+            }
+
+            State limit(const State& state) {
+                State newState                   = state;
+                newState.template segment<4>(QX) = newState.template segment<4>(QX).normalized();
+                return newState;
+            }
+
+            auto noise(const Scalar& dt) {
+                // Return our process noise matrix
+                return process_noise.asDiagonal();
+            }
+        };  // namespace darwin
+    }       // namespace darwin
 }  // namespace platform
 }  // namespace module
 
