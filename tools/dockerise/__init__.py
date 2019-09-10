@@ -157,7 +157,6 @@ def run_on_docker(func):
                             type="bind",
                             source=b.project_dir,
                             target="/home/{}/{}".format(repository, "NUbots"),
-                            read_only=True,
                             consistency="cached",
                         ),
                         docker.types.Mount(
