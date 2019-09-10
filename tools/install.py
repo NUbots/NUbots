@@ -58,6 +58,7 @@ def run(target, user, config, toolchain, **kwargs):
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
         # Only send toolchain files if ours are newer than the receivers.
+        # Delete toolchain files on the receiver if they no longer exist in our toolchain
         cprint("Installing toolchain library files", "blue", attrs=["bold"])
 
         subprocess.call(
@@ -79,6 +80,10 @@ def run(target, user, config, toolchain, **kwargs):
                 "{0}@{1}:/usr/".format(user, target),
             ]
         )
+
+        # Run ldconfig on the robot to ensure the system knows that the new libraries are there
+        cprint("Running ldconfig on {}".format(target), "blue", attrs=["bold"])
+        subprocess.call(["ssh", "{}@{}".format(user, target), "sudo ldconfig"])
 
     # Get list of config files
     config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]]
