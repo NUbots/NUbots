@@ -1,53 +1,46 @@
-NUCLEAR_ROLE(
-    # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
-    extension::FileWatcher
-    support::SignalCatcher
-    support::logging::ConsoleLogHandler
-    # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-    motion::KinematicsConfiguration
-
-    # Support
-    support::configuration::GlobalConfig
-    support::configuration::NetworkConfiguration
-    support::NUsight
-    support::configuration::SoccerConfig
-
-    # input
-    input::GameController
-
-    # Sensors
-    input::Camera
-    platform::darwin::HardwareIO
-    platform::darwin::SensorFilter
-
-    # Vision
-    vision::VisualMesh
-    vision::GreenHorizonDetector
-    vision::GoalDetector
-    vision::BallDetector
-
-    # Localisation
-    localisation::BallLocalisation
-    localisation::RobotParticleLocalisation
-
-    # Behaviour
-    behaviour::Controller
-    behaviour::skills::Stand
-    behaviour::skills::FallingRelax
-    behaviour::skills::Getup
-    behaviour::skills::KickScript
-    behaviour::skills::HeadBehaviourSoccer
-    behaviour::planning::KickPlanner
-    behaviour::planning::SimpleWalkPathPlanner  # Creates WalkPaths.
-    #behaviour::planning::BezierWalkPathPlanner  # Creates WalkPaths.
-    behaviour::strategy::SoccerStrategy
-    behaviour::skills::Nod
-
-    # Motion
-    motion::ScriptEngine
-    motion::OldWalkEngine
-    motion::HeadController
-
-    # Output
-    #output::eSpeak
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
+  # and without it many roles do not run
+  extension::FileWatcher
+  support::SignalCatcher
+  support::logging::ConsoleLogHandler
+  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+  motion::KinematicsConfiguration
+  # Support
+  support::configuration::GlobalConfig
+  support::configuration::NetworkConfiguration
+  support::NUsight
+  support::configuration::SoccerConfig
+  # input
+  input::GameController
+  # Sensors
+  input::Camera
+  platform::darwin::HardwareIO
+  platform::darwin::SensorFilter
+  # Vision
+  vision::VisualMesh
+  vision::GreenHorizonDetector
+  vision::GoalDetector
+  vision::BallDetector
+  # Localisation
+  localisation::BallLocalisation
+  localisation::RobotParticleLocalisation
+  # Behaviour
+  behaviour::Controller
+  behaviour::skills::Stand
+  behaviour::skills::FallingRelax
+  behaviour::skills::Getup
+  behaviour::skills::KickScript
+  behaviour::skills::HeadBehaviourSoccer
+  behaviour::planning::KickPlanner
+  behaviour::planning::SimpleWalkPathPlanner # Creates WalkPaths. behaviour::planning::BezierWalkPathPlanner  # Creates
+                                             # WalkPaths.
+  behaviour::strategy::SoccerStrategy
+  behaviour::skills::Nod
+  # Motion
+  motion::ScriptEngine
+  motion::OldWalkEngine
+  motion::HeadController
+  # Output
+  # output::eSpeak
 )

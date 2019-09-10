@@ -1,30 +1,28 @@
-NUCLEAR_ROLE(
-    # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
-    #support::SignalCatcher
-    extension::FileWatcher
-    # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-    motion::KinematicsConfiguration
-    # Support and Configuration
-    support::configuration::GlobalConfig
-    support::configuration::SoccerConfig
-    support::configuration::NetworkConfiguration
-    support::NUsight
-
-    # Hardware Interface
-    platform::darwin::HardwareIO
-    platform::darwin::SensorFilter
-
-    # Motion
-    motion::OldWalkEngine
-    motion::ScriptEngine
-    motion::HeadController
-
-    # Behaviour
-    behaviour::Controller
-    behaviour::skills::Stand
-    #behaviour::skills::FallingRelax
-    behaviour::skills::Getup
-    behaviour::skills::KickScript
-    behaviour::skills::DirectWalkController
-    behaviour::strategy::KeyboardWalk
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
+  # and without it many roles do not run
+  # support::SignalCatcher
+  extension::FileWatcher
+  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+  motion::KinematicsConfiguration
+  # Support and Configuration
+  support::configuration::GlobalConfig
+  support::configuration::SoccerConfig
+  support::configuration::NetworkConfiguration
+  support::NUsight
+  # Hardware Interface
+  platform::darwin::HardwareIO
+  platform::darwin::SensorFilter
+  # Motion
+  motion::OldWalkEngine
+  motion::ScriptEngine
+  motion::HeadController
+  # Behaviour
+  behaviour::Controller
+  behaviour::skills::Stand
+  # behaviour::skills::FallingRelax
+  behaviour::skills::Getup
+  behaviour::skills::KickScript
+  behaviour::skills::DirectWalkController
+  behaviour::strategy::KeyboardWalk
 )

@@ -1,5 +1,3 @@
-SET(dependencies
-	NUBOTS_PROJECT
-	)
+set(dependencies NUBOTS_PROJECT)
 
-ADD_UTILITY_LIBRARY(${CMAKE_CURRENT_SOURCE_DIR} ${dependencies})
+add_utility_library(${CMAKE_CURRENT_SOURCE_DIR} ${dependencies})

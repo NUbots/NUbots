@@ -1,5 +1,2 @@
-INCLUDE(ToolchainLibraryFinder)
-ToolchainLibraryFinder(NAME YAML-CPP
-                       HEADER yaml-cpp/yaml.h
-                       LIBRARY yaml-cpp
-)
+include(ToolchainLibraryFinder)
+ToolchainLibraryFinder(NAME YAML-CPP HEADER yaml-cpp/yaml.h LIBRARY yaml-cpp)

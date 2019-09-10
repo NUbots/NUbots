@@ -1,8 +1,5 @@
 # Build our NUClear module
-FIND_PACKAGE(TurboJPEG REQUIRED)
+find_package(TurboJPEG REQUIRED)
 
 # Build our NUClear module
-NUCLEAR_MODULE(
-    INCLUDES ${TurboJPEG_INCLUDE_DIRS}
-    LIBRARIES ${TurboJPEG_LIBRARIES}
-)
+nuclear_module(INCLUDES ${TurboJPEG_INCLUDE_DIRS} LIBRARIES ${TurboJPEG_LIBRARIES})

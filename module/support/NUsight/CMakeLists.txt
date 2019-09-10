@@ -1,6 +1,5 @@
 # Find libjpeg library
-FIND_PACKAGE(JPEG REQUIRED)
+find_package(JPEG REQUIRED)
 
 # Build our NUClear module
-NUCLEAR_MODULE(INCLUDES ${JPEG_INCLUDE_DIR}
-               LIBRARIES ${JPEG_LIBRARIES})
+nuclear_module(INCLUDES ${JPEG_INCLUDE_DIR} LIBRARIES ${JPEG_LIBRARIES})
