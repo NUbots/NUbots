@@ -39,15 +39,16 @@ namespace math {
             *this = this->orthogonalise();
         }
 
-        Rotation3D::Rotation(const Eigen::Quaterniond& q) {
+        Rotation3D::Rotation(const UnitQuaternion& q) {
             // quaternion to rotation conversion
             // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
             // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
-            *this << 1 - 2 * q.y() * q.y() - 2 * q.z() * q.z() << 2 * q.x() * q.y() - 2 * q.z() * q.w()
-                  << 2 * q.x() * q.z() + 2 * q.y() * q.w() << arma::endr << 2 * q.x() * q.y() + 2 * q.z() * q.w()
-                  << 1 - 2 * q.x() * q.x() - 2 * q.z() * q.z() << 2 * q.y() * q.z() - 2 * q.x() * q.w() << arma::endr
-                  << 2 * q.x() * q.z() - 2 * q.y() * q.w() << 2 * q.y() * q.z() + 2 * q.x() * q.w()
-                  << 1 - 2 * q.x() * q.x() - 2 * q.y() * q.y();
+            *this << 1 - 2 * q.kY() * q.kY() - 2 * q.kZ() * q.kZ() << 2 * q.kX() * q.kY() - 2 * q.kZ() * q.kW()
+                  << 2 * q.kX() * q.kZ() + 2 * q.kY() * q.kW() << arma::endr
+                  << 2 * q.kX() * q.kY() + 2 * q.kZ() * q.kW() << 1 - 2 * q.kX() * q.kX() - 2 * q.kZ() * q.kZ()
+                  << 2 * q.kY() * q.kZ() - 2 * q.kX() * q.kW() << arma::endr
+                  << 2 * q.kX() * q.kZ() - 2 * q.kY() * q.kW() << 2 * q.kY() * q.kZ() + 2 * q.kX() * q.kW()
+                  << 1 - 2 * q.kX() * q.kX() - 2 * q.kY() * q.kY();
         }
 
         Rotation3D::Rotation(const arma::vec3& axis) {
@@ -163,14 +164,13 @@ namespace math {
         }
 
         float Rotation3D::norm(Rotation3D T) {
-            Eigen::Quaterniond q = T.quaternion();
-
+            UnitQuaternion q = UnitQuaternion(T);
             // Get angle between -2Pi and 2pi
-            float angle = Eigen::AngleAxisd(q).angle();
+            float angle = q.getAngle();
             // Just want magnitude
             float theta = std::fabs(angle);
             // But rotating more that Pi in one direction is equivalent to a rotation in the other direction
-            return std::fmin(2.0 * M_PI - theta, theta);
+            return std::fmin(2 * M_PI - theta, theta);
         }
 
 
