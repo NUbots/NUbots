@@ -85,8 +85,12 @@ def run(target, user, config, toolchain, **kwargs):
         cprint("Running ldconfig on {}".format(target), "blue", attrs=["bold"])
         subprocess.call(["ssh", "{}@{}".format(user, target), "sudo ldconfig"])
 
+    # If there is only a single file then the b script returns this as a string rather than a list
+    config_files = b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]
+    config_files = config_files if isinstance(config_files, list) else [config_files]
+
     # Get list of config files
-    config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]]
+    config_files = [os.path.relpath(c, build_dir) for c in config_files]
 
     # Change to the build directory so our relative paths are correct
     os.chdir(build_dir)
