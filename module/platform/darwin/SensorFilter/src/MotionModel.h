@@ -21,7 +21,8 @@
 #define MODULE_PLATFORM_DARWIN_MOTIONMODEL_H
 
 /* Motion model Motion Unit*/
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 namespace module {
 namespace platform {
@@ -47,10 +48,10 @@ namespace platform {
 
             // Our orientation from robot to world
             // Rwt
-            static constexpr uint QW = 6;
-            static constexpr uint QX = 7;
-            static constexpr uint QY = 8;
-            static constexpr uint QZ = 9;
+            static constexpr uint QX = 6;
+            static constexpr uint QY = 7;
+            static constexpr uint QZ = 8;
+            static constexpr uint QW = 9;
 
             // Our rotational velocity in robot space
             // Gyroscope measures the angular velocity of the torso in torso space
@@ -69,10 +70,10 @@ namespace platform {
             static constexpr size_t size = 16;
 
             // Our static process noise matrix
-            arma::mat::fixed<size, size> processNoiseMatrix;
+            Eigen::Matrix<double, size, size> processNoiseMatrix;
 
             // The velocity decay for x/y/z velocities (1.0 = no decay)
-            arma::vec3 timeUpdateVelocityDecay = {1, 1, 1};
+            Eigen::Vector3d timeUpdateVelocityDecay = Eigen::Vector3d::Ones();
 
             struct MeasurementType {
                 struct GYROSCOPE {};
@@ -82,24 +83,28 @@ namespace platform {
                 struct FLAT_FOOT_ORIENTATION {};
             };
 
-            MotionModel() : processNoiseMatrix(arma::fill::eye) {}  // empty constructor
+            MotionModel() : processNoiseMatrix(Eigen::Matrix<double, size, size>::Identity()) {}
 
-            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+            Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
-            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
-            arma::vec4 predictedObservation(const arma::vec::fixed<size>& state,
-                                            const MeasurementType::FOOT_UP_WITH_Z&);
-            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state,
-                                            const MeasurementType::FLAT_FOOT_ODOMETRY&);
-            arma::vec4 predictedObservation(const arma::vec::fixed<size>& state,
-                                            const MeasurementType::FLAT_FOOT_ORIENTATION&);
+            Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
+                                                 const MeasurementType::ACCELEROMETER&);
+            Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
+                                                 const MeasurementType::GYROSCOPE&);
+            Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
+                                                 const MeasurementType::FOOT_UP_WITH_Z&);
+            Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
+                                                 const MeasurementType::FLAT_FOOT_ODOMETRY&);
+            Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state,
+                                                 const MeasurementType::FLAT_FOOT_ORIENTATION&);
 
-            arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+            template <int N>
+            Eigen::Matrix<double, N, 1> observationDifference(const Eigen::Matrix<double, N, 1>& a,
+                                                              const Eigen::Matrix<double, N, 1>& b);
 
-            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+            Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
-            const arma::mat::fixed<size, size>& processNoise();
+            const Eigen::Matrix<double, size, size>& processNoise();
         };
     }  // namespace darwin
 }  // namespace platform

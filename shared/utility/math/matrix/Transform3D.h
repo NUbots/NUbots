@@ -20,9 +20,9 @@
 #ifndef UTILITY_MATH_MATRIX_TRANSFORM3D_H
 #define UTILITY_MATH_MATRIX_TRANSFORM3D_H
 
+#include <Eigen/Geometry>
 #include <armadillo>
 
-#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 
@@ -59,7 +59,7 @@ namespace math {
             /**
              * @brief Convert from a quaternions vec4
              */
-            Transform(const geometry::UnitQuaternion& q);
+            Transform(const Eigen::Quaterniond& q);
 
             /**
              * @brief Convert from a Transform2D matrix
@@ -299,6 +299,15 @@ namespace math {
              */
             Transform2D projectTo2D(const arma::vec3& yawAxis     = arma::vec3({0, 0, 1}),
                                     const arma::vec3& forwardAxis = arma::vec3({1, 0, 0})) const;
+
+            Eigen::Quaterniond quaternion() {
+                Eigen::Quaterniond q;
+                q.w()         = std::sqrt(1.0 + at(0, 0) + at(1, 1) + at(2, 2)) * 0.5;
+                double inv_w4 = 1.0 / (4.0 * q.w());
+                q.vec()       = Eigen::Vector3d(
+                    (at(2, 1) - at(1, 2)) * inv_w4, (at(0, 2) - at(2, 0)) * inv_w4, (at(1, 0) - at(0, 1)) * inv_w4);
+                return q;
+            }
         };
 
     }  // namespace matrix

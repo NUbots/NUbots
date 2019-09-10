@@ -29,7 +29,6 @@ namespace motion {
     // using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
-    using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
 
@@ -78,10 +77,10 @@ namespace motion {
         Rotation3D errorOrientation = yawlessOrientation * yawlessGoalOrientation.i();
 
         // Our goal position as a quaternions
-        UnitQuaternion errorQuaternion(errorOrientation);
+        Eigen::Quaterniond errorQuaternion(errorOrientation.quaternion());
 
         // Calculate our D error and I error
-        UnitQuaternion differential = lastErrorQuaternion.i() * errorQuaternion;
+        Eigen::Quaterniond differential = lastErrorQuaternion.inverse() * errorQuaternion;
 
         // TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
         // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
@@ -90,14 +89,16 @@ namespace motion {
         // Rotation3D(error).pitch()));
 
         // Apply the PID gains
-        UnitQuaternion ankleRotation = UnitQuaternion().slerp(errorQuaternion, rotationPGain)
-                                       // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
-                                       * UnitQuaternion().slerp(differential, rotationDGain);
+        Eigen::Quaterniond ankleRotation = Eigen::Quaterniond().slerp(rotationPGain, errorQuaternion)
+                                           // * Eigen::Quaterniond().slerp(rotationIGain, footGoalErrorSum)
+                                           * Eigen::Quaterniond().slerp(rotationDGain, differential);
 
         // Apply our rotation
         auto hipRotation = ankleRotation;
-        ankleRotation.scaleAngle(ankleRotationScale);
-        hipRotation.scaleAngle(hipRotationScale);
+        Eigen::AngleAxisd tmp(ankleRotation);
+        ankleRotation = Eigen::AngleAxisd(tmp.angle() * ankleRotationScale, tmp.axis());
+        tmp           = hipRotation;
+        hipRotation   = Eigen::AngleAxisd(tmp.angle() * hipRotationScale, tmp.axis());
 
         // Apply this rotation goal to our position
         footToTorso.rotation() = Rotation3D(ankleRotation) * footToTorso.rotation();
