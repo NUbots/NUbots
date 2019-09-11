@@ -32,7 +32,6 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Eigen::Affine3d.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/eigen_armadillo.h"
@@ -44,12 +43,11 @@ namespace platform {
 
         using extension::Configuration;
 
+        using message::input::Sensors;
         using message::motion::ServoTarget;
         using message::platform::darwin::DarwinSensors;
-        using ServoID = utility::input::ServoID;
-        using message::input::Sensors;
 
-        using utility::math::matrix::Eigen::Affine3d;
+        using utility::input::ServoID;
         using utility::nusight::graph;
         using utility::support::Expression;
 
@@ -179,8 +177,8 @@ namespace platform {
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
                 [this](std::shared_ptr<const Sensors> previousSensors) {
                     if (previousSensors) {
-                        Eigen::Affine3d Hf_rt = previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL);
-                        Eigen::Affine3d Hf_lt = previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL);
+                        Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL));
+                        Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL));
                         Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                         Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
@@ -212,14 +210,14 @@ namespace platform {
                                 std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
                             Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
 
-                            Eigen::Vector3d cross = cross(present.cross(goal);
+                            Eigen::Vector3d cross = present.cross(goal);
                             if (cross.z() > 0) {
-                            servo.presentPosition =
-                                utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
+                                servo.presentPosition =
+                                    utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
                             }
                             else {
-                            servo.presentPosition =
-                                utility::math::angle::normalizeAngle(servo.presentPosition - movingSpeed);
+                                servo.presentPosition =
+                                    utility::math::angle::normalizeAngle(servo.presentPosition - movingSpeed);
                             }
                         }
                     }
