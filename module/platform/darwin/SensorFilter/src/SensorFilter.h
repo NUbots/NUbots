@@ -28,6 +28,7 @@
 
 #include "MotionModel.h"
 #include "VirtualLoadSensor.h"
+
 #include "message/motion/KinematicsModel.h"
 
 

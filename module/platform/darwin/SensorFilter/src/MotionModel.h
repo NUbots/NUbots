@@ -40,7 +40,6 @@ namespace platform {
 
         template <typename Scalar>
         class MotionModel {
-
         public:
             enum Values {
                 // Our position in global space
@@ -110,13 +109,12 @@ namespace platform {
                 // ********************************
 
                 // Extract our unit quaternion rotation
-                Eigen::Quaterniond Rwt(state.template segment<4>(QX));
+                Eigen::Quaternion<Scalar> Rwt(state.template segment<4>(QX));
 
                 // Apply our rotational velocity to our orientation
-                Scalar t_2 = deltaT * 0.5;
-                Eigen::Quaterniond qGyro;
-                qGyro.vec() = state.template segment<3>(WX) * t_2;
-                qGyro.w()   = 1.0 - 0.5 * qGyro.vec().squaredNorm();
+                Eigen::Quaternion<Scalar> qGyro;
+                qGyro.vec() = state.template segment<3>(WX) * deltaT * Scalar(0.5);
+                qGyro.w()   = Scalar(1.0) - Scalar(0.5) * qGyro.vec().squaredNorm();
                 qGyro       = Rwt * qGyro;
 
                 newState(QW)                     = qGyro.w();
@@ -128,7 +126,7 @@ namespace platform {
             auto predict(const State& state, const MeasurementType::ACCELEROMETER&) {
 
                 // Extract our rotation quaternion
-                Eigen::Quaterniond Rwt(state.template segment<4>(QX));
+                Eigen::Quaternion<Scalar> Rwt(state.template segment<4>(QX));
 
                 // Make a world gravity vector and rotate it into torso space
                 // Where is world gravity with respest to robot orientation?
