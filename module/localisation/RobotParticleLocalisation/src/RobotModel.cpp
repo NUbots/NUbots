@@ -61,7 +61,7 @@ namespace localisation {
                                                const Goal::MeasurementType& type,
                                                const FieldDescription& fd) {
 
-        Transform3D Hfw = fieldStateToTransform3D(state);
+        Transform3D Hfw = convert(fieldStateToTransform3D(convert(state)));
         Transform3D Hcf = Hcw * Hfw.i();
 
         // rZFf = vector from field origin to zenith high in the sky

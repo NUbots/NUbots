@@ -107,7 +107,7 @@ namespace behaviour {
                     // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
                     // TODO: The heading seems to judder here!!
                     // TODO: use sensors.Htw instead
-                    Transform3D Hfw = fieldStateToTransform3D(convert(field.position));
+                    Transform3D Hfw = convert(fieldStateToTransform3D(field.position));
 
                     Transform3D Htw         = convert(sensors.Htw);
                     arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});

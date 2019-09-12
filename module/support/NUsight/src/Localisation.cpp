@@ -21,14 +21,15 @@
 
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
+
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
 
     using message::localisation::Ball;
     using message::localisation::Field;
+
     using utility::nusight::graph;
 
     void NUsight::provideLocalisation() {

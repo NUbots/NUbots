@@ -1,5 +1,7 @@
 #include "RobotParticleLocalisation.h"
 
+#include <Eigen/Geometry>
+
 #include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
@@ -107,8 +109,10 @@ namespace localisation {
                     arma::vec3 rTFf   = {s.position[0], s.position[1], 0};
                     Hft.translation() = rTFf;
                     Hft.rotateZ(s.heading);
-                    Hfw = Hft * Htw;
-                    states.push_back(transform3DToFieldState(Hfw));
+                    Hfw      = Hft * Htw;
+                    auto tmp = transform3DToFieldState(Eigen::Affine3d(convert(Hfw)));
+                    states.push_back(Transform2D(convert(Eigen::Vector2d(tmp.translation())),
+                                                 Eigen::Rotation2Dd(tmp.linear()).angle()));
 
                     Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0})).rotation();
                     arma::mat22 pos_cov   = Hfw_xy * convert(s.position_cov) * Hfw_xy.t();

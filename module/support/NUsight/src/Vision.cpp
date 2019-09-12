@@ -28,8 +28,6 @@
 #include "message/vision/Obstacle.h"
 #include "message/vision/VisualMesh.h"
 
-#include "utility/support/eigen_armadillo.h"
-
 namespace module {
 namespace support {
 

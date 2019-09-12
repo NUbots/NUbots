@@ -23,8 +23,6 @@
 
 #include "message/vision/LookUpTable.h"
 
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
@@ -36,6 +34,8 @@ namespace support {
 
     using message::input::Image;
     using message::vision::LookUpTable;
+
+    using utility::support::Expression;
 
     using FOURCC = utility::vision::FOURCC;
 
@@ -83,7 +83,7 @@ namespace support {
                 lens.projection = Image::Lens::Projection::EQUIDISTANT;
                 lens.fov << config["FOV_X"].as<float>(), config["FOV_Y"].as<float>();
                 lens.focal_length = 1.0f / config["lens"]["radiansPerPixel"].as<float>();
-                lens.centre       = convert(config["lens"]["centreOffset"].as<arma::fvec>());
+                lens.centre       = config["lens"]["centreOffset"].as<Expression>();
             }
             else {
                 log<NUClear::ERROR>("LENS TYPE UNDEFINED: choose from 'pinhole' or 'radial'");

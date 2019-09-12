@@ -212,7 +212,7 @@ namespace behaviour {
                     if (useLocalisation) {
 
                         // Transform kick target to torso space
-                        Transform3D Hfw = fieldStateToTransform3D(convert(field.position));
+                        Transform3D Hfw = convert(fieldStateToTransform3D(field.position));
                         Transform3D Htf = (Htw * Hfw.i());
                         arma::vec3 kickTarget =
                             Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));

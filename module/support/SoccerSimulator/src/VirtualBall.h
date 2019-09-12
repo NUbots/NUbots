@@ -20,7 +20,8 @@
 #ifndef MODULE_SUPPORT_VIRTUALBALL
 #define MODULE_SUPPORT_VIRTUALBALL
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <random>
 
 #include "message/input/Image.h"
@@ -36,20 +37,20 @@ namespace support {
     public:
         VirtualBall();
 
-        VirtualBall(arma::vec2 position, float diameter);
+        VirtualBall(const Eigen::Vector2d& position, float diameter);
 
-        arma::vec3 position;
-        arma::vec3 velocity;
+        Eigen::Vector3d position;
+        Eigen::Vector3d velocity;
         float diameter;
 
         std::mt19937 rd;
-        std::normal_distribution<> angularDistribution = std::normal_distribution<>(0, M_PI_2);
-        std::normal_distribution<> radialDistribution  = std::normal_distribution<>(0, 0.01);
+        std::normal_distribution<> angularDistribution = std::normal_distribution<>(0.0, M_PI_2);
+        std::normal_distribution<> radialDistribution  = std::normal_distribution<>(0.0, 0.01);
 
         message::vision::Balls detect(const message::input::Image& image,
-                                      utility::math::matrix::Transform2D robotPose,
+                                      const Eigen::Affine2d& robotPose,
                                       const message::input::Sensors& sensors,
-                                      arma::vec4 error);
+                                      const Eigen::Vector4d& error);
     };
 }  // namespace support
 }  // namespace module
