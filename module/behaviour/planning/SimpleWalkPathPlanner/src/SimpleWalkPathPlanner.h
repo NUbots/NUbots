@@ -20,7 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_H
 #define MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_H
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <cmath>
 #include <nuclear>
 
@@ -54,15 +54,15 @@ namespace behaviour {
             //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
             // info for the current walk
-            arma::vec2 currentTargetPosition;
-            arma::vec2 currentTargetHeading;
+            Eigen::Vector2d currentTargetPosition;
+            Eigen::Vector2d currentTargetHeading;
             message::behaviour::KickPlan targetHeading;
-            arma::vec2 targetPosition = {0, 0};
+            Eigen::Vector2d targetPosition = Eigen::Vector2d::Zero();
 
             NUClear::clock::time_point timeBallLastSeen;
-            arma::vec3 rBWw          = {10, 0, 0};
-            bool robot_ground_space  = true;
-            arma::vec2 position      = {1, 0};  // ball pos rel to robot
+            Eigen::Vector3d rBWw(10.0, 0.0, 0.0);
+            bool robot_ground_space = true;
+            Eigen::Vector2d position(Eigen::Vector2d::UnitX());  // ball pos rel to robot
             float ball_approach_dist = 0.2;
             float slowdown_distance  = 0.2;
             bool useLocalisation     = true;

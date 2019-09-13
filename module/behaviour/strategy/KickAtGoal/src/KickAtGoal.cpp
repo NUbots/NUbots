@@ -18,13 +18,16 @@
  */
 
 #include "KickAtGoal.h"
-#include <armadillo>
+
+#include <Eigen/Core>
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
+
 #include "utility/time/time.h"
 
 namespace module {
@@ -32,29 +35,31 @@ namespace behaviour {
     namespace strategy {
 
         using extension::Configuration;
+
         using message::behaviour::Behaviour;
         using message::behaviour::KickPlan;
         using message::behaviour::MotionCommand;
         using message::behaviour::WalkApproach;
         using message::behaviour::WalkTarget;
-        using VisionBalls = message::vision::Balls;
-        using VisionGoals = message::vision::Goals;
+
+        using message::vision::Balls;
+        using message::vision::Goals;
         using utility::time::durationFromSeconds;
 
         KickAtGoal::KickAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             // TODO: unhack?
-            emit(std::make_unique<KickPlan>(KickPlan{{3, 0}}));
+            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(3.0, 0.0), KickPlan::KickType::SCRIPTED)));
 
             on<Every<30, Per<std::chrono::seconds>>, Single>().then([this] { doBehaviour(); });
 
-            on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+            on<Trigger<Balls>>().then([this](const Balls& balls) {
                 if (!balls.balls.empty()) {
                     ballLastSeen = NUClear::clock::now();
                 }
             });
 
-            on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
+            on<Trigger<Goals>>().then([this](const Goals& goals) {
                 if (!goals.goals.empty()) {
                     goalLastSeen = NUClear::clock::now();
                 }
@@ -87,7 +92,7 @@ namespace behaviour {
             approach->targetPositionType = WalkTarget::Ball;
             approach->targetHeadingType  = WalkTarget::WayPoint;
             approach->walkMovementType   = WalkApproach::WalkToPoint;
-            approach->heading            = arma::vec2({3, 0});  // TODO: unhack
+            approach->heading            = Eigen::Vector2d(3.0, 0.0);  // TODO: unhack
             emit(std::move(approach));
             currentState = Behaviour::WALK_TO_BALL;
         }
@@ -96,8 +101,8 @@ namespace behaviour {
             // TODO: does this work?
             auto command              = std::make_unique<MotionCommand>();
             command->walkMovementType = WalkApproach::DirectCommand;
-            command->target           = {0, 0};
-            command->heading          = {1, 0};
+            command->target           = Eigen::Vector2d::Zero();
+            command->heading          = Eigen::Vector2d(1.0, 0.0);
             emit(std::move(command));
             currentState = Behaviour::SEARCH_FOR_BALL;
         }

@@ -27,9 +27,9 @@
 #include "message/behaviour/MotionCommand.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KickCommand.h"
+
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"
-#include "utility/math/matrix/Transform2D.h"
 
 namespace module {
 namespace behaviour {
@@ -39,7 +39,6 @@ namespace behaviour {
         using message::motion::HeadCommand;
         using message::motion::KickCommand;
         using NUClear::message::LogMessage;
-        using utility::math::matrix::Transform2D;
         using LimbID = utility::input::LimbID;
 
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
@@ -138,7 +137,7 @@ namespace behaviour {
 
         void KeyboardWalk::kick(LimbID::Value l) {
             message::motion::KickScriptCommand ks;
-            ks.direction    = {0.05, 0, 0};
+            ks.direction    = Eigen::Vector3d(0.05, 0.0, 0.0);
             ks.leg          = l;
             std::string leg = (l == 1) ? "left" : "right";
             emit(std::make_unique<message::motion::KickScriptCommand>(ks));
@@ -186,10 +185,10 @@ namespace behaviour {
         }
 
         void KeyboardWalk::reset() {
-            velocity  = {0, 0};
-            rotation  = 0;
-            headYaw   = 0;
-            headPitch = 0;
+            velocity  = Eigen::Vector2d::Zero();
+            rotation  = 0.0f;
+            headYaw   = 0.0f;
+            headPitch = 0.0f;
             updateCommand();
             printStatus();
             log("reset");
@@ -197,9 +196,9 @@ namespace behaviour {
 
         void KeyboardWalk::updateCommand() {
             if (moving) {
-                std::cout << "New command " << velocity.t() << " " << rotation << std::endl;
+                log(fmt::format("New command {} {}", velocity.transpose(), rotation));
                 emit(std::make_unique<MotionCommand>(
-                    utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
+                    utility::behaviour::DirectCommand(Eigen::Vector3d(velocity.x(), velocity.y(), rotation))));
             }
 
             auto headCommand        = std::make_unique<HeadCommand>();
@@ -211,10 +210,10 @@ namespace behaviour {
 
         void KeyboardWalk::printStatus() {
             erase();
-            log(fmt::format("Velocity: {:.4f}, {:.4f}", velocity[0], velocity[1]));
+            log(fmt::format("Velocity: {:.4f}, {:.4f}", velocity.x(), velocity.y()));
             log(fmt::format("Rotation: {:.4f}", rotation));
             log(fmt::format("Moving: {}", moving));
-            log(fmt::format("Head Yaw: {:.2f}, Head Pitch: {:.2f}", headYaw * 180 / M_PI, headPitch * 180 / M_PI));
+            log(fmt::format("Head Yaw: {:.2f}, Head Pitch: {:.2f}", headYaw * 180.0 / M_PI, headPitch * 180.0 / M_PI));
         }
 
         void KeyboardWalk::quit() {

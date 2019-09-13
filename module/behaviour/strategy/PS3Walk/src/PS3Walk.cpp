@@ -29,8 +29,6 @@
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace behaviour {
@@ -40,8 +38,7 @@ namespace behaviour {
         using message::motion::HeadCommand;
         using message::motion::KickScriptCommand;
 
-        using LimbID = utility::input::LimbID;
-        using utility::math::matrix::Transform2D;
+        using utility::input::LimbID;
 
         PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), joystick() {
@@ -93,41 +90,38 @@ namespace behaviour {
                                     headLocked = !headLocked;
                                 }
                                 break;
-                            /*case BUTTON_L1:
-                                if (event.value > 0) { // button down
-                                    NUClear::log("Requesting Left Side Kick");
-                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                                        {0, -1, 0}, // vector pointing right relative to robot
-                                        LimbID::LEFT_LEG
-                                    }));
-                                }
-                                break;
-                            case BUTTON_L2:
-                                if (event.value > 0) { // button down
+                            case BUTTON_L1:
+                                if (event.value > 0) {  // button down
                                     NUClear::log("Requesting Left Front Kick");
-                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                                        {1, 0, 0}, // vector pointing forward relative to robot
-                                        LimbID::LEFT_LEG
-                                    }));
+                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
+                                        Eigen::Vector3d::UnitX(),  // vector pointing forward relative to robot
+                                        LimbID::LEFT_LEG)));
                                 }
                                 break;
                             case BUTTON_R1:
-                                if (event.value > 0) { // button down
-                                    NUClear::log("Requesting Right Side Kick");
-                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                                        {0, 1, 0}, // vector pointing left relative to robot
-                                        LimbID::RIGHT_LEG
-                                    }));
-                                }
-                                break;*/
-                            case BUTTON_R2:
                                 if (event.value > 0) {  // button down
                                     NUClear::log("Requesting Right Front Kick");
                                     emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
-                                        Eigen::Vector3d(1, 0, 0),  // vector pointing forward relative to robot
+                                        KickScriptCommand(Eigen::Vector3d::UnitX(),  // vector pointing forward relative to robot
                                         LimbID::RIGHT_LEG)));
                                 }
                                 break;
+                                // case BUTTON_L2:
+                                //     if (event.value > 0) {  // button down
+                                //         NUClear::log("Requesting Left Side Kick");
+                                //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
+                                //             -Eigen::Vector3d::UnitY(),  // vector pointing right relative to robot
+                                //             LimbID::LEFT_LEG)));
+                                //     }
+                                //     break;
+                                // case BUTTON_R2:
+                                //     if (event.value > 0) {  // button down
+                                //         NUClear::log("Requesting Right Side Kick");
+                                //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
+                                //             Eigen::Vector3d::UnitY(),  // vector pointing left relative to robot
+                                //             LimbID::RIGHT_LEG}));
+                                //     }
+                                //     break;
                         }
                     }
                 }
@@ -149,14 +143,10 @@ namespace behaviour {
                 }
 
                 if (moving) {
-                    // TODO: hacked to not allow backwards movement for stability
-                    // arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
-                    arma::vec s          = strafe;
-                    arma::vec strafeNorm = s / std::numeric_limits<short>::max();
-
+                    auto strafeNorm          = strafe / std::numeric_limits<short>::max();
                     auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
-                    auto transform           = Transform2D(strafeNorm, rotationalSpeedNorm);
-                    emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(transform)));
+                    emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(
+                        Eigen::Vector3d(strafeNorm.x(), strafeNorm.y(), rotationalSpeedNorm))));
                 }
             });
         }

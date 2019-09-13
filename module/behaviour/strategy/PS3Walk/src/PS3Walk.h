@@ -21,8 +21,9 @@
 #define MODULES_BEHAVIOUR_STRATEGY_PS3WALK_H
 
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
+
 #include "Joystick.h"
 
 namespace module {
@@ -65,12 +66,12 @@ namespace behaviour {
 
         private:
             Joystick joystick;  // TODO: make configurable
-            arma::vec strafe{0, 0};
-            float rotationalSpeed = 0;
-            bool moving           = false;
-            bool headLocked       = false;
-            float headPitch       = 0;
-            float headYaw         = 0;
+            Eigen::Vector2d strafe = Eigen::Vectro2d::Zero();
+            float rotationalSpeed  = 0;
+            bool moving            = false;
+            bool headLocked        = false;
+            float headPitch        = 0;
+            float headYaw          = 0;
         };
     }  // namespace strategy
 }  // namespace behaviour

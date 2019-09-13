@@ -22,9 +22,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/matrix/Transform3D.h"
-
 namespace utility {
 namespace localisation {
 

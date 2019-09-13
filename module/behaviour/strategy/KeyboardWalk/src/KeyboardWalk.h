@@ -20,7 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "utility/input/LimbID.h"
@@ -34,10 +34,10 @@ namespace behaviour {
             static constexpr const double DIFF     = 0.10;
             static constexpr const double ROT_DIFF = 0.10;
 
-            static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
+            static constexpr const double HEAD_DIFF = 1.0 * M_PI / 180.0;
 
             bool moving = false;
-            arma::vec2 velocity;
+            Eigen::Vector2d velocity;
             float rotation = 0;
 
             float headYaw   = 0;
