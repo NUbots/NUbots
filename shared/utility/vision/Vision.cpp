@@ -424,6 +424,22 @@ namespace vision {
             return (fourcc("RGB3"));
         }
 
+        else if (code.compare("BayerBGPolarized8") == 0) {
+            return (fourcc("PBG8"));
+        }
+
+        else if (code.compare("BayerRGPolarized8") == 0) {
+            return (fourcc("PRG8"));
+        }
+
+        else if (code.compare("BayerGRPolarized8") == 0) {
+            return (fourcc("PGR8"));
+        }
+
+        else if (code.compare("BayerGBPolarized8") == 0) {
+            return (fourcc("PGB8"));
+        }
+
         else {
             return (FOURCC::UNKNOWN);
         }
