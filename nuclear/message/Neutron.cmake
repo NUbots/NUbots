@@ -174,6 +174,7 @@ foreach(proto ${protobufs})
       ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS
       --cpp_out=lite:${message_binary_include_dir}
+      --python_out=${message_binary_include_dir}
       -I${message_binary_include_dir}
       -I${CMAKE_CURRENT_SOURCE_DIR}/proto
       "${outputpath}/${file_we}.proto"
