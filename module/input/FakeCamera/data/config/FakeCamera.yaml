@@ -1,0 +1,11 @@
+image:
+  folder: "images"
+  prefix: "image"
+  ext: "ppm"
+  format: BayerRGPolarized8
+  count: 63
+lens:
+  projection: EQUIDISTANT
+  focal_length: 412.507218876330336
+  centre: [0, 0]
+  fov: 3.14
