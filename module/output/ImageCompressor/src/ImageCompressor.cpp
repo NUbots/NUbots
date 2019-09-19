@@ -159,25 +159,6 @@ namespace output {
             dropped    = 0;
         });
 
-        // on<Every<2000, Per<std::chrono::seconds>>>().then([this] {
-        //     auto msg = std::make_unique<Image>();
-
-        //     // Compress the data
-        //     msg->data.resize(1280 * 1024);
-
-        //     // The format depends on what kind of data we took in
-        //     msg->format = utility::vision::fourcc("BGGR");
-
-        //     // Copy across the other attributes
-        //     msg->dimensions.x() = 1280;
-        //     msg->dimensions.y() = 1024;
-        //     msg->camera_id      = 0;
-        //     msg->name           = "Fake";
-        //     msg->timestamp      = NUClear::clock::now();
-
-        //     // Emit the compressed image
-        //     emit(msg);
-        // });
     }  // namespace output
 
 }  // namespace output
