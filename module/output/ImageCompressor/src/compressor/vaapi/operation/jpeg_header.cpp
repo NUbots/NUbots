@@ -13,6 +13,10 @@ namespace module::output::compressor::vaapi::operation {
 #pragma pack(push, 1)
 namespace markers {
 
+    /// htons is used throughout the code to fix the endian issue
+    /// In JPEG all of the 16 bit numbers are big endian, conveniently this is the same byte order as "network order"
+    /// So we can use host to network short to ensure that the endianess of the bytes is correct
+
     // Start of image
     struct SOI {
         uint8_t marker = 0xFF;
