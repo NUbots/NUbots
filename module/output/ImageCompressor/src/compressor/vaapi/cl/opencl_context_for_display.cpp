@@ -69,8 +69,7 @@ CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy) {
 
                     if (mem_from_surface == nullptr || acquire_surface == nullptr || release_surface == nullptr) {
                         throw std::runtime_error(
-                            "Unable to get the function pointer for converting surfaces to mem "
-                            "objects");
+                            "Unable to get the function pointer for converting surfaces to mem objects");
                     }
 
                     // create context for the first device only
