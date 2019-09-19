@@ -4,6 +4,8 @@ compressors:
   - name: vaapi
     concurrent: 2
     quality: 90
+    device: /dev/dri/renderD128
+    driver: iHD
   - name: turbojpeg
     concurrent: 2
     quality: 90
