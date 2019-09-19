@@ -1,5 +1,5 @@
-#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_MOSAIC_H
-#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_MOSAIC_H
+#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_MOSAIC_H
+#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_MOSAIC_H
 
 #include <cstdint>
 #include "compressor/CompressorFactory.h"
@@ -49,4 +49,4 @@ inline std::vector<uint32_t> build_table(const uint32_t& width, const uint32_t& 
 
 }  // namespace module::output::compressor::mosaic
 
-#endif  // MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_MOSAIC_H
+#endif  // MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_MOSAIC_H
