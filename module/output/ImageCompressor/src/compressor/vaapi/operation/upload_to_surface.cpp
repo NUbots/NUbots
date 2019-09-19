@@ -16,10 +16,9 @@ void unpack_copy(const uint8_t* const& rgb_begin, const uint8_t* const& rgb_end,
 
     // Move through 3 bytes at a time, but skip the last element (last 3 bytes) as it is not large
     // enough to do a 4 byte copy without accessing out of bounds memory
-    const uint8_t* rgb = rgb_begin;
-    while (rgb < rgb_end - 3) {
+    const uint8_t* rgb;  // Needed after
+    for (rgb = rgb_begin; rgb < rgb_end - 3; rgb += 3) {
         *(rgba++) = *reinterpret_cast<const uint32_t*>(rgb) | 0xFF000000;
-        rgb += 3;
     }
 
     // The rgb array is one byte shorter than the rgba array, so we have to copy the last byte by hand
