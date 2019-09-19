@@ -94,6 +94,14 @@ std::error_condition opencl_error_category_t::default_error_condition(int code) 
         case CL_INVALID_COMPILER_OPTIONS: return std::error_condition(cle::INVALID_COMPILER_OPTIONS);
         case CL_INVALID_LINKER_OPTIONS: return std::error_condition(cle::INVALID_LINKER_OPTIONS);
         case CL_INVALID_DEVICE_PARTITION_COUNT: return std::error_condition(cle::INVALID_DEVICE_PARTITION_COUNT);
+        case CL_INVALID_VA_API_MEDIA_ADAPTER_INTEL:
+            return std::error_condition(cle::INVALID_VA_API_MEDIA_ADAPTER_INTEL);
+        case CL_INVALID_VA_API_MEDIA_SURFACE_INTEL:
+            return std::error_condition(cle::INVALID_VA_API_MEDIA_SURFACE_INTEL);
+        case CL_VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL:
+            return std::error_condition(cle::VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL);
+        case CL_VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL:
+            return std::error_condition(cle::VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL);
         default: return std::error_condition(cle::UNKNOWN);
     }
 }
@@ -163,6 +171,10 @@ std::string opencl_error_category_t::message(int code) const noexcept {
         case CL_INVALID_COMPILER_OPTIONS: return "Invalid compiler options";
         case CL_INVALID_LINKER_OPTIONS: return "Invalid linker options";
         case CL_INVALID_DEVICE_PARTITION_COUNT: return "Invalid device partition count";
+        case CL_INVALID_VA_API_MEDIA_ADAPTER_INTEL: return "Invalid VAAPI media adapter";
+        case CL_INVALID_VA_API_MEDIA_SURFACE_INTEL: return "Invalid VAAPI media surface";
+        case CL_VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL: return "VAAPI media surface already acquired";
+        case CL_VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL: return "VAAPI media surface not acquired";
         default: return "Unknown error";
     }
 }
