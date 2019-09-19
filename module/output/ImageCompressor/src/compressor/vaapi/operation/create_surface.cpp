@@ -18,12 +18,15 @@ int va_render_target_type_from_format(uint32_t format) {
         case utility::vision::fourcc("PGR8"):
         case utility::vision::fourcc("PGB8"):
         case utility::vision::fourcc("GRAY"):
-        case utility::vision::fourcc("GREY"): return VA_RT_FORMAT_YUV400;
+        case utility::vision::fourcc("GREY"):
+        case utility::vision::fourcc("Y8  "):
+        case utility::vision::fourcc("Y16 "): return VA_RT_FORMAT_YUV400;
 
+        case utility::vision::fourcc("BGR3"):
         case utility::vision::fourcc("BGR8"):
         case utility::vision::fourcc("BGRA"):
-        case utility::vision::fourcc("RGB8"):
         case utility::vision::fourcc("RGB3"):
+        case utility::vision::fourcc("RGB8"):
         case utility::vision::fourcc("RGBA"): return VA_RT_FORMAT_RGB32;
         default:
             throw std::runtime_error(
@@ -47,12 +50,15 @@ VASurfaceAttrib va_fourcc_from_format(uint32_t format) {
         case utility::vision::fourcc("PGR8"):
         case utility::vision::fourcc("PGB8"):
         case utility::vision::fourcc("GRAY"):
-        case utility::vision::fourcc("GREY"): fourcc.value.value.i = VA_FOURCC_Y800; break;
+        case utility::vision::fourcc("GREY"):
+        case utility::vision::fourcc("Y8  "):
+        case utility::vision::fourcc("Y16 "): fourcc.value.value.i = VA_FOURCC_Y800; break;
 
+        case utility::vision::fourcc("BGR3"):
         case utility::vision::fourcc("BGR8"):
         case utility::vision::fourcc("BGRA"): fourcc.value.value.i = VA_FOURCC_BGRA; break;
-        case utility::vision::fourcc("RGB8"):
         case utility::vision::fourcc("RGB3"):
+        case utility::vision::fourcc("RGB8"):
         case utility::vision::fourcc("RGBA"): fourcc.value.value.i = VA_FOURCC_RGBA; break;
         default:
             throw std::runtime_error(

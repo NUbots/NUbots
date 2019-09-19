@@ -40,7 +40,8 @@ namespace output {
             case fourcc("RGB3"):                         // RGB formats
             case fourcc("GRAY"):                         // Monochrome formats
             case fourcc("GREY"):                         // Monochrome formats
-            case fourcc("Y8  "): return fourcc("JPEG");  // Monochrome formats
+            case fourcc("Y8  "):                         // Monochrome formats
+            case fourcc("Y16 "): return fourcc("JPEG");  // Monochrome formats
 
             default: throw std::runtime_error("Unhandled format");
         }
