@@ -1,4 +1,5 @@
 #include "Compressor.h"
+#include <fmt/format.h>
 #include <turbojpeg.h>
 #include "../mosaic.h"
 #include "utility/vision/fourcc.h"
@@ -14,8 +15,16 @@ namespace output {
                                    const uint32_t& format)
                 : quality(quality) {
 
+                // If this is a mosaic format, build a mosaic table
                 if (mosaic::mosaic_size(format) > 0) {
                     mosaic_table = mosaic::build_table(width, height, format);
+                }
+                // If this is a 16 bit greyscale image, our mosaic table just skips bytes
+                else if (format == utility::vision::fourcc("Y16 ")) {
+                    mosaic_table.reserve(width * height);
+                    for (int i = 0; i < width * height; ++i) {
+                        mosaic_table.push_back(i * 2 + 1);
+                    }
                 }
             }
             Compressor::~Compressor() {}
@@ -37,9 +46,10 @@ namespace output {
                     case utility::vision::fourcc("PRG8"):
                     case utility::vision::fourcc("PGR8"):
                     case utility::vision::fourcc("PGB8"):
-                    case utility::vision::fourcc("Y8  "):
                     case utility::vision::fourcc("GRAY"):
                     case utility::vision::fourcc("GREY"):
+                    case utility::vision::fourcc("Y8  "):
+                    case utility::vision::fourcc("Y16 "):
                         tj_sampling = TJSAMP_GRAY;
                         tj_format   = TJPF_GRAY;
                         break;
@@ -61,6 +71,9 @@ namespace output {
                         tj_sampling = TJSAMP_444;
                         tj_format   = TJPF_RGBA;
                         break;
+                    default:
+                        throw std::runtime_error(fmt::format("Format {} is not supported by the turbojpeg compressor",
+                                                             utility::vision::fourcc(format)));
                 }
 
                 // A compressor per thread
@@ -85,7 +98,7 @@ namespace output {
                 }
                 else {
                     // Permute our bytes into a new order
-                    std::vector<uint8_t> permuted(data.size());
+                    std::vector<uint8_t> permuted(width * height);
                     for (uint32_t i = 0; i < data.size(); ++i) {
                         permuted[mosaic_table[i]] = data[i];
                     }
