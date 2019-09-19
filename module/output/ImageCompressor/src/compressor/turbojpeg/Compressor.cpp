@@ -22,7 +22,7 @@ namespace output {
                 // If this is a 16 bit greyscale image, our mosaic table just skips bytes
                 else if (format == utility::vision::fourcc("Y16 ")) {
                     mosaic_table.reserve(width * height);
-                    for (int i = 0; i < width * height; ++i) {
+                    for (int i = 0; i < int(width * height); ++i) {
                         mosaic_table.push_back(i * 2 + 1);
                     }
                 }
