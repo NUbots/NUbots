@@ -1,10 +1,6 @@
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_FACTORY_H
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_FACTORY_H
 
-#include <CL/cl.h>
-#include <CL/cl_va_api_media_sharing_intel.h>
-#include <va/va.h>
-#include <map>
 #include "../CompressorFactory.h"
 #include "CompressionContext.h"
 #include "Compressor.h"
@@ -23,7 +19,7 @@ public:
 private:
     /// The file descriptor we opened for the DRM device
     int fd;
-    /// A shared pointer to the display object (gets terminated on destruction)
+    /// The compression context that we are using, contains information about the compressor and OpenCL contexts
     CompressionContext cctx;
     /// The quality that this compressor is configured for
     int quality;

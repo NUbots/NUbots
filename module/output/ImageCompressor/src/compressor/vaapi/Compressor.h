@@ -2,15 +2,10 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_H
 
 #include <va/va.h>
-#include <atomic>
 #include <memory>
-#include <tuple>
 #include "../Compressor.h"
 #include "CompressionContext.h"
 #include "cl/wrapper.h"
-#include "message/input/Image.h"
-#include "message/output/CompressedImage.h"
-#include "vaapi_error_category.hpp"
 
 namespace module::output::compressor::vaapi {
 

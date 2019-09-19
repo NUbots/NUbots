@@ -111,9 +111,8 @@ std::vector<uint8_t> Compressor::compress(const std::vector<uint8_t>& data,
                                           const uint32_t& height,
                                           const uint32_t& format) {
 
-    // If we have a mosaic format we need to use OpenCL to rearrange it as we upload
     if (mosaic::mosaic_size(format) > 0) {
-        // Use OpenCL to permute the mosaic into the format
+        // Use OpenCL to permute the mosaic into the surface
         cl::mosaic_to_surface(cctx.cl, command_queue, mosaic_kernel, cl_image, data, width, height, cl_surface);
     }
     else {
