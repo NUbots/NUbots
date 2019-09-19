@@ -47,6 +47,7 @@ void image_to_buffer(uint8_t* buffer,
         case utility::vision::fourcc("PRG8"):
         case utility::vision::fourcc("PGR8"):
         case utility::vision::fourcc("PGB8"):
+        case utility::vision::fourcc("Y8  "):
         case utility::vision::fourcc("GRAY"):
         case utility::vision::fourcc("GREY"): {
             // The simple case, the pitch matches width so we can just copy
@@ -59,6 +60,23 @@ void image_to_buffer(uint8_t* buffer,
                     std::copy(std::next(data.begin(), i * width * channels),
                               std::next(data.begin(), (i + 1) * width * channels),
                               buffer + surface_image.pitches[0] * i);
+                }
+            }
+        } break;
+        case utility::vision::fourcc("Y16 "): {
+            // 16 bit greyscale needs to be downcast
+            // The simple case, the pitch matches width so we can just copy
+            if (surface_image.pitches[0] == width * channels) {
+                for (uint32_t i = 0; i < width * height; ++i) {
+                    buffer[i] = data[i * 2 + 1];
+                }
+            }
+            // Tricky case, we have to copy the image row by row
+            else {
+                for (uint32_t y = 0; y < height; ++y) {
+                    for (uint32_t x = 0; x < width; ++x) {
+                        buffer[surface_image.pitches[0] * y + x] = data[(y * width + x) * 2 + 1];
+                    }
                 }
             }
         } break;
