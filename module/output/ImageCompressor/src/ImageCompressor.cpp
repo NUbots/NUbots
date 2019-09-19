@@ -134,6 +134,8 @@ namespace output {
                     catch (...) {
                         eptr = std::current_exception();
                     }
+
+                    // This sets the atomic integer back to false so another thread can use this compressor
                     ctx.active->store(false);
 
                     if (eptr) {

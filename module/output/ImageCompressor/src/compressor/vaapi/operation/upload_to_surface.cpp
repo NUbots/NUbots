@@ -50,7 +50,7 @@ void image_to_buffer(uint8_t* buffer,
         case utility::vision::fourcc("PGB8"):
         case utility::vision::fourcc("GRAY"):
         case utility::vision::fourcc("GREY"): {
-            // Simple version pitch matches width we can just copy
+            // The simple case, the pitch matches width so we can just copy
             if (surface_image.pitches[0] == width * channels) {
                 std::copy(data.begin(), data.end(), buffer);
             }
@@ -67,7 +67,7 @@ void image_to_buffer(uint8_t* buffer,
         case utility::vision::fourcc("RGB8"):
         case utility::vision::fourcc("RGB3"): {
             channels = 3;
-            // Simple version pitch matches width we can just copy
+            // The simple case, the pitch matches width so we can just copy
             if (surface_image.pitches[0] == width) {
                 unpack_copy(data.data(), data.data() + data.size(), buffer);
             }
