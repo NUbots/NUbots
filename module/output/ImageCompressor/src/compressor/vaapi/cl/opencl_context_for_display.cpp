@@ -39,7 +39,7 @@ CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy) {
                                                   &n_devices);
 
                 // If there was a device on this platform get it
-                if (err == CL_SUCCESS && len > 0) {
+                if (err == CL_SUCCESS && n_devices > 0) {
                     // Get the devices
                     std::vector<cl_device_id> device_ids(n_devices);
                     err = devices_from_display(platform_id,
