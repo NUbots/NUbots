@@ -18,6 +18,7 @@ VABufferID picture_parameter(VADisplay dpy,
     params.picture_width               = width;
     params.picture_height              = height;
     params.quality                     = quality;
+    params.pic_flags.bits.profile      = 0;  // Baseline jpeg profile
     params.pic_flags.bits.progressive  = 0;  // Sequential encoding
     params.pic_flags.bits.huffman      = 1;  // Uses Huffman coding
     params.pic_flags.bits.interleaved  = 0;  // Non interleaved
@@ -25,19 +26,20 @@ VABufferID picture_parameter(VADisplay dpy,
     params.sample_bit_depth            = 8;  // only 8 bit sample depth is currently supported
     params.num_scan                    = 1;
 
-    // Black and white
-    if (monochrome) {
-        params.num_components              = 1;
-        params.component_id[0]             = 0;
-        params.quantiser_table_selector[0] = 0;
-    }
+    // Luma component
+    params.num_components              = 1;
+    params.component_id[0]             = 0;
+    params.quantiser_table_selector[0] = 0;
+
     // RGB
-    else {
-        params.num_components  = 3;
-        params.component_id[0] = params.quantiser_table_selector[0] = 0;
-        params.component_id[1] = params.quantiser_table_selector[1] = 1;
-        params.component_id[2]                                      = 2;
-        params.quantiser_table_selector[2]                          = 1;
+    if (!monochrome) {
+        // Luma + 2 chroma
+        params.num_components = 3;
+        // U and V use the same quantisation table
+        params.component_id[1]             = 1;
+        params.quantiser_table_selector[1] = 1;
+        params.component_id[2]             = 2;
+        params.quantiser_table_selector[2] = 1;
     }
 
     // Upload to device
