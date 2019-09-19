@@ -145,6 +145,13 @@ std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
                                               const bool& monochrome,
                                               int quality) {
 
+    /// This jpeg header builder works using a c++ technique called placement new
+    /// https://en.cppreference.com/w/cpp/language/new#Placement_new
+    /// In placement new, the memory allocation is separated from the object construction.
+    /// By using this we can take our header as an std::vector, and continuously increase it's size and construct new
+    /// objects on it using placement new.
+    /// By doing this we can define easy to work with packed structs that place the data in the correct location
+
     // The final location for header data
     std::vector<uint8_t> header;
 
