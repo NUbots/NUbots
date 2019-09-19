@@ -44,9 +44,10 @@ namespace output {
         std::shared_mutex compressor_mutex;
         std::map<uint32_t, CompressorContext> compressors;
 
-        // Numbers to keep track of our data rate
+        /// Number of images that have been compressed since this was last reset
         int compressed = 0;
-        int dropped    = 0;
+        /// Number of images that have been dropped since this was last reset
+        int dropped = 0;
     };
 
 }  // namespace output

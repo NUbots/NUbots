@@ -149,19 +149,20 @@ namespace output {
                     }
                 }
             }
+            // We failed to compress this image
             ++dropped;
         });
 
         on<Every<1, std::chrono::seconds>>().then("Stats", [this] {
-            log<NUClear::INFO>(fmt::format("Receiving {}/s, Dropping {}/s ({}%)",
+            log<NUClear::INFO>(fmt::format("Receiving {}/s, Compressing {}/s,  Dropping {}/s ({}%)",
                                            compressed + dropped,
+                                           compressed,
                                            dropped,
                                            100 * double(compressed) / double(compressed + dropped)));
             compressed = 0;
             dropped    = 0;
         });
-
-    }  // namespace output
+    }
 
 }  // namespace output
 }  // namespace module
