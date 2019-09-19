@@ -1,4 +1,3 @@
-
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_OPERATION_JPEG_CONSTANTS_H
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_OPERATION_JPEG_CONSTANTS_H
 
@@ -34,7 +33,6 @@ namespace module::output::compressor::vaapi::operation {
         99, 99, 99, 99, 99, 99, 99, 99
     };
 
-
     //Zigzag scan order of the the Luma and Chroma components
     //Note: Jpeg Spec ISO/IEC 10918-1, Figure A.6 shows the zigzag order differently.
     //The Spec is trying to show the zigzag pattern with number positions. The below
@@ -49,7 +47,6 @@ namespace module::output::compressor::vaapi::operation {
         58,  59,  52,  45,  38,  31,  39,  46,
         53,  60,  61,  54,  47,  55,  62,  63
     };
-
 
     //Huffman table for Luminance DC Coefficients
     //Reference Jpeg Spec ISO/IEC 10918-1, K.3.3.1
@@ -74,7 +71,6 @@ namespace module::output::compressor::vaapi::operation {
         // Symbols (sum(lengths)bytes)
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B
     };
-
 
     //Huffman table for Luminance AC Coefficients
     //Reference Jpeg Spec ISO/IEC 10918-1, K.3.3.2
