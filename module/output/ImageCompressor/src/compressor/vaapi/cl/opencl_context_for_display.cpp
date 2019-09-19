@@ -92,6 +92,9 @@ CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy) {
             }
         }
     }
+
+    // If we got here, we failed
+    throw std::runtime_error("Unable to find an OpenCL platform that is associated with this vaapi device");
 }
 
 }  // namespace module::output::compressor::vaapi::cl
