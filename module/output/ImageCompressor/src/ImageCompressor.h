@@ -4,8 +4,9 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <nuclear>
-#include <shared_mutex>
+
 #include "compressor/CompressorFactory.h"
 
 namespace module {
@@ -41,8 +42,8 @@ namespace output {
         } config;
 
         /// The compressors that are available for use
-        std::shared_mutex compressor_mutex;
-        std::map<uint32_t, CompressorContext> compressors;
+        std::mutex compressor_mutex;
+        std::map<uint32_t, std::shared_ptr<CompressorContext>> compressors;
 
         /// Number of images that have been compressed since this was last reset
         int compressed = 0;

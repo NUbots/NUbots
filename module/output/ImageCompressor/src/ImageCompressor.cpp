@@ -53,7 +53,7 @@ namespace output {
 
         on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
             // Clear the compressors and factories
-            std::unique_lock<std::shared_mutex> lock(compressor_mutex);
+            std::lock_guard<std::mutex> lock(compressor_mutex);
             compressors.clear();
             config.factories.clear();
 
@@ -73,41 +73,37 @@ namespace output {
         });
 
         on<Trigger<Image>>().then("Compress Image", [this](const Image& image) {
-            // Lock the mutex in read mode
-            std::shared_lock<std::shared_mutex> lock(compressor_mutex);
-
             // Find our list of compressors, and if needed recreate it
-            auto it = compressors.find(image.camera_id);
-            if (it == compressors.end() || it->second.width != image.dimensions[0]
-                || it->second.height != image.dimensions[1] || it->second.format != image.format) {
-                log<NUClear::INFO>("Rebuilding compressors for", image.name, "camera");
+            std::shared_ptr<CompressorContext> ctx;
 
-                // Unlock the lock so we can get an exclusive lock
-                lock.unlock();
-                std::unique_lock<std::shared_mutex> unique_lock(compressor_mutex);
+            /* Mutex Scope */ {
+                std::lock_guard<std::mutex> lock(compressor_mutex);
+                auto it = compressors.find(image.camera_id);
+                if (it == compressors.end() || it->second->width != image.dimensions[0]
+                    || it->second->height != image.dimensions[1] || it->second->format != image.format) {
+                    log<NUClear::INFO>("Rebuilding compressors for", image.name, "camera");
 
-                // Replace the existing one with a new one
-                it                = compressors.insert(std::make_pair(image.camera_id, CompressorContext())).first;
-                it->second.width  = image.dimensions[0];
-                it->second.height = image.dimensions[1];
-                it->second.format = image.format;
+                    // Replace the existing one with a new one
+                    it = compressors.insert(std::make_pair(image.camera_id, std::make_shared<CompressorContext>()))
+                             .first;
+                    it->second->width  = image.dimensions[0];
+                    it->second->height = image.dimensions[1];
+                    it->second->format = image.format;
 
-                for (auto& f : config.factories) {
-                    for (int i = 0; i < f.second; ++i) {
-                        it->second.compressors.emplace_back(CompressorContext::Compressor{
-                            std::make_unique<std::atomic<bool>>(),
-                            f.first->make_compressor(image.dimensions[0], image.dimensions[1], image.format),
-                        });
+                    for (auto& f : config.factories) {
+                        for (int i = 0; i < f.second; ++i) {
+                            it->second->compressors.emplace_back(CompressorContext::Compressor{
+                                std::make_unique<std::atomic<bool>>(),
+                                f.first->make_compressor(image.dimensions[0], image.dimensions[1], image.format),
+                            });
+                        }
                     }
                 }
-
-                // Downgrade back to the shared lock
-                unique_lock.unlock();
-                lock.lock();
+                ctx = it->second;
             }
 
             // Look through our compressors and try to find the first free one
-            for (auto& ctx : it->second.compressors) {
+            for (auto& ctx : ctx->compressors) {
                 // We swap in true to the atomic and if we got false back then it wasn't active previously
                 if (!ctx.active->exchange(true)) {
                     std::exception_ptr eptr;
