@@ -23,9 +23,6 @@
 
 namespace module::output::compressor::vaapi {
 
-using message::input::Image;
-using message::output::CompressedImage;
-
 Compressor::Compressor(CompressionContext cctx,
                        const uint32_t& width,
                        const uint32_t& height,
@@ -46,8 +43,10 @@ Compressor::Compressor(CompressionContext cctx,
         cl_int error;
 
         // Create a command queue to run the mosaic kernels on
-        command_queue = cl::command_queue(clCreateCommandQueue(cctx.cl.context, cctx.cl.device, 0, &error),
-                                          ::clReleaseCommandQueue);
+        command_queue = cl::command_queue(
+            clCreateCommandQueue(cctx.cl.context, cctx.cl.device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &error),
+            ::clReleaseCommandQueue);
+
         if (error != CL_SUCCESS) {
             throw std::system_error(error, cl::opencl_error_category(), "Error creating the command queue");
         }
