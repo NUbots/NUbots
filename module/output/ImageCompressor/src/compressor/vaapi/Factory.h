@@ -9,7 +9,7 @@ namespace module::output::compressor::vaapi {
 
 class Factory : public CompressorFactory {
 public:
-    Factory(const int& quality);
+    Factory(const std::string& device, const std::string& driver, const int& quality);
     virtual ~Factory();
 
     virtual std::shared_ptr<compressor::Compressor> make_compressor(const uint32_t width,

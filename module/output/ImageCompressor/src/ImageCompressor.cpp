@@ -59,8 +59,10 @@ namespace output {
 
             for (const auto& c : cfg["compressors"].config) {
                 if (c["name"].as<std::string>() == "vaapi") {
-                    config.factories.emplace_back(std::make_shared<compressor::vaapi::Factory>(c["quality"].as<int>()),
-                                                  c["concurrent"].as<int>());
+                    config.factories.emplace_back(
+                        std::make_shared<compressor::vaapi::Factory>(
+                            c["device"].as<std::string>(), c["driver"].as<std::string>(), c["quality"].as<int>()),
+                        c["concurrent"].as<int>());
                 }
                 else if (c["name"].as<std::string>() == "turbojpeg") {
                     config.factories.emplace_back(

@@ -16,17 +16,13 @@
 
 namespace module::output::compressor::vaapi {
 
-Factory::Factory(const int& quality) : fd(-1), quality(quality) {
+Factory::Factory(const std::string& device, const std::string& driver, const int& quality) : fd(-1), quality(quality) {
     VAStatus va_status;
 
     // Open the render device
-    fd = open("/dev/dri/renderD128", O_RDWR);
+    fd = open(device.c_str(), O_RDWR);
     if (fd < 0) {
-        // Unlikely but maybe we can open the card device itself
-        fd = open("/dev/dri/card0", O_RDWR);
-        if (fd < 0) {
-            throw std::system_error(errno, std::system_category(), "Error when opening the GPU rendering device");
-        }
+        throw std::system_error(errno, std::system_category(), "Error when opening the GPU rendering device");
     }
 
     // Get the VA display object from DRM
@@ -50,7 +46,7 @@ Factory::Factory(const int& quality) : fd(-1), quality(quality) {
         this);
 
     // We use the iHD driver
-    va_status = vaSetDriverName(cctx.va.dpy, const_cast<char*>("iHD"));
+    va_status = vaSetDriverName(cctx.va.dpy, const_cast<char*>(driver.c_str()));
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error while setting the driver to use");
     }
