@@ -21,17 +21,17 @@ namespace markers {
 
     // APP0 segment marker
     struct APP0 {
-        uint8_t marker           = 0xFF;
-        uint8_t type             = 0xE0;
-        uint16_t length          = htons(sizeof(APP0) - 2);
-        char header[5]           = {'J', 'F', 'I', 'F', 0x00};
-        uint8_t major            = 1;
-        uint8_t minor            = 1;
-        uint8_t density          = 1;
-        uint16_t x_density       = htons(72);
-        uint16_t y_density       = htons(72);
-        uint8_t thumbnail_width  = 0;
-        uint8_t thumbnail_height = 0;
+        uint8_t marker             = 0xFF;
+        uint8_t type               = 0xE0;
+        uint16_t length            = htons(sizeof(APP0) - 2);
+        std::array<char, 5> header = {'J', 'F', 'I', 'F', 0x00};
+        uint8_t major              = 1;
+        uint8_t minor              = 1;
+        uint8_t density            = 1;
+        uint16_t x_density         = htons(72);
+        uint16_t y_density         = htons(72);
+        uint8_t thumbnail_width    = 0;
+        uint8_t thumbnail_height   = 0;
     };
 
     // Define quantisation table
@@ -40,7 +40,7 @@ namespace markers {
         uint8_t type               = 0xDB;
         uint16_t length            = htons(sizeof(DQT) - 2);
         uint8_t q_precision_q_type = 0;
-        uint8_t quant[64];
+        std::array<uint8_t, 64> quant;
 
         DQT(const std::array<uint8_t, 64>& table, int quality) {
             // Normalise by quality and clamp between 1 and 255
@@ -58,9 +58,12 @@ namespace markers {
         uint8_t type    = 0xC4;
         uint16_t length = htons(sizeof(DHT<Entries>) - 2);
 
-        std::array<uint8_t, Entries + 16 + 1> table;
+        // In a huffman table, there is 1 entry that describes the type of table (ac/dc etc)
+        // Then there are 16 values that say how many table entries of each byte size there are
+        // Following this there are those entries that were described in those 16 bytes
+        std::array<uint8_t, 1 + 16 + Entries> table;
 
-        DHT(const std::array<uint8_t, Entries + 16 + 1>& table) : table(table) {}
+        DHT(const std::array<uint8_t, 1 + 16 + Entries>& table) : table(table) {}
     };
 
     struct SOS_Monochrome {
