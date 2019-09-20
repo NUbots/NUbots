@@ -23,11 +23,11 @@ namespace markers {
         uint8_t type   = 0xD8;
     };
 
-    // APP0 segment marker
-    struct APP0 {
+    // Application Data
+    struct AppData {
         uint8_t marker             = 0xFF;
-        uint8_t type               = 0xE0;
-        uint16_t length            = htons(sizeof(APP0) - 2);
+        uint8_t type               = 0xE0;  // APP0 Marker
+        uint16_t length            = htons(sizeof(AppData) - 2);
         std::array<char, 5> header = {'J', 'F', 'I', 'F', 0x00};
         uint8_t major              = 1;
         uint8_t minor              = 1;
@@ -50,12 +50,13 @@ namespace markers {
             // Normalise by quality and clamp between 1 and 255
             quality = (quality < 50) ? (5000 / quality) : (200 - (quality * 2));
             for (size_t i = 0; i < table.size(); ++i) {
-                int v    = (table[i] * quality) / 100;
+                int v    = (table[jpeg_zigzag[i]] * quality) / 100;
                 quant[i] = std::max(1, std::min(255, v));
             }
         }
     };
 
+    // Define huffman table
     template <int Entries>
     struct DHT {
         uint8_t marker  = 0xFF;
@@ -106,11 +107,11 @@ namespace markers {
         uint8_t precision = 8;
         uint16_t height;
         uint16_t width;
-        uint16_t n_components = htons(1);
+        uint8_t n_components = 1;
 
         uint8_t y_id             = 1;
-        uint8_t y_samp           = 0;
-        uint8_t y_quant_table_no = 1;
+        uint8_t y_samp           = 0x11;
+        uint8_t y_quant_table_no = 0;
 
         SOF0_Monochrome(uint16_t width, uint16_t height) : height(htons(height)), width(htons(width)) {}
     };
@@ -122,19 +123,19 @@ namespace markers {
         uint8_t precision = 8;
         uint16_t height;
         uint16_t width;
-        uint16_t n_components = htons(3);
+        uint8_t n_components = 3;
 
         uint8_t y_id             = 1;
-        uint8_t y_samp           = 0;
-        uint8_t y_quant_table_no = 1;
+        uint8_t y_samp           = 0x11;
+        uint8_t y_quant_table_no = 0;
 
-        uint8_t u_id             = 3;
-        uint8_t u_samp           = 1;
-        uint8_t u_quant_table_no = 2;
+        uint8_t u_id             = 2;
+        uint8_t u_samp           = 0x11;
+        uint8_t u_quant_table_no = 1;
 
-        uint8_t v_id             = 1;
-        uint8_t v_samp           = 0;
-        uint8_t v_quant_table_no = 2;
+        uint8_t v_id             = 3;
+        uint8_t v_samp           = 0x11;
+        uint8_t v_quant_table_no = 1;
 
         SOF0_Colour(uint16_t width, uint16_t height) : height(height), width(width) {}
     };
@@ -142,12 +143,15 @@ namespace markers {
 }  // namespace markers
 #pragma pack(pop)
 
-std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
-                                              VAContextID context,
-                                              uint32_t width,
-                                              uint32_t height,
-                                              const bool& monochrome,
-                                              int quality) {
+template <typename T, typename... Args>
+void emplace_bytes(std::vector<uint8_t>& v, Args&&... args) {
+    size_t start = v.size();
+    v.resize(v.size() + sizeof(T));
+    new (v.data() + start) T(std::forward<Args>(args)...);
+}
+
+std::pair<VABufferID, VABufferID> jpeg_header(
+    VADisplay dpy, VAContextID context, uint32_t width, uint32_t height, const bool& monochrome, int quality) {
 
     /// This jpeg header builder works using a c++ technique called placement new
     /// https://en.cppreference.com/w/cpp/language/new#Placement_new
@@ -159,70 +163,39 @@ std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
     // The final location for header data
     std::vector<uint8_t> header;
 
-    // Add the APP0 segment
-    size_t start = header.size();
-    header.resize(header.size() + sizeof(markers::APP0));
-    new (header.data() + start) markers::APP0();
+    // Add the Start of image segment
+    emplace_bytes<markers::SOI>(header);
+
+    // Add the Application Data segment
+    emplace_bytes<markers::AppData>(header);
 
     // Add the luma quantization table
-    start = header.size();
-    header.resize(header.size() + sizeof(markers::DQT));
-    new (header.data() + start) markers::DQT(jpeg_luma_quant, quality);
+    emplace_bytes<markers::DQT>(header, jpeg_luma_quant, quality);
 
     // If colour add the chroma quantisation table
-    if (!monochrome) {
-        start = header.size();
-        header.resize(header.size() + sizeof(markers::DQT));
-        new (header.data() + start) markers::DQT(jpeg_chroma_quant, quality);
-    }
+    if (!monochrome) { emplace_bytes<markers::DQT>(header, jpeg_chroma_quant, quality); }
 
     // Depending on if we have a monochrome image, add the correct start of frame header
-    if (monochrome) {
-        start = header.size();
-        header.resize(header.size() + sizeof(markers::SOF0_Monochrome));
-        new (header.data() + start) markers::SOF0_Monochrome(uint16_t(width), uint16_t(height));
-    }
+    if (monochrome) { emplace_bytes<markers::SOF0_Monochrome>(header, uint16_t(width), uint16_t(height)); }
     else {
-        start = header.size();
-        header.resize(header.size() + sizeof(markers::SOF0_Colour));
-        new (header.data() + start) markers::SOF0_Colour(uint16_t(width), uint16_t(height));
+        emplace_bytes<markers::SOF0_Colour>(header, uint16_t(width), uint16_t(height));
     }
 
     // Add the dc and ac luma huffman table
-    start = header.size();
-    header.resize(header.size() + sizeof(markers::DHT<12>));
-    new (header.data() + start) markers::DHT<12>(jpeg_hufftable_luma_dc);
-    start = header.size();
-    header.resize(header.size() + sizeof(markers::DHT<162>));
-    new (header.data() + start) markers::DHT<162>(jpeg_hufftable_luma_ac);
+    emplace_bytes<markers::DHT<12>>(header, jpeg_hufftable_luma_dc);
+    emplace_bytes<markers::DHT<162>>(header, jpeg_hufftable_luma_ac);
 
     // If colour add the chroma huffman table
     if (!monochrome) {
-        start = header.size();
-        header.resize(header.size() + sizeof(markers::DHT<12>));
-        new (header.data() + start) markers::DHT<12>(jpeg_hufftable_chroma_dc);
-        start = header.size();
-        header.resize(header.size() + sizeof(markers::DHT<162>));
-        new (header.data() + start) markers::DHT<162>(jpeg_hufftable_chroma_ac);
+        emplace_bytes<markers::DHT<12>>(header, jpeg_hufftable_chroma_dc);
+        emplace_bytes<markers::DHT<162>>(header, jpeg_hufftable_chroma_ac);
     }
 
     // Add the scan header
-    if (monochrome) {
-        start = header.size();
-        header.resize(header.size() + sizeof(markers::SOS_Monochrome));
-        new (header.data() + start) markers::SOS_Monochrome();
-    }
+    if (monochrome) { emplace_bytes<markers::SOS_Monochrome>(header); }
     else {
-        start = header.size();
-        header.resize(header.size() + sizeof(markers::SOS_Colour));
-        new (header.data() + start) markers::SOS_Colour();
+        emplace_bytes<markers::SOS_Colour>(header);
     }
-
-    // Add the 3 scan start bytes
-    header.push_back(0);
-    header.push_back(63);
-    header.push_back(0);
-
 
     VAEncPackedHeaderParameterBuffer params;
     params.type                = VAEncPackedHeaderRawData;

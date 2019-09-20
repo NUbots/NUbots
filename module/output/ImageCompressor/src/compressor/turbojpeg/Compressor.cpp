@@ -19,13 +19,6 @@ namespace output {
                 if (mosaic::mosaic_size(format) > 0) {
                     mosaic_table = mosaic::build_table(width, height, format);
                 }
-                // If this is a 16 bit greyscale image, our mosaic table just skips bytes
-                else if (format == utility::vision::fourcc("Y16 ")) {
-                    mosaic_table.reserve(width * height);
-                    for (int i = 0; i < int(width * height); ++i) {
-                        mosaic_table.push_back(i * 2 + 1);
-                    }
-                }
             }
             Compressor::~Compressor() {}
 
@@ -92,7 +85,26 @@ namespace output {
                                 tj_format,
                                 &compressed,
                                 &jpeg_size,
-                                tj_sampling,  // Output chromiance sampling
+                                tj_sampling,  // Output chrominance sampling
+                                quality,
+                                TJFLAG_FASTDCT);
+                }
+                // Downcast 16 bit greyscale
+                else if (format == utility::vision::fourcc("Y16 ")) {
+                    std::vector<uint8_t> cast(width * height);
+                    for (uint32_t i = 0; i < width * height; ++i) {
+                        cast[i] = data[i * 2 + 1];
+                    }
+
+                    tjCompress2(compressor,
+                                cast.data(),
+                                width,
+                                0,
+                                height,
+                                tj_format,
+                                &compressed,
+                                &jpeg_size,
+                                tj_sampling,  // Output chrominance sampling
                                 quality,
                                 TJFLAG_FASTDCT);
                 }
@@ -111,7 +123,7 @@ namespace output {
                                 tj_format,
                                 &compressed,
                                 &jpeg_size,
-                                tj_sampling,  // Output chromiance sampling
+                                tj_sampling,  // Output chrominance sampling
                                 quality,
                                 TJFLAG_FASTDCT);
                 }
