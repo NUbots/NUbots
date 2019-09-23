@@ -1,129 +1,519 @@
 #include "Camera.h"
 
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
-#include "message/motion/KinematicsModel.h"
-#include "utility/support/yaml_armadillo.h"
+#include <cmath>
+#include <fmt/format.h>
+
+extern "C" {
+#include <aravis-0.6/arv.h>
+}
+
+#include "description_to_fourcc.h"
+#include "time_sync.h"
+
 #include "utility/support/yaml_expression.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
 namespace input {
 
-    uint Camera::cameraCount = 0;
-
     using extension::Configuration;
     using message::input::Image;
-    using message::input::Sensors;
-    using message::motion::KinematicsModel;
+    using utility::support::Expression;
+    using utility::vision::fourcc;
 
-    Camera::Camera(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , dumpImages(false)
-        , V4L2FrameRateHandle()
-        , V4L2SettingsHandle()
-        , V4L2Cameras()
-        , AravisCameras() {
+    /// The amount of time to observe after recalibrating to work out how long image transfer takes
+    constexpr int64_t TRANSFER_OFFSET_OBSERVE_TIME = 1e9;
+    /// The amount of time on top of the transfer time that would be considered a drifting clock
+    constexpr int64_t MAX_CLOCK_DRIFT = 5e6;
+    /// The over under count of recent messages that that were over the expected value
+    constexpr int64_t MAX_COUNT_OVER_TIME_FRAMES = 100;
 
-        on<Configuration>("Camera.yaml").then("Camera Module Configuration", [this](const Configuration& config) {
-            dumpImages = config["dump_images"].as<bool>();
-        });
+    Camera::Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
-            // Monitor camera config directory for files.
-            // Each file MUST define a "driver", we use this driver to load the appropriate handler for the camera.
+        on<Configuration>("Cameras").then("Configuration", [this](const Configuration& config) {
+            std::string serial_number = config["serial_number"].as<std::string>();
 
-            if (config.config["driver"] && config.config["deviceID"]) {
-                auto driver   = config["driver"].as<std::string>();
-                auto deviceID = config["deviceID"].as<std::string>();
+            // Find the camera if it has already been loaded
+            auto it = cameras.find(serial_number);
 
-                log("Searching for", driver, "camera with deviceID", deviceID);
+            /************************************************************************
+             *   ____                _          ____                                *
+             *  / ___|_ __ ___  __ _| |_ ___   / ___|__ _ _ __ ___   ___ _ __ __ _  *
+             * | |   | '__/ _ \/ _` | __/ _ \ | |   / _` | '_ ` _ \ / _ \ '__/ _` | *
+             * | |___| | |  __/ (_| | ||  __/ | |__| (_| | | | | | |  __/ | | (_| | *
+             *  \____|_|  \___|\__,_|\__\___|  \____\__,_|_| |_| |_|\___|_|  \__,_| *
+             *                                                                      *
+             ************************************************************************/
+            if (it == cameras.end()) {
+                // Strip the .yaml off the name of the file to get the name of the camera
+                std::string name = ::basename(config.path.substr(0, config.path.find_last_of('.')).c_str());
 
-                if (driver == "V4L2") {
-                    auto cam = V4L2Cameras.find(deviceID);
-
-                    if (cam == V4L2Cameras.end()) {
-                        V4L2Cameras.insert(std::make_pair(deviceID, std::move(initiateV4L2Camera(config))));
-                        cameraCount++;
+                // Find the camera with the correct serial number
+                auto find_camera = [](const std::string& serial_number) {
+                    int devices = arv_get_n_devices();
+                    for (int i = 0; i < devices; ++i) {
+                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) { return i; }
                     }
+                    return -1;
+                };
 
-                    else {
-                        cam->second.setConfig(config);
-                    }
+                // Find the device, and if we can't check for new devices
+                int device_no = find_camera(serial_number);
+                if (device_no == -1) {
+                    arv_update_device_list();
+                    device_no = find_camera(serial_number);
                 }
 
-                else if (driver == "Aravis") {
-                    auto cam = AravisCameras.find(deviceID);
-
-                    if (cam == AravisCameras.end()) {
-                        initiateAravisCamera(config);
-                        cameraCount++;
-                    }
-
-                    else {
-                        resetAravisCamera(cam, config);
-                    }
+                // If device_no is still -1 throw an error
+                if (device_no == -1) {
+                    throw std::runtime_error(
+                        fmt::format("{} camera with serial number {} not found", name, serial_number));
                 }
-
                 else {
-                    log<NUClear::FATAL>("Unsupported camera driver:", driver);
+
+                    // Open the camera: Store as shared pointer
+                    std::string device_description = arv_get_device_id(device_no);
+                    auto camera =
+                        std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
+                            if (ptr) g_object_unref(ptr);
+                        });
+
+                    if (!ARV_IS_CAMERA(camera.get())) {
+                        throw std::runtime_error(
+                            fmt::format("Failed to create {} camera ({})", name, device_description));
+                    }
+                    else {
+                        // Create a new stream object: Store as shared pointer
+                        auto stream = std::shared_ptr<ArvStream>(
+                            arv_camera_create_stream(camera.get(), nullptr, nullptr), [](ArvStream* ptr) {
+                                if (ptr) g_object_unref(ptr);
+                            });
+
+                        if (!ARV_IS_STREAM(stream.get())) {
+                            throw std::runtime_error(
+                                fmt::format("Failed to create stream for {} camera ({})", name, device_description));
+                        }
+
+                        uint32_t fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
+
+                        // Lens parameters
+                        Image::Lens::Projection lens_projection = config["lens"]["projection"].as<std::string>();
+                        float lens_focal_length                 = config["lens"]["focal_length"].as<Expression>();
+                        float lens_fov                          = config["lens"]["fov"].as<Expression>();
+                        Eigen::Vector2f lens_centre             = config["lens"]["centre"].as<Expression>();
+                        Image::Lens lens{lens_projection, lens_focal_length, lens_fov, lens_centre};
+
+
+                        // Add camera to list.
+                        it = cameras
+                                 .insert(std::make_pair(serial_number,
+                                                        CameraContext{
+                                                            name,
+                                                            fourcc,
+                                                            num_cameras++,
+                                                            lens,
+                                                            camera,
+                                                            stream,
+                                                            *this,
+                                                            CameraContext::TimeCorrection(),
+                                                        }))
+                                 .first;
+
+                        log<NUClear::INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
+                    }
                 }
             }
-        });
 
-        on<Trigger<ImageData>, Optional<With<Sensors>>, Optional<With<KinematicsModel>>>().then(
-            [this](const ImageData& image_data,
-                   std::shared_ptr<const Sensors> sensors,
-                   std::shared_ptr<const KinematicsModel> model) {
-                static uint8_t count = 0;
+            /*****************************************************************************
+             *   _   _           _       _         ____       _   _   _                  *
+             *  | | | |_ __   __| | __ _| |_ ___  / ___|  ___| |_| |_(_)_ __   __ _ ___  *
+             *  | | | | '_ \ / _` |/ _` | __/ _ \ \___ \ / _ \ __| __| | '_ \ / _` / __| *
+             *  | |_| | |_) | (_| | (_| | ||  __/  ___) |  __/ |_| |_| | | | | (_| \__ \ *
+             *   \___/| .__/ \__,_|\__,_|\__\___| |____/ \___|\__|\__|_|_| |_|\__, |___/ *
+             *        |_|                                                     |___/      *
+             *****************************************************************************/
 
+            // Update settings on the camera
+            const auto& name = it->second.name;
+            auto& cam        = it->second.camera;
+            auto& stream     = it->second.stream;
+            auto device      = arv_camera_get_device(cam.get());
 
-                // NOTE: we only emit direct the ImageData messages and steal their data
-                // Make sure you do not trigger on them anywhere else
-                ImageData& i = const_cast<ImageData&>(image_data);
+            // Stop the video stream so we can apply the settings
+            arv_camera_stop_acquisition(cam.get());
+            arv_stream_set_emit_signals(stream.get(), false);
 
-                // Copy across our data
-                auto msg        = std::make_unique<Image>();
-                msg->format     = i.format;
-                msg->dimensions = i.dimensions;
-                msg->data       = std::move(i.data);
-                msg->camera_id  = i.camera_id;
-                msg->name       = i.serial_number;
-                msg->timestamp  = i.timestamp;
-                msg->lens       = i.lens;
+            // Synchronise the clocks
+            it->second.time = sync_clocks(device);
 
-                // Calculate our transform if we have information
-                if (sensors && model) {
+            // Add buffers to the queue.
+            int payload_size = arv_camera_get_payload(cam.get());
+            for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
+                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
+                // the GPU.
+                // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
+                arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
+            }
 
-                    Eigen::Affine3d Htc(sensors->forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
-                    Htc(1, 3) += model->head.INTERPUPILLARY_DISTANCE * 0.5f * (i.isLeft ? 1.0f : -1.0f);
+            // Go through our settings and apply them to the camera
+            for (const auto& cfg : config["settings"].config) {
 
-                    msg->Hcw = Htc.inverse() * sensors->Htw;
+                std::string key = cfg.first.as<std::string>();
+                GError* error   = nullptr;
+
+                // Get the feature node
+                auto feature = arv_device_get_feature(device, key.c_str());
+                if (feature == nullptr) {
+                    // Doesn't have this feature
+                    NUClear::log<NUClear::WARN>(
+                        fmt::format("The {} camera does not have a setting named {}", name, key));
+                }
+
+                // Integer setting
+                else if (ARV_IS_GC_INTEGER_NODE(feature)) {
+                    auto setting  = reinterpret_cast<ArvGcInteger*>(feature);
+                    int64_t value = std::llround(cfg.second.as<Expression>());
+
+                    // Get our current value
+                    int64_t current = arv_gc_integer_get_value(setting, &error);
+                    if (error) {
+                        NUClear::log<NUClear::ERROR>(fmt::format(
+                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
+                        g_error_free(error);
+                        error = nullptr;
+                    }
+
+                    // If we are planning to change the value
+                    if (value != current) {
+                        // Get the information we need
+                        int64_t min        = arv_gc_integer_get_min(setting, nullptr);
+                        int64_t max        = arv_gc_integer_get_max(setting, nullptr);
+                        const char* unit_c = arv_gc_integer_get_unit(setting, nullptr);
+                        std::string unit   = unit_c == nullptr ? "" : unit_c;
+
+                        if (min <= value && value <= max) {
+                            arv_gc_integer_set_value(setting, value, &error);
+                            if (error) {
+                                NUClear::log<NUClear::ERROR>(
+                                    fmt::format("Failed changing {} from {}{} to {}{} on {} camera: \"{}\"",
+                                                key,
+                                                current,
+                                                unit,
+                                                value,
+                                                unit,
+                                                name,
+                                                error->message));
+                                g_error_free(error);
+                                error = nullptr;
+                            }
+                            else {
+                                NUClear::log<NUClear::INFO>(fmt::format("Changing {} from {}{} to {}{} on {} camera",
+                                                                        key,
+                                                                        current,
+                                                                        unit,
+                                                                        value,
+                                                                        unit,
+                                                                        name));
+                            }
+                        }
+                        else {
+                            log<NUClear::ERROR>(
+                                fmt::format("Cannot set {} to {} on {} camera. {} must be between {}{} and {}{}",
+                                            key,
+                                            value,
+                                            name,
+                                            key,
+                                            min,
+                                            unit,
+                                            max,
+                                            unit));
+                        }
+                    }
+                }
+
+                // Floating point setting
+                else if (ARV_IS_GC_FLOAT_NODE(feature)) {
+                    auto setting = reinterpret_cast<ArvGcFloat*>(feature);
+                    double value = cfg.second.as<Expression>();
+
+                    // Get our current value
+                    double current = arv_gc_float_get_value(setting, &error);
+                    if (error) {
+                        NUClear::log<NUClear::ERROR>(fmt::format(
+                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
+                        g_error_free(error);
+                        error = nullptr;
+                    }
+
+                    // If we are planning to change the value
+                    if (value != current) {
+                        // Get the information we need
+                        double min         = arv_gc_float_get_min(setting, nullptr);
+                        double max         = arv_gc_float_get_max(setting, nullptr);
+                        const char* unit_c = arv_gc_float_get_unit(setting, nullptr);
+                        std::string unit   = unit_c == nullptr ? "" : unit_c;
+
+                        if (min <= value && value <= max) {
+                            arv_gc_float_set_value(setting, value, &error);
+                            if (error) {
+                                NUClear::log<NUClear::ERROR>(
+                                    fmt::format("Failed changing {} from {}{} to {}{} on {} camera: \"{}\"",
+                                                key,
+                                                current,
+                                                unit,
+                                                value,
+                                                unit,
+                                                name,
+                                                error->message));
+                                g_error_free(error);
+                                error = nullptr;
+                            }
+                            else {
+                                NUClear::log<NUClear::INFO>(fmt::format("Changing {} from {}{} to {}{} on {} camera",
+                                                                        key,
+                                                                        current,
+                                                                        unit,
+                                                                        value,
+                                                                        unit,
+                                                                        name));
+                            }
+                        }
+                        else {
+                            log<NUClear::ERROR>(
+                                fmt::format("Cannot set {} to {} on {} camera. {} must be between {}{} and {}{}",
+                                            key,
+                                            value,
+                                            name,
+                                            key,
+                                            min,
+                                            unit,
+                                            max,
+                                            unit));
+                        }
+                    }
+                }
+
+                // Boolean setting
+                else if (ARV_IS_GC_BOOLEAN(feature)) {
+                    auto setting = reinterpret_cast<ArvGcBoolean*>(feature);
+                    bool value   = bool(cfg.second.as<Expression>());
+
+                    // Get our current value
+                    bool current = arv_gc_boolean_get_value(setting, &error);
+                    if (error) {
+                        NUClear::log<NUClear::ERROR>(fmt::format(
+                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
+                        g_error_free(error);
+                        error = nullptr;
+                    }
+
+                    // If we are planning to change the value
+                    if (value != current) {
+
+                        arv_gc_boolean_set_value(setting, value, &error);
+                        if (error) {
+                            NUClear::log<NUClear::ERROR>(
+                                fmt::format("Failed changing {} from {} to {} on {} camera: \"{}\"",
+                                            key,
+                                            current,
+                                            value,
+                                            name,
+                                            error->message));
+                            g_error_free(error);
+                            error = nullptr;
+                        }
+                        else {
+                            NUClear::log<NUClear::INFO>(
+                                fmt::format("Changing {} from {} to {} on {} camera", key, current, value, name));
+                        }
+                    }
+                }
+
+                // Enumeration setting
+                else if (ARV_IS_GC_ENUMERATION(feature)) {
+                    auto setting      = reinterpret_cast<ArvGcEnumeration*>(feature);
+                    std::string value = cfg.second.as<std::string>();
+
+                    const char* current = arv_gc_enumeration_get_string_value(setting, &error);
+                    if (error) {
+                        NUClear::log<NUClear::ERROR>(fmt::format(
+                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
+                        g_error_free(error);
+                    }
+
+                    // Set to the new value
+                    if (current == nullptr || value != current) {
+                        arv_gc_enumeration_set_string_value(setting, value.c_str(), &error);
+                        if (error) {
+                            NUClear::log<NUClear::ERROR>(
+                                fmt::format("Failed changing {} from {} to {} on {} camera: \"{}\"",
+                                            key,
+                                            current ? current : "UNKNOWN",
+                                            value,
+                                            name,
+                                            error->message));
+                            g_error_free(error);
+                            error = nullptr;
+                        }
+                        else {
+                            NUClear::log<NUClear::INFO>(fmt::format("Changing {} from {} to {} on {} camera",
+                                                                    key,
+                                                                    current ? current : "UNKNOWN",
+                                                                    value,
+                                                                    name));
+                        }
+                    }
                 }
                 else {
-                    msg->Hcw.setIdentity();
+                    log<NUClear::ERROR>(fmt::format("The type of setting {} is not currently handled", key));
                 }
+            }
 
-                if (dumpImages) {
-                    utility::vision::saveImage(fmt::format("image-{}.ppm", count++), *msg);
-                }
+            // Check for gigevision device and set packet size to jumbo packets
+            if (arv_camera_is_gv_device(cam.get())) {
+                arv_camera_gv_set_packet_size(cam.get(), 8192);
+                g_object_set(stream.get(), "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
+            }
 
-                emit(msg);
-            });
+            // Connect signal events
+            g_signal_connect(stream.get(), "new-buffer", G_CALLBACK(&Camera::emit_image), &it->second);
+            g_signal_connect(
+                arv_camera_get_device(cam.get()), "control-lost", G_CALLBACK(&Camera::control_lost), nullptr);
+            // Start aquisition
+            arv_camera_start_acquisition(cam.get());
+            arv_stream_set_emit_signals(stream.get(), true);
+        });
 
         on<Shutdown>().then([this] {
-            ShutdownV4L2Camera();
-            ShutdownAravisCamera();
+            for (auto& camera : cameras) {
+                // Stop the video stream.
+                arv_camera_stop_acquisition(camera.second.camera.get());
+                arv_stream_set_emit_signals(camera.second.stream.get(), false);
+            }
+            arv_debug_shutdown();
+            arv_shutdown();
+            cameras.clear();
         });
     }
 
-    // When we shutdown, we must tell our camera class to close (stop streaming)
-    void Camera::ShutdownV4L2Camera() {
-        for (auto& camera : V4L2Cameras) {
-            camera.second.closeCamera();
-            camera.second.disableHandles();
-        }
+    void Camera::emit_image(ArvStream* stream, CameraContext* context) {
+        using namespace std::chrono;
+        // Get now here, as close as possible to when we pop the buffer
+        int64_t now       = duration_cast<nanoseconds>(NUClear::clock::now().time_since_epoch()).count();
+        ArvBuffer* buffer = arv_stream_try_pop_buffer(stream);
 
-        V4L2Cameras.clear();
+        if (buffer != nullptr) {
+            if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
+                int width, height;
+                size_t buffSize;
+                arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
+                const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
+
+                auto& timesync = context->time;
+
+                // Get the timestamp from the buffer
+                int64_t ts = arv_buffer_get_timestamp(buffer);
+
+                // If we couldn't calculate the timestamp offset using the cameras API, we have to do it on the fly
+                // and hope that our answer isn't too far off the truth
+                if (timesync.live) {
+                    // Offset in nanoseconds and seconds
+                    int64_t o_ns = (now - ts);
+
+                    // Initialise the filter if this is the first time
+                    timesync.offset = timesync.offset == 0 ? o_ns : timesync.offset;
+
+                    // Add process noise
+                    timesync.kf.p += timesync.kf.q;
+
+                    // Measurement update
+                    double k        = timesync.kf.p / (timesync.kf.p + timesync.kf.r);
+                    timesync.offset = std::llround(timesync.offset + k * (o_ns - timesync.offset));
+                    timesync.kf.p   = (1.0 - k) * timesync.kf.p;
+                }
+                else {
+                    // Work out the total amount of time since calibration for both local and remote clocks
+                    int64_t total_cam   = ts - timesync.drift.cam_at_calibration;
+                    int64_t total_local = now - timesync.drift.local_at_calibration;
+
+                    // Until an appropriate amount of time has passed use the offset to work out what a bad clock
+                    // drift would be using exponential smoothing
+                    if (total_local < TRANSFER_OFFSET_OBSERVE_TIME) {
+                        timesync.drift.max_clock_drift = timesync.drift.max_clock_drift == 0
+                                                             ? std::abs(total_cam - total_local) + MAX_CLOCK_DRIFT
+                                                             : (timesync.drift.max_clock_drift * 9
+                                                                + std::abs(total_cam - total_local) + MAX_CLOCK_DRIFT)
+                                                                   / 10;
+                    }
+                    else {
+                        // If our camera has drifted out by too large a margin, we recalibrate our clock
+                        timesync.drift.over_time_count +=
+                            std::abs(total_cam - total_local) > timesync.drift.max_clock_drift
+                                ? 1
+                                : (timesync.drift.over_time_count == 0 ? 0 : -1);
+
+                        if (timesync.drift.over_time_count > 2) { std::cout << context->name << std::endl; }
+
+                        // 100 frames have been over time recently
+                        if (timesync.drift.over_time_count > MAX_COUNT_OVER_TIME_FRAMES) {
+                            context->reactor.log<NUClear::INFO>(fmt::format(
+                                "Clock drift for {} camera exceeded threshold ({:.1f}ms > {:.1f}ms), recalibrating",
+                                context->name,
+                                std::abs(total_cam - total_local) / 1e6,
+                                timesync.drift.max_clock_drift / 1e6));
+
+                            arv_camera_stop_acquisition(context->camera.get());
+                            arv_stream_set_emit_signals(context->stream.get(), false);
+                            context->time = sync_clocks(arv_camera_get_device(context->camera.get()));
+                            arv_stream_set_emit_signals(context->stream.get(), true);
+                            arv_camera_start_acquisition(context->camera.get());
+                        }
+                    }
+                }
+
+                // Apply our timestamp offset
+                ts = ts + context->time.offset;
+
+                auto msg        = std::make_unique<Image>();
+                msg->format     = context->fourcc;
+                msg->dimensions = Eigen::Matrix<unsigned int, 2, 1>(width, height);
+                // TODO(trent) use an std::vector here to avoid the copy
+                msg->data.insert(msg->data.end(), buff, buff + buffSize);
+                msg->camera_id = context->camera_id;
+                msg->name      = context->name;
+                msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
+                // TODO attach Hcw once we have access to sensors
+                msg->lens = context->lens;
+
+                context->reactor.emit(msg);
+
+                // Put the buffer back on the queue
+                arv_stream_push_buffer(stream, buffer);
+            }
+            else {
+                std::string msg;
+                switch (arv_buffer_get_status(buffer)) {
+                    case ARV_BUFFER_STATUS_UNKNOWN: msg = "UNKNOWN"; break;
+                    case ARV_BUFFER_STATUS_SUCCESS: msg = "SUCCESS"; break;
+                    case ARV_BUFFER_STATUS_CLEARED: msg = "CLEARED"; break;
+                    case ARV_BUFFER_STATUS_TIMEOUT: msg = "TIMEOUT"; break;
+                    case ARV_BUFFER_STATUS_MISSING_PACKETS: msg = "MISSING PACKETS"; break;
+                    case ARV_BUFFER_STATUS_WRONG_PACKET_ID: msg = "WRONG PACKET ID"; break;
+                    case ARV_BUFFER_STATUS_SIZE_MISMATCH: msg = "SIZE MISMATCH"; break;
+                    case ARV_BUFFER_STATUS_FILLING: msg = "FILLING"; break;
+                    case ARV_BUFFER_STATUS_ABORTED: msg = "ABORTED"; break;
+                }
+
+                // Put the buffer back on the queue and show an error message
+                arv_stream_push_buffer(stream, buffer);
+                NUClear::log<NUClear::WARN>("Failed getting buffer from", context->name, "with error", msg);
+            }
+        }
     }
+
+    void Camera::control_lost(ArvGvDevice*) {
+        NUClear::log<NUClear::WARN>("Control of a camera has been lost ");
+    }
+
 }  // namespace input
 }  // namespace module
