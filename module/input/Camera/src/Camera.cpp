@@ -1,7 +1,7 @@
 #include "Camera.h"
 
-#include <cmath>
 #include <fmt/format.h>
+#include <cmath>
 
 extern "C" {
 #include <aravis-0.6/arv.h>
@@ -52,7 +52,9 @@ namespace input {
                 auto find_camera = [](const std::string& serial_number) {
                     int devices = arv_get_n_devices();
                     for (int i = 0; i < devices; ++i) {
-                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) { return i; }
+                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
+                            return i;
+                        }
                     }
                     return -1;
                 };
@@ -145,15 +147,6 @@ namespace input {
 
             // Synchronise the clocks
             it->second.time = sync_clocks(device);
-
-            // Add buffers to the queue.
-            int payload_size = arv_camera_get_payload(cam.get());
-            for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
-                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
-                // the GPU.
-                // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
-                arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
-            }
 
             // Go through our settings and apply them to the camera
             for (const auto& cfg : config["settings"].config) {
@@ -373,6 +366,15 @@ namespace input {
             if (arv_camera_is_gv_device(cam.get())) {
                 arv_camera_gv_set_packet_size(cam.get(), 8192);
                 g_object_set(stream.get(), "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
+            }
+
+            // Add buffers to the queue
+            int payload_size = arv_camera_get_payload(cam.get());
+            for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
+                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
+                // the GPU.
+                // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
+                arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
             }
 
             // Connect signal events
