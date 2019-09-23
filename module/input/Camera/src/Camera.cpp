@@ -454,8 +454,6 @@ namespace input {
                                 ? 1
                                 : (timesync.drift.over_time_count == 0 ? 0 : -1);
 
-                        if (timesync.drift.over_time_count > 2) { std::cout << context->name << std::endl; }
-
                         // 100 frames have been over time recently
                         if (timesync.drift.over_time_count > MAX_COUNT_OVER_TIME_FRAMES) {
                             context->reactor.log<NUClear::INFO>(fmt::format(
