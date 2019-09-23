@@ -75,10 +75,15 @@ namespace output {
                 long unsigned int jpeg_size = 0;
                 uint8_t* compressed         = nullptr;
 
-                // No mosaic table to rearrange with
-                if (mosaic_table.empty()) {
+                // Downcast 16 bit greyscale
+                if (format == utility::vision::fourcc("Y16 ")) {
+                    std::vector<uint8_t> cast(width * height);
+                    for (uint32_t i = 0; i < width * height; ++i) {
+                        cast[i] = data[i * 2 + 1];
+                    }
+
                     tjCompress2(compressor,
-                                data.data(),
+                                cast.data(),
                                 width,
                                 0,
                                 height,
@@ -89,15 +94,10 @@ namespace output {
                                 quality,
                                 TJFLAG_FASTDCT);
                 }
-                // Downcast 16 bit greyscale
-                else if (format == utility::vision::fourcc("Y16 ")) {
-                    std::vector<uint8_t> cast(width * height);
-                    for (uint32_t i = 0; i < width * height; ++i) {
-                        cast[i] = data[i * 2 + 1];
-                    }
-
+                // No mosaic table to rearrange with
+                else if (mosaic_table.empty()) {
                     tjCompress2(compressor,
-                                cast.data(),
+                                data.data(),
                                 width,
                                 0,
                                 height,
