@@ -115,6 +115,7 @@ namespace input {
                         it = cameras
                                  .insert(std::make_pair(serial_number,
                                                         CameraContext{
+                                                            *this,
                                                             name,
                                                             fourcc,
                                                             num_cameras++,
@@ -122,7 +123,6 @@ namespace input {
                                                             Eigen::Affine3d(Hcp),
                                                             camera,
                                                             stream,
-                                                            *this,
                                                             CameraContext::TimeCorrection(),
                                                         }))
                                  .first;
@@ -265,6 +265,7 @@ namespace input {
         // Get now here, as close as possible to when we pop the buffer
         int64_t now       = duration_cast<nanoseconds>(NUClear::clock::now().time_since_epoch()).count();
         ArvBuffer* buffer = arv_stream_try_pop_buffer(stream);
+        Camera& reactor   = context->reactor;
 
         if (buffer != nullptr) {
             if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
@@ -348,23 +349,25 @@ namespace input {
                 Eigen::Affine3d Hcw;
 
                 /* Mutex Scope */ {
-                    std::lock_guard<std::mutex> lock(sensors_mutex);
+                    std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
 
                     Eigen::Affine3d Hcp = context->Hcp;
                     Eigen::Affine3d Hpw;
-                    if (Hpws.empty()) {
+                    if (reactor.Hpws.empty()) {
                         Hpw = Eigen::Affine3d::Identity();
                     }
                     else {
                         // Find the first time that is not less than the target time
-                        auto Hpw_it = std::lower_bound(
-                            Hpws.begin(), Hpws.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+                        auto Hpw_it = std::lower_bound(reactor.Hpws.begin(),
+                                                       reactor.Hpws.end(),
+                                                       std::make_pair(msg->timestamp, Eigen::Affine3d::Identity()),
+                                                       [](const auto& a, const auto& b) { return a.first < b.first; });
 
-                        if (Hpw_it == Hpws.end()) {
+                        if (Hpw_it == reactor.Hpws.end()) {
                             // Image is newer than most recent sensors
                             Hpw = std::prev(Hpw_it)->second;
                         }
-                        else if (Hpw_it == Hpws.begin()) {
+                        else if (Hpw_it == reactor.Hpws.begin()) {
                             // Image is older than oldest sensors
                             Hpw = Hpw_it->second;
                         }

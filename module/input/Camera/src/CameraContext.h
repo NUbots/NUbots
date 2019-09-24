@@ -14,9 +14,12 @@ extern "C" {
 
 namespace module {
 namespace input {
+    // Forward declare camera
+    class Camera;
 
     // Camera contextual information for Aravis new-buffer callback function.
     struct CameraContext {
+        Camera& reactor;
         std::string name;
         uint32_t fourcc;
         uint32_t camera_id;
@@ -25,7 +28,6 @@ namespace input {
         Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hcp;
         std::shared_ptr<ArvCamera> camera;
         std::shared_ptr<ArvStream> stream;
-        NUClear::Reactor& reactor;
 
         // Values used to correct the time between the clock on the device and the local clock
         struct TimeCorrection {
