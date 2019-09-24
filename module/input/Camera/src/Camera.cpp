@@ -228,7 +228,7 @@ namespace input {
             // Connect signal events
             g_signal_connect(stream.get(), "new-buffer", G_CALLBACK(&Camera::emit_image), &it->second);
             g_signal_connect(
-                arv_camera_get_device(cam.get()), "control-lost", G_CALLBACK(&Camera::control_lost), nullptr);
+                arv_camera_get_device(cam.get()), "control-lost", G_CALLBACK(&Camera::control_lost), &it->second);
             // Start aquisition
             arv_camera_start_acquisition(cam.get());
             arv_stream_set_emit_signals(stream.get(), true);
@@ -412,8 +412,8 @@ namespace input {
         }
     }
 
-    void Camera::control_lost(ArvGvDevice*) {
-        NUClear::log<NUClear::FATAL>("Control of a camera has been lost ");
+    void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
+        NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name);
     }
 
 }  // namespace input
