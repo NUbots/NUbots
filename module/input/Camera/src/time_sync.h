@@ -9,7 +9,7 @@ extern "C" {
 
 namespace module {
 namespace input {
-    extern CameraContext::TimeCorrection sync_clocks(ArvDevice* device);
+    CameraContext::TimeCorrection sync_clocks(ArvDevice* device);
 }  // namespace input
 }  // namespace module
 
