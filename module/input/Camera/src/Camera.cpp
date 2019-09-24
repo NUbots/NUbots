@@ -413,7 +413,7 @@ namespace input {
     }
 
     void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
-        NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name);
+        NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
     }
 
 }  // namespace input
