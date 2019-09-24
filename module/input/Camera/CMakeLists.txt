@@ -1,6 +1,5 @@
 # Find Aravis
-FIND_PACKAGE(Aravis REQUIRED)
+find_package(Aravis REQUIRED)
 
 # Build our NUClear module
-NUCLEAR_MODULE(INCLUDES ${Aravis_INCLUDE_DIRS} 
-               LIBRARIES ${Aravis_LIBRARIES})
+nuclear_module(INCLUDES ${Aravis_INCLUDE_DIRS} LIBRARIES ${Aravis_LIBRARIES})

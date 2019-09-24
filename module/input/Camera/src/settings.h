@@ -39,7 +39,9 @@ namespace input {
         static std::string unit(ArvGcInteger* setting) {
             GError* error = nullptr;
             const char* u = arv_gc_integer_get_unit(setting, &error);
-            if (error) { g_error_free(error); }
+            if (error) {
+                g_error_free(error);
+            }
             return u == nullptr ? "" : u;
         }
     };
@@ -73,7 +75,9 @@ namespace input {
         static std::string unit(ArvGcFloat* setting) {
             GError* error = nullptr;
             const char* u = arv_gc_float_get_unit(setting, &error);
-            if (error) { g_error_free(error); }
+            if (error) {
+                g_error_free(error);
+            }
             return u == nullptr ? "" : u;
         }
     };

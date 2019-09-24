@@ -1,16 +1,16 @@
 #include "Camera.h"
 
-#include <fmt/format.h>
-#include <cmath>
-
 extern "C" {
 #include <aravis-0.6/arv.h>
 }
 
+#include <fmt/format.h>
+#include <cmath>
 #include "description_to_fourcc.h"
+#include "message/input/Image.h"
+#include "message/input/Sensors.h"
 #include "settings.h"
 #include "time_sync.h"
-
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
 
@@ -19,6 +19,7 @@ namespace input {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::input::Sensors;
     using utility::support::Expression;
     using utility::vision::fourcc;
 
@@ -231,6 +232,21 @@ namespace input {
             arv_stream_set_emit_signals(stream.get(), true);
         });
 
+        on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
+            std::lock_guard<std::mutex> lock(sensors_mutex);
+            auto now = NUClear::clock::now();
+            Hpws.resize(std::distance(Hpws.begin(), std::remove_if(Hpws.begin(), Hpws.end(), [now] (const auto& v) {
+                return v.first < (now - std::chrono::milliseconds(500));
+            });
+
+            // Get torso to head, and torso to world
+            Eigen::Affine3d Htp = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+            Eigen::Affine3d Htw = sensors.Htw;
+            Eigen::Affine3d Hpw = Htp.inverse() * Htw;
+
+            Hpws.push_back(std::make_pair(sensors.timestamp, Hpw));
+        });
+
         on<Shutdown>().then([this] {
             for (auto& camera : cameras) {
                 // Stop the video stream.
@@ -327,8 +343,44 @@ namespace input {
                 msg->camera_id = context->camera_id;
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
-                // TODO attach Hcw once we have access to sensors
+
+                Eigen::Affine3d Hcw;
+
+                /* Mutex Scope */ {
+                    std::lock_guard<std::mutex> lock(sensors_mutex);
+
+                    Eigen::Affine3d Hcp = context->Hcp;
+                    Eigen::Affine3d Hpw;
+                    if (Hpws.empty()) {
+                        Hpw = Eigen::Affine3d::Identity();
+                    }
+                    else {
+                        // Find the first time that is not less than the target time
+                        auto Hpw_it = std::lower_bound(
+                            Hpws.begin(), Hpws.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+
+                        if (Hpw_it == Hpws.end()) {
+                            // Image is newer than most recent sensors
+                            Hpw = std::prev(Hpw_it)->second;
+                        }
+                        else if (Hpw_it == Hpws.begin()) {
+                            // Image is older than oldest sensors
+                            Hpw = Hpw_it->second;
+                        }
+                        else {
+                            // Check Hpw_it and std::prev(Hpw) for closest match
+                            Hpw = std::abs((Hpw_it->first - msg->timestamp).count())
+                                          < std::abs((std::prev(Hpw_it)->first - msg->timestamp).count())
+                                      ? Hpw_it->second
+                                      : std::prev(Hpw_it)->second;
+                        }
+                    }
+
+                    Hcw = Hcp * Hpw;
+                }
+
                 msg->lens = context->lens;
+                msg->Hcw  = Hcw.matrix();
 
                 context->reactor.emit(msg);
 

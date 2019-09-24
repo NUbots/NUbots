@@ -71,7 +71,9 @@ namespace input {
         // There were no valid samples, return 0 as the offset
         // Getting 0 as an offset is almost impossible at nanosecond precision and if it ever did happen
         // Then just using our own timestamp instead of the one from the camera is going to be pretty close
-        if (samples.begin() == end) { return output; }
+        if (samples.begin() == end) {
+            return output;
+        }
 
         // The total amount of time taken during the test on the local and remote systems for checking if it worked
         // These numbers should be the same to within a fairly tight tolerance

@@ -5,15 +5,12 @@ extern "C" {
 #include <aravis-0.6/arv.h>
 }
 
+#include <Eigen/Geometry>
 #include "CameraContext.h"
-
 #include "extension/Configuration.h"
-
-#include "message/input/Image.h"
 
 namespace module {
 namespace input {
-
 
     class Camera : public NUClear::Reactor {
 
@@ -25,6 +22,8 @@ namespace input {
         static void emit_image(ArvStream* stream, CameraContext* context);
         static void control_lost(ArvGvDevice* device);
 
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>>>
+            Hpws;
         std::map<std::string, CameraContext> cameras;
         uint32_t num_cameras = 0;
     };
