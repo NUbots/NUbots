@@ -22,7 +22,7 @@ namespace input {
 
     private:
         static void emit_image(ArvStream* stream, CameraContext* context);
-        static void control_lost(ArvGvDevice* device);
+        static void control_lost(ArvGvDevice* device, CameraContext* context);
 
         std::mutex sensors_mutex;
         std::vector<std::pair<NUClear::clock::time_point, Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>>>
