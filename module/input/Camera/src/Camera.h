@@ -5,6 +5,7 @@ extern "C" {
 #include <aravis-0.6/arv.h>
 }
 
+#include <Eigen/Core>
 #include <Eigen/Geometry>
 #include "CameraContext.h"
 #include "extension/Configuration.h"

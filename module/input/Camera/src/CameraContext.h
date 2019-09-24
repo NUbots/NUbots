@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <nuclear>
+#include <Eigen/Geometry>
 
 extern "C" {
 #include <aravis-0.6/arv.h>
