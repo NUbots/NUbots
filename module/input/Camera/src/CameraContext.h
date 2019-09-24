@@ -6,12 +6,11 @@
 #include <memory>
 #include <nuclear>
 #include <string>
+#include "message/input/Image.h"
 
 extern "C" {
 #include <aravis-0.6/arv.h>
 }
-
-#include "message/input/Image.h"
 
 namespace module {
 namespace input {

@@ -11,9 +11,9 @@ extern "C" {
 #include "message/input/Sensors.h"
 #include "settings.h"
 #include "time_sync.h"
+#include "utility/input/ServoID.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
-#include "utility/input/ServoID.h"
 
 namespace module {
 namespace input {
@@ -21,8 +21,8 @@ namespace input {
     using extension::Configuration;
     using message::input::Image;
     using message::input::Sensors;
-    using utility::support::Expression;
     using utility::input::ServoID;
+    using utility::support::Expression;
     using utility::vision::fourcc;
 
     /// The amount of time to observe after recalibrating to work out how long image transfer takes (nanoseconds)
@@ -165,7 +165,7 @@ namespace input {
                     std::string message;
                     if (feature == nullptr) {
                         // Doesn't have this feature
-                        NUClear::log<NUClear::WARN>(
+                        NUClear::log<NUClear::ERROR>(
                             fmt::format("The {} camera does not have a setting named {}", name, key));
                     }
 
@@ -237,9 +237,9 @@ namespace input {
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
             std::lock_guard<std::mutex> lock(sensors_mutex);
             auto now = NUClear::clock::now();
-            Hpws.resize(std::distance(Hpws.begin(), std::remove_if(Hpws.begin(), Hpws.end(), [now] (const auto& v) {
-                return v.first < (now - std::chrono::milliseconds(500));
-            }));
+            Hpws.resize(std::distance(Hpws.begin(), std::remove_if(Hpws.begin(), Hpws.end(), [now](const auto& v) {
+                                          return v.first < (now - std::chrono::milliseconds(500));
+                                      })));
 
             // Get torso to head, and torso to world
             Eigen::Affine3d Htp(sensors.forward_kinematics[ServoID::HEAD_PITCH]);
@@ -255,7 +255,6 @@ namespace input {
                 arv_camera_stop_acquisition(camera.second.camera.get());
                 arv_stream_set_emit_signals(camera.second.stream.get(), false);
             }
-            arv_debug_shutdown();
             arv_shutdown();
             cameras.clear();
         });
@@ -411,7 +410,7 @@ namespace input {
     }
 
     void Camera::control_lost(ArvGvDevice*) {
-        NUClear::log<NUClear::WARN>("Control of a camera has been lost ");
+        NUClear::log<NUClear::FATAL>("Control of a camera has been lost ");
     }
 
 }  // namespace input
