@@ -7,6 +7,7 @@ extern "C" {
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <mutex>
 #include "CameraContext.h"
 #include "extension/Configuration.h"
 
@@ -23,6 +24,7 @@ namespace input {
         static void emit_image(ArvStream* stream, CameraContext* context);
         static void control_lost(ArvGvDevice* device);
 
+        std::mutex sensors_mutex;
         std::vector<std::pair<NUClear::clock::time_point, Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>>>
             Hpws;
         std::map<std::string, CameraContext> cameras;

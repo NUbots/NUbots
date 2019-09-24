@@ -2,7 +2,7 @@
 
 #include "extension/Configuration.h"
 #include "message/output/CompressedImage.h"
-#include "utility/vision/Vision.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
 namespace output {

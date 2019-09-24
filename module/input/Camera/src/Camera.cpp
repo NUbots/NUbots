@@ -13,6 +13,7 @@ extern "C" {
 #include "time_sync.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace input {
@@ -21,11 +22,12 @@ namespace input {
     using message::input::Image;
     using message::input::Sensors;
     using utility::support::Expression;
+    using utility::input::ServoID;
     using utility::vision::fourcc;
 
-    /// The amount of time to observe after recalibrating to work out how long image transfer takes
+    /// The amount of time to observe after recalibrating to work out how long image transfer takes (nanoseconds)
     constexpr int64_t TRANSFER_OFFSET_OBSERVE_TIME = 1e9;
-    /// The amount of time on top of the transfer time that would be considered a drifting clock
+    /// The amount of time on top of the transfer time that would be considered a drifting clock (nanoseconds)
     constexpr int64_t MAX_CLOCK_DRIFT = 5e6;
     /// The over under count of recent messages that that were over the expected value
     constexpr int64_t MAX_COUNT_OVER_TIME_FRAMES = 100;
@@ -48,7 +50,7 @@ namespace input {
              ************************************************************************/
             if (it == cameras.end()) {
                 // Strip the .yaml off the name of the file to get the name of the camera
-                std::string name = ::basename(config.path.substr(0, config.path.find_last_of('.')).c_str());
+                std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
 
                 // Find the camera with the correct serial number
                 auto find_camera = [](const std::string& serial_number) {
@@ -117,7 +119,7 @@ namespace input {
                                                             fourcc,
                                                             num_cameras++,
                                                             lens,
-                                                            Hcp,
+                                                            Eigen::Affine3d(Hcp),
                                                             camera,
                                                             stream,
                                                             *this,
@@ -170,7 +172,7 @@ namespace input {
                     // Integer setting
                     else if (ARV_IS_GC_INTEGER_NODE(feature)) {
                         auto setting  = reinterpret_cast<ArvGcInteger*>(feature);
-                        int64_t value = std::llround(cfg.second.as<Expression>());
+                        int64_t value = std::llround(double(cfg.second.as<Expression>()));
                         message       = set_setting(setting, value);
                     }
 
@@ -237,11 +239,11 @@ namespace input {
             auto now = NUClear::clock::now();
             Hpws.resize(std::distance(Hpws.begin(), std::remove_if(Hpws.begin(), Hpws.end(), [now] (const auto& v) {
                 return v.first < (now - std::chrono::milliseconds(500));
-            });
+            }));
 
             // Get torso to head, and torso to world
-            Eigen::Affine3d Htp = sensors.forward_kinematics[ServoID::HEAD_PITCH];
-            Eigen::Affine3d Htw = sensors.Htw;
+            Eigen::Affine3d Htp(sensors.forward_kinematics[ServoID::HEAD_PITCH]);
+            Eigen::Affine3d Htw(sensors.Htw);
             Eigen::Affine3d Hpw = Htp.inverse() * Htw;
 
             Hpws.push_back(std::make_pair(sensors.timestamp, Hpw));

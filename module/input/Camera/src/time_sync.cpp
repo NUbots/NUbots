@@ -16,6 +16,7 @@ namespace input {
         };
 
         // This is what we return if we can't work out the timestamp offset now
+        // Note that all these times are measured in nanoseconds
         CameraContext::TimeCorrection output;
         output.live   = true;
         output.offset = 0;

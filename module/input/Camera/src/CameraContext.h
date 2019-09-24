@@ -1,10 +1,11 @@
 #ifndef MODULE_INPUT_CAMERA_CONTEXT_H
 #define MODULE_INPUT_CAMERA_CONTEXT_H
 
+#include <Eigen/Geometry>
 #include <cstdint>
 #include <memory>
 #include <nuclear>
-#include <Eigen/Geometry>
+#include <string>
 
 extern "C" {
 #include <aravis-0.6/arv.h>

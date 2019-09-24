@@ -123,12 +123,12 @@ namespace input {
 
             if (!options.empty() && std::find(options.begin(), options.end(), v) == options.end()) {
                 std::stringstream s;
-                s << "Value must be one of [";
+                s << "Value must be one of { ";
                 s << options.front();
                 for (std::size_t i = 1; i < options.size(); ++i) {
                     s << ", " << options[i];
                 }
-                s << "]";
+                s << " }";
 
                 throw std::runtime_error(s.str());
             }
