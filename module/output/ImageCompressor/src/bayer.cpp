@@ -26,12 +26,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-
-
 #include <vector>
-
 #include "bayer.h"
-#include "utility/vision/Vision.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
 namespace output {
