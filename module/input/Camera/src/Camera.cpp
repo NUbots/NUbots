@@ -1,13 +1,14 @@
 #include "Camera.h"
 
-#include <fmt/format.h>
 #include <cmath>
+#include <fmt/format.h>
 
 extern "C" {
 #include <aravis-0.6/arv.h>
 }
 
 #include "description_to_fourcc.h"
+#include "settings.h"
 #include "time_sync.h"
 
 #include "utility/support/yaml_expression.h"
@@ -52,9 +53,7 @@ namespace input {
                 auto find_camera = [](const std::string& serial_number) {
                     int devices = arv_get_n_devices();
                     for (int i = 0; i < devices; ++i) {
-                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
-                            return i;
-                        }
+                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) { return i; }
                     }
                     return -1;
                 };
@@ -152,213 +151,55 @@ namespace input {
             for (const auto& cfg : config["settings"].config) {
 
                 std::string key = cfg.first.as<std::string>();
-                GError* error   = nullptr;
 
                 // Get the feature node
                 auto feature = arv_device_get_feature(device, key.c_str());
-                if (feature == nullptr) {
-                    // Doesn't have this feature
-                    NUClear::log<NUClear::WARN>(
-                        fmt::format("The {} camera does not have a setting named {}", name, key));
-                }
-
-                // Integer setting
-                else if (ARV_IS_GC_INTEGER_NODE(feature)) {
-                    auto setting  = reinterpret_cast<ArvGcInteger*>(feature);
-                    int64_t value = std::llround(cfg.second.as<Expression>());
-
-                    // Get our current value
-                    int64_t current = arv_gc_integer_get_value(setting, &error);
-                    if (error) {
-                        NUClear::log<NUClear::ERROR>(fmt::format(
-                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
-                        g_error_free(error);
-                        error = nullptr;
+                try {
+                    std::string message;
+                    if (feature == nullptr) {
+                        // Doesn't have this feature
+                        NUClear::log<NUClear::WARN>(
+                            fmt::format("The {} camera does not have a setting named {}", name, key));
                     }
 
-                    // If we are planning to change the value
-                    if (value != current) {
-                        // Get the information we need
-                        int64_t min        = arv_gc_integer_get_min(setting, nullptr);
-                        int64_t max        = arv_gc_integer_get_max(setting, nullptr);
-                        const char* unit_c = arv_gc_integer_get_unit(setting, nullptr);
-                        std::string unit   = unit_c == nullptr ? "" : unit_c;
+                    // Integer setting
+                    else if (ARV_IS_GC_INTEGER_NODE(feature)) {
+                        auto setting  = reinterpret_cast<ArvGcInteger*>(feature);
+                        int64_t value = std::llround(cfg.second.as<Expression>());
+                        message       = set_setting(setting, value);
+                    }
 
-                        if (min <= value && value <= max) {
-                            arv_gc_integer_set_value(setting, value, &error);
-                            if (error) {
-                                NUClear::log<NUClear::ERROR>(
-                                    fmt::format("Failed changing {} from {}{} to {}{} on {} camera: \"{}\"",
-                                                key,
-                                                current,
-                                                unit,
-                                                value,
-                                                unit,
-                                                name,
-                                                error->message));
-                                g_error_free(error);
-                                error = nullptr;
-                            }
-                            else {
-                                NUClear::log<NUClear::INFO>(fmt::format("Changing {} from {}{} to {}{} on {} camera",
-                                                                        key,
-                                                                        current,
-                                                                        unit,
-                                                                        value,
-                                                                        unit,
-                                                                        name));
-                            }
-                        }
-                        else {
-                            log<NUClear::ERROR>(
-                                fmt::format("Cannot set {} to {} on {} camera. {} must be between {}{} and {}{}",
-                                            key,
-                                            value,
-                                            name,
-                                            key,
-                                            min,
-                                            unit,
-                                            max,
-                                            unit));
-                        }
+                    // Floating point setting
+                    else if (ARV_IS_GC_FLOAT_NODE(feature)) {
+                        auto setting = reinterpret_cast<ArvGcFloat*>(feature);
+                        double value = cfg.second.as<Expression>();
+                        message      = set_setting(setting, value);
+                    }
+
+                    // Boolean setting
+                    else if (ARV_IS_GC_BOOLEAN(feature)) {
+                        auto setting = reinterpret_cast<ArvGcBoolean*>(feature);
+                        bool value   = bool(cfg.second.as<Expression>());
+                        message      = set_setting(setting, value);
+                    }
+
+                    // Enumeration setting
+                    else if (ARV_IS_GC_ENUMERATION(feature)) {
+                        auto setting      = reinterpret_cast<ArvGcEnumeration*>(feature);
+                        std::string value = cfg.second.as<std::string>();
+                        message           = set_setting(setting, value);
+                    }
+                    else {
+                        log<NUClear::ERROR>(fmt::format("The type of setting {} is not currently handled", key));
+                    }
+
+                    // If we had a message pass it onto the user
+                    if (!message.empty()) {
+                        log<NUClear::INFO>(fmt::format("Updated {} on {} camera: {}", key, name, message));
                     }
                 }
-
-                // Floating point setting
-                else if (ARV_IS_GC_FLOAT_NODE(feature)) {
-                    auto setting = reinterpret_cast<ArvGcFloat*>(feature);
-                    double value = cfg.second.as<Expression>();
-
-                    // Get our current value
-                    double current = arv_gc_float_get_value(setting, &error);
-                    if (error) {
-                        NUClear::log<NUClear::ERROR>(fmt::format(
-                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
-                        g_error_free(error);
-                        error = nullptr;
-                    }
-
-                    // If we are planning to change the value
-                    if (value != current) {
-                        // Get the information we need
-                        double min         = arv_gc_float_get_min(setting, nullptr);
-                        double max         = arv_gc_float_get_max(setting, nullptr);
-                        const char* unit_c = arv_gc_float_get_unit(setting, nullptr);
-                        std::string unit   = unit_c == nullptr ? "" : unit_c;
-
-                        if (min <= value && value <= max) {
-                            arv_gc_float_set_value(setting, value, &error);
-                            if (error) {
-                                NUClear::log<NUClear::ERROR>(
-                                    fmt::format("Failed changing {} from {}{} to {}{} on {} camera: \"{}\"",
-                                                key,
-                                                current,
-                                                unit,
-                                                value,
-                                                unit,
-                                                name,
-                                                error->message));
-                                g_error_free(error);
-                                error = nullptr;
-                            }
-                            else {
-                                NUClear::log<NUClear::INFO>(fmt::format("Changing {} from {}{} to {}{} on {} camera",
-                                                                        key,
-                                                                        current,
-                                                                        unit,
-                                                                        value,
-                                                                        unit,
-                                                                        name));
-                            }
-                        }
-                        else {
-                            log<NUClear::ERROR>(
-                                fmt::format("Cannot set {} to {} on {} camera. {} must be between {}{} and {}{}",
-                                            key,
-                                            value,
-                                            name,
-                                            key,
-                                            min,
-                                            unit,
-                                            max,
-                                            unit));
-                        }
-                    }
-                }
-
-                // Boolean setting
-                else if (ARV_IS_GC_BOOLEAN(feature)) {
-                    auto setting = reinterpret_cast<ArvGcBoolean*>(feature);
-                    bool value   = bool(cfg.second.as<Expression>());
-
-                    // Get our current value
-                    bool current = arv_gc_boolean_get_value(setting, &error);
-                    if (error) {
-                        NUClear::log<NUClear::ERROR>(fmt::format(
-                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
-                        g_error_free(error);
-                        error = nullptr;
-                    }
-
-                    // If we are planning to change the value
-                    if (value != current) {
-
-                        arv_gc_boolean_set_value(setting, value, &error);
-                        if (error) {
-                            NUClear::log<NUClear::ERROR>(
-                                fmt::format("Failed changing {} from {} to {} on {} camera: \"{}\"",
-                                            key,
-                                            current,
-                                            value,
-                                            name,
-                                            error->message));
-                            g_error_free(error);
-                            error = nullptr;
-                        }
-                        else {
-                            NUClear::log<NUClear::INFO>(
-                                fmt::format("Changing {} from {} to {} on {} camera", key, current, value, name));
-                        }
-                    }
-                }
-
-                // Enumeration setting
-                else if (ARV_IS_GC_ENUMERATION(feature)) {
-                    auto setting      = reinterpret_cast<ArvGcEnumeration*>(feature);
-                    std::string value = cfg.second.as<std::string>();
-
-                    const char* current = arv_gc_enumeration_get_string_value(setting, &error);
-                    if (error) {
-                        NUClear::log<NUClear::ERROR>(fmt::format(
-                            "Failed to read the current value of {} on {} camera: \"{}\"", key, name, error->message));
-                        g_error_free(error);
-                    }
-
-                    // Set to the new value
-                    if (current == nullptr || value != current) {
-                        arv_gc_enumeration_set_string_value(setting, value.c_str(), &error);
-                        if (error) {
-                            NUClear::log<NUClear::ERROR>(
-                                fmt::format("Failed changing {} from {} to {} on {} camera: \"{}\"",
-                                            key,
-                                            current ? current : "UNKNOWN",
-                                            value,
-                                            name,
-                                            error->message));
-                            g_error_free(error);
-                            error = nullptr;
-                        }
-                        else {
-                            NUClear::log<NUClear::INFO>(fmt::format("Changing {} from {} to {} on {} camera",
-                                                                    key,
-                                                                    current ? current : "UNKNOWN",
-                                                                    value,
-                                                                    name));
-                        }
-                    }
-                }
-                else {
-                    log<NUClear::ERROR>(fmt::format("The type of setting {} is not currently handled", key));
+                catch (const std::runtime_error& e) {
+                    log<NUClear::ERROR>(fmt::format("Error setting {} on {} camera: {}", key, name, e.what()));
                 }
             }
 
