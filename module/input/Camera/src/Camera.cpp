@@ -1,7 +1,7 @@
 #include "Camera.h"
 
-#include <cmath>
 #include <fmt/format.h>
+#include <cmath>
 
 extern "C" {
 #include <aravis-0.6/arv.h>
@@ -53,7 +53,9 @@ namespace input {
                 auto find_camera = [](const std::string& serial_number) {
                     int devices = arv_get_n_devices();
                     for (int i = 0; i < devices; ++i) {
-                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) { return i; }
+                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
+                            return i;
+                        }
                     }
                     return -1;
                 };
@@ -102,6 +104,7 @@ namespace input {
                         float lens_focal_length                 = config["lens"]["focal_length"].as<Expression>();
                         float lens_fov                          = config["lens"]["fov"].as<Expression>();
                         Eigen::Vector2f lens_centre             = config["lens"]["centre"].as<Expression>();
+                        Eigen::Matrix4d Hcp                     = config["lens"]["Hcp"].as<Expression>();
                         Image::Lens lens{lens_projection, lens_focal_length, lens_fov, lens_centre};
 
 
@@ -113,6 +116,7 @@ namespace input {
                                                             fourcc,
                                                             num_cameras++,
                                                             lens,
+                                                            Hcp,
                                                             camera,
                                                             stream,
                                                             *this,
