@@ -352,16 +352,14 @@ namespace input {
                     std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
 
                     Eigen::Affine3d Hcp = context->Hcp;
-                    Eigen::Affine3d Hpw;
-                    if (reactor.Hpws.empty()) {
-                        Hpw = Eigen::Affine3d::Identity();
-                    }
-                    else {
+                    Eigen::Affine3d Hpw = Eigen::Affine3d::Identity();
+
+                    if (!reactor.Hpws.empty()) {
                         // Find the first time that is not less than the target time
-                        auto Hpw_it = std::lower_bound(reactor.Hpws.begin(),
-                                                       reactor.Hpws.end(),
-                                                       std::make_pair(msg->timestamp, Eigen::Affine3d::Identity()),
-                                                       [](const auto& a, const auto& b) { return a.first < b.first; });
+                        auto Hpw_it = std::lower_bound(
+                            reactor.Hpws.begin(), reactor.Hpws.end(), msg->timestamp, [](const auto& a, const auto& b) {
+                                return a.first < b;
+                            });
 
                         if (Hpw_it == reactor.Hpws.end()) {
                             // Image is newer than most recent sensors
