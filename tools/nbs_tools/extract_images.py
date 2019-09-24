@@ -38,7 +38,7 @@ def run(in_file, out_path, **kwargs):
                             "projection": packet.msg.lens.projection,
                             "focal_length": packet.msg.lens.focal_length,
                             "centre": [0, 0],
-                            "fov": packet.msg.lens.fov.x,
+                            "fov": packet.msg.lens.fov,
                         },
                     },
                     f,
