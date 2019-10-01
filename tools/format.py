@@ -2,13 +2,16 @@
 
 import os
 import b
+from dockerise import run_on_docker
 from subprocess import call, check_output
 
 
+@run_on_docker
 def register(command):
     command.help = "Format all the code in the codebase using clang-format"
 
 
+@run_on_docker
 def run(**kwargs):
 
     # Change into the project directory
