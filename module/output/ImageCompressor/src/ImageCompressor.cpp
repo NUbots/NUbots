@@ -52,6 +52,15 @@ namespace output {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
+            // clang-format off
+            std::string lvl = cfg["log_level"].as<NUClear::LogLevel>();
+            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
+            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
+            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(compressor_mutex);
             compressors.clear();
@@ -154,11 +163,11 @@ namespace output {
         });
 
         on<Every<1, std::chrono::seconds>>().then("Stats", [this] {
-            log<NUClear::INFO>(fmt::format("Receiving {}/s, Compressing {}/s,  Dropping {}/s ({}%)",
-                                           compressed + dropped,
-                                           compressed,
-                                           dropped,
-                                           100 * double(compressed) / double(compressed + dropped)));
+            log<NUClear::DEBUG>(fmt::format("Receiving {}/s, Compressing {}/s,  Dropping {}/s ({}%)",
+                                            compressed + dropped,
+                                            compressed,
+                                            dropped,
+                                            100 * double(compressed) / double(compressed + dropped)));
             compressed = 0;
             dropped    = 0;
         });
