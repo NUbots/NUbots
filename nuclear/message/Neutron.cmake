@@ -169,7 +169,7 @@ foreach(proto ${protobufs})
 
   # Run the protocol buffer compiler on these new protobufs
   add_custom_command(
-    OUTPUT "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h"
+    OUTPUT "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h" "${outputpath}/${file_we}_pb2.py"
     COMMAND
       ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS
