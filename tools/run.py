@@ -24,4 +24,4 @@ def run(args, **kwargs):
     args[0] = os.path.join("bin", args[0])
 
     # Run the command
-    exit(pty.spawn(args) << 8)
+    exit(pty.spawn(args) >> 8)
