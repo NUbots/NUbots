@@ -50,6 +50,7 @@ COPY --chown=nubots:nubots usr/local/toolchain/generate_generic_toolchain.py /us
 RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
 
 # Copy over a tool to install simple standard conforming libraries from source
+COPY --chown=nubots:nubots usr/local/bin/download-and-extract /usr/local/bin/download-and-extract
 COPY --chown=nubots:nubots usr/local/bin/install-from-source /usr/local/bin/install-from-source
 RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \

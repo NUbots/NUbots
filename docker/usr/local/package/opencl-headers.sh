@@ -20,23 +20,7 @@ mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code
-wget ${URL}
-
-# Extract the source code archive
-ARCHIVE_FILE=$(find . -type f | head -n 1)
-case "${ARCHIVE_FILE}" in
-  *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
-  *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tgz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz2)    tar xf ${ARCHIVE_FILE} ;;
-  *.txz)     tar xf ${ARCHIVE_FILE} ;;
-  *.zip)     unzip ${ARCHIVE_FILE} ;;
-  *.h)       ;;
-  *.hpp)     ;;
-  *)         echo "Unknown archive format"; exit 1 ;;
-esac
+download-and-extract ${URL}
 
 ARGS="$@"
 
