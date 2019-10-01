@@ -117,8 +117,12 @@ RUN /usr/local/package/intel-compute-runtime.sh \
     -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
 COPY --chown=nubots:nubots usr/local/package/opencl-headers/install-from-source /usr/local/package/opencl-headers.sh
 RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
-COPY --chown=nubots:nubots usr/local/package/opencl-clhpp/install-from-source /usr/local/package/opencl-clhpp.sh
-RUN /usr/local/package/opencl-clhpp.sh https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
+    -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
+    -DOPENCL_LIB_DIR=/usr/local/lib \
+    -DBUILD_DOCS=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_TESTS=OFF
 RUN install-package ruby
 COPY --chown=nubots:nubots usr/local/package/ocl-icd/install-from-source /usr/local/package/ocl-icd.sh
 RUN /usr/local/package/ocl-icd.sh https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
