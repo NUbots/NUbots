@@ -21,7 +21,7 @@ mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code and extract it
-download-and-extract ${URL}
+download-and-extract "${URL}"
 
 if [ "${METHOD}" = "install-from-source-with-patches" ]; then
     METHOD="install-from-source"
@@ -44,7 +44,7 @@ if [ "${METHOD}" = "install-from-source-with-patches" ]; then
     shift
 
     # Change back to where we should be
-    cd ${BUILD_FOLDER}
+    cd "${BUILD_FOLDER}"
 fi;
 
 # Check if we are doing a automagical determination of what build system to use go through them one by one until we
