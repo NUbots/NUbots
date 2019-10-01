@@ -20,7 +20,7 @@ mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code
-download-and-extract ${URL}
+download-and-extract "${URL}"
 
 # Apply patches
 SOURCE_DIR=$(find . -maxdepth 1 -type d | tail -n1)
@@ -34,7 +34,7 @@ echo "Configuring using cmake"
 
 # Find the closest configure file to the root
 CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-cd $(dirname ${CMAKELISTS_FILE})
+cd $(dirname "${CMAKELISTS_FILE}")
 
 echo "Building linux resource linker"
 cd "linux_linker"

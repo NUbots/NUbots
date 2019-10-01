@@ -21,7 +21,7 @@ mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code
-download-and-extract ${URL}
+download-and-extract "${URL}"
 
 echo "Configuring using autotools"
 
