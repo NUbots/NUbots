@@ -24,7 +24,7 @@
 #include <utility>
 #include <vector>
 
-#include "CM730.h"
+#include "CM740.h"
 #include "FSR.h"
 #include "MX28.h"
 #include "extension/Configuration.h"
@@ -38,7 +38,7 @@ namespace Darwin {
  */
 namespace ID {
     enum ID {
-        CM730            = 200,
+        CM740            = 200,
         R_SHOULDER_PITCH = 1,
         L_SHOULDER_PITCH = 2,
         R_SHOULDER_ROLL  = 3,
@@ -66,12 +66,12 @@ namespace ID {
 }  // namespace ID
 
 /**
- * @brief The main class that others will use to interact with the CM730 and attached devices.
+ * @brief The main class that others will use to interact with the CM740 and attached devices.
  *
  * @details
- *  This is the main access point for all users of this CM730 driver. Note that it is build for a little endian
+ *  This is the main access point for all users of this CM740 driver. Note that it is build for a little endian
  *  system, and if it is used on a big endian system, the code will need to be reviewed. This is because it is
- *  reading the 2 byte values as they are on the CM730 (which is little endian).
+ *  reading the 2 byte values as they are on the CM740 (which is little endian).
  *
  * @author Trent Houliston
  */
@@ -93,8 +93,8 @@ private:
 public:
     void setConfig(const extension::Configuration& config);
 
-    /// The CM730
-    CM730 cm730;
+    /// The CM740
+    CM740 cm740;
     /// The Right Shoulder Pitch MX28
     MX28 rShoulderPitch;
     /// The Left Shoulder Pitch MX28
@@ -143,16 +143,16 @@ public:
     /**
      * @brief Gets the darwin device with the given sensor id
      *
-     * @param id the ID of the device to get (e.g. 200 for the CM730)
+     * @param id the ID of the device to get (e.g. 200 for the CM740)
      *
      * @return the DarwinDevice object that controls this id
      */
     DarwinDevice& operator[](int id);
 
     /**
-     * @brief Constructs a new Darwin instance and sets up communication with the CM730.
+     * @brief Constructs a new Darwin instance and sets up communication with the CM740.
      *
-     * @param name the file handle for the device the CM730 is connected to (e.g. /dev/ttyUSB0)
+     * @param name the file handle for the device the CM740 is connected to (e.g. /dev/ttyUSB0)
      */
     explicit Darwin(const char* name);
 

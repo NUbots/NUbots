@@ -1,27 +1,32 @@
 steps:
   # Build for the NUC
   - label: "Build for NUC"
-    command: "/code/NUbots/.buildkite/scripts/build_code.sh"
+    command: "./b build"
     plugins:
-      - docker#v3.3.0:
-          image: "nubots/buildkite:0.4"
-          workdir: "/code/NUbots"
-          propagate-uid-gid: true
-          environment:
-            - "PLATFORM=nuc7i7bnh"
+      - docker-compose#v3.0.3:
+          config: .buildkite/docker-compose.yml
+          run: nuc7i7bnh
+          workdir: /home/nubots/NUbots/
 
-  # Validate formatting
+  # Formatting
   - label: "Validate C++ and Protobuf formatting"
-    command: "/code/NUbots/.buildkite/scripts/validate_clang_format.sh"
+    command: ".buildkite/scripts/validate_clang_format.sh"
     plugins:
-      - docker#v3.3.0:
-          image: "nubots/buildkite:0.4"
-          workdir: "/code/NUbots"
-          propagate-uid-gid: true
+      - docker-compose#v3.0.3:
+          config: .buildkite/docker-compose.yml
+          run: generic
+          workdir: /home/nubots/NUbots/
   - label: "Validate CMake formatting"
-    command: "/code/NUbots/.buildkite/scripts/validate_cmake_format.sh"
+    command: ".buildkite/scripts/validate_cmake_format.sh"
     plugins:
-      - docker#v3.3.0:
-          image: "nubots/buildkite:0.4"
-          workdir: "/code/NUbots"
-          propagate-uid-gid: true
+      - docker-compose#v3.0.3:
+          config: .buildkite/docker-compose.yml
+          run: generic
+          workdir: /home/nubots/NUbots/
+  - label: "Validate Python formatting"
+    command: ".buildkite/scripts/validate_python_format.sh"
+    plugins:
+      - docker-compose#v3.0.3:
+          config: .buildkite/docker-compose.yml
+          run: generic
+          workdir: /home/nubots/NUbots/

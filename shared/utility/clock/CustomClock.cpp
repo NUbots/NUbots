@@ -17,7 +17,7 @@ clock::time_point clock::now() {
     utility::clock::last_update =
         clock::time_point(utility::clock::last_update
                           + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                                (now - utility::clock::last_update) * utility::clock::custom_rtf));
+                              (now - utility::clock::last_update) * utility::clock::custom_rtf));
     return utility::clock::last_update;
 }
 }  // namespace NUClear

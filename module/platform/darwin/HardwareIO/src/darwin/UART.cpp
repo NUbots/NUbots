@@ -69,7 +69,7 @@ void UART::connect() {
     // If we have a valid file handle, and were able to configure it correctly (custom baud)
     if (fd < 0 || !configure(baud)) {
         // There was an exception connecting
-        throw std::runtime_error("There was an error setting up the serial connection to the CM730");
+        throw std::runtime_error("There was an error setting up the serial connection to the CM740");
     }
 
     NUClear::log<NUClear::DEBUG>("Device '", devName, "' successfully opened.");
@@ -115,7 +115,7 @@ bool UART::configure(double baud) {
 
     // Set our custom speed in the system
     if (ioctl(fd, TIOCSSERIAL, &serinfo) < 0) {
-        throw std::runtime_error("There was an error configuring up the serial connection to the CM730");
+        throw std::runtime_error("There was an error configuring up the serial connection to the CM740");
         return false;
     }
 

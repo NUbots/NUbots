@@ -29,7 +29,7 @@ namespace Darwin {
  * @brief The darwin device is a device on the serial port that will respond to the command types.
  *
  * @details
- *  This class is extended by the CM730, MX28 and FSR's, this allows them to access various memory locations
+ *  This class is extended by the CM740, MX28 and FSR's, this allows them to access various memory locations
  *  using the common functionality provided by this class
  *
  * @author Trent Houliston
@@ -38,7 +38,7 @@ class DarwinDevice {
 
 public:
     /**
-     * @brief The list of valid instructions for the CM730 and related components.
+     * @brief The list of valid instructions for the CM740 and related components.
      */
     enum Instruction {
         PING       = 1,
@@ -58,7 +58,7 @@ public:
  *
  * @details
  *  This type has it's members arranged in the same way as a raw array of this command would. Because of this
- *  you cannot add or remove members from this type (unless for some reason the API to the CM730 changes). The
+ *  you cannot add or remove members from this type (unless for some reason the API to the CM740 changes). The
  *  template argument and parameter allows you to read any type. For example if you read with a uint16_t then
  *  it will read two bytes to the device. And if you use a struct with 3 uint16_t's in it, then you can directly
  *  read a paramter with an x, y and z bytes (e.g. the accelerometer)
@@ -94,7 +94,7 @@ public:
  *
  * @details
  *  This type has it's members arranged in the same way as a raw array of this command would. Because of this
- *  you cannot add or remove members from this type (unless for some reason the API to the CM730 changes). The
+ *  you cannot add or remove members from this type (unless for some reason the API to the CM740 changes). The
  *  template argument and parameter allows you to write any type. For example if you write with a uint16_t then
  *  it will write two bytes to the device. And if you use a struct with 3 uint16_t's in it, then you directly
  *  write to something with an x, y and z byte.
@@ -132,7 +132,7 @@ public:
  *
  * @details
  *  This type has it's members arranged in the same way as a raw array of this command would. Because of this
- *  you cannot add or remove members from this type (unless for some reason the API to the CM730 changes).
+ *  you cannot add or remove members from this type (unless for some reason the API to the CM740 changes).
  *
  * @author Trent Houliston
  */
