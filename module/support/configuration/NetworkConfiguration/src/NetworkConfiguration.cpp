@@ -31,7 +31,7 @@ namespace support {
             on<Configuration>("NetworkConfiguration.yaml").then([this](const Configuration& config) {
                 auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
                 netConfig->name             = config["name"].as<std::string>();
-                netConfig->announce_address = config["address"].as<uint16_t>();
+                netConfig->announce_address = config["address"].as<std::string>();
                 netConfig->announce_port    = config["port"].as<uint16_t>();
                 emit<Scope::DIRECT>(netConfig);
             });
