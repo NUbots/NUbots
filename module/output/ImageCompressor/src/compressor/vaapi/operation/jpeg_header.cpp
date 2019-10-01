@@ -150,8 +150,12 @@ void emplace_bytes(std::vector<uint8_t>& v, Args&&... args) {
     new (v.data() + start) T(std::forward<Args>(args)...);
 }
 
-std::pair<VABufferID, VABufferID> jpeg_header(
-    VADisplay dpy, VAContextID context, uint32_t width, uint32_t height, const bool& monochrome, int quality) {
+std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
+                                              VAContextID context,
+                                              uint32_t width,
+                                              uint32_t height,
+                                              const bool& monochrome,
+                                              int quality) {
 
     /// This jpeg header builder works using a c++ technique called placement new
     /// https://en.cppreference.com/w/cpp/language/new#Placement_new
@@ -173,10 +177,14 @@ std::pair<VABufferID, VABufferID> jpeg_header(
     emplace_bytes<markers::DQT>(header, jpeg_luma_quant, quality);
 
     // If colour add the chroma quantisation table
-    if (!monochrome) { emplace_bytes<markers::DQT>(header, jpeg_chroma_quant, quality); }
+    if (!monochrome) {
+        emplace_bytes<markers::DQT>(header, jpeg_chroma_quant, quality);
+    }
 
     // Depending on if we have a monochrome image, add the correct start of frame header
-    if (monochrome) { emplace_bytes<markers::SOF0_Monochrome>(header, uint16_t(width), uint16_t(height)); }
+    if (monochrome) {
+        emplace_bytes<markers::SOF0_Monochrome>(header, uint16_t(width), uint16_t(height));
+    }
     else {
         emplace_bytes<markers::SOF0_Colour>(header, uint16_t(width), uint16_t(height));
     }
@@ -192,7 +200,9 @@ std::pair<VABufferID, VABufferID> jpeg_header(
     }
 
     // Add the scan header
-    if (monochrome) { emplace_bytes<markers::SOS_Monochrome>(header); }
+    if (monochrome) {
+        emplace_bytes<markers::SOS_Monochrome>(header);
+    }
     else {
         emplace_bytes<markers::SOS_Colour>(header);
     }
