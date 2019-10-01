@@ -4,6 +4,8 @@ import os
 import b
 import re
 import sys
+import shutil
+import subprocess
 
 # Try to import docker, if we are already in docker this will fail
 try:
@@ -15,6 +17,8 @@ except:
     client = None
 
 repository = "nubots"
+user = "nubots"
+directory = "NUbots"
 
 
 def is_docker():
@@ -143,10 +147,17 @@ def run_on_docker(func):
                 code_to_cwd = os.path.relpath(os.getcwd(), b.project_dir)
                 cwd_to_code = os.path.relpath(b.project_dir, os.getcwd())
 
+                # If we are running in WSL we need to translate our path to a windows one for docker
+                bind_path = (
+                    b.project_dir
+                    if shutil.which("wslpath") is None
+                    else subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
+                )
+
                 container = client.containers.create(
                     tag,
                     command=["{}/b".format(cwd_to_code), *sys.argv[1:]],
-                    working_dir="/home/{}/{}/{}".format(repository, "NUbots", code_to_cwd),
+                    working_dir="/home/{}/{}/{}".format(user, directory, code_to_cwd),
                     auto_remove=True,
                     tty=True,
                     stdin_open=True,
@@ -155,14 +166,14 @@ def run_on_docker(func):
                     mounts=[
                         docker.types.Mount(
                             type="bind",
-                            source=b.project_dir,
-                            target="/home/{}/{}".format(repository, "NUbots"),
+                            source=bind_path,
+                            target="/home/{}/{}".format(user, directory),
                             consistency="cached",
                         ),
                         docker.types.Mount(
                             type="volume",
                             source=build_volume.name,
-                            target="/home/{}/build".format(repository),
+                            target="/home/{}/build".format(user),
                             consistency="delegated",
                         ),
                     ],

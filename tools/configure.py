@@ -25,7 +25,6 @@ def register(command):
 
 @run_on_docker
 def run(interactive, args, **kwargs):
-
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
     # If configure then run ccmake else just run cmake

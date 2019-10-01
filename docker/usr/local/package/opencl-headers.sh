@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 # Exit immediately on error
 set -e
 
 # Get our method as the name of this script, url and args
 URL="$1"
+shift
 
 # Set installation prefix, default to /usr/local unless an external power says otherwise
 PREFIX=${PREFIX:-"/usr/local"}
@@ -37,7 +38,6 @@ case "${ARCHIVE_FILE}" in
   *)         echo "Unknown archive format"; exit 1 ;;
 esac
 
-shift
 ARGS="$@"
 
 echo "Installing header files"

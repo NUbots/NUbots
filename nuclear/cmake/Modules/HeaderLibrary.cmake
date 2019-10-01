@@ -36,7 +36,7 @@ function(HeaderLibrary)
     if(${PACKAGE_NAME}_STATUS_CODE EQUAL 0)
       message(STATUS "Successfully downloaded ${PACKAGE_NAME} library.")
 
-      set(${PACKAGE_NAME}_INCLUDE_DIR "${OUTPUT_DIR}")
+      set(${PACKAGE_NAME}_INCLUDE_DIR "${OUTPUT_DIR}" CACHE PATH "The ${PACKAGE_NAME} include directory" FORCE)
 
     else()
       message(ERROR "Failed to download ${PACKAGE_NAME} library.")

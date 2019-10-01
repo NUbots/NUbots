@@ -60,13 +60,6 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-python-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
-# Build llvm/clang and install to /usr so we can use them from cross-compiling
-RUN sudo PREFIX="/usr" install-cmake-from-source \
-    https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/llvm-8.0.1.src.tar.xz
-COPY --chown=nubots:nubots usr/local/package/clang/install-from-source /usr/local/package/clang.sh
-RUN  sudo PREFIX="/usr" /usr/local/package/clang.sh \
-    https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/cfe-8.0.1.src.tar.xz
-
 ################################################
 #  _____           _      _           _        #
 # |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
@@ -83,49 +76,31 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
-# Intel Compute Runtime (OpenCL), libva and Intel Media Driver (VAAPI)
-RUN install-cmake-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/llvm-8.0.1.src.tar.xz
-RUN install-from-source https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/cfe-8.0.1.src.tar.xz \
-    -DLLVM_TABLEGEN=/usr/bin/llvm-tblgen \
-    -DCLANG_TABLEGEN=/usr/bin/clang-tblgen
+# LLVM and Clang
+RUN BUILD_FILE_DIR='llvm' install-cmake-from-source \
+    https://github.com/llvm/llvm-project/archive/llvmorg-8.0.1.tar.gz \
+    -DLLVM_ENABLE_PROJECTS="clang"
+
+# Libpci access and libdrm for communicating with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
 RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.99.tar.bz2 \
     -Dudev=false \
     -Dvalgrind=false
-RUN install-from-source https://github.com/intel/libva/releases/download/2.5.0/libva-2.5.0.tar.bz2
-RUN install-from-source-with-patches https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz \
-    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0001-Update-LowerOpenCL-pass-to-handle-new-blocks-represn.patch \
-    https://raw.githubusercontent.com/intel/opencl-clang/94af090661d7c953c516c97a25ed053c744a0737/patches/spirv/0002-Remove-extra-semicolon.patch \
-    --
-COPY --chown=nubots:nubots usr/local/package/opencl-clang/install-from-source /usr/local/package/opencl-clang.sh
+
+# Intel graphics compiler
+RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz
+COPY --chown=nubots:nubots usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz
-COPY --chown=nubots:nubots usr/local/package/intel-graphics-compiler/python3.patch /usr/local/package/intel-graphics-compiler/
-RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.10.tar.gz \
-    /usr/local/package/intel-graphics-compiler/python3.patch \
+RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.11.tar.gz \
+    https://github.com/intel/intel-graphics-compiler/commit/5f96c6db35ffa238fd84314c99a53e6708322d65.patch \
     -- \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='8.0.0'
 RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.4.tar.gz \
     -DRUN_TEST_SUITE=OFF
-COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
-COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime/install-from-source /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh \
-    https://github.com/intel/compute-runtime/archive/19.34.13959.tar.gz \
-    -DNEO_DRIVER_VERSION=19.32.13826 \
-    -DSKIP_ALL_ULT=ON \
-    -DSKIP_UNIT_TESTS=ON \
-    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
-COPY --chown=nubots:nubots usr/local/package/opencl-headers/install-from-source /usr/local/package/opencl-headers.sh
-RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
-    -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
-    -DOPENCL_LIB_DIR=/usr/local/lib \
-    -DBUILD_DOCS=OFF \
-    -DBUILD_EXAMPLES=OFF \
-    -DBUILD_TESTS=OFF
-RUN install-package ruby
-COPY --chown=nubots:nubots usr/local/package/ocl-icd/install-from-source /usr/local/package/ocl-icd.sh
-RUN /usr/local/package/ocl-icd.sh https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+
+# Libva and the iHD driver for hardware compression
+RUN install-from-source https://github.com/intel/libva/releases/download/2.5.0/libva-2.5.0.tar.bz2
 RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
@@ -135,6 +110,30 @@ RUN install-from-source https://github.com/intel/media-driver/archive/intel-medi
     -DENABLE_KERNELS=ON \
     -DENABLE_NONFREE_KERNELS=ON \
     -DBUILD_TYPE=Release
+
+# Install intel compute runtime (OpenCL implementation)
+COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
+COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
+RUN /usr/local/package/intel-compute-runtime.sh \
+    https://github.com/intel/compute-runtime/archive/19.37.14191.tar.gz \
+    -DNEO_DRIVER_VERSION=19.37.14191 \
+    -DSKIP_ALL_ULT=ON \
+    -DSKIP_UNIT_TESTS=ON \
+    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
+
+# Install OpenCL C and C++ headers
+COPY --chown=nubots:nubots usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
+RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
+    -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
+    -DOPENCL_LIB_DIR=/usr/local/lib \
+    -DBUILD_DOCS=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_TESTS=OFF
+
+# OpenCL loader library
+RUN install-package ruby
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
 
 # OpenBLAS
 RUN install-package gcc-fortran
@@ -158,10 +157,10 @@ RUN install-from-source \
 
 # Protobuf
 RUN install-package protobuf
-RUN install-from-source https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-cpp-3.7.0.tar.gz \
+RUN install-autotools-from-source https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-cpp-3.7.0.tar.gz \
     --with-zlib=/usr/local \
-    --with-protoc=/usr/bin/protoc
-RUN PROTOC=/usr/bin/protoc install-python-from-source \
+    --with-protoc=/usr/sbin/protoc
+RUN PROTOC=/usr/sbin/protoc install-python-from-source \
     https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-python-3.7.0.tar.gz --cpp_implementation
 
 # Libjpeg
@@ -223,11 +222,18 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.31.0.tar
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
     -DBUILD_TESTS=OFF
 
-# libbacktrace
+# Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
     --without-system-libunwind \
     --enable-shared \
     --enable-static
+
+# Alsa and espeak
+RUN install-from-source ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.1.9.tar.bz2 \
+    --without-debug
+RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.gz
+COPY --chown=nubots:nubots usr/local/package/espeak.sh /usr/local/package/espeak.sh
+RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.49.2/espeak-ng-1.49.2.tar.gz
 
 # Install python libraries
 RUN pip install \
@@ -256,6 +262,6 @@ COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
 RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 
 # Setup the locations where we will mount our folders
-RUN mkdir -p /home/nubots/NUbots
-RUN mkdir -p /home/nubots/build
+RUN install -d -m 0755 -o nubots -g nubots /home/nubots/NUbots
+RUN install -d -m 0755 -o nubots -g nubots /home/nubots/build
 WORKDIR /home/nubots/NUbots

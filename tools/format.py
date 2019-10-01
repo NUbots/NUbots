@@ -2,8 +2,8 @@
 
 import os
 import b
-from dockerise import run_on_docker
 from subprocess import call, check_output
+from dockerise import run_on_docker
 
 
 @run_on_docker
