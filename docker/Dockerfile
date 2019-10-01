@@ -79,7 +79,7 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source \
-    https://github.com/llvm/llvm-project/archive/llvmorg-8.0.1.tar.gz \
+    https://github.com/llvm/llvm-project/archive/llvmorg-9.0.0.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang"
 
 # Libpci access and libdrm for communicating with graphics hardware
@@ -89,15 +89,15 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.99.t
     -Dvalgrind=false
 
 # Intel graphics compiler
-RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v8.0.1-2.tar.gz
+RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v9.0.0-1.tar.gz
 COPY --chown=nubots:nubots usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v8.0.1.tar.gz
-RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.11.tar.gz \
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v9.0.0.tar.gz
+RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.2652.tar.gz \
     https://github.com/intel/intel-graphics-compiler/commit/5f96c6db35ffa238fd84314c99a53e6708322d65.patch \
     -- \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='8.0.0'
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.2.4.tar.gz \
+    -DIGC_PREFERRED_LLVM_VERSION='9.0.0'
+RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.3.2.tar.gz \
     -DRUN_TEST_SUITE=OFF
 
 # Libva and the iHD driver for hardware compression
@@ -116,8 +116,8 @@ RUN install-from-source https://github.com/intel/media-driver/archive/intel-medi
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh \
-    https://github.com/intel/compute-runtime/archive/19.37.14191.tar.gz \
-    -DNEO_DRIVER_VERSION=19.37.14191 \
+    https://github.com/intel/compute-runtime/archive/19.38.14237.tar.gz \
+    -DNEO_DRIVER_VERSION=19.38.14237 \
     -DSKIP_ALL_ULT=ON \
     -DSKIP_UNIT_TESTS=ON \
     -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
@@ -166,7 +166,7 @@ RUN PROTOC=/usr/sbin/protoc install-python-from-source \
 
 # Libjpeg
 RUN install-package yasm
-RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.2.tar.gz \
+RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2.0.3.tar.gz \
     -DWITH_SIMD=ON \
     -DFORCE_INLINE=ON \
     -DINLINE_WORKS=1 \
@@ -179,7 +179,7 @@ RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/2
     -DFLOATTEST="sse"
 
 # yaml-cpp
-RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.tar.gz \
+RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz \
     -DYAML_CPP_BUILD_TESTS=OFF \
     -DBUILD_SHARED_LIBS=OFF
 
@@ -199,11 +199,11 @@ RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-lin
     --enable-libblkid \
     --enable-libmount \
     --enable-libuuid
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.61.2/glib-2.61.2.tar.gz \
+RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.62.0/glib-2.62.0.tar.gz \
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
-RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_6_4.tar.gz \
+RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_7_1.tar.gz \
     -Ddefault_library=both \
     -Dviewer=false \
     -Dgst-plugin=false \
@@ -215,7 +215,7 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
 RUN install-from-source https://github.com/emcrisostomo/fswatch/releases/download/1.14.0/fswatch-1.14.0.tar.gz
 
 # LibUV
-RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.31.0.tar.gz \
+RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.32.0.tar.gz \
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
@@ -240,6 +240,7 @@ RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases
 RUN pip install \
     cmake-format \
     black \
+    pylint \
     termcolor \
     stringcase \
     Pillow
