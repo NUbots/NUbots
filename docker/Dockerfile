@@ -92,8 +92,9 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.99.t
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v9.0.0-1.tar.gz
 COPY --chown=nubots:nubots usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v9.0.0.tar.gz
+COPY --chown=nubots:nubots usr/local/package/igc/gcc9.patch /usr/local/package/gcc9.patch
 RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.2652.tar.gz \
-    https://github.com/intel/intel-graphics-compiler/commit/5f96c6db35ffa238fd84314c99a53e6708322d65.patch \
+    /usr/local/package/gcc9.patch \
     -- \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='9.0.0'

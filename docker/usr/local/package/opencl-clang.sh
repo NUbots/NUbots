@@ -22,14 +22,6 @@ cd "${BUILD_FOLDER}"
 # Download the source code
 download-and-extract "${URL}"
 
-# Apply patches
-SOURCE_DIR=$(find . -maxdepth 1 -type d | tail -n1)
-cd "${SOURCE_DIR}"
-wget "https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch" -O - | patch -Np1
-wget "https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch" -O - | patch -Np1
-
-ARGS="$@"
-
 echo "Configuring using cmake"
 
 # Find the closest configure file to the root
@@ -50,12 +42,7 @@ cd build
 # Configure using cmake
 cmake .. \
     -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_C_FLAGS="${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
-    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
-    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
     -DLINUX_RESOURCE_LINKER_COMMAND:PATH="${PREFIX}/bin/linux_resource_linker" \
     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
     -DSPIRV_TRANSLATOR_DIR=/usr/local \
