@@ -1,0 +1,18 @@
+version: "3.2"
+services:
+  vscode:
+    # This stops the container from exiting so vscode can connect
+    tty: true
+    image: nubots:generic
+    volumes:
+      - type: bind
+        source: ./..
+        target: /home/nubots/NUbots
+        consistency: cached
+      - type: volume
+        source: nubots_generic_build
+        target: /home/nubots/build
+        consistency: delegated
+volumes:
+  nubots_generic_build:
+    external: true

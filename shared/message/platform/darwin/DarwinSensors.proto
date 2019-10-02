@@ -130,7 +130,7 @@ message DarwinSensors {
     }
 
     google.protobuf.Timestamp timestamp       = 1;
-    uint32                    cm730ErrorFlags = 2;
+    uint32                    cm740ErrorFlags = 2;
     LEDPanel                  ledPanel        = 3;
     HeadLED                   headLED         = 4;
     EyeLED                    eyeLED          = 5;
@@ -143,11 +143,7 @@ message DarwinSensors {
 }
 
 // Button press events
-message ButtonLeftDown {
-}
-message ButtonLeftUp {
-}
-message ButtonMiddleDown {
-}
-message ButtonMiddleUp {
-}
+message ButtonLeftDown {}
+message ButtonLeftUp {}
+message ButtonMiddleDown {}
+message ButtonMiddleUp {}

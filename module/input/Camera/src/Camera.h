@@ -17,7 +17,6 @@
 
 // clang-format off
 extern "C" {
-#include <arvconfig.h>
 #include <aravis-0.6/arv.h>
 }
 // clang-format on

@@ -24,7 +24,7 @@ namespace tools {
         std::map<std::pair<std::string, std::string>, Firmware> firmwares;
 
         enum MenuState { NO_MENU, DEVICE_MENU, BATTERY_MENU };
-        enum Device { NO_DEVICE, CM730, DYNAMIXEL };
+        enum Device { NO_DEVICE, CM730, CM740, DYNAMIXEL };
         enum Battery { NO_BATTERY, BATTERY3, BATTERY4 };
         MenuState menu_state;
         Device selected_device;
