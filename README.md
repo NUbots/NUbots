@@ -1,116 +1,134 @@
 NUbots Codebase [![Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master)](https://buildkite.com/nubots/nubots)
-==========================
+===============
 
-Vagrant
---------
+TODO describe what this codebase is
 
+# Setting up the Development Environment
+The NUbots codebase uses Docker containers to build the codebase.
+These docker containers are managed by a python script called `b`.
+This `b` script provides the tools for working with the NUbots codebase and related artifacts such as recordings.
 
-1. Install the following prerequisites on your machine (packages/installers are available for Windows, OSX, and Linux):
-    * [Git][]
-    * [Virtualbox][]
-    * [Vagrant][]
+The recommended editor for working with the NUbots codebase is [Visual Studio Code](https://code.visualstudio.com/).
+When opening the code folder project with vscode, it should suggest extensions that are helpful for working with the NUbots code.
+Additionally one of these will be the Remote Development Containers extension.
+This extension allows vscode to open the docker container and operate within it.
 
-    e.g. Linux: Installation should be done via the apt-get repositories. Open a console with `Ctrl+Alt+T` and type:
+Below are instructions on how to setup a computer to build the codebase ready to develop either on your own computer or on a robot.
 
-        $ sudo apt-get install git
-        $ sudo apt-get install virtualbox
+## Ubuntu
 
-        NOTE: Ubuntu users should get the debian for Vagrant from the vagrant website.
+---
+**NOTE**
+If you are using anything other than Ubuntu we assume that you know what you are doing and know how to modify the following commands appropriately
 
-    Windows and OSX installation can be done with installers from the program sites above.
+---
 
+1. Add the universe and docker repositories
+```sh
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo add-apt-repository universe
+sudo apt update
+```
+2. Install docker, git, and python3
+```sh
+sudo apt install docker-ce docker-ce-cli containerd.io python3 python3-pip git
+```
+3. Add current user to the docker group (to allow non-root usage of docker)
+```sh
+sudo usermod -aG docker "${USER}"
+```
+4. Reboot (or log out and log back in) to make the group change take effect
+5. Download the codebase
+```sh
+git clone https://github.com/NUbots/NUbots.git
+```
+6. Install the required python dependencies
+```sh
+sudo -H pip3 install -r NUbots/requirements.txt
+```
 
-2. Clone this git repository onto your machine. First, open a terminal. In Ubuntu, the default shortcut is `Ctrl+Alt+T`. In Windows you will need to open a Git Bash terminal (this is installed when you install Git; search for Git Bash in the Start Menu). (Todo: Terminal in OSX). Then enter the following:
+## Mac OSX
 
-        $ git clone https://github.com/NUbots/NUbots.git
+The easiest way to install most of the requirements for developing on Mac OSX is to use [Homebrew](https://brew.sh/) to install the dependencies.
 
-    **Note** We recommend [Sublime Text 3][] for editing the code. The file 'NUbots.sublime-project' can be opened with Sublime ('Project -> Open Project...', then browse to your NUbots repository).
-    The NUbots codebase also applies a formating style guide provided by [clang-format][].
-    This can be used from within Sublime using the [ClangFormat][] package from PackageControl.
+1. Install homebrew by following the directions at https://brew.sh/
+2. Install git, python3, and docker
+```sh
+brew install git python3
+brew cask install docker
+```
+4. Run the docker app that was installed which should add a docker icon to the menu bar.
+5. By default the docker install will allocate 2GB of memory to docker images. When building the images this is insufficent for some of the libraries and will result in an error. In the menu bar go to advanced settings and increase the memory available.
+6. Download the codebase
+```sh
+git clone https://github.com/NUbots/NUbots.git
+```
+7. Install the required python dependencies
+```sh
+pip3 install -r NUbots/requirements.txt
+```
 
-3. Create vagrant machine
+## Windows
 
-        $ cd NUbots
-        $ vagrant up
+TODO
 
-4. To set up vagrant and simulator
+# Building and Installing
+Once you have the codebase and prerequisites installed you should be ready to start working with the codebase.
+The NUbots codebase can be built for more than one target.
+Depending on if you want to run the code on your personal computer or one of the robots you will need to select a target platform that you will be executing the code on.
 
-    **Note** Multiple build targets are supported. You must tell CMake which target you would like to build for.
-    The currently supported targets are `nuc7i7bnh` (used for the iGus), `fitpc2i` (used for the DARwIn-OP), and `native`.
-    Due to the code optimisations done to the `nuc7i7bnh` and `fitpc2i` builds it is possible that neither of these two builds will be able to run inside the vm, this is why `native` exists.
-    In the commands that follow, `{target}` is one of the supported build targets.
+## Selecting a platform
 
-        $ vagrant ssh
-        $ cd NUbots
-        $ ./b platform select {target}
-        $ cd build
-        $ ninja
+To select the platform you use the target command in the `b` script. For example to select the `generic` platform which is used when running code on your own computer. Run the following:
+```sh
+./b target generic
+```
+This will download and setup the generic image and set it as your default image when running new commands. To change to build code to execute on the robot you would execute:
+```sh
+./b target nuc7i7bnh
+```
+This would build code that is optimised specificially to run on the platform that is currently used in the NUgus robots. Note that when building for other platforms than generic, the code may not be able to execute on your own computer depending on the CPU that you have.
 
-4. If quex permission error occurs run
+## Configuring the code
+To configure the code for building run:
+```sh
+./b configure
+```
+This will configure the code for building.
+If you want to change settings you can add the cmake flags to the end of the configure call such as the following command that will build the code with static libraries.
+```sh
+./b configure -DSTATIC_LIBRARIES=On
+```
+Additionally if you wish to perform interactive configuration (with ccmake) you can run
+```sh
+./b configure -i
+```
 
-        $ chmod +x /usr/local/bin/quex
-        $ quex
-        $ ninja
+## Building the code
+To compile the code you can run:
+```sh
+./b build
+```
+This will build the codebase for the currently selected platform.
+If you had not run configure first, this will also configure the code with a default set of options.
 
-5. Open a second terminal, go to [NUsight][] (after cloning) and run
+## Running the code on the local computer
+Once you have built code in the local docker container, you may want to run binaries that do not depend on the robots hardware.
+For example those that use gazebo simulations.
+To run commands like these you use the run command of b.
+For example, to run the nusighttest binary run:
+```sh
+./b run nusighttest
+```
 
-        $ node app
-
-then in internet browser go to
-
-    localhost:9090
-
-and then localization window
-go back to the first terminal and run
-
-    $ nano config/NUsight.yaml
-
-6. Select which data is to be sent to NUsight (Usually just localization and sensors)
-
-    $ bin/soccersimulator
-
-and you're done!
-
-Simulation parameters can be found in
-
-    $ nano config/SoccerSimulatorConfig.yaml
-
-TroubleShooting Vagrant
---------
-1. If the shared folders are not mounted you may need to run the following command on the host machine.
-
-        $ vagrant plugin install vagrant-vbguest
-
-2. If you have multiple nubotsvm in NUsight you can modify the name property in the following file
-
-        $ cd build/
-        $ nano config/NetworkConfiguration.yaml
-
-3. If dpkg is locked during vagrant provision:
-   This procedure should resolve most issues that may cause the dpkg to be locked (the lock file is like a mutex).
-   Pay attention to the output of the apt-get commands and look for any further errors.
-
-        $ vagrant ssh
-        $ sudo rm /var/lib/dpkg/lock
-        $ sudo apt-get install -f
-        $ sudo apt-get update
-        $ sudo apt-get upgrade
-        $ exit
-        $ vagrant provision
-
-   Optional step:
-   Run this after the "apt-get upgrade" command.
-   This isn't necessary to resolve any problems, it will just free up some hard drive space.
-
-        $ sudo apt-get autoremove --purge
-
-[NUbots]:                 http://nubots.net/                                      "NUbots"
-[NUClear]:                https://github.com/Fastcode/NUClear                     "NUClear"
-[NUsight]:                https://github.com/NUbots/NUsight                       "NUsight web robot debugger"
-[Sublime Text 3]:         http://www.sublimetext.com/                             "Sublime Text 3"
-[Homebrew]:               http://brew.sh/                                         "Homebrew"
-[Git]:                    https://git-scm.com/                                    "Git version control"
-[Vagrant]:                https://www.vagrantup.com/                              "Virtual machine wrapper"
-[VirtualBox]:             https://www.virtualbox.org/                             "Virtual machine"
-[clang-format]:           https://clang.llvm.org/docs/ClangFormat.html            "Clang Format"
-[ClangFormat]:            https://packagecontrol.io/packages/Clang%20Format       "Clang Format"
+## Installing the code on a robot
+To install the code on a robot you should use the install command of the b script.
+For example, to install the code onto the robot igus1 you should run the following.
+```
+./b install igus1
+```
+Note that you can replace igus1 with any of the preconfigured robot names, or an IP address of a target robot.

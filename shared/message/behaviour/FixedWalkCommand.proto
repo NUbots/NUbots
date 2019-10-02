@@ -23,12 +23,9 @@ package message.behaviour;
 import "google/protobuf/duration.proto";
 import "Vector.proto";
 
-message FixedWalkFinished {
-}
-message WalkConfigSaved {
-}
-message CancelFixedWalk {
-}
+message FixedWalkFinished {}
+message WalkConfigSaved {}
+message CancelFixedWalk {}
 
 message WalkOptimiserCommand {
     string walkConfig = 1;

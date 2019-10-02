@@ -69,11 +69,12 @@ def properties_run(context):
         with open(
             "C:/Users/fish_/Desktop/Igus_V5/Igus_{}.yaml".format(app.activeDocument.name.replace(" ", "_")), "w"
         ) as f:
-            f.write(yaml.dump(data, default_flow_style = None))
+            f.write(yaml.dump(data, default_flow_style=None))
 
     except:
         if ui:
-            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+            ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
+
 
 def export_step(context):
     ui = None
@@ -133,6 +134,7 @@ def export_step(context):
         if ui:
             ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
+
 def run(context):
     ui = None
     try:
@@ -141,7 +143,7 @@ def run(context):
         design = adsk.fusion.Design.cast(app.activeProduct)
 
         properties_run(context)
-        # export_step(context)   
+        # export_step(context)
 
         ui.messageBox("Finished.")
 

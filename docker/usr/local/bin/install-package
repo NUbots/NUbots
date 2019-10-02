@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+# If we are not root, rerun using sudo
+if ! [ $(id -u) = 0 ]; then
+    sudo "$0" "$@"
+else
+    # Update pacman, install the packages and cleanup the cache to make the layer smaller
+    pacman -Syu --noconfirm --needed
+    pacman -S --noconfirm --needed "$@"
+    rm -rf /var/cache
+fi

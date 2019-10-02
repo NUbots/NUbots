@@ -18,7 +18,7 @@
 #ifndef MODULES_EXTENSION_FILEWATCHER_H
 #define MODULES_EXTENSION_FILEWATCHER_H
 
-#include <libfswatch/c++/monitor.hpp>
+#include <libfswatch/c++/monitor_factory.hpp>
 #include <nuclear>
 
 namespace module {
