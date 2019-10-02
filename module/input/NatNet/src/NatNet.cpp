@@ -344,7 +344,9 @@ namespace input {
                 } break;
 
                 // Bad packet
-                default: { log<NUClear::WARN>("NatNet received an unexpected model type", type); } break;
+                default: {
+                    log<NUClear::WARN>("NatNet received an unexpected model type", type);
+                } break;
             }
         }
     }

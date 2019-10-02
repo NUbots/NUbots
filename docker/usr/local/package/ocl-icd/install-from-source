@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# Exit immediately on error
+set -e
+
+# Get our method as the name of this script, url and args
+URL="$1"
+
+# Set installation prefix, default to /usr/local unless an external power says otherwise
+PREFIX=${PREFIX:-"/usr/local"}
+
+BUILD_FOLDER="/var/tmp/build"
+
+# Pull in the toolchain arguments
+. /usr/local/toolchain.sh
+
+# Setup the temporary build directories
+mkdir -p "${BUILD_FOLDER}"
+cd "${BUILD_FOLDER}"
+
+# Download the source code
+wget ${URL}
+
+# Extract the source code archive
+ARCHIVE_FILE=$(find . -type f | head -n 1)
+case "${ARCHIVE_FILE}" in
+  *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
+  *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
+  *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
+  *.tgz)     tar xf ${ARCHIVE_FILE} ;;
+  *.tbz)     tar xf ${ARCHIVE_FILE} ;;
+  *.tbz2)    tar xf ${ARCHIVE_FILE} ;;
+  *.txz)     tar xf ${ARCHIVE_FILE} ;;
+  *.zip)     unzip ${ARCHIVE_FILE} ;;
+  *.h)       ;;
+  *.hpp)     ;;
+  *)         echo "Unknown archive format"; exit 1 ;;
+esac
+
+shift
+ARGS="$@"
+
+echo "Configuring using autotools"
+
+CONFIGURE_FILE=$(find -type f -name 'configure.ac' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+cd $(dirname ${CONFIGURE_FILE})
+
+echo "Configuring using configure file ${CONFIGURE_FILE}"
+
+# Generate configuration files
+autoreconf -fiv
+
+# Configure the build files
+CFLAGS="${EXTRA_CFLAGS} ${RELEASE_CFLAGS} ${CFLAGS}" \
+  CXXFLAGS="${EXTRA_CXXFLAGS} ${RELEASE_CXXFLAGS} ${CXXFLAGS}" \
+  ./configure $ARGS --prefix="${PREFIX}"
+
+# Build
+make -j$(nproc)
+
+# Now install
+make install
+
+# Now that we have built, cleanup the build directory
+rm -rf "${BUILD_FOLDER}"

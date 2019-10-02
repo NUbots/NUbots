@@ -1,0 +1,258 @@
+#!/bin/sh
+
+# Exit immediately on error
+set -e
+
+# Get our method as the name of this script, url and args
+METHOD=$(basename "$0")
+URL="$1"
+
+# Set installation prefix, default to /usr/local unless an external power says otherwise
+PREFIX=${PREFIX:-"/usr/local"}
+
+BUILD_FOLDER="/var/tmp/build"
+
+# Pull in the toolchain arguments
+. "${PREFIX}/toolchain.sh"
+
+# Setup the temporary build directories
+mkdir -p "${BUILD_FOLDER}"
+cd "${BUILD_FOLDER}"
+
+# Download the source code
+wget "${URL}"
+
+# Extract the source code archive
+ARCHIVE_FILE=$(find . -type f | head -n 1)
+case "${ARCHIVE_FILE}" in
+  *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
+  *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
+  *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
+  *.tgz)     tar xf ${ARCHIVE_FILE} ;;
+  *.tbz)     tar xf ${ARCHIVE_FILE} ;;
+  *.tbz2)    tar xf ${ARCHIVE_FILE} ;;
+  *.txz)     tar xf ${ARCHIVE_FILE} ;;
+  *.zip)     unzip ${ARCHIVE_FILE} ;;
+  *.h)       ;;
+  *.hpp)     ;;
+  *)         echo "Unknown archive format"; exit 1 ;;
+esac
+
+if [ "${METHOD}" = "install-from-source-with-patches" ]; then
+    shift
+    METHOD="install-from-source"
+    SOURCE_DIR=$(find . -maxdepth 1 -type d | tail -n1)
+    cd "${SOURCE_DIR}"
+
+    # Iterate through each argument until we find a --
+    while [ "$1" != "--" ]; do
+        if [ "$1" = "${1#http}" ] && [ "$1" = "${1#ftp}" ]; then
+            # Patch is a local file, apply it
+            patch -Np1 -i "$1"
+        else
+            # Patch is a remote file, download and apply it
+            wget "$1" -O - | patch -Np1
+        fi;
+        shift
+    done
+fi;
+
+shift
+ARGS="$@"
+
+# Check if we are doing a automagical determination of what build system to use go through them one by one until we
+# decide on one
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'configure')" ]; then
+    METHOD="install-autotools-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'autogen.sh')" ]; then
+    METHOD="install-autotools-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'CMakeLists.txt')" ]; then
+    METHOD="install-cmake-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'Jamroot')" ]; then
+    METHOD="install-bjam-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'Makefile')" ]; then
+    METHOD="install-make-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'meson.build')" ]; then
+    METHOD="install-meson-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ] && [ -n "$(find . -type f -name 'setup.py')" ]; then
+    METHOD="install-python-from-source"
+fi;
+
+if [ "${METHOD}" = "install-from-source" ]; then
+    echo "Could not work out the build system to use to build the source"
+    exit 1
+fi;
+
+# We are installing a header
+if [ "${METHOD}" = 'install-header-from-source' ]; then
+    echo "Installing a header"
+
+    HEADER_FILE=$(find -type f -name '*.h' -o -name '*.hpp' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cp "${HEADER_FILE}" "${PREFIX}/include"
+
+# We are using autotools
+elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
+    echo "Configuring using autotools"
+
+    # Find the closest configure file to the root
+    CONFIGURE_FILE=$(find -type f -name 'configure' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+
+    # If we have no configure file we need to autogen
+    if [ -z "${CONFIGURE_FILE}" ]; then
+        AUTOGEN_FILE=$(find -type f -name 'autogen.sh' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+        cd $(dirname "${AUTOGEN_FILE}")
+
+        echo "Generating configuration files using file ${AUTOGEN_FILE}"
+        # Some autogen scripts will automatically run configure after they have generated the configure files
+        # "NOCONFIGURE=1" and "--no-configure" are two ways that we can disable this behaviour
+        # (different packagers have different switches)
+        NOCONFIGURE=1 ./autogen.sh --no-configure
+    else
+        cd $(dirname "${CONFIGURE_FILE}")
+    fi
+
+    echo "Configuring using configure file ${CONFIGURE_FILE}"
+
+    # Run configure
+    CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" FFLAGS="${FFLAGS}" FCFLAGS="${FCFLAGS}" \
+        ./configure $ARGS --prefix="${PREFIX}"
+
+    # Run make
+    make -j$(nproc)
+
+    # Run make install
+    make install
+
+# We are using CMake
+elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
+    echo "Configuring using cmake"
+
+    # Find the closest configure file to the root
+    CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cd $(dirname "${CMAKELISTS_FILE}")
+
+    echo "Configuring using cmake file ${CMAKELISTS_FILE}"
+
+    # Do an out of source build
+    mkdir -p build
+    cd build
+
+    # Configure using cmake
+    cmake .. -GNinja \
+        ${ARGS} \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
+        -Wno-dev
+
+    # Run ninja
+    ninja
+
+    # Run ninja install
+    ninja install
+
+# We are using Boost.Build
+elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
+    echo "Configuring using Boost.Build"
+
+    # Bootstrap bjam
+    ./bootstrap.sh --prefix="${PREFIX}" --without-libraries=python
+
+    # Setup our include paths, library paths, compile flags, and then build
+    ./bjam ${ARGS} \
+        include="${PREFIX}/include" \
+        library-path="${PREFIX}/lib" \
+        -j$(nproc) \
+        -q \
+        cflags="${CFLAGS}" \
+        cxxflags="${CXXFLAGS}"
+
+    # Now install
+    ./bjam install
+
+# We are using standard makefiles
+elif [ "${METHOD}" = 'install-make-from-source' ]; then
+    echo "Building using make"
+
+    MAKEFILE=$(find -type f -name 'Makefile' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cd $(dirname "${MAKEFILE}")
+
+    make ${ARGS} -j$(nproc) \
+        CFLAGS="${CFLAGS}" \
+        CXXFLAGS="${CXXFLAGS}" \
+        FFLAGS="${FFLAGS}" \
+        FCFLAGS="${FCFLAGS}"
+
+    make PREFIX="${PREFIX}" install
+
+# We are using meson.build
+elif [ "${METHOD}" = 'install-meson-from-source' ]; then
+    echo "Building using meson"
+
+    # Find the closest configure file to the root
+    MESON_FILE=$(find -type f -name 'meson.build' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cd $(dirname "${MESON_FILE}")
+
+    echo "Configuring using meson build file ${MESON_FILE}"
+
+    # Do an out of source build
+    mkdir -p build
+    cd build
+
+    # Configure using meson
+    CFLAGS="${CFLAGS}" \
+    CXXFLAGS="${CXXFLAGS}" \
+    FFLAGS="${FFLAGS}" \
+    FCFLAGS="${FCFLAGS}" \
+    meson setup build .. \
+        $ARGS \
+        --cross-file="${PREFIX}/meson.cross" \
+        --buildtype=release \
+        --prefix="${PREFIX}" \
+        -D strip=true
+
+    # Run ninja
+    ninja -C build -j$(nproc)
+
+    # Run ninja install
+    ninja -C build install
+
+# We are using setuptools
+elif [ "${METHOD}" = 'install-python-from-source' ]; then
+    echo "Building using setuptools"
+
+    # Find the closest configure file to the root
+    SETUP_FILE=$(find -type f -name 'setup.py' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cd $(dirname "${SETUP_FILE}")
+
+    echo "Configuring using setuptools build file ${SETUP_FILE}"
+
+    # Build using setuptools
+    CFLAGS="${CFLAGS}" \
+    CXXFLAGS="${CXXFLAGS}" \
+    FFLAGS="${FFLAGS}" \
+    FCFLAGS="${FCFLAGS}" \
+    python setup.py build $ARGS
+
+    # Install using setuptools
+    CFLAGS="${CFLAGS}" \
+    CXXFLAGS="${CXXFLAGS}" \
+    FFLAGS="${FFLAGS}" \
+    FCFLAGS="${FCFLAGS}" \
+    python setup.py install $ARGS  --prefix="${PREFIX}"
+
+fi;
+
+# Now that we have built, cleanup the build directory
+rm -rf "${BUILD_FOLDER}"

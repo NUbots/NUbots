@@ -120,24 +120,22 @@ namespace math {
                     for (uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
 
                         // Split the points from this list off to the start
-                        auto newStart =
-                            std::partition(iterators[i],
-                                           iterators[i + 1],
-                                           [consensusErrorThreshold, bestModel](const DataPoint& point) {
-                                               return consensusErrorThreshold
-                                                      > bestModel.calculateError(std::forward<const DataPoint&>(point));
-                                           });
-                        offsets[i] = std::distance(newStart, iterators[i + 1]);
+                        auto newStart = std::partition(iterators[i],
+                                                       iterators[i + 1],
+                                                       [consensusErrorThreshold, bestModel](const DataPoint& point) {
+                                                           return consensusErrorThreshold > bestModel.calculateError(
+                                                                      std::forward<const DataPoint&>(point));
+                                                       });
+                        offsets[i]    = std::distance(newStart, iterators[i + 1]);
                     }
 
                     // Now we split off all our new points into a global partition
-                    auto newFirst = std::stable_partition(
-                        iterators.front(),
-                        iterators.back(),
-                        [consensusErrorThreshold, bestModel](const DataPoint& point) {
-                            return consensusErrorThreshold
-                                   > bestModel.calculateError(std::forward<const DataPoint&>(point));
-                        });
+                    auto newFirst = std::stable_partition(iterators.front(),
+                                                          iterators.back(),
+                                                          [consensusErrorThreshold, bestModel](const DataPoint& point) {
+                                                              return consensusErrorThreshold > bestModel.calculateError(
+                                                                         std::forward<const DataPoint&>(point));
+                                                          });
 
                     // We now start with this new first
                     auto start        = iterators.front();

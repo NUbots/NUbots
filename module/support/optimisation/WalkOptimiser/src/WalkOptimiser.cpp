@@ -131,22 +131,22 @@ namespace support {
             });
 
             on < Trigger<FixedWalkFinished>,
-                <Sync<WalkOptimiser>>().then("Walk Routine Finised",
-                                             [this] {
-                                                 // Get and reset data
-                                                 fitnesses[currentSample] = data.popFitness();
-                                                 std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample]
-                                                           << std::endl;
-                                                 if (currentSample >= samples.n_rows - 1) {
-                                                     emit(std::make_unique<OptimisationComplete>());
-                                                 }
-                                                 else {
-                                                     // Setup new parameters
-                                                     std::cerr << "Sample:" << ++currentSample << std::endl;
-                                                     setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
-                                                     // Now wait for WalkConfigSaved
-                                                 }
-                                             });
+                <Sync<WalkOptimiser>>().then(
+                    "Walk Routine Finised",
+                    [this] {
+                        // Get and reset data
+                        fitnesses[currentSample] = data.popFitness();
+                        std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample] << std::endl;
+                        if (currentSample >= samples.n_rows - 1) {
+                            emit(std::make_unique<OptimisationComplete>());
+                        }
+                        else {
+                            // Setup new parameters
+                            std::cerr << "Sample:" << ++currentSample << std::endl;
+                            setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                            // Now wait for WalkConfigSaved
+                        }
+                    });
 
             on<Trigger<OptimisationComplete>, Sync<WalkOptimiser>>().then("Record Results", [this] {
                 // Combine samples

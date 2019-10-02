@@ -3,7 +3,7 @@ Darwin Hardware I/O
 
 ## Description
 
-This module is responsible for communicating with the Darwin robot's CM730
+This module is responsible for communicating with the Darwin robot's CM740
 controller.
 
 ## Usage
@@ -13,7 +13,7 @@ Darwin Hardware I/O connects at startup to the Darwin controller located on
 aborted.
 
 This module reads the current status of the Darwin 50 times per second and
-emits it as a `message::DarwinSensors` object. This includes the CM730 error
+emits it as a `message::DarwinSensors` object. This includes the CM740 error
 code, LED panel, head and eye LED colour, buttons, voltage, accelerometer,
 gyroscope, left and right force-sensing resistors and each servo.
 
@@ -39,4 +39,3 @@ emit these commands individually or emit several at once in a `std::vector`.
 ## Dependencies
 
 * The USB TTY communication relies on Linux-specific system calls
-

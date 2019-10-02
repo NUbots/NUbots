@@ -1,0 +1,34 @@
+--- a/IGC/GenISAIntrinsics/Intrinsics.py
++++ b/IGC/GenISAIntrinsics/Intrinsics.py
+@@ -30,6 +30,7 @@
+ import sys
+ import re
+ import importlib
++from functools import reduce
+ 
+ # Compatibility with Python 3.X
+ if sys.version_info[0] >= 3:
+--- a/IGC/BiFModule/resource_embedder.py
++++ b/IGC/BiFModule/resource_embedder.py
+@@ -24,7 +24,6 @@
+ 
+ #======================= end_copyright_notice ==================================
+ 
+-import binascii
+ import os
+ import re
+ import sys
+@@ -89,11 +88,11 @@
+     readBytes = inFile.read(chunkSize)
+     while len(readBytes) > 0:
+         readSize = len(readBytes)
+-        hexBytes = binascii.hexlify(readBytes)
++        hexBytes = bytes.hex(readBytes)
+ 
+         if embeddedSize > 0:
+             outFile.write(',')
+-        outFile.write(','.join((('\n        0x' if (embeddedSize + i) % lineSize == 0 else ' 0x') + hexBytes[2*i:2*i+2]) for i in xrange(readSize)))
++        outFile.write(','.join((('\n        0x' if (embeddedSize + i) % lineSize == 0 else ' 0x') + hexBytes[2*i:2*i+2]) for i in range(readSize)))
+ 
+         embeddedSize += readSize
+         readBytes = inFile.read(chunkSize)

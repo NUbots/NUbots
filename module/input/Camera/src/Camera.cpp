@@ -24,9 +24,6 @@ namespace input {
         , V4L2Cameras()
         , AravisCameras() {
 
-        // Needed for Aravis cameras.
-        arv_g_type_init();
-
         on<Configuration>("Camera.yaml").then("Camera Module Configuration", [this](const Configuration& config) {
             dumpImages = config["dump_images"].as<bool>();
         });
