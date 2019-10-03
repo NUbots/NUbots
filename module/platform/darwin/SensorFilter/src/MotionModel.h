@@ -49,7 +49,7 @@ namespace platform {
                 PZ = 2,
 
                 // Our velocity in global space
-                // rTWw
+                // vTw
                 VX = 3,
                 VY = 4,
                 VZ = 5,
@@ -61,7 +61,7 @@ namespace platform {
                 QZ = 8,
                 QW = 9,
 
-                // Our rotational velocity in robot space
+                // Our rotational velocity in torso space
                 // Gyroscope measures the angular velocity of the torso in torso space
                 // omegaTTt
                 WX = 10,
