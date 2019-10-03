@@ -539,21 +539,6 @@ namespace motion {
             return robotToImu;
         }
 
-        // inline arma::vec4 fsrCentreInBodyCoords(const KinematicsModel& model,
-        //                                         const Sensors& sensors,
-        //                                         const arma::vec2& foot,
-        //                                         bool left) {
-        //     int negativeIfRight = left ? 1 : -1;
-
-        //     arma::vec2 position = foot % arma::vec2({model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2});
-        //     arma::vec4 centerFoot =
-        //         arma::vec4({position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0,
-        //         1});
-
-        //     return ((left) ? convert(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]) * centerFoot
-        //                    : convert(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]) * centerFoot);
-        // }
-
         inline Eigen::Vector4d fsrCentreInBodyCoords(const KinematicsModel& model,
                                                      const Sensors& sensors,
                                                      const Eigen::Vector2d& foot,
@@ -568,26 +553,6 @@ namespace motion {
             return ((left) ? sensors.forward_kinematics[ServoID::L_ANKLE_ROLL] * centerFoot
                            : sensors.forward_kinematics[ServoID::R_ANKLE_ROLL] * centerFoot);
         }
-
-        // inline arma::vec3 calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
-        //     arma::vec4 CoP            = {0, 0, 0, 1};
-        //     float number_of_feet_down = 0;
-        //     if (sensors.left_foot_down) {
-        //         CoP += fsrCentreInBodyCoords(model, sensors, convert(sensors.fsr[LimbID::LEFT_LEG - 1].centre),
-        //         true); number_of_feet_down += 1.0f;
-        //     }
-        //     if (sensors.right_foot_down) {
-        //         CoP += fsrCentreInBodyCoords(model, sensors, convert(sensors.fsr[LimbID::RIGHT_LEG - 1].centre),
-        //         false); number_of_feet_down += 1.0f;
-        //     }
-        //     if (number_of_feet_down == 2) {
-        //         CoP = CoP / number_of_feet_down;
-        //     }
-        //     // reset homogeneous coordinate
-        //     CoP(3)              = 1;
-        //     arma::vec4 CoP_body = convert(sensors.Hgt) * CoP;
-        //     return CoP_body.rows(0, 2);
-        // }
 
         inline Eigen::Vector3d calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
             Eigen::Vector4d CoP     = Eigen::Vector4d::UnitW();
