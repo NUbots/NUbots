@@ -103,7 +103,7 @@ namespace behaviour {
                                     NUClear::log("Requesting Right Front Kick");
                                     emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
                                         KickScriptCommand(Eigen::Vector3d::UnitX(),  // vector pointing forward relative to robot
-                                        LimbID::RIGHT_LEG)));
+                                        LimbID::RIGHT_LEG))));
                                 }
                                 break;
                                 // case BUTTON_L2:
@@ -145,8 +145,10 @@ namespace behaviour {
                 if (moving) {
                     auto strafeNorm          = strafe / std::numeric_limits<short>::max();
                     auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
-                    emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(
-                        Eigen::Vector3d(strafeNorm.x(), strafeNorm.y(), rotationalSpeedNorm))));
+                    Eigen::Affine2d affineParameter;
+                    affineParameter.linear() = Eigen::Rotation2Dd(rotationalSpeedNorm).toRotationMatrix();
+                    affineParameter.translation() = Eigen::Vector2d(strafeNorm.x(), strafeNorm.y());
+                    emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
                 }
             });
         }

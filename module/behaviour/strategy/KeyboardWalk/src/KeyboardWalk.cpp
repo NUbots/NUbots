@@ -42,7 +42,11 @@ namespace behaviour {
         using LimbID = utility::input::LimbID;
 
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), velocity(arma::fill::zeros) {
+            : Reactor(std::move(environment)) {
+
+            // Initialising velocity
+            velocity(0) = 0;
+            velocity(1) = 0;
 
             // Start curses mode
             initscr();
@@ -197,8 +201,11 @@ namespace behaviour {
         void KeyboardWalk::updateCommand() {
             if (moving) {
                 log(fmt::format("New command {} {}", velocity.transpose(), rotation));
+                Eigen::Affine2d affineParameter;
+                affineParameter.linear() = Eigen::Rotation2Dd(rotation).toRotationMatrix();
+                affineParameter.translation() = Eigen::Vector2d(velocity.x(), velocity.y());
                 emit(std::make_unique<MotionCommand>(
-                    utility::behaviour::DirectCommand(Eigen::Vector3d(velocity.x(), velocity.y(), rotation))));
+                    utility::behaviour::DirectCommand(affineParameter)));
             }
 
             auto headCommand        = std::make_unique<HeadCommand>();

@@ -20,6 +20,7 @@
 #ifndef UTILITY_MATH_ANGLE_H
 #define UTILITY_MATH_ANGLE_H
 
+#include <Eigen/Core>
 #include <armadillo>
 #include <cmath>
 
@@ -89,7 +90,7 @@ namespace math {
             return std::atan2(dirVec(1), dirVec(0));
         }
 
-        inline double vectorToBearing(cosnt Eigen::Vector2d& dirVec) {
+        inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
             return std::atan2(dirVec.y(), dirVec.x());
         }
 

@@ -66,7 +66,7 @@ namespace behaviour {
 
         private:
             Joystick joystick;  // TODO: make configurable
-            Eigen::Vector2d strafe = Eigen::Vectro2d::Zero();
+            Eigen::Vector2d strafe = Eigen::Vector2d::Zero();
             float rotationalSpeed  = 0;
             bool moving            = false;
             bool headLocked        = false;

@@ -34,7 +34,7 @@ namespace behaviour {
             explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
         private:
-            bool kickValid(const arma::vec3& ballPos);
+            bool kickValid(const Eigen::Vector3d& ballPos);
             message::motion::KickPlannerConfig cfg;
             NUClear::clock::time_point ballLastSeen;
             NUClear::clock::time_point lastTimeValid;
