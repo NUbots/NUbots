@@ -61,12 +61,6 @@ namespace platform {
                     struct Noise {
                         Noise() : measurement(), process() {}
                         struct Measurement {
-                            Measurement()
-                                : accelerometer(Eigen::Matrix3d::Identity())
-                                , accelerometerMagnitude(Eigen::Matrix3d::Identity())
-                                , gyroscope(Eigen::Matrix3d::Identity())
-                                , flatFootOdometry(Eigen::Matrix3d::Identity())
-                                , flatFootOrientation(Eigen::Matrix4d::Identity()) {}
                             Eigen::Matrix3d accelerometer;
                             Eigen::Matrix3d accelerometerMagnitude;
                             Eigen::Matrix3d gyroscope;
@@ -74,11 +68,6 @@ namespace platform {
                             Eigen::Matrix4d flatFootOrientation;
                         } measurement;
                         struct Process {
-                            Process()
-                                : position(Eigen::Vector3d::Ones())
-                                , velocity(Eigen::Vector3d::Ones())
-                                , rotation(Eigen::Vector4d::Ones())
-                                , rotationalVelocity(Eigen::Vector3d::Ones()) {}
                             Eigen::Vector3d position;
                             Eigen::Vector3d velocity;
                             Eigen::Vector4d rotation;
@@ -89,11 +78,6 @@ namespace platform {
                     struct Initial {
                         Initial() : mean(), covariance() {}
                         struct Mean {
-                            Mean()
-                                : position(Eigen::Vector3d::Ones())
-                                , velocity(Eigen::Vector3d::Ones())
-                                , rotation(Eigen::Vector4d::Ones())
-                                , rotationalVelocity(Eigen::Vector3d::Ones()) {}
                             Eigen::Vector3d position;
                             Eigen::Vector3d velocity;
                             Eigen::Vector4d rotation;
@@ -101,11 +85,6 @@ namespace platform {
                             Eigen::Vector3d gyroscopeBias;
                         } mean;
                         struct Covariance {
-                            Covariance()
-                                : position(Eigen::Vector3d::Ones())
-                                , velocity(Eigen::Vector3d::Ones())
-                                , rotation(Eigen::Vector4d::Ones())
-                                , rotationalVelocity(Eigen::Vector3d::Ones()) {}
                             Eigen::Vector3d position;
                             Eigen::Vector3d velocity;
                             Eigen::Vector4d rotation;
