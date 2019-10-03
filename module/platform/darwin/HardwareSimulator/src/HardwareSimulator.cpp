@@ -227,7 +227,7 @@ namespace platform {
                     // 'Receive Simulated Gyroscope' reaction above, so we can't
                     // reliably query the size of the gyroQueue.
                     Eigen::Vector3d sumGyro = Eigen::Vector3d::Zero();
-                    {
+                    /* mutext scope */ {
                         std::lock_guard<std::mutex> lock(gyroQueueMutex);
                         while (!gyroQueue.empty()) {
                             DarwinSensors::Gyroscope g = gyroQueue.front();
