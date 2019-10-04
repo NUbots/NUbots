@@ -27,7 +27,7 @@
 #include <vector>
 
 extern "C" {
-#include <aravis-0.6/arv.h>
+#include <aravis-0.8/arv.h>
 }
 
 #include "message/input/Image.h"
