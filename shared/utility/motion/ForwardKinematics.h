@@ -53,7 +53,7 @@ namespace motion {
                                                                              const ServoID& servoID) {
             std::map<ServoID, Eigen::Affine3d> positions;
 
-            Eigen::Affine3d runningTransform;
+            Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
             const Eigen::Vector3d NECK_POS(model.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Z);
@@ -113,7 +113,7 @@ namespace motion {
                                                                             const ServoID& servoID,
                                                                             const BodySide& isLeft) {
             std::map<ServoID, Eigen::Affine3d> positions;
-            Eigen::Affine3d runningTransform;
+            Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
             // Variables to mask left and right leg differences:
             ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
             int negativeIfRight = 1;
@@ -217,7 +217,7 @@ namespace motion {
                                                                             const ServoID& servoID,
                                                                             const BodySide& isLeft) {
             std::map<ServoID, Eigen::Affine3d> positions;
-            Eigen::Affine3d runningTransform;
+            Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
             // Variables to mask left and right differences:
             ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
             int negativeIfRight = 1;
