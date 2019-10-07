@@ -263,6 +263,10 @@ namespace motion {
 
             // swap legs if needed
             if (limb != LimbID::LEFT_LEG) {
+                target(0, 1)             = -target(0, 1);
+                target(0, 2)             = -target(0, 2);
+                target(1, 0)             = -target(1, 0);
+                target(2, 0)             = -target(2, 0);
                 target.translation().x() = -target.translation().x();
             }
 
