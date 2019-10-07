@@ -70,9 +70,9 @@ namespace motion {
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D target,
                                                                   LimbID limb);
-        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                  const Eigen::Affine3d& target,
-                                                                  const LimbID& limb);
+        std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                   const Eigen::Affine3d& target,
+                                                                   const LimbID& limb);
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D leftTarget,

@@ -226,23 +226,23 @@ namespace motion {
             return positions;
         }
 
-        std::vector<std::pair<ServoID, float>> calculateLegJoints(const KinematicsModel& model,
-                                                                  const Eigen::Affine3d& target_,
-                                                                  const LimbID& limb) {
-            const float LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
-            const float DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
-            const float HIP_OFFSET_X                    = model.leg.HIP_OFFSET_X;
-            const float UPPER_LEG_LENGTH                = model.leg.UPPER_LEG_LENGTH;
-            const float LOWER_LEG_LENGTH                = model.leg.LOWER_LEG_LENGTH;
+        std::vector<std::pair<ServoID, double>> calculateLegJoints(const KinematicsModel& model,
+                                                                   const Eigen::Affine3d& target_,
+                                                                   const LimbID& limb) {
+            const double LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
+            const double DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
+            const double HIP_OFFSET_X                    = model.leg.HIP_OFFSET_X;
+            const double UPPER_LEG_LENGTH                = model.leg.UPPER_LEG_LENGTH;
+            const double LOWER_LEG_LENGTH                = model.leg.LOWER_LEG_LENGTH;
 
-            std::vector<std::pair<ServoID, float>> positions;
+            std::vector<std::pair<ServoID, double>> positions;
 
-            float hipYaw     = 0;
-            float hipRoll    = 0;
-            float hipPitch   = 0;
-            float knee       = 0;
-            float anklePitch = 0;
-            float ankleRoll  = 0;
+            double hipYaw     = 0;
+            double hipRoll    = 0;
+            double hipPitch   = 0;
+            double knee       = 0;
+            double anklePitch = 0;
+            double ankleRoll  = 0;
 
             // Correct for input referencing the bottom of the foot
             Eigen::Affine3d target(target_);
@@ -278,30 +278,30 @@ namespace motion {
 
             Eigen::Vector3d targetLeg = anklePos - hipOffset;
 
-            float length       = targetLeg.norm();
-            float maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
+            double length       = targetLeg.norm();
+            double maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
             if (length > maxLegLength) {
                 targetLeg = targetLeg * maxLegLength / length;
                 length    = targetLeg.norm();
             }
-            float sqrLength   = length * length;
-            float sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
-            float sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
+            double sqrLength   = length * length;
+            double sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
+            double sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
 
-            float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-            knee          = std::acos(std::fmax(std::fmin(cosKnee, 1), -1));
+            double cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
+            knee           = std::acos(std::fmax(std::fmin(cosKnee, 1), -1));
 
-            float cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);
-            float lowerLeg    = std::acos(std::fmax(std::fmin(cosLowerLeg, 1), -1));
+            double cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);
+            double lowerLeg    = std::acos(std::fmax(std::fmin(cosLowerLeg, 1), -1));
 
-            float phi2 = std::acos(targetLeg.dot(ankleY) / length);
+            double phi2 = std::acos(targetLeg.dot(ankleY) / length);
 
             anklePitch = lowerLeg + phi2 - M_PI_2;
 
             Eigen::Vector3d unitTargetLeg = targetLeg / length;
 
             Eigen::Vector3d hipX = ankleY.cross(unitTargetLeg);
-            float hipXLength     = hipX.norm();
+            double hipXLength    = hipX.norm();
             if (hipXLength > 0) {
                 hipX /= hipXLength;
             }
@@ -319,19 +319,19 @@ namespace motion {
 
             bool isAnkleAboveWaist = unitTargetLeg.dot(Eigen::Vector3d::UnitZ()) < 0;
 
-            float cosZandHipX    = Eigen::Vector3d::UnitZ().dot(hipX);
+            double cosZandHipX   = Eigen::Vector3d::UnitZ().dot(hipX);
             bool hipRollPositive = cosZandHipX <= 0;
             Eigen::Vector3d legPlaneGlobalZ =
                 (isAnkleAboveWaist ? -1 : 1) * (Eigen::Vector3d::UnitZ() - (cosZandHipX * hipX));
-            float legPlaneGlobalZLength = legPlaneGlobalZ.norm();
+            double legPlaneGlobalZLength = legPlaneGlobalZ.norm();
             if (legPlaneGlobalZLength > 0) {
                 legPlaneGlobalZ /= legPlaneGlobalZLength;
             }
 
-            float cosHipRoll = legPlaneGlobalZ.dot(Eigen::Vector3d::UnitZ());
-            hipRoll          = (hipRollPositive ? 1 : -1) * std::acos(std::fmax(std::fmin(cosHipRoll, 1), -1));
+            double cosHipRoll = legPlaneGlobalZ.dot(Eigen::Vector3d::UnitZ());
+            hipRoll           = (hipRollPositive ? 1 : -1) * std::acos(std::fmax(std::fmin(cosHipRoll, 1), -1));
 
-            float phi4 = M_PI - knee - lowerLeg;
+            double phi4 = M_PI - knee - lowerLeg;
             // Superposition values:
             float sinPIminusPhi2 = std::sin(M_PI - phi2);
             Eigen::Vector3d unitUpperLeg =

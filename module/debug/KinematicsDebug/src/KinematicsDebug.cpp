@@ -74,7 +74,7 @@ namespace debug {
                 auto waypoints = std::make_unique<std::vector<ServoTarget>>();
 
                 if (left) {
-                    std::vector<std::pair<ServoID, float>> legJoints =
+                    std::vector<std::pair<ServoID, double>> legJoints =
                         calculateLegJoints(kinematicsModel, target, LimbID::LEFT_LEG);
                     for (auto& legJoint : legJoints) {
                         ServoTarget waypoint;
@@ -94,7 +94,7 @@ namespace debug {
                 }
 
                 if (right) {
-                    std::vector<std::pair<ServoID, float>> legJoints =
+                    std::vector<std::pair<ServoID, double>> legJoints =
                         calculateLegJoints(kinematicsModel, target, LimbID::RIGHT_LEG);
                     for (auto& legJoint : legJoints) {
                         ServoTarget waypoint;
@@ -160,7 +160,7 @@ namespace debug {
                     sensors->servo                   = std::vector<Sensors::Servo>(20);
 
                     if (left) {
-                        std::vector<std::pair<ServoID, float>> legJoints =
+                        std::vector<std::pair<ServoID, double>> legJoints =
                             calculateLegJoints(kinematicsModel, ikRequest, LimbID::LEFT_LEG);
                         for (auto& legJoint : legJoints) {
                             ServoID servoID;
@@ -173,7 +173,7 @@ namespace debug {
                     }
 
                     if (right) {
-                        std::vector<std::pair<ServoID, float>> legJoints =
+                        std::vector<std::pair<ServoID, double>> legJoints =
                             calculateLegJoints(kinematicsModel, ikRequest, LimbID::RIGHT_LEG);
                         for (auto& legJoint : legJoints) {
                             ServoID servoID;
