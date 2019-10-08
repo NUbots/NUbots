@@ -26,5 +26,6 @@ def run(platform, **kwargs):
     else:
         tag = "{}:{}".format(dockerise.repository, platform)
         dockerise.build_platform(platform)
+        img = dockerise.client.images.get(tag)
 
         img.tag(dockerise.repository, "selected")
