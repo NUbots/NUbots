@@ -25,11 +25,6 @@ def run(platform, **kwargs):
         print("Currently selected platform is {}".format(platform))
     else:
         tag = "{}:{}".format(dockerise.repository, platform)
-
-        try:
-            img = dockerise.client.images.get(tag)
-        except docker.errors.ImageNotFound:
-            dockerise.build_platform(platform)
-            img = dockerise.client.images.get(tag)
+        dockerise.build_platform(platform)
 
         img.tag(dockerise.repository, "selected")
