@@ -34,31 +34,40 @@ def build_platform(platform):
     # Pull the latest version from dockerhub
     progress = {}
     for event in client.api.pull(repository="nubots/nubots", tag=platform, stream=True, decode=True):
+        try:
+            id = int(event["id"], 16)
+            status = event["status"]
 
-        id = event["id"]
-        status = event["status"]
+            # If this is the first time we have seen this id, make a tqdm progress bar for it
+            if id not in progress:
+                progress[id] = {"bar": tqdm(unit="B", unit_scale=True, dynamic_ncols=True, leave=False), "value": 0}
 
-        # If this is the first time we have seen this id, make a tqdm progress bar for it
-        if id not in progress:
-            progress[id] = {"bar": tqdm(unit="B", unit_scale=True, dynamic_ncols=True, leave=False), "value": 0}
+            p = progress[id]
+            bar = p["bar"]
 
-        p = progress[id]
-        bar = p["bar"]
+            # Update the status
+            bar.set_description("{} - {}".format(id, status))
 
-        # Update the status
-        bar.set_description("{} - {}".format(id, status))
+            # If we have a value in progressDetail
+            if (
+                "progressDetail" in event
+                and "current" in event["progressDetail"]
+                and "total" in event["progressDetail"]
+            ):
+                current = int(event["progressDetail"]["current"], 10)
+                total = int(event["progressDetail"]["total"], 10)
 
-        # If we have a value in progressDetail
-        if "progressDetail" in event and "current" in event["progressDetail"] and "total" in event["progressDetail"]:
-            current = event["progressDetail"]["current"]
-            total = event["progressDetail"]["total"]
+                bar.total = total
+                bar.n = current
 
-            bar.total = total
-            bar.n = current
+            # Complete statuses need to finish off the bar
+            if "complete" in status:
+                bar.finish()
 
-        # Complete statuses need to finish off the bar
-        if "complete" in status:
-            bar.n = bar.total
+        except KeyError:
+            print(event["status"])
+        except ValueError:
+            print(event["status"])
 
     # Build the image
     for event in client.api.build(
