@@ -6,7 +6,7 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-FROM archlinux/base:latest
+FROM nubots/archlinux:latest
 
 # Create the nubots user, and setup sudo so no password is required
 RUN useradd --no-log-init -m -U nubots
@@ -102,7 +102,9 @@ RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.
 
 # Libva and the iHD driver for hardware compression
 RUN install-from-source https://github.com/intel/libva/releases/download/2.5.0/libva-2.5.0.tar.bz2
-RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
+RUN install-from-source-with-patches https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
+    https://github.com/intel/media-driver/commit/0c3126c1f6e818aaa8e1b2269283aa71535593c7.patch \
+    -- \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \

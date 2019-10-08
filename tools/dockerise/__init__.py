@@ -30,9 +30,19 @@ def build_platform(platform):
     tag = "{}:{}".format(repository, platform)
     dockerdir = os.path.join(b.project_dir, "docker")
 
+    # Pull the latest version from dockerhub
+    client.images.pull(repository="nubots/nubots", tag=platform)
+
     # Build the image
     stream = client.api.build(
-        path=dockerdir, tag=tag, buildargs={"platform": platform}, quiet=False, pull=True, rm=True, decode=True
+        path=dockerdir,
+        tag=tag,
+        buildargs={"platform": platform},
+        quiet=False,
+        pull=True,
+        rm=True,
+        decode=True,
+        cache_from=["nubots/nubots:{}".format(platform)],
     )
 
     # Print the progress as it happens
