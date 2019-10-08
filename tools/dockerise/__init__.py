@@ -6,6 +6,7 @@ import re
 import sys
 import shutil
 import subprocess
+from tqdm import tqdm
 
 # Try to import docker, if we are already in docker this will fail
 try:
@@ -31,9 +32,29 @@ def build_platform(platform):
     dockerdir = os.path.join(b.project_dir, "docker")
 
     # Pull the latest version from dockerhub
+    progress = {}
     for event in client.api.pull(repository="nubots/nubots", tag=platform, stream=True, decode=True):
-        if "status" in event:
-            print(event["status"])
+
+        id = event["id"]
+        status = event["status"]
+
+        # If this is the first time we have seen this id, make a tqdm progress bar for it
+        if id not in progress:
+            progress[id] = {"bar": tqdm(unit="B", unit_scale=True, dynamic_ncols=True, leave=False), "value": 0}
+
+        p = progress[id]
+        bar = p["bar"]
+
+        # Update the status
+        bar.set_description("{} - {}".format(id, status))
+
+        # If we have a value in progressDetail
+        if "progressDetail" in event and "current" in event["progressDetail"] and "total" in event["progressDetail"]:
+            current = event["progressDetail"]["current"]
+            total = event["progressDetail"]["total"]
+
+            bar.total = total
+            bar.n = current
 
     # Build the image
     for event in client.api.build(
