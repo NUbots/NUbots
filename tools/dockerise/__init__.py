@@ -31,10 +31,12 @@ def build_platform(platform):
     dockerdir = os.path.join(b.project_dir, "docker")
 
     # Pull the latest version from dockerhub
-    client.images.pull(repository="nubots/nubots", tag=platform)
+    for event in client.api.pull(repository="nubots/nubots", tag=platform, stream=True, decode=True):
+        if "status" in event:
+            print(event["status"])
 
     # Build the image
-    stream = client.api.build(
+    for event in client.api.build(
         path=dockerdir,
         tag=tag,
         buildargs={"platform": platform},
@@ -42,11 +44,8 @@ def build_platform(platform):
         pull=True,
         rm=True,
         decode=True,
-        cache_from=["nubots/nubots:{}".format(platform)],
-    )
-
-    # Print the progress as it happens
-    for event in stream:
+        cache_from=["nubots:{}".format(platform), "nubots/nubots:{}".format(platform)],
+    ):
         if "stream" in event:
             sys.stdout.write(event["stream"])
 
