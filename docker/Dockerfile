@@ -61,6 +61,14 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-python-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
+# Generate toolchain files for generic
+COPY --chown=nubots:nubots usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
+RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
+
+# Install tools that must be built with generic flags
+RUN sudo PREFIX=/usr \
+    install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protobuf-cpp-3.10.0.tar.gz
+
 ################################################
 #  _____           _      _           _        #
 # |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
@@ -159,12 +167,9 @@ RUN install-from-source \
     --enable-minimal
 
 # Protobuf
-RUN install-package protobuf
-RUN install-autotools-from-source https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-cpp-3.7.0.tar.gz \
+RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protobuf-cpp-3.10.0.tar.gz \
     --with-zlib=/usr/local \
     --with-protoc=/usr/sbin/protoc
-RUN PROTOC=/usr/sbin/protoc install-python-from-source \
-    https://github.com/google/protobuf/releases/download/v3.7.0/protobuf-python-3.7.0.tar.gz --cpp_implementation
 
 # Libjpeg
 RUN install-package yasm
@@ -245,7 +250,8 @@ RUN pip install \
     pylint \
     termcolor \
     stringcase \
-    Pillow
+    Pillow \
+    protobuf==3.10.0
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
