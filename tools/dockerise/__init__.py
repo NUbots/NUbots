@@ -56,6 +56,10 @@ def build_platform(platform):
             bar.total = total
             bar.n = current
 
+        # Complete statuses need to finish off the bar
+        if "complete" in status:
+            bar.n = bar.total
+
     # Build the image
     for event in client.api.build(
         path=dockerdir,
