@@ -143,5 +143,40 @@ Note that you can replace nugus1 with any of the preconfigured robot names, or a
 | -cu | Update config files on the target that are older than the local files |
 | -co | Overwrite all config files on the target |
 | -ci | Ignore all changes to config files (installs no config files) |
+
+# Flashing a new robot
+
+To install Arch Linux (our OS of choice) on to a robot perform the following instructions
+
+1. Download the latest [Arch Linux LiveUSB](https://www.archlinux.org/download/) image and burn it on to a [USB thumb drive](https://wiki.archlinux.org/index.php/USB_flash_installation_media#In_GNU/Linux)
+1. Boot into the LiveUSB environment on the robot and ensure the robot has an active network connection
+1. Download the installation script [https://git.io/JeWaF](https://git.io/JeWaF) and make sure the script is executable
+
+   - The installation script is located in this repo at [doc/ArchInstall/arch_install.sh](doc/ArchInstall/arch_install.sh)
+   - ```sh
+     wget https://git.io/JeWaF -O ./arch_install.sh
+     chmod +x ./arch_install.sh
+     ```
+
+1. Execute the script and follow the instructions
+   - ```sh
+     ./arch_install.sh
+     ```
+
+The installation script will end by downloading a secondary script and providing you with a command that you must run
+
+```sh
+ROBOT_NUMBER=<N> arch-chroot /mnt ./arch-chroot_install.sh
 ```
-Note that you can replace igus1 with any of the preconfigured robot names, or an IP address of a target robot.
+
+Substitute `<N>` with the number of the robot that you are building. This will influence the IP address of the robot as well as the robots' hostname.
+
+Finally, once that script has finished, you must run one more command.
+
+```sh
+/mnt/arch-post_install.sh
+```
+
+This command will end by rebooting the robot. When this happens be sure to remove the USB installation drive from robot so that you may boot into the new system.
+
+Thes final two scripts can be found at [doc/ArchInstall/arch-chroot_install.sh](doc/ArchInstall/arch-chroot_install.sh) and [doc/ArchInstall/arch-post_install.sh](doc/ArchInstall/arch-post_install.sh)
