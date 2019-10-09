@@ -82,7 +82,7 @@ pacman -S --noconfirm --needed \
 ##############
 
 # Enable the ssh server
-systemctl enable sshd.socket
+systemctl enable sshd.service
 
 # Setup the ssh issue file
 mkdir banner
