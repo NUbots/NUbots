@@ -127,8 +127,11 @@ For example, to run the nusighttest binary run:
 
 ## Installing the code on a robot
 To install the code on a robot you should use the install command of the b script.
-For example, to install the code onto the robot igus1 you should run the following.
+For example, to install the code onto the robot nugus1 you should run the following.
+```sh
+./b install nugus1
 ```
 ./b install igus1
+Note that you can replace nugus1 with any of the preconfigured robot names, or an IP address of a target robot.
 ```
 Note that you can replace igus1 with any of the preconfigured robot names, or an IP address of a target robot.
