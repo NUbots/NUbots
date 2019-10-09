@@ -184,6 +184,10 @@ To install Arch Linux (our OS of choice) on to a robot perform the following ins
 
 1. Download the latest [Arch Linux LiveUSB](https://www.archlinux.org/download/) image and burn it on to a [USB thumb drive](https://wiki.archlinux.org/index.php/USB_flash_installation_media#In_GNU/Linux)
 1. Boot into the LiveUSB environment on the robot and ensure the robot has an active network connection
+
+   - Run `ip addr` and look for a `inet` line that has a valid IP address on it. If you can'y see one you don't have a network connection. Alternatively, run `ping google.com` and look for a response time.
+   - If you have no connection and need to set up the WiFi interface, see below.
+
 1. Download the installation script [https://git.io/JeWaF](https://git.io/JeWaF) and make sure the script is executable
 
    - The installation script is located in this repo at [doc/ArchInstall/arch_install.sh](doc/ArchInstall/arch_install.sh)
