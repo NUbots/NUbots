@@ -253,7 +253,8 @@ RUN pip install \
     termcolor \
     stringcase \
     Pillow \
-    protobuf==3.10.0
+    protobuf==3.10.0 \
+    tqdm
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
