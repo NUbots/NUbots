@@ -180,3 +180,18 @@ Finally, once that script has finished, you must run one more command.
 This command will end by rebooting the robot. When this happens be sure to remove the USB installation drive from robot so that you may boot into the new system.
 
 Thes final two scripts can be found at [doc/ArchInstall/arch-chroot_install.sh](doc/ArchInstall/arch-chroot_install.sh) and [doc/ArchInstall/arch-post_install.sh](doc/ArchInstall/arch-post_install.sh)
+
+---
+
+<details>
+  <summary>Undocumented options</summary>
+
+## Shell access
+
+For some reason, if you really, really, _REALLY_ need to access a terminal inside of Docker you can run
+
+```sh
+./b shell
+```
+
+</details>
