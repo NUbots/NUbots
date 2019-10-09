@@ -158,7 +158,9 @@ RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/arm
 COPY --chown=nubots:nubots usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
 
 # Eigen3
-RUN install-from-source http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2
+COPY --chown=nubots:nubots usr/local/package/eigen/deprecated-copy.patch usr/local/package/deprecated-copy.patch
+RUN install-from-source-with-patches http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2 \
+    /usr/local/package/deprecated-copy.patch --
 
 # tcmalloc
 RUN install-from-source \
