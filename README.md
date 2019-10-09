@@ -169,14 +169,14 @@ Note that you can replace nugus1 with any of the preconfigured robot names, or a
 
 `./b install` also accepts the following options
 
-| Option | Description |
-| :---: | :--- |
-| -u | The user to install to on the target. Defaults to the user in the Docker image |
-| -t | Install toolchain to the target |
-| -cn | Only install new config files. This is the default |
-| -cu | Update config files on the target that are older than the local files |
-| -co | Overwrite all config files on the target |
-| -ci | Ignore all changes to config files (installs no config files) |
+| Option | Description                                                                    |
+| :----: | :----------------------------------------------------------------------------- |
+|   -u   | The user to install to on the target. Defaults to the user in the Docker image |
+|   -t   | Install toolchain to the target                                                |
+|  -cn   | Only install new config files. This is the default                             |
+|  -cu   | Update config files on the target that are older than the local files          |
+|  -co   | Overwrite all config files on the target                                       |
+|  -ci   | Ignore all changes to config files (installs no config files)                  |
 
 # Flashing a new robot
 
