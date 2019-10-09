@@ -215,6 +215,41 @@ This command will end by rebooting the robot. When this happens be sure to remov
 
 Thes final two scripts can be found at [doc/ArchInstall/arch-chroot_install.sh](doc/ArchInstall/arch-chroot_install.sh) and [doc/ArchInstall/arch-post_install.sh](doc/ArchInstall/arch-post_install.sh)
 
+## Setting up WiFi manually
+
+To set up the WiFi interface you first need to know the name of the interface. To find this, run
+
+```sh
+ip link
+```
+
+and look for an interface starting with `wl`. On our robots it is usually `wlp58s0`.
+
+The rest of these instructions assume a network using WPA2.
+
+1. Make sure the `wpa_supplicant` configuration directory exists
+
+   - ```sh
+     mkdir /etc/wpa_supplicant
+     ```
+
+1. Setup the network configuration
+
+   - ```sh
+     wpa_passphrase <Network SSID> <Network Passphrase> > /etc/wpa_supplicant/wpa_supplicant-<WiFi Interface>.conf
+     ```
+   - Be sure to replace `<Network SSID>` with the SSID of the wireless network to connect to, `<Network Passphrase>` with the password for the network, and `<WiFi Interface>` with the name of the interface found earlier.
+
+1. Now start all of the necessary services
+
+   - ```sh
+     systemctl start dhcpcd.service
+     systemctl start wpa_supplicant.service
+     systemctl start wpa_supplicant@<Wifi Interface>.service
+     ```
+   - Be sure to replace `<WiFi Interface>` with the name of the interface found earlier.
+   - Wait a handful of seconds and run `ip addr` to check that the WiFi interface has an IP address
+
 ---
 
 <details>
