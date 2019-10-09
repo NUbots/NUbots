@@ -25,7 +25,6 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "message/Geometry.proto";
 import "Matrix.proto";
-import "Neutron.proto";
 
 message Ball {
     enum MeasurementType {
