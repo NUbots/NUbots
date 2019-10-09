@@ -228,4 +228,11 @@ For some reason, if you really, really, _REALLY_ need to access a terminal insid
 ./b shell
 ```
 
+---
+
+**NOTE**
+Any changes you make outside of the `NUbots` or `/home/nubots/build` directories will not persist after exiting the Docker shell.
+
+---
+
 </details>
