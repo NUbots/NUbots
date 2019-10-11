@@ -20,6 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_SKILLS_SEARCHER_H
 #define MODULES_BEHAVIOUR_SKILLS_SEARCHER_H
 
+#include <Eigen/Core>
 #include <armadillo>
 #include <nuclear>
 
@@ -52,7 +53,7 @@ namespace behaviour {
 
         public:
             Searcher()
-                : points(std::vector<T>(1, arma::zeros<arma::vec>(2)))
+                : points(std::vector<T>(1, Eigen::Vector2d::Zero()))
                 , current(0)
                 , refPoint()
                 , new_goal(false)
@@ -91,11 +92,11 @@ namespace behaviour {
             }
 
             static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b) {
-                return arma::norm(a.second) < arma::norm(b.second);
+                return Eigen::VectorXd{(a.second)}.norm() < Eigen::VectorXd{(b.second)}.norm();
             }
 
             static bool comparator(const T& a, const T& b) {
-                return arma::norm(a) < arma::norm(b);
+                return Eigen::VectorXd{(a)}.norm() < Eigen::VectorXd{(b)}.norm();
             }
 
             void setSwitchTime(float dt) {

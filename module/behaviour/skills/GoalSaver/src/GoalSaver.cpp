@@ -68,7 +68,7 @@ namespace behaviour {
             });
 
             on<Trigger<ExecuteDive>>().then([this] {
-                arma::vec direction = diveCommand.direction;
+                Eigen::VectorXd direction = diveCommand.direction;
 
                 int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
                 // assume valid at this point as this is checked on the walkcommand trigger

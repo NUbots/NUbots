@@ -74,17 +74,17 @@ namespace behaviour {
         using message::behaviour::SoccerObjectPriority;
         using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
 
-        inline arma::vec screenAngularFromObjectDirection(const arma::vec& v) {
-            return {std::atan2(v[1], v[0]), std::atan2(v[2], v[0])};
+        inline Eigen::Vector2d screenAngularFromObjectDirection(const Eigen::Vector3d& v) {
+            return {std::atan2(v(1), v(0)), std::atan2(v(2), v(0))};
         }
 
-        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screen_angular) {
-            if (std::fmod(std::fabs(screen_angular[0]), M_PI) == M_PI_2
-                || std::fmod(std::fabs(screen_angular[1]), M_PI) == M_PI_2) {
-                return {0, 0, 0};
+        inline Eigen::Vector3d objectDirectionFromScreenAngular(const Eigen::Vector2d& screen_angular) {
+            if (std::fmod(std::fabs(screen_angular(0)), M_PI) == M_PI_2
+                || std::fmod(std::fabs(screen_angular(1)), M_PI) == M_PI_2) {
+                return {0,0,0};
             }
-            double tanTheta        = std::tan(screen_angular[0]);
-            double tanPhi          = std::tan(screen_angular[1]);
+            double tanTheta        = std::tan(screen_angular(0));
+            double tanPhi          = std::tan(screen_angular(1));
             double x               = 0;
             double y               = 0;
             double z               = 0;
@@ -94,7 +94,7 @@ namespace behaviour {
             y = x * tanTheta;
             z = x * tanPhi;
 
-            return {x, y, z};
+            return {x,y,z};
         }
 
         HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment)
@@ -115,7 +115,7 @@ namespace behaviour {
             , headSearcher()
             , lastPlanUpdate()
             , timeLastObjectSeen()
-            , lastCentroid(arma::fill::zeros) {
+            , lastCentroid(Eigen::Vector2d::Zero()) {
 
             on<Configuration>("HeadBehaviourSoccer.yaml")
                 .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
@@ -259,23 +259,23 @@ namespace behaviour {
 
                           // If objects visible, check current centroid to see if it moved
                           if (!lost) {
-                              arma::vec2 currentCentroid = arma::vec2({0, 0});
+                              Eigen::Vector2d currentCentroid = Eigen::Vector2d({0, 0});
                               if (ballMaxPriority) {
                                   for (auto& ob : ballFixationObjects.balls) {
-                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
-                                                         / float(ballFixationObjects.balls.size());
+                                      currentCentroid += (ob.screen_angular.cast<double>()
+                                                         / double(ballFixationObjects.balls.size()));
                                   }
                               }
                               else {
                                   for (auto& ob : goalFixationObjects.goals) {
-                                      currentCentroid += arma::conv_to<arma::vec>::from(convert(ob.screen_angular))
-                                                         / float(goalFixationObjects.goals.size());
+                                      currentCentroid += ob.screen_angular.cast<double>()
+                                                         / double(goalFixationObjects.goals.size());
                                   }
                               }
-                              arma::vec2 currentCentroid_world =
+                              Eigen::Vector2d currentCentroid_world =
                                   getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
                               // If our objects have moved, we need to replan
-                              if (arma::norm(currentCentroid_world - lastCentroid)
+                              if ((currentCentroid_world - lastCentroid).norm()
                                   >= fractional_angular_update_threshold
                                          * std::fmax(image.lens.fov[0], image.lens.fov[1]) / 2.0) {
                                   objectMoved  = true;
@@ -342,7 +342,7 @@ namespace behaviour {
                           // Emit new result if possible
                           if (headSearcher.newGoal()) {
                               // Emit result
-                              arma::vec2 direction                 = headSearcher.getState();
+                              Eigen::Vector2d direction            = headSearcher.getState();
                               std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                               command->yaw                         = direction[0];
                               command->pitch                       = direction[1];
@@ -428,18 +428,18 @@ namespace behaviour {
                                                  const Sensors& sensors,
                                                  const Rotation3D& headToIMUSpace,
                                                  const Image::Lens& lens) {
-            std::vector<arma::vec2> fixationPoints;
-            std::vector<arma::vec2> fixationSizes;
-            arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).present_position,
+            std::vector<Eigen::Vector2d> fixationPoints;
+            std::vector<Eigen::Vector2d> fixationSizes;
+            Eigen::Vector2d currentPos = {sensors.servo.at(ServoID::HEAD_YAW).present_position,
                                      sensors.servo.at(ServoID::HEAD_PITCH).present_position};
 
             for (uint i = 0; i < fixationObjects.balls.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(arma::vec(
-                    {fixationObjects.balls.at(i).screen_angular[0], fixationObjects.balls.at(i).screen_angular[1]}));
-                fixationSizes.push_back(arma::vec(
-                    {fixationObjects.balls.at(i).angular_size[0], fixationObjects.balls.at(i).angular_size[1]}));
+                fixationPoints.push_back(Eigen::Vector2d(
+                    {fixationObjects.balls.at(i).screen_angular(0), fixationObjects.balls.at(i).screen_angular(1)}));
+                fixationSizes.push_back(Eigen::Vector2d(
+                    {fixationObjects.balls.at(i).angular_size(0), fixationObjects.balls.at(i).angular_size(1)}));
             }
 
             // If there are objects to find
@@ -468,9 +468,9 @@ namespace behaviour {
                                                  const Sensors& sensors,
                                                  const Rotation3D& headToIMUSpace,
                                                  const Image::Lens& lens) {
-            std::vector<arma::vec2> fixationPoints;
-            std::vector<arma::vec2> fixationSizes;
-            arma::vec2 currentPos;
+            std::vector<Eigen::Vector2d> fixationPoints;
+            std::vector<Eigen::Vector2d> fixationSizes;
+            Eigen::Vector2d currentPos;
             for (const auto& servo : sensors.servo) {
                 if (servo.id == ServoID::HEAD_YAW) {
                     currentPos[0] = servo.present_position;
@@ -483,10 +483,10 @@ namespace behaviour {
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(arma::vec(
-                    {fixationObjects.goals.at(i).screen_angular[0], fixationObjects.goals.at(i).screen_angular[1]}));
-                fixationSizes.push_back(arma::vec(
-                    {fixationObjects.goals.at(i).angular_size[0], fixationObjects.goals.at(i).angular_size[1]}));
+                fixationPoints.push_back(Eigen::Vector2d(
+                    {fixationObjects.goals.at(i).screen_angular(0), fixationObjects.goals.at(i).screen_angular(1)}));
+                fixationSizes.push_back(Eigen::Vector2d(
+                    {fixationObjects.goals.at(i).angular_size(0), fixationObjects.goals.at(i).angular_size(1)}));
             }
 
             // If there are objects to find
@@ -509,36 +509,36 @@ namespace behaviour {
             headSearcher.replaceSearchPoints(fixationPoints, currentPos);
         }
 
-        arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const KinematicsModel& kinematicsModel,
-                                                             const arma::vec2& screenAngles,
+        Eigen::Vector2d HeadBehaviourSoccer::getIMUSpaceDirection(const KinematicsModel& kinematicsModel,
+                                                             const Eigen::Vector2d& screenAngles,
                                                              Rotation3D headToIMUSpace) {
 
-            // arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
-            arma::vec3 lookVectorFromHead = sphericalToCartesian(
-                {1, screenAngles[0], screenAngles[1]});  // This is an approximation relying on the robots small FOV
+            // Eigen::Vector3d lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
+            Eigen::Vector3d lookVectorFromHead = convert(sphericalToCartesian(
+                {1, screenAngles(0), screenAngles(1)}));  // This is an approximation relying on the robots small FOV
             // Remove pitch from matrix if we are adjusting search points
 
             // Rotate target angles to World space
-            arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
+            Eigen::Vector3d lookVector = convert(headToIMUSpace) * lookVectorFromHead;
             // Compute inverse kinematics for head direction angles
-            std::vector<std::pair<ServoID, float>> goalAngles = calculateCameraLookJoints(kinematicsModel, lookVector);
+            std::vector<std::pair<ServoID, float>> goalAngles = calculateCameraLookJoints(kinematicsModel, convert(lookVector));
 
-            arma::vec2 result;
+            Eigen::Vector2d result;
             for (auto& angle : goalAngles) {
                 if (angle.first == ServoID::HEAD_PITCH) {
-                    result[1] = angle.second;
+                    result(1) = angle.second;
                 }
                 else if (angle.first == ServoID::HEAD_YAW) {
-                    result[0] = angle.second;
+                    result(0) = angle.second;
                 }
             }
             return result;
         }
 
         /*! Get search points which keep everything in view.
-        Returns vector of arma::vec2
+        Returns vector of Eigen::Vector2d
         */
-        std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
+        std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
                                                                      Balls fixationObjects,
                                                                      SearchType sType,
                                                                      const Sensors&,
@@ -548,32 +548,32 @@ namespace behaviour {
             if (fixationObjects.balls.size() == 0) {
                 // log("getting search points 2");
                 // Lost searches are normalised in terms of the FOV
-                std::vector<arma::vec2> scaledResults;
+                std::vector<Eigen::Vector2d> scaledResults;
                 // scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint(kinematicsModel,
                 // lastLocBall.position,sensors));
                 for (auto& p : searches[sType]) {
                     // log("adding search point", p.t());
                     // old angles thing
                     // Interpolate between max and min allowed angles with -1 = min and 1 = max
-                    // auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                    // auto angles = Eigen::Vector2d({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                     //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) /
                     //                                    2});
 
                     // New absolute referencing
-                    arma::vec2 angles = p * M_PI / 180;
+                    Eigen::Vector2d angles = convert(p) * M_PI / 180;
                     // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
-                    // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
+                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV
 
 
                     // TODO: Fix trying to look underneath and behind self!!
 
 
-                    // arma::vec3 adjustedLookVector = lookVectorFromHead;
+                    // Eigen::Vector3d adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
+                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
                     // lookVectorFromHead;
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
+                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
                     // lookVectorFromHead;
                     // std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
                     // adjustedLookVector);
@@ -596,28 +596,28 @@ namespace behaviour {
 
             Quad<Eigen::Vector2d> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
-            std::vector<arma::vec2> viewPoints;
+            std::vector<Eigen::Vector2d> viewPoints;
             if (lens.fov.norm() == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
             float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
-            arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = convert(boundingBox.getBottomLeft()) - padding + convert(lens.fov) / 2.0;
+            Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
+            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
-            arma::vec2 br = convert(boundingBox.getTopLeft()) - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
+            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = convert(boundingBox.getTopRight()) - padding - convert(lens.fov) / 2.0;
+            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 4
             padding = {-view_padding_radians, view_padding_radians};
-            arma::vec2 tl =
-                convert(boundingBox.getBottomRight()) - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
+            Eigen::Vector2d tl =
+                boundingBox.getBottomRight() - padding + Eigen::Vector2d({-lens.fov[0], lens.fov[1]}) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
-            std::vector<arma::vec2> searchPoints;
+            std::vector<Eigen::Vector2d> searchPoints;
             for (auto& p : searches[SearchType::FIND_ADDITIONAL_OBJECTS]) {
                 float x = p[0];
                 float y = p[1];
@@ -629,7 +629,7 @@ namespace behaviour {
             return searchPoints;
         }
 
-        std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
+        std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
                                                                      Goals fixationObjects,
                                                                      SearchType sType,
                                                                      const Sensors&,
@@ -639,32 +639,32 @@ namespace behaviour {
             if (fixationObjects.goals.size() == 0) {
                 // log("getting search points 2");
                 // Lost searches are normalised in terms of the FOV
-                std::vector<arma::vec2> scaledResults;
+                std::vector<Eigen::Vector2d> scaledResults;
                 // scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint(kinematicsModel,
                 // lastLocBall.position,sensors));
                 for (auto& p : searches[sType]) {
                     // log("adding search point", p.t());
                     // old angles thing
                     // Interpolate between max and min allowed angles with -1 = min and 1 = max
-                    // auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                    // auto angles = Eigen::Vector2d({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                     //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) /
                     //                                    2});
 
                     // New absolute referencing
-                    arma::vec2 angles = p * M_PI / 180;
+                    Eigen::Vector2d angles = convert(p) * M_PI / 180;
                     // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
-                    // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
+                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV
 
 
                     // TODO: Fix trying to look underneath and behind self!!
 
 
-                    // arma::vec3 adjustedLookVector = lookVectorFromHead;
+                    // Eigen::Vector3d adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
+                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
                     // lookVectorFromHead;
-                    // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
+                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
                     // lookVectorFromHead;
                     // std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
                     // adjustedLookVector);
@@ -687,28 +687,28 @@ namespace behaviour {
 
             Quad<Eigen::Vector2d> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
-            std::vector<arma::vec2> viewPoints;
+            std::vector<Eigen::Vector2d> viewPoints;
             if (lens.fov.norm() == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
-            float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
+            double view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
-            arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = convert(boundingBox.getBottomLeft()) - padding + convert(lens.fov) / 2.0;
+            Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
+            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
-            arma::vec2 br = convert(boundingBox.getTopLeft()) - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
+            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = convert(boundingBox.getTopRight()) - padding - convert(lens.fov) / 2.0;
+            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 4
             padding = {-view_padding_radians, view_padding_radians};
-            arma::vec2 tl =
-                convert(boundingBox.getBottomRight()) - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
+            Eigen::Vector2d tl =
+                boundingBox.getBottomRight() - padding + Eigen::Vector2d({-lens.fov[0], lens.fov[1]}) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
-            std::vector<arma::vec2> searchPoints;
+            std::vector<Eigen::Vector2d> searchPoints;
             for (auto& p : searches[SearchType::FIND_ADDITIONAL_OBJECTS]) {
                 float x = p[0];
                 float y = p[1];

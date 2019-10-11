@@ -199,7 +199,7 @@ namespace behaviour {
                             // RoboCup HACK - Just aim for the goal state:
                             Transform2D targetState;
                             if (currentPath.command.type == MotionCommand::Type::BallApproach) {
-                                arma::vec2 worldBall = currentState.localToWorld({ball.position, 0}).xy();
+                                Eigen::Vector2d worldBall = currentState.localToWorld({ball.position, 0}).xy();
                                 Transform2D currentBallSpace =
                                     Transform2D::lookAt(worldBall, currentPath.command.kickTarget);
                                 targetState = currentBallSpace;
@@ -222,8 +222,8 @@ namespace behaviour {
 
                             // emit(utility::nusight::drawArrow("WPF_Closest_Arrow",
                             // currentState.localToWorld(walkCommand->command), {1,1,1}, 1));
-                            arma::vec2 arrowTip = currentState.localToWorld(walkCommand->command).xy();
-                            arma::vec2 dirPoint =
+                            Eigen::Vector2d arrowTip = currentState.localToWorld(walkCommand->command).xy();
+                            Eigen::Vector2d dirPoint =
                                 currentState
                                     .localToWorld({walkCommand->command.rotation() * walkCommand->command.xy(), 0})
                                     .xy();
@@ -277,13 +277,13 @@ namespace behaviour {
 
         bool WalkPathFollower::isVisited(const Transform2D& currentState, const Transform2D& visitState) {
             // TODO: Abstract away the distance metric used between states.
-            double dist = arma::norm(visitState.xy() - currentState.xy());
+            double dist = Eigen::Vector2d{(visitState.xy() - currentState.xy())}.norm();
             return dist < cfg_.waypoint_visit_distance;
         }
 
         bool WalkPathFollower::isGoalClose(const Transform2D& currentState, const Transform2D& visitState) {
             // TODO: Abstract away the distance metric used between states.
-            double dist = arma::norm(visitState.xy() - currentState.xy());
+            double dist = Eigen::Vector2d{(visitState.xy() - currentState.xy())}.norm();
             return dist < cfg_.goal_close_distance;
         }
 
@@ -293,7 +293,7 @@ namespace behaviour {
             double closestDist = std::numeric_limits<double>::infinity();
             for (int i = 0; i < numStates; i++) {
                 // TODO: Abstract away the distance metric used between states.
-                double dist = arma::norm(walkPath.states[i].xy() - currentState.xy());
+                double dist = Eigen::Vector2d{(walkPath.states[i].xy() - currentState.xy())}.norm();
                 if (dist < closestDist) {
                     closestDist  = dist;
                     closestIndex = i;
@@ -325,7 +325,7 @@ namespace behaviour {
         }
 
         WalkCommand WalkPathFollower::walkBetweenFar(const Transform2D& currentState, const Transform2D& targetState) {
-            auto diff      = arma::vec2(targetState.xy() - currentState.xy());
+            auto diff      = Eigen::Vector2d{(targetState.xy() - currentState.xy())};
             auto dir       = vectorToBearing(diff);
             double wcAngle = utility::math::angle::signedDifference(dir, currentState.angle());
             // TODO: Consider the heading of targetState in planning.
@@ -339,13 +339,13 @@ namespace behaviour {
             int angleSign           = (localTarget.angle() < 0) ? -1 : 1;      // angle must be normalised.
 
             double rotationSpeed      = angleSign * cfg_.walk_about_rotational_speed;
-            arma::vec2 translationVec = arma::normalise(localTarget.xy());
+            Eigen::Vector2d translationVec = Eigen::Vector2d{(localTarget.xy())}.norm();
 
             double translationAngle = utility::math::angle::vectorToBearing(translationVec);
 
             double translationSpeed = (1 - std::abs(translationAngle) * (0.25 / M_PI));
 
-            arma::vec2 translationVelocity = translationVec * translationSpeed;
+            Eigen::Vector2d translationVelocity = translationVec * translationSpeed;
 
             Transform2D velocity = {translationVelocity, rotationSpeed};
 

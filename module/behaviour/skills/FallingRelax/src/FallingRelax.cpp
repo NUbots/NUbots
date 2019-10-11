@@ -81,7 +81,7 @@ namespace behaviour {
                     double magnitude = 0;
 
                     for (const auto& sensor : sensors) {
-                        magnitude += arma::norm(convert(sensor->accelerometer), 2);
+                        magnitude += (Eigen::Vector2d{(convert(sensor->accelerometer), 2)}).norm();
                     }
 
                     magnitude /= sensors.size();
@@ -96,7 +96,7 @@ namespace behaviour {
                     double magnitude = 0;
 
                     for (const auto& sensor : sensors) {
-                        magnitude += arma::norm(convert(sensor->accelerometer), 2);
+                        magnitude += (Eigen::Vector2d{(convert(sensor->accelerometer), 2)}).norm();
                     }
 
                     magnitude /= sensors.size();

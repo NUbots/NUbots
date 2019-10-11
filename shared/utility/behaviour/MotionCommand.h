@@ -55,10 +55,10 @@ namespace behaviour {
         return cmd;
     }
 
-    inline MotionCommand BallApproach(arma::vec2 kickTarget_) {
+    inline MotionCommand BallApproach(const Eigen::Vector2d kickTarget_) {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::BallApproach;
-        cmd.kickTarget = convert(kickTarget_);
+        cmd.kickTarget = kickTarget_;
         return cmd;
     }
 

@@ -20,6 +20,7 @@
 #include "KeyboardWalk.h"
 
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <ncurses.h>
 #include <csignal>
 #include <cstdio>
@@ -42,11 +43,7 @@ namespace behaviour {
         using LimbID = utility::input::LimbID;
 
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)) {
-
-            // Initialising velocity
-            velocity(0) = 0;
-            velocity(1) = 0;
+            : Reactor(std::move(environment)), velocity(Eigen::Vector2d::Zero()) {
 
             // Start curses mode
             initscr();

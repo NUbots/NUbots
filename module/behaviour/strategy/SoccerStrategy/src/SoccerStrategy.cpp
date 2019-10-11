@@ -487,7 +487,7 @@ namespace behaviour {
                                                      cfg_.goalie_max_translation_speed);
 
                 Eigen::Affine2d cmd;
-                cmd.linear()      = Eigen::Rotation2Dd(rotationSpeed);
+                cmd.linear()      = Eigen::Rotation2Dd(rotationSpeed).matrix();
                 cmd.translation() = Eigen::Vector2d::Zero();
                 motionCommand     = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
                 if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
