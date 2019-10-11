@@ -37,6 +37,7 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 
 namespace module {
@@ -70,6 +71,8 @@ namespace behaviour {
         using utility::motion::kinematics::calculateCameraLookJoints;
 
         using ServoID = utility::input::ServoID;
+
+        using utility::support::Expression;
 
         using message::behaviour::SoccerObjectPriority;
         using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
@@ -145,9 +148,9 @@ namespace behaviour {
                     // Load searches:
                     for (auto& search : config["searches"].config) {
                         SearchType s(search["search_type"].as<std::string>());
-                        searches[s] = std::vector<arma::vec2>();
+                        searches[s] = std::vector<Eigen::Vector2d>();
                         for (auto& p : search["points"]) {
-                            searches[s].push_back(p.as<arma::vec2>());
+                            searches[s].push_back(p.as<Expression>());
                         }
                     }
                 });
@@ -560,7 +563,7 @@ namespace behaviour {
                     //                                    2});
 
                     // New absolute referencing
-                    Eigen::Vector2d angles = convert(p) * M_PI / 180;
+                    Eigen::Vector2d angles = p * M_PI / 180;
                     // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
                     // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV
@@ -651,7 +654,7 @@ namespace behaviour {
                     //                                    2});
 
                     // New absolute referencing
-                    Eigen::Vector2d angles = convert(p) * M_PI / 180;
+                    Eigen::Vector2d angles = p * M_PI / 180;
                     // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
                     // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
                     // approximation relying on the robots small FOV

@@ -131,7 +131,7 @@ namespace behaviour {
             bool locBallReceived = false;
             message::localisation::Ball lastLocBall;
 
-            std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<arma::vec2>> searches;
+            std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<Eigen::Vector2d>> searches;
 
             // State variables
             Searcher<Eigen::Vector2d> headSearcher;
