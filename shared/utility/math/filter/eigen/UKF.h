@@ -123,6 +123,16 @@ namespace math {
                 return mean_centred * weights.template cast<T1>().asDiagonal() * mean_centred.transpose();
             }
 
+            template <typename T1, typename T2, int S>
+            static Eigen::Matrix<T1, S, S> covariance_from_sigmas(
+                const Eigen::Matrix<T1, S, NUM_SIGMA_POINTS>& sigma_points,
+                const T1& mean,
+                const Eigen::Matrix<T2, NUM_SIGMA_POINTS, 1>& weights) {
+
+                Eigen::Matrix<T1, S, NUM_SIGMA_POINTS> mean_centred = (sigma_points.array() - mean).matrix();
+                return mean_centred * weights.template cast<T1>().asDiagonal() * mean_centred.transpose();
+            }
+
         public:
             UKF(StateVec initial_mean       = StateVec::Zero(),
                 StateMat initial_covariance = StateMat::Identity() * 0.1,
@@ -261,6 +271,64 @@ namespace math {
                             0.5
                             * (std::log(innovation_variance.determinant()) + std::abs(likelihood_exponent)
                                + innovation.size() * std::log(2 * M_PI));
+
+                        return -loglikelihood;
+                    });
+            }
+
+
+            /**
+             * Perform a measurement update using the given measurement and covariance
+             */
+            template <typename MeasurementScalar, typename... Args>
+            utility::support::LazyEvaluation<MeasurementScalar> measure(const MeasurementScalar& measurement,
+                                                                        const MeasurementScalar& measurement_variance,
+                                                                        const Args&... params) {
+
+                // Allocate room for our predictions
+                Eigen::Matrix<MeasurementScalar, 1, NUM_SIGMA_POINTS> predictions;
+
+                // First step is to calculate the predicted measurement for each sigma point.
+                for (unsigned int i = 0; i < NUM_SIGMA_POINTS; ++i) {
+                    predictions(i) = model.predict(sigma_points.col(i), params...);
+                }
+
+                // Now calculate the mean of these measurement sigmas.
+                MeasurementScalar predicted_mean = mean_from_sigmas(predictions, mean_weights).x();
+                Eigen::Matrix<MeasurementScalar, 1, NUM_SIGMA_POINTS> centred =
+                    (predictions.array() - predicted_mean).matrix();
+
+                // Create a state update in our measurement units
+                Eigen::Matrix<MeasurementScalar, NUM_SIGMA_POINTS, NUM_SIGMA_POINTS> update =
+                    covariance_update.template cast<MeasurementScalar>();
+                update = update.transpose() * centred.transpose()
+                         * (MeasurementScalar(1) / (measurement_variance + centred * update * centred.transpose()))
+                         * centred * update;
+                covariance_update -= update.template cast<Scalar>();
+
+                MeasurementScalar innovation = model.difference(measurement, predicted_mean);
+                d += (centred.transpose() * (MeasurementScalar(1) / measurement_variance) * innovation)
+                         .template cast<Scalar>();
+
+                // Update our mean and covariance
+                mean       = sigma_mean + centred_sigma_points * covariance_update * d;
+                mean       = model.limit(mean);
+                covariance = centred_sigma_points * covariance_update * centred_sigma_points.transpose();
+
+                // Calculate and return the likelihood of the prior mean and covariance given the new measurement
+                // (i.e. the prior probability density of the measurement):
+                return utility::support::LazyEvaluation<MeasurementScalar>(
+                    [predictions, predicted_mean, measurement_variance, innovation, cw = this->covariance_weights] {
+                        MeasurementScalar predicted_covariance =
+                            covariance_from_sigmas(predictions, predicted_mean, cw).x();
+
+                        MeasurementScalar innovation_variance = predicted_covariance + measurement_variance;
+
+                        MeasurementScalar likelihood_exponent =
+                            ((innovation * (MeasurementScalar(1) / innovation_variance)) * innovation);
+
+                        MeasurementScalar loglikelihood =
+                            0.5 * (innovation_variance + std::abs(likelihood_exponent) + std::log(2 * M_PI));
 
                         return -loglikelihood;
                     });
