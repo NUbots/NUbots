@@ -4,7 +4,6 @@
 #include <fmt/ostream.h>
 
 #include "extension/Configuration.h"
-
 #include "utility/support/yaml_expression.h"
 
 namespace module {
@@ -22,15 +21,13 @@ namespace tools {
         on<Configuration>("UKFTest.yaml").then([this](const Configuration& config) {
             model_filter.model.process_noise = config["process_noise"].as<Expression>();
             measurement_noise                = config["measurement_noise"].as<double>();
+            deltaT                           = config["deltaT"].as<double>();
 
             for (const auto& data : config["true_state"].config) {
                 true_state.push_back(data.as<Expression>());
             }
             for (const auto& data : config["measurements"].config) {
                 measurements.push_back(data.as<Expression>());
-            }
-            for (const auto& data : config["true_prediction"].config) {
-                true_prediction.push_back(data.as<Expression>());
             }
 
             model_filter.set_state(config["initial_state"].as<Expression>(),
@@ -45,9 +42,7 @@ namespace tools {
                     model_filter.time(deltaT);
                     innovations.push_back(measurements[time_count] - model_filter.get().x());
                     actual_state.push_back(std::make_pair(model_filter.get(), model_filter.getCovariance()));
-                    model_filter.measure(
-                        Eigen::Vector2d(measurements[time_count], 0.0),
-                        Eigen::Matrix2d(Eigen::Vector2d(measurement_noise, measurement_noise).asDiagonal()));
+                    model_filter.measure(measurements[time_count], measurement_noise);
                     time_count++;
 
                     if (time_count == measurements.size()) {

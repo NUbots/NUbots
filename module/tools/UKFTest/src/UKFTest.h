@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "VanDerPolModel.h"
-
 #include "utility/math/filter/eigen/UKF.h"
 
 namespace module {
@@ -22,7 +21,7 @@ namespace tools {
         explicit UKFTest(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        static constexpr double deltaT = 0.05;
+        double deltaT;
 
         NUClear::threading::ReactionHandle filter_handle;
 
@@ -32,7 +31,6 @@ namespace tools {
 
         std::vector<Eigen::Vector2d> true_state;
         std::vector<double> measurements;
-        std::vector<double> true_prediction;
         std::vector<double> innovations;
         std::vector<std::pair<utility::math::filter::UKF<double, VanDerPolModel>::StateVec,
                               utility::math::filter::UKF<double, VanDerPolModel>::StateMat>>

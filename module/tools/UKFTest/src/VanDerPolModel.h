@@ -36,22 +36,19 @@ namespace tools {
         // The size of our state
         static constexpr size_t size = 2;
 
-        using State      = Eigen::Matrix<Scalar, size, 1>;
-        using Covariance = Eigen::Matrix<Scalar, size, size>;
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
 
         // Our static process noise matrix
-        State process_noise;
+        StateVec process_noise;
 
-        State time(const State& state, Scalar deltaT) {
-            State new_state;
-            new_state << state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1];
-            new_state = state + new_state * deltaT;
-
-            return new_state;
+        StateVec time(const StateVec& state, Scalar deltaT) {
+            StateVec new_state(state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]);
+            return state + new_state * deltaT;
         }
 
-        State predict(const State& state) {
-            return State(state[X1], 0.0);
+        Scalar predict(const StateVec& state) {
+            return state[X1];
         }
 
         template <typename T, typename U>
@@ -59,12 +56,12 @@ namespace tools {
             return a - b;
         }
 
-        State limit(const State& state) {
-            State newState = state;
+        StateVec limit(const StateVec& state) {
+            StateVec newState = state;
             return newState;
         }
 
-        Covariance noise(const Scalar& /*dt*/) {
+        StateMat noise(const Scalar& /*dt*/) {
             // Return our process noise matrix
             return process_noise.asDiagonal();
         }
