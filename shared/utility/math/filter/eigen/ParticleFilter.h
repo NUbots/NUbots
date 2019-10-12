@@ -37,14 +37,15 @@ namespace math {
             // The model
             Model model;
 
+            using StateVec = Eigen::Matrix<Scalar, Model::size, 1>;
+            using StateMat = Eigen::Matrix<Scalar, Model::size, Model::size>;
+
         private:
             // Our random number generator
             std::mt19937 rng;
             std::normal_distribution<Scalar> norm;
 
             // Dimension types for vectors and square matricies
-            using StateVec     = Eigen::Matrix<Scalar, Model::size, 1>;
-            using StateMat     = Eigen::Matrix<Scalar, Model::size, Model::size>;
             using ParticleList = Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic>;
 
             ParticleList sample_particles(const StateVec& mean, const StateMat& covariance, const int& n_particles) {
