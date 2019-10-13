@@ -38,11 +38,12 @@ namespace math {
             // The model
             Model model;
 
+            using StateVec = arma::vec::fixed<Model::size>;
+            using StateMat = arma::mat::fixed<Model::size, Model::size>;
+
         private:
             // Dimension types for vectors and square matricies
-            using StateVec     = arma::vec::fixed<Model::size>;
             using ParticleList = arma::mat;
-            using StateMat     = arma::mat::fixed<Model::size, Model::size>;
 
             /* particles.n_cols = number of particles
                particle.col(i) = particle i
