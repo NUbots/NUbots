@@ -50,8 +50,8 @@ namespace tools {
             return state + new_state * deltaT;
         }
 
-        StateMat noise(const Scalar& /* deltaT */) {
-            return process_noise.asDiagonal();
+        StateMat noise(const Scalar& deltaT) {
+            return process_noise.asDiagonal() * deltaT;
         }
 
         template <typename T, typename U>
