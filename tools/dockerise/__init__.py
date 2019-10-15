@@ -28,6 +28,7 @@ user = "nubots"
 directory = "NUbots"
 
 
+# Based on the implementation at https://gist.github.com/jathanism/4489235
 class WrapPty:
     def __init__(self):
         self.fd = None
