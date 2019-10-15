@@ -151,8 +151,8 @@ namespace math {
             }
 
             StateMat getCovariance() const {
-                // return arma::cov(particles.t());
-                return StateMat();
+                auto mean_centered = particles.transpose().rowwise() - particles.transpose().colwise().mean();
+                return (mean_centered.transpose() * mean_centered) / (particles.transpose().rows() - 1);
             }
 
             ParticleList getParticles() const {
