@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-from dockerise import run_on_docker
+from dockerise import run_on_docker, WrapPty
 import b
 import os
-import pty
-import subprocess
+
+# import pty
+# import subprocess
 
 
 @run_on_docker
@@ -27,15 +28,12 @@ def register(command):
 def run(interactive, args, **kwargs):
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
+    pty = WrapPty()
+
     # If configure then run ccmake else just run cmake
     if interactive:
         exit(
             pty.spawn(["ccmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir])
-            << 8
         )
     else:
-        exit(
-            subprocess.call(
-                ["cmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir]
-            )
-        )
+        exit(pty.spawn(["cmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir]))
