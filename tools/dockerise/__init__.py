@@ -220,10 +220,6 @@ def run_on_docker(func):
                             consistency="delegated",
                         ),
                     ],
-                    environment={
-                        "COLUMNS": subprocess.check_output(["tput", "cols"])[:-1].decode("utf-8"),
-                        "LINES": subprocess.check_output(["tput", "lines"])[:-1].decode("utf-8"),
-                    },
                 )
 
                 # Attach a pty to this terminal
