@@ -146,8 +146,8 @@ namespace math {
                 // Resample
                 std::random_device rd;
                 std::mt19937 gen(rd());
-                std::discrete_distribution<> multinomial(weights.begin(),
-                                                         weights.end());  // class incorrectly named by cpp devs
+                std::discrete_distribution<> multinomial(logits.begin(),
+                                                         logits.end());  // class incorrectly named by cpp devs
                 for (unsigned int i = 0; i < particles.n_cols; i++) {
                     particles.col(i) = model.limitState(candidateParticles.col(multinomial(gen)));
                 }
