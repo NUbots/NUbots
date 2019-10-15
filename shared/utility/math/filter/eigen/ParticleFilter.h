@@ -115,14 +115,24 @@ namespace math {
                                       const Eigen::Matrix<MeasurementScalar, S, S, MArgs...>& measurement_variance,
                                       const Args&... params) {
 
+                ParticleList candidate_particles =
+                    ParticleList::Zero(Model::size, particles.cols() + model.getRogueCount());
+                candidate_particles.leftCols(particles.cols()) = particles;
+
+                // Resample some rogues
+                for (int i = 0; i < model.getRogueCount(); ++i) {
+                    candidate_particles.col(i + particles.cols()) =
+                        particles.col(i) + model.getRogueRange().cwiseProduct(StateVec::Random() * 0.5);
+                }
+
                 Eigen::Matrix<MeasurementScalar, S, Eigen::Dynamic> differences(S, particles.cols());
-                for (int i = 0; i < particles.cols(); ++i) {
+                for (int i = 0; i < candidate_particles.cols(); ++i) {
                     differences.col(i) = model.difference(model.predict(particles.col(i), params...), measurement);
                 }
 
                 // Calculate log probabilities
                 Eigen::Matrix<MeasurementScalar, Eigen::Dynamic, 1> logits =
-                    -(differences.array() * (measurement_variance.inverse() * differences).array()).colwise().sum();
+                    -differences.cwiseProduct(measurement_variance.inverse() * differences).colwise().sum();
 
                 // Subtract the max log prob for numerical stability and then exponentiate
                 logits = Eigen::exp(logits.array() - logits.maxCoeff());
@@ -130,7 +140,7 @@ namespace math {
                 // Resample
                 std::discrete_distribution<> multinomial(logits.data(), logits.data() + logits.size());
                 for (unsigned int i = 0; i < particles.cols(); i++) {
-                    particles.col(i) = particles.col(multinomial(rng));
+                    particles.col(i) = model.limit(candidate_particles.col(multinomial(rng)));
                 }
                 return logits.mean();
             }
