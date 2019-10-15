@@ -39,10 +39,10 @@ namespace tools {
         filter_handle =
             on<Every<20, Per<std::chrono::seconds>>>()
                 .then([this] {
+                    model_filter.measure(Eigen::Matrix<double, 1, 1>(measurements[time_count]), measurement_noise);
                     model_filter.time(deltaT);
                     innovations.push_back(measurements[time_count] - model_filter.get().x());
                     actual_state.push_back(std::make_pair(model_filter.get(), model_filter.getCovariance()));
-                    model_filter.measure(Eigen::Matrix<double, 1, 1>(measurements[time_count]), measurement_noise);
                     time_count++;
 
                     if (time_count == measurements.size()) {

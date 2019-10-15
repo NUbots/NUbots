@@ -40,11 +40,11 @@ namespace tools {
         filter_handle =
             on<Every<20, Per<std::chrono::seconds>>>()
                 .then([this] {
+                    model_filter.measurementUpdate(arma::vec::fixed<1>({measurements[time_count]}),
+                                                   arma::mat({measurement_noise}));
                     model_filter.timeUpdate(deltaT);
                     innovations.push_back(measurements[time_count] - model_filter.get()(1));
                     actual_state.push_back(std::make_pair(model_filter.get(), model_filter.getCovariance()));
-                    model_filter.measurementUpdate(arma::vec::fixed<1>({measurements[time_count]}),
-                                                   arma::mat({measurement_noise}));
                     time_count++;
 
                     if (time_count == measurements.size()) {
