@@ -135,10 +135,13 @@ namespace math {
                         model.predictedObservation(candidateParticles.col(i), measurementArgs...);
                     observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
                 }
-                arma::vec weights =
-                    arma::exp(
-                        -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0))
-                        .t();
+
+                // Calculate log probabilities
+                arma::vec logits =
+                    (-arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0)).t();
+
+                // Subtract the max log prob for numerical stability and then exponentiate
+                logits = arma::exp(logits - logits.max());
 
                 // Resample
                 std::random_device rd;
@@ -148,7 +151,7 @@ namespace math {
                 for (unsigned int i = 0; i < particles.n_cols; i++) {
                     particles.col(i) = model.limitState(candidateParticles.col(multinomial(gen)));
                 }
-                return arma::mean(weights);
+                return arma::mean(logits);
             }
 
 
