@@ -31,7 +31,7 @@ namespace tools {
 
             model_filter.set_state(config["initial_state"].as<Expression>(),
                                    config["initial_covariance"].as<Expression>(),
-                                   config["num_particles"].as<double>());
+                                   config["num_particles"].as<int>());
         });
 
         on<Startup>().then([this] { filter_handle.enable(); });
