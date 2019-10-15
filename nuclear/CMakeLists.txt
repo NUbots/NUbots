@@ -32,16 +32,17 @@ set(NUCLEAR_TEST_LIBRARIES "" CACHE STRING "Additional libraries used when linki
 # Our variables that are used to locate the shared, module, and message folders They are given relative to the current
 # project directory
 set(NUCLEAR_MODULE_DIR "module" CACHE PATH "The path to the module directory for NUClear")
-set(NUCLEAR_MESSAGE_DIR "shared/message" CACHE PATH "The path to the message directory for NUClear")
-set(NUCLEAR_UTILITY_DIR "shared/utility" CACHE PATH "The path to the utility dir for NUClear")
-set(NUCLEAR_EXTENSION_DIR "shared/extension" CACHE PATH "The path to the extension dir for NUClear")
+set(NUCLEAR_SHARED_DIR "shared" CACHE PATH "The path to the module directory for NUClear")
+set(NUCLEAR_MESSAGE_DIR "${NUCLEAR_SHARED_DIR}/message" CACHE PATH "The path to the message directory for NUClear")
+set(NUCLEAR_UTILITY_DIR "${NUCLEAR_SHARED_DIR}/utility" CACHE PATH "The path to the utility dir for NUClear")
+set(NUCLEAR_EXTENSION_DIR "${NUCLEAR_SHARED_DIR}/extension" CACHE PATH "The path to the extension dir for NUClear")
 
 # You generally shouldn't have to change these
 mark_as_advanced(NUCLEAR_ROLE_BANNER_FILE NUCLEAR_MODULE_DIR NUCLEAR_MESSAGE_DIR NUCLEAR_UTILITY_DIR
                  NUCLEAR_EXTENSION_DIR)
 
 # Make our shared directory to output files too
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/shared)
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/${NUCLEAR_SHARED_DIR})
 
 # Settings for the compiler to make NUClear work
 include(NUClearCompilerSettings)
