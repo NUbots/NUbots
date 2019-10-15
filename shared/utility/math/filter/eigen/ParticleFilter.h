@@ -50,6 +50,12 @@ namespace math {
 
             ParticleList sample_particles(const StateVec& mean, const StateMat& covariance, const int& n_particles) {
                 // Sample single gaussian (represented by a gaussian mixture model of size 1)
+
+                // Implementation based on the work presented in
+                // Conrad Sanderson and Ryan Curtin.
+                // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and Expectation
+                // Maximisation. International Conference on Signal Processing and Communication Systems, 2017.
+
                 ParticleList new_particles =
                     ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
 
@@ -64,7 +70,13 @@ namespace math {
 
             ParticleList sample_particles(const StateVec& mean, const StateVec& covariance, const int& n_particles) {
                 // Sample single gaussian (represented by a gaussian mixture model of size 1)
-                ParticleList new_particles =
+
+                // Implementation based on the work presented in
+                // Conrad Sanderson and Ryan Curtin.
+                // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and Expectation
+                // Maximisation. International Conference on Signal Processing and Communication Systems, 2017.
+
+                ParticleList new_particles = ParticleList new_particles =
                     ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
 
                 const StateVec sqrt_covariance = covariance.cwiseSqrt();
