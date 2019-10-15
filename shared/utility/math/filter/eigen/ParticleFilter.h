@@ -49,32 +49,31 @@ namespace math {
             using ParticleList = Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic>;
 
             ParticleList sample_particles(const StateVec& mean, const StateMat& covariance, const int& n_particles) {
+                // Sample single gaussian (represented by a gaussian mixture model of size 1)
+                ParticleList new_particles =
+                    ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
 
-                // Try to solve with cholesky and if that fails, solve with SelfAdjointEigenSolver
-                StateMat transform;
-                Eigen::LLT<StateMat> cholesky(covariance);
-                if (cholesky.info() == Eigen::Success) {  //
-                    transform = cholesky.matrixL();
-                }
-                else {
-                    Eigen::SelfAdjointEigenSolver<StateMat> solver(covariance);
-                    if (solver.info() == Eigen::Success) {
-                        transform = solver.eigenvectors() * solver.eigenvalues().cwiseMax(0).cwiseSqrt().asDiagonal();
-                    }
-                    else {
-                        throw std::runtime_error("Oh no!");
-                    }
+                const StateMat sqrt_covariance = covariance.cwiseSqrt();
+
+                for (int i = 0; i < n_particles; ++i) {
+                    new_particles.col(i) = new_particles.col(i).cwiseProduct(sqrt_covariance.col(0)) + mean;
                 }
 
-                // Random normal distribution for each point
-                ParticleList output = ParticleList::Zero(Model::size, n_particles);
-                for (int j = 0; j < output.cols(); ++j) {
-                    for (int i = 0; i < output.rows(); ++i) {
-                        output(i, j) = norm(rng);
-                    }
+                return new_particles;
+            }
+
+            ParticleList sample_particles(const StateVec& mean, const StateVec& covariance, const int& n_particles) {
+                // Sample single gaussian (represented by a gaussian mixture model of size 1)
+                ParticleList new_particles =
+                    ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
+
+                const StateVec sqrt_covariance = covariance.cwiseSqrt();
+
+                for (int i = 0; i < n_particles; ++i) {
+                    new_particles.col(i) = new_particles.col(i).cwiseProduct(sqrt_covariance) + mean;
                 }
 
-                return (transform * output).colwise() + mean;
+                return new_particles;
             }
 
         public:
@@ -97,14 +96,13 @@ namespace math {
 
             template <typename... Args>
             void time(const double& dt, const Args&... params) {
-
                 // Time update our particles
                 for (unsigned int i = 0; i < particles.cols(); ++i) {
                     particles.col(i) = model.time(particles.col(i), dt, params...);
                 }
 
                 // Perturb them by noise
-                particles += sample_particles(StateVec::Zero(), model.noise(dt), particles.cols());
+                particles += sample_particles(StateVec::Zero(), StateVec(model.noise(dt).diagonal()), particles.cols());
 
                 // Limit the state of each particle to ensure they are still valid
                 for (unsigned int i = 0; i < particles.cols(); i++) {
