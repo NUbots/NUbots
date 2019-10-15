@@ -47,3 +47,7 @@ add_subdirectory(nuclear)
 
 # Enable sending binaries to robots
 include(RobotSend)
+
+if(BUILD_TESTS)
+  add_subdirectory(shared/tests)
+endif(BUILD_TESTS)

@@ -20,7 +20,7 @@
 #include <catch.hpp>
 
 #include "message/input/Sensors.h"
-#include "message/input/ServoID.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
 

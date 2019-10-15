@@ -6,6 +6,7 @@ find_package(Protobuf REQUIRED)
 find_package(CATCH REQUIRED)
 find_package(YAML-CPP REQUIRED)
 find_package(fmt REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 # Resolve problems when OpenBLAS isn't found:
 if(OpenBLAS_FOUND)
@@ -34,6 +35,7 @@ set(
   ${PROTOBUF_LIBRARIES}
   ${YAML-CPP_LIBRARIES}
   ${fmt_LIBRARIES}
+  Eigen3::Eigen
   -ldl
   -lbacktrace
   CACHE PATH "Additional libraries used when linking roles, extensions, and utilities" FORCE
