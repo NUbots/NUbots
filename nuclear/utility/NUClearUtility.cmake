@@ -45,6 +45,11 @@ if(src)
   # Link our additional shared libraries
   target_link_libraries(nuclear_utility ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES} ${NUCLEAR_MESSAGE_LIBRARIES})
 
+  # Utilities have a dependency on the custom clock implementation
+  if(USE_CUSTOM_CLOCK)
+    target_link_libraries(nuclear_utility $<TARGET_OBJECTS:nubots_clock>)
+  endif(USE_CUSTOM_CLOCK)
+
   # Add to our list of NUClear utility libraries
   set(NUCLEAR_UTILITY_LIBRARIES nuclear_utility CACHE INTERNAL "List of libraries that are built as utilities" FORCE)
 

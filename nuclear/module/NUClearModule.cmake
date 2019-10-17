@@ -235,17 +235,8 @@ function(NUCLEAR_MODULE)
     )
     if(test_src)
       add_executable(${test_module_target_name} ${test_src})
-      target_link_libraries(
-        ${test_module_target_name}
-        ${module_target_name}
-        ${NUCLEAR_UTILITY_LIBRARIES}
-        ${NUCLEAR_MESSAGE_LIBRARIES}
-        ${NUCLEAR_EXTENSION_LIBRARIES}
-        ${MODULE_LIBRARIES}
-        ${NUClear_LIBRARIES}
-        ${MODULE_TEST_LIBRARIES}
-        ${NUCLEAR_TEST_LIBRARIES}
-      )
+      target_link_libraries(${test_module_target_name} ${module_target_name} ${MODULE_TEST_LIBRARIES}
+                            ${NUCLEAR_TEST_LIBRARIES})
 
       set_property(TARGET ${test_module_target_name} PROPERTY FOLDER "modules/tests")
 
@@ -256,7 +247,7 @@ function(NUCLEAR_MODULE)
         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${test_module_target_name}
       )
 
-    endif()
-  endif()
+    endif(test_src)
+  endif(BUILD_TESTS)
 
 endfunction(NUCLEAR_MODULE)

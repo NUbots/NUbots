@@ -9,8 +9,12 @@ if(STATIC_LIBRARIES)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
-# Set flag so NUClear uses a custom clock implementation See utility::clock::CustomClock
-add_compile_options(-DNUCLEAR_CUSTOM_CLOCK)
+# Set flag so NUClear uses a custom clock implementation
+option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
+if(USE_CUSTOM_CLOCK)
+  add_definitions(-DNUCLEAR_CUSTOM_CLOCK)
+  add_subdirectory(shared/clock)
+endif(USE_CUSTOM_CLOCK)
 
 # We use additional modules that cmake needs to know about
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
