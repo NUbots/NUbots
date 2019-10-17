@@ -22,5 +22,5 @@ if(test_src)
   set_property(TARGET TestShared PROPERTY FOLDER "shared/tests")
 
   # Add the test
-  add_test(NAME TestShared WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_shared)
+  add_test(NAME TestShared WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${CMAKE_CURRENT_BINARY_DIR}/TestShared)
 endif(test_src)
