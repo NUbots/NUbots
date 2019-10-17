@@ -17,16 +17,16 @@
  * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_TOOLS_VANDERPOLMODEL_H
-#define MODULE_TOOLS_VANDERPOLMODEL_H
+#ifndef SHARED_TESTS_UKFVANDERPOLMODEL_H
+#define SHARED_TESTS_UKFVANDERPOLMODEL_H
 
-#include <armadillo>
+#include <Eigen/Core>
 
-namespace module {
-namespace tools {
+namespace shared {
+namespace tests {
 
     template <typename Scalar>
-    class VanDerPolModel {
+    class UKFVanDerPolModel {
     public:
         enum Values {
             X1 = 0,
@@ -36,37 +36,37 @@ namespace tools {
         // The size of our state
         static constexpr size_t size = 2;
 
-        using StateVec = arma::vec::fixed<size>;
-        using StateMat = arma::mat::fixed<size, size>;
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
 
         // Our static process noise matrix
         StateVec process_noise;
 
-        StateVec timeUpdate(const StateVec& state, Scalar deltaT) {
-            StateVec new_state({state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]});
+        StateVec time(const StateVec& state, Scalar deltaT) {
+            StateVec new_state(state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]);
             return state + new_state * deltaT;
         }
 
-        typename arma::Col<Scalar>::template fixed<1> predictedObservation(const StateVec& state) {
-            return {state[X1]};
+        Scalar predict(const StateVec& state) {
+            return state[X1];
         }
 
         template <typename T, typename U>
-        auto observationDifference(const T& a, const U& b) {
+        auto difference(const T& a, const U& b) {
             return a - b;
         }
 
-        StateVec limitState(const StateVec& state) {
+        StateVec limit(const StateVec& state) {
             StateVec newState = state;
             return newState;
         }
 
-        StateMat processNoise() {
+        StateMat noise(const Scalar& /*dt*/) {
             // Return our process noise matrix
-            return arma::diagmat(process_noise);
+            return process_noise.asDiagonal();
         }
     };
-}  // namespace tools
-}  // namespace module
+}  // namespace tests
+}  // namespace shared
 
-#endif  // MODULE_TOOLS_VANDERPOLMODEL_H
+#endif  // SHARED_TESTS_UKFVANDERPOLMODEL_H

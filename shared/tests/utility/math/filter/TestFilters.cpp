@@ -22,7 +22,8 @@
 #include <catch.hpp>
 #include <utility>
 
-#include "VanDerPolModel.h"
+#include "PFVanDerPolModel.h"
+#include "UKFVanDerPolModel.h"
 #include "utility/math/filter/eigen/ParticleFilter.h"
 #include "utility/math/filter/eigen/UKF.h"
 
@@ -150,6 +151,7 @@ static constexpr std::array<double, 101> measurements    = {
     -0.834336476324293, -1.08344978673423,  -1.69966623692842,  -0.777801698154316,  -1.57714784288996,
     -0.971672418368469};
 
+static constexpr int number_of_particles  = 1000;
 static constexpr double deltaT            = 0.05;
 static constexpr double measurement_noise = 0.2;
 static const Eigen::Vector2d process_noise(0.02, 0.1);
@@ -159,9 +161,10 @@ static const Eigen::Matrix2d initial_covariance = Eigen::Matrix2d::Identity() * 
 
 TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
 
-    utility::math::filter::UKF<double, shared::tests::VanDerPolModel> model_filter;
+    utility::math::filter::UKF<double, shared::tests::UKFVanDerPolModel> model_filter;
 
     INFO("Configuring the UKF with")
+    INFO("    Time step.........: " << deltaT);
     INFO("    Process Noise.....: " << process_noise.transpose());
     INFO("    Initial State.....: " << initial_state.transpose());
     INFO("    Initial Covariance: \n" << initial_covariance);
@@ -170,8 +173,8 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
 
     INFO("Feeding noisy measurements into the filter")
     std::array<double, 100> innovations;
-    std::array<std::pair<utility::math::filter::UKF<double, shared::tests::VanDerPolModel>::StateVec,
-                         utility::math::filter::UKF<double, shared::tests::VanDerPolModel>::StateMat>,
+    std::array<std::pair<utility::math::filter::UKF<double, shared::tests::UKFVanDerPolModel>::StateVec,
+                         utility::math::filter::UKF<double, shared::tests::UKFVanDerPolModel>::StateMat>,
                100>
         actual_state;
     for (size_t time_count = 0; time_count < 100; ++time_count) {
@@ -218,5 +221,73 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
     INFO("The mean 1\u03C3 boundary for state 1 is [" << -mean_x1_boundary << ", " << mean_x1_boundary << "]");
     INFO("The mean 1\u03C3 boundary for state 2 is [" << -mean_x2_boundary << ", " << mean_x2_boundary << "]");
 
-    REQUIRE(percentage_x1 < 30.0);
+    REQUIRE(percentage_x1 <= 30.0);
+}
+
+
+TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") {
+
+    utility::math::filter::ParticleFilter<double, shared::tests::PFVanDerPolModel> model_filter;
+
+    INFO("Configuring the ParticleFilter with")
+    INFO("    Time step..........: " << deltaT);
+    INFO("    Number of Particles: " << number_of_particles)
+    INFO("    Process Noise......: " << process_noise.transpose());
+    INFO("    Initial State......: " << initial_state.transpose());
+    INFO("    Initial Covariance.: \n" << initial_covariance);
+    model_filter.model.process_noise = process_noise;
+    model_filter.set_state(initial_state, initial_covariance, number_of_particles);
+
+    INFO("Feeding noisy measurements into the filter")
+    std::array<double, 100> innovations;
+    std::array<std::pair<utility::math::filter::UKF<double, shared::tests::PFVanDerPolModel>::StateVec,
+                         utility::math::filter::UKF<double, shared::tests::PFVanDerPolModel>::StateMat>,
+               100>
+        actual_state;
+    for (size_t time_count = 0; time_count < 100; ++time_count) {
+        model_filter.measure(Eigen::Matrix<double, 1, 1>(measurements[time_count]),
+                             Eigen::Matrix<double, 1, 1>(measurement_noise));
+        model_filter.time(deltaT);
+        innovations[time_count]  = measurements[time_count] - model_filter.get().x();
+        actual_state[time_count] = std::make_pair(model_filter.get(), model_filter.getCovariance());
+    }
+
+    INFO("Calculating statistics")
+
+    double count_x1                  = 0.0;
+    double count_x2                  = 0.0;
+    double mean_innovations          = 0.0;
+    double mean_x1_boundary          = 0.0;
+    double mean_x2_boundary          = 0.0;
+    Eigen::Vector2d mean_state_error = Eigen::Vector2d::Zero();
+    for (size_t i = 0; i < actual_state.size(); ++i) {
+        Eigen::Vector2d state_error = true_state[i] - actual_state[i].first;
+        double covariance_bounds_x1 = std::sqrt(actual_state[i].second(0, 0));
+        double covariance_bounds_x2 = std::sqrt(actual_state[i].second(1, 1));
+        mean_x1_boundary += covariance_bounds_x1;
+        mean_x2_boundary += covariance_bounds_x2;
+
+        count_x1 += (std::abs(state_error.x()) - covariance_bounds_x1) > 0.0 ? 1.0 : 0.0;
+        count_x2 += (std::abs(state_error.y()) - covariance_bounds_x2) > 0.0 ? 1.0 : 0.0;
+
+        mean_innovations += innovations[i];
+        mean_state_error += state_error;
+    }
+
+    mean_innovations /= innovations.size();
+    mean_state_error /= actual_state.size();
+    mean_x1_boundary /= actual_state.size();
+    mean_x2_boundary /= actual_state.size();
+
+    double percentage_x1 = 100.0 * count_x1 / actual_state.size();
+    double percentage_x2 = 100.0 * count_x2 / actual_state.size();
+
+    INFO("The mean of the innovations is: " << mean_innovations << ". This should be small.");
+    INFO("The mean of the state errors is: " << mean_state_error.transpose() << ". This should be small.");
+    INFO(percentage_x1 << "% of state 1 estimates exceed the 1\u03C3 boundary");
+    INFO(percentage_x2 << "% of state 2 estimates exceed the 1\u03C3 boundary");
+    INFO("The mean 1\u03C3 boundary for state 1 is [" << -mean_x1_boundary << ", " << mean_x1_boundary << "]");
+    INFO("The mean 1\u03C3 boundary for state 2 is [" << -mean_x2_boundary << ", " << mean_x2_boundary << "]");
+
+    REQUIRE(percentage_x1 <= 30.0);
 }

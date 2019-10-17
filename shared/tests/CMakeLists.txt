@@ -10,7 +10,14 @@ file(GLOB_RECURSE test_src "*/**.cpp" "*/**.h")
 
 if(test_src)
   add_executable(TestShared "${CMAKE_SOURCE_DIR}/${NUCLEAR_SHARED_DIR}/tests/test.cpp" ${test_src})
-  target_link_libraries(TestShared ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES} ${NUCLEAR_TEST_LIBRARIES})
+  target_link_libraries(
+    TestShared
+    ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES}
+    ${NUCLEAR_UTILITY_LIBRARIES}
+    ${NUCLEAR_MESSAGE_LIBRARIES}
+    ${NUClear_LIBRARIES}
+    ${NUCLEAR_TEST_LIBRARIES}
+  )
 
   set_property(TARGET TestShared PROPERTY FOLDER "shared/tests")
 
