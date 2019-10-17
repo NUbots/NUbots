@@ -448,7 +448,7 @@ namespace behaviour {
                     script.frames[frame].duration = std::chrono::milliseconds(num);
                 }
                 // If it's not a number then ignore and beep
-                catch (std::invalid_argument& /* e */) {
+                catch (std::invalid_argument&) {
                     beep();
                 }
             }
@@ -509,7 +509,7 @@ namespace behaviour {
                     }
                 }
                 // If it's not a number then ignore and beep
-                catch (std::invalid_argument& /* e */) {
+                catch (std::invalid_argument&) {
                     beep();
                 }
             }
@@ -1064,7 +1064,7 @@ namespace behaviour {
                         beep();
                     }
                 }
-                catch (std::invalid_argument& /* e */) {
+                catch (std::invalid_argument&) {
                     beep();
                 }
             }
@@ -1083,7 +1083,7 @@ namespace behaviour {
                     }
                 }
             }
-            catch (std::invalid_argument& /* e */) {
+            catch (std::invalid_argument&) {
                 beep();
             }
 
