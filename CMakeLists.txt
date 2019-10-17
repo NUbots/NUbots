@@ -46,6 +46,10 @@ set(
   CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
 
+if(BUILD_TESTS)
+  enable_testing()
+endif(BUILD_TESTS)
+
 # Include the NUClear roles system
 add_subdirectory(nuclear)
 
