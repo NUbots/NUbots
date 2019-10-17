@@ -31,7 +31,6 @@
 
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -90,8 +89,8 @@ namespace motion {
 
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector);
-        std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
-                                                                         const Eigen::Vector3d& cameraUnitVector);
+        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
+                                                                          const Eigen::Vector3d& cameraUnitVector);
 
         std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
 
