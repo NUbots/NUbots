@@ -20,10 +20,8 @@
 #include "SensorFilter.h"
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/matrix.h"
@@ -141,7 +139,7 @@ namespace platform {
                     config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
                 // Set our process noise in our filter
-                MotionModel<double>::State process_noise;
+                MotionModel<double>::StateVec process_noise;
                 process_noise.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.noise.process.position;
                 process_noise.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.noise.process.velocity;
                 process_noise.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
@@ -175,14 +173,14 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
                 // Calculate our mean and covariance
-                MotionModel<double>::State mean;
+                MotionModel<double>::StateVec mean;
                 mean.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.mean.position;
                 mean.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.mean.velocity;
                 mean.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
                 mean.segment<3>(MotionModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
                 mean.segment<3>(MotionModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
-                MotionModel<double>::State covariance;
+                MotionModel<double>::StateVec covariance;
                 covariance.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.covariance.position;
                 covariance.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.covariance.velocity;
                 covariance.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
