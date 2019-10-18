@@ -12,7 +12,6 @@ import pty
 import tty
 import signal
 import termios
-from tqdm import tqdm
 
 # Try to import docker, if we are already in docker this will fail
 try:
@@ -82,6 +81,8 @@ def is_docker():
 
 
 def build_platform(platform):
+    from tqdm import tqdm
+
     tag = "{}:{}".format(repository, platform)
     dockerdir = os.path.join(b.project_dir, "docker")
 
@@ -108,8 +109,8 @@ def build_platform(platform):
                 and "current" in event["progressDetail"]
                 and "total" in event["progressDetail"]
             ):
-                current = int(event["progressDetail"]["current"], 10)
-                total = int(event["progressDetail"]["total"], 10)
+                current = int(event["progressDetail"]["current"])
+                total = int(event["progressDetail"]["total"])
 
                 bar.total = total
                 bar.n = current
