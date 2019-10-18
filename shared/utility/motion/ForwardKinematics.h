@@ -28,7 +28,6 @@
 
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
-
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
@@ -234,9 +233,9 @@ namespace motion {
                 negativeIfRight = -1;
             }
 
-            const float shoulder_pitch = sensors.servo[SHOULDER_PITCH].present_position;
-            const float shoulder_roll  = sensors.servo[SHOULDER_ROLL].present_position;
-            const float elbow          = sensors.servo[ELBOW].present_position;
+            const float& shoulder_pitch = sensors.servo[SHOULDER_PITCH].present_position;
+            const float& shoulder_roll  = sensors.servo[SHOULDER_ROLL].present_position;
+            const float& elbow          = sensors.servo[ELBOW].present_position;
 
             // Translate to shoulder
             runningTransform =
