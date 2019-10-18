@@ -248,6 +248,7 @@ namespace motion {
             Eigen::Affine3d target(target_);
             target = target.translate(Eigen::Vector3d(0.0, 0.0, model.leg.FOOT_HEIGHT));
 
+            // Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates
             // TODO remove this. It was due to wrong convention use
             Eigen::Matrix4d Tci;
             // clang-format off
