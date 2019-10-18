@@ -117,8 +117,8 @@ namespace platform {
                 qGyro.w()   = Scalar(1.0) - Scalar(0.5) * qGyro.vec().squaredNorm();
                 qGyro       = Rwt * qGyro;
 
-                newState(QW)                     = qGyro.w();
-                newState.template segment<3>(QX) = qGyro.vec();
+                // Quaternions are stored internally as (x, y, z, w)
+                newState.template segment<4>(QX) = qGyro.coeffs();
 
                 return newState;
             }
