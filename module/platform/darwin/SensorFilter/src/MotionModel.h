@@ -81,7 +81,7 @@ namespace platform {
             using State      = Eigen::Matrix<Scalar, size, 1>;
             using Covariance = Eigen::Matrix<Scalar, size, size>;
 
-            // Our static process noise matrix
+            // Our static process noise diagonal vector
             State process_noise;
 
             // The velocity decay for x/y/z velocities (1.0 = no decay)
