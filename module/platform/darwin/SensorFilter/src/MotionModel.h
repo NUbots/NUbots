@@ -78,19 +78,19 @@ namespace platform {
             // The size of our state
             static constexpr size_t size = 16;
 
-            using State      = Eigen::Matrix<Scalar, size, 1>;
-            using Covariance = Eigen::Matrix<Scalar, size, size>;
+            using StateVec = Eigen::Matrix<Scalar, size, 1>;
+            using StateMat = Eigen::Matrix<Scalar, size, size>;
 
             // Our static process noise diagonal vector
-            State process_noise;
+            StateVec process_noise;
 
             // The velocity decay for x/y/z velocities (1.0 = no decay)
             Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-            State time(const State& state, Scalar deltaT) {
+            StateVec time(const StateVec& state, Scalar deltaT) {
 
                 // Prepare our new state
-                State newState = state;
+                StateVec newState = state;
 
                 // ********************************
                 // UPDATE LINEAR POSITION/VELOCITY
@@ -136,16 +136,16 @@ namespace platform {
                 return Rtw.template rightCols<1>() * G;
             }
 
-            auto predict(const State& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Vector3d predict(const State& state, const MeasurementType::GYROSCOPE&) {
                 // Add predicted gyroscope bias to our predicted gyroscope
                 return state.template segment<3>(WX) + state.template segment<3>(BX);
             }
 
-            auto predict(const State& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            Eigen::Vector3d predict(const State& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
                 return state.template segment<3>(PX);
             }
 
-            auto predict(const State& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            Eigen::Vector4d predict(const State& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
                 return state.template segment<4>(QX);
             }
 
@@ -154,8 +154,8 @@ namespace platform {
                 return a - b;
             }
 
-            State limit(const State& state) {
-                State newState                   = state;
+            StateVec limit(const StateVec& state) {
+                StateVec newState                = state;
                 newState.template segment<4>(QX) = newState.template segment<4>(QX).normalized();
                 return newState;
             }
