@@ -123,14 +123,17 @@ namespace platform {
                 return newState;
             }
 
-            auto predict(const State& state, const MeasurementType::ACCELEROMETER&) {
+            Eigen::Vector3d predict(const State& state, const MeasurementType::ACCELEROMETER&) {
 
                 // Extract our rotation quaternion
-                Eigen::Quaternion<Scalar> Rwt(state.template segment<4>(QX));
+                Eigen::Matrix<Scalar, 3, 3> Rtw =
+                    Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).toRotationMatrix().transpose();
 
                 // Make a world gravity vector and rotate it into torso space
                 // Where is world gravity with respest to robot orientation?
-                return Rwt.inverse()._transformVector(Eigen::Vector3d(0.0, 0.0, G));
+                // Multiplying a matrix (0, 0, G) is equivalent to taking the
+                // third column of the matrix and multiplying it by G
+                return Rtw.template rightCols<1>() * G;
             }
 
             auto predict(const State& state, const MeasurementType::GYROSCOPE&) {
