@@ -149,9 +149,24 @@ namespace platform {
                 return state.template segment<4>(QX);
             }
 
-            template <typename T, typename U>
-            auto difference(const T& a, const U& b) {
+            // This function is called to determine the difference between position and velicty measurements/predictions
+            Eigen::Matrix<Scalar, 3, 1> difference(const Eigen::Matrix<Scalar, 3, 1>& a,
+                                                   const Eigen::Matrix<Scalar, 3, 1>& b) {
                 return a - b;
+            }
+
+            // This function is called to determine the difference between quaternion measurements/predictions
+            Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
+                                                   const Eigen::Matrix<Scalar, 4, 1>& b) {
+                // Difference between two quaternions
+                // diff * q = p
+                // diff = p * q^{i}
+                Eigen::Quaternion<Scalar> q(a.w(), a.x(), a.y(), a.z());
+                Eigen::Quaternion<Scalar> p(b.w(), b.x(), b.y(), b.z());
+                Eigen::Quaternion<Scalar> diff = p * q.inverse();
+
+                // Quaternions are stored internally as (x, y, z, w)
+                return diff.coeffs();
             }
 
             StateVec limit(const StateVec& state) {
