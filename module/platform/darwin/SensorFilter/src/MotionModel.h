@@ -36,7 +36,7 @@ namespace platform {
             struct ACCELEROMETER {};
             struct FLAT_FOOT_ODOMETRY {};
             struct FLAT_FOOT_ORIENTATION {};
-        };  // namespace MeasurementType
+        }  // namespace MeasurementType
 
         template <typename Scalar>
         class MotionModel {
