@@ -25,6 +25,13 @@
 namespace shared {
 namespace tests {
 
+    // This class implements a van der Pol oscillator with mu = 1.
+    // This is a two state system and is described by the following set of non-linear ODEs
+    // \dot{x_{1}} = x_{2}
+    // \dot{x_{2}} = (1 - x_{1}^{2}) * x_{2} - x_{1}
+    //
+    // This class is based on the implementation described at
+    // https://au.mathworks.com/help/control/ug/nonlinear-state-estimation-using-unscented-kalman-filter.html
     template <typename Scalar>
     class UKFVanDerPolModel {
     public:
@@ -43,7 +50,10 @@ namespace tests {
         StateVec process_noise;
 
         StateVec time(const StateVec& state, Scalar deltaT) {
+            // Evaluate the van der Pol ODEs for mu = 1
             StateVec new_state(state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]);
+
+            // Euler integration of continuous-time dynamics x' = f(x) with sample time deltaT
             return state + new_state * deltaT;
         }
 
@@ -57,11 +67,11 @@ namespace tests {
         }
 
         StateVec limit(const StateVec& state) {
-            StateVec newState = state;
-            return newState;
+            // Don't apply any limiting
+            return state;
         }
 
-        StateMat noise(const Scalar& /*dt*/) {
+        StateMat noise(const Scalar&) {
             // Return our process noise matrix
             return process_noise.asDiagonal();
         }
