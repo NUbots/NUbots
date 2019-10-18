@@ -95,7 +95,7 @@ def build_platform(platform):
 
             # If this is the first time we have seen this id, make a tqdm progress bar for it
             if id not in progress:
-                progress[id] = {"bar": tqdm(unit="B", unit_scale=True, dynamic_ncols=True, leave=False), "value": 0}
+                progress[id] = {"bar": tqdm(unit="B", unit_scale=True, dynamic_ncols=True, leave=True), "value": 0}
 
             p = progress[id]
             bar = p["bar"]
@@ -117,7 +117,8 @@ def build_platform(platform):
 
             # Complete statuses need to finish off the bar
             if "complete" in status:
-                bar.finish()
+                if bar.total is not None:
+                    bar.update(bar.total - bar.n)
 
         except KeyError:
             print(event["status"])
