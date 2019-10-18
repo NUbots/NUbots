@@ -123,7 +123,7 @@ namespace platform {
                 return newState;
             }
 
-            Eigen::Vector3d predict(const State& state, const MeasurementType::ACCELEROMETER&) {
+            Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
 
                 // Extract our rotation quaternion
                 Eigen::Matrix<Scalar, 3, 3> Rtw =
@@ -136,16 +136,16 @@ namespace platform {
                 return Rtw.template rightCols<1>() * G;
             }
 
-            Eigen::Vector3d predict(const State& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
                 // Add predicted gyroscope bias to our predicted gyroscope
                 return state.template segment<3>(WX) + state.template segment<3>(BX);
             }
 
-            Eigen::Vector3d predict(const State& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
                 return state.template segment<3>(PX);
             }
 
-            Eigen::Vector4d predict(const State& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
                 return state.template segment<4>(QX);
             }
 
@@ -160,12 +160,12 @@ namespace platform {
                 return newState;
             }
 
-            auto noise(const Scalar& dt) {
+            StateMat noise(const Scalar&) {
                 // Return our process noise matrix
                 return process_noise.asDiagonal();
             }
-        };  // namespace darwin
-    }       // namespace darwin
+        };
+    }  // namespace darwin
 }  // namespace platform
 }  // namespace module
 
