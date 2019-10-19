@@ -251,11 +251,6 @@ if(src)
   target_link_libraries(nuclear_message ${PROTOBUF_LIBRARIES})
   target_link_libraries(nuclear_message ${NUClear_LIBRARIES})
 
-  # Messages have a dependency on the custom clock implementation
-  if(USE_CUSTOM_CLOCK)
-    target_link_libraries(nuclear_message $<TARGET_OBJECTS:nubots_clock>)
-  endif(USE_CUSTOM_CLOCK)
-
   # If we have pybind11 we need to make this a python library too
   if(pybind11_FOUND)
     target_link_libraries(nuclear_message ${PYTHON_LIBRARIES})
