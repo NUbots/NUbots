@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.0)
 project(NUbots)
 
+# ~~~
+# This is needed so we can link in the custom clock object library to the message and utility libraries
+# CMP0079: target_link_libraries() allows use with targets in other directories
+# https://cmake.org/cmake/help/v3.16/policy/CMP0079.html
+# ~~~
+if(POLICY CMP0079)
+  cmake_policy(SET CMP0079 NEW)
+endif()
+
 # Set on to prefer .a files over .so files for linking
 option(STATIC_LIBRARIES "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!"
        OFF)
@@ -52,6 +61,12 @@ endif(BUILD_TESTS)
 
 # Include the NUClear roles system
 add_subdirectory(nuclear)
+
+# Messages and utilities have a dependency on the custom clock implementation
+if(USE_CUSTOM_CLOCK)
+  target_link_libraries(${NUCLEAR_UTILITY_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
+  target_link_libraries(${NUCLEAR_MESSAGE_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
+endif(USE_CUSTOM_CLOCK)
 
 # Enable sending binaries to robots
 include(RobotSend)

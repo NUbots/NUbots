@@ -41,11 +41,4 @@ add_library(nutilities ${NUTILITIES_LIBRARIES_FILES})
 target_link_libraries(nutilities ${NUCLEAR_MESSAGE_LIBRARIES})
 target_link_libraries(nutilities ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
 
-# Utilities have a dependency on the custom clock implementation
-if(USE_CUSTOM_CLOCK)
-  target_link_libraries(nutilities $<TARGET_OBJECTS:nubots_clock>)
-endif(USE_CUSTOM_CLOCK)
-
-# SET(NUCLEAR_UTILITY_LIBRARIES ${NUCLEAR_UTILITY_LIBRARIES} ${NUTILITIES_LIBRARIES} CACHE INTERNAL "Library for NUClear
-# utilities" FORCE)
 set(NUCLEAR_UTILITY_LIBRARIES nutilities CACHE INTERNAL "Library for NUClear utilities" FORCE)
