@@ -101,7 +101,6 @@ namespace math {
 
             /**
              * @brief Calculate the the mean given a set of sigma points.
-             *           This version
              *
              * @param mean          the mean to set
              * @param sigma_points  the sigma points to calculate the mean from
