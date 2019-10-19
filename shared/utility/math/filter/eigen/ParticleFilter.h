@@ -157,9 +157,67 @@ namespace math {
                 return logits.mean();
             }
 
+            // Take the mean of all particles, pay no attention to the type of the data
             StateVec get() const {
-                // TODO take the mean, but that'll explode quaternions
                 return particles.rowwise().mean();
+            }
+
+            // Take the mean of all poarticles
+            // quaternions Indices indicating the start of each quaternion on the state
+            //             It is assumed that the indices are sorted in increasing order
+            //
+            // Implementation based on https://github.com/tolgabirdal/averaging_quaternions
+            StateVec get(const std::vector<size_t>& quaternions) const {
+                // There are no quaternions to deal with, use the other method
+                if (quaternions.empty()) {
+                    return get();
+                }
+
+                StateVec mean;
+                size_t row = 0, q_counter = 0;
+
+                while (row < Model::Size) {
+                    if (q_counter < quaternions.size() && row == quaternions[q_counter]) {
+                        // Increment quaternion counter
+                        q_counter++;
+
+                        // Initialise our accumulator matrix
+                        Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
+
+                        // Accumlate the quaternions across all particles
+                        for (unsigned int i = 0; i < particles.cols(); i++) {
+                            Eigen::Matrix<Scalar, 4, 1> q(particles.col(i).segment<4>(row));
+
+                            // Rank 1 update
+                            A += q * q.transpose();
+                        }
+
+                        // Scale the accumulator matrix
+                        A /= particles.cols();
+
+                        // Solve for the eigenvectors of the accumulator matrix
+                        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
+                        if (eigensolver.info() != Eigen::Success) {
+                            throw std::runtime_error("Eigen decomposition failed");
+                        }
+
+                        // We want the eigenvector corresponding to the largest eigenvector
+                        mean.segment<4>(row) = eigensolver.eigenvectors().rightCols<1>();
+
+                        // Update row counter
+                        row += 4;
+                    }
+
+                    else {
+                        // Just take the mean of this row
+                        mean[row] = particles.row(row).mean();
+
+                        // Update row counter
+                        row++;
+                    }
+                }
+
+                return mean;
             }
 
             StateVec getBest() const {
