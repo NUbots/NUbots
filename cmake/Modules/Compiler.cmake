@@ -1,10 +1,9 @@
 # We need noncall exceptions so we can throw exceptions from signal handlers This allows us to catch null pointer
 # exceptions
 add_compile_options(
-  -Wall -Wpedantic -Wextra
+  -Wall -Wpedantic -Wextra -fPIC
   # -Werror
-  # Because Eigen
-  -Wno-int-in-bool-context -fnon-call-exceptions
+  # Because Eigen-Wno-int-in-bool-context -fnon-call-exceptions
 )
 
 list(APPEND CMAKE_INSTALL_RPATH toolchain/)
