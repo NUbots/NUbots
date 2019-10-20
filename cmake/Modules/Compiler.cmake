@@ -6,11 +6,14 @@ add_compile_options(
   # Because Eigen-Wno-int-in-bool-context -fnon-call-exceptions
 )
 
-list(APPEND CMAKE_INSTALL_RPATH toolchain/)
-list(APPEND CMAKE_INSTALL_RPATH /home/darwin/toolchain/)
+# C++17 allows eigen to not need to worry about alignment
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Make sure our binaries can find our libraries both in docker and on the robot
 list(APPEND CMAKE_INSTALL_RPATH /home/nubots/toolchain/)
-list(APPEND CMAKE_INSTALL_RPATH /nubots/toolchain/${PLATFORM}/lib/)
-list(APPEND CMAKE_INSTALL_RPATH /nubots/toolchain/lib/)
+list(APPEND CMAKE_INSTALL_RPATH /usr/local/lib)
 
 # GNU Compiler
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
@@ -19,8 +22,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
     add_compile_options(-fdiagnostics-color=always)
   endif()
 endif()
-
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} /home/darwin/toolchain/ /home/nubots/toolchain/)
 
 # Disable armadillo bounds checking in release and min size release builds
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DARMA_NO_DEBUG")
