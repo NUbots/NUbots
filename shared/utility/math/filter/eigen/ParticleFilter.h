@@ -107,7 +107,7 @@ namespace math {
             }
 
             template <typename... Args>
-            void time(const double& dt, const Args&... params) {
+            void time(const Scalar& dt, const Args&... params) {
                 // Time update our particles
                 for (unsigned int i = 0; i < particles.cols(); ++i) {
                     particles.col(i) = model.time(particles.col(i), dt, params...);

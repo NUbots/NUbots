@@ -182,7 +182,7 @@ namespace math {
             }
 
             template <typename... Args>
-            void time(Scalar dt, const Args&... params) {
+            void time(const Scalar& dt, const Args&... params) {
 
                 // Generate our sigma points
                 sigma_points = generate_sigma_points(mean, covariance, covariance_sigma_weight);
