@@ -14,51 +14,43 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2016 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef SHARED_TESTS_UKFVANDERPOLMODEL_H
-#define SHARED_TESTS_UKFVANDERPOLMODEL_H
+#ifndef SHARED_TESTS_VANDERPOLMODEL_H
+#define SHARED_TESTS_VANDERPOLMODEL_H
 
 #include <Eigen/Core>
 
 namespace shared {
 namespace tests {
 
-    // This class implements a van der Pol oscillator with mu = 1.
-    // This is a two state system and is described by the following set of non-linear ODEs
-    // \dot{x_{1}} = x_{2}
-    // \dot{x_{2}} = (1 - x_{1}^{2}) * x_{2} - x_{1}
-    //
-    // This class is based on the implementation described at
-    // https://au.mathworks.com/help/control/ug/nonlinear-state-estimation-using-unscented-kalman-filter.html
     template <typename Scalar>
-    class UKFVanDerPolModel {
+    class VanDerPolModel {
     public:
-        enum Values {
+        enum Components {
             X1 = 0,
             X2 = 1,
         };
 
-        // The size of our state
         static constexpr size_t size = 2;
 
         using StateVec = Eigen::Matrix<Scalar, size, 1>;
         using StateMat = Eigen::Matrix<Scalar, size, size>;
 
-        // Our static process noise matrix
         StateVec process_noise;
 
-        StateVec time(const StateVec& state, Scalar deltaT) {
-            // Evaluate the van der Pol ODEs for mu = 1
-            StateVec new_state(state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]);
+        // number and range of reset particles
+        int n_rogues         = 0;
+        StateVec reset_range = StateVec::Zero();
 
-            // Euler integration of continuous-time dynamics x' = f(x) with sample time deltaT
+        StateVec time(const StateVec& state, const Scalar& deltaT) {
+            StateVec new_state(state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]);
             return state + new_state * deltaT;
         }
 
-        Scalar predict(const StateVec& state) {
-            return state[X1];
+        StateMat noise(const Scalar& deltaT) {
+            return process_noise.asDiagonal() * deltaT;
         }
 
         template <typename T, typename U>
@@ -66,17 +58,23 @@ namespace tests {
             return a - b;
         }
 
+        Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state) {
+            // Our prediction is the first state
+            return Eigen::Matrix<Scalar, 1, 1>(state[X1]);
+        }
+
         StateVec limit(const StateVec& state) {
-            // Don't apply any limiting
             return state;
         }
 
-        StateMat noise(const Scalar&) {
-            // Return our process noise matrix
-            return process_noise.asDiagonal();
+        // Getters
+        int getRogueCount() const {
+            return n_rogues;
+        }
+        StateVec getRogueRange() const {
+            return reset_range;
         }
     };
 }  // namespace tests
 }  // namespace shared
-
-#endif  // SHARED_TESTS_UKFVANDERPOLMODEL_H
+#endif  // SHARED_TESTS_VANDERPOLMODEL_H

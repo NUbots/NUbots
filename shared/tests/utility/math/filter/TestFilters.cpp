@@ -22,12 +22,11 @@
 #include <catch.hpp>
 #include <utility>
 
-#include "PFVanDerPolModel.h"
-#include "UKFVanDerPolModel.h"
+#include "VanDerPolModel.h"
 #include "utility/math/filter/eigen/ParticleFilter.h"
 #include "utility/math/filter/eigen/UKF.h"
 
-static const std::array<Eigen::Vector2d, 101> true_state = {Eigen::Vector2d(2.0, 0.0),
+static const std::array<Eigen::Vector2d, 101> true_state       = {Eigen::Vector2d(2.0, 0.0),
                                                             Eigen::Vector2d(1.99762085441568, -0.0928337297585024),
                                                             Eigen::Vector2d(1.99093577483406, -0.172657352827464),
                                                             Eigen::Vector2d(1.98055246651833, -0.241386903989206),
@@ -128,32 +127,46 @@ static const std::array<Eigen::Vector2d, 101> true_state = {Eigen::Vector2d(2.0,
                                                             Eigen::Vector2d(-0.960219224918902, 1.19505274841269),
                                                             Eigen::Vector2d(-0.899115258278239, 1.24982181395314),
                                                             Eigen::Vector2d(-0.835163273045814, 1.30903290393871)};
-static constexpr std::array<double, 101> measurements    = {
-    1.41950444107972,   3.05283113500662,   1.31562902284910,   0.997734921435315,   1.22317216069731,
-    1.45104339243095,   1.44916178431237,   2.06339677800307,   1.72195383158608,    2.35251017984521,
-    1.13758715411292,   2.45821035462853,   0.578953962787527,  2.43761956273235,    1.53352456818439,
-    1.81381988145109,   0.200234781374404,  0.699659342503683,  2.41589834122634,    2.94986227453284,
-    1.32252096603566,   1.86485688535241,   2.56451677252815,   2.48362021303660,    0.222481906513196,
-    0.686611949943641,  1.01548108836852,   1.95185264477098,   0.446105603787606,   0.952557110639149,
-    1.63244604339666,   1.01247688931802,   1.10983006882242,   0.736674796266488,   1.07524139971197,
-    1.02750403456628,   0.510074652985162,  1.04128160500475,   0.628361191801920,   0.295319621277568,
-    0.410928595858317,  0.174591861010451,  0.121129239708858,  0.0322725917481610,  -0.0452595206149492,
-    -0.169494877079244, -0.152876202535486, -0.309465242157101, -0.814093938562644,  -0.238963726142840,
-    -0.632176504716999, -0.963633638072323, -0.376237691510885, -1.37716213599798,   -0.131734802488156,
-    -1.59915247716806,  -1.87046013578142,  -0.718515356889421, -1.36508448350099,   -2.29346522942158,
-    -1.63779457028304,  -0.324093827438352, -1.98571378934842,  -2.22628217705972,   -2.05076140006880,
-    -2.39347881695105,  -2.38945087335498,  -3.17603874489820,  -1.06279765777621,   -0.401001820498828,
-    -2.70473603679768,  -1.67751879293312,  -0.889945939781879, -2.88646633022762,   -1.47321377167750,
-    -2.63824624916142,  -2.16960369477233,  -3.01787696167607,  -2.16134730916625,   -2.28354745732726,
-    -1.25548768443738,  -1.25424509653701,  -2.88409421060811,  -1.38573935340991,   -1.72463024885456,
-    -0.420956973486694, -1.93083752178450,  -1.40734574623157,  -1.73446796614902,   -1.25680458659552,
-    -0.704189303383484, -2.31905323471143,  -1.37853985767260,  -0.0905469452467918, -1.29155787143731,
-    -0.834336476324293, -1.08344978673423,  -1.69966623692842,  -0.777801698154316,  -1.57714784288996,
-    -0.971672418368469};
+using MeasurementType                                          = Eigen::Matrix<double, 1, 1>;
+static constexpr std::array<MeasurementType, 101> measurements = {
+    MeasurementType(1.41950444107972),    MeasurementType(3.05283113500662),   MeasurementType(1.31562902284910),
+    MeasurementType(0.997734921435315),   MeasurementType(1.22317216069731),   MeasurementType(1.45104339243095),
+    MeasurementType(1.44916178431237),    MeasurementType(2.06339677800307),   MeasurementType(1.72195383158608),
+    MeasurementType(2.35251017984521),    MeasurementType(1.13758715411292),   MeasurementType(2.45821035462853),
+    MeasurementType(0.578953962787527),   MeasurementType(2.43761956273235),   MeasurementType(1.53352456818439),
+    MeasurementType(1.81381988145109),    MeasurementType(0.200234781374404),  MeasurementType(0.699659342503683),
+    MeasurementType(2.41589834122634),    MeasurementType(2.94986227453284),   MeasurementType(1.32252096603566),
+    MeasurementType(1.86485688535241),    MeasurementType(2.56451677252815),   MeasurementType(2.48362021303660),
+    MeasurementType(0.222481906513196),   MeasurementType(0.686611949943641),  MeasurementType(1.01548108836852),
+    MeasurementType(1.95185264477098),    MeasurementType(0.446105603787606),  MeasurementType(0.952557110639149),
+    MeasurementType(1.63244604339666),    MeasurementType(1.01247688931802),   MeasurementType(1.10983006882242),
+    MeasurementType(0.736674796266488),   MeasurementType(1.07524139971197),   MeasurementType(1.02750403456628),
+    MeasurementType(0.510074652985162),   MeasurementType(1.04128160500475),   MeasurementType(0.628361191801920),
+    MeasurementType(0.295319621277568),   MeasurementType(0.410928595858317),  MeasurementType(0.174591861010451),
+    MeasurementType(0.121129239708858),   MeasurementType(0.0322725917481610), MeasurementType(-0.0452595206149492),
+    MeasurementType(-0.169494877079244),  MeasurementType(-0.152876202535486), MeasurementType(-0.309465242157101),
+    MeasurementType(-0.814093938562644),  MeasurementType(-0.238963726142840), MeasurementType(-0.632176504716999),
+    MeasurementType(-0.963633638072323),  MeasurementType(-0.376237691510885), MeasurementType(-1.37716213599798),
+    MeasurementType(-0.131734802488156),  MeasurementType(-1.59915247716806),  MeasurementType(-1.87046013578142),
+    MeasurementType(-0.718515356889421),  MeasurementType(-1.36508448350099),  MeasurementType(-2.29346522942158),
+    MeasurementType(-1.63779457028304),   MeasurementType(-0.324093827438352), MeasurementType(-1.98571378934842),
+    MeasurementType(-2.22628217705972),   MeasurementType(-2.05076140006880),  MeasurementType(-2.39347881695105),
+    MeasurementType(-2.38945087335498),   MeasurementType(-3.17603874489820),  MeasurementType(-1.06279765777621),
+    MeasurementType(-0.401001820498828),  MeasurementType(-2.70473603679768),  MeasurementType(-1.67751879293312),
+    MeasurementType(-0.889945939781879),  MeasurementType(-2.88646633022762),  MeasurementType(-1.47321377167750),
+    MeasurementType(-2.63824624916142),   MeasurementType(-2.16960369477233),  MeasurementType(-3.01787696167607),
+    MeasurementType(-2.16134730916625),   MeasurementType(-2.28354745732726),  MeasurementType(-1.25548768443738),
+    MeasurementType(-1.25424509653701),   MeasurementType(-2.88409421060811),  MeasurementType(-1.38573935340991),
+    MeasurementType(-1.72463024885456),   MeasurementType(-0.420956973486694), MeasurementType(-1.93083752178450),
+    MeasurementType(-1.40734574623157),   MeasurementType(-1.73446796614902),  MeasurementType(-1.25680458659552),
+    MeasurementType(-0.704189303383484),  MeasurementType(-2.31905323471143),  MeasurementType(-1.37853985767260),
+    MeasurementType(-0.0905469452467918), MeasurementType(-1.29155787143731),  MeasurementType(-0.834336476324293),
+    MeasurementType(-1.08344978673423),   MeasurementType(-1.69966623692842),  MeasurementType(-0.777801698154316),
+    MeasurementType(-1.57714784288996),   MeasurementType(-0.971672418368469)};
 
-static constexpr int number_of_particles  = 1000;
-static constexpr double deltaT            = 0.05;
-static constexpr double measurement_noise = 0.2;
+static constexpr int number_of_particles = 1000;
+static constexpr double deltaT           = 0.05;
+static const MeasurementType measurement_noise(0.2);
 static const Eigen::Vector2d process_noise(0.02, 0.1);
 static const Eigen::Vector2d initial_state(2.0, 0.0);
 static const Eigen::Matrix2d initial_covariance = Eigen::Matrix2d::Identity() * 0.01;
@@ -161,7 +174,7 @@ static const Eigen::Matrix2d initial_covariance = Eigen::Matrix2d::Identity() * 
 
 TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
 
-    utility::math::filter::UKF<double, shared::tests::UKFVanDerPolModel> model_filter;
+    utility::math::filter::UKF<double, shared::tests::VanDerPolModel> model_filter;
 
     INFO("Configuring the UKF with")
     INFO("    Time step.........: " << deltaT);
@@ -173,8 +186,8 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
 
     INFO("Feeding noisy measurements into the filter")
     std::array<double, 100> innovations;
-    std::array<std::pair<utility::math::filter::UKF<double, shared::tests::UKFVanDerPolModel>::StateVec,
-                         utility::math::filter::UKF<double, shared::tests::UKFVanDerPolModel>::StateMat>,
+    std::array<std::pair<utility::math::filter::UKF<double, shared::tests::VanDerPolModel>::StateVec,
+                         utility::math::filter::UKF<double, shared::tests::VanDerPolModel>::StateMat>,
                100>
         actual_state;
     for (size_t time_count = 0; time_count < 100; ++time_count) {
@@ -227,7 +240,7 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
 
 TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") {
 
-    utility::math::filter::ParticleFilter<double, shared::tests::PFVanDerPolModel> model_filter;
+    utility::math::filter::ParticleFilter<double, shared::tests::VanDerPolModel> model_filter;
 
     INFO("Configuring the ParticleFilter with")
     INFO("    Time step..........: " << deltaT);
@@ -240,13 +253,12 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
 
     INFO("Feeding noisy measurements into the filter")
     std::array<double, 100> innovations;
-    std::array<std::pair<utility::math::filter::UKF<double, shared::tests::PFVanDerPolModel>::StateVec,
-                         utility::math::filter::UKF<double, shared::tests::PFVanDerPolModel>::StateMat>,
+    std::array<std::pair<utility::math::filter::UKF<double, shared::tests::VanDerPolModel>::StateVec,
+                         utility::math::filter::UKF<double, shared::tests::VanDerPolModel>::StateMat>,
                100>
         actual_state;
     for (size_t time_count = 0; time_count < 100; ++time_count) {
-        model_filter.measure(Eigen::Matrix<double, 1, 1>(measurements[time_count]),
-                             Eigen::Matrix<double, 1, 1>(measurement_noise));
+        model_filter.measure(measurements[time_count], measurement_noise);
         model_filter.time(deltaT);
         innovations[time_count]  = measurements[time_count] - model_filter.get().x();
         actual_state[time_count] = std::make_pair(model_filter.get(), model_filter.getCovariance());
