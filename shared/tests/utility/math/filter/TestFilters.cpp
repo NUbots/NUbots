@@ -26,7 +26,7 @@
 #include "utility/math/filter/eigen/ParticleFilter.h"
 #include "utility/math/filter/eigen/UKF.h"
 
-static const std::array<Eigen::Vector2d, 101> true_state       = {Eigen::Vector2d(2.0, 0.0),
+static const std::array<Eigen::Vector2d, 101> true_state   = {Eigen::Vector2d(2.0, 0.0),
                                                             Eigen::Vector2d(1.99762085441568, -0.0928337297585024),
                                                             Eigen::Vector2d(1.99093577483406, -0.172657352827464),
                                                             Eigen::Vector2d(1.98055246651833, -0.241386903989206),
@@ -127,7 +127,7 @@ static const std::array<Eigen::Vector2d, 101> true_state       = {Eigen::Vector2
                                                             Eigen::Vector2d(-0.960219224918902, 1.19505274841269),
                                                             Eigen::Vector2d(-0.899115258278239, 1.24982181395314),
                                                             Eigen::Vector2d(-0.835163273045814, 1.30903290393871)};
-using MeasurementType                                          = Eigen::Matrix<double, 1, 1>;
+using MeasurementType                                      = Eigen::Matrix<double, 1, 1>;
 static constexpr std::array<MeasurementType, 101> measurements = {
     MeasurementType(1.41950444107972),    MeasurementType(3.05283113500662),   MeasurementType(1.31562902284910),
     MeasurementType(0.997734921435315),   MeasurementType(1.22317216069731),   MeasurementType(1.45104339243095),
