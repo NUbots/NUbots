@@ -160,8 +160,8 @@ namespace platform {
                 // Difference between two quaternions
                 // diff * q = p
                 // diff = p * q^{i}
-                Eigen::Quaternion<Scalar> q(a.w(), a.x(), a.y(), a.z());
-                Eigen::Quaternion<Scalar> p(b.w(), b.x(), b.y(), b.z());
+                Eigen::Quaternion<Scalar> q(a);
+                Eigen::Quaternion<Scalar> p(b);
                 Eigen::Quaternion<Scalar> diff = p * q.inverse();
 
                 // Quaternions are stored internally as (x, y, z, w)
