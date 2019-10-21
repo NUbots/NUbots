@@ -1,7 +1,7 @@
 # Generate our data logging module to handle all the message types
 find_package(PythonInterp 3 REQUIRED)
 
-set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/DataLogging.cpp")
+set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/message_handles.cpp")
 set(config_file "${CMAKE_CURRENT_BINARY_DIR}/data/config/DataLogging.yaml")
 
 # Copy across the files
