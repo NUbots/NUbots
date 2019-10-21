@@ -229,7 +229,7 @@ namespace math {
                 return (mean_centered.transpose() * mean_centered) / (particles.transpose().rows() - 1);
             }
 
-            ParticleList getParticles() const {
+            const ParticleList& getParticles() const {
                 return particles;
             }
 
