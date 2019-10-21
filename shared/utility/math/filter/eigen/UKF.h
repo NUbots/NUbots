@@ -262,8 +262,8 @@ namespace math {
                             predicted_covariance + measurement_variance;
 
                         MeasurementScalar likelihood_exponent =
-                            ((innovation.transpose()
-                              * innovation_variance.llt().solve(Eigen::Matrix<MeasurementScalar, S, S>::Identity()))
+                            (innovation.transpose()
+                             * innovation_variance.llt().solve(Eigen::Matrix<MeasurementScalar, S, S>::Identity())
                              * innovation)
                                 .x();
 
