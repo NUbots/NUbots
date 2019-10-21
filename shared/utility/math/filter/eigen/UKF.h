@@ -283,8 +283,6 @@ namespace math {
             const StateMat& getCovariance() const {
                 return covariance;
             }
-
-            EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         };
     }  // namespace filter
 }  // namespace math
