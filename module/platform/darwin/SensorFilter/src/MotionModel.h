@@ -169,8 +169,12 @@ namespace platform {
             }
 
             StateVec limit(const StateVec& state) {
-                StateVec newState                = state;
-                newState.template segment<4>(QX) = newState.template segment<4>(QX).normalized();
+                StateVec newState = state;
+
+                // Make sure the quaternion remains normalised
+                newState.template segment<4>(QX) =
+                    Eigen::Quaternion<Scalar>(newState.template segment<4>(QX)).normalized().coeffs();
+
                 return newState;
             }
 
