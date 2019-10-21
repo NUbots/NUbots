@@ -178,9 +178,9 @@ namespace platform {
                 return newState;
             }
 
-            StateMat noise(const Scalar&) {
+            StateMat noise(const Scalar& deltaT) {
                 // Return our process noise matrix
-                return process_noise.asDiagonal();
+                return process_noise.asDiagonal() * deltaT;
             }
         };
     }  // namespace darwin
