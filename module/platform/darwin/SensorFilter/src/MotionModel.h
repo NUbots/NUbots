@@ -103,7 +103,6 @@ namespace platform {
                 newState.template segment<3>(VX) =
                     newState.template segment<3>(VX).cwiseProduct(timeUpdateVelocityDecay);
 
-
                 // ********************************
                 // UPDATE ANGULAR POSITION/VELOCITY
                 // ********************************
@@ -124,14 +123,13 @@ namespace platform {
             }
 
             Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
-
                 // Extract our rotation quaternion
                 Eigen::Matrix<Scalar, 3, 3> Rtw =
                     Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).toRotationMatrix().transpose();
 
                 // Make a world gravity vector and rotate it into torso space
                 // Where is world gravity with respest to robot orientation?
-                // Multiplying a matrix (0, 0, G) is equivalent to taking the
+                // Multiplying a matrix with (0, 0, G) is equivalent to taking the
                 // third column of the matrix and multiplying it by G
                 return Rtw.template rightCols<1>() * G;
             }
@@ -149,7 +147,8 @@ namespace platform {
                 return state.template segment<4>(QX);
             }
 
-            // This function is called to determine the difference between position and velicty measurements/predictions
+            // This function is called to determine the difference between position and velocity
+            // measurements/predictions
             Eigen::Matrix<Scalar, 3, 1> difference(const Eigen::Matrix<Scalar, 3, 1>& a,
                                                    const Eigen::Matrix<Scalar, 3, 1>& b) {
                 return a - b;
