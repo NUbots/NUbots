@@ -128,7 +128,7 @@ static const std::array<Eigen::Vector2d, 101> true_state   = {Eigen::Vector2d(2.
                                                             Eigen::Vector2d(-0.899115258278239, 1.24982181395314),
                                                             Eigen::Vector2d(-0.835163273045814, 1.30903290393871)};
 using MeasurementType                                      = Eigen::Matrix<double, 1, 1>;
-static constexpr std::array<MeasurementType, 101> measurements = {
+static const std::array<MeasurementType, 101> measurements = {
     MeasurementType(1.41950444107972),    MeasurementType(3.05283113500662),   MeasurementType(1.31562902284910),
     MeasurementType(0.997734921435315),   MeasurementType(1.22317216069731),   MeasurementType(1.45104339243095),
     MeasurementType(1.44916178431237),    MeasurementType(2.06339677800307),   MeasurementType(1.72195383158608),
@@ -193,7 +193,7 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
     for (size_t time_count = 0; time_count < 100; ++time_count) {
         model_filter.measure(measurements[time_count], measurement_noise);
         model_filter.time(deltaT);
-        innovations[time_count]  = measurements[time_count] - model_filter.get().x();
+        innovations[time_count]  = measurements[time_count].x() - model_filter.get().x();
         actual_state[time_count] = std::make_pair(model_filter.get(), model_filter.getCovariance());
     }
 
@@ -260,7 +260,7 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     for (size_t time_count = 0; time_count < 100; ++time_count) {
         model_filter.measure(measurements[time_count], measurement_noise);
         model_filter.time(deltaT);
-        innovations[time_count]  = measurements[time_count] - model_filter.get().x();
+        innovations[time_count]  = measurements[time_count].x() - model_filter.get().x();
         actual_state[time_count] = std::make_pair(model_filter.get(), model_filter.getCovariance());
     }
 
