@@ -100,19 +100,15 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.99.t
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v9.0.0-1.tar.gz
 COPY --chown=nubots:nubots usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v9.0.0.tar.gz
-RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.2652.tar.gz \
-    https://github.com/intel/intel-graphics-compiler/commit/028414b376d12d7d6fbb4939bca2a31a02b6a18f.patch \
-    -- \
+RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.2714.tar.gz \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='9.0.0'
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.3.2.tar.gz \
+RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.3.3.tar.gz \
     -DRUN_TEST_SUITE=OFF
 
 # Libva and the iHD driver for hardware compression
 RUN install-from-source https://github.com/intel/libva/releases/download/2.5.0/libva-2.5.0.tar.bz2
-RUN install-from-source-with-patches https://github.com/intel/media-driver/archive/intel-media-19.2.1.tar.gz \
-    https://github.com/intel/media-driver/commit/0c3126c1f6e818aaa8e1b2269283aa71535593c7.patch \
-    -- \
+RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.3.0.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
@@ -125,9 +121,8 @@ RUN install-from-source-with-patches https://github.com/intel/media-driver/archi
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh \
-    https://github.com/intel/compute-runtime/archive/19.38.14237.tar.gz \
-    -DNEO_DRIVER_VERSION=19.38.14237 \
+RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/19.40.14409.tar.gz \
+    -DNEO_DRIVER_VERSION=19.40.14409 \
     -DSKIP_ALL_ULT=ON \
     -DSKIP_UNIT_TESTS=ON \
     -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
@@ -159,11 +154,9 @@ COPY --chown=nubots:nubots usr/local/include/armadillo_bits/config.hpp /usr/loca
 
 # Eigen3
 COPY --chown=nubots:nubots usr/local/package/eigen3/deprecated-copy.patch usr/local/package/deprecated-copy.patch
-COPY --chown=nubots:nubots usr/local/package/eigen3/unsigned-types.patch usr/local/package/unsigned-types.patch
 COPY --chown=nubots:nubots usr/local/package/eigen3/cxx17-overalign.patch usr/local/package/cxx17-overalign.patch
 RUN install-from-source-with-patches http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2 \
     /usr/local/package/deprecated-copy.patch \
-    /usr/local/package/unsigned-types.patch \
     /usr/local/package/cxx17-overalign.patch --
 
 # tcmalloc
@@ -202,7 +195,7 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.0.0.tar.gz \
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
+RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.10.1/catch.hpp
 
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.7.tar.gz --with-zlib=/usr/local --without-python
@@ -212,11 +205,11 @@ RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-lin
     --enable-libblkid \
     --enable-libmount \
     --enable-libuuid
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.62.0/glib-2.62.0.tar.gz \
+RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.63.0/glib-2.63.0.tar.gz \
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
-RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_7_1.tar.gz \
+RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_7_2.tar.gz \
     -Ddefault_library=both \
     -Dviewer=false \
     -Dgst-plugin=false \
@@ -228,7 +221,7 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
 RUN install-from-source https://github.com/emcrisostomo/fswatch/releases/download/1.14.0/fswatch-1.14.0.tar.gz
 
 # LibUV
-RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.32.0.tar.gz \
+RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.33.1.tar.gz \
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
