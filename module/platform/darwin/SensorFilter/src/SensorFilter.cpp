@@ -516,13 +516,15 @@ namespace platform {
                                                  MeasurementType::FLAT_FOOT_ODOMETRY());
 
                             Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                            Eigen::Vector4d Rwt_vec(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
+                            Eigen::Vector4d Rwt_vec(Rwt.coeffs());
+                            // Eigen::Vector4d Rwt_vec(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
 
                             // check if we need to reverse our quaternion
                             Eigen::Quaterniond Rwt_filter =
                                 Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX));
-                            Eigen::Vector4d Rwt_filter_vec(
-                                Rwt_filter.w(), Rwt_filter.x(), Rwt_filter.y(), Rwt_filter.z());
+                            Eigen::Vector4d Rwt_filter_vec(Rwt_filter.coeffs());
+                            // Eigen::Vector4d Rwt_filter_vec(
+                            //     Rwt_filter.w(), Rwt_filter.x(), Rwt_filter.y(), Rwt_filter.z());
 
                             // Get the quaternion with the smallest norm
                             Rwt_vec = (Rwt_vec - Rwt_filter_vec).norm() < (Rwt_vec + Rwt_filter_vec).norm() ? Rwt_vec
