@@ -495,8 +495,8 @@ namespace platform {
 
                         if (foot_down && !prev_foot_down) {
                             Eigen::Affine3d Hwt;
-                            Hwt.linear() =
-                                Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX)).matrix();
+                            Hwt.linear() = Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX))
+                                               .toRotationMatrix();
                             Hwt.translation() = Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
 
                             Eigen::Affine3d Htg = utility::motion::kinematics::calculateGroundSpace(Htf, Hwt);
@@ -543,7 +543,7 @@ namespace platform {
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
-                    Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).matrix();
+                    Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
                     Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
                     sensors->Htw      = Hwt.inverse().matrix();
 
