@@ -202,7 +202,7 @@ namespace math {
                         }
 
                         // We want the eigenvector corresponding to the largest eigenvector
-                        mean.segment<4>(row) = eigensolver.eigenvectors().rightCols<1>();
+                        mean.segment<4>(row) = eigensolver.eigenvectors().template rightCols<1>();
 
                         // Update row counter
                         row += 4;
@@ -221,7 +221,7 @@ namespace math {
             }
 
             StateVec getBest() const {
-                return particles.leftCols<1>();
+                return particles.template leftCols<1>();
             }
 
             StateMat getCovariance() const {
