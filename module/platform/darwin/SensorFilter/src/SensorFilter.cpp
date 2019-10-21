@@ -527,7 +527,7 @@ namespace platform {
                             //     Rwt_filter.w(), Rwt_filter.x(), Rwt_filter.y(), Rwt_filter.z());
 
                             // Get the quaternion with the smallest norm
-                            Rwt_vec = (Rwt_vec - Rwt_filter_vec).norm() < (Rwt_vec + Rwt_filter_vec).norm() ? Rwt_vec
+                            Rwt_vec = (Rwt_filter_vec - Rwt_vec).norm() < (Rwt_filter_vec + Rwt_vec).norm() ? Rwt_vec
                                                                                                             : -Rwt_vec;
 
                             // do a foot based orientation update
@@ -542,6 +542,7 @@ namespace platform {
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
+                    log("bias: ", Eigen::Vector3d(o.segment<3>(MotionModel<double>::BX)).transpose());
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
