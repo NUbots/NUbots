@@ -162,10 +162,6 @@ namespace math {
                 return particles.rowwise().mean();
             }
 
-            StateVec getBest() const {
-                return particles.template leftCols<1>();
-            }
-
             StateMat getCovariance() const {
                 auto mean_centered = particles.transpose().rowwise() - particles.transpose().colwise().mean();
                 return (mean_centered.transpose() * mean_centered) / (particles.transpose().rows() - 1);
