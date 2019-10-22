@@ -93,7 +93,19 @@ namespace math {
                     }
                 }
                 else {
-                    throw std::runtime_error("Cholesky decomposition failed");
+                    switch (cholesky.info()) {
+                        case Eigen::NumericalIssue:
+                            throw std::runtime_error(
+                                "Cholesky decomposition failed. The provided data did not satisfy the prerequisites.");
+                        case Eigen::NoConvergence:
+                            throw std::runtime_error(
+                                "Cholesky decomposition failed. Iterative procedure did not converge.");
+                        case Eigen::InvalidInput:
+                            throw std::runtime_error(
+                                "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
+                                "improperly called. When assertions are enabled, such errors trigger an assert.");
+                        default: throw std::runtime_error("Cholesky decomposition failed. Some other reason.");
+                    }
                 }
 
                 return points;
