@@ -4,6 +4,14 @@ import os
 import b
 import re
 import sys
+import shutil
+import subprocess
+import array
+import fcntl
+import pty
+import tty
+import signal
+import termios
 
 # Try to import docker, if we are already in docker this will fail
 try:
@@ -15,6 +23,56 @@ except:
     client = None
 
 repository = "nubots"
+user = "nubots"
+directory = "NUbots"
+
+
+# Based on the implementation at https://gist.github.com/jathanism/4489235
+class WrapPty:
+    def __init__(self):
+        self.fd = None
+
+    def _set_pty_size(self):
+        buf = array.array("h", [0, 0, 0, 0])
+        fcntl.ioctl(pty.STDOUT_FILENO, termios.TIOCGWINSZ, buf, True)
+        fcntl.ioctl(self.fd, termios.TIOCSWINSZ, buf)
+
+    def _signal_winch(self, signum, frame):
+        """
+        Signal handler for SIGWINCH - window size has changed.
+        """
+        self._set_pty_size()
+
+    def spawn(self, args):
+        pid, self.fd = pty.fork()
+
+        if len(args) == 0:
+            args = ["/bin/bash"]
+
+        if pid == pty.CHILD:
+            # If no arguments run bash
+            os.execlp(args[0], *args)
+
+        old_handler = signal.signal(signal.SIGWINCH, self._signal_winch)
+        try:
+            mode = tty.tcgetattr(pty.STDIN_FILENO)
+            tty.setraw(pty.STDIN_FILENO)
+            restore = True
+        except tty.error:  # This is the same as termios.error
+            restore = False
+
+        self._set_pty_size()
+
+        try:
+            pty._copy(self.fd)
+        except (IOError, OSError):
+            if restore:
+                tty.tcsetattr(pty.STDIN_FILENO, tty.TCSAFLUSH, mode)
+
+        os.close(self.fd)
+        signal.signal(signal.SIGWINCH, old_handler)
+        self.fd = None
+        return os.waitpid(pid, 0)[1] >> 8
 
 
 def is_docker():
@@ -23,16 +81,61 @@ def is_docker():
 
 
 def build_platform(platform):
+    from tqdm import tqdm
+
     tag = "{}:{}".format(repository, platform)
     dockerdir = os.path.join(b.project_dir, "docker")
 
-    # Build the image
-    stream = client.api.build(
-        path=dockerdir, tag=tag, buildargs={"platform": platform}, quiet=False, pull=True, rm=True, decode=True
-    )
+    # Pull the latest version from dockerhub
+    progress = {}
+    for event in client.api.pull(repository="nubots/nubots", tag=platform, stream=True, decode=True):
+        try:
+            id = int(event["id"], 16)
+            status = event["status"]
 
-    # Print the progress as it happens
-    for event in stream:
+            # If this is the first time we have seen this id, make a tqdm progress bar for it
+            if id not in progress:
+                progress[id] = {"bar": tqdm(unit="B", unit_scale=True, dynamic_ncols=True, leave=True), "value": 0}
+
+            p = progress[id]
+            bar = p["bar"]
+
+            # Update the status
+            bar.set_description("{} - {}".format(id, status))
+
+            # If we have a value in progressDetail
+            if (
+                "progressDetail" in event
+                and "current" in event["progressDetail"]
+                and "total" in event["progressDetail"]
+            ):
+                current = int(event["progressDetail"]["current"])
+                total = int(event["progressDetail"]["total"])
+
+                bar.total = total
+                bar.n = current
+
+            # Complete statuses need to finish off the bar
+            if "complete" in status:
+                if bar.total is not None:
+                    bar.update(bar.total - bar.n)
+
+        except KeyError:
+            print(event["status"])
+        except ValueError:
+            print(event["status"])
+
+    # Build the image
+    for event in client.api.build(
+        path=dockerdir,
+        tag=tag,
+        buildargs={"platform": platform},
+        quiet=False,
+        pull=True,
+        rm=True,
+        decode=True,
+        cache_from=["nubots:{}".format(platform), "nubots/nubots:{}".format(platform)],
+    ):
         if "stream" in event:
             sys.stdout.write(event["stream"])
 
@@ -143,10 +246,17 @@ def run_on_docker(func):
                 code_to_cwd = os.path.relpath(os.getcwd(), b.project_dir)
                 cwd_to_code = os.path.relpath(b.project_dir, os.getcwd())
 
+                # If we are running in WSL we need to translate our path to a windows one for docker
+                bind_path = (
+                    b.project_dir
+                    if shutil.which("wslpath") is None
+                    else subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
+                )
+
                 container = client.containers.create(
                     tag,
                     command=["{}/b".format(cwd_to_code), *sys.argv[1:]],
-                    working_dir="/home/{}/{}/{}".format(repository, "NUbots", code_to_cwd),
+                    working_dir="/home/{}/{}/{}".format(user, directory, code_to_cwd),
                     auto_remove=True,
                     tty=True,
                     stdin_open=True,
@@ -155,14 +265,14 @@ def run_on_docker(func):
                     mounts=[
                         docker.types.Mount(
                             type="bind",
-                            source=b.project_dir,
-                            target="/home/{}/{}".format(repository, "NUbots"),
+                            source=bind_path,
+                            target="/home/{}/{}".format(user, directory),
                             consistency="cached",
                         ),
                         docker.types.Mount(
                             type="volume",
                             source=build_volume.name,
-                            target="/home/{}/build".format(repository),
+                            target="/home/{}/build".format(user),
                             consistency="delegated",
                         ),
                     ],

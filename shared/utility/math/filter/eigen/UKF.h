@@ -83,10 +83,10 @@ namespace math {
                 points.col(0) = mean;
 
                 // Get our Cholesky decomposition
-                Eigen::LLT<StateMat> cholesky(sigma_weight * covariance);
+                Eigen::LLT<StateMat, Eigen::Upper> cholesky(sigma_weight * covariance);
                 if (cholesky.info() == Eigen::Success) {
                     // Put our values in either end of the matrix
-                    StateMat chol = cholesky.matrixL().toDenseMatrix();
+                    StateMat chol = cholesky.matrixU().toDenseMatrix();
                     for (unsigned int i = 1; i < Model::size + 1; ++i) {
                         points.col(i)               = (mean + chol.col(i - 1));
                         points.col(i + Model::size) = (mean - chol.col(i - 1));
