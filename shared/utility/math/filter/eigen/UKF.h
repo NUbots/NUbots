@@ -83,7 +83,9 @@ namespace math {
                 points.col(0) = mean;
 
                 // Get our Cholesky decomposition
-                Eigen::LLT<StateMat> cholesky(sigma_weight * covariance);
+                // Impose positive semi-definiteness on the covariance matrix
+                Eigen::LLT<StateMat> cholesky(sigma_weight
+                                              * covariance.unaryExpr([](const Scalar& c) { return std::abs(c); }));
                 if (cholesky.info() == Eigen::Success) {
                     // Put our values in either end of the matrix
                     StateMat chol = cholesky.matrixL().toDenseMatrix();
@@ -195,7 +197,6 @@ namespace math {
 
             template <typename... Args>
             void time(const Scalar& dt, const Args&... params) {
-
                 // Generate our sigma points
                 sigma_points = generate_sigma_points(mean, covariance, covariance_sigma_weight);
 
