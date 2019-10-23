@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-from dockerise import run_on_docker
-import b
 import os
 import pty
+
+import b
+from dockerise import run_on_docker
 
 
 @run_on_docker

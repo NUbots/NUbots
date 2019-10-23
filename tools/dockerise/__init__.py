@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import os
-import b
 import re
-import sys
 import shutil
 import subprocess
+import sys
+
+import b
 
 from .wrappty import WrapPty
 

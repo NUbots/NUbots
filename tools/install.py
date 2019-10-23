@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-import os
 import glob
-import b
+import os
 import re
-from dockerise import run_on_docker
+import subprocess
 
 from termcolor import cprint
-import subprocess
+
+import b
+from dockerise import run_on_docker
 
 
 @run_on_docker

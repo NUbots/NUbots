@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-import os
 import array
 import fcntl
+import os
 import pty
-import tty
 import signal
 import termios
+import tty
+
 
 # Based on the implementation at https://gist.github.com/jathanism/4489235
 class WrapPty:
