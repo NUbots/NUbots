@@ -28,4 +28,10 @@ git ls-files | grep '.*\.py$' \
 ret=$(tail -n +2 /var/tmp/formatting.log | awk '{ sum += $7; } END {print sum}')
 
 echo "$ret files are not formatted correctly"
+
+# Check the include sorting of files
+isort -c
+isort_ret=$?
+ret=$((${isort_ret} + ${ret}))
+
 exit $ret
