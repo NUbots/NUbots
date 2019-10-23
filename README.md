@@ -1,8 +1,8 @@
 # NUbots Codebase [![Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master)](https://buildkite.com/nubots/nubots)
 
-NUbots is a team in the University of Newcastle’s robotics research group focused on developing humanoid soccer-playing robots for the international RoboCup competition.
+NUbots is a team in the University of Newcastle's robotics research group focused on developing humanoid soccer-playing robots for the international RoboCup competition.
 The team is made up of a multidisciplinary team of students and academics. The team develops both hardware and software for the robots.
-This codebase is the current state of our development efforts to complete in the competition as well as active research projects within the laboratory.
+This codebase is the current state of our development efforts to compete in the competition as well as active research projects within the laboratory.
 
 # Setting up the Development Environment
 
@@ -76,7 +76,7 @@ brew cask install docker
 ```
 
 4. Run the docker app that was installed which should add a docker icon to the menu bar.
-5. By default the docker install will allocate 2GB of memory to docker images. When building the images this is insufficent for some of the libraries and will result in an error. In the menu bar go to advanced settings and increase the memory available.
+5. By default the docker install will allocate 2GB of memory to docker images. When building the images this is insufficient for some of the libraries and will result in an error. In the menu bar go to advanced settings and increase the memory available.
 6. Download the codebase
 
 ```sh
@@ -101,7 +101,7 @@ Depending on if you want to run the code on your personal computer or one of the
 
 ## Selecting a platform
 
-To select the platform you use the target command in the `b` script. For example to select the `generic` platform which is used when running code on your own computer. Run the following:
+To select the platform you use the `target` command in the `b` script. For example to select the `generic` platform which is used when running code on your own computer. Run the following:
 
 ```sh
 ./b target generic
@@ -113,7 +113,7 @@ This will download and setup the generic image and set it as your default image 
 ./b target nuc7i7bnh
 ```
 
-This would build code that is optimised specificially to run on the platform that is currently used in the NUgus robots. Note that when building for other platforms than generic, the code may not be able to execute on your own computer depending on the CPU that you have.
+This would build code that is optimised specifically to run on the platform that is currently used in the NUgus robots. Note that when building for other platforms than generic, the code may not be able to execute on your own computer depending on the CPU that you have.
 
 ## Configuring the code
 
@@ -124,10 +124,10 @@ To configure the code for building run:
 ```
 
 This will configure the code for building.
-If you want to change settings you can add the cmake flags to the end of the configure call such as the following command that will build the code with static libraries.
+If you want to change settings you can add the cmake flags to the end of the configure call such as the following command that will build the code with static libraries. The `--` is needed to stop python from processing the arguments and allow them to be passed on to cmake.
 
 ```sh
-./b configure -DSTATIC_LIBRARIES=On
+./b configure -- -DSTATIC_LIBRARIES=On
 ```
 
 Additionally if you wish to perform interactive configuration (with ccmake) you can run
@@ -151,8 +151,8 @@ If you had not run configure first, this will also configure the code with a def
 
 Once you have built code in the local docker container, you may want to run binaries that do not depend on the robots hardware.
 For example those that use gazebo simulations.
-To run commands like these you use the run command of b.
-For example, to run the nusighttest binary run:
+To run commands like these you use the `run` command of `b`.
+For example, to run the `nusighttest` binary run:
 
 ```sh
 ./b run nusighttest
@@ -160,14 +160,14 @@ For example, to run the nusighttest binary run:
 
 ## Installing the code on a robot
 
-To install the code on a robot you should use the install command of the b script.
+To install the code on a robot you should use the `install` command of the `b` script.
 For example, to install the code onto the robot nugus1 you should run the following.
 
 ```sh
 ./b install nugus1
 ```
 
-Note that you can replace nugus1 with any of the preconfigured robot names, or an IP address of a target robot.
+Note that you can replace nugus1 with any of the pre-configured robot names, or an IP address of a target robot.
 
 `./b install` also accepts the following options
 
@@ -219,7 +219,7 @@ Finally, once that script has finished, you must run one more command.
 
 This command will end by rebooting the robot. When this happens be sure to remove the USB installation drive from robot so that you may boot into the new system.
 
-Thes final two scripts can be found at [doc/ArchInstall/arch-chroot_install.sh](doc/ArchInstall/arch-chroot_install.sh) and [doc/ArchInstall/arch-post_install.sh](doc/ArchInstall/arch-post_install.sh)
+The final two scripts can be found at [doc/ArchInstall/arch-chroot_install.sh](doc/ArchInstall/arch-chroot_install.sh) and [doc/ArchInstall/arch-post_install.sh](doc/ArchInstall/arch-post_install.sh)
 
 ## Setting up WiFi manually
 
