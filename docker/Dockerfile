@@ -251,6 +251,7 @@ RUN pip install \
     cmake-format \
     black \
     pylint \
+    isort \
     termcolor \
     stringcase \
     Pillow \

@@ -27,5 +27,6 @@ def run(**kwargs):
             print("Formatting {} with cmake-format".format(f))
             call(["cmake-format", "-i", f])
         elif f.endswith((".py")):
-            print("Formatting {} with black".format(f))
+            print("Formatting {} with isort and black".format(f))
+            call(["isort", f])
             call(["black", f])
