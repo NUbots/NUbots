@@ -9,7 +9,7 @@
 FROM archlinux:20191006
 
 # Arch recommends running this as the first command of the docker image
-RUN pacman -Syu --no-confirm
+RUN pacman -Syu --noconfirm
 
 # Create the nubots user, and setup sudo so no password is required
 RUN useradd --no-log-init -m -U nubots
