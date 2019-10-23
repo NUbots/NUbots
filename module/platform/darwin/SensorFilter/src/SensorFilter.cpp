@@ -464,12 +464,10 @@ namespace platform {
                      ************************************************/
 
                     // Calculate our time offset from the last read
-                    double deltaT =
+                    double deltaT = std::max(
                         (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
-                        / double(NUClear::clock::period::den);
-
-                    // Time update
-                    motionFilter.time(deltaT);
+                            / double(NUClear::clock::period::den),
+                        0.0);
 
                     // Calculate accelerometer noise factor
                     Eigen::Matrix3d acc_noise = config.motionFilter.noise.measurement.accelerometer
@@ -515,23 +513,9 @@ namespace platform {
                                                  config.motionFilter.noise.measurement.flatFootOdometry,
                                                  MeasurementType::FLAT_FOOT_ODOMETRY());
 
-                            Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                            Eigen::Vector4d Rwt_vec(Rwt.coeffs());
-                            // Eigen::Vector4d Rwt_vec(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
-
-                            // check if we need to reverse our quaternion
-                            Eigen::Quaterniond Rwt_filter =
-                                Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX));
-                            Eigen::Vector4d Rwt_filter_vec(Rwt_filter.coeffs());
-                            // Eigen::Vector4d Rwt_filter_vec(
-                            //     Rwt_filter.w(), Rwt_filter.x(), Rwt_filter.y(), Rwt_filter.z());
-
-                            // Get the quaternion with the smallest norm
-                            Rwt_vec = (Rwt_filter_vec - Rwt_vec).norm() < (Rwt_filter_vec + Rwt_vec).norm() ? Rwt_vec
-                                                                                                            : -Rwt_vec;
-
                             // do a foot based orientation update
-                            motionFilter.measure(Rwt_vec,
+                            Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
+                            motionFilter.measure(Rwt.coeffs(),
                                                  config.motionFilter.noise.measurement.flatFootOrientation,
                                                  MeasurementType::FLAT_FOOT_ORIENTATION());
                         }
@@ -540,9 +524,11 @@ namespace platform {
                         }
                     }
 
+                    // Time update
+                    motionFilter.time(deltaT);
+
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
-                    log("bias: ", Eigen::Vector3d(o.segment<3>(MotionModel<double>::BX)).transpose());
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
