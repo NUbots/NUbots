@@ -84,7 +84,7 @@ namespace behaviour {
         inline Eigen::Vector3d objectDirectionFromScreenAngular(const Eigen::Vector2d& screen_angular) {
             if (std::fmod(std::fabs(screen_angular(0)), M_PI) == M_PI_2
                 || std::fmod(std::fabs(screen_angular(1)), M_PI) == M_PI_2) {
-                return {0,0,0};
+                return {0, 0, 0};
             }
             double tanTheta        = std::tan(screen_angular(0));
             double tanPhi          = std::tan(screen_angular(1));
@@ -97,7 +97,7 @@ namespace behaviour {
             y = x * tanTheta;
             z = x * tanPhi;
 
-            return {x,y,z};
+            return {x, y, z};
         }
 
         HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment)
@@ -265,14 +265,14 @@ namespace behaviour {
                               Eigen::Vector2d currentCentroid = Eigen::Vector2d({0, 0});
                               if (ballMaxPriority) {
                                   for (auto& ob : ballFixationObjects.balls) {
-                                      currentCentroid += (ob.screen_angular.cast<double>()
-                                                         / double(ballFixationObjects.balls.size()));
+                                      currentCentroid +=
+                                          (ob.screen_angular.cast<double>() / double(ballFixationObjects.balls.size()));
                                   }
                               }
                               else {
                                   for (auto& ob : goalFixationObjects.goals) {
-                                      currentCentroid += ob.screen_angular.cast<double>()
-                                                         / double(goalFixationObjects.goals.size());
+                                      currentCentroid +=
+                                          ob.screen_angular.cast<double>() / double(goalFixationObjects.goals.size());
                                   }
                               }
                               Eigen::Vector2d currentCentroid_world =
@@ -434,7 +434,7 @@ namespace behaviour {
             std::vector<Eigen::Vector2d> fixationPoints;
             std::vector<Eigen::Vector2d> fixationSizes;
             Eigen::Vector2d currentPos = {sensors.servo.at(ServoID::HEAD_YAW).present_position,
-                                     sensors.servo.at(ServoID::HEAD_PITCH).present_position};
+                                          sensors.servo.at(ServoID::HEAD_PITCH).present_position};
 
             for (uint i = 0; i < fixationObjects.balls.size(); i++) {
                 // TODO: fix arma meat errors here
@@ -513,8 +513,8 @@ namespace behaviour {
         }
 
         Eigen::Vector2d HeadBehaviourSoccer::getIMUSpaceDirection(const KinematicsModel& kinematicsModel,
-                                                             const Eigen::Vector2d& screenAngles,
-                                                             Rotation3D headToIMUSpace) {
+                                                                  const Eigen::Vector2d& screenAngles,
+                                                                  Rotation3D headToIMUSpace) {
 
             // Eigen::Vector3d lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
             Eigen::Vector3d lookVectorFromHead = convert(sphericalToCartesian(
@@ -524,7 +524,8 @@ namespace behaviour {
             // Rotate target angles to World space
             Eigen::Vector3d lookVector = convert(headToIMUSpace) * lookVectorFromHead;
             // Compute inverse kinematics for head direction angles
-            std::vector<std::pair<ServoID, float>> goalAngles = calculateCameraLookJoints(kinematicsModel, convert(lookVector));
+            std::vector<std::pair<ServoID, float>> goalAngles =
+                calculateCameraLookJoints(kinematicsModel, convert(lookVector));
 
             Eigen::Vector2d result;
             for (auto& angle : goalAngles) {
@@ -542,10 +543,10 @@ namespace behaviour {
         Returns vector of Eigen::Vector2d
         */
         std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                     Balls fixationObjects,
-                                                                     SearchType sType,
-                                                                     const Sensors&,
-                                                                     const Image::Lens& lens) {
+                                                                          Balls fixationObjects,
+                                                                          SearchType sType,
+                                                                          const Sensors&,
+                                                                          const Image::Lens& lens) {
             // If there is nothing of interest, we search fot points of interest
             // log("getting search points");
             if (fixationObjects.balls.size() == 0) {
@@ -574,11 +575,10 @@ namespace behaviour {
 
                     // Eigen::Vector3d adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
-                    // lookVectorFromHead;
-                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
-                    // lookVectorFromHead;
-                    // std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
+                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch())
+                    // * lookVectorFromHead; Eigen::Vector3d adjustedLookVector =
+                    // Rotation3D::createRotationY(-pitch_plan_value) * lookVectorFromHead; std::vector<
+                    // std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
                     // adjustedLookVector);
 
                     // for(auto& angle : goalAngles){
@@ -607,13 +607,16 @@ namespace behaviour {
             float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
             Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            Eigen::Vector2d tr =
+                boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 2
-            padding       = {view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
+            padding = {view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d br =
+                boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
-            padding       = {-view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            padding = {-view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d bl =
+                boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 4
             padding = {-view_padding_radians, view_padding_radians};
             Eigen::Vector2d tl =
@@ -633,10 +636,10 @@ namespace behaviour {
         }
 
         std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                     Goals fixationObjects,
-                                                                     SearchType sType,
-                                                                     const Sensors&,
-                                                                     const Image::Lens& lens) {
+                                                                          Goals fixationObjects,
+                                                                          SearchType sType,
+                                                                          const Sensors&,
+                                                                          const Image::Lens& lens) {
             // If there is nothing of interest, we search fot points of interest
             // log("getting search points");
             if (fixationObjects.goals.size() == 0) {
@@ -665,11 +668,10 @@ namespace behaviour {
 
                     // Eigen::Vector3d adjustedLookVector = lookVectorFromHead;
                     // TODO: fix:
-                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch()) *
-                    // lookVectorFromHead;
-                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) *
-                    // lookVectorFromHead;
-                    // std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
+                    // Eigen::Vector3d adjustedLookVector = Rotation3D::createRotationX(sensors.Htw.rotation().pitch())
+                    // * lookVectorFromHead; Eigen::Vector3d adjustedLookVector =
+                    // Rotation3D::createRotationY(-pitch_plan_value) * lookVectorFromHead; std::vector<
+                    // std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
                     // adjustedLookVector);
 
                     // for(auto& angle : goalAngles){
@@ -698,13 +700,16 @@ namespace behaviour {
             double view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
             // 1
             Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            Eigen::Vector2d tr =
+                boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 2
-            padding       = {view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
+            padding = {view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d br =
+                boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
             // 3
-            padding       = {-view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            padding = {-view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d bl =
+                boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
             // 4
             padding = {-view_padding_radians, view_padding_radians};
             Eigen::Vector2d tl =

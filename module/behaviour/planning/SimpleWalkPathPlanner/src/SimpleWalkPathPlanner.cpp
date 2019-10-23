@@ -186,7 +186,7 @@ namespace behaviour {
                     Eigen::Affine3d Htw;
                     Htw.matrix() = sensors.Htw;
 
-                    auto now            = NUClear::clock::now();
+                    auto now = NUClear::clock::now();
                     float timeSinceBallSeen =
                         std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
                         * (1.0f / std::nano::den);

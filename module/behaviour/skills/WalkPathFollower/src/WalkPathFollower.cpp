@@ -338,7 +338,7 @@ namespace behaviour {
             Transform2D localTarget = currentState.worldToLocal(targetState);  // creating local target first
             int angleSign           = (localTarget.angle() < 0) ? -1 : 1;      // angle must be normalised.
 
-            double rotationSpeed      = angleSign * cfg_.walk_about_rotational_speed;
+            double rotationSpeed           = angleSign * cfg_.walk_about_rotational_speed;
             Eigen::Vector2d translationVec = Eigen::Vector2d{(localTarget.xy())}.norm();
 
             double translationAngle = utility::math::angle::vectorToBearing(translationVec);

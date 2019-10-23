@@ -77,21 +77,21 @@ namespace behaviour {
             /*! @brief Converts from camera space direction to IMU space direction
              */
             Eigen::Vector2d getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
-                                            const Eigen::Vector2d& screenAngles,
-                                            utility::math::matrix::Rotation3D headToIMUSpace);
+                                                 const Eigen::Vector2d& screenAngles,
+                                                 utility::math::matrix::Rotation3D headToIMUSpace);
 
             /*! @brief Gets points which allow for simultaneous search and viewing of key objects
              */
             std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    message::vision::Balls fixationObjects,
-                                                    message::behaviour::SoccerObjectPriority::SearchType sType,
-                                                    const message::input::Sensors& sensors,
-                                                    const message::input::Image::Lens& lens);
+                                                         message::vision::Balls fixationObjects,
+                                                         message::behaviour::SoccerObjectPriority::SearchType sType,
+                                                         const message::input::Sensors& sensors,
+                                                         const message::input::Image::Lens& lens);
             std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    message::vision::Goals fixationObjects,
-                                                    message::behaviour::SoccerObjectPriority::SearchType sType,
-                                                    const message::input::Sensors& sensors,
-                                                    const message::input::Image::Lens& lens);
+                                                         message::vision::Goals fixationObjects,
+                                                         message::behaviour::SoccerObjectPriority::SearchType sType,
+                                                         const message::input::Sensors& sensors,
+                                                         const message::input::Image::Lens& lens);
 
             /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the
              * bounding box of the objects
