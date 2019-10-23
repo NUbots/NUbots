@@ -3,6 +3,7 @@
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 
@@ -34,6 +35,14 @@ def build_platform(platform):
 
     tag = "{}:{}".format(repository, platform)
     dockerdir = os.path.join(b.project_dir, "docker")
+
+    # Go through all the files and try to ensure that their permissions are correct
+    # Otherwise caching will not work properly
+    for dir_name, subdirs, files in os.walk(dockerdir):
+        for f in files:
+            p = os.path.join(dir_name, f)
+            current = stat.S_IMODE(os.lstat(p).st_mode)
+            os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
 
     # Pull the latest version from dockerhub
     progress = {}
