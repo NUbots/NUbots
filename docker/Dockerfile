@@ -11,6 +11,7 @@ FROM nubots/archlinux:latest
 # Create the nubots user, and setup sudo so no password is required
 RUN useradd --no-log-init -m -U nubots
 COPY --chown=root:root etc/sudoers.d/user /etc/sudoers.d/user
+RUN chmod 440 /etc/sudoers.d/user 
 
 # Add a script that installs packages
 COPY --chown=nubots:nubots usr/local/bin/install-package /usr/local/bin/install-package
