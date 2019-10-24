@@ -111,13 +111,12 @@ namespace platform {
                 Eigen::Quaternion<Scalar> Rwt(state.template segment<4>(QX));
 
                 // Apply our rotational velocity to our orientation
-                Eigen::Quaternion<Scalar> qGyro;
-                qGyro.vec() = state.template segment<3>(WX) * deltaT * Scalar(0.5);
-                qGyro.w()   = Scalar(1.0) - Scalar(0.5) * qGyro.vec().squaredNorm();
-                qGyro       = Rwt * qGyro;
-
+                // https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
                 // Quaternions are stored internally as (x, y, z, w)
-                newState.template segment<4>(QX) = qGyro.coeffs();
+                const Scalar t_2 = deltaT * Scalar(0.5);
+                newState.template segment<4>(QX) =
+                    Rwt.coeffs()
+                    + t_2 * (Eigen::Quaternion<Scalar>(0.0, state[WX], state[WY], state[WZ]) * Rwt).coeffs();
 
                 return newState;
             }
