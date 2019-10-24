@@ -463,11 +463,10 @@ namespace platform {
                      *             Motion (IMU+Odometry)            *
                      ************************************************/
 
-                    // Calculate our time offset from the last read
-                    double deltaT = std::max(
-                        (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
-                            / double(NUClear::clock::period::den),
-                        0.0);
+                    // Gyroscope measurement update
+                    motionFilter.measure(sensors->gyroscope,
+                                         config.motionFilter.noise.measurement.gyroscope,
+                                         MeasurementType::GYROSCOPE());
 
                     // Calculate accelerometer noise factor
                     Eigen::Matrix3d acc_noise = config.motionFilter.noise.measurement.accelerometer
@@ -475,14 +474,8 @@ namespace platform {
                                                    * (sensors->accelerometer.norm() - std::abs(G)))
                                                       * config.motionFilter.noise.measurement.accelerometerMagnitude;
 
-                    // Accelerometer measurment update
+                    // Accelerometer measurement update
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
-
-                    // Gyroscope measurement update
-                    motionFilter.measure(sensors->gyroscope,
-                                         config.motionFilter.noise.measurement.gyroscope,
-                                         MeasurementType::GYROSCOPE());
-
 
                     for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
                         bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
@@ -523,6 +516,12 @@ namespace platform {
                             previous_foot_down[side] = false;
                         }
                     }
+
+                    // Calculate our time offset from the last read
+                    double deltaT = std::max(
+                        (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
+                            / double(NUClear::clock::period::den),
+                        0.0);
 
                     // Time update
                     motionFilter.time(deltaT);
