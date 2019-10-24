@@ -156,12 +156,12 @@ namespace platform {
             // This function is called to determine the difference between quaternion measurements/predictions
             Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
                                                    const Eigen::Matrix<Scalar, 4, 1>& b) {
-                // Difference between two quaternions
-                // diff * q = p
-                // diff = p * q^{i}
-                Eigen::Quaternion<Scalar> q(a);
-                Eigen::Quaternion<Scalar> p(b);
-                Eigen::Quaternion<Scalar> diff = p * q.inverse();
+                // Difference between two rotations
+                // We want the rotation needed to get from quat_b to quat_a
+                // https://www.gamedev.net/forums/topic/423462-rotation-difference-between-two-quaternions/?do=findComment&comment=3818213
+                Eigen::Quaternion<Scalar> quat_a(a);
+                Eigen::Quaternion<Scalar> quat_b(b);
+                Eigen::Quaternion<Scalar> diff = quat_b.inverse() * quat_a;
 
                 // Quaternions are stored internally as (x, y, z, w)
                 return diff.coeffs();
