@@ -180,6 +180,18 @@ Note that you can replace nugus1 with any of the pre-configured robot names, or 
 |  -co   | Overwrite all config files on the target                                       |
 |  -ci   | Ignore all changes to config files (installs no config files)                  |
 
+## Editing config files in the build directory
+
+When running code on your local machine, it may be necessary to edit a configuration file (or other data file). The preferred method for doing this is to edit the file in the NUbots source directory and rebuilding (`./b build`). However, certain modules generate their configuration at build time, meaning there is no file in the source directory to edit.
+
+To work around this, you can use the `edit` command of `b`. For example, to edit the `DataLogging` configuration file run:
+
+```sh
+./b edit config/DataLogging.yaml
+```
+
+The `edit` command will use the editor that is defined in your host shell (check the `EDITOR` enviroment variable). If this is not set then it will default to the nano text editor. Supported values for `EDITOR` (for `./b edit`) and `nano` and `vim`.
+
 # Flashing a new robot
 
 To install Arch Linux (our OS of choice) on to a robot perform the following instructions

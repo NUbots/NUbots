@@ -234,6 +234,7 @@ def run_on_docker(func):
                             consistency="delegated",
                         ),
                     ],
+                    environment={"EDITOR": os.environ.get("EDITOR", "nano")},
                 )
 
                 # Attach a pty to this terminal
