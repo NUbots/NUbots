@@ -21,8 +21,10 @@
 #define UTILITY_MATH_QUATERNION_H
 
 #include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 #include <Eigen/Geometry>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 namespace utility {
@@ -31,13 +33,15 @@ namespace math {
         // Take the mean of list of quaternions
         //
         // Implementation based on https://github.com/tolgabirdal/averaging_quaternions
-        template <Iterator It, typename QType = decltype(*std::declval<It>()), typename Scalar = Qtype::Scalar>
-        inline QType mean(const It& begin, const It& end) {
+        template <typename Iterator,
+                  typename QType  = std::remove_cv_t<std::remove_reference_t<decltype(*std::declval<Iterator>())>>,
+                  typename Scalar = typename QType::Scalar>
+        inline QType mean(const Iterator& begin, const Iterator& end) {
             // Initialise our accumulator matrix
             Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
 
             // Accumlate the quaternions across all particles
-            for (It it = begin; it != end; ++it) {
+            for (Iterator it = begin; it != end; ++it) {
                 // Convert quaternion to vec4
                 Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
 
@@ -55,7 +59,15 @@ namespace math {
             }
 
             // We want the eigenvector corresponding to the largest eigenvector
-            return QType(eigensolver.eigenvectors().rightCols<1>());
+            return QType(eigensolver.eigenvectors().template rightCols<1>());
+        }
+
+        template <typename QType>
+        inline QType difference(const QType& a, const QType& b) {
+            // Difference between two rotations
+            // Calculate the rotation from a to b
+            // https://www.gamedev.net/forums/topic/423462-rotation-difference-between-two-quaternions/?do=findComment&comment=3818213
+            return a.inverse() * b;
         }
     }  // namespace quaternion
 }  // namespace math
