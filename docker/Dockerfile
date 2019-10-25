@@ -267,7 +267,9 @@ RUN install-package \
     gdb \
     valgrind \
     colordiff \
-    parallel
+    parallel \
+    vim \
+    nano
 
 # Copy ssh keys over to the system
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
