@@ -158,10 +158,16 @@ namespace platform {
             // This function is called to determine the difference between quaternion measurements/predictions
             Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
                                                    const Eigen::Matrix<Scalar, 4, 1>& b) {
-                // Difference between two rotations
-                return utility::math::quaternion:: : difference(Eigen::Quaternion<Scalar>(a),
-                                                                Eigen::Quaternion<Scalar>(b))
-                                                         .coeffs();
+                // Find the rotation needed to get from orientation a to orientation b
+                Eigen::Quaternion<Scalar> diff =
+                    utility::math::quaternion::difference(Eigen::Quaternion<Scalar>(a), Eigen::Quaternion<Scalar>(b));
+
+                // Take the difference with the identity rotation (1, 0, 0, 0)
+                // If a and b represent very similar orientations, then the real part will be very close to one and the
+                // imaginary part will be very close to (0, 0, 0)
+                diff.w() -= Scalar(1);
+
+                return diff.coeffs();
             }
 
             StateVec limit(const StateVec& state) {
