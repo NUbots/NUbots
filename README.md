@@ -190,7 +190,7 @@ To work around this, you can use the `edit` command of `b`. For example, to edit
 ./b edit config/DataLogging.yaml
 ```
 
-The `edit` command will use the editor that is defined in your host shell (check the `EDITOR` enviroment variable). If this is not set then it will default to the nano text editor. Supported values for `EDITOR` (for `./b edit`) and `nano` and `vim`.
+The `edit` command will use the editor that is defined in your host shell (check the `EDITOR` enviroment variable). If this is not set then it will default to the nano text editor. Supported values for `EDITOR` (for `./b edit`) are `nano` and `vim`.
 
 # Flashing a new robot
 
