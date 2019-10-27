@@ -271,6 +271,10 @@ RUN install-package \
     vim \
     nano
 
+######################################
+### ADD NEW PROGRAM/LIBRARIES HERE ###
+######################################
+
 # Copy ssh keys over to the system
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
