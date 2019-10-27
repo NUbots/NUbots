@@ -73,6 +73,10 @@ RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
 RUN sudo PREFIX=/usr \
     install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protobuf-cpp-3.10.0.tar.gz
 
+#############################################
+### ADD NEW SYTEM PROGRAMS/LIBRARIES HERE ###
+#############################################
+
 ################################################
 #  _____           _      _           _        #
 # |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
@@ -271,9 +275,9 @@ RUN install-package \
     vim \
     nano
 
-######################################
-### ADD NEW PROGRAM/LIBRARIES HERE ###
-######################################
+#######################################
+### ADD NEW PROGRAMS/LIBRARIES HERE ###
+#######################################
 
 # Copy ssh keys over to the system
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
