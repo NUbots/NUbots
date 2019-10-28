@@ -166,20 +166,24 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
 elif [ "${METHOD}" = 'install-bjam-from-source' ]; then
     echo "Configuring using Boost.Build"
 
+    # Find the closest configure file to the root
+    JAMROOT_FILE=$(find -type f -path "*${BUILD_FILE_DIR}/Jamroot" -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
+    cd $(dirname "${JAMROOT_FILE}")
+
+    echo "Configuring using jam file file ${JAMROOT_FILE}"
+
     # Bootstrap bjam
-    ./bootstrap.sh --prefix="${PREFIX}" --without-libraries=python
+    ./bootstrap.sh --prefix="${PREFIX}" --with-python=$(which python3)
 
     # Setup our include paths, library paths, compile flags, and then build
-    ./bjam "$@" \
+    ./b2 "$@" \
         include="${PREFIX}/include" \
         library-path="${PREFIX}/lib" \
         -j$(nproc) \
         -q \
         cflags="${CFLAGS}" \
-        cxxflags="${CXXFLAGS}"
-
-    # Now install
-    ./bjam install
+        cxxflags="${CXXFLAGS}" \
+        install
 
 # We are using standard makefiles
 elif [ "${METHOD}" = 'install-make-from-source' ]; then
