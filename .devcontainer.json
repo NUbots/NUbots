@@ -4,6 +4,10 @@
     "image": "nubots:nuc7i7bnh",
     "workspaceMount": "type=bind,consistency=delegated,src=${localWorkspaceFolder},dst=/home/nubots/NUbots",
     "workspaceFolder": "/home/nubots/NUbots",
+    "runArgs": [
+        "--mount",
+        "type=volume,src=nubots_nuc7i7bnh_build,dst=/home/nubots/build,consistency=delegated"
+    ],
     "extensions": [
         "ms-vscode.cpptools",
         "twxs.cmake",
