@@ -30,7 +30,8 @@ RUN install-package \
     ninja \
     cmake \
     meson \
-    git
+    git \
+    protobuf
 
 # Get python to look in /usr/local for packages
 RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
@@ -68,10 +69,6 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
 # Generate toolchain files for generic
 COPY --chown=nubots:nubots usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
 RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
-
-# Install tools that must be built with generic flags
-RUN sudo PREFIX=/usr \
-    install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.10.0/protobuf-cpp-3.10.0.tar.gz
 
 #############################################
 ### ADD NEW SYTEM PROGRAMS/LIBRARIES HERE ###
@@ -278,6 +275,12 @@ RUN install-package \
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
+
+RUN install-bjam-from-source https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2 \
+    address-model=64 \
+    architecture=x86 \
+    link=static \
+    include=$(python3 -c "from sysconfig import get_paths; print(get_paths()['include'])")
 
 # Copy ssh keys over to the system
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
