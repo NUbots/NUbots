@@ -284,7 +284,7 @@ For some reason, if you really, really, _REALLY_ need to access a terminal insid
 ---
 
 **NOTE**
-Any changes you make outside of the `NUbots` or `/home/nubots/build` directories will not persist after exiting the Docker shell.
+Any changes you make outside of the `/home/nubots/NUbots` or `/home/nubots/build` directories will not persist after exiting the Docker shell.
 
 ---
 
