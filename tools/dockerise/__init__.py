@@ -72,7 +72,7 @@ def build_platform(platform):
                         bars[pos]["id"] = id
                         bars[pos]["bar"].total = data["total"]
                         bars[pos]["bar"].n = data["current"]
-                        bars[pos].set_description("{} - {}".format(id, data["status"]))
+                        bars[pos]["bar"].set_description("{} - {}".format(id, data["status"]))
                         progress[id] = {"bar": bars[pos]["bar"]}
 
                         del queue[id]
