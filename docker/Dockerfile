@@ -276,12 +276,6 @@ RUN install-package \
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
-RUN install-bjam-from-source https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2 \
-    address-model=64 \
-    architecture=x86 \
-    link=static \
-    include=$(python3 -c "from sysconfig import get_paths; print(get_paths()['include'])")
-
 # Copy ssh keys over to the system
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
