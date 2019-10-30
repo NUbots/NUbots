@@ -45,7 +45,7 @@ namespace support {
                 log->data = NUClear::util::serialise::Serialise<T>::serialise(data);
                 log->hash = NUClear::util::serialise::Serialise<T>::hash();
 
-                return std::move(log);
+                return log;
             }
 
         public:
