@@ -91,7 +91,7 @@ pip3 install -r NUbots/requirements.txt
 
 ## Windows
 
-TODO
+Windows support is coming soon™
 
 # Building and Installing
 
