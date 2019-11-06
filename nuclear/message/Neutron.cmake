@@ -227,10 +227,13 @@ if(pybind11_FOUND)
 endif()
 
 if(src)
-  # Build a library from these files if(NUCLEAR_SHARED_BUILD) add_library(nuclear_message SHARED ${protobufs} ${src})
-  # set_property(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib") else()
-  # add_library(nuclear_message STATIC ${protobufs} ${src}) endif()
-  add_library(nuclear_message STATIC ${protobufs} ${src})
+  # Build a library from these files
+  if(NUCLEAR_SHARED_BUILD)
+    add_library(nuclear_message SHARED ${protobufs} ${src})
+    set_property(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+  else()
+    add_library(nuclear_message STATIC ${protobufs} ${src})
+  endif()
 
   # The library uses protocol buffers
   target_link_libraries(nuclear_message ${PROTOBUF_LIBRARIES})
