@@ -2,7 +2,11 @@
 #define MODULE_INPUT_CAMERA_H
 
 #include <fcntl.h>
+// clang-format off
+// We need to include stdio.h before jpeglib.h because jpeglib.h doesn't do it.
+#include <stdio.h>
 #include <jpeglib.h>
+// clang-format on
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
