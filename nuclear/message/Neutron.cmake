@@ -75,6 +75,7 @@ foreach(proto ${builtin})
     "${message_binary_include_dir}/${file_we}.cpp"
     "${message_binary_include_dir}/${file_we}.py.cpp"
     "${message_binary_include_dir}/${file_we}.h"
+    "${message_binary_include_dir}/${file_we}_pb2.py"
     PROPERTIES
     COMPILE_FLAGS
     "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
