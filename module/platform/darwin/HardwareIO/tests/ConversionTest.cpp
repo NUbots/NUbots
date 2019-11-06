@@ -18,6 +18,7 @@
  */
 
 #include <catch.hpp>
+
 #include "Convert.h"
 #include "utility/math/angle.h"
 

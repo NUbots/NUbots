@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-import os
 import glob
-import b
+import os
 import re
-from dockerise import run_on_docker
+import subprocess
 
 from termcolor import cprint
-import subprocess
+
+import b
+from dockerise import run_on_docker
 
 
 @run_on_docker
@@ -71,6 +72,8 @@ def run(target, user, config, toolchain, **kwargs):
                 "--include=local/lib/**.so",
                 "--include=local/lib/**.so.*",
                 "--include=local/lib/python3.7/**",
+                "--include=local/share",
+                "--include=local/share/**",
                 "--exclude=*",
                 "--checksum",
                 "--delete",

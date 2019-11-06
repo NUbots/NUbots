@@ -27,7 +27,6 @@
 
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
-
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
@@ -615,19 +614,19 @@ namespace motion {
         T calculateGroundSpace(const T& Htf, const T& Hwt) {
             // Retrieve rotations needed for creating the space
             // support foot to torso rotation, and world to torso rotation
-            MatrixType Rtf = Htf.rotation();
+            MatrixType Rtf(Htf.rotation());
 
             // Fix the foot in world space
-            MatrixType Rwf = Hwt.rotation() * Rtf;
+            MatrixType Rwf(Hwt.rotation() * Rtf);
 
             // Dot product of foot z (in world space) with world z
             Scalar alpha = std::acos(Rwf(2, 2));
 
-            Eigen::Matrix<Scalar, 3, 1> axis = Rwf.col(2).cross(Eigen::Matrix<Scalar, 3, 1>::UnitZ()).normalized();
+            Eigen::Matrix<Scalar, 3, 1> axis(Rwf.col(2).cross(Eigen::Matrix<Scalar, 3, 1>::UnitZ()).normalized());
 
             // Axis angle is foot to ground
-            MatrixType Rwg = Eigen::AngleAxis<Scalar>(alpha, axis).toRotationMatrix() * Rwf;
-            MatrixType Rtg = Hwt.rotation().transpose() * Rwg;
+            MatrixType Rwg(Eigen::AngleAxis<Scalar>(alpha, axis).toRotationMatrix() * Rwf);
+            MatrixType Rtg(Hwt.rotation().transpose() * Rwg);
 
             // Ground space assemble!
             T Htg;

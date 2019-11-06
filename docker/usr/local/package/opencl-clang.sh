@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 # Exit immediately on error
 set -e
 
 # Get our method as the name of this script, url and args
 URL="$1"
+shift
 
 # Set installation prefix, default to /usr/local unless an external power says otherwise
 PREFIX=${PREFIX:-"/usr/local"}
@@ -19,38 +20,13 @@ mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code
-wget ${URL}
-
-# Extract the source code archive
-ARCHIVE_FILE=$(find . -type f | head -n 1)
-case "${ARCHIVE_FILE}" in
-  *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
-  *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tgz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz2)    tar xf ${ARCHIVE_FILE} ;;
-  *.txz)     tar xf ${ARCHIVE_FILE} ;;
-  *.zip)     unzip ${ARCHIVE_FILE} ;;
-  *.h)       ;;
-  *.hpp)     ;;
-  *)         echo "Unknown archive format"; exit 1 ;;
-esac
-
-# Apply patches
-SOURCE_DIR=$(find . -maxdepth 1 -type d | tail -n1)
-cd "${SOURCE_DIR}"
-wget "https://github.com/intel/opencl-clang/commit/a6e69b30a6a2c925254784be808ae3171ecd75ea.patch" -O - | patch -Np1
-wget "https://github.com/intel/opencl-clang/commit/94af090661d7c953c516c97a25ed053c744a0737.patch" -O - | patch -Np1
-
-shift
-ARGS="$@"
+download-and-extract "${URL}"
 
 echo "Configuring using cmake"
 
 # Find the closest configure file to the root
 CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-cd $(dirname ${CMAKELISTS_FILE})
+cd $(dirname "${CMAKELISTS_FILE}")
 
 echo "Building linux resource linker"
 cd "linux_linker"
@@ -66,12 +42,7 @@ cd build
 # Configure using cmake
 cmake .. \
     -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_C_FLAGS="${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
-    -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
-    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-    -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
-    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
     -DLINUX_RESOURCE_LINKER_COMMAND:PATH="${PREFIX}/bin/linux_resource_linker" \
     -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
     -DSPIRV_TRANSLATOR_DIR=/usr/local \

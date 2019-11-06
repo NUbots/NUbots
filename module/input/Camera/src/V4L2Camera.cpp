@@ -1,12 +1,11 @@
 #include "V4L2Camera.h"
-#include "Camera.h"
 
 #include <Eigen/Core>
 #include <Eigen/LU>
 #include <nuclear>
 
+#include "Camera.h"
 #include "extension/FileWatch.h"
-
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
 

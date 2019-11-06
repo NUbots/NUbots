@@ -1,9 +1,11 @@
 #include "uart.h"
+
 #include <fcntl.h>
 #include <linux/serial.h>
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
+
 #include <cerrno>
 #include <cstring>
 #include <stdexcept>

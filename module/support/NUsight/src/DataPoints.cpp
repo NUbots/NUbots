@@ -18,7 +18,6 @@
  */
 
 #include "NUsight.h"
-
 #include "message/support/nusight/DataPoint.h"
 
 namespace module {

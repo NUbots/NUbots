@@ -22,11 +22,9 @@
 #include <fmt/format.h>
 
 #include "extension/Configuration.h"
-
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
 #include "message/vision/GreenHorizon.h"
-
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/ConvexHull.h"
 #include "utility/support/eigen_armadillo.h"

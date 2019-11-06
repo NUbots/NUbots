@@ -23,7 +23,6 @@
 #include <sstream>
 
 #include "extension/Configuration.h"
-
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
 #include "message/input/Image.h"
@@ -33,7 +32,6 @@
 #include "message/motion/WalkCommand.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
-
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/ForwardKinematics.h"

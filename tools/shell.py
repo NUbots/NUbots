@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-from dockerise import run_on_docker
-import os
-import pty
+import b
+from dockerise import WrapPty, run_on_docker
 
 
 @run_on_docker
@@ -17,9 +16,8 @@ def register(command):
 
 @run_on_docker
 def run(args, **kwargs):
-
-    # If no arguments run bash and return its exit code
+    pty = WrapPty()
     if len(args) == 0:
-        exit(pty.spawn("/bin/bash") >> 8)
+        exit(pty.spawn(["/bin/bash"]))
     else:
-        exit(pty.spawn(args) >> 8)
+        exit(pty.spawn(args))

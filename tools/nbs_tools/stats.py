@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-import os
 import json
-from . import decoder
-from si_prefix import si_format
+import os
+
 import numpy as np
+from si_prefix import si_format
+
+from . import decoder
 
 
 def register(command):
