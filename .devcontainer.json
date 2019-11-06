@@ -1,12 +1,12 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
   "name": "NUbots",
-  "image": "nubots:selected",
+  "image": "nubots:generic",
   "workspaceMount": "type=bind,consistency=delegated,src=${localWorkspaceFolder},dst=/home/nubots/NUbots",
   "workspaceFolder": "/home/nubots/NUbots",
   "runArgs": [
     "--mount",
-    "type=volume,src=nubots_nuc7i7bnh_build,dst=/home/nubots/build,consistency=delegated"
+    "type=volume,src=nubots_generic_build,dst=/home/nubots/build,consistency=delegated"
   ],
   "extensions": [
     "ms-vscode.cpptools",
