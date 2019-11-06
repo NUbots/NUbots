@@ -8,7 +8,8 @@ nuclear_role(
   motion::KinematicsConfiguration
   support::configuration::GlobalConfig
   support::configuration::NetworkConfiguration
-  platform::darwin::HardwareIO
+  # platform::darwin::HardwareIO
   platform::darwin::SensorFilter
   support::NUsight
+  support::logging::DataPlayback
 )
