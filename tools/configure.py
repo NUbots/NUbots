@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from dockerise import run_on_docker, WrapPty
-import b
 import os
+
+import b
+from dockerise import WrapPty, run_on_docker
 
 # import pty
 # import subprocess

@@ -11,8 +11,9 @@ if(POLICY CMP0079)
 endif()
 
 # Set on to prefer .a files over .so files for linking
-option(STATIC_LIBRARIES "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!"
-       OFF)
+option(
+  STATIC_LIBRARIES "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF
+)
 
 if(STATIC_LIBRARIES)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -49,10 +50,9 @@ mark_as_advanced(
 )
 
 # Our banner file for placing at the top of the roles
-set(
-  NUCLEAR_ROLE_BANNER_FILE
-  "${PROJECT_SOURCE_DIR}/cmake/banner.png"
-  CACHE PATH "The path the banner to print at the start of each role execution" FORCE
+set(NUCLEAR_ROLE_BANNER_FILE
+    "${PROJECT_SOURCE_DIR}/cmake/banner.png"
+    CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
 
 if(BUILD_TESTS)

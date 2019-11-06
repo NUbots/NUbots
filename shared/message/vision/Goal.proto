@@ -22,7 +22,6 @@ syntax = "proto3";
 package message.vision;
 
 import "google/protobuf/timestamp.proto";
-import "Neutron.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
@@ -56,8 +55,8 @@ message Goal {
         fvec3 bottom   = 2;
         float distance = 3;
     }
-    Side     side                       = 1;
-    Post     post                       = 3;
+    Side                 side           = 1;
+    Post                 post           = 3;
     repeated Measurement measurements   = 4;
     fvec2                screen_angular = 5;
     fvec2                angular_size   = 6;
@@ -68,5 +67,5 @@ message Goals {
     uint32                    camera_id = 1;
     google.protobuf.Timestamp timestamp = 2;
     mat4                      Hcw       = 3;
-    repeated Goal goals                 = 4;
+    repeated Goal             goals     = 4;
 }

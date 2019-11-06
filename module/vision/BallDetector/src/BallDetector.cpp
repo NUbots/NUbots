@@ -23,11 +23,9 @@
 #include <fmt/ostream.h>
 
 #include "extension/Configuration.h"
-
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
 #include "message/vision/GreenHorizon.h"
-
 #include "utility/math/coordinates.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"

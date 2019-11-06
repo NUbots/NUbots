@@ -2,6 +2,7 @@
 #define MODULE_LOCALISATION_ODOMETRYLOCALISATION_H
 
 #include <nuclear>
+
 #include "utility/math/matrix/Transform2D.h"
 
 namespace module {

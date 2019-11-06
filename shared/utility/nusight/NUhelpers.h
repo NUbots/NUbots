@@ -22,6 +22,7 @@
 
 #include <armadillo>
 #include <nuclear>
+
 #include "message/support/nusight/DataPoint.h"
 #include "message/vision/Line.h"
 

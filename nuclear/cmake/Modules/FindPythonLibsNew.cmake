@@ -57,7 +57,8 @@ endif()
 # The library suffix is from the config var LDVERSION sometimes, otherwise VERSION. VERSION will typically be like "2.7"
 # on unix, and "27" on windows.
 execute_process(
-  COMMAND "${PYTHON_EXECUTABLE}" "-c" "from distutils import sysconfig as s;import sys;import struct;
+  COMMAND
+    "${PYTHON_EXECUTABLE}" "-c" "from distutils import sysconfig as s;import sys;import struct;
 print('.'.join(str(v) for v in sys.version_info));
 print(sys.prefix);
 print(s.get_python_inc(plat_specific=True));
@@ -147,7 +148,12 @@ else()
   endif()
   # message(STATUS "Searching for Python libs in ${_PYTHON_LIBS_SEARCH}") Probably this needs to be more involved. It
   # would be nice if the config information the python interpreter itself gave us were more complete.
-  find_library(PYTHON_LIBRARY NAMES "python${PYTHON_LIBRARY_SUFFIX}" PATHS ${_PYTHON_LIBS_SEARCH} NO_DEFAULT_PATH)
+  find_library(
+    PYTHON_LIBRARY
+    NAMES "python${PYTHON_LIBRARY_SUFFIX}"
+    PATHS ${_PYTHON_LIBS_SEARCH}
+    NO_DEFAULT_PATH
+  )
 
   # If all else fails, just set the name/version and let the linker figure out the path.
   if(NOT PYTHON_LIBRARY)

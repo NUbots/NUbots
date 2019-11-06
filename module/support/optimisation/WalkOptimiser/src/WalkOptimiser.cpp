@@ -19,7 +19,6 @@
 
 #include "WalkOptimiser.h"
 
-
 #include "message/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/math/optimisation/PGAoptimiser.h"

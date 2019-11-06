@@ -20,7 +20,6 @@
 #include "IKKick.h"
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
@@ -28,8 +27,6 @@
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
-
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

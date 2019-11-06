@@ -1,10 +1,6 @@
-# We need noncall exceptions so we can throw exceptions from signal handlers This allows us to catch null pointer
-# exceptions
-add_compile_options(
-  -Wall -Wpedantic -Wextra -fPIC
-  # -Werror
-  # Because Eigen-Wno-int-in-bool-context -fnon-call-exceptions
-)
+# We need noncall exceptions so we can throw exceptions from signal handlers. This allows us to catch null pointer
+# exceptions. no-int-in-bool-context is to silence a warning from Eigen.
+add_compile_options(-Wall -Wpedantic -Wextra -Wno-int-in-bool-context -fnon-call-exceptions)
 
 # C++17 allows eigen to not need to worry about alignment
 set(CMAKE_CXX_STANDARD 17)

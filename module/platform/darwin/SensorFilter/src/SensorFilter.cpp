@@ -490,7 +490,7 @@ namespace platform {
                                                .toRotationMatrix();
                             Hwt.translation() = Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
 
-                            Eigen::Affine3d Htg = utility::motion::kinematics::calculateGroundSpace(Htf, Hwt);
+                            Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
                             footlanding_Hwf[side]                   = Hwt * Htg;
                             footlanding_Hwf[side].translation().z() = 0.0;

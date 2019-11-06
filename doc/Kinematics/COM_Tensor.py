@@ -7,11 +7,12 @@ The particles are defined as head, upper arm, lower arm, torso, hip, upper leg, 
 It is assumed that the particles are symmetric across the body so that we dont need a separate particle for the left
 and right upper arms (for example)
 """
-import yaml
-import numpy as np
-import sys
 import json
 import os
+import sys
+
+import numpy as np
+import yaml
 
 # CoM for each particle in the system
 particles = {

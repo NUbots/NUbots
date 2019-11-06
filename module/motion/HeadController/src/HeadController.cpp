@@ -20,12 +20,10 @@
 #include "HeadController.h"
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KinematicsModel.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

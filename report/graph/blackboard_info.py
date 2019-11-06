@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
-import os
 import json
+import os
 import sys
+
 from PIL import Image
 
 files = os.listdir(sys.argv[1])

@@ -2,11 +2,11 @@
 #define MODULE_LOCALISATION_ROBOTPARTICLELOCALISATION_H
 
 #include <nuclear>
-#include "RobotModel.h"
-#include "utility/math/filter/ParticleFilter.h"
 
+#include "RobotModel.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
+#include "utility/math/filter/ParticleFilter.h"
 
 namespace module {
 namespace localisation {

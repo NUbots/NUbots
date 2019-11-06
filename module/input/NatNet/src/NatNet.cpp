@@ -19,10 +19,9 @@
 
 #include "NatNet.h"
 
-#include "Parse.h"
-
 #include <fmt/format.h>
 
+#include "Parse.h"
 #include "extension/Configuration.h"
 
 namespace module {

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import os
 import json
+import os
+
 from . import decoder
 
 

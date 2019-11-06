@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import re
+import sys
 
 input_file = sys.argv[1]
 output_dir = sys.argv[2]

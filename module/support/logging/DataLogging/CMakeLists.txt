@@ -8,13 +8,8 @@ set(config_file "${CMAKE_CURRENT_BINARY_DIR}/data/config/DataLogging.yaml")
 add_custom_command(
   USES_TERMINAL
   OUTPUT "${source_file}" "${config_file}"
-  COMMAND
-    ${PYTHON_EXECUTABLE}
-    ARGS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
-    "${PROJECT_BINARY_DIR}/shared"
-    "${source_file}"
-    "${config_file}"
+  COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
+          "${PROJECT_BINARY_DIR}/shared" "${source_file}" "${config_file}"
   DEPENDS ${NUCLEAR_MESSAGE_LIBRARIES} "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_datalogging.py"
   COMMENT "Generating DataLogging system for current messages"
 )

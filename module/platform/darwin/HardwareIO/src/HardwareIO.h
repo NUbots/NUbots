@@ -20,9 +20,9 @@
 #ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 #define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 
-#include <nuclear>
-
 #include <yaml-cpp/yaml.h>
+
+#include <nuclear>
 
 #include "darwin/Darwin.h"
 #include "message/platform/darwin/DarwinSensors.h"
