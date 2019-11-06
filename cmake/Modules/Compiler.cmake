@@ -2,8 +2,7 @@
 # exceptions
 add_compile_options(
   -Wall -Wpedantic -Wextra
-  # -Werror
-  # Because Eigen
+  # -Werror Because Eigen
   -Wno-int-in-bool-context -fnon-call-exceptions
 )
 

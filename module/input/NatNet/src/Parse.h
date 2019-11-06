@@ -23,7 +23,6 @@
 #include <nuclear>
 
 #include "NatNet.h"
-
 #include "message/input/MotionCapture.h"
 
 namespace module {

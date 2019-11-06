@@ -3,8 +3,5 @@ nuclear_role(
   # and without it many roles do not run
   support::logging::ConsoleLogHandler
   # Config
-  extension::FileWatcher
-  support::configuration::NetworkConfiguration
-  support::NUsight
-  support::NUsightHarness
+  extension::FileWatcher support::configuration::NetworkConfiguration support::NUsight support::NUsightHarness
 )

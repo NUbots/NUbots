@@ -20,6 +20,7 @@
 #define UTILITY_VISION_VISION_H
 
 #include <fmt/format.h>
+
 #include <Eigen/Core>
 #include <fstream>
 #include <iostream>

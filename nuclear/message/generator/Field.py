@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import re
-from google.protobuf.descriptor_pb2 import FileDescriptorSet, FieldOptions
+import sys
+
+from google.protobuf.descriptor_pb2 import FieldOptions, FileDescriptorSet
+
+from Neutron_pb2 import PointerType, array_size, pointer
 
 # Add our cwd to the path so we can import generated python protobufs
 # And extend our options with our Neutron protobuf
 sys.path.append(os.getcwd() + "/..")
-from Neutron_pb2 import pointer, PointerType, array_size
 
 FieldOptions.RegisterExtension(pointer)
 FieldOptions.RegisterExtension(array_size)

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-from generator.textutil import indent, dedent
+import re
+
 from generator.Enum import Enum
 from generator.Message import Message
-import re
+from generator.textutil import dedent, indent
 
 
 class File:

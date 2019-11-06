@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import itertools
+import os
+import re
+
 #
 # File:   generate.py
 # Authors:
@@ -8,12 +12,9 @@
 #   Trent Houliston <trent@houliston.me>
 #
 import sys
-import re
-import os
 import textwrap
-import itertools
-from banner import ampscii
-from banner import bigtext
+
+from banner import ampscii, bigtext
 
 role_name = sys.argv[1]
 banner_file = sys.argv[2]

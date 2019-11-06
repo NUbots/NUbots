@@ -21,16 +21,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "bayer.h"
+
 #include <climits>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-
-
 #include <vector>
 
-#include "bayer.h"
 #include "utility/vision/Vision.h"
 
 namespace module {

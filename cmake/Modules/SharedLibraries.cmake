@@ -27,14 +27,13 @@ include_directories(SYSTEM ${YAML-CPP_INCLUDE_DIRS})
 include_directories(SYSTEM ${fmt_INCLUDE_DIRS})
 # INCLUDE_DIRECTORIES(SYSTEM ${OPENRAVE_INCLUDE_DIRS})
 
-set(
-  NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
-  ${BLAS_LIBRARIES}
-  ${LIBGFORTRAN_LIBRARIES}
-  ${PROTOBUF_LIBRARIES}
-  ${YAML-CPP_LIBRARIES}
-  ${fmt_LIBRARIES}
-  -ldl
-  -lbacktrace
-  CACHE PATH "Additional libraries used when linking roles, extensions, and utilities" FORCE
+set(NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
+    ${BLAS_LIBRARIES}
+    ${LIBGFORTRAN_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${YAML-CPP_LIBRARIES}
+    ${fmt_LIBRARIES}
+    -ldl
+    -lbacktrace
+    CACHE PATH "Additional libraries used when linking roles, extensions, and utilities" FORCE
 )

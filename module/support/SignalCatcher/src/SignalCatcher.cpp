@@ -18,6 +18,7 @@
  */
 
 #include "SignalCatcher.h"
+
 #include <csignal>
 
 namespace module {

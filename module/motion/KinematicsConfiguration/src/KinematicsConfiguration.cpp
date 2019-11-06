@@ -20,12 +20,10 @@
 #include "KinematicsConfiguration.h"
 
 #include "extension/Configuration.h"
-
+#include "message/motion/KinematicsModel.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
-
-#include "message/motion/KinematicsModel.h"
 
 namespace module {
 namespace motion {

@@ -24,13 +24,13 @@ package message.behaviour;
 message Subsumption {
 
     message LimbSet {
-        float    priority     = 1;
-        repeated uint32 limbs = 2;
+        float           priority = 1;
+        repeated uint32 limbs    = 2;
     }
 
     message ActionRegister {
-        uint32   id               = 1;
-        string   name             = 2;
+        uint32           id       = 1;
+        string           name     = 2;
         repeated LimbSet limb_set = 3;
     }
 
@@ -41,8 +41,8 @@ message Subsumption {
             KILL    = 2;
         }
 
-        State    state        = 1;
-        string   name         = 2;
+        State           state = 1;
+        string          name  = 2;
         repeated uint32 limbs = 3;
     }
 
@@ -51,7 +51,7 @@ message Subsumption {
         repeated float priorities = 2;
     }
 
-    repeated ActionRegister action_register         = 1;
-    repeated ActionStateChange action_state_change  = 2;
-    repeated ActionPriorites action_priority_change = 3;
+    repeated ActionRegister    action_register        = 1;
+    repeated ActionStateChange action_state_change    = 2;
+    repeated ActionPriorites   action_priority_change = 3;
 }

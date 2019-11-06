@@ -1,11 +1,6 @@
 #ifndef MODULE_INPUT_CAMERA_H
 #define MODULE_INPUT_CAMERA_H
 
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <system_error>
-
 #include <fcntl.h>
 #include <jpeglib.h>
 #include <linux/videodev2.h>
@@ -14,6 +9,10 @@
 #include <unistd.h>
 
 #include <nuclear>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <system_error>
 
 // clang-format off
 extern "C" {

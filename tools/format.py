@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import os
-import b
 from subprocess import call, check_output
+
+import b
 from dockerise import run_on_docker
 
 

@@ -2,8 +2,8 @@
 
 import stringcase
 
-from generator.textutil import indent, dedent
 from generator.Field import Field
+from generator.textutil import dedent, indent
 
 
 class OneOfType:
