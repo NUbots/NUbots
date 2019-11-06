@@ -148,7 +148,7 @@ namespace platform {
                 return state.template segment<4>(QX);
             }
 
-            // This function is called to determine the difference between position and velocity
+            // This function is called to determine the difference between position, velocity, and acceleration
             // measurements/predictions
             Eigen::Matrix<Scalar, 3, 1> difference(const Eigen::Matrix<Scalar, 3, 1>& a,
                                                    const Eigen::Matrix<Scalar, 3, 1>& b) {
