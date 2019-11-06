@@ -158,9 +158,11 @@ foreach(proto ${protobufs})
 
   # Run the protocol buffer compiler on these new protobufs
   add_custom_command(
-    OUTPUT "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h"
-    COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${message_binary_include_dir}
-            -I${message_binary_include_dir} -I${CMAKE_CURRENT_SOURCE_DIR}/proto "${outputpath}/${file_we}.proto"
+    OUTPUT "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h" "${outputpath}/${file_we}_pb2.py"
+    COMMAND
+      ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${message_binary_include_dir}
+      --python_out=${message_binary_include_dir} -I${message_binary_include_dir} -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+      "${outputpath}/${file_we}.proto"
     DEPENDS ${binary_depends}
     COMMENT "Compiling protocol buffer ${proto}"
   )
@@ -185,6 +187,7 @@ foreach(proto ${protobufs})
     "${outputpath}/${file_we}.cpp"
     "${outputpath}/${file_we}.py.cpp"
     "${outputpath}/${file_we}.h"
+    "${outputpath}/${file_we}_pb2.py"
     PROPERTIES
     GENERATED
     TRUE
