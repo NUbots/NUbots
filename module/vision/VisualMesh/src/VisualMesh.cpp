@@ -3,16 +3,13 @@
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
-
 #include "geometry/Circle.hpp"
 #include "geometry/Cylinder.hpp"
 #include "geometry/Sphere.hpp"
-
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisualMesh.h"
-
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/Timer.hpp"
 

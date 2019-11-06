@@ -24,14 +24,12 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
-#include "utility/math/filter/UKF.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform3D.h"
-
 #include "MotionModel.h"
 #include "VirtualLoadSensor.h"
 #include "message/motion/KinematicsModel.h"
+#include "utility/math/filter/UKF.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 
 namespace module {

@@ -1,2 +1,6 @@
 include(ToolchainLibraryFinder)
-ToolchainLibraryFinder(NAME fmt HEADER fmt/format.h LIBRARY fmt)
+ToolchainLibraryFinder(
+  NAME fmt
+  HEADER fmt/format.h
+  LIBRARY fmt
+)

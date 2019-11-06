@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import sys
-import os
 import argparse
+import os
 import pkgutil
 import re
+import sys
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
@@ -72,13 +72,6 @@ except:
 
 if __name__ == "__main__":
 
-    if binary_dir is not None:
-        # Print some information for the user
-        print("b script for", cmake_cache["CMAKE_PROJECT_NAME"])
-        print("\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"])
-        print("\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_BINARY_DIR"])
-        print()
-
     # Add our builtin tools to the path and user tools
     sys.path.append(nuclear_tools_path)
     sys.path.append(user_tools_path)
@@ -111,17 +104,22 @@ if __name__ == "__main__":
         if not ispkg:
 
             # Get our module, class name and registration function
-            try:
+            if len(modules) == 1:
                 module = loader.find_module(module_name).load_module(module_name)
                 tool = getattr(module, "run")
                 register = getattr(module, "register")
-            except BaseException as e:
-                # Capture the exception in a variable
-                ex = e
+            else:
+                try:
+                    module = loader.find_module(module_name).load_module(module_name)
+                    tool = getattr(module, "run")
+                    register = getattr(module, "register")
+                except BaseException as e:
+                    # Capture the exception in a variable
+                    ex = e
 
-                # Swallow arguments for failed commands
-                register = lambda command: command.add_argument("_", nargs="*")
-                tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
+                    # Swallow arguments for failed commands
+                    register = lambda command: command.add_argument("_", nargs="*")
+                    tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
 
             # Let the tool register it's arguments
             register(subcommands.add_parser(module_name))

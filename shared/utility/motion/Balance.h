@@ -21,13 +21,12 @@
 #define UTILITY_MOTION_BALANCE_H
 
 #include <yaml-cpp/yaml.h>
+
 #include <nuclear>
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
-
 #include "utility/input/LimbID.h"
 //#include "utility/input/ServoID.h"
 #include "utility/math/geometry/UnitQuaternion.h"

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import re
-from . import decoder
+
 from google.protobuf.json_format import MessageToJson
+
+from . import decoder
 
 
 def register(command):

@@ -7,10 +7,9 @@ set(utility_source_include_dir "${PROJECT_SOURCE_DIR}/${utility_include_path}")
 set(utility_binary_include_dir "${PROJECT_BINARY_DIR}/${utility_include_path}")
 
 # Make our utility include directories variable
-set(
-  NUCLEAR_UTILITY_INCLUDE_DIRS
-  ${utility_source_include_dir} ${utility_binary_include_dir}
-  CACHE INTERNAL "Include directories for the utility folder and generated sources"
+set(NUCLEAR_UTILITY_INCLUDE_DIRS
+    ${utility_source_include_dir} ${utility_binary_include_dir}
+    CACHE INTERNAL "Include directories for the utility folder and generated sources"
 )
 
 # Include both our include directory and messages (since we can use them)
@@ -46,7 +45,10 @@ if(src)
   target_link_libraries(nuclear_utility ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES} ${NUCLEAR_MESSAGE_LIBRARIES})
 
   # Add to our list of NUClear utility libraries
-  set(NUCLEAR_UTILITY_LIBRARIES nuclear_utility CACHE INTERNAL "List of libraries that are built as utilities" FORCE)
+  set(NUCLEAR_UTILITY_LIBRARIES
+      nuclear_utility
+      CACHE INTERNAL "List of libraries that are built as utilities" FORCE
+  )
 
   # Put it in an IDE group for shared
   set_property(TARGET nuclear_utility PROPERTY FOLDER "shared/")

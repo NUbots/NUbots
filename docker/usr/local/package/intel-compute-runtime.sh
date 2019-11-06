@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 # Exit immediately on error
 set -e
 
 # Get our method as the name of this script, url and args
 URL="$1"
+shift
 
 # Set installation prefix, default to /usr/local unless an external power says otherwise
 PREFIX=${PREFIX:-"/usr/local"}
@@ -19,32 +20,13 @@ mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code
-wget ${URL}
-
-# Extract the source code archive
-ARCHIVE_FILE=$(find . -type f | head -n 1)
-case "${ARCHIVE_FILE}" in
-  *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
-  *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tgz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz2)    tar xf ${ARCHIVE_FILE} ;;
-  *.txz)     tar xf ${ARCHIVE_FILE} ;;
-  *.zip)     unzip ${ARCHIVE_FILE} ;;
-  *.h)       ;;
-  *.hpp)     ;;
-  *)         echo "Unknown archive format"; exit 1 ;;
-esac
-
-shift
-ARGS="$@"
+download-and-extract "${URL}"
 
 echo "Configuring using cmake"
 
 # Find the closest configure file to the root
 CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
-cd $(dirname ${CMAKELISTS_FILE})
+cd $(dirname "${CMAKELISTS_FILE}")
 
 echo "Configuring using cmake file ${CMAKELISTS_FILE}"
 
@@ -53,7 +35,7 @@ mkdir -p build
 cd build
 
 # Configure using cmake
-cmake .. ${ARGS} \
+cmake .. "$@" \
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
     -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
@@ -67,10 +49,10 @@ cmake .. ${ARGS} \
 make -j$(nproc)
 
 # Now install
-install -dm755 ${PREFIX}/lib/intel-opencl
-install -dm755 ${PREFIX}/bin
-install -m 644 "bin/libigdrcl.so" ${PREFIX}/lib/intel-opencl/
-install -m 644 "bin/ocloc" ${PREFIX}/bin/
+install -dm755 "${PREFIX}/lib/intel-opencl"
+install -dm755 "${PREFIX}/bin"
+install -m 644 "bin/libigdrcl.so" "${PREFIX}/lib/intel-opencl/"
+install -m 644 "bin/ocloc" "${PREFIX}/bin/"
 
 # Now that we have built, cleanup the build directory
 rm -rf "${BUILD_FOLDER}"

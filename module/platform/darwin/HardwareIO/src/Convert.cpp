@@ -18,6 +18,7 @@
  */
 
 #include "Convert.h"
+
 #include "utility/math/angle.h"
 
 namespace module {

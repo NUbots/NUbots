@@ -17,8 +17,9 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "message/support/nusight/Overview.h"
 
+#include "NUsight.h"
 #include "message/behaviour/Behaviour.h"
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/WalkPath.h"
@@ -29,10 +30,8 @@
 #include "message/localisation/Field.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/GlobalConfig.h"
-#include "message/support/nusight/Overview.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
-
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"

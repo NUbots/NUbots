@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
-import xxhash
+import enum
+import glob
 import gzip
-import struct
-import sys
 import os
 import pkgutil
-import glob
-import enum
-import b
+import struct
+import sys
 from collections import namedtuple
+
 import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
+
+import b
+import xxhash
 
 # Build all the protocol buffers into python messages located at out_folder
 protobuf_path = os.path.join(os.path.dirname(__file__), "protocol_buffers")
