@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 
+import array
+import fcntl
 import os
+import pty
 import re
 import shutil
+import signal
 import stat
 import subprocess
 import sys
-import shutil
-import subprocess
-import array
-import fcntl
-import pty
-import tty
-import signal
 import termios
+import tty
 
 import b
 
