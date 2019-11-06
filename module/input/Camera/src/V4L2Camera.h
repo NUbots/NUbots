@@ -25,12 +25,9 @@
 #include <nuclear>
 #include <string>
 
-#include "extension/Configuration.h"
-
 #include "ImageData.h"
-
+#include "extension/Configuration.h"
 #include "message/input/Image.h"
-
 #include "utility/vision/Vision.h"
 
 namespace module {

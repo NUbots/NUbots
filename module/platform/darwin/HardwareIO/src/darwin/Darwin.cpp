@@ -233,7 +233,7 @@ BulkReadResults Darwin::bulkRead() {
 
             // Copy CM740 data
             else if (r.header.id == ID::CM740) {
-                memcpy(&data, r.data.data(), sizeof(Types::CM740Data));
+                memcpy(&(data.cm740), r.data.data(), sizeof(Types::CM740Data));
                 data.cm740ErrorCode = r.header.errorcode;
             }
         }
@@ -258,20 +258,36 @@ BulkReadResults Darwin::bulkRead() {
 
             // Set for servo data
             if (r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_PITCH) {
-                memset(&data.servos[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
-                data.servoErrorCodes[r.header.id - 1] = r.header.errorcode;
+                data.servos[r.header.id - 1].presentPosition = 0xFFFF;
+                data.servos[r.header.id - 1].presentSpeed    = 0xFFFF;
+                data.servos[r.header.id - 1].load            = 0xFF;
+                data.servos[r.header.id - 1].voltage         = 0xFF;
+                data.servos[r.header.id - 1].temperature     = 0xFF;
+                data.servoErrorCodes[r.header.id - 1]        = r.header.errorcode;
             }
 
             // Set for FSR data
             else if (r.header.id == ID::R_FSR || r.header.id == ID::L_FSR) {
-                memset(&data.fsr[r.header.id - ID::R_FSR], 0xFF, sizeof(Types::FSRData));
+                data.fsr[r.header.id - ID::R_FSR].fsr1      = 0xFFFF;
+                data.fsr[r.header.id - ID::R_FSR].fsr2      = 0xFFFF;
+                data.fsr[r.header.id - ID::R_FSR].fsr3      = 0xFFFF;
+                data.fsr[r.header.id - ID::R_FSR].fsr4      = 0xFFFF;
+                data.fsr[r.header.id - ID::R_FSR].centreX   = 0xFF;
+                data.fsr[r.header.id - ID::R_FSR].centreY   = 0xFF;
                 data.fsrErrorCodes[r.header.id - ID::R_FSR] = r.header.errorcode;
             }
 
             // Set CM740 data
             else if (r.header.id == ID::CM740) {
-                memset(&data, 0xFF, sizeof(Types::CM740Data));
-                data.cm740ErrorCode = r.header.errorcode;
+                data.cm740.buttons         = 0xFF;
+                data.cm740.gyroscope.x     = 0xFFFF;
+                data.cm740.gyroscope.y     = 0xFFFF;
+                data.cm740.gyroscope.z     = 0xFFFF;
+                data.cm740.accelerometer.x = 0xFFFF;
+                data.cm740.accelerometer.y = 0xFFFF;
+                data.cm740.accelerometer.z = 0xFFFF;
+                data.cm740.voltage         = 0xFF;
+                data.cm740ErrorCode        = r.header.errorcode;
             }
         }
     }

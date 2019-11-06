@@ -19,11 +19,11 @@
 #define EXTENSION_CONFIGURATION_H
 
 #include <yaml-cpp/yaml.h>
+
 #include <cstdlib>
 #include <nuclear>
 
 #include "FileWatch.h"
-
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
 

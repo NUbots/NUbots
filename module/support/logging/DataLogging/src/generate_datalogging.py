@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
 import os
 import pkgutil
+import sys
 from textwrap import dedent
+
 import google.protobuf.message
 
 if __name__ == "__main__":

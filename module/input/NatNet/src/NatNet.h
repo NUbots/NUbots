@@ -20,9 +20,8 @@
 #ifndef MODULES_INPUT_NATNET_H
 #define MODULES_INPUT_NATNET_H
 
-#include <nuclear>
-
 #include <Eigen/Core>
+#include <nuclear>
 
 namespace module {
 namespace input {

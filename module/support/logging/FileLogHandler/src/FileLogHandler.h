@@ -1,10 +1,9 @@
 #ifndef MODULE_SUPPORT_LOGGING_FILELOGHANDLER_H
 #define MODULE_SUPPORT_LOGGING_FILELOGHANDLER_H
 
-#include <nuclear>
-
 #include <fstream>
 #include <mutex>
+#include <nuclear>
 #include <string>
 
 namespace module {

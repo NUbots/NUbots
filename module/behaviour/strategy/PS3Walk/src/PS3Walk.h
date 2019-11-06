@@ -23,6 +23,7 @@
 
 #include <armadillo>
 #include <nuclear>
+
 #include "Joystick.h"
 
 namespace module {

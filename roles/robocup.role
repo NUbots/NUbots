@@ -41,6 +41,4 @@ nuclear_role(
   motion::ScriptEngine
   motion::OldWalkEngine
   motion::HeadController
-  # Output
-  # output::eSpeak
 )

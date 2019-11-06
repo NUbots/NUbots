@@ -25,13 +25,13 @@
 #include <stdint.h>
 #include <termios.h>
 #include <unistd.h>
+
 #include <cassert>
-
-#include "extension/Configuration.h"
-
 #include <cstring>
 #include <mutex>
 #include <vector>
+
+#include "extension/Configuration.h"
 
 
 namespace Darwin {

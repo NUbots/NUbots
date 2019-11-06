@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-from dockerise import run_on_docker
-import b
 import os
 import subprocess
+
+import b
+from dockerise import run_on_docker
 
 
 @run_on_docker
 def register(command):
     # Install help
-    command.help = "build the NUbots codebase"
+    command.help = "build the codebase"
 
     command.add_argument("args", nargs="...", help="the arguments to pass through to ninja")
 
@@ -20,7 +21,7 @@ def run(args, **kwargs):
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
-    # Run cmake if we haven't already
+    # Run cmake if we don't have a ninja build file
     if not os.path.isfile("build.ninja"):
         exitcode = os.system("cmake {} -GNinja".format(b.project_dir)) >> 8
 

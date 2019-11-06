@@ -25,11 +25,10 @@
 #include <vector>
 
 #include "CM740.h"
+#include "DarwinRawSensors.h"
 #include "FSR.h"
 #include "MX28.h"
 #include "extension/Configuration.h"
-
-#include "DarwinRawSensors.h"
 
 namespace Darwin {
 

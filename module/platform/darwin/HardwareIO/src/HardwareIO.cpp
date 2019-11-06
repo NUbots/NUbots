@@ -18,15 +18,13 @@
  */
 
 #include "HardwareIO.h"
-#include "Convert.h"
 
 #include <iomanip>
 
+#include "Convert.h"
 #include "extension/Configuration.h"
-
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/yaml_expression.h"

@@ -16,9 +16,9 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include <stdexcept>
-
 #include "ServoID.h"
+
+#include <stdexcept>
 
 namespace utility {
 namespace input {

@@ -19,6 +19,6 @@ set(CMAKE_MACOSX_RPATH ON)
 # Add some useful places to the RPATH These will allow the binary to run from the build folder
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} lib/ ../lib/ bin/lib)
 
-if(NOT MSVC)
-  add_compile_options(-std=c++17 -fPIC)
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
