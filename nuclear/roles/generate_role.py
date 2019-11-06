@@ -3,6 +3,10 @@
 import itertools
 import os
 import re
+import sys
+import textwrap
+
+from banner import ampscii, bigtext
 
 #
 # File:   generate.py
@@ -11,10 +15,7 @@ import re
 #   Jake Woods <jake.f.woods@gmail.com>
 #   Trent Houliston <trent@houliston.me>
 #
-import sys
-import textwrap
 
-from banner import ampscii, bigtext
 
 role_name = sys.argv[1]
 banner_file = sys.argv[2]
