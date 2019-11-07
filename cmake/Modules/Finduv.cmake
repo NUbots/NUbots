@@ -14,4 +14,8 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 include(ToolchainLibraryFinder)
-ToolchainLibraryFinder(NAME uv HEADER uv.h LIBRARY uv)
+ToolchainLibraryFinder(
+  NAME uv
+  HEADER uv.h
+  LIBRARY uv
+)
