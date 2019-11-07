@@ -1,11 +1,11 @@
 #include "DataLogging.h"
 
 #include <fmt/format.h>
+
 #include <iomanip>
 #include <sstream>
 
 #include "extension/Configuration.h"
-
 #include "utility/file/fileutil.h"
 #include "utility/support/yaml_expression.h"
 
