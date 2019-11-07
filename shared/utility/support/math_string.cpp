@@ -40,6 +40,11 @@ namespace support {
         table.add_constants();
         table.add_constant("auto", std::numeric_limits<double>::infinity());
 
+        // File size constants
+        table.add_constant("KiB", 1024);
+        table.add_constant("MiB", 1048576);
+        table.add_constant("GiB", 1073741824);
+
         // Add table to expression
         exprtk::expression<double> expression;
         expression.register_symbol_table(table);
