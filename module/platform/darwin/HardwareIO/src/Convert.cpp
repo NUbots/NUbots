@@ -136,7 +136,6 @@ namespace platform {
 
             // Go the correct direction
             return raw * SERVO_DIRECTION[id];
-            ;
         }
 
         float Convert::temperature(const uint8_t value) {
