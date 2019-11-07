@@ -20,7 +20,7 @@
 #ifndef MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 #define MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <mutex>
 #include <nuclear>
 
@@ -57,8 +57,8 @@ namespace platform {
                 Vec3Noise accelerometer;
                 Vec3Noise gyroscope;
             } noise;
-            double bodyTilt                 = 0;
-            arma::vec3 integrated_gyroscope = {0, 0, 0};
+            double bodyTilt                      = 0;
+            Eigen::Vector3d integrated_gyroscope = Eigen::Vector3d::Zero();
             void setRightFootDown(bool down);
             void setLeftFootDown(bool down);
 
