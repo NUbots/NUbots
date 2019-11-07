@@ -115,12 +115,12 @@ namespace support {
                             handle.second.unbind();
                         }
 
-                        // Add any recorders new ones that we don't have yet
+                        // Add any new recorders that we don't have yet
                         for (auto& setting : cfg["messages"].config) {
                             std::string name = setting.first.as<std::string>();
                             bool enabled     = setting.second.as<bool>();
 
-                            // If it was enabled and we are keeping it enabled, keep it and remove it from the old list
+                            // If we are enabling this, and it wasn't already enabled, enable it
                             if (new_handles.count(name) == 0 && enabled) {
                                 log<NUClear::INFO>("Data logging for type", name, "enabled");
                                 new_handles.insert(std::make_pair(name, activate_recorder(name)));
