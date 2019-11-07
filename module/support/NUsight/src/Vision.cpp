@@ -18,7 +18,6 @@
  */
 
 #include "NUsight.h"
-
 #include "message/input/Image.h"
 #include "message/output/CompressedImage.h"
 #include "message/vision/Ball.h"
@@ -27,7 +26,6 @@
 #include "message/vision/Line.h"
 #include "message/vision/Obstacle.h"
 #include "message/vision/VisualMesh.h"
-
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {

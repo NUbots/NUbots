@@ -43,4 +43,7 @@ target_link_libraries(nutilities ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
 
 # SET(NUCLEAR_UTILITY_LIBRARIES ${NUCLEAR_UTILITY_LIBRARIES} ${NUTILITIES_LIBRARIES} CACHE INTERNAL "Library for NUClear
 # utilities" FORCE)
-set(NUCLEAR_UTILITY_LIBRARIES nutilities CACHE INTERNAL "Library for NUClear utilities" FORCE)
+set(NUCLEAR_UTILITY_LIBRARIES
+    nutilities
+    CACHE INTERNAL "Library for NUClear utilities" FORCE
+)

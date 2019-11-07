@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from dockerise import run_on_docker
-import b
 import os
-import pty
+
+import b
+from dockerise import WrapPty, run_on_docker
 
 
 @run_on_docker
@@ -24,4 +24,5 @@ def run(args, **kwargs):
     args[0] = os.path.join("bin", args[0])
 
     # Run the command
-    exit(pty.spawn(args) >> 8)
+    pty = WrapPty()
+    exit(pty.spawn(args))

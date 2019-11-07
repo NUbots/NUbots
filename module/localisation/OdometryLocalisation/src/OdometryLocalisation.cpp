@@ -1,12 +1,10 @@
 #include "OdometryLocalisation.h"
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/Nod.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"

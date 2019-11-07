@@ -24,11 +24,9 @@
 #include <mutex>
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Transform3D.h"

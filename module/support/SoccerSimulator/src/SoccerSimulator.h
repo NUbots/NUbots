@@ -23,18 +23,15 @@
 #include <armadillo>
 #include <nuclear>
 
+#include "VirtualBall.h"
+#include "VirtualGoalPost.h"
 #include "extension/Configuration.h"
-
 #include "message/motion/KickCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/support/GlobalConfig.h"
-
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Transform2D.h"
-
-#include "VirtualBall.h"
-#include "VirtualGoalPost.h"
 
 namespace module {
 namespace support {

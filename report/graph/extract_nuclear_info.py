@@ -1,22 +1,23 @@
 #!/usr/bin/python
 
-from info.parse_dsl_type import parse_dsl_type
-from info.collapse_output_type import collapse_output_type
-from info.parse_output_type import parse_output_type
-from info.symbol_parser import SymbolParser
-
+import bisect
 import copy
-import pyparsing as pp
-import logging
-import json
-import sys
-import re
 import ctypes
+import json
+import logging
+import re
 import struct
+import sys
+from subprocess import PIPE, Popen
+
+import pyparsing as pp
+
 import pybfd.bfd
 import pybfd.opcodes
-import bisect
-from subprocess import Popen, PIPE
+from info.collapse_output_type import collapse_output_type
+from info.parse_dsl_type import parse_dsl_type
+from info.parse_output_type import parse_output_type
+from info.symbol_parser import SymbolParser
 
 if sys.argv[1]:
     module_name = sys.argv[1]

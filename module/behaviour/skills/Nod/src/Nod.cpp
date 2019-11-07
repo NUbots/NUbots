@@ -18,13 +18,12 @@
  */
 
 #include "Nod.h"
+
 #include <nuclear>
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
-
 #include "message/behaviour/Nod.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import os
+from subprocess import call, check_output
+
 import b
 from dockerise import run_on_docker
-from subprocess import call, check_output
 
 
 @run_on_docker
@@ -27,5 +28,6 @@ def run(**kwargs):
             print("Formatting {} with cmake-format".format(f))
             call(["cmake-format", "-i", f])
         elif f.endswith((".py")):
-            print("Formatting {} with black".format(f))
+            print("Formatting {} with isort and black".format(f))
+            call(["isort", f])
             call(["black", f])

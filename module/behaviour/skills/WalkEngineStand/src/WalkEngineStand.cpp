@@ -20,9 +20,7 @@
 #include "WalkEngineStand.h"
 
 #include "extension/Configuration.h"
-
 #include "message/motion/WalkCommand.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

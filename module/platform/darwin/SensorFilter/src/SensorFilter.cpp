@@ -20,11 +20,9 @@
 #include "SensorFilter.h"
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 //#include "message/localisation/ResetRobotHypotheses.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -528,7 +526,7 @@ namespace platform {
                                                                 motionFilter.get()[MotionModel::PY],
                                                                 motionFilter.get()[MotionModel::PZ]);
 
-                            Eigen::Affine3d Htg = utility::motion::kinematics::calculateGroundSpace(Htf, Hwt);
+                            Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
                             footlanding_Hwf[side]                   = Hwt * Htg;
                             footlanding_Hwf[side].translation().z() = 0.0;
@@ -548,10 +546,10 @@ namespace platform {
                             Eigen::Vector4d Rwt_vec(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
 
                             // check if we need to reverse our quaternion
-                            Eigen::Quaterniond Rwt_filter = Eigen::Quaterniond(motionFilter.get()[MotionModel::QW],
-                                                                               motionFilter.get()[MotionModel::QX],
-                                                                               motionFilter.get()[MotionModel::QY],
-                                                                               motionFilter.get()[MotionModel::QZ]);
+                            Eigen::Quaterniond Rwt_filter(motionFilter.get()[MotionModel::QW],
+                                                          motionFilter.get()[MotionModel::QX],
+                                                          motionFilter.get()[MotionModel::QY],
+                                                          motionFilter.get()[MotionModel::QZ]);
                             Eigen::Vector4d Rwt_filter_vec(
                                 Rwt_filter.w(), Rwt_filter.x(), Rwt_filter.y(), Rwt_filter.z());
 

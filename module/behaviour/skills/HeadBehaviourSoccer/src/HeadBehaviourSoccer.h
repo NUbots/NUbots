@@ -25,7 +25,6 @@
 #include <set>
 
 #include "Searcher.h"
-
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
@@ -34,7 +33,6 @@
 #include "message/motion/KinematicsModel.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
-
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/matrix/Rotation3D.h"
 

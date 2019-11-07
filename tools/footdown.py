@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 import os
-import tensorflow as tf
-from tensorflow import keras
-import yaml
+import re
+
 from tqdm import tqdm
+
 import nbs_tools.decoder as nbs_decoder
 import numpy as np
-import re
+import tensorflow as tf
+import yaml
+from tensorflow import keras
 
 SERVO_ID = {
     "R_SHOULDER_PITCH": 0,

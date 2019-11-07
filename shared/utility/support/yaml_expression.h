@@ -21,6 +21,7 @@
 #define UTILITY_SUPPORT_YAML_EXPRESSION_H
 
 #include <yaml-cpp/yaml.h>
+
 #include <Eigen/Core>
 #include <cassert>
 #include <iostream>

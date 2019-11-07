@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 install-make-from-source $1 \
     CROSS=1 \
