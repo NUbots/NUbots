@@ -69,8 +69,8 @@ namespace support {
     using utility::math::transform::localToWorld;
     using utility::math::transform::worldToLocal;
     using utility::motion::kinematics::calculateRobotToIMU;
-    using utility::nusight::drawArrow;
-    using utility::nusight::drawSphere;
+    // using utility::nusight::drawArrow;
+    // using utility::nusight::drawSphere;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -351,13 +351,12 @@ namespace support {
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
             Eigen::Vector2d bearingVector      = world.robotPose.rotation() * Eigen::Vector2d::UnitX());
             Eigen::Vector3d robotHeadingVector(bearingVector.x(), bearingVector.x(), 0.0);
-            emit(drawArrow("robot",
-                           Eigen::Vector3d(world.robotPose.translation().x(), world.robotPosetranslation()..y(), 0.0),
-                           1.0,
-                           robotHeadingVector,
-                           0.0));
+            // emit(drawArrow("robot",
+            //                Eigen::Vector3d(world.robotPose.translation().x(), world.robotPosetranslation()..y(),
+            //                0.0), 1.0, robotHeadingVector, 0.0));
 
-            emit(drawSphere("ball", Eigen::Vector3d(world.ball.position.x(), world.ball.position.y(), 0.0), 0.1, 0.0));
+            // emit(drawSphere("ball", Eigen::Vector3d(world.ball.position.x(), world.ball.position.y(), 0.0), 0.1,
+            // 0.0));
         });
 
         on<Startup>().then("SoccerSimulator Startup", [this] {

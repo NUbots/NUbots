@@ -38,11 +38,21 @@ namespace support {
                                   const message::input::Image::Lens& lens,
                                   const Eigen::Matrix<unsigned int, 2, 1>& dimensions);
 
+        Eigen::Affine3d getFieldToCam(const Eigen::Affine2d& Tft, const Eigen::Affine3d& Htc);
+        Eigen::Vector2d projectCamSpaceToScreen(const Eigen::Vector3d& point, const message::input::Image::Lens& cam);
+        Eigen::Vector2i screenToImage(const Eigen::Vector2d& screen,
+                                      const Eigen::Matrix<unsigned int, 2, 1>& imageSize);
+        Eigen::Matrix<double, 3, 4> cameraSpaceGoalProjection(const Eigen::Affine2d& robotPose,
+                                                              const Eigen::Vector3d& goalLocation,
+                                                              const message::support::FieldDescription& field,
+                                                              const Eigen::Affine3d& Hgc,
+                                                              const bool& failIfNegative = true);
+
     public:
-        VirtualGoalPost::VirtualGoalPost(const Eigen::Vector3d& position,
-                                         float height,
-                                         Goal::Side side,
-                                         Goal::Team team)
+        VirtualGoalPost(const Eigen::Vector3d& position,
+                        const float& height,
+                        const message::vision::Goal::Side& side,
+                        const message::vision::Goal::Team& team)
             : position(position), height(height), side(side), team(team) {}
 
         Eigen::Vector3d position         = Eigen::Vector3d::Zero();
