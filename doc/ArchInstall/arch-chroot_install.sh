@@ -36,6 +36,11 @@ pacman -S --noconfirm --needed sudo
 
 # Setup users of the wheel group to be able to execute sudo commands with no password
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+
+# Get sudo to insult users when they type a password wrong
+echo "Defaults insults" > /etc/sudoers.d/insults
+
+# Add u3v group and create our user
 groupadd u3v
 useradd -m -G wheel,lp,u3v ${USER}
 
@@ -82,7 +87,7 @@ pacman -S --noconfirm --needed \
 ##############
 
 # Enable the ssh server
-systemctl enable sshd.socket
+systemctl enable sshd.service
 
 # Setup the ssh issue file
 mkdir banner

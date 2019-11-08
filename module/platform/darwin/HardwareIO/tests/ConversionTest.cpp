@@ -18,6 +18,7 @@
  */
 
 #include <catch.hpp>
+
 #include "Convert.h"
 #include "utility/math/angle.h"
 
@@ -34,10 +35,10 @@ TEST_CASE("Testing the hardware accelerometer conversions to SI units", "[hardwa
 TEST_CASE("Testing the hardware gyroscope conversions to SI units", "[hardware][conversion][gyroscope]") {
 
     REQUIRE(Convert::gyroscope(0)
-            == Approx((-1800.0 * M_PI) / 180.0));   // Should be -1800 degrees/second in radians/second
+            == Approx((-1880.0 * M_PI) / 180.0));   // Should be -1880 degrees/second in radians/second
     REQUIRE(Convert::gyroscope(512) == Approx(0));  // Should be 0
     REQUIRE(Convert::gyroscope(1024)
-            == Approx((1800.0 * M_PI) / 180.0));  // Should be 1800 degrees/second in radians/second
+            == Approx((1880.0 * M_PI) / 180.0));  // Should be 1880 degrees/second in radians/second
 }
 
 TEST_CASE("Testing the hardware voltage conversions to SI units", "[hardware][conversion][voltage]") {
@@ -55,27 +56,15 @@ TEST_CASE("Testing the hardware FSR conversions to SI units", "[hardware][conver
 
     INFO("Testing the FSR centre conversions");
     // Test Left Foot
-    // Test X
-    REQUIRE(Convert::fsrCentre(true, true, 0) == Approx(1));     // Should be 1
-    REQUIRE(Convert::fsrCentre(true, true, 254) == Approx(-1));  // Should be -1
-    REQUIRE(Convert::fsrCentre(true, true, 127) == Approx(0));   // Should be 0
-    REQUIRE(std::isnan(Convert::fsrCentre(true, true, 0xFF)));   // Should be NaN
-    // Test Y
-    REQUIRE(Convert::fsrCentre(true, false, 0) == Approx(-1));   // Should be -1
-    REQUIRE(Convert::fsrCentre(true, false, 254) == Approx(1));  // Should be 1
-    REQUIRE(Convert::fsrCentre(true, false, 127) == Approx(0));  // Should be 0
-    REQUIRE(std::isnan(Convert::fsrCentre(true, false, 0xFF)));  // Should be NaN
+    REQUIRE(Convert::fsrCentre(true, 0) == Approx(-1));   // Should be -1
+    REQUIRE(Convert::fsrCentre(true, 254) == Approx(1));  // Should be 1
+    REQUIRE(Convert::fsrCentre(true, 127) == Approx(0));  // Should be 0
+    REQUIRE(std::isnan(Convert::fsrCentre(true, 0xFF)));  // Should be NaN
     // Test Right Foot
-    // Test X
-    REQUIRE(Convert::fsrCentre(false, true, 0) == Approx(-1));   // Should be -1
-    REQUIRE(Convert::fsrCentre(false, true, 254) == Approx(1));  // Should be 1
-    REQUIRE(Convert::fsrCentre(false, true, 127) == Approx(0));  // Should be 0
-    REQUIRE(std::isnan(Convert::fsrCentre(true, true, 0xFF)));   // Should be NaN
-    // Test Y
-    REQUIRE(Convert::fsrCentre(false, false, 0) == Approx(1));     // Should be 1
-    REQUIRE(Convert::fsrCentre(false, false, 254) == Approx(-1));  // Should be -1
-    REQUIRE(Convert::fsrCentre(false, false, 127) == Approx(0));   // Should be 0
-    REQUIRE(std::isnan(Convert::fsrCentre(true, false, 0xFF)));    // Should be NaN
+    REQUIRE(Convert::fsrCentre(false, 0) == Approx(1));     // Should be 1
+    REQUIRE(Convert::fsrCentre(false, 254) == Approx(-1));  // Should be -1
+    REQUIRE(Convert::fsrCentre(false, 127) == Approx(0));   // Should be 0
+    REQUIRE(std::isnan(Convert::fsrCentre(false, 0xFF)));   // Should be NaN
 }
 
 TEST_CASE("Testing the hardware coloured LED conversions to 24bit rgb", "[hardware][conversion][led]") {
@@ -133,12 +122,25 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
 
     std::vector<std::vector<std::pair<float, uint16_t>>> inverseTests;
 
+    // Load in servo offsets and directions
+    constexpr std::array<int8_t, 20> direction = {-1, 1,  -1, -1, -1, 1, -1, -1, -1, -1,
+                                                  1,  -1, 1,  -1, -1, 1, 1,  1,  1,  1};
+    constexpr std::array<double, 20> offset    = {M_PI / 2, M_PI / 2, -M_PI / 4, M_PI / 4, -M_PI / 2, -M_PI / 2, 0.0,
+                                               0.0,      0.0,      0.0,       0.0,      0.0,       0.0,       0.0,
+                                               0.0,      0.0,      0.0,       0.0,      0.0,       0.0};
+
+    for (size_t i = 0; i < 20; ++i) {
+        Convert::SERVO_DIRECTION[i] = direction[i];
+        Convert::SERVO_OFFSET[i]    = offset[i];
+    }
+
+
     // This scope gets rid of the old INFO messages once we pass this section
     {
         INFO("Testing the forward position conversions");
 
         const std::pair<uint16_t, float> forwardTests[] = {
-            {0, -M_PI}, {1023, -M_PI_2}, {2048, 0}, {3073, M_PI_2}, {4095, M_PI}};
+            {0, M_PI}, {1023, -M_PI_2}, {2048, 0.0}, {3073, M_PI_2}, {4095, M_PI}};
 
         for (size_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
@@ -146,8 +148,9 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
             std::vector<std::pair<float, uint16_t>> inverseTest;
 
             for (auto& test : forwardTests) {
-                float expected = utility::math::angle::normalizeAngle((test.second + Convert::SERVO_OFFSET[i])
-                                                                      * Convert::SERVO_DIRECTION[i]);
+                INFO("Input: " << test.first << " Expected output: " << test.second);
+                float expected = utility::math::angle::normalizeAngle(test.second * Convert::SERVO_DIRECTION[i]
+                                                                      + Convert::SERVO_OFFSET[i]);
                 float actual   = Convert::servoPosition(i, test.first);
 
                 INFO("Expected: " << expected << " Actual: " << actual);
@@ -217,7 +220,7 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
     {
         INFO("Testing the forward position conversions");
 
-        const std::pair<uint16_t, float> tests[] = {{0, 0}, {1023, 1.0}, {1024, 0}, {2047, -1.0}};
+        const std::pair<uint16_t, float> tests[] = {{0, 0.0}, {1023, 1.0}, {1024, 0.0}, {2047, -1.0}};
 
         for (size_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
@@ -225,43 +228,11 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
             // Test with MX28s
             INFO("Testing with MX28s");
             for (auto& test : tests) {
-                float expected =
-                    test.second * (Convert::MX28_SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
-                float actual = Convert::servoSpeed(i, test.first);
+                float expected = test.second * (Convert::SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
+                float actual   = Convert::servoSpeed(i, test.first);
 
                 INFO("Input: " << test.first << " Expected: " << test.second << " Actual: " << actual);
 
-                REQUIRE(expected == Approx(actual));
-            }
-
-            // Test with RX28s it fails
-            INFO("Testing with RX28s");
-            for (auto& test : tests) {
-                float expected =
-                    test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
-                float actual = Convert::servoSpeed(i, test.first);
-
-                INFO("Input: " << test.first << " Expected: " << test.second << " Actual: " << actual);
-
-                // Test that if they're not both equal to 0, they are unequal
-                if ((expected + actual) != 0) {
-                    REQUIRE(expected != Approx(actual));
-                }
-            }
-
-            // Change this motor to be an RX28
-            Convert::SPEED_CONVERSION_FACTOR[i] = Convert::RX28_SPEED_CONVERSION_FACTOR;
-
-            // Check with an RX28 it now succeeds
-            INFO("Testing with converted RX28s");
-            for (auto& test : tests) {
-                float expected =
-                    test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
-                float actual = Convert::servoSpeed(i, test.first);
-
-                INFO("Input: " << test.first << " Expected: " << test.second << " Actual: " << actual);
-
-                // It should now succeed
                 REQUIRE(expected == Approx(actual));
             }
 
@@ -270,16 +241,13 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
             for (auto& test : tests) {
                 uint16_t expected = test.first % 1024;
                 uint16_t actual =
-                    Convert::servoSpeedInverse(i, fabs(test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023)));
+                    Convert::servoSpeedInverse(fabs(test.second * (Convert::SPEED_CONVERSION_FACTOR * 1023)));
 
-                INFO("Input: " << fabs(test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023))
+                INFO("Input: " << fabs(test.second * (Convert::SPEED_CONVERSION_FACTOR * 1023))
                                << " Expected: " << test.first << " Actual: " << actual);
 
                 // These should be equal
                 REQUIRE(expected == actual);
-
-                // Test that going over the max speed makes it go to 0
-                REQUIRE(Convert::servoSpeedInverse(i, Convert::RX28_SPEED_CONVERSION_FACTOR * 1024) == 0);
             }
         }
     }
@@ -296,8 +264,8 @@ TEST_CASE("Testing the hardware load conversions to between -100 and 100", "[har
     for (int i = 0; i < 20; ++i) {
         REQUIRE(Convert::servoLoad(i, 0) == Approx(0 * Convert::SERVO_DIRECTION[i]));
         REQUIRE(Convert::servoLoad(i, 1024) == Approx(0 * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::servoLoad(i, 2047) == Approx(-100 * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::servoLoad(i, 1023) == Approx(100 * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(i, 2047) == Approx(-1.0 * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(i, 1023) == Approx(1.0 * Convert::SERVO_DIRECTION[i]));
     }
 }
 

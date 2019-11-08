@@ -42,10 +42,9 @@ foreach(var ${vars})
   if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
     if(${var})
       string(SUBSTRING ${var} 5 -1 role_name)
-      set(
-        NUCLEAR_ROLES
-        ${NUCLEAR_ROLES} ${role_name}
-        CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
+      set(NUCLEAR_ROLES
+          ${NUCLEAR_ROLES} ${role_name}
+          CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
       )
     endif()
   endif()

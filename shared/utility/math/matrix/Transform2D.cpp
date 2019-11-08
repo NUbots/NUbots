@@ -18,8 +18,8 @@
  */
 
 #include "Transform2D.h"
-#include "Rotation2D.h"
 
+#include "Rotation2D.h"
 #include "utility/math/angle.h"
 
 namespace utility {

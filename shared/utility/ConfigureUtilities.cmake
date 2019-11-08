@@ -1,6 +1,10 @@
 # List subdirectories
 macro(SUBDIRLIST result curdir)
-  file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  file(
+    GLOB children
+    RELATIVE ${curdir}
+    ${curdir}/*
+  )
   set(dirlist "")
   foreach(child ${children})
     if(IS_DIRECTORY ${curdir}/${child})
@@ -12,26 +16,12 @@ endmacro()
 
 # Collect CXX files
 macro(GET_CXX_FILES file_list dir)
-  file(
-    GLOB
-    file_list
-    "${dir}*.cpp"
-    "${dir}*.c"
-    "${dir}/*.cpp"
-    "${dir}/*.c"
-  )
+  file(GLOB file_list "${dir}*.cpp" "${dir}*.c" "${dir}/*.cpp" "${dir}/*.c")
 endmacro(GET_CXX_FILES)
 
 # Collect CXX files recursively
 macro(GET_CXX_FILES_RECURSE file_list dir)
-  file(
-    GLOB_RECURSE
-    file_list
-    "${dir}*.cpp"
-    "${dir}*.c"
-    "${dir}/*.cpp"
-    "${dir}/*.c"
-  )
+  file(GLOB_RECURSE file_list "${dir}*.cpp" "${dir}*.c" "${dir}/*.cpp" "${dir}/*.c")
 endmacro(GET_CXX_FILES_RECURSE)
 
 # Check if the dependencies of the folder have been found
@@ -64,10 +54,9 @@ macro(ADD_UTILITY_LIBRARY directory)
     if(file_list)
       # ADD_LIBRARY(${current_library} ${file_list}) SET(NUTILITIES_LIBRARIES ${NUTILITIES_LIBRARIES} ${current_library}
       # CACHE INTERNAL "Libraries for NUtilities" FORCE)
-      set(
-        NUTILITIES_LIBRARIES_FILES
-        ${NUTILITIES_LIBRARIES_FILES} ${file_list}
-        CACHE INTERNAL "Libraries for NUtilities" FORCE
+      set(NUTILITIES_LIBRARIES_FILES
+          ${NUTILITIES_LIBRARIES_FILES} ${file_list}
+          CACHE INTERNAL "Libraries for NUtilities" FORCE
       )
     else()
       # MESSAGE("")

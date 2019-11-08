@@ -19,6 +19,7 @@
 #define EXTENSION_SCRIPT_H
 
 #include <yaml-cpp/yaml.h>
+
 #include <cstdlib>
 #include <nuclear>
 #include <regex>
@@ -26,7 +27,6 @@
 #include <system_error>
 
 #include "FileWatch.h"
-
 #include "utility/file/fileutil.h"
 #include "utility/input/ServoID.h"
 #include "utility/strutil/strutil.h"
@@ -48,6 +48,25 @@ struct Script {
                 : id(servo), position(pos), gain(gain), torque(torque) {}
             Target(const Target& other)
                 : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
+            Target(Target&& other)
+                : id(std::move(other.id))
+                , position(std::move(other.position))
+                , gain(std::move(other.gain))
+                , torque(std::move(other.torque)) {}
+            Target& operator=(const Target& other) {
+                id       = other.id;
+                position = other.position;
+                gain     = other.gain;
+                torque   = other.torque;
+                return *this;
+            }
+            Target& operator=(Target&& other) {
+                id       = std::move(other.id);
+                position = std::move(other.position);
+                gain     = std::move(other.gain);
+                torque   = std::move(other.torque);
+                return *this;
+            }
 
             ServoID id;
             float position;

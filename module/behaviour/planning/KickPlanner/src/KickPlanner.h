@@ -21,11 +21,10 @@
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 
 #include <armadillo>
+#include <nuclear>
 
 #include "message/input/Sensors.h"
 #include "message/motion/KickCommand.h"
-
-#include <nuclear>
 namespace module {
 namespace behaviour {
     namespace planning {

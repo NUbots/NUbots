@@ -7,10 +7,9 @@ set(message_source_include_dir "${PROJECT_SOURCE_DIR}/${message_include_dir}")
 set(message_binary_include_dir "${PROJECT_BINARY_DIR}/${message_include_dir}")
 
 # Make our message include directories variable
-set(
-  NUCLEAR_MESSAGE_INCLUDE_DIRS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include ${message_source_include_dir} ${message_binary_include_dir}
-  CACHE INTERNAL "Include directories for the message folder and generated sources"
+set(NUCLEAR_MESSAGE_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include ${message_source_include_dir} ${message_binary_include_dir}
+    CACHE INTERNAL "Include directories for the message folder and generated sources"
 )
 
 # Include our message directories
@@ -53,22 +52,19 @@ foreach(proto ${builtin})
 
   # Run the protocol buffer compiler on the builtin protocol buffers
   add_custom_command(
-    OUTPUT
-      "${message_binary_include_dir}/${file_we}.pb.cc" "${message_binary_include_dir}/${file_we}.pb.h"
-      "${message_binary_include_dir}/${file_we}_pb2.py"
+    OUTPUT "${message_binary_include_dir}/${file_we}.pb.cc" "${message_binary_include_dir}/${file_we}.pb.h"
+           "${message_binary_include_dir}/${file_we}_pb2.py"
     COMMAND
-      ${PROTOBUF_PROTOC_EXECUTABLE}
-      ARGS
-      --cpp_out=lite:${message_binary_include_dir}
-      --python_out=${message_binary_include_dir}
-      -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+      ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${message_binary_include_dir}
+      --python_out=${message_binary_include_dir} -I${CMAKE_CURRENT_SOURCE_DIR}/proto
       "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
     COMMENT "Compiling protocol buffer ${proto}"
   )
 
   set(src ${src} "${message_binary_include_dir}/${file_we}.pb.cc" "${message_binary_include_dir}/${file_we}.pb.h"
-          "${message_binary_include_dir}/${file_we}_pb2.py")
+          "${message_binary_include_dir}/${file_we}_pb2.py"
+  )
 
   # Prevent Effective C++ and unused parameter error checks being performed on generated files.
   set_source_files_properties(
@@ -79,6 +75,7 @@ foreach(proto ${builtin})
     "${message_binary_include_dir}/${file_we}.cpp"
     "${message_binary_include_dir}/${file_we}.py.cpp"
     "${message_binary_include_dir}/${file_we}.h"
+    "${message_binary_include_dir}/${file_we}_pb2.py"
     PROPERTIES
     COMPILE_FLAGS
     "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
@@ -109,12 +106,9 @@ foreach(proto ${protobufs})
   # Get the dependencies on this protobuf so we can recompile on changes If they change you will need to re cmake
   execute_process(
     COMMAND
-      ${PROTOBUF_PROTOC_EXECUTABLE}
-      --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/temp1
-      --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/temp2
-      -I${message_source_include_dir}
-      -I${CMAKE_CURRENT_SOURCE_DIR}/proto
-      ${proto}
+      ${PROTOBUF_PROTOC_EXECUTABLE} --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/temp1
+      --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/temp2 -I${message_source_include_dir}
+      -I${CMAKE_CURRENT_SOURCE_DIR}/proto ${proto}
   )
 
   file(READ "${CMAKE_CURRENT_BINARY_DIR}/temp1" dependencies)
@@ -144,13 +138,9 @@ foreach(proto ${protobufs})
   add_custom_command(
     OUTPUT "${outputpath}/${file_we}.pb" "${outputpath}/${file_we}.dep"
     COMMAND
-      ${PROTOBUF_PROTOC_EXECUTABLE}
-      ARGS
-      --descriptor_set_out="${outputpath}/${file_we}.pb"
-      --dependency_out="${outputpath}/${file_we}.dep"
-      -I${message_source_include_dir}
-      -I${CMAKE_CURRENT_SOURCE_DIR}/proto
-      ${proto}
+      ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --descriptor_set_out="${outputpath}/${file_we}.pb"
+      --dependency_out="${outputpath}/${file_we}.dep" -I${message_source_include_dir}
+      -I${CMAKE_CURRENT_SOURCE_DIR}/proto ${proto}
     DEPENDS ${source_depends}
     COMMENT "Extracting protocol buffer information from ${proto}"
   )
@@ -169,13 +159,10 @@ foreach(proto ${protobufs})
 
   # Run the protocol buffer compiler on these new protobufs
   add_custom_command(
-    OUTPUT "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h"
+    OUTPUT "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h" "${outputpath}/${file_we}_pb2.py"
     COMMAND
-      ${PROTOBUF_PROTOC_EXECUTABLE}
-      ARGS
-      --cpp_out=lite:${message_binary_include_dir}
-      -I${message_binary_include_dir}
-      -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+      ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${message_binary_include_dir}
+      --python_out=${message_binary_include_dir} -I${message_binary_include_dir} -I${CMAKE_CURRENT_SOURCE_DIR}/proto
       "${outputpath}/${file_we}.proto"
     DEPENDS ${binary_depends}
     COMMENT "Compiling protocol buffer ${proto}"
@@ -184,13 +171,11 @@ foreach(proto ${protobufs})
   # Build our c++ class from the extracted information
   add_custom_command(
     OUTPUT "${outputpath}/${file_we}.cpp" "${outputpath}/${file_we}.py.cpp" "${outputpath}/${file_we}.h"
-    COMMAND
-      ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${outputpath}/${file_we}"
-      ${outputpath}
+    COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${outputpath}/${file_we}"
+            ${outputpath}
     WORKING_DIRECTORY ${message_binary_dir}
-    DEPENDS
-      "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" ${message_class_generator_depends}
-      "${message_binary_include_dir}/Neutron_pb2.py" "${outputpath}/${file_we}.pb"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" ${message_class_generator_depends}
+            "${message_binary_include_dir}/Neutron_pb2.py" "${outputpath}/${file_we}.pb"
     COMMENT "Building classes for ${proto}"
   )
 
@@ -203,16 +188,19 @@ foreach(proto ${protobufs})
     "${outputpath}/${file_we}.cpp"
     "${outputpath}/${file_we}.py.cpp"
     "${outputpath}/${file_we}.h"
+    "${outputpath}/${file_we}_pb2.py"
     PROPERTIES
     GENERATED
     TRUE
     # Prevent Effective C++ and unused parameter error checks being performed on generated files.
-    COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+    COMPILE_FLAGS
+    "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
   )
 
   # Add the generated files to our list
   set(src ${src} "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h" "${outputpath}/${file_we}.cpp"
-          "${outputpath}/${file_we}.h")
+          "${outputpath}/${file_we}.h"
+  )
 
   # If we have pybind11 also add the python bindings
   if(pybind11_FOUND)
@@ -227,11 +215,8 @@ if(pybind11_FOUND)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
     COMMAND
-      ${PYTHON_EXECUTABLE}
-      ARGS
-      "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
-      "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
-      "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}"
+      ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+      "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp" "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}"
       ${message_dependencies}
     WORKING_DIRECTORY ${message_binary_dir}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" ${message_dependencies}
@@ -243,8 +228,12 @@ endif()
 
 if(src)
   # Build a library from these files
-  add_library(nuclear_message SHARED ${protobufs} ${src})
-  set_property(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+  if(NUCLEAR_SHARED_BUILD)
+    add_library(nuclear_message SHARED ${protobufs} ${src})
+    set_property(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+  else()
+    add_library(nuclear_message STATIC ${protobufs} ${src})
+  endif()
 
   # The library uses protocol buffers
   target_link_libraries(nuclear_message ${PROTOBUF_LIBRARIES})
@@ -263,17 +252,15 @@ if(src)
     # Create symlinks to the files
     add_custom_command(
       TARGET nuclear_message POST_BUILD
-      COMMAND
-        ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nuclear_message>
-        "${PROJECT_BINARY_DIR}/python/nuclear/${python_module_path}"
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nuclear_message>
+              "${PROJECT_BINARY_DIR}/python/nuclear/${python_module_path}"
       COMMENT "Copying messages lib into python file format"
     )
 
     add_custom_command(
       TARGET nuclear_message POST_BUILD
-      COMMAND
-        ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
-        "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
+      COMMAND ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
+              "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
       DEPENDS "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
       COMMENT "Copying nuclear.py to python build directory"
     )
@@ -281,7 +268,10 @@ if(src)
   endif()
 
   # Add to our list of NUClear message libraries
-  set(NUCLEAR_MESSAGE_LIBRARIES nuclear_message CACHE INTERNAL "List of libraries that are built as messages" FORCE)
+  set(NUCLEAR_MESSAGE_LIBRARIES
+      nuclear_message
+      CACHE INTERNAL "List of libraries that are built as messages" FORCE
+  )
 
   # Put it in an IDE group for shared
   set_property(TARGET nuclear_message PROPERTY FOLDER "shared/")

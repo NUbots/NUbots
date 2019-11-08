@@ -38,11 +38,12 @@ namespace math {
             // The model
             Model model;
 
+            using StateVec = arma::vec::fixed<Model::size>;
+            using StateMat = arma::mat::fixed<Model::size, Model::size>;
+
         private:
             // Dimension types for vectors and square matricies
-            using StateVec     = arma::vec::fixed<Model::size>;
             using ParticleList = arma::mat;
-            using StateMat     = arma::mat::fixed<Model::size, Model::size>;
 
             /* particles.n_cols = number of particles
                particle.col(i) = particle i
@@ -134,20 +135,23 @@ namespace math {
                         model.predictedObservation(candidateParticles.col(i), measurementArgs...);
                     observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
                 }
-                arma::vec weights =
-                    arma::exp(
-                        -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0))
-                        .t();
+
+                // Calculate log probabilities
+                arma::vec logits =
+                    (-arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0)).t();
+
+                // Subtract the max log prob for numerical stability and then exponentiate
+                logits = arma::exp(logits - logits.max());
 
                 // Resample
                 std::random_device rd;
                 std::mt19937 gen(rd());
-                std::discrete_distribution<> multinomial(weights.begin(),
-                                                         weights.end());  // class incorrectly named by cpp devs
+                std::discrete_distribution<> multinomial(logits.begin(),
+                                                         logits.end());  // class incorrectly named by cpp devs
                 for (unsigned int i = 0; i < particles.n_cols; i++) {
                     particles.col(i) = model.limitState(candidateParticles.col(multinomial(gen)));
                 }
-                return arma::mean(weights);
+                return arma::mean(logits);
             }
 
 

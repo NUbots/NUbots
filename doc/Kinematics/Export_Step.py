@@ -1,7 +1,13 @@
 # Author-
 # Description-
-import adsk.core, adsk.fusion, traceback, yaml, math, os
+import math
+import os
+import traceback
+
+import adsk.core
+import adsk.fusion
 import numpy as np
+import yaml
 
 
 def properties_run(context):

@@ -29,6 +29,10 @@ max_prefix_chars = 2
 # then reject the layout.
 max_lines_hwrap = 2
 
+# If a positional argument group contains more than this many arguments, then
+# force it to a vertical layout.
+max_pargs_hwrap = 1
+
 # What style line endings to use in the output.
 line_ending = "unix"
 

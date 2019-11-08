@@ -21,6 +21,7 @@
 #define MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
 
 #include <nuclear>
+
 #include "message/behaviour/WalkPath.h"
 #include "message/motion/WalkCommand.h"
 #include "utility/math/matrix/Transform2D.h"

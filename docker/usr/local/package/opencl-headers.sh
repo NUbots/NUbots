@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 # Exit immediately on error
 set -e
 
 # Get our method as the name of this script, url and args
 URL="$1"
+shift
 
 # Set installation prefix, default to /usr/local unless an external power says otherwise
 PREFIX=${PREFIX:-"/usr/local"}
@@ -19,41 +20,22 @@ mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
 # Download the source code
-wget ${URL}
-
-# Extract the source code archive
-ARCHIVE_FILE=$(find . -type f | head -n 1)
-case "${ARCHIVE_FILE}" in
-  *.tar.gz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tar.bz2) tar xf ${ARCHIVE_FILE} ;;
-  *.tar.xz)  tar xf ${ARCHIVE_FILE} ;;
-  *.tgz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz)     tar xf ${ARCHIVE_FILE} ;;
-  *.tbz2)    tar xf ${ARCHIVE_FILE} ;;
-  *.txz)     tar xf ${ARCHIVE_FILE} ;;
-  *.zip)     unzip ${ARCHIVE_FILE} ;;
-  *.h)       ;;
-  *.hpp)     ;;
-  *)         echo "Unknown archive format"; exit 1 ;;
-esac
-
-shift
-ARGS="$@"
+download-and-extract "${URL}"
 
 echo "Installing header files"
 
 # Find the folder containing the header files
 CL_FOLDER=$(find -type d -name "CL")
-cd ${CL_FOLDER}
+cd "${CL_FOLDER}"
 
 # Remove unneeded header files
 rm {cl_d3d,cl_dx9}*.h
 
 # Now install
-install -dm755 ${PREFIX}/include/CL
+install -dm755 "${PREFIX}/include/CL"
 for header in *.h
 do
-  install -m 644 ${header} ${PREFIX}/include/CL/
+  install -m 644 "${header}" "${PREFIX}/include/CL/"
 done
 
 # Now that we have built, cleanup the build directory

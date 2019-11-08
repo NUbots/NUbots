@@ -2,7 +2,6 @@
 #define MODULE_TOOLS_FIRMWAREINSTALLER_H
 
 #include <nuclear>
-
 #include <string>
 
 namespace module {

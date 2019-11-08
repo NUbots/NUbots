@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from generator.textutil import indent, dedent
+from generator.Enum import Enum
 from generator.Field import Field, PointerType
 from generator.OneOfField import OneOfField
 from generator.OneOfType import OneOfType
-from generator.Enum import Enum
+from generator.textutil import dedent, indent
 
 
 class Message:
