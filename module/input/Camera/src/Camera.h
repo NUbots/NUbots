@@ -1,23 +1,26 @@
 #ifndef MODULE_INPUT_CAMERA_H
 #define MODULE_INPUT_CAMERA_H
 
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <system_error>
-
 #include <fcntl.h>
+// clang-format off
+// We need to include stdio.h before jpeglib.h because jpeglib.h doesn't do it.
+#include <stdio.h>
 #include <jpeglib.h>
+// clang-format on
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
 #include <nuclear>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <system_error>
 
 // clang-format off
 extern "C" {
-#include <aravis-0.6/arv.h>
+#include <aravis-0.8/arv.h>
 }
 // clang-format on
 

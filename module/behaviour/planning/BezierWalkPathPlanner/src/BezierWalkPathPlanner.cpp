@@ -22,20 +22,17 @@
 #include <cmath>
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/WalkCommand.h"
 #include "message/vision/Ball.h"
-
-#include "utility/localisation/transform.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/nusight/NUhelpers.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
+#include "utility/localisation/transform.h"
+#include "utility/math/matrix/Transform2D.h"
+#include "utility/nusight/NUhelpers.h"
 
 
 namespace module {

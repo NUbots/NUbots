@@ -21,6 +21,7 @@
 #define MODULES_BEHAVIOUR_PLANNING_GOALSAVER_H
 
 #include <nuclear>
+
 #include "message/motion/DiveCommand.h"
 
 namespace module {

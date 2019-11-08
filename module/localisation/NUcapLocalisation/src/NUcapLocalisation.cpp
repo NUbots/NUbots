@@ -18,7 +18,9 @@
  */
 
 #include "NUcapLocalisation.h"
+
 #include <armadillo>
+
 #include "extension/Configuration.h"
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"

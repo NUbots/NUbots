@@ -17,11 +17,10 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
-
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
+#include "NUsight.h"
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
 

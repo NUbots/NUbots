@@ -103,7 +103,7 @@ namespace platform {
                 }
 
                 // Run the neural network
-                for (int i = 0; i < layers.size(); ++i) {
+                for (size_t i = 0; i < layers.size(); ++i) {
 
                     // Weights and bias
                     logits = logits.transpose() * layers[i].first + layers[i].second.transpose();

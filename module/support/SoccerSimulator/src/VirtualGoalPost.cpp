@@ -22,7 +22,6 @@
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
-
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Quad.h"

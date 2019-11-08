@@ -23,11 +23,9 @@
 #include <fmt/ostream.h>
 
 #include "extension/Configuration.h"
-
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
 #include "message/vision/GreenHorizon.h"
-
 #include "utility/math/coordinates.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/visualmesh/VisualMesh.h"

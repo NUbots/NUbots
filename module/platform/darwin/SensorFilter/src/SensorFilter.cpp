@@ -20,10 +20,8 @@
 #include "SensorFilter.h"
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/matrix.h"
@@ -141,7 +139,7 @@ namespace platform {
                     config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
                 // Set our process noise in our filter
-                MotionModel<double>::State process_noise;
+                MotionModel<double>::StateVec process_noise;
                 process_noise.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.noise.process.position;
                 process_noise.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.noise.process.velocity;
                 process_noise.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
@@ -175,14 +173,14 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
                 // Calculate our mean and covariance
-                MotionModel<double>::State mean;
+                MotionModel<double>::StateVec mean;
                 mean.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.mean.position;
                 mean.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.mean.velocity;
                 mean.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
                 mean.segment<3>(MotionModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
                 mean.segment<3>(MotionModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
-                MotionModel<double>::State covariance;
+                MotionModel<double>::StateVec covariance;
                 covariance.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.covariance.position;
                 covariance.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.covariance.velocity;
                 covariance.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
@@ -465,13 +463,10 @@ namespace platform {
                      *             Motion (IMU+Odometry)            *
                      ************************************************/
 
-                    // Calculate our time offset from the last read
-                    double deltaT =
-                        (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
-                        / double(NUClear::clock::period::den);
-
-                    // Time update
-                    motionFilter.time(deltaT);
+                    // Gyroscope measurement update
+                    motionFilter.measure(sensors->gyroscope,
+                                         config.motionFilter.noise.measurement.gyroscope,
+                                         MeasurementType::GYROSCOPE());
 
                     // Calculate accelerometer noise factor
                     Eigen::Matrix3d acc_noise = config.motionFilter.noise.measurement.accelerometer
@@ -479,14 +474,8 @@ namespace platform {
                                                    * (sensors->accelerometer.norm() - std::abs(G)))
                                                       * config.motionFilter.noise.measurement.accelerometerMagnitude;
 
-                    // Accelerometer measurment update
+                    // Accelerometer measurement update
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
-
-                    // Gyroscope measurement update
-                    motionFilter.measure(sensors->gyroscope,
-                                         config.motionFilter.noise.measurement.gyroscope,
-                                         MeasurementType::GYROSCOPE());
-
 
                     for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
                         bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
@@ -497,11 +486,11 @@ namespace platform {
 
                         if (foot_down && !prev_foot_down) {
                             Eigen::Affine3d Hwt;
-                            Hwt.linear() =
-                                Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX)).matrix();
+                            Hwt.linear() = Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX))
+                                               .toRotationMatrix();
                             Hwt.translation() = Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
 
-                            Eigen::Affine3d Htg = utility::motion::kinematics::calculateGroundSpace(Htf, Hwt);
+                            Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
                             footlanding_Hwf[side]                   = Hwt * Htg;
                             footlanding_Hwf[side].translation().z() = 0.0;
@@ -517,21 +506,9 @@ namespace platform {
                                                  config.motionFilter.noise.measurement.flatFootOdometry,
                                                  MeasurementType::FLAT_FOOT_ODOMETRY());
 
-                            Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                            Eigen::Vector4d Rwt_vec(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
-
-                            // check if we need to reverse our quaternion
-                            Eigen::Quaterniond Rwt_filter =
-                                Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX));
-                            Eigen::Vector4d Rwt_filter_vec(
-                                Rwt_filter.w(), Rwt_filter.x(), Rwt_filter.y(), Rwt_filter.z());
-
-                            // Get the quaternion with the smallest norm
-                            Rwt_vec = (Rwt_vec - Rwt_filter_vec).norm() < (Rwt_vec + Rwt_filter_vec).norm() ? Rwt_vec
-                                                                                                            : -Rwt_vec;
-
                             // do a foot based orientation update
-                            motionFilter.measure(Rwt_vec,
+                            Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
+                            motionFilter.measure(Rwt.coeffs(),
                                                  config.motionFilter.noise.measurement.flatFootOrientation,
                                                  MeasurementType::FLAT_FOOT_ORIENTATION());
                         }
@@ -540,12 +517,21 @@ namespace platform {
                         }
                     }
 
+                    // Calculate our time offset from the last read
+                    double deltaT = std::max(
+                        (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
+                            / double(NUClear::clock::period::den),
+                        0.0);
+
+                    // Time update
+                    motionFilter.time(deltaT);
+
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
-                    Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).matrix();
+                    Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
                     Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
                     sensors->Htw      = Hwt.inverse().matrix();
 

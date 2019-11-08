@@ -17,10 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
-
 #include "message/input/Sensors.h"
 
+#include "NUsight.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {

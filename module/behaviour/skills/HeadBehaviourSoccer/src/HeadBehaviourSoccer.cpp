@@ -22,13 +22,11 @@
 #include <string>
 
 #include "extension/Configuration.h"
-
 #include "message/localisation/Field.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/HeadCommand.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
-
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/UnitQuaternion.h"

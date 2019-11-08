@@ -22,7 +22,6 @@
 #include <cmath>
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/Subsumption.h"
@@ -33,7 +32,6 @@
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"

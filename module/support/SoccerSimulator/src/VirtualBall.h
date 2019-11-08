@@ -27,7 +27,6 @@
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/vision/Ball.h"
-
 #include "utility/math/matrix/Transform2D.h"
 
 namespace module {

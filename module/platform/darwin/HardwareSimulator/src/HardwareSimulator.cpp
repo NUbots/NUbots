@@ -25,11 +25,9 @@
 #include <mutex>
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/nusight/NUhelpers.h"
@@ -177,8 +175,8 @@ namespace platform {
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
                 [this](std::shared_ptr<const Sensors> previousSensors) {
                     if (previousSensors) {
-                        Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL));
-                        Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL));
+                        Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics[ServoID::L_ANKLE_ROLL]);
                         Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                         Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
@@ -227,7 +225,7 @@ namespace platform {
                     // 'Receive Simulated Gyroscope' reaction above, so we can't
                     // reliably query the size of the gyroQueue.
                     Eigen::Vector3d sumGyro = Eigen::Vector3d::Zero();
-                    {
+                    /* mutext scope */ {
                         std::lock_guard<std::mutex> lock(gyroQueueMutex);
                         while (!gyroQueue.empty()) {
                             DarwinSensors::Gyroscope g = gyroQueue.front();
@@ -237,16 +235,11 @@ namespace platform {
                             gyroQueue.pop();
                         }
                     }
-                    sumGyro             = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
-                    sensors.gyroscope.x = -sumGyro.x();
-                    sensors.gyroscope.y = sumGyro.y();
-                    sensors.gyroscope.z = sumGyro.z();
-
-                    sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
-                    sensors.accelerometer.y = 0;
-                    sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
-
-                    sensors.timestamp = NUClear::clock::now();
+                    sumGyro               = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
+                    sumGyro.x()           = -sumGyro.x();
+                    sensors.gyroscope     = sumGyro;
+                    sensors.accelerometer = Eigen::Vector3d(-9.8 * std::sin(bodyTilt), 0.0, -9.8 * std::cos(bodyTilt));
+                    sensors.timestamp     = NUClear::clock::now();
 
                     // Add some noise so that sensor fusion doesnt converge to a singularity
                     auto sensors_message = std::make_unique<DarwinSensors>(sensors);

@@ -20,7 +20,6 @@
 #include "KickPlanner.h"
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/localisation/Ball.h"
@@ -29,7 +28,6 @@
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/localisation/transform.h"

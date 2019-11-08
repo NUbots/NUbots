@@ -7,10 +7,9 @@ set(extension_source_include_dir "${PROJECT_SOURCE_DIR}/${extension_include_path
 set(extension_binary_include_dir "${PROJECT_BINARY_DIR}/${extension_include_path}")
 
 # Make our extension include directories variable
-set(
-  NUCLEAR_EXTENSION_INCLUDE_DIRS
-  ${extension_source_include_dir} ${extension_binary_include_dir}
-  CACHE INTERNAL "Include directories for the extension folder and generated sources"
+set(NUCLEAR_EXTENSION_INCLUDE_DIRS
+    ${extension_source_include_dir} ${extension_binary_include_dir}
+    CACHE INTERNAL "Include directories for the extension folder and generated sources"
 )
 
 # Include both our include directory message and utility (since we can use them)
@@ -51,14 +50,15 @@ else()
     add_library(nuclear_extension extension.cpp ${src})
 
     # Link our additional shared libraries
-    target_link_libraries(nuclear_extension ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES} ${NUCLEAR_UTILITY_LIBRARIES}
-                          ${NUCLEAR_MESSAGE_LIBRARIES})
+    target_link_libraries(
+      nuclear_extension ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES} ${NUCLEAR_UTILITY_LIBRARIES}
+      ${NUCLEAR_MESSAGE_LIBRARIES}
+    )
 
     # Add to our list of NUClear extension libraries
-    set(
-      NUCLEAR_EXTENSION_LIBRARIES
-      nuclear_extension
-      CACHE INTERNAL "List of libraries that are built as extensions" FORCE
+    set(NUCLEAR_EXTENSION_LIBRARIES
+        nuclear_extension
+        CACHE INTERNAL "List of libraries that are built as extensions" FORCE
     )
 
     # Put it in an IDE group for shared

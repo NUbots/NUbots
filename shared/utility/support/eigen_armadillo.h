@@ -20,6 +20,8 @@
 #ifndef UTILITY_SUPPORT_EIGEN_ARMADILLO_H
 #define UTILITY_SUPPORT_EIGEN_ARMADILLO_H
 
+#include <Eigen/Core>
+#include <Eigen/Dense>
 #include <armadillo>
 #include <type_traits>
 

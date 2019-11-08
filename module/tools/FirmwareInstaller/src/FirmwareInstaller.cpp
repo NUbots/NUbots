@@ -6,7 +6,6 @@
 #include <numeric>
 
 #include "extension/Configuration.h"
-
 #include "utility/file/fileutil.h"
 #include "utility/io/uart.h"
 #include "utility/strutil/strutil.h"

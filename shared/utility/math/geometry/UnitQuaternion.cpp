@@ -18,6 +18,7 @@
  */
 
 #include "UnitQuaternion.h"
+
 #include "utility/math/angle.h"
 
 namespace utility {

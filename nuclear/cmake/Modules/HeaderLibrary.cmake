@@ -36,7 +36,10 @@ function(HeaderLibrary)
     if(${PACKAGE_NAME}_STATUS_CODE EQUAL 0)
       message(STATUS "Successfully downloaded ${PACKAGE_NAME} library.")
 
-      set(${PACKAGE_NAME}_INCLUDE_DIR "${OUTPUT_DIR}")
+      set(${PACKAGE_NAME}_INCLUDE_DIR
+          "${OUTPUT_DIR}"
+          CACHE PATH "The ${PACKAGE_NAME} include directory" FORCE
+      )
 
     else()
       message(ERROR "Failed to download ${PACKAGE_NAME} library.")
@@ -45,7 +48,10 @@ function(HeaderLibrary)
 
   # Setup and export our variables
   set(required_vars ${required_vars} "${PACKAGE_NAME}_INCLUDE_DIR")
-  set(${PACKAGE_NAME}_INCLUDE_DIRS ${${PACKAGE_NAME}_INCLUDE_DIR} PARENT_SCOPE)
+  set(${PACKAGE_NAME}_INCLUDE_DIRS
+      ${${PACKAGE_NAME}_INCLUDE_DIR}
+      PARENT_SCOPE
+  )
   mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR ${PACKAGE_NAME}_INCLUDE_DIRS)
 
   # Find the package

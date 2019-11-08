@@ -21,8 +21,10 @@
 #define UTILITY_SUPPORT_YAML_ARMADILLO_H
 
 #include <yaml-cpp/yaml.h>
+
 #include <armadillo>
 #include <iostream>
+
 #include "utility/support/yaml_expression.h"
 
 namespace YAML {

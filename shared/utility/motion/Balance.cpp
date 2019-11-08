@@ -19,7 +19,6 @@
 #include "Balance.h"
 
 #include "message/motion/KinematicsModel.h"
-
 #include "utility/support/eigen_armadillo.h"
 
 namespace utility {
