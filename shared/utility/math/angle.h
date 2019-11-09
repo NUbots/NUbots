@@ -20,6 +20,7 @@
 #ifndef UTILITY_MATH_ANGLE_H
 #define UTILITY_MATH_ANGLE_H
 
+#include <Eigen/Core>
 #include <armadillo>
 #include <cmath>
 
@@ -83,6 +84,10 @@ namespace math {
             auto d = std::fmod(m + M_PI, 2 * M_PI) - M_PI;
 
             return d;
+        }
+
+        inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
+            return std::atan2(dirVec.y(), dirVec.x());
         }
 
         inline double vectorToBearing(arma::vec2 dirVec) {

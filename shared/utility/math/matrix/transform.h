@@ -35,7 +35,7 @@ namespace utility {
 namespace math {
     namespace transform {
 
-        inline Eigen::Affine2d localToWorld(const Eigen::Affine2d& local, const Eigen::Affine2d& reference) const {
+        inline Eigen::Affine2d localToWorld(const Eigen::Affine2d& local, const Eigen::Affine2d& reference) {
             // translates to this + rotZ(this.angle) * reference
             Eigen::Rotation2Dd R(local.linear());
             Eigen::Vector2d newPos = R * reference.translation();
