@@ -23,6 +23,9 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 #include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
