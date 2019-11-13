@@ -20,8 +20,6 @@
 #include "GoalDetector.h"
 
 #include <fmt/format.h>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
