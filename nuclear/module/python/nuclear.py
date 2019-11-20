@@ -1,8 +1,9 @@
 import inspect
-import message
-import re
 import os
+import re
 from textwrap import dedent
+
+import message
 
 
 def indent(str, len=4):

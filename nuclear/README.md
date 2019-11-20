@@ -41,13 +41,20 @@ It is also recommended that you make a symlink from nuclear/b to ./b to make it 
 ### Dependencies
 NUClear roles has several dependences that must be met before you are able to build the system.
 These dependencies are:
+
 - NUClear
 - Python3 with the following packages
   - argparse
   - Pillow
+  - stringcase
 - Optional dependencies:
   - [pybind11](https://github.com/pybind/pybind11) for Python module support
   - [Google Protobuf 3](https://developers.google.com/protocol-buffers/) (both c++ and python libraries) for Neutron messaging
+
+The Python dependencies can be installed using the provided requirements file:
+```bash
+pip3 install -r requirements.txt
+```
 
 ### Banner
 NUClear roles generates an ansi coded banner at the top of ever role it runs.

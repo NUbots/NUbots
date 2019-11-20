@@ -18,6 +18,7 @@
  */
 
 #include "Rotation3D.h"
+
 #include "matrix.h"
 #include "utility/math/angle.h"
 #include "utility/math/comparison.h"

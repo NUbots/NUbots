@@ -6,7 +6,6 @@
 #include <numeric>
 
 #include "extension/Configuration.h"
-
 #include "utility/file/fileutil.h"
 #include "utility/io/uart.h"
 #include "utility/strutil/strutil.h"
@@ -68,6 +67,13 @@ namespace tools {
                 case DEVICE_MENU:
                     if (input.compare("CM730") == 0) {
                         selected_device  = CM730;
+                        selected_battery = NO_BATTERY;
+                        menu_state       = BATTERY_MENU;
+                        showBatteryMenu();
+                    }
+
+                    else if (input.compare("CM740") == 0) {
+                        selected_device  = CM740;
                         selected_battery = NO_BATTERY;
                         menu_state       = BATTERY_MENU;
                         showBatteryMenu();
@@ -139,6 +145,7 @@ namespace tools {
 
             switch (selected_device) {
                 case CM730: name.first = "CM730"; break;
+                case CM740: name.first = "CM740"; break;
                 default: log<NUClear::WARN>("Invalid device selected."); return;
             }
 
@@ -154,28 +161,28 @@ namespace tools {
             utility::io::uart uart(device, 57600);
 
             if (!uart.connected()) {
-                log<NUClear::WARN>("Unable to connect to CM730 firmware. Check your config file.");
+                log<NUClear::WARN>("Unable to connect to CM740 firmware. Check your config file.");
                 powerplant.shutdown();
             }
 
             else if (it == firmwares.end()) {
-                log<NUClear::WARN>("Unable to find CM730 firmware. Check your config file.");
+                log<NUClear::WARN>("Unable to find CM740 firmware. Check your config file.");
                 powerplant.shutdown();
             }
 
             else {
-                const auto& cm730 = it->second;
+                const auto& cm740 = it->second;
 
                 pollfd pfd{uart.native_handle(), POLLIN, 0};
 
-                log<NUClear::INFO>("Please press the CM730 reset button to begin...");
+                log<NUClear::INFO>("Please press the", name.first, "reset button to begin...");
 
-                // Wait for connection to the CM730 Bootloader
+                // Wait for connection to the CM740 Bootloader
                 char send      = '#';
                 char recv[256] = {'\0'};
                 int read       = 1;
                 do {
-                    std::cout << "\rWaiting for CM730 to reset .....";
+                    std::cout << "\rWaiting for " << name.first << " to reset .....";
                     uart.write(&send, sizeof(send));
 
                     // Wait for some action!
@@ -184,12 +191,12 @@ namespace tools {
                     recv[read] = '\0';
                 } while ((std::string(recv, read).compare("#") != 0) && powerplant.running());
 
-                std::cout << "\rWaiting for CM730 to reset ....." << std::endl;
+                std::cout << "\rWaiting for " << name.first << " to reset ....." << std::endl;
 
                 // Check we are good to go
                 if (std::string(recv, read).compare("#") == 0) {
 
-                    log<NUClear::INFO>("CM730 reset complete...");
+                    log<NUClear::INFO>(name.first, "reset complete...");
 
                     // Enter erase block mode and erase
                     uart.write("\rl\r", 3);
@@ -199,7 +206,7 @@ namespace tools {
                         poll(&pfd, 1, 135);
                         read = uart.read(recv, sizeof(recv));
 
-                        // CM730 echos "l\r"
+                        // CM740 echos "l\r"
                         // std::string text(recv, read);
                         // log<NUClear::INFO>(text);
                     } while (read != 0);
@@ -211,26 +218,26 @@ namespace tools {
 
                     // TODO write in such a way that you get progress
                     ssize_t count;
-                    for (count = 0; static_cast<size_t>(count) < cm730.firmware.size();) {
+                    for (count = 0; static_cast<size_t>(count) < cm740.firmware.size();) {
                         ssize_t writeSize = 64;
 
-                        if ((static_cast<size_t>(count) + 64) > cm730.firmware.size()) {
-                            writeSize = cm730.firmware.size() - count;
+                        if ((static_cast<size_t>(count) + 64) > cm740.firmware.size()) {
+                            writeSize = cm740.firmware.size() - count;
                         }
 
-                        if (uart.write(cm730.firmware.data() + count, writeSize) == writeSize) {
+                        if (uart.write(cm740.firmware.data() + count, writeSize) == writeSize) {
                             count += writeSize;
-                            std::cout << "\rFlashing CM730 firmware " << count << "/" << cm730.firmware.size()
+                            std::cout << "\rFlashing CM740 firmware " << count << "/" << cm740.firmware.size()
                                       << " completed...";
                         }
                     }
 
-                    std::cout << "\rFlashing CM730 firmware " << count << "/" << cm730.firmware.size()
+                    std::cout << "\rFlashing " << name.first << " firmware " << count << "/" << cm740.firmware.size()
                               << " completed..." << std::endl;
-                    std::cout << "Flashing CM730 firmware completed." << std::endl;
+                    std::cout << "Flashing " << name.first << " firmware completed." << std::endl;
 
                     // Write the checksum
-                    while (uart.write(&cm730.checksum, sizeof(cm730.checksum)) != sizeof(cm730.checksum)) {
+                    while (uart.write(&cm740.checksum, sizeof(cm740.checksum)) != sizeof(cm740.checksum)) {
                         ;
                     }
 
@@ -262,7 +269,7 @@ namespace tools {
                 }
 
                 else {
-                    log<NUClear::WARN>("CM730 reset failed.");
+                    log<NUClear::WARN>(name.first, "reset failed.");
                     uart.close();
                 }
             }
@@ -277,6 +284,7 @@ namespace tools {
         std::cout << "* Welcome to NUfirmware Installer *" << std::endl;
         std::cout << "***********************************" << std::endl;
         std::cout << "\tType \"CM730\" to flash CM730 firmware." << std::endl;
+        std::cout << "\tType \"CM740\" to flash CM740 firmware." << std::endl;
         std::cout << "\tType \"DYNXL\" to flash Dynamixel firmware." << std::endl;
         std::cout << "\tType \"QUIT\" to quit." << std::endl;
         std::cout << "Choice: " << std::flush;

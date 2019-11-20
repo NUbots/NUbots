@@ -21,16 +21,16 @@
 
 #include <fmt/format.h>
 
-#include "extension/Configuration.h"
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
+#include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
 #include "message/vision/GreenHorizon.h"
-
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/ConvexHull.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
@@ -45,6 +45,7 @@ namespace vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::support::Expression;
 
     static constexpr int GOAL_INDEX = 1;
 
@@ -55,7 +56,7 @@ namespace vision {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<int>();
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
-            config.goal_angular_cov     = convert(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>()).asDiagonal();
             config.use_median           = cfg["use_median"].as<bool>();
             config.debug                = cfg["debug"].as<bool>();
         });

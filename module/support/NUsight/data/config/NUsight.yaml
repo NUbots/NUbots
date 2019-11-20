@@ -22,9 +22,9 @@ reaction_handles:
   # Vision objects including goals, balls and debugging lines
   vision_object: false
   # Visual mesh data
-  visual_mesh: true
+  visual_mesh: false
   # Green horizon data
-  green_horizon: true
+  green_horizon: false
   # Localisation state estimates and uncertainties
   localisation: false
   # Data for chart tool in NUsight

@@ -1,0 +1,24 @@
+version: "3.2"
+services:
+  generic:
+    build:
+      context: ./../docker
+      args:
+        platform: generic
+    volumes:
+      - type: bind
+        source: ./..
+        target: /home/nubots/NUbots
+        read_only: true
+        consistency: cached
+  nuc7i7bnh:
+    build:
+      context: ./../docker
+      args:
+        platform: nuc7i7bnh
+    volumes:
+      - type: bind
+        source: ./..
+        target: /home/nubots/NUbots
+        read_only: true
+        consistency: cached

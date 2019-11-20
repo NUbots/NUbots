@@ -18,6 +18,7 @@
  */
 
 #include "KickAtGoal.h"
+
 #include <armadillo>
 
 #include "extension/Configuration.h"

@@ -16,16 +16,14 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include <nuclear>
-
 #include "KickScript.h"
+
+#include <nuclear>
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
-
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/WalkCommand.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

@@ -19,6 +19,7 @@
 #include "Vision.h"
 
 #include <fmt/format.h>
+
 #include <fstream>
 #include <string>
 
@@ -317,7 +318,9 @@ namespace vision {
             case GB16:
             case BG16:
             case UNKNOWN:
-            default: { return {0, 0, 0}; }
+            default: {
+                return {0, 0, 0};
+            }
         }
     }
 
