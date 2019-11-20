@@ -3,14 +3,12 @@
 #include <fmt/format.h>
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/SaveConfiguration.h"
-
 #include "utility/math/comparison.h"
 #include "utility/math/euler.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -81,7 +79,7 @@ namespace motion {
             config.imu_roll_threshold  = cfg["imu"]["roll"]["threshold"].as<float>();
 
             for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; ++i) {
-                if (int(i) >= 6) {
+                if ((i >= 6) && (i < 18)) {
                     jointGains[i] = cfg["gains"]["legs"].as<float>();
                 }
             }
@@ -110,22 +108,18 @@ namespace motion {
             const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
 
             // Clamp velocity command
-            Eigen::Vector3f orders(command);
-            for (int i = 0; i < 3; ++i) {
-                orders[i] = utility::math::clamp(-config.max_step[i], orders[i], config.max_step[i]);
-            }
+            Eigen::Vector3f orders =
+                command.array().max(-config.max_step.array()).min(config.max_step.array()).matrix();
 
             // translational orders (x+y) should not exceed combined limit. scale if necessary
             if (config.max_step_xy != 0) {
-                float scaling_factor = 1.0f / std::max(1.0f, (orders[0] + orders[1]) / config.max_step_xy);
-                for (int i = 0; i < 2; i++) {
-                    orders[i] = orders[i] * scaling_factor;
-                }
+                float scaling_factor = 1.0f / std::max(1.0f, (orders.x() + orders.y()) / config.max_step_xy);
+                orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
             }
 
             // warn user that speed was limited
-            if (command.x() * factor != orders[0] || command.y() * factor != orders[1]
-                || command.z() * factor != orders[2]) {
+            if (command.x() * factor != orders.x() || command.y() * factor != orders.y()
+                || command.z() * factor != orders.z()) {
                 log<NUClear::WARN>(
                     fmt::format("Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
                                 command.x(),
@@ -151,15 +145,17 @@ namespace motion {
                 float wanted_pitch =
                     params.trunk_pitch + params.trunk_pitch_p_coef_forward * walk_engine.getFootstep().getNext().x()
                     + params.trunk_pitch_p_coef_turn * std::abs(walk_engine.getFootstep().getNext().z());
-                RPY[1] += wanted_pitch;
+                RPY.y() += wanted_pitch;
 
                 // threshold pitch and roll
                 if (std::abs(RPY[0]) > config.imu_roll_threshold) {
-                    log<NUClear::WARN>("Robot roll exceeds threshold");
+                    log<NUClear::WARN>(fmt::format(
+                        "Robot roll exceeds threshold - {} > {}", std::abs(RPY.x()), config.imu_roll_threshold));
                     walk_engine.requestPause();
                 }
                 else if (std::abs(RPY[1]) > config.imu_pitch_threshold) {
-                    log<NUClear::WARN>("Robot pitch exceeds threshold");
+                    log<NUClear::WARN>(fmt::format(
+                        "Robot pitch exceeds threshold - {} > {}", std::abs(RPY.y()), config.imu_pitch_threshold));
                     walk_engine.requestPause();
                 }
             }
@@ -213,7 +209,7 @@ namespace motion {
         auto time_diff_ms = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time);
         dt                = time_diff_ms.count() / 1000.0f;
         if (dt == 0.0f) {
-            log<NUClear::WARN>("dt was 0");
+            log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));
             dt = 0.001f;
         }
         last_update_time = current_time;
