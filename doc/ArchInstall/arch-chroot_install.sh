@@ -82,7 +82,8 @@ pacman -S --noconfirm --needed \
 	linux-headers \
 	bluez \
 	bluez-utils \
-	rsync
+	rsync \
+	linux-firmware
 
 ##############
 # NETWORKING #
