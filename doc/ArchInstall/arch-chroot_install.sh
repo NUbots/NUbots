@@ -260,7 +260,7 @@ done
 chsh -s /usr/bin/zsh ${USER}
 
 # Get fuzzy find and install it
-pacman -S fzf
+pacman -S --noconfirm --needed fzf
 cat << EOF >> ${HOME}/.zshrc
 
 # Source the fuzzy find scripts
