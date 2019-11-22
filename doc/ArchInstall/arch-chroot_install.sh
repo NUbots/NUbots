@@ -13,8 +13,10 @@ ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
 hwclock --systohc
 
 # Setup locale
-echo "en_AU.UTF-8 UTF-8"  > /etc/locale.gen
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+cat << EOF > /etc/locale.gen
+en_AU.UTF-8 UTF-8
+en_US.UTF-8 UTF-8
+EOF
 locale-gen
 
 echo "LANG=en_AU.UTF-8" > /etc/locale.conf
@@ -258,10 +260,12 @@ chsh -s /usr/bin/zsh ${USER}
 
 # Get fuzzy find and install it
 pacman -S fzf
-echo "" >> ${HOME}/.zshrc
-echo "# Source the fuzzy find scripts" >> ${HOME}/.zshrc
-echo "/usr/share/fzf/key-bindings.zsh" >> ${HOME}/.zshrc
-echo "/usr/share/fzf/completion.zsh" >> ${HOME}/.zshrc
+cat << EOF >> ${HOME}/.zshrc
+
+# Source the fuzzy find scripts
+source /usr/share/fzf/key-bindings.zsh
+source /usr/share/fzf/completion.zsh
+EOF
 
 ############
 # SSH KEYS #
