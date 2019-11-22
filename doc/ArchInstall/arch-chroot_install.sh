@@ -240,10 +240,10 @@ EOF
 
 # Make sure the system checks /usr/local for libraries
 echo -e "/usr/local/lib\n/usr/local/lib64" > /etc/ld.so.conf.d/usrlocal.conf
+ldconfig
 
 # Make sure python checks /usr/local for packages
-sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
-ldconfig
+sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py
 
 #############
 # ZSH SHELL #
