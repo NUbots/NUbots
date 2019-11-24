@@ -20,9 +20,7 @@
 #include "ScriptEngine.h"
 
 #include "extension/Script.h"
-
 #include "message/behaviour/ServoCommand.h"
-
 #include "utility/file/fileutil.h"
 
 namespace module {

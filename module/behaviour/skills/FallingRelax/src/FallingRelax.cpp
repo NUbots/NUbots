@@ -23,10 +23,8 @@
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
-
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

@@ -22,6 +22,5 @@ nuclear_role(
   vision::BallDetector
   vision::GoalDetector
   output::ImageCompressor
-  # Data logger
-  # support::logging::DataLogging
+  # Data logger support::logging::DataLogging
 )

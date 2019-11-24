@@ -1,10 +1,10 @@
-#include "Camera.h"
-
 #include <fmt/format.h>
+
 #include <armadillo>
 #include <cmath>
 #include <exception>
 
+#include "Camera.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 

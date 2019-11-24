@@ -20,6 +20,7 @@
 #define UTILITY_LOCALISATION_TRANSFORM_H
 
 #include <armadillo>
+
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 

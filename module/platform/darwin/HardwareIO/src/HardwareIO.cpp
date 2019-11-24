@@ -18,16 +18,13 @@
  */
 
 #include "HardwareIO.h"
-#include "Convert.h"
 
 #include <iomanip>
 
-
-#include "message/input/Sensors.h"
+#include "Convert.h"
+#include "extension/Configuration.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
-#include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/platform/darwin/DarwinSensors.h"
@@ -61,42 +58,42 @@ namespace platform {
             sensors.timestamp = NUClear::clock::now();
 
             /*
-             CM730 Data
+             CM740 Data
              */
 
             // Read our Error code
-            sensors.cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT
-                                                                  : DarwinSensors::Error(data.cm730ErrorCode).value;
+            sensors.cm740ErrorFlags = data.cm740ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT
+                                                                  : DarwinSensors::Error(data.cm740ErrorCode).value;
 
             // LED Panel
-            sensors.ledPanel = cm730State.ledPanel;
+            sensors.ledPanel = cm740State.ledPanel;
 
             // Head LED
-            sensors.headLED = cm730State.headLED;
+            sensors.headLED = cm740State.headLED;
 
             // Eye LED
-            sensors.eyeLED = cm730State.eyeLED;
+            sensors.eyeLED = cm740State.eyeLED;
 
             // Buttons
-            sensors.buttons.left   = Convert::getBit<0>(data.cm730.buttons);
-            sensors.buttons.middle = Convert::getBit<1>(data.cm730.buttons);
+            sensors.buttons.left   = Convert::getBit<0>(data.cm740.buttons);
+            sensors.buttons.middle = Convert::getBit<1>(data.cm740.buttons);
 
             // Voltage (in volts)
-            sensors.voltage = Convert::voltage(data.cm730.voltage);
+            sensors.voltage = Convert::voltage(data.cm740.voltage);
 
             if (sensors.voltage <= chargedVoltage) {
-                sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+                sensors.cm740ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
             }
 
             // Accelerometer (in m/s^2)
-            sensors.accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
-            sensors.accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
-            sensors.accelerometer.z = Convert::accelerometer(data.cm730.accelerometer.z);
+            sensors.accelerometer.x = Convert::accelerometer(data.cm740.accelerometer.x);
+            sensors.accelerometer.y = Convert::accelerometer(data.cm740.accelerometer.y);
+            sensors.accelerometer.z = Convert::accelerometer(data.cm740.accelerometer.z);
 
             // Gyroscope (in radians/second)
-            sensors.gyroscope.x = Convert::gyroscope(data.cm730.gyroscope.x);
-            sensors.gyroscope.y = Convert::gyroscope(data.cm730.gyroscope.y);
-            sensors.gyroscope.z = Convert::gyroscope(data.cm730.gyroscope.z);
+            sensors.gyroscope.x = Convert::gyroscope(data.cm740.gyroscope.x);
+            sensors.gyroscope.y = Convert::gyroscope(data.cm740.gyroscope.y);
+            sensors.gyroscope.z = Convert::gyroscope(data.cm740.gyroscope.z);
 
             /*
              Force Sensitive Resistor Data
@@ -271,16 +268,16 @@ namespace platform {
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , darwin(nullptr)
-            , cm730State()
+            , cm740State()
             , servoState()
             , chargedVoltage(0.0f)
             , flatVoltage(0.0f) {
 
             /*
-             CM730 Data
+             CM740 Data
             */
             // Read our Error code
-            simulatedSensors.cm730ErrorFlags = 0;
+            simulatedSensors.cm740ErrorFlags = 0;
 
             // LED Panel
             simulatedSensors.ledPanel.led2 = 0;
@@ -539,10 +536,8 @@ namespace platform {
                 on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>()
                     .then([this](std::shared_ptr<const Sensors> previousSensors) {
                         if (previousSensors) {
-                            Eigen::Matrix4d rightFootPose =
-                                previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL);
-                            Eigen::Matrix4d leftFootPose =
-                                previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL);
+                            Eigen::Matrix4d rightFootPose = previousSensors->forward_kinematics[ServoID::R_ANKLE_ROLL];
+                            Eigen::Matrix4d leftFootPose  = previousSensors->forward_kinematics[ServoID::L_ANKLE_ROLL];
                             Eigen::Vector3d torsoFromRightFoot =
                                 -rightFootPose.topLeftCorner<3, 3>().transpose() * rightFootPose.topRightCorner<3, 1>();
                             Eigen::Vector3d torsoFromLeftFoot =
@@ -573,11 +568,12 @@ namespace platform {
                                 servo.presentPosition = servo.goalPosition;
                             }
                             else {
-                                Eigen::Vector3f present(cos(servo.presentPosition), sin(servo.presentPosition), 0);
-                                Eigen::Vector3f goal(cos(servo.goalPosition), sin(servo.goalPosition), 0);
+                                Eigen::Vector3f present(
+                                    std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0f);
+                                Eigen::Vector3f goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0f);
 
                                 Eigen::Vector3f cross = present.cross(goal);
-                                if (cross[2] > 0) {
+                                if (cross.z() > 0.0f) {
                                     servo.presentPosition =
                                         utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
                                 }
@@ -603,10 +599,10 @@ namespace platform {
                                 gyroQueue.pop();
                             }
                         }
-                        sumGyro = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3f(0, 0, imu_drift_rate));
-                        simulatedSensors.gyroscope.x = sumGyro[0];
-                        simulatedSensors.gyroscope.y = sumGyro[1];
-                        simulatedSensors.gyroscope.z = sumGyro[2];
+                        sumGyro = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3f(0.0f, 0.0f, imu_drift_rate));
+                        simulatedSensors.gyroscope.x = sumGyro.x();
+                        simulatedSensors.gyroscope.y = sumGyro.y();
+                        simulatedSensors.gyroscope.z = sumGyro.z();
 
                         simulatedSensors.accelerometer.x = 0;
                         simulatedSensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
@@ -690,23 +686,23 @@ namespace platform {
                     }
                 });
 
-            // Periodically checks connection to CM730, otherwise uses simulated hardware reaction
-            cm730PollHandle = on<Every<CM730_POLL_PERIOD, std::chrono::seconds>>().then("CM730 Device Check", [this] {
+            // Periodically checks connection to CM740, otherwise uses simulated hardware reaction
+            cm730PollHandle = on<Every<CM740_POLL_PERIOD, std::chrono::seconds>>().then("CM740 Device Check", [this] {
                 try {
-                    darwin = std::make_unique<Darwin::Darwin>("/dev/CM730");
+                    darwin = std::make_unique<Darwin::Darwin>("/dev/CM740");
                     // Disable simulated hardware reaction if we can connect to CM730
                     simulatedHardwareHandle.disable();
 
                     // Set config for the packet waiting
                     darwin->setConfig(darwinConfiguration);
 
-                    uint16_t CM730Model  = darwin->cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
-                    uint8_t CM730Version = darwin->cm730.read<uint8_t>(Darwin::CM730::Address::VERSION);
+                    uint16_t CM740Model  = darwin->cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
+                    uint8_t CM740Version = darwin->cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
                     std::stringstream version, model;
-                    model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM730Model);
-                    version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
-                    log<NUClear::INFO>("CM730 Model:", model.str());
-                    log<NUClear::INFO>("CM730 Firmware Version:", version.str());
+                    model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM740Model);
+                    version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM740Version);
+                    log<NUClear::INFO>("CM740 Model:", model.str());
+                    log<NUClear::INFO>("CM740 Firmware Version:", version.str());
 
                     realHardwareHandle.enable();
                 }
@@ -728,32 +724,32 @@ namespace platform {
             // If we get a HeadLED command then write it
             on<Trigger<DarwinSensors::HeadLED>>().then([this](const DarwinSensors::HeadLED& led) {
                 // Update our internal state
-                cm730State.headLED = led;
+                cm740State.headLED = led;
 
-                darwin->cm730.write(Darwin::CM730::Address::LED_HEAD_L,
-                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
+                darwin.cm740.write(Darwin::CM740::Address::LED_HEAD_L,
+                                   Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                             static_cast<uint8_t>(led.RGB & 0x000000FF)));
             });
 
             // If we get a EyeLED command then write it
             on<Trigger<DarwinSensors::EyeLED>>().then([this](const DarwinSensors::EyeLED& led) {
                 // Update our internal state
-                cm730State.eyeLED = led;
+                cm740State.eyeLED = led;
 
-                darwin->cm730.write(Darwin::CM730::Address::LED_EYE_L,
-                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
+                darwin.cm740.write(Darwin::CM740::Address::LED_EYE_L,
+                                   Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                             static_cast<uint8_t>(led.RGB & 0x000000FF)));
             });
 
             // If we get a EyeLED command then write it
             on<Trigger<DarwinSensors::LEDPanel>>().then([this](const DarwinSensors::LEDPanel& led) {
                 // Update our internal state
-                cm730State.ledPanel = led;
+                cm740State.ledPanel = led;
 
-                darwin->cm730.write(Darwin::CM730::Address::LED_PANNEL,
-                                    (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
+                darwin.cm740.write(Darwin::CM740::Address::LED_PANNEL,
+                                   (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
             });
         }
     }  // namespace darwin

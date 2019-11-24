@@ -20,7 +20,6 @@
 #include "SoccerStrategy.h"
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/Look.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/Nod.h"
@@ -32,7 +31,6 @@
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
-
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -252,7 +250,7 @@ namespace behaviour {
                             emit(std::make_unique<Behaviour::State>(currentState));
                         }
                     }
-                    catch (std::runtime_error err) {
+                    catch (std::runtime_error& err) {
                         log(err.what());
                         log("Runtime exception.");
                     }

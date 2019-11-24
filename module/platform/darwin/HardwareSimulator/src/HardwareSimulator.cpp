@@ -19,19 +19,17 @@
 
 #include "HardwareSimulator.h"
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <limits>
 #include <mutex>
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/eigen_armadillo.h"
@@ -43,12 +41,11 @@ namespace platform {
 
         using extension::Configuration;
 
+        using message::input::Sensors;
         using message::motion::ServoTarget;
         using message::platform::darwin::DarwinSensors;
-        using ServoID = utility::input::ServoID;
-        using message::input::Sensors;
 
-        using utility::math::matrix::Transform3D;
+        using utility::input::ServoID;
         using utility::nusight::graph;
         using utility::support::Expression;
 
@@ -56,10 +53,10 @@ namespace platform {
             : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
 
             /*
-             CM730 Data
+             CM740 Data
              */
             // Read our Error code
-            sensors.cm730ErrorFlags = 0;
+            sensors.cm740ErrorFlags = 0;
 
             // LED Panel
             sensors.ledPanel.led2 = 0;
@@ -178,19 +175,16 @@ namespace platform {
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
                 [this](std::shared_ptr<const Sensors> previousSensors) {
                     if (previousSensors) {
-                        Transform3D rightFootPose =
-                            convert(previousSensors->forward_kinematics.at(ServoID::R_ANKLE_ROLL));
-                        Transform3D leftFootPose =
-                            convert(previousSensors->forward_kinematics.at(ServoID::L_ANKLE_ROLL));
-                        arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
-                        arma::vec3 torsoFromLeftFoot  = -leftFootPose.rotation().i() * leftFootPose.translation();
-                        // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
-                        // emit(graph("torsoFromLeftFoot", torsoFromLeftFoot));
-                        if (torsoFromRightFoot(2) > torsoFromLeftFoot(2)) {
+                        Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                        Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
+                        Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
+
+                        if (torsoFromRightFoot.z() > torsoFromLeftFoot.z()) {
                             setLeftFootDown(false);
                             setRightFootDown(true);
                         }
-                        else if (torsoFromRightFoot(2) < torsoFromLeftFoot(2)) {
+                        else if (torsoFromRightFoot.z() < torsoFromLeftFoot.z()) {
                             setLeftFootDown(true);
                             setRightFootDown(false);
                         }
@@ -201,7 +195,6 @@ namespace platform {
                     }
 
                     for (int i = 0; i < 20; ++i) {
-
                         auto& servo       = utility::platform::darwin::getDarwinServo(i, sensors);
                         float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
                         movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
@@ -209,18 +202,14 @@ namespace platform {
 
                         if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
                             servo.presentPosition = servo.goalPosition;
-                            // std::cout << "First: movingSpeed = " << movingSpeed << " servo.goalPosition = "<<
-                            // servo.goalPosition << " servo.presentPosition = "<< servo.presentPosition << std::endl;
                         }
                         else {
-                            // std::cout << "Second: movingSpeed = " << movingSpeed << " servo.goalPosition = "<<
-                            // servo.goalPosition << " servo.presentPosition = "<< servo.presentPosition << std::endl;
+                            Eigen::Vector3d present(
+                                std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
+                            Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
 
-                            arma::vec3 present = {cos(servo.presentPosition), sin(servo.presentPosition), 0};
-                            arma::vec3 goal    = {cos(servo.goalPosition), sin(servo.goalPosition), 0};
-
-                            arma::vec3 cross = arma::cross(present, goal);
-                            if (cross[2] > 0) {
+                            Eigen::Vector3d cross = present.cross(goal);
+                            if (cross.z() > 0) {
                                 servo.presentPosition =
                                     utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
                             }
@@ -235,43 +224,27 @@ namespace platform {
                     // Note: This reaction is not (and should not be) synced with the
                     // 'Receive Simulated Gyroscope' reaction above, so we can't
                     // reliably query the size of the gyroQueue.
-                    arma::vec3 sumGyro = {0, 0, 0};
-                    {
-                        // std::lock_guard<std::mutex> lock(gyroQueueMutex);
+                    Eigen::Vector3d sumGyro = Eigen::Vector3d::Zero();
+                    /* mutext scope */ {
+                        std::lock_guard<std::mutex> lock(gyroQueueMutex);
                         while (!gyroQueue.empty()) {
                             DarwinSensors::Gyroscope g = gyroQueue.front();
-                            sumGyro += arma::vec3({g.x, g.y, g.z});
+                            sumGyro += Eigen::Vector3d(g.x, g.y, g.z);
 
                             std::lock_guard<std::mutex> lock(gyroQueueMutex);
                             gyroQueue.pop();
                         }
                     }
-                    sumGyro             = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0, 0, imu_drift_rate}));
-                    sensors.gyroscope.x = -sumGyro[0];
-                    sensors.gyroscope.y = sumGyro[1];
-                    sensors.gyroscope.z = sumGyro[2];
-
-                    // sensors.accelerometer.x = 0;
-                    // sensors.accelerometer.y = -9.8 * std::sin(bodyTilt);
-                    // sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
-
-                    sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
-                    sensors.accelerometer.y = 0;
-                    sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
-
-
-                    sensors.timestamp = NUClear::clock::now();
-
-                    // //Debug:
-                    // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
-                    // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " <<
-                    // sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
-                    // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() <<
-                    // std::endl;
+                    sumGyro               = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
+                    sumGyro.x()           = -sumGyro.x();
+                    sensors.gyroscope     = sumGyro;
+                    sensors.accelerometer = Eigen::Vector3d(-9.8 * std::sin(bodyTilt), 0.0, -9.8 * std::cos(bodyTilt));
+                    sensors.timestamp     = NUClear::clock::now();
 
                     // Add some noise so that sensor fusion doesnt converge to a singularity
                     auto sensors_message = std::make_unique<DarwinSensors>(sensors);
                     addNoise(sensors_message);
+
                     // Send our nicely computed sensor data out to the world
                     emit(std::move(sensors_message));
                 });
@@ -298,7 +271,6 @@ namespace platform {
                     auto& servo        = utility::platform::darwin::getDarwinServo(command.id, sensors);
                     servo.movingSpeed  = speed;
                     servo.goalPosition = utility::math::angle::normalizeAngle(command.position);
-                    // std::cout << __LINE__ << std::endl;
                 }
             });
 

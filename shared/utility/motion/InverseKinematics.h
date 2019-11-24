@@ -20,6 +20,8 @@
 #ifndef UTILITY_MOTION_INVERSEKINEMATICS_H
 #define UTILITY_MOTION_INVERSEKINEMATICS_H
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <armadillo>
 #include <chrono>
 #include <cmath>
@@ -29,7 +31,6 @@
 
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -68,6 +69,9 @@ namespace motion {
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D target,
                                                                   LimbID limb);
+        std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                   const Eigen::Affine3d& target,
+                                                                   const LimbID& limb);
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D leftTarget,
@@ -85,6 +89,8 @@ namespace motion {
 
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector);
+        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
+                                                                          const Eigen::Vector3d& cameraUnitVector);
 
         std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
 

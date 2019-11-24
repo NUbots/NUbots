@@ -2,8 +2,10 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_H
 
 #include <turbojpeg.h>
+
 #include <cstdint>
 #include <nuclear>
+
 #include "bayer.h"
 #include "message/input/Image.h"
 

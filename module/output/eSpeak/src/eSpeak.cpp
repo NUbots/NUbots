@@ -20,6 +20,7 @@
 #include "eSpeak.h"
 
 #include <espeak/speak_lib.h>
+
 #include "message/output/Say.h"
 
 namespace module {

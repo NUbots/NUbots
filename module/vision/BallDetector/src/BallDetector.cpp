@@ -23,14 +23,10 @@
 #include <fmt/ostream.h>
 
 #include "extension/Configuration.h"
-
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
 #include "message/vision/GreenHorizon.h"
-
 #include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
@@ -45,6 +41,7 @@ namespace vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::support::Expression;
 
     static constexpr int BALL_INDEX = 0;
 
@@ -56,7 +53,7 @@ namespace vision {
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
             config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
-            config.ball_angular_cov      = convert(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.ball_angular_cov      = Eigen::Vector3f(cfg["ball_angular_cov"].as<Expression>()).asDiagonal();
             config.debug                 = cfg["debug"].as<bool>();
         });
 
