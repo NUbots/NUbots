@@ -19,12 +19,16 @@
 
 #include "HardwareIO.h"
 
-#include <iomanip>
+#include <fmt/format.h>
 
 #include "Convert.h"
+
 #include "extension/Configuration.h"
+
+#include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/platform/darwin/DarwinSensors.h"
@@ -40,12 +44,14 @@ namespace platform {
         constexpr int HardwareIO::UPDATE_FREQUENCY;
 
         using extension::Configuration;
+
         using message::input::Sensors;
         using message::motion::ServoTarget;
         using message::platform::darwin::DarwinSensors;
+
+        using utility::input::ServoID;
         using utility::math::matrix::Transform3D;
         using utility::support::Expression;
-        using ServoID = utility::input::ServoID;
 
         /**********************
          *    REAL HARDWARE   *
@@ -398,7 +404,7 @@ namespace platform {
             });
 
 
-            // This trigger gets the sensor data from the CM730
+            // This trigger gets the sensor data from the CM740
             realHardwareHandle =
                 on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
                     .then("Hardware Loop",
@@ -482,7 +488,7 @@ namespace platform {
                               sensors->voltage =
                                   std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
-                              // cm730 leds to display battery voltage
+                              // cm740 leds to display battery voltage
                               uint32_t ledl            = 0;
                               uint32_t ledr            = 0;
                               std::array<bool, 3> ledp = {false, false, false};
@@ -687,10 +693,10 @@ namespace platform {
                 });
 
             // Periodically checks connection to CM740, otherwise uses simulated hardware reaction
-            cm730PollHandle = on<Every<CM740_POLL_PERIOD, std::chrono::seconds>>().then("CM740 Device Check", [this] {
+            cm740PollHandle = on<Every<CM740_POLL_PERIOD, std::chrono::seconds>>().then("CM740 Device Check", [this] {
                 try {
                     darwin = std::make_unique<Darwin::Darwin>("/dev/CM740");
-                    // Disable simulated hardware reaction if we can connect to CM730
+                    // Disable simulated hardware reaction if we can connect to CM740
                     simulatedHardwareHandle.disable();
 
                     // Set config for the packet waiting
@@ -698,16 +704,14 @@ namespace platform {
 
                     uint16_t CM740Model  = darwin->cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
                     uint8_t CM740Version = darwin->cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
-                    std::stringstream version, model;
-                    model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM740Model);
-                    version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM740Version);
-                    log<NUClear::INFO>("CM740 Model:", model.str());
-                    log<NUClear::INFO>("CM740 Firmware Version:", version.str());
+                    log<NUClear::INFO>("CM740 Model:", fmt::format("0x{:04X}", static_cast<int>(CM740Model)));
+                    log<NUClear::INFO>("CM740 Firmware Version:",
+                                       fmt::format("0x{:02X}", static_cast<int>(CM740Version)));
 
                     realHardwareHandle.enable();
                 }
                 catch (std::runtime_error& e) {
-                    // Disable real hardware reaction if we cannot connect to CM730
+                    // Disable real hardware reaction if we cannot connect to CM740
                     realHardwareHandle.disable();
                     simulatedHardwareHandle.enable();
                 }
@@ -726,10 +730,10 @@ namespace platform {
                 // Update our internal state
                 cm740State.headLED = led;
 
-                darwin.cm740.write(Darwin::CM740::Address::LED_HEAD_L,
-                                   Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                             static_cast<uint8_t>(led.RGB & 0x000000FF)));
+                darwin->cm740.write(Darwin::CM740::Address::LED_HEAD_L,
+                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
             });
 
             // If we get a EyeLED command then write it
@@ -737,10 +741,10 @@ namespace platform {
                 // Update our internal state
                 cm740State.eyeLED = led;
 
-                darwin.cm740.write(Darwin::CM740::Address::LED_EYE_L,
-                                   Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                             static_cast<uint8_t>(led.RGB & 0x000000FF)));
+                darwin->cm740.write(Darwin::CM740::Address::LED_EYE_L,
+                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
             });
 
             // If we get a EyeLED command then write it
@@ -748,8 +752,8 @@ namespace platform {
                 // Update our internal state
                 cm740State.ledPanel = led;
 
-                darwin.cm740.write(Darwin::CM740::Address::LED_PANNEL,
-                                   (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
+                darwin->cm740.write(Darwin::CM740::Address::LED_PANNEL,
+                                    (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
             });
         }
     }  // namespace darwin

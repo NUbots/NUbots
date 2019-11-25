@@ -29,7 +29,9 @@
 #include <nuclear>
 
 #include "darwin/Darwin.h"
+
 #include "extension/Configuration.h"
+
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
@@ -47,7 +49,7 @@ namespace platform {
         private:
             // How often we read the servos
             static constexpr int UPDATE_FREQUENCY  = 90;
-            static constexpr int CM730_POLL_PERIOD = 1;  // seconds
+            static constexpr int CM740_POLL_PERIOD = 1;  // seconds
 
             /// @brief Our internal darwin class that is used for interacting with the hardware
             std::unique_ptr<Darwin::Darwin> darwin;
@@ -75,9 +77,9 @@ namespace platform {
             } noise;
             float imu_drift_rate                 = 0;
             double bodyTilt                      = 0;
-            Eigen::Vector3f integrated_gyroscope = Eigen::Vector3f({0, 0, 0});
+            Eigen::Vector3f integrated_gyroscope = Eigen::Vector3f::Zero();
 
-            ReactionHandle realHardwareHandle, simulatedHardwareHandle, cm730PollHandle;
+            ReactionHandle realHardwareHandle, simulatedHardwareHandle, cm740PollHandle;
 
             struct CM740State {
                 message::platform::darwin::DarwinSensors::LEDPanel ledPanel = {false, false, false};
