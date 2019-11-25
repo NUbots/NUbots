@@ -34,7 +34,7 @@ RUN install-package \
     protobuf
 
 # Get python to look in /usr/local for packages
-RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
+RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.8/site.py \
     && mkdir -p /usr/local/lib/python3.7/site-packages
 COPY --chown=root:root etc/pip.conf /etc/pip.conf
 
