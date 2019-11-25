@@ -1,7 +1,7 @@
-forwardSpeed: 0.8
-sideSpeed: 0.8
-turnSpeed : 0.3
-slow_approach_factor: 0.2
+forwardSpeed: 0.0
+sideSpeed: 0.0
+turnSpeed : 0.1
+slow_approach_factor: 0.0
 a: 7
 b: 0
 search_timeout: 3

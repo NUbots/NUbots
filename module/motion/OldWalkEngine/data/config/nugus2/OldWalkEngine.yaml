@@ -1,9 +1,9 @@
 use_com: True
 stance:
   # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
-  body_height: 0.45
+  body_height: 0.48
   # The angle of the torso when walking
-  body_tilt: 13 * pi / 180
+  body_tilt: 6 * pi / 180
   # Default arm positions while walking
   arms:
       left:
@@ -27,23 +27,23 @@ stance:
 
   foot_offset:
     - -0.05 # The distance the ankles are offset from the torso, in meters.
-    - -0.07 # How far from the center of the foot the center of mass is placed during each step.
+    - -0.1 # How far from the center of the foot the center of mass is placed during each step.
   # The gains to use for the servos during the walk
   gains:
-    arms: 15
+    arms: 0 # 15
     legs: 10
   # ???
-  limit_margin_y: -0.08
+  limit_margin_y: -0.05
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
-  step_time: 0.6
+  step_time: 0.8
   # ???
-  zmp_time: 0.48
-  hip_roll_compensation: 4 * pi / 180 #4
+  zmp_time: 0.45
+  hip_roll_compensation: 5 * pi / 180 #4
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-    height: 0.09
+    height: 0.1
     # height of foot as a fraction of height
     height_slow_fraction: 0.5
     height_fast_fraction: 1.5
@@ -51,7 +51,7 @@ walk_cycle:
     limits:
       - [-0.1, 0.3] # [min_x, max_x]
       - [0.0 , 0.3] # [min_y, max_y]
-      - [0, 15 * pi / 180] # [min_angle, max_angle]
+      - [0, 30 * pi / 180] # [min_angle, max_angle]
     # Angle in which the leg will be rotated about z when walking
     leg_yaw: 0 * pi / 180
     # Compensation factors for roll and pitch (<factor> * (current_pos - compensated_pos))
@@ -63,22 +63,22 @@ walk_cycle:
   velocity:
     # Velocity limits for the walk
     limits:
-      - [-0.0027, 0.3] # [min_x, max_x]
+      - [-0.2, 0.2] # [min_x, max_x] #-0.0027
       - [-0.01, 0.01] # [min_y, max_y]
       - [-0.8, 0.8] # [min_angle, max_angle]
     # This defines a 'fast' speed in the forward direction
-    high_speed: 0.06
+    high_speed: 0.03
   acceleration:
     # Acceleration limits
     limits: [1.5, 0.045, 5]
     # When moving at 'fast' speed or faster, use these limits instead
-    limits_high: [0.08, 0.05, 5]
+    limits_high: [0.05, 0.05, 5]
     # Factor to slow down walk when turning
-    turning_factor: 0.6
+    turning_factor: 0.1
   # When to begin and end the single support phase. Range: [0,1]
   single_support_phase:
-    start: 0.3 #0.3
-    end: 0.6 #0.6
+    start: 0.10
+    end: 0.90
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: false
