@@ -1,0 +1,24 @@
+head:
+  neck:
+    base_position_from_origin: [-0.007, 0, 0.30] # [x, y, z]
+arm:
+  shoulder:
+    offset: [0.0, 0.2805] # [x, z]
+mass_model:
+  # Particles CoM is in particle space
+  # CoM_x, CoM_y, CoM_z, mass
+  # SI units
+  particles:
+    torso:
+      [-0.009324683328055739, 0.0010457585460456695, 0.14180366719941379, 2.715]
+tensor_model:
+  # Particle inertial tensors (in partical space)
+  # [[xx, xy, xz],
+  #  [xy, yy, yz],
+  #  [xz, yz, zz]]
+  # SI units
+  particles:
+    torso:
+      - [-0.011630507298741237, -0.00024876302658097873, 0.007892428088249172]
+      - [-0.00024876302658097873, -0.04113865323956621, 0.0006398031046040552]
+      - [0.007892428088249172, 0.0006398031046040552, 0.08405102157501397]
