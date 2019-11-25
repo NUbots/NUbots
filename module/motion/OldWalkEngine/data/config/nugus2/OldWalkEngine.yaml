@@ -6,31 +6,31 @@ stance:
   body_tilt: 6 * pi / 180
   # Default arm positions while walking
   arms:
-      left:
-        start:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
-        end:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
-      right:
-        start:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
-        end:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
+    left:
+      start:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
+      end:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
+    right:
+      start:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
+      end:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
 
   foot_offset:
     - -0.05 # The distance the ankles are offset from the torso, in meters.
     - -0.1 # How far from the center of the foot the center of mass is placed during each step.
   # The gains to use for the servos during the walk
   gains:
-    arms: 0 # 15
+    arms: 0
     legs: 10
   # ???
   limit_margin_y: -0.05
@@ -40,7 +40,7 @@ walk_cycle:
   step_time: 0.8
   # ???
   zmp_time: 0.45
-  hip_roll_compensation: 5 * pi / 180 #4
+  hip_roll_compensation: 5 * pi / 180
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
     height: 0.1
@@ -50,7 +50,7 @@ walk_cycle:
     # These limit the distance a footstep will take
     limits:
       - [-0.1, 0.3] # [min_x, max_x]
-      - [0.0 , 0.3] # [min_y, max_y]
+      - [0.0, 0.3] # [min_y, max_y]
       - [0, 30 * pi / 180] # [min_angle, max_angle]
     # Angle in which the leg will be rotated about z when walking
     leg_yaw: 0 * pi / 180
@@ -63,7 +63,7 @@ walk_cycle:
   velocity:
     # Velocity limits for the walk
     limits:
-      - [-0.2, 0.2] # [min_x, max_x] #-0.0027
+      - [-0.2, 0.2] # [min_x, max_x]
       - [-0.01, 0.01] # [min_y, max_y]
       - [-0.8, 0.8] # [min_angle, max_angle]
     # This defines a 'fast' speed in the forward direction
