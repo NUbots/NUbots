@@ -30,7 +30,6 @@
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -50,7 +49,6 @@ namespace platform {
         using message::platform::darwin::DarwinSensors;
 
         using utility::input::ServoID;
-        using utility::math::matrix::Transform3D;
         using utility::support::Expression;
 
         /**********************
