@@ -34,8 +34,8 @@ RUN install-package \
     protobuf
 
 # Get python to look in /usr/local for packages
-RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.8/site.py \
-    && mkdir -p /usr/local/lib/python3.8/site-packages
+RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i $(python -c "import site; print(site.__file__)") \
+    && mkdir -p $(python -c "import site, os; print(os.path.join('/', 'usr', 'local', 'lib', os.path.basename(os.path.dirname(site.__file__)), 'site-packages'))")
 COPY --chown=root:root etc/pip.conf /etc/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
