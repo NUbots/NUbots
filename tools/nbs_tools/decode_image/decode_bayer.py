@@ -35,21 +35,18 @@ def decode_bayer(data, format, factor=2):
     # Load the Cached Tensor:
     lookup_tensor = lookups[key]
 
-    # Debayer, and reshape into 2D array:
+    # Permute the mosaic, and reshape into 2D array:
     bayer = tf.reshape(tf.gather(tf.reshape(raw_img, (height * width, 1)), indices=lookup_tensor), tf.shape(raw_img))
-
-    # Rotate the Image by 180 Degrees:
-    bayer = tf.image.rot90(bayer, k=2)
 
     return [
         {
             "name": "",
             "image": bayer,
             "pixel_format": {
-                fourcc("JPRG"): "bayer_bggr8",
-                fourcc("JPGR"): "bayer_gbrg8",
-                fourcc("JPBG"): "bayer_rggb8",
-                fourcc("JPGB"): "bayer_grbg8",
+                fourcc("JPRG"): "bayer_rggb8",
+                fourcc("JPGR"): "bayer_grbg8",
+                fourcc("JPBG"): "bayer_bggr8",
+                fourcc("JPGB"): "bayer_gbrg8",
             }[format],
         }
     ]
