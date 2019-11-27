@@ -35,7 +35,7 @@ RUN install-package \
 
 # Get python to look in /usr/local for packages
 RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i $(python -c "import site; print(site.__file__)") \
-    && mkdir -p $(python -c "import site, os; print(os.path.join('/', 'usr', 'local', 'lib', os.path.basename(os.path.dirname(site.__file__)), 'site-packages'))")
+    && mkdir -p $(python -c "import sys; print("/usr/lib/python{}.{}/site-packages".format(sys.version_info.major, sys.version_info.minor))")
 COPY --chown=root:root etc/pip.conf /etc/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
