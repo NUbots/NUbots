@@ -8,7 +8,7 @@ from .fourcc import fourcc
 lookups = {}
 
 
-def decompress_bayer(data, format, factor=2):
+def decompress_bayer(data, fmt, factor=2):
     raw_img = tf.io.decode_jpeg(data, channels=1)
 
     # Reference Lookups by Image Shape:
@@ -47,6 +47,6 @@ def decompress_bayer(data, format, factor=2):
                 fourcc("JPGR"): fourcc("GRBG"),
                 fourcc("JPBG"): fourcc("BGGR"),
                 fourcc("JPGB"): fourcc("GBRG"),
-            }[format],
+            }[fmt],
         }
     ]

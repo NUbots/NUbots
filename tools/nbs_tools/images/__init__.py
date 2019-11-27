@@ -2,20 +2,23 @@
 
 from .decompress_bayer import decompress_bayer
 from .decompress_jpeg import decompress_jpeg
+from .decompress_polarized import decompress_polarized
 
-from .fourcc import fourcc
+from .fourcc import fourcc, fourcc_to_string
 
 
-def decode_image(data, format):
+def decode_image(data, fmt):
 
     # Decompress and depermute compressed bayer formats
-    if fourcc in [fourcc(s) for s in ("JPBG", "JPRG", "JPGR", "JPGB")]:
-        return decompress_bayer(data, fourcc)
+    if fmt in [fourcc(s) for s in ("JPBG", "JPRG", "JPGR", "JPGB")]:
+        return decompress_bayer(data, fmt)
+    if fmt in [fourcc(s) for s in ("PJBG", "PJRG", "PJGR", "PJGB")]:
+        return decompress_polarized(data, fmt)
     # JPEGs can just be decompressed
-    elif fourcc in [fourcc("JPEG")]:
-        return decompress_jpeg(data, fourcc)
+    elif fmt in [fourcc("JPEG")]:
+        return decompress_jpeg(data, fmt)
     # Already raw formats can just be returned
-    elif fourcc in [
+    elif fmt in [
         fourcc(s)
         for s in (
             "BGGR",
@@ -33,6 +36,6 @@ def decode_image(data, format):
             "Y8  ",
         )
     ]:
-        return [{"name": "", "image": data, "fourcc": fourcc}]
+        return [{"name": "", "image": data, "fourcc": fmt}]
     else:
-        raise RuntimeError("Unknown format {}".format(fourcc))
+        raise RuntimeError("Unknown format {}".format(fourcc_to_string(fmt)))

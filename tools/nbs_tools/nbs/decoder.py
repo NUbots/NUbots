@@ -65,7 +65,6 @@ class Decoder:
 
                 # Read our header
                 size, timestamp, type_hash = struct.unpack("<IQQ", self._current_file.read(20))
-                print(type_hash)
 
                 # Read our payload
                 payload = self._current_file.read(size - 16)

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import multiprocessing
-import multiprocessing.pool
 import os
 
 import numpy as np
@@ -38,9 +37,11 @@ def process_frame(item):
     data = decode_image(item["data"], item["format"])
 
     return {
-        **item,
+        "bytes_read": item["bytes_read"],
+        "timestamp": item["timestamp"],
         "data": [
-            {**d, "image": d["image"].numpy(), "name": "{}{}".format(item["camera_name"], d["name"])} for d in data
+            {"image": d["image"].numpy(), "name": "{}{}".format(item["camera_name"], d["name"]), "fourcc": d["fourcc"]}
+            for d in data
         ],
     }
 
@@ -73,12 +74,12 @@ def run(files, output, encoder, quality, **kwargs):
 
     recorders = {}
 
-    pool = multiprocessing.pool.ThreadPool(multiprocessing.cpu_count())
+    pool = multiprocessing.Pool(multiprocessing.cpu_count())
 
     decoder = Decoder(*files)
     with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
 
-        def record_frame(frame):
+        def record_frame(msg):
             # Update the progress based on the image we are up to
             progress.update(msg["bytes_read"])
 
