@@ -51,7 +51,7 @@ def packetise_stream(decoder):
     for packet in decoder:
 
         # Check for compressed images
-        if packet.type == "message.output.CompressedImage":
+        if packet.type in ("message.output.CompressedImage", "message.input.Image"):
 
             # Work out how many bytes we have read to get to this message
             read = decoder.bytes_read() - bytes_read
@@ -86,7 +86,11 @@ def run(files, output, encoder, quality, **kwargs):
             for frame in msg["data"]:
                 if frame["name"] not in recorders:
                     recorders[frame["name"]] = Recorder(
-                        output, frame["name"], tf.shape(frame["image"]), frame["pixel_format"], encoder, quality
+                        os.path.join(output, "{}.mp4".format(frame["name"])),
+                        tf.shape(frame["image"]),
+                        frame["fourcc"],
+                        encoder,
+                        quality,
                     )
 
                 # Push the next packet

@@ -4,13 +4,32 @@ import os
 import queue
 import threading
 from subprocess import DEVNULL, PIPE, Popen, call
+from .fourcc import fourcc
+
+
+def pix_fmt_from_fourcc(code):
+    return {
+        fourcc("BGGR"): "bayer_bggr8",
+        fourcc("RGGB"): "bayer_rggb8",
+        fourcc("GRBG"): "bayer_grbg8",
+        fourcc("GBRG"): "bayer_gbrg8",
+        fourcc("RGBA"): "rgba",
+        fourcc("RGB3"): "rgb24",
+        fourcc("RGB8"): "rgb24",
+        fourcc("BGRA"): "bgra",
+        fourcc("BGR3"): "bgr24",
+        fourcc("BGR8"): "bgr24",
+        fourcc("GRAY"): "gray",
+        fourcc("GREY"): "gray",
+        fourcc("Y8  "): "gray",
+    }[code]
 
 
 class Recorder:
-    def __init__(self, output_path, camera_name, dimensions, pixel_format, encoder, buffer_size=100):
+    def __init__(self, output_path, dimensions, fourcc, encoder, bitrate, buffer_size=100):
 
-        self.timecode_path = os.path.join(output_path, "{}_timecode.txt".format(camera_name))
-        self.video_path = os.path.join(output_path, "{}.mp4".format(camera_name))
+        self.timecode_path = "{}_timecode.txt".format(os.path.splitext(output_path)[0])
+        self.video_path = output_path
         self.buffer_size = buffer_size
 
         self.timecode = open(self.timecode_path, "w")
@@ -27,7 +46,7 @@ class Recorder:
                 "-c:v",
                 "rawvideo",
                 "-pix_fmt",
-                pixel_format,
+                pix_fmt_from_fourcc(fourcc),
                 "-s",
                 "{}x{}".format(dimensions[1], dimensions[0]),
                 "-i",
@@ -39,7 +58,7 @@ class Recorder:
                 "-profile:v",
                 "high444" if encoder == "libx264" else "high",
                 "-b:v",
-                "30M",
+                bitrate,
                 self.video_path,
             ],
             stdin=PIPE,
