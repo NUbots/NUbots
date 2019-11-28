@@ -20,7 +20,7 @@ class Encoder:
 
         # Serialise the message and get the type hash
         data = message.SerializeToString()
-        pb_hash, = struct.unpack(">Q", (xxhash.xxh64(message.DESCRIPTOR.full_name, seed=0x4E55436C).digest()))
+        (pb_hash,) = struct.unpack(">Q", (xxhash.xxh64(message.DESCRIPTOR.full_name, seed=0x4E55436C).digest()))
 
         # Header
         self._file.write(b"\xE2\x98\xA2")
