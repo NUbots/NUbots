@@ -42,9 +42,6 @@ def euclidean_error(points):
         axis=1,
     )
 
-    # Stack all the horizontal planes on top of one another
-    hp = tf.concat([hp_1, hp_2], axis=1)
-
     # Orthogonality loss
     orthogonality_loss = tf.abs(tf.einsum("ab,ab->a", vpp, hpp))
 
