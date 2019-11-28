@@ -9,9 +9,9 @@ import sys
 import tempfile
 
 import google.protobuf.message
-import xxhash
 
 import b
+import xxhash
 
 if shutil.which("protoc") is None:
     sys.stderr.write("protoc is required to process nbs files\n")

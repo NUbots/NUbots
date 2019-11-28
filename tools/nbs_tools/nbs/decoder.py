@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+import enum
+import gzip
 import os
 import struct
-import gzip
-import enum
+
 from .protobuf_types import MessageTypes
 
 

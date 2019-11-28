@@ -3,13 +3,14 @@
 import multiprocessing
 import os
 
-import numpy as np
-import tensorflow as tf
 from tqdm import tqdm
 
-from .nbs import Decoder
+import numpy as np
+import tensorflow as tf
+
 from .images import decode_image
 from .images.video_recorder import Recorder
+from .nbs import Decoder
 
 gpus = tf.config.experimental.list_physical_devices("GPU")
 for gpu in gpus:

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-import os
 import json
-from .nbs import Decoder
+import os
+
 from tqdm import tqdm
+
+from .nbs import Decoder
 
 
 def register(command):

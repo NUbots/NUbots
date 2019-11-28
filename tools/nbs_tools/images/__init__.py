@@ -3,7 +3,6 @@
 from .decompress_bayer import decompress_bayer
 from .decompress_jpeg import decompress_jpeg
 from .decompress_polarized import decompress_polarized
-
 from .fourcc import fourcc, fourcc_to_string
 
 

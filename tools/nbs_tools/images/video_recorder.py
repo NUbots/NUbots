@@ -4,6 +4,7 @@ import os
 import queue
 import threading
 from subprocess import DEVNULL, PIPE, Popen, call
+
 from .fourcc import fourcc
 
 
