@@ -15,6 +15,7 @@ def register(command):
     nbs_tools.stats.register(subcommands.add_parser("stats"))
     nbs_tools.extract_images.register(subcommands.add_parser("extract_images"))
     nbs_tools.video.register(subcommands.add_parser("video"))
+    nbs_tools.calibrate_cameras.register(subcommands.add_parser("calibrate_cameras"))
 
 
 def run(nbs_command, **kwargs):
@@ -23,4 +24,5 @@ def run(nbs_command, **kwargs):
         "json": nbs_tools.json.run,
         "extract_images": nbs_tools.extract_images.run,
         "video": nbs_tools.video.run,
+        "calibrate_cameras": nbs_tools.calibrate_cameras.run,
     }[nbs_command](**kwargs)
