@@ -21,7 +21,7 @@ from .camera_calibration.loss import ExtrinsicLoss, euclidean_error, euclidean_l
 from .camera_calibration.metric import GridError, alignment, collinearity, orthogonality, parallelity
 from .camera_calibration.model import Equidistant, Equisolid, ExtrinsicCluster, Rectilinear
 from .decoder import Decoder
-from .images import decode_image
+from .images import decode_image, fourcc
 
 ROWS = 4
 COLS = 11
@@ -87,11 +87,20 @@ def process_frame(item):
 
     if len(data) == 1:
         img = data[0]["image"].numpy()
+        fmt = data[0]["fourcc"]
     else:
         img = [d for d in data if d["name"] == "_colour"][0]["image"].numpy()
+        fmt = data[0]["fourcc"]
 
-    # TODO need to handle this better
-    img = cv2.cvtColor(img, cv2.COLOR_BayerBG2RGB)
+    # Debayer if we need to
+    if fmt == fourcc("BGGR"):
+        img = cv2.cvtColor(img, cv2.COLOR_BayerBG2RGB)
+    elif fmt == fourcc("RGGB"):
+        img = cv2.cvtColor(img, cv2.COLOR_BayerRG2RGB)
+    elif fmt == fourcc("GRBG"):
+        img = cv2.cvtColor(img, cv2.COLOR_BayerGR2RGB)
+    elif fmt == fourcc("GBRG"):
+        img = cv2.cvtColor(img, cv2.COLOR_BayerGB2RGB)
 
     params = cv2.SimpleBlobDetector_Params()
 
@@ -143,64 +152,64 @@ def find_grids(files):
     if not os.path.isfile(pickle_path):
 
         # Read the nbs file
-        pool = multiprocessing.Pool(multiprocessing.cpu_count())
-        decoder = Decoder(*files)
+        with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
+            decoder = Decoder(*files)
 
-        grids = {}
+            grids = {}
 
-        print("Detecting asymmetric circles grids")
+            print("Detecting asymmetric circles grids")
 
-        with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
+            with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
 
-            results = []
+                results = []
 
-            # Function that updates the results
-            def update_results(msg):
+                # Function that updates the results
+                def update_results(msg):
 
-                # Update the progress based on the image we are up to
-                progress.update(msg["bytes_read"])
+                    # Update the progress based on the image we are up to
+                    progress.update(msg["bytes_read"])
 
-                img = msg["image"]
-                img = cv2.drawKeypoints(
-                    img, msg["blobs"], np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
-                )
-                if msg["centres"] is not None:
-                    img = cv2.drawChessboardCorners(img, (ROWS, COLS), msg["centres"], True)
+                    img = msg["image"]
+                    img = cv2.drawKeypoints(
+                        img, msg["blobs"], np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+                    )
+                    if msg["centres"] is not None:
+                        img = cv2.drawChessboardCorners(img, (ROWS, COLS), msg["centres"], True)
 
-                cv2.imshow(msg["name"], img)
-                cv2.waitKey(1)
+                    cv2.imshow(msg["name"], img)
+                    cv2.waitKey(1)
 
-                # Add this to the grids list
-                if msg["name"] not in grids:
-                    grids[msg["name"]] = []
-                grids[msg["name"]].append(
-                    {
-                        "timestamp": msg["timestamp"],
-                        # Normalise the pixel coordinates to be based from the centre of the image
-                        # And then divide by the width of the image to get a normalised coordinate
-                        "centres": None
-                        if msg["centres"] is None
-                        else (np.array(img.shape[:2][::-1], dtype=np.float) * 0.5 - msg["centres"]) / img.shape[1],
-                    }
-                )
+                    # Add this to the grids list
+                    if msg["name"] not in grids:
+                        grids[msg["name"]] = []
+                    grids[msg["name"]].append(
+                        {
+                            "timestamp": msg["timestamp"],
+                            # Normalise the pixel coordinates to be based from the centre of the image
+                            # And then divide by the width of the image to get a normalised coordinate
+                            "centres": None
+                            if msg["centres"] is None
+                            else (np.array(img.shape[:2][::-1], dtype=np.float) * 0.5 - msg["centres"]) / img.shape[1],
+                        }
+                    )
 
-            for msg in packetise_stream(decoder):
-                # Add a task to the pool to process
-                results.append(pool.apply_async(process_frame, (msg,)))
+                for msg in packetise_stream(decoder):
+                    # Add a task to the pool to process
+                    results.append(pool.apply_async(process_frame, (msg,)))
 
-                # Only buffer 1024 images for each cpu core to avoid running out of memory
-                if len(results) > 128 * multiprocessing.cpu_count():
-                    results[0].wait()
+                    # Only buffer 1024 images for each cpu core to avoid running out of memory
+                    if len(results) > 128 * multiprocessing.cpu_count():
+                        results[0].wait()
 
-                # If the next one is ready process it
-                if len(results) > 0 and results[0].ready():
+                    # If the next one is ready process it
+                    if len(results) > 0 and results[0].ready():
+                        update_results(results.pop(0).get())
+
+                while len(results) > 0:
                     update_results(results.pop(0).get())
 
-            while len(results) > 0:
-                update_results(results.pop(0).get())
-
-            with open(pickle_path, "wb") as f:
-                pickle.dump(grids, f, protocol=pickle.HIGHEST_PROTOCOL)
+                with open(pickle_path, "wb") as f:
+                    pickle.dump(grids, f, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Close all the windows
         cv2.destroyAllWindows()
@@ -216,6 +225,26 @@ def find_grids(files):
         v.sort(key=lambda v: v["timestamp"])
 
     return grids
+
+
+def grid_area(points):
+    # Take the 4 Corner Points: P1,P2,P3,P4 of the Quadrilateral
+    p1 = points[:, 0, 0, :]
+    p2 = points[:, 0, -1, :]
+    p3 = points[:, -1, -1, :]
+    p4 = points[:, -1, 0, :]
+
+    # Using the Shoelace formula: https://math.stackexchange.com/questions/1259094/coordinate-geometry-area-of-a-quadrilateral
+    return 0.5 * tf.abs(
+        p1[:, 0] * p2[:, 1]
+        + p2[:, 0] * p3[:, 1]
+        + p3[:, 0] * p4[:, 1]
+        + p4[:, 0] * p1[:, 1]
+        - p2[:, 0] * p1[:, 1]
+        - p3[:, 0] * p2[:, 1]
+        - p4[:, 0] * p3[:, 1]
+        - p1[:, 0] * p4[:, 1]
+    )
 
 
 def run(files, config_path, no_intrinsics, no_extrinsics, **kwargs):
@@ -264,16 +293,7 @@ def run(files, config_path, no_intrinsics, no_extrinsics, **kwargs):
         # Run a prediction to help identify outliers to be removed
         # Even though this is running on an untrained model at this point, the outliers are pretty obvious
         predictions = euclidean_error(tf.convert_to_tensor(model.predict(points)))
-
-        # Gather the samples best losses from each of the error categories and only include the intersection of them
-        _, indices = tf.math.top_k(tf.math.negative(predictions), k=(9 * predictions[0].shape[0]) // 10)
-        indices = tf.squeeze(
-            tf.sparse.to_dense(tf.sets.intersection(tf.sets.intersection(indices[0:1], indices[1:2]), indices[2:3])),
-            axis=0,
-        )
-
-        # Regather these points
-        points = tf.gather(points, indices, batch_dims=0)
+        area = grid_area(points)
 
         # Average pixel coordinates of the grid
         position = tf.math.reduce_mean(points, axis=[1, 2])
@@ -282,24 +302,6 @@ def run(files, config_path, no_intrinsics, no_extrinsics, **kwargs):
             [tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.math.squared_difference(position, p)))) for p in position], axis=0
         )
         position_distance = tf.divide(position_distance, tf.reduce_sum(position_distance))
-
-        # Take the 4 Corner Points: P1,P2,P3,P4 of the Quadrilateral
-        P1 = points[:, 0, 0, :]
-        P2 = points[:, 0, 3, :]
-        P3 = points[:, 10, 3, :]
-        P4 = points[:, 10, 0, :]
-
-        # Using the Shoelace formula: https://math.stackexchange.com/questions/1259094/coordinate-geometry-area-of-a-quadrilateral
-        area = 0.5 * tf.abs(
-            P1[:, 0] * P2[:, 1]
-            + P2[:, 0] * P3[:, 1]
-            + P3[:, 0] * P4[:, 1]
-            + P4[:, 0] * P1[:, 1]
-            - P2[:, 0] * P1[:, 1]
-            - P3[:, 0] * P2[:, 1]
-            - P4[:, 0] * P3[:, 1]
-            - P1[:, 0] * P4[:, 1]
-        )
 
         # Area distance is already squared, get the difference of squares and then square root
         area_distance = tf.stack([tf.reduce_mean(tf.sqrt(tf.abs(tf.math.subtract(area, a)))) for a in area], axis=0)

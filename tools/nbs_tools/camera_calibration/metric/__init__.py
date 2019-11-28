@@ -10,15 +10,15 @@ from ..loss.extrinsic_loss import alignment_error, grid_error
 
 
 def collinearity(truth, pred):
-    return 90 - tf.acos(tf.sqrt(tf.reduce_mean(euclidean_error(pred)[0]))) * (180 / math.pi)
+    return 90 - tf.reduce_mean(tf.acos(euclidean_error(pred)[0])) * (180 / math.pi)
 
 
 def parallelity(truth, pred):
-    return 90 - tf.acos(tf.sqrt(tf.reduce_mean(euclidean_error(pred)[1]))) * (180 / math.pi)
+    return 90 - tf.reduce_mean(tf.acos(euclidean_error(pred)[1])) * (180 / math.pi)
 
 
 def orthogonality(truth, pred):
-    return 90 - tf.acos(tf.sqrt(tf.reduce_mean(euclidean_error(pred)[2]))) * (180 / math.pi)
+    return 90 - tf.reduce_mean(tf.acos(euclidean_error(pred)[2])) * (180 / math.pi)
 
 
 def alignment(truth, pred):
