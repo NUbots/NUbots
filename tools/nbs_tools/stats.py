@@ -3,17 +3,19 @@
 import json
 import os
 
+from tqdm import tqdm
+
 import numpy as np
 from si_prefix import si_format
 
-from . import decoder
+from .nbs import Decoder
 
 
 def register(command):
     command.help = "Decode an nbs file into a series of file statistics"
 
     # Command arguments
-    command.add_argument("in_file", metavar="in_file", help="The nbs file to examine")
+    command.add_argument("files", metavar="files", nargs="+", help="The nbs files to examine")
     command.add_argument(
         "--message-timestamp",
         "-t",
@@ -77,29 +79,36 @@ def indent(in_string, count):
     return "\n".join(["{}{}".format(" " * count, s) for s in in_string.split("\n")])
 
 
-def run(in_file, use_message_timestamp, **kwargs):
+def run(files, use_message_timestamp, **kwargs):
 
     data = []
     max_cat_len = 0
     max_subcat_len = 0
-    for packet in decoder.decode(in_file):
 
-        # If our object has a timestamp field of its own, we can decide to use that instead of the nbs timestamp
-        # This can sometimes give better rates but can also cause problems when the timebases aren't synchronized
-        if use_message_timestamp and hasattr(packet.msg, "timestamp"):
-            ts = packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos
-        else:
-            ts = packet.timestamp * 1e3
+    decoder = Decoder(*files)
+    with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
+        for packet in decoder:
 
-        # Treat some objects specially as they have sub categories
-        if packet.type in ("message.input.Image", "message.output.CompressedImage"):
-            data.append((packet.type, packet.msg.name, ts, len(packet.raw)))
-        else:
-            data.append((packet.type, "", ts, len(packet.raw)))
+            # Update the progress bar
+            progress.n = decoder.bytes_read()
+            progress.update(0)
 
-        # Work out the largest name length so we can put it into numpy
-        max_cat_len = max(max_cat_len, len(data[-1][0]))
-        max_subcat_len = max(max_subcat_len, len(data[-1][1]))
+            # If our object has a timestamp field of its own, we can decide to use that instead of the nbs timestamp
+            # This can sometimes give better rates but can also cause problems when the timebases aren't synchronized
+            if use_message_timestamp and hasattr(packet.msg, "timestamp"):
+                ts = packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos
+            else:
+                ts = packet.timestamp * 1e3
+
+            # Treat some objects specially as they have sub categories
+            if packet.type in ("message.input.Image", "message.output.CompressedImage"):
+                data.append((packet.type, packet.msg.name, ts, len(packet.raw)))
+            else:
+                data.append((packet.type, "", ts, len(packet.raw)))
+
+            # Work out the largest name length so we can put it into numpy
+            max_cat_len = max(max_cat_len, len(data[-1][0]))
+            max_subcat_len = max(max_subcat_len, len(data[-1][1]))
 
     data = np.array(
         data,
