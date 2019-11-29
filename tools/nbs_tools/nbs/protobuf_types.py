@@ -66,7 +66,7 @@ with tempfile.TemporaryDirectory() as protobuf_path:
     for message in google.protobuf.message.Message.__subclasses__():
 
         # Unpack the big endian 64 bit integer
-        type_hash, = struct.unpack(">Q", xxhash.xxh64(message.DESCRIPTOR.full_name, seed=0x4E55436C).digest())
+        (type_hash,) = struct.unpack(">Q", xxhash.xxh64(message.DESCRIPTOR.full_name, seed=0x4E55436C).digest())
 
         # Add the string to hash, and hash to string conversions
         MessageTypes[type_hash] = NBSType(type_hash, message.DESCRIPTOR.full_name, message)
