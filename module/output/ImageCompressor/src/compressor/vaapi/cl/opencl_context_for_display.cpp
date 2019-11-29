@@ -1,7 +1,10 @@
 #include "opencl_context_for_display.h"
+
 #include <CL/cl.h>
 #include <va/va.h>
+
 #include <vector>
+
 #include "opencl_error_category.h"
 
 namespace module::output::compressor::vaapi::cl {

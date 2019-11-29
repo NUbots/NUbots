@@ -2,6 +2,7 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_ERROR_CATEGORY_H
 
 #include <va/va.h>
+
 #include <system_error>
 
 namespace module::output::compressor::vaapi {

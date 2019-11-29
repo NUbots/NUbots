@@ -1,5 +1,7 @@
 #include "upload_to_surface.h"
+
 #include <fmt/format.h>
+
 #include "../vaapi_error_category.hpp"
 #include "utility/vision/fourcc.h"
 

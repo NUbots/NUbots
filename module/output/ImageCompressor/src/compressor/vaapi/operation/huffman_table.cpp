@@ -1,6 +1,7 @@
 #include "huffman_table.h"
 
 #include <cstring>
+
 #include "../vaapi_error_category.hpp"
 #include "jpeg_constants.h"
 

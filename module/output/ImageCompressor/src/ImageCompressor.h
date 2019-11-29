@@ -6,6 +6,7 @@
 #include <memory>
 #include <mutex>
 #include <nuclear>
+
 #include "compressor/CompressorFactory.h"
 
 namespace module {

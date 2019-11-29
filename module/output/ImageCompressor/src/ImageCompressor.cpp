@@ -1,6 +1,7 @@
 #include "ImageCompressor.h"
 
 #include <fmt/format.h>
+
 #include "compressor/turbojpeg/Factory.h"
 #include "compressor/vaapi/Factory.h"
 #include "extension/Configuration.h"

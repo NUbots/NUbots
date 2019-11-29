@@ -2,6 +2,7 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_MOSAIC_H
 
 #include <cstdint>
+
 #include "compressor/CompressorFactory.h"
 #include "utility/vision/fourcc.h"
 

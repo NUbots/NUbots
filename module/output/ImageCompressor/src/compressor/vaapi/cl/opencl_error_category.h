@@ -19,6 +19,7 @@
 
 #include <CL/cl.h>
 #include <CL/cl_va_api_media_sharing_intel.h>
+
 #include <system_error>
 
 namespace module::output::compressor::vaapi::cl {

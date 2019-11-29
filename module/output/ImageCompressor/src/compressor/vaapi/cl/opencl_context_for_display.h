@@ -2,6 +2,7 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_OPENCL_CONTEXT_FOR_DISPLAY_H
 
 #include <va/va.h>
+
 #include "../CompressionContext.h"
 
 namespace module::output::compressor::vaapi::cl {

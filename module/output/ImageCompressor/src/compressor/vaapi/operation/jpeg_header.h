@@ -2,6 +2,7 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_OPERATION_JPEG_HEADER_H
 
 #include <va/va.h>
+
 #include <utility>
 
 namespace module::output::compressor::vaapi::operation {

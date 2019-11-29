@@ -4,6 +4,7 @@
 #include <CL/cl.h>
 #include <CL/cl_va_api_media_sharing_intel.h>
 #include <va/va.h>
+
 #include "cl/wrapper.h"
 
 namespace module::output::compressor::vaapi {

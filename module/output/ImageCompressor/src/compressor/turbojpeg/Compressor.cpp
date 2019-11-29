@@ -1,6 +1,8 @@
 #include "Compressor.h"
+
 #include <fmt/format.h>
 #include <turbojpeg.h>
+
 #include "../mosaic.h"
 #include "utility/vision/fourcc.h"
 

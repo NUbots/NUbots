@@ -1,5 +1,7 @@
 #include "make_mosaic_kernel.h"
+
 #include <fmt/format.h>
+
 #include "../../mosaic.h"
 #include "opencl_error_category.h"
 

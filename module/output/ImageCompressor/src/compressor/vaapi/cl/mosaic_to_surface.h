@@ -2,7 +2,9 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_OPERATION_MOSAIC_TO_SURFACE_H
 
 #include <CL/cl.h>
+
 #include <vector>
+
 #include "../CompressionContext.h"
 
 namespace module::output::compressor::vaapi::cl {

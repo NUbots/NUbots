@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+
 #include "Compressor.h"
 
 namespace module::output::compressor {

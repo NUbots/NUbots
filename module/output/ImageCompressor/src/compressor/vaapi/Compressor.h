@@ -2,7 +2,9 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_H
 
 #include <va/va.h>
+
 #include <memory>
+
 #include "../Compressor.h"
 #include "CompressionContext.h"
 #include "cl/wrapper.h"

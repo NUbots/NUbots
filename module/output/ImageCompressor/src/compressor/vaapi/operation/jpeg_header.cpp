@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <vector>
+
 #include "../vaapi_error_category.hpp"
 #include "jpeg_constants.h"
 

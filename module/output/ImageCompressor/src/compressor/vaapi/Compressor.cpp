@@ -5,8 +5,10 @@
 #include <va/va.h>
 #include <va/va_drm.h>
 #include <va/va_enc_jpeg.h>
+
 #include <cstring>
 #include <system_error>
+
 #include "../mosaic.h"
 #include "cl/make_mosaic_kernel.h"
 #include "cl/mosaic_to_surface.h"

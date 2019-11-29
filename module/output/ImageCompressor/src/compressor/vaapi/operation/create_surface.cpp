@@ -1,6 +1,9 @@
 #include "create_surface.h"
+
 #include <fmt/format.h>
+
 #include <iostream>
+
 #include "../vaapi_error_category.hpp"
 #include "utility/vision/fourcc.h"
 

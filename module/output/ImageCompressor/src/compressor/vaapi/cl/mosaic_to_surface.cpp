@@ -1,6 +1,9 @@
 #include "mosaic_to_surface.h"
+
 #include <fmt/format.h>
+
 #include <array>
+
 #include "opencl_error_category.h"
 
 namespace module::output::compressor::vaapi::cl {
