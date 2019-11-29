@@ -54,7 +54,7 @@ namespace output {
 
         on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
             // clang-format off
-            std::string lvl = cfg["log_level"].as<NUClear::LogLevel>();
+            std::string lvl = cfg["log_level"].as<std::string>();
             if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
             else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
             else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
