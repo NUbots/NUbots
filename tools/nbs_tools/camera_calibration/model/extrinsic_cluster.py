@@ -22,7 +22,7 @@ class ExtrinsicCluster(tf.keras.Model):
 
             return (
                 [psi_0, theta_0, phi_0]
-                if tf.linalg.norm([psi_0, theta_0, phi_0]) < tf.linalg.norm([psi_0, theta_0, phi_0])
+                if tf.linalg.norm([psi_0, theta_0, phi_0]) < tf.linalg.norm([psi_1, theta_1, phi_1])
                 else [psi_1, theta_1, phi_1]
             )
         # Locked gimbal case
@@ -30,20 +30,20 @@ class ExtrinsicCluster(tf.keras.Model):
             if R[2, 0] == -1:
                 phi = 0
                 theta = math.pi / 2.0
-                psi = phi + math.atan2(R[0, 1], R[0, 2])
+                psi = math.atan2(R[0, 1], R[0, 2]) + phi
             else:
                 phi = 0
                 theta = -math.pi / 2.0
-                psi = -phi + math.atan2(-R[0, 1], -R[0, 2])
+                psi = math.atan2(-R[0, 1], -R[0, 2]) - phi
 
             return [psi, theta, phi]
 
     # http://www.gregslabaugh.net/publications/euler.pdf
     def compose(self, euler):
         # Extract the euler angles
-        psi = euler[..., 0]
-        theta = euler[..., 1]
-        phi = euler[..., 2]
+        psi = euler[:, 0]
+        theta = euler[:, 1]
+        phi = euler[:, 2]
 
         # Get the trig values
         s_psi = tf.sin(psi)
@@ -128,25 +128,43 @@ class ExtrinsicCluster(tf.keras.Model):
         v_1 = tf.einsum("aij,aklj->akli", R_1, x_1)
 
         # Find the perpendicular direction for these two lines
-        v_2 = tf.linalg.normalize(tf.linalg.cross(v_1, v_0))[0]
+        v_2 = tf.linalg.normalize(tf.linalg.cross(v_1, v_0), axis=-1)[0]
+
+        p_0 = tf.broadcast_to(p_0[:, tf.newaxis, tf.newaxis], tf.shape(v_0))
+        p_1 = tf.broadcast_to(p_1[:, tf.newaxis, tf.newaxis], tf.shape(v_1))
 
         # Setup a system of linear equations to solve the points of closest approach on each line
+        # https://math.stackexchange.com/questions/1993953/closest-points-between-two-lines
         rhs = p_1 - p_0
         lhs = tf.stack([v_0, -v_1, v_2], axis=-2)
-        sols = tf.squeeze(
-            tf.linalg.solve(
-                lhs, tf.expand_dims(tf.broadcast_to(rhs[:, tf.newaxis, tf.newaxis], tf.shape(lhs)[:-1]), -1)
-            ),
-            -1,
-        )
-        t_0 = sols[..., 0]
-        t_1 = sols[..., 1]
+        sols = tf.squeeze(tf.linalg.solve(lhs, tf.expand_dims(rhs, -1)), -1)
+        t_0 = sols[..., 0, tf.newaxis]
+        t_1 = sols[..., 1, tf.newaxis]
 
-        # Calculate the two line equations and stack them into a result
-        return tf.stack(
+        # Calculate the angular difference for each point
+        # v_1 . |p_1 - (t_0 * v_0 + p_0)|
+        # v_0 . |p_0 - (t_1 * v_1 + p_1)|
+        # Dihedral angle might be better
+        angle = tf.stack(
             [
-                p_0[:, tf.newaxis, tf.newaxis] + tf.expand_dims(t_0, -1) * v_0,
-                p_1[:, tf.newaxis, tf.newaxis] + tf.expand_dims(t_1, -1) * v_1,
+                tf.reduce_sum(
+                    tf.multiply(
+                        v_1, tf.linalg.normalize(tf.subtract(p_1, tf.add(tf.multiply(v_0, t_0), p_0)), axis=-1)[0],
+                    ),
+                    axis=-1,
+                ),
+                tf.reduce_sum(
+                    tf.multiply(
+                        v_0, tf.linalg.normalize(tf.subtract(p_0, tf.add(tf.multiply(v_1, t_1), p_1)), axis=-1)[0],
+                    ),
+                    axis=-1,
+                ),
             ],
             axis=1,
         )
+
+        # Calculate the position for each point
+        position = tf.stack([tf.add(p_0, tf.multiply(t_0, v_0)), tf.add(p_1, tf.multiply(t_1, v_1))], axis=1)
+
+        # Return this angle error and the position of the point as a single tensor
+        return tf.concat([position, tf.expand_dims(angle, axis=-1)], axis=-1)

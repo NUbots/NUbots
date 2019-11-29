@@ -22,35 +22,21 @@ def orthogonality(truth, pred):
 
 
 def alignment(truth, pred):
-    return tf.reduce_mean(tf.sqrt(alignment_error(pred)))
+    return tf.reduce_mean(tf.acos(tf.clip_by_value(pred[:, :, :, :, 3], -1.0, 1.0))) * (180 / math.pi)
 
 
-class GridError(tf.keras.metrics.Metric):
-    def __init__(self, rows, cols, grid_size, name="grid", **kwargs):
-        super(GridError, self).__init__(name=name, **kwargs)
+def GridError(rows, cols, grid_size):
+    # Create the grid to test against
+    grid = np.empty([cols, rows, 2], dtype=np.float32)
 
-        # Create the grid to test against
-        grid = np.empty([cols, rows, 2], dtype=np.float32)
+    # Set the coordinate values in our grid
+    grid[:, :, 0] = (np.arange(cols) * grid_size)[:, np.newaxis]
+    grid[0::2, :, 1] = np.arange(rows) * (grid_size * 2)
+    grid[1::2, :, 1] = np.arange(rows) * (grid_size * 2) + grid_size
+    grid = tf.convert_to_tensor(grid)
 
-        # Set the coordinate values in our grid
-        grid[0::2, :, 0] = np.arange(rows) * (grid_size * 2)
-        grid[1::2, :, 0] = grid_size + np.arange(rows) * (grid_size * 2)
-        grid[:, :, 1] = (np.arange(cols) * (grid_size * 2))[:, np.newaxis]
-        self.grid = tf.convert_to_tensor(grid)
+    def grid_e(truth, pred):
+        position = pred[:, :, :, :, :3]
+        return tf.reduce_mean(tf.sqrt(grid_error(position, grid)))
 
-        self.err = self.add_weight("grid_error", shape=(), initializer="zeros", dtype=tf.float32)
-        self.count = self.add_weight("error_count", shape=(), initializer="zeros", dtype=tf.float32)
-
-    def __name__(self):
-        return "grid"
-
-    def update_state(self, truth, pred, sample_weight=None):
-        self.err.assign_add(tf.reduce_sum(tf.sqrt(grid_error(pred, self.grid))))
-        self.count.assign_add(pred.shape[0])
-
-    def result(self):
-        return self.err / self.count
-
-    def reset_state(self):
-        self.err.assign(0)
-        self.count.assign(0)
+    return grid_e

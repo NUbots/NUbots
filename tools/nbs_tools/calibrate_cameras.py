@@ -281,39 +281,7 @@ def run(files, config_path, no_intrinsics, no_extrinsics, **kwargs):
         if projection == "RECTILINEAR":
             model = Rectilinear(**config["lens"])
 
-        # Put the model into the config
-        configurations[name]["model"] = model
-
-        # Extract all of the point grids that were found into a single matrix
-        points = tf.stack([p["centres"] for p in data if p["centres"] is not None], axis=0)
-
-        # Stack up the points into rows/cols
-        points = tf.reshape(points, (points.shape[0], COLS, ROWS, 2))
-
-        # Run a prediction to help identify outliers to be removed
-        # Even though this is running on an untrained model at this point, the outliers are pretty obvious
-        predictions = euclidean_error(tf.convert_to_tensor(model.predict(points)))
-        area = grid_area(points)
-
-        # Average pixel coordinates of the grid
-        position = tf.math.reduce_mean(points, axis=[1, 2])
-        # Work out the average difference from this point to all the other points
-        position_distance = tf.stack(
-            [tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.math.squared_difference(position, p)))) for p in position], axis=0
-        )
-        position_distance = tf.divide(position_distance, tf.reduce_sum(position_distance))
-
-        # Area distance is already squared, get the difference of squares and then square root
-        area_distance = tf.stack([tf.reduce_mean(tf.sqrt(tf.abs(tf.math.subtract(area, a)))) for a in area], axis=0)
-        area_distance = tf.divide(area_distance, tf.reduce_sum(area_distance))
-
-        # Multiply position weight with area weight and then multiply by normalised area (bigger areas get more weight)
-        area_weight = tf.sqrt(area)
-        weight = tf.multiply(
-            tf.multiply(position_distance, area_distance), tf.divide(area_weight, tf.reduce_sum(area_weight))
-        )
-        weight = tf.multiply(tf.divide(weight, tf.reduce_sum(weight)), weight.shape[0])
-
+        # Compile the model
         model.compile(
             run_eagerly=True,
             optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2),
@@ -321,7 +289,41 @@ def run(files, config_path, no_intrinsics, no_extrinsics, **kwargs):
             metrics=[collinearity, parallelity, orthogonality],
         )
 
+        # Put the model into the config
+        configurations[name]["model"] = model
+
         if not no_intrinsics:
+            # Extract all of the point grids that were found into a single matrix
+            points = tf.stack([p["centres"] for p in data if p["centres"] is not None], axis=0)
+
+            # Stack up the points into rows/cols
+            points = tf.reshape(points, (points.shape[0], COLS, ROWS, 2))
+
+            # Run a prediction to help identify outliers to be removed
+            # Even though this is running on an untrained model at this point, the outliers are pretty obvious
+            predictions = euclidean_error(tf.convert_to_tensor(model.predict(points)))
+            area = grid_area(points)
+
+            # Average pixel coordinates of the grid
+            position = tf.math.reduce_mean(points, axis=[1, 2])
+            # Work out the average difference from this point to all the other points
+            position_distance = tf.stack(
+                [tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.math.squared_difference(position, p)))) for p in position],
+                axis=0,
+            )
+            position_distance = tf.divide(position_distance, tf.reduce_sum(position_distance))
+
+            # Area distance is already squared, get the difference of squares and then square root
+            area_distance = tf.stack([tf.reduce_mean(tf.sqrt(tf.abs(tf.math.subtract(area, a)))) for a in area], axis=0)
+            area_distance = tf.divide(area_distance, tf.reduce_sum(area_distance))
+
+            # Multiply position weight with area weight and then multiply by normalised area (bigger areas get more weight)
+            area_weight = tf.sqrt(area)
+            weight = tf.multiply(
+                tf.multiply(position_distance, area_distance), tf.divide(area_weight, tf.reduce_sum(area_weight))
+            )
+            weight = tf.multiply(tf.divide(weight, tf.reduce_sum(weight)), weight.shape[0])
+
             history = model.fit(
                 x=points,
                 y=tf.ones([*points.shape[:-1], 3], dtype=tf.float32),
@@ -493,7 +495,7 @@ def run(files, config_path, no_intrinsics, no_extrinsics, **kwargs):
         )
 
         for i, v in enumerate(model.translations):
-            print("{}->{}: {}".format(name_for_id[0], name_for_id[i], v))
+            print("{}->{}: {}".format(name_for_id[0], name_for_id[i], v.numpy()))
 
         import pdb
 
