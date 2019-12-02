@@ -19,6 +19,8 @@
 #ifndef UTILITY_LOCALISATION_TRANSFORM_H
 #define UTILITY_LOCALISATION_TRANSFORM_H
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <armadillo>
 
 #include "utility/math/matrix/Transform2D.h"
@@ -39,6 +41,34 @@ namespace localisation {
     inline arma::vec3 transform3DToFieldState(const utility::math::matrix::Transform3D& m) {
         utility::math::matrix::Transform2D ax = m.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0}));
         return arma::vec3({ax.x(), ax.y(), ax.angle()});
+    }
+
+    inline Eigen::Affine2d projectTo2D(const Eigen::Vector3d& yawAxis,
+                                       const Eigen::Vector3d& forwardAxis,
+                                       const Eigen::Affine3d this_transform) {
+        Eigen::Affine2d result;
+
+        // Translation
+        Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
+        Eigen::Vector3d r                = this_transform.translation();
+        Eigen::Matrix<double, 3, 3> newSpaceToWorld;
+        newSpaceToWorld.col(0) = orthoForwardAxis;
+        newSpaceToWorld.col(1) = yawAxis.cross(orthoForwardAxis);
+        newSpaceToWorld.col(2) = yawAxis;
+        // The inverse of a rotation is its transpose
+        Eigen::Matrix<double, 3, 3> worldToNewSpace = newSpaceToWorld.transpose();
+        Eigen::Vector3d rNewSpace                   = worldToNewSpace * r;
+        result.translation()                        = Eigen::Vector2d{rNewSpace(0), rNewSpace(1)};
+
+        // Rotation
+        Eigen::Vector3d x     = this_transform.linear().matrix().col(0);
+        Eigen::Vector3d xNew  = worldToNewSpace * x;
+        double theta_x_from_f = std::atan2(xNew[1], xNew[0]);  // sin/cos
+        result.linear()       = Eigen::Rotation2D{theta_x_from_f}.toRotationMatrix();
+
+        // std::cerr << "in = \n" << *this << std::endl;
+        // std::cerr << "out = \n" << result << std::endl;
+        return result;
     }
 
 }  // namespace localisation
