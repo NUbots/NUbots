@@ -42,136 +42,150 @@ namespace localisation {
     using utility::localisation::fieldStateToTransform3D;
     using utility::math::angle::normalizeAngle;
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::matrix::Transform3D;
 
-
-    using utility::math::matrix::Transform3D;
-    arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(const arma::vec::fixed<RobotModel::size>& state,
-                                                              double /*deltaT*/) {
-        arma::vec::fixed<RobotModel::size> new_state = state;
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, RobotModel<Scalar>::size, 1> RobotModel<Scalar>::time(
+        const Eigen::Matrix<Scalar, RobotModel<Scalar>::size, 1>& state,
+        double /*deltaT*/) {
+        Eigen::Matrix<Scalar, RobotModel<Scalar>::size, 1> new_state = state;
 
         return new_state;
     }
 
 
     /// Return the predicted observation of an object at the given position
-    arma::vec RobotModel::predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
-                                               const arma::vec& actual_position,
-                                               const utility::math::matrix::Transform3D& Hcw,
-                                               const Goal::MeasurementType& type,
-                                               const FieldDescription& fd) {
+    template <typename Scalar>
+    Eigen::VectorXd RobotModel<Scalar>::predictedObservation(
+        const Eigen::Matrix<Scalar, RobotModel<Scalar>::size, 1>& state,
+        const Eigen::VectorXd& actual_position,
+        const Eigen::Affine3d& Hcw,
+        const Goal::MeasurementType& type,
+        const FieldDescription& fd) {
 
-        Transform3D Hfw = fieldStateToTransform3D(state);
-        Transform3D Hcf = Hcw * Hfw.i();
+        double c = std::cos(state[2]);
+        double s = std::sin(state[2]);
+        Eigen::Matrix<Scalar, 3, 3> rotation;
+        rotation << c << -s << 0 << s << c << 0 << 0 << 0 << 1;
+        Eigen::Affine3d Hfw;
+        Hfw.translation()   = Eigen::Vector3d{state[0], state[1], 0};
+        Hfw.linear()        = rotation;
+        Eigen::Affine3d Hcf = Hcw * Hfw.inverse();
 
         // rZFf = vector from field origin to zenith high in the sky
-        arma::vec3 rZFf = {0, 0, 1};
-        arma::vec3 rZCc = Hcf.transformVector(rZFf);
+        Eigen::Vector4d rZFf = {0, 0, 1, 0};
+        rZFf                 = Hcf * rZFf;
 
         if (type == Goal::MeasurementType::CENTRE) {
             // rGCc = vector from camera to goal post expected position
-            arma::vec3 rGCc     = Hcf.transformPoint(actual_position);
-            arma::vec3 rGCc_sph = cartesianToSpherical(rGCc);  // in r,theta,phi
+            Eigen::Vector4d rGCc_4   = {actual_position[0], actual_position[1], actual_position[2], 1};
+            rGCc_4                   = Hcf * rGCc_4;
+            Eigen::Vector3d rGCc     = {rGCc_4[0], rGCc_4[1], rGCc_4[2]};
+            Eigen::Vector3d rGCc_sph = cartesianToSpherical(rGCc);  // in r,theta,phi
             return rGCc_sph;
         }
 
         switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
             case FieldDescription::GoalpostType::CIRCLE: {
                 if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                    arma::vec3 rNCc   = getCylindricalPostCamSpaceNormal(type, actual_position, Hcf, fd);
-                    arma::vec2 angles = {std::atan2(rNCc[1], rNCc[0]),
-                                         std::atan2(rNCc[2], std::sqrt(rNCc[0] * rNCc[0] + rNCc[1] * rNCc[1]))};
+                    Eigen::Vector3d rNCc   = getCylindricalPostCamSpaceNormal(type, actual_position, Hcf, fd);
+                    Eigen::Vector2d angles = {std::atan2(rNCc[1], rNCc[0]),
+                                              std::atan2(rNCc[2], std::sqrt(rNCc[0] * rNCc[0] + rNCc[1] * rNCc[1]))};
                     return angles;
                 }
                 break;
             }
             case FieldDescription::GoalpostType::RECTANGLE: {
                 if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                    arma::vec3 rNCc   = getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd);
-                    arma::vec2 angles = {std::atan2(rNCc[1], rNCc[0]),
-                                         std::atan2(rNCc[2], std::sqrt(rNCc[0] * rNCc[0] + rNCc[1] * rNCc[1]))};
+                    Eigen::Vector3d rNCc   = getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd);
+                    Eigen::Vector2d angles = {std::atan2(rNCc[1], rNCc[0]),
+                                              std::atan2(rNCc[2], std::sqrt(rNCc[0] * rNCc[0] + rNCc[1] * rNCc[1]))};
                     return angles;
                 }
                 break;
             }
         }
-        return arma::vec2({0, 0});
+        return Eigen::Vector2d({0, 0});
     }
 
-
-    arma::vec RobotModel::observationDifference(const arma::vec& a, const arma::vec& b) {
-
-        return a - b;
-    }
-
-    arma::vec::fixed<RobotModel::size> RobotModel::limitState(const arma::vec::fixed<RobotModel::size>& state) {
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, RobotModel<Scalar>::size, 1> RobotModel<Scalar>::limit(
+        const Eigen::Matrix<Scalar, RobotModel<Scalar>::size, 1>& state) {
         auto state2 = state;
         // state2[kAngle] = normalizeAngle(state2[kAngle]);
         // TODO: Clip robot's state to the field?
         return state2;
     }
 
-    arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
-        return arma::diagmat(processNoiseDiagonal);
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, RobotModel<Scalar>::size, RobotModel<Scalar>::size> RobotModel<Scalar>::noise(
+        const Scalar& deltaT) {
+        return processNoiseDiagonal.asDiagonal() * deltaT;
     }
 
-    arma::vec3 RobotModel::getCylindricalPostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                                            const arma::vec3& post_centre,
-                                                            const Transform3D& Hcf,
-                                                            const FieldDescription& fd) {
+    template <typename Scalar>
+    Eigen::Vector3d RobotModel<Scalar>::getCylindricalPostCamSpaceNormal(
+        const message::vision::Goal::MeasurementType& type,
+        const Eigen::Vector3d& post_centre,
+        const Eigen::Affine3d& Hcf,
+        const FieldDescription& fd) {
         if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
-            return arma::vec(0, 0, 0);
+            return Eigen::VectorXd{0, 0, 0};
         // rZFf = field vertical
-        arma::vec3 rZFf({0, 0, 1});
-        arma::vec3 rZCc = Hcf.transformVector(rZFf);
-        // The vector direction across the field perpendicular to the camera view vector
-        arma::vec3 rLRf = arma::normalise(arma::cross(rZCc, arma::vec3({1, 0, 0})));
+        Eigen::Vector4d rZFf = {0, 0, 1, 0};
+        rZFf                 = Hcf * rZFf;
+        Eigen::Vector3d rZCc = {rZFf[0], rZFf[1], rZFf[2]};
 
-        float dir          = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1 : -1;
-        arma::vec3 rG_blCc = post_centre + 0.5 * dir * fd.dimensions.goalpost_width * rLRf;
-        arma::vec3 rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height * rZCc;
+        // The vector direction across the field perpendicular to the camera view vector
+        Eigen::Vector3d rLRf = rZCc.cross(Eigen::Vector3d({1, 0, 0})).normalized();
+
+        float dir               = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1.0 : -1.0;
+        Eigen::Vector3d rG_blCc = post_centre + 0.5 * dir * fd.dimensions.goalpost_width * rLRf;
+        Eigen::Vector3d rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height * rZCc;
 
         // creating the normal vector (following convention stipulated in VisionObjects)
-        return (type == Goal::MeasurementType::LEFT_NORMAL) ? arma::normalise(arma::cross(rG_blCc, rG_tlCc))
-                                                            : arma::normalise(arma::cross(rG_tlCc, rG_blCc));
+        return (type == Goal::MeasurementType::LEFT_NORMAL) ? rG_blCc.cross(rG_tlCc).normalized()
+                                                            : rG_tlCc.cross(rG_blCc).normalized();
     }
 
-    arma::vec3 RobotModel::getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                                       const arma::vec3& post_centre,
-                                                       const Transform3D& Hcf,
-                                                       const FieldDescription& fd) {
+    template <typename Scalar>
+    Eigen::Vector3d RobotModel<Scalar>::getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
+                                                                    const Eigen::Vector3d& post_centre,
+                                                                    const Eigen::Affine3d& Hcf,
+                                                                    const FieldDescription& fd) {
         if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
-            return arma::vec(0, 0, 0);
+            return Eigen::Vector3d{0, 0, 0};
 
         // Finding 4 corners of goalpost and centre (4 corners and centre)
-        arma::mat goalBaseCorners(4, 5);
-        goalBaseCorners.each_col() = arma::vec4({post_centre[0], post_centre[1], post_centre[2], 1});
+        Eigen::Matrix<Scalar, 4, 5> goalBaseCorners;
+        for (int i = 0; i < 5; ++i)
+            goalBaseCorners.col(i) = Eigen::Vector4d({post_centre[0], post_centre[1], post_centre[2], 1});
         //
         goalBaseCorners.col(1) +=
-            arma::vec4({0.5 * fd.dimensions.goalpost_depth, 0.5 * fd.dimensions.goalpost_width, 0, 0});
+            Eigen::Vector4d({0.5 * fd.dimensions.goalpost_depth, 0.5 * fd.dimensions.goalpost_width, 0, 0});
         goalBaseCorners.col(2) +=
-            arma::vec4({0.5 * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width, 0, 0});
+            Eigen::Vector4d({0.5 * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width, 0, 0});
         goalBaseCorners.col(3) +=
-            arma::vec4({-0.5 * fd.dimensions.goalpost_depth, 0.5 * fd.dimensions.goalpost_width, 0, 0});
+            Eigen::Vector4d({-0.5 * fd.dimensions.goalpost_depth, 0.5 * fd.dimensions.goalpost_width, 0, 0});
         goalBaseCorners.col(4) +=
-            arma::vec4({-0.5 * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width, 0, 0});
+            Eigen::Vector4d({-0.5 * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width, 0, 0});
 
-        arma::mat goalTopCorners = goalBaseCorners;
-        goalTopCorners.each_col() += arma::vec4({0, 0, fd.dimensions.goal_crossbar_height, 0});
+        Eigen::Matrix<Scalar, 4, 5> goalTopCorners = goalBaseCorners;
+        for (int i = 0; i < 5; ++i)
+            goalTopCorners.col(i) += Eigen::Vector4d({0, 0, fd.dimensions.goal_crossbar_height, 0});
 
         // Transform to robot camera space
-        arma::mat goalBaseCornersCam = Hcf * goalBaseCorners;
-        arma::mat goalTopCornersCam  = Hcf * goalTopCorners;
+        Eigen::Matrix<Scalar, 4, 5> goalBaseCornersCam = Hcf * goalBaseCorners;
+        Eigen::Matrix<Scalar, 4, 5> goalTopCornersCam  = Hcf * goalTopCorners;
 
         // Get widest line
         int widest          = 0;
         float largest_angle = 0;
         for (int i = 1; i < goalBaseCornersCam.n_cols; i++) {
-            float angle = std::acos(arma::dot(goalBaseCornersCam.col(i), goalBaseCornersCam.col(0)));
+            float angle = std::acos(goalBaseCornersCam.col(i).dot(goalBaseCornersCam.col(0)));
             // Left side will have cross product point in neg field z direction
-            float left_side = arma::dot(arma::cross(goalBaseCornersCam.col(i), goalBaseCornersCam.col(0)),
-                                        goalTopCornersCam - goalBaseCornersCam)
-                              < 0;
+            bool left_side =
+                (goalBaseCornersCam.col(i).cross(goalBaseCornersCam.col(0)).dot(goalTopCornersCam - goalBaseCornersCam))
+                < 0;
             if (left_side && (type == Goal::MeasurementType::LEFT_NORMAL)) {
                 if (angle > largest_angle) {
                     widest        = i;
@@ -189,8 +203,8 @@ namespace localisation {
         // creating the normal vector (following convention stipulated in VisionObjects)
         // Normals point into the goal centre
         return (type == Goal::MeasurementType::LEFT_NORMAL)
-                   ? arma::normalise(arma::cross(goalBaseCornersCam.col(widest), goalTopCornersCam.col(widest)))
-                   : arma::normalise(arma::cross(goalTopCornersCam.col(widest), goalBaseCornersCam.col(widest)));
+                   ? (goalBaseCornersCam.col(widest).cross(goalTopCornersCam.col(widest))).normalize()
+                   : (goalTopCornersCam.col(widest).cross(goalBaseCornersCam.col(widest))).normalize();
     }
 }  // namespace localisation
 }  // namespace module

@@ -12,7 +12,7 @@ namespace localisation {
 
     class BallLocalisation : public NUClear::Reactor {
     private:
-        utility::math::filter::ParticleFilter<BallModel> filter;
+        utility::math::filter::ParticleFilter<double, BallModel> filter;
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
         bool ball_pos_log;

@@ -9,7 +9,6 @@
 #include "message/vision/Ball.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
@@ -23,9 +22,9 @@ namespace localisation {
     using message::support::FieldDescription;
 
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::matrix::Transform3D;
     using ServoID = utility::input::ServoID;
     using utility::nusight::graph;
+    using utility::support::Expression;
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), filter() {
@@ -42,15 +41,15 @@ namespace localisation {
 
             ball_pos_log = config["ball_pos_log"].as<bool>();
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
+            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
             filter.model.n_rogues             = config["n_rogues"].as<int>();
-            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
+            filter.model.resetRange           = config["reset_range"].as<Expression>();
             int n_particles                   = config["n_particles"].as<int>();
 
-            arma::vec2 start_state    = config["start_state"].as<arma::vec>();
-            arma::vec2 start_variance = config["start_variance"].as<arma::vec>();
+            Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
+            Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
 
-            filter.reset(start_state, arma::diagmat(start_variance), n_particles);
+            filter.set_state(start_state, Eigen::DiagonalMatrix<double, 2, 2>{start_variance}, n_particles);
 
             // Use configuration here from file BallLocalisation.yaml
         });
@@ -63,12 +62,12 @@ namespace localisation {
                 auto curr_time        = NUClear::clock::now();
                 double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
-                filter.timeUpdate(seconds);
+                filter.time(seconds);
 
                 /* Creating ball state vector and covariance matrix for emission */
                 auto ball        = std::make_unique<Ball>();
-                ball->position   = convert(filter.get());
-                ball->covariance = convert(filter.getCovariance());
+                ball->position   = filter.get();
+                ball->covariance = filter.getCovariance();
 
                 if (ball_pos_log) {
                     emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
@@ -87,16 +86,19 @@ namespace localisation {
                     auto curr_time        = NUClear::clock::now();
                     double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
-                    filter.timeUpdate(seconds);
+                    filter.time(seconds);
 
                     /* Now call Measurement Update. Supports multiple measurement methods
                      * and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls.balls[0].measurements) {
-                        filter.measurementUpdate(arma::conv_to<arma::vec>::from(convert(measurement.rBCc)),
-                                                 arma::conv_to<arma::mat>::from(convert(measurement.covariance)),
-                                                 field,
-                                                 convert(balls.Hcw));
+                        /* These parameters must be cast because Eigen doesn't do implicit conversion of float to
+                           double. They must also be wrapped, because Eigen converts to an intermediate type after the
+                           cast and that intermediate type screws up the function call */
+                        filter.measure(Eigen::VectorXd{measurement.rBCc.cast<double>()},
+                                       Eigen::MatrixXd{measurement.covariance.cast<double>()},
+                                       field,
+                                       balls.Hcw);
                     }
                     last_measurement_update_time = curr_time;
                 }

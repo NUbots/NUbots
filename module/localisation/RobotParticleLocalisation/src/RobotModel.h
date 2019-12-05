@@ -20,21 +20,25 @@
 #ifndef MODULES_LOCALISATION_ROBOTMODEL_H
 #define MODULES_LOCALISATION_ROBOTMODEL_H
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <armadillo>
 
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform3D.h"
 
 
 namespace module {
 namespace localisation {
 
+    template <typename Scalar>
     class RobotModel {
     public:
         static constexpr size_t size = 3;
+
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
 
         enum Components : int {
             // Field center in world space
@@ -47,42 +51,52 @@ namespace localisation {
 
         RobotModel() {}
 
-        arma::vec::fixed<RobotModel::size> timeUpdate(const arma::vec::fixed<RobotModel::size>& state, double deltaT);
+        StateVec time(const StateVec& state, double deltaT);
 
-        arma::vec predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
-                                       const arma::vec& actual_position,
-                                       const utility::math::matrix::Transform3D& Hcw,
-                                       const message::vision::Goal::MeasurementType& type,
-                                       const message::support::FieldDescription& fd);
+        Eigen::VectorXd predictedObservation(const StateVec& state,
+                                             const Eigen::VectorXd& actual_position,
+                                             const Eigen::Affine3d& Hcw,
+                                             const message::vision::Goal::MeasurementType& type,
+                                             const message::support::FieldDescription& fd);
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+        StateVec limit(const StateVec& state);
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+        StateMat noise(const Scalar& deltaT);
 
-        arma::mat::fixed<size, size> processNoise();
+        template <typename... Args>
+        Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
 
-        arma::vec3 processNoiseDiagonal;
+            // Our prediction is the first state
+            return Eigen::Matrix<Scalar, 1, 1>(state[kX]);
+        }
+
+        template <typename T, typename U>
+        static auto difference(const T& a, const U& b) {
+            return a - b;
+        }
+
+        Eigen::Vector3d processNoiseDiagonal;
 
         // number and range of reset particles
-        int n_rogues          = 0;
-        arma::vec3 resetRange = {0, 0, 0};
+        int n_rogues               = 0;
+        Eigen::Vector3d resetRange = {0, 0, 0};
 
         // Getters
         int getRogueCount() const {
             return n_rogues;
         }
-        arma::vec getRogueRange() const {
+        Eigen::VectorXd getRogueRange() const {
             return resetRange;
         }
 
-        arma::vec3 getCylindricalPostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                                    const arma::vec3& post_centre,
-                                                    const utility::math::matrix::Transform3D& Hcf,
+        Eigen::Vector3d getCylindricalPostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
+                                                         const Eigen::Vector3d& post_centre,
+                                                         const Eigen::Affine3d& Hcf,
+                                                         const message::support::FieldDescription& fd);
+        Eigen::Vector3d getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
+                                                    const Eigen::Vector3d& post_centre,
+                                                    const Eigen::Affine3d& Hcf,
                                                     const message::support::FieldDescription& fd);
-        arma::vec3 getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                               const arma::vec3& post_centre,
-                                               const utility::math::matrix::Transform3D& Hcf,
-                                               const message::support::FieldDescription& fd);
     };
 }  // namespace localisation
 }  // namespace module

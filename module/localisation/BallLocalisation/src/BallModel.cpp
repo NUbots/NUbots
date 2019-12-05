@@ -22,9 +22,6 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
@@ -32,40 +29,43 @@ namespace localisation {
 
     using message::input::Sensors;
     using message::support::FieldDescription;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::matrix::Transform2D;
-    using utility::math::matrix::Transform3D;
     using ServoID = utility::input::ServoID;
     using utility::math::coordinates::cartesianToSpherical;
 
-    arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, BallModel<Scalar>::size, 1> BallModel<Scalar>::time(
+        const Eigen::Matrix<Scalar, BallModel<Scalar>::size, 1>& state,
+        double /*deltaT*/) {
         return state;
     }
 
-    arma::vec3 BallModel::predictedObservation(const arma::vec::fixed<size>& state,
-                                               const FieldDescription& field,
-                                               const Transform3D& Hcw) const {
+    template <typename Scalar>
+    Eigen::Vector3d BallModel<Scalar>::predictedObservation(
+        const Eigen::Matrix<Scalar, BallModel<Scalar>::size, 1>& state,
+        const FieldDescription& field,
+        const Eigen::Affine3d& Hcw) const {
 
-        arma::vec3 rBWw      = {state[PX], state[PY], field.ball_radius};
-        arma::vec3 rBCc_cart = Hcw.transformPoint(rBWw);
-        arma::vec3 rBCc_sph1 = cartesianToSpherical(rBCc_cart);             // in r,theta,phi
-        arma::vec3 rBCc_sph2 = {rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};  // in roe, theta, phi, where roe is 1/r
+        Eigen::Vector4d rBWw      = {state[PX], state[PY], field.ball_radius, 1.0};
+        rBWw                      = Hcw * rBWw;
+        Eigen::Vector3d rBCc_cart = {rBWw[0], rBWw[1], rBWw[2]};
+        Eigen::Vector3d rBCc_sph1 = cartesianToSpherical(rBCc_cart);             // in r,theta,phi
+        Eigen::Vector3d rBCc_sph2 = {rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};  // in roe, theta, phi, where roe is 1/r
 
         return rBCc_sph2;
     }
 
-    arma::vec BallModel::observationDifference(const arma::vec& measurement, const arma::vec3& rBCc) const {
-
-        return measurement - rBCc;  // not sure this raw delta vector will be what the UKF needs
-    }
-
-    arma::vec::fixed<BallModel::size> BallModel::limitState(const arma::vec::fixed<size>& state) const {
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, BallModel<Scalar>::size, 1> BallModel<Scalar>::limit(
+        const Eigen::Matrix<Scalar, BallModel<Scalar>::size, 1>& state) const {
         // TODO: configure
         return state;
     }
 
-    arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() const {
-        return arma::diagmat(processNoiseDiagonal);
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, BallModel<Scalar>::size, BallModel<Scalar>::size> BallModel<Scalar>::noise(
+        const Scalar& deltaT) {
+        return processNoiseDiagonal.asDiagonal() * deltaT;
     }
+
 }  // namespace localisation
 }  // namespace module

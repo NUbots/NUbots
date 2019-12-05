@@ -20,15 +20,16 @@
 #ifndef MODULE_LOCALISATION_BALLMODEL_H
 #define MODULE_LOCALISATION_BALLMODEL_H
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
-#include "utility/math/matrix/Transform3D.h"
 
 namespace module {
 namespace localisation {
 
+    template <typename Scalar>
     class BallModel {
     public:
         // The indicies for our vector
@@ -37,37 +38,49 @@ namespace localisation {
 
         static constexpr size_t size = 2;
 
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
+
         struct MeasurementType {
             struct BALL {};
         };
 
-        arma::vec2 processNoiseDiagonal;
+        Eigen::Vector2d processNoiseDiagonal;
 
 
-        BallModel() : processNoiseDiagonal(arma::fill::eye) {}  // empty constructor
+        BallModel() : processNoiseDiagonal(Eigen::Vector2d::Identity()) {}  // empty constructor
 
-        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+        StateVec time(const StateVec& state, double deltaT);
 
-        arma::vec3 predictedObservation(const arma::vec::fixed<size>& state,
-                                        const message::support::FieldDescription& field,
-                                        const utility::math::matrix::Transform3D& Hcw) const;
+        Eigen::Vector3d predictedObservation(const StateVec& state,
+                                             const message::support::FieldDescription& field,
+                                             const Eigen::Affine3d& Hcw) const;
 
-        arma::vec observationDifference(const arma::vec& measurement, const arma::vec3& rBCc) const;
+        StateVec limit(const StateVec& state) const;
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
+        StateMat noise(const Scalar& deltaT);
 
-        arma::mat::fixed<size, size> processNoise() const;
+        template <typename... Args>
+        Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
 
+            // Our prediction is the first state
+            return Eigen::Matrix<Scalar, 1, 1>(state[PX]);
+        }
+
+        template <typename T, typename U>
+        static auto difference(const T& a, const U& b) {
+            return a - b;
+        }
 
         // number and range of reset particles
-        int n_rogues          = 10;
-        arma::vec2 resetRange = {10, 10};
+        int n_rogues               = 10;
+        Eigen::Vector2d resetRange = {10, 10};
 
         // Getters
-        int getRogueCount() const {
+        inline int getRogueCount() const {
             return n_rogues;
         }
-        arma::vec getRogueRange() const {
+        Eigen::Vector2d getRogueRange() const {
             return resetRange;
         }
     };
