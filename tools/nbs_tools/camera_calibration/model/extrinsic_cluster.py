@@ -86,7 +86,7 @@ class ExtrinsicCluster(tf.keras.Model):
         return tf.linalg.matmul(tf.linalg.matmul(R_z, R_y), R_x)
 
     def __init__(self, Hpcs, **kwargs):
-        super(ExtrinsicCluster, self).__init__()
+        super(ExtrinsicCluster, self).__init__(**kwargs)
 
         # The first camera is the camera everything else is measured relative to.
         # So whatever transform is required to make this transform identity needs to be applied to every other camera
@@ -98,8 +98,8 @@ class ExtrinsicCluster(tf.keras.Model):
         for i, Hpc in enumerate(Hpcs[1:]):
             Hc_0c_n = tf.linalg.matmul(self.Hc_0p, Hpc)
 
-            t = self.add_weight("t_{}".format(i + 1), shape=(3), initializer="zeros", dtype=tf.float32)
-            r = self.add_weight("r_{}".format(i + 1), shape=(3), initializer="zeros", dtype=tf.float32)
+            t = self.add_weight("t_{}".format(i + 1), shape=(3), initializer="zeros", dtype=self.dtype)
+            r = self.add_weight("r_{}".format(i + 1), shape=(3), initializer="zeros", dtype=self.dtype)
 
             t.assign(Hc_0c_n[0:3, 3])
             r.assign(self.decompose(Hc_0c_n[0:3, 0:3]))
@@ -107,9 +107,9 @@ class ExtrinsicCluster(tf.keras.Model):
             self.translations.append(t)
             self.rotations.append(r)
 
-    def call(self, args, training=False):
+    def call(self, inputs, training=False):
         # Extract the arguments
-        i_0, x_0, i_1, x_1 = args
+        i_0, x_0, i_1, x_1 = inputs
         i_0 = tf.squeeze(i_0, axis=1)
         i_1 = tf.squeeze(i_1, axis=1)
 
@@ -136,35 +136,16 @@ class ExtrinsicCluster(tf.keras.Model):
         # Setup a system of linear equations to solve the points of closest approach on each line
         # https://math.stackexchange.com/questions/1993953/closest-points-between-two-lines
         rhs = p_1 - p_0
-        lhs = tf.stack([v_0, -v_1, v_2], axis=-2)
+        lhs = tf.stack([v_0, -v_1, v_2], axis=-1)
         sols = tf.squeeze(tf.linalg.solve(lhs, tf.expand_dims(rhs, -1)), -1)
-        t_0 = sols[..., 0, tf.newaxis]
-        t_1 = sols[..., 1, tf.newaxis]
+        t_0 = sols[..., 0]
+        t_1 = sols[..., 1]
 
-        # Calculate the angular difference for each point
-        # v_1 . |p_1 - (t_0 * v_0 + p_0)|
-        # v_0 . |p_0 - (t_1 * v_1 + p_1)|
-        # Dihedral angle might be better
-        angle = tf.stack(
-            [
-                tf.reduce_sum(
-                    tf.multiply(
-                        v_1, tf.linalg.normalize(tf.subtract(p_1, tf.add(tf.multiply(v_0, t_0), p_0)), axis=-1)[0],
-                    ),
-                    axis=-1,
-                ),
-                tf.reduce_sum(
-                    tf.multiply(
-                        v_0, tf.linalg.normalize(tf.subtract(p_0, tf.add(tf.multiply(v_1, t_1), p_1)), axis=-1)[0],
-                    ),
-                    axis=-1,
-                ),
-            ],
-            axis=1,
+        dihedral_angle = tf.einsum(
+            "ijkl,ijkl->ijk",
+            tf.linalg.normalize(tf.linalg.cross(p_0 - p_1, v_0), axis=-1)[0],
+            tf.linalg.normalize(tf.linalg.cross(p_0 - p_1, v_1), axis=-1)[0],
         )
 
-        # Calculate the position for each point
-        position = tf.stack([tf.add(p_0, tf.multiply(t_0, v_0)), tf.add(p_1, tf.multiply(t_1, v_1))], axis=1)
-
         # Return this angle error and the position of the point as a single tensor
-        return tf.concat([position, tf.expand_dims(angle, axis=-1)], axis=-1)
+        return tf.stack([t_0, t_1, dihedral_angle], axis=-1)

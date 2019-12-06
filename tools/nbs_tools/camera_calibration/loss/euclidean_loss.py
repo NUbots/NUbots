@@ -6,11 +6,11 @@ import tensorflow as tf
 def euclidean_error(points):
 
     # Vertical lines
-    v = points  # m_v
+    v = tf.dtypes.cast(points, dtype=tf.float64)  # m_v
 
     # Horizontal lines
-    h_1 = tf.transpose(points[:, ::2, :, :], perm=[0, 2, 1, 3])  # m_h1
-    h_2 = tf.transpose(points[:, 1::2, :, :], perm=[0, 2, 1, 3])  # m_h2
+    h_1 = tf.transpose(v[:, ::2, :, :], perm=[0, 2, 1, 3])  # m_h1
+    h_2 = tf.transpose(v[:, 1::2, :, :], perm=[0, 2, 1, 3])  # m_h2
 
     # Get the planes for each of the lines
     vp = tf.linalg.normalize(tf.linalg.cross(v[:, :, 0, :], v[:, :, -1, :]), axis=-1)[0]  # n_kv

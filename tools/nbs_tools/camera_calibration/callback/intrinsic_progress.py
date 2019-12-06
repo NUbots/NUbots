@@ -4,9 +4,9 @@ import tensorflow as tf
 from tqdm import tqdm
 
 
-class EpochProgress(tf.keras.callbacks.Callback):
+class IntrinsicProgress(tf.keras.callbacks.Callback):
     def __init__(self):
-        super(EpochProgress, self).__init__()
+        super(IntrinsicProgress, self).__init__()
         self.progress = tqdm(unit=" epochs", dynamic_ncols=True)
 
     def on_epoch_end(self, epoch, logs):

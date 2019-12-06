@@ -1,3 +1,4 @@
 #!/usr/bin/env python3
 
-from .epoch_progress import EpochProgress
+from .intrinsic_progress import IntrinsicProgress
+from .extrinsic_progress import ExtrinsicProgress

@@ -4,11 +4,11 @@ import tensorflow as tf
 
 
 class Rectilinear(tf.keras.Model):
-    def __init__(self, focal_length, centre, **kwargs):
-        super(Rectilinear, self).__init__()
+    def __init__(self, focal_length, centre, dtype=tf.float64, **kwargs):
+        super(Rectilinear, self).__init__(dtype=dtype)
 
-        self.focal_length = tf.Variable(initial_value=1, dtype=tf.float32)
-        self.centre = tf.Variable(initial_value=[0, 0], dtype=tf.float32)
+        self.focal_length = tf.Variable(initial_value=1, dtype=self.dtype)
+        self.centre = tf.Variable(initial_value=[0, 0], dtype=self.dtype)
 
         self.focal_length.assign(focal_length)
         self.centre.assign(centre)
