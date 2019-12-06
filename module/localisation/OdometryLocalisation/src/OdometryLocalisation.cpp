@@ -38,12 +38,13 @@ namespace localisation {
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
             Eigen::Affine2d Trw = sensors.Htw.projectTo2D();
-            Eigen::Affine2d Twr = Trw.i();
+            Eigen::Affine2d Twr = Trw.inverse();
 
-            Eigen::Affine2d state = localisationOffset.localToWorld(Twr);
+            // Local to world transform
+            Eigen::Affine2d state = Twr * localisationOffset;
 
-            auto field        = std::make_unique<Field>();
-            field->position   = Eigen::Vector3d(state.x(), state.y(), state.angle());
+            auto field      = std::make_unique<Field>();
+            field->position = Eigen::Vector3d(state.translation()(0), state.translation()(1), state.rotation().angle());
             field->covariance = Eigen::Matrix3d::Identity();
 
             emit(std::make_unique<std::vector<Field>>(1, *field));
