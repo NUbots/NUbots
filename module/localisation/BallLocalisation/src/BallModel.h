@@ -25,9 +25,14 @@
 
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
+#include "utility/math/coordinates.h"
 
 namespace module {
 namespace localisation {
+
+    using message::input::Sensors;
+    using message::support::FieldDescription;
+    using utility::math::coordinates::cartesianToSpherical;
 
     template <typename Scalar>
     class BallModel {
@@ -50,15 +55,31 @@ namespace localisation {
 
         BallModel() : processNoiseDiagonal(Eigen::Vector2d::Identity()) {}  // empty constructor
 
-        StateVec time(const StateVec& state, double deltaT);
+        StateVec time(const StateVec& state, double deltaT) {
+            return state;
+        }
 
         Eigen::Vector3d predictedObservation(const StateVec& state,
                                              const message::support::FieldDescription& field,
-                                             const Eigen::Affine3d& Hcw) const;
+                                             const Eigen::Affine3d& Hcw) const {
 
-        StateVec limit(const StateVec& state) const;
+            Eigen::Vector4d rBWw      = {state[PX], state[PY], field.ball_radius, 1.0};
+            rBWw                      = Hcw * rBWw;
+            Eigen::Vector3d rBCc_cart = {rBWw[0], rBWw[1], rBWw[2]};
+            Eigen::Vector3d rBCc_sph1 = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
+            Eigen::Vector3d rBCc_sph2 = {
+                rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};  // in roe, theta, phi, where roe is 1/r
 
-        StateMat noise(const Scalar& deltaT);
+            return rBCc_sph2;
+        }
+
+        StateVec limit(const StateVec& state) const {
+            return state;
+        }
+
+        StateMat noise(const Scalar& deltaT) {
+            return processNoiseDiagonal.asDiagonal() * deltaT;
+        }
 
         template <typename... Args>
         Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
