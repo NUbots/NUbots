@@ -1,16 +1,15 @@
 #ifndef MODULE_LOCALISATION_ODOMETRYLOCALISATION_H
 #define MODULE_LOCALISATION_ODOMETRYLOCALISATION_H
 
+#include <Eigen/Geometry>
 #include <nuclear>
-
-#include "utility/math/matrix/Transform2D.h"
 
 namespace module {
 namespace localisation {
 
     class OdometryLocalisation : public NUClear::Reactor {
     private:
-        utility::math::matrix::Transform2D localisationOffset = {0, 0, 0};
+        Eigen::Affine2d localisationOffset = Eigen::Affine2d::Identity();
 
     public:
         /// @brief Called by the powerplant to build and setup the OdometryLocalisation reactor.
