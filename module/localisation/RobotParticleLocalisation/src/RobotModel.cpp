@@ -19,7 +19,6 @@
 
 #include "RobotModel.h"
 
-#include <armadillo>
 #include <iostream>
 #include <nuclear>
 
@@ -29,7 +28,6 @@
 #include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
 
 
 namespace module {

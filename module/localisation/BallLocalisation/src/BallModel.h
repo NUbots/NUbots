@@ -62,7 +62,6 @@ namespace localisation {
 
         template <typename... Args>
         Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
-
             // Our prediction is the first state
             return Eigen::Matrix<Scalar, 1, 1>(state[PX]);
         }

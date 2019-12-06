@@ -7,7 +7,6 @@
 #include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {

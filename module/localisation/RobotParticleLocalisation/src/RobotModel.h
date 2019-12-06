@@ -22,7 +22,6 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <armadillo>
 
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"

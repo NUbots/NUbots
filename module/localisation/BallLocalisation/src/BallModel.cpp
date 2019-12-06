@@ -22,7 +22,6 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace localisation {
