@@ -31,6 +31,7 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
+#include "utility/math/comparison.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
