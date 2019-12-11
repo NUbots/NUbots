@@ -644,7 +644,7 @@ namespace motion {
             MatrixType Rwf(Hwt.rotation() * Rtf);
 
             // Dot product of foot z (in world space) with world z
-            Scalar alpha = std::acos(Rwf(2, 2));
+            Scalar alpha = std::acos(utility::math::clamp(-1.0, Rwf(2, 2), 1.0));
 
             Eigen::Matrix<Scalar, 3, 1> axis(Rwf.col(2).cross(Eigen::Matrix<Scalar, 3, 1>::UnitZ()).normalized());
 
