@@ -128,8 +128,7 @@ namespace output {
                         msg->format = compressed_fourcc(image.format);
 
                         // Copy across the other attributes
-                        msg->dimensions.x()    = image.dimensions.x();
-                        msg->dimensions.y()    = image.dimensions.y();
+                        msg->dimensions        = image.dimensions;
                         msg->camera_id         = image.camera_id;
                         msg->name              = image.name;
                         msg->timestamp         = image.timestamp;
@@ -137,6 +136,7 @@ namespace output {
                         msg->lens.projection   = int(image.lens.projection);
                         msg->lens.focal_length = image.lens.focal_length;
                         msg->lens.fov          = image.lens.fov;
+                        msg->lens.centre       = image.lens.centre;
 
                         // Emit the compressed image
                         emit(msg);
