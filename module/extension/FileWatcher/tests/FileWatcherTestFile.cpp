@@ -17,15 +17,15 @@
 
 // Uncomment this line when other test files are added
 // #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <fmt/format.h>
+
 #include <catch.hpp>
 #include <filesystem>
-#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <nuclear>
 
 #include "FileWatcher.h"
-
 #include "extension/FileWatch.h"
 
 namespace {
@@ -53,7 +53,9 @@ public:
                 UNSCOPED_INFO("File change event: " << message.path);
                 fileWatchEvents.push_back(message);
 
-                if (fileWatchEvents.size() >= 2) { powerplant.shutdown(); }
+                if (fileWatchEvents.size() >= 2) {
+                    powerplant.shutdown();
+                }
             });
 
         on<Startup>().then([this] { emit(std::make_unique<StartTest>()); });
