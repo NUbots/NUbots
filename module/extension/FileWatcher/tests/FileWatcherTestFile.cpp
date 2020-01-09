@@ -60,6 +60,9 @@ public:
 
         on<Startup>().then([this] { emit(std::make_unique<StartTest>()); });
         on<Trigger<StartTest>, MainThread>().then([this, filePath] {
+            // Delay for a little bit to ensure the system is entirely started
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
             // WHEN the file contents are modified.
             std::ofstream ofs1 = std::ofstream(filePath, std::ofstream::app);
             ofs1 << "Test\n";
