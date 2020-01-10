@@ -76,9 +76,7 @@ foreach(proto ${builtin})
     "${message_binary_include_dir}/${file_we}.py.cpp"
     "${message_binary_include_dir}/${file_we}.h"
     "${message_binary_include_dir}/${file_we}_pb2.py"
-    PROPERTIES
-    COMPILE_FLAGS
-    "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+    PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
   )
 
 endforeach(proto)
@@ -190,11 +188,8 @@ foreach(proto ${protobufs})
     "${outputpath}/${file_we}.h"
     "${outputpath}/${file_we}_pb2.py"
     PROPERTIES
-    GENERATED
-    TRUE
-    # Prevent Effective C++ and unused parameter error checks being performed on generated files.
-    COMPILE_FLAGS
-    "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+      GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated files.
+      COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
   )
 
   # Add the generated files to our list
@@ -251,17 +246,19 @@ if(src)
 
     # Create symlinks to the files
     add_custom_command(
-      TARGET nuclear_message POST_BUILD
+      TARGET nuclear_message
+      POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nuclear_message>
               "${PROJECT_BINARY_DIR}/python/nuclear/${python_module_path}"
       COMMENT "Copying messages lib into python file format"
     )
 
     add_custom_command(
-      TARGET nuclear_message POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
-              "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
-      DEPENDS "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
+      TARGET nuclear_message
+      POST_BUILD
+      COMMAND
+        ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
+        "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py" DEPENDS "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
       COMMENT "Copying nuclear.py to python build directory"
     )
 
