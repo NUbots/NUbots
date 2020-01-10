@@ -1,8 +1,13 @@
 #ifndef MODULE_INPUT_CAMERA_SETTINGS_H
 #define MODULE_INPUT_CAMERA_SETTINGS_H
 
+#include <fmt/format.h>
+
+#include <stdexcept>
+#include <string>
+
 extern "C" {
-#include <aravis-0.6/arv.h>
+#include <aravis-0.8/arv.h>
 }
 
 namespace module {

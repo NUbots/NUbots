@@ -22,12 +22,14 @@
  */
 
 #include "bayer.h"
+
 #include <climits>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+
 #include "utility/vision/fourcc.h"
 
 namespace module {

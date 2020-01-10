@@ -8,6 +8,7 @@ extern "C" {
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <mutex>
+
 #include "CameraContext.h"
 #include "extension/Configuration.h"
 

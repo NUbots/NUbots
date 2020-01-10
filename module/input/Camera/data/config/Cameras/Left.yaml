@@ -1,17 +1,5 @@
 buffer_count: 4 # The number of software buffers to use.
 
-lens:
-  # focal_length_in_pixels = camera_focal_length / camera_pixel_size = 1.98mm / 4.8um
-  projection: EQUIDISTANT
-  focal_length: 412.507218876330336
-  centre: [0, 0]
-  fov: 3.14
-  Hcp:
-    - [1.0, 0.0, 0.0, 0.0]
-    - [0.0, 1.0, 0.0, 0.0]
-    - [0.0, 0.0, 1.0, 0.0]
-    - [0.0, 0.0, 0.0, 1.0]
-
 settings:
   PixelFormat: BayerRG8
   Width: 1280
@@ -20,4 +8,4 @@ settings:
   OffsetY: 0
   ExposureAuto: Continuous
   GainAuto: Continuous
-  WhiteBalanceAuto: Continuous
+  BalanceWhiteAuto: Continuous

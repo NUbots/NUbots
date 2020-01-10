@@ -1,11 +1,13 @@
 #include "Camera.h"
 
 extern "C" {
-#include <aravis-0.6/arv.h>
+#include <aravis-0.8/arv.h>
 }
 
 #include <fmt/format.h>
+
 #include <cmath>
+
 #include "description_to_fourcc.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
@@ -14,6 +16,7 @@ extern "C" {
 #include "utility/input/ServoID.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
+#include "utility/vision/projection.h"
 
 namespace module {
 namespace input {
@@ -100,27 +103,16 @@ namespace input {
                                 fmt::format("Failed to create stream for {} camera ({})", name, device_description));
                         }
 
-                        uint32_t fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
-
-                        // Lens parameters
-                        Image::Lens::Projection lens_projection = config["lens"]["projection"].as<std::string>();
-                        float lens_focal_length                 = config["lens"]["focal_length"].as<Expression>();
-                        float lens_fov                          = config["lens"]["fov"].as<Expression>();
-                        Eigen::Vector2f lens_centre             = config["lens"]["centre"].as<Expression>();
-                        Eigen::Matrix4d Hcp                     = config["lens"]["Hcp"].as<Expression>();
-                        Image::Lens lens{lens_projection, lens_focal_length, lens_fov, lens_centre};
-
-
                         // Add camera to list.
                         it = cameras
                                  .insert(std::make_pair(serial_number,
                                                         CameraContext{
                                                             *this,
                                                             name,
-                                                            fourcc,
+                                                            0,  // fourcc is set later
                                                             num_cameras++,
-                                                            lens,
-                                                            Eigen::Affine3d(Hcp),
+                                                            Image::Lens(),      // Lens is constructed in settings
+                                                            Eigen::Affine3d(),  // Hpc is set in settings
                                                             camera,
                                                             stream,
                                                             CameraContext::TimeCorrection(),
@@ -142,9 +134,10 @@ namespace input {
              *****************************************************************************/
 
             // Update settings on the camera
-            const auto& name = it->second.name;
-            auto& cam        = it->second.camera;
-            auto& stream     = it->second.stream;
+            auto& context    = it->second;
+            const auto& name = context.name;
+            auto& cam        = context.camera;
+            auto& stream     = context.stream;
             auto device      = arv_camera_get_device(cam.get());
 
             // Stop the video stream so we can apply the settings
@@ -152,12 +145,75 @@ namespace input {
             arv_stream_set_emit_signals(stream.get(), false);
 
             // Synchronise the clocks
-            it->second.time = sync_clocks(device);
+            context.time = sync_clocks(device);
+
+            // Get the fourcc code from the pixel format
+            context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
+
+            // Load Hpc from configuration
+            context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
+
+            // Apply image offsets to lens_centre, optical axis:
+            GError* error  = nullptr;
+            int full_width = arv_device_get_integer_feature_value(device, "WidthMax", &error);
+            if (error) {
+                g_error_free(error);
+                error = nullptr;
+            }
+            int full_height = arv_device_get_integer_feature_value(device, "HeightMax", &error);
+            if (error) {
+                g_error_free(error);
+                error = nullptr;
+            }
+            log<NUClear::DEBUG>(fmt::format("Max. resolution: {} by {} on {} camera", full_width, full_height, name));
+
+            int offset_x = config["settings"]["OffsetX"].as<Expression>();
+            int offset_y = config["settings"]["OffsetY"].as<Expression>();
+            int width    = config["settings"]["Width"].as<Expression>();
+            int height   = config["settings"]["Height"].as<Expression>();
+
+            // Set the lens paramters from configuration
+            context.lens = Image::Lens{config["lens"]["projection"].as<std::string>(),
+                                       float(config["lens"]["focal_length"].as<Expression>() * full_width / width),
+                                       float(config["lens"]["fov"].as<Expression>()),
+                                       ((Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width)
+                                        + Eigen::Vector2f(offset_x - (full_width - width - offset_x),
+                                                          offset_y - (full_height - height - offset_y))
+                                              * 0.5)
+                                           / width};
+
+            log<NUClear::DEBUG>(fmt::format("Lens Centre: [{} , {}] on {} camera",
+                                            config["lens"]["centre"][0].as<double>(),
+                                            config["lens"]["centre"][1].as<double>(),
+                                            name));
+            log<NUClear::DEBUG>(fmt::format(
+                "Lens Centre: [{} , {}] on {} camera", context.lens.centre[0], context.lens.centre[1], name));
+
+
+            // If the lens fov was auto we need to correct it
+            if (!std::isfinite(context.lens.fov)) {
+                double a = height / width;
+                std::array<double, 4> options{
+                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
+
+                context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
+                log<NUClear::DEBUG>(fmt::format("Calculated fov for {} camera as {}", name, context.lens.fov));
+            }
+
+            // Apply the region to the camera
+            arv_camera_set_region(cam.get(), offset_x, offset_y, width, height);
 
             // Go through our settings and apply them to the camera
             for (const auto& cfg : config["settings"].config) {
-
                 std::string key = cfg.first.as<std::string>();
+
+                // Skip the region keys as we handle them above
+                if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY") {
+                    continue;
+                };
 
                 // Get the feature node
                 auto feature = arv_device_get_feature(device, key.c_str());
@@ -319,7 +375,7 @@ namespace input {
 
                         // 100 frames have been over time recently
                         if (timesync.drift.over_time_count > MAX_COUNT_OVER_TIME_FRAMES) {
-                            context->reactor.log<NUClear::INFO>(fmt::format(
+                            reactor.log<NUClear::INFO>(fmt::format(
                                 "Clock drift for {} camera exceeded threshold ({:.1f}ms > {:.1f}ms), recalibrating",
                                 context->name,
                                 std::abs(total_cam - total_local) / 1e6,
@@ -351,15 +407,17 @@ namespace input {
                 /* Mutex Scope */ {
                     std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
 
-                    Eigen::Affine3d Hcp = context->Hcp;
-                    Eigen::Affine3d Hpw = Eigen::Affine3d::Identity();
-
-                    if (!reactor.Hpws.empty()) {
+                    Eigen::Affine3d Hpc = context->Hpc;
+                    Eigen::Affine3d Hpw;
+                    if (reactor.Hpws.empty()) {
+                        Hpw = Eigen::Affine3d::Identity();
+                    }
+                    else {
                         // Find the first time that is not less than the target time
-                        auto Hpw_it = std::lower_bound(
-                            reactor.Hpws.begin(), reactor.Hpws.end(), msg->timestamp, [](const auto& a, const auto& b) {
-                                return a.first < b;
-                            });
+                        auto Hpw_it = std::lower_bound(reactor.Hpws.begin(),
+                                                       reactor.Hpws.end(),
+                                                       std::make_pair(msg->timestamp, Eigen::Affine3d::Identity()),
+                                                       [](const auto& a, const auto& b) { return a.first < b.first; });
 
                         if (Hpw_it == reactor.Hpws.end()) {
                             // Image is newer than most recent sensors
@@ -378,13 +436,13 @@ namespace input {
                         }
                     }
 
-                    Hcw = Hcp * Hpw;
+                    Hcw = Hpc.inverse() * Hpw;  // Transform: From world to platform to camera to image.
                 }
 
                 msg->lens = context->lens;
                 msg->Hcw  = Hcw.matrix();
 
-                context->reactor.emit(msg);
+                reactor.emit(msg);
 
                 // Put the buffer back on the queue
                 arv_stream_push_buffer(stream, buffer);

@@ -6,10 +6,11 @@
 #include <memory>
 #include <nuclear>
 #include <string>
+
 #include "message/input/Image.h"
 
 extern "C" {
-#include <aravis-0.6/arv.h>
+#include <aravis-0.8/arv.h>
 }
 
 namespace module {
@@ -25,7 +26,7 @@ namespace input {
         uint32_t camera_id;
         message::input::Image::Lens lens;
         // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached to
-        Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hcp;
+        Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hpc;
         std::shared_ptr<ArvCamera> camera;
         std::shared_ptr<ArvStream> stream;
 
