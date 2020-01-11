@@ -1,10 +1,10 @@
 import { action } from 'mobx'
-import { Matrix4 } from 'three'
-import { Quaternion } from 'three'
-import { Vector3 } from 'three'
+import * as THREE from 'three'
 
 import { message } from '../../../shared/proto/messages'
 import { Imat4 } from '../../../shared/proto/messages'
+import { Quaternion } from '../../math/quaternion'
+import { Vector3 } from '../../math/vector3'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
@@ -32,9 +32,9 @@ export class LocalisationNetwork {
   private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
     const robot = LocalisationRobotModel.of(robotModel)
 
-    const { translation: rWTt, rotation: Rwt } = decompose(new Matrix4().getInverse(fromProtoMat44(sensors.Htw!)))
-    robot.rWTt.set(rWTt.x, rWTt.y, rWTt.z)
-    robot.Rwt.set(Rwt.x, Rwt.y, Rwt.z, Rwt.w)
+    const { translation: rWTt, rotation: Rwt } = decompose(new THREE.Matrix4().getInverse(fromProtoMat44(sensors.Htw!)))
+    robot.rWTt = new Vector3(rWTt.x, rWTt.y, rWTt.z)
+    robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w)
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!
     robot.motors.leftShoulderPitch.angle = sensors.servo[1].presentPosition!
@@ -59,16 +59,16 @@ export class LocalisationNetwork {
   }
 }
 
-function decompose(m: Matrix4): { translation: Vector3, rotation: Quaternion, scale: Vector3 } {
-  const translation = new Vector3()
-  const rotation = new Quaternion()
-  const scale = new Vector3()
+function decompose(m: THREE.Matrix4): { translation: THREE.Vector3, rotation: THREE.Quaternion, scale: THREE.Vector3 } {
+  const translation = new THREE.Vector3()
+  const rotation = new THREE.Quaternion()
+  const scale = new THREE.Vector3()
   m.decompose(translation, rotation, scale)
   return { translation, rotation, scale }
 }
 
-function fromProtoMat44(m: Imat4): Matrix4 {
-  return new Matrix4().set(
+function fromProtoMat44(m: Imat4): THREE.Matrix4 {
+  return new THREE.Matrix4().set(
     m!.x!.x!, m!.y!.x!, m!.z!.x!, m!.t!.x!,
     m!.x!.y!, m!.y!.y!, m!.z!.y!, m!.t!.y!,
     m!.x!.z!, m!.y!.z!, m!.z!.z!, m!.t!.z!,

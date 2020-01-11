@@ -26,7 +26,7 @@ import { renderText } from './text'
 export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Group | Shape<Geometry>, world: Transform) {
 
   if (obj instanceof Group) {
-    const objWorld = world.clone().then(obj.transform)
+    const objWorld = world.then(obj.transform)
 
     for (const o of obj.children) {
       ctx.save()

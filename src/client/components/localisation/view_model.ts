@@ -4,9 +4,9 @@ import { PointLight } from 'three'
 import { Object3D } from 'three'
 
 import { Vector3 } from '../../math/vector3'
+import { stage } from '../three/builders'
 import { scene } from '../three/builders'
 import { perspectiveCamera } from '../three/builders'
-import { Stage } from '../three/three'
 import { Canvas } from '../three/three'
 
 import { FieldViewModel } from './field/view_model'
@@ -25,10 +25,7 @@ export class LocalisationViewModel {
     return new LocalisationViewModel(canvas, model)
   }
 
-  @computed
-  get stage(): Stage {
-    return { camera: this.camera.get(), scene: this.scene.get() }
-  }
+  readonly stage = stage(() => ({ camera: this.camera.get(), scene: this.scene.get() }))
 
   private readonly camera = perspectiveCamera(() => ({
     fov: 75,

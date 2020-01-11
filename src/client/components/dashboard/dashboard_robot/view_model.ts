@@ -108,7 +108,7 @@ export class DashboardRobotViewModel {
     return Shape.of(
       LineGeometry.of({
         origin: Vector2.from(this.model.robotPosition),
-        target: this.model.ballPosition.clone(),
+        target: this.model.ballPosition,
       }),
       LineAppearance.of({
         stroke: { width: 0.025, color: this.model.ballSightColor },
@@ -119,14 +119,14 @@ export class DashboardRobotViewModel {
   @computed
   private get kickTarget() {
     const origin = this.model.ballPosition
-    const difference = this.model.kickTarget.clone().subtract(origin)
+    const difference = this.model.kickTarget.subtract(origin)
     return Shape.of(
       ArrowGeometry.of({
-        direction: difference.clone().normalize(),
+        direction: difference.normalize(),
         headLength: 0.3,
         headWidth: 0.15,
         length: difference.length,
-        origin: origin.clone(),
+        origin,
         width: 0.025,
       }),
       BasicAppearance.of({

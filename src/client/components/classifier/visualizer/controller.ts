@@ -61,7 +61,7 @@ export class Dragger {
     return new Dragger(
       model,
       from,
-      from.clone(),
+      from,
       { azimuth: model.camera.azimuth, elevation: model.camera.elevation },
     )
   }
@@ -78,7 +78,7 @@ export class Dragger {
   }
 
   private diff(): Vector2 {
-    return this._to.clone().subtract(this.from).multiplyScalar(0.5 * DegToRad)
+    return this._to.subtract(this.from).multiplyScalar(0.5 * DegToRad)
   }
 }
 

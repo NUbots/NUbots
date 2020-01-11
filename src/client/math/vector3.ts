@@ -1,15 +1,9 @@
-import { computed } from 'mobx'
-import { observable } from 'mobx'
-
 export class Vector3 {
-  @observable x: number
-  @observable y: number
-  @observable z: number
-
-  constructor(x: number, y: number, z: number) {
-    this.x = x
-    this.y = y
-    this.z = z
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly z: number,
+  ) {
   }
 
   static of() {
@@ -27,26 +21,8 @@ export class Vector3 {
     return new Vector3(scalar, scalar, scalar)
   }
 
-  @computed get length(): number {
+  get length(): number {
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
-  }
-
-  set(x: number, y: number, z: number): Vector3 {
-    this.x = x
-    this.y = y
-    this.z = z
-    return this
-  }
-
-  clone(): Vector3 {
-    return new Vector3(this.x, this.y, this.z)
-  }
-
-  copy(v: Vector3): Vector3 {
-    this.x = v.x
-    this.y = v.y
-    this.z = v.z
-    return this
   }
 
   normalize(): Vector3 {
@@ -54,38 +30,24 @@ export class Vector3 {
   }
 
   multiplyScalar(scalar: number): Vector3 {
-    this.x *= scalar
-    this.y *= scalar
-    this.z *= scalar
-    return this
+    return new Vector3(this.x * scalar, this.y * scalar, this.z * scalar)
   }
 
   divideScalar(scalar: number): Vector3 {
     if (scalar !== 0) {
       const invScalar = 1 / scalar
-      this.x *= invScalar
-      this.y *= invScalar
-      this.z *= invScalar
+      return new Vector3(this.x * invScalar, this.y * invScalar, this.z * invScalar)
     } else {
-      this.x = 0
-      this.y = 0
-      this.z = 0
+      return new Vector3(0, 0, 0) // TODO (Annable): This should throw
     }
-    return this
   }
 
   add(v: Vector3): Vector3 {
-    this.x += v.x
-    this.y += v.y
-    this.z += v.z
-    return this
+    return new Vector3(this.x + v.x, this.y + v.y, this.z + v.z)
   }
 
   subtract(v: Vector3): Vector3 {
-    this.x -= v.x
-    this.y -= v.y
-    this.z -= v.z
-    return this
+    return new Vector3(this.x - v.x, this.y - v.y, this.z - v.z)
   }
 }
 

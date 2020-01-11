@@ -13,6 +13,7 @@ import { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
 
 import { Transform } from '../math/transform'
+import { Vector2 } from '../math/vector2'
 
 import { pixiObject } from './pixi/rendering'
 import { RendererProps } from './renderer_props'
@@ -98,21 +99,17 @@ export class PixiRenderer extends Component<RendererProps> {
     this.renderer!.resize(width, height)
 
     // Translate to the center
-    this.resolution.translate.x = -width * 0.5
-    this.resolution.translate.y = -height * 0.5
+    const translate = Vector2.of(-width * 0.5, -height * 0.5)
 
     // If we have an aspect ratio, use it to scale the canvas to unit size
     if (this.props.aspectRatio !== undefined) {
 
       const canvasAspect = width / height
       const scale = canvasAspect < this.props.aspectRatio ? 1 / width : 1 / (height * this.props.aspectRatio)
-
       // Scale to fit
-      this.resolution.scale.x = scale
-      this.resolution.scale.y = scale
+      this.resolution = Transform.of({ scale: { x: scale, y: scale }, translate })
     } else {
-      this.resolution.scale.x = 1 / width
-      this.resolution.scale.y = 1 / height
+      this.resolution = Transform.of({ scale: { x: 1 / width, y: 1 / height }, translate })
     }
   }
 }

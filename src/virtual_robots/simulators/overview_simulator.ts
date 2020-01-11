@@ -62,7 +62,7 @@ export class OverviewSimulator extends Simulator {
 
     const ballPosition = this.figureEight(t, fieldLength / 4, fieldWidth / 4)
 
-    const robotHeading = ballPosition.clone().subtract(robotPosition)
+    const robotHeading = ballPosition.subtract(robotPosition)
     // TODO (Annable): Add helper for getting the angle for a unit vector.
     const robotAngle = Math.atan2(robotHeading.y, robotHeading.x)
 

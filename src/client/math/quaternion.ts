@@ -1,27 +1,13 @@
-import { observable } from 'mobx'
-
 export class Quaternion {
-  @observable x: number
-  @observable y: number
-  @observable z: number
-  @observable w: number
-
-  constructor(x: number, y: number, z: number, w: number) {
-    this.x = x
-    this.y = y
-    this.z = z
-    this.w = w
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly z: number,
+    readonly w: number,
+  ) {
   }
 
   static of() {
     return new Quaternion(0, 0, 0, 1)
-  }
-
-  set(x: number, y: number, z: number, w: number): Quaternion {
-    this.x = x
-    this.y = y
-    this.z = z
-    this.w = w
-    return this
   }
 }

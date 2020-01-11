@@ -44,7 +44,7 @@ export class LocalisationController {
   onHawkEyeClick(model: LocalisationModel) {
     model.controls.pitch = -Math.PI / 2
     model.controls.yaw = Math.PI / 2
-    model.camera.position.set(0, 0, 5)
+    model.camera.position = new Vector3(0, 0, 5)
     model.viewMode = ViewMode.FreeCamera
     this.updatePosition(model)
   }
@@ -200,7 +200,7 @@ export class LocalisationController {
     movement.normalize()
     movement.multiplyScalar(actualSpeed)
 
-    model.camera.position.add(new Vector3(movement.x, movement.y, movement.z))
+    model.camera.position = model.camera.position.add(new Vector3(movement.x, movement.y, movement.z))
   }
 
   private updatePositionFirstPerson(model: LocalisationModel) {
@@ -217,10 +217,9 @@ export class LocalisationController {
 
     // This camera position hack will not work with orientation/head movement.
     // TODO (Annable): Sync camera position/rotation properly using kinematic chain.
-    model.camera.position.set(target.rWTt.x, target.rWTt.y, target.rWTt.z + 0.15)
+    model.camera.position = new Vector3(target.rWTt.x, target.rWTt.y, target.rWTt.z + 0.15)
     const Rwt = new THREE.Quaternion(target.Rwt.x, target.Rwt.y, target.Rwt.z, target.Rwt.w)
-    const heading = new THREE.Euler().setFromQuaternion(Rwt).z
-    model.camera.yaw = heading// - Math.PI // TODO (Annable): Find why offset by PI is needed.
+    model.camera.yaw = new THREE.Euler().setFromQuaternion(Rwt).z
     model.camera.pitch = 0
   }
 
@@ -247,9 +246,7 @@ export class LocalisationController {
       Math.sin(pitch) * Math.sin(yaw),
       Math.cos(pitch),
     ).multiplyScalar(distance)
-    const cameraPosition = targetPosition.clone().add(offset)
-
-    model.camera.position.copy(cameraPosition)
+    model.camera.position = targetPosition.add(offset)
     model.camera.pitch = pitch - Math.PI / 2
     model.camera.yaw = yaw + Math.PI
   }

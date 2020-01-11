@@ -68,8 +68,8 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
     const n = this.model.boxes.length
     this.model.boxes.forEach((box, i) => {
       const position = Vector2.fromPolar(1, i * 2 * Math.PI / n + t)
-      box.position.set(position.x, position.y, 0)
-      box.rotation.set(Math.cos(3 * t + i), Math.cos(5 * t + i), Math.cos(7 * t + i))
+      box.position = new Vector3(position.x, position.y, 0)
+      box.rotation = new Vector3(Math.cos(3 * t + i), Math.cos(5 * t + i), Math.cos(7 * t + i))
     })
   }
 }
