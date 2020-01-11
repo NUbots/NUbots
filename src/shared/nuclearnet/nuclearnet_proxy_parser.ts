@@ -22,6 +22,7 @@ export class Encoder {
   encode(packet: Packet, callback: (wire: any[]) => void) {
     switch (packet.type) {
       case TYPES.EVENT:
+      case TYPES.BINARY_EVENT:
 
         const { nsp, data: [eventName] } = packet
 
