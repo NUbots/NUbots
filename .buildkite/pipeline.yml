@@ -7,6 +7,7 @@ steps:
       - docker-login#v2.0.1:
           username: nubotsdocker
       - docker-compose#v3.1.0:
+          config: .buildkite/docker-compose.yml
           push:
             - generic:index.docker.io/nubots/nubots:generic
             - nuc7i7bnh:index.docker.io/nubots/nubots:nuc7i7bnh
