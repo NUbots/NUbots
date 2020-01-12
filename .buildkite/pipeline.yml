@@ -9,8 +9,8 @@ steps:
       - docker-compose#v3.1.0:
           config: .buildkite/docker-compose.yml
           push:
-            - generic:index.docker.io/nubots/nubots:generic
-            - nuc7i7bnh:index.docker.io/nubots/nubots:nuc7i7bnh
+            - generic:nubots/nubots:generic
+            - nuc7i7bnh:nubots/nubots:nuc7i7bnh
   # Build for the NUC
   - label: "Build for NUC"
     command: "./b configure -- -DBUILD_TESTS=ON && ./b build && ./b build test"
