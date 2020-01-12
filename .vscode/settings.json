@@ -11,10 +11,6 @@
     ],
     "python.formatting.provider": "black",
     "files.associations": {
-        "*.role": "cmake",
-        "thread": "cpp",
-        "random": "cpp",
-        "boundingbox": "cpp",
-        "boundingsphere": "cpp"
+        "*.role": "cmake"
     }
 }
