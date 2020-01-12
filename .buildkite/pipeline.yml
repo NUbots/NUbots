@@ -1,5 +1,7 @@
 steps:
   # Push up new images to DockerHub when they get to master
+  # Makes development faster as you can just pull the images rather than building them yourself
+  # If you make modifications to the Dockerfile it should resume from the common point in master
   - label: ":docker: Push new images"
     branches: master
     agents:
@@ -7,6 +9,7 @@ steps:
     plugins:
       - docker-login#v2.0.1:
           username: nubotsdocker
+          # Dockerhub password is loaded from the environment hook via DOCKER_LOGIN_PASSWORD environment variable
       - docker-compose#v3.1.0:
           config: .buildkite/docker-compose.yml
           push:
@@ -18,6 +21,7 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: nubots/nubots:nuc7i7bnh
           run: nuc7i7bnh
           workdir: /home/nubots/NUbots/
 
@@ -27,6 +31,7 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: nubots/nubots:generic
           run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate CMake formatting"
@@ -34,6 +39,7 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: nubots/nubots:generic
           run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate Python formatting"
@@ -41,5 +47,6 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: nubots/nubots:generic
           run: generic
           workdir: /home/nubots/NUbots/
