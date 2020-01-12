@@ -1,4 +1,15 @@
 steps:
+  # Push up new images to DockerHub when they get to master
+  - label: ":docker: Push new images"
+    agents:
+      dockerhub: true
+    plugins:
+      - docker-login#v2.0.1:
+          username: nubotsdocker
+      - docker-compose#v3.1.0:
+          push:
+            - generic:index.docker.io/nubots/nubots:generic
+            - nuc7i7bnh:index.docker.io/nubots/nubots:nuc7i7bnh
   # Build for the NUC
   - label: "Build for NUC"
     command: "./b configure -- -DBUILD_TESTS=ON && ./b build && ./b build test"
