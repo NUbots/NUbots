@@ -21,6 +21,7 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: nuc7i7bnh_image
           run: nuc7i7bnh
           workdir: /home/nubots/NUbots/
 
@@ -30,6 +31,7 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate CMake formatting"
@@ -37,6 +39,7 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate Python formatting"
@@ -44,5 +47,6 @@ steps:
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
+          pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
