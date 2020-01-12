@@ -1,6 +1,7 @@
 steps:
   # Push up new images to DockerHub when they get to master
   - label: ":docker: Push new images"
+    # branches: master Uncomment me when it works!
     agents:
       dockerhub: true
     plugins:
