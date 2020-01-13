@@ -8,21 +8,21 @@ import multiprocessing
 import os
 import pickle
 
+from tqdm import tqdm, trange
+
+import b
 import cv2
 import numpy as np
 import tensorflow as tf
 from ruamel.yaml import YAML
-from tqdm import tqdm, trange
-
-import b
 
 from .camera_calibration.callback import ExtrinsicProgress, IntrinsicProgress
 from .camera_calibration.grid_distance import grid_distance
 from .camera_calibration.loss import euclidean_error, euclidean_loss, extrinsic_loss
 from .camera_calibration.metric import *
 from .camera_calibration.model import Equidistant, Equisolid, ExtrinsicCluster, Rectilinear
-from .nbs import Decoder
 from .images import decode_image, fourcc
+from .nbs import Decoder
 
 # The dtype we will use to calibrate, 64 bit floats tend to be a little more numerically stable
 TF_CALIBRATION_DTYPE = tf.float64

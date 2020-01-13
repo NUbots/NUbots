@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import tensorflow as tf
 from tqdm import tqdm
+
+import tensorflow as tf
 
 
 class IntrinsicProgress(tf.keras.callbacks.Callback):

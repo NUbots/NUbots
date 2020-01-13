@@ -2,8 +2,8 @@
 
 import math
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from ..loss import euclidean_error
 

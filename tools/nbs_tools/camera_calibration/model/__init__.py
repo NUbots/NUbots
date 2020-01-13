@@ -2,5 +2,5 @@
 
 from .equidistant import Equidistant
 from .equisolid import Equisolid
-from .rectilinear import Rectilinear
 from .extrinsic_cluster import ExtrinsicCluster
+from .rectilinear import Rectilinear
