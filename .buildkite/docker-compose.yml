@@ -1,5 +1,7 @@
 version: "3.2"
 services:
+  generic_image:
+    image: nubots/nubots:generic
   generic:
     build:
       context: ./../docker
@@ -11,6 +13,8 @@ services:
         target: /home/nubots/NUbots
         read_only: true
         consistency: cached
+  nuc7i7bnh_image:
+    image: nubots/nubots:nuc7i7bnh
   nuc7i7bnh:
     build:
       context: ./../docker
