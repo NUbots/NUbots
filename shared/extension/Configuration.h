@@ -207,8 +207,7 @@ namespace dsl {
         struct DSLProxy<::extension::Configuration> {
             template <typename DSL>
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
-                auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED | ::extension::FileWatch::CREATED
-                             | ::extension::FileWatch::UPDATED | ::extension::FileWatch::MOVED_TO;
+                auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
                 char hostname[255];
