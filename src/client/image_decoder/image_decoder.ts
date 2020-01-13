@@ -33,33 +33,37 @@ export interface Image {
 }
 
 export class ImageDecoder {
-
   private atom: IAtom
 
   // These two functions are used to cache/destroy textures as they are created
   private cache: {
-    get(): Texture
-    destroy(): void
+    get(): Texture;
+    destroy(): void;
   }
 
   // Variables needed by the bayer decoder
-  private bayerDecoder?: { scene: Scene, camera: Camera, geometry: BufferGeometry, shader: RawShaderMaterial }
+  private bayerDecoder?: {
+    scene: Scene;
+    camera: Camera;
+    geometry: BufferGeometry;
+    shader: RawShaderMaterial;
+  }
 
   constructor(private renderer: WebGLRenderer) {
-
-    this.atom = createAtom('ImageDecoder', () => {
-    }, this.destroy)
+    this.atom = createAtom('ImageDecoder', () => {}, this.destroy)
 
     this.cache = {
       get: () => new Texture(),
-      destroy: () => {
-      },
+      destroy: () => {},
     }
   }
 
-  static of = createTransformer((renderer: WebGLRenderer) => {
-    return new ImageDecoder(renderer)
-  }, decoder => decoder && decoder.destroy())
+  static of = createTransformer(
+    (renderer: WebGLRenderer) => {
+      return new ImageDecoder(renderer)
+    },
+    decoder => decoder && decoder.destroy(),
+  )
 
   private destroy = () => {
     this.cache.destroy()
@@ -84,6 +88,14 @@ export class ImageDecoder {
     switch (image.format) {
       case fourcc('JPEG'):
         return this.jpeg(image)
+      case fourcc('JPBG'):
+        return this.permuted_bayer(image, [1, 1], this.mosaic_size('JPBG'))
+      case fourcc('JPRG'):
+        return this.permuted_bayer(image, [0, 0], this.mosaic_size('JPRG'))
+      case fourcc('JPGR'):
+        return this.permuted_bayer(image, [1, 0], this.mosaic_size('JPGR'))
+      case fourcc('JPGB'):
+        return this.permuted_bayer(image, [0, 1], this.mosaic_size('JPGB'))
       case fourcc('GRBG'):
         return this.bayer(image, [1, 0])
       case fourcc('RGGB'):
@@ -96,7 +108,18 @@ export class ImageDecoder {
         return this.dataTexture(image, RGBFormat)
       case fourcc('GREY'):
       case fourcc('GRAY'):
+      case fourcc('Y8  '):
         return this.dataTexture(image, LuminanceFormat)
+      case fourcc('PJBG'):
+        return this.permuted_bayer(image, [1, 1], this.mosaic_size('PJBG'))
+      case fourcc('PJRG'):
+        return this.permuted_bayer(image, [0, 0], this.mosaic_size('PJRG'))
+      case fourcc('PJGR'):
+        return this.permuted_bayer(image, [1, 0], this.mosaic_size('PJGR'))
+      case fourcc('PJGB'):
+        return this.permuted_bayer(image, [0, 1], this.mosaic_size('PJGB'))
+      case fourcc('PJPG'):
+      case fourcc('PY8 '):
       default:
         throw Error(`Unsupported image format ${fourccToString(image.format)}`)
     }
@@ -110,19 +133,51 @@ export class ImageDecoder {
     }
   }
 
-  private bayer(image: Image, firstRed: [number, number]): void {
+  private mosaic_size(format: string): number {
+    switch (fourcc(format)) {
+      case fourcc('BGGR'): // Colour Bayer
+      case fourcc('RGGB'): // Colour Bayer
+      case fourcc('GRBG'): // Colour Bayer
+      case fourcc('GBRG'): // Colour Bayer
+        return 1 // One value per width/height
 
+      case fourcc('JPBG'): // Permuted Colour Bayer
+      case fourcc('JPRG'): // Permuted Colour Bayer
+      case fourcc('JPGR'): // Permuted Colour Bayer
+      case fourcc('JPGB'): // Permuted Colour Bayer
+      case fourcc('PJPG'): // Permuted Polarized Monochrome
+      case fourcc('PY8 '): // Polarized Monochrome
+        return 2 // Two values per width/height
+
+      case fourcc('PBG8'): // Polarized Colour Bayer
+      case fourcc('PRG8'): // Polarized Colour Bayer
+      case fourcc('PGR8'): // Polarized Colour Bayer
+      case fourcc('PGB8'): // Polarized Colour Bayer
+      case fourcc('PJBG'): // Permuted Polarized Colour
+      case fourcc('PJRG'): // Permuted Polarized Colour
+      case fourcc('PJGR'): // Permuted Polarized Colour
+      case fourcc('PJGB'): // Permuted Polarized Colour
+        return 4 // Four values per width/height
+
+      default:
+        return 0
+    }
+  }
+
+  private bayer(image: Image, firstRed: [number, number]): void {
     // If we have never decoded bayer with this decoder before we need to make our threejs objects
-    this.bayerDecoder = {
-      scene: new Scene(),
-      camera: new OrthographicCamera(-1, 1, 1, -1, 0, 1),
-      geometry: new PlaneBufferGeometry(2, 2),
-      shader: new RawShaderMaterial({
-        vertexShader: bayerVertexShader,
-        fragmentShader: bayerFragmentShader,
-        depthTest: false,
-        depthWrite: false,
-      }),
+    if (!this.bayerDecoder) {
+      this.bayerDecoder = {
+        scene: new Scene(),
+        camera: new OrthographicCamera(-1, 1, 1, -1, 0, 1),
+        geometry: new PlaneBufferGeometry(2, 2),
+        shader: new RawShaderMaterial({
+          vertexShader: bayerVertexShader,
+          fragmentShader: bayerFragmentShader,
+          depthTest: false,
+          depthWrite: false,
+        }),
+      }
     }
 
     const { width, height } = image
@@ -130,60 +185,92 @@ export class ImageDecoder {
     target.depthBuffer = false
     target.stencilBuffer = false
 
-    // Create our getter function to debayer the first time it's called
-    const get = () => {
-
-      // The raw bayer texture
-      const rawTexture = new DataTexture(
-        image.data,
-        image.width,
-        image.height,
-        LuminanceFormat,
-        UnsignedByteType,
-        Texture.DEFAULT_MAPPING,
-        ClampToEdgeWrapping,
-        ClampToEdgeWrapping,
-        NearestFilter,
-        NearestFilter,
-      )
-      rawTexture.needsUpdate = true
-
-      // Cloning a material allows for new uniforms without recompiling the shader itself
-      const material = this.bayerDecoder!.shader.clone()
-      material.uniforms.sourceSize = { value: [width, height, 1 / width, 1 / height] }
-      material.uniforms.firstRed = { value: firstRed }
-      material.uniforms.image = { value: rawTexture }
-
-      const mesh = new Mesh(this.bayerDecoder!.geometry, material)
-      mesh.frustumCulled = false
-
-      // Cleanup last render
-      const scene = this.bayerDecoder!.scene
-      scene.remove(...this.bayerDecoder!.scene.children)
-      scene.add(mesh)
-
-      this.renderer.setRenderTarget(target)
-      this.renderer.render(scene, this.bayerDecoder!.camera)
-      this.renderer.setRenderTarget(null)
-
-      // We don't need the raw texture anymore since we already rendered the bayer
-      rawTexture.dispose()
-
-      // Now that we have debayered once, we can just keep returning the result
-      this.cache.get = () => target.texture
-
-      return target.texture
-    }
+    // The raw bayer texture
+    const rawTexture = new DataTexture(
+      image.data,
+      image.width,
+      image.height,
+      LuminanceFormat,
+      UnsignedByteType,
+      Texture.DEFAULT_MAPPING,
+      ClampToEdgeWrapping,
+      ClampToEdgeWrapping,
+      NearestFilter,
+      NearestFilter,
+    )
+    rawTexture.needsUpdate = true
 
     // Set our cache to use the getter function
-    this.updateCache(get, () => target.dispose())
+    this.updateCache(
+      this.bayer_renderer(target, width, height, rawTexture, firstRed, 1),
+      () => target.dispose(),
+    )
 
     // The image is ready to be read now
     this.atom.reportChanged()
   }
 
-  private jpeg(image: Image): void {
+  private permuted_bayer(
+    image: Image,
+    firstRed: [number, number],
+    mosaicSize: number,
+  ): void {
+    // If we have never decoded bayer with this decoder before we need to make our threejs objects
+    if (!this.bayerDecoder) {
+      this.bayerDecoder = {
+        scene: new Scene(),
+        camera: new OrthographicCamera(-1, 1, 1, -1, 0, 1),
+        geometry: new PlaneBufferGeometry(2, 2),
+        shader: new RawShaderMaterial({
+          vertexShader: bayerVertexShader,
+          fragmentShader: bayerFragmentShader,
+          depthTest: false,
+          depthWrite: false,
+        }),
+      }
+    }
 
+    const { width, height } = image
+    const target = new WebGLRenderTarget(width, height)
+    target.depthBuffer = false
+    target.stencilBuffer = false
+
+    // Create a blob URL for our loaded data
+    const blob = new Blob([image.data], { type: 'image/jpeg' })
+    const url = window.URL.createObjectURL(blob)
+
+    // Create our image tag and load the url in
+    const tag = document.createElement('img')
+
+    // Don't bother doing anything until the image loads
+    tag.onload = () => {
+      const texture = new Texture(tag)
+      texture.needsUpdate = true
+      texture.minFilter = LinearFilter
+      texture.flipY = false
+
+      this.updateCache(
+        this.bayer_renderer(
+          target,
+          width,
+          height,
+          texture,
+          firstRed,
+          mosaicSize,
+        ),
+        () => {
+          target.dispose()
+          window.URL.revokeObjectURL(url)
+        },
+      )
+
+      // The image is ready to be read now
+      this.atom.reportChanged()
+    }
+    tag.src = url
+  }
+
+  private jpeg(image: Image): void {
     // Create a blob URL for our loaded data
     const blob = new Blob([image.data], { type: 'image/jpeg' })
     const url = window.URL.createObjectURL(blob)
@@ -211,9 +298,52 @@ export class ImageDecoder {
     tag.src = url
   }
 
+  private bayer_renderer(
+    target: WebGLRenderTarget,
+    width: number,
+    height: number,
+    texture: Texture,
+    firstRed: [number, number],
+    mosaicSize: number,
+  ): any {
+    // Create our getter function to debayer the first time it's called
+    const get = () => {
+      // Cloning a material allows for new uniforms without recompiling the shader itself
+      const material = this.bayerDecoder!.shader.clone()
+      material.uniforms.sourceSize = {
+        value: [width, height, 1 / width, 1 / height],
+      }
+      material.uniforms.firstRed = { value: firstRed }
+      material.uniforms.image = { value: texture }
+      material.uniforms.mosaicSize = { value: mosaicSize }
+
+      const mesh = new Mesh(this.bayerDecoder!.geometry, material)
+      mesh.frustumCulled = false
+
+      // Cleanup last render
+      const scene = this.bayerDecoder!.scene
+      scene.remove(...this.bayerDecoder!.scene.children)
+      scene.add(mesh)
+
+      this.renderer.setRenderTarget(target)
+      this.renderer.render(scene, this.bayerDecoder!.camera)
+      this.renderer.setRenderTarget(null)
+
+      // We don't need the raw texture anymore since we already rendered the bayer
+      texture.dispose()
+
+      // Now that we have debayered once, we can just keep returning the result
+      this.cache.get = () => target.texture
+
+      return target.texture
+    }
+
+    return get
+  }
   private dataTexture(image: Image, format: PixelFormat): void {
-    this.updateCache(() => {
-      const texture = new DataTexture(
+    this.updateCache(
+      () => {
+        const texture = new DataTexture(
           image.data,
           image.width,
           image.height,
@@ -225,20 +355,19 @@ export class ImageDecoder {
           LinearFilter,
           LinearFilter,
         )
-      texture.flipY = false
-      texture.needsUpdate = true
+        texture.flipY = false
+        texture.needsUpdate = true
 
         // Update our cache so we don't upload to the GPU each time, and we dispose of our texture
         // Don't use update cache though as we don't want to dispose of ourself
-      this.cache.get = () => texture
-      this.cache.destroy = () => {
-        texture.dispose()
-      }
+        this.cache.get = () => texture
+        this.cache.destroy = () => {
+          texture.dispose()
+        }
 
-      return texture
-    },
-      () => {
+        return texture
       },
+      () => {},
     )
 
     // This is ready immediately
