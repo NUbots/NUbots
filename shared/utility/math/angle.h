@@ -50,12 +50,14 @@ namespace math {
             return angle;
         }
 
-        inline double acos_clamped(const double& a) {
-            return std::acos(std::fmax(std::fmin(a, 1), -1));
+        template <typename T>
+        inline T acos_clamped(const T& a) {
+            return std::acos(std::max(std::min(a, T(1.0)), T(-1.0)));
         }
 
-        inline double asin_clamped(const double& a) {
-            return std::asin(std::fmax(std::fmin(a, 1), -1));
+        template <typename T>
+        inline T asin_clamped(const T& a) {
+            return std::asin(std::max(std::min(a, T(1.0)), T(-1.0)));
         }
 
         /**

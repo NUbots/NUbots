@@ -2,6 +2,7 @@
 #define UTILITY_VISION_FOURCC
 
 #include <cstdint>
+#include <string>
 
 namespace utility {
 namespace vision {

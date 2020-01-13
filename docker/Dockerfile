@@ -34,8 +34,8 @@ RUN install-package \
     protobuf
 
 # Get python to look in /usr/local for packages
-RUN sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i $(python -c "import site; print(site.__file__)") \
-    && python -c "import site, os; [os.makedirs(p, exist_ok=True) for p in site.getsitepackages()]"
+RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
+    > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
 COPY --chown=root:root etc/pip.conf /etc/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
@@ -221,9 +221,6 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
     -Dusb=true \
     -Ddocumentation=false \
     -Dintrospection=false
-
-# FSWatch
-RUN install-from-source https://github.com/emcrisostomo/fswatch/releases/download/1.14.0/fswatch-1.14.0.tar.gz
 
 # LibUV
 RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.33.1.tar.gz \
