@@ -2,9 +2,9 @@
 #define UTILITY_SUPPORT_MATH_STRING_H
 
 #include <fmt/format.h>
-#include <exprtk.hpp>
 #include <limits>
 #include <stdexcept>
+#include "exprtk.hpp"
 
 namespace utility {
 namespace support {
