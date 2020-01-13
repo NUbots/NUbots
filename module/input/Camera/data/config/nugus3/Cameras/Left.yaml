@@ -23,6 +23,6 @@ lens:
   # The homogenous transform from the rigid platform this camera is attached to to its optical location
   Hpc:
     - [1, 0, 0, 0]
-    - [0, 1, 0, 0]
+    - [0, 1, 0, 0.068]
     - [0, 0, 1, 0]
     - [0, 0, 0, 1]
