@@ -21,6 +21,7 @@
 #define UTILITY_SUPPORT_yaml_expression_H
 
 #include <fmt/format.h>
+
 #include <Eigen/Core>
 #include <limits>
 #include <system_error>
