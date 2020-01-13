@@ -222,9 +222,6 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
     -Ddocumentation=false \
     -Dintrospection=false
 
-# FSWatch
-RUN install-from-source https://github.com/emcrisostomo/fswatch/releases/download/1.14.0/fswatch-1.14.0.tar.gz
-
 # LibUV
 RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.33.1.tar.gz \
     -Dlibuv_buildtests=OFF \
