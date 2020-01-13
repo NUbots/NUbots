@@ -23,7 +23,8 @@ namespace vision {
      */
     template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time>
     Eigen::Matrix<T, 2, 1> project_equidistant(
-        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray, const T& f) {
+        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray,
+        const T& f) {
 
         const T theta     = std::cos(ray.x());
         const T sin_theta = std::sin(theta);
@@ -33,7 +34,8 @@ namespace vision {
 
     template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time>
     Eigen::Matrix<T, 2, 1> project_equisolid(
-        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray, const T& f) {
+        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray,
+        const T& f) {
         const T theta     = std::cos(ray.x());
         const T sin_theta = std::sin(theta);
         const T r         = T(2.0) * f * std::sin(theta * T(0.5));
@@ -43,7 +45,8 @@ namespace vision {
 
     template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time>
     Eigen::Matrix<T, 2, 1> project_rectilinear(
-        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray, const T& f) {
+        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray,
+        const T& f) {
         return Eigen::Matrix<T, 2, 1>(f * (ray.y() / ray.x()), f * (ray.z() / ray.x()));
     }
 
@@ -78,11 +81,12 @@ namespace vision {
      */
     template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time>
     Eigen::Matrix<T, 3, 1> unproject_equidistant(
-        const Eigen::Matrix<T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& px, const T& f) {
+        const Eigen::Matrix<T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& px,
+        const T& f) {
         const T r = px.norm();
         // This calculation returns a number greater than 1, causing inf/nans in further trig functions:
         // Restricting theta to be max of 1.
-        const T theta = std::max(std::min(r / f, 1), -1);
+        const T theta = std::max(std::min(r / f, T(1.0)), T(-1.0));
 
         const T sin_theta = std::sin(theta);
         Eigen::Matrix<T, 3, 1> A =
@@ -92,7 +96,8 @@ namespace vision {
 
     template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time>
     Eigen::Matrix<T, 3, 1> unproject_equisolid(
-        const Eigen::Matrix<T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& px, const T& f) {
+        const Eigen::Matrix<T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& px,
+        const T& f) {
         const T r         = px.norm();
         const T theta     = T(2.0) * std::asin(r / (T(2.0) * f));
         const T sin_theta = std::sin(theta);
@@ -104,7 +109,8 @@ namespace vision {
 
     template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time>
     Eigen::Matrix<T, 3, 1> unproject_rectilinear(
-        const Eigen::Matrix<T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& px, const T& f) {
+        const Eigen::Matrix<T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& px,
+        const T& f) {
         return Eigen::Matrix<T, 3, 1>(f, px.x(), px.y()).normalized();
     }
 
