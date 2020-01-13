@@ -119,7 +119,7 @@ namespace vision {
             lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
             lens.focal_length = img.lens.focal_length * image.dimensions[0];
             lens.fov          = img.lens.fov;
-            lens.centre       = {img.lens.centre[0] * image.dimensions[0], img.lens.centre[1] * image.dimensions[0]};
+            lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
             switch (img.lens.projection.value) {
                 case Image::Lens::Projection::EQUIDISTANT: lens.projection = visualmesh::EQUIDISTANT; break;
                 case Image::Lens::Projection::EQUISOLID: lens.projection = visualmesh::EQUISOLID; break;
