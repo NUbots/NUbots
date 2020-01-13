@@ -4,6 +4,7 @@ import nbs_tools.extract_images
 import nbs_tools.json
 import nbs_tools.stats
 import nbs_tools.video
+import nbs_tools.calibrate_cameras
 
 
 def register(command):
