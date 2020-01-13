@@ -1,55 +1,19 @@
 #ifndef MODULE_INPUT_CAMERA_H
 #define MODULE_INPUT_CAMERA_H
 
-#include <fcntl.h>
-// clang-format off
-// We need to include stdio.h before jpeglib.h because jpeglib.h doesn't do it.
-#include <stdio.h>
-#include <jpeglib.h>
-// clang-format on
-#include <linux/videodev2.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <unistd.h>
-
-#include <nuclear>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <system_error>
-
-// clang-format off
 extern "C" {
 #include <aravis-0.8/arv.h>
 }
-// clang-format on
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <mutex>
+
+#include "CameraContext.h"
 #include "extension/Configuration.h"
-
-#include "message/input/Image.h"
-
-#include "utility/input/ServoID.h"
-
-#include "utility/support/eigen_armadillo.h"
-
-#include "utility/vision/Vision.h"
-
-#include "V4L2Camera.h"
 
 namespace module {
 namespace input {
-
-    // Camera contextual information for Aravis new-buffer callback function.
-    typedef struct {
-        uint32_t fourcc;
-        std::string deviceID;
-        uint cameraID;
-        bool isLeft;
-        message::input::Image::Lens lens;
-        ArvCamera* camera;
-        ArvStream* stream;
-        NUClear::Reactor& reactor;
-    } CameraContext;
 
     class Camera : public NUClear::Reactor {
 
@@ -58,32 +22,17 @@ namespace input {
         explicit Camera(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        bool dumpImages;
+        static void emit_image(ArvStream* stream, CameraContext* context);
+        static void control_lost(ArvGvDevice* device, CameraContext* context);
 
-        // V4L2 Camera details
-        V4L2Camera initiateV4L2Camera(const ::extension::Configuration& config);
-        void ShutdownV4L2Camera();
-
-        ReactionHandle V4L2FrameRateHandle;
-        ReactionHandle V4L2SettingsHandle;
-
-        std::map<std::string, V4L2Camera> V4L2Cameras;
-
-
-        // Aravis Camera details
-        void initiateAravisCamera(const ::extension::Configuration& config);
-        static void EmitAravisImage(ArvStream* stream, CameraContext* context);
-        void resetAravisCamera(std::map<std::string, CameraContext>::iterator&,
-                               const ::extension::Configuration& config);
-        void ShutdownAravisCamera();
-
-        std::map<std::string, CameraContext> AravisCameras;
-
-        // Static count of all cameras in the system.
-        static uint cameraCount;
+        std::mutex sensors_mutex;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>>>
+            Hpws;
+        std::map<std::string, CameraContext> cameras;
+        uint32_t num_cameras = 0;
     };
+
 }  // namespace input
 }  // namespace module
-
 
 #endif  // MODULE_INPUT_CAMERA_H
