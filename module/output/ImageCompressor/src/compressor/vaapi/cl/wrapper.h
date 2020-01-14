@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2016 Trent Houliston <trent@houliston.me>
+ * Copyright (C) 2017-2018 Trent Houliston <trent@houliston.me>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,11 +15,36 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Uncomment this line when other test files are added
-//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-//#include <catch.hpp>
+#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_WRAPPER_H
+#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_WRAPPER_H
 
-// Remove this line when test files are added
-int main() {
-    return 0;
-}
+#include <CL/opencl.h>
+
+#include <memory>
+#include <string>
+#include <type_traits>
+
+namespace module::output::compressor::vaapi::cl {
+
+template <typename T>
+struct opencl_wrapper : public std::shared_ptr<std::remove_pointer_t<T>> {
+    using std::shared_ptr<std::remove_pointer_t<T>>::shared_ptr;
+
+    operator T() const {
+        return this->get();
+    }
+
+private:
+    T ptr = nullptr;
+};
+
+using command_queue = opencl_wrapper<::cl_command_queue>;
+using context       = opencl_wrapper<::cl_context>;
+using event         = opencl_wrapper<::cl_event>;
+using kernel        = opencl_wrapper<::cl_kernel>;
+using mem           = opencl_wrapper<::cl_mem>;
+using program       = opencl_wrapper<::cl_program>;
+
+}  // namespace module::output::compressor::vaapi::cl
+
+#endif  // MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_WRAPPER_H

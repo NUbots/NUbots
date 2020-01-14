@@ -4,19 +4,19 @@ import re
 
 from google.protobuf.json_format import MessageToJson
 
-from . import decoder
+from .nbs import Decoder
 
 
 def register(command):
     command.help = "Decode an nbs file and convert it to json"
 
     # Command arguments
-    command.add_argument("path", metavar="path", help="The nbs file to convert to json")
+    command.add_argument("files", metavar="files", nargs="+", help="The nbs files to convert to json")
 
 
-def run(path, **kwargs):
+def run(files, **kwargs):
 
-    for packet in decoder.decode(path):
+    for packet in Decoder(*files):
         out = re.sub(r"\s+", " ", MessageToJson(packet.msg, True))
         out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type, packet.timestamp, out)
         # Print as a json object
