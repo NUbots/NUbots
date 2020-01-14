@@ -241,7 +241,9 @@ echo -e "/usr/local/lib\n/usr/local/lib64" > /etc/ld.so.conf.d/usrlocal.conf
 ldconfig
 
 # Make sure python checks /usr/local for packages
-sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py
+echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
+    > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/etc/pip.conf -O /etc/pip.conf
 
 #############
 # ZSH SHELL #
