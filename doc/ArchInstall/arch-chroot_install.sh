@@ -7,8 +7,8 @@ HOME="/home/${USER}"
 HOST="nugus"
 HOSTNAME="${HOST}${ROBOT_NUMBER}"
 IP_ADDR="10.1.1.${ROBOT_NUMBER}"
-ETHERNET_INTERFACE="${ETHERNET_INTERFACE:-eth0}"
-WIFI_INTERFACE="${WIFI_INTERFACE:-wlan0}"
+ETHERNET_INTERFACE="eno1"
+WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/wlan0 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
 
 # Setup timezone information
 ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
@@ -66,7 +66,6 @@ pacman -S --noconfirm --needed grub efibootmgr
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --removable
 sed 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' -i /etc/default/grub
 sed 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=hidden/' -i /etc/default/grub
-sed 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="net.ifnames=0"/' -i /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Update the system
