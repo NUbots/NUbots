@@ -11,8 +11,7 @@
   "extensions": [
     "ms-vscode.cpptools",
     "twxs.cmake",
-    "vector-of-bool.cmake-tools",
-    "maddouri.cmake-tools-helper",
+    "ms-vscode.cmake-tools",
     "cheshirekow.cmake-format",
     "ms-azuretools.vscode-docker",
     "galarius.vscode-opencl",
@@ -23,7 +22,7 @@
   ],
   "settings": {
     "C_Cpp.clang_format_path": "/usr/local/bin/clang-format",
-    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "cmake.buildDirectory": "/home/nubots/build",
     "cmake.configureOnOpen": true
   }
