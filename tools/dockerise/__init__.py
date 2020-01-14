@@ -153,14 +153,7 @@ def build_platform(platform):
 
     # Build the image
     for event in client.api.build(
-        path=dockerdir,
-        tag=tag,
-        buildargs={"platform": platform},
-        quiet=False,
-        pull=True,
-        rm=True,
-        decode=True,
-        cache_from=["nubots:{}".format(platform), "nubots/nubots:{}".format(platform)],
+        path=dockerdir, tag=tag, buildargs={"platform": platform}, quiet=False, pull=True, rm=True, decode=True,
     ):
         if "stream" in event:
             sys.stdout.write(event["stream"])

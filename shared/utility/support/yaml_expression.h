@@ -17,14 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_YAML_EXPRESSION_H
-#define UTILITY_SUPPORT_YAML_EXPRESSION_H
+#ifndef UTILITY_SUPPORT_yaml_expression_H
+#define UTILITY_SUPPORT_yaml_expression_H
 
-#include <yaml-cpp/yaml.h>
+#include <fmt/format.h>
 
 #include <Eigen/Core>
-#include <cassert>
-#include <iostream>
 #include <limits>
 #include <system_error>
 
@@ -41,14 +39,18 @@ namespace support {
         Expression() {}
         Expression(const YAML::Node& node) : node(node) {}
 
-        template <typename T, std::enable_if_t<std::is_integral<T>::value>* = nullptr>
-        operator T() {
-            return parse<T>(node.as<std::string>());
-        }
+        operator double() {
+            double value;
 
-        template <typename T, std::enable_if_t<std::is_floating_point<T>::value>* = nullptr>
-        operator T() {
-            return parse<T>(node.as<std::string>());
+            try {
+                value = parse_math_string<double>(node.as<std::string>());
+            }
+
+            catch (const std::invalid_argument& ex) {
+                throw std::invalid_argument(fmt::format("Unable to convert node to arithmetic type.\n{}", ex.what()));
+            }
+
+            return value;
         }
 
         // Handle fixed-sized matrices.
@@ -62,29 +64,33 @@ namespace support {
             // Count the columns on every row.
             for (const auto& row : node) {
                 if (row.size() != cols) {
-                    throw std::system_error(-1,
-                                            std::system_category(),
-                                            "Inconsistent number of cols in matrix (cols: " + std::to_string(row.size())
-                                                + " vs " + std::to_string(cols) + ").");
+                    throw std::out_of_range(
+                        fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
             }
 
             // Validate row and column sizes.
             if ((rows != T::RowsAtCompileTime) || (cols != T::ColsAtCompileTime)) {
-                throw std::system_error(
-                    -1,
-                    std::system_category(),
-                    "Rows and columns in YAML matrix do not align with output matrix. (rows: " + std::to_string(rows)
-                        + " vs " + std::to_string(T::RowsAtCompileTime) + " cols: " + std::to_string(cols) + " vs "
-                        + std::to_string(T::ColsAtCompileTime) + ").");
+                throw std::out_of_range(
+                    fmt::format("Rows and columns in YAML matrix do not align with output matrix. "
+                                "(rows: {} vs {}, cols: {} vs {}).",
+                                rows,
+                                T::RowsAtCompileTime,
+                                cols,
+                                T::ColsAtCompileTime));
             }
 
             T matrix;
 
-            for (size_t row = 0; row < rows; row++) {
-                for (size_t col = 0; col < cols; col++) {
-                    matrix(row, col) = parse<typename T::Scalar>(node[row][col].as<std::string>());
+            try {
+                for (size_t row = 0; row < rows; row++) {
+                    for (size_t col = 0; col < cols; col++) {
+                        matrix(row, col) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
+                    }
                 }
+            }
+            catch (const std::invalid_argument& ex) {
+                throw std::invalid_argument(fmt::format("Unable to convert node to arithmetic type.\n{}", ex.what()));
             }
 
             return matrix;
@@ -96,21 +102,24 @@ namespace support {
             std::enable_if_t<((T::RowsAtCompileTime != Eigen::Dynamic) && (T::ColsAtCompileTime == 1))>* = nullptr>
         operator T() const {
 
-            // value : [a, b, c, d]
-
             // Validate row size.
             if (node.size() != T::RowsAtCompileTime) {
-                throw std::system_error(
-                    -1,
-                    std::system_category(),
-                    "Rows in YAML column vector do not align with output vector. (rows: " + std::to_string(node.size())
-                        + " vs " + std::to_string(T::RowsAtCompileTime) + ").");
+                throw std::out_of_range(
+                    fmt::format("Rows in YAML column vector do not align with output vector. "
+                                "(rows: {} vs {}).",
+                                node.size(),
+                                T::RowsAtCompileTime));
             }
 
             T matrix;
 
-            for (size_t i = 0; i < node.size(); i++) {
-                matrix(i) = parse<typename T::Scalar>(node[i].as<std::string>());
+            try {
+                for (size_t i = 0; i < node.size(); i++) {
+                    matrix(i) = parse_math_string<typename T::Scalar>(node[i].as<std::string>());
+                }
+            }
+            catch (const std::invalid_argument& ex) {
+                throw std::invalid_argument(fmt::format("Unable to convert node to arithmetic type.\n{}", ex.what()));
             }
 
             return matrix;
@@ -128,30 +137,33 @@ namespace support {
 
             // Validate row size.
             if (rows != T::ColsAtCompileTime) {
-                throw std::system_error(-1,
-                                        std::system_category(),
-                                        "Columns in YAML column vector do not align with output vector. (rows: "
-                                            + std::to_string(node.size()) + " vs "
-                                            + std::to_string(T::RowsAtCompileTime) + ").");
+                throw std::out_of_range(
+                    fmt::format("Columns in YAML row vector do not align with output vector. "
+                                "(cols: {} vs {}).",
+                                node.size(),
+                                T::ColsAtCompileTime));
             }
 
             // Count the columns on every row.
             for (const auto& col : node) {
                 if (col.size() != cols) {
-                    throw std::system_error(-1,
-                                            std::system_category(),
-                                            "Inconsistent number of cols in matrix (cols: " + std::to_string(col.size())
-                                                + " vs " + std::to_string(cols) + ").");
+                    throw std::out_of_range(
+                        fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", col.size(), cols));
                 }
             }
 
 
             T matrix;
 
-            for (size_t row = 0; row < rows; row++) {
-                for (size_t col = 0; col < cols; col++) {
-                    matrix(col, row) = parse<typename T::Scalar>(node[row][col].as<std::string>());
+            try {
+                for (size_t row = 0; row < rows; row++) {
+                    for (size_t col = 0; col < cols; col++) {
+                        matrix(col, row) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
+                    }
                 }
+            }
+            catch (const std::invalid_argument& ex) {
+                throw std::invalid_argument(fmt::format("Unable to convert node to arithmetic type.\n{}", ex.what()));
             }
 
             return matrix;
@@ -171,19 +183,22 @@ namespace support {
             // Count the columns on every row.
             for (const auto& row : node) {
                 if (row.size() != cols) {
-                    throw std::system_error(-1,
-                                            std::system_category(),
-                                            "Inconsistent number of cols in matrix (cols: " + std::to_string(row.size())
-                                                + " vs " + std::to_string(cols) + ").");
+                    throw std::out_of_range(
+                        fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
             }
 
             T matrix(rows, cols);
 
-            for (size_t row = 0; row < rows; row++) {
-                for (size_t col = 0; col < cols; col++) {
-                    matrix(row, col) = parse<typename T::Scalar>(node[row][col].as<std::string>());
+            try {
+                for (size_t row = 0; row < rows; row++) {
+                    for (size_t col = 0; col < cols; col++) {
+                        matrix(row, col) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
+                    }
                 }
+            }
+            catch (const std::invalid_argument& ex) {
+                throw std::invalid_argument(fmt::format("Unable to convert node to arithmetic type.\n{}", ex.what()));
             }
 
             return matrix;
@@ -203,17 +218,20 @@ namespace support {
             // Count the columns on every row.
             for (const auto& row : node) {
                 if (row.size() != cols) {
-                    throw std::system_error(-1,
-                                            std::system_category(),
-                                            "Inconsistent number of cols in matrix (cols: " + std::to_string(row.size())
-                                                + " vs " + std::to_string(cols) + ").");
+                    throw std::out_of_range(
+                        fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
             }
 
             T matrix(rows, std::max(cols, size_t(1)));
 
-            for (size_t i = 0; i < rows; i++) {
-                matrix(i) = parse<typename T::Scalar>(node[i].as<std::string>());
+            try {
+                for (size_t i = 0; i < rows; i++) {
+                    matrix(i) = parse_math_string<typename T::Scalar>(node[i].as<std::string>());
+                }
+            }
+            catch (const std::invalid_argument& ex) {
+                throw std::invalid_argument(fmt::format("Unable to convert node to arithmetic type.\n{}", ex.what()));
             }
 
             return matrix;
@@ -233,17 +251,20 @@ namespace support {
             // Count the columns on every row.
             for (const auto& row : node) {
                 if (row.size() != cols) {
-                    throw std::system_error(-1,
-                                            std::system_category(),
-                                            "Inconsistent number of cols in matrix (cols: " + std::to_string(row.size())
-                                                + " vs " + std::to_string(cols) + ").");
+                    throw std::out_of_range(
+                        fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
             }
 
             T matrix(cols, rows);
 
-            for (size_t i = 0; i < rows; i++) {
-                matrix(i) = parse<typename T::Scalar>(node[i][0].as<std::string>());
+            try {
+                for (size_t i = 0; i < rows; i++) {
+                    matrix(i) = parse_math_string<typename T::Scalar>(node[i][0].as<std::string>());
+                }
+            }
+            catch (const std::invalid_argument& ex) {
+                throw std::invalid_argument(fmt::format("Unable to convert node to arithmetic type.\n{}", ex.what()));
             }
 
             return matrix;
@@ -251,12 +272,6 @@ namespace support {
 
     private:
         YAML::Node node;
-
-        template <typename Scalar>
-        Scalar parse(const std::string& expression) const {
-            // Parse the expression using the math string parser
-            return static_cast<Scalar>(utility::support::parse_math_string(expression));
-        }
     };
 }  // namespace support
 }  // namespace utility
@@ -281,4 +296,4 @@ struct convert<utility::support::Expression> {
 };
 }  // namespace YAML
 
-#endif  // UTILITY_SUPPORT_YAML_EXPRESSION_H
+#endif
