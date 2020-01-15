@@ -60,7 +60,7 @@ namespace support {
 
                 for (const auto& parameter : config["parameters_and_sigmas"].config) {
                     parameter_names[i]  = parameter.first.as<std::string>();
-                    parameter_sigmas[i] = parameter.second.as<double>();
+                    parameter_sigmas[i] = parameter.second.as<Expression>();
                     i++;
                 }
 
@@ -69,13 +69,13 @@ namespace support {
 
                     walk_command.segments.push_back(FixedWalkCommand::WalkSegment());
                     walk_command.segments.back().direction   = segment["direction"].as<Expression>();
-                    walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
+                    walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<Expression>();
 
-                    walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();
+                    walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<Expression>();
                     walk_command.segments.back().normalisedAngularVelocity =
-                        segment["normalisedAngularVelocity"].as<double>();
+                        segment["normalisedAngularVelocity"].as<Expression>();
                     walk_command.segments.back().duration =
-                        std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
+                        std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<Expression>()));
                 }
 
                 getup_cancel_trial_threshold = config["getup_cancel_trial_threshold"].as<uint>();
