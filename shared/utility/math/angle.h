@@ -88,10 +88,6 @@ namespace math {
             return d;
         }
 
-        inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
-            return std::atan2(dirVec.y(), dirVec.x());
-        }
-
         inline double vectorToBearing(arma::vec2 dirVec) {
             return std::atan2(dirVec(1), dirVec(0));
         }

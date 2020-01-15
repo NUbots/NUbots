@@ -65,7 +65,6 @@ namespace support {
 
     using utility::math::angle::bearingToUnitVector;
     using utility::math::angle::normalizeAngle;
-    using utility::math::angle::vectorToBearing;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::transform::worldToLocal;
     using utility::motion::kinematics::calculateRobotToIMU;
@@ -204,7 +203,8 @@ namespace support {
 
                               // Face along direction of movement
                               world.robotPose.linear() =
-                                  Eigen::Rotation2Dd(vectorToBearing(diff.translation())).toRotationMatrix();
+                                  Eigen::Rotation2Dd(std::atan2(diff.translation().y(), diff.translation().x()))
+                                      .toRotationMatrix();
 
                               // Robot coordinates
                               world.robotVelocity.linear() = Eigen::Matrix2d::Zero();
