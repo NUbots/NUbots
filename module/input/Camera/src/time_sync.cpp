@@ -4,6 +4,8 @@ extern "C" {
 #include <aravis-0.8/arv.h>
 }
 
+#include "aravis_wrap.h"
+
 namespace module {
 namespace input {
 
@@ -47,28 +49,18 @@ namespace input {
         for (auto& s : samples) {
             // Get the time before and after sending the command. We know neither are correct and it's likely somewhere
             // in the middle that the actual latching took place. Therefore take the average of the two to get closer.
-            GError* error                 = nullptr;
-            NUClear::clock::time_point t1 = NUClear::clock::now();
-            arv_device_execute_command(device, latch_command.c_str(), &error);
-            NUClear::clock::time_point t2 = NUClear::clock::now();
-            s.local = duration_cast<nanoseconds>((t1.time_since_epoch() + t2.time_since_epoch()) / 2).count();
+            try {
 
-            // If we had an error, this sample is invalid
-            if (error) {
-                s.valid = false;
-                g_error_free(error);
-                error = nullptr;
-            }
-            else {
+                NUClear::clock::time_point t1 = NUClear::clock::now();
+                arv::device_execute_command(device, latch_command.c_str());
+                NUClear::clock::time_point t2 = NUClear::clock::now();
+                s.local = duration_cast<nanoseconds>((t1.time_since_epoch() + t2.time_since_epoch()) / 2).count();
+
                 // Try to read the time we just latched off the camera
-                s.cam   = arv_device_get_integer_feature_value(device, read_command.c_str(), &error);
-                s.valid = error == nullptr;
-
-                // If we got an error we need to free the memory
-                if (error) {
-                    g_error_free(error);
-                    error = nullptr;
-                }
+                s.cam = arv::device_get_integer_feature_value(device, read_command.c_str());
+            }
+            catch (const std::runtime_error&) {
+                s.valid = false;
             }
         }
 
