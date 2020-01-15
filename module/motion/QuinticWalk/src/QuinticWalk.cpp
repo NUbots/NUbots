@@ -269,7 +269,7 @@ namespace motion {
 
         auto waypoints = motionLegs(joints);
 
-        emit(std::move(waypoints));
+        emit(waypoints);
     }
 
     std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(
@@ -289,7 +289,7 @@ namespace motion {
                                   100});  // TODO: support separate gains for each leg
         }
 
-        return std::move(waypoints);
+        return waypoints;
     }
 }  // namespace motion
 }  // namespace module
