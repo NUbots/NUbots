@@ -24,6 +24,7 @@
 #include "message/support/SaveConfiguration.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
+// Comment remains as an example of usage for this module.
 // #include "utility/math/optimisation/PGAoptimiser.h"
 #include "utility/support/yaml_expression.h"
 
@@ -89,6 +90,7 @@ namespace support {
                     // Start optimisation
                     std::cerr << "Optimiser command" << std::endl;
                     // Get samples
+                    // Comment remains as an example of usage for this module.
                     // samples = utility::math::optimisation::PGA::getSamples(
                     //     getState(walkConfig), parameter_sigmas, number_of_samples);
                     // Initialise fitnesses
@@ -150,6 +152,7 @@ namespace support {
             on<Trigger<OptimisationComplete>, Sync<WalkOptimiser>>().then("Record Results", [this] {
                 // Combine samples
                 Eigen::VectorXd result;
+                // Comment remains as an example of usage for this module.
                 // result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
 
                 std::cerr << "Final Result:" << std::endl;
