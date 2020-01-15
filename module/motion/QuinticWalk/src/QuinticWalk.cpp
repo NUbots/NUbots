@@ -69,10 +69,10 @@ namespace motion {
 
             walk_engine.setParameters(params);
 
-            config.max_step[0] = cfg["maxStep"]["X"].as<float>();
-            config.max_step[1] = cfg["maxStep"]["Y"].as<float>();
-            config.max_step[2] = cfg["maxStep"]["Z"].as<float>();
-            config.max_step_xy = cfg["maxStep"]["XY"].as<float>();
+            config.max_step[0] = cfg["max_step"]["x"].as<float>();
+            config.max_step[1] = cfg["max_step"]["y"].as<float>();
+            config.max_step[2] = cfg["max_step"]["z"].as<float>();
+            config.max_step_xy = cfg["max_step"]["xy"].as<float>();
 
             config.imu_active          = cfg["imu"]["active"].as<bool>();
             config.imu_pitch_threshold = cfg["imu"]["pitch"]["threshold"].as<float>();

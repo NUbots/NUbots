@@ -8,10 +8,6 @@ walk:
   # Give extra swing to first step for better start
   # (in ?, [0:10])
   first_step_swing_factor: 1.0
-  pause:
-    # Time that the walking is paused when becoming unstable
-    # (in s, [0:10])
-    duration: 0.5
   foot:
     # Lateral distance between the feet center
     # (in m, >= 0)
@@ -32,7 +28,7 @@ walk:
       phase: 1.0
       # Roll offset on flying foot at put down
       # (in rad, [-1,1])
-      roll_offset:
+      roll_offset: 0
     # Phase of flying foot apex
     # (single support cycle phase, [0:1])
     apex_phase: 0.5
@@ -68,10 +64,10 @@ walk:
     x_offset_p_coef:
       # Trunk forward offset proportional to forward step
       # (in 1)
-      Forward: 0.0
+      forward: 0.0
       # Trunk forward offset proportional to rotation step
       # (in m/rad)
-      Turn: 0.0
+      turn: 0.0
     pitch_p_coef:
       # Trunk pitch orientation proportional to forward step
       # (in rad/m)
@@ -89,20 +85,24 @@ walk:
     # Kick velocity
     # (in m/s, > 0)
     vel: 0.2
+  pause:
+    # Time that the walking is paused when becoming unstable
+    # (in s, [0:10])
+    duration: 0.5
 
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  X: 0.06
+  x: 0.06
   # Maximal step length in Y
   # (in m, [0:1])
-  Y: 0.05
+  y: 0.05
   # Maximal step turn in yaw
   # (in rad, [0:1.5])
-  Z: 0.50
+  z: 0.50
   # Maximal step length in X and Y combined
   # (in m, [0:1])
-  XY: 0.09
+  xy: 0.09
 
 imu:
   # Activates the IMU to stop the walking when the robot gets unstable
