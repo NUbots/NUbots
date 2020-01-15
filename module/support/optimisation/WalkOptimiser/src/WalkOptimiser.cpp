@@ -33,7 +33,6 @@ namespace support {
     namespace optimisation {
 
         using extension::Configuration;
-
         using message::behaviour::CancelFixedWalk;
         using message::behaviour::FixedWalkCommand;
         using message::behaviour::FixedWalkFinished;
@@ -43,7 +42,6 @@ namespace support {
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
         using message::support::SaveConfiguration;
-
         using utility::input::ServoID;
         using utility::support::Expression;
 

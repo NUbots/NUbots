@@ -27,7 +27,6 @@ namespace support {
     namespace configuration {
 
         using extension::Configuration;
-
         using message::support::FieldDescription;
 
         void SetGoalpostPositions(FieldDescription& desc) {
