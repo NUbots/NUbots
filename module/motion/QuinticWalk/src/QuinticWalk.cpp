@@ -253,11 +253,11 @@ namespace motion {
         Hst.translation() = -Hst.rotation() * trunk_pos;
 
         Eigen::Affine3f Hfs;  // support_to_flying_foot
-        Hst.linear()      = setRPY(foot_axis[0], foot_axis[1], foot_axis[2]);
-        Hst.translation() = foot_pos;
+        Hfs.linear()      = setRPY(foot_axis[0], foot_axis[1], foot_axis[2]);
+        Hfs.translation() = foot_pos;
 
-        Eigen::Affine3f Hft = Hst * Hfs;  // trunk_to_flying_foot_goal
-        // Eigen::Affine3f Hft = Hfs * Hst; // trunk_to_flying_foot_goal ????? should be this????
+        // Eigen::Affine3f Hft = Hst * Hfs;  // trunk_to_flying_foot_goal
+        Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal ????? should be this????
 
         // Calculate leg joints
         std::vector<std::pair<ServoID, float>> joints;
