@@ -8,6 +8,7 @@ extern "C" {
 
 #include <cmath>
 
+#include "aravis_wrap.h"
 #include "description_to_fourcc.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
@@ -141,7 +142,7 @@ namespace input {
             auto device      = arv_camera_get_device(cam.get());
 
             // Stop the video stream so we can apply the settings
-            arv_camera_stop_acquisition(cam.get());
+            arv::camera_stop_acquisition(cam.get());
             arv_stream_set_emit_signals(stream.get(), false);
 
             // Synchronise the clocks
@@ -154,17 +155,9 @@ namespace input {
             context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
 
             // Apply image offsets to lens_centre, optical axis:
-            GError* error  = nullptr;
-            int full_width = arv_device_get_integer_feature_value(device, "WidthMax", &error);
-            if (error) {
-                g_error_free(error);
-                error = nullptr;
-            }
-            int full_height = arv_device_get_integer_feature_value(device, "HeightMax", &error);
-            if (error) {
-                g_error_free(error);
-                error = nullptr;
-            }
+            int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
+            int full_height = arv::device_get_integer_feature_value(device, "HeightMax");
+
             log<NUClear::DEBUG>(fmt::format("Max. resolution: {} by {} on {} camera", full_width, full_height, name));
 
             int offset_x = config["settings"]["OffsetX"].as<Expression>();
@@ -204,7 +197,7 @@ namespace input {
             }
 
             // Apply the region to the camera
-            arv_camera_set_region(cam.get(), offset_x, offset_y, width, height);
+            arv::camera_set_region(cam.get(), offset_x, offset_y, width, height);
 
             // Go through our settings and apply them to the camera
             for (const auto& cfg : config["settings"].config) {
@@ -213,7 +206,7 @@ namespace input {
                 // Skip the region keys as we handle them above
                 if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY") {
                     continue;
-                };
+                }
 
                 // Get the feature node
                 auto feature = arv_device_get_feature(device, key.c_str());
@@ -268,12 +261,12 @@ namespace input {
 
             // Check for gigevision device and set packet size to jumbo packets
             if (arv_camera_is_gv_device(cam.get())) {
-                arv_camera_gv_set_packet_size(cam.get(), 8192);
+                arv::camera_gv_set_packet_size(cam.get(), 8192);
                 g_object_set(stream.get(), "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
             }
 
             // Add buffers to the queue
-            int payload_size = arv_camera_get_payload(cam.get());
+            int payload_size = arv::camera_get_payload(cam.get());
             for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
                 // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
                 // the GPU.
@@ -286,7 +279,7 @@ namespace input {
             g_signal_connect(
                 arv_camera_get_device(cam.get()), "control-lost", G_CALLBACK(&Camera::control_lost), &it->second);
             // Start aquisition
-            arv_camera_start_acquisition(cam.get());
+            arv::camera_start_acquisition(cam.get());
             arv_stream_set_emit_signals(stream.get(), true);
         });
 
@@ -308,7 +301,7 @@ namespace input {
         on<Shutdown>().then([this] {
             for (auto& camera : cameras) {
                 // Stop the video stream.
-                arv_camera_stop_acquisition(camera.second.camera.get());
+                arv::camera_stop_acquisition(camera.second.camera.get());
                 arv_stream_set_emit_signals(camera.second.stream.get(), false);
             }
             arv_shutdown();
@@ -381,11 +374,11 @@ namespace input {
                                 std::abs(total_cam - total_local) / 1e6,
                                 timesync.drift.max_clock_drift / 1e6));
 
-                            arv_camera_stop_acquisition(context->camera.get());
+                            arv::camera_stop_acquisition(context->camera.get());
                             arv_stream_set_emit_signals(context->stream.get(), false);
                             context->time = sync_clocks(arv_camera_get_device(context->camera.get()));
                             arv_stream_set_emit_signals(context->stream.get(), true);
-                            arv_camera_start_acquisition(context->camera.get());
+                            arv::camera_start_acquisition(context->camera.get());
                         }
                     }
                 }
