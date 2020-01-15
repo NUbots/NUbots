@@ -22,12 +22,9 @@
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <armadillo>
 #include <type_traits>
-
-#include <Eigen/Core>
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"

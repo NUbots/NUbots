@@ -20,7 +20,6 @@
 #include "SoccerConfig.h"
 
 #include "extension/Configuration.h"
-
 #include "message/support/FieldDescription.h"
 
 namespace module {

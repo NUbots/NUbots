@@ -26,7 +26,6 @@
 
 #include "MotionModel.h"
 #include "VirtualLoadSensor.h"
-
 #include "message/motion/KinematicsModel.h"
 #include "utility/math/filter/eigen/UKF.h"
 

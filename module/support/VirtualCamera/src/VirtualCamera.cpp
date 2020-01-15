@@ -20,9 +20,7 @@
 #include "VirtualCamera.h"
 
 #include "extension/Configuration.h"
-
 #include "message/input/Image.h"
-
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/Vision.h"
 

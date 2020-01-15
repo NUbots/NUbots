@@ -153,10 +153,10 @@ namespace support {
                       || (quad.getTopLeft().x() > 0 && quad.getTopLeft().x() < image.dimensions.x()
                           && quad.getTopRight().x() > 0 && quad.getTopRight().x() < image.dimensions.x()))
                   && (
-                         // Check that the bottom is below the top of the screen and the top is below the bottom of
-                         // the screen
-                         (quad.getBottomRight().y() < image.dimensions.y() && quad.getTopRight().y() > 0)
-                         || (quad.getBottomLeft().y() < image.dimensions.y() && quad.getTopLeft().y() > 0)))) {
+                      // Check that the bottom is below the top of the screen and the top is below the bottom of
+                      // the screen
+                      (quad.getBottomRight().y() < image.dimensions.y() && quad.getTopRight().y() > 0)
+                      || (quad.getBottomLeft().y() < image.dimensions.y() && quad.getTopLeft().y() > 0)))) {
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin() + 1);
                 result.goals.at(0).measurements.erase(result.goals.at(0).measurements.begin());
             }
