@@ -67,11 +67,8 @@ namespace support {
     using utility::math::angle::normalizeAngle;
     using utility::math::angle::vectorToBearing;
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::transform::localToWorld;
     using utility::math::transform::worldToLocal;
     using utility::motion::kinematics::calculateRobotToIMU;
-    // using utility::nusight::drawArrow;
-    // using utility::nusight::drawSphere;
     using utility::nusight::graph;
     using utility::support::Expression;
 
