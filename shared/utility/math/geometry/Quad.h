@@ -29,14 +29,17 @@ namespace utility {
 namespace math {
     namespace geometry {
 
+        template <typename T>
+        class Quad : std::false_type {};
+
         // *********************
         // * ARMADILLO VERSION *
         // *********************
 
-        template <typename T>
-        class Quad {
+        template <typename Scalar>
+        class Quad<typename arma::Col<Scalar>> {
         public:
-            using Scalar = typename T::elem_type;
+            using T = typename arma::Col<Scalar>::template fixed<2>;
             Quad() : bl(arma::fill::zeros), br(arma::fill::zeros), tr(arma::fill::zeros), tl(arma::fill::zeros) {}
             Quad(const Quad& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
             Quad(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight)
@@ -222,10 +225,10 @@ namespace math {
         // * EIGEN VERSION *
         // *****************
 
-        template <typename T>
-        class Quad<typename Eigen::MatrixBase<T>> {
+        template <typename Scalar, int R, int C>
+        class Quad<typename Eigen::Matrix<Scalar, R, C>> {
         public:
-            using Scalar = typename T::Scalar;
+            using T = typename Eigen::Matrix<Scalar, R, C>;
             Quad() : bl(T::Zero()), br(T::Zero()), tr(T::Zero()), tl(T::Zero()) {}
             Quad(const Quad& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
             Quad(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight)
