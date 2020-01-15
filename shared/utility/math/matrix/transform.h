@@ -35,19 +35,6 @@ namespace utility {
 namespace math {
     namespace transform {
 
-        inline Eigen::Affine2d localToWorld(const Eigen::Affine2d& local, const Eigen::Affine2d& reference) {
-            // translates to this + rotZ(this.angle) * reference
-            Eigen::Rotation2Dd R(local.linear());
-            Eigen::Vector2d newPos = R * reference.translation();
-            Eigen::Affine2d result;
-            result.translation() = local.translation() + newPos;
-            // do not use normalizeAngle here, causes bad things when turning! TODO: unsure on cause
-            result.linear() = Eigen::Rotation2Dd(Eigen::Rotation2Dd(local.linear()).angle()
-                                                 + Eigen::Rotation2Dd(reference.linear()).angle())
-                                  .toRotationMatrix();
-            return result;
-        }
-
         inline Eigen::Affine2d worldToLocal(const Eigen::Affine2d world, const Eigen::Affine2d& reference) {
             Eigen::Affine2d diff;
             double angle       = utility::math::angle::normalizeAngle(Eigen::Rotation2Dd(reference.linear()).angle()
