@@ -38,27 +38,28 @@ namespace support {
 
     using utility::math::geometry::Quad;
 
-    Eigen::Vector2d VirtualGoalPost::getCamRay(const Eigen::Vector3d& norm1,
-                                               const Eigen::Vector3d& norm2,
-                                               const Image::Lens& lens,
-                                               const Eigen::Matrix<unsigned int, 2, 1>& dimensions) {
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, 2, 1> VirtualGoalPost::getCamRay(const Eigen::Matrix<Scalar, 3, 1>& norm1,
+                                                           const Eigen::Matrix<Scalar, 3, 1>& norm2,
+                                                           const Image::Lens& lens,
+                                                           const Eigen::Matrix<unsigned int, 2, 1>& dimensions) {
         // Solve the vector intersection between two planes to get the camera ray of the quad corner
-        Eigen::Vector3d result;
-        const double zdiff = norm2.z() * norm1.y() - norm1.z() * norm2.y();
-        const double ydiff = norm2.y() * norm1.z() - norm1.y() * norm2.z();
-        if (std::abs(zdiff) > std::numeric_limits<double>::epsilon()) {
+        Eigen::Matrix<Scalar, 3, 1> result;
+        const Scalar zdiff = norm2.z() * norm1.y() - norm1.z() * norm2.y();
+        const Scalar ydiff = norm2.y() * norm1.z() - norm1.y() * norm2.z();
+        if (std::abs(zdiff) > std::numeric_limits<Scalar>::epsilon()) {
             result.x() = 1.0;
             result.z() = (norm1.x() * norm2.y() - norm1.y() * norm2.x()) / zdiff;
             result.y() = (-norm1.x() - norm1.z() * result.z()) / norm1.y();
         }
-        else if (std::abs(ydiff) > std::numeric_limits<double>::epsilon()) {
+        else if (std::abs(ydiff) > std::numeric_limits<Scalar>::epsilon()) {
             result.x() = 1.0;
             result.y() = (norm1.x() * norm2.z() - norm1.z() * norm2.x()) / ydiff;
             result.z() = (-norm1.x() - norm1.y() * result.y()) / norm1.z();
         }
         else {
             result.z()         = 1.0;
-            const double ndiff = norm1.x() * norm2.y() - norm1.y() * norm2.x();
+            const Scalar ndiff = norm1.x() * norm2.y() - norm1.y() * norm2.x();
             result.y()         = (norm1.z() * norm2.x() - norm1.x() * norm2.z()) / ndiff;
             result.x()         = (-norm1.z() - norm1.y() * result.y()) / norm1.x();
             if (result.x() < 0.0) {
@@ -66,7 +67,7 @@ namespace support {
             }
         }
 
-        return screenToImage(projectCamSpaceToScreen(result, lens), dimensions).cast<double>();
+        return screenToImage<Scalar>(projectCamSpaceToScreen<Scalar>(result, lens), dimensions);
     }
 
     Goals VirtualGoalPost::detect(const Image& image,
@@ -113,26 +114,19 @@ namespace support {
                 Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, goalNormals.block<3, 1>(0, 3)));
 
             // build the predicted quad
-            utility::math::geometry::Quad<Eigen::Vector2f> quad(getCamRay(goalNormals.block<3, 1>(0, 0).cast<double>(),
-                                                                          goalNormals.block<3, 1>(0, 3).cast<double>(),
-                                                                          image.lens,
-                                                                          image.dimensions)
-                                                                    .cast<float>(),
-                                                                getCamRay(goalNormals.block<3, 1>(0, 0).cast<double>(),
-                                                                          goalNormals.block<3, 1>(0, 2).cast<double>(),
-                                                                          image.lens,
-                                                                          image.dimensions)
-                                                                    .cast<float>(),
-                                                                getCamRay(goalNormals.block<3, 1>(0, 1).cast<double>(),
-                                                                          goalNormals.block<3, 1>(0, 2).cast<double>(),
-                                                                          image.lens,
-                                                                          image.dimensions)
-                                                                    .cast<float>(),
-                                                                getCamRay(goalNormals.block<3, 1>(0, 1).cast<double>(),
-                                                                          goalNormals.block<3, 1>(0, 3).cast<double>(),
-                                                                          image.lens,
-                                                                          image.dimensions)
-                                                                    .cast<float>());
+            utility::math::geometry::Quad<Eigen::Vector2f> quad(
+                getCamRay<float>(
+                    goalNormals.block<3, 1>(0, 0), goalNormals.block<3, 1>(0, 3), image.lens, image.dimensions)
+                    .cast<float>(),
+                getCamRay<float>(
+                    goalNormals.block<3, 1>(0, 0), goalNormals.block<3, 1>(0, 2), image.lens, image.dimensions)
+                    .cast<float>(),
+                getCamRay<float>(
+                    goalNormals.block<3, 1>(0, 1), goalNormals.block<3, 1>(0, 2), image.lens, image.dimensions)
+                    .cast<float>(),
+                getCamRay<float>(
+                    goalNormals.block<3, 1>(0, 1), goalNormals.block<3, 1>(0, 3), image.lens, image.dimensions)
+                    .cast<float>());
 
 
             // goal base visibility check
@@ -273,25 +267,28 @@ namespace support {
         return Htc.inverse() * Htf;
     }
 
-    Eigen::Vector2d VirtualGoalPost::projectCamSpaceToScreen(const Eigen::Vector3d& point,
-                                                             const message::input::Image::Lens& cam) {
-        auto pinhole = [](const Eigen::Vector3d& point, const message::input::Image::Lens& cam) -> Eigen::Vector2d {
-            return Eigen::Vector2d(static_cast<double>(cam.focal_length) * point[1] / point[0],
-                                   static_cast<double>(cam.focal_length) * point[2] / point[0]);
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, 2, 1> VirtualGoalPost::projectCamSpaceToScreen(const Eigen::Matrix<Scalar, 3, 1>& point,
+                                                                         const message::input::Image::Lens& cam) {
+        auto pinhole = [](const Eigen::Matrix<Scalar, 3, 1>& point,
+                          const message::input::Image::Lens& cam) -> Eigen::Matrix<Scalar, 2, 1> {
+            return Eigen::Matrix<Scalar, 2, 1>(static_cast<Scalar>(cam.focal_length) * point[1] / point[0],
+                                               static_cast<Scalar>(cam.focal_length) * point[2] / point[0]);
         };
 
-        auto radial = [](const Eigen::Vector3d& point, const message::input::Image::Lens& cam) -> Eigen::Vector2d {
-            Eigen::Vector3d p = point.normalized();
-            float theta       = std::acos(p.x());
+        auto radial = [](const Eigen::Matrix<Scalar, 3, 1>& point,
+                         const message::input::Image::Lens& cam) -> Eigen::Matrix<Scalar, 2, 1> {
+            Eigen::Matrix<Scalar, 3, 1> p = point.normalized();
+            Scalar theta                  = std::acos(p.x());
             if (theta == 0) {
-                return Eigen::Vector2d::Zero();
+                return Eigen::Matrix<Scalar, 2, 1>::Zero();
             }
-            float r         = theta * cam.focal_length;
-            float sin_theta = std::sin(theta);
-            float px        = r * p.y() / sin_theta;
-            float py        = r * p.z() / sin_theta;
+            Scalar r         = theta * cam.focal_length;
+            Scalar sin_theta = std::sin(theta);
+            Scalar px        = r * p.y() / sin_theta;
+            Scalar py        = r * p.z() / sin_theta;
 
-            return Eigen::Vector2d(px, py) + cam.centre.cast<double>();
+            return Eigen::Matrix<Scalar, 2, 1>(px, py) + cam.centre.cast<Scalar>();
         };
 
         switch (cam.projection.value) {
@@ -300,16 +297,17 @@ namespace support {
             case message::input::Image::Lens::Projection::EQUISOLID:  // TODO: do this properly
                 return radial(point, cam);
             case message::input::Image::Lens::Projection::UNKNOWN:
-            default: return Eigen::Vector2d();
+            default: return Eigen::Matrix<Scalar, 2, 1>();
         }
     }
 
-    Eigen::Vector2i VirtualGoalPost::screenToImage(const Eigen::Vector2d& screen,
-                                                   const Eigen::Matrix<unsigned int, 2, 1>& imageSize) {
-        Eigen::Vector2d v =
-            Eigen::Vector2d(static_cast<double>(imageSize.x() - 1) * 0.5, static_cast<double>(imageSize.y() - 1) * 0.5)
-            - screen;
-        return v.array().round().matrix().cast<int>();
+    template <typename Scalar>
+    Eigen::Matrix<Scalar, 2, 1> VirtualGoalPost::screenToImage(const Eigen::Matrix<Scalar, 2, 1>& screen,
+                                                               const Eigen::Matrix<unsigned int, 2, 1>& imageSize) {
+        Eigen::Matrix<Scalar, 2, 1> v(static_cast<Scalar>(imageSize.x() - 1) * static_cast<Scalar>(0.5),
+                                      static_cast<Scalar>(imageSize.y() - 1) * static_cast<Scalar>(0.5));
+        v -= screen;
+        return v.array().round().matrix();
     }
 
 }  // namespace support
