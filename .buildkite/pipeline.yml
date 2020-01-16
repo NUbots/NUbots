@@ -1,0 +1,33 @@
+steps:
+  - label: Build code
+    command:
+      - yarn
+      - yarn build:ci
+    plugins:
+      - docker#v3.5.0:
+          image: "node:13"
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
+  - label: Check code with tslint
+    command:
+      - yarn
+      - yarn tslint
+    plugins:
+      - docker#v3.5.0:
+          image: "node:13"
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
+  - label: Test code
+    command:
+      - yarn
+      - yarn test:ci
+    plugins:
+      - docker#v3.5.0:
+          image: "node:13"
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
