@@ -34,3 +34,7 @@ message ServoTarget {
     float                     gain     = 4;
     float                     torque   = 5;
 }
+
+message ServoTargets {
+    repeated ServoTarget targets = 1;
+}

@@ -22,10 +22,8 @@ package message.motion;
 
 import "Vector.proto";
 
-message WalkStarted {
-}
-message WalkStopped {
-}
+message WalkStarted {}
+message WalkStopped {}
 
 message WalkCommand {
     uint64 subsumptionId = 1;  // reservation identifier for servo control

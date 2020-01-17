@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.patches import Circle
 
 xmin = -30

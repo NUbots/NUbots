@@ -4,9 +4,9 @@
 
 #include <backtrace.h>
 #include <dlfcn.h>
-#include <nuclear>
 
 #include <iostream>
+#include <nuclear>
 
 namespace utility {
 namespace support {

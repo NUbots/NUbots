@@ -36,7 +36,7 @@ message CompressedImage {
 
         Projection projection   = 1;
         float      focal_length = 2;
-        fvec2      fov          = 3;
+        float      fov          = 3;
         fvec2      centre       = 4;
     }
 

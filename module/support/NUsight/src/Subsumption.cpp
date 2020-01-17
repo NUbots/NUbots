@@ -17,10 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
-
 #include "message/behaviour/Subsumption.h"
 
+#include "NUsight.h"
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 

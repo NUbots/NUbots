@@ -25,13 +25,13 @@
 #include <stdint.h>
 #include <termios.h>
 #include <unistd.h>
+
 #include <cassert>
-
-#include "extension/Configuration.h"
-
 #include <cstring>
 #include <mutex>
 #include <vector>
+
+#include "extension/Configuration.h"
 
 
 namespace Darwin {
@@ -74,7 +74,7 @@ struct CommandResult {
     uint8_t checksum;
 };
 
-// This value calculates the checksum for a packet (the command argument is assumed to be in the CM730 format)
+// This value calculates the checksum for a packet (the command argument is assumed to be in the CM740 format)
 uint8_t calculateChecksum(void* command);
 uint8_t calculateChecksum(const CommandResult& result);
 

@@ -10,4 +10,7 @@
         120
     ],
     "python.formatting.provider": "black",
+    "files.associations": {
+        "*.role": "cmake"
+    }
 }

@@ -19,12 +19,9 @@
 
 #include "ScriptRunner.h"
 
-#include "message/platform/darwin/DarwinSensors.h"
-
 #include "extension/Configuration.h"
 #include "extension/Script.h"
-
-
+#include "message/platform/darwin/DarwinSensors.h"
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

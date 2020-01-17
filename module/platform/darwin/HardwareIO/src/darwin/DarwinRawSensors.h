@@ -31,7 +31,7 @@ namespace Darwin {
 namespace Types {
 
     /**
-     * @brief This represents the raw gyro values from the CM730 (they are read from the board in ZYX)
+     * @brief This represents the raw gyro values from the CM740 (they are read from the board in ZYX)
      */
     struct Gyro {
         Gyro() : z(0), y(0), x(0) {}
@@ -41,7 +41,7 @@ namespace Types {
     };
 
     /**
-     * @brief This represents the raw accelerometer values from the CM730
+     * @brief This represents the raw accelerometer values from the CM740
      */
     struct Accelerometer {
         Accelerometer() : x(0), y(0), z(0) {}
@@ -76,10 +76,10 @@ namespace Types {
     };
 
     /**
-     * @brief This represents data that comes from the CM730
+     * @brief This represents data that comes from the CM740
      */
-    struct CM730Data {
-        CM730Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
+    struct CM740Data {
+        CM740Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
         uint8_t buttons;
         uint8_t reserved[7] = {0};
         Gyro gyroscope;
@@ -106,16 +106,16 @@ namespace Types {
  * @brief This represents the bulk read results we get when we do one
  */
 struct BulkReadResults {
-    BulkReadResults() : cm730() {}
-    /// @brief Holds data from the CM730
-    Types::CM730Data cm730;
+    BulkReadResults() : cm740() {}
+    /// @brief Holds data from the CM740
+    Types::CM740Data cm740;
     /// @brief Holds data from the 20 servos (stored in location ServoID - 1)
     Types::MX28Data servos[20] = {Types::MX28Data()};
     /// @brief Holds data from the 2 FSR (stored as Right Left)
     Types::FSRData fsr[2] = {Types::FSRData()};
 
-    /// @brief Holds the error code (if any) from the CM730
-    uint8_t cm730ErrorCode = 0;
+    /// @brief Holds the error code (if any) from the CM740
+    uint8_t cm740ErrorCode = 0;
     /// @brief Holds the error code from the Servos (ServoID - 1)
     uint8_t servoErrorCodes[20] = {0};
     /// @brief Holds the error code from the FSR (right then left)

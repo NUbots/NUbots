@@ -3,12 +3,10 @@
 #include <chrono>
 
 #include "extension/Configuration.h"
-
 #include "message/input/Sensors.h"
 #include "message/localisation/Ball.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
-
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"

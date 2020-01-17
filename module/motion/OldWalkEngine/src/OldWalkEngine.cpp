@@ -26,14 +26,12 @@
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
-
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/SaveConfiguration.h"
-
 #include "utility/math/angle.h"
 #include "utility/math/comparison.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -657,7 +655,7 @@ namespace motion {
                                   100});  // TODO: support separate gains for each leg
         }
 
-        return std::move(waypoints);
+        return waypoints;
     }
 
     std::unique_ptr<std::vector<ServoCommand>> OldWalkEngine::motionArms(double phase) {
@@ -721,7 +719,7 @@ namespace motion {
         waypoints->push_back(
             {subsumptionId, time, ServoID::L_ELBOW, float(qLArmActual[2]), jointGains[ServoID::L_ELBOW], 100});
 
-        return std::move(waypoints);
+        return waypoints;
     }
 
     Transform2D OldWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) {

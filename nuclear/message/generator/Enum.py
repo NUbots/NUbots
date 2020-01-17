@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from generator.textutil import indent, dedent
+from generator.textutil import dedent, indent
 
 
 class Enum:

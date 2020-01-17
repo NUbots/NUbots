@@ -16,9 +16,11 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include "unistd.h"
 
 Joystick::Joystick() : _fd(-1), path("/dev/input/js0") {

@@ -24,7 +24,6 @@
 #include <nuclear>
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/Subsumption.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"

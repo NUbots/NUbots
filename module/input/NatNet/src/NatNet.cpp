@@ -19,10 +19,9 @@
 
 #include "NatNet.h"
 
-#include "Parse.h"
-
 #include <fmt/format.h>
 
+#include "Parse.h"
 #include "extension/Configuration.h"
 
 namespace module {
@@ -344,7 +343,9 @@ namespace input {
                 } break;
 
                 // Bad packet
-                default: { log<NUClear::WARN>("NatNet received an unexpected model type", type); } break;
+                default: {
+                    log<NUClear::WARN>("NatNet received an unexpected model type", type);
+                } break;
             }
         }
     }

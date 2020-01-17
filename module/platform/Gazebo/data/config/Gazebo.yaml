@@ -1,0 +1,3 @@
+simulator_name: gazebo
+model_name: nugus1
+clock_smoothing: 0.6

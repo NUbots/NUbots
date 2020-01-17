@@ -18,15 +18,13 @@
  */
 
 #include "HardwareIO.h"
-#include "Convert.h"
 
 #include <iomanip>
 
+#include "Convert.h"
 #include "extension/Configuration.h"
-
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/yaml_expression.h"
@@ -48,42 +46,42 @@ namespace platform {
             sensors.timestamp = NUClear::clock::now();
 
             /*
-             CM730 Data
+             CM740 Data
              */
 
             // Read our Error code
-            sensors.cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT
-                                                                  : DarwinSensors::Error(data.cm730ErrorCode).value;
+            sensors.cm740ErrorFlags = data.cm740ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT
+                                                                  : DarwinSensors::Error(data.cm740ErrorCode).value;
 
             // LED Panel
-            sensors.ledPanel = cm730State.ledPanel;
+            sensors.ledPanel = cm740State.ledPanel;
 
             // Head LED
-            sensors.headLED = cm730State.headLED;
+            sensors.headLED = cm740State.headLED;
 
             // Eye LED
-            sensors.eyeLED = cm730State.eyeLED;
+            sensors.eyeLED = cm740State.eyeLED;
 
             // Buttons
-            sensors.buttons.left   = Convert::getBit<0>(data.cm730.buttons);
-            sensors.buttons.middle = Convert::getBit<1>(data.cm730.buttons);
+            sensors.buttons.left   = Convert::getBit<0>(data.cm740.buttons);
+            sensors.buttons.middle = Convert::getBit<1>(data.cm740.buttons);
 
             // Voltage (in volts)
-            sensors.voltage = Convert::voltage(data.cm730.voltage);
+            sensors.voltage = Convert::voltage(data.cm740.voltage);
 
             if (sensors.voltage <= chargedVoltage) {
-                sensors.cm730ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+                sensors.cm740ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
             }
 
             // Accelerometer (in m/s^2)
-            sensors.accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
-            sensors.accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
-            sensors.accelerometer.z = Convert::accelerometer(data.cm730.accelerometer.z);
+            sensors.accelerometer.x = Convert::accelerometer(data.cm740.accelerometer.x);
+            sensors.accelerometer.y = Convert::accelerometer(data.cm740.accelerometer.y);
+            sensors.accelerometer.z = Convert::accelerometer(data.cm740.accelerometer.z);
 
             // Gyroscope (in radians/second)
-            sensors.gyroscope.x = Convert::gyroscope(data.cm730.gyroscope.x);
-            sensors.gyroscope.y = Convert::gyroscope(data.cm730.gyroscope.y);
-            sensors.gyroscope.z = Convert::gyroscope(data.cm730.gyroscope.z);
+            sensors.gyroscope.x = Convert::gyroscope(data.cm740.gyroscope.x);
+            sensors.gyroscope.y = Convert::gyroscope(data.cm740.gyroscope.y);
+            sensors.gyroscope.z = Convert::gyroscope(data.cm740.gyroscope.z);
 
             /*
              Force Sensitive Resistor Data
@@ -209,20 +207,20 @@ namespace platform {
 
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , darwin("/dev/CM730")
-            , cm730State()
+            , darwin("/dev/CM740")
+            , cm740State()
             , servoState()
             , chargedVoltage(0.0f)
             , flatVoltage(0.0f) {
 
             on<Startup>().then("HardwareIO Startup", [this] {
-                uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
-                uint8_t CM730Version = darwin.cm730.read<uint8_t>(Darwin::CM730::Address::VERSION);
+                uint16_t CM740Model  = darwin.cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
+                uint8_t CM740Version = darwin.cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
                 std::stringstream version, model;
-                model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM730Model);
-                version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
-                log<NUClear::INFO>("CM730 Model:", model.str());
-                log<NUClear::INFO>("CM730 Firmware Version:", version.str());
+                model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM740Model);
+                version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM740Version);
+                log<NUClear::INFO>("CM740 Model:", model.str());
+                log<NUClear::INFO>("CM740 Firmware Version:", version.str());
             });
 
             on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
@@ -239,7 +237,7 @@ namespace platform {
                 flatVoltage    = config["battery"]["flat_voltage"].as<float>();
             });
 
-            // This trigger gets the sensor data from the CM730
+            // This trigger gets the sensor data from the CM740
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
                 "Hardware Loop", [this] {
                     // Our final sensor output
@@ -320,7 +318,7 @@ namespace platform {
                     sensors->voltage =
                         std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
-                    // cm730 leds to display battery voltage
+                    // cm740 leds to display battery voltage
                     uint32_t ledl            = 0;
                     uint32_t ledr            = 0;
                     std::array<bool, 3> ledp = {false, false, false};
@@ -421,9 +419,9 @@ namespace platform {
             // If we get a HeadLED command then write it
             on<Trigger<DarwinSensors::HeadLED>>().then([this](const DarwinSensors::HeadLED& led) {
                 // Update our internal state
-                cm730State.headLED = led;
+                cm740State.headLED = led;
 
-                darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L,
+                darwin.cm740.write(Darwin::CM740::Address::LED_HEAD_L,
                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
@@ -432,9 +430,9 @@ namespace platform {
             // If we get a EyeLED command then write it
             on<Trigger<DarwinSensors::EyeLED>>().then([this](const DarwinSensors::EyeLED& led) {
                 // Update our internal state
-                cm730State.eyeLED = led;
+                cm740State.eyeLED = led;
 
-                darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L,
+                darwin.cm740.write(Darwin::CM740::Address::LED_EYE_L,
                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
@@ -443,9 +441,9 @@ namespace platform {
             // If we get a EyeLED command then write it
             on<Trigger<DarwinSensors::LEDPanel>>().then([this](const DarwinSensors::LEDPanel& led) {
                 // Update our internal state
-                cm730State.ledPanel = led;
+                cm740State.ledPanel = led;
 
-                darwin.cm730.write(Darwin::CM730::Address::LED_PANNEL,
+                darwin.cm740.write(Darwin::CM740::Address::LED_PANNEL,
                                    (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
             });
         }
