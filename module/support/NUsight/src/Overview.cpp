@@ -130,15 +130,14 @@ namespace support {
                             }
                         }
 
-                        // if (walk_path) {
-                        //     // Set our walk path plan
-                        //     if (walk_path) {
-                        //         for (const auto& state : walk_path->states) {
-                        //             // Make these positions in field space
-                        //             msg->path_plan.push_back(state);
-                        //         }
-                        //     }
-                        // }
+                        if (walk_path) {
+                            // Set our walk path plan
+                            if (walk_path) {
+                                for (const auto& state : walk_path->states) {
+                                    msg->walk_path_plan.push_back(state);
+                                }
+                            }
+                        }
                     }
 
                     if (kick_plan) {
