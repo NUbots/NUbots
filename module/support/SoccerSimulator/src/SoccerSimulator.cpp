@@ -34,7 +34,6 @@
 #include "message/vision/Goal.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/matrix/transform.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_expression.h"
@@ -66,7 +65,6 @@ namespace support {
     using utility::math::angle::bearingToUnitVector;
     using utility::math::angle::normalizeAngle;
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::transform::worldToLocal;
     using utility::motion::kinematics::calculateRobotToIMU;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -255,7 +253,7 @@ namespace support {
                                   // Empty queue
                                   std::queue<KickCommand>().swap(kickQueue);
                                   // Check if kick worked:
-                                  Eigen::Affine2d relativeBallPose = worldToLocal(world.robotPose, ball_pose);
+                                  Eigen::Affine2d relativeBallPose = world.robotPose.inverse() * ball_pose;
 
                                   world.ball.position.head<2>() +=
                                       world.robotPose.rotation() * lastKickCommand.direction.head<2>().normalized();
@@ -349,7 +347,7 @@ namespace support {
                     Eigen::Affine2d ball_pose;
                     ball_pose.linear()      = Eigen::Rotation2Dd(world.ball.position.z()).toRotationMatrix();
                     ball_pose.translation() = world.ball.position.head<2>();
-                    b->position             = worldToLocal(world.robotPose, ball_pose).translation();
+                    b->position             = (world.robotPose.inverse() * ball_pose).translation();
                     b->covariance           = Eigen::Matrix2d::Identity() * 0.00001;
 
                     emit(std::make_unique<std::vector<message::localisation::Ball>>(1, *b));
