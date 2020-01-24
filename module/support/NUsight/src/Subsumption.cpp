@@ -32,7 +32,7 @@ namespace support {
     using utility::behaviour::ActionPriorites;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
-    using LimbID = utility::input::LimbID;
+    using utility::input::LimbID;
 
     void NUsight::provideSubsumption() {
 

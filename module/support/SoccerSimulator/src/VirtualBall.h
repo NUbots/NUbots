@@ -20,35 +20,46 @@
 #ifndef MODULE_SUPPORT_VIRTUALBALL
 #define MODULE_SUPPORT_VIRTUALBALL
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <random>
 
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/vision/Ball.h"
-#include "utility/math/matrix/Transform2D.h"
 
 namespace module {
 namespace support {
 
     class VirtualBall {
     public:
-        VirtualBall();
+        VirtualBall()
+            : position(Eigen::Vector3d::Zero()), velocity(Eigen::Vector3d::Zero()), diameter(0.1), rd(rand()) {}
 
-        VirtualBall(arma::vec2 position, float diameter);
+        VirtualBall(const Eigen::Vector2d& position, float diameter)
+            : position(position.x(), position.y(), diameter * 0.5)
+            , velocity(Eigen::Vector3d::Zero())
+            , diameter(diameter)
+            , rd(rand()) {}
 
-        arma::vec3 position;
-        arma::vec3 velocity;
+        Eigen::Vector3d position;
+        Eigen::Vector3d velocity;
         float diameter;
 
         std::mt19937 rd;
-        std::normal_distribution<> angularDistribution = std::normal_distribution<>(0, M_PI_2);
-        std::normal_distribution<> radialDistribution  = std::normal_distribution<>(0, 0.01);
+        std::normal_distribution<> angularDistribution = std::normal_distribution<>(0.0, M_PI_2);
+        std::normal_distribution<> radialDistribution  = std::normal_distribution<>(0.0, 0.01);
 
         message::vision::Balls detect(const message::input::Image& image,
-                                      utility::math::matrix::Transform2D robotPose,
+                                      const Eigen::Affine2d& robotPose,
                                       const message::input::Sensors& sensors,
-                                      arma::vec4 error);
+                                      const Eigen::Vector4d& error);
+
+    private:
+        Eigen::Affine3d getFieldToCam(const Eigen::Affine2d& Tft, const Eigen::Affine3d& Htc);
+        Eigen::Vector2d projectCamSpaceToScreen(const Eigen::Vector3d& point, const message::input::Image::Lens& cam);
+        Eigen::Vector2i screenToImage(const Eigen::Vector2d& screen,
+                                      const Eigen::Matrix<unsigned int, 2, 1>& imageSize);
     };
 }  // namespace support
 }  // namespace module

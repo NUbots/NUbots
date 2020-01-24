@@ -19,13 +19,8 @@
 
 #include "VirtualBall.h"
 
-#include <armadillo>
-
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/vision.h"
-#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
@@ -35,30 +30,12 @@ namespace support {
     using message::vision::Ball;
     using message::vision::Balls;
 
-    using ServoID = utility::input::ServoID;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::matrix::Transform2D;
-    using utility::math::matrix::Transform3D;
-    using utility::math::vision::getFieldToCam;
-    using utility::math::vision::projectCamSpaceToScreen;
-    using utility::math::vision::screenToImage;
+    using utility::input::ServoID;
 
-    VirtualBall::VirtualBall() : position(arma::fill::zeros), velocity(arma::fill::zeros), diameter(0.1), rd(rand()) {}
-
-    VirtualBall::VirtualBall(arma::vec2 position, float diameter)
-        : position({position[0], position[1], diameter * 0.5})
-        , velocity(arma::fill::zeros)
-        , diameter(diameter)
-        , rd(rand()) {}
-
-    // utility::math::matrix::Transform2D ballPose;
-    arma::vec3 position;
-    arma::vec3 velocity;
-
-    // arma::vec2 position;
-    float diameter;
-
-    Balls VirtualBall::detect(const Image& image, Transform2D robotPose, const Sensors& sensors, arma::vec4 /*error*/) {
+    Balls VirtualBall::detect(const Image& image,
+                              const Eigen::Affine2d& robotPose,
+                              const Sensors& sensors,
+                              const Eigen::Vector4d& /*error*/) {
 
         Balls result;
         result.balls.reserve(1);
@@ -67,70 +44,123 @@ namespace support {
         result.Hcw       = Htc.inverse() * sensors.Htw;
         result.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
 
-        Transform3D Hcf = getFieldToCam(robotPose, convert(sensors.Hgc));
-        Transform3D Hfc = Hcf.i();
+        Eigen::Affine3d Hcf = getFieldToCam(robotPose, Eigen::Affine3d(sensors.Hgc));
+        Eigen::Affine3d Hfc = Hcf.inverse();
 
         // Ball position in field
-        arma::vec3 rBFf = position;
+        Eigen::Vector3d rBFf = position;
 
         // Camera position in field
-        arma::vec3 rCFf = Hfc.translation();
+        Eigen::Vector3d rCFf = Hfc.translation();
 
         // Get our ball position in camera
-        arma::vec3 rBCc = Hcf.rotation() * arma::vec3(rBFf - rCFf);
-        if (rBCc[0] < 0.0) {
+        Eigen::Vector3d rBCc = Hcf.rotation() * (rBFf - rCFf);
+        if (rBCc.x() < 0.0) {
             return result;
         }
 
-        double rBCcLength = arma::norm(rBCc);
+        double rBCcLength = rBCc.norm();
 
         // The angular width of the cone we are drawing
-        double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
+        double angle = 2.0 * std::asin((diameter * 0.5) / rBCc.norm());
 
         // Project the centre to the screen and work out the radius as if it was in the centre
-        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, image.lens), convert(image.dimensions));
+        auto centre = screenToImage(projectCamSpaceToScreen(rBCc, image.lens), image.dimensions);
         // TODO actually project this
         // double radius = 100 * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
-        if (centre[0] > 0 && centre[0] < int(image.dimensions[0]) && centre[1] > 0
-            && centre[1] < int(image.dimensions[1])) {
+        if (centre.x() > 0 && centre.x() < int(image.dimensions.x()) && centre.y() > 0
+            && centre.y() < int(image.dimensions.y())) {
 
             // Set our circle parameters for simulating the ball
-            result.balls.at(0).cone.axis     = convert(arma::vec3(arma::normalise(rBCc))).cast<float>();
+            result.balls.at(0).cone.axis     = rBCc.normalized().cast<float>();
             result.balls.at(0).cone.gradient = std::tan(angle * 0.5);
 
             // Get our transform to world coordinates
-            Transform3D Hwc = convert(Eigen::Matrix4d((Htc.inverse() * sensors.Htw).inverse()));
+            Eigen::Affine3d Hwc((Htc.inverse() * sensors.Htw).inverse());
 
-            arma::vec3 rBWw = Hwc.transformPoint(rBCc);
+            Eigen::Vector3d rBWw = (Hwc * Eigen::Vector4d(rBCc.x(), rBCc.y(), rBCc.z(), 1.0)).head<3>();
             // Attach the measurement to the object
             result.balls.at(0).measurements.push_back(Ball::Measurement());
             // TODO: This needs updating to actually provide rBCc
-            result.balls.at(0).measurements.back().rBCc = convert(rBWw).cast<float>();
+            result.balls.at(0).measurements.back().rBCc = rBWw.cast<float>();
 
             // Measure points around the ball as a normal distribution
-            arma::vec3 rEBc;
-            if (rBCc[0] == 0.0 && rBCc[1] == 0.0) {
-                if (rBCc[2] > 0.0) {
-                    rEBc = {1, 0, 0};
+            Eigen::Vector3d rEBc;
+            if (rBCc.x() == 0.0 && rBCc.y() == 0.0) {
+                if (rBCc.z() > 0.0) {
+                    rEBc = Eigen::Vector3d::UnitX();
                 }
                 else {
-                    rEBc = {-1, 0, 0};
+                    rEBc = -Eigen::Vector3d::UnitX();
                 }
             }
             else {
                 // NOTE: this may not work correctly for view fields > 180 degrees
-                rEBc = {M_SQRT1_2, 0, M_SQRT1_2};
+                rEBc = Eigen::Vector3d(M_SQRT1_2, 0.0, M_SQRT1_2);
             }
             // set rEBC to be a properly sized radius vector facing from the ball centre towards the (top or inner int
             // he case of extreme values) ball edge
-            rEBc = rBCcLength * arma::normalise(rEBc - rEBc * arma::dot(rEBc, rBCc) / rBCcLength);
+            rEBc = rBCcLength * (rEBc - rEBc * rEBc.dot(rBCc) / rBCcLength).normalized();
         }
-
 
         // If no measurements are in the Ball, then there it was not observed
         return result;
+    }
+
+    Eigen::Affine3d VirtualBall::getFieldToCam(const Eigen::Affine2d& Tft,
+                                               // f = field
+                                               // t = torso
+                                               // c = camera
+                                               const Eigen::Affine3d& Htc) {
+
+        Eigen::Affine3d Htf = Eigen::Affine3d::Identity();
+        Htf                 = Htf.translate(Eigen::Vector3d(Tft.translation().x(), Tft.translation().y(), 0.0))
+                  .rotate(Eigen::AngleAxisd(Eigen::Rotation2Dd(Tft.rotation()).angle(), Eigen::Vector3d::UnitZ()))
+                  .inverse();
+
+
+        return Htc.inverse() * Htf;
+    }
+
+    Eigen::Vector2d VirtualBall::projectCamSpaceToScreen(const Eigen::Vector3d& point,
+                                                         const message::input::Image::Lens& cam) {
+        auto pinhole = [](const Eigen::Vector3d& point, const message::input::Image::Lens& cam) -> Eigen::Vector2d {
+            return Eigen::Vector2d(static_cast<double>(cam.focal_length) * point[1] / point[0],
+                                   static_cast<double>(cam.focal_length) * point[2] / point[0]);
+        };
+
+        auto radial = [](const Eigen::Vector3d& point, const message::input::Image::Lens& cam) -> Eigen::Vector2d {
+            Eigen::Vector3d p = point.normalized();
+            float theta       = std::acos(p.x());
+            if (theta == 0) {
+                return Eigen::Vector2d::Zero();
+            }
+            float r         = theta * cam.focal_length;
+            float sin_theta = std::sin(theta);
+            float px        = r * p.y() / sin_theta;
+            float py        = r * p.z() / sin_theta;
+
+            return Eigen::Vector2d(px, py) + cam.centre.cast<double>();
+        };
+
+        switch (cam.projection.value) {
+            case message::input::Image::Lens::Projection::RECTILINEAR: return pinhole(point, cam);
+            case message::input::Image::Lens::Projection::EQUIDISTANT:
+            case message::input::Image::Lens::Projection::EQUISOLID:  // TODO: do this properly
+                return radial(point, cam);
+            case message::input::Image::Lens::Projection::UNKNOWN:
+            default: return Eigen::Vector2d();
+        }
+    }
+
+    Eigen::Vector2i VirtualBall::screenToImage(const Eigen::Vector2d& screen,
+                                               const Eigen::Matrix<unsigned int, 2, 1>& imageSize) {
+        Eigen::Vector2d v =
+            Eigen::Vector2d(static_cast<double>(imageSize.x() - 1) * 0.5, static_cast<double>(imageSize.y() - 1) * 0.5)
+            - screen;
+        return v.array().round().matrix().cast<int>();
     }
 }  // namespace support
 }  // namespace module
