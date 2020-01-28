@@ -267,7 +267,7 @@ namespace motion {
             // Evaluate and save trunk orientation
             // in next support foot frame
             Eigen::Vector3f trunkAxis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
-                                      trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
+                                      params.trunk_pitch - trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
                                       trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(period_time));
             // Convert in intrinsic euler angle
             Eigen::Matrix3f trunkMat   = Eigen::AngleAxisf(trunkAxis.norm(), trunkAxis.normalized()).toRotationMatrix();
@@ -515,11 +515,14 @@ namespace motion {
 
             point(TrajectoryTypes::TRUNK_AXIS_Y,
                   0.0f,
-                  trunk_axis_pos_at_last.y(),
+                  params.trunk_pitch - trunk_axis_pos_at_last.y(),
                   trunk_axis_vel_at_last.y(),
                   trunk_axis_acc_at_last.y());
-            point(TrajectoryTypes::TRUNK_AXIS_Y, half_period + timeShift, axisAtSupport.y(), axisVel.y());
-            point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, axisAtNext.y(), axisVel.y());
+            point(TrajectoryTypes::TRUNK_AXIS_Y,
+                  half_period + timeShift,
+                  params.trunk_pitch - axisAtSupport.y(),
+                  axisVel.y());
+            point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch - axisAtNext.y(), axisVel.y());
 
             point(TrajectoryTypes::TRUNK_AXIS_Z,
                   0.0f,
@@ -649,10 +652,11 @@ namespace motion {
             point(TrajectoryTypes::TRUNK_AXIS_X, half_period, 0.0f);
             point(TrajectoryTypes::TRUNK_AXIS_Y,
                   0.0f,
-                  trunk_axis_pos_at_last.y(),
+                  params.trunk_pitch - trunk_axis_pos_at_last.y(),
                   trunk_axis_vel_at_last.y(),
                   trunk_axis_acc_at_last.y());
-            point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch);
+            point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - params.trunk_pitch);
+
             point(TrajectoryTypes::TRUNK_AXIS_Z,
                   0.0f,
                   trunk_axis_pos_at_last.z(),
