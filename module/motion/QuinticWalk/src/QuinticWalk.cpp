@@ -260,16 +260,17 @@ namespace motion {
         Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal ????? should be this????
 
         // Calculate leg joints
-        std::vector<std::pair<ServoID, float>> joints;
         Eigen::Matrix4d left_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hst.matrix().cast<double>() : Hft.matrix().cast<double>();
         Eigen::Matrix4d right_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
-        joints = calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
+
+        auto joints =
+            calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
 
         auto waypoints = motionLegs(joints);
 
-        emit(waypoints);
+        emit(std::move(waypoints));
     }
 
     std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(

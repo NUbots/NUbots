@@ -293,21 +293,14 @@ namespace motion {
                                                   const bool& startMovement,
                                                   const bool& startStep,
                                                   const bool& kickStep) {
-            // save the current trunk state to use it later
+            // save the current trunk state to use it later and compute next step position
             if (!startMovement) {
                 saveCurrentTrunkState();
+                foot_step.stepFromOrders(orders);
             }
             else {
                 trunk_pos_at_last.y() -= foot_step.getNext().y();
-                // trunkPos = Eigen::Rotation2Dd(-foot_step.getNext().z()).toRotationMatrix() * trunkPos;
-            }
-
-            if (startMovement) {
-                // update support foot and compute odometry
                 foot_step.stepFromOrders(Eigen::Vector3f::Zero());
-            }
-            else {
-                foot_step.stepFromOrders(orders);
             }
 
             // Reset the trajectories
@@ -336,7 +329,8 @@ namespace motion {
                 doubleSupportLength = half_period;
                 singleSupportLength = 0.0f;
             }
-            // Set float support phase
+
+            // Set double support phase
             point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, 1.0f);
             point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 1.0f);
             point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 0.0f);
@@ -491,19 +485,20 @@ namespace motion {
             // orientation position and velocity
             // in euler angle and convertion
             // to axis vector
-            Eigen::Vector3f eulerAtSuport(0.0f,
-                                          params.trunk_pitch
-                                              + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                              + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
-                                          0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
+            Eigen::Vector3f eulerAtSupport(0.0f,
+                                           params.trunk_pitch
+                                               + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
+                                               + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                           0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
             Eigen::Vector3f eulerAtNext(0.0f,
                                         params.trunk_pitch + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
                                             + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
                                         foot_step.getNext().z());
-            Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSuport);
+            Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
             Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
             Eigen::Vector3f axisAtSupport = Eigen::AngleAxisf(matAtSupport).axis();
             Eigen::Vector3f axisAtNext    = Eigen::AngleAxisf(matAtNext).axis();
+
             Eigen::Vector3f axisVel(
                 0.0f,
                 0.0f,
