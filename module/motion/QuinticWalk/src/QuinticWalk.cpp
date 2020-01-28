@@ -118,8 +118,7 @@ namespace motion {
             }
 
             // warn user that speed was limited
-            if (command.x() * factor != orders.x() || command.y() * factor != orders.y()
-                || command.z() * factor != orders.z()) {
+            if (command.x() != orders.x() || command.y() != orders.y() || command.z() != orders.z()) {
                 log<NUClear::WARN>(
                     fmt::format("Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
                                 command.x(),
