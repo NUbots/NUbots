@@ -655,7 +655,7 @@ namespace motion {
                   params.trunk_pitch - trunk_axis_pos_at_last.y(),
                   trunk_axis_vel_at_last.y(),
                   trunk_axis_acc_at_last.y());
-            point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - params.trunk_pitch);
+            point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - 1.0f);
 
             point(TrajectoryTypes::TRUNK_AXIS_Z,
                   0.0f,
