@@ -13,6 +13,7 @@
 #include "utility/math/euler.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
@@ -30,6 +31,7 @@ namespace motion {
     using message::motion::ServoTarget;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
+    using utility::nusight::graph;
 
     using utility::input::ServoID;
     using utility::math::matrix::Transform3D;
@@ -268,6 +270,8 @@ namespace motion {
             calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
 
         auto waypoints = motionLegs(joints);
+
+        emit(graph("support to swing x", foot_pos.x()));
 
         emit(std::move(waypoints));
     }
