@@ -1,17 +1,17 @@
 walk:
   # Full walk cycle frequency
   # (in Hz, > 0)
-  freq: 1.3
+  freq: 1.5
   # Length of double support phase in half cycle
   # (ratio, [0:1])
   double_support_ratio: 0.05
   # Give extra swing to first step for better start
   # (in ?, [0:10])
-  first_step_swing_factor: 1.0
+  first_step_swing_factor: 0.8
   foot:
     # Lateral distance between the feet center
     # (in m, >= 0)
-    distance: 0.22
+    distance: 0.23
     # Maximum flying foot height
     # (in m, >= 0)
     rise: 0.08
@@ -35,23 +35,23 @@ walk:
     overshoot:
       # Foot X/Y overshoot in ratio of step length
       # (ratio, >= 0)
-      ratio: 0.1
+      ratio: 0.05
       # Foot X/Y overshoot phase
       # (single support cycle phase, [footApexPhase:1]
       phase: 0.85
   trunk:
     # Height of the trunk from ground
     # (in m, > 0)
-    height: 0.45
+    height: 0.47
     # Trunk pitch orientation
     # (in rad)
-    pitch: 1.3
+    pitch: 1.4
     # Phase offset of trunk oscillation
     # (half cycle phase, [-1:1])
     phase: -0.1
     # Trunk forward offset
     # (in m)
-    x_offset: 0.0
+    x_offset: 0.045
     # Trunk lateral offset
     # (in m)
     y_offset: 0.0
@@ -60,18 +60,18 @@ walk:
     swing: 0.2
     # Trunk swing pause length in phase at apex
     # (half cycle ratio, [0:1])
-    pause: 0.0
+    pause: 0.2
     x_offset_p_coef:
       # Trunk forward offset proportional to forward step
       # (in 1)
-      forward: 0.0
+      forward: 0.09
       # Trunk forward offset proportional to rotation step
       # (in m/rad)
       turn: 0.0
     pitch_p_coef:
       # Trunk pitch orientation proportional to forward step
       # (in rad/m)
-      forward: 0.0
+      forward: 0.015
       # Trunk pitch orientation proportional to rotation step
       # (in 1)
       turn: 0.0
@@ -117,4 +117,4 @@ imu:
     threshold: 0.4
 
 gains:
-  legs: 5
+  legs: 10
