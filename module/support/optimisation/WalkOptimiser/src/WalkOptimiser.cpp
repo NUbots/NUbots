@@ -19,59 +19,61 @@
 
 #include "WalkOptimiser.h"
 
-#include "message/input/ServoID.h"
+#include <fmt/format.h>
+
+#include "message/support/SaveConfiguration.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
-#include "utility/math/optimisation/PGAoptimiser.h"
-#include "utility/support/yaml_armadillo.h"
+// Comment remains as an example of usage for this module.
+// #include "utility/math/optimisation/PGAoptimiser.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace support {
     namespace optimisation {
 
+        using extension::Configuration;
         using message::behaviour::CancelFixedWalk;
         using message::behaviour::FixedWalkCommand;
         using message::behaviour::FixedWalkFinished;
         using message::behaviour::WalkConfigSaved;
         using message::behaviour::WalkOptimiserCommand;
-
         using message::input::Sensors;
-        using message::input::ServoID;
-
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
-
-        using extension::Configuration;
         using message::support::SaveConfiguration;
+        using utility::input::ServoID;
+        using utility::support::Expression;
 
         WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), initialConfig("Jerry", YAML::Node()) {
+            : Reactor(std::move(environment)), initialConfig("Config.yaml", "nugus", "WalkOptimiser", YAML::Node()) {
 
             on<Configuration>("WalkOptimiser.yaml").then([this](const Configuration& config) {
                 log("Starting up walk optimiser");
 
                 number_of_samples = config["number_of_samples"].as<int>();
-                parameter_sigmas.resize(config["parameters_and_sigmas"].size());
-                parameter_names.resize(config["parameters_and_sigmas"].size());
+                parameter_sigmas  = Eigen::VectorXd(config["parameters_and_sigmas"].config.size());
+                parameter_names.resize(config["parameters_and_sigmas"].config.size());
                 int i = 0;
 
-                for (const auto& parameter : config["parameters_and_sigmas"]) {
+                for (const auto& parameter : config["parameters_and_sigmas"].config) {
                     parameter_names[i]  = parameter.first.as<std::string>();
-                    parameter_sigmas[i] = parameter.second.as<double>();
+                    parameter_sigmas[i] = parameter.second.as<Expression>();
                     i++;
                 }
 
                 walk_command.segments.clear();
-                for (auto& segment : config["segments"]) {
+                for (auto& segment : config["segments"].config) {
 
                     walk_command.segments.push_back(FixedWalkCommand::WalkSegment());
-                    walk_command.segments.back().direction   = segment["direction"].as<arma::vec>();
-                    walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
+                    walk_command.segments.back().direction   = segment["direction"].as<Expression>();
+                    walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<Expression>();
 
-                    walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();
+                    walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<Expression>();
                     walk_command.segments.back().normalisedAngularVelocity =
-                        segment["normalisedAngularVelocity"].as<double>();
+                        segment["normalisedAngularVelocity"].as<Expression>();
                     walk_command.segments.back().duration =
-                        std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
+                        std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<Expression>()));
                 }
 
                 getup_cancel_trial_threshold = config["getup_cancel_trial_threshold"].as<uint>();
@@ -86,19 +88,20 @@ namespace support {
                     // Start optimisation
                     std::cerr << "Optimiser command" << std::endl;
                     // Get samples
-                    samples = utility::math::optimisation::PGA::getSamples(
-                        getState(walkConfig), parameter_sigmas, number_of_samples);
+                    // Comment remains as an example of usage for this module.
+                    // samples = utility::math::optimisation::PGA::getSamples(
+                    //     getState(walkConfig), parameter_sigmas, number_of_samples);
                     // Initialise fitnesses
-                    fitnesses.zeros(number_of_samples);
+                    fitnesses.setZero(number_of_samples);
                     // Save the config which we loaded from file
                     initialConfig = walkConfig;
                     // Set the sample we are currently on
-                    // Use iteritive evaluation so that more samples can be added at any time
+                    // Use iterative evaluation so that more samples can be added at any time
                     currentSample = 0;
 
                     std::cerr << "Sample: " << currentSample << std::endl;
                     // Apply the parameters to the walk engine
-                    setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                    setWalkParameters(getWalkConfig(samples.row(currentSample).transpose()));
                     // Now wait for WalkConfigSaved
                 });
 
@@ -106,7 +109,7 @@ namespace support {
                 std::this_thread::sleep_for(std::chrono::milliseconds(configuration_wait_milliseconds));
                 // Start a walk routine
                 auto command = std::make_unique<FixedWalkCommand>(walk_command);
-                emit(std::move(command));
+                emit(command);
             });
 
 
@@ -129,27 +132,26 @@ namespace support {
                 }
             });
 
-            on < Trigger<FixedWalkFinished>,
-                <Sync<WalkOptimiser>>().then(
-                    "Walk Routine Finised",
-                    [this] {
-                        // Get and reset data
-                        fitnesses[currentSample] = data.popFitness();
-                        std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample] << std::endl;
-                        if (currentSample >= samples.n_rows - 1) {
-                            emit(std::make_unique<OptimisationComplete>());
-                        }
-                        else {
-                            // Setup new parameters
-                            std::cerr << "Sample:" << ++currentSample << std::endl;
-                            setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
-                            // Now wait for WalkConfigSaved
-                        }
-                    });
+            on<Trigger<FixedWalkFinished>, Sync<WalkOptimiser>>().then("Walk Routine Finised", [this] {
+                // Get and reset data
+                fitnesses[currentSample] = data.popFitness();
+                std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample] << std::endl;
+                if (currentSample >= samples.rows() - 1) {
+                    emit(std::make_unique<OptimisationComplete>());
+                }
+                else {
+                    // Setup new parameters
+                    std::cerr << "Sample:" << ++currentSample << std::endl;
+                    setWalkParameters(getWalkConfig(samples.row(currentSample).transpose()));
+                    // Now wait for WalkConfigSaved
+                }
+            });
 
             on<Trigger<OptimisationComplete>, Sync<WalkOptimiser>>().then("Record Results", [this] {
                 // Combine samples
-                arma::vec result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
+                Eigen::VectorXd result;
+                // Comment remains as an example of usage for this module.
+                // result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
 
                 std::cerr << "Final Result:" << std::endl;
                 auto cfg = getWalkConfig(result);
@@ -157,8 +159,8 @@ namespace support {
             });
         }
 
-        arma::vec WalkOptimiser::getState(const Configuration& walkConfig) {
-            arma::vec state(parameter_names.size());
+        Eigen::VectorXd WalkOptimiser::getState(const Configuration& walkConfig) {
+            Eigen::VectorXd state(parameter_names.size());
             std::cerr << "walkConfig.size() = " << walkConfig.config.size() << "\nLoading state:" << std::endl;
             int i = 0;
             for (const std::string& name : parameter_names) {
@@ -169,7 +171,7 @@ namespace support {
             return state;
         }
 
-        void WalkOptimiser::printState(const arma::vec& state) {
+        void WalkOptimiser::printState(const Eigen::VectorXd& state) {
             std::cerr << "[";
             for (uint i = 0; i < parameter_names.size(); ++i) {
                 std::cerr << parameter_names[i] << ": " << state[i] << ", ";
@@ -177,7 +179,7 @@ namespace support {
             std::cerr << std::endl;
         }
 
-        YAML::Node WalkOptimiser::getWalkConfig(const arma::vec& state) {
+        YAML::Node WalkOptimiser::getWalkConfig(const Eigen::VectorXd& state) {
             YAML::Node config(initialConfig.config);
             for (uint i = 0; i < state.size(); ++i) {
                 config[parameter_names[i]] = state[i];
@@ -187,16 +189,18 @@ namespace support {
         }
 
         void WalkOptimiser::saveConfig(const YAML::Node& config) {
-            auto saveConfig    = std::make_unique<SaveConfiguration>();
-            saveConfig->path   = WalkOptimiserCommand::CONFIGURATION_PATH;
+            auto saveConfig = std::make_unique<SaveConfiguration>();
+            char hostname[255];
+            gethostname(hostname, 255);
+            saveConfig->path   = fmt::format("config/{}/WalkEngine_Optimised.yaml", hostname);
             saveConfig->config = config.as<std::string>();
-            emit(std::move(saveConfig));
+            emit(saveConfig);
         }
 
         void WalkOptimiser::setWalkParameters(const YAML::Node& config) {
             auto command        = std::make_unique<WalkOptimiserCommand>();
-            command->walkConfig = config;
-            emit(std::move(command));
+            command->walkConfig = config.as<std::string>();
+            emit(command);
         }
 
         double FitnessData::popFitness() {
@@ -213,9 +217,10 @@ namespace support {
         }
         void FitnessData::update(const message::input::Sensors& sensors) {
             if (recording) {
-                arma::vec3 verticalKinematics  = sensors.camToGround.submat(0, 2, 2, 2);
-                arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0, 2, 2, 2);
-                double tiltMag = utility::math::angle::acos_clamped(arma::dot(verticalOrientation, verticalKinematics));
+                Eigen::Vector3d verticalKinematics = sensors.Hgc.block<3, 1>(0, 2);
+                Eigen::Vector3d verticalOrientation =
+                    (sensors.Hgt * sensors.forward_kinematics[ServoID::HEAD_PITCH]).block<3, 1>(0, 2);
+                double tiltMag = utility::math::angle::acos_clamped(verticalOrientation.dot(verticalKinematics));
                 if (std::fabs(tiltMag) < M_PI_4) {
                     tilt(tiltMag);
                 }

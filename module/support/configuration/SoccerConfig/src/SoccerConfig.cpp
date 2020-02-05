@@ -19,17 +19,15 @@
 
 #include "SoccerConfig.h"
 
-#include <armadillo>
-
 #include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
-
-using extension::Configuration;
-using message::support::FieldDescription;
 
 namespace module {
 namespace support {
     namespace configuration {
+
+        using extension::Configuration;
+        using message::support::FieldDescription;
 
         void SetGoalpostPositions(FieldDescription& desc) {
             // Unused formulas remain as comments for completeness.

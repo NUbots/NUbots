@@ -34,13 +34,11 @@ namespace support {
     using GameMode       = message::input::GameEvents::GameMode;
     using GameState      = message::input::GameState;
     using GameStateData  = message::input::GameState::Data;
+
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
 
     void NUsight::provideGameController() {
-
-        // HALP X_X
-        // NO
 
         handles["game_state"].push_back(on<Trigger<TeamColour>, With<GameState>>().then(
             [this](std::shared_ptr<const GameState> gameState) { sendGameState("TeamColour", gameState); }));
