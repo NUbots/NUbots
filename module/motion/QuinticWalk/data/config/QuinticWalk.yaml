@@ -45,7 +45,7 @@ walk:
     height: 0.47
     # Trunk pitch orientation
     # (in rad)
-    pitch: 1.4
+    pitch: 23 * pi / 180
     # Phase offset of trunk oscillation
     # (half cycle phase, [-1:1])
     phase: -0.1
@@ -71,10 +71,10 @@ walk:
     pitch_p_coef:
       # Trunk pitch orientation proportional to forward step
       # (in rad/m)
-      forward: 0.015
+      forward: 0 * pi / 180
       # Trunk pitch orientation proportional to rotation step
       # (in 1)
-      turn: 0.0
+      turn: 0 * pi / 180
   kick:
     # Length of kick movement
     # (in m, [0:1])
