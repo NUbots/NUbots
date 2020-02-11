@@ -56,7 +56,7 @@ namespace motion {
             params.foot_overshoot_ratio          = cfg["walk"]["foot"]["overshoot"]["ratio"].as<float>();
             params.foot_overshoot_phase          = cfg["walk"]["foot"]["overshoot"]["phase"].as<float>();
             params.trunk_height                  = cfg["walk"]["trunk"]["height"].as<float>();
-            params.trunk_pitch                   = 1.0f - cfg["walk"]["trunk"]["pitch"].as<Expression>();
+            params.trunk_pitch                   = 1.0f + cfg["walk"]["trunk"]["pitch"].as<Expression>();
             params.trunk_phase                   = cfg["walk"]["trunk"]["phase"].as<float>();
             params.trunk_x_offset                = cfg["walk"]["trunk"]["x_offset"].as<float>();
             params.trunk_y_offset                = cfg["walk"]["trunk"]["y_offset"].as<float>();
@@ -64,8 +64,8 @@ namespace motion {
             params.trunk_pause                   = cfg["walk"]["trunk"]["pause"].as<float>();
             params.trunk_x_offset_p_coef_forward = cfg["walk"]["trunk"]["x_offset_p_coef"]["forward"].as<float>();
             params.trunk_x_offset_p_coef_turn    = cfg["walk"]["trunk"]["x_offset_p_coef"]["turn"].as<float>();
-            params.trunk_pitch_p_coef_forward = 1.0f - cfg["walk"]["trunk"]["pitch_p_coef"]["forward"].as<Expression>();
-            params.trunk_pitch_p_coef_turn    = 1.0f - cfg["walk"]["trunk"]["pitch_p_coef"]["turn"].as<Expression>();
+            params.trunk_pitch_p_coef_forward = 1.0f + cfg["walk"]["trunk"]["pitch_p_coef"]["forward"].as<Expression>();
+            params.trunk_pitch_p_coef_turn    = 1.0f + cfg["walk"]["trunk"]["pitch_p_coef"]["turn"].as<Expression>();
             params.kick_length                = cfg["walk"]["kick"]["length"].as<float>();
             params.kick_phase                 = cfg["walk"]["kick"]["phase"].as<float>();
             params.kick_vel                   = cfg["walk"]["kick"]["vel"].as<float>();
