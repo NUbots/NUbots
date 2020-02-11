@@ -7,14 +7,18 @@ HOME="/home/${USER}"
 HOST="nugus"
 HOSTNAME="${HOST}${ROBOT_NUMBER}"
 IP_ADDR="10.1.1.${ROBOT_NUMBER}"
+ETHERNET_INTERFACE="eno1"
+WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/wlan0 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
 
 # Setup timezone information
 ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
 hwclock --systohc
 
 # Setup locale
-echo "en_AU.UTF-8 UTF-8"  > /etc/locale.gen
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+cat << EOF > /etc/locale.gen
+en_AU.UTF-8 UTF-8
+en_US.UTF-8 UTF-8
+EOF
 locale-gen
 
 echo "LANG=en_AU.UTF-8" > /etc/locale.conf
@@ -105,9 +109,9 @@ python ./generate_banner.py
 rm -rf banner.png bigtext.py generate_banner.py
 
 # Setup the fallback ethernet static connection
-cat << EOF > /etc/systemd/network/99-eno1-static.network
+cat << EOF > /etc/systemd/network/99-${ETHERNET_INTERFACE}-static.network
 [Match]
-Name=eno1
+Name=${ETHERNET_INTERFACE}
 
 [Network]
 Address=${IP_ADDR}/16
@@ -117,9 +121,9 @@ DNS=8.8.8.8
 EOF
 
 # Setup the fallback wireless static connection
-cat << EOF > /etc/systemd/network/99-wlp58s0-static.network
+cat << EOF > /etc/systemd/network/99-${WIFI_INTERFACE}-static.network
 [Match]
-Name=wlp58s0
+Name=${WIFI_INTERFACE}
 
 [Network]
 Address=${IP_ADDR}/16
@@ -129,7 +133,7 @@ DNS=8.8.8.8
 EOF
 
 # Setup wpa_supplicant networks
-cat << EOF > /etc/wpa_supplicant/wpa_supplicant-wlp58s0.conf
+cat << EOF > /etc/wpa_supplicant/wpa_supplicant-${WIFI_INTERFACE}.conf
 ctrl_interface=/var/run/wpa_supplicant
 ctrl_interface_group=wheel
 update_config=1
@@ -174,9 +178,9 @@ DNS=8.8.8.8
 EOF
 
 # Setup the bond ethernet connection
-cat << EOF > /etc/systemd/network/20-eno1.network
+cat << EOF > /etc/systemd/network/20-${ETHERNET_INTERFACE}.network
 [Match]
-Name=eno1
+Name=${ETHERNET_INTERFACE}
 
 [Network]
 Bond=bond0
@@ -184,9 +188,9 @@ PrimarySlave=true
 EOF
 
 # Setup the bond wireless connection
-cat << EOF > /etc/systemd/network/30-wlp58s0.network
+cat << EOF > /etc/systemd/network/30-${WIFI_INTERFACE}.network
 [Match]
-Name=wlp58s0
+Name=${WIFI_INTERFACE}
 
 [Network]
 Bond=bond0
@@ -196,7 +200,7 @@ EOF
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 systemctl enable wpa_supplicant
-systemctl enable wpa_supplicant@wlp58s0
+systemctl enable wpa_supplicant@${WIFI_INTERFACE}
 
 # Populate udev rules.
 cat << EOF > /etc/udev/rules.d/10-nubots.rules
@@ -234,10 +238,12 @@ EOF
 
 # Make sure the system checks /usr/local for libraries
 echo -e "/usr/local/lib\n/usr/local/lib64" > /etc/ld.so.conf.d/usrlocal.conf
+ldconfig
 
 # Make sure python checks /usr/local for packages
-sed "s/^\(PREFIXES\s=\s\)\[\([^]]*\)\]/\1[\2, '\/usr\/local']/" -i /usr/lib/python3.7/site.py \
-ldconfig
+echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
+    > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/etc/pip.conf -O /etc/pip.conf
 
 #############
 # ZSH SHELL #
@@ -257,11 +263,13 @@ done
 chsh -s /usr/bin/zsh ${USER}
 
 # Get fuzzy find and install it
-pacman -S fzf
-echo "" >> ${HOME}/.zshrc
-echo "# Source the fuzzy find scripts" >> ${HOME}/.zshrc
-echo "/usr/share/fzf/key-bindings.zsh" >> ${HOME}/.zshrc
-echo "/usr/share/fzf/completion.zsh" >> ${HOME}/.zshrc
+pacman -S --noconfirm --needed fzf
+cat << EOF >> ${HOME}/.zshrc
+
+# Source the fuzzy find scripts
+source /usr/share/fzf/key-bindings.zsh
+source /usr/share/fzf/completion.zsh
+EOF
 
 ############
 # SSH KEYS #
