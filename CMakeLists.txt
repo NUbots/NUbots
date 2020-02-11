@@ -11,8 +11,8 @@ if(POLICY CMP0079)
 endif()
 
 # Set on to prefer .a files over .so files for linking
-option(
-  STATIC_LIBRARIES "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF
+option(STATIC_LIBRARIES
+       "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF
 )
 
 if(STATIC_LIBRARIES)
