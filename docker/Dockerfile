@@ -205,12 +205,7 @@ RUN install-header-from-source https://github.com/catchorg/Catch2/releases/downl
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz
-RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.34/util-linux-2.34.tar.xz \
-    --disable-all-programs \
-    --enable-libblkid \
-    --enable-libmount \
-    --enable-libuuid
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.62.4/glib-2.62.4.tar.bz2 \
+RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.63.3/glib-2.63.3.tar.bz2 \
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
@@ -246,8 +241,6 @@ RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases
 
 # Install python libraries
 RUN pip install \
-    cmake-format \
-    black \
     pylint \
     isort \
     termcolor \
@@ -268,6 +261,11 @@ RUN install-package \
     parallel \
     vim \
     nano
+
+# Install formatters as last step so if they change the image is easy to update
+RUN pip install \
+    cmake-format==0.6.9 \
+    black==19.10b0
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
