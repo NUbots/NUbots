@@ -241,8 +241,6 @@ RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases
 
 # Install python libraries
 RUN pip install \
-    cmake-format \
-    black \
     pylint \
     isort \
     termcolor \
@@ -263,6 +261,11 @@ RUN install-package \
     parallel \
     vim \
     nano
+
+# Install formatters as last step so if they change the image is easy to update
+RUN pip install \
+    cmake-format==0.6.9 \
+    black==19.10b0
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
