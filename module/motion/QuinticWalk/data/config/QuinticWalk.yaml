@@ -1,17 +1,17 @@
 walk:
   # Full walk cycle frequency
   # (in Hz, > 0)
-  freq: 1.5
+  freq: 1.3
   # Length of double support phase in half cycle
   # (ratio, [0:1])
-  double_support_ratio: 0.05
+  double_support_ratio: 0.1
   # Give extra swing to first step for better start
   # (in ?, [0:10])
-  first_step_swing_factor: 0.8
+  first_step_swing_factor: 1.1
   foot:
     # Lateral distance between the feet center
     # (in m, >= 0)
-    distance: 0.23
+    distance: 0.26
     # Maximum flying foot height
     # (in m, >= 0)
     rise: 0.08
@@ -28,14 +28,14 @@ walk:
       phase: 1.0
       # Roll offset on flying foot at put down
       # (in rad, [-1,1])
-      roll_offset: 0
+      roll_offset: 0.0
     # Phase of flying foot apex
     # (single support cycle phase, [0:1])
     apex_phase: 0.5
     overshoot:
       # Foot X/Y overshoot in ratio of step length
       # (ratio, >= 0)
-      ratio: 0.05
+      ratio: 0.1
       # Foot X/Y overshoot phase
       # (single support cycle phase, [footApexPhase:1]
       phase: 0.85
@@ -45,10 +45,10 @@ walk:
     height: 0.47
     # Trunk pitch orientation
     # (in rad)
-    pitch: 23 * pi / 180
+    pitch: 25 * pi / 180
     # Phase offset of trunk oscillation
     # (half cycle phase, [-1:1])
-    phase: -0.1
+    phase: 0.1
     # Trunk forward offset
     # (in m)
     x_offset: 0.045
@@ -60,18 +60,18 @@ walk:
     swing: 0.2
     # Trunk swing pause length in phase at apex
     # (half cycle ratio, [0:1])
-    pause: 0.2
+    pause: 0.0
     x_offset_p_coef:
       # Trunk forward offset proportional to forward step
       # (in 1)
-      forward: 0.09
+      forward: 0.04
       # Trunk forward offset proportional to rotation step
       # (in m/rad)
       turn: 0.0
     pitch_p_coef:
       # Trunk pitch orientation proportional to forward step
       # (in rad/m)
-      forward: 0 * pi / 180
+      forward: 10 * pi / 180
       # Trunk pitch orientation proportional to rotation step
       # (in 1)
       turn: 0 * pi / 180
@@ -93,7 +93,7 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.06
+  x: 0.05
   # Maximal step length in Y
   # (in m, [0:1])
   y: 0.05
@@ -102,7 +102,7 @@ max_step:
   z: 0.50
   # Maximal step length in X and Y combined
   # (in m, [0:1])
-  xy: 0.09
+  xy: 0.05
 
 imu:
   # Activates the IMU to stop the walking when the robot gets unstable
@@ -117,4 +117,4 @@ imu:
     threshold: 0.4
 
 gains:
-  legs: 10
+  legs: 15
