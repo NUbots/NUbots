@@ -61,6 +61,7 @@ namespace output {
             else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
             else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            //clang-format on
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(compressor_mutex);
