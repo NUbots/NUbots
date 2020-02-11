@@ -15,4 +15,4 @@ def extrinsic_loss(truth, points):
     e_1 = tf.reduce_mean(tf.abs(t_1 - d_1) / d_1, axis=[1, 2])
     a_0 = tf.reduce_mean(1.0 - dihedral_angle, axis=[1, 2])
 
-    return e_0 + e_1 + a_0 * 10
+    return e_0 + e_1 + a_0 * 20

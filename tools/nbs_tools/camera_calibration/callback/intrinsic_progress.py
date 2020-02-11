@@ -13,10 +13,11 @@ class IntrinsicProgress(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs):
         self.progress.update()
         self.progress.set_description(
-            "ƒ:{focal_length:.3f} Δx:{cx:+.3f} Δy:{cy:+.3f} (↔:{collinearity:.3f}º ||:{parallelity:.3f}º ⟂:{orthogonality:.3f}º)".format(
+            "ƒ:{focal_length:.3f} Δx:{cx:+.3f} Δy:{cy:+.3f} k[{k}] (↔:{collinearity:.3f}º ||:{parallelity:.3f}º ⟂:{orthogonality:.3f}º)".format(
                 focal_length=self.model.focal_length.numpy(),
                 cx=self.model.centre[0].numpy(),
                 cy=self.model.centre[1].numpy(),
+                k=", ".join(["{:+.3f}".format(v) for v in self.model.k + 0]),
                 **logs
             )
         )

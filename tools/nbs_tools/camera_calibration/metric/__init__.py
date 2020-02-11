@@ -5,20 +5,6 @@ import math
 import numpy as np
 import tensorflow as tf
 
-from ..loss import euclidean_error
-
-
-def collinearity(truth, pred):
-    return 90 - tf.reduce_mean(tf.acos(euclidean_error(pred)[0])) * (180 / math.pi)
-
-
-def parallelity(truth, pred):
-    return 90 - tf.reduce_mean(tf.acos(euclidean_error(pred)[1])) * (180 / math.pi)
-
-
-def orthogonality(truth, pred):
-    return 90 - tf.reduce_mean(tf.acos(euclidean_error(pred)[2])) * (180 / math.pi)
-
 
 def alignment(truth, pred):
     return tf.reduce_mean(tf.acos(pred[:, :, :, 2]), axis=[1, 2]) * (180 / math.pi)

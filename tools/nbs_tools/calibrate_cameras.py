@@ -18,9 +18,9 @@ from ruamel.yaml import YAML
 
 from .camera_calibration.callback import ExtrinsicProgress, IntrinsicProgress
 from .camera_calibration.grid_distance import grid_distance
-from .camera_calibration.loss import euclidean_error, euclidean_loss, extrinsic_loss
+from .camera_calibration.loss import extrinsic_loss
 from .camera_calibration.metric import *
-from .camera_calibration.model import Equidistant, Equisolid, ExtrinsicCluster, Rectilinear
+from .camera_calibration.model import *
 from .images import decode_image, fourcc
 from .nbs import Decoder
 
@@ -243,26 +243,8 @@ def find_grids(files, rows, cols):
     return grids
 
 
-def grid_area(points):
-    # Take the 4 Corner Points: P1,P2,P3,P4 of the Quadrilateral
-    p1 = points[:, 0, 0, :]
-    p2 = points[:, 0, -1, :]
-    p3 = points[:, -1, -1, :]
-    p4 = points[:, -1, 0, :]
-
-    # Using the Shoelace formula: https://math.stackexchange.com/questions/1259094/coordinate-geometry-area-of-a-quadrilateral
-    return 0.5 * tf.abs(
-        p1[:, 0] * p2[:, 1]
-        + p2[:, 0] * p3[:, 1]
-        + p3[:, 0] * p4[:, 1]
-        + p4[:, 0] * p1[:, 1]
-        - p2[:, 0] * p1[:, 1]
-        - p3[:, 0] * p2[:, 1]
-        - p4[:, 0] * p3[:, 1]
-        - p1[:, 0] * p4[:, 1]
-    )
-
-
+# Measures the quality in the Axis using SVD, i.e. rectangularity and the Flatness of the detected grid.
+# We want to discard the nosiest samples of the dataset, and discard data with percentage error greater than allowed_error.
 def plane_quality(points, rows, cols, grid_size):
     # Work out our ideal SVD values
     world_grid = np.empty([cols, rows, 2], dtype=NP_CALIBRATION_DTYPE)
@@ -279,19 +261,19 @@ def plane_quality(points, rows, cols, grid_size):
     max_xy = tf.linalg.svd(tf.transpose((1 + allowed_error) * world_grid), compute_uv=False,)
     min_xy = tf.linalg.svd(tf.transpose((1 - allowed_error) * world_grid), compute_uv=False,)
 
-    # Mean center
-    centered = points - tf.reduce_mean(points, axis=[1, 2], keepdims=True)
+    # Mean centre
+    centred = points - tf.reduce_mean(points, axis=[1, 2], keepdims=True)
 
     # Flatten into planes per detection
-    centered = tf.transpose(tf.reshape(centered, (-1, tf.multiply(*centered.shape[1:-1]), 3)), [0, 2, 1])
+    centred = tf.transpose(tf.reshape(centred, (-1, tf.multiply(*centred.shape[1:-1]), 3)), [0, 2, 1])
 
     # We run out of GPU memory if we try to do this all at once since svd is pretty memory heavy so instead we split up
     # the task and do it in segments
     skip = 1000
     result = tf.concat(
         [
-            tf.linalg.svd(centered[i : min(i + skip, centered.shape[0])], compute_uv=False)
-            for i in range(0, centered.shape[0], skip)
+            tf.linalg.svd(centred[i : min(i + skip, centred.shape[0])], compute_uv=False)
+            for i in range(0, centred.shape[0], skip)
         ],
         axis=0,
     )
@@ -335,18 +317,22 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
         # Check which projection we are using and load an appropriate model starting with the values in the configuration
         projection = config["lens"]["projection"]
         if projection == "EQUIDISTANT":
-            model = Equidistant(**config["lens"], dtype=TF_CALIBRATION_DTYPE)
+            LensModel = EquidistantModel
         if projection == "EQUISOLID":
-            model = Equisolid(**config["lens"], dtype=TF_CALIBRATION_DTYPE)
+            LensModel = EquisolidModel
         if projection == "RECTILINEAR":
-            model = Rectilinear(**config["lens"], dtype=TF_CALIBRATION_DTYPE)
+            LensModel = RectilinearModel
+
+        model = LensModel(
+            focal_length=config["lens"]["focal_length"],
+            centre=config["lens"]["centre"],
+            k=config["lens"]["k"],
+            dtype=TF_CALIBRATION_DTYPE,
+        )
 
         # Compile the model
-        model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2),
-            loss=euclidean_loss,
-            metrics=[collinearity, parallelity, orthogonality],
-        )
+        # For computers with a smaller GPU, run_eagerly should be set to True.
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2))
 
         # Put the model into the config
         configurations[name]["model"] = model
@@ -358,57 +344,46 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             # Stack up the points into rows/cols
             points = tf.cast(tf.reshape(points, (points.shape[0], cols, rows, 2)), dtype=TF_CALIBRATION_DTYPE)
 
-            # Run a prediction to help identify outliers to be removed
-            # Even though this is running on an untrained model at this point, the outliers are pretty obvious
-            predictions = euclidean_error(model.predict(points))
-            area = grid_area(points)
-
-            # Average pixel coordinates of the grid
-            position = tf.math.reduce_mean(points, axis=[1, 2])
-            # Work out the average difference from this point to all the other points
-            position_distance = tf.stack(
-                [tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.math.squared_difference(position, p)))) for p in position],
-                axis=0,
-            )
-            position_distance = tf.divide(position_distance, tf.reduce_sum(position_distance))
-
-            # Area distance is already squared, get the difference of squares and then square root
-            area_distance = tf.stack([tf.reduce_mean(tf.sqrt(tf.abs(tf.math.subtract(area, a)))) for a in area], axis=0)
-            area_distance = tf.divide(area_distance, tf.reduce_sum(area_distance))
-
-            # Multiply position weight with area weight and then multiply by normalised area (bigger areas get more weight)
-            area_weight = tf.sqrt(area)
-            weight = tf.multiply(
-                tf.multiply(position_distance, area_distance), tf.divide(area_weight, tf.reduce_sum(area_weight))
-            )
-            weight = tf.multiply(tf.divide(weight, tf.reduce_sum(weight)), weight.shape[0])
-
             history = model.fit(
                 x=points,
-                y=tf.ones([*points.shape[:-1], 3], dtype=TF_CALIBRATION_DTYPE),
+                # y=tf.ones([*points.shape[:-1], 3], dtype=TF_CALIBRATION_DTYPE),
                 epochs=1000000,
                 batch_size=points.shape[0],
-                sample_weight=weight,
                 verbose=0,
                 callbacks=[
                     # 0 Learning rate for the first epoch so that if our current optimisation is the best we don't lose it
                     tf.keras.callbacks.LearningRateScheduler(schedule=lambda epoch: 0.0 if epoch == 0 else 1e-2),
                     tf.keras.callbacks.EarlyStopping(monitor="loss", patience=99, restore_best_weights=True),
-                    tf.keras.callbacks.ReduceLROnPlateau(monitor="loss", factor=0.5, patience=10),
                     IntrinsicProgress(),
                 ],
             )
-
-            # Work out how much the loss has improved by
-            original_loss = history.history["loss"][0]
-            best_loss = min(history.history["loss"])
-            print("Loss improved by {:.2g}%".format(100.0 * (original_loss - best_loss) / original_loss))
-            print()
 
             # Update the intrinsics in the config
             config["lens"]["focal_length"] = float(model.focal_length.numpy())
             config["lens"]["centre"][0] = float(model.centre[0].numpy())
             config["lens"]["centre"][1] = float(model.centre[1].numpy())
+            for i in range(len(config["lens"]["k"])):
+                config["lens"]["k"][i] = float(model.k[i].numpy())
+
+            # Work out how much the loss has improved by
+            best_idx = np.argmin(history.history["loss"])
+
+            print("Intrinsic calibration results for {} camera".format(name))
+            print("\t ƒ: {:.3f}".format(model.focal_length.numpy()))
+            print("\tΔc: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.centre.numpy()])))
+            print("\t k: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.k.numpy()])))
+            print("\tik: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.inverse_coeffs()])))
+            print("Error")
+            print("\t ↔: {:.3f}º".format(history.history["collinearity"][best_idx]))
+            print("\t||: {:.3f}º".format(history.history["parallelity"][best_idx]))
+            print("\t ⟂: {:.3f}º".format(history.history["orthogonality"][best_idx]))
+            print("\t k: {:.3f}%".format(math.sqrt(model.inverse_quality()) * 100))
+
+            original_loss = history.history["loss"][0]
+            best_loss = min(history.history["loss"])
+            print()
+            print("Loss improved by {:.2g}%".format(100.0 * (original_loss - best_loss) / original_loss))
+            print()
 
     # Write out the new model configuration
     for name, config in configurations.items():
@@ -664,15 +639,14 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             x=[i_0, x_0, i_1, x_1],
             y=tf.stack([d_0, d_1, tf.zeros_like(d_0)], axis=-1),
             epochs=1000000,
-            batch_size=i_0.shape[0],
+            batch_size=4096,
             sample_weight=weights,
             shuffle=True,
             verbose=0,
             callbacks=[
                 # 0 Learning rate for the first epoch so that if our current optimisation is the best we don't lose it
                 tf.keras.callbacks.LearningRateScheduler(schedule=lambda epoch: 0.0 if epoch == 0 else 1e-2),
-                tf.keras.callbacks.EarlyStopping(monitor="loss", patience=100, restore_best_weights=True),
-                tf.keras.callbacks.ReduceLROnPlateau(monitor="loss", factor=0.5, patience=10),
+                tf.keras.callbacks.EarlyStopping(monitor="loss", patience=20, restore_best_weights=True),
                 ExtrinsicProgress(),
             ],
         )

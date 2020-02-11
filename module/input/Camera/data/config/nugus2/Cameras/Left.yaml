@@ -18,7 +18,9 @@ lens:
   focal_length: 0.322265625
   # Normalised image centre offset: pixels from centre to optical axis / image width
   centre: [0, 0]
-  # The angular diameter that the lens covers (the area that light hits on the sensor)
+  # The polynomial distortion coefficients for the lens
+  k: [0, 0]
+  # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
   fov: 180 * pi / 180
   # The homogenous transform from the rigid platform this camera is attached to to its optical location
   Hpc:
