@@ -9,6 +9,7 @@ https://github.com/Rhoban/model/
 #include <iomanip>
 #include <iostream>
 #include <vector>
+
 #include "Polynom.hpp"
 
 namespace module {
