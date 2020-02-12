@@ -7,6 +7,7 @@ https://github.com/Rhoban/model/
 #define MODULE_MOTION_QUINTICWALK_SPLINECONTAINER_HPP
 
 #include <fmt/format.h>
+
 #include <algorithm>
 #include <fstream>
 #include <map>
@@ -14,6 +15,7 @@ https://github.com/Rhoban/model/
 #include <stdexcept>
 #include <string>
 #include <vector>
+
 #include "Spline.hpp"
 
 namespace module {

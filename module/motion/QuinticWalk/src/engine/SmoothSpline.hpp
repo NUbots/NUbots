@@ -6,9 +6,8 @@ https://github.com/Rhoban/model/
 #ifndef MODULE_MOTION_QUINTICWALK_SMOOTHSPLINE_HPP
 #define MODULE_MOTION_QUINTICWALK_SMOOTHSPLINE_HPP
 
-#include "Spline.hpp"
-
 #include <vector>
+#include "Spline.hpp"
 
 namespace module {
 namespace motion {

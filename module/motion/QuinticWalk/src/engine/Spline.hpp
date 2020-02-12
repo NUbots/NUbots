@@ -6,11 +6,10 @@ https://github.com/Rhoban/model/
 #ifndef MODULE_MOTION_QUINTICWALK_SPLINE_HPP
 #define MODULE_MOTION_QUINTICWALK_SPLINE_HPP
 
-#include "Polynom.hpp"
-
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include "Polynom.hpp"
 
 namespace module {
 namespace motion {

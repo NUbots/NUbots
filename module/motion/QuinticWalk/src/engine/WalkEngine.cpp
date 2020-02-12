@@ -6,6 +6,7 @@ https://github.com/Rhoban/model/
 #include "WalkEngine.hpp"
 
 #include <fmt/format.h>
+
 #include <nuclear>
 
 #include "utility/math/angle.h"
