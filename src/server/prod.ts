@@ -3,6 +3,7 @@ import history from 'connect-history-api-fallback'
 import express from 'express'
 import http from 'http'
 import minimist from 'minimist'
+import * as path from 'path'
 import favicon from 'serve-favicon'
 import sio from 'socket.io'
 
@@ -20,7 +21,6 @@ const app = express()
 const server = http.createServer(app)
 const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 
-const root = `${__dirname}/../../dist`
 app.use(history({
   rewrites: [
     // Allows user to navigate to /storybook/ without needing to type /index.html
@@ -28,8 +28,8 @@ app.use(history({
   ],
 }))
 app.use(compression())
-app.use(express.static(root))
-app.use(favicon(`${__dirname}/../assets/favicon.ico`))
+app.use(express.static(path.join('dist', 'public')))
+app.use(favicon(path.join('dist', 'public', 'favicon.ico')))
 
 const port = process.env.PORT || 9090
 server.listen(port, () => {

@@ -1,8 +1,12 @@
 import bindings from 'bindings'
 import { EventEmitter } from 'events'
 import fs from 'fs'
+import * as path from 'path'
 
-const MMapNBSPlayer = bindings('nbs_player') as MMapNBSPlayerConstructor
+const MMapNBSPlayer = bindings({
+  bindings: 'nbs_player',
+  module_root: path.join(__dirname, '..'),
+} as any) as MMapNBSPlayerConstructor
 
 export type NBSPacket = {
   timestamp: number

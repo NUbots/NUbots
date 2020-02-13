@@ -1,6 +1,5 @@
 import fs from 'fs'
 import { autorun } from 'mobx'
-import path from 'path'
 import { Vector3 } from 'three'
 import { Matrix4 } from 'three'
 
@@ -12,6 +11,17 @@ import { toTimestamp } from '../../shared/time/timestamp'
 import { Simulator } from '../simulator'
 import { Message } from '../simulator'
 
+import image0 from './images/0.jpg'
+import image1 from './images/1.jpg'
+import image10 from './images/10.jpg'
+import image2 from './images/2.jpg'
+import image3 from './images/3.jpg'
+import image4 from './images/4.jpg'
+import image5 from './images/5.jpg'
+import image6 from './images/6.jpg'
+import image7 from './images/7.jpg'
+import image8 from './images/8.jpg'
+import image9 from './images/9.jpg'
 import { periodic } from './periodic'
 import CompressedImage = message.output.CompressedImage
 import Projection = message.output.CompressedImage.Lens.Projection
@@ -34,10 +44,8 @@ export class VisionSimulator extends Simulator {
   }
 
   static of({ nuclearnetClient }: { nuclearnetClient: NUClearNetClient }): VisionSimulator {
-    const images = Array.from(
-      { length: 11 },
-      (_, i) => toUint8Array(fs.readFileSync(path.join(__dirname, `images/${i}.jpg`))),
-    )
+    const urls = [image0, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10]
+    const images = urls.map(url => toUint8Array(fs.readFileSync(url)))
     return new VisionSimulator(nuclearnetClient, images)
   }
 

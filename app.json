@@ -4,15 +4,7 @@
   },
   "env": {
     "NODE_ENV": {
-      "required": true
-    },
-    "NPM_CONFIG_PRODUCTION": {
-      "required": true
-    },
-    "NPM_ENV": {
-      "required": true
-    },
-    "YARN_PRODUCTION": {
+      "value": "production",
       "required": true
     }
   },

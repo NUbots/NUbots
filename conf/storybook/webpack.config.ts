@@ -1,8 +1,14 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import * as path from 'path'
 import webpack from 'webpack'
-import config from '../../webpack.config'
+import { getClientConfig } from '../../webpack.config'
 
 export default ({ config: storybookConfig }: { config: webpack.Configuration }) => {
+  const config = getClientConfig({
+    mode: 'development',
+    context: path.resolve(path.join(__dirname, '..', '..', 'src')),
+    sourceMap: 'eval-source-map',
+  })
   return {
     ...config,
     ...storybookConfig,
