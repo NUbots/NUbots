@@ -4,6 +4,7 @@ steps:
       - yarn
       - yarn build:ci
     plugins:
+      - ./.buildkite/plugins/cache: ~
       - docker#v3.5.0:
           image: "node:13"
           propagate-uid-gid: true
@@ -15,6 +16,7 @@ steps:
       - yarn
       - yarn tslint
     plugins:
+      - ./.buildkite/plugins/cache: ~
       - docker#v3.5.0:
           image: "node:13"
           propagate-uid-gid: true
@@ -26,6 +28,7 @@ steps:
       - yarn
       - yarn test:ci
     plugins:
+      - ./.buildkite/plugins/cache: ~
       - docker#v3.5.0:
           image: "node:13"
           propagate-uid-gid: true
