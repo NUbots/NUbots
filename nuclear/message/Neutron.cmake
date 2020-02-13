@@ -256,9 +256,8 @@ if(src)
     add_custom_command(
       TARGET nuclear_message
       POST_BUILD
-      COMMAND
-        ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
-        "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py" DEPENDS "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
+      COMMAND ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
+              "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py" DEPENDS "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
       COMMENT "Copying nuclear.py to python build directory"
     )
 
