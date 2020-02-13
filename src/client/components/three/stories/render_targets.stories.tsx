@@ -62,10 +62,10 @@ class RenderTargetHarness extends React.Component<{ animate?: boolean }> {
 
   private stage = (canvas: Canvas) => {
     const robotRenderTarget = renderTarget(() => ({ width: 512, height: 512 }))
-    const robotTexture = computed(() => robotRenderTarget.get().texture)
+    const robotTexture = () => robotRenderTarget().texture
     const robotViewModel = RobotViewModel.of(this.model, robotRenderTarget)
     const innerBoxRenderTarget = renderTarget(() => ({ width: 512, height: 512 }))
-    const innerBoxTexture = computed(() => innerBoxRenderTarget.get().texture)
+    const innerBoxTexture = () => innerBoxRenderTarget().texture
     const innerBoxViewModel = OrangeBoxViewModel.of(this.model, robotTexture, innerBoxRenderTarget)
     const viewModel = WhiteBoxViewModel.of(canvas, this.model, innerBoxTexture)
     return computed(() => [robotViewModel.stage, innerBoxViewModel.stage, viewModel.stage])
@@ -81,17 +81,17 @@ class WhiteBoxViewModel {
   constructor(
     private readonly canvas: Canvas,
     private readonly model: Model,
-    private readonly orangeBoxTexture: IComputedValue<Texture>,
+    private readonly orangeBoxTexture: () => Texture,
   ) {
   }
 
-  static of(canvas: Canvas, model: Model, orangeBoxTexture: IComputedValue<Texture>) {
+  static of(canvas: Canvas, model: Model, orangeBoxTexture: () => Texture) {
     return new WhiteBoxViewModel(canvas, model, orangeBoxTexture)
   }
 
   readonly stage = stage(() => ({
-    camera: this.camera.get(),
-    scene: this.scene.get(),
+    camera: this.camera(),
+    scene: this.scene(),
   }))
 
   private readonly camera = perspectiveCamera(() => ({
@@ -109,9 +109,9 @@ class WhiteBoxViewModel {
 
   private readonly scene = scene(() => ({
     children: [
-      this.ambientLight.get(),
-      this.pointLight.get(),
-      this.box.get(),
+      this.ambientLight(),
+      this.pointLight(),
+      this.box(),
     ],
   }))
 
@@ -123,39 +123,39 @@ class WhiteBoxViewModel {
   }))
 
   private readonly box = mesh(() => ({
-    geometry: this.geometry.get(),
-    material: this.material.get(),
+    geometry: this.geometry(),
+    material: this.material(),
     rotation: new Vector3(3 * this.model.time, 5 * this.model.time, 7 * this.model.time),
   }))
 
   private readonly geometry = boxGeometry(() => ({ width: 1, height: 1, depth: 1 }))
 
-  private readonly material = meshPhongMaterial(() => ({ map: this.orangeBoxTexture.get() }))
+  private readonly material = meshPhongMaterial(() => ({ map: this.orangeBoxTexture() }))
 }
 
 class OrangeBoxViewModel {
   constructor(
     private readonly model: Model,
-    private readonly robotTexture: IComputedValue<Texture>,
-    private readonly renderTarget: IComputedValue<WebGLRenderTarget>,
+    private readonly robotTexture: () => Texture,
+    private readonly renderTarget: () => WebGLRenderTarget,
   ) {
   }
 
-  static of(model: Model, robotTexture: IComputedValue<Texture>, renderTarget: IComputedValue<WebGLRenderTarget>) {
+  static of(model: Model, robotTexture: () => Texture, renderTarget: () => WebGLRenderTarget) {
     return new OrangeBoxViewModel(model, robotTexture, renderTarget)
   }
 
   readonly stage = stage(() => ({
-    scene: this.scene.get(),
-    camera: this.camera.get(),
-    target: this.renderTarget.get(),
+    scene: this.scene(),
+    camera: this.camera(),
+    target: this.renderTarget(),
   }))
 
   private readonly scene = scene(() => ({
     children: [
-      this.ambientLight.get(),
-      this.pointLight.get(),
-      this.box.get(),
+      this.ambientLight(),
+      this.pointLight(),
+      this.box(),
     ],
   }))
 
@@ -181,40 +181,40 @@ class OrangeBoxViewModel {
   }
 
   private readonly box = mesh(() => ({
-    geometry: this.geometry.get(),
-    material: this.material.get(),
+    geometry: this.geometry(),
+    material: this.material(),
     rotation: new Vector3(-17 * this.model.time, -13 * this.model.time, -11 * this.model.time),
   }))
 
   private readonly geometry = boxGeometry(() => ({ width: 2, height: 2, depth: 2 }))
 
-  private readonly material = meshPhongMaterial(() => ({ map: this.robotTexture.get() }))
+  private readonly material = meshPhongMaterial(() => ({ map: this.robotTexture() }))
 }
 
 class RobotViewModel {
   constructor(
     private readonly model: Model,
-    private readonly renderTarget: IComputedValue<WebGLRenderTarget>,
+    private readonly renderTarget: () => WebGLRenderTarget,
   ) {
   }
 
-  static of(model: Model, renderTarget: IComputedValue<WebGLRenderTarget>) {
+  static of(model: Model, renderTarget: () => WebGLRenderTarget) {
     return new RobotViewModel(model, renderTarget)
   }
 
   readonly stage = stage(() => ({
-    scene: this.scene.get(),
-    camera: this.camera.get(),
-    target: this.renderTarget.get(),
+    scene: this.scene(),
+    camera: this.camera(),
+    target: this.renderTarget(),
   }))
 
-  private readonly scene = scene(() => ({ children: [this.robot.get()] }))
+  private readonly scene = scene(() => ({ children: [this.robot()] }))
 
   private readonly camera = orthographicCamera(() => ({ left: -1, right: 1, top: 1, bottom: -1, near: 0, far: 1 }))
 
   private readonly robot = mesh(() => ({
-    geometry: this.geometry.get(),
-    material: this.material.get(),
+    geometry: this.geometry(),
+    material: this.material(),
     rotation: new Vector3(0, 0, 17 * this.model.time),
   }))
 

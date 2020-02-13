@@ -16,6 +16,9 @@ module.exports = {
     'node_modules',
     '<rootDir>/src',
   ],
+  transformIgnorePatterns: [
+    "/node_modules\/(?!mobx-utils\/lib)"
+  ],
   moduleFileExtensions: [
     'js',
     'ts',
@@ -35,5 +38,5 @@ module.exports = {
   testMatch: [
     '**/tests/**/*.tests.{ts,tsx}',
   ],
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/js-with-ts',
 }

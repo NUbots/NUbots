@@ -37,7 +37,7 @@ class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
       t => this.simulateWalk(model, t),
       { fireImmediately: true },
     ))
-    return computed(() => NUgusViewModel.of(model).robot, { equals: () => false })
+    return () => NUgusViewModel.of(model).robot
   }
 
   simulateWalk(model: LocalisationRobotModel, t: number) {

@@ -80,13 +80,13 @@ class ViewModel {
 
   @computed
   get stage(): Stage {
-    return { camera: this.camera.get(), scene: this.scene.get() }
+    return { camera: this.camera(), scene: this.scene() }
   }
 
   @computed
   private get light(): Light {
     const light = new PointLight()
-    light.position.copy(this.camera.get().position)
+    light.position.copy(this.camera().position)
     return light
   }
 
@@ -100,7 +100,7 @@ class ViewModel {
 
   private scene = scene(() => ({
     children: [
-      ...this.boxes.map(boxViewModel => boxViewModel.box.get()),
+      ...this.boxes.map(boxViewModel => boxViewModel.box()),
       this.light,
     ],
   }))
@@ -127,7 +127,7 @@ class BoxViewModel {
 
   readonly box = mesh(() => ({
     geometry: BoxViewModel.geometry.get(),
-    material: this.material.get(),
+    material: this.material(),
     position: this.model.position,
     rotation: this.model.rotation,
     scale: Vector3.fromScalar(this.model.size),

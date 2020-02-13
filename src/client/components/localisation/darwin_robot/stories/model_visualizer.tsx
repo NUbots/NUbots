@@ -1,4 +1,3 @@
-import { IComputedValue } from 'mobx'
 import { computed } from 'mobx'
 import { Component } from 'react'
 import React from 'react'
@@ -15,7 +14,7 @@ import { Canvas } from '../../../three/three'
 import { Three } from '../../../three/three'
 
 export class ModelVisualiser extends Component<{
-  model: IComputedValue<Object3D>,
+  model(): Object3D;
   cameraPosition: Vector3
 }> {
   render() {
@@ -31,14 +30,14 @@ export class ModelVisualiser extends Component<{
 class ViewModel {
   constructor(
     private readonly canvas: Canvas,
-    private readonly model: IComputedValue<Object3D>,
+    private readonly model: () => Object3D,
     private readonly cameraPosition: Vector3,
   ) {
   }
 
   @computed
   get stage(): Stage {
-    return { camera: this.camera.get(), scene: this.scene.get() }
+    return { camera: this.camera(), scene: this.scene() }
   }
 
   private readonly camera = perspectiveCamera(() => ({
@@ -56,7 +55,7 @@ class ViewModel {
       this.helper,
       this.spotlight,
       this.pointlight,
-      this.model.get(),
+      this.model(),
     ],
   }))
 
@@ -75,7 +74,7 @@ class ViewModel {
   @computed
   private get pointlight() {
     const light = new PointLight('#fff')
-    light.position.copy(this.camera.get().position)
+    light.position.copy(this.camera().position)
     return light
   }
 }

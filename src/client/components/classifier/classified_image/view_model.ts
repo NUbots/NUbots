@@ -30,7 +30,7 @@ export class ClassifiedImageViewModel {
   }
 
   get stage(): Stage {
-    return { camera: this.camera.get(), scene: this.scene.get() }
+    return { camera: this.camera(), scene: this.scene() }
   }
 
   private readonly camera = orthographicCamera(() => ({
@@ -43,12 +43,12 @@ export class ClassifiedImageViewModel {
   }))
 
   private readonly scene = scene(() => ({
-    children: [this.image.get()],
+    children: [this.image()],
   }))
 
   private readonly image = mesh(() => ({
     geometry: ClassifiedImageViewModel.geometry.get(),
-    material: this.material.get(),
+    material: this.material(),
   }))
 
   private static geometry = disposableComputed(() => {
@@ -61,8 +61,8 @@ export class ClassifiedImageViewModel {
     vertexShader,
     fragmentShader,
     uniforms: {
-      image: { value: this.imageTexture.get() },
-      lut: { value: this.lutTexture.get() },
+      image: { value: this.imageTexture() },
+      lut: { value: this.lutTexture() },
       lutSize: { value: this.lutSize },
       bitsX: { value: this.model.lut.size.x },
       bitsY: { value: this.model.lut.size.y },

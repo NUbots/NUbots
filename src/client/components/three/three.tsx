@@ -25,7 +25,7 @@ export type Canvas = { width: number, height: number }
 
 @observer
 export class Three extends Component<{
-  stage(canvas: Canvas): IComputedValue<Stage | Array<IComputedValue<Stage>>>,
+  stage(canvas: Canvas): IComputedValue<Stage | Array<() => Stage>>,
   objectFit: ObjectFit,
   clearColor?: Color,
   onClick?({ button }: { button: number }): void
@@ -57,7 +57,7 @@ export class Three extends Component<{
           if (stages instanceof Array) {
             // Create individual reactions for each stage, so they may react and re-render independently.
             dispose = compose(stages.map(stage => autorun(
-              () => this.renderStage(stage.get()),
+              () => this.renderStage(stage()),
               { scheduler: requestAnimationFrame },
             )))
           } else {

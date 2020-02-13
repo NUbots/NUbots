@@ -27,7 +27,7 @@ function createModel(animate?: 'animate') {
     t => simulateWalk(model, t),
     { fireImmediately: true },
   )
-  return computed(() => viewModel.robot)
+  return () => viewModel.robot
 }
 
 const cameraPosition = new Vector3(0.3, 0.4, 0.4)

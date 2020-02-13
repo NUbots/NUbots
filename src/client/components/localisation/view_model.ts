@@ -25,7 +25,7 @@ export class LocalisationViewModel {
     return new LocalisationViewModel(canvas, model)
   }
 
-  readonly stage = stage(() => ({ camera: this.camera.get(), scene: this.scene.get() }))
+  readonly stage = stage(() => ({ camera: this.camera(), scene: this.scene() }))
 
   private readonly camera = perspectiveCamera(() => ({
     fov: 75,

@@ -1,3 +1,4 @@
+import { computed } from 'mobx'
 import { observe } from 'mobx'
 import { observable } from 'mobx'
 
@@ -10,7 +11,10 @@ describe('createUpdatableComputed', () => {
 
   const computedTriangle = createUpdatableComputed(
     (opts: TriangleOpts) => new Triangle(opts),
-    (triangle, { color }) => triangle.color = color,
+    (triangle, { id, color }) => {
+      triangle.id = id
+      triangle.color = color
+    },
     triangle => triangle.dispose(),
   )
 
@@ -28,18 +32,21 @@ describe('createUpdatableComputed', () => {
     ) {
     }
 
-    readonly triangle = computedTriangle(() => ({
+    readonly triangle = computedTriangle((id: string) => ({
+      id,
       color: this.model.color,
     }))
   }
 
-  type TriangleOpts = { color: string }
+  type TriangleOpts = { color: string, id: string }
 
   class Triangle {
+    id: string
     color: string
     disposed: boolean = false
 
-    constructor({ color }: TriangleOpts) {
+    constructor({ id, color }: TriangleOpts) {
+      this.id = id
       this.color = color
     }
 
@@ -55,23 +62,28 @@ describe('createUpdatableComputed', () => {
   })
 
   it('returns computed value', () => {
-    const triangle = viewModel.triangle.get()
+    const triangle = viewModel.triangle('foo')
     expect(triangle).toBeInstanceOf(Triangle)
     expect(triangle.color).toBe('red')
   })
 
-  it('caches computed value', () => {
-    expect(viewModel.triangle.get()).toBe(viewModel.triangle.get())
+  it('caches value with identical arguments', () => {
+    expect(viewModel.triangle('foo')).toBe(viewModel.triangle('foo'))
+  })
+
+  it('does not caches value with unique arguments', () => {
+    expect(viewModel.triangle('foo')).not.toBe(viewModel.triangle('bar'))
   })
 
   it('maintains reference as its updated', () => {
-    const dispose = observe(viewModel.triangle, onChange)
+    const expr = computed(() => viewModel.triangle('foo'), { equals: () => false })
+    const dispose = observe(expr, onChange)
 
-    const firstTriangle = viewModel.triangle.get()
+    const firstTriangle = viewModel.triangle('foo')
     model.color = 'green'
     expect(firstTriangle.color).toBe('green')
 
-    const secondTriangle = viewModel.triangle.get()
+    const secondTriangle = viewModel.triangle('foo')
     model.color = 'blue'
     expect(secondTriangle.color).toBe('blue')
 
@@ -81,8 +93,9 @@ describe('createUpdatableComputed', () => {
   })
 
   it('does not dispose when updated', () => {
-    const dispose = observe(viewModel.triangle, onChange)
-    const triangle = viewModel.triangle.get()
+    const expr = computed(() => viewModel.triangle('foo'), { equals: () => false })
+    const dispose = observe(expr, onChange)
+    const triangle = viewModel.triangle('foo')
     model.color = 'green'
     expect(triangle.color).toBe('green')
     expect(triangle.disposed).toBe(false)
@@ -91,8 +104,9 @@ describe('createUpdatableComputed', () => {
   })
 
   it('disposes when no longer observed', () => {
-    const dispose = observe(viewModel.triangle, onChange)
-    const triangle = viewModel.triangle.get()
+    const expr = computed(() => viewModel.triangle('foo'), { equals: () => false })
+    const dispose = observe(expr, onChange)
+    const triangle = viewModel.triangle('foo')
     dispose()
     expect(triangle.disposed).toBe(true)
   })

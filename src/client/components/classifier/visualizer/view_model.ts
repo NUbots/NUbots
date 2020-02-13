@@ -31,7 +31,7 @@ export class VisualizerViewModel {
 
   @computed
   get stage(): Stage {
-    return { camera: this.camera.get(), scene: this.scene.get() }
+    return { camera: this.camera(), scene: this.scene() }
   }
 
   private readonly scene = scene(() => ({
@@ -62,7 +62,7 @@ export class VisualizerViewModel {
 
   @computed
   private get points(): Points {
-    const points = new Points(this.pointsGeometry, this.planeMaterial.get())
+    const points = new Points(this.pointsGeometry, this.planeMaterial())
     points.frustumCulled = false
     return points
   }
@@ -94,7 +94,7 @@ export class VisualizerViewModel {
     vertexShader,
     fragmentShader,
     uniforms: {
-      lut: { value: this.lutTexture.get() },
+      lut: { value: this.lutTexture() },
       lutSize: { value: this.lutSize },
       bitsX: { value: this.model.lut.size.x },
       bitsY: { value: this.model.lut.size.y },
