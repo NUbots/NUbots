@@ -26,6 +26,7 @@ export interface VisionImage extends Image {
     readonly projection: number
     readonly focalLength: number
     readonly centre: Vector2
+    readonly k: Vector2 // The distortion coefficents
   }
 }
 

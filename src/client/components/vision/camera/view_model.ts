@@ -228,12 +228,13 @@ export class CameraViewModel {
 
   private visualmesh = createTransformer((mesh: VisualMesh) => {
     const material = this.meshMaterial.clone()
-    const { centre, focalLength, projection } = this.model.image!.lens
+    const { centre, focalLength, projection, k } = this.model.image!.lens
     material.uniforms = {
       Hcw: { value: this.model.image ? toThreeMatrix4(this.model.image.Hcw) : new Matrix4() },
       viewSize: { value: new Vector2(this.viewWidth, this.viewHeight) },
       focalLength: { value: focalLength },
       centre: { value: new Vector2(centre.x, centre.y) },
+      k: { value: new Vector2(k.x, k.y) },
       projection: { value: projection },
     }
     const lines = new Mesh(this.meshGeometry(mesh), material)
@@ -290,11 +291,12 @@ export class CameraViewModel {
     // This does not recompile the shader so we are fine
     const shader = this.worldLineShader.clone()
 
-    const { centre, focalLength, projection } = this.model.image!.lens
+    const { centre, focalLength, projection, k } = this.model.image!.lens
     shader.uniforms = {
       viewSize: { value: new Vector2(this.viewWidth, this.viewHeight) },
       focalLength: { value: focalLength },
       centre: { value: new Vector2(centre.x, centre.y) },
+      k: { value: new Vector3(k.x, k.y) },
       projection: { value: projection },
       axis: { value: axis },
       start: { value: start },
