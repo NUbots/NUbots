@@ -1,3 +1,5 @@
+import * as THREE from 'three'
+
 export class Vector3 {
   constructor(
     readonly x: number,
@@ -48,6 +50,18 @@ export class Vector3 {
 
   subtract(v: Vector3): Vector3 {
     return new Vector3(this.x - v.x, this.y - v.y, this.z - v.z)
+  }
+
+  static fromThree(vec3: THREE.Vector3): Vector3 {
+    return new Vector3(vec3.x, vec3.y, vec3.z)
+  }
+
+  toThree(): THREE.Vector3 {
+    return new THREE.Vector3(this.x, this.y, this.z)
+  }
+
+  toString() {
+    return `(${this.x}, ${this.y}, ${this.z})`
   }
 }
 

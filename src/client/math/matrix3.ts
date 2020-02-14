@@ -1,3 +1,5 @@
+import * as THREE from 'three'
+
 import { Vector3 } from './vector3'
 
 export class Matrix3 {
@@ -30,4 +32,30 @@ export class Matrix3 {
   get trace(): number {
     return this.x.x + this.y.y + this.z.z
   }
+
+  static fromThree(mat4: THREE.Matrix3) {
+    return new Matrix3(
+      new Vector3(mat4.elements[0], mat4.elements[1], mat4.elements[2]),
+      new Vector3(mat4.elements[3], mat4.elements[4], mat4.elements[5]),
+      new Vector3(mat4.elements[6], mat4.elements[7], mat4.elements[8]),
+    )
+  }
+
+  toThree(): THREE.Matrix3 {
+    return new THREE.Matrix3().set(
+      this.x.x, this.y.x, this.z.x,
+      this.x.y, this.y.y, this.z.y,
+      this.x.z, this.y.z, this.z.z,
+    )
+  }
+
+  toString() {
+    return [
+      `${format(this.x.x)} ${format(this.y.x)} ${format(this.z.x)}`,
+      `${format(this.x.y)} ${format(this.y.y)} ${format(this.z.y)}`,
+      `${format(this.x.z)} ${format(this.y.z)} ${format(this.z.z)}`,
+    ].join('\n')
+  }
 }
+
+const format = (x: number) => x.toFixed(2).padStart(7)

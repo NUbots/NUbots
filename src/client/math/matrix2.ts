@@ -1,3 +1,5 @@
+import * as THREE from 'three'
+
 import { Vector2 } from './vector2'
 
 export class Matrix2 {
@@ -27,4 +29,13 @@ export class Matrix2 {
   get trace(): number {
     return this.x.x + this.y.y
   }
+
+  toString() {
+    return [
+      `${format(this.x.x)} ${format(this.y.x)}`,
+      `${format(this.x.y)} ${format(this.y.y)}`,
+    ].join('\n')
+  }
 }
+
+const format = (x: number) => x.toFixed(2).padStart(7)

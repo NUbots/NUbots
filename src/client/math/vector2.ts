@@ -1,3 +1,5 @@
+import * as THREE from 'three'
+
 import { Transform } from './transform'
 
 export class Vector2 {
@@ -71,5 +73,17 @@ export class Vector2 {
 
   subtract(v: Vector2): Vector2 {
     return new Vector2(this.x - v.x, this.y - v.y)
+  }
+
+  static fromThree(vec2: THREE.Vector2): Vector2 {
+    return new Vector2(vec2.x, vec2.y)
+  }
+
+  toThree(): THREE.Vector2 {
+    return new THREE.Vector2(this.x, this.y)
+  }
+
+  toString() {
+    return `(${this.x}, ${this.y})`
   }
 }
