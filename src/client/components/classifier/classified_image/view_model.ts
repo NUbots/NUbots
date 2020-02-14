@@ -9,6 +9,7 @@ import { Matrix4 } from 'three'
 import { PlaneGeometry } from 'three'
 
 import { disposableComputed } from '../../../base/disposable_computed'
+import { rawShader } from '../../three/builders'
 import { dataTexture } from '../../three/builders'
 import { shaderMaterial } from '../../three/builders'
 import { imageTexture } from '../../three/builders'
@@ -58,8 +59,7 @@ export class ClassifiedImageViewModel {
   })
 
   private readonly material = shaderMaterial(() => ({
-    vertexShader,
-    fragmentShader,
+    shader: this.shader,
     uniforms: {
       image: { value: this.imageTexture() },
       lut: { value: this.lutTexture() },
@@ -69,6 +69,8 @@ export class ClassifiedImageViewModel {
       bitsZ: { value: this.model.lut.size.z },
     },
   }))
+
+  private readonly shader = rawShader(() => ({ vertexShader, fragmentShader }))
 
   private readonly imageTexture = imageTexture(() => ({
     image: this.imageElement,

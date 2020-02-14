@@ -10,6 +10,7 @@ import { Texture } from 'three'
 
 import { disposableComputed } from '../../../base/disposable_computed'
 import { Vector3 } from '../../../math/vector3'
+import { rawShader } from '../../three/builders'
 import { dataTexture } from '../../three/builders'
 import { shaderMaterial } from '../../three/builders'
 import { perspectiveCamera } from '../../three/builders'
@@ -91,8 +92,7 @@ export class VisualizerViewModel {
   }
 
   private readonly planeMaterial = shaderMaterial(() => ({
-    vertexShader,
-    fragmentShader,
+    shader: this.shader,
     uniforms: {
       lut: { value: this.lutTexture() },
       lutSize: { value: this.lutSize },
@@ -103,6 +103,8 @@ export class VisualizerViewModel {
       size: { value: this.canvas.height / this.model.lut.size.z / 7 },
     },
   }))
+
+  private readonly shader = rawShader(() => ({ vertexShader, fragmentShader }))
 
   @computed
   get lutSize() {
