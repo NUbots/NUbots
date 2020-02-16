@@ -39,6 +39,6 @@ nuclear_role(
   behaviour::skills::Nod
   # Motion
   motion::ScriptEngine
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::HeadController
 )
