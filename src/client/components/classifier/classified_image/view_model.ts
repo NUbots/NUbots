@@ -9,9 +9,9 @@ import { Matrix4 } from 'three'
 import { PlaneGeometry } from 'three'
 
 import { disposableComputed } from '../../../base/disposable_computed'
-import { rawShader } from '../../three/builders'
 import { dataTexture } from '../../three/builders'
 import { shaderMaterial } from '../../three/builders'
+import { shader } from '../../three/builders'
 import { imageTexture } from '../../three/builders'
 import { mesh } from '../../three/builders'
 import { scene } from '../../three/builders'
@@ -70,7 +70,7 @@ export class ClassifiedImageViewModel {
     },
   }))
 
-  private readonly shader = rawShader(() => ({ vertexShader, fragmentShader }))
+  private readonly shader = shader(() => ({ vertexShader, fragmentShader }))
 
   private readonly imageTexture = imageTexture(() => ({
     image: this.imageElement,

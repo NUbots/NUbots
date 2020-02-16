@@ -45,7 +45,7 @@ type Object3DOpts = {
   rotationOrder?: string,
   scale?: Vector3,
   up?: Vector3,
-  children?: Array<Object3D | false | undefined>,
+  children?: (Object3D | false | undefined)[],
   frustumCulled?: false
 }
 

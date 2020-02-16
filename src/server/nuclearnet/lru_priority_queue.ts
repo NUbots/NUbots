@@ -8,7 +8,7 @@ type Item<K, V> = { key: K, values: V[] }
 export class LruPriorityQueue<K, V> {
   private size: number = 0
   private readonly capacityPerKey?: number
-  private readonly queue: Array<Item<K, V>> = []
+  private readonly queue: Item<K, V>[] = []
   private readonly map: Map<K, Item<K, V>> = new Map()
 
   constructor({ capacityPerKey }: { capacityPerKey?: number } = {}) {

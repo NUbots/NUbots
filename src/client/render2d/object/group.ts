@@ -6,12 +6,12 @@ import { Geometry } from './geometry'
 import { Shape } from './shape'
 
 export type GroupOpts = {
-  children: Array<Group | Shape<Geometry>>
+  children: (Group | Shape<Geometry>)[]
   transform: Transform
 }
 
 export class Group {
-  @observable children: Array<Group | Shape<Geometry>>
+  @observable children: (Group | Shape<Geometry>)[]
   @observable transform: Transform
 
   constructor(opts: GroupOpts) {

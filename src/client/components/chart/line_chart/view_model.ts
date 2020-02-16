@@ -48,7 +48,7 @@ export class LineChartViewModel {
   @computed
   get dataSeries(): DataSeries[] {
     const series: DataSeries[] = []
-    const queue: Array<TreeData | DataSeries> = [this.model.treeData]
+    const queue: (TreeData | DataSeries)[] = [this.model.treeData]
 
     while (queue.length > 0) {
       const elem = queue.pop()!
@@ -94,7 +94,7 @@ export class LineChartViewModel {
     const minor = major / nMinor
     const offset = this.minValue + (this.maxValue - this.minValue) / 2
 
-    const lines: Array<Shape<Geometry>> = []
+    const lines: Shape<Geometry>[] = []
 
     // Make our major and minor lines
     let lineNo = 0
@@ -162,7 +162,7 @@ export class LineChartViewModel {
     const minor = major / nMinor
     const offset = min + (max - min) / 2
 
-    const lines: Array<Shape<Geometry>> = []
+    const lines: Shape<Geometry>[] = []
 
     // Make our major and minor lines
     let lineNo = 0

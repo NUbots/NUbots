@@ -1,9 +1,8 @@
-import { RenderFunction } from '@storybook/react'
 import React from 'react'
 
 import style from './fullscreen.css'
 
-export function fullscreen(story: RenderFunction) {
+export function fullscreen(story: () => JSX.Element) {
   return <div className={style.fullscreen}>
     {
       // This is an inline <style> and not in `fullscreen.css` as that would make it apply globally

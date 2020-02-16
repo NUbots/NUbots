@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
 import { NUClearNetSend } from 'nuclearnet.js'
 import XXH from 'xxhashjs'
 

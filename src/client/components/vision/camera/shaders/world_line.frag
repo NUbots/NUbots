@@ -40,10 +40,10 @@ float distort(float r, vec2 k) {
   // These terms have been stripped back to only include k1 and k2 and only uses the first 4 terms
   // if more are needed in the future go and get them from the original paper
   // TODO if performance ever becomes an issue, this can be precomputed for the same k values
-  const Scalar b1 = -k.x;
-  const Scalar b2 = 3.0 * (k.x * k.x) - k.y;
-  const Scalar b3 = -12.0 * (k.x * k.x) * k.x + 8.0 * k.x * k.y;
-  const Scalar b4 = 55.0 * (k.x * k.x) * (k.x * k.x) - 55.0 * (k.x * k.x) * k.y + 5.0 * (k.y * k.y);
+  float b1 = -k.x;
+  float b2 = 3.0 * (k.x * k.x) - k.y;
+  float b3 = -12.0 * (k.x * k.x) * k.x + 8.0 * k.x * k.y;
+  float b4 = 55.0 * (k.x * k.x) * (k.x * k.x) - 55.0 * (k.x * k.x) * k.y + 5.0 * (k.y * k.y);
 
   // These parenthesis are important as they allow the compiler to optimise further
   // Since floating point multiplication is not commutative r * r * r * r != (r * r) * (r * r)

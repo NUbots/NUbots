@@ -6,12 +6,12 @@ const MillisecondsToSeconds = 1e-3
 
 function setTimeout(cb: () => void, seconds: number): CancelTimer {
   const handle = window.setTimeout(cb, seconds * SecondsToMilliseconds)
-  return window.clearTimeout.bind(undefined, handle)
+  return () => window.clearTimeout(handle)
 }
 
 function setInterval(cb: () => void, seconds: number): CancelTimer {
   const handle = window.setInterval(cb, seconds * SecondsToMilliseconds)
-  return window.clearInterval.bind(undefined, handle)
+  return () => window.clearInterval(handle)
 }
 
 function nextTick(cb: () => void): void {
