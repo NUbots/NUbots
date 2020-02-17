@@ -579,7 +579,7 @@ namespace motion {
                   doubleSupportLength + singleSupportLength * params.foot_put_down_phase * params.foot_overshoot_phase,
                   -supportSign * params.foot_distance
                       + (-supportSign * params.foot_distance - foot_step.getLast().y()) * params.foot_overshoot_ratio);
-            point(TrajectoryTypes::FOOT_POS_X,
+            point(TrajectoryTypes::FOOT_POS_Y,
                   doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
                   -supportSign * params.foot_distance);
             point(TrajectoryTypes::FOOT_POS_Y, half_period, -supportSign * params.foot_distance);
