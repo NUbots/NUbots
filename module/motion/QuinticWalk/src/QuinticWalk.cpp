@@ -13,7 +13,6 @@
 #include "utility/math/euler.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -32,7 +31,6 @@ namespace motion {
     using message::motion::ServoTarget;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
-    using utility::nusight::graph;
     using utility::support::Expression;
 
     using utility::input::ServoID;
@@ -71,6 +69,7 @@ namespace motion {
             params.kick_vel                   = cfg["walk"]["kick"]["vel"].as<float>();
             params.pause_duration             = cfg["walk"]["pause"]["duration"].as<float>();
 
+            // Send these parameters to the walk engine
             walk_engine.setParameters(params);
 
             config.max_step[0] = cfg["max_step"]["x"].as<float>();
@@ -212,7 +211,7 @@ namespace motion {
         auto time_diff_ms = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time);
         dt                = time_diff_ms.count() / 1000.0f;
         if (dt == 0.0f) {
-            log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));
+            // log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));
             dt = 0.001f;
         }
         last_update_time = current_time;
@@ -247,10 +246,10 @@ namespace motion {
                 .toRotationMatrix();
         };
 
-        // read the cartesian positions and orientations for trunk and fly foot
+        // Read the cartesian positions and orientations for trunk and fly foot
         walk_engine.computeCartesianPosition(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support);
 
-        // change goals from support foot based coordinate system to trunk based coordinate system
+        // Change goals from support foot based coordinate system to trunk based coordinate system
         Eigen::Affine3f Hst;  // trunk_to_support_foot_goal
         Hst.linear()      = setRPY(trunk_axis[0], trunk_axis[1], trunk_axis[2]).transpose();
         Hst.translation() = -Hst.rotation() * trunk_pos;
@@ -259,8 +258,7 @@ namespace motion {
         Hfs.linear()      = setRPY(foot_axis[0], foot_axis[1], foot_axis[2]);
         Hfs.translation() = foot_pos;
 
-        // Eigen::Affine3f Hft = Hst * Hfs;  // trunk_to_flying_foot_goal
-        Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal ????? should be this????
+        Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
 
         // Calculate leg joints
         Eigen::Matrix4d left_foot =
@@ -272,8 +270,6 @@ namespace motion {
             calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
 
         auto waypoints = motionLegs(joints);
-
-        emit(graph("support to swing x", foot_pos.x()));
 
         emit(std::move(waypoints));
     }
@@ -287,12 +283,7 @@ namespace motion {
 
 
         for (auto& joint : joints) {
-            waypoints->push_back({subsumptionId,
-                                  time,
-                                  joint.first,
-                                  joint.second,
-                                  jointGains[joint.first],
-                                  100});  // TODO: support separate gains for each leg
+            waypoints->push_back({subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
         }
 
         return waypoints;

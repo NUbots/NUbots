@@ -1,7 +1,7 @@
 walk:
   # Full walk cycle frequency
   # (in Hz, > 0)
-  freq: 0.8	
+  freq: 0.8
   # Length of double support phase in half cycle
   # (ratio, [0:1])
   double_support_ratio: 0.55
@@ -71,7 +71,7 @@ walk:
     pitch_p_coef:
       # Trunk pitch orientation proportional to forward step
       # (in rad/m)
-      forward: 18 * pi / 180 # 11
+      forward: 18 * pi / 180
       # Trunk pitch orientation proportional to rotation step
       # (in 1)
       turn: 18 * pi / 180

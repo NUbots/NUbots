@@ -19,9 +19,7 @@ namespace motion {
         /**
          * Polynom
          *
-         * Simple one dimentional
-         * polynom class for spline
-         * generation
+         * Simple one dimentional polynom class for spline generation
          */
         template <typename Scalar>
         class Polynom {
@@ -33,9 +31,7 @@ namespace motion {
             Polynom(size_t degree) : coefs(degree + 1, static_cast<Scalar>(0)) {}
 
             /**
-             * Access to coefficient
-             * indexed from constant to
-             * higher degree
+             * Access to coefficient indexed from constant to higher degree
              */
             const std::vector<Scalar>& getCoefs() const {
                 return coefs;
@@ -55,16 +51,14 @@ namespace motion {
             }
 
             /**
-             * Return polynom degree
-             * -1 mean empty polynom
+             * Return polynom degree -1 mean empty polynom
              */
             size_t degree() const {
                 return coefs.size() - 1;
             }
 
             /**
-             * Polynom evaluation, its first,
-             * second and third derivative at given x
+             * Polynom evaluation, its first, second and third derivative at given x
              */
             Scalar pos(Scalar x) const {
                 Scalar xx  = static_cast<Scalar>(1);
@@ -75,6 +69,7 @@ namespace motion {
                 }
                 return val;
             }
+
             Scalar vel(Scalar x) const {
                 Scalar xx  = static_cast<Scalar>(1);
                 Scalar val = static_cast<Scalar>(0);
@@ -84,6 +79,7 @@ namespace motion {
                 }
                 return val;
             }
+
             Scalar acc(Scalar x) const {
                 Scalar xx  = static_cast<Scalar>(1);
                 Scalar val = static_cast<Scalar>(0);
@@ -93,6 +89,7 @@ namespace motion {
                 }
                 return val;
             }
+
             Scalar jerk(Scalar x) const {
                 Scalar xx  = static_cast<Scalar>(1);
                 Scalar val = static_cast<Scalar>(0);
@@ -111,6 +108,7 @@ namespace motion {
                     coefs[i] *= coef;
                 }
             }
+
             void operator+=(const Polynom& p) {
                 while (p.coefs.size() > coefs.size()) {
                     coefs.push_back(static_cast<Scalar>(0));
@@ -122,9 +120,7 @@ namespace motion {
             }
 
             /**
-             * Update the polynom coefficients
-             * by applying delta offset
-             * on X abscisse
+             * Update the polynom coefficients by applying delta offset on X abscisse
              */
             void shift(Scalar delta) {
                 Polynom<Scalar> n(coefs.size() - 1);
@@ -141,9 +137,8 @@ namespace motion {
             }
 
             /**
-             * Expand the given formula (x + y)^degree
-             * and return the polynom in x whose coefficient
-             * are computed using binomial coefficient
+             * Expand the given formula (x + y)^degree and return the polynom in x whose coefficient are computed using
+             * binomial coefficient
              */
             static Polynom<Scalar> expandBinomial(Scalar y, size_t degree) {
                 Combination combination;
@@ -160,7 +155,7 @@ namespace motion {
 
         private:
             /**
-             * Polynom coeficients
+             * Polynom coefficients
              */
             std::vector<Scalar> coefs;
         };

@@ -19,15 +19,13 @@ namespace motion {
         /**
          * Spline
          *
-         * Generic one dimentional
-         * polynomial spline generator
+         * Generic one dimentional polynomial spline generator
          */
         template <typename Scalar>
         class Spline {
         public:
             /**
-             * Internal spline part structure
-             * with a polynom valid on an interval
+             * Internal spline part structure with a polynom valid on an interval
              */
             struct Spline_t {
                 Polynom<Scalar> polynom;
@@ -36,9 +34,7 @@ namespace motion {
             };
 
             /**
-             * Return spline interpolation
-             * at given t. Compute spline value,
-             * its first, second and third derivative
+             * Return spline interpolation at given t. Compute spline value, its first, second and third derivative
              */
             Scalar pos(Scalar t) const {
                 return interpolation(t, &Polynom<Scalar>::pos);
@@ -53,11 +49,8 @@ namespace motion {
                 return interpolation(t, &Polynom<Scalar>::jerk);
             }
 
-
             /**
-             * Return spline interpolation
-             * value, first, second and third derivative
-             * with given t bound between 0 and 1
+             * Return spline interpolation value, first, second and third derivative with given t bound between 0 and 1
              */
             Scalar posMod(Scalar t) const {
                 return interpolationMod(t, &Polynom<Scalar>::pos);
@@ -73,8 +66,7 @@ namespace motion {
             }
 
             /**
-             * Return minimum and maximum abscisse
-             * value for which spline is defined
+             * Return minimum and maximum abscisse value for which spline is defined
              */
             Scalar min() const {
                 if (splines.size() == 0) {
@@ -93,10 +85,8 @@ namespace motion {
                 }
             }
 
-
             /**
-             * Write and read splines data into given
-             * iostream in ascii format
+             * Write and read splines data into given iostream in ascii format
              */
             void exportData(std::ostream& os) const {
                 for (size_t i = 0; i < splines.size(); i++) {
@@ -109,6 +99,7 @@ namespace motion {
                 }
                 os << std::endl;
             }
+
             void importData(std::istream& is) {
                 bool isFormatError;
                 while (is.good()) {
@@ -163,16 +154,14 @@ namespace motion {
             }
 
             /**
-             * Add a part with given polynom
-             * and min/max time range
+             * Add a part with given polynom and min/max time range
              */
             void addPart(const Polynom<Scalar>& poly, Scalar min, Scalar max) {
                 splines.emplace_back(poly, min, max);
             }
 
             /**
-             * Replace this spline part with the
-             * internal data of given spline
+             * Replace this spline part with the internal data of given spline
              */
             void copyData(const Spline<Scalar>& sp) {
                 splines = sp.splines;
@@ -187,16 +176,14 @@ namespace motion {
             std::vector<Spline_t> splines;
 
             /**
-             * Possible override callback
-             * after importation
+             * Possible override callback after importation
              */
             virtual void importCallBack() {}
 
         private:
             /**
-             * Return spline interpolation of given value and
-             * used given polynom evaluation function
-             * (member function pointer)
+             * Return spline interpolation of given value and used given polynom evaluation function (member function
+             * pointer)
              */
             Scalar interpolation(Scalar x, Scalar (Polynom<Scalar>::*func)(Scalar) const) const {
                 // Empty case
@@ -231,8 +218,7 @@ namespace motion {
             }
 
             /**
-             * Return interpolation with x
-             * bound between 0 and 1
+             * Return interpolation with x bound between 0 and 1
              */
             Scalar interpolationMod(Scalar x, Scalar (Polynom<Scalar>::*func)(Scalar) const) const {
                 if (x < static_cast<Scalar>(0)) {

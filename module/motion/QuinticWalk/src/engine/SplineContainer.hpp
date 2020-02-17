@@ -25,8 +25,7 @@ namespace motion {
         /**
          * SplineContainer
          *
-         * Wrapper for map of generic splines
-         * types indexed by string name
+         * Wrapper for map of generic splines types indexed by string name
          * Implementation of implort/export from files
          */
         template <typename T, typename U, typename Scalar>
@@ -43,8 +42,7 @@ namespace motion {
 
             /**
              * Add an empty spline with given name.
-             * Variadic arguments allow to pass parameters to
-             * spline constructor.
+             * Variadic arguments allow to pass parameters to spline constructor.
              */
             template <typename... Args>
             inline void add(const U& name, Args... args) {
@@ -55,8 +53,7 @@ namespace motion {
             }
 
             /**
-             * Return true if given spline
-             * name is contained
+             * Return true if given spline name is contained
              */
             inline bool exist(const U& name) const {
                 return container.count(name) > 0;
@@ -71,6 +68,7 @@ namespace motion {
                 }
                 return container.at(name);
             }
+
             inline T& get(const U& name) {
                 if (container.count(name) == 0) {
                     throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
@@ -84,6 +82,7 @@ namespace motion {
             const Map& get() const {
                 return container;
             }
+
             Map& get() {
                 return container;
             }
@@ -108,8 +107,7 @@ namespace motion {
             }
 
             /**
-             * Return minimum and maximum abscisse values
-             * of all registered splines parts
+             * Return minimum and maximum abscisse values of all registered splines parts
              */
             Scalar min() const {
                 if (container.size() == 0) {
@@ -125,6 +123,7 @@ namespace motion {
                 }
                 return m;
             }
+
             Scalar max() const {
                 if (container.size() == 0) {
                     return 0.0;
@@ -140,10 +139,8 @@ namespace motion {
                 return m;
             }
 
-
             /**
-             * Export to and Import from given file name
-             * in "spline" CSV format prefixed with spline name
+             * Export to and Import from given file name in "spline" CSV format prefixed with spline name
              */
             void exportData(const std::string& file_name) const {
                 if (container.size() == 0) {
@@ -162,6 +159,7 @@ namespace motion {
 
                 file.close();
             }
+
             void importData(const std::string& file_name) {
                 std::ifstream file(file_name);
                 if (!file.is_open()) {
@@ -198,8 +196,7 @@ namespace motion {
 
         private:
             /**
-             * Spline container indexed
-             * by their name
+             * Spline container indexed by their name
              */
             Map container;
         };

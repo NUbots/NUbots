@@ -76,13 +76,11 @@ namespace motion {
             else {
                 tmpDiff.y() -= foot_distance;
             }
-            // Allow lateral step only on external foot
-            //(internal foot will return to zero pose)
+            // Allow lateral step only on external foot (internal foot will return to zero pose)
             if ((is_left_support_foot && diff.y() > 0.0f) || (!is_left_support_foot && diff.y() < 0.0f)) {
                 tmpDiff.y() += diff.y();
             }
-            // No change in turn (in order to
-            // rotate arroud trunk center)
+            // No change in turn (in order to rotate around trunk center)
             tmpDiff.z() = diff.z();
 
             // Make the step

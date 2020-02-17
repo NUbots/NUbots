@@ -18,17 +18,13 @@ namespace motion {
         /**
          * Combination
          *
-         * Implement binomial coefficient
-         * computation using Pascal Triangle
-         * and iterate thought all (n choose k)
+         * Implement binomial coefficient computation using Pascal Triangle and iterate thought all (n choose k)
          * combinations
          */
         class Combination {
         public:
             /**
-             * Compute the number of possible
-             * combinations for (n choose k)
-             * (using dynamic progamming)
+             * Compute the number of possible combinations for (n choose k) (using dynamic progamming)
              */
             unsigned long binomialCoefficient(size_t k, size_t n) {
                 if (n == 0 || k == 0) {
@@ -62,8 +58,7 @@ namespace motion {
             }
 
             /**
-             * Start combination iteration
-             * for given (n choose k)
+             * Start combination iteration for given (n choose k)
              */
             void startCombination(size_t k, size_t n) {
                 if (n == 0 || k == 0) {
@@ -83,8 +78,7 @@ namespace motion {
 
             /**
              * Return the next combination.
-             * Return empty sdt::vector when
-             * iteration is finished
+             * Return empty sdt::vector when iteration is finished
              */
             std::vector<size_t> nextCombination() {
                 std::vector<size_t> result = indexes;
@@ -107,23 +101,20 @@ namespace motion {
             typedef std::vector<size_t> Comb;
 
             /**
-             * Hold (n choose k) number of possible
-             * combinations for dynamic programming
+             * Hold (n choose k) number of possible combinations for dynamic programming
              */
             std::map<Pair, unsigned long> pascal_triangle;
 
             /**
-             * Current indexes container and
-             * iteration n and k parameter
+             * Current indexes container and iteration n and k parameter
              */
             std::vector<size_t> indexes;
             size_t n;
             size_t k;
 
             /**
-             * Increment by one the indexes container
-             * at digit i (recursively).
-             * Return true on iteration end
+             * Increment by one the indexes container at digit i (recursively).
+             * Return true on iteration end.
              */
             bool incrIndexes(size_t i) {
                 if (indexes[i] == n - (k - i)) {

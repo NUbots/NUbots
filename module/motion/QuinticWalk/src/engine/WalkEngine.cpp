@@ -33,10 +33,9 @@ namespace motion {
             , trunk_axis_vel_at_last()
             , trunk_axis_acc_at_last()
             , trajs() {
-            // make sure to call the reset method after having the parameters
+            // Make sure to call the reset method after having the parameters
             trajs = TrajectoriesInit();
         }
-
 
         bool QuinticWalkEngine::updateState(const float& dt, const Eigen::Vector3f& orders, const bool& walkableState) {
             bool ordersZero = orders.isZero();
@@ -56,9 +55,6 @@ namespace motion {
                         // we can continue
                         engine_state = WalkEngineState::WALKING;
                         time_paused  = 0.0f;
-                        /*buildNormalTrajectories(orders);
-                        updatePhase(dt);
-                        return true;*/
                     }
                 }
                 else {
@@ -227,12 +223,10 @@ namespace motion {
         }
 
         void QuinticWalkEngine::saveCurrentTrunkState() {
-            // Evaluate current trunk state
-            //(position, velocity, acceleration)
-            // in next support foot frame
+            // Evaluate current trunk state (position, velocity, acceleration) in next support foot frame
 
-            // compute current point in time to save state
-            // by multiplying the half period time with the advancement of period time
+            // Compute current point in time to save state by multiplying the half period time with the advancement of
+            // period time
             float factor;
             if (last_phase < 0.5f) {
                 factor = last_phase / 0.5f;
@@ -248,12 +242,14 @@ namespace motion {
                                      trajs.get(TrajectoryTypes::TRUNK_POS_Y).vel(period_time));
             Eigen::Vector2f trunkAcc(trajs.get(TrajectoryTypes::TRUNK_POS_X).acc(period_time),
                                      trajs.get(TrajectoryTypes::TRUNK_POS_Y).acc(period_time));
+
             // Convert in next support foot frame
             trunkPos.x() -= foot_step.getNext().x();
             trunkPos.y() -= foot_step.getNext().y();
             trunkPos = Eigen::Rotation2Df(-foot_step.getNext().z()).toRotationMatrix() * trunkPos;
             trunkVel = Eigen::Rotation2Df(-foot_step.getNext().z()).toRotationMatrix() * trunkVel;
             trunkAcc = Eigen::Rotation2Df(-foot_step.getNext().z()).toRotationMatrix() * trunkAcc;
+
             // Save state
             trunk_pos_at_last.x() = trunkPos.x();
             trunk_pos_at_last.y() = trunkPos.y();
@@ -261,27 +257,30 @@ namespace motion {
             trunk_vel_at_last.y() = trunkVel.y();
             trunk_acc_at_last.x() = trunkAcc.x();
             trunk_acc_at_last.y() = trunkAcc.y();
+
             // No transformation for height
             trunk_pos_at_last.z() = trajs.get(TrajectoryTypes::TRUNK_POS_Z).pos(period_time);
             trunk_vel_at_last.z() = trajs.get(TrajectoryTypes::TRUNK_POS_Z).vel(period_time);
             trunk_acc_at_last.z() = trajs.get(TrajectoryTypes::TRUNK_POS_Z).acc(period_time);
-            // Evaluate and save trunk orientation
-            // in next support foot frame
+
+            // Evaluate and save trunk orientation in next support foot frame
             Eigen::Vector3f trunkAxis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
                                       params.trunk_pitch - trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
                                       trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(period_time));
+
             // Convert in intrinsic euler angle
             Eigen::Matrix3f trunkMat   = Eigen::AngleAxisf(trunkAxis.norm(), trunkAxis.normalized()).toRotationMatrix();
             Eigen::Vector3f trunkEuler = utility::math::euler::MatrixToEulerIntrinsic(trunkMat);
+
             // Transform to next support foot
             trunkEuler.z() -= foot_step.getNext().z();
+
             // Reconvert to axis and save it
             trunkMat               = utility::math::euler::EulerIntrinsicToMatrix(trunkEuler);
             trunkAxis              = Eigen::AngleAxisf(trunkMat).axis();
             trunk_axis_pos_at_last = trunkAxis;
-            // Evaluate trunk orientation velocity
-            // and acceleration without frame
-            // transformation
+
+            // Evaluate trunk orientation velocity and acceleration without frame transformation
             trunk_axis_vel_at_last.x() = trajs.get(TrajectoryTypes::TRUNK_AXIS_X).vel(period_time);
             trunk_axis_vel_at_last.y() = trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).vel(period_time);
             trunk_axis_vel_at_last.z() = trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).vel(period_time);
@@ -294,7 +293,7 @@ namespace motion {
                                                   const bool& startMovement,
                                                   const bool& startStep,
                                                   const bool& kickStep) {
-            // save the current trunk state to use it later and compute next step position
+            // Save the current trunk state to use it later and compute next step position
             if (!startMovement) {
                 saveCurrentTrunkState();
                 foot_step.stepFromOrders(orders);
@@ -306,6 +305,7 @@ namespace motion {
 
             // Reset the trajectories
             trajs = TrajectoriesInit();
+
             // full period (float step) is needed for trunk splines
             float period = 2.0f * half_period;
 
@@ -316,14 +316,11 @@ namespace motion {
             // Sign of support foot with respect to lateral
             float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
 
-            // The trunk trajectory is defined for a
-            // complete cycle to handle trunk phase shift
-            // Trunk phase shift is done due to the length of the float
-            // support phase and can be adjusted optionally by a parameter
-            // 0.5halfPeriod to be acyclic to the feet, 0.5floatSupportLength to keep the float support phase centered
-            // between feet
+            // The trunk trajectory is defined for a complete cycle to handle trunk phase shift
+            // Trunk phase shift is done due to the length of the float support phase and can be adjusted optionally by
+            // a parameter. 0.5halfPeriod to be acyclic to the feet, 0.5floatSupportLength to keep the float support
+            // phase centered between feet
             float timeShift = (doubleSupportLength - half_period) * 0.5f + params.trunk_phase * half_period;
-
 
             // Only move the trunk on the first half cycle after a walk enable
             if (startMovement) {
@@ -344,6 +341,7 @@ namespace motion {
             // Flying foot position
             point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
             point(TrajectoryTypes::FOOT_POS_X, doubleSupportLength, foot_step.getLast().x());
+
             if (kickStep) {
                 point(TrajectoryTypes::FOOT_POS_X,
                       doubleSupportLength + singleSupportLength * params.kick_phase,
@@ -356,11 +354,14 @@ namespace motion {
                           + singleSupportLength * params.foot_put_down_phase * params.foot_overshoot_phase,
                       foot_step.getNext().x() + foot_step.getNext().x() * params.foot_overshoot_ratio);
             }
+
+            // Add points for the foot x position
             point(TrajectoryTypes::FOOT_POS_X,
                   doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
                   foot_step.getNext().x());
             point(TrajectoryTypes::FOOT_POS_X, half_period, foot_step.getNext().x());
 
+            // Add points for the foot y position
             point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.getLast().y());
             point(TrajectoryTypes::FOOT_POS_Y, doubleSupportLength, foot_step.getLast().y());
             point(TrajectoryTypes::FOOT_POS_Y,
@@ -372,6 +373,7 @@ namespace motion {
                   foot_step.getNext().y());
             point(TrajectoryTypes::FOOT_POS_Y, half_period, foot_step.getNext().y());
 
+            // Add points for the foot z position
             point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
             point(TrajectoryTypes::FOOT_POS_Z, doubleSupportLength, 0.0f);
             point(TrajectoryTypes::FOOT_POS_Z,
@@ -387,7 +389,8 @@ namespace motion {
                   params.foot_put_down_z_offset);
             point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
 
-            // Flying foot orientation
+            // Add points for flying foot orientation
+            // X axis orientation
             point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
             point(TrajectoryTypes::FOOT_AXIS_X, doubleSupportLength + 0.1f * singleSupportLength, 0.0f);
             point(TrajectoryTypes::FOOT_AXIS_X,
@@ -395,9 +398,11 @@ namespace motion {
                   params.foot_put_down_roll_offset * supportSign);
             point(TrajectoryTypes::FOOT_AXIS_X, half_period, 0.0f);
 
+            // Y axis orientation
             point(TrajectoryTypes::FOOT_AXIS_Y, 0.0f, 0.0f);
             point(TrajectoryTypes::FOOT_AXIS_Y, half_period, 0.0f);
 
+            // Z axis orientation
             point(TrajectoryTypes::FOOT_AXIS_Z, 0.0f, foot_step.getLast().z());
             point(TrajectoryTypes::FOOT_AXIS_Z, doubleSupportLength, foot_step.getLast().z());
             point(TrajectoryTypes::FOOT_AXIS_Z,
@@ -405,14 +410,10 @@ namespace motion {
                   foot_step.getNext().z());
             point(TrajectoryTypes::FOOT_AXIS_Z, half_period, foot_step.getNext().z());
 
-
-            // Half pause length of trunk swing
-            // lateral oscillation
+            // Half pause length of trunk swing lateral oscillation
             float pauseLength = 0.5f * params.trunk_pause * half_period;
 
-            // Trunk support foot and next
-            // support foot external
-            // oscillating position
+            // Trunk support foot and next support foot external oscillating position
             Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
                                                   + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
                                                   + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
@@ -421,20 +422,26 @@ namespace motion {
                                                + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
                                                + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
                                            foot_step.getNext().y() + params.trunk_y_offset);
+
             // Trunk middle neutral (no swing) position
             Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
+
             // Trunk vector from middle to support apex
             Eigen::Vector2f trunkVect = trunkPointSupport - trunkPointMiddle;
+
             // Apply swing amplitude ratio
             trunkVect.y() *= params.trunk_swing;
+
             // Trunk support and next apex position
             Eigen::Vector2f trunkApexSupport = trunkPointMiddle + trunkVect;
             Eigen::Vector2f trunkApexNext    = trunkPointMiddle - trunkVect;
+
             // Trunk forward velocity
             float trunkVelSupport = (foot_step.getNext().x() - foot_step.getLast().x()) / period;
             float trunkVelNext    = foot_step.getNext().x() / half_period;
 
-            // Trunk position
+            // Set points for trunk
+            // Trunk x position
             if (startStep) {
                 point(TrajectoryTypes::TRUNK_POS_X, 0.0f, 0.0f, 0.0f, 0.0f);
             }
@@ -446,8 +453,10 @@ namespace motion {
                       trunk_acc_at_last.x());
                 point(TrajectoryTypes::TRUNK_POS_X, half_period + timeShift, trunkApexSupport.x(), trunkVelSupport);
             }
+
             point(TrajectoryTypes::TRUNK_POS_X, period + timeShift, trunkApexNext.x(), trunkVelNext);
 
+            // Trunk y position
             point(TrajectoryTypes::TRUNK_POS_Y,
                   0.0f,
                   trunk_pos_at_last.y(),
@@ -474,6 +483,7 @@ namespace motion {
                 point(TrajectoryTypes::TRUNK_POS_Y, period + timeShift + pauseLength, trunkApexNext.y());
             }
 
+            // Trunk z position
             point(TrajectoryTypes::TRUNK_POS_Z,
                   0.0f,
                   trunk_pos_at_last.z(),
@@ -482,10 +492,7 @@ namespace motion {
             point(TrajectoryTypes::TRUNK_POS_Z, half_period + timeShift, params.trunk_height);
             point(TrajectoryTypes::TRUNK_POS_Z, period + timeShift, params.trunk_height);
 
-            // Define trunk yaw target
-            // orientation position and velocity
-            // in euler angle and convertion
-            // to axis vector
+            // Define trunk yaw target orientation position and velocity in euler angle and convertion to axis vector
             Eigen::Vector3f eulerAtSupport(0.0f,
                                            params.trunk_pitch
                                                + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
@@ -505,7 +512,8 @@ namespace motion {
                 0.0f,
                 utility::math::angle::angleDistance(foot_step.getLast().z(), foot_step.getNext().z()) / period);
 
-            // Trunk orientation
+            // Add points for trunk orientation
+            // Trunk x axis orientation
             point(TrajectoryTypes::TRUNK_AXIS_X,
                   0.0f,
                   trunk_axis_pos_at_last.x(),
@@ -514,6 +522,7 @@ namespace motion {
             point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, axisAtSupport.x(), axisVel.x());
             point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, axisAtNext.x(), axisVel.x());
 
+            // Trunk y axis orientation
             point(TrajectoryTypes::TRUNK_AXIS_Y,
                   0.0f,
                   params.trunk_pitch - trunk_axis_pos_at_last.y(),
@@ -525,6 +534,7 @@ namespace motion {
                   axisVel.y());
             point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch - axisAtNext.y(), axisVel.y());
 
+            // Trunk z axis orientation
             point(TrajectoryTypes::TRUNK_AXIS_Z,
                   0.0f,
                   trunk_axis_pos_at_last.z(),
@@ -536,21 +546,19 @@ namespace motion {
 
         void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders,
                                                              const bool& footInIdlePosition) {
-            // save the current trunk state to use it later
+            // Save the current trunk state to use it later
             saveCurrentTrunkState();
-            // update support foot and compute odometry
+            // Update support foot and compute odometry
             foot_step.stepFromOrders(orders);
 
             // Reset the trajectories
             trajs = TrajectoriesInit();
 
-            // Time length of float and single
-            // support phase during the half cycle
+            // Time length of float and single support phase during the half cycle
             float doubleSupportLength = params.double_support_ratio * half_period;
             float singleSupportLength = half_period - doubleSupportLength;
 
-            // Sign of support foot with
-            // respect to lateral
+            // Sign of support foot with respect to lateral
             float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
 
             // Set float support phase
@@ -562,7 +570,8 @@ namespace motion {
             point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
             point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
 
-            // Flying foot position
+            // Add points for flying foot position
+            // Foot x position
             point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
             point(TrajectoryTypes::FOOT_POS_X, doubleSupportLength, foot_step.getLast().x());
             point(TrajectoryTypes::FOOT_POS_X,
@@ -573,6 +582,7 @@ namespace motion {
                   0.0f);
             point(TrajectoryTypes::FOOT_POS_X, half_period, 0.0f);
 
+            // Foot y position
             point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.getLast().y());
             point(TrajectoryTypes::FOOT_POS_Y, doubleSupportLength, foot_step.getLast().y());
             point(TrajectoryTypes::FOOT_POS_Y,
@@ -584,8 +594,8 @@ namespace motion {
                   -supportSign * params.foot_distance);
             point(TrajectoryTypes::FOOT_POS_Y, half_period, -supportSign * params.foot_distance);
 
-            // If the walk has just been disabled,
-            // make one single step to neutral pose
+            // Foot z position
+            // If the walk has just been disabled, make one single step to neutral pose
             if (!footInIdlePosition) {
                 point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
                 point(TrajectoryTypes::FOOT_POS_Z, doubleSupportLength, 0.0f);
@@ -607,13 +617,17 @@ namespace motion {
                 point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
                 point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
             }
-            // Flying foot orientation
+
+            // Add points for flying foot orientation
+            // Flying foot x axis orientation
             point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
             point(TrajectoryTypes::FOOT_AXIS_X, half_period, 0.0f);
 
+            // Flying foot y axis orientation
             point(TrajectoryTypes::FOOT_AXIS_Y, 0.0f, 0.0f);
             point(TrajectoryTypes::FOOT_AXIS_Y, half_period, 0.0f);
 
+            // Flying foot z axis orientation
             point(TrajectoryTypes::FOOT_AXIS_Z, 0.0f, foot_step.getLast().z());
             point(TrajectoryTypes::FOOT_AXIS_Z, doubleSupportLength, foot_step.getLast().z());
             point(TrajectoryTypes::FOOT_AXIS_Z,
@@ -621,7 +635,8 @@ namespace motion {
                   0.0f);
             point(TrajectoryTypes::FOOT_AXIS_Z, half_period, 0.0f);
 
-            // Trunk position
+            // Add points for trunk position
+            // Trunk x position
             point(TrajectoryTypes::TRUNK_POS_X,
                   0.0f,
                   trunk_pos_at_last.x(),
@@ -629,6 +644,7 @@ namespace motion {
                   trunk_acc_at_last.x());
             point(TrajectoryTypes::TRUNK_POS_X, half_period, params.trunk_x_offset);
 
+            // Trunk y position
             point(TrajectoryTypes::TRUNK_POS_Y,
                   0.0f,
                   trunk_pos_at_last.y(),
@@ -638,19 +654,24 @@ namespace motion {
                   half_period,
                   -supportSign * 0.5f * params.foot_distance + params.trunk_y_offset);
 
+            // Trunk z position
             point(TrajectoryTypes::TRUNK_POS_Z,
                   0.0f,
                   trunk_pos_at_last.z(),
                   trunk_vel_at_last.z(),
                   trunk_acc_at_last.z());
             point(TrajectoryTypes::TRUNK_POS_Z, half_period, params.trunk_height);
-            // Trunk orientation
+
+            // Add points for trunk orientation
+            // Trunk x axis orientation
             point(TrajectoryTypes::TRUNK_AXIS_X,
                   0.0f,
                   trunk_axis_pos_at_last.x(),
                   trunk_axis_vel_at_last.x(),
                   trunk_axis_acc_at_last.x());
             point(TrajectoryTypes::TRUNK_AXIS_X, half_period, 0.0f);
+
+            // Trunk y axis orientation
             point(TrajectoryTypes::TRUNK_AXIS_Y,
                   0.0f,
                   params.trunk_pitch - trunk_axis_pos_at_last.y(),
@@ -658,6 +679,7 @@ namespace motion {
                   trunk_axis_acc_at_last.y());
             point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - 1.0f);
 
+            // Trunk z axis orientation
             point(TrajectoryTypes::TRUNK_AXIS_Z,
                   0.0f,
                   trunk_axis_pos_at_last.z(),
@@ -700,8 +722,7 @@ namespace motion {
                                                                Eigen::Vector3f& footAxis,
                                                                bool& isLeftsupportFoot,
                                                                float time) {
-            // Evaluate target cartesian
-            // state from trajectories
+            // Evaluate target cartesian state from trajectories
             bool isDoubleSupport;
             TrajectoriesTrunkFootPos(time, trajs, trunkPos, trunkAxis, footPos, footAxis);
             TrajectoriesSupportFootState(time, trajs, isDoubleSupport, isLeftsupportFoot);

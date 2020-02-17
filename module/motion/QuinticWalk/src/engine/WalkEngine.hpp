@@ -110,7 +110,7 @@ namespace motion {
          * generator based on footstep control
          * and quintic splines in cartesian space.
          * Expressed all target state in cartesian
-         * space with respect to current cupport foot
+         * space with respect to current support foot
          */
         class QuinticWalkEngine {
         public:

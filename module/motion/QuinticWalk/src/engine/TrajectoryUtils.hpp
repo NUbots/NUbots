@@ -89,7 +89,6 @@ namespace motion {
                 }
             }
 
-
             // Operators
             bool operator<(TrajectoryTypes const& other) const {
                 return value < other.value;
@@ -165,8 +164,7 @@ namespace motion {
         using Trajectories = SplineContainer<SmoothSpline<float>, TrajectoryTypes, float>;
 
         /**
-         * Return initialized trajectories for
-         * trunk/foot ik cartesian with empty splines
+         * Return initialized trajectories for trunk/foot ik cartesian with empty splines
          */
         inline Trajectories TrajectoriesInit() {
             Trajectories traj;
@@ -188,12 +186,9 @@ namespace motion {
             return traj;
         }
 
-
         /**
-         * Compute from given spline container
-         * trajectory Cartesian trunk and foot
-         * position/velocity/acceleration
-         * and assign it to given vector
+         * Compute from given spline container trajectory Cartesian trunk and foot position/velocity/acceleration and
+         * assign it to given vector
          */
         inline void TrajectoriesTrunkFootPos(float t,
                                              const Trajectories& traj,
@@ -215,6 +210,7 @@ namespace motion {
                                        traj.get(TrajectoryTypes::FOOT_AXIS_Y).pos(t),
                                        traj.get(TrajectoryTypes::FOOT_AXIS_Z).pos(t));
         }
+
         inline void TrajectoriesTrunkFootVel(float t,
                                              const Trajectories& traj,
                                              Eigen::Vector3f& trunkPosVel,
@@ -235,6 +231,7 @@ namespace motion {
                                           traj.get(TrajectoryTypes::FOOT_AXIS_Y).vel(t),
                                           traj.get(TrajectoryTypes::FOOT_AXIS_Z).vel(t));
         }
+
         inline void TrajectoriesTrunkFootAcc(float t,
                                              const Trajectories& traj,
                                              Eigen::Vector3f& trunkPosAcc,
@@ -255,6 +252,7 @@ namespace motion {
                                           traj.get(TrajectoryTypes::FOOT_AXIS_Y).acc(t),
                                           traj.get(TrajectoryTypes::FOOT_AXIS_Z).acc(t));
         }
+
         inline void TrajectoriesSupportFootState(float t,
                                                  const Trajectories& traj,
                                                  bool& isDoubleSupport,
@@ -264,12 +262,9 @@ namespace motion {
             isLeftsupportFoot = (traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5f ? true : false);
         }
 
-
         /**
          * Default Cartesian state check function.
-         * Return positive cost value
-         * if given time and Cartesian state are outside
-         * standard valid range
+         * Return positive cost value if given time and Cartesian state are outside standard valid range
          */
         inline float DefaultCheckState(const Eigen::VectorXf& params,
                                        float t,

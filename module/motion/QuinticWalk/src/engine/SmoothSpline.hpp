@@ -17,8 +17,7 @@ namespace motion {
         /**
          * SmoothSpline
          *
-         * Implementation of 5th order polynomial
-         * splines trajectory known to minimize jerk
+         * Implementation of 5th order polynomial splines trajectory known to minimize jerk
          */
         template <typename Scalar>
         class SmoothSpline : public Spline<Scalar> {
@@ -34,8 +33,7 @@ namespace motion {
             };
 
             /**
-             * Add a new point with its time, position value,
-             * velocity and acceleration
+             * Add a new point with its time, position value, velocity and acceleration
              */
             void addPoint(Scalar time,
                           Scalar position,
@@ -51,6 +49,7 @@ namespace motion {
             const std::vector<Point>& getPoints() const {
                 return points;
             }
+
             std::vector<Point>& getPoints() {
                 return points;
             }
@@ -86,8 +85,7 @@ namespace motion {
 
         protected:
             /**
-             * Inherit
-             * Load Points
+             * Inherit Load Points
              */
             virtual void importCallBack() override {
                 size_t size = Spline<Scalar>::splines.size();
@@ -133,8 +131,7 @@ namespace motion {
             std::vector<Point> points;
 
             /**
-             * Fit a polynom between 0 and t with given
-             * pos, vel and acc initial and final conditions
+             * Fit a polynom between 0 and t with given pos, vel and acc initial and final conditions
              */
             Polynom<Scalar>
             polynomFit(Scalar t, Scalar pos1, Scalar vel1, Scalar acc1, Scalar pos2, Scalar vel2, Scalar acc2) const {
