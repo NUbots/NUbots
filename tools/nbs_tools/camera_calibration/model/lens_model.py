@@ -6,7 +6,16 @@ import tensorflow as tf
 
 
 class LensModel(tf.keras.Model):
-    def __init__(self, focal_length, centre, k, dtype=tf.float64, **kwargs):
+    def __init__(
+        self,
+        focal_length,
+        centre,
+        k,
+        dtype=tf.float64,
+        distortion_reg=0.01,
+        inverse_regularisation=10,
+        inverse_parameters=9,
+    ):
         super(LensModel, self).__init__(dtype=dtype)
 
         self.focal_length = self.add_weight("focal_length", shape=(), initializer="ones", dtype=self.dtype)
@@ -18,10 +27,10 @@ class LensModel(tf.keras.Model):
         self.k.assign(k)
 
         # Often the optimisation will attempt to introduce extreme distortion on the edges that doesn't help
-        self.add_loss(lambda: 0.01 * tf.reduce_sum(tf.square(self.k)))
+        self.add_loss(lambda: distortion_reg * tf.reduce_sum(tf.square(self.k)))
 
         # When optimising try to tweak the parameters such that our inverse function has low error
-        self.add_loss(lambda: self.inverse_quality())
+        self.add_loss(lambda: inverse_regularisation * self.inverse_quality(inverse_parameters))
 
     def distortion(self, r, k):
 
@@ -65,12 +74,12 @@ class LensModel(tf.keras.Model):
         ]
         # fmt: on
 
-    def inverse_quality(self):
+    def inverse_quality(self, n_params=9):
 
         # Up to sqrt 2 would work for a square image, and it's unlikely to find a camera taller than wide
         r_d = tf.cast(tf.linspace(0.0, 0.5 * math.sqrt(2), 1000), dtype=self.dtype)
         r_u = self.distortion(r_d, self.k)
-        r_p = self.distortion(r_u, self.inverse_coeffs())
+        r_p = self.distortion(r_u, self.inverse_coeffs()[:n_params])
         return tf.reduce_mean(tf.math.squared_difference(r_d, r_p))
 
     def call(self, screen, training=False):

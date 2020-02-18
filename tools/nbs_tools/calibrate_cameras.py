@@ -206,6 +206,7 @@ def find_grids(files, rows, cols):
                             "centres": None
                             if msg["centres"] is None
                             else (np.array(img.shape[:2][::-1], dtype=np.float) * 0.5 - msg["centres"]) / img.shape[1],
+                            "dimensions": img.shape,
                         }
                     )
 
@@ -243,7 +244,7 @@ def find_grids(files, rows, cols):
     return grids
 
 
-# Measures the quality in the Axis using SVD, i.e. rectangularity and the Flatness of the detected grid.
+# Measures the quality in the Axis using SVD, i.e. rectangularity and the flatness of the detected grid.
 # We want to discard the nosiest samples of the dataset, and discard data with percentage error greater than allowed_error.
 def plane_quality(points, rows, cols, grid_size):
     # Work out our ideal SVD values
@@ -327,6 +328,7 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             focal_length=config["lens"]["focal_length"],
             centre=config["lens"]["centre"],
             k=config["lens"]["k"],
+            inverse_parameters=4,
             dtype=TF_CALIBRATION_DTYPE,
         )
 
@@ -336,6 +338,9 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
 
         # Put the model into the config
         configurations[name]["model"] = model
+
+        # Assume the resolution is the same across all the images, this lets us get values in pixels later
+        dimensions = data[0]["dimensions"]
 
         if not no_intrinsics:
             # Extract all of the point grids that were found into a single matrix
@@ -368,6 +373,8 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             # Work out how much the loss has improved by
             best_idx = np.argmin(history.history["loss"])
 
+            inverse_qualities = [math.sqrt(model.inverse_quality(i).numpy()) for i in range(1, 10)]
+
             print("Intrinsic calibration results for {} camera".format(name))
             print("\t ƒ: {:.3f}".format(model.focal_length.numpy()))
             print("\tΔc: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.centre.numpy()])))
@@ -377,7 +384,11 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             print("\t ↔: {:.3f}º".format(history.history["collinearity"][best_idx]))
             print("\t||: {:.3f}º".format(history.history["parallelity"][best_idx]))
             print("\t ⟂: {:.3f}º".format(history.history["orthogonality"][best_idx]))
-            print("\t k: {:.3f}%".format(math.sqrt(model.inverse_quality()) * 100))
+            print(
+                "\t k: [{}]".format(
+                    ", ".join(["{:.2f}px ({:.2f}%)".format(v * dimensions[1], v * 100) for v in inverse_qualities])
+                )
+            )
 
             original_loss = history.history["loss"][0]
             best_loss = min(history.history["loss"])
