@@ -15,16 +15,16 @@ lens:
   # Lens projection type
   projection: EQUIDISTANT
   # Normalised focal length: focal length in pixels / image width
-  focal_length: 0.322265625
+  focal_length: 0.34668243830134987
   # Normalised image centre offset: pixels from centre to optical axis / image width
-  centre: [0, 0]
+  centre: [0.02070395328006253, 0.0010238129312947657]
   # The polynomial distortion coefficients for the lens
-  k: [0, 0]
+  k: [0.46102867909441303, 0.1464565980831643]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
   fov: 180 * pi / 180
   # The homogenous transform from the rigid platform this camera is attached to to its optical location
   Hpc:
-    - [1, 0, 0, 0]
-    - [0, 1, 0, -0.068]
-    - [0, 0, 1, 0]
-    - [0, 0, 0, 1]
+  - [0.9998967953325474, 0.01226743650302695, -0.007477211067366644, -0.0016101812952169137]
+  - [-0.012002742104359317, 0.9993335702670356, 0.034472445798289085, 0.0040800945273187506]
+  - [0.00789511657152625, -0.034379141044882724, 0.9993776772548694, 0.0037364977509289138]
+  - [0.0, 0.0, 0.0, 1.0]
