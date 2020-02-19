@@ -75,7 +75,7 @@ namespace support {
         // Member variables
         message::motion::KickPlannerConfig kick_cfg;
 
-        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;
+        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 90;  // To match HardwareIO IMU read frequency
 
         struct Config {
             Config() : robot(), ball() {}
