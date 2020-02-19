@@ -10,4 +10,7 @@ class RectilinearModel(LensModel):
         super(RectilinearModel, self).__init__(**kwargs)
 
     def theta(self, r):
-        return tf.atan(tf.divide(r, self.focal_length))
+        return tf.atan(r / self.focal_length)
+
+    def r(self, theta):
+        return self.focal_length * tf.tan(theta)

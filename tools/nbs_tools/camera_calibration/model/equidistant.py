@@ -10,4 +10,7 @@ class EquidistantModel(LensModel):
         super(EquidistantModel, self).__init__(**kwargs)
 
     def theta(self, r):
-        return tf.divide(r, self.focal_length)
+        return r / self.focal_length
+
+    def r(self, theta):
+        return self.focal_length * theta

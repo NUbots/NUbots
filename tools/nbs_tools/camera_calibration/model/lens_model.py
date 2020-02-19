@@ -12,7 +12,7 @@ class LensModel(tf.keras.Model):
         centre,
         k,
         dtype=tf.float64,
-        distortion_reg=0.01,
+        distortion_reg=1e-4,
         inverse_regularisation=10,
         inverse_parameters=9,
     ):
@@ -83,6 +83,8 @@ class LensModel(tf.keras.Model):
         return tf.reduce_mean(tf.math.squared_difference(r_d, r_p))
 
     def call(self, screen, training=False):
+        # We use pi/2 a lot
+        pi_2 = tf.cast(math.pi * 0.5, self.dtype)
 
         # Unproject the pixel coordinates back into unit vector rays
         offset = tf.add(screen, self.centre)
@@ -103,11 +105,17 @@ class LensModel(tf.keras.Model):
         hp_1 = tf.linalg.normalize(tf.linalg.cross(h_1[:, :, 0, :], h_1[:, :, -1, :]), axis=-1)[0]  # n_kh1
         hp_2 = tf.linalg.normalize(tf.linalg.cross(h_2[:, :, 0, :], h_2[:, :, -1, :]), axis=-1)[0]  # n_kh2
 
-        # Collinearity loss
-        v_co = tf.reduce_mean(tf.abs(tf.einsum("abcd,abd->abc", v[:, :, 1:-1, :], vp)), axis=[1, 2])
-        h1_co = tf.reduce_mean(tf.abs(tf.einsum("abcd,abd->abc", h_1[:, :, 1:-1, :], hp_1)), axis=[1, 2])
-        h2_co = tf.reduce_mean(tf.abs(tf.einsum("abcd,abd->abc", h_2[:, :, 1:-1, :], hp_2)), axis=[1, 2])
-        collinearity_loss = tf.multiply(tf.math.accumulate_n([v_co, h1_co, h2_co]), 1.0 / 3.0)
+        # Collinearity loss, make sure we take the mean angle
+        v_co = tf.reduce_mean(
+            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", v[:, :, 1:-1, :], vp)))), axis=[1, 2]
+        )
+        h1_co = tf.reduce_mean(
+            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_1[:, :, 1:-1, :], hp_1)))), axis=[1, 2],
+        )
+        h2_co = tf.reduce_mean(
+            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_2[:, :, 1:-1, :], hp_2)))), axis=[1, 2],
+        )
+        collinearity_loss = tf.math.accumulate_n([v_co, h1_co, h2_co]) / 3.0
 
         # Get the planes formed by each of the plane normals (parallel plane normals)
         vpp = tf.linalg.normalize(tf.linalg.cross(vp[:, 0, :], vp[:, -1, :]), axis=-1)[0]
@@ -115,39 +123,39 @@ class LensModel(tf.keras.Model):
 
         # Parallelity loss
         parallelity_loss = tf.reduce_mean(
-            tf.abs(
-                tf.concat(
-                    [
-                        tf.einsum("abc,ac->ab", vp[:, 1:-1, :], vpp),
-                        tf.einsum("abc,ac->ab", hp_1[:, 1:, :], hpp),
-                        tf.einsum("abc,ac->ab", hp_2[:, :-1, :], hpp),
-                    ],
-                    axis=-1,
+            tf.square(
+                tf.subtract(
+                    pi_2,
+                    tf.acos(
+                        tf.concat(
+                            [
+                                tf.einsum("abc,ac->ab", vp[:, 1:-1, :], vpp),
+                                tf.einsum("abc,ac->ab", hp_1[:, 1:, :], hpp),
+                                tf.einsum("abc,ac->ab", hp_2[:, :-1, :], hpp),
+                            ],
+                            axis=-1,
+                        )
+                    ),
                 )
             ),
             axis=1,
         )
 
         # Orthogonality loss
-        orthogonality_loss = tf.abs(tf.einsum("ab,ab->a", vpp, hpp))
+        orthogonality_loss = tf.square(tf.subtract(pi_2, tf.acos(tf.abs(tf.einsum("ab,ab->a", vpp, hpp)))))
 
         # Strip out the worst of values to help with outliers
-        collinearity_loss = tf.math.top_k(collinearity_loss, k=tf.size(collinearity_loss) * 8 // 10, sorted=False)[0]
-        parallelity_loss = tf.math.top_k(parallelity_loss, k=tf.size(parallelity_loss) * 8 // 10, sorted=False)[0]
-        orthogonality_loss = tf.math.top_k(orthogonality_loss, k=tf.size(orthogonality_loss) * 8 // 10, sorted=False)[0]
+        n_elements = tf.size(collinearity_loss) * 8 // 10
+        collinearity_loss = -tf.math.top_k(-collinearity_loss, k=n_elements, sorted=False)[0]
+        parallelity_loss = -tf.math.top_k(-parallelity_loss, k=n_elements, sorted=False)[0]
+        orthogonality_loss = -tf.math.top_k(-orthogonality_loss, k=n_elements, sorted=False)[0]
 
         # Add these losses to the model
         self.add_loss(tf.reduce_mean(collinearity_loss))
         self.add_loss(tf.reduce_mean(parallelity_loss))
         self.add_loss(tf.reduce_mean(orthogonality_loss))
-        self.add_metric(
-            name="collinearity", value=90.0 - tf.acos(collinearity_loss) * (180 / math.pi), aggregation="mean"
-        )
-        self.add_metric(
-            name="parallelity", value=90.0 - tf.acos(parallelity_loss) * (180 / math.pi), aggregation="mean"
-        )
-        self.add_metric(
-            name="orthogonality", value=90.0 - tf.acos(orthogonality_loss) * (180 / math.pi), aggregation="mean"
-        )
+        self.add_metric(name="collinearity", value=collinearity_loss, aggregation="mean")
+        self.add_metric(name="parallelity", value=parallelity_loss, aggregation="mean")
+        self.add_metric(name="orthogonality", value=orthogonality_loss, aggregation="mean")
 
         return rays

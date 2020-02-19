@@ -54,13 +54,13 @@ def register(command):
         help="The directory containing the configuration files for the cameras",
     )
     command.add_argument(
-        "--rows", default=4, help="the number of rows in the asymmetric circles grid",
+        "--rows", default=4, type=int, help="the number of rows in the asymmetric circles grid",
     )
     command.add_argument(
-        "--cols", default=11, help="the number of columns in the asymmetric circles grid",
+        "--cols", default=11, type=int, help="the number of columns in the asymmetric circles grid",
     )
     command.add_argument(
-        "--grid_size", default=0.04, help="the distance between rows/cols in the grid in meters",
+        "--grid_size", default=0.04, type=float, help="the distance between rows/cols in the grid in meters",
     )
     command.add_argument(
         "--no-intrinsics",
@@ -373,6 +373,14 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             # Work out how much the loss has improved by
             best_idx = np.argmin(history.history["loss"])
 
+            # Extract the angular errors and express them in pixels also
+            collinearity = math.sqrt(history.history["collinearity"][best_idx])
+            parallelity = math.sqrt(history.history["parallelity"][best_idx])
+            orthogonality = math.sqrt(history.history["orthogonality"][best_idx])
+            collinearity_px = model.r(tf.cast(collinearity, model.dtype)) * dimensions[1]
+            parallelity_percent = 100 * math.tan(parallelity)
+            orthogonality_percent = 100 * math.tan(orthogonality)
+
             inverse_qualities = [math.sqrt(model.inverse_quality(i).numpy()) for i in range(1, 10)]
 
             print("Intrinsic calibration results for {} camera".format(name))
@@ -381,9 +389,9 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             print("\t k: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.k.numpy()])))
             print("\tik: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.inverse_coeffs()])))
             print("Error")
-            print("\t ↔: {:.3f}º".format(history.history["collinearity"][best_idx]))
-            print("\t||: {:.3f}º".format(history.history["parallelity"][best_idx]))
-            print("\t ⟂: {:.3f}º".format(history.history["orthogonality"][best_idx]))
+            print("\t ↔: {:.3f}º ({:.3f}px) ".format(collinearity * 180 / math.pi, collinearity_px))
+            print("\t||: {:.3f}º ({:.3f}%)".format(parallelity * 180 / math.pi, parallelity_percent))
+            print("\t ⟂: {:.3f}º ({:.3f}%)".format(orthogonality * 180 / math.pi, orthogonality_percent))
             print(
                 "\t k: [{}]".format(
                     ", ".join(["{:.2f}px ({:.2f}%)".format(v * dimensions[1], v * 100) for v in inverse_qualities])
