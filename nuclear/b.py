@@ -126,23 +126,28 @@ if __name__ == "__main__":
 
             # Load the modules and check it's a tool
             components = modname.split(".")
-            module = pkgutil.find_loader(modname).load_module()
-            if hasattr(module, "register") and hasattr(module, "run"):
+            try:
+                module = pkgutil.find_loader(modname).load_module()
+                if hasattr(module, "register") and hasattr(module, "run"):
 
-                subcommand = subcommands
-                tool = tools
-                for c in components[:-1]:
-                    if c in tool:
-                        tool, subcommand = tool[c]
-                    else:
-                        subcommand = subcommand.add_parser(c).add_subparsers(
-                            dest="{}_command".format(c),
-                            help="Commands related to working with {} functionality".format(c),
-                        )
-                        tool[c] = ({}, subcommand)
-                        tool = tool[c][0]
+                    subcommand = subcommands
+                    tool = tools
+                    for c in components[:-1]:
+                        if c in tool:
+                            tool, subcommand = tool[c]
+                        else:
+                            subcommand = subcommand.add_parser(c).add_subparsers(
+                                dest="{}_command".format(c),
+                                help="Commands related to working with {} functionality".format(c),
+                            )
+                            tool[c] = ({}, subcommand)
+                            tool = tool[c][0]
 
-                module.register(subcommand.add_parser(components[-1]))
+                    module.register(subcommand.add_parser(components[-1]))
+            except ModuleNotFoundError as e:
+                print("Could not load the tool '{}': {}".format(modname.replace(".", " "), e))
+            except BaseException as e:
+                pass
 
     # Given what we know, this will fail here and give the user some help
     command.parse_args()

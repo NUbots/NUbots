@@ -3,10 +3,9 @@
 import multiprocessing
 import os
 
-from tqdm import tqdm
-
 import numpy as np
 import tensorflow as tf
+from tqdm import tqdm
 
 from .images import decode_image
 from .images.video_recorder import Recorder
@@ -75,46 +74,46 @@ def run(files, output, encoder, quality, **kwargs):
 
     recorders = {}
 
-    pool = multiprocessing.Pool(multiprocessing.cpu_count())
+    with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
 
-    decoder = Decoder(*files)
-    with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
+        decoder = Decoder(*files)
+        with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
 
-        def record_frame(msg):
+            def record_frame(msg):
 
-            # If we haven't seen this camera before, make a new encoder for it
-            for frame in msg["data"]:
-                if frame["name"] not in recorders:
-                    recorders[frame["name"]] = Recorder(
-                        os.path.join(output, "{}.mp4".format(frame["name"])),
-                        tf.shape(frame["image"]),
-                        frame["fourcc"],
-                        encoder,
-                        quality,
-                    )
+                # If we haven't seen this camera before, make a new encoder for it
+                for frame in msg["data"]:
+                    if frame["name"] not in recorders:
+                        recorders[frame["name"]] = Recorder(
+                            os.path.join(output, "{}.mp4".format(frame["name"])),
+                            tf.shape(frame["image"]),
+                            frame["fourcc"],
+                            encoder,
+                            quality,
+                        )
 
-                # Push the next packet
-                recorders[frame["name"]].encode({"timestamp": msg["timestamp"], "image": frame["image"]})
+                    # Push the next packet
+                    recorders[frame["name"]].encode({"timestamp": msg["timestamp"], "image": frame["image"]})
 
-            # Update the progress based on the image we are up to
-            progress.update(msg["bytes_read"])
+                # Update the progress based on the image we are up to
+                progress.update(msg["bytes_read"])
 
-        results = []
-        for msg in packetise_stream(decoder):
-            # Add a task to the pool to process
-            results.append(pool.apply_async(process_frame, (msg,)))
+            results = []
+            for msg in packetise_stream(decoder):
+                # Add a task to the pool to process
+                results.append(pool.apply_async(process_frame, (msg,)))
 
-            # Only buffer 1024 images for each cpu core to avoid running out of memory
-            if len(results) > 1024 * multiprocessing.cpu_count():
-                results[0].wait()
+                # Only buffer 1024 images for each cpu core to avoid running out of memory
+                if len(results) > 1024 * multiprocessing.cpu_count():
+                    results[0].wait()
 
-            # If the next one is ready process it
-            if len(results) > 0 and results[0].ready():
+                # If the next one is ready process it
+                if len(results) > 0 and results[0].ready():
+                    record_frame(results.pop(0).get())
+
+            # Drain the remainder of the images
+            while len(results) > 0:
                 record_frame(results.pop(0).get())
-
-        # Drain the remainder of the images
-        while len(results) > 0:
-            record_frame(results.pop(0).get())
 
     # Once we have finished reading all the frames, we need to finish writing the remainder of the buffer
     # And then use the timecode file we made to setup the VFR timecodes
