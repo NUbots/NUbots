@@ -16,7 +16,7 @@ def run(**kwargs):
     source_path = b.cmake_cache["NUbots_SOURCE_DIR"]
     roles_path = source_path + "/roles"
     modules_path = source_path + "/modules"
-    print(roles_path, modules_path)
+    # print(roles_path, modules_path)
     existing_modules = {}
     missing_modules = {}
     commented_modules = {}
