@@ -98,7 +98,6 @@ if __name__ == "__main__":
                     if sys.argv[1 : len(components) + 1] == components:
 
                         # Load the module
-                        fqn = ".".join(components)
                         module = pkgutil.find_loader(".".join(components)).load_module()
                         if hasattr(module, "register") and hasattr(module, "run"):
 
