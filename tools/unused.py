@@ -4,19 +4,16 @@ import os
 import re
 import b
 
-# @run_on_docker
 def register(command):
     # Install help
     command.help = "Creates a list of unused or commented out modules"
 
 
-# @run_on_docker
 def run(**kwargs):
 
-    source_path = b.cmake_cache["NUbots_SOURCE_DIR"]
-    roles_path = source_path + "/roles"
-    modules_path = source_path + "/modules"
-    # print(roles_path, modules_path)
+    source_dir = b.cmake_cache[b.cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"]
+    roles_path = os.path.join(source_path + b.cmake_cache['NUCLEAR_ROLE_DIR'])
+    modules_path = os.path.join(source_path, b.cmake_cache['NUCLEAR_MODULE_DIR'])
     existing_modules = {}
     missing_modules = {}
     commented_modules = {}
