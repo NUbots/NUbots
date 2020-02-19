@@ -81,8 +81,6 @@ def run(files, output, encoder, quality, **kwargs):
     with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
 
         def record_frame(msg):
-            # Update the progress based on the image we are up to
-            progress.update(msg["bytes_read"])
 
             # If we haven't seen this camera before, make a new encoder for it
             for frame in msg["data"]:
@@ -97,6 +95,9 @@ def run(files, output, encoder, quality, **kwargs):
 
                 # Push the next packet
                 recorders[frame["name"]].encode({"timestamp": msg["timestamp"], "image": frame["image"]})
+
+            # Update the progress based on the image we are up to
+            progress.update(msg["bytes_read"])
 
         results = []
         for msg in packetise_stream(decoder):
