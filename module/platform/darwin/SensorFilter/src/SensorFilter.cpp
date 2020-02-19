@@ -346,24 +346,17 @@ namespace platform {
                         }
                     }
 
-                    // gyro_x to the right
-                    // gyro_y to the back
-                    // gyro_z down
-
-                    // acc_x to the back
-                    // acc_y to the left
-                    // acc_z up
-
                     // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
                     if (previousSensors && (input.cm740ErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
                     else {
                         sensors->accelerometer =
-                            Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
+                            Eigen::Vector3d(input.accelerometer.x, -input.accelerometer.y, -input.accelerometer.z);
                     }
 
-                    // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
+                    // If we have a previous sensors and our cm740 has errors or has rotated more than 4*PI then reuse
+                    // our last sensor value
                     if (previousSensors
                         && (input.cm740ErrorFlags
                             || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
@@ -477,6 +470,7 @@ namespace platform {
                     // Accelerometer measurement update
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
+                    /*
                     for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
                         bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
                         bool prev_foot_down = previous_foot_down[side];
@@ -516,6 +510,7 @@ namespace platform {
                             previous_foot_down[side] = false;
                         }
                     }
+                    */
 
                     // Calculate our time offset from the last read
                     double deltaT = std::max(
