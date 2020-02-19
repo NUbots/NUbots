@@ -25,7 +25,6 @@
 #include <nuclear>
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/input/Sensors.h"

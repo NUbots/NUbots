@@ -24,7 +24,6 @@
 #include <nuclear>
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/Subsumption.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
@@ -66,10 +65,7 @@ namespace support {
         void provideSensors();
         void provideVision();
 
-        void sendReactionHandles();
-
         void sendGameState(std::string event, std::shared_ptr<const message::input::GameState> gameState);
-
         void saveConfigurationFile(std::string path, const std::string& root);
         void sendSubsumption();
 

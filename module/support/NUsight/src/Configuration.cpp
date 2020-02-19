@@ -17,14 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
-
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
+#include "NUsight.h"
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
-#include "utility/time/time.h"
 
 /**
  * @author Monica Olejniczak
@@ -33,8 +31,6 @@ namespace module {
 namespace support {
     using utility::file::listFiles;
     using utility::strutil::split;
-    using utility::time::getUtcTimestamp;
-
 
     /**
      * @brief Saves the configuration file using the root YAML node.
@@ -49,11 +45,6 @@ namespace support {
         std::string tempName(fmt::format("{}.tmp", path));
         utility::file::writeToFile(tempName, root);
         rename(tempName.c_str(), path.c_str());
-
-        // YAML::Emitter emitter;          // create a YAML emitter
-        // emitter << root;                // send the root node to the emitter's output stream
-        // std::ofstream fout(path);       // create an output stream to the specified path
-        // fout << emitter.c_str();        // write to the file
     }
 }  // namespace support
 }  // namespace module

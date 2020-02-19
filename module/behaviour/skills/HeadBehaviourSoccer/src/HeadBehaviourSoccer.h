@@ -25,7 +25,6 @@
 #include <set>
 
 #include "Searcher.h"
-
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
@@ -34,7 +33,6 @@
 #include "message/motion/KinematicsModel.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
-
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/matrix/Rotation3D.h"
 
@@ -101,8 +99,8 @@ namespace behaviour {
 
             /*! @brief Gets a bounding box in screen angular space of a set of vision objects
              */
-            utility::math::geometry::Quad getScreenAngularBoundingBox(const message::vision::Balls& obs);
-            utility::math::geometry::Quad getScreenAngularBoundingBox(const message::vision::Goals& obs);
+            utility::math::geometry::Quad<arma::vec> getScreenAngularBoundingBox(const message::vision::Balls& obs);
+            utility::math::geometry::Quad<arma::vec> getScreenAngularBoundingBox(const message::vision::Goals& obs);
 
             bool orientationHasChanged(const message::input::Sensors& sensors);
 

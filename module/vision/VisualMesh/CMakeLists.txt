@@ -1,6 +1,5 @@
 # Add the VisualMesh project to be built
-ADD_SUBDIRECTORY(VisualMesh)
+add_subdirectory(VisualMesh)
 
 # Build our NUClear module
-NUCLEAR_MODULE(INCLUDES}
-               LIBRARIES libvisualmesh)
+nuclear_module(INCLUDES} LIBRARIES libvisualmesh)

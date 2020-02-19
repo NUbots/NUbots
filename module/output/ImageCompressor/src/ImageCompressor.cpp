@@ -1,8 +1,13 @@
 #include "ImageCompressor.h"
 
+#include <fmt/format.h>
+
+#include "compressor/turbojpeg/Factory.h"
+#include "compressor/vaapi/Factory.h"
 #include "extension/Configuration.h"
+#include "message/input/Image.h"
 #include "message/output/CompressedImage.h"
-#include "utility/vision/Vision.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
 namespace output {
@@ -10,92 +15,164 @@ namespace output {
     using extension::Configuration;
     using message::input::Image;
     using message::output::CompressedImage;
-    using utility::vision::fourcc;
 
-    void ImageCompressor::compress(const Image& image, const TJPF& format) {
+    /**
+     * Get the new fourcc code that we will use to describe this image after it has been compressed
+     */
+    uint32_t compressed_fourcc(const uint32_t old_fourcc) {
+        using utility::vision::fourcc;
+        switch (old_fourcc) {
+            case fourcc("BGGR"): return fourcc("JPBG");  // Permuted Bayer
+            case fourcc("RGGB"): return fourcc("JPRG");  // Permuted Bayer
+            case fourcc("GRBG"): return fourcc("JPGR");  // Permuted Bayer
+            case fourcc("GBRG"): return fourcc("JPGB");  // Permuted Bayer
 
-        // A compressor per thread
-        static thread_local tjhandle compressor = tjInitCompress();
+            case fourcc("PBG8"): return fourcc("PJBG");  // Polarized Colour
+            case fourcc("PRG8"): return fourcc("PJRG");  // Polarized Colour
+            case fourcc("PGR8"): return fourcc("PJGR");  // Polarized Colour
+            case fourcc("PGB8"): return fourcc("PJGB");  // Polarized Colour
 
-        long unsigned int jpeg_size = 0;
-        uint8_t* compressed         = nullptr;
+            case fourcc("PY8 "): return fourcc("PJPG");  // Polarized Monochrome
 
-        tjCompress2(compressor,
-                    image.data.data(),
-                    image.dimensions.x(),
-                    0,
-                    image.dimensions.y(),
-                    format,
-                    &compressed,
-                    &jpeg_size,
-                    TJSAMP_444,  // Output chromiance sampling
-                    quality,
-                    TJFLAG_FASTDCT);
+            case fourcc("BGRA"):                         // RGB formats
+            case fourcc("BGR8"):                         // RGB formats
+            case fourcc("BGR3"):                         // RGB formats
+            case fourcc("RGBA"):                         // RGB formats
+            case fourcc("RGB8"):                         // RGB formats
+            case fourcc("RGB3"):                         // RGB formats
+            case fourcc("GRAY"):                         // Monochrome formats
+            case fourcc("GREY"):                         // Monochrome formats
+            case fourcc("Y8  "):                         // Monochrome formats
+            case fourcc("Y16 "): return fourcc("JPEG");  // Monochrome formats
 
-        auto msg = std::make_unique<CompressedImage>();
-
-        msg->format            = fourcc("JPEG");
-        msg->dimensions.x()    = image.dimensions.x();
-        msg->dimensions.y()    = image.dimensions.y();
-        msg->camera_id         = image.camera_id;
-        msg->name              = image.name;
-        msg->timestamp         = image.timestamp;
-        msg->Hcw               = image.Hcw;
-        msg->lens.projection   = int(image.lens.projection);
-        msg->lens.focal_length = image.lens.focal_length;
-        msg->lens.fov          = image.lens.fov;
-        msg->lens.centre       = image.lens.centre;
-
-        msg->data.assign(compressed, compressed + jpeg_size);
-
-        emit(msg);
-
-        tjFree(compressed);
+            default: throw std::runtime_error("Unhandled format");
+        }
     }
 
     ImageCompressor::ImageCompressor(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), quality(100), method(DEBAYER_METHOD::SIMPLE) {
+        : Reactor(std::move(environment)) {
 
+        on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
+            // clang-format off
+            std::string lvl = cfg["log_level"].as<std::string>();
+            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
+            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
+            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
 
-        on<Configuration>("ImageCompressor.yaml").then([this](const Configuration& config) {
-            // Store our config
-            quality = config["quality"];
+            // Clear the compressors and factories
+            std::lock_guard<std::mutex> lock(compressor_mutex);
+            compressors.clear();
+            config.factories.clear();
 
-            std::string method_str = config["method"].as<std::string>();
-            if (method_str.compare("SIMPLE") == 0) {
-                method = DEBAYER_METHOD::SIMPLE;
-            }
-            else if (method_str.compare("BILINEAR") == 0) {
-                method = DEBAYER_METHOD::BILINEAR;
-            }
-            else if (method_str.compare("HQLINEAR") == 0) {
-                method = DEBAYER_METHOD::HQLINEAR;
-            }
-            else if (method_str.compare("EDGESENSE") == 0) {
-                method = DEBAYER_METHOD::EDGESENSE;
-            }
-            else {
-                throw std::runtime_error("Invalid Bayer method requested");
+            for (const auto& c : cfg["compressors"].config) {
+                if (c["name"].as<std::string>() == "vaapi") {
+                    config.factories.emplace_back(
+                        std::make_shared<compressor::vaapi::Factory>(
+                            c["device"].as<std::string>(), c["driver"].as<std::string>(), c["quality"].as<int>()),
+                        c["concurrent"].as<int>());
+                }
+                else if (c["name"].as<std::string>() == "turbojpeg") {
+                    config.factories.emplace_back(
+                        std::make_shared<compressor::turbojpeg::Factory>(c["quality"].as<int>()),
+                        c["concurrent"].as<int>());
+                }
             }
         });
 
-        on<Trigger<Image>, Buffer<4>>().then([this](const Image& image) {
-            // If this is the first time using the compressor, we need to make one
-            switch (image.format) {
-                // Bayer formats
-                case fourcc("BGGR"):
-                case fourcc("RGGB"):
-                case fourcc("GRBG"):
-                case fourcc("GBRG"): compress(debayer(image, method), TJPF_RGB); break;
+        on<Trigger<Image>>().then("Compress Image", [this](const Image& image) {
+            // Find our list of compressors, and if needed recreate it
+            std::shared_ptr<CompressorContext> ctx;
 
-                // Regular convertible formats
-                case fourcc("RGB3"):
-                case fourcc("RGB8"): compress(image, TJPF_RGB); break;
-                case fourcc("BGR8"): compress(image, TJPF_BGR); break;
-                case fourcc("GRAY"):
-                case fourcc("GREY"): compress(image, TJPF_GRAY); break;
+            /* Mutex Scope */ {
+                std::lock_guard<std::mutex> lock(compressor_mutex);
+                auto it = compressors.find(image.camera_id);
+                if (it == compressors.end() || it->second->width != image.dimensions[0]
+                    || it->second->height != image.dimensions[1] || it->second->format != image.format) {
+                    log<NUClear::INFO>("Rebuilding compressors for", image.name, "camera");
+
+                    // Replace the existing one with a new one
+                    it = compressors.insert(std::make_pair(image.camera_id, std::make_shared<CompressorContext>()))
+                             .first;
+                    it->second->width  = image.dimensions[0];
+                    it->second->height = image.dimensions[1];
+                    it->second->format = image.format;
+
+                    for (auto& f : config.factories) {
+                        for (int i = 0; i < f.second; ++i) {
+                            it->second->compressors.emplace_back(CompressorContext::Compressor{
+                                std::make_unique<std::atomic<bool>>(),
+                                f.first->make_compressor(image.dimensions[0], image.dimensions[1], image.format),
+                            });
+                        }
+                    }
+                }
+                ctx = it->second;
             }
+
+            // Look through our compressors and try to find the first free one
+            for (auto& ctx : ctx->compressors) {
+                // We swap in true to the atomic and if we got false back then it wasn't active previously
+                if (!ctx.active->exchange(true)) {
+                    std::exception_ptr eptr;
+                    try {
+                        auto msg = std::make_unique<CompressedImage>();
+
+                        // Compress the data
+                        msg->data = ctx.compressor->compress(
+                            image.data, image.dimensions[0], image.dimensions[1], image.format);
+
+                        // The format depends on what kind of data we took in
+                        msg->format = compressed_fourcc(image.format);
+
+                        // Copy across the other attributes
+                        msg->dimensions        = image.dimensions;
+                        msg->camera_id         = image.camera_id;
+                        msg->name              = image.name;
+                        msg->timestamp         = image.timestamp;
+                        msg->Hcw               = image.Hcw;
+                        msg->lens.projection   = int(image.lens.projection);
+                        msg->lens.focal_length = image.lens.focal_length;
+                        msg->lens.fov          = image.lens.fov;
+                        msg->lens.centre       = image.lens.centre;
+
+                        // Emit the compressed image
+                        emit(msg);
+                    }
+                    catch (...) {
+                        eptr = std::current_exception();
+                    }
+
+                    // This sets the atomic integer back to false so another thread can use this compressor
+                    ctx.active->store(false);
+
+                    if (eptr) {
+                        // Exception :(
+                        std::rethrow_exception(eptr);
+                    }
+                    else {
+                        // Successful compression!
+                        ++compressed;
+                        return;
+                    }
+                }
+            }
+            // We failed to compress this image
+            ++dropped;
         });
-    }  // namespace output
+
+        on<Every<1, std::chrono::seconds>>().then("Stats", [this] {
+            log<NUClear::DEBUG>(fmt::format("Receiving {}/s, Compressing {}/s,  Dropping {}/s ({}%)",
+                                            compressed + dropped,
+                                            compressed,
+                                            dropped,
+                                            100 * double(compressed) / double(compressed + dropped)));
+            compressed = 0;
+            dropped    = 0;
+        });
+    }
+
 }  // namespace output
 }  // namespace module

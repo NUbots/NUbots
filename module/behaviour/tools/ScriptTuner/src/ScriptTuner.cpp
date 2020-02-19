@@ -19,19 +19,22 @@
 
 #include "ScriptTuner.h"
 
+extern "C" {
+#include <ncurses.h>
+#undef OK
+}
+
+#include <cstdio>
+#include <sstream>
+
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/file/fileutil.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
-
-#include <ncurses.h>
-#include <cstdio>
-#include <sstream>
 
 namespace module {
 namespace behaviour {
@@ -445,7 +448,7 @@ namespace behaviour {
                     script.frames[frame].duration = std::chrono::milliseconds(num);
                 }
                 // If it's not a number then ignore and beep
-                catch (std::invalid_argument) {
+                catch (std::invalid_argument&) {
                     beep();
                 }
             }
@@ -506,7 +509,7 @@ namespace behaviour {
                     }
                 }
                 // If it's not a number then ignore and beep
-                catch (std::invalid_argument) {
+                catch (std::invalid_argument&) {
                     beep();
                 }
             }
@@ -1061,7 +1064,7 @@ namespace behaviour {
                         beep();
                     }
                 }
-                catch (std::invalid_argument) {
+                catch (std::invalid_argument&) {
                     beep();
                 }
             }
@@ -1080,7 +1083,7 @@ namespace behaviour {
                     }
                 }
             }
-            catch (std::invalid_argument) {
+            catch (std::invalid_argument&) {
                 beep();
             }
 

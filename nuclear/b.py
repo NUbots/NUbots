@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import sys
-import os
 import argparse
+import os
 import pkgutil
 import re
+import sys
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
@@ -27,7 +27,7 @@ if os.path.isfile("CMakeCache.txt"):
 
 # Look for a build directory
 else:
-    dirs = ["build"]
+    dirs = ["build", os.path.join(os.pardir, "build")]
     try:
         dirs.extend([os.path.join("build", f) for f in os.listdir("build")])
     except FileNotFoundError:
@@ -72,13 +72,6 @@ except:
 
 if __name__ == "__main__":
 
-    if binary_dir is not None:
-        # Print some information for the user
-        print("b script for", cmake_cache["CMAKE_PROJECT_NAME"])
-        print("\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"])
-        print("\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_BINARY_DIR"])
-        print()
-
     # Add our builtin tools to the path and user tools
     sys.path.append(nuclear_tools_path)
     sys.path.append(user_tools_path)
@@ -87,11 +80,19 @@ if __name__ == "__main__":
     command = argparse.ArgumentParser(
         description="This script is an optional helper script for performing common tasks for working with the NUClear roles system."
     )
-    subcommands = command.add_subparsers(dest="command")
-    subcommands.help = "The command to run from the script. See each help for more information."
+    subcommands = command.add_subparsers(
+        dest="command", help="The command to run from the script. See each help for more information."
+    )
+    subcommands.required = True
 
     # Get all of the packages that are in the build tools
-    modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
+    modules = list(pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path]))
+
+    # First we try to see if sys.argv[1] gives us all the information we need
+    # If it does we only need to load that module directly
+    # Otherwise we load every module so we can build a help for possible tools
+    target_modules = [] if len(sys.argv) < 2 else [m for m in modules if not m[2] and m[1] == sys.argv[1]]
+    modules = target_modules if len(target_modules) > 0 else modules
 
     # Our tools dictionary
     tools = {}
@@ -99,20 +100,32 @@ if __name__ == "__main__":
     # Loop through all the modules we have to set them up in the parser
     for loader, module_name, ispkg in modules:
 
-        # Skip any util module to make it easier to write tools
-        if module_name == "util":
-            continue
+        # Skip any packages (folders) as these are used to store useful things that are not tools
+        if not ispkg:
 
-        # Get our module, class name and registration function
-        module = loader.find_module(module_name).load_module(module_name)
-        tool = getattr(module, "run")
-        register = getattr(module, "register")
+            # Get our module, class name and registration function
+            if len(modules) == 1:
+                module = loader.find_module(module_name).load_module(module_name)
+                tool = getattr(module, "run")
+                register = getattr(module, "register")
+            else:
+                try:
+                    module = loader.find_module(module_name).load_module(module_name)
+                    tool = getattr(module, "run")
+                    register = getattr(module, "register")
+                except BaseException as e:
+                    # Capture the exception in a variable
+                    ex = e
 
-        # Let the tool register it's arguments
-        register(subcommands.add_parser(module_name))
+                    # Swallow arguments for failed commands
+                    register = lambda command: command.add_argument("_", nargs="*")
+                    tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
 
-        # Associate our module_name with this tool
-        tools[module_name] = tool
+            # Let the tool register it's arguments
+            register(subcommands.add_parser(module_name))
+
+            # Associate our module_name with this tool
+            tools[module_name] = tool
 
     # Parse our arguments
     args = command.parse_args()

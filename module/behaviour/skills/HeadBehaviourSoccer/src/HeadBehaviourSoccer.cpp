@@ -22,19 +22,16 @@
 #include <string>
 
 #include "extension/Configuration.h"
-
 #include "message/localisation/Field.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/HeadCommand.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
-
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/math/vision.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
@@ -68,14 +65,35 @@ namespace behaviour {
         using utility::math::geometry::UnitQuaternion;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
-        using utility::math::vision::objectDirectionFromScreenAngular;
-        using utility::math::vision::screenAngularFromObjectDirection;
         using utility::motion::kinematics::calculateCameraLookJoints;
 
         using ServoID = utility::input::ServoID;
 
         using message::behaviour::SoccerObjectPriority;
         using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
+
+        inline arma::vec screenAngularFromObjectDirection(const arma::vec& v) {
+            return {std::atan2(v[1], v[0]), std::atan2(v[2], v[0])};
+        }
+
+        inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screen_angular) {
+            if (std::fmod(std::fabs(screen_angular[0]), M_PI) == M_PI_2
+                || std::fmod(std::fabs(screen_angular[1]), M_PI) == M_PI_2) {
+                return {0, 0, 0};
+            }
+            double tanTheta        = std::tan(screen_angular[0]);
+            double tanPhi          = std::tan(screen_angular[1]);
+            double x               = 0;
+            double y               = 0;
+            double z               = 0;
+            double denominator_sqr = 1 + tanTheta * tanTheta + tanPhi * tanPhi;
+            // Assume facing forward st x>0 (which is fine for screen angular)
+            x = 1 / std::sqrt(denominator_sqr);
+            y = x * tanTheta;
+            z = x * tanPhi;
+
+            return {x, y, z};
+        }
 
         HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -256,8 +274,7 @@ namespace behaviour {
                                   getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
                               // If our objects have moved, we need to replan
                               if (arma::norm(currentCentroid_world - lastCentroid)
-                                  >= fractional_angular_update_threshold
-                                         * std::fmax(image.lens.fov[0], image.lens.fov[1]) / 2.0) {
+                                  >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
                                   objectMoved  = true;
                                   lastCentroid = currentCentroid_world;
                               }
@@ -574,26 +591,26 @@ namespace behaviour {
                 return scaledResults;
             }
 
-            Quad boundingBox = getScreenAngularBoundingBox(fixationObjects);
+            Quad<arma::vec> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
             std::vector<arma::vec2> viewPoints;
-            if (lens.fov.norm() == 0) {
+            if (lens.fov == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
-            float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
+            float view_padding_radians = fractional_view_padding * lens.fov;
             // 1
             arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert(lens.fov) / 2.0;
+            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + lens.fov / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
-            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
+            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov, -lens.fov}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = boundingBox.getTopRight() - padding - convert(lens.fov) / 2.0;
+            arma::vec2 bl = boundingBox.getTopRight() - padding - lens.fov / 2.0;
             // 4
             padding       = {-view_padding_radians, view_padding_radians};
-            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
+            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov, lens.fov}) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<arma::vec2> searchPoints;
@@ -664,26 +681,26 @@ namespace behaviour {
                 return scaledResults;
             }
 
-            Quad boundingBox = getScreenAngularBoundingBox(fixationObjects);
+            Quad<arma::vec> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
             std::vector<arma::vec2> viewPoints;
-            if (lens.fov.norm() == 0) {
+            if (lens.fov == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
-            float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
+            float view_padding_radians = fractional_view_padding * lens.fov;
             // 1
             arma::vec2 padding = {view_padding_radians, view_padding_radians};
-            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + convert(lens.fov) / 2.0;
+            arma::vec2 tr      = boundingBox.getBottomLeft() - padding + lens.fov / 2.0;
             // 2
             padding       = {view_padding_radians, -view_padding_radians};
-            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov[0], -lens.fov[1]}) / 2.0;
+            arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({lens.fov, -lens.fov}) / 2.0;
             // 3
             padding       = {-view_padding_radians, -view_padding_radians};
-            arma::vec2 bl = boundingBox.getTopRight() - padding - convert(lens.fov) / 2.0;
+            arma::vec2 bl = boundingBox.getTopRight() - padding - lens.fov / 2.0;
             // 4
             padding       = {-view_padding_radians, view_padding_radians};
-            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov[0], lens.fov[1]}) / 2.0;
+            arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-lens.fov, lens.fov}) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<arma::vec2> searchPoints;
@@ -704,14 +721,14 @@ namespace behaviour {
                     "HeadBehaviourSoccer::combineVisionBalls - Attempted to combine zero vision objects into one.");
                 return Ball();
             }
-            Quad q           = getScreenAngularBoundingBox(ob);
-            Ball v           = ob.balls.at(0);
-            v.screen_angular = convert(q.getCentre()).cast<float>();
-            v.angular_size   = convert(q.getSize()).cast<float>();
+            Quad<arma::vec> q = getScreenAngularBoundingBox(ob);
+            Ball v            = ob.balls.at(0);
+            v.screen_angular  = convert(q.getCentre()).cast<float>();
+            v.angular_size    = convert(q.getSize()).cast<float>();
             return v;
         }
 
-        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
+        Quad<arma::vec> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.balls.size(); i++) {
                 boundingPoints.push_back(arma::conv_to<arma::vec>::from(
@@ -719,7 +736,7 @@ namespace behaviour {
                 boundingPoints.push_back(arma::conv_to<arma::vec>::from(
                     convert(Eigen::Vector2f(ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2))));
             }
-            return Quad::getBoundingBox(boundingPoints);
+            return Quad<arma::vec>::getBoundingBox(boundingPoints);
         }
 
 
@@ -729,12 +746,12 @@ namespace behaviour {
                     "HeadBehaviourSoccer::combineVisionObjects - Attempted to combine zero vision objects into one.");
                 return Goal();
             }
-            Quad q = getScreenAngularBoundingBox(ob);
-            Goal v = ob.goals.at(0);
+            Quad<arma::vec> q = getScreenAngularBoundingBox(ob);
+            Goal v            = ob.goals.at(0);
             return v;
         }
 
-        Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
+        Quad<arma::vec> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
             std::vector<arma::vec2> boundingPoints;
             for (uint i = 0; i < ob.goals.size(); i++) {
                 boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
@@ -742,7 +759,7 @@ namespace behaviour {
                 boundingPoints.push_back(convert(Eigen::Vector2d(ob.goals.at(i).screen_angular.cast<double>()
                                                                  - ob.goals.at(i).angular_size.cast<double>() / 2)));
             }
-            return Quad::getBoundingBox(boundingPoints);
+            return Quad<arma::vec>::getBoundingBox(boundingPoints);
         }
 
 

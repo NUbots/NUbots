@@ -57,8 +57,7 @@ message KickPlannerConfig {
     float kick_forward_angle_limit = 4;
 }
 
-message KickFinished {
-}
+message KickFinished {}
 
 message IKKickParams {
     float stand_height = 1;

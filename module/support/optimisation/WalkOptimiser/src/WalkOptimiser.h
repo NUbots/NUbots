@@ -20,13 +20,14 @@
 #ifndef MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
 #define MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Configuration.h"
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"
+#include "running_stat.hpp"
 
 namespace module {
 namespace support {
@@ -39,7 +40,7 @@ namespace support {
         class FitnessData {
         public:
             uint numberOfGetups = 0;
-            arma::running_stat<double> tilt;
+            running_stat<double> tilt;
             bool recording;
             double popFitness();
             void update(const message::input::Sensors& sensors);
@@ -51,24 +52,22 @@ namespace support {
         private:
             message::behaviour::FixedWalkCommand walk_command;
             std::vector<std::string> parameter_names;
-            arma::vec parameter_sigmas;
-            arma::vec fitnesses;
+            Eigen::VectorXd parameter_sigmas;
+            Eigen::VectorXd fitnesses;
 
             unsigned int currentSample;
-            arma::mat samples;
+            Eigen::MatrixXd samples;
             int number_of_samples;
 
             unsigned int getup_cancel_trial_threshold;
 
             int configuration_wait_milliseconds = 2000;
 
-            extension::Configuration initialConfig;
+            ::extension::Configuration initialConfig;
 
-            static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
-
-            void printState(const arma::vec& state);
-            arma::vec getState(const extension::Configuration& walkConfig);
-            YAML::Node getWalkConfig(const arma::vec& state);
+            void printState(const Eigen::VectorXd& state);
+            Eigen::VectorXd getState(const ::extension::Configuration& walkConfig);
+            YAML::Node getWalkConfig(const Eigen::VectorXd& state);
             void saveConfig(const YAML::Node& config);
             void setWalkParameters(const YAML::Node& config);
 

@@ -21,6 +21,7 @@
 
 #include <fmt/format.h>
 #include <ncurses.h>
+
 #include <csignal>
 #include <cstdio>
 

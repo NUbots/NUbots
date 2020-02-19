@@ -22,7 +22,6 @@
 #include <cmath>
 
 #include "extension/Configuration.h"
-
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/Subsumption.h"
@@ -33,7 +32,6 @@
 #include "message/motion/WalkCommand.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
-
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"
@@ -66,7 +64,6 @@ namespace behaviour {
         using utility::math::matrix::Rotation2D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
-        using utility::nusight::drawSphere;
         using utility::nusight::graph;
 
         using utility::behaviour::ActionPriorites;
@@ -202,7 +199,7 @@ namespace behaviour {
 
                     arma::vec3 rBWw_temp = {ball.position[0], ball.position[1], fieldDescription.ball_radius};
                     rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
-                               Htw.x() + Htw.translation();                                  // In front of the robot
+                               Htw.i().x() + Htw.i().translation();                          // In front of the robot
                     arma::vec3 pos = Htw.transformPoint(rBWw);
                     position       = pos.rows(0, 1);
 

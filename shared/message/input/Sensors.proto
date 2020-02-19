@@ -65,19 +65,19 @@ message Sensors {
 
     /// This is the transform from the odometry (world) space to robot space (=Htw). It measures the world in robot
     /// space.
-    mat4     Htw                    = 4;
-    repeated FSR fsr                = 5;
-    repeated Servo servo            = 6;
-    repeated Button button          = 7;
-    repeated LED led                = 8;
-    float        voltage            = 9;
-    float        battery            = 10;
-    vec3         centre_of_pressure = 11;
-    mat2         robot_to_IMU       = 12;
+    mat4            Htw                = 4;
+    repeated FSR    fsr                = 5;
+    repeated Servo  servo              = 6;
+    repeated Button button             = 7;
+    repeated LED    led                = 8;
+    float           voltage            = 9;
+    float           battery            = 10;
+    vec3            centre_of_pressure = 11;
+    mat2            robot_to_IMU       = 12;
 
     /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR sensors have weight this is 0.75
-    bool     left_foot_down          = 13;
-    bool     right_foot_down         = 14;
+    bool          left_foot_down     = 13;
+    bool          right_foot_down    = 14;
     repeated mat4 forward_kinematics = 15 [(array_size) = 20];
     float         body_centre_height = 16;
     vec4          centre_of_mass     = 17;

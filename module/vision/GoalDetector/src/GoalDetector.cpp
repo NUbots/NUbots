@@ -21,19 +21,16 @@
 
 #include <fmt/format.h>
 
-#include "RansacGoalModel.h"
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
-
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
 #include "message/vision/GreenHorizon.h"
-
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/ConvexHull.h"
-#include "utility/math/vision.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
@@ -48,6 +45,7 @@ namespace vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::support::Expression;
 
     static constexpr int GOAL_INDEX = 1;
 
@@ -58,7 +56,7 @@ namespace vision {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<int>();
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
-            config.goal_angular_cov     = convert(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>()).asDiagonal();
             config.use_median           = cfg["use_median"].as<bool>();
             config.debug                = cfg["debug"].as<bool>();
         });
@@ -68,7 +66,7 @@ namespace vision {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
-                const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = horizon.mesh->rays;
+                const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
 
                 // Get some indices to partition
@@ -148,80 +146,82 @@ namespace vision {
                                             std::distance(other, cluster.end())));
                         }
 
-                        Eigen::Vector3f left_side    = Eigen::Vector3f::Zero();
-                        Eigen::Vector3f right_side   = Eigen::Vector3f::Zero();
-                        Eigen::Vector3f bottom_point = Eigen::Vector3f::Zero();
+                        if ((std::distance(cluster.begin(), right) != 0) && (std::distance(right, other) != 0)) {
+                            Eigen::Vector3f left_side    = Eigen::Vector3f::Zero();
+                            Eigen::Vector3f right_side   = Eigen::Vector3f::Zero();
+                            Eigen::Vector3f bottom_point = Eigen::Vector3f::Zero();
 
-                        // Find the median of the left side and the right side
-                        if (config.use_median) {
-                            utility::math::geometry::sort_by_theta(cluster.begin(), right, rays, world_offset);
-                            utility::math::geometry::sort_by_theta(right, other, rays, world_offset);
-                            left_side =
-                                rays.row(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
-                            right_side = rays.row(*std::next(right, std::distance(right, other) / 2));
-                            for (auto it = cluster.begin(); it != cluster.end(); it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
-                                if (p0.z() < bottom_point.z()) {
-                                    bottom_point = p0;
+                            // Find the median of the left side and the right side
+                            if (config.use_median) {
+                                utility::math::geometry::sort_by_theta(cluster.begin(), right, rays, world_offset);
+                                utility::math::geometry::sort_by_theta(right, other, rays, world_offset);
+                                left_side =
+                                    rays.col(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
+                                right_side = rays.col(*std::next(right, std::distance(right, other) / 2));
+                                for (auto it = cluster.begin(); it != cluster.end(); it = std::next(it)) {
+                                    const Eigen::Vector3f& p0(rays.col(*it));
+                                    if (p0.z() < bottom_point.z()) {
+                                        bottom_point = p0;
+                                    }
                                 }
                             }
+                            // Find the average of the left side and the right side
+                            else {
+                                // Calculate average of left_xy and right_xy and find lowest z point
+                                for (auto it = cluster.begin(); it != right; it = std::next(it)) {
+                                    const Eigen::Vector3f& p0(rays.col(*it));
+                                    left_side += p0;
+                                    if (p0.z() < bottom_point.z()) {
+                                        bottom_point = p0;
+                                    }
+                                }
+                                for (auto it = right; it != other; it = std::next(it)) {
+                                    const Eigen::Vector3f& p0(rays.col(*it));
+                                    right_side += p0;
+                                    if (p0.z() < bottom_point.z()) {
+                                        bottom_point = p0;
+                                    }
+                                }
+                                for (auto it = other; it != cluster.end(); it = std::next(it)) {
+                                    const Eigen::Vector3f& p0(rays.col(*it));
+                                    if (p0.z() < bottom_point.z()) {
+                                        bottom_point = p0;
+                                    }
+                                }
+                                left_side /= std::distance(cluster.begin(), right);
+                                right_side /= std::distance(right, other);
+                            }
+
+                            // Calculate bottom middle of goal post, z is calculated above
+                            bottom_point.x() = (left_side.x() + right_side.x()) * 0.5f;
+                            bottom_point.y() = (left_side.y() + right_side.y()) * 0.5f;
+
+                            // https://en.wikipedia.org/wiki/Angular_diameter
+                            Eigen::Vector3f middle = ((left_side + right_side) * 0.5f).normalized();
+                            float radius           = middle.dot(left_side.normalized());
+                            float distance =
+                                field.dimensions.goalpost_width * radius * 0.5f / std::sqrt(1.0f - radius * radius);
+
+                            Eigen::Vector3f top_point(bottom_point * distance);
+                            top_point.z() += field.dimensions.goal_crossbar_height;
+                            g.post.top    = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * top_point.normalized();
+                            g.post.bottom = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * bottom_point.normalized();
+                            g.post.distance = distance;
+
+                            // Attach the measurement to the object (distance from camera to bottom center of post)
+                            g.measurements.push_back(Goal::Measurement());
+                            g.measurements.back().type = Goal::MeasurementType::CENTRE;
+                            g.measurements.back().position =
+                                cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
+                            g.measurements.back().covariance =
+                                config.goal_angular_cov * Eigen::Vector3f(distance, 1, 1).asDiagonal();
+
+                            // Angular positions from the camera
+                            g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
+                            g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
+
+                            goals->goals.push_back(std::move(g));
                         }
-                        // Find the average of the left side and the right side
-                        else {
-                            // Calculate average of left_xy and right_xy and find lowest z point
-                            for (auto it = cluster.begin(); it != right; it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
-                                left_side += p0;
-                                if (p0.z() < bottom_point.z()) {
-                                    bottom_point = p0;
-                                }
-                            }
-                            for (auto it = right; it != other; it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
-                                right_side += p0;
-                                if (p0.z() < bottom_point.z()) {
-                                    bottom_point = p0;
-                                }
-                            }
-                            for (auto it = other; it != cluster.end(); it = std::next(it)) {
-                                const Eigen::Vector3f& p0(rays.row(*it));
-                                if (p0.z() < bottom_point.z()) {
-                                    bottom_point = p0;
-                                }
-                            }
-                            left_side /= std::distance(cluster.begin(), right);
-                            right_side /= std::distance(right, other);
-                        }
-
-                        // Calculate bottom middle of goal post, z is calculated above
-                        bottom_point.x() = (left_side.x() + right_side.x()) * 0.5f;
-                        bottom_point.y() = (left_side.y() + right_side.y()) * 0.5f;
-
-                        // https://en.wikipedia.org/wiki/Angular_diameter
-                        Eigen::Vector3f middle = ((left_side + right_side) * 0.5f).normalized();
-                        float radius           = middle.dot(left_side.normalized());
-                        float distance =
-                            field.dimensions.goalpost_width * radius * 0.5f / std::sqrt(1.0f - radius * radius);
-
-                        Eigen::Vector3f top_point(bottom_point * distance);
-                        top_point.z() += field.dimensions.goal_crossbar_height;
-                        g.post.top      = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * top_point.normalized();
-                        g.post.bottom   = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * bottom_point.normalized();
-                        g.post.distance = distance;
-
-                        // Attach the measurement to the object (distance from camera to bottom center of post)
-                        g.measurements.push_back(Goal::Measurement());
-                        g.measurements.back().type = Goal::MeasurementType::CENTRE;
-                        g.measurements.back().position =
-                            cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
-                        g.measurements.back().covariance =
-                            config.goal_angular_cov * Eigen::Vector3f(distance, 1, 1).asDiagonal();
-
-                        // Angular positions from the camera
-                        g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
-                        g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
-
-                        goals->goals.push_back(std::move(g));
                     }
 
                     // Returns true if rGCc0 is to the left of rGCc1, with respect to camera z

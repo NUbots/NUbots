@@ -3,16 +3,13 @@
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
-
 #include "geometry/Circle.hpp"
 #include "geometry/Cylinder.hpp"
 #include "geometry/Sphere.hpp"
-
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisualMesh.h"
-
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/Timer.hpp"
 
@@ -120,9 +117,9 @@ namespace vision {
             // Build our lens object
             visualmesh::Lens<float> lens;
             lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
-            lens.focal_length = img.lens.focal_length;
-            lens.fov          = img.lens.fov[0];
-            lens.centre       = {img.lens.centre[0], img.lens.centre[1]};
+            lens.focal_length = img.lens.focal_length * img.dimensions[0];
+            lens.fov          = img.lens.fov;
+            lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
             switch (img.lens.projection.value) {
                 case Image::Lens::Projection::EQUIDISTANT: lens.projection = visualmesh::EQUIDISTANT; break;
                 case Image::Lens::Projection::EQUISOLID: lens.projection = visualmesh::EQUISOLID; break;
@@ -141,10 +138,10 @@ namespace vision {
             msg->camera_id = img.camera_id;
 
             // Get all the rays
-            msg->rays.resize(results.global_indices.size(), 3);
-            int row = 0;
+            msg->rays.resize(3, results.global_indices.size());
+            int col = 0;
             for (const auto& i : results.global_indices) {
-                msg->rays.row(row++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
+                msg->rays.col(col++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
             }
 
             for (const auto& r : m.rows) {

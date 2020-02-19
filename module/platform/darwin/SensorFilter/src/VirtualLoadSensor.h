@@ -103,7 +103,7 @@ namespace platform {
                 }
 
                 // Run the neural network
-                for (int i = 0; i < layers.size(); ++i) {
+                for (size_t i = 0; i < layers.size(); ++i) {
 
                     // Weights and bias
                     logits = logits.transpose() * layers[i].first + layers[i].second.transpose();
@@ -137,7 +137,9 @@ namespace platform {
                 return output_state;
             }
 
-        private:
+            Eigen::Matrix<Scalar, 2, 1, Eigen::DontAlign> state;
+
+        public:
             enum Field { POSITION, VELOCITY, LOAD };
 
             Scalar noise_factor;
@@ -155,7 +157,6 @@ namespace platform {
                                   Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>>
                 layers;
 
-            Eigen::Matrix<Scalar, 2, 1, Eigen::DontAlign> state;
             std::array<bool, 2> output_state;
         };
     }  // namespace darwin

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import b
 import os
 import sys
 import textwrap
+
+import b
 
 
 def register(command):

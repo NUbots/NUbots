@@ -23,14 +23,10 @@
 #include <fmt/ostream.h>
 
 #include "extension/Configuration.h"
-
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
 #include "message/vision/GreenHorizon.h"
-
 #include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
@@ -45,6 +41,7 @@ namespace vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::support::Expression;
 
     static constexpr int BALL_INDEX = 0;
 
@@ -56,7 +53,7 @@ namespace vision {
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
             config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
-            config.ball_angular_cov      = convert(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.ball_angular_cov      = Eigen::Vector3f(cfg["ball_angular_cov"].as<Expression>()).asDiagonal();
             config.debug                 = cfg["debug"].as<bool>();
         });
 
@@ -65,7 +62,7 @@ namespace vision {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
-                const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = horizon.mesh->rays;
+                const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
 
                 // Get some indices to partition
@@ -126,7 +123,7 @@ namespace vision {
                         // Average the cluster to get the cones axis
                         Eigen::Vector3f axis = Eigen::Vector3f::Zero();
                         for (const auto& idx : cluster) {
-                            axis += rays.row(idx);
+                            axis += rays.col(idx);
                         }
                         axis /= cluster.size();
                         axis.normalize();
@@ -135,7 +132,7 @@ namespace vision {
                         // Should we use the average distance instead?
                         float radius = 1.0f;
                         for (const auto& idx : cluster) {
-                            const Eigen::Vector3f& ray(rays.row(idx));
+                            const Eigen::Vector3f& ray(rays.col(idx));
                             if (axis.dot(ray) < radius) {
                                 radius = axis.dot(ray);
                             }
@@ -180,7 +177,7 @@ namespace vision {
                         float mean             = 0.0f;
                         const float max_radius = std::acos(radius);
                         for (const auto& idx : cluster) {
-                            const float angle = std::acos(axis.dot(rays.row(idx))) / max_radius;
+                            const float angle = std::acos(axis.dot(rays.col(idx))) / max_radius;
                             angles.emplace_back(angle);
                             mean += angle;
                         }

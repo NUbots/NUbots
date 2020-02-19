@@ -1,15 +1,14 @@
 #include "GreenHorizonDetector.h"
 
 #include <fmt/format.h>
+
+#include <numeric>
 #include <set>
 
 #include "extension/Configuration.h"
-
 #include "message/vision/GreenHorizon.h"
 #include "message/vision/VisualMesh.h"
-
 #include "utility/math/geometry/ConvexHull.h"
-#include "utility/math/vision.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
 namespace module {
@@ -38,7 +37,7 @@ namespace vision {
             // Convenience variables
             const auto& cls                                     = mesh.classifications;
             const auto& neighbours                              = mesh.neighbourhood;
-            const Eigen::Matrix<float, Eigen::Dynamic, 3>& rays = mesh.rays;
+            const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
             const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
 
             // Get some indices to partition
@@ -89,21 +88,21 @@ namespace vision {
                 for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
                     // Get the largest and smallest theta values
                     auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const int& a, const int& b) {
-                        return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 0));
+                        return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
                     });
 
-                    const float min_a = std::atan2(rays(*range_a.first, 1), rays(*range_a.first, 0));
-                    const float max_a = std::atan2(rays(*range_a.second, 1), rays(*range_a.second, 0));
+                    const float min_a = std::atan2(rays(1, *range_a.first), rays(0, *range_a.first));
+                    const float max_a = std::atan2(rays(1, *range_a.second), rays(0, *range_a.second));
 
                     for (auto it2 = std::next(it); it2 != clusters.end();) {
                         // Get the largest and smallest theta values
                         auto range_b =
                             std::minmax_element(it2->begin(), it2->end(), [&rays](const int& a, const int& b) {
-                                return std::atan2(rays(a, 1), rays(a, 0)) < std::atan2(rays(b, 1), rays(b, 0));
+                                return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
                             });
 
-                        const float min_b = std::atan2(rays(*range_b.first, 1), rays(*range_b.first, 0));
-                        const float max_b = std::atan2(rays(*range_b.second, 1), rays(*range_b.second, 0));
+                        const float min_b = std::atan2(rays(1, *range_b.first), rays(0, *range_b.first));
+                        const float max_b = std::atan2(rays(1, *range_b.second), rays(0, *range_b.second));
 
                         // Ranges do not overlap
                         // Merge the clusters
@@ -168,7 +167,7 @@ namespace vision {
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
                 for (const auto& idx : hull_indices) {
-                    const Eigen::Vector3f ray      = rays.row(idx);
+                    const Eigen::Vector3f ray      = rays.col(idx);
                     const float d                  = mesh.Hcw(2, 3) / ray.z();
                     Eigen::Vector3f ray_projection = ray * d;
                     const float norm               = ray_projection.head<2>().norm();

@@ -1,5 +1,3 @@
-SET(dependencies
-	ARMADILLO
-	)
+set(dependencies ARMADILLO)
 
-ADD_UTILITY_LIBRARY(${CMAKE_CURRENT_SOURCE_DIR} ${dependencies})
+add_utility_library(${CMAKE_CURRENT_SOURCE_DIR} ${dependencies})
