@@ -5,11 +5,12 @@ import re
 
 from tqdm import tqdm
 
-import .nbs import Decoder
 import numpy as np
 import tensorflow as tf
 import yaml
 from tensorflow import keras
+
+from .nbs import Decoder
 
 SERVO_ID = {
     "R_SHOULDER_PITCH": 0,
@@ -65,7 +66,7 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
     xs = []
     ys = []
 
-    decoder = Decoder(*files)
+    decoder = Decoder(path)
     with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
         for packet in decoder:
             if packet.type == "message.input.Sensors":
