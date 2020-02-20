@@ -117,7 +117,7 @@ export function getClientConfig({ mode, context, sourceMap, transpileOnly }: Con
         // static assets
         { test: /\.html$/, use: 'html-loader' },
         { test: /\.png$/, use: 'url-loader?limit=10000' },
-        { test: /\.(jpg|glb)$/, use: 'file-loader' },
+        { test: /\.(jpg|glb|bin)$/, use: 'file-loader' },
         { test: /\.(vert|frag)$/, use: 'raw-loader' },
       ],
     },
