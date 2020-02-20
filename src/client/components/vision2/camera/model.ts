@@ -3,6 +3,49 @@ import { observable } from 'mobx'
 import { Matrix4 } from '../../../math/matrix4'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
+import { Vector4 } from '../../../math/vector4'
+import { Image } from '../image'
+
+export class CameraModel {
+  @observable.ref id: number
+  @observable.ref name: string
+  @observable.ref image: Image
+  @observable.ref params: CameraParams
+
+  @observable.ref greenhorizon?: GreenHorizon
+  @observable.ref balls?: Ball[]
+  @observable.ref goals?: Goal[]
+
+  constructor({ id, name, image, params, greenhorizon, balls, goals }: {
+    id: number,
+    name: string,
+    image: Image
+    params: CameraParams
+    greenhorizon?: GreenHorizon
+    balls?: Ball[]
+    goals?: Goal[]
+  }) {
+    this.id = id
+    this.name = name
+    this.image = image
+    this.params = params
+    this.greenhorizon = greenhorizon
+    this.balls = balls
+    this.goals = goals
+  }
+
+  static of(opts: {
+    id: number,
+    name: string,
+    image: Image,
+    params: CameraParams,
+    greenhorizon?: GreenHorizon,
+    balls?: Ball[],
+    goals?: Goal[]
+  }) {
+    return new CameraModel(opts)
+  }
+}
 
 export class CameraParams {
   @observable.ref Hcw: Matrix4
@@ -51,4 +94,28 @@ export class GreenHorizon {
     this.horizon = horizon ?? []
     this.Hcw = Hcw ?? Matrix4.of()
   }
+}
+
+export interface Ball {
+  readonly timestamp: number
+  readonly Hcw: Matrix4
+  readonly cone: Cone
+  readonly distance: number
+  readonly colour: Vector4
+}
+
+export interface Goal {
+  readonly timestamp: number
+  readonly Hcw: Matrix4
+  readonly side: 'left' | 'right' | 'unknown'
+  readonly post: {
+    readonly top: Vector3
+    readonly bottom: Vector3
+    readonly distance: number
+  }
+}
+
+export interface Cone {
+  readonly axis: Vector3
+  readonly radius: number
 }
