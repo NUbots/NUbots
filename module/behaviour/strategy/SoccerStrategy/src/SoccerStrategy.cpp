@@ -226,7 +226,7 @@ namespace behaviour {
                                     standStill();
                                     find({FieldTarget(FieldTarget::Target::BALL)});
                                     if (mode == GameMode::PENALTY_SHOOTOUT) {
-                                        penaltyShootoutLocalisationReset();
+                                        penaltyShootoutLocalisationReset(fieldDescription);
                                     }
                                     currentState = Behaviour::State::SET;
                                 }
@@ -338,7 +338,7 @@ namespace behaviour {
             emit(std::move(reset));
         }
 
-        void SoccerStrategy::penaltyShootoutLocalisationReset() {
+        void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fieldDescription) {
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
