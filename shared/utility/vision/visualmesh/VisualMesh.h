@@ -88,7 +88,7 @@ namespace vision {
                     }
                 }
                 // Only add cluster to list if it meets minimum size requirment
-                if (cluster.size() >= min_cluster_size) {
+                if ((int)cluster.size() >= min_cluster_size) {
                     clusters.emplace_back(std::move(cluster));
                 }
             }
@@ -115,7 +115,7 @@ namespace vision {
             // We need to find one point above the green horizon and one below it
             return std::partition(first, last, [&](const value_type& cluster) {
                 bool above = false, below = false;
-                for (int idx = 0; idx < cluster.size() && !success(above, below); ++idx) {
+                for (unsigned int idx = 0; idx < cluster.size() && !success(above, below); ++idx) {
                     if (utility::math::geometry::point_under_hull(
                             rays.col(cluster[idx]), horizon_first, horizon_last)) {
                         above = true;

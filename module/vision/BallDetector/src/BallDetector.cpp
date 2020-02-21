@@ -72,7 +72,7 @@ namespace vision {
                 // Partition the indices such that we only have the ball points that dont have ball surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
                     indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == indices.size() || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
+                        return idx == (int)indices.size() || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
