@@ -63,7 +63,6 @@ namespace vision {
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
-                const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
