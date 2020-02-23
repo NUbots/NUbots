@@ -11,10 +11,15 @@ import { LocalisationModel } from './model'
 import { LocalisationNetwork } from './network'
 import { LocalisationView } from './view'
 
-export function installLocalisation({ nav, appModel, nusightNetwork, menu }: {
-  nav: NavigationConfiguration,
-  appModel: AppModel,
-  nusightNetwork: NUsightNetwork,
+export function installLocalisation({
+  nav,
+  appModel,
+  nusightNetwork,
+  menu,
+}: {
+  nav: NavigationConfiguration
+  appModel: AppModel
+  nusightNetwork: NUsightNetwork
   menu: ComponentType
 }) {
   const model = LocalisationModel.of(appModel)
@@ -25,7 +30,9 @@ export function installLocalisation({ nav, appModel, nusightNetwork, menu }: {
     Content: () => {
       const network = LocalisationNetwork.of(nusightNetwork, model)
       const controller = LocalisationController.of()
-      return <LocalisationView controller={controller} menu={menu} model={model} network={network}/>
+      return (
+        <LocalisationView controller={controller} menu={menu} model={model} network={network} />
+      )
     },
   })
 }

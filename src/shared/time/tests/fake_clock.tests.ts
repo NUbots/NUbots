@@ -19,11 +19,19 @@ describe('FakeClock', () => {
 
   describe('#date', () => {
     it('starts at unix epoch by default', () => {
-      expect(FakeClock.of().date().toUTCString()).toEqual('Thu, 01 Jan 1970 00:00:00 GMT')
+      expect(
+        FakeClock.of()
+          .date()
+          .toUTCString(),
+      ).toEqual('Thu, 01 Jan 1970 00:00:00 GMT')
     })
 
     it('returns date at the initialized time', () => {
-      expect(FakeClock.of(1492778724).date().toUTCString()).toEqual('Fri, 21 Apr 2017 12:45:24 GMT')
+      expect(
+        FakeClock.of(1492778724)
+          .date()
+          .toUTCString(),
+      ).toEqual('Fri, 21 Apr 2017 12:45:24 GMT')
     })
   })
 

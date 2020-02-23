@@ -15,12 +15,13 @@ import LeftPelvisYConfig from './config/left_pelvis_y.json'
 import LeftUpperLegConfig from './config/left_upper_leg.json'
 
 export class LeftLegViewModel {
-  constructor(private model: LocalisationRobotModel) {
-  }
+  constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer((model: LocalisationRobotModel): LeftLegViewModel => {
-    return new LeftLegViewModel(model)
-  })
+  static of = createTransformer(
+    (model: LocalisationRobotModel): LeftLegViewModel => {
+      return new LeftLegViewModel(model)
+    },
+  )
 
   @computed
   get leftLeg() {

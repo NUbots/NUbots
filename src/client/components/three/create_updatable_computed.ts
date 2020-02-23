@@ -8,7 +8,7 @@ export const createUpdatableComputed = <T, O>(
   update: (instance: T, opts: O) => void,
   dispose?: (instance: T) => void,
 ) => {
-  return <D extends unknown[]>(getOpts: (...deps: D) => O): (...deps: D) => T => {
+  return <D extends unknown[]>(getOpts: (...deps: D) => O): ((...deps: D) => T) => {
     const cache = new DeepMap<IComputedValue<T>>()
     return (...deps: D): T => {
       const entry = cache.entry(deps)
@@ -16,14 +16,17 @@ export const createUpdatableComputed = <T, O>(
         return entry.get().get()
       }
       let instance: T | undefined
-      const expr = computed(() => {
-        const opts = getOpts(...deps)
-        if (instance == null) {
-          instance = create(opts)
-        }
-        update(instance, opts)
-        return instance
-      }, { equals: () => false })
+      const expr = computed(
+        () => {
+          const opts = getOpts(...deps)
+          if (instance == null) {
+            instance = create(opts)
+          }
+          update(instance, opts)
+          return instance
+        },
+        { equals: () => false },
+      )
       entry.set(expr)
       onBecomeUnobserved(expr, () => {
         instance != null && dispose && dispose(instance)

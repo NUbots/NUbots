@@ -23,9 +23,13 @@ export class SensorsSimulator extends Simulator {
     super(nuclearnetClient)
   }
 
-  static of({ nuclearnetClient, robotIndex, numRobots }: {
-    nuclearnetClient: NUClearNetClient,
-    robotIndex: number,
+  static of({
+    nuclearnetClient,
+    robotIndex,
+    numRobots,
+  }: {
+    nuclearnetClient: NUClearNetClient
+    robotIndex: number
     numRobots: number
   }) {
     return new SensorsSimulator(nuclearnetClient, robotIndex, numRobots)
@@ -36,7 +40,6 @@ export class SensorsSimulator extends Simulator {
   }
 
   get sensors(): Message {
-
     const messageType = 'message.input.Sensors'
 
     // Simulate a walk
@@ -45,7 +48,7 @@ export class SensorsSimulator extends Simulator {
 
     const t = time * 5 + this.robotIndex
 
-    const angle = this.robotIndex * (2 * Math.PI) / this.numRobots + time / 40
+    const angle = (this.robotIndex * (2 * Math.PI)) / this.numRobots + time / 40
     const distance = Math.cos(time + 4 * this.robotIndex) * 0.3 + 1
     const x = distance * Math.cos(angle)
     const y = distance * Math.sin(angle)
@@ -55,12 +58,12 @@ export class SensorsSimulator extends Simulator {
     const buffer = Sensors.encode({
       Htw: toProtoMat44(Htw),
       servo: [
-        { presentPosition: 3 * Math.PI / 4 + 0.5 * Math.cos(t - Math.PI) },
-        { presentPosition: 3 * Math.PI / 4 + 0.5 * Math.cos(t) },
+        { presentPosition: (3 * Math.PI) / 4 + 0.5 * Math.cos(t - Math.PI) },
+        { presentPosition: (3 * Math.PI) / 4 + 0.5 * Math.cos(t) },
         { presentPosition: -Math.PI / 8 },
         { presentPosition: Math.PI / 8 },
-        { presentPosition: -3 * Math.PI / 4 },
-        { presentPosition: -3 * Math.PI / 4 },
+        { presentPosition: (-3 * Math.PI) / 4 },
+        { presentPosition: (-3 * Math.PI) / 4 },
         { presentPosition: 0 },
         { presentPosition: 0 },
         { presentPosition: 0 },

@@ -3,19 +3,15 @@ import * as THREE from 'three'
 import { Vector3 } from './vector3'
 
 export class Vector4 {
-  constructor(
-    readonly x: number,
-    readonly y: number,
-    readonly z: number,
-    readonly t: number,
-  ) {
-  }
+  constructor(readonly x: number, readonly y: number, readonly z: number, readonly t: number) {}
 
   static of() {
     return new Vector4(0, 0, 0, 0)
   }
 
-  static from(vec?: { x?: number | null, y?: number | null, z?: number | null, t?: number | null } | null): Vector4 {
+  static from(
+    vec?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null,
+  ): Vector4 {
     if (!vec) {
       return Vector4.of()
     }
@@ -37,7 +33,12 @@ export class Vector4 {
   divideScalar(scalar: number): Vector4 {
     if (scalar !== 0) {
       const invScalar = 1 / scalar
-      return new Vector4(this.x * invScalar, this.y * invScalar, this.z * invScalar, this.t * invScalar)
+      return new Vector4(
+        this.x * invScalar,
+        this.y * invScalar,
+        this.z * invScalar,
+        this.t * invScalar,
+      )
     } else {
       return new Vector4(0, 0, 0, 0) // TODO (Annable): This should throw
     }

@@ -11,12 +11,13 @@ import { Geometry } from 'three'
 import { FieldModel } from './model'
 
 export class FieldViewModel {
-  constructor(private model: FieldModel) {
-  }
+  constructor(private model: FieldModel) {}
 
-  static of = createTransformer((model: FieldModel): FieldViewModel => {
-    return new FieldViewModel(model)
-  })
+  static of = createTransformer(
+    (model: FieldModel): FieldViewModel => {
+      return new FieldViewModel(model)
+    },
+  )
 
   @computed
   get field() {
@@ -78,9 +79,22 @@ export class FieldViewModel {
       -halfGoalAreaWidth,
       goalAreaLength,
       goalAreaWidth,
-      lineWidth)
-    const blueHalfGoal = this.buildRectangle(-halfLength - goalDepth, -halfGoalWidth, goalDepth, goalWidth, lineWidth)
-    const blueHalfPenaltyMark = this.buildRectangle(-halfLength + penaltyMarkDistance, 0, 0, 0, lineWidth)
+      lineWidth,
+    )
+    const blueHalfGoal = this.buildRectangle(
+      -halfLength - goalDepth,
+      -halfGoalWidth,
+      goalDepth,
+      goalWidth,
+      lineWidth,
+    )
+    const blueHalfPenaltyMark = this.buildRectangle(
+      -halfLength + penaltyMarkDistance,
+      0,
+      0,
+      0,
+      lineWidth,
+    )
 
     const yellowHalf = this.buildRectangle(0, -halfWidth, halfLength, fieldWidth, lineWidth)
     const yellowHalfGoalArea = this.buildRectangle(
@@ -88,9 +102,22 @@ export class FieldViewModel {
       -halfGoalAreaWidth,
       goalAreaLength,
       goalAreaWidth,
-      lineWidth)
-    const yellowHalfGoal = this.buildRectangle(halfLength, -halfGoalWidth, goalDepth, goalWidth, lineWidth)
-    const yellowHalfPenaltyMark = this.buildRectangle(halfLength - penaltyMarkDistance, 0, 0, 0, lineWidth)
+      lineWidth,
+    )
+    const yellowHalfGoal = this.buildRectangle(
+      halfLength,
+      -halfGoalWidth,
+      goalDepth,
+      goalWidth,
+      lineWidth,
+    )
+    const yellowHalfPenaltyMark = this.buildRectangle(
+      halfLength - penaltyMarkDistance,
+      0,
+      0,
+      0,
+      lineWidth,
+    )
 
     const identity = new Matrix4()
     geometry.merge(centerCircle, identity)

@@ -12,10 +12,15 @@ export class VirtualRobot {
     this.nuclearnetClient.connect({ name: this.name, address: nuclearnetAddress })
   }
 
-  static of({ name, simulators, nuclearnetClient, nuclearnetAddress }: {
-    name: string,
-    simulators: Simulator[],
-    nuclearnetClient: NUClearNetClient,
+  static of({
+    name,
+    simulators,
+    nuclearnetClient,
+    nuclearnetAddress,
+  }: {
+    name: string
+    simulators: Simulator[]
+    nuclearnetClient: NUClearNetClient
     nuclearnetAddress: string
   }) {
     return new VirtualRobot(name, nuclearnetClient, nuclearnetAddress, simulators)

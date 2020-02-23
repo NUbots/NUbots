@@ -13,12 +13,13 @@ const PenaltyReason = message.input.GameState.Data.PenaltyReason
 const Phase = message.input.GameState.Data.Phase
 
 export class RobotPanelViewModel {
-  constructor(private model: DashboardRobotModel) {
-  }
+  constructor(private model: DashboardRobotModel) {}
 
-  static of = createTransformer((model: DashboardRobotModel): RobotPanelViewModel => {
-    return new RobotPanelViewModel(model)
-  })
+  static of = createTransformer(
+    (model: DashboardRobotModel): RobotPanelViewModel => {
+      return new RobotPanelViewModel(model)
+    },
+  )
 
   @computed get connected(): boolean {
     return this.model.connected
@@ -62,7 +63,9 @@ export class RobotPanelViewModel {
 
   @computed
   get penalty(): string {
-    return PenaltyReason[this.model.penaltyReason] || PenaltyReason[PenaltyReason.UNKNOWN_PENALTY_REASON]
+    return (
+      PenaltyReason[this.model.penaltyReason] || PenaltyReason[PenaltyReason.UNKNOWN_PENALTY_REASON]
+    )
   }
 
   @computed

@@ -19,30 +19,29 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props
   const dropdownToggle = (
     <button className={style.button}>
-      <RobotIcon/>
+      <RobotIcon />
       Select robots
     </button>
   )
   return (
     <div className={style.robotSelector}>
-      <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
+      <EnhancedDropdown
+        dropdownToggle={dropdownToggle}
+        dropdownPosition={props.dropdownMenuPosition}
+      >
         <div className={style.robots}>
-          {robots.length === 0 &&
-          <div className={style.empty}>
-            <div className={style.emptyIcon}>
-              <PlugIcon/>
+          {robots.length === 0 && (
+            <div className={style.empty}>
+              <div className={style.emptyIcon}>
+                <PlugIcon />
+              </div>
+              <div className={style.emptyTitle}>No connected robots</div>
+              <span className={style.emptyDescription}>Run yarn start:sim to simulate robots</span>
             </div>
-            <div className={style.emptyTitle}>
-              No connected robots
-            </div>
-            <span className={style.emptyDescription}>
-                Run yarn start:sim to simulate robots
-              </span>
-          </div>
-          }
-          {
-            robots.map(robot => <RobotLabel key={robot.id} robot={robot} selectRobot={selectRobot}/>)
-          }
+          )}
+          {robots.map(robot => (
+            <RobotLabel key={robot.id} robot={robot} selectRobot={selectRobot} />
+          ))}
         </div>
       </EnhancedDropdown>
     </div>

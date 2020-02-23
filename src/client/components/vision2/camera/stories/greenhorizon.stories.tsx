@@ -25,19 +25,20 @@ import { GreenHorizon } from '../model'
 
 storiesOf('components.vision2.camera.greenhorizon', module)
   .addDecorator(fullscreen)
-  .add('Renders statically', () => <GreenHorizonHarness/>)
-  .add('Renders animated', () => <GreenHorizonHarness animate/>)
+  .add('Renders statically', () => <GreenHorizonHarness />)
+  .add('Renders animated', () => <GreenHorizonHarness animate />)
 
 const camHeight = 0.8
 const Hwc = Matrix4.fromThree(
-  new THREE.Matrix4().makeTranslation(0, 0, camHeight)
+  new THREE.Matrix4()
+    .makeTranslation(0, 0, camHeight)
     .multiply(new THREE.Matrix4().makeRotationY(Math.PI / 4)),
 )
 const Hcw = Matrix4.fromThree(new THREE.Matrix4().getInverse(Hwc.toThree()))
 
 class GreenHorizonHarness extends Component<{ animate?: boolean }> {
   render() {
-    return <Three stage={this.stage} objectFit={{ type: 'contain', aspect: 1 }}/>
+    return <Three stage={this.stage} objectFit={{ type: 'contain', aspect: 1 }} />
   }
 
   private readonly stage = (canvas: Canvas) => {
@@ -54,10 +55,14 @@ class GreenHorizonHarness extends Component<{ animate?: boolean }> {
         focalLength: 415 / 800,
       }),
     })
-    this.props.animate && disposeOnUnmount(this, reaction(
-      () => now('frame') / 1000,
-      t => greenHorizon.horizon = this.generateHorizon(t),
-    ))
+    this.props.animate &&
+      disposeOnUnmount(
+        this,
+        reaction(
+          () => now('frame') / 1000,
+          t => (greenHorizon.horizon = this.generateHorizon(t)),
+        ),
+      )
     return ViewModel.of(canvas, greenHorizon, params)
   }
 
@@ -75,8 +80,7 @@ class GreenHorizonHarness extends Component<{ animate?: boolean }> {
 }
 
 class ViewModel {
-  constructor(private readonly viewModel: GreenHorizonViewModel) {
-  }
+  constructor(private readonly viewModel: GreenHorizonViewModel) {}
 
   static of(canvas: Canvas, greenHorizon: GreenHorizon, params: CameraParams) {
     return new ViewModel(GreenHorizonViewModel.of(canvas, greenHorizon, params))
@@ -84,7 +88,14 @@ class ViewModel {
 
   readonly stage = stage(() => ({ camera: this.camera(), scene: this.scene() }))
 
-  private readonly camera = orthographicCamera(() => ({ left: -1, right: 1, top: 1, bottom: -1, near: 0, far: 1 }))
+  private readonly camera = orthographicCamera(() => ({
+    left: -1,
+    right: 1,
+    top: 1,
+    bottom: -1,
+    near: 0,
+    far: 1,
+  }))
 
   private readonly scene = scene(() => ({ children: [this.viewModel.greenhorizon()] }))
 }
@@ -98,5 +109,5 @@ function lissajous(t: number, a = 3, b = 4) {
   return new Vector2(Math.sin(a * t), Math.sin(b * t))
 }
 
-const mod = (n: number) => (x: number): number => (x % n + n) % n
+const mod = (n: number) => (x: number): number => ((x % n) + n) % n
 const mod2pi = mod(2 * Math.PI)

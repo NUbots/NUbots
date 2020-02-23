@@ -3,17 +3,13 @@ import * as THREE from 'three'
 import { Transform } from './transform'
 
 export class Vector2 {
-  constructor(
-    readonly x: number,
-    readonly y: number,
-  ) {
-  }
+  constructor(readonly x: number, readonly y: number) {}
 
   static of(x?: number, y?: number): Vector2 {
     return new Vector2(x || 0, y || 0)
   }
 
-  static from(vec?: { x?: number | null, y?: number | null } | null): Vector2 {
+  static from(vec?: { x?: number | null; y?: number | null } | null): Vector2 {
     if (!vec) {
       return Vector2.of()
     }
@@ -36,10 +32,7 @@ export class Vector2 {
     const cosTheta = Math.cos(theta)
     const sinTheta = Math.sin(theta)
 
-    const rotationMatrix = [
-      cosTheta, -sinTheta,
-      sinTheta, cosTheta,
-    ]
+    const rotationMatrix = [cosTheta, -sinTheta, sinTheta, cosTheta]
 
     return new Vector2(
       scale.x * (this.x * rotationMatrix[0] + this.y * rotationMatrix[1]) + translate.x,

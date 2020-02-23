@@ -31,14 +31,22 @@ export class TreeLabel extends Component<TreeLabelProps> {
 
     if (!node.leaf) {
       return (
-        <div className={style.label} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
+        <div
+          className={style.label}
+          onMouseEnter={this.onMouseEnter}
+          onMouseLeave={this.onMouseLeave}
+        >
           {node.label}
         </div>
       )
     }
 
     return (
-      <div className={style.label} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
+      <div
+        className={style.label}
+        onMouseEnter={this.onMouseEnter}
+        onMouseLeave={this.onMouseLeave}
+      >
         <span className={style.labelName}>{node.label}</span>
 
         <button
@@ -47,12 +55,16 @@ export class TreeLabel extends Component<TreeLabelProps> {
           style={{ backgroundColor: node.color }}
         ></button>
 
-        {this.state.showColorPicker &&
-        <div className={style.pickerPopover}>
-          <div className={style.pickerPopoverCover} onClick={this.closePicker}></div>
-          <TwitterPicker color={node.color} onChangeComplete={this.onColorChange} triangle='hide'/>
-        </div>
-        }
+        {this.state.showColorPicker && (
+          <div className={style.pickerPopover}>
+            <div className={style.pickerPopoverCover} onClick={this.closePicker}></div>
+            <TwitterPicker
+              color={node.color}
+              onChangeComplete={this.onColorChange}
+              triangle="hide"
+            />
+          </div>
+        )}
       </div>
     )
   }

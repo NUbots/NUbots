@@ -24,10 +24,10 @@ export class SVGRenderer extends Component<RendererProps> {
     const cam = this.resolution.inverse().then(camera)
     return (
       <div className={classNames(className, style.container)}>
-        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize}/>
+        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
         <svg className={style.container}>
           <g transform={toSvgTransform(cam)}>
-            <Group model={scene} world={cam}/>
+            <Group model={scene} world={cam} />
           </g>
         </svg>
       </div>
@@ -36,15 +36,14 @@ export class SVGRenderer extends Component<RendererProps> {
 
   @action
   private onResize = (width: number, height: number) => {
-
     // Translate to the center
     const translate = Vector2.of(-width * 0.5, -height * 0.5)
 
     // If we have an aspect ratio, use it to scale the canvas to unit size
     if (this.props.aspectRatio !== undefined) {
-
       const canvasAspect = width / height
-      const scale = canvasAspect < this.props.aspectRatio ? 1 / width : 1 / (height * this.props.aspectRatio)
+      const scale =
+        canvasAspect < this.props.aspectRatio ? 1 / width : 1 / (height * this.props.aspectRatio)
       // Scale to fit
       this.resolution = Transform.of({ scale: { x: scale, y: -scale }, translate })
     } else {

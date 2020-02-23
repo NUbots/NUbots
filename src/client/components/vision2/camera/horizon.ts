@@ -9,8 +9,7 @@ export class HorizonViewModel {
   constructor(
     private readonly params: CameraParams,
     private readonly lineProjection: LineProjection,
-  ) {
-  }
+  ) {}
 
   static of(canvas: Canvas, params: CameraParams): HorizonViewModel {
     return new HorizonViewModel(params, LineProjection.of(canvas, params.lens))

@@ -7,8 +7,7 @@ import { Shape } from '../object/shape'
 
 import { toSvgProps } from './rendering'
 
-
-type Props = { model: Shape<ArrowGeometry>, world: Transform }
+type Props = { model: Shape<ArrowGeometry>; world: Transform }
 export const Arrow = observer(({ model: { geometry, appearance } }: Props) => {
   const { origin, direction, width, length, headWidth, headLength } = geometry
   const w = width * 0.5
@@ -24,9 +23,11 @@ export const Arrow = observer(({ model: { geometry, appearance } }: Props) => {
   path += `L${length - hl} ${w}`
   path += `L0 ${w}`
 
-  return <path
-    d={path}
-    transform={`translate(${origin.x},${origin.y}) rotate(${r})`}
-    {...toSvgProps(appearance)}
-  />
+  return (
+    <path
+      d={path}
+      transform={`translate(${origin.x},${origin.y}) rotate(${r})`}
+      {...toSvgProps(appearance)}
+    />
+  )
 })

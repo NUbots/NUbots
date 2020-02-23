@@ -3,7 +3,6 @@ import { fourccToString } from '../fourcc'
 
 describe('fourcc', () => {
   it('Calculates fourcc codes from strings', () => {
-
     expect(fourcc('GREY')).toEqual(0x59455247)
     expect(fourcc('Y12 ')).toEqual(0x20323159)
     expect(fourcc('Y16 ')).toEqual(0x20363159)
@@ -30,7 +29,6 @@ describe('fourcc', () => {
 
 describe('fourccToString', () => {
   it('Gives strings for fourcc codes', () => {
-
     expect(fourccToString(0x59455247)).toEqual('GREY')
     expect(fourccToString(0x20323159)).toEqual('Y12 ')
     expect(fourccToString(0x20363159)).toEqual('Y16 ')

@@ -33,7 +33,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     document.addEventListener('keydown', this.onKeyDown, false)
     document.addEventListener('keyup', this.onKeyUp, false)
     document.addEventListener('wheel', this.onWheel, false)
-    disposeOnUnmount(this, reaction(() => now('frame'), this.onAnimationFrame))
+    disposeOnUnmount(
+      this,
+      reaction(() => now('frame'), this.onAnimationFrame),
+    )
   }
 
   componentWillUnmount(): void {
@@ -48,18 +51,17 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   render(): JSX.Element {
     return (
       <div className={style.localisation}>
-        <LocalisationMenuBar menu={this.props.menu} onHawkEyeClick={this.onHawkEyeClick}/>
+        <LocalisationMenuBar menu={this.props.menu} onHawkEyeClick={this.onHawkEyeClick} />
         <div className={style.localisation__canvas}>
-          <Three ref={this.canvas} onClick={this.onClick} stage={this.stage}/>
+          <Three ref={this.canvas} onClick={this.onClick} stage={this.stage} />
         </div>
-        <StatusBar model={this.props.model}/>
+        <StatusBar model={this.props.model} />
       </div>
     )
   }
 
-  private stage = (canvas: Canvas) => computed(() => [
-    LocalisationViewModel.of(canvas, this.props.model).stage,
-  ])
+  private stage = (canvas: Canvas) =>
+    computed(() => [LocalisationViewModel.of(canvas, this.props.model).stage])
 
   requestPointerLock() {
     this.canvas.current!.requestPointerLock()
@@ -78,7 +80,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   }
 
   private onPointerLockChange = () => {
-    this.props.controller.onPointerLockChange(this.props.model, this.canvas.current!.isPointerLocked())
+    this.props.controller.onPointerLockChange(
+      this.props.model,
+      this.canvas.current!.isPointerLocked(),
+    )
   }
 
   private onMouseMove = (e: MouseEvent) => {
@@ -118,7 +123,9 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
     <Menu>
       <ul className={style.localisation__menu}>
         <li className={style.localisation__menuItem}>
-          <button className={style.localisation__menuButton} onClick={props.onHawkEyeClick}>Hawk Eye</button>
+          <button className={style.localisation__menuButton} onClick={props.onHawkEyeClick}>
+            Hawk Eye
+          </button>
         </li>
       </ul>
     </Menu>
@@ -130,14 +137,14 @@ interface StatusBarProps {
 }
 
 const StatusBar = observer((props: StatusBarProps) => {
-  const target = props.model.viewMode !== ViewMode.FreeCamera && props.model.target
-    ? props.model.target.name
-    : 'No Target'
+  const target =
+    props.model.viewMode !== ViewMode.FreeCamera && props.model.target
+      ? props.model.target.name
+      : 'No Target'
   return (
     <div className={style.localisation__status}>
       <span className={style.localisation__info}>&#160;</span>
-      <span
-        className={style.localisation__target}>{target}</span>
+      <span className={style.localisation__target}>{target}</span>
       <span className={style.localisation__viewMode}>{viewModeString(props.model.viewMode)}</span>
     </div>
   )

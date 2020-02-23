@@ -18,7 +18,11 @@ export const Collapsible = observer((props: CollapsibleProps) => {
   const { open, className, header, children, onToggle, animate = true } = props
   return (
     <div>
-      {header && <button className={style.collapsibleHeader} onClick={onToggle}>{header}</button>}
+      {header && (
+        <button className={style.collapsibleHeader} onClick={onToggle}>
+          {header}
+        </button>
+      )}
       <CSSTransition
         in={open}
         timeout={200}

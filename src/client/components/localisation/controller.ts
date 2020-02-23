@@ -60,7 +60,10 @@ export class LocalisationController {
       return
     }
 
-    const pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, model.controls.pitch - movementY / 200))
+    const pitch = Math.max(
+      -Math.PI / 2,
+      Math.min(Math.PI / 2, model.controls.pitch - movementY / 200),
+    )
     model.controls.pitch = pitch
     model.controls.yaw = model.controls.yaw - movementX / 200
   }
@@ -200,7 +203,9 @@ export class LocalisationController {
     movement.normalize()
     movement.multiplyScalar(actualSpeed)
 
-    model.camera.position = model.camera.position.add(new Vector3(movement.x, movement.y, movement.z))
+    model.camera.position = model.camera.position.add(
+      new Vector3(movement.x, movement.y, movement.z),
+    )
   }
 
   private updatePositionFirstPerson(model: LocalisationModel) {

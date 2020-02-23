@@ -7,7 +7,7 @@ import { Shape } from '../object/shape'
 
 import { toSvgProps } from './rendering'
 
-type Props = { model: Shape<LineGeometry>, world: Transform }
+type Props = { model: Shape<LineGeometry>; world: Transform }
 export const Line = observer(({ model: { geometry, appearance } }: Props) => (
   <line
     x1={geometry.origin.x}

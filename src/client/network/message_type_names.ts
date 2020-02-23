@@ -38,7 +38,11 @@ export class MessageTypePath {
  *
  * e.g. findPath({ a: { b: { c: 'd' } } }, v => v === 'd') // 'a.b.c'
  */
-function findPath(obj: any, isSubject: (value: any) => boolean, path: string[] = []): string | undefined {
+function findPath(
+  obj: any,
+  isSubject: (value: any) => boolean,
+  path: string[] = [],
+): string | undefined {
   if (isSubject(obj)) {
     return path.join('.')
   }

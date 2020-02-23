@@ -27,10 +27,7 @@ describe('createUpdatableComputed', () => {
   }
 
   class ViewModel {
-    constructor(
-      private readonly model: { color: string },
-    ) {
-    }
+    constructor(private readonly model: { color: string }) {}
 
     readonly triangle = computedTriangle((id: string) => ({
       id,
@@ -38,7 +35,7 @@ describe('createUpdatableComputed', () => {
     }))
   }
 
-  type TriangleOpts = { color: string, id: string }
+  type TriangleOpts = { color: string; id: string }
 
   class Triangle {
     id: string

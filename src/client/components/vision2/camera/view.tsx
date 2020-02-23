@@ -17,12 +17,14 @@ import { CameraViewModel } from './view_model'
 @observer
 export class CameraView extends Component<{ model: CameraModel }> {
   render() {
-    return <div className={styles.camera}>
-      <Three stage={this.stage} objectFit={this.objectFit}/>
-      <div className={styles.menu}>
-        <SwitchesMenu dropdownMenuPosition='right' options={this.drawOptions}/>
+    return (
+      <div className={styles.camera}>
+        <Three stage={this.stage} objectFit={this.objectFit} />
+        <div className={styles.menu}>
+          <SwitchesMenu dropdownMenuPosition="right" options={this.drawOptions} />
+        </div>
       </div>
-    </div>
+    )
   }
 
   @computed
@@ -32,37 +34,37 @@ export class CameraView extends Component<{ model: CameraModel }> {
       {
         label: 'Image',
         enabled: drawOptions.drawImage,
-        toggle: action(() => drawOptions.drawImage = !drawOptions.drawImage),
+        toggle: action(() => (drawOptions.drawImage = !drawOptions.drawImage)),
       },
       {
         label: 'Distance',
         enabled: drawOptions.drawDistance,
-        toggle: action(() => drawOptions.drawDistance = !drawOptions.drawDistance),
+        toggle: action(() => (drawOptions.drawDistance = !drawOptions.drawDistance)),
       },
       {
         label: 'Compass',
         enabled: drawOptions.drawCompass,
-        toggle: action(() => drawOptions.drawCompass = !drawOptions.drawCompass),
+        toggle: action(() => (drawOptions.drawCompass = !drawOptions.drawCompass)),
       },
       {
         label: 'Horizon',
         enabled: drawOptions.drawHorizon,
-        toggle: action(() => drawOptions.drawHorizon = !drawOptions.drawHorizon),
+        toggle: action(() => (drawOptions.drawHorizon = !drawOptions.drawHorizon)),
       },
       {
         label: 'Green Horizon',
         enabled: drawOptions.drawGreenhorizon,
-        toggle: action(() => drawOptions.drawGreenhorizon = !drawOptions.drawGreenhorizon),
+        toggle: action(() => (drawOptions.drawGreenhorizon = !drawOptions.drawGreenhorizon)),
       },
       {
         label: 'Balls',
         enabled: drawOptions.drawBalls,
-        toggle: action(() => drawOptions.drawBalls = !drawOptions.drawBalls),
+        toggle: action(() => (drawOptions.drawBalls = !drawOptions.drawBalls)),
       },
       {
         label: 'Goals',
         enabled: drawOptions.drawGoals,
-        toggle: action(() => drawOptions.drawGoals = !drawOptions.drawGoals),
+        toggle: action(() => (drawOptions.drawGoals = !drawOptions.drawGoals)),
       },
     ]
   }

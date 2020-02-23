@@ -16,11 +16,11 @@ export class MarkerGeometry {
   }
 
   static of({
-              heading = Vector2.of(1, 0),
-              radius = 1,
-              x = 0,
-              y = 0,
-            }: Partial<MarkerGeometry> = {}): MarkerGeometry {
+    heading = Vector2.of(1, 0),
+    radius = 1,
+    x = 0,
+    y = 0,
+  }: Partial<MarkerGeometry> = {}): MarkerGeometry {
     return new MarkerGeometry({
       heading,
       radius,

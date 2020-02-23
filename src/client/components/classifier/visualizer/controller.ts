@@ -8,8 +8,7 @@ const PI2 = Math.PI / 2
 const DegToRad = Math.PI / 180
 
 export class VisualizerController {
-  constructor(private model: VisualizerModel) {
-  }
+  constructor(private model: VisualizerModel) {}
 
   static of(model: VisualizerModel) {
     return new VisualizerController(model)
@@ -44,13 +43,13 @@ export class Dragger {
   private readonly from: Vector2
   // tslint:disable-next-line variable-name
   private _to: Vector2
-  private readonly fromCamera: { azimuth: number, elevation: number }
+  private readonly fromCamera: { azimuth: number; elevation: number }
 
   constructor(
     private readonly model: VisualizerModel,
     from: Vector2,
     to: Vector2,
-    fromCamera: { azimuth: number, elevation: number },
+    fromCamera: { azimuth: number; elevation: number },
   ) {
     this.from = from
     this._to = to
@@ -58,12 +57,10 @@ export class Dragger {
   }
 
   static of(model: VisualizerModel, from: Vector2) {
-    return new Dragger(
-      model,
-      from,
-      from,
-      { azimuth: model.camera.azimuth, elevation: model.camera.elevation },
-    )
+    return new Dragger(model, from, from, {
+      azimuth: model.camera.azimuth,
+      elevation: model.camera.elevation,
+    })
   }
 
   set to(to: Vector2) {

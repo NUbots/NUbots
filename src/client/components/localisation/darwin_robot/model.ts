@@ -41,27 +41,27 @@ export class DarwinMotorSet {
   @observable headTilt: DarwinMotor
 
   constructor({
-                rightShoulderPitch,
-                leftShoulderPitch,
-                rightShoulderRoll,
-                leftShoulderRoll,
-                rightElbow,
-                leftElbow,
-                rightHipYaw,
-                leftHipYaw,
-                rightHipRoll,
-                leftHipRoll,
-                rightHipPitch,
-                leftHipPitch,
-                rightKnee,
-                leftKnee,
-                rightAnklePitch,
-                leftAnklePitch,
-                rightAnkleRoll,
-                leftAnkleRoll,
-                headPan,
-                headTilt,
-              }: DarwinMotorSet) {
+    rightShoulderPitch,
+    leftShoulderPitch,
+    rightShoulderRoll,
+    leftShoulderRoll,
+    rightElbow,
+    leftElbow,
+    rightHipYaw,
+    leftHipYaw,
+    rightHipRoll,
+    leftHipRoll,
+    rightHipPitch,
+    leftHipPitch,
+    rightKnee,
+    leftKnee,
+    rightAnklePitch,
+    leftAnklePitch,
+    rightAnkleRoll,
+    leftAnkleRoll,
+    headPan,
+    headTilt,
+  }: DarwinMotorSet) {
     this.rightShoulderPitch = rightShoulderPitch
     this.leftShoulderPitch = leftShoulderPitch
     this.rightShoulderRoll = rightShoulderRoll
@@ -118,12 +118,19 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion // Torso to world rotation.
   @observable motors: DarwinMotorSet
 
-  constructor({ model, name, color, rWTt, Rwt, motors }: {
-    model: RobotModel,
-    name: string,
-    color?: string,
-    rWTt: Vector3,
-    Rwt: Quaternion,
+  constructor({
+    model,
+    name,
+    color,
+    rWTt,
+    Rwt,
+    motors,
+  }: {
+    model: RobotModel
+    name: string
+    color?: string
+    rWTt: Vector3
+    Rwt: Quaternion
     motors: DarwinMotorSet
   }) {
     this.model = model
@@ -134,15 +141,17 @@ export class LocalisationRobotModel {
     this.motors = motors
   }
 
-  static of = memoize((model: RobotModel): LocalisationRobotModel => {
-    return new LocalisationRobotModel({
-      model,
-      name: model.name,
-      rWTt: Vector3.of(),
-      Rwt: Quaternion.of(),
-      motors: DarwinMotorSet.of(),
-    })
-  })
+  static of = memoize(
+    (model: RobotModel): LocalisationRobotModel => {
+      return new LocalisationRobotModel({
+        model,
+        name: model.name,
+        rWTt: Vector3.of(),
+        Rwt: Quaternion.of(),
+        motors: DarwinMotorSet.of(),
+      })
+    },
+  )
 
   @computed get visible() {
     return this.model.enabled

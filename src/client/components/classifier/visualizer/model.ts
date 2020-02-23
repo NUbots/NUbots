@@ -6,12 +6,15 @@ import { Dragger } from './controller'
 
 export class VisualizerModel {
   @observable.ref lut: Lut
-  @observable.shallow camera: { distance: number, elevation: number, azimuth: number }
+  @observable.shallow camera: { distance: number; elevation: number; azimuth: number }
   @observable.ref dragger?: Dragger
 
-  constructor({ lut, camera }: {
-    lut: Lut,
-    camera: { distance: number, elevation: number, azimuth: number }
+  constructor({
+    lut,
+    camera,
+  }: {
+    lut: Lut
+    camera: { distance: number; elevation: number; azimuth: number }
   }) {
     this.lut = lut
     this.camera = camera

@@ -15,11 +15,7 @@ import { NUgusViewModel } from './nugus_robot/view_model'
 import { SkyboxViewModel } from './skybox/view_model'
 
 export class LocalisationViewModel {
-  constructor(
-    private readonly canvas: Canvas,
-    private readonly model: LocalisationModel,
-  ) {
-  }
+  constructor(private readonly canvas: Canvas, private readonly model: LocalisationModel) {}
 
   static of(canvas: Canvas, model: LocalisationModel) {
     return new LocalisationViewModel(canvas, model)
@@ -43,13 +39,7 @@ export class LocalisationViewModel {
   }))
 
   private readonly scene = scene(() => ({
-    children: [
-      ...this.robots,
-      this.field,
-      this.skybox,
-      this.hemisphereLight,
-      this.pointLight,
-    ],
+    children: [...this.robots, this.field, this.skybox, this.hemisphereLight, this.pointLight],
   }))
 
   @computed
@@ -77,7 +67,11 @@ export class LocalisationViewModel {
   @computed
   private get pointLight() {
     const light = new PointLight('#fff')
-    light.position.set(this.model.camera.position.x, this.model.camera.position.y, this.model.camera.position.z)
+    light.position.set(
+      this.model.camera.position.x,
+      this.model.camera.position.y,
+      this.model.camera.position.z,
+    )
     return light
   }
 }

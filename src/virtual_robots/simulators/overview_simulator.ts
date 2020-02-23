@@ -29,9 +29,13 @@ export class OverviewSimulator extends Simulator {
     super(nuclearnetClient)
   }
 
-  static of({ nuclearnetClient, robotIndex, numRobots }: {
-    nuclearnetClient: NUClearNetClient,
-    robotIndex: number,
+  static of({
+    nuclearnetClient,
+    robotIndex,
+    numRobots,
+  }: {
+    nuclearnetClient: NUClearNetClient
+    robotIndex: number
     numRobots: number
   }) {
     return new OverviewSimulator(
@@ -48,7 +52,6 @@ export class OverviewSimulator extends Simulator {
   }
 
   get overview(): Message {
-
     const time = periodic(2)
 
     const messageType = 'message.support.nusight.Overview'
@@ -119,8 +122,8 @@ export class OverviewSimulator extends Simulator {
     const fieldLength = this.field.fieldLength
     const fieldWidth = this.field.fieldWidth
     return {
-      x: this.random.float() * fieldLength - (fieldLength * 0.5),
-      y: this.random.float() * fieldWidth - (fieldWidth * 0.5),
+      x: this.random.float() * fieldLength - fieldLength * 0.5,
+      y: this.random.float() * fieldWidth - fieldWidth * 0.5,
     }
   }
 
@@ -129,14 +132,11 @@ export class OverviewSimulator extends Simulator {
   }
 
   private randomSeconds(now: number, offset: number): number {
-    return now + (offset * this.random.float())
+    return now + offset * this.random.float()
   }
 
   private figureEight(t: number, scaleX: number = 1, scaleY: number = 1) {
-    return new Vector2(
-      scaleX * Math.cos(t),
-      scaleY * Math.sin(2 * t),
-    )
+    return new Vector2(scaleX * Math.cos(t), scaleY * Math.sin(2 * t))
   }
 }
 

@@ -9,12 +9,13 @@ import { GroundViewModel } from '../ground/view_model'
 import { FieldModel } from './model'
 
 export class FieldViewModel {
-  constructor(private model: FieldModel) {
-  }
+  constructor(private model: FieldModel) {}
 
-  static of = createTransformer((model: FieldModel): FieldViewModel => {
-    return new FieldViewModel(model)
-  })
+  static of = createTransformer(
+    (model: FieldModel): FieldViewModel => {
+      return new FieldViewModel(model)
+    },
+  )
 
   @computed
   get scene(): Group {
@@ -23,10 +24,7 @@ export class FieldViewModel {
         // TODO (Annable): move camera to the view model and put this transform there.
         rotate: this.model.orientation === 'left' ? Math.PI : 0,
       }),
-      children: [
-        this.ground,
-        this.robots,
-      ],
+      children: [this.ground, this.robots],
     })
   }
 

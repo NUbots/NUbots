@@ -4,7 +4,6 @@ import { Shape } from '../object/shape'
 import { applyAppearance } from './rendering'
 
 export function renderLine(ctx: CanvasRenderingContext2D, shape: Shape<LineGeometry>): void {
-
   const { origin, target } = shape.geometry
 
   ctx.beginPath()

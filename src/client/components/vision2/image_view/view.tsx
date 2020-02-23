@@ -13,7 +13,7 @@ import { ImageViewModel } from './view_model'
 
 export class ImageView extends Component<{ image: Image }> {
   render() {
-    return <Three stage={this.stages} objectFit={this.objectFit}/>
+    return <Three stage={this.stages} objectFit={this.objectFit} />
   }
 
   @computed
@@ -32,5 +32,12 @@ export class ImageView extends Component<{ image: Image }> {
     return ImageViewModel.of(this.props.image)
   }
 
-  private readonly camera = orthographicCamera(() => ({ left: -1, right: 1, top: 1, bottom: -1, near: 0, far: 1 }))
+  private readonly camera = orthographicCamera(() => ({
+    left: -1,
+    right: 1,
+    top: 1,
+    bottom: -1,
+    near: 0,
+    far: 1,
+  }))
 }

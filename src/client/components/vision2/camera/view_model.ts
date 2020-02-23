@@ -15,11 +15,7 @@ import { HorizonViewModel } from './horizon'
 import { CameraModel } from './model'
 
 export class CameraViewModel {
-  constructor(
-    private readonly canvas: Canvas,
-    private readonly model: CameraModel,
-  ) {
-  }
+  constructor(private readonly canvas: Canvas, private readonly model: CameraModel) {}
 
   static of(canvas: Canvas, model: CameraModel) {
     return new CameraViewModel(canvas, model)
@@ -37,7 +33,14 @@ export class CameraViewModel {
 
   readonly stage = stage(() => ({ camera: this.camera(), scene: this.scene() }))
 
-  readonly camera = orthographicCamera(() => ({ left: -1, right: 1, top: 1, bottom: -1, near: 0, far: 1 }))
+  readonly camera = orthographicCamera(() => ({
+    left: -1,
+    right: 1,
+    top: 1,
+    bottom: -1,
+    near: 0,
+    far: 1,
+  }))
 
   readonly scene = scene(() => {
     const { drawOptions } = this.model

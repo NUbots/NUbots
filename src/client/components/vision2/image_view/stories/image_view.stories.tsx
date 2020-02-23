@@ -15,37 +15,45 @@ import jprgUrl from './images/image.jprg.jpg'
 import rggbBinUrl from './images/image.rggb.bin'
 import rggbUrl from './images/image.rggb.jpg'
 
-const createModel = () => observable<{ image: Image | undefined}>({ image: undefined })
+const createModel = () => observable<{ image: Image | undefined }>({ image: undefined })
 
 storiesOf('components.vision2.image_view', module)
   .addDecorator(fullscreen)
   .add('JPEG', () => {
     const model = createModel()
-    loadImageElement(jpegUrl, ImageFormat.JPEG).then(action((image: Image) => model.image = image))
-    return <Observer>{() => <>
-      {model.image ? <ImageView image={model.image}/> : null}
-    </>}</Observer>
+    loadImageElement(jpegUrl, ImageFormat.JPEG).then(
+      action((image: Image) => (model.image = image)),
+    )
+    return (
+      <Observer>{() => <>{model.image ? <ImageView image={model.image} /> : null}</>}</Observer>
+    )
   })
   .add('JPRG', () => {
     const model = createModel()
-    loadImageElement(jprgUrl, ImageFormat.JPRG).then(action((image: Image) => model.image = image))
-    return <Observer>{() => <>
-      {model.image ? <ImageView image={model.image}/> : null}
-    </>}</Observer>
+    loadImageElement(jprgUrl, ImageFormat.JPRG).then(
+      action((image: Image) => (model.image = image)),
+    )
+    return (
+      <Observer>{() => <>{model.image ? <ImageView image={model.image} /> : null}</>}</Observer>
+    )
   })
   .add('RGGB', () => {
     const model = createModel()
-    loadImageElement(rggbUrl, ImageFormat.RGGB).then(action((image: Image) => model.image = image))
-    return <Observer>{() => <>
-      {model.image ? <ImageView image={model.image}/> : null}
-    </>}</Observer>
+    loadImageElement(rggbUrl, ImageFormat.RGGB).then(
+      action((image: Image) => (model.image = image)),
+    )
+    return (
+      <Observer>{() => <>{model.image ? <ImageView image={model.image} /> : null}</>}</Observer>
+    )
   })
   .add('RGGB Buffer', () => {
     const model = createModel()
-    loadImageData(rggbBinUrl, 600, 480, ImageFormat.RGGB).then(action((image: Image) => model.image = image))
-    return <Observer>{() => <>
-      {model.image ? <ImageView image={model.image}/> : null}
-    </>}</Observer>
+    loadImageData(rggbBinUrl, 600, 480, ImageFormat.RGGB).then(
+      action((image: Image) => (model.image = image)),
+    )
+    return (
+      <Observer>{() => <>{model.image ? <ImageView image={model.image} /> : null}</>}</Observer>
+    )
   })
 
 async function loadImageElement(url: string, format: ImageFormat): Promise<Image> {
@@ -54,7 +62,12 @@ async function loadImageElement(url: string, format: ImageFormat): Promise<Image
   return { type: 'element', width, height, element, format }
 }
 
-async function loadImageData(url: string, width: number, height: number, format: ImageFormat): Promise<Image> {
+async function loadImageData(
+  url: string,
+  width: number,
+  height: number,
+  format: ImageFormat,
+): Promise<Image> {
   const data = await fetchUrlAsBuffer(url)
   return { type: 'data', width, height, data: computed(() => new Uint8Array(data)), format }
 }

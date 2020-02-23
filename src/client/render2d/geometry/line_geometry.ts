@@ -12,9 +12,9 @@ export class LineGeometry {
   }
 
   static of({
-              origin = Vector2.of(0, 0),
-              target = Vector2.of(1, 1),
-            }: Partial<LineGeometry> = {}): LineGeometry {
+    origin = Vector2.of(0, 0),
+    target = Vector2.of(1, 1),
+  }: Partial<LineGeometry> = {}): LineGeometry {
     return new LineGeometry({
       origin,
       target,

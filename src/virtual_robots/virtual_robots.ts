@@ -15,13 +15,19 @@ export class VirtualRobots {
     this.robots = robots
   }
 
-  static of({ fakeNetworking, nuclearnetAddress, numRobots }: {
-    fakeNetworking: boolean,
-    nuclearnetAddress: string,
+  static of({
+    fakeNetworking,
+    nuclearnetAddress,
+    numRobots,
+  }: {
+    fakeNetworking: boolean
+    nuclearnetAddress: string
     numRobots: number
   }) {
     const robots = Array.from({ length: numRobots }, (_, i) => {
-      const nuclearnetClient = fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of()
+      const nuclearnetClient = fakeNetworking
+        ? FakeNUClearNetClient.of()
+        : DirectNUClearNetClient.of()
       return VirtualRobot.of({
         name: `Virtual Robot ${i + 1}`,
         nuclearnetClient,

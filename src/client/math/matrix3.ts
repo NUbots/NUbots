@@ -3,26 +3,19 @@ import * as THREE from 'three'
 import { Vector3 } from './vector3'
 
 export class Matrix3 {
-  constructor(
-    readonly x: Vector3,
-    readonly y: Vector3,
-    readonly z: Vector3,
-  ) {
-  }
+  constructor(readonly x: Vector3, readonly y: Vector3, readonly z: Vector3) {}
 
   static of() {
-    return new Matrix3(
-      new Vector3(1, 0, 0),
-      new Vector3(0, 1, 0),
-      new Vector3(0, 0, 1),
-    )
+    return new Matrix3(new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1))
   }
 
-  static from(mat?: {
-    x?: { x?: number | null, y?: number | null, z?: number | null } | null,
-    y?: { x?: number | null, y?: number | null, z?: number | null } | null,
-    z?: { x?: number | null, y?: number | null, z?: number | null } | null
-  } | null): Matrix3 {
+  static from(
+    mat?: {
+      x?: { x?: number | null; y?: number | null; z?: number | null } | null
+      y?: { x?: number | null; y?: number | null; z?: number | null } | null
+      z?: { x?: number | null; y?: number | null; z?: number | null } | null
+    } | null,
+  ): Matrix3 {
     if (!mat) {
       return Matrix3.of()
     }
@@ -42,6 +35,7 @@ export class Matrix3 {
   }
 
   toThree(): THREE.Matrix3 {
+    // prettier-ignore
     return new THREE.Matrix3().set(
       this.x.x, this.y.x, this.z.x,
       this.x.y, this.y.y, this.z.y,

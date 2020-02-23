@@ -44,7 +44,19 @@ export class VisionSimulator extends Simulator {
   }
 
   static of({ nuclearnetClient }: { nuclearnetClient: NUClearNetClient }): VisionSimulator {
-    const urls = [image0, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10]
+    const urls = [
+      image0,
+      image1,
+      image2,
+      image3,
+      image4,
+      image5,
+      image6,
+      image7,
+      image8,
+      image9,
+      image10,
+    ]
     const images = urls.map(url => toUint8Array(fs.readFileSync(url)))
     return new VisionSimulator(nuclearnetClient, images)
   }
@@ -53,7 +65,7 @@ export class VisionSimulator extends Simulator {
     const time = periodic(10)
     const t = time / 10
     const numImages = this.images.length
-    const imageIndex = Math.floor((Math.cos(2 * Math.PI * t) + 1) / 2 * numImages) % numImages
+    const imageIndex = Math.floor(((Math.cos(2 * Math.PI * t) + 1) / 2) * numImages) % numImages
     const data = this.images[imageIndex]
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
     return {
@@ -79,20 +91,24 @@ export class VisionSimulator extends Simulator {
     const time = periodic(10)
     const t = time / 10
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
-    const axis = new Vector3(10, 1, 0).normalize().applyMatrix4(new Matrix4().makeRotationX(2 * Math.PI * t))
+    const axis = new Vector3(10, 1, 0)
+      .normalize()
+      .applyMatrix4(new Matrix4().makeRotationX(2 * Math.PI * t))
     return {
       messageType: 'message.vision.Balls',
       buffer: Balls.encode({
         cameraId: 1,
         timestamp: toTimestamp(time),
         Hcw: toProtoMat44(Hcw),
-        balls: [{
-          cone: {
-            axis,
-            gradient: Math.cos(Math.PI / 16 * (Math.cos(2 * Math.PI * t) / 5 + 1)),
+        balls: [
+          {
+            cone: {
+              axis,
+              gradient: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
+            },
+            measurements: [],
           },
-          measurements: [],
-        }],
+        ],
       }).finish(),
     }
   }
@@ -107,28 +123,32 @@ export class VisionSimulator extends Simulator {
         cameraId: 1,
         timestamp: toTimestamp(time),
         Hcw: toProtoMat44(Hcw),
-        goals: [{
-          side: Side.RIGHT,
-          post: {
-            top: new Vector3(10, -2, 2).normalize(),
-            bottom: new Vector3(10, -2, -2).normalize(),
+        goals: [
+          {
+            side: Side.RIGHT,
+            post: {
+              top: new Vector3(10, -2, 2).normalize(),
+              bottom: new Vector3(10, -2, -2).normalize(),
+            },
+            measurements: [],
           },
-          measurements: [],
-        }, {
-          side: Side.LEFT,
-          post: {
-            top: new Vector3(10, 2, 2).normalize(),
-            bottom: new Vector3(10, 2, -2).normalize(),
+          {
+            side: Side.LEFT,
+            post: {
+              top: new Vector3(10, 2, 2).normalize(),
+              bottom: new Vector3(10, 2, -2).normalize(),
+            },
+            measurements: [],
           },
-          measurements: [],
-        }, {
-          side: Side.UNKNOWN_SIDE,
-          post: {
-            top: new Vector3(10, 0, 2).normalize(),
-            bottom: new Vector3(10, 0, -2).normalize(),
+          {
+            side: Side.UNKNOWN_SIDE,
+            post: {
+              top: new Vector3(10, 0, 2).normalize(),
+              bottom: new Vector3(10, 0, -2).normalize(),
+            },
+            measurements: [],
           },
-          measurements: [],
-        }],
+        ],
       }).finish(),
     }
   }

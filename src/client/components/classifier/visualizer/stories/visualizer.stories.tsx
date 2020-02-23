@@ -29,24 +29,29 @@ storiesOf('classifier.visualizer', module)
     const random = SeededRandom.of('classifier')
     const model = VisualizerModel.of(generateLut(random))
     const controller = VisualizerController.of(model)
-    return <VisualizerView model={model} controller={controller}/>
+    return <VisualizerView model={model} controller={controller} />
   })
   .add('renders animated', () => {
     const random = SeededRandom.of('classifier')
     const model = VisualizerModel.of(generateLut(random))
     const controller = VisualizerController.of(model)
-    return <AnimatedVisualizer model={model} random={random}>
-      <VisualizerView model={model} controller={controller}/>
-    </AnimatedVisualizer>
+    return (
+      <AnimatedVisualizer model={model} random={random}>
+        <VisualizerView model={model} controller={controller} />
+      </AnimatedVisualizer>
+    )
   })
 
 class AnimatedVisualizer extends React.Component<{
-  model: VisualizerModel,
-  random: SeededRandom,
+  model: VisualizerModel
+  random: SeededRandom
   children: any
 }> {
   componentDidMount() {
-    disposeOnUnmount(this, reaction(() => now('frame'), this.update))
+    disposeOnUnmount(
+      this,
+      reaction(() => now('frame'), this.update),
+    )
   }
 
   render() {
@@ -57,10 +62,15 @@ class AnimatedVisualizer extends React.Component<{
   private update() {
     const percentageFull = 0.4
     range(100).forEach(() => {
-      const { random, model: { lut } } = this.props
+      const {
+        random,
+        model: { lut },
+      } = this.props
       const randomIndex = random.integer(0, lut.data.length)
-      const randomClassification = random.float() <= percentageFull
-        ? random.choice(classifications) : Classification.Unclassified
+      const randomClassification =
+        random.float() <= percentageFull
+          ? random.choice(classifications)
+          : Classification.Unclassified
       lut.set(randomIndex, randomClassification)
     })
   }
@@ -68,6 +78,8 @@ class AnimatedVisualizer extends React.Component<{
 
 function generateLut(random: SeededRandom, percentageFull = 0.4) {
   return Lut.generate({ x: 4, y: 4, z: 4 }, () => {
-    return random.float() <= percentageFull ? random.choice(classifications) : Classification.Unclassified
+    return random.float() <= percentageFull
+      ? random.choice(classifications)
+      : Classification.Unclassified
   })
 }

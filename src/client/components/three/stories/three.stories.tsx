@@ -29,14 +29,14 @@ import { Three } from '../three'
 storiesOf('component.three', module)
   .addDecorator(fullscreen)
   .add('renders static scene', () => {
-    return <BoxVisualiser/>
+    return <BoxVisualiser />
   })
   .add('renders animated scene', () => {
-    return <BoxVisualiser animate/>
+    return <BoxVisualiser animate />
   })
 
 type Model = { boxes: BoxModel[] }
-type BoxModel = { color: string, size: number, position: Vector3, rotation: Vector3 }
+type BoxModel = { color: string; size: number; position: Vector3; rotation: Vector3 }
 
 class BoxVisualiser extends Component<{ animate?: boolean }> {
   @observable
@@ -50,11 +50,15 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
 
   componentDidMount() {
     this.update(0)
-    this.props.animate && disposeOnUnmount(this, reaction(() => now('frame'), this.update))
+    this.props.animate &&
+      disposeOnUnmount(
+        this,
+        reaction(() => now('frame'), this.update),
+      )
   }
 
   render() {
-    return <Three stage={this.stage}/>
+    return <Three stage={this.stage} />
   }
 
   private stage = (canvas: Canvas) => {
@@ -64,10 +68,10 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
 
   @action.bound
   private update(now: number) {
-    const t = 2 * Math.PI * now / (20 * 1000)
+    const t = (2 * Math.PI * now) / (20 * 1000)
     const n = this.model.boxes.length
     this.model.boxes.forEach((box, i) => {
-      const position = Vector2.fromPolar(1, i * 2 * Math.PI / n + t)
+      const position = Vector2.fromPolar(1, (i * 2 * Math.PI) / n + t)
       box.position = new Vector3(position.x, position.y, 0)
       box.rotation = new Vector3(Math.cos(3 * t + i), Math.cos(5 * t + i), Math.cos(7 * t + i))
     })
@@ -75,8 +79,7 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
 }
 
 class ViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: Model) {
-  }
+  constructor(private readonly canvas: Canvas, private readonly model: Model) {}
 
   @computed
   get stage(): Stage {
@@ -99,10 +102,7 @@ class ViewModel {
   }))
 
   private scene = scene(() => ({
-    children: [
-      ...this.boxes.map(boxViewModel => boxViewModel.box()),
-      this.light,
-    ],
+    children: [...this.boxes.map(boxViewModel => boxViewModel.box()), this.light],
   }))
 
   @computed
@@ -110,16 +110,17 @@ class ViewModel {
     return this.model.boxes.map(ViewModel.getBox)
   }
 
-  private static getBox = createTransformer((box: BoxModel): BoxViewModel => {
-    return BoxViewModel.of(box)
-  })
+  private static getBox = createTransformer(
+    (box: BoxModel): BoxViewModel => {
+      return BoxViewModel.of(box)
+    },
+  )
 }
 
 class BoxViewModel {
   private static geometry = disposableComputed<Geometry>(() => new BoxGeometry(1, 1, 1))
 
-  constructor(private readonly model: BoxModel) {
-  }
+  constructor(private readonly model: BoxModel) {}
 
   static of(model: BoxModel): BoxViewModel {
     return new BoxViewModel(model)

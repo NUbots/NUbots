@@ -18,11 +18,13 @@ import { getServerConfig } from '../../webpack.config'
 // Both instances listen for updates, and restart and recompile appropriately.
 
 const args = minimist(process.argv.slice(2))
-const compiler = webpack(getServerConfig({
-  mode: 'development',
-  context: path.join(__dirname, '..'),
-  transpileOnly: args.t || args.transpileOnly || false,
-}))
+const compiler = webpack(
+  getServerConfig({
+    mode: 'development',
+    context: path.join(__dirname, '..'),
+    transpileOnly: args.t || args.transpileOnly || false,
+  }),
+)
 
 let startedServer = false
 compiler.watch({}, (err, stats) => {
@@ -36,10 +38,7 @@ compiler.watch({}, (err, stats) => {
     nodemon({
       script: 'dist/dev.js',
       exec: 'node',
-      args: [
-        '--context', path.join(__dirname, '..'),
-        ...process.argv.slice(2),
-      ],
+      args: ['--context', path.join(__dirname, '..'), ...process.argv.slice(2)],
       watch: ['dist/dev.js'],
       ext: 'js',
     })

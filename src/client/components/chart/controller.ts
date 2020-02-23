@@ -9,7 +9,6 @@ import { ChartModel } from './model'
 import { TreeViewModel } from './view_model'
 
 export class ChartController {
-
   private colorPool: string[] = [
     '#f0a3ff',
     '#0075dc',
@@ -40,8 +39,7 @@ export class ChartController {
   ]
   private usedColors: Set<string> = new Set(['#ffffff'])
 
-  constructor(private model: ChartModel,
-              private clock: Clock) {
+  constructor(private model: ChartModel, private clock: Clock) {
     this.model = model
     this.clock = clock
   }
@@ -107,7 +105,7 @@ export class ChartController {
           let b = Math.random()
 
           // If we are over 2/3 close to white, normalise us back
-          if ((r + g + b) >= 2) {
+          if (r + g + b >= 2) {
             r *= 2 / 3
             g *= 2 / 3
             b *= 2 / 3

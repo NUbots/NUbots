@@ -2,7 +2,11 @@ import { IComputedValue } from 'mobx'
 import { onBecomeUnobserved } from 'mobx'
 import { computed } from 'mobx'
 
-function disposableComputedDecorator(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function disposableComputedDecorator(
+  target: any,
+  propertyKey: string,
+  descriptor: PropertyDescriptor,
+) {
   if (!descriptor) {
     descriptor = Object.getOwnPropertyDescriptor(target, propertyKey)!
   }
@@ -26,7 +30,7 @@ function disposableComputedDecorator(target: any, propertyKey: string, descripto
  *
  * Any stale values will be disposed, and the last value will be disposed when the computed is no longer observed.
  */
-const disposableComputedExpr = <T extends { dispose(): void; }>(fn: () => T): IComputedValue<T> => {
+const disposableComputedExpr = <T extends { dispose(): void }>(fn: () => T): IComputedValue<T> => {
   let latest: T | undefined
   const expr = computed(() => {
     latest && latest.dispose()
@@ -37,7 +41,7 @@ const disposableComputedExpr = <T extends { dispose(): void; }>(fn: () => T): IC
   return expr
 }
 
-export const disposableComputed: DisposableComputed = function computed(arg1: any, arg2: any, arg3: any) {
+export const disposableComputed: DisposableComputed = function computed(arg1: any, arg2: any) {
   if (typeof arg2 === 'string') {
     // Used as an annotation e.g. @disposableComputed
     return disposableComputedDecorator.apply(null, arguments as any)

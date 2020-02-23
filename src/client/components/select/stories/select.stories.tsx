@@ -15,11 +15,7 @@ const actions = {
 storiesOf('components.select', module)
   .addDecorator(story => <div style={{ maxWidth: '350px' }}>{story()}</div>)
   .add('renders basic', () => {
-    return <Select
-      options={[]}
-      onChange={actions.onChange}
-      placeholder='Select...'
-    />
+    return <Select options={[]} onChange={actions.onChange} placeholder="Select..." />
   })
   .add('renders empty', () => {
     const empty = (
@@ -28,39 +24,34 @@ storiesOf('components.select', module)
         <p>Add options to see them here</p>
       </div>
     )
-    return <Select
-      options={[]}
-      onChange={actions.onChange}
-      placeholder='Select...'
-      empty={empty}
-    />
+    return <Select options={[]} onChange={actions.onChange} placeholder="Select..." empty={empty} />
   })
   .add('renders with options', () => {
     const options = getOptions()
-    return <Select
-      options={options}
-      onChange={actions.onChange}
-      placeholder='Select a color...'
-    />
+    return <Select options={options} onChange={actions.onChange} placeholder="Select a color..." />
   })
   .add('renders with selection', () => {
     const options = getOptions()
     const selected = options[1]
-    return <Select
-      options={options}
-      selectedOption={selected}
-      onChange={actions.onChange}
-      placeholder='Select a color...'
-    />
+    return (
+      <Select
+        options={options}
+        selectedOption={selected}
+        onChange={actions.onChange}
+        placeholder="Select a color..."
+      />
+    )
   })
   .add('renders with icon', () => {
     const options = getOptions()
-    return <Select
-      options={options}
-      onChange={actions.onChange}
-      placeholder='Select a color...'
-      icon={<Icon/>}
-    />
+    return (
+      <Select
+        options={options}
+        onChange={actions.onChange}
+        placeholder="Select a color..."
+        icon={<Icon />}
+      />
+    )
   })
   .add('interactive', () => {
     const options = getOptions()
@@ -68,16 +59,18 @@ storiesOf('components.select', module)
       options,
       selectedOption: options[1],
     })
-    const onChange = mobxAction((option: Option) => model.selectedOption = option)
-    const Component = observer(() => <Select
-      options={model.options}
-      selectedOption={model.selectedOption}
-      onChange={onChange}
-      placeholder='Select a color...'
-      icon={<Icon/>}
-    />)
+    const onChange = mobxAction((option: Option) => (model.selectedOption = option))
+    const Component = observer(() => (
+      <Select
+        options={model.options}
+        selectedOption={model.selectedOption}
+        onChange={onChange}
+        placeholder="Select a color..."
+        icon={<Icon />}
+      />
+    ))
 
-    return <Component/>
+    return <Component />
   })
 
 function getOptions(): Option[] {

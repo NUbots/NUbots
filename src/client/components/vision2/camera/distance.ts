@@ -16,11 +16,17 @@ export class DistanceViewModel {
   private readonly minorLines: number
   private readonly maxDistance: number
 
-  constructor({ params, lineProjection, majorStep, minorLines, maxDistance }: {
-    params: CameraParams,
-    lineProjection: LineProjection,
-    majorStep: number,
-    minorLines: number,
+  constructor({
+    params,
+    lineProjection,
+    majorStep,
+    minorLines,
+    maxDistance,
+  }: {
+    params: CameraParams
+    lineProjection: LineProjection
+    majorStep: number
+    minorLines: number
     maxDistance: number
   }) {
     this.params = params
@@ -41,13 +47,14 @@ export class DistanceViewModel {
   }
 
   readonly distance = group(() => ({
-    children: range((this.minorLines + 1) * this.maxDistance / this.majorStep).map(i => (
+    children: range(((this.minorLines + 1) * this.maxDistance) / this.majorStep).map(i =>
       this.lineProjection.cone({
         axis: this.params.Hcw.z.vec3().multiplyScalar(-1),
-        radius: Math.cos(Math.atan(((i + 1) / (this.minorLines + 1)) / this.cameraHeight)),
+        radius: Math.cos(Math.atan((i + 1) / (this.minorLines + 1) / this.cameraHeight)),
         color: new Vector4(1, 1, 1, (i + 1) % (this.minorLines + 1) ? 0.2 : 0.4),
         lineWidth: (i + 1) % (this.minorLines + 1) ? 2 : 3,
-      }))),
+      }),
+    ),
   }))
 
   @computed

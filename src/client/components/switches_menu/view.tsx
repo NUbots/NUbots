@@ -22,23 +22,22 @@ export const SwitchesMenu = observer((props: SwitchesMenuProps) => {
   const { options } = props
   const dropdownToggle = (
     <button className={style.button}>
-      <MenuIcon/>
+      <MenuIcon />
     </button>
   )
   return (
     <div className={style.switchesMenu}>
-      <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
+      <EnhancedDropdown
+        dropdownToggle={dropdownToggle}
+        dropdownPosition={props.dropdownMenuPosition}
+      >
         <div className={style.options}>
-          {options.length === 0 &&
-          <div className={style.empty}>
-            No options
-          </div>
-          }
+          {options.length === 0 && <div className={style.empty}>No options</div>}
           {options.map(option => {
             return (
               <label key={option.label} className={style.option}>
                 <span className={style.optionLabel}>{option.label}</span>
-                <Switch on={option.enabled} onChange={option.toggle}/>
+                <Switch on={option.enabled} onChange={option.toggle} />
               </label>
             )
           })}

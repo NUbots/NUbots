@@ -33,7 +33,6 @@ import meshVertexShader from './shaders/mesh.vert'
 import worldLineFragmentShader from './shaders/world_line.frag'
 import worldLineVertexShader from './shaders/world_line.vert'
 
-
 export class CameraViewModel {
   @observable.ref canvas: HTMLCanvasElement | null = null
   @observable viewWidth?: number
@@ -49,7 +48,6 @@ export class CameraViewModel {
     private scene: Scene,
     camera: Camera,
   ) {
-
     this.camera = camera
 
     // Setup an autorun that will feed images to our image decoder when they change
@@ -58,13 +56,12 @@ export class CameraViewModel {
     })
   }
 
-  static of = createTransformer((model: CameraModel) => {
-    return new CameraViewModel(
-      model,
-      new Scene(),
-      new OrthographicCamera(-1, 1, 1, -1, 0, 1),
-    )
-  }, vm => vm && vm.destroy())
+  static of = createTransformer(
+    (model: CameraModel) => {
+      return new CameraViewModel(model, new Scene(), new OrthographicCamera(-1, 1, 1, -1, 0, 1))
+    },
+    vm => vm && vm.destroy(),
+  )
 
   @computed
   get id(): number {
@@ -86,11 +83,14 @@ export class CameraViewModel {
     return ImageDecoder.of(this.renderer(this.canvas)!)
   }
 
-  renderer = createTransformer((canvas: HTMLCanvasElement | null) => {
-    if (canvas) {
-      return new WebGLRenderer({ canvas })
-    }
-  }, renderer => renderer && renderer.dispose())
+  renderer = createTransformer(
+    (canvas: HTMLCanvasElement | null) => {
+      if (canvas) {
+        return new WebGLRenderer({ canvas })
+      }
+    },
+    renderer => renderer && renderer.dispose(),
+  )
 
   getScene(): Scene {
     const scene = this.scene
@@ -144,13 +144,17 @@ export class CameraViewModel {
 
   private greenhorizon = createTransformer((m: GreenHorizon) => {
     const greenhorizon = new Object3D()
-    const Hcw = this.model.image ? new Matrix4().extractRotation(toThreeMatrix4(this.model.image.Hcw)) : new Matrix4()
+    const Hcw = this.model.image
+      ? new Matrix4().extractRotation(toThreeMatrix4(this.model.image.Hcw))
+      : new Matrix4()
     const rays = m.horizon.map(v => toThreeVector3(v).applyMatrix4(Hcw))
 
     const colour = new Vector4(0, 0.8, 0, 0.8)
     const nElem = m.horizon.length
     for (let i = 1; i < nElem; i++) {
-      greenhorizon.add(this.makePlaneSegment({ start: rays[i - 1], end: rays[i], colour, lineWidth: 10 }))
+      greenhorizon.add(
+        this.makePlaneSegment({ start: rays[i - 1], end: rays[i], colour, lineWidth: 10 }),
+      )
     }
     return greenhorizon
   })
@@ -176,44 +180,46 @@ export class CameraViewModel {
     return mesh
   }
 
-  private meshGeometry = createTransformer((mesh: VisualMesh): BufferGeometry => {
+  private meshGeometry = createTransformer(
+    (mesh: VisualMesh): BufferGeometry => {
+      const { neighbours, rays, classifications } = mesh
 
-    const { neighbours, rays, classifications } = mesh
-
-    // Calculate our triangle indexes
-    const nElem = mesh.rays.length / 3
-    const triangles = []
-    for (let i = 0; i < nElem; i++) {
-      const ni = i * 6
-      if (neighbours[ni + 0] < nElem) {
-        if (neighbours[ni + 2] < nElem) {
-          triangles.push(i, neighbours[ni + 0], neighbours[ni + 2])
-        }
-        if (neighbours[ni + 1] < nElem) {
-          triangles.push(i, neighbours[ni + 1], neighbours[ni + 0])
+      // Calculate our triangle indexes
+      const nElem = mesh.rays.length / 3
+      const triangles = []
+      for (let i = 0; i < nElem; i++) {
+        const ni = i * 6
+        if (neighbours[ni + 0] < nElem) {
+          if (neighbours[ni + 2] < nElem) {
+            triangles.push(i, neighbours[ni + 0], neighbours[ni + 2])
+          }
+          if (neighbours[ni + 1] < nElem) {
+            triangles.push(i, neighbours[ni + 1], neighbours[ni + 0])
+          }
         }
       }
-    }
 
-    const geometry = new BufferGeometry()
-    geometry.setIndex(triangles)
-    geometry.addAttribute('position', new Float32BufferAttribute(rays, 3))
+      const geometry = new BufferGeometry()
+      geometry.setIndex(triangles)
+      geometry.addAttribute('position', new Float32BufferAttribute(rays, 3))
 
-    // Read each class into a separate attribute
-    const buffer = new InterleavedBuffer(
-      new Float32Array(classifications.values.slice(0, -classifications.dim)),
-      classifications.dim,
-    )
+      // Read each class into a separate attribute
+      const buffer = new InterleavedBuffer(
+        new Float32Array(classifications.values.slice(0, -classifications.dim)),
+        classifications.dim,
+      )
 
-    // Add our classification objects
-    geometry.addAttribute(`ball`, new InterleavedBufferAttribute(buffer, 1, 0))
-    geometry.addAttribute(`goal`, new InterleavedBufferAttribute(buffer, 1, 1))
-    geometry.addAttribute(`fieldLine`, new InterleavedBufferAttribute(buffer, 1, 2))
-    geometry.addAttribute(`field`, new InterleavedBufferAttribute(buffer, 1, 3))
-    geometry.addAttribute(`environment`, new InterleavedBufferAttribute(buffer, 1, 4))
+      // Add our classification objects
+      geometry.addAttribute('ball', new InterleavedBufferAttribute(buffer, 1, 0))
+      geometry.addAttribute('goal', new InterleavedBufferAttribute(buffer, 1, 1))
+      geometry.addAttribute('fieldLine', new InterleavedBufferAttribute(buffer, 1, 2))
+      geometry.addAttribute('field', new InterleavedBufferAttribute(buffer, 1, 3))
+      geometry.addAttribute('environment', new InterleavedBufferAttribute(buffer, 1, 4))
 
-    return geometry
-  }, (geom?: BufferGeometry) => geom && geom.dispose())
+      return geometry
+    },
+    (geom?: BufferGeometry) => geom && geom.dispose(),
+  )
 
   @computed
   private get meshMaterial() {
@@ -258,7 +264,6 @@ export class CameraViewModel {
   }
 
   private get imageMaterial() {
-
     // Cloning a material allows for new uniforms without recompiling the shader
     const mat = this.imageBasicMaterial.clone()
     mat.map = this.decoder.texture
@@ -276,14 +281,19 @@ export class CameraViewModel {
    * @param colour    the colour of the line to draw
    * @param lineWidth the width of the line to draw on the screen in pixels
    */
-  private makeConeSegment({ axis, start, end, colour, lineWidth }: {
-    axis: Vector3,
-    start: Vector3,
-    end: Vector3,
-    colour?: Vector4,
+  private makeConeSegment({
+    axis,
+    start,
+    end,
+    colour,
+    lineWidth,
+  }: {
+    axis: Vector3
+    start: Vector3
+    end: Vector3
+    colour?: Vector4
     lineWidth?: number
   }): Mesh {
-
     colour = colour || new Vector4(0, 0, 1, 1)
     lineWidth = lineWidth || 8
 
@@ -315,10 +325,18 @@ export class CameraViewModel {
    * @param colour    the colour of the line to draw
    * @param lineWidth the width of the line to draw on the screen in pixels
    */
-  private makePlane({ axis, colour, lineWidth }: { axis: Vector3, colour?: Vector4, lineWidth?: number }) {
-
+  private makePlane({
+    axis,
+    colour,
+    lineWidth,
+  }: {
+    axis: Vector3
+    colour?: Vector4
+    lineWidth?: number
+  }) {
     // Pick an arbitrary orthogonal vector
-    const start = (!axis.x && !axis.y) ? new Vector3(0, 1, 0) : new Vector3(-axis.y, axis.x, 0).normalize()
+    const start =
+      !axis.x && !axis.y ? new Vector3(0, 1, 0) : new Vector3(-axis.y, axis.x, 0).normalize()
 
     return this.makeConeSegment({ axis, start, end: start, colour, lineWidth })
   }
@@ -333,11 +351,17 @@ export class CameraViewModel {
    * @param colour    the colour of the line to draw.
    * @param lineWidth the width of the line to draw on the screen in pixels.
    */
-  private makePlaneSegment({ axis, start, end, colour, lineWidth }: {
-    axis?: Vector3,
-    start: Vector3,
-    end: Vector3,
-    colour?: Vector4,
+  private makePlaneSegment({
+    axis,
+    start,
+    end,
+    colour,
+    lineWidth,
+  }: {
+    axis?: Vector3
+    start: Vector3
+    end: Vector3
+    colour?: Vector4
     lineWidth?: number
   }) {
     return this.makeConeSegment({
@@ -357,15 +381,20 @@ export class CameraViewModel {
    * @param colour    the colour of the line to draw.
    * @param lineWidth the width of the line to draw on the screen in pixels.
    */
-  private makeCone({ axis, gradient, colour, lineWidth }: {
-    axis: Vector3,
-    gradient: number,
-    colour?: Vector4,
+  private makeCone({
+    axis,
+    gradient,
+    colour,
+    lineWidth,
+  }: {
+    axis: Vector3
+    gradient: number
+    colour?: Vector4
     lineWidth?: number
   }) {
-
     // Pick an arbitrary orthogonal vector
-    const orth = !axis.x && !axis.y ? new Vector3(0, 1, 0) : new Vector3(-axis.y, axis.x, 0).normalize()
+    const orth =
+      !axis.x && !axis.y ? new Vector3(0, 1, 0) : new Vector3(-axis.y, axis.x, 0).normalize()
 
     // Rotate our axis by this gradient to get a start
     const start = axis.clone().applyAxisAngle(orth, Math.acos(gradient))
@@ -382,36 +411,43 @@ export class CameraViewModel {
   })
 
   private compass = createTransformer((m: Matrix4Model) => {
-
     const o3d = new Object3D()
 
-    o3d.add(this.makePlaneSegment({
-      start: new Vector3(m.x.x, m.x.y, m.x.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
-      colour: new Vector4(1, 0, 0, 0.5),
-      lineWidth: 5,
-    }))
+    o3d.add(
+      this.makePlaneSegment({
+        start: new Vector3(m.x.x, m.x.y, m.x.z),
+        end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+        colour: new Vector4(1, 0, 0, 0.5),
+        lineWidth: 5,
+      }),
+    )
 
-    o3d.add(this.makePlaneSegment({
-      start: new Vector3(-m.x.x, -m.x.y, -m.x.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
-      colour: new Vector4(0, 1, 1, 0.5),
-      lineWidth: 5,
-    }))
+    o3d.add(
+      this.makePlaneSegment({
+        start: new Vector3(-m.x.x, -m.x.y, -m.x.z),
+        end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+        colour: new Vector4(0, 1, 1, 0.5),
+        lineWidth: 5,
+      }),
+    )
 
-    o3d.add(this.makePlaneSegment({
-      start: new Vector3(m.y.x, m.y.y, m.y.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
-      colour: new Vector4(0, 1, 0, 0.5),
-      lineWidth: 5,
-    }))
+    o3d.add(
+      this.makePlaneSegment({
+        start: new Vector3(m.y.x, m.y.y, m.y.z),
+        end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+        colour: new Vector4(0, 1, 0, 0.5),
+        lineWidth: 5,
+      }),
+    )
 
-    o3d.add(this.makePlaneSegment({
-      start: new Vector3(-m.y.x, -m.y.y, -m.y.z),
-      end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
-      colour: new Vector4(1, 0, 1, 0.5),
-      lineWidth: 5,
-    }))
+    o3d.add(
+      this.makePlaneSegment({
+        start: new Vector3(-m.y.x, -m.y.y, -m.y.z),
+        end: new Vector3(-m.z.x, -m.z.y, -m.z.z),
+        colour: new Vector4(1, 0, 1, 0.5),
+        lineWidth: 5,
+      }),
+    )
 
     return o3d
   })
@@ -430,10 +466,22 @@ export class CameraViewModel {
 
 function toThreeMatrix4(mat4: Matrix4Model): Matrix4 {
   return new Matrix4().set(
-    mat4.x.x, mat4.y.x, mat4.z.x, mat4.t.x,
-    mat4.x.y, mat4.y.y, mat4.z.y, mat4.t.y,
-    mat4.x.z, mat4.y.z, mat4.z.z, mat4.t.z,
-    mat4.x.t, mat4.y.t, mat4.z.t, mat4.t.t,
+    mat4.x.x,
+    mat4.y.x,
+    mat4.z.x,
+    mat4.t.x,
+    mat4.x.y,
+    mat4.y.y,
+    mat4.z.y,
+    mat4.t.y,
+    mat4.x.z,
+    mat4.y.z,
+    mat4.z.z,
+    mat4.t.z,
+    mat4.x.t,
+    mat4.y.t,
+    mat4.z.t,
+    mat4.t.t,
   )
 }
 

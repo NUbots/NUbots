@@ -20,14 +20,14 @@ import { debounce } from 'throttle-debounce'
 
 import styles from './styles.css'
 
-export type Stage = { scene: Scene, camera: Camera, target?: WebGLRenderTarget }
-export type Canvas = { width: number, height: number }
+export type Stage = { scene: Scene; camera: Camera; target?: WebGLRenderTarget }
+export type Canvas = { width: number; height: number }
 
 @observer
 export class Three extends Component<{
-  stage(canvas: Canvas): IComputedValue<Stage | (() => Stage)[]>,
-  objectFit: ObjectFit,
-  clearColor?: Color,
+  stage(canvas: Canvas): IComputedValue<Stage | (() => Stage)[]>
+  objectFit: ObjectFit
+  clearColor?: Color
   onClick?({ button }: { button: number }): void
   onMouseDown?(x: number, y: number): void
   onMouseMove?(x: number, y: number): void
@@ -56,10 +56,11 @@ export class Three extends Component<{
           dispose()
           if (stages instanceof Array) {
             // Create individual reactions for each stage, so they may react and re-render independently.
-            dispose = compose(stages.map(stage => autorun(
-              () => this.renderStage(stage()),
-              { scheduler: requestAnimationFrame },
-            )))
+            dispose = compose(
+              stages.map(stage =>
+                autorun(() => this.renderStage(stage()), { scheduler: requestAnimationFrame }),
+              ),
+            )
           } else {
             dispose = autorun(() => this.renderStage(stages), { scheduler: requestAnimationFrame })
           }
@@ -69,10 +70,13 @@ export class Three extends Component<{
       ),
       reaction(
         () => objectFit(this.containerSize, this.props.objectFit),
-        debounce(80, action(({ width, height }: { width: number, height: number }) => {
-          this.canvas.width = width
-          this.canvas.height = height
-        })),
+        debounce(
+          80,
+          action(({ width, height }: { width: number; height: number }) => {
+            this.canvas.width = width
+            this.canvas.height = height
+          }),
+        ),
         { fireImmediately: true },
       ),
     ])
@@ -84,19 +88,23 @@ export class Three extends Component<{
 
   render() {
     const { objectFit } = this.props
-    return <Measure bounds onResize={this.onResize} innerRef={this.setRef}>
-      {({ measureRef }) => <canvas
-        ref={measureRef}
-        // Use 'none' instead of fill to avoid stretching the visuals during a resize.
-        style={{ objectFit: objectFit.type === 'fill' ? 'none' : objectFit.type }}
-        className={styles.canvas}
-        onClick={this.props.onClick}
-        onMouseDown={this.onMouseDown}
-        onMouseMove={this.onMouseMove}
-        onMouseUp={this.onMouseUp}
-        onWheel={this.onWheel}
-      />}
-    </Measure>
+    return (
+      <Measure bounds onResize={this.onResize} innerRef={this.setRef}>
+        {({ measureRef }) => (
+          <canvas
+            ref={measureRef}
+            // Use 'none' instead of fill to avoid stretching the visuals during a resize.
+            style={{ objectFit: objectFit.type === 'fill' ? 'none' : objectFit.type }}
+            className={styles.canvas}
+            onClick={this.props.onClick}
+            onMouseDown={this.onMouseDown}
+            onMouseMove={this.onMouseMove}
+            onMouseUp={this.onMouseUp}
+            onWheel={this.onWheel}
+          />
+        )}
+      </Measure>
+    )
   }
 
   requestPointerLock() {
@@ -128,17 +136,20 @@ export class Three extends Component<{
 
   private onMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     // TODO: Remove deprecated layerX
-    this.props.onMouseDown && this.props.onMouseDown((e.nativeEvent as any).layerX, (e.nativeEvent as any).layerY)
+    this.props.onMouseDown &&
+      this.props.onMouseDown((e.nativeEvent as any).layerX, (e.nativeEvent as any).layerY)
   }
 
   private onMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
     // TODO: Remove deprecated layerX
-    this.props.onMouseMove && this.props.onMouseMove((e.nativeEvent as any).layerX, (e.nativeEvent as any).layerY)
+    this.props.onMouseMove &&
+      this.props.onMouseMove((e.nativeEvent as any).layerX, (e.nativeEvent as any).layerY)
   }
 
   private onMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
     // TODO: Remove deprecated layerX
-    this.props.onMouseUp && this.props.onMouseUp((e.nativeEvent as any).layerX, (e.nativeEvent as any).layerY)
+    this.props.onMouseUp &&
+      this.props.onMouseUp((e.nativeEvent as any).layerX, (e.nativeEvent as any).layerY)
   }
 
   private onWheel = (e: WheelEvent<HTMLCanvasElement>) => {
@@ -147,23 +158,23 @@ export class Three extends Component<{
 }
 
 /** Take an array of functions and return a function that calls them all. */
-const compose = (fns: (() => void)[]): () => void => () => {
+const compose = (fns: (() => void)[]): (() => void) => () => {
   for (const fn of fns) {
     fn()
   }
 }
 
 // Based on the object-fit CSS property: https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
-export type ObjectFit
+export type ObjectFit =
   // Stretch content to fill entire container.
-  = { type: 'fill' }
+  | { type: 'fill' }
   // Either cover the container with content, or contain the content in the container, while maintaining aspect ratio.
-  | { type: 'contain' | 'cover', aspect: number }
+  | { type: 'contain' | 'cover'; aspect: number }
 
 export function objectFit(
-  container: { width: number, height: number },
+  container: { width: number; height: number },
   objectFit: ObjectFit,
-): { width: number, height: number } {
+): { width: number; height: number } {
   switch (objectFit.type) {
     case 'fill':
       return { width: container.width, height: container.height }

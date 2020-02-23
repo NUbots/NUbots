@@ -7,7 +7,7 @@ import { PolygonGeometry } from '../geometry/polygon_geometry'
 import { TextGeometry } from '../geometry/text_geometry'
 
 export type Geometry =
-  ArcGeometry
+  | ArcGeometry
   | ArrowGeometry
   | CircleGeometry
   | LineGeometry

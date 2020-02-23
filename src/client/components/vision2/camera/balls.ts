@@ -16,8 +16,7 @@ export class BallsViewModel {
     private readonly model: Ball[],
     private readonly params: CameraParams,
     private readonly lineProjection: LineProjection,
-  ) {
-  }
+  ) {}
 
   static of(model: Ball[], canvas: Canvas, params: CameraParams): BallsViewModel {
     return new BallsViewModel(model, params, LineProjection.of(canvas, params.lens))
@@ -51,6 +50,8 @@ export function transform(cone: Cone, distance: number, transform: Matrix4): Con
     // Takes `radius = cos(asin(radiusActual / distance))` and solves for the new radius given a new distance.
     // Solve sin(acos(r_1)) * d_1 = sin(acos(r_2)) * d_2 for r_2
     // Simplifies to:
-    radius: Math.sqrt(distance ** 2 * cone.radius ** 2 - distance ** 2 + newDistanceSqr) / Math.sqrt(newDistanceSqr),
+    radius:
+      Math.sqrt(distance ** 2 * cone.radius ** 2 - distance ** 2 + newDistanceSqr) /
+      Math.sqrt(newDistanceSqr),
   }
 }

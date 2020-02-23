@@ -14,17 +14,19 @@ export type FieldProps = {
 
 @observer
 export class Field extends Component<FieldProps> {
-
   render() {
     const model = this.props.model
     const viewModel = FieldViewModel.of(model)
-    return <div className={style.container}>
-      <Renderer
-        engine='svg'
-        className={style.field}
-        scene={viewModel.scene}
-        camera={viewModel.camera}
-        aspectRatio={viewModel.aspectRatio}/>
-    </div>
+    return (
+      <div className={style.container}>
+        <Renderer
+          engine="svg"
+          className={style.field}
+          scene={viewModel.scene}
+          camera={viewModel.camera}
+          aspectRatio={viewModel.aspectRatio}
+        />
+      </div>
+    )
   }
 }

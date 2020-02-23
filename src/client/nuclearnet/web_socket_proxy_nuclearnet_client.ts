@@ -22,7 +22,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   // Store all listeners so that we can restore them after a socket disconnection/reconnection.
   private joinListeners: Set<NUClearEventListener>
   private leaveListeners: Set<NUClearEventListener>
-  private packetListeners: Map<string, Set<{ requestToken: string, listener: PacketListener }>>
+  private packetListeners: Map<string, Set<{ requestToken: string; listener: PacketListener }>>
 
   constructor(private socket: WebSocketClient) {
     this.nextRequestToken = 0
@@ -33,10 +33,12 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
 
   static of() {
     const uri = `${document.location!.origin}/nuclearnet`
-    return new WebSocketProxyNUClearNetClient(WebWorkerWebSocketClient.of(uri, {
-      upgrade: false,
-      transports: ['websocket'],
-    } as any))
+    return new WebSocketProxyNUClearNetClient(
+      WebWorkerWebSocketClient.of(uri, {
+        upgrade: false,
+        transports: ['websocket'],
+      } as any),
+    )
   }
 
   connect(options: NUClearNetOptions): () => void {

@@ -8,7 +8,7 @@ export interface VisualMesh {
   readonly indices: number[]
   readonly neighbours: number[]
   readonly coordinates: number[]
-  readonly classifications: { dim: number, values: number[] }
+  readonly classifications: { dim: number; values: number[] }
 }
 
 type CameraModelOpts = {

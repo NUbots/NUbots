@@ -8,8 +8,7 @@ import { Shape } from '../object/shape'
 
 import { toSvgProps } from './rendering'
 
-
-type Props = { model: Shape<ArcGeometry>, world: Transform }
+type Props = { model: Shape<ArcGeometry>; world: Transform }
 export const Arc = observer(({ model: { geometry, appearance } }: Props) => {
   const { origin, radius, startAngle, endAngle, anticlockwise } = geometry
 
@@ -32,5 +31,5 @@ export const Arc = observer(({ model: { geometry, appearance } }: Props) => {
   // Draw the arc
   path += `A${radius} ${radius} 0 ${+(da >= Math.PI)} ${cw} ${p1.x} ${p1.y}`
 
-  return <path d={path} {...toSvgProps(appearance)}/>
+  return <path d={path} {...toSvgProps(appearance)} />
 })

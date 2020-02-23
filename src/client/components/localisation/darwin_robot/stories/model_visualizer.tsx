@@ -14,11 +14,11 @@ import { Canvas } from '../../../three/three'
 import { Three } from '../../../three/three'
 
 export class ModelVisualiser extends Component<{
-  model(): Object3D;
+  model(): Object3D
   cameraPosition: Vector3
 }> {
   render() {
-    return <Three stage={this.stage}/>
+    return <Three stage={this.stage} />
   }
 
   private stage = (canvas: Canvas) => {
@@ -32,8 +32,7 @@ class ViewModel {
     private readonly canvas: Canvas,
     private readonly model: () => Object3D,
     private readonly cameraPosition: Vector3,
-  ) {
-  }
+  ) {}
 
   @computed
   get stage(): Stage {
@@ -51,12 +50,7 @@ class ViewModel {
   }))
 
   private readonly scene = scene(() => ({
-    children: [
-      this.helper,
-      this.spotlight,
-      this.pointlight,
-      this.model(),
-    ],
+    children: [this.helper, this.spotlight, this.pointlight, this.model()],
   }))
 
   @computed

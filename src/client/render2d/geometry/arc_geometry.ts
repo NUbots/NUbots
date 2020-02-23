@@ -18,12 +18,12 @@ export class ArcGeometry {
   }
 
   static of({
-              origin = Vector2.of(0, 0),
-              radius = 1,
-              startAngle = 0,
-              endAngle = 2 * Math.PI,
-              anticlockwise = false,
-            }: Partial<ArcGeometry> = {}): ArcGeometry {
+    origin = Vector2.of(0, 0),
+    radius = 1,
+    startAngle = 0,
+    endAngle = 2 * Math.PI,
+    anticlockwise = false,
+  }: Partial<ArcGeometry> = {}): ArcGeometry {
     return new ArcGeometry({
       origin,
       radius,

@@ -1,18 +1,13 @@
 import * as THREE from 'three'
 
 export class Vector3 {
-  constructor(
-    readonly x: number,
-    readonly y: number,
-    readonly z: number,
-  ) {
-  }
+  constructor(readonly x: number, readonly y: number, readonly z: number) {}
 
   static of() {
     return new Vector3(0, 0, 0)
   }
 
-  static from(vec?: { x?: number | null, y?: number | null, z?: number | null } | null): Vector3 {
+  static from(vec?: { x?: number | null; y?: number | null; z?: number | null } | null): Vector3 {
     if (!vec) {
       return Vector3.of()
     }
@@ -64,4 +59,3 @@ export class Vector3 {
     return `(${this.x}, ${this.y}, ${this.z})`
   }
 }
-

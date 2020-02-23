@@ -5,7 +5,6 @@ import { Shape } from '../object/shape'
 import { applyAppearance } from './rendering'
 
 export function renderArc(ctx: CanvasRenderingContext2D, shape: Shape<ArcGeometry>): void {
-
   const { origin, radius, startAngle, endAngle, anticlockwise } = shape.geometry
 
   ctx.beginPath()

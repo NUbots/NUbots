@@ -37,16 +37,16 @@ export class ImageDecoder {
 
   // These two functions are used to cache/destroy textures as they are created
   private cache: {
-    get(): Texture;
-    destroy(): void;
+    get(): Texture
+    destroy(): void
   }
 
   // Variables needed by the bayer decoder
   private bayerDecoder?: {
-    scene: Scene;
-    camera: Camera;
-    geometry: BufferGeometry;
-    shader: RawShaderMaterial;
+    scene: Scene
+    camera: Camera
+    geometry: BufferGeometry
+    shader: RawShaderMaterial
   }
 
   constructor(private renderer: WebGLRenderer) {
@@ -201,20 +201,15 @@ export class ImageDecoder {
     rawTexture.needsUpdate = true
 
     // Set our cache to use the getter function
-    this.updateCache(
-      this.bayer_renderer(target, width, height, rawTexture, firstRed, 1),
-      () => target.dispose(),
+    this.updateCache(this.bayer_renderer(target, width, height, rawTexture, firstRed, 1), () =>
+      target.dispose(),
     )
 
     // The image is ready to be read now
     this.atom.reportChanged()
   }
 
-  private permuted_bayer(
-    image: Image,
-    firstRed: [number, number],
-    mosaicSize: number,
-  ): void {
+  private permuted_bayer(image: Image, firstRed: [number, number], mosaicSize: number): void {
     // If we have never decoded bayer with this decoder before we need to make our threejs objects
     if (!this.bayerDecoder) {
       this.bayerDecoder = {
@@ -250,14 +245,7 @@ export class ImageDecoder {
       texture.flipY = false
 
       this.updateCache(
-        this.bayer_renderer(
-          target,
-          width,
-          height,
-          texture,
-          firstRed,
-          mosaicSize,
-        ),
+        this.bayer_renderer(target, width, height, texture, firstRed, mosaicSize),
         () => {
           target.dispose()
           window.URL.revokeObjectURL(url)

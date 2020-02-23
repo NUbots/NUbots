@@ -38,18 +38,28 @@ describe('NbsNUClearPlayback', () => {
 
     playback.write(frame1)
     clock.runAllTimers()
-    expect(nuclearnetClient.send).toHaveBeenCalledWith(expect.objectContaining({ type: hashType('frame1') }))
+    expect(nuclearnetClient.send).toHaveBeenCalledWith(
+      expect.objectContaining({ type: hashType('frame1') }),
+    )
 
     playback.write(frame2)
     clock.runTimersToTime(1009) // Should not have sent packet yet at only 9 elapsed seconds.
-    expect(nuclearnetClient.send).not.toHaveBeenCalledWith(expect.objectContaining({ type: hashType('frame2') }))
+    expect(nuclearnetClient.send).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: hashType('frame2') }),
+    )
     clock.runTimersToTime(1010) // At 10 elapsed seconds the packet should have been sent.
-    expect(nuclearnetClient.send).toHaveBeenCalledWith(expect.objectContaining({ type: hashType('frame2') }))
+    expect(nuclearnetClient.send).toHaveBeenCalledWith(
+      expect.objectContaining({ type: hashType('frame2') }),
+    )
 
     playback.write(frame3)
     clock.runTimersToTime(1019) // Should not have sent packet yet at only 19 elapsed seconds.
-    expect(nuclearnetClient.send).not.toHaveBeenCalledWith(expect.objectContaining({ type: hashType('frame3') }))
+    expect(nuclearnetClient.send).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: hashType('frame3') }),
+    )
     clock.runTimersToTime(1020) // At 20 elapsed seconds the packet should have been sent.
-    expect(nuclearnetClient.send).toHaveBeenCalledWith(expect.objectContaining({ type: hashType('frame3') }))
+    expect(nuclearnetClient.send).toHaveBeenCalledWith(
+      expect.objectContaining({ type: hashType('frame3') }),
+    )
   })
 })

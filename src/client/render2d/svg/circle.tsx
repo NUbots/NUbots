@@ -7,12 +7,7 @@ import { Shape } from '../object/shape'
 
 import { toSvgProps } from './rendering'
 
-type Props = { model: Shape<CircleGeometry>, world: Transform }
+type Props = { model: Shape<CircleGeometry>; world: Transform }
 export const Circle = observer(({ model: { geometry: { x, y, radius }, appearance } }: Props) => (
-  <circle
-    cx={x}
-    cy={y}
-    r={radius}
-    {...toSvgProps(appearance)}
-  />
+  <circle cx={x} cy={y} r={radius} {...toSvgProps(appearance)} />
 ))

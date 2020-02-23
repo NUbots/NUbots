@@ -23,13 +23,15 @@ export const Switch = (props: SwitchProps) => {
   })
   return (
     <span className={style.switch}>
-      <span className={trackClassName}/>
-      <span role='thumb' className={thumbClassName}/>
-      <input type='checkbox'
-             checked={on}
-             disabled={disabled}
-             className={style.nativeControl}
-             onChange={props.onChange}/>
+      <span className={trackClassName} />
+      <span role="thumb" className={thumbClassName} />
+      <input
+        type="checkbox"
+        checked={on}
+        disabled={disabled}
+        className={style.nativeControl}
+        onChange={props.onChange}
+      />
     </span>
   )
 }

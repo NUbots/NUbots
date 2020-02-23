@@ -43,7 +43,7 @@ describe('Transform', () => {
 
       const actual = transform1.then(transform2)
       const expected = Transform.of({
-        rotate: 3 * Math.PI / 2,
+        rotate: (3 * Math.PI) / 2,
         scale: { x: 2, y: 2 },
         translate: { x: 6, y: 3 },
       })

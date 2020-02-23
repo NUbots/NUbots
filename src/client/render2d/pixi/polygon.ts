@@ -7,17 +7,19 @@ import { Shape } from '../object/shape'
 
 import { applyAppearance } from './rendering'
 
-export const renderPolygon = createTransformer((shape: Shape<PolygonGeometry>): Graphics => {
-  const { points } = shape.geometry
+export const renderPolygon = createTransformer(
+  (shape: Shape<PolygonGeometry>): Graphics => {
+    const { points } = shape.geometry
 
-  const polygon = points.slice(0)
-  polygon.push(polygon[0])
+    const polygon = points.slice(0)
+    polygon.push(polygon[0])
 
-  const g = new Graphics()
+    const g = new Graphics()
 
-  applyAppearance(g, shape.appearance, g => {
-    g.drawPolygon(polygon.map(p => new Point(p.x, p.y)))
-  })
+    applyAppearance(g, shape.appearance, g => {
+      g.drawPolygon(polygon.map(p => new Point(p.x, p.y)))
+    })
 
-  return g
-})
+    return g
+  },
+)

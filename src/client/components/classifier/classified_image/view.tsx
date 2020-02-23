@@ -4,7 +4,6 @@ import React from 'react'
 import { Component } from 'react'
 
 import { ObjectFit } from '../../three/three'
-import { Canvas } from '../../three/three'
 import { Three } from '../../three/three'
 
 import { ClassifiedImageModel } from './model'
@@ -13,7 +12,7 @@ import { ClassifiedImageViewModel } from './view_model'
 @observer
 export class ClassifiedImageView extends Component<{ model: ClassifiedImageModel }> {
   render() {
-    return <Three stage={this.stage} objectFit={this.objectFit}/>
+    return <Three stage={this.stage} objectFit={this.objectFit} />
   }
 
   @computed.struct
@@ -26,7 +25,7 @@ export class ClassifiedImageView extends Component<{ model: ClassifiedImageModel
     }
   }
 
-  private stage = (canvas: Canvas) => {
+  private stage = () => {
     const viewModel = ClassifiedImageViewModel.of(this.props.model)
     return computed(() => viewModel.stage)
   }

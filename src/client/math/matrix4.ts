@@ -3,13 +3,7 @@ import * as THREE from 'three'
 import { Vector4 } from './vector4'
 
 export class Matrix4 {
-  constructor(
-    readonly x: Vector4,
-    readonly y: Vector4,
-    readonly z: Vector4,
-    readonly t: Vector4,
-  ) {
-  }
+  constructor(readonly x: Vector4, readonly y: Vector4, readonly z: Vector4, readonly t: Vector4) {}
 
   static of() {
     return new Matrix4(
@@ -20,16 +14,23 @@ export class Matrix4 {
     )
   }
 
-  static from(mat?: {
-    x?: { x?: number | null, y?: number | null, z?: number | null, t?: number | null } | null,
-    y?: { x?: number | null, y?: number | null, z?: number | null, t?: number | null } | null,
-    z?: { x?: number | null, y?: number | null, z?: number | null, t?: number | null } | null,
-    t?: { x?: number | null, y?: number | null, z?: number | null, t?: number | null } | null
-  } | null): Matrix4 {
+  static from(
+    mat?: {
+      x?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
+      y?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
+      z?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
+      t?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
+    } | null,
+  ): Matrix4 {
     if (!mat) {
       return Matrix4.of()
     }
-    return new Matrix4(Vector4.from(mat.x), Vector4.from(mat.y), Vector4.from(mat.z), Vector4.from(mat.t))
+    return new Matrix4(
+      Vector4.from(mat.x),
+      Vector4.from(mat.y),
+      Vector4.from(mat.z),
+      Vector4.from(mat.t),
+    )
   }
 
   get trace(): number {
@@ -46,6 +47,7 @@ export class Matrix4 {
   }
 
   toThree(): THREE.Matrix4 {
+    // prettier-ignore
     return new THREE.Matrix4().set(
       this.x.x, this.y.x, this.z.x, this.t.x,
       this.x.y, this.y.y, this.z.y, this.t.y,

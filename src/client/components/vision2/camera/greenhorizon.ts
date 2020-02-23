@@ -16,22 +16,27 @@ export class GreenHorizonViewModel {
     private readonly greenHorizon: GreenHorizon,
     private readonly params: CameraParams,
     private readonly lineProjection: LineProjection,
-  ) {
-  }
+  ) {}
 
-  static of(canvas: Canvas, greenHorizon: GreenHorizon, params: CameraParams): GreenHorizonViewModel {
+  static of(
+    canvas: Canvas,
+    greenHorizon: GreenHorizon,
+    params: CameraParams,
+  ): GreenHorizonViewModel {
     return new GreenHorizonViewModel(greenHorizon, params, LineProjection.of(canvas, params.lens))
   }
 
   readonly greenhorizon = group(() => ({
     children: this.greenHorizon.horizon.map((_, index) => {
       // For n given rays there are n - 1 line segments between them.
-      return index >= 1 ? this.lineProjection.planeSegment({
-        start: this.rays[index - 1],
-        end: this.rays[index],
-        color: new Vector4(0, 0.8, 0, 0.8),
-        lineWidth: 10,
-      }) : undefined
+      return index >= 1
+        ? this.lineProjection.planeSegment({
+            start: this.rays[index - 1],
+            end: this.rays[index],
+            color: new Vector4(0, 0.8, 0, 0.8),
+            lineWidth: 10,
+          })
+        : undefined
     }),
   }))
 
@@ -50,19 +55,23 @@ export class GreenHorizonViewModel {
 
     const { horizon, Hcw: greenHorizonHcw } = this.greenHorizon
     const imageHcw = this.params.Hcw
-    const greenHorizonHwc = Matrix4.fromThree(new THREE.Matrix4().getInverse(greenHorizonHcw.toThree()))
-    const rCWw =  greenHorizonHwc.t.vec3()
-    return horizon.map(ray => Vector3.fromThree(ray
-      .toThree() // rUCw
-      // Project world space unit vector onto the world/field ground, giving us a camera to field vector in world space.
-      .multiplyScalar(ray.z !== 0 ? -greenHorizonHwc.t.z / ray.z : 1) // rFCw
-      // Get the world to field vector, so that we can...
-      .add(rCWw.toThree()) // rFWw = rFCw + rCWw
-      // ...apply the camera image's world to camera transform, giving us a corrected camera space vector.
-      .applyMatrix4(imageHcw.toThree()) // rFCc
-      // Normalize to get the final camera space direction vector/ray.
-      .normalize(), // rUCc
-    ))
+    const greenHorizonHwc = Matrix4.fromThree(
+      new THREE.Matrix4().getInverse(greenHorizonHcw.toThree()),
+    )
+    const rCWw = greenHorizonHwc.t.vec3()
+    return horizon.map(ray =>
+      Vector3.fromThree(
+        ray
+          .toThree() // rUCw
+          // Project world space unit vector onto the world/field ground, giving us a camera to field vector in world space.
+          .multiplyScalar(ray.z !== 0 ? -greenHorizonHwc.t.z / ray.z : 1) // rFCw
+          // Get the world to field vector, so that we can...
+          .add(rCWw.toThree()) // rFWw = rFCw + rCWw
+          // ...apply the camera image's world to camera transform, giving us a corrected camera space vector.
+          .applyMatrix4(imageHcw.toThree()) // rFCc
+          // Normalize to get the final camera space direction vector/ray.
+          .normalize(), // rUCc
+      ),
+    )
   }
 }
-

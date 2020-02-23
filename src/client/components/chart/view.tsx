@@ -9,7 +9,6 @@ import { CheckboxTree } from '../checkbox_tree/view'
 
 import { ChartController } from './controller'
 import { LineChartProps } from './line_chart/view'
-import { LineChart } from './line_chart/view'
 import { ChartModel } from './model'
 import { ChartNetwork } from './network'
 import style from './style.css'
@@ -17,14 +16,18 @@ import { TreeLabel } from './tree_label/view'
 
 @observer
 export class ChartView extends Component<{
-  Menu: ComponentType,
+  Menu: ComponentType
   model: ChartModel
-  network: ChartNetwork,
+  network: ChartNetwork
   controller: ChartController
   LineChart: ComponentType<LineChartProps>
 }> {
-
-  static of({ model, menu, nusightNetwork, LineChart }: {
+  static of({
+    model,
+    menu,
+    nusightNetwork,
+    LineChart,
+  }: {
     model: ChartModel
     menu: ComponentType
     nusightNetwork: NUsightNetwork
@@ -33,7 +36,15 @@ export class ChartView extends Component<{
     const controller = ChartController.of({ model })
     return () => {
       const network = ChartNetwork.of(nusightNetwork, model)
-      return <ChartView controller={controller} Menu={menu} model={model} network={network} LineChart={LineChart}/>
+      return (
+        <ChartView
+          controller={controller}
+          Menu={menu}
+          model={model}
+          network={network}
+          LineChart={LineChart}
+        />
+      )
     }
   }
 
@@ -55,14 +66,15 @@ export class ChartView extends Component<{
         </Menu>
         <div className={style.chart}>
           <div className={style.main}>
-            <LineChart/>
+            <LineChart />
           </div>
           <div className={style.sidebar}>
             <CheckboxTree
               model={model.tree}
               onCheck={controller.onNodeCheck}
               onExpand={controller.onNodeExpand}
-              renderLabel={this.renderLabel}/>
+              renderLabel={this.renderLabel}
+            />
           </div>
         </div>
       </div>
@@ -70,11 +82,13 @@ export class ChartView extends Component<{
   }
 
   renderLabel = (node: TreeNodeModel): JSX.Element | string => {
-    return <TreeLabel
-      node={node}
-      onColorChange={this.props.controller.onColorChange}
-      onMouseEnter={this.props.controller.onHighlight}
-      onMouseLeave={this.props.controller.onUnhighlight}
-    />
+    return (
+      <TreeLabel
+        node={node}
+        onColorChange={this.props.controller.onColorChange}
+        onMouseEnter={this.props.controller.onHighlight}
+        onMouseLeave={this.props.controller.onUnhighlight}
+      />
+    )
   }
 }

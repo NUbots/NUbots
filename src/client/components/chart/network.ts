@@ -40,9 +40,7 @@ const ServoIds = [
 ]
 
 export class ChartNetwork {
-  constructor(private clock: Clock,
-              private network: Network,
-              private model: ChartModel) {
+  constructor(private clock: Clock, private network: Network, private model: ChartModel) {
     this.network.on(DataPoint, this.onDataPoint)
     this.network.on(Sensors, this.onSensorData)
   }
@@ -63,11 +61,14 @@ export class ChartNetwork {
     }
 
     const basePath = [robotModel.name].concat(data.label.split('/'))
-    const keys = data.value.length === 1
-      ? [basePath.pop()]
-      : data.value.length < 5 ? ['x', 'y', 'z', 'w'] : data.value.map((v, i) => `s${i}`)
+    const keys =
+      data.value.length === 1
+        ? [basePath.pop()]
+        : data.value.length < 5
+        ? ['x', 'y', 'z', 'w']
+        : data.value.map((v, i) => `s${i}`)
 
-    const node = basePath.reduce((accumulator: TreeData, p: string, index: number) => {
+    const node = basePath.reduce((accumulator: TreeData, p: string) => {
       if (!accumulator.has(p)) {
         accumulator.set(p, new Map<string, TreeData | DataSeries>())
       }
@@ -100,7 +101,7 @@ export class ChartNetwork {
       // Swap it backward until it's in place (keeping the list sorted)
       for (let i = series.length - 1; i > 0; i--) {
         if (series[i - 1].x > pointTime) {
-          [series[i - 1], series[i]] = [series[i], series[i - 1]]
+          ;[series[i - 1], series[i]] = [series[i], series[i - 1]]
         } else {
           break
         }
@@ -119,52 +120,53 @@ export class ChartNetwork {
 
   @action
   private onSensorData = (robotModel: RobotModel, sensorData: Sensors) => {
-    const { accelerometer, gyroscope, Htw, fsr, battery, voltage, led, servo } = sensorData
+    const { accelerometer, gyroscope } = sensorData
     const timestamp = sensorData.timestamp!
 
     if (accelerometer) {
-      this.onDataPoint(robotModel, new DataPoint({
-        label: 'Sensor/Accelerometer',
-        value: [
-          accelerometer!.x!,
-          accelerometer!.y!,
-          accelerometer!.z!,
-        ],
-        timestamp,
-      }))
+      this.onDataPoint(
+        robotModel,
+        new DataPoint({
+          label: 'Sensor/Accelerometer',
+          value: [accelerometer!.x!, accelerometer!.y!, accelerometer!.z!],
+          timestamp,
+        }),
+      )
     }
 
     if (gyroscope) {
-      this.onDataPoint(robotModel, new DataPoint({
-        label: 'Sensor/Gyroscope',
-        value: [
-          gyroscope!.x!,
-          gyroscope!.y!,
-          gyroscope!.z!,
-        ],
-        timestamp,
-      }))
+      this.onDataPoint(
+        robotModel,
+        new DataPoint({
+          label: 'Sensor/Gyroscope',
+          value: [gyroscope!.x!, gyroscope!.y!, gyroscope!.z!],
+          timestamp,
+        }),
+      )
     }
 
     // FSRs
     if (sensorData.fsr) {
       sensorData.fsr.forEach((fsr: Sensors.IFSR, index: number) => {
         // Our FSR values
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/FSR/${index ? 'Right' : 'Left'}/Values`,
-          value: fsr.value,
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/FSR/${index ? 'Right' : 'Left'}/Values`,
+            value: fsr.value,
+            timestamp,
+          }),
+        )
 
         // Our FSR centre
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/FSR/${index ? 'Right' : 'Left'}/Centre`,
-          value: [
-            fsr!.centre!.x!,
-            fsr!.centre!.y!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/FSR/${index ? 'Right' : 'Left'}/Centre`,
+            value: [fsr!.centre!.x!, fsr!.centre!.y!],
+            timestamp,
+          }),
+        )
       })
     }
 
@@ -174,78 +176,84 @@ export class ChartNetwork {
         const name = ServoIds[servo!.id! || index]
 
         // PID gain
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Gain`,
-          value: [
-            servo!.pGain!,
-            servo!.iGain!,
-            servo!.dGain!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Gain`,
+            value: [servo!.pGain!, servo!.iGain!, servo!.dGain!],
+            timestamp,
+          }),
+        )
 
         // Goal position
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Position/Goal`,
-          value: [
-            servo!.goalPosition!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Position/Goal`,
+            value: [servo!.goalPosition!],
+            timestamp,
+          }),
+        )
 
         // Goal Velocity
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Velocity/Goal`,
-          value: [
-            servo!.goalVelocity!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Velocity/Goal`,
+            value: [servo!.goalVelocity!],
+            timestamp,
+          }),
+        )
 
         // Present position
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Position/Present`,
-          value: [
-            servo!.presentPosition!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Position/Present`,
+            value: [servo!.presentPosition!],
+            timestamp,
+          }),
+        )
 
         // Present Velocity
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Velocity/Present`,
-          value: [
-            servo!.presentVelocity!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Velocity/Present`,
+            value: [servo!.presentVelocity!],
+            timestamp,
+          }),
+        )
 
         // Load
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Load`,
-          value: [
-            servo!.load!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Load`,
+            value: [servo!.load!],
+            timestamp,
+          }),
+        )
 
         // Voltage
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Voltage`,
-          value: [
-            servo!.voltage!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Voltage`,
+            value: [servo!.voltage!],
+            timestamp,
+          }),
+        )
 
         // Temperature
-        this.onDataPoint(robotModel, new DataPoint({
-          label: `Sensor/Servos/${name}/Temperature`,
-          value: [
-            servo!.temperature!,
-          ],
-          timestamp,
-        }))
+        this.onDataPoint(
+          robotModel,
+          new DataPoint({
+            label: `Sensor/Servos/${name}/Temperature`,
+            value: [servo!.temperature!],
+            timestamp,
+          }),
+        )
       })
     }
   }

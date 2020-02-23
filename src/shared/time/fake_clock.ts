@@ -72,7 +72,9 @@ export class FakeClock implements Clock {
 
     while (this.tasks.length > 0) {
       if (i > limit) {
-        throw new Error(`Exceeded clock task limit of ${limit}, possibly caused by a infinite task loop?`)
+        throw new Error(
+          `Exceeded clock task limit of ${limit}, possibly caused by a infinite task loop?`,
+        )
       }
       const task = this.tasks[0]
       this.consumeTask(task)
@@ -88,7 +90,9 @@ export class FakeClock implements Clock {
 
     while (this.tasks.length > 0 && this.tasks[0].nextTime <= lastTastTime) {
       if (i > limit) {
-        throw new Error(`Exceeded clock task limit of ${limit}, possibly caused by a infinite task loop?`)
+        throw new Error(
+          `Exceeded clock task limit of ${limit}, possibly caused by a infinite task loop?`,
+        )
       }
       const task = this.tasks[0]
       this.consumeTask(task)
@@ -102,7 +106,9 @@ export class FakeClock implements Clock {
 
     while (this.tasks.length > 0 && this.tasks[0].nextTime <= time) {
       if (i > limit) {
-        throw new Error(`Exceeded clock task limit of ${limit}, possibly caused by a infinite task loop?`)
+        throw new Error(
+          `Exceeded clock task limit of ${limit}, possibly caused by a infinite task loop?`,
+        )
       }
       const task = this.tasks[0]
       this.consumeTask(task)

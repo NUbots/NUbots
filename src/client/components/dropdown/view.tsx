@@ -28,15 +28,10 @@ export const Dropdown: StatelessComponent<DropdownProps> = (props: DropdownProps
 
   return (
     <div className={classNames([style.dropdown, props.className])} ref={props.onRef}>
-      <span className={style.dropdownToggle}
-            onClick={props.onToggleClick}>
+      <span className={style.dropdownToggle} onClick={props.onToggleClick}>
         {props.dropdownToggle}
       </span>
-      {props.isOpen &&
-      <div className={dropdownMenuClassName}>
-        {props.children}
-      </div>
-      }
+      {props.isOpen && <div className={dropdownMenuClassName}>{props.children}</div>}
     </div>
   )
 }

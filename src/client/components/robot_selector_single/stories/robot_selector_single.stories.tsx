@@ -14,26 +14,16 @@ const actions = {
 storiesOf('components.robot_selector_single', module)
   .addDecorator(story => <div style={{ maxWidth: '320px' }}>{story()}</div>)
   .add('renders empty', () => {
-    return <RobotSelectorSingle
-      robots={[]}
-      onSelect={actions.onSelect}
-    />
+    return <RobotSelectorSingle robots={[]} onSelect={actions.onSelect} />
   })
   .add('renders with robots', () => {
     const robots = getRobots()
-    return <RobotSelectorSingle
-      robots={robots}
-      onSelect={actions.onSelect}
-    />
+    return <RobotSelectorSingle robots={robots} onSelect={actions.onSelect} />
   })
   .add('renders with selection', () => {
     const robots = getRobots()
     const selected = robots[0]
-    return <RobotSelectorSingle
-      robots={robots}
-      selected={selected}
-      onSelect={actions.onSelect}
-    />
+    return <RobotSelectorSingle robots={robots} selected={selected} onSelect={actions.onSelect} />
   })
   .add('interactive', () => {
     const robots = getRobots()
@@ -41,13 +31,11 @@ storiesOf('components.robot_selector_single', module)
       robots,
       selected: robots[1],
     })
-    const onSelect = mobxAction((robot: RobotModel) => model.selected = robot)
-    const Component = observer(() => <RobotSelectorSingle
-      robots={model.robots}
-      selected={model.selected}
-      onSelect={onSelect}
-    />)
-    return <Component/>
+    const onSelect = mobxAction((robot: RobotModel) => (model.selected = robot))
+    const Component = observer(() => (
+      <RobotSelectorSingle robots={model.robots} selected={model.selected} onSelect={onSelect} />
+    ))
+    return <Component />
   })
 
 function getRobots(): RobotModel[] {

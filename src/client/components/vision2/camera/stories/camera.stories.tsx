@@ -22,18 +22,18 @@ storiesOf('components.vision2.camera', module)
   .addDecorator(fullscreen)
   .add('vision objects', () => {
     const box = observable<{ model: CameraModel | undefined }>({ model: undefined })
-    fakeCameraModel().then(model => box.model = model)
-    return <Observer>{() => <>
-      {box.model ? <CameraView model={box.model}/> : null}
-    </>}</Observer>
+    fakeCameraModel().then(model => (box.model = model))
+    return <Observer>{() => <>{box.model ? <CameraView model={box.model} /> : null}</>}</Observer>
   })
 
 async function fakeCameraModel(): Promise<CameraModel> {
   const image = await loadImageElement(imageUrl, ImageFormat.JPEG)
-  const Hcw = Matrix4.fromThree(new THREE.Matrix4().makeRotationZ(Math.PI * 13 / 32)
-    .premultiply(new THREE.Matrix4().makeRotationY(-2 * Math.PI * (1.5 / 16)))
-    .premultiply(new THREE.Matrix4().makeRotationX(Math.PI / 35))
-    .premultiply(new THREE.Matrix4().makeTranslation(1, 2, 0.8)),
+  const Hcw = Matrix4.fromThree(
+    new THREE.Matrix4()
+      .makeRotationZ((Math.PI * 13) / 32)
+      .premultiply(new THREE.Matrix4().makeRotationY(-2 * Math.PI * (1.5 / 16)))
+      .premultiply(new THREE.Matrix4().makeRotationX(Math.PI / 35))
+      .premultiply(new THREE.Matrix4().makeTranslation(1, 2, 0.8)),
   )
   const Hwc = Matrix4.fromThree(new THREE.Matrix4().getInverse(Hcw.toThree()))
   const viewSize = Vector2.of(image.width, image.height)
@@ -62,35 +62,40 @@ async function fakeCameraModel(): Promise<CameraModel> {
       ].map(p => screenToWorldRay(p, viewSize, focalLength, Hwc)),
       Hcw,
     }),
-    balls: [{
-      timestamp: 0,
-      Hcw,
-      cone: {
-        axis: unprojectEquidistant(new Vector2(195, 303), viewSize, focalLength),
-        radius: 0.105,
+    balls: [
+      {
+        timestamp: 0,
+        Hcw,
+        cone: {
+          axis: unprojectEquidistant(new Vector2(195, 303), viewSize, focalLength),
+          radius: 0.105,
+        },
+        distance: 1,
+        colour: new Vector4(1, 0.5, 0, 1),
       },
-      distance: 1,
-      colour: new Vector4(1, 0.5, 0, 1),
-    }],
-    goals: [{
-      timestamp: 0,
-      Hcw,
-      side: 'left',
-      post: {
-        top: unprojectEquidistant(new Vector2(63, 150), viewSize, focalLength),
-        bottom: unprojectEquidistant(new Vector2(80, 218), viewSize, focalLength),
-        distance: 4,
+    ],
+    goals: [
+      {
+        timestamp: 0,
+        Hcw,
+        side: 'left',
+        post: {
+          top: unprojectEquidistant(new Vector2(63, 150), viewSize, focalLength),
+          bottom: unprojectEquidistant(new Vector2(80, 218), viewSize, focalLength),
+          distance: 4,
+        },
       },
-    }, {
-      timestamp: 0,
-      Hcw,
-      side: 'right',
-      post: {
-        top: unprojectEquidistant(new Vector2(197, 68), viewSize, focalLength),
-        bottom: unprojectEquidistant(new Vector2(197, 152), viewSize, focalLength),
-        distance: 4.5,
+      {
+        timestamp: 0,
+        Hcw,
+        side: 'right',
+        post: {
+          top: unprojectEquidistant(new Vector2(197, 68), viewSize, focalLength),
+          bottom: unprojectEquidistant(new Vector2(197, 152), viewSize, focalLength),
+          distance: 4.5,
+        },
       },
-    }],
+    ],
   })
 }
 
@@ -109,7 +114,12 @@ async function loadImage(url: string): Promise<HTMLImageElement> {
   })
 }
 
-function screenToWorldRay(screenPoint: Vector2, viewSize: Vector2, focalLength: number, Hwc: Matrix4) {
+function screenToWorldRay(
+  screenPoint: Vector2,
+  viewSize: Vector2,
+  focalLength: number,
+  Hwc: Matrix4,
+) {
   const rFCc = unprojectEquidistant(screenPoint, viewSize, focalLength)
   const Rwc = new THREE.Matrix4().extractRotation(Hwc.toThree())
   return Vector3.fromThree(rFCc.toThree().applyMatrix4(Rwc)) // rFCw
@@ -121,7 +131,7 @@ function unprojectEquidistant(point: Vector2, viewSize: Vector2, focalLength: nu
   const theta = r / focalLength
   return new Vector3(
     Math.cos(theta),
-    r !== 0 ? Math.sin(theta) * p.x / r : 0,
-    r !== 0 ? Math.sin(theta) * p.y / r : 0,
+    r !== 0 ? (Math.sin(theta) * p.x) / r : 0,
+    r !== 0 ? (Math.sin(theta) * p.y) / r : 0,
   ).normalize()
 }

@@ -14,8 +14,7 @@ import { LocalisationModel } from './model'
 import Sensors = message.input.Sensors
 
 export class LocalisationNetwork {
-  constructor(private network: Network,
-              private model: LocalisationModel) {
+  constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(Sensors, this.onSensors)
   }
 
@@ -32,7 +31,9 @@ export class LocalisationNetwork {
   private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
     const robot = LocalisationRobotModel.of(robotModel)
 
-    const { translation: rWTt, rotation: Rwt } = decompose(new THREE.Matrix4().getInverse(fromProtoMat44(sensors.Htw!)))
+    const { translation: rWTt, rotation: Rwt } = decompose(
+      new THREE.Matrix4().getInverse(fromProtoMat44(sensors.Htw!)),
+    )
     robot.rWTt = new Vector3(rWTt.x, rWTt.y, rWTt.z)
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w)
 
@@ -59,7 +60,9 @@ export class LocalisationNetwork {
   }
 }
 
-function decompose(m: THREE.Matrix4): { translation: THREE.Vector3, rotation: THREE.Quaternion, scale: THREE.Vector3 } {
+function decompose(
+  m: THREE.Matrix4,
+): { translation: THREE.Vector3; rotation: THREE.Quaternion; scale: THREE.Vector3 } {
   const translation = new THREE.Vector3()
   const rotation = new THREE.Quaternion()
   const scale = new THREE.Vector3()
@@ -69,9 +72,21 @@ function decompose(m: THREE.Matrix4): { translation: THREE.Vector3, rotation: TH
 
 function fromProtoMat44(m: Imat4): THREE.Matrix4 {
   return new THREE.Matrix4().set(
-    m!.x!.x!, m!.y!.x!, m!.z!.x!, m!.t!.x!,
-    m!.x!.y!, m!.y!.y!, m!.z!.y!, m!.t!.y!,
-    m!.x!.z!, m!.y!.z!, m!.z!.z!, m!.t!.z!,
-    m!.x!.t!, m!.y!.t!, m!.z!.t!, m!.t!.t!,
+    m!.x!.x!,
+    m!.y!.x!,
+    m!.z!.x!,
+    m!.t!.x!,
+    m!.x!.y!,
+    m!.y!.y!,
+    m!.z!.y!,
+    m!.t!.y!,
+    m!.x!.z!,
+    m!.y!.z!,
+    m!.z!.z!,
+    m!.t!.z!,
+    m!.x!.t!,
+    m!.y!.t!,
+    m!.z!.t!,
+    m!.t!.t!,
   )
 }

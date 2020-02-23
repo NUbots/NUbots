@@ -8,7 +8,6 @@ import { Packet } from '../nuclearnet_proxy_parser_socketio'
 import { EventPacket } from '../nuclearnet_proxy_parser_socketio'
 
 describe('NUClearNetProxyParser', () => {
-
   let e: Encoder
   let d: Decoder
   let random: SeededRandom
@@ -32,7 +31,6 @@ describe('NUClearNetProxyParser', () => {
   }
 
   it('Roundtrips regular socket.io packets', () => {
-
     const packets: Packet[] = [
       {
         nsp: '/',
@@ -68,26 +66,31 @@ describe('NUClearNetProxyParser', () => {
   })
 
   it('Roundtrips NUClearNet informational packets', () => {
-
     const packets: Packet[] = [
       {
         nsp: '/',
         type: TYPES.EVENT,
-        data: ['nuclear_join', {
-          name: 'itsnotme',
-          address: '127.0.0.1',
-          port: randomPort(),
-        }],
+        data: [
+          'nuclear_join',
+          {
+            name: 'itsnotme',
+            address: '127.0.0.1',
+            port: randomPort(),
+          },
+        ],
         id: randomPacketId(),
       },
       {
         nsp: '/',
         type: TYPES.EVENT,
-        data: ['nuclear_leave', {
-          name: 'itsyou',
-          address: '192.168.10.11',
-          port: randomPort(),
-        }],
+        data: [
+          'nuclear_leave',
+          {
+            name: 'itsyou',
+            address: '192.168.10.11',
+            port: randomPort(),
+          },
+        ],
         id: randomPacketId(),
       },
       {
@@ -129,7 +132,6 @@ describe('NUClearNetProxyParser', () => {
   })
 
   it('Roundtrips NUClearNet packets with binary data in them', () => {
-
     // Encode an image protocol buffer as an example
     //
     const nuclearPackets: NUClearNetPacket[] = [
@@ -155,14 +157,14 @@ describe('NUClearNetProxyParser', () => {
       },
     ]
 
-    const packets: Packet[] = nuclearPackets.map((p): EventPacket => (
-    {
-      nsp: '/',
-      type: TYPES.EVENT,
-      data: ['message.input.Image', p],
-      id: randomPacketId(),
-    }
-    ))
+    const packets: Packet[] = nuclearPackets.map(
+      (p): EventPacket => ({
+        nsp: '/',
+        type: TYPES.EVENT,
+        data: ['message.input.Image', p],
+        id: randomPacketId(),
+      }),
+    )
 
     // Encode all the packets
     const wire: any[] = []

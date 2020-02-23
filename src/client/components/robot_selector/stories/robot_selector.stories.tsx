@@ -17,36 +17,29 @@ const actions = {
 storiesOf('components.robot_selector', module)
   .addDecorator(story => <div style={{ maxWidth: '320px' }}>{story()}</div>)
   .add('renders empty', () => {
-    return <RobotSelector
-      robots={[]}
-      selectRobot={actions.selectRobot}
-    />
+    return <RobotSelector robots={[]} selectRobot={actions.selectRobot} />
   })
   .add('renders with robots', () => {
     const robots = getRobots()
-    return <RobotSelector
-      robots={robots}
-      selectRobot={actions.selectRobot}
-    />
+    return <RobotSelector robots={robots} selectRobot={actions.selectRobot} />
   })
   .add('renders with updating stats', () => {
     const robots = getRobots()
     const model = observable({
       robots,
     })
-    return <UpdatingStatsStory robots={model.robots}/>
+    return <UpdatingStatsStory robots={model.robots} />
   })
   .add('interactive', () => {
     const robots = getRobots()
     const model = observable({
       robots,
     })
-    const selectRobot = mobxAction((robot: RobotModel) => robot.enabled = !robot.enabled)
-    const Component = observer(() => <RobotSelector
-      robots={model.robots}
-      selectRobot={selectRobot}
-    />)
-    return <Component/>
+    const selectRobot = mobxAction((robot: RobotModel) => (robot.enabled = !robot.enabled))
+    const Component = observer(() => (
+      <RobotSelector robots={model.robots} selectRobot={selectRobot} />
+    ))
+    return <Component />
   })
 
 function getRobots(): RobotModel[] {
@@ -85,10 +78,7 @@ export class UpdatingStatsStory extends React.Component<{ robots: RobotModel[] }
   render() {
     const { robots } = this.props
 
-    return <RobotSelector
-      robots={robots}
-      selectRobot={actions.selectRobot}
-    />
+    return <RobotSelector robots={robots} selectRobot={actions.selectRobot} />
   }
 
   @mobxAction
@@ -107,10 +97,9 @@ export class UpdatingStatsStory extends React.Component<{ robots: RobotModel[] }
   }
 
   componentDidMount() {
-    disposeOnUnmount(this, reaction(
-      () => now('frame'),
-      this.updateStats,
-      { fireImmediately: true },
-    ))
+    disposeOnUnmount(
+      this,
+      reaction(() => now('frame'), this.updateStats, { fireImmediately: true }),
+    )
   }
 }

@@ -15,58 +15,63 @@ import { LineChartViewModel } from './view_model'
 export type LineChartProps = {}
 
 @observer
-export class LineChart extends Component<LineChartProps & {
-  model: LineChartModel
-  controller: LineChartController
-}> {
+export class LineChart extends Component<
+  LineChartProps & {
+    model: LineChartModel
+    controller: LineChartController
+  }
+> {
   static of(model: ChartModel): ComponentType<LineChartProps> {
     const controller = LineChartController.of()
     const lineChartModel = LineChartModel.of(model)
-    return props => <LineChart {...props} model={lineChartModel} controller={controller}/>
+    return props => <LineChart {...props} model={lineChartModel} controller={controller} />
   }
 
   render() {
     const viewModel = LineChartViewModel.of(this.props.model)
     const { bufferSeconds, minValue, maxValue } = viewModel
 
-    return <>
-      <div className={style.topBar}>
-        <label className={style.topBarItem}>
-          Minimum Value
-          <input
-            className={style.topBarInput}
-            type='number'
-            onChange={this.onChangeMin}
-            placeholder={`(${minValue.toPrecision(3)})`}
+    return (
+      <>
+        <div className={style.topBar}>
+          <label className={style.topBarItem}>
+            Minimum Value
+            <input
+              className={style.topBarInput}
+              type="number"
+              onChange={this.onChangeMin}
+              placeholder={`(${minValue.toPrecision(3)})`}
+            />
+          </label>
+          <label className={style.topBarItem}>
+            Maximum Value
+            <input
+              className={style.topBarInput}
+              type="number"
+              onChange={this.onChangeMax}
+              placeholder={`(${maxValue.toPrecision(3)})`}
+            />
+          </label>
+          <label className={style.topBarItem}>
+            View Seconds
+            <input
+              className={style.topBarInput}
+              type="number"
+              onChange={this.onChangeBuffer}
+              placeholder={`(${bufferSeconds.toPrecision(3)})`}
+            />
+          </label>
+        </div>
+        <div className={style.container}>
+          <Renderer
+            engine="svg"
+            className={style.field}
+            scene={viewModel.scene}
+            camera={viewModel.camera}
           />
-        </label>
-        <label className={style.topBarItem}>
-          Maximum Value
-          <input
-            className={style.topBarInput}
-            type='number'
-            onChange={this.onChangeMax}
-            placeholder={`(${maxValue.toPrecision(3)})`}
-          />
-        </label>
-        <label className={style.topBarItem}>
-          View Seconds
-          <input
-            className={style.topBarInput}
-            type='number'
-            onChange={this.onChangeBuffer}
-            placeholder={`(${bufferSeconds.toPrecision(3)})`}
-          />
-        </label>
-      </div>
-      <div className={style.container}>
-        <Renderer
-          engine='svg'
-          className={style.field}
-          scene={viewModel.scene}
-          camera={viewModel.camera}/>
-      </div>
-    </>
+        </div>
+      </>
+    )
   }
 
   private readonly onChangeMin = (event: ChangeEvent<HTMLInputElement>) => {

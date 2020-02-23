@@ -20,12 +20,13 @@ import { TreeData } from '../model'
 import { LineChartModel } from './model'
 
 export class LineChartViewModel {
-  constructor(private model: LineChartModel) {
-  }
+  constructor(private model: LineChartModel) {}
 
-  static of = createTransformer((model: LineChartModel): LineChartViewModel => {
-    return new LineChartViewModel(model)
-  })
+  static of = createTransformer(
+    (model: LineChartModel): LineChartViewModel => {
+      return new LineChartViewModel(model)
+    },
+  )
 
   @computed
   get bufferSeconds() {
@@ -66,26 +67,19 @@ export class LineChartViewModel {
   @computed
   get scene(): Group {
     return Group.of({
-      children: [
-        this.chart,
-        this.axis,
-      ],
+      children: [this.chart, this.axis],
     })
   }
 
   @computed
   get axis(): Group {
     return Group.of({
-      children: [
-        this.yAxis,
-        this.xAxis,
-      ],
+      children: [this.yAxis, this.xAxis],
     })
   }
 
   @computed
   get yAxis(): Group {
-
     // Work out the distance between our major and minor grid lines
     const nMinor = 4
     const range = this.maxValue - this.minValue
@@ -98,7 +92,11 @@ export class LineChartViewModel {
 
     // Make our major and minor lines
     let lineNo = 0
-    for (let y = Math.floor(this.minValue / major) * major - major; y <= this.maxValue + major; y += minor) {
+    for (
+      let y = Math.floor(this.minValue / major) * major - major;
+      y <= this.maxValue + major;
+      y += minor
+    ) {
       const geometry = LineGeometry.of({
         origin: Vector2.of(-this.model.bufferSeconds / 2, y - offset),
         target: Vector2.of(this.model.bufferSeconds / 2, y - offset),
@@ -106,36 +104,50 @@ export class LineChartViewModel {
 
       if (lineNo % nMinor === 0) {
         // Major gridline
-        lines.push(Shape.of(geometry, LineAppearance.of({
-          stroke: {
-            color: '#555555',
-            width: 1,
-            nonScaling: true,
-          },
-        })))
+        lines.push(
+          Shape.of(
+            geometry,
+            LineAppearance.of({
+              stroke: {
+                color: '#555555',
+                width: 1,
+                nonScaling: true,
+              },
+            }),
+          ),
+        )
 
-        lines.push(Shape.of(TextGeometry.of({
-          text: y.toPrecision(2).toString(),
-          worldScale: true,
-          textAlign: 'end',
-          fontSize: '1em',
-          x: this.model.bufferSeconds / 2,
-          y: y - offset,
-        }), BasicAppearance.of({
-          fill: {
-            color: '#000000',
-          },
-        })))
-
+        lines.push(
+          Shape.of(
+            TextGeometry.of({
+              text: y.toPrecision(2).toString(),
+              worldScale: true,
+              textAlign: 'end',
+              fontSize: '1em',
+              x: this.model.bufferSeconds / 2,
+              y: y - offset,
+            }),
+            BasicAppearance.of({
+              fill: {
+                color: '#000000',
+              },
+            }),
+          ),
+        )
       } else {
         // Minor gridline
-        lines.push(Shape.of(geometry, LineAppearance.of({
-          stroke: {
-            color: '#999999',
-            width: 0.5,
-            nonScaling: true,
-          },
-        })))
+        lines.push(
+          Shape.of(
+            geometry,
+            LineAppearance.of({
+              stroke: {
+                color: '#999999',
+                width: 0.5,
+                nonScaling: true,
+              },
+            }),
+          ),
+        )
       }
 
       lineNo++
@@ -148,7 +160,6 @@ export class LineChartViewModel {
 
   @computed
   get xAxis(): Group {
-
     // Work out our min/max value
     const max = this.now
     const min = max - this.model.bufferSeconds
@@ -174,23 +185,32 @@ export class LineChartViewModel {
 
       if (lineNo % nMinor === 0) {
         // Major gridline
-        lines.push(Shape.of(geometry, LineAppearance.of({
-          stroke: {
-            color: '#555555',
-            width: 1,
-            nonScaling: true,
-          },
-        })))
-
+        lines.push(
+          Shape.of(
+            geometry,
+            LineAppearance.of({
+              stroke: {
+                color: '#555555',
+                width: 1,
+                nonScaling: true,
+              },
+            }),
+          ),
+        )
       } else {
         // Minor gridline
-        lines.push(Shape.of(geometry, LineAppearance.of({
-          stroke: {
-            color: '#999999',
-            width: 0.5,
-            nonScaling: true,
-          },
-        })))
+        lines.push(
+          Shape.of(
+            geometry,
+            LineAppearance.of({
+              stroke: {
+                color: '#999999',
+                width: 0.5,
+                nonScaling: true,
+              },
+            }),
+          ),
+        )
       }
 
       lineNo++
@@ -203,7 +223,6 @@ export class LineChartViewModel {
 
   @computed
   get chart() {
-
     // Get our min and max values
     const minValue = this.model.yMin === 'auto' ? this.minValue : this.model.yMin
     const maxValue = this.model.yMax === 'auto' ? this.maxValue : this.model.yMax
@@ -226,16 +245,20 @@ export class LineChartViewModel {
     } else if (this.dataSeries.length === 0) {
       return 1
     } else {
-
       const max = this.dataSeries.reduce((maxValue, series: DataSeries) => {
-
         // Get the range we are viewing
         let end = this.now + series.timeDelta
         let start = end - this.model.bufferSeconds
 
         const values = series.series
-        end = Math.max(0, bounds.lt(values, Vector2.of(), p => p.x - end))
-        start = Math.max(0, bounds.lt(values, Vector2.of(), p => p.x - start))
+        end = Math.max(
+          0,
+          bounds.lt(values, Vector2.of(), p => p.x - end),
+        )
+        start = Math.max(
+          0,
+          bounds.lt(values, Vector2.of(), p => p.x - start),
+        )
 
         return values.slice(start, end).reduce((max, value) => {
           return Math.max(max, value.y)
@@ -253,14 +276,19 @@ export class LineChartViewModel {
       return -1
     } else {
       const min = this.dataSeries.reduce((minValue, series: DataSeries) => {
-
         // Get the range we are viewing
         let end = this.now + series.timeDelta
         let start = end - this.model.bufferSeconds
 
         const values = series.series
-        end = Math.max(0, bounds.lt(values, Vector2.of(), p => p.x - end))
-        start = Math.max(0, bounds.lt(values, Vector2.of(), p => p.x - start))
+        end = Math.max(
+          0,
+          bounds.lt(values, Vector2.of(), p => p.x - end),
+        )
+        start = Math.max(
+          0,
+          bounds.lt(values, Vector2.of(), p => p.x - start),
+        )
 
         return values.slice(start, end).reduce((min, value) => {
           return Math.min(min, value.y)
@@ -272,18 +300,23 @@ export class LineChartViewModel {
 
   @computed
   get now() {
-    return (now('frame') / 1000) - this.model.startTime
+    return now('frame') / 1000 - this.model.startTime
   }
 
   private makeLines(series: DataSeries): Group {
-
     // Get the range we are viewing
     let end = this.now + series.timeDelta
     let start = end - this.model.bufferSeconds
 
     let values = series.series
-    end = Math.max(0, bounds.lt(values, Vector2.of(), p => p.x - end))
-    start = Math.max(0, bounds.lt(values, Vector2.of(), p => p.x - start))
+    end = Math.max(
+      0,
+      bounds.lt(values, Vector2.of(), p => p.x - end),
+    )
+    start = Math.max(
+      0,
+      bounds.lt(values, Vector2.of(), p => p.x - start),
+    )
     values = values.slice(start, end)
 
     // If we have no values, don't draw the line
@@ -294,28 +327,32 @@ export class LineChartViewModel {
     const lines = []
 
     if (series.highlight) {
-      lines.push(Shape.of(
+      lines.push(
+        Shape.of(
+          PathGeometry.of(values),
+          LineAppearance.of({
+            stroke: {
+              color: '#ffff00',
+              width: 8,
+              nonScaling: true,
+            },
+          }),
+        ),
+      )
+    }
+
+    lines.push(
+      Shape.of(
         PathGeometry.of(values),
         LineAppearance.of({
           stroke: {
-            color: '#ffff00',
-            width: 8,
+            color: series.color,
+            width: 2,
             nonScaling: true,
           },
         }),
-      ))
-    }
-
-    lines.push(Shape.of(
-      PathGeometry.of(values),
-      LineAppearance.of({
-        stroke: {
-          color: series.color,
-          width: 2,
-          nonScaling: true,
-        },
-      }),
-    ))
+      ),
+    )
 
     // Apply our time delta
     return Group.of({

@@ -23,10 +23,10 @@ steps:
           environment:
             - "HOME=/workdir"
 
-  - label: Check code with tslint
+  - label: Check code with eslint
     command:
       - yarn
-      - yarn tslint
+      - yarn eslint
     plugins:
       - ./.buildkite/plugins/cache: ~
       - docker#v3.5.0:

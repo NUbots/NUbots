@@ -75,9 +75,12 @@ export class FakeNUClearNetServer {
      * This list intentionally includes the sender unless explicitly targeting another peer. This matches the real
      * NUClearNet behaviour.
      */
-    const targetClients = opts.target === undefined
-      ? this.clients
-      : this.clients.filter(otherClient => otherClient.peer && otherClient.peer.name === opts.target)
+    const targetClients =
+      opts.target === undefined
+        ? this.clients
+        : this.clients.filter(
+            otherClient => otherClient.peer && otherClient.peer.name === opts.target,
+          )
 
     const hashString = hash.toString('hex')
     for (const client of targetClients) {

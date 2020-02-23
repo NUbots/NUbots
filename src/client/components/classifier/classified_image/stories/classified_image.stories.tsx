@@ -24,39 +24,47 @@ storiesOf('classifier.classified_image', module)
     const random = SeededRandom.of('classifier')
     const lut = generateLut(random)
     const model = ClassifiedImageModel.of({ lut })
-    return <ClassifiedImageViewHarness model={model} random={random}/>
+    return <ClassifiedImageViewHarness model={model} random={random} />
   })
   .add('renders animated', () => {
     const random = SeededRandom.of('classifier')
     const lut = generateLut(random)
     const model = ClassifiedImageModel.of({ lut })
-    return <ClassifiedImageViewHarness model={model} random={random} animate/>
+    return <ClassifiedImageViewHarness model={model} random={random} animate />
   })
 
 @observer
 class ClassifiedImageViewHarness extends Component<{
-  model: ClassifiedImageModel,
-  random: SeededRandom,
+  model: ClassifiedImageModel
+  random: SeededRandom
   animate?: boolean
 }> {
   async componentDidMount() {
     const image = await loadImage(imageUrl)
-    runInAction(() => this.props.model.rawImage = { type: 'image', image })
-    disposeOnUnmount(this, reaction(() => this.props.animate && now('frame'), this.update))
+    runInAction(() => (this.props.model.rawImage = { type: 'image', image }))
+    disposeOnUnmount(
+      this,
+      reaction(() => this.props.animate && now('frame'), this.update),
+    )
   }
 
   render() {
-    return <ClassifiedImageView model={this.props.model}/>
+    return <ClassifiedImageView model={this.props.model} />
   }
 
   @action.bound
   private update() {
     const percentageFull = 0.4
     range(100).forEach(() => {
-      const { random, model: { lut } } = this.props
+      const {
+        random,
+        model: { lut },
+      } = this.props
       const randomIndex = random.integer(0, lut.data.length)
-      const randomClassification = random.float() <= percentageFull
-        ? random.choice(classifications) : Classification.Unclassified
+      const randomClassification =
+        random.float() <= percentageFull
+          ? random.choice(classifications)
+          : Classification.Unclassified
       lut.set(randomIndex, randomClassification)
     })
   }
@@ -82,6 +90,8 @@ const classifications = Object.freeze([
 
 function generateLut(random: SeededRandom, percentageFull = 0.4) {
   return Lut.generate({ x: 4, y: 4, z: 4 }, () => {
-    return random.float() <= percentageFull ? random.choice(classifications) : Classification.Unclassified
+    return random.float() <= percentageFull
+      ? random.choice(classifications)
+      : Classification.Unclassified
   })
 }

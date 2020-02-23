@@ -63,8 +63,8 @@ export class FieldDimensions {
       goalCrossbarHeight: 1.1,
       goalPostDiameter: 0.1,
       goalNetHeight: 0.8,
-      penaltyMarkDistance: 1.80,
-      centerCircleDiameter: 1.20,
+      penaltyMarkDistance: 1.8,
+      centerCircleDiameter: 1.2,
       borderStripMinWidth: 0.7,
     })
   }

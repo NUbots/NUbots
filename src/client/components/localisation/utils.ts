@@ -13,7 +13,9 @@ export function geometryAndMaterial(config: any, color?: string) {
     materials = materials.map(material => coloredMaterial(material, color))
   }
   return {
-    geometry, materials, dispose() {
+    geometry,
+    materials,
+    dispose() {
       this.geometry.dispose()
       if (this.materials) {
         this.materials.forEach(material => material.dispose())

@@ -7,12 +7,12 @@ import { Vector4 } from '../../../math/vector4'
 import { Image } from '../image'
 
 type DrawOptions = {
-  drawImage: boolean,
-  drawDistance: boolean,
-  drawCompass: boolean,
-  drawHorizon: boolean,
-  drawGreenhorizon: boolean,
-  drawBalls: boolean,
+  drawImage: boolean
+  drawDistance: boolean
+  drawCompass: boolean
+  drawHorizon: boolean
+  drawGreenhorizon: boolean
+  drawBalls: boolean
   drawGoals: boolean
 }
 
@@ -28,9 +28,18 @@ export class CameraModel {
 
   @observable.shallow drawOptions: DrawOptions
 
-  constructor({ id, name, image, params, greenhorizon, balls, goals, drawOptions }: {
-    id: number,
-    name: string,
+  constructor({
+    id,
+    name,
+    image,
+    params,
+    greenhorizon,
+    balls,
+    goals,
+    drawOptions,
+  }: {
+    id: number
+    name: string
     image: Image
     params: CameraParams
     greenhorizon?: GreenHorizon
@@ -49,12 +58,12 @@ export class CameraModel {
   }
 
   static of(opts: {
-    id: number,
-    name: string,
-    image: Image,
-    params: CameraParams,
-    greenhorizon?: GreenHorizon,
-    balls?: Ball[],
+    id: number
+    name: string
+    image: Image
+    params: CameraParams
+    greenhorizon?: GreenHorizon
+    balls?: Ball[]
     goals?: Goal[]
   }) {
     return new CameraModel({
@@ -76,7 +85,7 @@ export class CameraParams {
   @observable.ref Hcw: Matrix4
   @observable.ref lens: Lens
 
-  constructor({ Hcw, lens }: { Hcw: Matrix4, lens: Lens }) {
+  constructor({ Hcw, lens }: { Hcw: Matrix4; lens: Lens }) {
     this.Hcw = Hcw
     this.lens = lens
   }
@@ -88,10 +97,15 @@ export class Lens {
   @observable.ref centre?: Vector2
   @observable.ref distortionCoeffecients?: Vector2
 
-  constructor({ projection, focalLength, centre, distortionCoeffecients }: {
-    projection: Projection,
-    focalLength: number,
-    centre?: Vector2,
+  constructor({
+    projection,
+    focalLength,
+    centre,
+    distortionCoeffecients,
+  }: {
+    projection: Projection
+    focalLength: number
+    centre?: Vector2
     distortionCoeffecients?: Vector2
   }) {
     this.projection = projection
@@ -115,7 +129,7 @@ export class GreenHorizon {
   /** The world to camera transform, at the time the green horizon was measured. */
   @observable.ref Hcw: Matrix4
 
-  constructor({ horizon, Hcw }: { horizon?: Vector3[], Hcw?: Matrix4 }) {
+  constructor({ horizon, Hcw }: { horizon?: Vector3[]; Hcw?: Matrix4 }) {
     this.horizon = horizon ?? []
     this.Hcw = Hcw ?? Matrix4.of()
   }

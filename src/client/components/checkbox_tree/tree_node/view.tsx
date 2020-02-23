@@ -2,7 +2,6 @@ import classNames from 'classnames'
 import { autorun } from 'mobx'
 import { IReactionDisposer } from 'mobx'
 import { observer } from 'mobx-react'
-import { ChangeEvent } from 'react'
 import { Component } from 'react'
 import { MouseEvent } from 'react'
 import React from 'react'
@@ -56,7 +55,7 @@ export class TreeNode extends Component<TreeNodeProps> {
     // Using inline paddingLeft to indent so that the hover and selected background indicators
     // are full width. Padding is the default left padding of 8px plus each level's indent of 22px.
     const headerInlineStyle = {
-      paddingLeft: 8 + (level * 22) + 'px',
+      paddingLeft: 8 + level * 22 + 'px',
     }
 
     return (
@@ -64,16 +63,18 @@ export class TreeNode extends Component<TreeNodeProps> {
         <li>
           <div className={style.treenode__header} style={headerInlineStyle} onClick={this.onClick}>
             <div className={style.treenode__icon}>
-              {
-                hasChildren ?
-                  (this.props.node.expanded ? <IconChevronDown/> : <IconChevronRight/>) :
-                  null
-              }
+              {hasChildren ? (
+                this.props.node.expanded ? (
+                  <IconChevronDown />
+                ) : (
+                  <IconChevronRight />
+                )
+              ) : null}
             </div>
 
             <div className={style.treenode__checkbox}>
               <input
-                type='checkbox'
+                type="checkbox"
                 ref={this.onRef}
                 onClick={this.onCheckboxClick}
                 onChange={this.onCheckboxChange}
@@ -86,17 +87,16 @@ export class TreeNode extends Component<TreeNodeProps> {
           </div>
 
           {this.props.node.expanded &&
-          children.map((node, i) =>
-            <TreeNode
-              key={i}
-              node={node}
-              level={level + 1}
-              renderLabel={this.props.renderLabel}
-              onCheck={this.props.onCheck}
-              onExpand={this.props.onExpand}
-            />,
-          )
-          }
+            children.map((node, i) => (
+              <TreeNode
+                key={i}
+                node={node}
+                level={level + 1}
+                renderLabel={this.props.renderLabel}
+                onCheck={this.props.onCheck}
+                onExpand={this.props.onExpand}
+              />
+            ))}
         </li>
       </ul>
     )
@@ -106,7 +106,7 @@ export class TreeNode extends Component<TreeNodeProps> {
     this.checkbox = checkbox
   }
 
-  private onClick = (event: MouseEvent<HTMLElement>) => {
+  private onClick = () => {
     if (this.props.onExpand) {
       this.props.onExpand(this.props.node)
     }
@@ -128,7 +128,7 @@ export class TreeNode extends Component<TreeNodeProps> {
     event.stopPropagation()
   }
 
-  private onCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
+  private onCheckboxChange = () => {
     if (this.props.onCheck) {
       this.props.onCheck(this.props.node)
     }

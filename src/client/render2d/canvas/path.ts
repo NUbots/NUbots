@@ -4,7 +4,6 @@ import { Shape } from '../object/shape'
 import { applyAppearance } from './rendering'
 
 export function renderPath(ctx: CanvasRenderingContext2D, shape: Shape<PathGeometry>): void {
-
   const { points } = shape.geometry
   const start = points[0]
 

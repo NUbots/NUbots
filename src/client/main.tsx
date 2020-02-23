@@ -31,4 +31,4 @@ installVision({ nav, appModel, nusightNetwork, Menu: menu })
 installVisualMesh({ nav, appModel, nusightNetwork, Menu: menu })
 
 configure({ enforceActions: 'observed' })
-ReactDOM.render(<AppView nav={nav}/>, document.getElementById('root'))
+ReactDOM.render(<AppView nav={nav} />, document.getElementById('root'))

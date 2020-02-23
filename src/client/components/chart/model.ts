@@ -8,11 +8,10 @@ import { RobotModel } from '../robot/model'
 
 import { TreeViewModel } from './view_model'
 
-export interface TreeData extends Map<string, TreeData | DataSeries> {
-}
+export interface TreeData extends Map<string, TreeData | DataSeries> {}
 
 export class DataSeries {
-  private kf: { processNoise: number, measurementNoise: number }
+  private kf: { processNoise: number; measurementNoise: number }
 
   @observable highlight: boolean = false
   @observable color: string
@@ -22,14 +21,22 @@ export class DataSeries {
   @observable checked: CheckedState
   @observable series: Vector2[]
 
-  constructor({ color, checked, series, startTime, timeDelta, timeVariance, kf }: {
+  constructor({
+    color,
+    checked,
+    series,
+    startTime,
+    timeDelta,
+    timeVariance,
+    kf,
+  }: {
     color: string
     checked: CheckedState
     series: Vector2[]
     startTime: number
     timeDelta: number
     timeVariance: number
-    kf: { processNoise: number, measurementNoise: number }
+    kf: { processNoise: number; measurementNoise: number }
   }) {
     this.color = color
     this.checked = checked
@@ -60,7 +67,7 @@ export class DataSeries {
     const K = (this.timeVariance + Q) / (this.timeVariance + Q + R)
 
     // Do the filter
-    this.timeVariance = R * (this.timeVariance + Q) / (R + this.timeVariance + Q)
+    this.timeVariance = (R * (this.timeVariance + Q)) / (R + this.timeVariance + Q)
     this.timeDelta = this.timeDelta + (delta - this.timeDelta) * K
   }
 }
@@ -76,7 +83,12 @@ export class ChartModel {
   @observable startTime: number
   @observable bufferSeconds: number
 
-  constructor({ robotModels, treeData, startTime, bufferSeconds }: {
+  constructor({
+    robotModels,
+    treeData,
+    startTime,
+    bufferSeconds,
+  }: {
     robotModels: RobotModel[]
     treeData: Map<string, TreeData | DataSeries>
     startTime: number
@@ -101,7 +113,9 @@ export class ChartModel {
   @computed
   get tree() {
     return {
-      nodes: Array.from(this.treeData.entries(), ([label, model]) => TreeViewModel.of({ label, model })),
+      nodes: Array.from(this.treeData.entries(), ([label, model]) =>
+        TreeViewModel.of({ label, model }),
+      ),
       usePessimisticToggle: true,
     }
   }

@@ -20,13 +20,13 @@ export class ArrowGeometry {
   }
 
   static of({
-              length = 1,
-              direction = Vector2.of(1, 0),
-              headLength = 0.2 * length,
-              headWidth = 0.04 * length,
-              origin = Vector2.of(),
-              width = 1,
-            }: Partial<ArrowGeometry> = {}): ArrowGeometry {
+    length = 1,
+    direction = Vector2.of(1, 0),
+    headLength = 0.2 * length,
+    headWidth = 0.04 * length,
+    origin = Vector2.of(),
+    width = 1,
+  }: Partial<ArrowGeometry> = {}): ArrowGeometry {
     return new ArrowGeometry({
       direction,
       headLength,

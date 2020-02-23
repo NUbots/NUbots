@@ -1,5 +1,4 @@
 import { storiesOf } from '@storybook/react'
-import { IComputedValue } from 'mobx'
 import { action } from 'mobx'
 import { reaction } from 'mobx'
 import { computed } from 'mobx'
@@ -37,10 +36,10 @@ import robotSvgUrl from './robot.file.svg'
 storiesOf('component.three', module)
   .addDecorator(fullscreen)
   .add('renders static scene with render targets', () => {
-    return <RenderTargetHarness/>
+    return <RenderTargetHarness />
   })
   .add('renders animated scene with render targets', () => {
-    return <RenderTargetHarness animate/>
+    return <RenderTargetHarness animate />
   })
 
 type Model = { time: number }
@@ -53,11 +52,15 @@ class RenderTargetHarness extends React.Component<{ animate?: boolean }> {
 
   componentDidMount() {
     this.update(0)
-    this.props.animate && disposeOnUnmount(this, reaction(() => now('frame'), this.update))
+    this.props.animate &&
+      disposeOnUnmount(
+        this,
+        reaction(() => now('frame'), this.update),
+      )
   }
 
   render() {
-    return <Three stage={this.stage} clearColor={new Color('white')}/>
+    return <Three stage={this.stage} clearColor={new Color('white')} />
   }
 
   private stage = (canvas: Canvas) => {
@@ -73,7 +76,7 @@ class RenderTargetHarness extends React.Component<{ animate?: boolean }> {
 
   @action.bound
   private update(now: number) {
-    this.model.time = 2 * Math.PI * now / (60 * 1000)
+    this.model.time = (2 * Math.PI * now) / (60 * 1000)
   }
 }
 
@@ -82,8 +85,7 @@ class WhiteBoxViewModel {
     private readonly canvas: Canvas,
     private readonly model: Model,
     private readonly orangeBoxTexture: () => Texture,
-  ) {
-  }
+  ) {}
 
   static of(canvas: Canvas, model: Model, orangeBoxTexture: () => Texture) {
     return new WhiteBoxViewModel(canvas, model, orangeBoxTexture)
@@ -108,11 +110,7 @@ class WhiteBoxViewModel {
   }
 
   private readonly scene = scene(() => ({
-    children: [
-      this.ambientLight(),
-      this.pointLight(),
-      this.box(),
-    ],
+    children: [this.ambientLight(), this.pointLight(), this.box()],
   }))
 
   private readonly ambientLight = ambientLight(() => ({ intensity: 0.5 }))
@@ -138,8 +136,7 @@ class OrangeBoxViewModel {
     private readonly model: Model,
     private readonly robotTexture: () => Texture,
     private readonly renderTarget: () => WebGLRenderTarget,
-  ) {
-  }
+  ) {}
 
   static of(model: Model, robotTexture: () => Texture, renderTarget: () => WebGLRenderTarget) {
     return new OrangeBoxViewModel(model, robotTexture, renderTarget)
@@ -152,14 +149,13 @@ class OrangeBoxViewModel {
   }))
 
   private readonly scene = scene(() => ({
-    children: [
-      this.ambientLight(),
-      this.pointLight(),
-      this.box(),
-    ],
+    children: [this.ambientLight(), this.pointLight(), this.box()],
   }))
 
-  private readonly ambientLight = ambientLight(() => ({ color: new Color('orange'), intensity: 0.5 }))
+  private readonly ambientLight = ambientLight(() => ({
+    color: new Color('orange'),
+    intensity: 0.5,
+  }))
 
   private readonly pointLight = pointLight(() => ({
     color: new Color('orange'),
@@ -195,8 +191,7 @@ class RobotViewModel {
   constructor(
     private readonly model: Model,
     private readonly renderTarget: () => WebGLRenderTarget,
-  ) {
-  }
+  ) {}
 
   static of(model: Model, renderTarget: () => WebGLRenderTarget) {
     return new RobotViewModel(model, renderTarget)
@@ -210,7 +205,14 @@ class RobotViewModel {
 
   private readonly scene = scene(() => ({ children: [this.robot()] }))
 
-  private readonly camera = orthographicCamera(() => ({ left: -1, right: 1, top: 1, bottom: -1, near: 0, far: 1 }))
+  private readonly camera = orthographicCamera(() => ({
+    left: -1,
+    right: 1,
+    top: 1,
+    bottom: -1,
+    near: 0,
+    far: 1,
+  }))
 
   private readonly robot = mesh(() => ({
     geometry: this.geometry(),
@@ -220,7 +222,10 @@ class RobotViewModel {
 
   private readonly geometry = planeGeometry(() => ({ width: 1, height: 1 }))
 
-  private readonly material = meshBasicMaterial(() => ({ map: this.texture.get(), transparent: true }))
+  private readonly material = meshBasicMaterial(() => ({
+    map: this.texture.get(),
+    transparent: true,
+  }))
 
   private readonly texture = disposableComputed<Texture>(() => {
     const texture = new TextureLoader().load(String(robotSvgUrl))

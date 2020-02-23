@@ -1,4 +1,3 @@
-import React from 'react'
 import { ComponentType } from 'react'
 
 import { NavigationConfiguration } from '../../navigation'
@@ -10,10 +9,15 @@ import { LineChart as LineChartImpl } from './line_chart/view'
 import { ChartModel } from './model'
 import { ChartView as ChartViewImpl } from './view'
 
-export function installChart({ nav, appModel, nusightNetwork, menu }: {
-  nav: NavigationConfiguration,
-  appModel: AppModel,
-  nusightNetwork: NUsightNetwork,
+export function installChart({
+  nav,
+  appModel,
+  nusightNetwork,
+  menu,
+}: {
+  nav: NavigationConfiguration
+  appModel: AppModel
+  nusightNetwork: NUsightNetwork
   menu: ComponentType
 }) {
   const model = ChartModel.of({ robotModels: appModel.robots })

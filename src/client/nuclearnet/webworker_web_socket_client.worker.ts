@@ -8,7 +8,6 @@ let callbackId = 0
 const callbacks: Map<number, Function> = new Map()
 
 const findBuffers = (obj: any): ArrayBuffer[] => {
-
   const buffers: any[] = []
 
   Object.keys(obj).forEach(k => {
@@ -24,15 +23,14 @@ const findBuffers = (obj: any): ArrayBuffer[] => {
 
 addEventListener('message', (e: MessageEvent) => {
   switch (e.data.command) {
-
-    case 'construct':
+    case 'construct': {
       const { uri, opts } = e.data
       socket = SocketIO(uri, {
         ...opts,
         parser: NUClearNetProxyParser,
       })
       break
-
+    }
     case 'connect':
       socket.connect()
       break
@@ -52,7 +50,6 @@ addEventListener('message', (e: MessageEvent) => {
       if (!events.has(e.data.event)) {
         events.set(e.data.event, 0)
         socket.on(e.data.event, (...args: any[]) => {
-
           // Map out the functions and replace them with a proxy
           args = args.map(v => {
             if (v instanceof Function) {
@@ -64,10 +61,11 @@ addEventListener('message', (e: MessageEvent) => {
             }
           })
 
-          postMessage({
-            event: e.data.event,
-            args,
-          },
+          postMessage(
+            {
+              event: e.data.event,
+              args,
+            },
             findBuffers(args),
           )
         })
@@ -76,14 +74,13 @@ addEventListener('message', (e: MessageEvent) => {
       events.set(e.data.event, events.get(e.data.event)! + 1)
       break
 
-    case 'off':
+    case 'off': {
       if (!events.has(e.data.event)) {
         throw Error(`The event ${event} did not have any registered callbacks`)
       }
 
       const v = events.get(e.data.event)!
       if (v === 1) {
-
         // Since there is only ever one listener we can just remove it
         socket.off(e.data.event)
         events.delete(e.data.event)
@@ -92,6 +89,7 @@ addEventListener('message', (e: MessageEvent) => {
       }
 
       break
+    }
 
     case 'send':
       socket.emit(e.data.event, ...e.data.args)
@@ -99,4 +97,4 @@ addEventListener('message', (e: MessageEvent) => {
   }
 })
 
-export default {} as any as new() => Worker
+export default ({} as any) as new () => Worker

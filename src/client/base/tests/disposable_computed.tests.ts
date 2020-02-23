@@ -5,8 +5,8 @@ import { autorun } from 'mobx'
 import { disposableComputed } from '../disposable_computed'
 
 describe('disposableComputed', () => {
-  let model: { a: number, b: number }
-  let expr: IComputedValue<{ sum: number, dispose: jest.Mock<void, []> }>
+  let model: { a: number; b: number }
+  let expr: IComputedValue<{ sum: number; dispose: jest.Mock<void, []> }>
 
   beforeEach(() => {
     model = observable({ a: 1, b: 1 })
@@ -92,8 +92,7 @@ describe('disposableComputed', () => {
       constructor(
         private readonly factory: TriangleFactory,
         private readonly model: { color: string },
-      ) {
-      }
+      ) {}
 
       @disposableComputed
       get value(): Triangle {
@@ -159,8 +158,7 @@ class TriangleFactory {
 }
 
 class Triangle {
-  constructor(public color: string, private onDispose: () => void) {
-  }
+  constructor(public color: string, private onDispose: () => void) {}
 
   dispose() {
     this.onDispose()

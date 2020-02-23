@@ -27,54 +27,63 @@ import { renderPath } from './path'
 import { renderPolygon } from './polygon'
 import { renderText } from './text'
 
-export const pixiObject = createTransformer((obj: Group | Shape<Geometry>): DisplayObject => {
+export const pixiObject = createTransformer(
+  (obj: Group | Shape<Geometry>): DisplayObject => {
+    if (obj instanceof Group) {
+      const g = new Container()
 
-  if (obj instanceof Group) {
-    const g = new Container()
+      const {
+        transform: { scale, translate, rotate },
+      } = obj
+      g.scale.x = scale.x
+      g.scale.y = scale.x
+      g.x = translate.x
+      g.y = translate.y
+      g.rotation = rotate
 
-    const { transform: { scale, translate, rotate } } = obj
-    g.scale.x = scale.x
-    g.scale.y = scale.x
-    g.x = translate.x
-    g.y = translate.y
-    g.rotation = rotate
+      obj.children.forEach(o => {
+        g.addChild(pixiObject(o))
+      })
 
-    obj.children.forEach(o => {
-      g.addChild(pixiObject(o))
-    })
-
-    return g
-
-  } else if (obj instanceof Shape) {
-    if (obj.geometry instanceof ArcGeometry) {
-      return renderArc(obj as Shape<ArcGeometry>)
-    } else if (obj.geometry instanceof ArrowGeometry) {
-      return renderArrow(obj as Shape<ArrowGeometry>)
-    } else if (obj.geometry instanceof CircleGeometry) {
-      return renderCircle(obj as Shape<CircleGeometry>)
-    } else if (obj.geometry instanceof LineGeometry) {
-      return renderLine(obj as Shape<LineGeometry>)
-    } else if (obj.geometry instanceof MarkerGeometry) {
-      return renderMarker(obj as Shape<MarkerGeometry>)
-    } else if (obj.geometry instanceof PathGeometry) {
-      return renderPath(obj as Shape<PathGeometry>)
-    } else if (obj.geometry instanceof PolygonGeometry) {
-      return renderPolygon(obj as Shape<PolygonGeometry>)
-    } else if (obj.geometry instanceof TextGeometry) {
-      return renderText(obj as Shape<TextGeometry>)
+      return g
+    } else if (obj instanceof Shape) {
+      if (obj.geometry instanceof ArcGeometry) {
+        return renderArc(obj as Shape<ArcGeometry>)
+      } else if (obj.geometry instanceof ArrowGeometry) {
+        return renderArrow(obj as Shape<ArrowGeometry>)
+      } else if (obj.geometry instanceof CircleGeometry) {
+        return renderCircle(obj as Shape<CircleGeometry>)
+      } else if (obj.geometry instanceof LineGeometry) {
+        return renderLine(obj as Shape<LineGeometry>)
+      } else if (obj.geometry instanceof MarkerGeometry) {
+        return renderMarker(obj as Shape<MarkerGeometry>)
+      } else if (obj.geometry instanceof PathGeometry) {
+        return renderPath(obj as Shape<PathGeometry>)
+      } else if (obj.geometry instanceof PolygonGeometry) {
+        return renderPolygon(obj as Shape<PolygonGeometry>)
+      } else if (obj.geometry instanceof TextGeometry) {
+        return renderText(obj as Shape<TextGeometry>)
+      } else {
+        throw new Error(`Unsupported geometry type: ${obj.geometry}`)
+      }
     } else {
-      throw new Error(`Unsupported geometry type: ${obj.geometry}`)
+      throw new Error(`Unsupported Object2d type: ${obj}`)
     }
-  } else {
-    throw new Error(`Unsupported Object2d type: ${obj}`)
-  }
-})
+  },
+)
 
-export function applyAppearance(obj: Graphics, appearance: Appearance, draw: (obj: Graphics) => void): void {
-
+export function applyAppearance(
+  obj: Graphics,
+  appearance: Appearance,
+  draw: (obj: Graphics) => void,
+): void {
   if (appearance instanceof BasicAppearance) {
     if (appearance.stroke) {
-      obj.lineStyle(appearance.stroke.width, parseInt(appearance.stroke.color.slice(1), 16), appearance.stroke.alpha)
+      obj.lineStyle(
+        appearance.stroke.width,
+        parseInt(appearance.stroke.color.slice(1), 16),
+        appearance.stroke.alpha,
+      )
     } else {
       obj.lineStyle(0, 0, 0)
     }
@@ -88,10 +97,12 @@ export function applyAppearance(obj: Graphics, appearance: Appearance, draw: (ob
     if (appearance.fill) {
       obj.endFill()
     }
-
   } else if (appearance instanceof LineAppearance) {
-
-    obj.lineStyle(appearance.stroke.width, parseInt(appearance.stroke.color.slice(1), 16), appearance.stroke.alpha)
+    obj.lineStyle(
+      appearance.stroke.width,
+      parseInt(appearance.stroke.color.slice(1), 16),
+      appearance.stroke.alpha,
+    )
     if (appearance.stroke.nonScaling) {
       obj.nativeLines = true
     }

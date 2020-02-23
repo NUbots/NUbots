@@ -1,11 +1,10 @@
 import { ComponentType } from 'react'
-import React from 'react'
 
 export type Route = {
   exact?: boolean
   path: string
-  Icon: any,
-  label: string,
+  Icon: any
+  label: string
   Content: ComponentType
 }
 

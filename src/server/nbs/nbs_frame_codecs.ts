@@ -19,14 +19,16 @@ export type NbsFrame = {
 // 8 Bytes - 64bit bit hash of the message type.
 // N bytes - The binary packet payload.
 
-export const NBS_HEADER = Buffer.from([0xE2, 0x98, 0xA2]) // NUClear radiation symbol.
+export const NBS_HEADER = Buffer.from([0xe2, 0x98, 0xa2]) // NUClear radiation symbol.
 export const PACKET_SIZE_SIZE = 4
 export const TIMESTAMP_SIZE = 8
 export const HASH_SIZE = 8
 
 export function encodeFrame(frame: NbsFrame): Buffer {
-  assert(frame.hash.byteLength === HASH_SIZE,
-    `Expected hash buffer size of ${HASH_SIZE} but received ${frame.hash.byteLength}`)
+  assert(
+    frame.hash.byteLength === HASH_SIZE,
+    `Expected hash buffer size of ${HASH_SIZE} but received ${frame.hash.byteLength}`,
+  )
 
   const size = TIMESTAMP_SIZE + HASH_SIZE + frame.payload.byteLength
   const sizeBuffer = Buffer.alloc(PACKET_SIZE_SIZE)
@@ -37,25 +39,19 @@ export function encodeFrame(frame: NbsFrame): Buffer {
   timestampBuffer.writeUInt32LE(timeLong.getLowBitsUnsigned(), 0)
   timestampBuffer.writeUInt32LE(timeLong.getHighBitsUnsigned(), 4)
 
-  return Buffer.concat([
-    NBS_HEADER,
-    sizeBuffer,
-    timestampBuffer,
-    frame.hash,
-    frame.payload,
-  ])
+  return Buffer.concat([NBS_HEADER, sizeBuffer, timestampBuffer, frame.hash, frame.payload])
 }
 
 export function decodeFrame(buffer: Buffer): NbsFrame {
-  const values = binary.parse(buffer)
+  const values = binary
+    .parse(buffer)
     .buffer('header', NBS_HEADER.byteLength)
     .word32lu('size')
     .word64le('timestampInMicroseconds')
     .buffer('hash', HASH_SIZE)
     .tap(function(vars) {
       this.buffer('payload', vars.size)
-    })
-    .vars
+    }).vars
 
   return {
     timestampInMicroseconds: values.timestampInMicroseconds,

@@ -12,10 +12,15 @@ export class RobotNetworkStatsModel {
   @observable.ref bytes: number
   @observable.ref bytesPerSecond: Rate
 
-  constructor({ packets, packetsPerSecond, bytes, bytesPerSecond }: {
-    packets: number,
-    packetsPerSecond: Rate,
-    bytes: number,
+  constructor({
+    packets,
+    packetsPerSecond,
+    bytes,
+    bytesPerSecond,
+  }: {
+    packets: number
+    packetsPerSecond: Rate
+    bytes: number
     bytesPerSecond: Rate
   }) {
     this.packets = packets
@@ -24,6 +29,7 @@ export class RobotNetworkStatsModel {
     this.bytesPerSecond = bytesPerSecond
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static of = memoize((robotModel: RobotModel) => {
     return new RobotNetworkStatsModel({
       bytes: 0,

@@ -9,8 +9,7 @@ import { AppModel } from './model'
 export class AppNetwork {
   private nextRobotId: number
 
-  constructor(private nusightNetwork: NUsightNetwork,
-              private model: AppModel) {
+  constructor(private nusightNetwork: NUsightNetwork, private model: AppModel) {
     this.nextRobotId = 0
 
     nusightNetwork.onNUClearJoin(this.onJoin)
@@ -35,14 +34,16 @@ export class AppNetwork {
       robot.port = peer.port
     } else {
       const robotId = String(this.nextRobotId++)
-      this.model.robots.push(RobotModel.of({
-        id: robotId,
-        name: peer.name,
-        address: peer.address,
-        port: peer.port,
-        connected: true,
-        enabled: true, // TODO (Annable): Only automatically enable robots that have connected shortly after load.
-      }))
+      this.model.robots.push(
+        RobotModel.of({
+          id: robotId,
+          name: peer.name,
+          address: peer.address,
+          port: peer.port,
+          connected: true,
+          enabled: true, // TODO (Annable): Only automatically enable robots that have connected shortly after load.
+        }),
+      )
     }
   }
 
@@ -53,7 +54,11 @@ export class AppNetwork {
     }
 
     const robot = this.model.robots.find(otherRobot => {
-      return otherRobot.name === peer.name && otherRobot.address === peer.address && otherRobot.port === peer.port
+      return (
+        otherRobot.name === peer.name &&
+        otherRobot.address === peer.address &&
+        otherRobot.port === peer.port
+      )
     })
     if (robot) {
       robot.connected = false

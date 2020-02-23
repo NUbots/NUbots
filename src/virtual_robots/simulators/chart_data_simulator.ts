@@ -24,7 +24,7 @@ export class ChartSimulator extends Simulator {
 
     const messageType = 'message.support.nusight.DataPoint'
     const period = 10
-    const theta = 2 * Math.PI * time / period
+    const theta = (2 * Math.PI * time) / period
     const sin = Math.sin(theta)
     const cos = Math.cos(theta)
 
@@ -38,4 +38,3 @@ export class ChartSimulator extends Simulator {
     return message
   }
 }
-

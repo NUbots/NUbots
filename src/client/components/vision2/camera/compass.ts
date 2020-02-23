@@ -11,20 +11,14 @@ export class CompassViewModel {
   constructor(
     private readonly params: CameraParams,
     private readonly lineProjection: LineProjection,
-  ) {
-  }
+  ) {}
 
   static of(canvas: Canvas, params: CameraParams): CompassViewModel {
     return new CompassViewModel(params, LineProjection.of(canvas, params.lens))
   }
 
   readonly compass = group(() => ({
-    children: [
-      this.xPositiveAxis,
-      this.xNegativeAxis,
-      this.yPositiveAxis,
-      this.yNegativeAxis,
-    ],
+    children: [this.xPositiveAxis, this.xNegativeAxis, this.yPositiveAxis, this.yNegativeAxis],
   }))
 
   @computed

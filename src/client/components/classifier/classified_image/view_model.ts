@@ -23,8 +23,7 @@ import fragmentShader from './shaders/classify.frag'
 import vertexShader from './shaders/classify.vert'
 
 export class ClassifiedImageViewModel {
-  constructor(private readonly model: ClassifiedImageModel) {
-  }
+  constructor(private readonly model: ClassifiedImageModel) {}
 
   static of(model: ClassifiedImageModel) {
     return new ClassifiedImageViewModel(model)

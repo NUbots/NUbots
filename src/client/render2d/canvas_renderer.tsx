@@ -23,7 +23,6 @@ export class CanvasRenderer extends Component<RendererProps> {
   private stopAutorun?: IReactionDisposer
 
   componentDidMount() {
-
     // Render when changes happen
     this.stopAutorun = autorun(this.renderCanvas, {
       scheduler: requestAnimationFrame,
@@ -39,7 +38,7 @@ export class CanvasRenderer extends Component<RendererProps> {
   render() {
     return (
       <div className={classNames(this.props.className, style.container)}>
-        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize}/>
+        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
         <canvas
           className={style.container}
           width={-this.resolution.translate.x * 2}
@@ -70,7 +69,6 @@ export class CanvasRenderer extends Component<RendererProps> {
 
   @action
   private onResize = (width: number, height: number) => {
-
     // Multiply all our widths by dpi
     width *= devicePixelRatio
     height *= devicePixelRatio
@@ -80,9 +78,9 @@ export class CanvasRenderer extends Component<RendererProps> {
 
     // If we have an aspect ratio, use it to scale the canvas to unit size
     if (this.props.aspectRatio !== undefined) {
-
       const canvasAspect = width / height
-      const scale = canvasAspect < this.props.aspectRatio ? 1 / width : 1 / (height * this.props.aspectRatio)
+      const scale =
+        canvasAspect < this.props.aspectRatio ? 1 / width : 1 / (height * this.props.aspectRatio)
       // Scale to fit
       this.resolution = Transform.of({ scale: { x: scale, y: scale }, translate })
     } else {

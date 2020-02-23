@@ -35,9 +35,8 @@ export class Rate {
     } else {
       // Update the current rate using the culmulative sum for the ending time period
       this.currentRate =
-        (this.currentRate * this.smoothing) +
-        (this.currentUpdateCount / (now - this.lastUpdateTime)) *
-        (1.0 - this.smoothing)
+        this.currentRate * this.smoothing +
+        (this.currentUpdateCount / (now - this.lastUpdateTime)) * (1.0 - this.smoothing)
 
       // Commit the current rate at a throttled interval
       this.commit(this.currentRate)
@@ -49,5 +48,8 @@ export class Rate {
     }
   }
 
-  private commit = throttle(1000, action((rate: number) => this.rate = rate))
+  private commit = throttle(
+    1000,
+    action((rate: number) => (this.rate = rate)),
+  )
 }

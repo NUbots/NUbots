@@ -6,8 +6,7 @@ import seedrandom from 'seedrandom'
  * Useful in tests or fakes to generate a predictable range of values that will be the same each time the test is run.
  */
 export class SeededRandom {
-  constructor(private prng: () => number) {
-  }
+  constructor(private prng: () => number) {}
 
   static of(seed: string) {
     return new SeededRandom(seedrandom(seed))

@@ -21,12 +21,14 @@ const app = express()
 const server = http.createServer(app)
 const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 
-app.use(history({
-  rewrites: [
-    // Allows user to navigate to /storybook/ without needing to type /index.html
-    { from: /\/storybook\/$/, to: 'storybook/index.html' },
-  ],
-}))
+app.use(
+  history({
+    rewrites: [
+      // Allows user to navigate to /storybook/ without needing to type /index.html
+      { from: /\/storybook\/$/, to: 'storybook/index.html' },
+    ],
+  }),
+)
 app.use(compression())
 app.use(express.static(path.join('dist', 'public')))
 app.use(favicon(path.join('dist', 'public', 'favicon.ico')))

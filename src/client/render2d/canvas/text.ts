@@ -5,9 +5,22 @@ import { Shape } from '../object/shape'
 
 import { applyAppearance } from './rendering'
 
-export function renderText(ctx: CanvasRenderingContext2D, shape: Shape<TextGeometry>, world: Transform): void {
-
-  const { x, y, text, fontSize, fontFamily, textAlign, textBaseline, worldAlignment, worldScale } = shape.geometry
+export function renderText(
+  ctx: CanvasRenderingContext2D,
+  shape: Shape<TextGeometry>,
+  world: Transform,
+): void {
+  const {
+    x,
+    y,
+    text,
+    fontSize,
+    fontFamily,
+    textAlign,
+    textBaseline,
+    worldAlignment,
+    worldScale,
+  } = shape.geometry
 
   ctx.font = `${fontSize} ${fontFamily}`
   ctx.textAlign = textAlign === 'middle' ? 'center' : textAlign

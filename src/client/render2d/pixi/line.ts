@@ -6,16 +6,17 @@ import { Shape } from '../object/shape'
 
 import { applyAppearance } from './rendering'
 
-export const renderLine = createTransformer((shape: Shape<LineGeometry>): Graphics => {
+export const renderLine = createTransformer(
+  (shape: Shape<LineGeometry>): Graphics => {
+    const { origin, target } = shape.geometry
 
-  const { origin, target } = shape.geometry
+    const g = new Graphics()
 
-  const g = new Graphics()
+    applyAppearance(g, shape.appearance, g => {
+      g.moveTo(origin.x, origin.y)
+      g.lineTo(target.x, target.y)
+    })
 
-  applyAppearance(g, shape.appearance, g => {
-    g.moveTo(origin.x, origin.y)
-    g.lineTo(target.x, target.y)
-  })
-
-  return g
-})
+    return g
+  },
+)

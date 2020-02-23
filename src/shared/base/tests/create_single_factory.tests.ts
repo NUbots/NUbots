@@ -1,8 +1,7 @@
 import { createSingletonFactory } from '../create_singleton_factory'
 
 describe('createSingletonFactory', () => {
-  class MyClass {
-  }
+  class MyClass {}
 
   it('returns a new instance from factory', () => {
     const factory = createSingletonFactory(() => new MyClass())

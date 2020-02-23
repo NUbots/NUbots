@@ -19,15 +19,20 @@ export class VisionView extends Component<{
   }
 
   render() {
-    const { viewModel: { robots }, Menu } = this.props
+    const {
+      viewModel: { robots },
+      Menu,
+    } = this.props
     return (
       <div className={styles.vision}>
-        <Menu/>
+        <Menu />
         {robots.map(({ id, name, cameras }) => (
           <div key={id}>
             <h1>{name}</h1>
             <div className={styles.cameras}>
-              {cameras.map(camera => <CameraView key={camera.id} viewModel={camera}/>)}
+              {cameras.map(camera => (
+                <CameraView key={camera.id} viewModel={camera} />
+              ))}
             </div>
           </div>
         ))}

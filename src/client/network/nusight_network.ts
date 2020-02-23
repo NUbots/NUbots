@@ -18,10 +18,11 @@ import { RobotNetworkStatsModel } from './model'
  * instead create their own ComponentNetwork class which uses the Network helper class.
  */
 export class NUsightNetwork {
-  constructor(private nuclearnetClient: NUClearNetClient,
-              private appModel: AppModel,
-              private messageTypePath: MessageTypePath) {
-  }
+  constructor(
+    private nuclearnetClient: NUClearNetClient,
+    private appModel: AppModel,
+    private messageTypePath: MessageTypePath,
+  ) {}
 
   static of(appModel: AppModel) {
     const messageTypePath = MessageTypePath.of()
@@ -39,23 +40,28 @@ export class NUsightNetwork {
 
   onNUClearMessage<T>(messageType: MessageType<T>, cb: MessageCallback<T>) {
     const messageTypeName = this.messageTypePath.getPath(messageType)
-    return this.nuclearnetClient.on(messageTypeName, action((packet: NUClearNetPacket) => {
-      const buffer = new Uint8Array(packet.payload)
-      const message = messageType.decode(buffer)
-      const peer = packet.peer
-      const robotModel = this.appModel.robots.find(robot => {
-        return robot.name === peer.name && robot.address === peer.address && robot.port === peer.port
-      })
-      if (robotModel) {
-        const stats = RobotNetworkStatsModel.of(robotModel)
-        stats.packets += 1
-        stats.packetsPerSecond.update(1)
-        stats.bytes += buffer.length
-        stats.bytesPerSecond.update(buffer.length)
+    return this.nuclearnetClient.on(
+      messageTypeName,
+      action((packet: NUClearNetPacket) => {
+        const buffer = new Uint8Array(packet.payload)
+        const message = messageType.decode(buffer)
+        const peer = packet.peer
+        const robotModel = this.appModel.robots.find(robot => {
+          return (
+            robot.name === peer.name && robot.address === peer.address && robot.port === peer.port
+          )
+        })
+        if (robotModel) {
+          const stats = RobotNetworkStatsModel.of(robotModel)
+          stats.packets += 1
+          stats.packetsPerSecond.update(1)
+          stats.bytes += buffer.length
+          stats.bytesPerSecond.update(buffer.length)
 
-        cb(robotModel, message)
-      }
-    }))
+          cb(robotModel, message)
+        }
+      }),
+    )
   }
 
   onNUClearJoin(cb: (peer: NUClearNetPeer) => void) {
@@ -68,7 +74,7 @@ export class NUsightNetwork {
 }
 
 export interface MessageType<T> {
-  new(...args: any[]): T
+  new (...args: any[]): T
 
   decode(...args: any[]): T
 }

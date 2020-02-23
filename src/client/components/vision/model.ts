@@ -8,8 +8,7 @@ import { RobotModel } from '../robot/model'
 import { CameraModel } from './camera/model'
 
 export class VisionModel {
-  constructor(private appModel: AppModel) {
-  }
+  constructor(private appModel: AppModel) {}
 
   static of = memoize((appModel: AppModel) => {
     return new VisionModel(appModel)
@@ -22,11 +21,9 @@ export class VisionModel {
 }
 
 export class VisionRobotModel {
-
   @observable cameras: Map<number, CameraModel> = new Map()
 
-  constructor(private robotModel: RobotModel) {
-  }
+  constructor(private robotModel: RobotModel) {}
 
   static of = memoize((robotModel: RobotModel) => {
     return new VisionRobotModel(robotModel)

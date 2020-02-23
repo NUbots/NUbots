@@ -23,8 +23,11 @@ import { renderPath } from './path'
 import { renderPolygon } from './polygon'
 import { renderText } from './text'
 
-export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Group | Shape<Geometry>, world: Transform) {
-
+export function renderObject2d(
+  ctx: CanvasRenderingContext2D,
+  obj: Group | Shape<Geometry>,
+  world: Transform,
+) {
   if (obj instanceof Group) {
     const objWorld = world.then(obj.transform)
 
@@ -66,7 +69,7 @@ export function applyTransform(ctx: CanvasRenderingContext2D, transform: Transfo
 }
 
 // e.g. '#ff0000' → { r: 255, g: 0, b: 0 }
-export const hexToRGB = (hex: string): { r: number, g: number, b: number } => {
+export const hexToRGB = (hex: string): { r: number; g: number; b: number } => {
   const result = /^#([A-Fa-f0-9]{2})([A-Fa-f0-9]{2})([A-Fa-f0-9]{2})/.exec(hex)
 
   if (result === null) {
@@ -81,9 +84,7 @@ export const hexToRGB = (hex: string): { r: number, g: number, b: number } => {
 }
 
 export function applyAppearance(ctx: CanvasRenderingContext2D, appearance: Appearance): void {
-
   if (appearance instanceof BasicAppearance) {
-
     if (appearance.fill) {
       const fill = hexToRGB(appearance.fill.color)
       const fA = appearance.fill.alpha
@@ -96,9 +97,7 @@ export function applyAppearance(ctx: CanvasRenderingContext2D, appearance: Appea
       ctx.lineWidth = appearance.stroke.width
       ctx.strokeStyle = `rgba(${stroke.r}, ${stroke.g}, ${stroke.b}, ${sA})`
     }
-
   } else if (appearance instanceof LineAppearance) {
-
     ctx.lineCap = appearance.stroke.cap
     ctx.lineDashOffset = appearance.stroke.dashOffset
     ctx.lineJoin = appearance.stroke.join

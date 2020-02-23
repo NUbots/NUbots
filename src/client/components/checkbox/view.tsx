@@ -27,13 +27,15 @@ export const Checkbox: StatelessComponent<CheckboxProps> = (props: CheckboxProps
 
   return (
     <span className={style.checkbox}>
-      <input type='checkbox'
-             className={style.nativeControl}
-             checked={checked}
-             disabled={disabled}
-             onChange={onChange}/>
+      <input
+        type="checkbox"
+        className={style.nativeControl}
+        checked={checked}
+        disabled={disabled}
+        onChange={onChange}
+      />
       <span className={backgroundClassName}>
-        <CheckIcon className={checkIconClassName}/>
+        <CheckIcon className={checkIconClassName} />
       </span>
     </span>
   )

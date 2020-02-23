@@ -51,7 +51,10 @@ describe('Networking Integration', () => {
 
       sendMessages()
 
-      expect(onSensors).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
+      expect(onSensors).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Robot #1' }),
+        expect.any(Sensors),
+      )
       expect(onSensors).toHaveBeenCalledTimes(1)
     })
 
@@ -80,7 +83,10 @@ describe('Networking Integration', () => {
       sendMessages()
 
       expect(onSensors1).not.toHaveBeenCalled()
-      expect(onSensors2).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
+      expect(onSensors2).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Robot #1' }),
+        expect.any(Sensors),
+      )
     })
   })
 
@@ -101,7 +107,10 @@ describe('Networking Integration', () => {
 
       sendMessages()
 
-      expect(onSensors).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
+      expect(onSensors).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Robot #1' }),
+        expect.any(Sensors),
+      )
     })
 
     it('handles multiple sessions simultaneously', () => {
@@ -117,8 +126,14 @@ describe('Networking Integration', () => {
 
       sendMessages()
 
-      expect(onSensors1).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
-      expect(onSensors2).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
+      expect(onSensors1).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Robot #1' }),
+        expect.any(Sensors),
+      )
+      expect(onSensors2).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Robot #1' }),
+        expect.any(Sensors),
+      )
     })
   })
 

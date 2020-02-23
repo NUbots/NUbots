@@ -3,19 +3,19 @@ import { IComputedValue } from 'mobx'
 export type Image = DataImage | ElementImage
 
 interface BaseImage {
-  width: number,
-  height: number,
-  format: ImageFormat,
+  width: number
+  height: number
+  format: ImageFormat
 }
 
 export interface DataImage extends BaseImage {
-  type: 'data',
-  data: IComputedValue<Uint8Array>,
+  type: 'data'
+  data: IComputedValue<Uint8Array>
 }
 
 export interface ElementImage extends BaseImage {
-  type: 'element',
-  element: HTMLImageElement,
+  type: 'element'
+  element: HTMLImageElement
 }
 
 export enum ImageFormat {
@@ -38,8 +38,8 @@ export enum ImageFormat {
   Y8__, // Monochrome
 }
 
-export type BayerImageFormat
-  = ImageFormat.BGGR
+export type BayerImageFormat =
+  | ImageFormat.BGGR
   | ImageFormat.RGGB
   | ImageFormat.GRBG
   | ImageFormat.GBRG

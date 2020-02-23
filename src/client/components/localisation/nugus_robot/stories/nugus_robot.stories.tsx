@@ -1,5 +1,4 @@
 import { storiesOf } from '@storybook/react'
-import { computed } from 'mobx'
 import { reaction } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { now } from 'mobx-utils'
@@ -14,12 +13,14 @@ import { NUgusViewModel } from '../view_model'
 
 storiesOf('component.localisation.nugus_robot', module)
   .addDecorator(fullscreen)
-  .add('renders statically', () => <NUgusVisualizer/>)
-  .add('renders animated', () => <NUgusVisualizer animate/>)
+  .add('renders statically', () => <NUgusVisualizer />)
+  .add('renders animated', () => <NUgusVisualizer animate />)
 
 class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
   render() {
-    return <ModelVisualiser model={this.createModel()} cameraPosition={new Vector3(0.5, 0.6, 0.5)}/>
+    return (
+      <ModelVisualiser model={this.createModel()} cameraPosition={new Vector3(0.5, 0.6, 0.5)} />
+    )
   }
 
   private createModel() {
@@ -32,21 +33,25 @@ class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
       port: 1234,
     })
     const model = LocalisationRobotModel.of(robotModel)
-    this.props.animate && disposeOnUnmount(this, reaction(
-      () => 2 * Math.PI * now('frame') / 1000,
-      t => this.simulateWalk(model, t),
-      { fireImmediately: true },
-    ))
+    this.props.animate &&
+      disposeOnUnmount(
+        this,
+        reaction(
+          () => (2 * Math.PI * now('frame')) / 1000,
+          t => this.simulateWalk(model, t),
+          { fireImmediately: true },
+        ),
+      )
     return () => NUgusViewModel.of(model).robot
   }
 
   simulateWalk(model: LocalisationRobotModel, t: number) {
-    model.motors.rightShoulderPitch.angle = 3 * Math.PI / 4 + 0.5 * Math.cos(t - Math.PI)
-    model.motors.leftShoulderPitch.angle = 3 * Math.PI / 4 + 0.5 * Math.cos(t)
+    model.motors.rightShoulderPitch.angle = (3 * Math.PI) / 4 + 0.5 * Math.cos(t - Math.PI)
+    model.motors.leftShoulderPitch.angle = (3 * Math.PI) / 4 + 0.5 * Math.cos(t)
     model.motors.rightShoulderRoll.angle = -Math.PI / 8
     model.motors.leftShoulderRoll.angle = Math.PI / 8
-    model.motors.rightElbow.angle = -3 * Math.PI / 4
-    model.motors.leftElbow.angle = -3 * Math.PI / 4
+    model.motors.rightElbow.angle = (-3 * Math.PI) / 4
+    model.motors.leftElbow.angle = (-3 * Math.PI) / 4
     model.motors.rightHipYaw.angle = 0
     model.motors.leftHipYaw.angle = 0
     model.motors.rightHipRoll.angle = 0

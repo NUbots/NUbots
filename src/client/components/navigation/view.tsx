@@ -14,8 +14,13 @@ interface NavigationItemViewProps {
 
 const NavigationItemView = ({ exact = false, url, Icon, children }: NavigationItemViewProps) => (
   <li className={style.header__item}>
-    <NavLink exact={exact} className={style.header__link} to={url} activeClassName={style['header__link--active']}>
-      <Icon className={style.header__icon}/>
+    <NavLink
+      exact={exact}
+      className={style.header__link}
+      to={url}
+      activeClassName={style['header__link--active']}
+    >
+      <Icon className={style.header__icon} />
       <span>{children}</span>
     </NavLink>
   </li>
@@ -26,10 +31,12 @@ export const NavigationView = ({ nav }: { nav: NavigationConfiguration }) => (
     <h1 className={style.header__title}>NUsight</h1>
     <ul className={style.header__list}>
       {...nav.getRoutes().map(config => (
-        <NavigationItemView key={config.path}
-                            exact={config.exact}
-                            url={config.path}
-                            Icon={config.Icon}>
+        <NavigationItemView
+          key={config.path}
+          exact={config.exact}
+          url={config.path}
+          Icon={config.Icon}
+        >
           {config.label}
         </NavigationItemView>
       ))}

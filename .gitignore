@@ -2,6 +2,7 @@
 /node_modules
 .module-cache
 .awcache
+.eslintcache
 /build
 /dist
 

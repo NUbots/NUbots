@@ -26,13 +26,22 @@ type Opts = {
 export class WebSocketProxyNUClearNetServer {
   private nuclearnetAddress: string
 
-  constructor(private server: WebSocketServer, private nuclearnetClient: NUClearNetClient, private address: string) {
+  constructor(
+    private server: WebSocketServer,
+    private nuclearnetClient: NUClearNetClient,
+    private address: string,
+  ) {
     server.onConnection(this.onClientConnection)
     this.nuclearnetAddress = address
   }
 
-  static of(server: WebSocketServer, { fakeNetworking, nuclearnetAddress }: Opts): WebSocketProxyNUClearNetServer {
-    const nuclearnetClient: NUClearNetClient = fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of()
+  static of(
+    server: WebSocketServer,
+    { fakeNetworking, nuclearnetAddress }: Opts,
+  ): WebSocketProxyNUClearNetServer {
+    const nuclearnetClient: NUClearNetClient = fakeNetworking
+      ? FakeNUClearNetClient.of()
+      : DirectNUClearNetClient.of()
     return new WebSocketProxyNUClearNetServer(server, nuclearnetClient, nuclearnetAddress)
   }
 
@@ -68,7 +77,12 @@ class WebSocketServerClient {
   }
 
   static of(nuclearnetClient: NUClearNetClient, socket: WebSocket, nuclearnetAddress: string) {
-    return new WebSocketServerClient(nuclearnetClient, socket, PacketProcessor.of(socket), nuclearnetAddress)
+    return new WebSocketServerClient(
+      nuclearnetClient,
+      socket,
+      PacketProcessor.of(socket),
+      nuclearnetAddress,
+    )
   }
 
   private onJoin = (peer: NUClearNetPeer) => {
@@ -129,10 +143,12 @@ class PacketProcessor {
   // The number of seconds before giving up on an acknowledge
   private timeout: number
 
-  constructor(private socket: WebSocket,
-              private clock: Clock,
-              private queue: LruPriorityQueue<string, { event: string, packet: NUClearNetPacket }>,
-              { outgoingLimit, timeout }: { outgoingLimit: number, timeout: number }) {
+  constructor(
+    private socket: WebSocket,
+    private clock: Clock,
+    private queue: LruPriorityQueue<string, { event: string; packet: NUClearNetPacket }>,
+    { outgoingLimit, timeout }: { outgoingLimit: number; timeout: number },
+  ) {
     this.outgoingLimit = outgoingLimit
     this.timeout = timeout
     this.queue = queue

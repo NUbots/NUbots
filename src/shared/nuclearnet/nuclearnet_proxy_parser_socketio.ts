@@ -53,8 +53,8 @@ export interface BinaryAckPacket {
   id: number
 }
 
-export type Packet
-  = ConnectPacket
+export type Packet =
+  | ConnectPacket
   | DisconnectPacket
   | EventPacket
   | AckPacket

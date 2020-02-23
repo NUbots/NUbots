@@ -2,7 +2,7 @@ import { observable } from 'mobx'
 
 import { Lut } from '../lut'
 
-export type RawImage = { readonly type: 'image', readonly image: HTMLImageElement }
+export type RawImage = { readonly type: 'image'; readonly image: HTMLImageElement }
 
 export class ClassifiedImageModel {
   @observable.ref rawImage?: RawImage

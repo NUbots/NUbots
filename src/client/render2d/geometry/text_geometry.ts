@@ -24,16 +24,16 @@ export class TextGeometry {
   }
 
   static of({
-              worldAlignment = false,
-              worldScale = false,
-              fontFamily = 'sans-serif',
-              fontSize = '1em',
-              text = '',
-              textAlign = 'start',
-              textBaseline = 'alphabetic',
-              x = 0,
-              y = 0,
-            }: Partial<TextGeometry> = {}): TextGeometry {
+    worldAlignment = false,
+    worldScale = false,
+    fontFamily = 'sans-serif',
+    fontSize = '1em',
+    text = '',
+    textAlign = 'start',
+    textBaseline = 'alphabetic',
+    x = 0,
+    y = 0,
+  }: Partial<TextGeometry> = {}): TextGeometry {
     return new TextGeometry({
       worldAlignment,
       worldScale,

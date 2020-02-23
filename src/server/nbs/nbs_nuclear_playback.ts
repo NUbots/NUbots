@@ -27,8 +27,7 @@ export class NbsNUClearPlayback extends stream.Writable {
   private firstFrameTimestamp?: number
   private firstLocalTimestamp?: number
 
-  constructor(private nuclearnetClient: NUClearNetClient,
-              private clock: Clock) {
+  constructor(private nuclearnetClient: NUClearNetClient, private clock: Clock) {
     super({
       objectMode: true,
     })
@@ -46,13 +45,20 @@ export class NbsNUClearPlayback extends stream.Writable {
     const rawStream = fs.createReadStream(filename, { highWaterMark: 1024 * 1024 * 32 })
     const isGzipped = filename.endsWith('.nbz') || filename.endsWith('.nbs.gz')
     const decompress = isGzipped ? createGunzip() : new PassThrough()
-    rawStream.pipe(decompress).pipe(new NbsFrameChunker()).pipe(new NbsFrameDecoder()).pipe(playback)
+    rawStream
+      .pipe(decompress)
+      .pipe(new NbsFrameChunker())
+      .pipe(new NbsFrameDecoder())
+      .pipe(playback)
     return playback
   }
 
   static fromRawStream(rawStream: ReadStream, nuclearnetClient: NUClearNetClient) {
     const playback = NbsNUClearPlayback.of(nuclearnetClient)
-    rawStream.pipe(new NbsFrameChunker()).pipe(new NbsFrameDecoder()).pipe(playback)
+    rawStream
+      .pipe(new NbsFrameChunker())
+      .pipe(new NbsFrameDecoder())
+      .pipe(playback)
     return playback
   }
 

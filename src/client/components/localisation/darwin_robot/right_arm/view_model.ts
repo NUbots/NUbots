@@ -12,12 +12,13 @@ import RightShoulderConfig from './config/right_shoulder.json'
 import RightUpperArmConfig from './config/right_upper_arm.json'
 
 export class RightArmViewModel {
-  constructor(private model: LocalisationRobotModel) {
-  }
+  constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer((model: LocalisationRobotModel): RightArmViewModel => {
-    return new RightArmViewModel(model)
-  })
+  static of = createTransformer(
+    (model: LocalisationRobotModel): RightArmViewModel => {
+      return new RightArmViewModel(model)
+    },
+  )
 
   @computed
   get rightArm() {

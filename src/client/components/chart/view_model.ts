@@ -24,9 +24,11 @@ export class TreeViewModel implements TreeNodeModel {
     this.expanded = false
   }
 
-  static of = createTransformer((opts: TreeViewModelOpts): TreeViewModel => {
-    return new TreeViewModel(opts)
-  })
+  static of = createTransformer(
+    (opts: TreeViewModelOpts): TreeViewModel => {
+      return new TreeViewModel(opts)
+    },
+  )
 
   @computed
   get color(): string {
@@ -40,10 +42,10 @@ export class TreeViewModel implements TreeNodeModel {
 
   set color(color: string) {
     if (!this.leaf) {
-      throw new Error(`Cannot set the color of a non-leaf node`)
+      throw new Error('Cannot set the color of a non-leaf node')
     }
 
-    (this.model as DataSeries).color = color
+    ;(this.model as DataSeries).color = color
   }
 
   @computed
@@ -58,10 +60,10 @@ export class TreeViewModel implements TreeNodeModel {
 
   set highlight(highlight: boolean) {
     if (!this.leaf) {
-      throw new Error(`Cannot set the highlight of a non-leaf node`)
+      throw new Error('Cannot set the highlight of a non-leaf node')
     }
 
-    (this.model as DataSeries).highlight = highlight
+    ;(this.model as DataSeries).highlight = highlight
   }
 
   @computed
@@ -88,7 +90,7 @@ export class TreeViewModel implements TreeNodeModel {
 
   set checked(checked: CheckedState) {
     if (this.leaf) {
-      (this.model as DataSeries).checked = checked
+      ;(this.model as DataSeries).checked = checked
     } else {
       this.children.forEach(child => {
         child.checked = checked
@@ -102,9 +104,11 @@ export class TreeViewModel implements TreeNodeModel {
       return []
     }
 
-    return Array.from(this.model.entries()).map((entry: [string, TreeData | DataSeries]) => TreeViewModel.of({
-      label: entry[0],
-      model: entry[1],
-    }))
+    return Array.from(this.model.entries()).map((entry: [string, TreeData | DataSeries]) =>
+      TreeViewModel.of({
+        label: entry[0],
+        model: entry[1],
+      }),
+    )
   }
 }

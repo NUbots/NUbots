@@ -6,12 +6,13 @@ import { VisionModel } from './model'
 import { VisionRobotModel } from './model'
 
 export class VisionViewModel {
-  constructor(private model: VisionModel) {
-  }
+  constructor(private model: VisionModel) {}
 
-  static of = createTransformer((model: VisionModel): VisionViewModel => {
-    return new VisionViewModel(model)
-  })
+  static of = createTransformer(
+    (model: VisionModel): VisionViewModel => {
+      return new VisionViewModel(model)
+    },
+  )
 
   @computed
   get robots(): RobotViewModel[] {
@@ -25,8 +26,7 @@ export class VisionViewModel {
 }
 
 export class RobotViewModel {
-  constructor(private model: VisionRobotModel) {
-  }
+  constructor(private model: VisionRobotModel) {}
 
   static of = createTransformer((model: VisionRobotModel) => {
     return new RobotViewModel(model)

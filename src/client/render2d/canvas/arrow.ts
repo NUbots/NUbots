@@ -5,7 +5,6 @@ import { Shape } from '../object/shape'
 import { applyAppearance } from './rendering'
 
 export function renderArrow(ctx: CanvasRenderingContext2D, shape: Shape<ArrowGeometry>): void {
-
   const { length, width, headLength, headWidth, origin, direction } = shape.geometry
 
   const w = width * 0.5

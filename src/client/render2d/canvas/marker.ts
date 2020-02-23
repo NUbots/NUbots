@@ -5,7 +5,6 @@ import { Shape } from '../object/shape'
 import { applyAppearance } from './rendering'
 
 export function renderMarker(ctx: CanvasRenderingContext2D, shape: Shape<MarkerGeometry>): void {
-
   const { x, y, radius, heading } = shape.geometry
 
   const headingAngle = Math.atan2(heading.y, heading.x)
@@ -18,22 +17,13 @@ export function renderMarker(ctx: CanvasRenderingContext2D, shape: Shape<MarkerG
   const endAngle = headingAngle + arcDistance + startAngleOffset
 
   ctx.beginPath()
-  ctx.arc(
-    x,
-    y,
-    radius,
-    startAngle,
-    endAngle,
-  )
+  ctx.arc(x, y, radius, startAngle, endAngle)
 
   // The diagonal length of a unit square.
   const sqrt2 = Math.sqrt(2)
 
   // Convert the heading to absolute canvas coordinates.
-  ctx.lineTo(
-    x + sqrt2 * radius * heading.x,
-    y + sqrt2 * radius * heading.y,
-  )
+  ctx.lineTo(x + sqrt2 * radius * heading.x, y + sqrt2 * radius * heading.y)
   ctx.closePath()
 
   applyAppearance(ctx, shape.appearance)

@@ -40,18 +40,18 @@ import { Vector3 } from '../../math/vector3'
 import { createUpdatableComputed } from './create_updatable_computed'
 
 type Object3DOpts = {
-  position?: Vector3,
-  rotation?: Vector3,
-  rotationOrder?: string,
-  scale?: Vector3,
-  up?: Vector3,
-  children?: (Object3D | false | undefined)[],
+  position?: Vector3
+  rotation?: Vector3
+  rotationOrder?: string
+  scale?: Vector3
+  up?: Vector3
+  children?: (Object3D | false | undefined)[]
   frustumCulled?: false
 }
 
 export type StageOpts = {
-  scene: Scene,
-  camera: Camera,
+  scene: Scene
+  camera: Camera
   target?: WebGLRenderTarget
 }
 
@@ -65,6 +65,7 @@ export const stage = createUpdatableComputed(
 )
 
 export const scene = createUpdatableComputed(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (opts: Object3DOpts) => new Scene(),
   (scene, opts) => {
     scene.remove(...scene.children)
@@ -89,14 +90,15 @@ export const group = createUpdatableComputed(
 )
 
 type PerspectiveCameraOpts = {
-  fov: number,
-  aspect: number,
-  near: number,
-  far: number,
+  fov: number
+  aspect: number
+  near: number
+  far: number
   lookAt?: Vector3
 }
 
 export const perspectiveCamera = createUpdatableComputed(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (opts: PerspectiveCameraOpts & Object3DOpts) => new PerspectiveCamera(),
   (camera, opts) => {
     camera.fov = opts.fov
@@ -110,16 +112,17 @@ export const perspectiveCamera = createUpdatableComputed(
 )
 
 type OrthographicCameraOpts = {
-  left: number,
-  right: number,
-  top: number,
-  bottom: number,
-  near: number,
+  left: number
+  right: number
+  top: number
+  bottom: number
+  near: number
   far: number
 }
 
 export const orthographicCamera = createUpdatableComputed(
-  (opts: OrthographicCameraOpts & Object3DOpts) => new OrthographicCamera(opts.left, opts.right, opts.top, opts.bottom),
+  (opts: OrthographicCameraOpts & Object3DOpts) =>
+    new OrthographicCamera(opts.left, opts.right, opts.top, opts.bottom),
   (camera, opts) => {
     camera.left = opts.left
     camera.right = opts.right
@@ -133,7 +136,7 @@ export const orthographicCamera = createUpdatableComputed(
 )
 
 type MeshOpts = Object3DOpts & {
-  geometry: Geometry | BufferGeometry,
+  geometry: Geometry | BufferGeometry
   material: Material | Material[]
 }
 
@@ -147,21 +150,22 @@ export const mesh = createUpdatableComputed(
 )
 
 type MaterialOpts = {
-  depthTest?: boolean,
-  depthWrite?: boolean,
+  depthTest?: boolean
+  depthWrite?: boolean
   transparent?: boolean
 }
 
 type MeshBasicMaterialOpts = MaterialOpts & {
-  color?: Color,
-  map?: Texture,
-  transparent?: boolean,
+  color?: Color
+  map?: Texture
+  transparent?: boolean
   combine?: Combine
 }
 
 const defaultColor = new Color(0xffffff)
 const defaultCombine = MultiplyOperation
 export const meshBasicMaterial = createUpdatableComputed(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (opts: MeshBasicMaterialOpts) => new MeshBasicMaterial(),
   (material, opts) => {
     material.color = opts.color || defaultColor
@@ -174,11 +178,12 @@ export const meshBasicMaterial = createUpdatableComputed(
 )
 
 type MeshPhongMaterialOpts = MaterialOpts & {
-  color?: Color,
+  color?: Color
   map?: Texture
 }
 
 export const meshPhongMaterial = createUpdatableComputed(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (opts: MeshPhongMaterialOpts) => new MeshPhongMaterial(),
   (material, opts) => {
     material.color = opts.color || defaultColor
@@ -213,7 +218,7 @@ export const rawShader = createUpdatableComputed(
 )
 
 type ShaderMaterialOpts = MaterialOpts & {
-  shader(): ShaderMaterial | RawShaderMaterial;
+  shader(): ShaderMaterial | RawShaderMaterial
   uniforms?: { [uniform: string]: { value: any } }
 }
 
@@ -236,8 +241,8 @@ function updateMaterial(object: Material, opts: MaterialOpts) {
   object.transparent = opts.transparent != null ? opts.transparent : false
 }
 
-type TypedArray
-  = Int8Array
+type TypedArray =
+  | Int8Array
   | Uint8Array
   | Uint8ClampedArray
   | Int16Array
@@ -248,16 +253,16 @@ type TypedArray
   | Float64Array
 
 type DataTextureOpts = {
-  data: TypedArray,
-  width: number,
-  height: number,
-  format?: PixelFormat,
-  type?: TextureDataType,
-  mapping?: Mapping,
-  wrapS?: Wrapping,
-  wrapT?: Wrapping,
-  magFilter?: TextureFilter,
-  minFilter?: TextureFilter,
+  data: TypedArray
+  width: number
+  height: number
+  format?: PixelFormat
+  type?: TextureDataType
+  mapping?: Mapping
+  wrapS?: Wrapping
+  wrapT?: Wrapping
+  magFilter?: TextureFilter
+  minFilter?: TextureFilter
   flipY?: boolean
 }
 
@@ -278,17 +283,17 @@ export const dataTexture = createUpdatableComputed(
 )
 
 type TextureOpts = {
-  format?: PixelFormat,
-  type?: TextureDataType,
-  wrapS?: Wrapping,
-  wrapT?: Wrapping,
-  magFilter?: TextureFilter,
+  format?: PixelFormat
+  type?: TextureDataType
+  wrapS?: Wrapping
+  wrapT?: Wrapping
+  magFilter?: TextureFilter
   minFilter?: TextureFilter
 }
 
 type ImageTextureOpts = TextureOpts & {
-  image?: HTMLImageElement,
-  mapping?: Mapping,
+  image?: HTMLImageElement
+  mapping?: Mapping
   flipY?: boolean
 }
 
@@ -310,11 +315,11 @@ export const imageTexture = createUpdatableComputed(
 )
 
 type RenderTargetOpts = TextureOpts & {
-  width: number,
-  height: number,
-  anisotropy?: number;
-  depthBuffer?: boolean;
-  stencilBuffer?: boolean;
+  width: number
+  height: number
+  anisotropy?: number
+  depthBuffer?: boolean
+  stencilBuffer?: boolean
 }
 
 export const renderTarget = createUpdatableComputed(
@@ -338,7 +343,7 @@ function updateTexture(texture: Texture, opts: TextureOpts) {
   texture.minFilter = opts.minFilter || LinearFilter
 }
 
-type BoxGeometryOpts = { width: number, height: number, depth: number }
+type BoxGeometryOpts = { width: number; height: number; depth: number }
 
 export const boxGeometry = createUpdatableComputed(
   (opts: BoxGeometryOpts) => new BoxGeometry(opts.width, opts.height, opts.depth),
@@ -351,7 +356,7 @@ export const boxGeometry = createUpdatableComputed(
   box => box.dispose(),
 )
 
-type PlaneGeometryOpts = { width: number, height: number }
+type PlaneGeometryOpts = { width: number; height: number }
 
 export const planeGeometry = createUpdatableComputed(
   (opts: PlaneGeometryOpts) => new PlaneGeometry(opts.width, opts.height),
@@ -365,16 +370,16 @@ export const planeGeometry = createUpdatableComputed(
 )
 
 type InterleavedBufferOpts = {
-  buffer: TypedArray,
+  buffer: TypedArray
   stride: number
 }
 
 export const interleavedBuffer = createUpdatableComputed(
   (opts: InterleavedBufferOpts) => new InterleavedBuffer(opts.buffer, opts.stride),
-  buffer => buffer.needsUpdate = true,
+  buffer => (buffer.needsUpdate = true),
 )
 
-type LightOpts = Object3DOpts & { color?: Color, intensity?: number }
+type LightOpts = Object3DOpts & { color?: Color; intensity?: number }
 
 export const ambientLight = createUpdatableComputed(
   (opts: LightOpts) => new AmbientLight(opts.color, opts.intensity),
@@ -396,7 +401,8 @@ export const pointLight = createUpdatableComputed(
 
 function updateObject3D(object: Object3D, opts: Object3DOpts) {
   opts.position && object.position.set(opts.position.x, opts.position.y, opts.position.z)
-  opts.rotation && object.rotation.set(opts.rotation.x, opts.rotation.y, opts.rotation.z, opts.rotationOrder)
+  opts.rotation &&
+    object.rotation.set(opts.rotation.x, opts.rotation.y, opts.rotation.z, opts.rotationOrder)
   opts.scale && object.scale.set(opts.scale.x, opts.scale.y, opts.scale.z)
   opts.up && object.up.set(opts.up.x, opts.up.y, opts.up.z)
   object.frustumCulled = opts.frustumCulled != null ? opts.frustumCulled : true

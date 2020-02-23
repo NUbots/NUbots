@@ -16,12 +16,16 @@ export type SelectOptionProps = {
 @observer
 export class SelectOption extends React.Component<SelectOptionProps> {
   render(): JSX.Element {
-    const { className, option, isSelected, onSelect } = this.props
+    const { className, option, isSelected } = this.props
 
-    return <div
-      className={classNames([className, style.option, isSelected ? style.optionSelected : ''])}
-      onClick={this.onSelect}
-    >{option.label}</div>
+    return (
+      <div
+        className={classNames([className, style.option, isSelected ? style.optionSelected : ''])}
+        onClick={this.onSelect}
+      >
+        {option.label}
+      </div>
+    )
   }
 
   @action.bound

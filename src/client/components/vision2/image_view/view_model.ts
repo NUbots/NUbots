@@ -22,11 +22,7 @@ import fragmentShader from './shaders/bayer.frag'
 import vertexShader from './shaders/bayer.vert'
 
 export class ImageViewModel {
-  constructor(
-    private readonly source: Image,
-    private readonly geometry: () => Geometry,
-  ) {
-  }
+  constructor(private readonly source: Image, private readonly geometry: () => Geometry) {}
 
   static of(source: Image) {
     return new ImageViewModel(source, ImageViewModel.geometry)
@@ -74,23 +70,25 @@ export class ImageViewModel {
 
   private readonly basicMaterial = meshBasicMaterial(() => ({ map: this.texture }))
 
-  private readonly bayerMaterial = shaderMaterial((firstRed: [number, number], mosaicSize: number) => ({
-    shader: this.bayerShader,
-    depthTest: false,
-    uniforms: {
-      image: { value: this.texture },
-      sourceSize: {
-        value: [
-          this.source.width,
-          this.source.height,
-          1 / this.source.width,
-          1 / this.source.height,
-        ],
+  private readonly bayerMaterial = shaderMaterial(
+    (firstRed: [number, number], mosaicSize: number) => ({
+      shader: this.bayerShader,
+      depthTest: false,
+      uniforms: {
+        image: { value: this.texture },
+        sourceSize: {
+          value: [
+            this.source.width,
+            this.source.height,
+            1 / this.source.width,
+            1 / this.source.height,
+          ],
+        },
+        firstRed: { value: firstRed },
+        mosaicSize: { value: mosaicSize },
       },
-      firstRed: { value: firstRed },
-      mosaicSize: { value: mosaicSize },
-    },
-  }))
+    }),
+  )
 
   private readonly bayerShader = rawShader(() => ({ vertexShader, fragmentShader }))
 
@@ -106,46 +104,54 @@ export class ImageViewModel {
     }
   }
 
-  private readonly elementTexture = imageTexture(({ element, width, height, format }: ElementImage) => ({
-    image: element, width, height,
-    format: this.textureFormat(format),
-    magFilter: THREE.LinearFilter,
-    minFilter: THREE.LinearFilter,
-  }))
+  private readonly elementTexture = imageTexture(
+    ({ element, width, height, format }: ElementImage) => ({
+      image: element,
+      width,
+      height,
+      format: this.textureFormat(format),
+      magFilter: THREE.LinearFilter,
+      minFilter: THREE.LinearFilter,
+    }),
+  )
 
   private readonly dataTexture = dataTexture(({ data, width, height, format }: DataImage) => ({
-    data: data.get(), width, height,
+    data: data.get(),
+    width,
+    height,
     format: this.textureFormat(format),
     magFilter: THREE.LinearFilter,
     minFilter: THREE.LinearFilter,
   }))
 
-  private textureFormat = createTransformer((format: ImageFormat): THREE.PixelFormat => {
-    switch (format) {
-      case ImageFormat.JPEG:
-      case ImageFormat.JPBG:
-      case ImageFormat.JPRG:
-      case ImageFormat.JPGR:
-      case ImageFormat.JPGB:
-      case ImageFormat.PJBG:
-      case ImageFormat.PJRG:
-      case ImageFormat.PJGR:
-      case ImageFormat.PJGB:
-        return THREE.RGBAFormat
-      case ImageFormat.RGB8:
-        return THREE.RGBFormat
-      case ImageFormat.GRBG:
-      case ImageFormat.RGGB:
-      case ImageFormat.GBRG:
-      case ImageFormat.BGGR:
-      case ImageFormat.GREY:
-      case ImageFormat.GRAY:
-      case ImageFormat.Y8__:
-        return THREE.LuminanceFormat
-      default:
-        throw new UnreachableError(format)
-    }
-  })
+  private textureFormat = createTransformer(
+    (format: ImageFormat): THREE.PixelFormat => {
+      switch (format) {
+        case ImageFormat.JPEG:
+        case ImageFormat.JPBG:
+        case ImageFormat.JPRG:
+        case ImageFormat.JPGR:
+        case ImageFormat.JPGB:
+        case ImageFormat.PJBG:
+        case ImageFormat.PJRG:
+        case ImageFormat.PJGR:
+        case ImageFormat.PJGB:
+          return THREE.RGBAFormat
+        case ImageFormat.RGB8:
+          return THREE.RGBFormat
+        case ImageFormat.GRBG:
+        case ImageFormat.RGGB:
+        case ImageFormat.GBRG:
+        case ImageFormat.BGGR:
+        case ImageFormat.GREY:
+        case ImageFormat.GRAY:
+        case ImageFormat.Y8__:
+          return THREE.LuminanceFormat
+        default:
+          throw new UnreachableError(format)
+      }
+    },
+  )
 
   private firstRed = createTransformer((format: BayerImageFormat): [number, number] => {
     switch (format) {

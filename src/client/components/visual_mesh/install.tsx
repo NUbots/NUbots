@@ -11,10 +11,15 @@ import { VisualMeshNetwork } from './network'
 import { VisualMeshView } from './view'
 import { VisualMeshViewModel } from './view_model'
 
-export function installVisualMesh({ nav, appModel, nusightNetwork, Menu }: {
-  nav: NavigationConfiguration,
-  appModel: AppModel,
-  nusightNetwork: NUsightNetwork,
+export function installVisualMesh({
+  nav,
+  appModel,
+  nusightNetwork,
+  Menu,
+}: {
+  nav: NavigationConfiguration
+  appModel: AppModel
+  nusightNetwork: NUsightNetwork
   Menu: ComponentType
 }) {
   const model = VisualMeshModel.of(appModel)
@@ -25,7 +30,7 @@ export function installVisualMesh({ nav, appModel, nusightNetwork, Menu }: {
     Content: () => {
       const viewModel = VisualMeshViewModel.of(model)
       const network = VisualMeshNetwork.of(nusightNetwork)
-      return <VisualMeshView viewModel={viewModel} network={network} Menu={Menu}/>
+      return <VisualMeshView viewModel={viewModel} network={network} Menu={Menu} />
     },
   })
 }

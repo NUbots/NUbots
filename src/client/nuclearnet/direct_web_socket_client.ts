@@ -11,8 +11,7 @@ import { WebSocketClient } from './web_socket_client'
  * There should never be enough logic in here that it needs any testing.
  */
 export class DirectWebSocketClient implements WebSocketClient {
-  constructor(private socket: SocketIOClient.Socket) {
-  }
+  constructor(private socket: SocketIOClient.Socket) {}
 
   static of(uri: string, opts: SocketIOClient.ConnectOpts) {
     const socket = SocketIO(uri, { ...opts, parser: NUClearNetProxyParser } as any)

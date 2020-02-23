@@ -14,16 +14,20 @@ export class AppView extends Component<{ nav: NavigationConfiguration }> {
     return (
       <BrowserRouter>
         <div className={style.app}>
-          <NavigationView nav={this.props.nav}/>
+          <NavigationView nav={this.props.nav} />
           <div className={style.app__container}>
             <div className={style.app__content}>
               <Switch>
-                {...this.props.nav.getRoutes().map(config => <Route
-                  key={config.path}
-                  exact={config.exact}
-                  path={config.path}
-                  component={config.Content}
-                />)}
+                {...this.props.nav
+                  .getRoutes()
+                  .map(config => (
+                    <Route
+                      key={config.path}
+                      exact={config.exact}
+                      path={config.path}
+                      component={config.Content}
+                    />
+                  ))}
               </Switch>
             </div>
           </div>

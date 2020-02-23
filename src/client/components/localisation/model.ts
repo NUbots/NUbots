@@ -13,7 +13,7 @@ export class TimeModel {
   @observable time: number // seconds
   @observable lastPhysicsUpdate: number // seconds
 
-  constructor({ time, lastPhysicsUpdate }: { time: number, lastPhysicsUpdate: number }) {
+  constructor({ time, lastPhysicsUpdate }: { time: number; lastPhysicsUpdate: number }) {
     this.time = time
     this.lastPhysicsUpdate = lastPhysicsUpdate
   }
@@ -105,16 +105,28 @@ export class LocalisationModel {
   @observable target?: LocalisationRobotModel
   @observable time: TimeModel
 
-  constructor(appModel: AppModel, { field, skybox, camera, locked, controls, viewMode, target, time }: {
-    field: FieldModel,
-    skybox: SkyboxModel,
-    camera: CameraModel,
-    locked: boolean,
-    controls: ControlsModel,
-    viewMode: ViewMode,
-    target?: LocalisationRobotModel,
-    time: TimeModel
-  }) {
+  constructor(
+    appModel: AppModel,
+    {
+      field,
+      skybox,
+      camera,
+      locked,
+      controls,
+      viewMode,
+      target,
+      time,
+    }: {
+      field: FieldModel
+      skybox: SkyboxModel
+      camera: CameraModel
+      locked: boolean
+      controls: ControlsModel
+      viewMode: ViewMode
+      target?: LocalisationRobotModel
+      time: TimeModel
+    },
+  ) {
     this.appModel = appModel
     this.field = field
     this.skybox = skybox
@@ -126,17 +138,19 @@ export class LocalisationModel {
     this.time = time
   }
 
-  static of = memoize((appModel: AppModel): LocalisationModel => {
-    return new LocalisationModel(appModel, {
-      field: FieldModel.of(),
-      skybox: SkyboxModel.of(),
-      camera: CameraModel.of(),
-      locked: false,
-      controls: ControlsModel.of(),
-      viewMode: ViewMode.FreeCamera,
-      time: TimeModel.of(),
-    })
-  })
+  static of = memoize(
+    (appModel: AppModel): LocalisationModel => {
+      return new LocalisationModel(appModel, {
+        field: FieldModel.of(),
+        skybox: SkyboxModel.of(),
+        camera: CameraModel.of(),
+        locked: false,
+        controls: ControlsModel.of(),
+        viewMode: ViewMode.FreeCamera,
+        time: TimeModel.of(),
+      })
+    },
+  )
 
   @computed get robots(): LocalisationRobotModel[] {
     return this.appModel.robots.map(robot => LocalisationRobotModel.of(robot))

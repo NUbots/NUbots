@@ -7,4 +7,3 @@ export enum Classification {
   Cyan = 99.0,
   Magenta = 109.0,
 }
-

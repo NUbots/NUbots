@@ -15,7 +15,6 @@ export type NBSPacket = {
 }
 
 export class NBSPlayer {
-
   private readonly player: MMapNBSPlayer
   private readonly emitter: EventEmitter = new EventEmitter()
 
@@ -75,8 +74,10 @@ export class NBSPlayer {
   }
 }
 
-type MMapNBSPlayerConstructor
-  = new(file: string, cb: (timestamp?: number, hash?: Buffer, payload?: Buffer) => void) => MMapNBSPlayer
+type MMapNBSPlayerConstructor = new (
+  file: string,
+  cb: (timestamp?: number, hash?: Buffer, payload?: Buffer) => void,
+) => MMapNBSPlayer
 
 interface MMapNBSPlayer {
   play(): void
@@ -89,4 +90,3 @@ interface MMapNBSPlayer {
 
   seek(timestamp: number): void
 }
-

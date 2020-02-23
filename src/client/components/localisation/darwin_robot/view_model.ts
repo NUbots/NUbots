@@ -9,12 +9,13 @@ import { LocalisationRobotModel } from './model'
 export const HIP_TO_FOOT = 0.2465
 
 export class RobotViewModel {
-  constructor(private model: LocalisationRobotModel) {
-  }
+  constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer((model: LocalisationRobotModel): RobotViewModel => {
-    return new RobotViewModel(model)
-  })
+  static of = createTransformer(
+    (model: LocalisationRobotModel): RobotViewModel => {
+      return new RobotViewModel(model)
+    },
+  )
 
   @computed
   get robot(): Object3D {
@@ -22,7 +23,12 @@ export class RobotViewModel {
     robot.position.x = this.model.rWTt.x
     robot.position.y = this.model.rWTt.y
     robot.position.z = this.model.rWTt.z
-    const rotation = new Quaternion(this.model.Rwt.x, this.model.Rwt.y, this.model.Rwt.z, this.model.Rwt.w)
+    const rotation = new Quaternion(
+      this.model.Rwt.x,
+      this.model.Rwt.y,
+      this.model.Rwt.z,
+      this.model.Rwt.w,
+    )
     robot.setRotationFromQuaternion(rotation)
     robot.add(BodyViewModel.of(this.model).body)
     return robot

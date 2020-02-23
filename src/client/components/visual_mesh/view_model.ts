@@ -6,12 +6,13 @@ import { VisualMeshModel } from './model'
 import { VisualMeshRobotModel } from './model'
 
 export class VisualMeshViewModel {
-  constructor(private model: VisualMeshModel) {
-  }
+  constructor(private model: VisualMeshModel) {}
 
-  static of = createTransformer((model: VisualMeshModel): VisualMeshViewModel => {
-    return new VisualMeshViewModel(model)
-  })
+  static of = createTransformer(
+    (model: VisualMeshModel): VisualMeshViewModel => {
+      return new VisualMeshViewModel(model)
+    },
+  )
 
   @computed
   get robots(): RobotViewModel[] {
@@ -25,8 +26,7 @@ export class VisualMeshViewModel {
 }
 
 export class RobotViewModel {
-  constructor(private model: VisualMeshRobotModel) {
-  }
+  constructor(private model: VisualMeshRobotModel) {}
 
   static of = createTransformer((model: VisualMeshRobotModel) => {
     return new RobotViewModel(model)

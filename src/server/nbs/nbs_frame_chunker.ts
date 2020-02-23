@@ -52,11 +52,10 @@ export class NbsFrameChunker extends stream.Transform {
    * nbs header byte sequence, and then processes just enough to know the size of the frame and it will return that
    * slice, along with the starting index it was found at.
    */
-  private getNextFrame(buffer: Buffer): { index: number, buffer: Buffer } | undefined {
+  private getNextFrame(buffer: Buffer): { index: number; buffer: Buffer } | undefined {
     // Search for the nbs header byte sequence.
     const headerIndex = buffer.indexOf(NBS_HEADER)
     if (headerIndex >= 0 && buffer.length > headerIndex + PACKET_SIZE_SIZE) {
-
       // Read the size of the next packet
       const sizeStart = headerIndex + NBS_HEADER.byteLength
       const sizeEnd = sizeStart + PACKET_SIZE_SIZE

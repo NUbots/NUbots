@@ -13,7 +13,7 @@ import { VisualizerViewModel } from './view_model'
 
 @observer
 export class VisualizerView extends Component<{
-  controller: VisualizerController,
+  controller: VisualizerController
   model: VisualizerModel
 }> {
   render() {

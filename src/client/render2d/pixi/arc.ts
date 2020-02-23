@@ -6,16 +6,16 @@ import { Shape } from '../object/shape'
 
 import { applyAppearance } from './rendering'
 
-export const renderArc = createTransformer((shape: Shape<ArcGeometry>): Graphics => {
+export const renderArc = createTransformer(
+  (shape: Shape<ArcGeometry>): Graphics => {
+    const { origin, radius, startAngle, endAngle, anticlockwise } = shape.geometry
 
-  const { origin, radius, startAngle, endAngle, anticlockwise } = shape.geometry
+    const g = new Graphics()
 
-  const g = new Graphics()
+    applyAppearance(g, shape.appearance, g => {
+      g.arc(origin.x, origin.y, radius, startAngle, endAngle, anticlockwise)
+    })
 
-  applyAppearance(g, shape.appearance, g => {
-    g.arc(origin.x, origin.y, radius, startAngle, endAngle, anticlockwise)
-  })
-
-  return g
-
-})
+    return g
+  },
+)

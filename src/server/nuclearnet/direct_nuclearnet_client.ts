@@ -10,8 +10,7 @@ import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
  * A thin adapter around the real NUClearNet which implements the NUClearNetClient interface.
  */
 export class DirectNUClearNetClient implements NUClearNetClient {
-  constructor(private nuclearNetwork: NUClearNet) {
-  }
+  constructor(private nuclearNetwork: NUClearNet) {}
 
   static of(): DirectNUClearNetClient {
     const nuclearNetwork = new NUClearNet()

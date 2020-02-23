@@ -7,8 +7,7 @@ export interface Message {
 }
 
 export abstract class Simulator {
-  constructor(protected readonly nuclearnetClient: NUClearNetClient) {
-  }
+  constructor(protected readonly nuclearnetClient: NUClearNetClient) {}
 
   protected send(message: Message): void {
     this.nuclearnetClient.send({

@@ -18,13 +18,14 @@ import { TYPES } from './nuclearnet_proxy_parser_socketio'
  */
 
 export class Encoder {
-
   encode(packet: Packet, callback: (wire: any[]) => void) {
     switch (packet.type) {
       case TYPES.EVENT:
-      case TYPES.BINARY_EVENT:
-
-        const { nsp, data: [eventName] } = packet
+      case TYPES.BINARY_EVENT: {
+        const {
+          nsp,
+          data: [eventName],
+        } = packet
 
         switch (eventName) {
           // For our communication layer we can just use JSON
@@ -37,7 +38,10 @@ export class Encoder {
             return callback([JSON.stringify(packet)])
 
           case 'packet': {
-            const { id, data: [key, { target, type, payload, reliable }] } = packet
+            const {
+              id,
+              data: [key, { target, type, payload, reliable }],
+            } = packet
             return callback([
               JSON.stringify({ id, nsp, key, header: { target, type, reliable } }),
               payload,
@@ -46,7 +50,10 @@ export class Encoder {
 
           // For NUClearNet packets, we send the payload separately to avoid array slicing later
           default: {
-            const { id, data: [key, { peer, hash, payload, reliable }] } = packet
+            const {
+              id,
+              data: [key, { peer, hash, payload, reliable }],
+            } = packet
 
             // Send the header as a JSON and then the payload as binary
             return callback([
@@ -56,6 +63,7 @@ export class Encoder {
             ])
           }
         }
+      }
       default:
         return callback([JSON.stringify(packet)])
     }
@@ -63,17 +71,15 @@ export class Encoder {
 }
 
 export class Decoder extends Emitter {
-
   private state: number = 0
   private nuclearPacket?: {
-    nsp: string,
-    type: TYPES.EVENT,
-    data: [string, Partial<NUClearNetPacket> | Partial<NUClearNetSend>],
+    nsp: string
+    type: TYPES.EVENT
+    data: [string, Partial<NUClearNetPacket> | Partial<NUClearNetSend>]
     id: number
   }
 
   add(obj: any) {
-
     // Strings are json
     if (typeof obj === 'string') {
       const parsed = JSON.parse(obj)
@@ -105,7 +111,7 @@ export class Decoder extends Emitter {
             this.state = 0
           } else {
             // For NUClearNetPackets we get a hash in state 1 and move to state 2 for the payload
-            (this.nuclearPacket!.data[1] as NUClearNetPacket).hash = obj
+            ;(this.nuclearPacket!.data[1] as NUClearNetPacket).hash = obj
             this.state = 2
           }
           break

@@ -9,6 +9,5 @@ app.use(express.static(root))
 const port = process.env.PORT || 9002
 
 server.listen(port, () => {
-  // tslint:disable-next-line no-console
   console.log(`Storybook server started at http://localhost:${port}`)
 })

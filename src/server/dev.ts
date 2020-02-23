@@ -21,11 +21,13 @@ import { WebSocketProxyNUClearNetServer } from './nuclearnet/web_socket_proxy_nu
 import { WebSocketServer } from './nuclearnet/web_socket_server'
 
 const args = minimist(process.argv.slice(2))
-const compiler = webpack(getClientConfig({
-  mode: 'development',
-  context: args.context || undefined,
-  transpileOnly: args.t || args.transpileOnly || false,
-}))
+const compiler = webpack(
+  getClientConfig({
+    mode: 'development',
+    context: args.context || undefined,
+    transpileOnly: args.t || args.transpileOnly || false,
+  }),
+)
 
 const withVirtualRobots = args['virtual-robots'] || false
 const nbsFile = args.play
@@ -66,12 +68,18 @@ server.listen(port, () => {
 
 function init() {
   if (withVirtualRobots) {
-    const virtualRobots = VirtualRobots.of({ fakeNetworking: true, nuclearnetAddress, numRobots: 3 })
+    const virtualRobots = VirtualRobots.of({
+      fakeNetworking: true,
+      nuclearnetAddress,
+      numRobots: 3,
+    })
     virtualRobots.start()
   }
 
   if (nbsFile) {
-    const nuclearnetClient = withVirtualRobots ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of()
+    const nuclearnetClient = withVirtualRobots
+      ? FakeNUClearNetClient.of()
+      : DirectNUClearNetClient.of()
     nuclearnetClient.connect({ name: nbsFile })
 
     const player = NBSPlayer.of({

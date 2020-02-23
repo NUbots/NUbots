@@ -15,30 +15,29 @@ import vertexShader from './shaders/line_projection.vert'
 
 export interface ConeSegment {
   /** The camera space central axis of the cone. */
-  axis: Vector3,
+  axis: Vector3
   /** The camera space vector pointing to the start of the segment. */
-  start: Vector3,
+  start: Vector3
   /** The camera space vector pointing to the end of the segment. */
-  end: Vector3,
+  end: Vector3
   /** The colour of the line to draw. */
-  color?: Vector4,
+  color?: Vector4
   /** The width of the line to draw on the screen in pixels. */
   lineWidth?: number
 }
 
 export class LineProjection {
-  constructor(private readonly canvas: Canvas, private readonly lens: Lens) {
-  }
+  constructor(private readonly canvas: Canvas, private readonly lens: Lens) {}
 
   static of(canvas: Canvas, lens: Lens) {
     return new LineProjection(canvas, lens)
   }
 
   /** Draws a plane projected to infinity in world space. */
-  plane({ axis, color, lineWidth }: { axis: Vector3, color?: Vector4, lineWidth?: number }) {
+  plane({ axis, color, lineWidth }: { axis: Vector3; color?: Vector4; lineWidth?: number }) {
     // Pick an arbitrary orthogonal vector
     const start = Vector3.fromThree(
-      (!axis.x && !axis.y)
+      !axis.x && !axis.y
         ? new THREE.Vector3(0, 1, 0)
         : new THREE.Vector3(-axis.y, axis.x, 0).normalize(),
     )
@@ -46,24 +45,44 @@ export class LineProjection {
   }
 
   /** Draws a segment of a plane projected to infinity in world space. */
-  planeSegment(segment: { axis?: Vector3, start: Vector3, end: Vector3, color?: Vector4, lineWidth?: number }) {
+  planeSegment(segment: {
+    axis?: Vector3
+    start: Vector3
+    end: Vector3
+    color?: Vector4
+    lineWidth?: number
+  }) {
     return this.coneSegment({
       ...segment,
-      axis: segment.axis ?? Vector3.fromThree(
-        new THREE.Vector3().crossVectors(
-          segment.start.toThree(),
-          segment.end.toThree(),
-        ).normalize(),
-      ),
+      axis:
+        segment.axis ??
+        Vector3.fromThree(
+          new THREE.Vector3()
+            .crossVectors(segment.start.toThree(), segment.end.toThree())
+            .normalize(),
+        ),
     })
   }
 
   /** Draw a cone projected to infinity in world space. Only draws the positive cone, not the negative cone. */
-  cone({ axis, radius, color, lineWidth }: { axis: Vector3, radius: number, color?: Vector4, lineWidth?: number }) {
+  cone({
+    axis,
+    radius,
+    color,
+    lineWidth,
+  }: {
+    axis: Vector3
+    radius: number
+    color?: Vector4
+    lineWidth?: number
+  }) {
     // Pick an arbitrary orthogonal vector
-    const orth = !axis.x && !axis.y ? new Vector3(0, 1, 0) : new Vector3(-axis.y, axis.x, 0).normalize()
+    const orth =
+      !axis.x && !axis.y ? new Vector3(0, 1, 0) : new Vector3(-axis.y, axis.x, 0).normalize()
     // Rotate our axis by this radius to get a start
-    const start = Vector3.fromThree(axis.toThree().applyAxisAngle(orth.toThree(), Math.acos(radius)))
+    const start = Vector3.fromThree(
+      axis.toThree().applyAxisAngle(orth.toThree(), Math.acos(radius)),
+    )
     return this.coneSegment({ axis, start, end: start, color, lineWidth })
   }
 

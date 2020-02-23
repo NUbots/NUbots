@@ -7,8 +7,7 @@ import SocketIO from 'socket.io'
  * There should never be enough logic in here that it needs any testing.
  */
 export class WebSocketServer {
-  constructor(private sioServer: SocketIO.Server | SocketIO.Namespace) {
-  }
+  constructor(private sioServer: SocketIO.Server | SocketIO.Namespace) {}
 
   static of(server: SocketIO.Server | SocketIO.Namespace) {
     return new WebSocketServer(server)
@@ -26,8 +25,7 @@ export class WebSocketServer {
 }
 
 export class WebSocket {
-  constructor(private sioSocket: SocketIO.Socket) {
-  }
+  constructor(private sioSocket: SocketIO.Socket) {}
 
   static of(socket: SocketIO.Socket) {
     return new WebSocket(socket)

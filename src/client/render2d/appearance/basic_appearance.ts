@@ -1,10 +1,10 @@
 import { observable } from 'mobx'
 
-type Fill = { color: string, alpha: number }
-type Stroke = { color: string, alpha: number, width: number }
+type Fill = { color: string; alpha: number }
+type Stroke = { color: string; alpha: number; width: number }
 
 export type BasicAppearanceOpts = {
-  fill?: Partial<Fill>,
+  fill?: Partial<Fill>
   stroke?: Partial<Stroke>
 }
 
@@ -12,7 +12,7 @@ export class BasicAppearance {
   @observable fill?: Fill
   @observable stroke?: Stroke
 
-  constructor({ fill, stroke }: { fill?: Fill, stroke?: Stroke }) {
+  constructor({ fill, stroke }: { fill?: Fill; stroke?: Stroke }) {
     this.fill = fill
     this.stroke = stroke
   }

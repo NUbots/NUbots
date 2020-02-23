@@ -1,6 +1,6 @@
 export type Rotate = number
-export type Scale = { readonly x: number, readonly y: number }
-export type Translate = { readonly x: number, readonly y: number }
+export type Scale = { readonly x: number; readonly y: number }
+export type Translate = { readonly x: number; readonly y: number }
 
 export type TransformOpts = {
   readonly anticlockwise: boolean
@@ -23,11 +23,11 @@ export class Transform {
   }
 
   static of({
-              anticlockwise = true,
-              rotate = 0,
-              scale = { x: 1, y: 1 },
-              translate = { x: 0, y: 0 },
-            }: Partial<Transform> = {}): Transform {
+    anticlockwise = true,
+    rotate = 0,
+    scale = { x: 1, y: 1 },
+    translate = { x: 0, y: 0 },
+  }: Partial<Transform> = {}): Transform {
     return new Transform({
       anticlockwise,
       rotate,
@@ -50,10 +50,7 @@ export class Transform {
     const cosTheta = Math.cos(theta)
     const sinTheta = Math.sin(theta)
 
-    const rotationMatrix = [
-      cosTheta, -sinTheta,
-      sinTheta, cosTheta,
-    ]
+    const rotationMatrix = [cosTheta, -sinTheta, sinTheta, cosTheta]
 
     return new Transform({
       anticlockwise: this.anticlockwise,
@@ -63,8 +60,12 @@ export class Transform {
         y: this.scale.y * scale.y,
       },
       translate: {
-        x: this.translate.x + scaleX * (translate.x * rotationMatrix[0] + translate.y * rotationMatrix[1]),
-        y: this.translate.y + scaleY * (translate.x * rotationMatrix[2] + translate.y * rotationMatrix[3]),
+        x:
+          this.translate.x +
+          scaleX * (translate.x * rotationMatrix[0] + translate.y * rotationMatrix[1]),
+        y:
+          this.translate.y +
+          scaleY * (translate.x * rotationMatrix[2] + translate.y * rotationMatrix[3]),
       },
     })
   }
@@ -79,10 +80,12 @@ export class Transform {
   }
 
   isIdentity(): boolean {
-    return this.scale.x === 1
-      && this.scale.y === 1
-      && this.translate.x === 0
-      && this.translate.y === 0
-      && this.rotate === 0
+    return (
+      this.scale.x === 1 &&
+      this.scale.y === 1 &&
+      this.translate.x === 0 &&
+      this.translate.y === 0 &&
+      this.rotate === 0
+    )
   }
 }

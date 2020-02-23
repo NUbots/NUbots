@@ -17,8 +17,7 @@ export class GoalsViewModel {
     private readonly model: Goal[],
     private readonly params: CameraParams,
     private readonly lineProjection: LineProjection,
-  ) {
-  }
+  ) {}
 
   static of(model: Goal[], canvas: Canvas, params: CameraParams): GoalsViewModel {
     return new GoalsViewModel(model, params, LineProjection.of(canvas, params.lens))
@@ -35,14 +34,16 @@ export class GoalsViewModel {
     const bottom = goal.post.bottom.toThree().multiplyScalar(goal.post.distance)
     return this.lineProjection.planeSegment({
       start: Vector3.fromThree(
-        bottom.clone()
+        bottom
+          .clone()
           .applyMatrix4(Hwc)
           .add(new THREE.Vector3(0, 0, FieldDimensions.postYear2017().goalCrossbarHeight))
           .applyMatrix4(this.params.Hcw.toThree())
           .normalize(),
       ),
       end: Vector3.fromThree(
-        bottom.clone()
+        bottom
+          .clone()
           .applyMatrix4(Hcc)
           .normalize(),
       ),

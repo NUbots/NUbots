@@ -32,8 +32,8 @@ describe('createMockEventHandler', () => {
 type TestEventListener = (str: string, num: number) => void
 
 class TestClass {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onTestEvent(callback: TestEventListener): () => void {
-    return () => {
-    }
+    return () => {}
   }
 }

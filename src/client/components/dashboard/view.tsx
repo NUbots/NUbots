@@ -33,40 +33,43 @@ export class Dashboard extends Component<DashboardProps> {
         <Menu>
           <ul className={style.menu}>
             <li className={style.menuItem}>
-              <button className={style.menuButton} onClick={this.onToggleOrientationClick}>Flip Orientation</button>
+              <button className={style.menuButton} onClick={this.onToggleOrientationClick}>
+                Flip Orientation
+              </button>
             </li>
           </ul>
         </Menu>
         <div className={style.dashboard}>
           <div className={style.field}>
-            <Field/>
+            <Field />
           </div>
-          {showPanels &&
-          <div className={style.panels}>
-            {model.robots.map(robot => {
-              const model = RobotPanelViewModel.of(robot)
-              return (
-                robot.enabled &&
-                <div className={style.panel} key={robot.id}>
-                  <RobotPanel
-                    connected={model.connected}
-                    batteryValue={model.batteryValue}
-                    behaviour={model.behaviour}
-                    lastCameraImage={model.lastCameraImage}
-                    lastSeenBall={model.lastSeenBall}
-                    lastSeenGoal={model.lastSeenGoal}
-                    mode={model.mode}
-                    penalised={model.penalised}
-                    penalty={model.penalty}
-                    phase={model.phase}
-                    title={model.title}
-                    walkCommand={model.walkCommand}
-                  />
-                </div>
-              )
-            })}
-          </div>
-          }
+          {showPanels && (
+            <div className={style.panels}>
+              {model.robots.map(robot => {
+                const model = RobotPanelViewModel.of(robot)
+                return (
+                  robot.enabled && (
+                    <div className={style.panel} key={robot.id}>
+                      <RobotPanel
+                        connected={model.connected}
+                        batteryValue={model.batteryValue}
+                        behaviour={model.behaviour}
+                        lastCameraImage={model.lastCameraImage}
+                        lastSeenBall={model.lastSeenBall}
+                        lastSeenGoal={model.lastSeenGoal}
+                        mode={model.mode}
+                        penalised={model.penalised}
+                        penalty={model.penalty}
+                        phase={model.phase}
+                        title={model.title}
+                        walkCommand={model.walkCommand}
+                      />
+                    </div>
+                  )
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     )

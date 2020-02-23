@@ -1,11 +1,11 @@
 import { observable } from 'mobx'
 
 type Stroke = {
-  color: string,
-  alpha: number,
-  width: number,
-  cap: 'butt' | 'round' | 'square',
-  dashOffset: number,
+  color: string
+  alpha: number
+  width: number
+  cap: 'butt' | 'round' | 'square'
+  dashOffset: number
   join: 'bevel' | 'round' | 'miter'
   nonScaling: boolean
 }
@@ -13,7 +13,6 @@ type Stroke = {
 export type LineAppearanceOpts = {
   stroke: Partial<Stroke>
 }
-
 
 export class LineAppearance {
   @observable stroke: Stroke

@@ -23,8 +23,7 @@ import fragmentShader from './shaders/visualizer.frag'
 import vertexShader from './shaders/visualizer.vert'
 
 export class VisualizerViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: VisualizerModel) {
-  }
+  constructor(private readonly canvas: Canvas, private readonly model: VisualizerModel) {}
 
   static of(canvas: Canvas, model: VisualizerModel) {
     return new VisualizerViewModel(canvas, model)

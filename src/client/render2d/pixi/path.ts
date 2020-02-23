@@ -7,15 +7,16 @@ import { Shape } from '../object/shape'
 
 import { applyAppearance } from './rendering'
 
-export const renderPath = createTransformer((shape: Shape<PathGeometry>): Graphics => {
+export const renderPath = createTransformer(
+  (shape: Shape<PathGeometry>): Graphics => {
+    const { points } = shape.geometry
 
-  const { points } = shape.geometry
+    const g = new Graphics()
 
-  const g = new Graphics()
+    applyAppearance(g, shape.appearance, g => {
+      g.drawPolygon(points.map(p => new Point(p.x, p.y)))
+    })
 
-  applyAppearance(g, shape.appearance, g => {
-    g.drawPolygon(points.map(p => new Point(p.x, p.y)))
-  })
-
-  return g
-})
+    return g
+  },
+)

@@ -19,10 +19,7 @@ export class Group {
     this.transform = opts.transform
   }
 
-  static of({
-              children = [],
-              transform = Transform.of(),
-            }: Partial<GroupOpts> = {}): Group {
+  static of({ children = [], transform = Transform.of() }: Partial<GroupOpts> = {}): Group {
     return new Group({
       children,
       transform,

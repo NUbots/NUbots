@@ -20,6 +20,7 @@ export class ScriptDataSimulator extends Simulator {
   }
 
   @action.bound
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSensors(packet: NUClearNetPacket) {
     // console.log('ScriptDataSimulator: packet received', packet)
   }

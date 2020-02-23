@@ -8,12 +8,13 @@ import { RobotModel } from '../../robot/model'
 export class RobotLabelModel {
   @observable statsOpen = false
 
-  constructor(private robotModel: RobotModel) {
-  }
+  constructor(private robotModel: RobotModel) {}
 
-  static of = createTransformer((robotModel: RobotModel): RobotLabelModel => {
-    return new RobotLabelModel(robotModel)
-  })
+  static of = createTransformer(
+    (robotModel: RobotModel): RobotLabelModel => {
+      return new RobotLabelModel(robotModel)
+    },
+  )
 
   @computed
   get stats() {

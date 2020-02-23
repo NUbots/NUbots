@@ -1,4 +1,4 @@
-type Item<K, V> = { key: K, values: V[] }
+type Item<K, V> = { key: K; values: V[] }
 
 /**
  * A priority queue which favours values whose keys are the least recently used (LRU).
