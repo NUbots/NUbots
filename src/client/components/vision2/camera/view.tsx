@@ -35,6 +35,11 @@ export class CameraView extends Component<{ model: CameraModel }> {
         toggle: action(() => drawOptions.drawImage = !drawOptions.drawImage),
       },
       {
+        label: 'Distance',
+        enabled: drawOptions.drawDistance,
+        toggle: action(() => drawOptions.drawDistance = !drawOptions.drawDistance),
+      },
+      {
         label: 'Compass',
         enabled: drawOptions.drawCompass,
         toggle: action(() => drawOptions.drawCompass = !drawOptions.drawCompass),

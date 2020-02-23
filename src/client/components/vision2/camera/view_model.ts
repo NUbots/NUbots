@@ -8,6 +8,7 @@ import { ImageViewModel } from '../image_view/view_model'
 
 import { BallsViewModel } from './balls'
 import { CompassViewModel } from './compass'
+import { DistanceViewModel } from './distance'
 import { GoalsViewModel } from './goals'
 import { GreenHorizonViewModel } from './greenhorizon'
 import { HorizonViewModel } from './horizon'
@@ -43,6 +44,7 @@ export class CameraViewModel {
     return {
       children: [
         drawOptions.drawImage && this.image.image(),
+        drawOptions.drawDistance && this.distance.distance(),
         drawOptions.drawCompass && this.compass.compass(),
         drawOptions.drawHorizon && this.horizon.horizon(),
         drawOptions.drawGreenhorizon && this.greenhorizon?.greenhorizon(),
@@ -60,6 +62,11 @@ export class CameraViewModel {
   @computed
   private get horizon(): HorizonViewModel {
     return HorizonViewModel.of(this.canvas, this.model.params)
+  }
+
+  @computed
+  private get distance(): DistanceViewModel {
+    return DistanceViewModel.of(this.canvas, this.model.params)
   }
 
   @computed

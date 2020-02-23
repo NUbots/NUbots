@@ -8,6 +8,7 @@ import { Image } from '../image'
 
 type DrawOptions = {
   drawImage: boolean,
+  drawDistance: boolean,
   drawCompass: boolean,
   drawHorizon: boolean,
   drawGreenhorizon: boolean,
@@ -59,6 +60,7 @@ export class CameraModel {
     return new CameraModel({
       drawOptions: {
         drawImage: true,
+        drawDistance: false,
         drawCompass: true,
         drawHorizon: true,
         drawGreenhorizon: true,
