@@ -38,16 +38,19 @@ export class CameraViewModel {
 
   readonly camera = orthographicCamera(() => ({ left: -1, right: 1, top: 1, bottom: -1, near: 0, far: 1 }))
 
-  readonly scene = scene(() => ({
-    children: [
-      this.image.image(),
-      this.compass.compass(),
-      this.horizon.horizon(),
-      this.greenhorizon?.greenhorizon(),
-      this.balls?.balls(),
-      this.goals?.goals(),
-    ],
-  }))
+  readonly scene = scene(() => {
+    const { drawOptions } = this.model
+    return {
+      children: [
+        drawOptions.drawImage && this.image.image(),
+        drawOptions.drawCompass && this.compass.compass(),
+        drawOptions.drawHorizon && this.horizon.horizon(),
+        drawOptions.drawGreenhorizon && this.greenhorizon?.greenhorizon(),
+        drawOptions.drawBalls && this.balls?.balls(),
+        drawOptions.drawGoals && this.goals?.goals(),
+      ],
+    }
+  })
 
   @computed
   private get compass(): CompassViewModel {

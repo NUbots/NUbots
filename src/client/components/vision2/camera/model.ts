@@ -6,6 +6,15 @@ import { Vector3 } from '../../../math/vector3'
 import { Vector4 } from '../../../math/vector4'
 import { Image } from '../image'
 
+type DrawOptions = {
+  drawImage: boolean,
+  drawCompass: boolean,
+  drawHorizon: boolean,
+  drawGreenhorizon: boolean,
+  drawBalls: boolean,
+  drawGoals: boolean
+}
+
 export class CameraModel {
   @observable.ref id: number
   @observable.ref name: string
@@ -16,7 +25,9 @@ export class CameraModel {
   @observable.ref balls?: Ball[]
   @observable.ref goals?: Goal[]
 
-  constructor({ id, name, image, params, greenhorizon, balls, goals }: {
+  @observable.shallow drawOptions: DrawOptions
+
+  constructor({ id, name, image, params, greenhorizon, balls, goals, drawOptions }: {
     id: number,
     name: string,
     image: Image
@@ -24,6 +35,7 @@ export class CameraModel {
     greenhorizon?: GreenHorizon
     balls?: Ball[]
     goals?: Goal[]
+    drawOptions: DrawOptions
   }) {
     this.id = id
     this.name = name
@@ -32,6 +44,7 @@ export class CameraModel {
     this.greenhorizon = greenhorizon
     this.balls = balls
     this.goals = goals
+    this.drawOptions = drawOptions
   }
 
   static of(opts: {
@@ -43,7 +56,17 @@ export class CameraModel {
     balls?: Ball[],
     goals?: Goal[]
   }) {
-    return new CameraModel(opts)
+    return new CameraModel({
+      drawOptions: {
+        drawImage: true,
+        drawCompass: true,
+        drawHorizon: true,
+        drawGreenhorizon: true,
+        drawBalls: true,
+        drawGoals: true,
+      },
+      ...opts,
+    })
   }
 }
 
