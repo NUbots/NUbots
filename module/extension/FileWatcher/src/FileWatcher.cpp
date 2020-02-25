@@ -90,8 +90,8 @@ namespace extension {
                 }
             }
         }
-        //Shut compiler up about unused argument by pretending to use it
-        (void)status;
+        // Shut compiler up about unused argument by pretending to use it
+        (void) status;
     }
 
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)

@@ -184,7 +184,6 @@ class Enum:
             }}
 
             """
-
         )
 
         python_template = dedent(
