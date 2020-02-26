@@ -88,7 +88,7 @@ namespace vision {
                     }
                 }
                 // Only add cluster to list if it meets minimum size requirment
-                if ((int) cluster.size() >= min_cluster_size) {
+                if (int(cluster.size()) >= min_cluster_size) {
                     clusters.emplace_back(std::move(cluster));
                 }
             }

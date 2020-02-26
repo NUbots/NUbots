@@ -76,7 +76,7 @@ namespace vision {
                 // Partition the indices such that we only have the goal points that dont have goal surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
                     indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == (int) indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
+                        return idx == int(indices.size()) || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -125,7 +125,7 @@ namespace vision {
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == (int) indices.size()
+                                return idx == int(indices.size())
                                        || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
                             {2});
@@ -135,7 +135,7 @@ namespace vision {
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == (int) indices.size()
+                                return idx == int(indices.size())
                                        || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
                             {3});
