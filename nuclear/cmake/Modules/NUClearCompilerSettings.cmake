@@ -24,6 +24,3 @@ if(NOT MSVC)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
-
-# Set OpenCL Target version
-add_compile_definitions(CL_TARGET_OPENCL_VERSION=120)
