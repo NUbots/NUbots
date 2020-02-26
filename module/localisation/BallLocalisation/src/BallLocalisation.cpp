@@ -56,8 +56,8 @@ namespace localisation {
         });
 
         /* Run Time Update */
-        on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>, With<FieldDescription>, With<Sensors>>().then(
-            "BallLocalisation Time", [this]() {
+        on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>>().then(
+            "BallLocalisation Time", [this] {
                 /* Perform time update */
                 using namespace std::chrono;
                 auto curr_time        = NUClear::clock::now();
