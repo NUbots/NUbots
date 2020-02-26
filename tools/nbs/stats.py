@@ -89,10 +89,6 @@ def run(files, use_message_timestamp, **kwargs):
     with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
         for packet in decoder:
 
-            # Update the progress bar
-            progress.n = decoder.bytes_read()
-            progress.update(0)
-
             # If our object has a timestamp field of its own, we can decide to use that instead of the nbs timestamp
             # This can sometimes give better rates but can also cause problems when the timebases aren't synchronized
             if use_message_timestamp and hasattr(packet.msg, "timestamp"):
@@ -109,6 +105,10 @@ def run(files, use_message_timestamp, **kwargs):
             # Work out the largest name length so we can put it into numpy
             max_cat_len = max(max_cat_len, len(data[-1][0]))
             max_subcat_len = max(max_subcat_len, len(data[-1][1]))
+
+            # Update the progress bar
+            progress.n = decoder.bytes_read()
+            progress.update(0)
 
     data = np.array(
         data,

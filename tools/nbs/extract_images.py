@@ -26,10 +26,6 @@ def run(files, output, **kwargs):
     with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
         for packet in decoder:
 
-            # Update the progress bar
-            progress.n = decoder.bytes_read()
-            progress.update(0)
-
             if packet.type == "message.output.CompressedImage":
                 with open(
                     os.path.join(
@@ -70,3 +66,7 @@ def run(files, output, **kwargs):
                         indent=4,
                         sort_keys=True,
                     )
+
+            # Update the progress bar
+            progress.n = decoder.bytes_read()
+            progress.update(0)
