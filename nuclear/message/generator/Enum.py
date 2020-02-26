@@ -176,11 +176,9 @@ class Enum:
             }}
 
             namespace {namespace} {{
-
                 std::ostream& operator<< (std::ostream& out, const {fqn}& val) {{
                     return out << static_cast<std::string>(val);
                 }}
-            
             }}
 
             """
