@@ -10,7 +10,7 @@ set(bin_files "${firmware_source}/build/cm730_3cell.bin" "${firmware_source}/bui
               "${firmware_source}/build/cm740_3cell.bin" "${firmware_source}/build/cm740_4cell.bin"
 )
 
-ExternalProject_Add(
+externalproject_add(
   CM730Firmware
   DOWNLOAD_DIR "${firmware_source}"
   GIT_REPOSITORY "https://github.com/NUbots/CM730"

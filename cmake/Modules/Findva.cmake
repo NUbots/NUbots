@@ -1,5 +1,5 @@
 include(ToolchainLibraryFinder)
-ToolchainLibraryFinder(
+toolchainlibraryfinder(
   NAME va
   HEADER va/va.h
   LIBRARY va

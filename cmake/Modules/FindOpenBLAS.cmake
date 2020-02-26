@@ -1,5 +1,5 @@
 include(ToolchainLibraryFinder)
-ToolchainLibraryFinder(
+toolchainlibraryfinder(
   NAME OpenBLAS
   HEADER cblas.h
   LIBRARY openblas

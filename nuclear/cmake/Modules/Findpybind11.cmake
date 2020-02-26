@@ -1,2 +1,2 @@
 include(ToolchainLibraryFinder)
-ToolchainLibraryFinder(NAME pybind11 HEADER pybind11/pybind11.h)
+toolchainlibraryfinder(NAME pybind11 HEADER pybind11/pybind11.h)
