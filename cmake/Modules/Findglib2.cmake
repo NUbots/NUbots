@@ -1,5 +1,5 @@
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(
+ToolchainLibraryFinder(
   NAME glib2
   HEADER glib.h
   LIBRARY glib-2.0

@@ -1,2 +1,2 @@
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(NAME CATCH HEADER catch.hpp)
+ToolchainLibraryFinder(NAME CATCH HEADER catch.hpp)

@@ -1,5 +1,5 @@
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(
+ToolchainLibraryFinder(
   NAME TurboJPEG
   HEADER turbojpeg.h
   LIBRARY turbojpeg

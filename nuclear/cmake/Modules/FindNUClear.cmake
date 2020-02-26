@@ -1,5 +1,5 @@
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(
+ToolchainLibraryFinder(
   NAME NUClear
   HEADER nuclear
   LIBRARY nuclear

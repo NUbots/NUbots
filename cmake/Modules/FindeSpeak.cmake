@@ -5,7 +5,7 @@ find_package(ALSA REQUIRED)
 find_package(PortAudio REQUIRED)
 
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(
+ToolchainLibraryFinder(
   NAME eSpeak
   HEADER espeak/speak_lib.h
   LIBRARY espeak

@@ -1,5 +1,5 @@
 include(ToolchainLibraryFinder)
-toolchainlibraryfinder(
+ToolchainLibraryFinder(
   NAME Aravis
   HEADER arv.h
   LIBRARY aravis-0.8
