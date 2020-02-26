@@ -29,7 +29,7 @@ namespace extension {
     using ::extension::FileWatchRequest;
     using Unbind = NUClear::dsl::operation::Unbind<FileWatch>;
 
-    void FileWatcher::file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int status) {
+    void FileWatcher::file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int /*status*/) {
 
         // Regain our reactor
         FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(handle->data);
@@ -90,8 +90,6 @@ namespace extension {
                 }
             }
         }
-        // Shut compiler up about unused argument by pretending to use it
-        (void) status;
     }
 
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)

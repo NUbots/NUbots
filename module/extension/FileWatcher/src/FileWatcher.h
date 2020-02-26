@@ -69,7 +69,7 @@ namespace extension {
         /// @brief Called by the powerplant to build and setup the FileWatcher reactor.
         explicit FileWatcher(std::unique_ptr<NUClear::Environment> environment);
         ~FileWatcher();
-        static void file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int status);
+        static void file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int /*status*/);
     };
 
 
