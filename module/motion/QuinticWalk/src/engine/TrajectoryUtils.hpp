@@ -11,7 +11,7 @@ https://github.com/Rhoban/model/
 #include "SmoothSpline.hpp"
 #include "SplineContainer.hpp"
 
-
+#include <nuclear>
 namespace module {
 namespace motion {
     namespace engine {
@@ -196,6 +196,9 @@ namespace motion {
                                              Eigen::Vector3f& trunkAxis,
                                              Eigen::Vector3f& footPos,
                                              Eigen::Vector3f& footAxis) {
+            if (traj.size() != 14) {
+                NUClear::log(traj.size());
+            }
             // Compute Cartesian positions
             trunkPos  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
                                        traj.get(TrajectoryTypes::TRUNK_POS_Y).pos(t),
@@ -256,10 +259,10 @@ namespace motion {
         inline void TrajectoriesSupportFootState(float t,
                                                  const Trajectories& traj,
                                                  bool& isDoubleSupport,
-                                                 bool& isLeftsupportFoot) {
+                                                 bool& isLeftSupportFoot) {
             // Compute support foot state
-            isDoubleSupport   = (traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f ? true : false);
-            isLeftsupportFoot = (traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5f ? true : false);
+            isDoubleSupport   = (traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f);
+            isLeftSupportFoot = (traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5f);
         }
 
         /**

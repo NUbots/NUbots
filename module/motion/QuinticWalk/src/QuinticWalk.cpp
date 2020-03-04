@@ -194,9 +194,9 @@ namespace motion {
                 //                      || _robotState ==
                 //                      humanoid_league_msgs::RobotControlState::MOTOR_OFF;
                 // see if the walk engine has new goals for us
-                bool newGoals = walk_engine.updateState(dt, current_orders, walkableState);
-                if (walk_engine.getState() != engine::WalkEngineState::IDLE) {  // todo
-                    calculateJointGoals();
+                walkableState = walk_engine.updateState(dt, current_orders, walkableState);
+                if (walk_engine.getState() != engine::WalkEngineState::IDLE && walkableState) {  // todo
+                    // calculateJointGoals();
                 }
             }
         });

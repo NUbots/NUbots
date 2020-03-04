@@ -114,7 +114,7 @@ namespace motion {
                     is >> max;
                     if (!is.good()) break;
                     is >> size;
-                    // Load polynom coeficients
+                    // Load polynom coefficients
                     p.getCoefs().resize(size);
                     for (size_t i = 0; i < size; i++) {
                         if (!is.good()) break;

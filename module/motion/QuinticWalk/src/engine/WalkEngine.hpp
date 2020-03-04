@@ -174,7 +174,7 @@ namespace motion {
              * (pĥase, trajectories) from given
              * elapsed time since last update() call
              */
-            bool updateState(const float& dt, const Eigen::Vector3f& orders, const bool& walkableState);
+            bool updateState(const float dt, const Eigen::Vector3f& orders, const bool walkableState);
 
             /**
              * Compute current cartesian
@@ -188,16 +188,16 @@ namespace motion {
                                           Eigen::Vector3f& trunkAxis,
                                           Eigen::Vector3f& footPos,
                                           Eigen::Vector3f& footAxis,
-                                          bool& isLeftsupportFoot);
+                                          bool isLeftsupportFoot);
 
             void computeCartesianPositionAtTime(Eigen::Vector3f& trunkPos,
                                                 Eigen::Vector3f& trunkAxis,
                                                 Eigen::Vector3f& footPos,
                                                 Eigen::Vector3f& footAxis,
-                                                bool& isLeftsupportFoot,
+                                                bool isLeftsupportFoot,
                                                 float time);
 
-            void requestKick(const bool& left) {
+            void requestKick(const bool left) {
                 if (left) {
                     left_kick_requested  = true;
                     right_kick_requested = false;
@@ -274,7 +274,7 @@ namespace motion {
              */
             Trajectories trajs;
 
-            void updatePhase(const float& dt);
+            void updatePhase(const float dt);
 
             void buildNormalTrajectories(const Eigen::Vector3f& orders) {
                 buildTrajectories(orders, false, false, false);
@@ -296,21 +296,21 @@ namespace motion {
                 buildWalkDisableTrajectories(orders, true);
             }
             void buildTrajectories(const Eigen::Vector3f& orders,
-                                   const bool& startMovement,
-                                   const bool& startStep,
-                                   const bool& kickStep);
+                                   const bool startMovement,
+                                   const bool startStep,
+                                   const bool kickStep);
 
-            void buildWalkDisableTrajectories(const Eigen::Vector3f& orders, const bool& footInIdlePosition);
+            void buildWalkDisableTrajectories(const Eigen::Vector3f& orders, const bool footInIdlePosition);
 
             void saveCurrentTrunkState();
 
             void useCurrentTrunkState();
 
             void point(const TrajectoryTypes& spline,
-                       const float& t,
-                       const float& pos,
-                       const float& vel = 0,
-                       const float& acc = 0) {
+                       const float t,
+                       const float pos,
+                       const float vel = 0,
+                       const float acc = 0) {
                 trajs.get(spline).addPoint(t, pos, vel, acc);
             }
 
