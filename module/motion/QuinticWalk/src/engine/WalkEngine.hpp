@@ -171,7 +171,7 @@ namespace motion {
 
             /**
              * Update the internal walk state
-             * (pĥase, trajectories) from given
+             * (phase, trajectories) from given
              * elapsed time since last update() call
              */
             bool updateState(const float dt, const Eigen::Vector3f& orders, const bool walkableState);

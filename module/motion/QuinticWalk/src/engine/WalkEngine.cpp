@@ -156,7 +156,7 @@ namespace motion {
                     if (halfStepFinished) {
                         // stop step is finished, go to stop movement state
                         engine_state = WalkEngineState::STOP_MOVEMENT;
-                        buildStopMovementTrajectories(orders);
+                        // buildStopMovementTrajectories(orders);
                     }
                     break;
                 case WalkEngineState::STOP_MOVEMENT:
@@ -328,226 +328,220 @@ namespace motion {
                 singleSupportLength = 0.0f;
             }
 
-            // Set double support phase
-            //     point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, 1.0f);
-            //     point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 1.0f);
-            //     point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 0.0f);
-            //     point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, 0.0f);
+            // Set double support phase point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, 1.0f);
+            point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 1.0f);
+            point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 0.0f);
+            point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, 0.0f);
 
-            //     // Set support foot
-            //     point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-            //     point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+            // Set support foot
+            point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
+            point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
 
-            //     // Flying foot position
-            //     point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
-            //     point(TrajectoryTypes::FOOT_POS_X, doubleSupportLength, foot_step.getLast().x());
+            // Flying foot position
+            point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
+            point(TrajectoryTypes::FOOT_POS_X, doubleSupportLength, foot_step.getLast().x());
 
-            //     if (kickStep) {
-            //         point(TrajectoryTypes::FOOT_POS_X,
-            //               doubleSupportLength + singleSupportLength * params.kick_phase,
-            //               foot_step.getNext().x() + params.kick_length,
-            //               params.kick_vel);
-            //     }
-            //     else {
-            //         point(TrajectoryTypes::FOOT_POS_X,
-            //               doubleSupportLength
-            //                   + singleSupportLength * params.foot_put_down_phase * params.foot_overshoot_phase,
-            //               foot_step.getNext().x() + foot_step.getNext().x() * params.foot_overshoot_ratio);
-            //     }
+            if (kickStep) {
+                point(TrajectoryTypes::FOOT_POS_X,
+                      doubleSupportLength + singleSupportLength * params.kick_phase,
+                      foot_step.getNext().x() + params.kick_length,
+                      params.kick_vel);
+            }
+            else {
+                point(TrajectoryTypes::FOOT_POS_X,
+                      doubleSupportLength
+                          + singleSupportLength * params.foot_put_down_phase * params.foot_overshoot_phase,
+                      foot_step.getNext().x() + foot_step.getNext().x() * params.foot_overshoot_ratio);
+            }
 
-            //     // Add points for the foot x position
-            //     point(TrajectoryTypes::FOOT_POS_X,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           foot_step.getNext().x());
-            //     point(TrajectoryTypes::FOOT_POS_X, half_period, foot_step.getNext().x());
+            // Add points for the foot x position
+            point(TrajectoryTypes::FOOT_POS_X,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  foot_step.getNext().x());
+            point(TrajectoryTypes::FOOT_POS_X, half_period, foot_step.getNext().x());
 
-            //     // Add points for the foot y position
-            //     point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.getLast().y());
-            //     point(TrajectoryTypes::FOOT_POS_Y, doubleSupportLength, foot_step.getLast().y());
-            //     point(TrajectoryTypes::FOOT_POS_Y,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase *
-            //           params.foot_overshoot_phase, foot_step.getNext().y()
-            //               + (foot_step.getNext().y() - foot_step.getLast().y()) * params.foot_overshoot_ratio);
-            //     point(TrajectoryTypes::FOOT_POS_Y,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           foot_step.getNext().y());
-            //     point(TrajectoryTypes::FOOT_POS_Y, half_period, foot_step.getNext().y());
+            // Add points for the foot y position
+            point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.getLast().y());
+            point(TrajectoryTypes::FOOT_POS_Y, doubleSupportLength, foot_step.getLast().y());
+            point(TrajectoryTypes::FOOT_POS_Y,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase * params.foot_overshoot_phase,
+                  foot_step.getNext().y()
+                      + (foot_step.getNext().y() - foot_step.getLast().y()) * params.foot_overshoot_ratio);
+            point(TrajectoryTypes::FOOT_POS_Y,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  foot_step.getNext().y());
+            point(TrajectoryTypes::FOOT_POS_Y, half_period, foot_step.getNext().y());
 
-            //     // Add points for the foot z position
-            //     point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
-            //     point(TrajectoryTypes::FOOT_POS_Z, doubleSupportLength, 0.0f);
-            //     point(TrajectoryTypes::FOOT_POS_Z,
-            //           doubleSupportLength + singleSupportLength * params.foot_apex_phase
-            //               - 0.5f * params.foot_z_pause * singleSupportLength,
-            //           params.foot_rise);
-            //     point(TrajectoryTypes::FOOT_POS_Z,
-            //           doubleSupportLength + singleSupportLength * params.foot_apex_phase
-            //               + 0.5f * params.foot_z_pause * singleSupportLength,
-            //           params.foot_rise);
-            //     point(TrajectoryTypes::FOOT_POS_Z,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           params.foot_put_down_z_offset);
-            //     point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
+            // Add points for the foot z position
+            point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
+            point(TrajectoryTypes::FOOT_POS_Z, doubleSupportLength, 0.0f);
+            point(TrajectoryTypes::FOOT_POS_Z,
+                  doubleSupportLength + singleSupportLength * params.foot_apex_phase
+                      - 0.5f * params.foot_z_pause * singleSupportLength,
+                  params.foot_rise);
+            point(TrajectoryTypes::FOOT_POS_Z,
+                  doubleSupportLength + singleSupportLength * params.foot_apex_phase
+                      + 0.5f * params.foot_z_pause * singleSupportLength,
+                  params.foot_rise);
+            point(TrajectoryTypes::FOOT_POS_Z,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  params.foot_put_down_z_offset);
+            point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
 
-            //     // Add points for flying foot orientation
-            //     // X axis orientation
-            //     point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
-            //     point(TrajectoryTypes::FOOT_AXIS_X, doubleSupportLength + 0.1f * singleSupportLength, 0.0f);
-            //     point(TrajectoryTypes::FOOT_AXIS_X,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           params.foot_put_down_roll_offset * supportSign);
-            //     point(TrajectoryTypes::FOOT_AXIS_X, half_period, 0.0f);
+            // Add points for flying foot orientation
+            // X axis orientation
+            point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
+            point(TrajectoryTypes::FOOT_AXIS_X, doubleSupportLength + 0.1f * singleSupportLength, 0.0f);
+            point(TrajectoryTypes::FOOT_AXIS_X,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  params.foot_put_down_roll_offset * supportSign);
+            point(TrajectoryTypes::FOOT_AXIS_X, half_period, 0.0f);
 
-            //     // Y axis orientation
-            //     point(TrajectoryTypes::FOOT_AXIS_Y, 0.0f, 0.0f);
-            //     point(TrajectoryTypes::FOOT_AXIS_Y, half_period, 0.0f);
+            // Y axis orientation
+            point(TrajectoryTypes::FOOT_AXIS_Y, 0.0f, 0.0f);
+            point(TrajectoryTypes::FOOT_AXIS_Y, half_period, 0.0f);
 
-            //     // Z axis orientation
-            //     point(TrajectoryTypes::FOOT_AXIS_Z, 0.0f, foot_step.getLast().z());
-            //     point(TrajectoryTypes::FOOT_AXIS_Z, doubleSupportLength, foot_step.getLast().z());
-            //     point(TrajectoryTypes::FOOT_AXIS_Z,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           foot_step.getNext().z());
-            //     point(TrajectoryTypes::FOOT_AXIS_Z, half_period, foot_step.getNext().z());
+            // Z axis orientation
+            point(TrajectoryTypes::FOOT_AXIS_Z, 0.0f, foot_step.getLast().z());
+            point(TrajectoryTypes::FOOT_AXIS_Z, doubleSupportLength, foot_step.getLast().z());
+            point(TrajectoryTypes::FOOT_AXIS_Z,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  foot_step.getNext().z());
+            point(TrajectoryTypes::FOOT_AXIS_Z, half_period, foot_step.getNext().z());
 
-            //     // Half pause length of trunk swing lateral oscillation
-            //     float pauseLength = 0.5f * params.trunk_pause * half_period;
+            // Half pause length of trunk swing lateral oscillation
+            float pauseLength = 0.5f * params.trunk_pause * half_period;
 
-            //     // Trunk support foot and next support foot external oscillating position
-            //     Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
-            //                                           + params.trunk_x_offset_p_coef_forward *
-            //                                           foot_step.getNext().x()
-            //                                           + params.trunk_x_offset_p_coef_turn *
-            //                                           fabs(foot_step.getNext().z()),
-            //                                       params.trunk_y_offset);
-            //     Eigen::Vector2f trunkPointNext(foot_step.getNext().x() + params.trunk_x_offset
-            //                                        + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-            //                                        + params.trunk_x_offset_p_coef_turn *
-            //                                        fabs(foot_step.getNext().z()),
-            //                                    foot_step.getNext().y() + params.trunk_y_offset);
+            // Trunk support foot and next support foot external oscillating position
+            Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
+                                                  + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                                                  + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
+                                              params.trunk_y_offset);
+            Eigen::Vector2f trunkPointNext(foot_step.getNext().x() + params.trunk_x_offset
+                                               + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                                               + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
+                                           foot_step.getNext().y() + params.trunk_y_offset);
 
-            //     // Trunk middle neutral (no swing) position
-            //     Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
+            // Trunk middle neutral (no swing) position
+            Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
 
-            //     // Trunk vector from middle to support apex
-            //     Eigen::Vector2f trunkVect = trunkPointSupport - trunkPointMiddle;
+            // Trunk vector from middle to support apex
+            Eigen::Vector2f trunkVect = trunkPointSupport - trunkPointMiddle;
 
-            //     // Apply swing amplitude ratio
-            //     trunkVect.y() *= params.trunk_swing;
+            // Apply swing amplitude ratio
+            trunkVect.y() *= params.trunk_swing;
 
-            //     // Trunk support and next apex position
-            //     Eigen::Vector2f trunkApexSupport = trunkPointMiddle + trunkVect;
-            //     Eigen::Vector2f trunkApexNext    = trunkPointMiddle - trunkVect;
+            // Trunk support and next apex position
+            Eigen::Vector2f trunkApexSupport = trunkPointMiddle + trunkVect;
+            Eigen::Vector2f trunkApexNext    = trunkPointMiddle - trunkVect;
 
-            //     // Trunk forward velocity
-            //     float trunkVelSupport = (foot_step.getNext().x() - foot_step.getLast().x()) / period;
-            //     float trunkVelNext    = foot_step.getNext().x() / half_period;
+            // Trunk forward velocity
+            float trunkVelSupport = (foot_step.getNext().x() - foot_step.getLast().x()) / period;
+            float trunkVelNext    = foot_step.getNext().x() / half_period;
 
-            //     // Set points for trunk
-            //     // Trunk x position
-            //     if (startStep) {
-            //         point(TrajectoryTypes::TRUNK_POS_X, 0.0f, 0.0f, 0.0f, 0.0f);
-            //     }
-            //     else {
-            //         point(TrajectoryTypes::TRUNK_POS_X,
-            //               0.0f,
-            //               trunk_pos_at_last.x(),
-            //               trunk_vel_at_last.x(),
-            //               trunk_acc_at_last.x());
-            //         point(TrajectoryTypes::TRUNK_POS_X, half_period + timeShift, trunkApexSupport.x(),
-            //         trunkVelSupport);
-            //     }
+            // Set points for trunk
+            // Trunk x position
+            if (startStep) {
+                point(TrajectoryTypes::TRUNK_POS_X, 0.0f, 0.0f, 0.0f, 0.0f);
+            }
+            else {
+                point(TrajectoryTypes::TRUNK_POS_X,
+                      0.0f,
+                      trunk_pos_at_last.x(),
+                      trunk_vel_at_last.x(),
+                      trunk_acc_at_last.x());
+                point(TrajectoryTypes::TRUNK_POS_X, half_period + timeShift, trunkApexSupport.x(), trunkVelSupport);
+            }
 
-            //     point(TrajectoryTypes::TRUNK_POS_X, period + timeShift, trunkApexNext.x(), trunkVelNext);
+            point(TrajectoryTypes::TRUNK_POS_X, period + timeShift, trunkApexNext.x(), trunkVelNext);
 
-            //     // Trunk y position
-            //     point(TrajectoryTypes::TRUNK_POS_Y,
-            //           0.0f,
-            //           trunk_pos_at_last.y(),
-            //           trunk_vel_at_last.y(),
-            //           trunk_acc_at_last.y());
-            //     if (startStep || startMovement) {
-            //         point(TrajectoryTypes::TRUNK_POS_Y,
-            //               half_period + timeShift - pauseLength,
-            //               trunkPointMiddle.y() + trunkVect.y() * params.first_step_swing_factor);
-            //         point(TrajectoryTypes::TRUNK_POS_Y,
-            //               half_period + timeShift + pauseLength,
-            //               trunkPointMiddle.y() + trunkVect.y() * params.first_step_swing_factor);
-            //         point(TrajectoryTypes::TRUNK_POS_Y,
-            //               period + timeShift - pauseLength,
-            //               trunkPointMiddle.y() - trunkVect.y() * params.first_step_swing_factor);
-            //         point(TrajectoryTypes::TRUNK_POS_Y,
-            //               period + timeShift + pauseLength,
-            //               trunkPointMiddle.y() - trunkVect.y() * params.first_step_swing_factor);
-            //     }
-            //     else {
-            //         point(TrajectoryTypes::TRUNK_POS_Y, half_period + timeShift - pauseLength, trunkApexSupport.y());
-            //         point(TrajectoryTypes::TRUNK_POS_Y, half_period + timeShift + pauseLength, trunkApexSupport.y());
-            //         point(TrajectoryTypes::TRUNK_POS_Y, period + timeShift - pauseLength, trunkApexNext.y());
-            //         point(TrajectoryTypes::TRUNK_POS_Y, period + timeShift + pauseLength, trunkApexNext.y());
-            //     }
+            // Trunk y position
+            point(TrajectoryTypes::TRUNK_POS_Y,
+                  0.0f,
+                  trunk_pos_at_last.y(),
+                  trunk_vel_at_last.y(),
+                  trunk_acc_at_last.y());
+            if (startStep || startMovement) {
+                point(TrajectoryTypes::TRUNK_POS_Y,
+                      half_period + timeShift - pauseLength,
+                      trunkPointMiddle.y() + trunkVect.y() * params.first_step_swing_factor);
+                point(TrajectoryTypes::TRUNK_POS_Y,
+                      half_period + timeShift + pauseLength,
+                      trunkPointMiddle.y() + trunkVect.y() * params.first_step_swing_factor);
+                point(TrajectoryTypes::TRUNK_POS_Y,
+                      period + timeShift - pauseLength,
+                      trunkPointMiddle.y() - trunkVect.y() * params.first_step_swing_factor);
+                point(TrajectoryTypes::TRUNK_POS_Y,
+                      period + timeShift + pauseLength,
+                      trunkPointMiddle.y() - trunkVect.y() * params.first_step_swing_factor);
+            }
+            else {
+                point(TrajectoryTypes::TRUNK_POS_Y, half_period + timeShift - pauseLength, trunkApexSupport.y());
+                point(TrajectoryTypes::TRUNK_POS_Y, half_period + timeShift + pauseLength, trunkApexSupport.y());
+                point(TrajectoryTypes::TRUNK_POS_Y, period + timeShift - pauseLength, trunkApexNext.y());
+                point(TrajectoryTypes::TRUNK_POS_Y, period + timeShift + pauseLength, trunkApexNext.y());
+            }
 
-            //     // Trunk z position
-            //     point(TrajectoryTypes::TRUNK_POS_Z,
-            //           0.0f,
-            //           trunk_pos_at_last.z(),
-            //           trunk_vel_at_last.z(),
-            //           trunk_acc_at_last.z());
-            //     point(TrajectoryTypes::TRUNK_POS_Z, half_period + timeShift, params.trunk_height);
-            //     point(TrajectoryTypes::TRUNK_POS_Z, period + timeShift, params.trunk_height);
+            // Trunk z position
+            point(TrajectoryTypes::TRUNK_POS_Z,
+                  0.0f,
+                  trunk_pos_at_last.z(),
+                  trunk_vel_at_last.z(),
+                  trunk_acc_at_last.z());
+            point(TrajectoryTypes::TRUNK_POS_Z, half_period + timeShift, params.trunk_height);
+            point(TrajectoryTypes::TRUNK_POS_Z, period + timeShift, params.trunk_height);
 
-            //     // Define trunk yaw target orientation position and velocity in euler angle and convertion to axis
-            //     vector Eigen::Vector3f eulerAtSupport(0.0f,
-            //                                    params.trunk_pitch
-            //                                        + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-            //                                        + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
-            //                                    0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
-            //     Eigen::Vector3f eulerAtNext(0.0f,
-            //                                 params.trunk_pitch + params.trunk_pitch_p_coef_forward *
-            //                                 foot_step.getNext().x()
-            //                                     + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
-            //                                 foot_step.getNext().z());
-            //     Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
-            //     Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
-            //     Eigen::Vector3f axisAtSupport = Eigen::AngleAxisf(matAtSupport).axis();
-            //     Eigen::Vector3f axisAtNext    = Eigen::AngleAxisf(matAtNext).axis();
+            // Define trunk yaw target orientation position and velocity in euler angle and convertion to axis
+            // vector
+            Eigen::Vector3f eulerAtSupport(0.0f,
+                                           params.trunk_pitch
+                                               + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
+                                               + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                           0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
+            Eigen::Vector3f eulerAtNext(0.0f,
+                                        params.trunk_pitch + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
+                                            + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                        foot_step.getNext().z());
+            Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
+            Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
+            Eigen::Vector3f axisAtSupport = Eigen::AngleAxisf(matAtSupport).axis();
+            Eigen::Vector3f axisAtNext    = Eigen::AngleAxisf(matAtNext).axis();
 
-            //     Eigen::Vector3f axisVel(
-            //         0.0f,
-            //         0.0f,
-            //         utility::math::angle::angleDistance(foot_step.getLast().z(), foot_step.getNext().z()) / period);
+            Eigen::Vector3f axisVel(
+                0.0f,
+                0.0f,
+                utility::math::angle::angleDistance(foot_step.getLast().z(), foot_step.getNext().z()) / period);
 
-            //     // Add points for trunk orientation
-            //     // Trunk x axis orientation
-            //     point(TrajectoryTypes::TRUNK_AXIS_X,
-            //           0.0f,
-            //           trunk_axis_pos_at_last.x(),
-            //           trunk_axis_vel_at_last.x(),
-            //           trunk_axis_acc_at_last.x());
-            //     point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, axisAtSupport.x(), axisVel.x());
-            //     point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, axisAtNext.x(), axisVel.x());
+            // Add points for trunk orientation
+            // Trunk x axis orientation
+            point(TrajectoryTypes::TRUNK_AXIS_X,
+                  0.0f,
+                  trunk_axis_pos_at_last.x(),
+                  trunk_axis_vel_at_last.x(),
+                  trunk_axis_acc_at_last.x());
+            point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, axisAtSupport.x(), axisVel.x());
+            point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, axisAtNext.x(), axisVel.x());
 
-            //     // Trunk y axis orientation
-            //     point(TrajectoryTypes::TRUNK_AXIS_Y,
-            //           0.0f,
-            //           params.trunk_pitch - trunk_axis_pos_at_last.y(),
-            //           trunk_axis_vel_at_last.y(),
-            //           trunk_axis_acc_at_last.y());
-            //     point(TrajectoryTypes::TRUNK_AXIS_Y,
-            //           half_period + timeShift,
-            //           params.trunk_pitch - axisAtSupport.y(),
-            //           axisVel.y());
-            //     point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch - axisAtNext.y(),
-            //     axisVel.y());
+            // Trunk y axis orientation
+            point(TrajectoryTypes::TRUNK_AXIS_Y,
+                  0.0f,
+                  params.trunk_pitch - trunk_axis_pos_at_last.y(),
+                  trunk_axis_vel_at_last.y(),
+                  trunk_axis_acc_at_last.y());
+            point(TrajectoryTypes::TRUNK_AXIS_Y,
+                  half_period + timeShift,
+                  params.trunk_pitch - axisAtSupport.y(),
+                  axisVel.y());
+            point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch - axisAtNext.y(), axisVel.y());
 
-            //     // Trunk z axis orientation
-            //     point(TrajectoryTypes::TRUNK_AXIS_Z,
-            //           0.0f,
-            //           trunk_axis_pos_at_last.z(),
-            //           trunk_axis_vel_at_last.z(),
-            //           trunk_axis_acc_at_last.z());
-            //     point(TrajectoryTypes::TRUNK_AXIS_Z, half_period + timeShift, axisAtSupport.z(), axisVel.z());
-            //     point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, axisAtNext.z(), axisVel.z());
+            // Trunk z axis orientation
+            point(TrajectoryTypes::TRUNK_AXIS_Z,
+                  0.0f,
+                  trunk_axis_pos_at_last.z(),
+                  trunk_axis_vel_at_last.z(),
+                  trunk_axis_acc_at_last.z());
+            point(TrajectoryTypes::TRUNK_AXIS_Z, half_period + timeShift, axisAtSupport.z(), axisVel.z());
+            point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, axisAtNext.z(), axisVel.z());
         }
 
         void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders,
@@ -560,139 +554,139 @@ namespace motion {
             // Reset the trajectories
             trajs = TrajectoriesInit();
 
-            //     // Time length of float and single support phase during the half cycle
-            //     float doubleSupportLength = params.double_support_ratio * half_period;
-            //     float singleSupportLength = half_period - doubleSupportLength;
+            // Time length of float and single support phase during the half cycle
+            float doubleSupportLength = params.double_support_ratio * half_period;
+            float singleSupportLength = half_period - doubleSupportLength;
 
-            //     // Sign of support foot with respect to lateral
-            //     float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
+            // Sign of support foot with respect to lateral
+            float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
 
-            //     // Set float support phase
-            //     float isDoubleSupport = footInIdlePosition ? 1.0f : 0.0f;
-            //     point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, isDoubleSupport);
-            //     point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, isDoubleSupport);
+            // Set float support phase
+            float isDoubleSupport = footInIdlePosition ? 1.0f : 0.0f;
+            point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, isDoubleSupport);
+            point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, isDoubleSupport);
 
-            //     // Set support foot
-            //     point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-            //     point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+            // Set support foot
+            point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
+            point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
 
-            //     // Add points for flying foot position
-            //     // Foot x position
-            //     point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
-            //     point(TrajectoryTypes::FOOT_POS_X, doubleSupportLength, foot_step.getLast().x());
-            //     point(TrajectoryTypes::FOOT_POS_X,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase *
-            //           params.foot_overshoot_phase, -foot_step.getLast().x() * params.foot_overshoot_ratio);
-            //     point(TrajectoryTypes::FOOT_POS_X,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           0.0f);
-            //     point(TrajectoryTypes::FOOT_POS_X, half_period, 0.0f);
+            // Add points for flying foot position
+            // Foot x position
+            point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
+            point(TrajectoryTypes::FOOT_POS_X, doubleSupportLength, foot_step.getLast().x());
+            point(TrajectoryTypes::FOOT_POS_X,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase * params.foot_overshoot_phase,
+                  -foot_step.getLast().x() * params.foot_overshoot_ratio);
+            point(TrajectoryTypes::FOOT_POS_X,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  0.0f);
+            point(TrajectoryTypes::FOOT_POS_X, half_period, 0.0f);
 
-            //     // Foot y position
-            //     point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.getLast().y());
-            //     point(TrajectoryTypes::FOOT_POS_Y, doubleSupportLength, foot_step.getLast().y());
-            //     point(TrajectoryTypes::FOOT_POS_Y,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase *
-            //           params.foot_overshoot_phase, -supportSign * params.foot_distance
-            //               + (-supportSign * params.foot_distance - foot_step.getLast().y()) *
-            //               params.foot_overshoot_ratio);
-            //     point(TrajectoryTypes::FOOT_POS_Y,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           -supportSign * params.foot_distance);
-            //     point(TrajectoryTypes::FOOT_POS_Y, half_period, -supportSign * params.foot_distance);
+            // Foot y position
+            point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.getLast().y());
+            point(TrajectoryTypes::FOOT_POS_Y, doubleSupportLength, foot_step.getLast().y());
+            point(TrajectoryTypes::FOOT_POS_Y,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase * params.foot_overshoot_phase,
+                  -supportSign * params.foot_distance
+                      + (-supportSign * params.foot_distance - foot_step.getLast().y()) * params.foot_overshoot_ratio);
+            point(TrajectoryTypes::FOOT_POS_Y,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  -supportSign * params.foot_distance);
+            point(TrajectoryTypes::FOOT_POS_Y, half_period, -supportSign * params.foot_distance);
 
-            //     // Foot z position
-            //     // If the walk has just been disabled, make one single step to neutral pose
-            //     if (!footInIdlePosition) {
-            //         point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
-            //         point(TrajectoryTypes::FOOT_POS_Z, doubleSupportLength, 0.0f);
-            //         point(TrajectoryTypes::FOOT_POS_Z,
-            //               doubleSupportLength + singleSupportLength * params.foot_apex_phase
-            //                   - 0.5f * params.foot_z_pause * singleSupportLength,
-            //               params.foot_rise);
-            //         point(TrajectoryTypes::FOOT_POS_Z,
-            //               doubleSupportLength + singleSupportLength * params.foot_apex_phase
-            //                   + 0.5f * params.foot_z_pause * singleSupportLength,
-            //               params.foot_rise);
-            //         point(TrajectoryTypes::FOOT_POS_Z,
-            //               doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //               params.foot_put_down_z_offset);
-            //         point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
-            //     }
-            //     else {
-            //         // dont move the foot in last single step before stop since we only move the trunk back to
-            //         the center point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f); point(TrajectoryTypes::FOOT_POS_Z,
-            //         half_period, 0.0f);
-            //     }
+            // Foot z position
+            // If the walk has just been disabled, make one single step to neutral pose
+            if (!footInIdlePosition) {
+                point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
+                point(TrajectoryTypes::FOOT_POS_Z, doubleSupportLength, 0.0f);
+                point(TrajectoryTypes::FOOT_POS_Z,
+                      doubleSupportLength + singleSupportLength * params.foot_apex_phase
+                          - 0.5f * params.foot_z_pause * singleSupportLength,
+                      params.foot_rise);
+                point(TrajectoryTypes::FOOT_POS_Z,
+                      doubleSupportLength + singleSupportLength * params.foot_apex_phase
+                          + 0.5f * params.foot_z_pause * singleSupportLength,
+                      params.foot_rise);
+                point(TrajectoryTypes::FOOT_POS_Z,
+                      doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                      params.foot_put_down_z_offset);
+                point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
+            }
+            else {
+                // dont move the foot in last single step before stop since we only move the trunk back to
+                // the center
+                point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
+                point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
+            }
 
-            //     // Add points for flying foot orientation
-            //     // Flying foot x axis orientation
-            //     point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
-            //     point(TrajectoryTypes::FOOT_AXIS_X, half_period, 0.0f);
+            // Add points for flying foot orientation
+            // Flying foot x axis orientation
+            point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
+            point(TrajectoryTypes::FOOT_AXIS_X, half_period, 0.0f);
 
-            //     // Flying foot y axis orientation
-            //     point(TrajectoryTypes::FOOT_AXIS_Y, 0.0f, 0.0f);
-            //     point(TrajectoryTypes::FOOT_AXIS_Y, half_period, 0.0f);
+            // Flying foot y axis orientation
+            point(TrajectoryTypes::FOOT_AXIS_Y, 0.0f, 0.0f);
+            point(TrajectoryTypes::FOOT_AXIS_Y, half_period, 0.0f);
 
-            //     // Flying foot z axis orientation
-            //     point(TrajectoryTypes::FOOT_AXIS_Z, 0.0f, foot_step.getLast().z());
-            //     point(TrajectoryTypes::FOOT_AXIS_Z, doubleSupportLength, foot_step.getLast().z());
-            //     point(TrajectoryTypes::FOOT_AXIS_Z,
-            //           doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
-            //           0.0f);
-            //     point(TrajectoryTypes::FOOT_AXIS_Z, half_period, 0.0f);
+            // Flying foot z axis orientation
+            point(TrajectoryTypes::FOOT_AXIS_Z, 0.0f, foot_step.getLast().z());
+            point(TrajectoryTypes::FOOT_AXIS_Z, doubleSupportLength, foot_step.getLast().z());
+            point(TrajectoryTypes::FOOT_AXIS_Z,
+                  doubleSupportLength + singleSupportLength * params.foot_put_down_phase,
+                  0.0f);
+            point(TrajectoryTypes::FOOT_AXIS_Z, half_period, 0.0f);
 
-            //     // Add points for trunk position
-            //     // Trunk x position
-            //     point(TrajectoryTypes::TRUNK_POS_X,
-            //           0.0f,
-            //           trunk_pos_at_last.x(),
-            //           trunk_vel_at_last.x(),
-            //           trunk_acc_at_last.x());
-            //     point(TrajectoryTypes::TRUNK_POS_X, half_period, params.trunk_x_offset);
+            // Add points for trunk position
+            // Trunk x position
+            point(TrajectoryTypes::TRUNK_POS_X,
+                  0.0f,
+                  trunk_pos_at_last.x(),
+                  trunk_vel_at_last.x(),
+                  trunk_acc_at_last.x());
+            point(TrajectoryTypes::TRUNK_POS_X, half_period, params.trunk_x_offset);
 
-            //     // Trunk y position
-            //     point(TrajectoryTypes::TRUNK_POS_Y,
-            //           0.0f,
-            //           trunk_pos_at_last.y(),
-            //           trunk_vel_at_last.y(),
-            //           trunk_acc_at_last.y());
-            //     point(TrajectoryTypes::TRUNK_POS_Y,
-            //           half_period,
-            //           -supportSign * 0.5f * params.foot_distance + params.trunk_y_offset);
+            // Trunk y position
+            point(TrajectoryTypes::TRUNK_POS_Y,
+                  0.0f,
+                  trunk_pos_at_last.y(),
+                  trunk_vel_at_last.y(),
+                  trunk_acc_at_last.y());
+            point(TrajectoryTypes::TRUNK_POS_Y,
+                  half_period,
+                  -supportSign * 0.5f * params.foot_distance + params.trunk_y_offset);
 
-            //     // Trunk z position
-            //     point(TrajectoryTypes::TRUNK_POS_Z,
-            //           0.0f,
-            //           trunk_pos_at_last.z(),
-            //           trunk_vel_at_last.z(),
-            //           trunk_acc_at_last.z());
-            //     point(TrajectoryTypes::TRUNK_POS_Z, half_period, params.trunk_height);
+            // Trunk z position
+            point(TrajectoryTypes::TRUNK_POS_Z,
+                  0.0f,
+                  trunk_pos_at_last.z(),
+                  trunk_vel_at_last.z(),
+                  trunk_acc_at_last.z());
+            point(TrajectoryTypes::TRUNK_POS_Z, half_period, params.trunk_height);
 
-            //     // Add points for trunk orientation
-            //     // Trunk x axis orientation
-            //     point(TrajectoryTypes::TRUNK_AXIS_X,
-            //           0.0f,
-            //           trunk_axis_pos_at_last.x(),
-            //           trunk_axis_vel_at_last.x(),
-            //           trunk_axis_acc_at_last.x());
-            //     point(TrajectoryTypes::TRUNK_AXIS_X, half_period, 0.0f);
+            // Add points for trunk orientation
+            // Trunk x axis orientation
+            point(TrajectoryTypes::TRUNK_AXIS_X,
+                  0.0f,
+                  trunk_axis_pos_at_last.x(),
+                  trunk_axis_vel_at_last.x(),
+                  trunk_axis_acc_at_last.x());
+            point(TrajectoryTypes::TRUNK_AXIS_X, half_period, 0.0f);
 
-            //     // Trunk y axis orientation
-            //     point(TrajectoryTypes::TRUNK_AXIS_Y,
-            //           0.0f,
-            //           params.trunk_pitch - trunk_axis_pos_at_last.y(),
-            //           trunk_axis_vel_at_last.y(),
-            //           trunk_axis_acc_at_last.y());
-            //     point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - 1.0f);
+            // Trunk y axis orientation
+            point(TrajectoryTypes::TRUNK_AXIS_Y,
+                  0.0f,
+                  params.trunk_pitch - trunk_axis_pos_at_last.y(),
+                  trunk_axis_vel_at_last.y(),
+                  trunk_axis_acc_at_last.y());
+            point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - 1.0f);
 
-            //     // Trunk z axis orientation
-            //     point(TrajectoryTypes::TRUNK_AXIS_Z,
-            //           0.0f,
-            //           trunk_axis_pos_at_last.z(),
-            //           trunk_axis_vel_at_last.z(),
-            //           trunk_axis_acc_at_last.z());
-            //     point(TrajectoryTypes::TRUNK_AXIS_Z, half_period, 0.0f);
+            // Trunk z axis orientation
+            point(TrajectoryTypes::TRUNK_AXIS_Z,
+                  0.0f,
+                  trunk_axis_pos_at_last.z(),
+                  trunk_axis_vel_at_last.z(),
+                  trunk_axis_acc_at_last.z());
+            point(TrajectoryTypes::TRUNK_AXIS_Z, half_period, 0.0f);
         }
 
         void QuinticWalkEngine::resetTrunkLastState() {

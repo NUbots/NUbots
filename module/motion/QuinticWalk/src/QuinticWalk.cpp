@@ -180,23 +180,13 @@ namespace motion {
             }
             else {
                 // we don't want to walk, even if we have orders, if we are not in the right state
-                /* Our robots will soon^TM be able to sit down and stand up autonomously, when
-                 * sitting down the motors are off but will turn on automatically which is why
-                 * MOTOR_OFF is a valid walkable state.
-                 */
-                // TODO Figure out a better way than having integration knowledge that HCM will play
-                // an animation to stand up
                 bool walkableState = true;  // TODO: what is our equivalent here?
-                // bool walkableState = _robotState ==
-                // humanoid_league_msgs::RobotControlState::CONTROLABLE
-                //                      || _robotState ==
-                //                      humanoid_league_msgs::RobotControlState::WALKING
-                //                      || _robotState ==
-                //                      humanoid_league_msgs::RobotControlState::MOTOR_OFF;
+
                 // see if the walk engine has new goals for us
                 walkableState = walk_engine.updateState(dt, current_orders, walkableState);
+
                 if (walk_engine.getState() != engine::WalkEngineState::IDLE && walkableState) {  // todo
-                    // calculateJointGoals();
+                    calculateJointGoals();
                 }
             }
         });
