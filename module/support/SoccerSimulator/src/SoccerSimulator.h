@@ -38,7 +38,7 @@ namespace support {
 
     class SoccerSimulator : public NUClear::Reactor {
     public:
-        enum MotionType { NONE = 0, PATH = 1, MOTION = 2 };
+        enum MotionType { NONE = 0, PATH = 1, MOTION = 2, STRAIGHT = 3 };
         MotionType motionTypeFromString(std::string s) {
             if (s.compare("NONE") == 0) {
                 return MotionType::NONE;
@@ -49,8 +49,8 @@ namespace support {
             else if (s.compare("MOTION") == 0) {
                 return MotionType::MOTION;
             }
-            else {
-                return MotionType::PATH;
+            else if (s.compare("STRAIGHT") == 0) {
+                return MotionType::STRAIGHT;
             }
         }
 
@@ -75,7 +75,7 @@ namespace support {
         // Member variables
         message::motion::KickPlannerConfig kick_cfg;
 
-        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 90;  // To match HardwareIO IMU read frequency
+        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;  // To match HardwareIO IMU read frequency
 
         struct Config {
             Config() : robot(), ball() {}
@@ -129,6 +129,7 @@ namespace support {
         std::queue<message::motion::KickCommand> kickQueue;
 
         Eigen::Affine2d oldRobotPose;
+        Eigen::Affine2d oldRobotVelocity;
         Eigen::Affine2d oldBallPose;
 
         bool kicking     = false;

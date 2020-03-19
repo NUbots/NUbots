@@ -33,6 +33,7 @@ namespace support {
 
     class VirtualGoalPost {
     private:
+        /*
         template <typename Scalar>
         Eigen::Matrix<Scalar, 2, 1> getCamRay(const Eigen::Matrix<Scalar, 3, 1>& norm1,
                                               const Eigen::Matrix<Scalar, 3, 1>& norm2,
@@ -51,7 +52,7 @@ namespace support {
                                                               const message::support::FieldDescription& field,
                                                               const Eigen::Affine3d& Hgc,
                                                               const bool& failIfNegative = true);
-
+        */
     public:
         VirtualGoalPost(const Eigen::Vector3d& position,
                         const float& height,
@@ -64,11 +65,12 @@ namespace support {
         message::vision::Goal::Side side = message::vision::Goal::Side::UNKNOWN_SIDE;  // LEFT, RIGHT, or UNKNOWN
         message::vision::Goal::Team team = message::vision::Goal::Team::UNKNOWN_TEAM;  // OWN, OPPONENT, or UNKNOWN
 
-        message::vision::Goals detect(const message::input::Image& image,
-                                      const Eigen::Affine2d& robotPose,
-                                      const message::input::Sensors& sensors,
-                                      const Eigen::Vector4d& /*error*/,
-                                      const message::support::FieldDescription& field);
+
+        // message::vision::Goals detect(const message::input::Image& image,
+        //                              const Eigen::Affine2d& robotPose,
+        //                              const message::input::Sensors& sensors,
+        //                              const Eigen::Vector4d& /*error*/,
+        //                              const message::support::FieldDescription& field);
     };
 }  // namespace support
 }  // namespace module

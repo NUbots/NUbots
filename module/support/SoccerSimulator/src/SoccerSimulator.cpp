@@ -177,104 +177,129 @@ namespace support {
         on<Trigger<StopCommand>>().then("Sim walk start", [this] { walking = false; });
 
         on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Optional<With<WalkCommand>>>()
-            .then("Robot motion simulation",
-                  [this](const Sensors& /*sensors*/, std::shared_ptr<const WalkCommand> walkCommand) {
-                      NUClear::clock::time_point now = NUClear::clock::now();
-                      double deltaT =
-                          1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
-                      Eigen::Affine2d diff;
-                      Eigen::Affine2d ball_pose;
-                      ball_pose.linear()      = Eigen::Rotation2Dd(world.ball.position.z()).toRotationMatrix();
-                      ball_pose.translation() = world.ball.position.head<2>();
+            .then(
+                "Robot motion simulation",
+                [this](const Sensors& /*sensors*/, std::shared_ptr<const WalkCommand> walkCommand) {
+                    NUClear::clock::time_point now = NUClear::clock::now();
+                    log("Simulating...");
+                    double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
+                    Eigen::Affine2d diff;
+                    Eigen::Affine2d ball_pose;
+                    ball_pose.linear()      = Eigen::Rotation2Dd(world.ball.position.z()).toRotationMatrix();
+                    ball_pose.translation() = world.ball.position.head<2>();
 
-                      switch (cfg_.robot.motion_type) {
-                          case MotionType::NONE: world.robotVelocity = Eigen::Affine2d::Identity(); break;
+                    switch (cfg_.robot.motion_type) {
+                        case MotionType::NONE: world.robotVelocity = Eigen::Affine2d::Identity(); break;
 
-                          case MotionType::PATH:
+                        case MotionType::PATH:
 
-                              world.robotPose.translation() = getPath(cfg_.robot.path);
+                            world.robotPose.translation() = getPath(cfg_.robot.path);
 
-                              diff.linear() = Eigen::Rotation2Dd(Eigen::Rotation2Dd(world.robotPose.linear()).angle()
-                                                                 - Eigen::Rotation2Dd(oldRobotPose.linear()).angle())
-                                                  .toRotationMatrix();
-                              diff.translation() = world.robotPose.translation() - oldRobotPose.translation();
+                            diff.linear() = Eigen::Rotation2Dd(Eigen::Rotation2Dd(world.robotPose.linear()).angle()
+                                                               - Eigen::Rotation2Dd(oldRobotPose.linear()).angle())
+                                                .toRotationMatrix();
+                            diff.translation() = world.robotPose.translation() - oldRobotPose.translation();
 
-                              // Face along direction of movement
-                              world.robotPose.linear() =
-                                  Eigen::Rotation2Dd(std::atan2(diff.translation().y(), diff.translation().x()))
-                                      .toRotationMatrix();
+                            // Face along direction of movement
+                            world.robotPose.linear() =
+                                Eigen::Rotation2Dd(std::atan2(diff.translation().y(), diff.translation().x()))
+                                    .toRotationMatrix();
 
-                              // Robot coordinates
-                              world.robotVelocity.linear() = Eigen::Matrix2d::Zero();
-                              world.robotVelocity.translation() =
-                                  Eigen::Vector2d(diff.translation().norm() / deltaT, 0.0);
+                            // Robot coordinates
+                            world.robotVelocity.linear() = Eigen::Matrix2d::Zero();
+                            world.robotVelocity.translation() =
+                                Eigen::Vector2d(diff.translation().norm() / deltaT, 0.0);
 
-                              break;
+                            break;
 
-                          case MotionType::MOTION:
+                        case MotionType::MOTION:
 
-                              // Update based on walk engine
-                              if (walking && walkCommand && !kicking) {
-                                  world.robotVelocity.translation() = walkCommand->command.head<2>() * 0.15;
-                                  // world.robotVelocity.xy() = sensors.odometry;
-                                  // angle from command:
-                                  world.robotVelocity.linear() =
-                                      Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix();
-                              }
-                              else {
-                                  world.robotVelocity = Eigen::Affine2d::Identity();
-                              }
-                              world.robotVelocity.translation() =
-                                  world.robotPose.rotation() * world.robotVelocity.translation();
-                              world.robotPose.translation() += world.robotVelocity.translation() * deltaT;
-                              break;
-                      }
-                      // Update ball position
-                      switch (cfg_.ball.motion_type) {
-                          case MotionType::NONE: world.ball.velocity = Eigen::Vector3d::Zero(); break;
+                            // Update based on walk engine
+                            if (walking && walkCommand && !kicking) {
+                                world.robotVelocity.translation() = walkCommand->command.head<2>() * 0.15;
+                                // world.robotVelocity.xy() = sensors.odometry;
+                                // angle from command:
+                                world.robotVelocity.linear() =
+                                    Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix();
+                            }
+                            else {
+                                world.robotVelocity = Eigen::Affine2d::Identity();
+                            }
+                            world.robotVelocity.translation() =
+                                world.robotPose.rotation() * world.robotVelocity.translation();
+                            world.robotPose.translation() += world.robotVelocity.translation() * deltaT;
+                            break;
 
-                          case MotionType::PATH:
+                        case MotionType::STRAIGHT:
 
-                              world.ball.position.head<2>() = getPath(cfg_.ball.path);
+                            world.robotPose.translation() = world.robotPose.translation() + Eigen::Vector2d(0.01, 0.0);
+                            world.robotPose.linear() =
+                                world.robotPose.linear() + Eigen::Rotation2Dd(0.0).toRotationMatrix();
 
-                              world.ball.velocity =
-                                  (world.ball.position
-                                   - Eigen::Vector3d(oldBallPose.translation().x(),
-                                                     oldBallPose.translation().y(),
-                                                     Eigen::Rotation2Dd(oldBallPose.rotation()).angle()))
-                                  / deltaT;  // world coordinates
-                              break;
+                            world.robotVelocity.linear()      = Eigen::Matrix2d::Zero();
+                            world.robotVelocity.translation() = Eigen::Vector2d(
+                                (world.robotPose.translation().x() - oldRobotPose.translation().x()) / deltaT,
+                                (world.robotPose.translation().y() - oldRobotPose.translation().y()) / deltaT);
 
-                          case MotionType::MOTION:
-                              // log("check kick:", !kickQueue.empty(), !kicking, lastKicking);
-                              if (!kickQueue.empty() && !kicking && lastKicking) {
-                                  // Get last queue
-                                  KickCommand lastKickCommand = kickQueue.back();
-                                  // Empty queue
-                                  std::queue<KickCommand>().swap(kickQueue);
-                                  // Check if kick worked:
-                                  Eigen::Affine2d relativeBallPose = world.robotPose.inverse() * ball_pose;
+                            log("From MotionType::STRAIGHT: [",
+                                world.robotPose.translation().x(),
+                                ",",
+                                world.robotPose.translation().y(),
+                                "]");
 
-                                  world.ball.position.head<2>() +=
-                                      world.robotPose.rotation() * lastKickCommand.direction.head<2>().normalized();
-                              }
-                              break;
-                      }
+                            break;
+                    }
+                    // Update ball position
+                    switch (cfg_.ball.motion_type) {
+                        case MotionType::NONE: world.ball.velocity = Eigen::Vector3d::Zero(); break;
 
+                        case MotionType::PATH:
 
-                      // Emit the change in orientation as a DarwinSensors::Gyroscope,
-                      // to be handled by HardwareSimulator.
-                      emit(computeGyro(Eigen::Rotation2Dd(world.robotPose.linear()).angle(),
-                                       Eigen::Rotation2Dd(oldRobotPose.linear()).angle()));
+                            world.ball.position.head<2>() = getPath(cfg_.ball.path);
 
-                      oldRobotPose = world.robotPose;
-                      oldBallPose  = ball_pose;
-                      lastNow      = now;
-                      lastKicking  = kicking;
-                  });
+                            world.ball.velocity =
+                                (world.ball.position
+                                 - Eigen::Vector3d(oldBallPose.translation().x(),
+                                                   oldBallPose.translation().y(),
+                                                   Eigen::Rotation2Dd(oldBallPose.rotation()).angle()))
+                                / deltaT;  // world coordinates
+                            break;
+
+                        case MotionType::MOTION:
+                            // log("check kick:", !kickQueue.empty(), !kicking, lastKicking);
+                            if (!kickQueue.empty() && !kicking && lastKicking) {
+                                // Get last queue
+                                KickCommand lastKickCommand = kickQueue.back();
+                                // Empty queue
+                                std::queue<KickCommand>().swap(kickQueue);
+                                // Check if kick worked:
+                                Eigen::Affine2d relativeBallPose = world.robotPose.inverse() * ball_pose;
+
+                                world.ball.position.head<2>() +=
+                                    world.robotPose.rotation() * lastKickCommand.direction.head<2>().normalized();
+                            }
+                            break;
+                    }
+
+                    // Emit the change in orientation as a DarwinSensors::Gyroscope,
+                    // to be handled by HardwareSimulator.
+                    emit(computeGyro(Eigen::Rotation2Dd(world.robotPose.linear()).angle(),
+                                     Eigen::Rotation2Dd(oldRobotPose.linear()).angle()));
+
+                    // Emit the change in position as a DarwinSensors::Accelerometer,
+                    // to be handled by HardwareSimulator.
+                    emit(computeAccl());
+
+                    oldRobotPose     = world.robotPose;
+                    oldRobotVelocity = world.robotVelocity;
+                    oldBallPose      = ball_pose;
+                    lastNow          = now;
+                    lastKicking      = kicking;
+                });
 
         // Simulate Vision
         // VirtualCamera is emitting images with lens parameters at 30 fps
+        /*
         on<Trigger<Image>, With<Sensors>, Optional<With<FieldDescription>>, Single>().then(
             "Vision Simulation",
             [this](const Image& image, const Sensors& sensors, const std::shared_ptr<const FieldDescription> fd) {
@@ -323,7 +348,7 @@ namespace support {
                     // Emit current field exactly
                     auto r = std::make_unique<std::vector<message::localisation::Field>>();
                     r->push_back(message::localisation::Field());
-                    r->back().position   = Eigen::Vector3d(world.robotPose.translation().x(),
+                    r->back().position = Eigen::Vector3d(world.robotPose.translation().x(),
                                                          world.robotPose.translation().y(),
                                                          Eigen::Rotation2Dd(world.robotPose.linear()).angle());
                     r->back().covariance = Eigen::Matrix3d::Identity() * 0.00001;
@@ -355,16 +380,12 @@ namespace support {
                 }
             });
 
-
+        */
         // Emit exact position to NUsight
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
+            log("Position: [", world.robotPose.translation().x(), ",", world.robotPose.translation().y(), "]");
             Eigen::Vector2d bearingVector = world.robotPose.rotation() * Eigen::Vector2d::UnitX();
             Eigen::Vector3d robotHeadingVector(bearingVector.x(), bearingVector.x(), 0.0);
-            // Graph statistics for plotting in NUsight2
-            emit(graph("x_true", world.robotPose.x()));
-            emit(graph("y_true", world.robotPose.y()));
-            emit(graph("heading_x_true", bearingVector[0]));
-            emit(graph("heading_y_true", bearingVector[1]));
         });
 
         on<Startup>().then("SoccerSimulator Startup", [this] {
@@ -388,6 +409,16 @@ namespace support {
         g->y   = 0;
         g->z   = dHeading;
         return g;
+    }
+
+    std::unique_ptr<DarwinSensors::Accelerometer> SoccerSimulator::computeAccl() {
+
+        auto a = std::make_unique<DarwinSensors::Accelerometer>();
+
+        a->x = (world.robotVelocity.translation().x() - oldRobotVelocity.translation().x()) / deltaT;
+        a->y = (world.robotVelocity.translation().y() - oldRobotVelocity.translation().y()) / deltaT;
+        a->z = 0.0;
+        return a;
     }
 
     Eigen::Vector2d SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p) {

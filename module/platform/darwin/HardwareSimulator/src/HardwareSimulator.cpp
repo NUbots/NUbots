@@ -171,83 +171,117 @@ namespace platform {
                                                              gyroQueue.push(tmpGyro);
                                                          });
 
+            on<Trigger<DarwinSensors::Accelerometer>>().then("Receive Simulated Accelerometer",
+                                                             [this](const DarwinSensors::Accelerometer& accl) {
+                                                                 std::lock_guard<std::mutex> lock(acclQueueMutex);
+                                                                 DarwinSensors::Accelerometer tmpAccl = accl;
+                                                                 acclQueue.push(tmpAccl);
+                                                             });
 
-            on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
-                [this](std::shared_ptr<const Sensors> previousSensors) {
-                    if (previousSensors) {
-                        Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics[ServoID::R_ANKLE_ROLL]);
-                        Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics[ServoID::L_ANKLE_ROLL]);
-                        Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
-                        Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
-                        if (torsoFromRightFoot.z() > torsoFromLeftFoot.z()) {
-                            setLeftFootDown(false);
-                            setRightFootDown(true);
-                        }
-                        else if (torsoFromRightFoot.z() < torsoFromLeftFoot.z()) {
-                            setLeftFootDown(true);
-                            setRightFootDown(false);
+            on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then([this](
+                std::shared_ptr<const Sensors> previousSensors) {
+                if (previousSensors) {
+                    Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                    Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                    Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
+                    Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
+
+                    if (torsoFromRightFoot.z() > torsoFromLeftFoot.z()) {
+                        setLeftFootDown(false);
+                        setRightFootDown(true);
+                    }
+                    else if (torsoFromRightFoot.z() < torsoFromLeftFoot.z()) {
+                        setLeftFootDown(true);
+                        setRightFootDown(false);
+                    }
+                    else {
+                        setLeftFootDown(true);
+                        setRightFootDown(true);
+                    }
+                }
+
+                for (int i = 0; i < 20; ++i) {
+                    auto& servo       = utility::platform::darwin::getDarwinServo(i, sensors);
+                    float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
+                    movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
+
+
+                    if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
+                        servo.presentPosition = servo.goalPosition;
+                    }
+                    else {
+                        Eigen::Vector3d present(std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
+                        Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
+
+                        Eigen::Vector3d cross = present.cross(goal);
+                        if (cross.z() > 0) {
+                            servo.presentPosition =
+                                utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
                         }
                         else {
-                            setLeftFootDown(true);
-                            setRightFootDown(true);
+                            servo.presentPosition =
+                                utility::math::angle::normalizeAngle(servo.presentPosition - movingSpeed);
                         }
                     }
+                }
 
-                    for (int i = 0; i < 20; ++i) {
-                        auto& servo       = utility::platform::darwin::getDarwinServo(i, sensors);
-                        float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
-                        movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
+                // Gyro:
+                // Note: This reaction is not (and should not be) synced with the
+                // 'Receive Simulated Gyroscope' reaction above, so we can't
+                // reliably query the size of the gyroQueue.
+                Eigen::Vector3d sumGyro = Eigen::Vector3d::Zero();
+                /* mutext scope */ {
+                    std::lock_guard<std::mutex> lock(gyroQueueMutex);
+                    while (!gyroQueue.empty()) {
+                        DarwinSensors::Gyroscope g = gyroQueue.front();
+                        sumGyro += Eigen::Vector3d(g.y, g.x, -(g.z + imu_drift_rate));
 
-
-                        if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
-                            servo.presentPosition = servo.goalPosition;
-                        }
-                        else {
-                            Eigen::Vector3d present(
-                                std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
-                            Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
-
-                            Eigen::Vector3d cross = present.cross(goal);
-                            if (cross.z() > 0) {
-                                servo.presentPosition =
-                                    utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
-                            }
-                            else {
-                                servo.presentPosition =
-                                    utility::math::angle::normalizeAngle(servo.presentPosition - movingSpeed);
-                            }
-                        }
-                    }
-
-                    // Gyro:
-                    // Note: This reaction is not (and should not be) synced with the
-                    // 'Receive Simulated Gyroscope' reaction above, so we can't
-                    // reliably query the size of the gyroQueue.
-                    Eigen::Vector3d sumGyro = Eigen::Vector3d::Zero();
-                    /* mutext scope */ {
                         std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                        while (!gyroQueue.empty()) {
-                            DarwinSensors::Gyroscope g = gyroQueue.front();
-                            sumGyro += Eigen::Vector3d(g.x, g.y, g.z);
-
-                            std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                            gyroQueue.pop();
-                        }
+                        gyroQueue.pop();
                     }
-                    sumGyro               = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
-                    sumGyro.x()           = -sumGyro.x();
-                    sensors.gyroscope     = sumGyro;
-                    sensors.accelerometer = Eigen::Vector3d(-9.8 * std::sin(bodyTilt), 0.0, -9.8 * std::cos(bodyTilt));
-                    sensors.timestamp     = NUClear::clock::now();
+                }
 
-                    // Add some noise so that sensor fusion doesnt converge to a singularity
-                    auto sensors_message = std::make_unique<DarwinSensors>(sensors);
-                    addNoise(sensors_message);
+                // Accl:
+                // Note: This reaction is not (and should not be) synced with the
+                // 'Receive Simulated Accelerometer' reaction above, so we can't
+                // reliably query the size of the acclQueue.
+                Eigen::Vector3d sumAccl = Eigen::Vector3d::Zero();
+                Eigen::Vector3d avgAccl = Eigen::Vector3d::Zero();
+                int count               = 0;
+                /* mutext scope */ {
+                    std::lock_guard<std::mutex> lock(acclQueueMutex);
 
-                    // Send our nicely computed sensor data out to the world
-                    emit(std::move(sensors_message));
-                });
+                    while (!acclQueue.empty()) {
+                        DarwinSensors::Accelerometer a = acclQueue.front();
+                        sumAccl += Eigen::Vector3d(a.x, -a.y, -a.z);
+                        count++;
+
+                        std::lock_guard<std::mutex> lock(acclQueueMutex);
+                        acclQueue.pop();
+                    }
+
+                    if (count > 0) {
+                        avgAccl = sumAccl / count;
+                    }
+                }
+
+                // sumGyro               = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
+                sensors.gyroscope.x     = sumGyro.x();
+                sensors.gyroscope.y     = sumGyro.y();
+                sensors.gyroscope.z     = sumGyro.z();
+                sensors.accelerometer.x = 9.8 * std::sin(bodyTilt) + avgAccl.x();
+                sensors.accelerometer.y = avgAccl.y();
+                sensors.accelerometer.z = 9.8 * std::cos(bodyTilt) + avgAccl.z();
+                sensors.timestamp       = NUClear::clock::now();
+
+                // Add some noise so that sensor fusion doesnt converge to a singularity
+                auto sensors_message = std::make_unique<DarwinSensors>(sensors);
+                addNoise(sensors_message);
+
+                // Send our nicely computed sensor data out to the world
+                emit(std::move(sensors_message));
+            });
 
             // This trigger writes the servo positions to the hardware
             on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {

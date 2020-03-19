@@ -42,7 +42,10 @@ namespace platform {
             message::platform::darwin::DarwinSensors sensors;
 
             std::queue<message::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
+            std::queue<message::platform::darwin::DarwinSensors::Accelerometer> acclQueue;
             std::mutex gyroQueueMutex;
+            std::mutex acclQueueMutex;
+
 
             float imu_drift_rate                     = 0;
             static constexpr size_t UPDATE_FREQUENCY = 90;

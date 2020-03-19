@@ -470,7 +470,7 @@ namespace platform {
                     // Accelerometer measurement update
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
-                    /*
+
                     for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
                         bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
                         bool prev_foot_down = previous_foot_down[side];
@@ -500,6 +500,7 @@ namespace platform {
                                                  config.motionFilter.noise.measurement.flatFootOdometry,
                                                  MeasurementType::FLAT_FOOT_ODOMETRY());
 
+
                             // do a foot based orientation update
                             Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
                             motionFilter.measure(Rwt.coeffs(),
@@ -510,7 +511,7 @@ namespace platform {
                             previous_foot_down[side] = false;
                         }
                     }
-                    */
+
 
                     // Calculate our time offset from the last read
                     double deltaT = std::max(
