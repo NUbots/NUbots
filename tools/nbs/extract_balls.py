@@ -12,20 +12,13 @@ from .nbs import Decoder
 
 
 def register(command):
-    command.help = "Decode an nbs file and convert it to json"
+    command.help = "Decode an nbs file, extract ball messages, and convert it to json"
 
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to convert to json")
     command.add_argument("--output", "-o", nargs="?", default=os.getcwd(), help="The folder to extract the json data into")
 
 def run(files, output, **kwargs):
-
-    #for packet in Decoder(*files):
-    #    out = re.sub(r"\s+", " ", MessageToJson(packet.msg, True))
-    #    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type, packet.timestamp, out)
-    #    # Print as a json object
-    #    print(out)
-
     os.makedirs(output, exist_ok=True)
     decoder = Decoder(*files)
 
