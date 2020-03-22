@@ -93,14 +93,6 @@ namespace platform {
             emit<Scope::UDP>(std::make_unique<message::motion::ServoTargets>(commands), config.ip, config.outPort);
         });
 
-        /*on<UDP>(config.outPort).then([this](const UDP::Packet packet) {
-            log("UDP message received");
-            message::motion::ServoTargets message =
-                NUClear::util::serialise::Serialise<message::motion::ServoTargets>::deserialise(packet.payload);
-
-            log(message.targets.front().id);
-        });*/
-
         /*
          * Send updated servo positions to the sim
          */
