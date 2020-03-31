@@ -45,7 +45,7 @@ namespace vision {
                     auto& net_layer = net_conv.back();
 
                     // Copy across our weights
-                    for (int i = 0; i < layer["weights"].size(); i++) {
+                    for (unsigned int i = 0; i < layer["weights"].size(); i++) {
                         const auto& l = layer["weights"][i];
 
                         net_layer.first.emplace_back();

@@ -50,7 +50,7 @@ namespace vision {
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return idx == indices.size()
+                    return idx == int(indices.size())
                            || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
                 },
                 {4, 5});
