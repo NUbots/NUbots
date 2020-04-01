@@ -34,7 +34,7 @@ namespace motion {
             , trunk_axis_acc_at_last()
             , trajs() {
             // Make sure to call the reset method after having the parameters
-            trajs = TrajectoriesInit();
+            TrajectoriesInit(trajs);
         }
 
         bool QuinticWalkEngine::updateState(const float dt, const Eigen::Vector3f& orders, const bool walkableState) {
@@ -304,7 +304,7 @@ namespace motion {
             }
 
             // Reset the trajectories
-            trajs = TrajectoriesInit();
+            TrajectoriesInit(trajs);
 
             // full period (float step) is needed for trunk splines
             float period = 2.0f * half_period;
@@ -552,7 +552,7 @@ namespace motion {
             foot_step.stepFromOrders(orders);
 
             // Reset the trajectories
-            trajs = TrajectoriesInit();
+            TrajectoriesInit(trajs);
 
             // Time length of float and single support phase during the half cycle
             float doubleSupportLength = params.double_support_ratio * half_period;
