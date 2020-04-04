@@ -36,6 +36,8 @@ namespace platform {
             uint inPort;
             uint outPort;
         } config;
+
+        int test = 0;
     };
 
 }  // namespace platform
