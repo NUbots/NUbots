@@ -166,20 +166,25 @@ namespace motion {
          * Return initialized trajectories for trunk/foot ik cartesian with empty splines
          */
         inline void TrajectoriesInit(Trajectories& traj) {
-            traj.add(TrajectoryTypes::IS_DOUBLE_SUPPORT);
-            traj.add(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT);
-            traj.add(TrajectoryTypes::TRUNK_POS_X);
-            traj.add(TrajectoryTypes::TRUNK_POS_Y);
-            traj.add(TrajectoryTypes::TRUNK_POS_Z);
-            traj.add(TrajectoryTypes::TRUNK_AXIS_X);
-            traj.add(TrajectoryTypes::TRUNK_AXIS_Y);
-            traj.add(TrajectoryTypes::TRUNK_AXIS_Z);
-            traj.add(TrajectoryTypes::FOOT_POS_X);
-            traj.add(TrajectoryTypes::FOOT_POS_Y);
-            traj.add(TrajectoryTypes::FOOT_POS_Z);
-            traj.add(TrajectoryTypes::FOOT_AXIS_X);
-            traj.add(TrajectoryTypes::FOOT_AXIS_Y);
-            traj.add(TrajectoryTypes::FOOT_AXIS_Z);
+            if (traj.size() != 0) {
+                traj.reset();
+            }
+            else {
+                traj.add(TrajectoryTypes::IS_DOUBLE_SUPPORT);
+                traj.add(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT);
+                traj.add(TrajectoryTypes::TRUNK_POS_X);
+                traj.add(TrajectoryTypes::TRUNK_POS_Y);
+                traj.add(TrajectoryTypes::TRUNK_POS_Z);
+                traj.add(TrajectoryTypes::TRUNK_AXIS_X);
+                traj.add(TrajectoryTypes::TRUNK_AXIS_Y);
+                traj.add(TrajectoryTypes::TRUNK_AXIS_Z);
+                traj.add(TrajectoryTypes::FOOT_POS_X);
+                traj.add(TrajectoryTypes::FOOT_POS_Y);
+                traj.add(TrajectoryTypes::FOOT_POS_Z);
+                traj.add(TrajectoryTypes::FOOT_AXIS_X);
+                traj.add(TrajectoryTypes::FOOT_AXIS_Y);
+                traj.add(TrajectoryTypes::FOOT_AXIS_Z);
+            }
         }
 
         /**

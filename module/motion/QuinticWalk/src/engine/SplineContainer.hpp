@@ -53,6 +53,18 @@ namespace motion {
             }
 
             /**
+             * Reset spline to be empty
+             */
+            inline void reset() {
+                typename Map::iterator it = container.begin();
+
+                for (size_t i = 0; i < size(); i++) {
+                    container[it->first].reset();
+                    it++;
+                }
+            }
+
+            /**
              * Return true if given spline name is contained
              */
             inline bool exist(const U& name) const {

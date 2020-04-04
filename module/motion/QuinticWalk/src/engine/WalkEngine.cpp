@@ -39,7 +39,6 @@ namespace motion {
 
         bool QuinticWalkEngine::updateState(const float dt, const Eigen::Vector3f& orders, const bool walkableState) {
             bool ordersZero = orders.isZero();
-
             // First check if we are currently in pause state or idle, since we don't want to update the phase in this
             // case
             if (engine_state == WalkEngineState::PAUSED) {
@@ -156,7 +155,7 @@ namespace motion {
                     if (halfStepFinished) {
                         // stop step is finished, go to stop movement state
                         engine_state = WalkEngineState::STOP_MOVEMENT;
-                        // buildStopMovementTrajectories(orders);
+                        buildStopMovementTrajectories(orders);
                     }
                     break;
                 case WalkEngineState::STOP_MOVEMENT:

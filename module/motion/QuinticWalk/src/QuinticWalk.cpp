@@ -185,7 +185,7 @@ namespace motion {
                 // see if the walk engine has new goals for us
                 walkableState = walk_engine.updateState(dt, current_orders, walkableState);
 
-                if (walk_engine.getState() != engine::WalkEngineState::IDLE && walkableState) {  // todo
+                if ((walk_engine.getState() != engine::WalkEngineState::IDLE) && walkableState) {  // todo
                     calculateJointGoals();
                 }
             }

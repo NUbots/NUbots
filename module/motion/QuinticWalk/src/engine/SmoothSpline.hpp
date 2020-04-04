@@ -32,6 +32,10 @@ namespace motion {
                 Scalar acceleration;
             };
 
+            void reset() {
+                points.clear();
+            }
+
             /**
              * Add a new point with its time, position value, velocity and acceleration
              */
