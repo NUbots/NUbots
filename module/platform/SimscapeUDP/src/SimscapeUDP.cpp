@@ -42,9 +42,10 @@ namespace platform {
             message::motion::ServoTarget testData;
             testData.time     = NUClear::clock::now();
             testData.id       = 0;
-            testData.position = 3;
+            testData.position = test;
             testData.gain     = 3;
             testData.torque   = 3;
+            test += 1;
             emit(std::make_unique<message::motion::ServoTarget>(testData));
         });
 
@@ -57,8 +58,25 @@ namespace platform {
 
         /*
          * Receive a packet from the sim and emit it for the robot
-         */
+         *
         on<UDP>(config.inPort).then([this](const UDP::Packet packet) {
+            log("UDP message received");
+            log(packet.payload.data());
+
+            if (packet.valid) {
+                std::string data = std::string(packet.payload.begin(), packet.payload.end());
+
+                message::platform::darwin::DarwinSensors sensors =
+                    NUClear::util::serialise::Serialise<message::platform::darwin::DarwinSensors>::deserialise(
+                        packet.payload);
+                emit(std::make_unique<message::platform::darwin::DarwinSensors>(sensors));
+            }
+        });*/
+
+        /*
+         * Receive a packet from the sim and emit it for the robot
+         */
+        on<UDP::Broadcast>(config.inPort).then([this](const UDP::Packet packet) {
             log("UDP message received");
             log(packet.payload.data());
 
@@ -82,10 +100,6 @@ namespace platform {
          * Send updated servo positions to the sim
          */
         on<Trigger<message::motion::ServoTarget>>().then([this](const message::motion::ServoTarget& command) {
-            log("Converting servotarget to servotargets and sending on");
-            log(config.ip);
-            log(config.outPort);
-
             message::motion::ServoTargets commands;
 
             commands.targets.push_back(command);
