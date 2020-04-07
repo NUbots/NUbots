@@ -20,6 +20,8 @@
 #ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 
+#include <ncurses.h>
+
 #include <armadillo>
 #include <nuclear>
 
@@ -43,6 +45,10 @@ namespace behaviour {
             float headYaw   = 0;
             float headPitch = 0;
 
+            std::shared_ptr<WINDOW> command_window, log_window;
+            bool colours_enabled;
+
+            void create_windows();
             void forward();
             void left();
             void back();
