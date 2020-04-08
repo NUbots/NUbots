@@ -32,6 +32,8 @@ def run(args, use_asan, use_gdb, use_valgrind, **kwargs):
 
     if use_gdb and use_valgrind:
         raise Exception("Cannot run with both gdb and valgrind")
+    if use_asan and use_valgrind:
+        raise Exception("Cannot run with both asan and valgrind")
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
