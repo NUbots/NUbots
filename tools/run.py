@@ -49,7 +49,7 @@ def run(args, use_asan, use_gdb, use_valgrind, **kwargs):
         env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/asan.log"})
 
     if use_gdb:
-        cmd = cmd + [
+        cmd = [
             "gdb",
             "-ex",
             "'set logging redirect on'",
@@ -60,7 +60,7 @@ def run(args, use_asan, use_gdb, use_valgrind, **kwargs):
             "--args",
         ]
     elif use_valgrind:
-        cmd = cmd + [
+        cmd = [
             "valgrind",
             "--log-file=/home/nubots/build/valgrind.log",
             "--show-error-list=yes",
