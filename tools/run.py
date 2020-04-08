@@ -46,7 +46,13 @@ def run(args, use_asan, use_gdb, use_valgrind, **kwargs):
 
     # Add necessary ASAN environment variables
     if use_asan:
-        env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/asan.log"})
+        # Append log_path option if other options have been set
+        if "ASAN_OPTIONS" in env:
+            # Only append log_path if it hasn't already been set
+            if "log_path" not in env["ASAN_OPTIONS"]:
+                env["ASAN_OPTIONS"] = "{}:log_path=/home/nubots/NUbots/asan.log".format(env["ASAN_OPTIONS"])
+        else:
+            env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/asan.log"})
 
     if use_gdb:
         cmd = [
