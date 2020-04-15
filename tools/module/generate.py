@@ -10,17 +10,14 @@ import b
 def register(command):
 
     # Module help
-    command.help = "Manage NUClear modules in the codebase"
+    command.help = "Generate a new NUClear Roles module at the provided location"
 
     # Module subcommands
-    subcommands = command.add_subparsers(dest="module_command")
-
-    # Generate module subcommand
-    generate_command = subcommands.add_parser("generate", help="Generate a new NUClear module based on a template")
-    generate_command.add_argument("path", metavar="path", help="a path to the new module (from the module directory)")
+    command.add_argument("path", metavar="path", help="a path to the new module (from the module directory)")
 
 
 def run(path, **kwargs):
+    print("hi")
     # Try to get our actual module directory from the cmake cache
     if "NUCLEAR_MODULE_DIR" in b.cmake_cache:
         module_path = os.path.join(b.source_dir, b.cmake_cache["NUCLEAR_MODULE_DIR"])
