@@ -12,9 +12,6 @@ def register(command):
     command.help = "Run a built binary within the local docker container"
 
     command.add_argument(
-        "--asan", dest="use_asan", action="store_true", default=False, help="Add ASAN environment variables"
-    )
-    command.add_argument(
         "--gdb", dest="use_gdb", action="store_true", default=False, help="Run the specified program using gdb"
     )
     command.add_argument(
@@ -28,7 +25,10 @@ def register(command):
 
 
 @run_on_docker
-def run(args, use_asan, use_gdb, use_valgrind, **kwargs):
+def run(args, use_gdb, use_valgrind, **kwargs):
+
+    # Check to see if ASan was enabled
+    use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
     if use_gdb and use_valgrind:
         raise Exception("Cannot run with both gdb and valgrind")
