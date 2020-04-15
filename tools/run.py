@@ -2,6 +2,8 @@
 
 import os
 
+from termcolor import cprint
+
 import b
 from dockerise import WrapPty, run_on_docker
 
@@ -46,6 +48,8 @@ def run(args, use_gdb, use_valgrind, **kwargs):
 
     # Add necessary ASAN environment variables
     if use_asan:
+        cprint("WARN: ASan is enabled. Set USE_ASAN to OFF and rebuild to disable.", "red", attrs=["bold"])
+
         # Append log_path option if other options have been set
         if "ASAN_OPTIONS" in env:
             # Only append log_path if it hasn't already been set
