@@ -13,8 +13,8 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Use libfswatch to abstract between platforms
-find_package(FSWatch REQUIRED)
+# Use libuv to abstract between platforms
+find_package(uv REQUIRED)
 
 # Build our NUClear module
-nuclear_module(INCLUDES ${FSWatch_INCLUDE_DIRS} LIBRARIES ${FSWatch_LIBRARIES})
+nuclear_module(INCLUDES ${uv_INCLUDE_DIRS} LIBRARIES ${uv_LIBRARIES})

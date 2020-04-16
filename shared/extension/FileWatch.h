@@ -26,22 +26,9 @@ struct FileWatch {
     using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
 
     enum Event {
-        NO_OP = 0, /**< No event has occurred. */
-        PLATFORM_SPECIFIC =
-            (1 << 0), /**< Platform-specific placeholder for event type that cannot currently be mapped. */
-        CREATED            = (1 << 1),  /**< An object was created. */
-        UPDATED            = (1 << 2),  /**< An object was updated. */
-        REMOVED            = (1 << 3),  /**< An object was removed. */
-        RENAMED            = (1 << 4),  /**< An object was renamed. */
-        OWNER_MODIFIED     = (1 << 5),  /**< The owner of an object was modified. */
-        ATTRIBUTE_MODIFIED = (1 << 6),  /**< The attributes of an object were modified. */
-        MOVED_FROM         = (1 << 7),  /**< An object was moved from this location. */
-        MOVED_TO           = (1 << 8),  /**< An object was moved to this location. */
-        IS_FILE            = (1 << 9),  /**< The object is a file. */
-        IS_DIR             = (1 << 10), /**< The object is a directory. */
-        IS_SYM_LINK        = (1 << 11), /**< The object is a symbolic link. */
-        LINK               = (1 << 12), /**< The link count of an object has changed. */
-        QUEUE_OVERFLOW     = (1 << 13)  /**< The event queue has overflowed. */
+        NO_OP   = 0,  // No event
+        RENAMED = 1,  // File created or renamed
+        CHANGED = 2   // File modified
     };
 
     std::string path;

@@ -30,7 +30,7 @@ mkdir -p /mnt/boot/efi
 mount ${BOOT} /mnt/boot/efi
 
 # Bootstrap Pacman
-pacstrap /mnt base linux
+pacstrap /mnt base linux linux-firmware
 
 # Update fstab
 genfstab -U /mnt >> /mnt/etc/fstab

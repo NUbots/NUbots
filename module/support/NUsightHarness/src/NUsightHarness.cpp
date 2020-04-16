@@ -24,21 +24,21 @@
 namespace module {
 namespace support {
 
-    using NUClear::DEBUG;
     using std::chrono::milliseconds;
+
     using utility::nusight::graph;
 
     NUsightHarness::NUsightHarness(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Every<50, milliseconds>>().then([this] {
-            double period = 10;
-            double freq   = 1 / period;
-            double t      = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
-            float sine    = sin(2 * M_PI * freq * t);
-            float cosine  = cos(2 * M_PI * freq * t);
-            float dsine   = 2 * sine;
-            float dcosine = 4 * cosine;
+            double period  = 10;
+            double freq    = 1.0 / period;
+            double t       = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
+            double sine    = std::sin(2.0 * M_PI * freq * t);
+            double cosine  = std::cos(2.0 * M_PI * freq * t);
+            double dsine   = 2.0 * sine;
+            double dcosine = 4.0 * cosine;
 
             emit(graph("Debug Waves", sine, cosine, dsine, dcosine));
         });

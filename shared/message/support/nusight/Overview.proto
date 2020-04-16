@@ -71,6 +71,6 @@ message Overview {
     google.protobuf.Timestamp last_seen_goal = 17;
 
     // Walking path
-    repeated fvec2 walk_path_plan = 18;
+    repeated fvec3 walk_path_plan = 18;
     fvec3          walk_command   = 19;
 }

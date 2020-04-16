@@ -22,6 +22,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <armadillo>
 #include <type_traits>
 
@@ -241,6 +242,13 @@ auto convert(const typename Eigen::Matrix<Scalar, 4, 4, O, MR, MC>& emat) {
     typename arma::Mat<Scalar>::template fixed<4, 4> amat;
     Eigen::Map<Eigen::Matrix<Scalar, 4, 4, O, MR, MC>>(amat.memptr(), 4, 4) = emat;
     return (amat);
+}
+template <typename Scalar, int Dim, int Options>
+auto convert(const typename Eigen::Transform<Scalar, Dim, Eigen::Affine, Options>& etrans) {
+    typename arma::Mat<Scalar>::template fixed<Dim + 1, Dim + 1> atrans;
+    Eigen::Map<Eigen::Matrix<Scalar, Dim + 1, Dim + 1, Options, Dim + 1, Dim + 1>>(atrans.memptr(), Dim + 1, Dim + 1) =
+        etrans.matrix();
+    return (atrans);
 }
 template <typename Scalar, int O, int MR, int MC>
 auto convert(const typename Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>& emat) {

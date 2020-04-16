@@ -15,15 +15,7 @@ foreach(host_pair ${KNOWN_HOSTS})
   list(GET host_pair 0 host)
   list(GET host_pair 1 alias)
 
-  foreach(
-    config
-    ""
-    n
-    u
-    o
-    i
-    t
-  )
+  foreach(config "" n u o i t)
     if(config STREQUAL "")
       set(target "${host}")
     else()
@@ -35,18 +27,18 @@ foreach(host_pair ${KNOWN_HOSTS})
     # form hostname (e.g. darwin1)
     if(config STREQUAL "t")
       add_custom_target(
-        "${target}" USES_TERMINAL
-        COMMAND
-          ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--user=${user}"
-          "--toolchain"
+        "${target}"
+        USES_TERMINAL
+        COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--user=${user}"
+                "--toolchain"
         DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py"
       )
     else()
       add_custom_target(
-        "${target}" USES_TERMINAL
-        COMMAND
-          ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--config=${config}"
-          "--user=${user}"
+        "${target}"
+        USES_TERMINAL
+        COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}"
+                "--config=${config}" "--user=${user}"
         DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py"
       )
     endif()
