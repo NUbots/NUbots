@@ -32,6 +32,7 @@ def run(args, use_gdb, use_valgrind, **kwargs):
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
+    # Check mutual exclusive status of command line options
     if use_gdb and use_valgrind:
         raise Exception("Cannot run with both gdb and valgrind")
     if use_asan and use_valgrind:
@@ -58,21 +59,24 @@ def run(args, use_gdb, use_valgrind, **kwargs):
         else:
             env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/asan.log"})
 
+    # Start role with GDB
     if use_gdb:
         cmd = [
             "gdb",
             "-ex",
             "'set logging redirect on'",
             "-ex",
-            "'set logging file /home/nubots/build/gdb.log'",
+            "'set logging file /home/nubots/NUbots/gdb.log'",
             "-ex",
             "r",
             "--args",
         ]
+
+    # Start role with valgrind
     elif use_valgrind:
         cmd = [
             "valgrind",
-            "--log-file=/home/nubots/build/valgrind.log",
+            "--log-file=/home/nubots/NUbots/valgrind.log",
             "--show-error-list=yes",
             "--leak-check=full",
             "--show-leak-kinds=all",
