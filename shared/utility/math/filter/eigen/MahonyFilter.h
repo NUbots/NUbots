@@ -23,6 +23,7 @@ namespace utility {
 namespace math {
     namespace filter {
 
+        // For quaternion q = w + ix + jy + kz, the vector is [x, y, z, w]
         // The Mahony update uses the IMU data to compute the attitude
         // INPUT
         // acc:     accelerometer reading as a column vector, [a_x, a_y, a_z]'. g force
@@ -43,8 +44,8 @@ namespace math {
             Eigen::Vector3d norm_acc = acc.normalize();
 
             // Compute the 3 by 3 attitude matrix from the quaternion
-            Eigen::Vector3d rho(quat.w(), quat.x(), quat.y());
-            double q4           = quat.z();
+            Eigen::Vector3d rho(quat.x(), quat.y(), quat.z());
+            double q4           = quat.w();
             double rho_norm_squ = std::pow(rho.norm(), 2);
             // clang-format off
             Eigen::Matrix3d rho_x << 0        << -rho.z() << -rho.y()
@@ -61,7 +62,7 @@ namespace math {
             // Calculate estimated accelerometer reading
             Eigen::Matrix3d est_acc = attitude * r_acc;
             // Calculate error between estimate and real
-            a_corr = norm_acc * est_acc - est_acc * norm_acc.transpose();
+            a_corr = norm_acc * est_acc.transpose() - est_acc * norm_acc.transpose();
             // Vex (inverse function of skew-symmetric function) the error
             Eigen::Vector3d omega_mes(a_corr(3, 2), a_corr(1, 3), a_corr(2, 1));
             omega_mes = -omega_mes;
@@ -77,9 +78,20 @@ namespace math {
 
             // Calculate attitude using quaternion dynamics
             // Depolarizing the gyroscope bias
-            l_omega = gyro + Kp * omega_mes + bias;
+            Eigen::Vector3d l_omega = gyro + Kp * omega_mes + bias;
+
             // Find the quaternions rate of change
-            // TODO ome = w_x & w / -w^T & 0
+            // clang-format off
+            Eigen::Matrix3d omega_x << 0            << -l_omega.z() << -l_omega.y()
+                                    << l_omega.z()  <<            0 << -l_omega.x()
+                                    << -l_omega.y() <<  l_omega.x() << 0;
+            // clang-format on
+            Eigen::Matrix4d ome;
+            ome.block<3, 3>(0, 0) = -omega_x;
+            ome.block<1, 3>(3, 0) = -l_omega.transpose();
+            ome.block<3, 1>(0, 3) = l_omega;
+            ome(3, 3)             = 0;
+
             q_d = 0.5 * ome * quat;
 
             // Calculate integral to find the attitude quaternion
