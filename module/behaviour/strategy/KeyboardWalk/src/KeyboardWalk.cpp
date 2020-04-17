@@ -134,7 +134,7 @@ namespace behaviour {
                 wprintw(packet.window.get(), packet.source.c_str());
                 if (packet.print_level) {
                     if (colours_enabled) {
-                        attron(COLOR_PAIR(short(packet.colours)));
+                        wattron(packet.window.get(), COLOR_PAIR(short(packet.colours)));
                     }
                     switch (packet.colours) {
                         case LogColours::TRACE_COLOURS: wprintw(packet.window.get(), "TRACE: "); break;
@@ -145,7 +145,7 @@ namespace behaviour {
                         case LogColours::FATAL_COLOURS: waddwstr(packet.window.get(), L"(ノಠ益ಠ)ノ彡┻━┻: "); break;
                     }
                     if (colours_enabled) {
-                        attroff(COLOR_PAIR(short(packet.colours)));
+                        wattroff(packet.window.get(), COLOR_PAIR(short(packet.colours)));
                     }
                 }
                 wprintw(packet.window.get(), packet.message.c_str());
