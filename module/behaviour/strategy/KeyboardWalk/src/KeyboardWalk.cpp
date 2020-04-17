@@ -101,9 +101,6 @@ namespace behaviour {
             // Set up windows
             create_windows();
 
-            updateCommand();
-            printStatus();
-
             // Trigger when stdin has something to read
             on<IO>(STDIN_FILENO, IO::READ).then([this] {
                 switch (tolower(getch())) {
@@ -130,6 +127,38 @@ namespace behaviour {
                 }
             });
 
+            on<Trigger<LogMessage>, Sync<KeyboardWalk>>().then([this](const LogMessage& packet) {
+                // Where this message came from
+                std::string source = "";
+
+                // If we know where this log message came from, we display that
+                if (packet.task) {
+                    // Get our reactor name
+                    std::string reactor = packet.task->identifier[1];
+
+                    // Strip to the last semicolon if we have one
+                    size_t lastC = reactor.find_last_of(':');
+                    reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+
+                    // This is our source
+                    source = reactor + " "
+                             + (packet.task->identifier[0].empty() ? "" : "- " + packet.task->identifier[0] + " ");
+                }
+
+                LogColours colours;
+                switch (packet.level) {
+                    default:
+                    case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
+                    case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
+                    case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
+                    case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
+                    case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
+                    case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
+                }
+
+                emit(std::make_unique<UpdateWindow>(log_window, source, packet.message, colours));
+            });
+
             on<Trigger<UpdateWindow>, Sync<KeyboardWalk>>().then([this](const UpdateWindow& packet) {
                 wprintw(packet.window.get(), packet.source.c_str());
                 if (packet.print_level) {
@@ -152,39 +181,10 @@ namespace behaviour {
                 wrefresh(packet.window.get());
             });
 
-            on<Trigger<LogMessage>, Sync<KeyboardWalk>>().then([this](const LogMessage& packet) {
-                LogColours colours;
-                switch (packet.level) {
-                    default:
-                    case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
-                    case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
-                    case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
-                    case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
-                    case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
-                    case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
-                }
-
-                // Where this message came from
-                std::string source = "";
-
-                // If we know where this log message came from, we display that
-                if (packet.task) {
-                    // Get our reactor name
-                    std::string reactor = packet.task->identifier[1];
-
-                    // Strip to the last semicolon if we have one
-                    size_t lastC = reactor.find_last_of(':');
-                    reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
-
-                    // This is our source
-                    source = reactor + " "
-                             + (packet.task->identifier[0].empty() ? "" : "- " + packet.task->identifier[0] + " ");
-                }
-
-                emit(std::make_unique<UpdateWindow>(log_window, source, packet.message, colours));
-            });
-
             on<Shutdown>().then(endwin);
+
+            updateCommand();
+            printStatus();
         }
 
         void KeyboardWalk::create_windows() {
