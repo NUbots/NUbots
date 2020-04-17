@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH="${HOME}/.local/bin:$PATH"
+
 check_formatting() {
     echo "Validating formatting for $1"
 
