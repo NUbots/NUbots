@@ -61,16 +61,16 @@ def run(args, use_gdb, use_valgrind, **kwargs):
 
     # Start role with GDB
     if use_gdb:
-        cmd = [
-            "gdb",
-            "-ex",
-            "'set logging redirect on'",
-            "-ex",
-            "'set logging file /home/nubots/NUbots/gdb.log'",
-            "-ex",
-            "r",
-            "--args",
-        ]
+        # Setup the gdb command
+        cmd = ["gdb"]
+
+        # Add breakpoint to stop asan before it reports an error
+        if use_asan:
+            cmd.extend(["-ex", "set breakpoint pending on"])
+            cmd.extend(["-ex", "br __asan::ReportGenericError"])
+
+        # Start the role
+        cmd.extend(["-ex", "r", "--args"])
 
     # Start role with valgrind
     elif use_valgrind:
