@@ -123,7 +123,10 @@ namespace behaviour {
                     case KEY_UP: lookUp(); break;
                     case KEY_DOWN: lookDown(); break;
                     case 'q': quit(); return;
-                    default: log<NUClear::WARN>("Unknown Command");
+                    default:
+                        log<NUClear::ERROR>("Unknown Command");
+                        printStatus();
+                        break;
                 }
             });
 
