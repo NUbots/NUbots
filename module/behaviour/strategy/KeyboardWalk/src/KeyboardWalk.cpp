@@ -148,8 +148,7 @@ namespace behaviour {
                         wattroff(packet.window.get(), COLOR_PAIR(short(packet.colours)));
                     }
                 }
-                wprintw(packet.window.get(), packet.message.c_str());
-                wprintw(packet.window.get(), "\n");
+                wprintw(packet.window.get(), "%s\n", packet.message.c_str());
                 wrefresh(packet.window.get());
             });
 
