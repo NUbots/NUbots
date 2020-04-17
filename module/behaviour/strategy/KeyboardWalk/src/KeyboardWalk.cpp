@@ -50,7 +50,7 @@ namespace behaviour {
                          const std::string& source,
                          const std::string& message,
                          const LogColours& colours)
-                : window(window), source(source), message(message), colours(colours), print_level(false) {}
+                : window(window), source(source), message(message), colours(colours), print_level(true) {}
             UpdateWindow(const std::shared_ptr<WINDOW>& window, const std::string& message, const bool& print_level)
                 : window(window), source(""), message(message), print_level(print_level) {}
             std::shared_ptr<WINDOW> window;
