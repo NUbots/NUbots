@@ -54,7 +54,7 @@ sudo usermod -aG docker "${USER}"
 5. Download the codebase
 
 ```sh
-git clone https://github.com/NUbots/NUbots.git --recursive
+git clone --recursive https://github.com/NUbots/NUbots.git
 ```
 
 6. Install the required python dependencies
