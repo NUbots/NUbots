@@ -21,6 +21,7 @@
 
 #include <fmt/format.h>
 
+#include <clocale>
 #include <csignal>
 #include <cstdio>
 
@@ -68,6 +69,9 @@ namespace behaviour {
 
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), velocity(arma::fill::zeros) {
+
+            // Ensure UTF-8 is enabled
+            std::setlocale(LC_ALL, "en_US.UTF-8");
 
             // Start curses mode
             initscr();
@@ -134,8 +138,8 @@ namespace behaviour {
                         case LogColours::DEBUG_COLOURS: wprintw(packet.window.get(), "DEBUG: "); break;
                         case LogColours::INFO_COLOURS: wprintw(packet.window.get(), "INFO: "); break;
                         case LogColours::WARN_COLOURS: wprintw(packet.window.get(), "WARN: "); break;
-                        case LogColours::ERROR_COLOURS: wprintw(packet.window.get(), "(╯°□°）╯︵ ┻━┻: "); break;
-                        case LogColours::FATAL_COLOURS: wprintw(packet.window.get(), "(ノಠ益ಠ)ノ彡┻━┻: "); break;
+                        case LogColours::ERROR_COLOURS: waddwstr(packet.window.get(), L"(╯°□°）╯︵ ┻━┻: "); break;
+                        case LogColours::FATAL_COLOURS: waddwstr(packet.window.get(), L"(ノಠ益ಠ)ノ彡┻━┻: "); break;
                     }
                     if (colours_enabled) {
                         attroff(COLOR_PAIR(short(packet.colours)));
