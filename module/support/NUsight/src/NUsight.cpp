@@ -30,8 +30,10 @@ namespace module {
 namespace support {
 
     using extension::Configuration;
+
     using message::support::SaveConfiguration;
     using message::support::nusight::Command;
+
     using utility::nusight::graph;
 
     NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment)

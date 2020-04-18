@@ -22,6 +22,7 @@
 
 #include <Eigen/Core>
 #include <nuclear>
+#include <string>
 
 #include "message/input/Image.h"
 

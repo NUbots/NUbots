@@ -45,8 +45,6 @@ namespace platform {
             emit<Scope::NETWORK>(msg, event.name, false);
         });
 
-        on<Network<Ball>>().then([this](const NetworkSource& network_source, const Ball& simulation) {});
-
         on<Network<Simulation>>().then([this](const NetworkSource& network_source, const Simulation& simulation) {
             // Only listen to our target simulation
             if (network_source.name == config.simulator_name) {
