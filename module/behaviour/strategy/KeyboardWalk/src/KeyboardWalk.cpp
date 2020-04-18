@@ -36,30 +36,6 @@ namespace module {
 namespace behaviour {
     namespace strategy {
 
-        enum class LogColours : short {
-            TRACE_COLOURS = 1,
-            DEBUG_COLOURS = 2,
-            INFO_COLOURS  = 3,
-            WARN_COLOURS  = 4,
-            ERROR_COLOURS = 5,
-            FATAL_COLOURS = 6
-        };
-
-        struct UpdateWindow {
-            UpdateWindow(const std::shared_ptr<WINDOW>& window,
-                         const std::string& source,
-                         const std::string& message,
-                         const LogColours& colours)
-                : window(window), source(source), message(message), colours(colours), print_level(true) {}
-            UpdateWindow(const std::shared_ptr<WINDOW>& window, const std::string& message, const bool& print_level)
-                : window(window), source(""), message(message), print_level(print_level) {}
-            std::shared_ptr<WINDOW> window;
-            std::string source;
-            std::string message;
-            LogColours colours;
-            bool print_level;
-        };
-
         using message::behaviour::MotionCommand;
         using message::motion::HeadCommand;
         using message::motion::KickCommand;
@@ -128,8 +104,6 @@ namespace behaviour {
             });
 
             on<Trigger<LogMessage>>().then([this](const LogMessage& packet) {
-                std::lock_guard<std::mutex> lock(mutex);
-
                 // Where this message came from
                 std::string source = "";
 
@@ -158,29 +132,7 @@ namespace behaviour {
                     case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
                 }
 
-                emit(std::make_unique<UpdateWindow>(log_window, source, packet.message, colours));
-            });
-
-            on<Trigger<UpdateWindow>, Sync<KeyboardWalk>>().then([this](const UpdateWindow& packet) {
-                wprintw(packet.window.get(), packet.source.c_str());
-                if (packet.print_level) {
-                    if (colours_enabled) {
-                        wattron(packet.window.get(), COLOR_PAIR(short(packet.colours)));
-                    }
-                    switch (packet.colours) {
-                        case LogColours::TRACE_COLOURS: wprintw(packet.window.get(), "TRACE: "); break;
-                        case LogColours::DEBUG_COLOURS: wprintw(packet.window.get(), "DEBUG: "); break;
-                        case LogColours::INFO_COLOURS: wprintw(packet.window.get(), "INFO: "); break;
-                        case LogColours::WARN_COLOURS: wprintw(packet.window.get(), "WARN: "); break;
-                        case LogColours::ERROR_COLOURS: waddwstr(packet.window.get(), L"(╯°□°）╯︵ ┻━┻: "); break;
-                        case LogColours::FATAL_COLOURS: waddwstr(packet.window.get(), L"(ノಠ益ಠ)ノ彡┻━┻: "); break;
-                    }
-                    if (colours_enabled) {
-                        wattroff(packet.window.get(), COLOR_PAIR(short(packet.colours)));
-                    }
-                }
-                wprintw(packet.window.get(), "%s\n", packet.message.c_str());
-                wrefresh(packet.window.get());
+                update_window(UpdateWindow(log_window, source, packet.message, colours));
             });
 
             on<Shutdown>().then(endwin);
@@ -234,6 +186,36 @@ namespace behaviour {
             });
             scrollok(log_window.get(), true);
             wrefresh(log_window.get());
+        }
+
+        void KeyboardWalk::update_window(const UpdateWindow& packet) {
+            std::lock_guard<std::mutex> lock(mutex);
+
+            // Print the message source
+            wprintw(packet.window.get(), packet.source.c_str());
+
+            // Print the log level if it is enabled
+            if (packet.print_level) {
+                // Print it in colour if the functionality is available
+                if (colours_enabled) {
+                    wattron(packet.window.get(), COLOR_PAIR(short(packet.colours)));
+                }
+                switch (packet.colours) {
+                    case LogColours::TRACE_COLOURS: wprintw(packet.window.get(), "TRACE: "); break;
+                    case LogColours::DEBUG_COLOURS: wprintw(packet.window.get(), "DEBUG: "); break;
+                    case LogColours::INFO_COLOURS: wprintw(packet.window.get(), "INFO: "); break;
+                    case LogColours::WARN_COLOURS: wprintw(packet.window.get(), "WARN: "); break;
+                    case LogColours::ERROR_COLOURS: waddwstr(packet.window.get(), L"(╯°□°）╯︵ ┻━┻: "); break;
+                    case LogColours::FATAL_COLOURS: waddwstr(packet.window.get(), L"(ノಠ益ಠ)ノ彡┻━┻: "); break;
+                }
+                if (colours_enabled) {
+                    wattroff(packet.window.get(), COLOR_PAIR(short(packet.colours)));
+                }
+            }
+
+            // Print the log message and refresh the screen
+            wprintw(packet.window.get(), "%s\n", packet.message.c_str());
+            wrefresh(packet.window.get());
         }
 
         void KeyboardWalk::forward() {
@@ -357,17 +339,23 @@ namespace behaviour {
         }
 
         void KeyboardWalk::printStatus() {
+            // Clear the command window and move to top-left corner
             wmove(command_window.get(), 0, 0);
             wclear(command_window.get());
             werase(command_window.get());
-            emit(std::make_unique<UpdateWindow>(
-                command_window, fmt::format("Velocity: {:.4f}, {:.4f}", velocity[0], velocity[1]), false));
-            emit(std::make_unique<UpdateWindow>(command_window, fmt::format("Rotation: {:.4f}", rotation), false));
-            emit(std::make_unique<UpdateWindow>(command_window, fmt::format("Moving: {}", moving), false));
-            emit(std::make_unique<UpdateWindow>(
-                command_window,
-                fmt::format("Head Yaw: {:.2f}, Head Pitch: {:.2f}", headYaw * 180 / M_PI, headPitch * 180 / M_PI),
-                false));
+
+            // Construct the log command message
+            std::string msg = fmt::format(
+                "Velocity: {:.4f}, {:.4f}\nRotation: {:.4f}\nMoving: {}\nHead Yaw: {:.2f}, Head Pitch: {:.2f}",
+                velocity[0],
+                velocity[1],
+                rotation,
+                moving,
+                head_yaw * 180 / M_PI,
+                head_pitch * 180 / M_PI);
+
+            // Update the command window
+            update_window(UpdateWindow(command_window, msg, false));
         }
 
         void KeyboardWalk::quit() {
