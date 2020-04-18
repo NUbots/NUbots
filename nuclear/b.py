@@ -139,6 +139,7 @@ if __name__ == "__main__":
                                 dest="{}_command".format(c),
                                 help="Commands related to working with {} functionality".format(c),
                             )
+                            subcommand.required = True
                             tool[c] = ({}, subcommand)
                             tool = tool[c][0]
 
