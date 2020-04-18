@@ -36,6 +36,7 @@
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
+#include "utility/support/eigen_armadillo.h"
 
 /**
  * @author Monica Olejniczak
@@ -104,7 +105,10 @@ namespace support {
 
                         // If we have field information
                         if (field) {
-                            Eigen::Affine3d Hfw = utility::localisation::fieldStateToTransform3D(field->position);
+                            Eigen::Affine3d Hfw;
+                            Hfw.matrix() =
+                                convert(utility::localisation::fieldStateToTransform3D(convert(field->position)))
+                                    .matrix();
 
                             // Get our torso in field space
                             Eigen::Affine3d Hft  = Hfw * Htw.inverse();

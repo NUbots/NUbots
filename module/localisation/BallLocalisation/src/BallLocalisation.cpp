@@ -10,6 +10,7 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/nusight/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {
@@ -60,12 +61,12 @@ namespace localisation {
             auto curr_time        = NUClear::clock::now();
             double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
             last_time_update_time = curr_time;
-            filter.timeUpdate(seconds);
+            filter.time(seconds);
 
             /* Creating ball state vector and covariance matrix for emission */
             auto ball        = std::make_unique<Ball>();
-            ball->position   = convert(filter.get());
-            ball->covariance = convert(filter.getCovariance());
+            ball->position   = filter.get();
+            ball->covariance = filter.getCovariance();
 
             if (ball_pos_log) {
                 emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
