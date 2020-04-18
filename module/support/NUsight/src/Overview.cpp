@@ -105,10 +105,13 @@ namespace support {
 
                         // If we have field information
                         if (field) {
+                            // Transform the field state into Affine3 transform
                             Eigen::Affine3d Hfw;
-                            Hfw.matrix() =
-                                convert(utility::localisation::fieldStateToTransform3D(convert(field->position)))
-                                    .matrix();
+                            Hfw.translation() = Eigen::Vector3d({field->position[0], field->position[1], 0});
+
+                            // Rotate field-position[2] radians about the Z-axis
+                            Hfw.linear() =
+                                Eigen::AngleAxisd({field->position[2], Eigen::Vector3d::UnitZ()}).toRotationMatrix();
 
                             // Get our torso in field space
                             Eigen::Affine3d Hft  = Hfw * Htw.inverse();
