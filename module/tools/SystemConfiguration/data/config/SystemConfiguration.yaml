@@ -1,0 +1,22 @@
+# Change this to debug or lower to see the files getting checked
+log_level: DEBUG
+
+# File permissions that need to be set
+permissions:
+  /etc/sudoers.d/insults: 0440
+  /etc/sudoers.d/wheel: 0440
+
+# Pacman packages that should be installed and updated
+pacman:
+  - dhcp
+  - linux-headers
+  - nvidia-dkms
+  - ocl-icd
+  - screen
+
+# Systemd units that should be enabled
+systemd:
+  - systemd-networkd.service
+  - systemd-resolved.service
+  - systemd-timesyncd.service
+  - dhcpd4.service
