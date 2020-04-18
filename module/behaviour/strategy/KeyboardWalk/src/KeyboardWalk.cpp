@@ -127,7 +127,9 @@ namespace behaviour {
                 }
             });
 
-            on<Trigger<LogMessage>, Sync<KeyboardWalk>>().then([this](const LogMessage& packet) {
+            on<Trigger<LogMessage>>().then([this](const LogMessage& packet) {
+                std::lock_guard<std::mutex> lock(mutex);
+
                 // Where this message came from
                 std::string source = "";
 

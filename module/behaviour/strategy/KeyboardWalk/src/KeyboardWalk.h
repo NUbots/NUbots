@@ -23,6 +23,7 @@
 #include <ncurses.h>
 
 #include <armadillo>
+#include <mutex>
 #include <nuclear>
 
 #include "utility/input/LimbID.h"
@@ -47,6 +48,8 @@ namespace behaviour {
 
             std::shared_ptr<WINDOW> command_window, log_window;
             bool colours_enabled;
+
+            std::mutex mutex;
 
             void create_windows();
             void forward();
