@@ -17,13 +17,9 @@ def register(command):
 
 
 def run(path, **kwargs):
-    # Try to get our actual module directory from the cmake cache
-    if "NUCLEAR_MODULE_DIR" in b.cmake_cache:
-        module_path = os.path.join(b.source_dir, b.cmake_cache["NUCLEAR_MODULE_DIR"])
-    else:
-        sys.stderr.write("Warning: the system couldn't find the real module directory.")
-        sys.stderr.write("defaulting to module\n")
-        module_path = "module"
+
+    # We use the default "module" directory for modules
+    module_path = "module"
 
     # Calculate all of our file paths
     path = os.path.join(module_path, path)

@@ -21,8 +21,7 @@ def run(path, **kwargs):
     if "NUCLEAR_MODULE_DIR" in b.cmake_cache:
         module_path = os.path.join(b.source_dir, b.cmake_cache["NUCLEAR_MODULE_DIR"])
     else:
-        sys.stderr.write("Warning: the system couldn't find the real module directory.")
-        sys.stderr.write("defaulting to module\n")
+        sys.stderr.write("Warning: the system couldn't find the real module directory. Defaulting to module\n")
         module_path = "module"
 
     # Calculate all of our file paths
