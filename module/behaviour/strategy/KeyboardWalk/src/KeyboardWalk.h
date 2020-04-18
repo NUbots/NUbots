@@ -67,8 +67,8 @@ namespace behaviour {
             arma::vec2 velocity;
             float rotation = 0;
 
-            float headYaw   = 0;
-            float headPitch = 0;
+            float head_yaw   = 0.0f;
+            float head_pitch = 0.0f;
 
             std::shared_ptr<WINDOW> command_window, log_window;
             bool colours_enabled;
@@ -80,20 +80,20 @@ namespace behaviour {
             void left();
             void back();
             void right();
-            void turnLeft();
-            void turnRight();
-            void getUp();
+            void turn_left();
+            void turn_right();
+            void get_up();
             void reset();
             void kick(utility::input::LimbID::Value l);
-            void lookLeft();
-            void lookRight();
-            void lookUp();
-            void lookDown();
-            void walkToggle();
+            void look_left();
+            void look_right();
+            void look_up();
+            void look_down();
+            void walk_toggle();
             void quit();
 
-            void updateCommand();
-            void printStatus();
+            void update_command();
+            void print_status();
             void update_window(const UpdateWindow& packet);
 
         public:

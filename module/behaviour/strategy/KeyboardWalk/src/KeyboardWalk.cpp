@@ -84,21 +84,21 @@ namespace behaviour {
                     case 'a': left(); break;
                     case 's': back(); break;
                     case 'd': right(); break;
-                    case 'z': turnLeft(); break;
-                    case 'x': turnRight(); break;
+                    case 'z': turn_left(); break;
+                    case 'x': turn_right(); break;
                     case 'r': reset(); break;
-                    case 'g': getUp(); break;
-                    case 'e': walkToggle(); break;
+                    case 'g': get_up(); break;
+                    case 'e': walk_toggle(); break;
                     case '.': kick(LimbID::RIGHT_LEG); break;
                     case ',': kick(LimbID::LEFT_LEG); break;
-                    case KEY_LEFT: lookLeft(); break;
-                    case KEY_RIGHT: lookRight(); break;
-                    case KEY_UP: lookUp(); break;
-                    case KEY_DOWN: lookDown(); break;
+                    case KEY_LEFT: look_left(); break;
+                    case KEY_RIGHT: look_right(); break;
+                    case KEY_UP: look_up(); break;
+                    case KEY_DOWN: look_down(); break;
                     case 'q': quit(); return;
                     default:
                         log<NUClear::ERROR>("Unknown Command");
-                        printStatus();
+                        print_status();
                         break;
                 }
             });
@@ -137,8 +137,8 @@ namespace behaviour {
 
             on<Shutdown>().then(endwin);
 
-            updateCommand();
-            printStatus();
+            update_command();
+            print_status();
         }
 
         void KeyboardWalk::create_windows() {
@@ -220,49 +220,49 @@ namespace behaviour {
 
         void KeyboardWalk::forward() {
             velocity[0] += DIFF;
-            updateCommand();
-            printStatus();
+            update_command();
+            print_status();
             log<NUClear::INFO>("forward");
         }
 
         void KeyboardWalk::left() {
             velocity[1] += DIFF;
-            updateCommand();
-            printStatus();
+            update_command();
+            print_status();
             log<NUClear::INFO>("left");
         }
 
         void KeyboardWalk::back() {
             velocity[0] -= DIFF;
-            updateCommand();
-            printStatus();
+            update_command();
+            print_status();
             log<NUClear::INFO>("back");
         }
 
         void KeyboardWalk::right() {
             velocity[1] -= DIFF;
-            updateCommand();
-            printStatus();
+            update_command();
+            print_status();
             log<NUClear::INFO>("right");
         }
 
-        void KeyboardWalk::turnLeft() {
+        void KeyboardWalk::turn_left() {
             rotation += ROT_DIFF;
-            updateCommand();
-            printStatus();
+            update_command();
+            print_status();
             log<NUClear::INFO>("turn left");
         }
 
-        void KeyboardWalk::turnRight() {
+        void KeyboardWalk::turn_right() {
             rotation -= ROT_DIFF;
-            updateCommand();
-            printStatus();
+            update_command();
+            print_status();
             log<NUClear::INFO>("turn right");
         }
 
-        void KeyboardWalk::getUp() {
-            updateCommand();
-            printStatus();
+        void KeyboardWalk::get_up() {
+            update_command();
+            print_status();
             log<NUClear::INFO>("getup");
         }
 
@@ -275,70 +275,70 @@ namespace behaviour {
             log<NUClear::INFO>(fmt::format("kick {}", leg));
         }
 
-        void KeyboardWalk::lookLeft() {
-            headYaw += HEAD_DIFF;
-            updateCommand();
-            printStatus();
+        void KeyboardWalk::look_left() {
+            head_yaw += HEAD_DIFF;
+            update_command();
+            print_status();
             log<NUClear::INFO>("look left");
         }
 
-        void KeyboardWalk::lookRight() {
-            headYaw -= HEAD_DIFF;
-            updateCommand();
-            printStatus();
+        void KeyboardWalk::look_right() {
+            head_yaw -= HEAD_DIFF;
+            update_command();
+            print_status();
             log<NUClear::INFO>("look right");
         }
 
-        void KeyboardWalk::lookUp() {
-            headPitch += HEAD_DIFF;
-            updateCommand();
-            printStatus();
+        void KeyboardWalk::look_up() {
+            head_pitch += HEAD_DIFF;
+            update_command();
+            print_status();
             log<NUClear::INFO>("look up");
         }
 
-        void KeyboardWalk::lookDown() {
-            headPitch -= HEAD_DIFF;
-            updateCommand();
-            printStatus();
+        void KeyboardWalk::look_down() {
+            head_pitch -= HEAD_DIFF;
+            update_command();
+            print_status();
             log<NUClear::INFO>("look down");
         }
 
-        void KeyboardWalk::walkToggle() {
+        void KeyboardWalk::walk_toggle() {
             if (moving) {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                 moving = false;
             }
             else {
                 moving = true;
-                updateCommand();
+                update_command();
             }
-            printStatus();
+            print_status();
         }
 
         void KeyboardWalk::reset() {
-            velocity  = {0, 0};
-            rotation  = 0;
-            headYaw   = 0;
-            headPitch = 0;
-            updateCommand();
-            printStatus();
+            velocity   = {0, 0};
+            rotation   = 0;
+            head_yaw   = 0;
+            head_pitch = 0;
+            update_command();
+            print_status();
             log<NUClear::INFO>("reset");
         }
 
-        void KeyboardWalk::updateCommand() {
+        void KeyboardWalk::update_command() {
             if (moving) {
                 emit(std::make_unique<MotionCommand>(
                     utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
             }
 
-            auto headCommand        = std::make_unique<HeadCommand>();
-            headCommand->yaw        = headYaw;
-            headCommand->pitch      = headPitch;
-            headCommand->robotSpace = true;
-            emit(std::move(headCommand));
+            auto head_command        = std::make_unique<HeadCommand>();
+            head_command->yaw        = head_yaw;
+            head_command->pitch      = head_pitch;
+            head_command->robotSpace = true;
+            emit(head_command);
         }
 
-        void KeyboardWalk::printStatus() {
+        void KeyboardWalk::print_status() {
             // Clear the command window and move to top-left corner
             wmove(command_window.get(), 0, 0);
             wclear(command_window.get());
