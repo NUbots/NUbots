@@ -29,7 +29,6 @@ def run(path, **kwargs):
     path = os.path.join(module_path, path)
     src_path = os.path.join(path, "src")
     tests_path = os.path.join(path, "tests")
-    config_path = os.path.join(path, "data", "config")
     module_name = os.path.split(path)[-1]
 
     # Check if the path already exists
@@ -48,8 +47,6 @@ def run(path, **kwargs):
     print("\t", src_path)
     os.makedirs(tests_path)
     print("\t", tests_path)
-    os.makedirs(config_path)
-    print("\t", config_path)
 
     # Split our provided path
     parts = ["module"] + os.path.relpath(path, module_path).split(os.sep)
@@ -76,9 +73,6 @@ def run(path, **kwargs):
     with open(os.path.join(tests_path, "{}.cpp".format(module_name)), "w") as output:
         output.write(generate_test(parts))
         print("\t", os.path.join(tests_path, "{}.cpp".format(module_name)))
-
-    with open(os.path.join(config_path, "{}.yaml".format(module_name)), "a"):
-        print("\t", os.path.join(config_path, "{}.yaml".format(module_name)))
 
 
 def generate_cmake(parts):
@@ -126,18 +120,10 @@ def generate_cpp(parts):
         """\
         #include "{className}.h"
 
-        #include "extension/Configuration.h"
-
         {openNamespace}
-
-            using extension::Configuration;
 
             {className}::{className}(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)) {{
-
-                on<Configuration>("{className}.yaml").then([this] (const Configuration& config) {{
-                    // Use configuration here from file {className}.yaml
-                }});
             }}
         {closeNamespace}
         """

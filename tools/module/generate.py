@@ -17,7 +17,6 @@ def register(command):
 
 
 def run(path, **kwargs):
-    print("hi")
     # Try to get our actual module directory from the cmake cache
     if "NUCLEAR_MODULE_DIR" in b.cmake_cache:
         module_path = os.path.join(b.source_dir, b.cmake_cache["NUCLEAR_MODULE_DIR"])
