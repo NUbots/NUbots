@@ -31,7 +31,6 @@
 #include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace localisation {
@@ -40,10 +39,8 @@ namespace localisation {
     using message::support::FieldDescription;
     using message::vision::Goal;
     using utility::input::ServoID;
-    using utility::localisation::fieldStateToTransform3D;
     using utility::math::angle::normalizeAngle;
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::matrix::Transform3D;
 
     template <typename Scalar>
     class RobotModel {

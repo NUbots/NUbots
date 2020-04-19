@@ -10,7 +10,6 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {
