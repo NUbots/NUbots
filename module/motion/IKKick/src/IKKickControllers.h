@@ -20,7 +20,8 @@
 #ifndef MODULES_MOTION_IKKICKCONTROLLERS_H
 #define MODULES_MOTION_IKKICKCONTROLLERS_H
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Configuration.h"
@@ -28,12 +29,13 @@
 #include "message/motion/KinematicsModel.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace motion {
+
+    using utility::support::Expression;
+    using Eigen::AngleAxisd;
 
     enum MotionStage { READY = 0, RUNNING = 1, STOPPING = 2, FINISHED = 3 };
 
@@ -45,18 +47,18 @@ namespace motion {
         // };
         // InterpolationType interpolation = LINEAR;
     public:
-        utility::math::matrix::Transform3D pose;
+        Eigen::Affine3d pose;
         float duration;
         SixDOFFrame() : pose(), duration(0.0f) {}
-        SixDOFFrame(utility::math::matrix::Transform3D pose_, float duration_) : pose(pose_), duration(duration_) {}
+        SixDOFFrame(Eigen::Affine3d pose_, float duration_) : pose(pose_), duration(duration_) {}
         SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
             duration               = config["duration"].as<float>();
-            arma::vec3 pos         = config["pos"].as<arma::vec>();
-            arma::vec3 orientation = (180.0 / M_PI) * config["orientation"].as<arma::vec>();
-            pose                   = utility::math::matrix::Transform3D();
-            pose.rotateX(orientation[0]);
-            pose.rotateY(orientation[1]);
-            pose.rotateZ(orientation[2]);
+            Eigen::Vector3d pos         = config["pos"].as<Expression>();
+            Eigen::Vector3d orientation = (180.0 / M_PI) * config["orientation"].as<Expression>();
+            pose                        = Eigen::Affine3d::Identity();
+            pose.rotate(AngleAxisd(orientation[0], Vector3d::UnitX()));
+            pose.rotate(AngleAxisd(orientation[1], Vector3d::UnitY()));
+            pose.rotate(AngleAxisd(orientation[2], Vector3d::UnitZ()));
             pose.translation() = pos;
         };
         // TODO:
@@ -68,7 +70,7 @@ namespace motion {
         std::vector<SixDOFFrame> frames;
         int i = 0;
         Animator() : frames() {
-            frames.push_back(SixDOFFrame{utility::math::matrix::Transform3D(), 0});
+            frames.push_back(SixDOFFrame{Eigen::Affine3d::Identity(), 0});
         }
         Animator(const std::vector<SixDOFFrame>& frames_) : frames(frames_) {}
         int clampPrev(int k) const {
@@ -110,8 +112,8 @@ namespace motion {
         Animator anim;
         float servo_angle_threshold = 0.1;
 
-        arma::vec3 ballPosition;
-        arma::vec3 goalPosition;
+        Eigen::Vector3d ballPosition;
+        Eigen::Vector3d goalPosition;
 
         NUClear::clock::time_point motionStartTime;
 
@@ -121,8 +123,8 @@ namespace motion {
             , forward_duration(0.0f)
             , return_duration(0.0f)
             , anim()
-            , ballPosition(arma::fill::zeros)
-            , goalPosition(arma::fill::zeros)
+            , ballPosition(Eigen::Vector3d::Zero())
+            , goalPosition(Eigen::Vector3d::Zero())
             , motionStartTime() {}
         virtual ~SixDOFFootController() = default;
 
@@ -167,23 +169,23 @@ namespace motion {
 
 
         void setKickParameters(utility::input::LimbID supportFoot_,
-                               arma::vec3 ballPosition_,
-                               arma::vec3 goalPosition_) {
+                               Eigen::Vector3d ballPosition_,
+                               Eigen::Vector3d goalPosition_) {
             supportFoot  = supportFoot_;
             ballPosition = ballPosition_;
             goalPosition = goalPosition_;
             reset();
         }
 
-        utility::math::matrix::Transform3D getTorsoPose(const message::input::Sensors& sensors) {
+        Eigen::Affine3d getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? convert(sensors.forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL])
-                        : convert(sensors.forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL]));
+                        ? sensors.forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL]
+                        : sensors.forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL]);
         }
 
-        utility::math::matrix::Transform3D getFootPose(const message::input::Sensors& sensors) {
-            auto result = utility::math::matrix::Transform3D();
+        Eigen::Affine3d getFootPose(const message::input::Sensors& sensors) {
+            auto result = Eigen::Affine3d();
             if (stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
 
                 double elapsedTime =
@@ -192,8 +194,21 @@ namespace motion {
                 float alpha = (anim.currentFrame().duration != 0)
                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
                                   : 1;
-                result = utility::math::matrix::Transform3D::interpolate(
-                    anim.previousFrame().pose, anim.currentFrame().pose, alpha);
+
+                // Interpolate between the previous frame transform and the current frame transform, using the alpha parameter
+                Eigen::Quaternion previousFrameRot = Eigen::Quaternion(anim.previousFrame().pose.linear());
+                Eigen::Quaternion currentFrameRot = Eigen::Quaternion(anim.currentFrame().pose.linear());
+
+                Eigen::Vector3d previousFrameTranslation = anim.previousFrame().pose.translation();
+                Eigen::Vector3d currentFrameTranlsation = anim.currentFrame().pose.translation();
+
+                Eigen::Quaternion resultRotation = previousFrameTranslation.slerp(alpha, currentFrameTranlsation);
+                Eigen::Vector3d resultTranslation = alpha * (currentFrameTranlsation - previousFrameTranslation) + previousFrameTranslation;
+
+                Eigen::Affine3d result;
+                result.linear() = resultRotation.toRotationMatrix();
+                result.translation() = resultTranslation;
+
 
                 bool servosAtGoal = true;
                 for (auto& servo : sensors.servo) {
