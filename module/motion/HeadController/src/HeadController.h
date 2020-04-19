@@ -20,7 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
 #define MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 namespace module {
@@ -47,8 +47,8 @@ namespace motion {
 
         explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
 
-        arma::vec2 currentAngles;
-        arma::vec2 goalAngles;
+        Eigen::Vector2f currentAngles;
+        Eigen::Vector2f goalAngles;
         bool goalRobotSpace = true;
     };
 

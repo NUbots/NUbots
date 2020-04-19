@@ -437,6 +437,16 @@ namespace motion {
             return positions;
         }
 
+        std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector) {
+            std::vector<std::pair<ServoID, float>> positions;
+            positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1], cameraUnitVector[0])));
+            positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
+                                               atan2(-cameraUnitVector[2],
+                                                     std::sqrt(cameraUnitVector[0] * cameraUnitVector[0]
+                                                               + cameraUnitVector[1] * cameraUnitVector[1]))));
+            return positions;
+        }
+
         arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint,
                                                const utility::math::matrix::Transform3D& Hgc,
                                                const utility::math::matrix::Transform3D& Hgt) {

@@ -29,10 +29,8 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/comparison.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -50,7 +48,6 @@ namespace motion {
     using utility::behaviour::RegisterAction;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian;
-    using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
     using utility::support::Expression;
@@ -70,8 +67,8 @@ namespace motion {
         , p_gain(0.0)
         , updateHandle()
         , lastTime()
-        , currentAngles(arma::fill::zeros)
-        , goalAngles(arma::fill::zeros) {
+        , currentAngles(Eigen::Vector2f::Zero())
+        , goalAngles(Eigen::Vector2f::Zero()) {
 
         // do a little configurating
         on<Configuration>("HeadController.yaml")
@@ -108,11 +105,11 @@ namespace motion {
                 // Get goal vector from angles
                 // Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
                 // The goal angles are for the neck directly, so we have to offset the camera declination again
-                arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
+                Eigen::Vector3f goalHeadUnitVector_world = sphericalToCartesian(Eigen::Vector3f({1, currentAngles[0], currentAngles[1]}));
                 // Convert to robot space
-                arma::vec3 headUnitVector =
+                Eigen::Vector3f headUnitVector =
                     goalRobotSpace ? goalHeadUnitVector_world
-                                   : Transform3D(convert(sensors.Htw)).rotation() * goalHeadUnitVector_world;
+                                   : sensors.Htw.block(0, 0, 2, 2).cast<float>() * goalHeadUnitVector_world;
                 // Compute inverse kinematics for head
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
