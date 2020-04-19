@@ -132,7 +132,7 @@ namespace behaviour {
                     case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
                 }
 
-                update_window(UpdateWindow(log_window, source, packet.message, colours));
+                update_window(log_window, colours, source, packet.message, true);
             });
 
             on<Shutdown>().then(endwin);
@@ -188,34 +188,38 @@ namespace behaviour {
             wrefresh(log_window.get());
         }
 
-        void KeyboardWalk::update_window(const UpdateWindow& packet) {
+        void KeyboardWalk::update_window(const std::shared_ptr<WINDOW>& window,
+                                         const LogColours& colours,
+                                         const std::string& source,
+                                         const std::string& message,
+                                         const bool& print_level) {
             std::lock_guard<std::mutex> lock(mutex);
 
             // Print the message source
-            wprintw(packet.window.get(), packet.source.c_str());
+            wprintw(window.get(), source.c_str());
 
             // Print the log level if it is enabled
-            if (packet.print_level) {
+            if (print_level) {
                 // Print it in colour if the functionality is available
                 if (colours_enabled) {
-                    wattron(packet.window.get(), COLOR_PAIR(short(packet.colours)));
+                    wattron(window.get(), COLOR_PAIR(short(colours)));
                 }
-                switch (packet.colours) {
-                    case LogColours::TRACE_COLOURS: wprintw(packet.window.get(), "TRACE: "); break;
-                    case LogColours::DEBUG_COLOURS: wprintw(packet.window.get(), "DEBUG: "); break;
-                    case LogColours::INFO_COLOURS: wprintw(packet.window.get(), "INFO: "); break;
-                    case LogColours::WARN_COLOURS: wprintw(packet.window.get(), "WARN: "); break;
-                    case LogColours::ERROR_COLOURS: waddwstr(packet.window.get(), L"(╯°□°）╯︵ ┻━┻: "); break;
-                    case LogColours::FATAL_COLOURS: waddwstr(packet.window.get(), L"(ノಠ益ಠ)ノ彡┻━┻: "); break;
+                switch (colours) {
+                    case LogColours::TRACE_COLOURS: wprintw(window.get(), "TRACE: "); break;
+                    case LogColours::DEBUG_COLOURS: wprintw(window.get(), "DEBUG: "); break;
+                    case LogColours::INFO_COLOURS: wprintw(window.get(), "INFO: "); break;
+                    case LogColours::WARN_COLOURS: wprintw(window.get(), "WARN: "); break;
+                    case LogColours::ERROR_COLOURS: waddwstr(window.get(), L"(╯°□°）╯︵ ┻━┻: "); break;
+                    case LogColours::FATAL_COLOURS: waddwstr(window.get(), L"(ノಠ益ಠ)ノ彡┻━┻: "); break;
                 }
                 if (colours_enabled) {
-                    wattroff(packet.window.get(), COLOR_PAIR(short(packet.colours)));
+                    wattroff(window.get(), COLOR_PAIR(short(colours)));
                 }
             }
 
             // Print the log message and refresh the screen
-            wprintw(packet.window.get(), "%s\n", packet.message.c_str());
-            wrefresh(packet.window.get());
+            wprintw(window.get(), "%s\n", message.c_str());
+            wrefresh(window.get());
         }
 
         void KeyboardWalk::forward() {
@@ -345,17 +349,17 @@ namespace behaviour {
             werase(command_window.get());
 
             // Construct the log command message
-            std::string msg = fmt::format(
+            std::string message = fmt::format(
                 "Velocity: {:.4f}, {:.4f}\nRotation: {:.4f}\nMoving: {}\nHead Yaw: {:.2f}, Head Pitch: {:.2f}",
                 velocity[0],
                 velocity[1],
                 rotation,
                 moving,
-                head_yaw * 180 / M_PI,
-                head_pitch * 180 / M_PI);
+                head_yaw * 180.0 / M_PI,
+                head_pitch * 180.0 / M_PI);
 
             // Update the command window
-            update_window(UpdateWindow(command_window, msg, false));
+            update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);
         }
 
         void KeyboardWalk::quit() {

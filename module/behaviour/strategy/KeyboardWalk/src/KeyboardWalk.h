@@ -41,21 +41,6 @@ namespace behaviour {
             FATAL_COLOURS = 6
         };
 
-        struct UpdateWindow {
-            UpdateWindow(const std::shared_ptr<WINDOW>& window,
-                         const std::string& source,
-                         const std::string& message,
-                         const LogColours& colours)
-                : window(window), source(source), message(message), colours(colours), print_level(true) {}
-            UpdateWindow(const std::shared_ptr<WINDOW>& window, const std::string& message, const bool& print_level)
-                : window(window), source(""), message(message), print_level(print_level) {}
-            std::shared_ptr<WINDOW> window;
-            std::string source;
-            std::string message;
-            LogColours colours;
-            bool print_level;
-        };
-
         class KeyboardWalk : public NUClear::Reactor {
         private:
             static constexpr const double DIFF     = 0.10;
@@ -94,7 +79,11 @@ namespace behaviour {
 
             void update_command();
             void print_status();
-            void update_window(const UpdateWindow& packet);
+            void update_window(const std::shared_ptr<WINDOW>& window,
+                               const LogColours& colours,
+                               const std::string& source,
+                               const std::string& message,
+                               const bool& print_level);
 
         public:
             /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
