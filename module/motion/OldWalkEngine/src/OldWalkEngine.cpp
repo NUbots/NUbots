@@ -20,7 +20,6 @@
 #include "OldWalkEngine.h"
 
 #include <algorithm>
-#include <armadillo>
 #include <chrono>
 #include <cmath>
 
@@ -34,7 +33,6 @@
 #include "message/support/SaveConfiguration.h"
 #include "utility/math/angle.h"
 #include "utility/math/comparison.h"
-#include "utility/math/matrix/Rotation3D.h"
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
@@ -65,9 +63,6 @@ namespace motion {
     using LimbID  = utility::input::LimbID;
     using utility::math::clamp;
     using utility::math::angle::normalizeAngle;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::matrix::Transform2D;
-    using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::nusight::graph;
@@ -94,16 +89,16 @@ namespace motion {
         , velocityCurrent()
         , velocityCommand()
         , velocityDifference()
-        , zmpCoefficients(arma::fill::zeros)
-        , zmpParams(arma::fill::zeros)
+        , zmpCoefficients(Eigen::Vector4d::Zero())
+        , zmpParams(Eigen::Vector4d::Zero())
         , swingLeg()
         , lastFootGoalRotation()
         , footGoalErrorSum()
         , stanceLimitY2(0.0)
-        , stepLimits(arma::fill::zeros)
-        , velocityLimits(arma::fill::zeros)
-        , accelerationLimits(arma::fill::zeros)
-        , accelerationLimitsHigh(arma::fill::zeros)
+        , stepLimits(Eigen::Matrix<double, 3, 2>::Zero())
+        , velocityLimits(Eigen::Matrix<double, 3, 2>::Zero())
+        , accelerationLimits(Eigen::Vector3d::Zero())
+        , accelerationLimitsHigh(Eigen::Vector3d::Zero())
         , velocityHigh(0.0)
         , accelerationTurningFactor(0.0)
         , bodyHeight(0.0)
@@ -117,13 +112,13 @@ namespace motion {
         , step_height_fast_fraction(0.0f)
         , phase1Single(0.0)
         , phase2Single(0.0)
-        , footOffset(arma::fill::zeros)
+        , footOffset(Eigen::Vector2d::Zero())
         , legYaw(0.0)
         , uLRFootOffset()
-        , qLArmStart(arma::fill::zeros)
-        , qLArmEnd(arma::fill::zeros)
-        , qRArmStart(arma::fill::zeros)
-        , qRArmEnd(arma::fill::zeros)
+        , qLArmStart(Eigen::Vector3d::Zero())
+        , qLArmEnd(Eigen::Vector3d::Zero())
+        , qRArmStart(Eigen::Vector3d::Zero())
+        , qRArmEnd(Eigen::Vector3d::Zero())
         , balanceEnabled(0.0)
         , balanceAmplitude(0.0)
         , balanceWeight(0.0)
@@ -190,7 +185,7 @@ namespace motion {
                            .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            Transform2D velocity = convert(walkCommand.command);
+            Eigen::Affine2d velocity = convert(walkCommand.command);
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();
             }
@@ -259,11 +254,11 @@ namespace motion {
         auto& stance = config["stance"];
         bodyHeight   = stance["body_height"].as<Expression>();
         bodyTilt     = stance["body_tilt"].as<Expression>();
-        qLArmStart   = stance["arms"]["left"]["start"].as<arma::vec>();
-        qLArmEnd     = stance["arms"]["left"]["end"].as<arma::vec>();
-        qRArmStart   = stance["arms"]["right"]["start"].as<arma::vec>();
-        qRArmEnd     = stance["arms"]["right"]["end"].as<arma::vec>();
-        footOffset   = stance["foot_offset"].as<arma::vec>();
+        qLArmStart   = stance["arms"]["left"]["start"].as<Expression>();
+        qLArmEnd     = stance["arms"]["left"]["end"].as<Expression>();
+        qRArmStart   = stance["arms"]["right"]["start"].as<Expression>();
+        qRArmEnd     = stance["arms"]["right"]["end"].as<Expression>();
+        footOffset   = stance["foot_offset"].as<Expression>();
         // gToe/heel overlap checking values
         stanceLimitY2 = stance["limit_margin_y"].as<Expression>();
         stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stanceLimitY2;
@@ -286,7 +281,7 @@ namespace motion {
         zmpTime             = walkCycle["zmp_time"].as<Expression>();
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight          = walkCycle["step"]["height"].as<Expression>();
-        stepLimits          = walkCycle["step"]["limits"].as<arma::mat::fixed<3, 2>>();
+        stepLimits          = walkCycle["step"]["limits"].as<Expression>>();
         legYaw              = walkCycle["step"]["leg_yaw"].as<Expression>();
         ankleRollComp       = walkCycle["step"]["compensation"]["roll_coef"].as<Expression>();
         ankleRollLimit      = walkCycle["step"]["compensation"]["roll_limit"].as<Expression>();
@@ -297,12 +292,12 @@ namespace motion {
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<arma::mat::fixed<3, 2>>();
+        velocityLimits = velocity["limits"].as<Expression>>();
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration        = walkCycle["acceleration"];
-        accelerationLimits        = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh    = acceleration["limits_high"].as<arma::vec>();
+        accelerationLimits        = acceleration["limits"].as<Expression>();
+        accelerationLimitsHigh    = acceleration["limits_high"].as<Expression>();
         accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
@@ -373,9 +368,9 @@ namespace motion {
     void OldWalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
-            uLeftFoot  = arma::zeros(3);
-            uRightFoot = arma::zeros(3);
-            uTorso     = arma::zeros(3);
+            uLeftFoot  = Eigen::Affine2d::Zero();
+            uRightFoot = Eigen::Affine2d::Zero();
+            uTorso     = Eigen::Affine2d::Zero();
 
             // start walking asap
             initialStep = 1;
@@ -408,20 +403,20 @@ namespace motion {
         uLeftFoot  = {0, kinematicsModel.leg.HIP_OFFSET_Y, 0};
         uRightFoot = {0, -kinematicsModel.leg.HIP_OFFSET_Y, 0};
 
-        uTorsoSource          = arma::zeros(3);
-        uTorsoDestination     = arma::zeros(3);
-        uLeftFootSource       = arma::zeros(3);
-        uLeftFootDestination  = arma::zeros(3);
-        uRightFootSource      = arma::zeros(3);
-        uRightFootDestination = arma::zeros(3);
+        uTorsoSource          = Eigen::Affine2d::Zero();
+        uTorsoDestination     = Eigen::Affine2d::Zero();
+        uLeftFootSource       = Eigen::Affine2d::Zero();
+        uLeftFootDestination  = Eigen::Affine2d::Zero();
+        uRightFootSource      = Eigen::Affine2d::Zero();
+        uRightFootDestination = Eigen::Affine2d::Zero();
 
-        velocityCurrent    = arma::zeros(3);
-        velocityCommand    = arma::zeros(3);
-        velocityDifference = arma::zeros(3);
+        velocityCurrent    = Eigen::Affine2d::Zero();
+        velocityCommand    = Eigen::Affine2d::Zero();
+        velocityDifference = Eigen::Affine2d::Zero();
 
         // gZMP exponential coefficients:
-        zmpCoefficients = arma::zeros(4);
-        zmpParams       = arma::zeros(4);
+        zmpCoefficients = Eigen::Vector4d::Zero();
+        zmpParams       = Eigen::Vector4d::Zero();
 
         // gGyro stabilization variables
         swingLeg      = swingLegInitial;
@@ -496,7 +491,7 @@ namespace motion {
 
     void OldWalkEngine::updateStep(double phase, const Sensors& sensors) {
         // Get unitless phases for x and z motion
-        arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
+        Eigen::Vector3d foot = footPhase(phase, phase1Single, phase2Single);
 
         // Lift foot by amount depending on walk speed
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh
@@ -512,7 +507,7 @@ namespace motion {
             foot[2] = 0;
         }
 
-        // Interpolate Transform2D from start to destination
+        // Interpolate Eigen::Affine2d from start to destination
         if (swingLeg == LimbID::RIGHT_LEG) {
             uRightFoot = uRightFootSource.interpolate(foot[0], uRightFootDestination);
         }
@@ -533,8 +528,8 @@ namespace motion {
                         uRightFootDestination,
                         uRightFootSource);
 
-        Transform3D leftFoot  = uLeftFoot;
-        Transform3D rightFoot = uRightFoot;
+        Eigen::Affine3d leftFoot  = uLeftFoot;
+        Eigen::Affine3d rightFoot = uRightFoot;
 
         // Lift swing leg
         if (swingLeg == LimbID::RIGHT_LEG) {
@@ -544,13 +539,13 @@ namespace motion {
             leftFoot = leftFoot.translateZ(stepHeight * foot[2]);
         }
 
-        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
-        Transform3D torso =
-            arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
+        Eigen::Affine2d uTorsoActual = uTorso.localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
+        Eigen::Affine3d torso =
+            Eigen::Vector6d({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        Transform3D leftFootCOM  = leftFoot.worldToLocal(torso);
-        Transform3D rightFootCOM = rightFoot.worldToLocal(torso);
+        Eigen::Affine3d leftFootCOM  = leftFoot.worldToLocal(torso);
+        Eigen::Affine3d rightFootCOM = rightFoot.worldToLocal(torso);
 
         // TODO: what is this magic?
         double phaseComp = std::min({1.0, foot[1] / 0.1, (1 - foot[1]) / 0.1});
@@ -575,11 +570,11 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
-            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+        Eigen::Affine3d Htc = Eigen::Affine3d::Identity();
+        Htc.translation() = ({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
 
-        Transform3D leftFootTorso  = Htc * leftFootCOM;
-        Transform3D rightFootTorso = Htc * rightFootCOM;
+        Eigen::Affine3d leftFootTorso  = Htc * leftFootCOM;
+        Eigen::Affine3d rightFootTorso = Htc * rightFootCOM;
 
         // Calculate roll and pitch compensation based on limits and compensation factors
         float rollComp  = clamp(-ankleRollLimit, ankleRollComp * sensors.angular_position[0], ankleRollLimit);
@@ -601,13 +596,13 @@ namespace motion {
     std::unique_ptr<std::vector<ServoCommand>> OldWalkEngine::updateStillWayPoints(const Sensors& sensors) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
 
-        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
-        Transform3D torso =
-            arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
+        Eigen::Affine2d uTorsoActual = uTorso.localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
+        Eigen::Affine3d torso =
+            Eigen::Vector6d({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        Transform3D leftFootCOM  = Transform3D(uLeftFoot).worldToLocal(torso);
-        Transform3D rightFootCOM = Transform3D(uRightFoot).worldToLocal(torso);
+        Eigen::Affine3d leftFootCOM = Transform3D(uLeftFoot).worldToLocal(torso);
+        Eigen::Affine3d rightFootCOM = Transform3D(uRightFoot).worldToLocal(torso);
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
@@ -617,11 +612,11 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
+        Eigen::Affine3d Htc =
             Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
 
-        Transform3D leftFootTorso  = Htc * leftFootCOM;
-        Transform3D rightFootTorso = Htc * rightFootCOM;
+        Eigen::Affine3d leftFootTorso  = Htc * leftFootCOM;
+        Eigen::Affine3d rightFootTorso = Htc * rightFootCOM;
 
         std::vector<std::pair<ServoID, float>> joints;
         joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
@@ -668,14 +663,14 @@ namespace motion {
 
         // Linearly interpolate between the start and end positions using the easing
         // parameter
-        arma::vec3 qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
-        arma::vec3 qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
+        Eigen::Vector3d qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
+        Eigen::Vector3d qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
 
         // Start arm/leg collision/prevention
         double rotLeftA           = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
         double rotRightA          = normalizeAngle(uTorso.angle() - uRightFoot.angle());
-        Transform2D leftLegTorso  = uTorso.worldToLocal(uLeftFoot);
-        Transform2D rightLegTorso = uTorso.worldToLocal(uRightFoot);
+        Eigen::Affine2d leftLegTorso  = uTorso.worldToLocal(uLeftFoot);
+        Eigen::Affine2d rightLegTorso = uTorso.worldToLocal(uRightFoot);
         double leftMinValue       = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2
                               + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2
@@ -722,13 +717,13 @@ namespace motion {
         return waypoints;
     }
 
-    Transform2D OldWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) {
-        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
-        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
+    Eigen::Affine2d OldWalkEngine::stepTorso(Eigen::Affine2d uLeftFoot, Eigen::Affine2d uRightFoot, double shiftFactor) {
+        Eigen::Affine2d uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
+        Eigen::Affine2d uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
 
-    void OldWalkEngine::setVelocity(Transform2D velocity) {
+    void OldWalkEngine::setVelocity(Eigen::Affine2d velocity) {
         // filter the commanded speed
         velocity.x()     = std::min(std::max(velocity.x(), velocityLimits(0, 0)), velocityLimits(0, 1));
         velocity.y()     = std::min(std::max(velocity.y(), velocityLimits(1, 0)), velocityLimits(1, 1));
@@ -750,11 +745,11 @@ namespace motion {
             std::min(std::max(velocityCommand.angle(), velocityLimits(2, 0)), velocityLimits(2, 1));
     }
 
-    Transform2D OldWalkEngine::getVelocity() {
+    Eigen::Affine2d OldWalkEngine::getVelocity() {
         return velocityCurrent;
     }
 
-    arma::vec2 OldWalkEngine::zmpSolve(double zs,
+    Eigen::Vector2d OldWalkEngine::zmpSolve(double zs,
                                        double z1,
                                        double z2,
                                        double x1,
@@ -783,19 +778,19 @@ namespace motion {
         return {aP, aN};
     }
 
-    Transform2D OldWalkEngine::zmpCom(double phase,
-                                      arma::vec4 zmpCoefficients,
-                                      arma::vec4 zmpParams,
+    Eigen::Affine2d OldWalkEngine::zmpCom(double phase,
+                                      Eigen::Vector4d zmpCoefficients,
+                                      Eigen::Vector4d zmpParams,
                                       double stepTime,
                                       double zmpTime,
                                       double phase1Single,
                                       double phase2Single,
-                                      Transform2D uSupport,
-                                      Transform2D uLeftFootDestination,
-                                      Transform2D uLeftFootSource,
-                                      Transform2D uRightFootDestination,
-                                      Transform2D uRightFootSource) {
-        Transform2D com = {0, 0, 0};
+                                      Eigen::Affine2d uSupport,
+                                      Eigen::Affine2d uLeftFootDestination,
+                                      Eigen::Affine2d uLeftFootSource,
+                                      Eigen::Affine2d uRightFootDestination,
+                                      Eigen::Affine2d uRightFootSource) {
+        Eigen::Affine2d com = {0, 0, 0};
         double expT     = std::exp(stepTime * phase / zmpTime);
         com.x()         = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
         com.y()         = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
