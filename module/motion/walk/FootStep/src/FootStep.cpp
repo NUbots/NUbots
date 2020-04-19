@@ -11,7 +11,6 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 
@@ -29,7 +28,6 @@ namespace motion {
         using utility::behaviour::RegisterAction;
         using utility::input::LimbID;
         using utility::input::ServoID;
-        using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateLegJoints;
         using utility::nusight::graph;
 
@@ -149,7 +147,7 @@ namespace motion {
                     Htf_t.linear()      = Rf_tt;   // Rotation from above
                     Htf_t.translation() = rF_tTt;  // Translation to foot target
 
-                    Transform3D t = convert(Htf_t.matrix());
+                    Eigen::Affine3d t = Htf_t.matrix();
                     auto joints =
                         calculateLegJoints(model, t, target.isRightFootSwing ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
 
