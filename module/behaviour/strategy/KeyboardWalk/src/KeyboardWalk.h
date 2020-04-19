@@ -55,7 +55,8 @@ namespace behaviour {
             float head_yaw   = 0.0f;
             float head_pitch = 0.0f;
 
-            std::shared_ptr<WINDOW> command_window, log_window;
+            std::shared_ptr<WINDOW> command_window;
+            std::shared_ptr<WINDOW> log_window;
             bool colours_enabled;
 
             std::mutex mutex;
