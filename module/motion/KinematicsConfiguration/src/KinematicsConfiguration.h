@@ -22,7 +22,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Configuration.h"
