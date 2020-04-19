@@ -30,11 +30,8 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace motion {
@@ -56,7 +53,6 @@ namespace motion {
 
     using utility::behaviour::ActionPriorites;
     using utility::behaviour::RegisterAction;
-    using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
 
@@ -66,8 +62,8 @@ namespace motion {
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , supportFoot()
-        , ballPosition(arma::fill::zeros)
-        , goalPosition(arma::fill::zeros)
+        , ballPosition(Eigen::Vector3d::Zero())
+        , goalPosition(Eigen::Vector3d::Zero())
         , subsumptionId(size_t(this) * size_t(this) - size_t(this))
         , leftFootIsSupport(false)
         , foot_separation(0.0f)
@@ -120,8 +116,8 @@ namespace motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Transform3D leftFoot  = convert(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
-                Transform3D rightFoot = convert(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                Eigen::Affine3d leftFoot  = sensors.forward_kinematics[ServoID::L_ANKLE_ROLL];
+                Eigen::Affine3d rightFoot = sensors.forward_kinematics[ServoID::R_ANKLE_ROLL];
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -132,25 +128,25 @@ namespace motion {
                     supportFoot = LimbID::RIGHT_LEG;
                 }
 
-                Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
+                Eigen::Affine3d torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
 
                 // Put the ball position from vision into torso coordinates
-                arma::vec3 targetTorso;  // = Transform3D(convert<double, 4,
+                Eigen::Vector3d targetTorso;  // = Transform3D(convert<double, 4,
                                          // 4>(sensors.kinematicsBodyToGround)).i().transformPoint(convert<double,
                                          // 3>(command.target)); //TODO fix
                 // Put the ball position into support foot coordinates
-                arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
+                Eigen::Vector3d targetSupportFoot = torsoPose* targetTorso;
 
                 // Put the goal from vision into torso coordinates
-                arma::vec3 directionTorso;  // = Transform3D(convert<double, 4,
+                Eigen::Vector3d directionTorso;  // = Transform3D(convert<double, 4,
                                             // 4>(sensors.kinematicsBodyToGround)).i().transformVector(convert<double,
                                             // 3>(command.direction)); //TODO fix
                 // Put the goal into support foot coordinates
-                arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
+                Eigen::Vector3d directionSupportFoot = torsoPose.linear() * directionTorso;
 
-                arma::vec3 ballPosition = targetSupportFoot;
+                Eigen::Vector3d ballPosition = targetSupportFoot;
                 ballPosition[2]         = 0.05;  // TODO: figure out why ball height is unreliable
-                arma::vec3 goalPosition = directionSupportFoot;
+                Eigen::Vector3d goalPosition = directionSupportFoot;
                 goalPosition[2]         = 0.0;  // TODO: figure out why ball height is unreliable
 
                 balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -188,14 +184,14 @@ namespace motion {
 
                 // Do things based on current state
 
-                Transform3D kickFootGoal;
-                Transform3D supportFootGoal;
+                Eigen::Affine3d kickFootGoal;
+                Eigen::Affine3d supportFootGoal;
 
                 // Move torso over support foot
                 if (balancer.isRunning()) {
-                    Transform3D supportFootPose = balancer.getFootPose(sensors);
+                    Eigen::Affine3d supportFootPose = balancer.getFootPose(sensors);
                     supportFootGoal             = supportFootPose;
-                    kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
+                    kickFootGoal = supportFootPose.translate(Eigen::Vector3d({0, negativeIfKickRight * foot_separation, 0}));
                 }
 
                 // Move foot to ball to kick
