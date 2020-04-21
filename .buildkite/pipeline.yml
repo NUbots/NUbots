@@ -20,14 +20,32 @@ steps:
   # Wait to finish uploading the image before doing the next steps
   - wait
 
-  # Build for the NUC
-  - label: "Build and Test"
+  # Build generic target and test
+  - label: "Build generic and Test"
     command: "./b configure -- -DBUILD_TESTS=ON && ./b build && ./b build test"
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
           pull: generic_image
           run: generic
+          workdir: /home/nubots/NUbots/
+
+  # Build for both nuc targets
+  - label: "Build nuc7i7bnh"
+    command: echo "nuc7i7bnh image successfully built!"
+    plugins:
+      - docker-compose#v3.0.3:
+          config: .buildkite/docker-compose.yml
+          pull: nuc7i7bnh_image
+          run: nuc7i7bnh
+          workdir: /home/nubots/NUbots/
+  - label: "Build nuc8i7beh"
+    command: echo "nuc8i7beh image successfully built!"
+    plugins:
+      - docker-compose#v3.0.3:
+          config: .buildkite/docker-compose.yml
+          pull: nuc8i7beh_image
+          run: nuc8i7beh
           workdir: /home/nubots/NUbots/
 
   # Formatting
