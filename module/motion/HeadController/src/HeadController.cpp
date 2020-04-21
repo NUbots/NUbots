@@ -108,7 +108,7 @@ namespace motion {
                 // Convert to robot space
                 Eigen::Vector3f headUnitVector =
                     goalRobotSpace ? goalHeadUnitVector_world
-                                   : sensors.Htw.block(0, 0, 2, 2).cast<float>() * goalHeadUnitVector_world;
+                                   : Eigen::Affine3d(sensors.Htw).rotation().cast<float>() * goalHeadUnitVector_world;
                 // Compute inverse kinematics for head
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
