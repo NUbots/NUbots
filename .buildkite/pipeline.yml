@@ -32,6 +32,7 @@ steps:
 
   # Build for both nuc targets
   - label: "Build nuc7i7bnh"
+    command: echo "nuc7i7bnh image successfully built!"
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
@@ -39,6 +40,7 @@ steps:
           run: nuc7i7bnh
           workdir: /home/nubots/NUbots/
   - label: "Build nuc8i7beh"
+    command: echo "nuc8i7beh image successfully built!"
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
