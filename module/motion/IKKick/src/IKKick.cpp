@@ -142,7 +142,7 @@ namespace motion {
                                             // 4>(sensors.kinematicsBodyToGround)).i().transformVector(convert<double,
                                             // 3>(command.direction)); //TODO fix
                 // Put the goal into support foot coordinates
-                Eigen::Vector3d directionSupportFoot = torsoPose.linear() * directionTorso;
+                Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
 
                 Eigen::Vector3d ballPosition = targetSupportFoot;
                 ballPosition[2]         = 0.05;  // TODO: figure out why ball height is unreliable
@@ -191,7 +191,7 @@ namespace motion {
                 if (balancer.isRunning()) {
                     Eigen::Affine3d supportFootPose = balancer.getFootPose(sensors);
                     supportFootGoal             = supportFootPose;
-                    kickFootGoal = supportFootPose.translate(Eigen::Vector3d({0, negativeIfKickRight * foot_separation, 0}));
+                    kickFootGoal = supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
                 }
 
                 // Move foot to ball to kick
