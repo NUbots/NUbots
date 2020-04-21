@@ -21,7 +21,6 @@
 
 #include "extension/Configuration.h"
 #include "message/motion/KinematicsModel.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 namespace module {
@@ -117,26 +116,25 @@ namespace motion {
         auto& objUpperArm = objArm["upper_arm"];
         auto& objLowerArm = objArm["lower_arm"];
 
-        Eigen::Vector2d shoulderOffset       = objShoulder["offset"].as<Expression>();
         model.arm.DISTANCE_BETWEEN_SHOULDERS = objArm["distance_between_shoulders"].as<float>();
+        Eigen::Vector2d shoulderOffset       = objShoulder["offset"].as<Expression>();
         model.arm.SHOULDER_Z_OFFSET          = shoulderOffset[1];
         model.arm.SHOULDER_X_OFFSET          = shoulderOffset[0];
         model.arm.SHOULDER_LENGTH            = objShoulder["length"].as<float>();
         model.arm.SHOULDER_WIDTH             = objShoulder["width"].as<float>();
         model.arm.SHOULDER_HEIGHT            = objShoulder["height"].as<float>();
 
-        Eigen::Vector2d upperArmOffset = objUpperArm["offset"].as<Expression>();
         model.arm.UPPER_ARM_LENGTH     = objUpperArm["length"].as<float>();
+        Eigen::Vector2d upperArmOffset = objUpperArm["offset"].as<Expression>();
         model.arm.UPPER_ARM_Y_OFFSET   = upperArmOffset[0];
         model.arm.UPPER_ARM_X_OFFSET   = upperArmOffset[1];
 
-        Eigen::Vector2d lowerArmOffset = objLowerArm["offset"].as<Expression>();
         model.arm.LOWER_ARM_LENGTH     = objLowerArm["length"].as<float>();
+        Eigen::Vector2d lowerArmOffset = objLowerArm["offset"].as<Expression>();
         model.arm.LOWER_ARM_Y_OFFSET   = lowerArmOffset[0];
         model.arm.LOWER_ARM_Z_OFFSET   = lowerArmOffset[1];
     }
 
-    // vec4
     void KinematicsConfiguration::configureMassModel(KinematicsModel& model, const YAML::Node& objMassModel) {
         model.massModel.head        = objMassModel["particles"]["head"].as<Expression>();
         model.massModel.arm_upper   = objMassModel["particles"]["arm_upper"].as<Expression>();
@@ -148,7 +146,7 @@ namespace motion {
         model.massModel.ankle_block = objMassModel["particles"]["ankle_block"].as<Expression>();
         model.massModel.foot        = objMassModel["particles"]["foot"].as<Expression>();
     }
-    // mat33
+
     void KinematicsConfiguration::configureTensorModel(KinematicsModel& model, const YAML::Node& objTensorModel) {
         model.tensorModel.head        = objTensorModel["particles"]["head"].as<Expression>();
         model.tensorModel.arm_upper   = objTensorModel["particles"]["arm_upper"].as<Expression>();
