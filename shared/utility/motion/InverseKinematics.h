@@ -77,6 +77,10 @@ namespace motion {
                                                                   utility::math::matrix::Transform3D leftTarget,
                                                                   utility::math::matrix::Transform3D rightTarget);
 
+        std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                  const Eigen::Affine3d& leftTarget,
+                                                                  const Eigen::Affine3d& rightTarget);
+
         std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(
             const message::motion::KinematicsModel& model,
             utility::math::matrix::Transform3D target,

@@ -30,12 +30,14 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/support/yaml_expression.h"
+#include "utility/math/matrix/transform.h"
 
 namespace module {
 namespace motion {
 
     using utility::support::Expression;
     using Eigen::AngleAxisd;
+    using utility::math::transform::interpolate;
 
     enum MotionStage { READY = 0, RUNNING = 1, STOPPING = 2, FINISHED = 3 };
 
@@ -195,20 +197,7 @@ namespace motion {
                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
                                   : 1;
 
-                // Interpolate between the previous frame transform and the current frame transform, using the alpha parameter
-                Eigen::Quaternion previousFrameRot = Eigen::Quaternion(anim.previousFrame().pose.linear());
-                Eigen::Quaternion currentFrameRot = Eigen::Quaternion(anim.currentFrame().pose.linear());
-
-                Eigen::Vector3d previousFrameTranslation = anim.previousFrame().pose.translation();
-                Eigen::Vector3d currentFrameTranlsation = anim.currentFrame().pose.translation();
-
-                Eigen::Quaternion resultRotation = previousFrameTranslation.slerp(alpha, currentFrameTranlsation);
-                Eigen::Vector3d resultTranslation = alpha * (currentFrameTranlsation - previousFrameTranslation) + previousFrameTranslation;
-
-                Eigen::Affine3d result;
-                result.linear() = resultRotation.toRotationMatrix();
-                result.translation() = resultTranslation;
-
+                Eigen::Affine3d result = interpolate(anim.previousFrame.pose, anim.currentFrame.pose, alpha);
 
                 bool servosAtGoal = true;
                 for (auto& servo : sensors.servo) {

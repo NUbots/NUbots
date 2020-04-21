@@ -23,15 +23,15 @@
 #include <yaml-cpp/yaml.h>
 
 #include <nuclear>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
 #include "utility/input/LimbID.h"
+#include "utility/math/matrix/transform.h"
 //#include "utility/input/ServoID.h"
-#include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform3D.h"
 
 namespace utility {
 namespace motion {
@@ -60,14 +60,14 @@ namespace motion {
         float lastPitch = 0;
         float lastRoll  = 0;
 
-        utility::math::geometry::UnitQuaternion lastErrorQuaternion;
+        Eigen::Quaternion<float> lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
 
     public:
         Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
         void configure(const YAML::Node& config);
         void balance(const message::motion::KinematicsModel& hip,
-                     utility::math::matrix::Transform3D& footToTorso,
+                     Eigen::Affine3f& footToTorso,
                      const utility::input::LimbID& leg,
                      const message::input::Sensors& sensors);
     };

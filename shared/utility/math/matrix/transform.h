@@ -35,16 +35,99 @@ namespace utility {
 namespace math {
     namespace transform {
 
-        inline Eigen::Affine2d worldToLocal(const Eigen::Affine2d world, const Eigen::Affine2d& reference) {
-            Eigen::Affine2d diff;
-            double angle       = utility::math::angle::normalizeAngle(Eigen::Rotation2Dd(reference.linear()).angle()
-                                                                - Eigen::Rotation2Dd(world.linear()).angle());
-            diff.linear()      = Eigen::Rotation2Dd(angle).toRotationMatrix();
-            diff.translation() = reference.translation() - world.translation();
+        template <typename Scalar>
+        inline Scalar angle(const Eigen::Transform<Scalar, 2, Eigen::Affine>& t) {
+            // .smallestAngle() returns in the range -pi to pi, so this is a "normalised" angle
+            return Eigen::Rotation2D<Scalar>(t.linear()).smallestAngle();
+        }
 
-            Eigen::Affine2d result;
-            result.translation() = world.linear() * diff.translation();
-            result.linear()      = diff.linear();
+        template <typename Scalar, int dim>
+        inline Eigen::Transform<Scalar, dim, Eigen::Affine> worldToLocal(const Eigen::Transform<Scalar, dim, Eigen::Affine>& world, const Eigen::Transform<Scalar, dim, Eigen::Affine>& reference) {
+            // http://en.wikipedia.org/wiki/Change_of_basis
+            return reference.inverse() * world;
+        }
+
+        template <typename Scalar, int dim>
+        inline Eigen::Transform<Scalar, dim, Eigen::Affine> localToWorld(const Eigen::Transform<Scalar, dim, Eigen::Affine>& world, const Eigen::Transform<Scalar, dim, Eigen::Affine>& reference) {
+            // http://en.wikipedia.org/wiki/Change_of_basis
+            return reference * world;
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 2, Eigen::Affine> interpolate(const Eigen::Transform<Scalar, 2, Eigen::Affine>& current, const Eigen::Transform<Scalar, 2, Eigen::Affine>& target, double t) {
+            Eigen::Transform<Scalar, 2, Eigen::Affine> result;
+            // current * CreateRotation(t * ( current(theta) - target(theta) ))
+            result.linear() = current.linear() * Eigen::Rotation2D<Scalar>(t * angle(current) - angle(target)).toRotationMatrix();
+            result.translation() = current.translation() + t * (target.translation() - current.translation());
+            return result;
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> interpolate(const Eigen::Transform<Scalar, 3, Eigen::Affine>& t1, Eigen::Transform<Scalar, 3, Eigen::Affine>& t2, Scalar alpha) {
+            
+            // Create quaternions from the transforms' rotation matrices
+            Eigen::Quaternion t1Rot = Eigen::Quaternion(t1.linear());
+            Eigen::Quaternion t2Rot = Eigen::Quaternion(t2.linear());
+
+            // Extract the translation vectors
+            Eigen::Matrix<Scalar, 3, 1> t1Translation = t1.translation();
+            Eigen::Matrix<Scalar, 3, 1> t2Tranlsation = t2.translation();
+
+            // Create and return interpolated transform
+            Eigen::Transform<Scalar, 3, Eigen::Affine> result;
+            result.linear() = (t1Rot.slerp(alpha, t2Rot)).toRotationMatrix();
+            result.translation() = alpha * (t2Tranlsation - t1Translation);
+            return result;
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateLocal(const Eigen::Transform<Scalar, 3, Eigen::Affine>& world, const Eigen::AngleAxis<Scalar>& rotation, const Eigen::Transform<Scalar, 3, Eigen::Affine>& local) {
+            
+            // Create a transform with zero translation and .linear() = rotation param
+            Eigen::Transform<Scalar, 3, Eigen::Affine> temp;
+            temp.translation() = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            temp.linear() = rotation.toRotationMatrix();
+            return localToWorld(temp*worldToLocal(world, local), local);
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateXLocal(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
+            return (Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitX()).toRotationMatrix() * worldToLocal(t)).localToWorld(t);
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateYLocal(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
+            return (Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix() * worldToLocal(t)).localToWorld(t);
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZLocal(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
+            return (Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix() * worldToLocal(t)).localToWorld(t);
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateX(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
+            return t * Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitX()).toRotationMatrix();
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateY(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
+            return t * Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZ(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
+            return t * Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> createAffine(const Eigen::Matrix<Scalar, 6, 1>& featureVec) {
+            Eigen::Transform<Scalar, 3, Eigen::Affine> result;
+            result.translation() = {featureVec[0], featureVec[1], featureVec[2]};
+            result.linear().matrix() = Eigen::Matrix<Scalar, 3, 3>::Identity();
+            result.rotate(Eigen::AngleAxis<Scalar>(featureVec[5], Eigen::Matrix<Scalar, 3, 1>::UnitZ()));
+            result.rotate(Eigen::AngleAxis<Scalar>(featureVec[4], Eigen::Matrix<Scalar, 3, 1>::UnitY()));
+            result.rotate(Eigen::AngleAxis<Scalar>(featureVec[3], Eigen::Matrix<Scalar, 3, 1>::UnitX()));
             return result;
         }
 

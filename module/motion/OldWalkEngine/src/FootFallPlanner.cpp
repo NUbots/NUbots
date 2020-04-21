@@ -26,8 +26,11 @@ namespace motion {
 
     using LimbID = utility::input::LimbID;
     using message::motion::KinematicsModel;
+    using utility::math::transform::worldToLocal;
+    using utility::math::transform::localToWorld;
+    using utility::math::transform::interpolate;
+    using utility::math::transform::angle;
 
-    using utility::math::matrix::Transform2D;
     using utility::nusight::graph;
 
     void OldWalkEngine::calculateNewStep() {
@@ -40,20 +43,26 @@ namespace motion {
         uRightFootSource = uRightFootDestination;
         uTorsoSource     = uTorsoDestination;
 
-        arma::vec2 supportMod = arma::zeros(2);  // support point modulation for wallkick
+        Eigen::Vector2d supportMod = Eigen::Vector2d::Zero();  // support point modulation for wallkick
 
         if (state == State::STOP_REQUEST) {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
             state           = State::LAST_STEP;
-            velocityCurrent = arma::zeros(3);
-            velocityCommand = arma::zeros(3);
+            velocityCurrent = Eigen::Vector3d::Zero();
+            velocityCommand = Eigen::Vector3d::Zero();
 
             // Stop with feet together by targetting swing leg next to support leg
             if (swingLeg == LimbID::RIGHT_LEG) {
-                uRightFootDestination = uLeftFootSource.localToWorld(-2 * uLRFootOffset);
+                Eigen::Affine2d temp;
+                temp.translation() = -2 * uLRFootOffset.translation();
+                temp.linear() = Eigen::Rotation2Dd(-2 * angle(uLRFootOffset)).toRotationMatrix();
+                uRightFootDestination = localToWorld(uLeftFootSource, temp);
             }
             else {
-                uLeftFootDestination = uRightFootSource.localToWorld(2 * uLRFootOffset);
+                Eigen::Affine2d temp;
+                temp.translation() = 2 * uLRFootOffset.translation();
+                temp.linear() = Eigen::Rotation2Dd(2 * angle(uLRFootOffset)).toRotationMatrix();
+                uLeftFootDestination = localToWorld(uRightFootSource, temp);
             }
         }
         else {
@@ -68,42 +77,51 @@ namespace motion {
 
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 
+        Eigen::Affine2d supportModTranslate;
+        supportModTranslate.translation() = supportMod;
+        supportModTranslate.linear() = Eigen::Matrix2d::Identity();
+
+        Eigen::Affine2d footOffsetNeg;
+        footOffsetNeg.translation() = -footOffset;
+        footOffsetNeg.linear() = Eigen::Matrix2d::Identity();
+
         // apply velocity-based support point modulation for uSupport
         if (swingLeg == LimbID::RIGHT_LEG) {
-            Transform2D uLeftFootTorso  = uTorsoSource.worldToLocal(uLeftFootSource);
-            Transform2D uTorsoModded    = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
-            Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
-            uSupport                    = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
+            Eigen::Affine2d uLeftFootTorso  = worldToLocal(uTorsoSource, uLeftFootSource);
+            Eigen::Affine2d uTorsoModded    = localToWorld(uTorso, supportModTranslate);
+            Eigen::Affine2d uLeftFootModded = localToWorld(uTorsoModded, uLeftFootTorso);
+            uSupport                    = localToWorld(uLeftFootModded, footOffsetNeg);
         }
         else {
-            Transform2D uRightFootTorso  = uTorsoSource.worldToLocal(uRightFootSource);
-            Transform2D uTorsoModded     = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
-            Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
-            uSupport                     = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
+            Eigen::Affine2d uRightFootTorso  = worldToLocal(uTorsoSource, uRightFootSource);
+
+            Eigen::Affine2d uTorsoModded     = localToWorld(uTorso, supportModTranslate);
+            Eigen::Affine2d uRightFootModded = localToWorld(uTorsoModded, uRightFootTorso);
+            uSupport                     = localToWorld(uRightFootModded, footOffsetNeg);
         }
 
         // compute ZMP coefficients
         zmpParams = {
-            (uSupport.x() - uTorso.x()) / (stepTime * phase1Single),
-            (uTorsoDestination.x() - uSupport.x()) / (stepTime * (1 - phase2Single)),
-            (uSupport.y() - uTorso.y()) / (stepTime * phase1Single),
-            (uTorsoDestination.y() - uSupport.y()) / (stepTime * (1 - phase2Single)),
+            (uSupport.translation()[0] - uTorso.translation()[0]) / (stepTime * phase1Single),
+            (uTorsoDestination.translation()[0] - uSupport.translation()[0]) / (stepTime * (1 - phase2Single)),
+            (uSupport.translation()[1] - uTorso.translation()[1]) / (stepTime * phase1Single),
+            (uTorsoDestination.translation()[1] - uSupport.translation()[1]) / (stepTime * (1 - phase2Single)),
         };
 
-        zmpCoefficients.rows(0, 1) = zmpSolve(uSupport.x(),
-                                              uTorsoSource.x(),
-                                              uTorsoDestination.x(),
-                                              uTorsoSource.x(),
-                                              uTorsoDestination.x(),
+        zmpCoefficients(0, 1) = zmpSolve(uSupport.translation()[0],
+                                              uTorsoSource.translation()[0],
+                                              uTorsoDestination.translation()[0],
+                                              uTorsoSource.translation()[0],
+                                              uTorsoDestination.translation()[0],
                                               phase1Single,
                                               phase2Single,
                                               stepTime,
                                               zmpTime);
-        zmpCoefficients.rows(2, 3) = zmpSolve(uSupport.y(),
-                                              uTorsoSource.y(),
-                                              uTorsoDestination.y(),
-                                              uTorsoSource.y(),
-                                              uTorsoDestination.y(),
+        zmpCoefficients(2, 3) = zmpSolve(uSupport.translation()[1],
+                                              uTorsoSource.translation()[1],
+                                              uTorsoDestination.translation()[1],
+                                              uTorsoSource.translation()[1],
+                                              uTorsoDestination.translation()[1],
                                               phase1Single,
                                               phase2Single,
                                               stepTime,
@@ -117,48 +135,54 @@ namespace motion {
             std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
         lastVeloctiyUpdateTime = now;
 
-        auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits)
+        auto& limit = (velocityCurrent.translation()[0] > velocityHigh ? accelerationLimitsHigh : accelerationLimits)
                       * deltaT;  // TODO: use a function instead
 
 
-        velocityDifference.x() = std::min(std::max(velocityCommand.x() - velocityCurrent.x(), -limit[0]), limit[0]);
-        velocityDifference.y() = std::min(std::max(velocityCommand.y() - velocityCurrent.y(), -limit[1]), limit[1]);
-        velocityDifference.angle() =
-            std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
+        velocityDifference.translation()[0] = std::min(std::max(velocityCommand.translation()[0] - velocityCurrent.translation()[0], -limit[0]), limit[0]);
+        velocityDifference.translation()[1] = std::min(std::max(velocityCommand.translation()[1] - velocityCurrent.translation()[1], -limit[1]), limit[1]);
+        velocityDifference.linear() = 
+            Eigen::Rotation2Dd(std::min(std::max(angle(velocityCommand) - angle(velocityCurrent), -limit[2]), limit[2])).toRotationMatrix();
 
-        velocityCurrent.x() += velocityDifference.x();
-        velocityCurrent.y() += velocityDifference.y();
-        velocityCurrent.angle() += velocityDifference.angle();
-
+        velocityCurrent.translation()[0] += velocityDifference.translation()[0];
+        velocityCurrent.translation()[1] += velocityDifference.translation()[1];
+        velocityCurrent.linear() = velocityCurrent.linear() * velocityDifference.linear();
+        
         if (initialStep > 0) {
-            velocityCurrent = arma::zeros(3);
+            velocityCurrent = Eigen::Vector3d::Zero();
             initialStep--;
         }
     }
 
-    Transform2D OldWalkEngine::getNewFootTarget(const Transform2D& velocity,
-                                                const Transform2D& leftFoot,
-                                                const Transform2D& rightFoot,
+    Eigen::Affine2d OldWalkEngine::getNewFootTarget(const Eigen::Affine2d& velocity,
+                                                const Eigen::Affine2d& leftFoot,
+                                                const Eigen::Affine2d& rightFoot,
                                                 const LimbID& swingLeg) {
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
-        Transform2D midPoint = leftFoot.interpolate(0.5, rightFoot);
+        Eigen::Affine2d midPoint = interpolate(leftFoot, rightFoot, 0.5);
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together
-        Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);
+        Eigen::Affine2d forwardPoint;
+        forwardPoint.translation() = 1.5 * velocity.translation();
+        forwardPoint.linear() = Eigen::Rotation2Dd(1.5 * angle(velocity)).toRotationMatrix();
+
         // Offset to towards the foot in use to get the target location
-        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);
+        Eigen::Affine2d signeduLRFootOffset;
+        signeduLRFootOffset.translation() = sign * uLRFootOffset.translation();
+        signeduLRFootOffset.linear() = Eigen::Rotation2Dd(angle(uLRFootOffset) * sign).toRotationMatrix();
+        Eigen::Affine2d footTarget = localToWorld(forwardPoint, signeduLRFootOffset);
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
-        Transform2D supportFoot    = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
-        Transform2D feetDifference = supportFoot.worldToLocal(footTarget);
-        feetDifference.x()         = std::min(std::max(feetDifference.x(), stepLimits(0, 0)), stepLimits(0, 1));
-        feetDifference.y() = std::min(std::max(feetDifference.y() * sign, stepLimits(1, 0)), stepLimits(1, 1)) * sign;
-        feetDifference.angle() =
-            std::min(std::max(feetDifference.angle() * sign, stepLimits(2, 0)), stepLimits(2, 1)) * sign;
+        Eigen::Affine2d supportFoot    = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
+        Eigen::Affine2d feetDifference = worldToLocal(supportFoot, footTarget);
+        feetDifference.translation()[0]         = std::min(std::max(feetDifference.translation()[0], stepLimits(0, 0)), stepLimits(0, 1));
+        feetDifference.translation()[1] = std::min(std::max(feetDifference.translation()[1] * sign, stepLimits(1, 0)), stepLimits(1, 1)) * sign;
+        feetDifference.linear() =
+            Eigen::Rotation2Dd(std::min(std::max(angle(feetDifference) * sign, stepLimits(2, 0)), stepLimits(2, 1)) * sign).toRotationMatrix();
         // end applying step limits
 
         // Start feet collision detection:
@@ -175,17 +199,17 @@ namespace motion {
 
         double overlap = std::sqrt(length_factor * length_factor + width_factor * width_factor)
                              * std::atan(width_factor / length_factor)
-                         + feetDifference.angle();
-        feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
+                         + angle(feetDifference);
+        feetDifference.translation()[1] = std::max(feetDifference.translation()[1] * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 
         // Update foot target to be 'feetDistance' away from the support foot
-        footTarget = supportFoot.localToWorld(feetDifference);
+        footTarget = localToWorld(supportFoot, feetDifference);
 
         return footTarget;
     }
 
-    arma::vec3 OldWalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
+    Eigen::Vector3d OldWalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
         double phaseSingle     = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);

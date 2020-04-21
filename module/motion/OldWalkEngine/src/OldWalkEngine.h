@@ -25,6 +25,8 @@
 #include <nuclear>
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <Eigen/Dense>
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
@@ -136,8 +138,8 @@ namespace motion {
         // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID swingLeg;
         // The last foot goal rotation
-        UnitQuaternion lastFootGoalRotation;
-        UnitQuaternion footGoalErrorSum;
+        Eigen::Quaternion<double> lastFootGoalRotation;
+        Eigen::Quaternion<double> footGoalErrorSum;
 
         // end state
 
@@ -317,6 +319,7 @@ namespace motion {
          * @return A clamped between 0 and maxvalue, offset by deadband
          */
         double procFunc(double a, double deadband, double maxvalue);
+
     };
 
 }  // namespace motion

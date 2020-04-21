@@ -382,6 +382,16 @@ namespace motion {
             return joints;
         }
 
+        std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                  const Eigen::Affine3d& leftTarget,
+                                                                  const Eigen::Affine3d& rightTarget) {
+            auto joints  = calculateLegJoints(model, leftTarget, LimbID::LEFT_LEG);
+            auto joints2 = calculateLegJoints(model, rightTarget, LimbID::RIGHT_LEG);
+            joints.insert(joints.end(), joints2.begin(), joints2.end());
+            return joints;
+        }
+
+
         std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(const KinematicsModel& model,
                                                                             utility::math::matrix::Transform3D target,
                                                                             LimbID limb) {
