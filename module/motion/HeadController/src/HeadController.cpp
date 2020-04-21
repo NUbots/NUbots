@@ -31,7 +31,6 @@
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 
