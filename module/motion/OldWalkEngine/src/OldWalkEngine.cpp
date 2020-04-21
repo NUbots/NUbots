@@ -64,7 +64,6 @@ namespace motion {
     using utility::math::clamp;
     using utility::math::angle::normalizeAngle;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::nusight::graph;
     using utility::support::Expression;
     using utility::math::transform::worldToLocal;

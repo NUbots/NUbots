@@ -69,18 +69,22 @@ namespace motion {
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D target,
                                                                   LimbID limb);
+
         std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                    const Eigen::Affine3d& target,
+                                                                   const LimbID& limb);
+
+        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                   const Eigen::Affine3f& target,
                                                                    const LimbID& limb);
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D leftTarget,
                                                                   utility::math::matrix::Transform3D rightTarget);
 
-        template <typename Scalar>
-        std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                  const Eigen::Transform<Scalar, 3, Eigen::Affine>& leftTarget,
-                                                                  const Eigen::Transform<Scalar, 3, Eigen::Affine>& rightTarget);
+        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                  const Eigen::Affine3f& leftTarget,
+                                                                  const Eigen::Affine3f& rightTarget);
 
         std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(
             const message::motion::KinematicsModel& model,
