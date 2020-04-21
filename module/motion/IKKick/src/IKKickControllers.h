@@ -187,7 +187,7 @@ namespace motion {
         }
 
         Eigen::Affine3d getFootPose(const message::input::Sensors& sensors) {
-            auto result = Eigen::Affine3d();
+            auto result = Eigen::Affine3d::Identity();
             if (stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
 
                 double elapsedTime =

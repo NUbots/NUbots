@@ -89,8 +89,8 @@ namespace motion {
         Eigen::Affine3d currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
         Eigen::Affine3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                          ? convert(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL])
-                                          : convert(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                                          ? sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]
+                                          : sensors.forward_kinematics[ServoID::R_ANKLE_ROLL];
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Eigen::Affine3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
@@ -139,7 +139,7 @@ namespace motion {
         // Robocup code / hacks
         auto startFrame                     = SixDOFFrame{startPose, 0};
         auto liftBeforeWindUp               = startFrame;
-        liftBeforeWindUp.pose.translation() = Eigen::Vector3d{0, 0, lift_foot.pose.translation()[2]};
+        liftBeforeWindUp.pose.translation() = Eigen::Vector3d(0, 0, lift_foot.pose.translation()[2]);
         liftBeforeWindUp.duration           = lift_before_windup_duration;
         auto returnBeforePlace              = liftBeforeWindUp;
         returnBeforePlace.duration          = return_before_place_duration;
