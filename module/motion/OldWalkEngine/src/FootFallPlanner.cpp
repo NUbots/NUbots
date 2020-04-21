@@ -48,8 +48,12 @@ namespace motion {
         if (state == State::STOP_REQUEST) {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
             state           = State::LAST_STEP;
-            velocityCurrent = Eigen::Vector3d::Zero();
-            velocityCommand = Eigen::Vector3d::Zero();
+
+            velocityCurrent.translation() = Eigen::Vector2d::Zero();
+            velocityCurrent.linear().matrix() = Eigen::Matrix2d::Identity();
+
+            velocityCommand.translation() = Eigen::Vector2d::Zero();
+            velocityCommand.linear().matrix() = Eigen::Matrix2d::Identity();
 
             // Stop with feet together by targetting swing leg next to support leg
             if (swingLeg == LimbID::RIGHT_LEG) {
@@ -108,7 +112,7 @@ namespace motion {
             (uTorsoDestination.translation()[1] - uSupport.translation()[1]) / (stepTime * (1 - phase2Single)),
         };
 
-        zmpCoefficients(0, 1) = zmpSolve(uSupport.translation()[0],
+        zmpCoefficients.block(0, 0, 1, 0) = zmpSolve(uSupport.translation()[0],
                                               uTorsoSource.translation()[0],
                                               uTorsoDestination.translation()[0],
                                               uTorsoSource.translation()[0],
@@ -117,7 +121,7 @@ namespace motion {
                                               phase2Single,
                                               stepTime,
                                               zmpTime);
-        zmpCoefficients(2, 3) = zmpSolve(uSupport.translation()[1],
+        zmpCoefficients.block(2, 0, 3, 0) = zmpSolve(uSupport.translation()[1],
                                               uTorsoSource.translation()[1],
                                               uTorsoDestination.translation()[1],
                                               uTorsoSource.translation()[1],
@@ -149,7 +153,8 @@ namespace motion {
         velocityCurrent.linear() = velocityCurrent.linear() * velocityDifference.linear();
         
         if (initialStep > 0) {
-            velocityCurrent = Eigen::Vector3d::Zero();
+            velocityCurrent.translation() = Eigen::Vector2d::Zero();
+            velocityCurrent.linear().matrix() = Eigen::Matrix2d::Identity();
             initialStep--;
         }
     }

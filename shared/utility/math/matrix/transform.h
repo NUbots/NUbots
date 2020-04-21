@@ -91,43 +91,62 @@ namespace math {
         }
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateXLocal(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
-            return (Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitX()).toRotationMatrix() * worldToLocal(t)).localToWorld(t);
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateXLocal(const Eigen::Transform<Scalar, 3, Eigen::Affine>& world, const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& local) {
+            return localToWorld((Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitX()).toRotationMatrix() * worldToLocal(world, local)), local);
         }
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateYLocal(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
-            return (Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix() * worldToLocal(t)).localToWorld(t);
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateYLocal(const Eigen::Transform<Scalar, 3, Eigen::Affine>& world, const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& local) {
+            return localToWorld((Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix() * worldToLocal(world, local)), local);
         }
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZLocal(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
-            return (Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix() * worldToLocal(t)).localToWorld(t);
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZLocal(const Eigen::Transform<Scalar, 3, Eigen::Affine>& world, const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& local) {
+            return localToWorld((Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix() * worldToLocal(world, local)), local);
         }
 
         template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateX(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
-            return t * Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitX()).toRotationMatrix();
+            Eigen::Transform<Scalar, 3, Eigen::Affine> rotationMatrix;
+            rotationMatrix.translation() = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            rotationMatrix.linear() = Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitX()).toRotationMatrix();
+            return t * rotationMatrix;
         }
 
+ 
         template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateY(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
-            return t * Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
+            Eigen::Transform<Scalar, 3, Eigen::Affine> rotationMatrix;
+            rotationMatrix.translation() = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            rotationMatrix.linear() = Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
+            return t * rotationMatrix;
         }
 
+ 
         template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZ(const Scalar radians, const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
-            return t * Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
+            Eigen::Transform<Scalar, 3, Eigen::Affine> rotationMatrix;
+            rotationMatrix.translation() = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            rotationMatrix.linear() = Eigen::AngleAxis<Scalar>(radians, Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
+            return t * rotationMatrix;
         }
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> createAffine(const Eigen::Matrix<Scalar, 6, 1>& featureVec) {
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> createAffine(const Scalar x, const Scalar y, const Scalar z, const Scalar xRad, const Scalar yRad, const Scalar zRad) {
             Eigen::Transform<Scalar, 3, Eigen::Affine> result;
-            result.translation() = {featureVec[0], featureVec[1], featureVec[2]};
+            result.translation() = Eigen::Matrix<Scalar, 3, 1>({x, y, z});
             result.linear().matrix() = Eigen::Matrix<Scalar, 3, 3>::Identity();
-            result.rotate(Eigen::AngleAxis<Scalar>(featureVec[5], Eigen::Matrix<Scalar, 3, 1>::UnitZ()));
-            result.rotate(Eigen::AngleAxis<Scalar>(featureVec[4], Eigen::Matrix<Scalar, 3, 1>::UnitY()));
-            result.rotate(Eigen::AngleAxis<Scalar>(featureVec[3], Eigen::Matrix<Scalar, 3, 1>::UnitX()));
+            result.rotate(Eigen::AngleAxis<Scalar>(zRad, Eigen::Matrix<Scalar, 3, 1>::UnitZ()));
+            result.rotate(Eigen::AngleAxis<Scalar>(yRad, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
+            result.rotate(Eigen::AngleAxis<Scalar>(xRad, Eigen::Matrix<Scalar, 3, 1>::UnitX()));
+            return result;
+        }
+
+        template <typename Scalar>
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> twoD_to_threeD(const Eigen::Transform<Scalar, 2, Eigen::Affine>& t) {
+            Eigen::Transform<Scalar, 3, Eigen::Affine> result;
+            result = rotateZ(angle(t), Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity());
+            result.translation() = Eigen::Vector3d({t.translation()[0], t.translation()[1], 0});
             return result;
         }
 

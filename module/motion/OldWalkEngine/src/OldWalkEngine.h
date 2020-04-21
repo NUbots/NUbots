@@ -165,7 +165,7 @@ namespace motion {
         double phase1Single;
         double phase2Single;
         Eigen::Vector2d footOffset;
-        double legYaw;
+        float legYaw;
         // Ankle feedback parameters
         double ankleRollComp;
         double ankleRollLimit;

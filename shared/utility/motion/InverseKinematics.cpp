@@ -382,9 +382,10 @@ namespace motion {
             return joints;
         }
 
-        std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                  const Eigen::Affine3d& leftTarget,
-                                                                  const Eigen::Affine3d& rightTarget) {
+        template <typename Scalar>
+        std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                  const Eigen::Transform<Scalar, 3, Eigen::Affine>& leftTarget,
+                                                                  const Eigen::Transform<Scalar, 3, Eigen::Affine>& rightTarget) {
             auto joints  = calculateLegJoints(model, leftTarget, LimbID::LEFT_LEG);
             auto joints2 = calculateLegJoints(model, rightTarget, LimbID::RIGHT_LEG);
             joints.insert(joints.end(), joints2.begin(), joints2.end());

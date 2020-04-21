@@ -75,6 +75,7 @@ namespace motion {
     using utility::math::transform::rotateX;
     using utility::math::transform::rotateY;
     using utility::math::transform::rotateZ;
+    using utility::math::transform::twoD_to_threeD;
 
 
     OldWalkEngine::OldWalkEngine(std::unique_ptr<NUClear::Environment> environment)
@@ -195,7 +196,7 @@ namespace motion {
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
             Eigen::Affine2d velocity;
-            velocity.translation() = {walkCommand.command[0], walkCommand.command[1]};
+            velocity.translation() = Eigen::Vector2d({walkCommand.command[0], walkCommand.command[1]});
             velocity.linear() = Eigen::Rotation2Dd(walkCommand.command[2]).toRotationMatrix();
             if (velocity.translation()[0] == 0 && velocity.translation()[1] == 0 && angle(velocity) == 0) {
                 requestStop();
@@ -295,7 +296,7 @@ namespace motion {
         zmpTime             = walkCycle["zmp_time"].as<Expression>();
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight          = walkCycle["step"]["height"].as<Expression>();
-        stepLimits.matrix()          = walkCycle["step"]["limits"].as<Expression>>();
+        stepLimits          = walkCycle["step"]["limits"].as<Expression>();
         legYaw              = walkCycle["step"]["leg_yaw"].as<Expression>();
         ankleRollComp       = walkCycle["step"]["compensation"]["roll_coef"].as<Expression>();
         ankleRollLimit      = walkCycle["step"]["compensation"]["roll_limit"].as<Expression>();
@@ -306,7 +307,7 @@ namespace motion {
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<Expression>>();
+        velocityLimits = velocity["limits"].as<Expression>();
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration        = walkCycle["acceleration"];
@@ -391,14 +392,16 @@ namespace motion {
         }
         else {
             // stance resetted
-            Eigen::Affine2d footOffsetMinus;
+            Eigen::Affine2d footOffsetTemp;
             footOffsetTemp.linear().matrix() = Eigen::Matrix2d::Identity();
             
-            footOffsetTemp.translation() = {footOffset[0], kinematicsModel.leg.HIP_OFFSET_Y - footOffset[1]};
+            // Each foot has slightly different .translation()[1] assigned
+            footOffsetTemp.translation() = Eigen::Vector2d({footOffset[0], kinematicsModel.leg.HIP_OFFSET_Y - footOffset[1]});
             uLeftFoot   = localToWorld(uTorso, footOffsetTemp);
 
-            footOffsetTemp.translation() = {footOffset[0], -kinematicsModel.leg.HIP_OFFSET_Y + footOffset[1]};
+            footOffsetTemp.translation() = Eigen::Vector2d({footOffset[0], -kinematicsModel.leg.HIP_OFFSET_Y + footOffset[1]});
             uRightFoot  = localToWorld(uTorso,  footOffsetTemp);
+
             initialStep = 2;
         }
 
@@ -420,11 +423,11 @@ namespace motion {
 
     void OldWalkEngine::reset() {
         uTorso.translation()     = Eigen::Vector2d({-footOffset[0], 0});
-        uTorso.linear() = Eigen::Matrix2d::Identity();
+        uTorso.linear().matrix() = Eigen::Matrix2d::Identity();
         uLeftFoot.translation() = Eigen::Vector2d({0, kinematicsModel.leg.HIP_OFFSET_Y});
-        uLeftFoot.linear() = Eigen::Matrix2d::Identity();
+        uLeftFoot.linear().matrix() = Eigen::Matrix2d::Identity();
         uRightFoot.translation() = Eigen::Vector2d({0, -kinematicsModel.leg.HIP_OFFSET_Y});
-        uRightFoot.linear() = Eigen::Matrix2d::Identity();
+        uRightFoot.linear().matrix() = Eigen::Matrix2d::Identity();
 
         uTorsoSource.matrix()          = Eigen::Matrix3d::Identity();
         uTorsoDestination.matrix()     = Eigen::Matrix3d::Identity();
@@ -447,8 +450,8 @@ namespace motion {
         initialStep   = 2;
 
         // gStandard offset
-        uLRFootOffset.translation() = Vector2d({0, kinematicsModel.leg.HIP_OFFSET_Y - footOffset[1]});
-        uLRFootOffset.linear() = Eigen::Matrix2d::Identity();
+        uLRFootOffset.translation() = Eigen::Vector2d({0, kinematicsModel.leg.HIP_OFFSET_Y - footOffset[1]});
+        uLRFootOffset.linear().matrix() = Eigen::Matrix2d::Identity();
 
         // gWalking/Stepping transition variables
         startFromStep = false;
@@ -561,18 +564,24 @@ namespace motion {
 
         // Lift swing leg
         if (swingLeg == LimbID::RIGHT_LEG) {
-            rightFoot.linear() = Eigen::Matrix3d::Identity();
+            rightFoot.linear().matrix() = Eigen::Matrix3d::Identity();
             rightFoot.translation() = Eigen::Vector3d({0, 0, stepHeight * foot[2]});
         }
         else {
-            leftFoot.linear() = Eigen::Matrix3d::Identity();
+            leftFoot.linear().matrix() = Eigen::Matrix3d::Identity();
             leftFoot.translation() = Eigen::Vector3d({0, 0, stepHeight * foot[2]});
         }
 
-        Eigen::Affine2d uTorsoActual = localToWorld(uTorso, {-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
-        Eigen::Affine3d torso =utility::math::transform::createAffine(
-            Eigen::Matrix<double, 6, 1>({uTorsoActual.translation()[0], uTorsoActual.translation()[1], bodyHeight, 0, bodyTilt, angle(uTorsoActual)}));
-
+        Eigen::Affine2d hipOffsetTransform;
+        hipOffsetTransform.translation() = Eigen::Vector2d({-kinematicsModel.leg.HIP_OFFSET_X, 0});
+        hipOffsetTransform.linear().matrix() = Eigen::Matrix2d::Identity();
+        Eigen::Affine2d uTorsoActual = localToWorld(uTorso, hipOffsetTransform);
+        Eigen::Affine3d torso;
+        torso.translation() = Eigen::Vector3d({uTorsoActual.translation()[0], uTorsoActual.translation()[1], bodyHeight});
+        torso.linear().matrix() = Eigen::Matrix<double, 3, 3>::Identity();
+        torso.rotate(Eigen::AngleAxis<double>(bodyTilt, Eigen::Vector3d::UnitY()));
+        torso.rotate(Eigen::AngleAxis<double>(angle(uTorsoActual), Eigen::Vector3d::UnitX()));
+        
         // Transform feet targets to be relative to the torso
         Eigen::Affine3d leftFootCOM  = worldToLocal(leftFoot, torso);
         Eigen::Affine3d rightFootCOM = worldToLocal(rightFoot, torso);
@@ -583,12 +592,12 @@ namespace motion {
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
             rightFootCOM = 
-            rightFootCOM = rotateZLocal(-hipRollCompensation * phaseComp,
-                                                     sensors.forward_kinematics[ServoID::R_HIP_ROLL]);
+            rightFootCOM = rotateZLocal(rightFootCOM, -hipRollCompensation * phaseComp,
+                                                     Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootCOM = rotateZLocal(hipRollCompensation * phaseComp,
-                                                   sensors.forward_kinematics[ServoID::L_HIP_ROLL]);
+            leftFootCOM = rotateZLocal(rightFootCOM, hipRollCompensation * phaseComp,
+                                                   Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {
@@ -601,12 +610,12 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Eigen::Affine3d Htc = Eigen::Affine3d::Identity();
-        Eigen::Affine3d sensorsCentreOfMass = Eigen::Affine3d(sensors.centre_of_mass);
-        Htc.translation() = Eigen::Vector3d({-sensorsCentreOfMass.translation()[0], -sensorsCentreOfMass.translation()[1], 0.0});
+        Eigen::Affine3f Htc;
+        Htc.linear().matrix() = Eigen::Matrix3f::Identity();
+        Htc.translation() = Eigen::Vector3f({-sensors.centre_of_mass[0], -sensors.centre_of_mass[1], 0.0f});
 
-        Eigen::Affine3d leftFootTorso  = Htc * leftFootCOM;
-        Eigen::Affine3d rightFootTorso = Htc * rightFootCOM;
+        Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM.cast<float>();
+        Eigen::Affine3f rightFootTorso = Htc * rightFootCOM.cast<float>();
 
         // Calculate roll and pitch compensation based on limits and compensation factors
         float rollComp  = clamp(-ankleRollLimit, ankleRollComp * sensors.angular_position[0], ankleRollLimit);
@@ -615,7 +624,7 @@ namespace motion {
         leftFootTorso = rotateZ(legYaw, rotateY(pitchComp, rotateX(rollComp, leftFootTorso)));
         rightFootTorso = rotateZ(-legYaw, rotateY(pitchComp, rotateX(-rollComp, rightFootTorso)));
 
-        std::vector<std::pair<ServoID, double>> joints;
+        std::vector<std::pair<ServoID, float>> joints;
         joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
 
         auto waypoints = motionLegs(joints);
@@ -629,31 +638,34 @@ namespace motion {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
 
         Eigen::Affine2d uTorsoActual;
-        uTorsoActual.translation() = {-kinematicsModel.leg.HIP_OFFSET_X, 0};
+        uTorsoActual.translation() = Eigen::Vector2d({-kinematicsModel.leg.HIP_OFFSET_X, 0});
         uTorsoActual.linear().matrix() = Eigen::Matrix2d::Identity();
-        Eigen::Affine3d torso = utility::math::transform::createAffine(
-            Eigen::Matrix<double, 6, 1>({uTorsoActual.translation()[0], uTorsoActual.translation()[1], bodyHeight, 0, bodyTilt, angle(uTorsoActual)}));
-
+        Eigen::Affine3d torso;
+        torso.translation() = Eigen::Vector3d({uTorsoActual.translation()[0], uTorsoActual.translation()[1], bodyHeight});
+        torso.linear().matrix() = Eigen::Matrix3d::Identity();
+        torso.rotate(Eigen::AngleAxis<double>(bodyTilt, Eigen::Vector3d::UnitY()));
+        torso.rotate(Eigen::AngleAxis<double>(angle(uTorsoActual), Eigen::Vector3d::UnitX()));
+        
         // Transform feet targets to be relative to the torso
-        Eigen::Affine3d leftFootCOM = worldToLocal(uLeftFoot, torso);
-        Eigen::Affine3d rightFootCOM = worldToLocal(uRightFoot, torso);
+        Eigen::Affine3d leftFootCOM = worldToLocal(twoD_to_threeD(uLeftFoot), torso);
+        Eigen::Affine3d rightFootCOM = worldToLocal(twoD_to_threeD(uRightFoot), torso);
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            balancer.balance(kinematicsModel, leftFootCOM, LimbID::LEFT_LEG, sensors);
-            balancer.balance(kinematicsModel, rightFootCOM, LimbID::RIGHT_LEG, sensors);
+            balancer.balance(kinematicsModel, leftFootCOM.cast<float>(), LimbID::LEFT_LEG, sensors);
+            balancer.balance(kinematicsModel, rightFootCOM.cast<float>(), LimbID::RIGHT_LEG, sensors);
         }
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Eigen::Affine3d Htc;
-        Htc.translation() = ({-sensors.centre_of_mass.translation()[0], -sensors.centre_of_mass.translation()[1], 0.0});
-        Htc.linear().matrix() = Eigen::Matrix3d::Identity();
+        Eigen::Affine3f Htc;
+        Htc.linear().matrix() = Eigen::Matrix3f::Identity();
+        Htc.translation() = Eigen::Vector3f({-sensors.centre_of_mass[0], -sensors.centre_of_mass[1], 0.0f});
 
-        Eigen::Affine3d leftFootTorso  = Htc * leftFootCOM;
-        Eigen::Affine3d rightFootTorso = Htc * rightFootCOM;
+        Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM.cast<float>();
+        Eigen::Affine3f rightFootTorso = Htc * rightFootCOM.cast<float>();
 
-        std::vector<std::pair<ServoID, double>> joints;
+        std::vector<std::pair<ServoID, float>> joints;
         joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
 
         auto waypoints = motionLegs(joints);
@@ -669,7 +681,7 @@ namespace motion {
     }
 
     std::unique_ptr<std::vector<ServoCommand>> OldWalkEngine::motionLegs(
-        std::vector<std::pair<ServoID, double>> joints) {
+        std::vector<std::pair<ServoID, float>> joints) {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
 
@@ -755,7 +767,7 @@ namespace motion {
     Eigen::Affine2d OldWalkEngine::stepTorso(Eigen::Affine2d uLeftFoot, Eigen::Affine2d uRightFoot, double shiftFactor) {
         Eigen::Affine2d footOffsetNeg;
         footOffsetNeg.translation() = -footOffset;
-        footOffsetNeg.linear() = Eigen::Matrix2d::Identity();
+        footOffsetNeg.linear().matrix() = Eigen::Matrix2d::Identity();
         Eigen::Affine2d uLeftFootSupport  = localToWorld(uLeftFoot, footOffsetNeg);
         Eigen::Affine2d uRightFootSupport = localToWorld(uRightFoot, footOffsetNeg);
         return interpolate(uLeftFootSupport, uRightFootSupport, shiftFactor);
@@ -765,7 +777,7 @@ namespace motion {
         // filter the commanded speed
         velocity.translation()[0]     = std::min(std::max(velocity.translation()[0], velocityLimits(0, 0)), velocityLimits(0, 1));
         velocity.translation()[1]     = std::min(std::max(velocity.translation()[1], velocityLimits(1, 0)), velocityLimits(1, 1));
-        velocity.linear() = Eigen::Rotation2Dd(std::min(std::max(angle(velocity), velocityLimits(2, 0)), velocityLimits(2, 1))).toRotationMatrix();
+        velocity.linear().matrix() = Eigen::Rotation2Dd(std::min(std::max(angle(velocity), velocityLimits(2, 0)), velocityLimits(2, 1))).toRotationMatrix();
 
         // slow down when turning
         double vFactor = 1 - std::abs(angle(velocity)) / accelerationTurningFactor;

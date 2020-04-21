@@ -50,7 +50,7 @@ namespace motion {
 
 
     void Balancer::balance(const KinematicsModel& model,
-                           Eigen::Affine3f& footToTorso,
+                           Eigen::Affine3f footToTorso,
                            const LimbID& leg,
                            const Sensors& sensors) {
 
@@ -103,7 +103,7 @@ namespace motion {
 
         // Get the position of our hip to rotate around
         Eigen::Affine3f hip;
-        hip.linear().matrix() = Eigen::Matrix3f::Zero();
+        hip.linear().matrix() = Eigen::Matrix3f::Identity();
         hip.translation() = Eigen::Vector3f({model.leg.HIP_OFFSET_X,
                                                   model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
                                                   -model.leg.HIP_OFFSET_Z});
