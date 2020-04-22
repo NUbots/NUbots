@@ -4,80 +4,77 @@ import os
 import re
 import b
 
+from dockerise import run_on_docker
+
+
+@run_on_docker
 def register(command):
     # Install help
     command.help = "Creates a list of unused or commented out modules"
 
 
+@run_on_docker
 def run(**kwargs):
 
     source_dir = b.cmake_cache[b.cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"]
-    roles_path = os.path.join(source_path + b.cmake_cache['NUCLEAR_ROLE_DIR'])
-    modules_path = os.path.join(source_path, b.cmake_cache['NUCLEAR_MODULE_DIR'])
-    existing_modules = {}
-    missing_modules = {}
-    commented_modules = {}
-    used_modules = []
-    unused_commented_modules = []
+    roles_path = os.path.join(source_dir, "roles")
+    modules_path = os.path.join(source_dir, b.cmake_cache["NUCLEAR_MODULE_DIR"])
 
-    # a list of folders that could be within a module
-    skip_list = ["src", "data", "config", "tests", "report"]
-    skip_list = [s + os.sep for s in skip_list]
+    # Modules that exist in the system
+    existing_modules = set()
 
-    # find all the modules that are available
-    for root, dirs, files in os.walk(modules_path):
-        if len(files) != 0:
-            if not any(substring in (root + os.sep) for substring in skip_list):
-                existing_modules[
-                    root.replace(modules_path + os.sep, "")
-                ] = 0  # make sure we remove the base path from the module
+    # Modules that are used in role files
+    used_modules = set()
 
-    # compare our roles to our existing modules
-    for root, dirs, files in os.walk(roles_path):
-        for file in files:
-            with open(os.path.join(roles_path, file), "r") as role:
-                for line in role:
+    # Modules that are not used by any role
+    missing_modules = set()
+
+    # Find all CMakeLists.txt in NUCLEAR_MODULE_DIR that contain a nuclear_module() call
+    for folder, _, files in os.walk(modules_path):
+        for module in files:
+            if module == "CMakeLists.txt":
+                module_path = os.path.join(folder, module)
+                with open(module_path, "r") as f:
+                    for line in f:
+                        if "nuclear_module" in line.lower():
+                            # Find nuclear_module call and make sure it is not commented out
+                            if "#" not in line or line.find("#") > line.lower().find("nuclear_module"):
+                                # Remove modules_path from the start of the path and
+                                # CMakeLists.txt from the end of the path
+                                # So module/motion/HeadController/CMakeLists.txt becomes motion/HeadController
+                                path = module_path.replace(modules_path, "")
+                                path = os.path.join(*(path.split(os.path.sep)[:-1]))
+
+                                # Replace path separators with ::
+                                path = path.replace(os.path.sep, "::")
+                                existing_modules.add(path)
+                                break
+
+    # Find all of the used modules
+    for role in os.listdir(roles_path):
+        if role.endswith(".role"):
+            with open(os.path.join(roles_path, role), "r") as f:
+                for line in f:
+                    if "#" in line:
+                        line = line[: line.find("#")]
                     line = line.strip()
+                    reg = re.findall(r"(\w+::(?:\w+(::)?)*)", line)
+                    for modules in reg:
+                        for module in modules:
+                            if module != "" and module != "::":
+                                used_modules.add(module)
 
-                    if "#" in line:  # a commented
-                        line = re.sub(r"##+", "#", line)  # remove multiple # that are next to each other
-                        location = line.find("#")
+    # Find out which modules are missing
+    missing_modules = existing_modules.difference(used_modules)
 
-                        if location == 0:
-                            line = line[1:]  # remove the comment and continue to process
-                            if "::" in line:  # the commented line is a commented out module
-                                additional_comment_loc = line.find("#")
-                                if additional_comment_loc > 0:
-                                    line = line[:additional_comment_loc]
+    print("Existing")
+    print("\n".join(existing_modules))
+    print("\n")
 
-                                line = line.replace("::", os.sep)
-                                commented_modules[line.strip()] = 1
-                            continue
-                        else:
-                            # the comment was just a description, remove the comment and continue
-                            line = line[:location].strip()
+    print("Used")
+    print("\n".join(used_modules))
+    print("\n")
 
-                    if "::" in line:  # the line is a module
-                        line = line.replace("::", os.sep)
-                        if line in existing_modules:
-                            existing_modules[line] += 1
-                            used_modules.append(line)
-                        else:
-                            missing_modules[line] = 1
-
-    print("Unused modules:\n")
-    for key in sorted(existing_modules.keys()):
-        if existing_modules[key] == 0:
-            if key not in commented_modules.keys():
-                print("\t", key)
-            else:
-                unused_commented_modules.append(key)
-
-    print("\nUnused but commented out modules:\n")
-    for key in sorted(commented_modules):
-        if key not in used_modules:
-            if key in existing_modules:
-                if existing_modules[key] > 0:
-                    continue
-
-            print("\t", key)
+    print("Missing")
+    print("\n".join(missing_modules))
+    print("\n")
