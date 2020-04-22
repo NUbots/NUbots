@@ -60,14 +60,15 @@ namespace localisation {
         }
 
         Eigen::Matrix<Scalar, 3, 1> predictedObservation(const StateVec& state,
-                                             const message::support::FieldDescription& field,
-                                             const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw) const {
+                                                         const message::support::FieldDescription& field,
+                                                         const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw) const {
 
             Eigen::Matrix<Scalar, 4, 1> rBWw(state[PX], state[PY], field.ball_radius, 1.0);
-            rBWw                      = Hcw * rBWw;
+            rBWw = Hcw * rBWw;
             Eigen::Matrix<Scalar, 3, 1> rBCc_cart(rBWw.x(), rBWw.y(), rBWw.z());
             Eigen::Matrix<Scalar, 3, 1> rBCc_sph1 = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
-            Eigen::Matrix<Scalar, 3, 1> rBCc_sph2(rBCc_sph1.x(), rBCc_sph1.y(), rBCc_sph1.z());  // in roe, theta, phi, where roe is 1/r
+            Eigen::Matrix<Scalar, 3, 1> rBCc_sph2(
+                rBCc_sph1.x(), rBCc_sph1.y(), rBCc_sph1.z());  // in roe, theta, phi, where roe is 1/r
 
             return rBCc_sph2;
         }
@@ -92,7 +93,7 @@ namespace localisation {
         }
 
         // number and range of reset particles
-        int n_rogues               = 10;
+        int n_rogues                           = 10;
         Eigen::Matrix<Scalar, 2, 1> resetRange = Eigen::Matrix<Scalar, 2, 1>(10, 10);
 
         // Getters

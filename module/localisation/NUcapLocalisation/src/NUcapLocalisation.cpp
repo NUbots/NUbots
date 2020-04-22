@@ -25,7 +25,6 @@
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Rotation3D.h"
 #include "utility/nusight/NUhelpers.h"
 
 namespace module {
@@ -35,7 +34,6 @@ namespace localisation {
     using message::input::MotionCapture;
     using message::input::Sensors;
     using message::localisation::Self;
-    using utility::math::matrix::Rotation3D;
     using utility::nusight::graph;
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment)
@@ -56,21 +54,21 @@ namespace localisation {
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
                     float z = rigidBody.position().z();
-                    Eigen::Quaternionf q(Eigen::Vector4f{rigidBody.rotation().x(),
-                                                         rigidBody.rotation().y(),
-                                                         rigidBody.rotation().z(),
-                                                         rigidBody.rotation().t()});
+                    Eigen::Quaternionf q(rigidBody.rotation().x(),
+                                         rigidBody.rotation().y(),
+                                         rigidBody.rotation().z(),
+                                         rigidBody.rotation().t());
 
 
-                    Eigen::Rotation<float, 3> groundToWorldRotation = q.normalized().toRotationMatrix();
+                    Eigen::Matrix3f groundToWorldRotation = q.normalized().toRotationMatrix();
 
-                    double heading = utility::math::angle::acos_clamped(groundToWorldRotation.matrix()(0, 0));
+                    double heading = utility::math::angle::acos_clamped(groundToWorldRotation(0, 0));
 
                     // TODO: transform from head to field
                     auto selfs = std::make_unique<std::vector<Self>>();
                     selfs->push_back(Self());
-                    selfs->back().heading  = groundToWorldRotation.matrix.block(0, 0, 1, 0).normalized();
-                    selfs->back().position = Eigen::Vector2f{x, y};
+                    selfs->back().heading  = groundToWorldRotation.block<1, 0>(0, 0).normalized();
+                    selfs->back().position = Eigen::Vector2f(x, y);
                     emit(std::move(selfs));
 
                     emit(graph("NUcap pos", x, y, z));
