@@ -48,6 +48,40 @@ namespace math {
             return result;
         }
 
+        template <typename Scalar>
+        inline  Eigen::Transform<Scalar, 2, Eigen::Affine> projectTo2D(const Eigen::Transform<Scalar, 3, Eigen::Affine> t,
+                                                                        const Eigen::Matrix<Scalar, 3, 1>& yawAxis     = Eigen::Matrix<Scalar, 3, 1>(0, 0, 1),
+                                                                        const Eigen::Matrix<Scalar, 3, 1>& forwardAxis = Eigen::Matrix<Scalar, 3, 1>(1, 0, 0)) const {
+            Eigen::Transform<Scalar, 2, Eigen::Affine> result;
+
+            // Translation
+            Eigen::Matrix<Scalar, 3, 1> orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalize();
+            Eigen::Matrix<Scalar, 3, 1> r                = t.translation();
+
+            // Create a rotation matrix, then assign the columns of it separately
+            Eigen::Matrix<Scalar, 3, 3> newSpaceToWorld(Eigen::Matrix<Scalar, 3, 3>::Identity());
+            newSpaceToWorld.block<2, 0>(0, 0)        = orthoForwardAxis;
+            newSpaceToWorld.block<2, 1>(0, 1)        = yawAxis.cross(orthoForwardAxis);
+            newSpaceToWorld.block<2, 2>(0, 2)        = yawAxis;
+
+            Eigen::Matrix<Scalar, 3, 3> worldToNewSpace(newSpaceToWorld.inverse());
+
+            Eigen::Matrix<Scalar, 3, 1> rNewSpace       = worldToNewSpace * r;
+            result.translation().x()                = rNewSpace.x();
+            result.translation().y()                = rNewSpace.y();
+
+            // Rotation
+            Eigen::Rotation<Scalar, 3> rot       = t.rotation();
+            Eigen::Matrix<Scalar, 3, 1> x         = rot.block<2, 0>(0, 0);
+            Eigen::Matrix<Scalar, 3, 1> xNew      = worldToNewSpace * x;
+
+            result.linear()       = Eigen::Rotation2D<Scalar>(std::atan2(xNew.x(), xNew.y())).toRotationMatrix();
+
+            // std::cerr << "in = \n" << *this << std::endl;
+            // std::cerr << "out = \n" << result << std::endl;
+            return result;
+        }
+
     }  // namespace transform
 }  // namespace math
 }  // namespace utility
