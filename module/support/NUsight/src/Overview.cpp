@@ -107,11 +107,13 @@ namespace support {
                         if (field) {
                             // Transform the field state into Affine3 transform
                             Eigen::Affine3d Hfw;
-                            Hfw.translation() = Eigen::Vector3d({field->position[0], field->position[1], 0});
 
-                            // Rotate field-position[2] radians about the Z-axis
+                            Eigen::Affine2d position(field->position);
+                            Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
+
+                            // Rotate field-position.rotation().angle() radians about the Z-axis
                             Hfw.linear() =
-                                Eigen::AngleAxisd({field->position[2], Eigen::Vector3d::UnitZ()}).toRotationMatrix();
+                                Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
 
                             // Get our torso in field space
                             Eigen::Affine3d Hft  = Hfw * Htw.inverse();
