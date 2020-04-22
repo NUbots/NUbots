@@ -17,7 +17,7 @@ nuclear_role(
   platform::darwin::SensorFilter
 
   # Motion
-  motion::QuinticWalk
+  motion::OldWalkEngine
   motion::HeadController
 
   # Behaviour
