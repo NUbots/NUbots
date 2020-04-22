@@ -50,25 +50,24 @@ namespace localisation {
             struct BALL {};
         };
 
-        Eigen::Vector2d processNoiseDiagonal;
+        Eigen::Matrix<Scalar, 2, 1> processNoiseDiagonal;
 
 
-        BallModel() : processNoiseDiagonal(Eigen::Vector2d::Identity()) {}  // empty constructor
+        BallModel() : processNoiseDiagonal(Eigen::Matrix<Scalar, 2, 1>::Identity()) {}  // empty constructor
 
-        StateVec time(const StateVec& state, double deltaT) {
+        StateVec time(const StateVec& state, double /*deltaT*/) {
             return state;
         }
 
-        Eigen::Vector3d predictedObservation(const StateVec& state,
+        Eigen::Matrix<Scalar, 3, 1> predictedObservation(const StateVec& state,
                                              const message::support::FieldDescription& field,
-                                             const Eigen::Affine3d& Hcw) const {
+                                             const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw) const {
 
-            Eigen::Vector4d rBWw      = {state[PX], state[PY], field.ball_radius, 1.0};
+            Eigen::Matrix<Scalar, 4, 1> rBWw(state[PX], state[PY], field.ball_radius, 1.0);
             rBWw                      = Hcw * rBWw;
-            Eigen::Vector3d rBCc_cart = {rBWw[0], rBWw[1], rBWw[2]};
-            Eigen::Vector3d rBCc_sph1 = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
-            Eigen::Vector3d rBCc_sph2 = {
-                rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};  // in roe, theta, phi, where roe is 1/r
+            Eigen::Matrx<Scalar, 3, 1> rBCc_cart(rBWw.x(), rBWw.y(), rBWw.z());
+            Eigen::Matrx<Scalar, 3, 1> rBCc_sph1 = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
+            Eigen::Matrx<Scalar, 3, 1> rBCc_sph2(rBCc_sph1.x(), rBCc_sph1.y(), rBCc_sph1.z());  // in roe, theta, phi, where roe is 1/r
 
             return rBCc_sph2;
         }
@@ -94,13 +93,13 @@ namespace localisation {
 
         // number and range of reset particles
         int n_rogues               = 10;
-        Eigen::Vector2d resetRange = {10, 10};
+        Eigen::Matrix<Scalar, 2, 1> resetRange(10, 10);
 
         // Getters
         inline int getRogueCount() const {
             return n_rogues;
         }
-        Eigen::Vector2d getRogueRange() const {
+        Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
             return resetRange;
         }
     };
