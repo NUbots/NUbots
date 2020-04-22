@@ -48,9 +48,9 @@ namespace motion {
         int negativeIfRight        = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Eigen::Affine3d finishPose = torsoToFoot;
         finishPose.translation() =
-            Eigen::Vector3d({forward_lean,
-                             negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE),
-                             stand_height});
+            Eigen::Vector3d(forward_lean,
+                            negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE),
+                            stand_height);
         finishPose = finishPose.inverse();
 
         std::vector<SixDOFFrame> frames;

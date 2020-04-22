@@ -35,7 +35,6 @@
 namespace module {
 namespace motion {
 
-    using Eigen::AngleAxisd;
     using utility::math::transform::interpolate;
     using utility::support::Expression;
 
@@ -58,9 +57,9 @@ namespace motion {
             Eigen::Vector3d pos         = config["pos"].as<Expression>();
             Eigen::Vector3d orientation = (180.0 / M_PI) * config["orientation"].as<Expression>();
             pose                        = Eigen::Affine3d::Identity();
-            pose.rotate(AngleAxisd(orientation.x(), Vector3d::UnitX()));
-            pose.rotate(AngleAxisd(orientation.y(), Vector3d::UnitY()));
-            pose.rotate(AngleAxisd(orientation.z(), Vector3d::UnitZ()));
+            pose.rotate(Eigen::AngleAxisd(orientation.x(), Vector3d::UnitX()));
+            pose.rotate(Eigen::AngleAxisd(orientation.y(), Vector3d::UnitY()));
+            pose.rotate(Eigen::AngleAxisd(orientation.z(), Vector3d::UnitZ()));
             pose.translation() = pos;
         };
         // TODO:
