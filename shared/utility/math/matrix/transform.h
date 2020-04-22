@@ -133,16 +133,6 @@ namespace math {
         }
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> createAffine(const Scalar x, const Scalar y, const Scalar z, const Scalar xRad, const Scalar yRad, const Scalar zRad) {
-            Eigen::Transform<Scalar, 3, Eigen::Affine> result = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
-            result.translation() = Eigen::Matrix<Scalar, 3, 1>(x, y, z);
-            result.rotate(Eigen::AngleAxis<Scalar>(zRad, Eigen::Matrix<Scalar, 3, 1>::UnitZ()));
-            result.rotate(Eigen::AngleAxis<Scalar>(yRad, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
-            result.rotate(Eigen::AngleAxis<Scalar>(xRad, Eigen::Matrix<Scalar, 3, 1>::UnitX()));
-            return result;
-        }
-
-        template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> twoD_to_threeD(const Eigen::Transform<Scalar, 2, Eigen::Affine>& t) {
             Eigen::Transform<Scalar, 3, Eigen::Affine> result;
 
