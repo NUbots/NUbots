@@ -97,7 +97,7 @@ namespace motion {
         updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>().then(
             "Head Controller - Update Head Position",
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-                emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
+                emit(graph("HeadController Goal Angles", goalAngles.x(), goalAngles.y()));
                 // P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 
@@ -105,7 +105,7 @@ namespace motion {
                 // Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
                 // The goal angles are for the neck directly, so we have to offset the camera declination again
                 Eigen::Vector3f goalHeadUnitVector_world =
-                    sphericalToCartesian(Eigen::Vector3f({1, currentAngles[0], currentAngles[1]}));
+                    sphericalToCartesian(Eigen::Vector3f(1, currentAngles.x(), currentAngles.y()));
                 // Convert to robot space
                 Eigen::Vector3f headUnitVector =
                     goalRobotSpace ? goalHeadUnitVector_world

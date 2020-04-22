@@ -195,8 +195,8 @@ namespace motion {
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
             Eigen::Affine2d velocity;
-            velocity.translation() = Eigen::Vector2d(walkCommand.command[0], walkCommand.command[1]);
-            velocity.linear()      = Eigen::Rotation2Dd(walkCommand.command[2]).toRotationMatrix();
+            velocity.translation() = Eigen::Vector2d(walkCommand.command.x(), walkCommand.command.y());
+            velocity.linear()      = Eigen::Rotation2Dd(walkCommand.command.z()).toRotationMatrix();
             if (velocity.translation().x() == 0 && velocity.translation().y() == 0 && angle(velocity) == 0) {
                 requestStop();
             }
@@ -397,11 +397,11 @@ namespace motion {
 
             // both feet have different .translation().y() in their localToWorld assignments
             footOffsetTemp.translation() =
-                Eigen::Vector2d(footOffset[0], kinematicsModel.leg.HIP_OFFSET_Y - footOffset[1]);
+                Eigen::Vector2d(footOffset.x(), kinematicsModel.leg.HIP_OFFSET_Y - footOffset.y());
             uLeftFoot = localToWorld(uTorso, footOffsetTemp);
 
             footOffsetTemp.translation() =
-                Eigen::Vector2d(footOffset[0], -kinematicsModel.leg.HIP_OFFSET_Y + footOffset[1]);
+                Eigen::Vector2d(footOffset.x(), -kinematicsModel.leg.HIP_OFFSET_Y + footOffset.y());
             uRightFoot = localToWorld(uTorso, footOffsetTemp);
 
             initialStep = 2;
@@ -418,14 +418,14 @@ namespace motion {
         uSupport                    = uTorso;
         beginStepTime               = getTime();
         uLRFootOffset               = Eigen::Affine2d::Identity();
-        uLRFootOffset.translation() = Eigen::Vector2d(0, kinematicsModel.leg.HIP_OFFSET_Y - footOffset[1]);
+        uLRFootOffset.translation() = Eigen::Vector2d(0, kinematicsModel.leg.HIP_OFFSET_Y - footOffset.y());
         startFromStep               = false;
         calculateNewStep();
     }
 
     void OldWalkEngine::reset() {
         uTorso                       = Eigen::Affine2d::Identity();
-        uTorso.translation().x()     = -footOffset[0];
+        uTorso.translation().x()     = -footOffset.x();
         uLeftFoot                    = Eigen::Affine2d::Identity();
         uLeftFoot.translation().y()  = kinematicsModel.leg.HIP_OFFSET_Y;
         uRightFoot                   = Eigen::Affine2d::Identity();
@@ -453,7 +453,7 @@ namespace motion {
 
         // gStandard offset
         uLRFootOffset               = Eigen::Affine2d::Identity();
-        uLRFootOffset.translation() = Eigen::Vector2d(0, kinematicsModel.leg.HIP_OFFSET_Y - footOffset[1]);
+        uLRFootOffset.translation() = Eigen::Vector2d(0, kinematicsModel.leg.HIP_OFFSET_Y - footOffset.y());
 
         // gWalking/Stepping transition variables
         startFromStep = false;
@@ -527,22 +527,22 @@ namespace motion {
             (velocityCurrent.translation().x() > velocityHigh ? accelerationLimitsHigh
                                                               : accelerationLimits);  // TODO: use a function instead
         float speed = std::min(1.0,
-                               std::max(std::abs(velocityCurrent.translation().x() / (limit[0] * 10)),
-                                        std::abs(velocityCurrent.translation().y() / (limit[1] * 10))));
+                               std::max(std::abs(velocityCurrent.translation().x() / (limit.x() * 10)),
+                                        std::abs(velocityCurrent.translation().y() / (limit.y() * 10))));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
-        foot[2] *= scale;
+        foot.z() *= scale;
 
         // don't lift foot at initial step, TODO: review
         if (initialStep > 0) {
-            foot[2] = 0;
+            foot.z() = 0;
         }
 
         // Interpolate the transform from start to destination
         if (swingLeg == LimbID::RIGHT_LEG) {
-            uRightFoot = interpolate(uRightFootSource, uRightFootDestination, foot[0]);
+            uRightFoot = interpolate(uRightFootSource, uRightFootDestination, foot.x());
         }
         else {
-            uLeftFoot = interpolate(uLeftFootSource, uLeftFootDestination, foot[0]);
+            uLeftFoot = interpolate(uLeftFootSource, uLeftFootDestination, foot.x());
         }
         // I hear you like arguments...
         uTorso = zmpCom(phase,
@@ -564,11 +564,11 @@ namespace motion {
         // Lift swing leg
         if (swingLeg == LimbID::RIGHT_LEG) {
             rightFoot                   = Eigen::Affine3d::Identity();
-            rightFoot.translation().z() = stepHeight * foot[2];
+            rightFoot.translation().z() = stepHeight * foot.z();
         }
         else {
             leftFoot                   = Eigen::Affine3d::Identity();
-            leftFoot.translation().z() = stepHeight * foot[2];
+            leftFoot.translation().z() = stepHeight * foot.z();
         }
 
         // Create a temporary transform to use in the localToWorld transform which creates uTorsoActual
@@ -588,7 +588,7 @@ namespace motion {
         Eigen::Affine3d rightFootCOM = worldToLocal(rightFoot, torso);
 
         // TODO: what is this magic?
-        double phaseComp = std::min({1.0, foot[1] / 0.1, (1 - foot[1]) / 0.1});
+        double phaseComp = std::min({1.0, foot.y() / 0.1, (1 - foot.y()) / 0.1});
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
@@ -613,14 +613,14 @@ namespace motion {
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
         Eigen::Affine3f Htc = Eigen::Affine3f::Identity();
-        Htc.translation()   = Eigen::Vector3f(-sensors.centre_of_mass[0], -sensors.centre_of_mass[1], 0.0f);
+        Htc.translation()   = Eigen::Vector3f(-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0f);
 
         Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM.cast<float>();
         Eigen::Affine3f rightFootTorso = Htc * rightFootCOM.cast<float>();
 
         // Calculate roll and pitch compensation based on limits and compensation factors
-        float rollComp  = clamp(-ankleRollLimit, ankleRollComp * sensors.angular_position[0], ankleRollLimit);
-        float pitchComp = clamp(-anklePitchLimit, anklePitchComp * sensors.angular_position[1], anklePitchLimit);
+        float rollComp  = clamp(-ankleRollLimit, ankleRollComp * sensors.angular_position.x(), ankleRollLimit);
+        float pitchComp = clamp(-anklePitchLimit, anklePitchComp * sensors.angular_position.y(), anklePitchLimit);
         // Apply compensation to left and right feet positions
         leftFootTorso  = rotateZ(legYaw, rotateY(pitchComp, rotateX(rollComp, leftFootTorso)));
         rightFootTorso = rotateZ(-legYaw, rotateY(pitchComp, rotateX(-rollComp, rightFootTorso)));
@@ -659,7 +659,7 @@ namespace motion {
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
         Eigen::Affine3f Htc = Eigen::Affine3f::Identity();
-        Htc.translation()   = Eigen::Vector3f(-sensors.centre_of_mass[0], -sensors.centre_of_mass[1], 0.0f);
+        Htc.translation()   = Eigen::Vector3f(-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0f);
 
         Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM.cast<float>();
         Eigen::Affine3f rightFootTorso = Htc * rightFootCOM.cast<float>();
@@ -722,8 +722,8 @@ namespace motion {
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2
                                - std::max(0.0, -rightLegTorso.translation().y() - 0.04) / 0.02 * (6 * M_PI / 180);
         // update shoulder pitch to move arm away from body
-        qLArmActual[1] = std::max(leftMinValue, qLArmActual[1]);
-        qRArmActual[1] = std::min(rightMinValue, qRArmActual[1]);
+        qLArmActual.y() = std::max(leftMinValue, qLArmActual.y());
+        qRArmActual.y() = std::min(rightMinValue, qRArmActual.y());
         // End arm/leg collision/prevention
 
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
@@ -734,31 +734,31 @@ namespace motion {
         waypoints->push_back({subsumptionId,
                               time,
                               ServoID::R_SHOULDER_PITCH,
-                              float(qRArmActual[0]),
+                              float(qRArmActual.x()),
                               jointGains[ServoID::R_SHOULDER_PITCH],
                               100});
         waypoints->push_back({subsumptionId,
                               time,
                               ServoID::R_SHOULDER_ROLL,
-                              float(qRArmActual[1]),
+                              float(qRArmActual.y()),
                               jointGains[ServoID::R_SHOULDER_ROLL],
                               100});
         waypoints->push_back(
-            {subsumptionId, time, ServoID::R_ELBOW, float(qRArmActual[2]), jointGains[ServoID::R_ELBOW], 100});
+            {subsumptionId, time, ServoID::R_ELBOW, float(qRArmActual.z()), jointGains[ServoID::R_ELBOW], 100});
         waypoints->push_back({subsumptionId,
                               time,
                               ServoID::L_SHOULDER_PITCH,
-                              float(qLArmActual[0]),
+                              float(qLArmActual.x()),
                               jointGains[ServoID::L_SHOULDER_PITCH],
                               100});
         waypoints->push_back({subsumptionId,
                               time,
                               ServoID::L_SHOULDER_ROLL,
-                              float(qLArmActual[1]),
+                              float(qLArmActual.y()),
                               jointGains[ServoID::L_SHOULDER_ROLL],
                               100});
         waypoints->push_back(
-            {subsumptionId, time, ServoID::L_ELBOW, float(qLArmActual[2]), jointGains[ServoID::L_ELBOW], 100});
+            {subsumptionId, time, ServoID::L_ELBOW, float(qLArmActual.z()), jointGains[ServoID::L_ELBOW], 100});
 
         return waypoints;
     }
@@ -851,19 +851,19 @@ namespace motion {
         Eigen::Affine2d com = Eigen::Affine2d::Identity();
 
         double expT           = std::exp(stepTime * phase / zmpTime);
-        com.translation().x() = uSupport.translation().x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
-        com.translation().y() = uSupport.translation().y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
+        com.translation().x() = uSupport.translation().x() + zmpCoefficients.x() * expT + zmpCoefficients.y() / expT;
+        com.translation().y() = uSupport.translation().y() + zmpCoefficients.z() * expT + zmpCoefficients.w() / expT;
         if (phase < phase1Single) {
-            com.translation().x() += zmpParams[0] * stepTime * (phase - phase1Single)
-                                     - zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
-            com.translation().y() += zmpParams[1] * stepTime * (phase - phase1Single)
-                                     - zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com.translation().x() += zmpParams.x() * stepTime * (phase - phase1Single)
+                                     - zmpTime * zmpParams.x() * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com.translation().y() += zmpParams.y() * stepTime * (phase - phase1Single)
+                                     - zmpTime * zmpParams.y() * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
         }
         else if (phase > phase2Single) {
-            com.translation().x() += zmpParams[2] * stepTime * (phase - phase2Single)
-                                     - zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
-            com.translation().y() += zmpParams[3] * stepTime * (phase - phase2Single)
-                                     - zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com.translation().x() += zmpParams.z() * stepTime * (phase - phase2Single)
+                                     - zmpTime * zmpParams.z() * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com.translation().y() += zmpParams.w() * stepTime * (phase - phase2Single)
+                                     - zmpTime * zmpParams.w() * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
         }
         // com[2] = .5 * (uLeftFoot[2] + uRightFoot[2]);
         // Linear speed turning

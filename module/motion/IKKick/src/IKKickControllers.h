@@ -58,9 +58,9 @@ namespace motion {
             Eigen::Vector3d pos         = config["pos"].as<Expression>();
             Eigen::Vector3d orientation = (180.0 / M_PI) * config["orientation"].as<Expression>();
             pose                        = Eigen::Affine3d::Identity();
-            pose.rotate(AngleAxisd(orientation[0], Vector3d::UnitX()));
-            pose.rotate(AngleAxisd(orientation[1], Vector3d::UnitY()));
-            pose.rotate(AngleAxisd(orientation[2], Vector3d::UnitZ()));
+            pose.rotate(AngleAxisd(orientation.x(), Vector3d::UnitX()));
+            pose.rotate(AngleAxisd(orientation.y(), Vector3d::UnitY()));
+            pose.rotate(AngleAxisd(orientation.z(), Vector3d::UnitZ()));
             pose.translation() = pos;
         };
         // TODO:

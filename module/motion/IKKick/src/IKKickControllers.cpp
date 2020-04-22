@@ -61,9 +61,9 @@ namespace motion {
 
     void KickBalancer::computeStopMotion(const Sensors&) {
         // Play the reverse
-        anim.frames[0].duration = return_duration;
+        anim.frames.x().duration = return_duration;
         std::reverse(anim.frames.begin(), anim.frames.end());
-        anim.frames[0].duration = 0;
+        anim.frames.x().duration = 0;
     }
 
     void Kicker::configure(const Configuration& config) {
@@ -107,28 +107,28 @@ namespace motion {
         Eigen::Vector3d kickGoal = followThrough;
         Eigen::Vector3d liftGoal = windUp;
 
-        kickGoal[2] = kick_height;
-        liftGoal[2] = kick_height;
+        kickGoal.z() = kick_height;
+        liftGoal.z() = kick_height;
 
         // constrain to prevent leg collision
         Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
-        int signSupportFootPosY        = supportFootPos[1] < 0 ? -1 : 1;
+        int signSupportFootPosY        = supportFootPos.y() < 0 ? -1 : 1;
         float clippingPlaneY =
-            supportFootPos[1]
+            supportFootPos.y()
             - signSupportFootPosY
                   * (foot_separation_margin
                      + (kinematicsModel.leg.FOOT_WIDTH / 2.0 - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
-        float liftClipDistance = (liftGoal[1] - clippingPlaneY);
+        float liftClipDistance = (liftGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * liftClipDistance > 0) {
             // Clip
-            liftGoal.rows(0, 1) = liftGoal.rows(0, 1) * clippingPlaneY / liftGoal[1];
+            liftGoal.rows(0, 1) = liftGoal.rows(0, 1) * clippingPlaneY / liftGoal.y();
         }
 
-        float kickClipDistance = (kickGoal[1] - clippingPlaneY);
+        float kickClipDistance = (kickGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * kickClipDistance > 0) {
             // Clip
-            kickGoal.rows(0, 1) = kickGoal.rows(0, 1) * clippingPlaneY / kickGoal[1];
+            kickGoal.rows(0, 1) = kickGoal.rows(0, 1) * clippingPlaneY / kickGoal.y();
         }
 
         kick.pose.translation()      = kickGoal;
@@ -139,7 +139,7 @@ namespace motion {
         // Robocup code / hacks
         auto startFrame                     = SixDOFFrame{startPose, 0};
         auto liftBeforeWindUp               = startFrame;
-        liftBeforeWindUp.pose.translation() = Eigen::Vector3d(0, 0, lift_foot.pose.translation()[2]);
+        liftBeforeWindUp.pose.translation() = Eigen::Vector3d(0, 0, lift_foot.pose.translation().z());
         liftBeforeWindUp.duration           = lift_before_windup_duration;
         auto returnBeforePlace              = liftBeforeWindUp;
         returnBeforePlace.duration          = return_before_place_duration;

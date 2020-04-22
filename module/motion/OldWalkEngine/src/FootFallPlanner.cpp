@@ -134,16 +134,17 @@ namespace motion {
             std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
         lastVeloctiyUpdateTime = now;
 
-        auto& limit = (velocityCurrent.translation()[0] > velocityHigh ? accelerationLimitsHigh : accelerationLimits)
+        auto& limit = (velocityCurrent.translation().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits)
                       * deltaT;  // TODO: use a function instead
 
 
         velocityDifference.translation().x() = std::min(
-            std::max(velocityCommand.translation().x() - velocityCurrent.translation().x(), -limit[0]), limit[0]);
+            std::max(velocityCommand.translation().x() - velocityCurrent.translation().x(), -limit.x()), limit.x());
         velocityDifference.translation().y() = std::min(
-            std::max(velocityCommand.translation().y() - velocityCurrent.translation().y(), -limit[1]), limit[1]);
+            std::max(velocityCommand.translation().y() - velocityCurrent.translation().y(), -limit.y()), limit.y());
         velocityDifference.linear() =
-            Eigen::Rotation2Dd(std::min(std::max(angle(velocityCommand) - angle(velocityCurrent), -limit[2]), limit[2]))
+            Eigen::Rotation2Dd(
+                std::min(std::max(angle(velocityCommand) - angle(velocityCurrent), -limit.z()), limit.z()))
                 .toRotationMatrix();
 
         velocityCurrent.translation().x() += velocityDifference.translation().x();

@@ -147,9 +147,9 @@ namespace motion {
                 Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
 
                 Eigen::Vector3d ballPosition = targetSupportFoot;
-                ballPosition[2]              = 0.05;  // TODO: figure out why ball height is unreliable
+                ballPosition.z()             = 0.05;  // TODO: figure out why ball height is unreliable
                 Eigen::Vector3d goalPosition = directionSupportFoot;
-                goalPosition[2]              = 0.0;  // TODO: figure out why ball height is unreliable
+                goalPosition.z()             = 0.0;  // TODO: figure out why ball height is unreliable
 
                 balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
                 kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
