@@ -45,10 +45,12 @@ namespace localisation {
                 emit(graph("robot filter state = ", state[0], state[1], state[2]));
 
                 // Emit state
-                auto field      = std::make_unique<Field>();
-                field->position = Eigen::Vector3d(
-                    state[RobotModel<double>::kX], state[RobotModel<double>::kY], state[RobotModel<double>::kAngle]);
-                field->covariance = filter.getCovariance();
+                auto field               = std::make_unique<Field>();
+                Eigen::Affine2d position = Eigen::Affine2d::Identity();
+                position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
+                position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
+                field->position        = position.matrix();
+                field->covariance      = filter.getCovariance();
 
                 emit(std::make_unique<std::vector<Field>>(1, *field));
                 emit(field);
@@ -101,12 +103,11 @@ namespace localisation {
 
                 for (auto& s : locReset.hypotheses) {
                     Eigen::Affine3d Hft;
-                    Eigen::Vector3d rTFf = {s.position[0], s.position[1], 0};
-                    Hft.translation()    = rTFf;
-                    Hfw                  = Hft * Htw;
-                    Eigen::Affine2d hfw_2d_projection =
-                        utility::localisation::projectTo2D(Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{1, 0, 0}, Hfw);
-                    Eigen::Vector3d hfw_state_vec = {
+                    Eigen::Vector3d rTFf              = {s.position[0], s.position[1], 0};
+                    Hft.translation()                 = rTFf;
+                    Hfw                               = Hft * Htw;
+                    Eigen::Affine2d hfw_2d_projection = utility::localisation::projectTo2D(Hfw);
+                    Eigen::Vector3d hfw_state_vec     = {
                         hfw_2d_projection.translation()(0), hfw_2d_projection.translation()(1), 0};
                     Eigen::Rotation2D<double> hfw_2d_rotation;
                     hfw_2d_rotation.matrix() = hfw_2d_projection.linear();
@@ -115,9 +116,7 @@ namespace localisation {
                     states.push_back(hfw_state_vec);
 
                     Eigen::Rotation2D<double> Hfw_xy;
-                    Hfw_xy.matrix() =
-                        utility::localisation::projectTo2D(Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{1, 0, 0}, Hfw)
-                            .linear();
+                    Hfw_xy.matrix() = utility::localisation::projectTo2D(Hfw).linear();
                     Eigen::Rotation2D<double> pos_cov;
                     pos_cov.matrix()                      = Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose();
                     Eigen::Matrix<double, 3, 3> state_cov = Eigen::Matrix<double, 3, 3>::Identity();

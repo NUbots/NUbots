@@ -62,69 +62,65 @@ namespace localisation {
 
         RobotModel() {}
 
-        StateVec time(const StateVec& state, double deltaT) {
-            Eigen::Matrix<Scalar, RobotModel<Scalar>::size, 1> new_state = state;
-            return new_state;
+        StateVec time(const StateVec& state, double /*deltaT*/) {
+            return state;
         }
 
         Eigen::VectorXd predictedObservation(const StateVec& state,
-                                             const Eigen::VectorXd& actual_position,
-                                             const Eigen::Affine3d& Hcw,
+                                             const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& actual_position,
+                                             const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw,
                                              const message::vision::Goal::MeasurementType& type,
                                              const message::support::FieldDescription& fd) {
 
-            double c = std::cos(state[2]);
-            double s = std::sin(state[2]);
-            Eigen::Matrix<Scalar, 3, 3> rotation;
-            rotation << c << -s << 0 << s << c << 0 << 0 << 0 << 1;
-            Eigen::Affine3d Hfw;
-            Hfw.translation()   = Eigen::Vector3d{state[0], state[1], 0};
-            Hfw.linear()        = rotation;
-            Eigen::Affine3d Hcf = Hcw * Hfw.inverse();
+            Scalar c = std::cos(state[2]);
+            Scalar s = std::sin(state[2]);
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
+            Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state[0], state[1], 0);
+            Hfw.linear() = Eigen::AngleAxis<Scalar>(state[2], Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
+            ;
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf = Hcw * Hfw.inverse();
 
             // rZFf = vector from field origin to zenith high in the sky
-            Eigen::Vector4d rZFf = {0, 0, 1, 0};
-            rZFf                 = Hcf * rZFf;
+            Eigen::Matrix<Scalar, 4, 1> rZFf(0, 0, 1, 0);
+            rZFf = Hcf * rZFf;
 
             if (type == Goal::MeasurementType::CENTRE) {
                 // rGCc = vector from camera to goal post expected position
-                Eigen::Vector4d rGCc_4   = {actual_position[0], actual_position[1], actual_position[2], 1};
-                rGCc_4                   = Hcf * rGCc_4;
-                Eigen::Vector3d rGCc     = {rGCc_4[0], rGCc_4[1], rGCc_4[2]};
-                Eigen::Vector3d rGCc_sph = cartesianToSpherical(rGCc);  // in r,theta,phi
+                Eigen::Matrix<Scalar, 4, 1> rGCc_4(actual_position.x(), actual_position.y(), actual_position.z(), 1);
+                rGCc_4 = Hcf * rGCc_4;
+                Eigen::Matrix<Scalar, 3, 1> rGCc(rGCc_4.x(), rGCc_4.y(), rGCc_4.z());
+                Eigen::Matrix<Scalar, 3, 1> rGCc_sph(cartesianToSpherical(rGCc));  // in r,theta,phi
                 return rGCc_sph;
             }
 
             switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
                 case FieldDescription::GoalpostType::CIRCLE: {
                     if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                        Eigen::Vector3d rNCc   = getCylindricalPostCamSpaceNormal(type, actual_position, Hcf, fd);
-                        Eigen::Vector2d angles = {
-                            std::atan2(rNCc[1], rNCc[0]),
-                            std::atan2(rNCc[2], std::sqrt(rNCc[0] * rNCc[0] + rNCc[1] * rNCc[1]))};
+                        Eigen::Matrix<Scalar, 3, 1> rNCc(
+                            getCylindricalPostCamSpaceNormal(type, actual_position, Hcf, fd));
+                        Eigen::Matrix<Scalar, 2, 1> angles(
+                            std::atan2(rNCc.y(), rNCc.x()),
+                            std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
                         return angles;
                     }
                     break;
                 }
                 case FieldDescription::GoalpostType::RECTANGLE: {
                     if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                        Eigen::Vector3d rNCc   = getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd);
-                        Eigen::Vector2d angles = {
-                            std::atan2(rNCc[1], rNCc[0]),
-                            std::atan2(rNCc[2], std::sqrt(rNCc[0] * rNCc[0] + rNCc[1] * rNCc[1]))};
+                        Eigen::Matrix<Scalar, 3, 1> rNCc(getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd));
+                        Eigen::Matrix<Scalar, 2, 1> angles(
+                            std::atan2(rNCc.y(), rNCc.x()),
+                            std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
                         return angles;
                     }
                     break;
                 }
             }
-            return Eigen::Vector2d({0, 0});
+            return Eigen::Vector2d::Zero();
         }
 
         StateVec limit(const StateVec& state) {
-            auto state2 = state;
-            // state2[kAngle] = normalizeAngle(state2[kAngle]);
-            // TODO: Clip robot's state to the field?
-            return state2;
+            return state;
         }
 
         StateMat noise(const Scalar& deltaT) {

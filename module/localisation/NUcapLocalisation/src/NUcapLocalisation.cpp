@@ -54,10 +54,7 @@ namespace localisation {
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
                     float z = rigidBody.position().z();
-                    Eigen::Quaternionf q(rigidBody.rotation().x(),
-                                         rigidBody.rotation().y(),
-                                         rigidBody.rotation().z(),
-                                         rigidBody.rotation().t());
+                    Eigen::Quaternionf q(rigidBody.rotation());
 
 
                     Eigen::Matrix3f groundToWorldRotation = q.normalized().toRotationMatrix();

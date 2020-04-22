@@ -43,9 +43,9 @@ namespace localisation {
         return arma::vec3({ax.x(), ax.y(), ax.angle()});
     }
 
-    inline Eigen::Affine2d projectTo2D(const Eigen::Vector3d& yawAxis,
-                                       const Eigen::Vector3d& forwardAxis,
-                                       const Eigen::Affine3d this_transform) {
+    inline Eigen::Affine2d projectTo2D(const Eigen::Affine3d this_transform,
+                                       const Eigen::Vector3d& yawAxis     = Eigen::Vector3d(0, 0, 1),
+                                       const Eigen::Vector3d& forwardAxis = Eigen::Vector3d(1, 0, 0)) {
         Eigen::Affine2d result;
 
         // Translation

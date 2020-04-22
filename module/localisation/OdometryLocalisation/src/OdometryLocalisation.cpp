@@ -5,6 +5,7 @@
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
 #include "message/platform/darwin/DarwinSensors.h"
+#include "utility/localisation/transform.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -16,6 +17,7 @@ namespace localisation {
     using message::input::Sensors;
     using message::localisation::Field;
     using message::platform::darwin::ButtonLeftDown;
+    using utility::localisation::projectTo2D;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -31,20 +33,20 @@ namespace localisation {
             [this](const Sensors& sensors) {
                 NUClear::log("Localisation Orientation reset. This direction is now forward.");
                 emit(std::make_unique<Nod>(true));
-                Eigen::Affine2d Trw = sensors.Htw.projectTo2D();
+                Eigen::Affine2d Trw = projectTo2D(sensors.Htw);
                 localisationOffset  = Trw;
             });
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
-            Eigen::Affine2d Trw = sensors.Htw.projectTo2D();
+            Eigen::Affine2d Trw = projectTo2D(sensors.Htw);
             Eigen::Affine2d Twr = Trw.inverse();
 
             // Local to world transform
             Eigen::Affine2d state = Twr * localisationOffset;
 
-            auto field      = std::make_unique<Field>();
-            field->position = Eigen::Vector3d(state.translation()(0), state.translation()(1), state.rotation().angle());
+            auto field        = std::make_unique<Field>();
+            field->position   = state.matrix();
             field->covariance = Eigen::Matrix3d::Identity();
 
             emit(std::make_unique<std::vector<Field>>(1, *field));
