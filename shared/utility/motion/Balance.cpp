@@ -62,22 +62,24 @@ namespace motion {
         //------------------------------------
 
         // Robot coords in world (:Robot -> World)
-        Eigen::Affine3f Htw = Eigen::Affine3d(sensors.Htw).cast<float>();
-        Eigen::AngleAxisf orientation        = Eigen::AngleAxisf(Htw.rotation().inverse());
+        Eigen::Affine3f Htw           = Eigen::Affine3d(sensors.Htw).cast<float>();
+        Eigen::AngleAxisf orientation = Eigen::AngleAxisf(Htw.rotation().inverse());
 
         // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}
         float orientationYaw = orientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
         // The nested AngleAxis creates a -orientationYaw radians rotation about the Z axis
         // The outside AngleAxis constructs an AngleAxis from the returned Quaternion type of the multiplication
-        Eigen::AngleAxisf yawlessOrientation = Eigen::AngleAxisf(Eigen::AngleAxisf(-orientationYaw, Eigen::Vector3f::UnitZ()) * orientation);
+        Eigen::AngleAxisf yawlessOrientation =
+            Eigen::AngleAxisf(Eigen::AngleAxisf(-orientationYaw, Eigen::Vector3f::UnitZ()) * orientation);
 
         // Removes any yaw component
         float goalTorsoOrientationYaw = goalTorsoOrientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
-        // Again the nested AngleAxis is a rotation -goalTorsoOrientation radians about the Z axis and the outer one converts from Quaternion type to AngleAxis
-        Eigen::AngleAxisf yawlessGoalOrientation =
-            Eigen::AngleAxisf(Eigen::AngleAxisf(-goalTorsoOrientationYaw, Eigen::Vector3f::UnitZ()) * goalTorsoOrientation);
+        // Again the nested AngleAxis is a rotation -goalTorsoOrientation radians about the Z axis and the outer one
+        // converts from Quaternion type to AngleAxis
+        Eigen::AngleAxisf yawlessGoalOrientation = Eigen::AngleAxisf(
+            Eigen::AngleAxisf(-goalTorsoOrientationYaw, Eigen::Vector3f::UnitZ()) * goalTorsoOrientation);
 
         // Error orientation maps: Goal -> Current
         Eigen::AngleAxisf errorOrientation = Eigen::AngleAxisf(yawlessOrientation * yawlessGoalOrientation.inverse());
@@ -95,14 +97,15 @@ namespace motion {
         // Rotation3D(error).pitch()));
 
         // Apply the PID gains
-        Eigen::AngleAxisf ankleRotation = Eigen::AngleAxisf(Eigen::Quaternion<float>::Identity().slerp(rotationPGain, errorQuaternion)
-                                       // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
-                                       * Eigen::Quaternion<float>::Identity().slerp(rotationDGain, differential));
+        Eigen::AngleAxisf ankleRotation =
+            Eigen::AngleAxisf(Eigen::Quaternion<float>::Identity().slerp(rotationPGain, errorQuaternion)
+                              // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
+                              * Eigen::Quaternion<float>::Identity().slerp(rotationDGain, differential));
 
         // Apply our rotation by scaling the thetas by the rotationScale parameters
         auto hipRotation = ankleRotation;
-        ankleRotation = Eigen::AngleAxisf(ankleRotationScale * ankleRotation.angle(), ankleRotation.axis());
-        hipRotation = Eigen::AngleAxisf(hipRotationScale * hipRotation.angle(), hipRotation.axis());
+        ankleRotation    = Eigen::AngleAxisf(ankleRotationScale * ankleRotation.angle(), ankleRotation.axis());
+        hipRotation      = Eigen::AngleAxisf(hipRotationScale * hipRotation.angle(), hipRotation.axis());
 
 
         // Apply this rotation goal to our position
@@ -110,9 +113,9 @@ namespace motion {
 
         // Get the position of our hip to rotate around
         Eigen::Affine3f hip = Eigen::Affine3f::Identity();
-        hip.translation() = Eigen::Vector3f(model.leg.HIP_OFFSET_X,
-                                                  model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
-                                                  -model.leg.HIP_OFFSET_Z);
+        hip.translation()   = Eigen::Vector3f(model.leg.HIP_OFFSET_X,
+                                            model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
+                                            -model.leg.HIP_OFFSET_Z);
 
         // Rotate around our hip to apply a balance
         footToTorso = utility::math::transform::rotateLocal(footToTorso, hipRotation, hip);  // Lean against the motion
@@ -161,11 +164,13 @@ namespace motion {
         // sensors.bodyCentreHeight * dPitch));
 
         // Compute torso position adjustment
-        Eigen::Vector3f torsoAdjustment_world = Eigen::Vector3f(-translationPGainX * sensors.body_centre_height * pitch
-                                                           - translationDGainX * sensors.body_centre_height * dPitch,
-                                                       translationPGainY * sensors.body_centre_height * roll
-                                                           + translationDGainY * sensors.body_centre_height * dRoll,
-                                                       -translationPGainZ * total - translationDGainY * dTotal).cast<float>();
+        Eigen::Vector3f torsoAdjustment_world =
+            Eigen::Vector3f(-translationPGainX * sensors.body_centre_height * pitch
+                                - translationDGainX * sensors.body_centre_height * dPitch,
+                            translationPGainY * sensors.body_centre_height * roll
+                                + translationDGainY * sensors.body_centre_height * dRoll,
+                            -translationPGainZ * total - translationDGainY * dTotal)
+                .cast<float>();
 
         // //Rotate from world space to torso space
         // Rotation3D yawLessOrientation =

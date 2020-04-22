@@ -75,8 +75,8 @@ namespace motion {
                                                                    const LimbID& limb);
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                   const Eigen::Affine3f& target,
-                                                                   const LimbID& limb);
+                                                                  const Eigen::Affine3f& target,
+                                                                  const LimbID& limb);
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D leftTarget,
@@ -102,7 +102,7 @@ namespace motion {
                                                                           const Eigen::Vector3d& cameraUnitVector);
 
         std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
-        
+
         std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
 
         arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint,

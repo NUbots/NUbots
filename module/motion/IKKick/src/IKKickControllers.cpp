@@ -45,12 +45,12 @@ namespace motion {
         Eigen::Affine3d torsoToFoot = getTorsoPose(sensors);
         Eigen::Affine3d startPose   = torsoToFoot.inverse();
 
-        int negativeIfRight    = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
+        int negativeIfRight        = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Eigen::Affine3d finishPose = torsoToFoot;
         finishPose.translation() =
             Eigen::Vector3d({forward_lean,
-                        negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE),
-                        stand_height});
+                             negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE),
+                             stand_height});
         finishPose = finishPose.inverse();
 
         std::vector<SixDOFFrame> frames;
@@ -89,8 +89,8 @@ namespace motion {
         Eigen::Affine3d currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
         Eigen::Affine3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                          ? sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]
-                                          : sensors.forward_kinematics[ServoID::R_ANKLE_ROLL];
+                                              ? sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]
+                                              : sensors.forward_kinematics[ServoID::R_ANKLE_ROLL];
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Eigen::Affine3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
@@ -112,7 +112,7 @@ namespace motion {
 
         // constrain to prevent leg collision
         Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
-        int signSupportFootPosY   = supportFootPos[1] < 0 ? -1 : 1;
+        int signSupportFootPosY        = supportFootPos[1] < 0 ? -1 : 1;
         float clippingPlaneY =
             supportFootPos[1]
             - signSupportFootPosY

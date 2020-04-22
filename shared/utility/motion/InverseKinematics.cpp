@@ -374,8 +374,8 @@ namespace motion {
         }
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const KinematicsModel& model,
-                                                                   const Eigen::Affine3f& target_,
-                                                                   const LimbID& limb) {
+                                                                  const Eigen::Affine3f& target_,
+                                                                  const LimbID& limb) {
             const float LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
             const float DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
             const float HIP_OFFSET_X                    = model.leg.HIP_OFFSET_X;
@@ -437,7 +437,7 @@ namespace motion {
             float sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
 
             float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-            knee           = std::acos(std::fmax(std::fmin(cosKnee, 1), -1));
+            knee          = std::acos(std::fmax(std::fmin(cosKnee, 1), -1));
 
             float cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);
             float lowerLeg    = std::acos(std::fmax(std::fmin(cosLowerLeg, 1), -1));
@@ -449,7 +449,7 @@ namespace motion {
             Eigen::Vector3f unitTargetLeg = targetLeg / length;
 
             Eigen::Vector3f hipX = ankleY.cross(unitTargetLeg);
-            float hipXLength    = hipX.norm();
+            float hipXLength     = hipX.norm();
             if (hipXLength > 0) {
                 hipX /= hipXLength;
             }
@@ -467,7 +467,7 @@ namespace motion {
 
             bool isAnkleAboveWaist = unitTargetLeg.dot(Eigen::Vector3f::UnitZ()) < 0;
 
-            float cosZandHipX   = Eigen::Vector3f::UnitZ().dot(hipX);
+            float cosZandHipX    = Eigen::Vector3f::UnitZ().dot(hipX);
             bool hipRollPositive = cosZandHipX <= 0;
             Eigen::Vector3f legPlaneGlobalZ =
                 (isAnkleAboveWaist ? -1 : 1) * (Eigen::Vector3f::UnitZ() - (cosZandHipX * hipX));
@@ -477,7 +477,7 @@ namespace motion {
             }
 
             float cosHipRoll = legPlaneGlobalZ.dot(Eigen::Vector3f::UnitZ());
-            hipRoll           = (hipRollPositive ? 1 : -1) * std::acos(std::fmax(std::fmin(cosHipRoll, 1), -1));
+            hipRoll          = (hipRollPositive ? 1 : -1) * std::acos(std::fmax(std::fmin(cosHipRoll, 1), -1));
 
             float phi4 = M_PI - knee - lowerLeg;
             // Superposition values:

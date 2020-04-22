@@ -22,11 +22,10 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <nuclear>
-
 #include <Eigen/Core>
-#include <Eigen/Geometry>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
+#include <nuclear>
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
@@ -250,9 +249,9 @@ namespace motion {
         std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
 
         Eigen::Affine2d getNewFootTarget(const Eigen::Affine2d& velocity,
-                                     const Eigen::Affine2d& leftFoot,
-                                     const Eigen::Affine2d& rightFoot,
-                                     const LimbID& swingLeg);
+                                         const Eigen::Affine2d& leftFoot,
+                                         const Eigen::Affine2d& rightFoot,
+                                         const LimbID& swingLeg);
 
         /**
          * Get the next torso position
@@ -268,14 +267,14 @@ namespace motion {
          * Solve the ZMP equation
          */
         Eigen::Vector2d zmpSolve(double zs,
-                            double z1,
-                            double z2,
-                            double x1,
-                            double x2,
-                            double phase1Single,
-                            double phase2Single,
-                            double stepTime,
-                            double zmpTime);
+                                 double z1,
+                                 double z2,
+                                 double x1,
+                                 double x2,
+                                 double phase1Single,
+                                 double phase2Single,
+                                 double stepTime,
+                                 double zmpTime);
 
         /**
          * Uses ZMP to determine the torso position
@@ -283,17 +282,17 @@ namespace motion {
          * @return The torso position in Eigen::Affine2d
          */
         Eigen::Affine2d zmpCom(double phase,
-                           Eigen::Vector4d zmpCoefficients,
-                           Eigen::Vector4d zmpParams,
-                           double stepTime,
-                           double zmpTime,
-                           double phase1Zmp,
-                           double phase2Zmp,
-                           Eigen::Affine2d uSupport,
-                           Eigen::Affine2d uLeftFootDestination,
-                           Eigen::Affine2d uLeftFootSource,
-                           Eigen::Affine2d uRightFootDestination,
-                           Eigen::Affine2d uRightFootSource);
+                               Eigen::Vector4d zmpCoefficients,
+                               Eigen::Vector4d zmpParams,
+                               double stepTime,
+                               double zmpTime,
+                               double phase1Zmp,
+                               double phase2Zmp,
+                               Eigen::Affine2d uSupport,
+                               Eigen::Affine2d uLeftFootDestination,
+                               Eigen::Affine2d uLeftFootSource,
+                               Eigen::Affine2d uRightFootDestination,
+                               Eigen::Affine2d uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -319,7 +318,6 @@ namespace motion {
          * @return A clamped between 0 and maxvalue, offset by deadband
          */
         double procFunc(double a, double deadband, double maxvalue);
-
     };
 
 }  // namespace motion

@@ -22,9 +22,9 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <nuclear>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <nuclear>
 
 #include "extension/Configuration.h"
 #include "message/input/Sensors.h"

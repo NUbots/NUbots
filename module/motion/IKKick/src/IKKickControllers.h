@@ -29,15 +29,15 @@
 #include "message/motion/KinematicsModel.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/support/yaml_expression.h"
 #include "utility/math/matrix/transform.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace motion {
 
-    using utility::support::Expression;
     using Eigen::AngleAxisd;
     using utility::math::transform::interpolate;
+    using utility::support::Expression;
 
     enum MotionStage { READY = 0, RUNNING = 1, STOPPING = 2, FINISHED = 3 };
 
@@ -54,7 +54,7 @@ namespace motion {
         SixDOFFrame() : pose(), duration(0.0f) {}
         SixDOFFrame(Eigen::Affine3d pose_, float duration_) : pose(pose_), duration(duration_) {}
         SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
-            duration               = config["duration"].as<float>();
+            duration                    = config["duration"].as<float>();
             Eigen::Vector3d pos         = config["pos"].as<Expression>();
             Eigen::Vector3d orientation = (180.0 / M_PI) * config["orientation"].as<Expression>();
             pose                        = Eigen::Affine3d::Identity();
