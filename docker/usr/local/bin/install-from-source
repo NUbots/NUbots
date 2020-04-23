@@ -224,6 +224,7 @@ elif [ "${METHOD}" = 'install-meson-from-source' ]; then
         --cross-file="${PREFIX}/meson.cross" \
         --buildtype=release \
         --prefix="${PREFIX}" \
+        --pkg-config-path="${PKG_CONFIG_PATH}" \
         -D strip=true
 
     # Run ninja
