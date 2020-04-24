@@ -59,12 +59,14 @@ namespace localisation {
             return state;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predictedObservation(const StateVec& state,
-                                                         const message::support::FieldDescription& field,
-                                                         const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw) const {
+        template <typename... Args>
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                            const message::support::FieldDescription& field,
+                                            const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
 
+            Eigen::Transform<Scalar, 3, Eigen::Affine> HcwAff(Hcw);
             Eigen::Matrix<Scalar, 4, 1> rBWw(state[PX], state[PY], field.ball_radius, 1.0);
-            rBWw = Hcw * rBWw;
+            rBWw = HcwAff * rBWw;
             Eigen::Matrix<Scalar, 3, 1> rBCc_cart(rBWw.x(), rBWw.y(), rBWw.z());
             Eigen::Matrix<Scalar, 3, 1> rBCc_sph1 = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
             Eigen::Matrix<Scalar, 3, 1> rBCc_sph2(
@@ -79,12 +81,6 @@ namespace localisation {
 
         StateMat noise(const Scalar& deltaT) {
             return processNoiseDiagonal.asDiagonal() * deltaT;
-        }
-
-        template <typename... Args>
-        Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
-            // Our prediction is the first state
-            return Eigen::Matrix<Scalar, 1, 1>(state[PX]);
         }
 
         template <typename T, typename U>
