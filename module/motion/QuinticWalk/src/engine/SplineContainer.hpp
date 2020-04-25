@@ -44,11 +44,12 @@ namespace motion {
              * Add an empty spline with given name.
              * Variadic arguments allow to pass parameters to spline constructor.
              */
-            inline void add(const U& name) {
+            template <typename... Args>
+            inline void add(const U& name, Args... args) {
                 if (container.count(name) != 0) {
                     throw std::logic_error("SplineContainer spline already added");
                 }
-                container[name] = T();
+                container[name] = T(args...);
             }
 
             /**
@@ -73,14 +74,14 @@ namespace motion {
             /**
              * Access to given named spline
              */
-            inline const T get(const U name) const {
+            inline const T& get(const U& name) const {
                 if (container.count(name) == 0) {
                     throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
                 }
                 return container.at(name);
             }
 
-            inline T get(const U name) {
+            inline T& get(const U& name) {
                 if (container.count(name) == 0) {
                     throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
                 }
@@ -104,7 +105,7 @@ namespace motion {
             std::vector<Scalar> getTimes() {
                 std::set<Scalar> times;
                 std::vector<Scalar> times_sorted;
-                // go trough all splines
+                // go through all splines
                 for (const auto& sp : container) {
                     // go trough all points of the spline
                     for (typename SmoothSpline<Scalar>::Point point : sp.second.points()) {
