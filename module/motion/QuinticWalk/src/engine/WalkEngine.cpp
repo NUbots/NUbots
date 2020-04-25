@@ -327,7 +327,8 @@ namespace motion {
                 singleSupportLength = 0.0f;
             }
 
-            // Set double support phase point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, 1.0f);
+            // Set double support phase
+            point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, 1.0f);
             point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 1.0f);
             point(TrajectoryTypes::IS_DOUBLE_SUPPORT, doubleSupportLength, 0.0f);
             point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, 0.0f);
