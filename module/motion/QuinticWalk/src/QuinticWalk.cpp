@@ -171,7 +171,7 @@ namespace motion {
 
         on<Trigger<DisableWalkEngineCommand>>().then([this] { update_handle.disable(); });
 
-        update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this]() {
+        update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
             const float dt = getTimeDelta();
 
             if (falling) {
