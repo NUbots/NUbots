@@ -13,7 +13,7 @@ nuclear_role(
   platform::darwin::HardwareSimulator
   platform::darwin::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::HeadController
   # Behaviour
   behaviour::Controller
