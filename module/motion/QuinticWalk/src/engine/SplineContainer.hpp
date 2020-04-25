@@ -44,12 +44,11 @@ namespace motion {
              * Add an empty spline with given name.
              * Variadic arguments allow to pass parameters to spline constructor.
              */
-            template <typename... Args>
-            inline void add(const U& name, Args... args) {
+            inline void add(const U& name) {
                 if (container.count(name) != 0) {
                     throw std::logic_error("SplineContainer spline already added");
                 }
-                container[name] = T(args...);
+                container[name] = T();
             }
 
             /**
@@ -74,14 +73,14 @@ namespace motion {
             /**
              * Access to given named spline
              */
-            inline const T& get(const U& name) const {
+            inline const T get(const U name) const {
                 if (container.count(name) == 0) {
                     throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
                 }
                 return container.at(name);
             }
 
-            inline T& get(const U& name) {
+            inline T get(const U name) {
                 if (container.count(name) == 0) {
                     throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
                 }
