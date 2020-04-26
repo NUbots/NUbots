@@ -3,6 +3,8 @@
 
 #include <nuclear>
 
+#define CL_TARGET_OPENCL_VERSION 120
+
 #include "engine/opencl/opencl_engine.hpp"
 #include "visualmesh.hpp"
 

@@ -35,7 +35,7 @@ RUN install-package \
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-COPY --chown=root:root etc/pip.conf /etc/pip.conf
+COPY --chown=root:root usr/pip.conf /usr/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY --chown=root:root etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
@@ -242,7 +242,6 @@ RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases
 # Install python libraries
 RUN pip install \
     pylint \
-    isort \
     termcolor \
     stringcase \
     Pillow \
@@ -263,8 +262,9 @@ RUN install-package \
     nano
 
 # Install formatters as last step so if they change the image is easy to update
-RUN pip install \
+RUN pip install --upgrade \
     cmake-format==0.6.9 \
+    isort \
     black==19.10b0
 
 #######################################
@@ -276,6 +276,7 @@ RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
 COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
+COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 
 # Setup the locations where we will mount our folders

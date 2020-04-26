@@ -22,7 +22,7 @@ namespace util {
 
                 protobuf_type proto = in;
 
-                std::vector<char> output(proto.ByteSize());
+                std::vector<char> output(proto.ByteSizeLong());
                 proto.SerializeToArray(output.data(), output.size());
 
                 return output;
