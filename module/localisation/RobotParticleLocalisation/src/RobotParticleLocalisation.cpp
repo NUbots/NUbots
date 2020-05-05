@@ -7,7 +7,6 @@
 #include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace localisation {
@@ -41,12 +40,12 @@ namespace localisation {
                 filter.time(seconds);
 
                 // Get filter state and transform
-                Eigen::Vector3d state = filter.get();
-                emit(graph("robot filter state = ", state[0], state[1], state[2]));
+                Eigen::Vector3d state(filter.get());
+                emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
-                auto field               = std::make_unique<Field>();
-                Eigen::Affine2d position = Eigen::Affine2d::Identity();
+                auto field(std::make_unique<Field>());
+                Eigen::Affine2d position(Eigen::Affine2d::Identity());
                 position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
                 position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
                 field->position        = position.matrix();
@@ -78,8 +77,8 @@ namespace localisation {
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
                                 if (m.position.allFinite() && m.covariance.allFinite()) {
-                                    filter.measure(Eigen::VectorXd{m.position.cast<double>()},
-                                                   Eigen::MatrixXd{m.covariance.cast<double>()},
+                                    filter.measure(Eigen::VectorXd(m.position.cast<double>()),
+                                                   Eigen::MatrixXd(m.covariance.cast<double>()),
                                                    poss,
                                                    goals.Hcw,
                                                    m.type,
@@ -97,31 +96,31 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 Eigen::Affine3d Hfw;
-                const Eigen::Matrix<double, 4, 4>& Htw = sensors.Htw;
+                const Eigen::Matrix<double, 4, 4>& Htw(sensors.Htw);
                 std::vector<Eigen::Vector3d> states;
                 std::vector<Eigen::Matrix<double, 3, 3>> cov;
 
                 for (auto& s : locReset.hypotheses) {
                     Eigen::Affine3d Hft;
-                    Eigen::Vector3d rTFf              = {s.position[0], s.position[1], 0};
-                    Hft.translation()                 = rTFf;
-                    Hfw                               = Hft * Htw;
-                    Eigen::Affine2d hfw_2d_projection = utility::localisation::projectTo2D(Hfw);
-                    Eigen::Vector3d hfw_state_vec     = {
-                        hfw_2d_projection.translation()(0), hfw_2d_projection.translation()(1), 0};
+                    Eigen::Vector3d rTFf(s.position[0], s.position[1], 0);
+                    Hft.translation() = rTFf;
+                    Hfw               = Hft * Htw;
+                    Eigen::Affine2d hfw_2d_projection(utility::localisation::projectTo2D(Hfw));
+                    Eigen::Vector3d hfw_state_vec(
+                        hfw_2d_projection.translation().x(), hfw_2d_projection.translation().y(), 0);
                     Eigen::Rotation2D<double> hfw_2d_rotation;
-                    hfw_2d_rotation.matrix() = hfw_2d_projection.linear();
+                    hfw_2d_rotation.matrix() = hfw_2d_projection.rotation();
                     hfw_state_vec(2)         = hfw_2d_rotation.angle();
 
                     states.push_back(hfw_state_vec);
 
                     Eigen::Rotation2D<double> Hfw_xy;
-                    Hfw_xy.matrix() = utility::localisation::projectTo2D(Hfw).linear();
+                    Hfw_xy.matrix() = utility::localisation::projectTo2D(Hfw).rotation();
                     Eigen::Rotation2D<double> pos_cov;
-                    pos_cov.matrix()                      = Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose();
-                    Eigen::Matrix<double, 3, 3> state_cov = Eigen::Matrix<double, 3, 3>::Identity();
-                    state_cov.block(0, 0, 1, 1)           = pos_cov.matrix();
-                    state_cov(2, 2)                       = s.heading_var;
+                    pos_cov.matrix() = Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose();
+                    Eigen::Matrix<double, 3, 3> state_cov(Eigen::Matrix<double, 3, 3>::Identity());
+                    state_cov.block(0, 0, 1, 1) = pos_cov.matrix();
+                    state_cov(2, 2)             = s.heading_var;
                     cov.push_back(state_cov);
                 }
                 filter.set_state_ambiguous(states, cov, n_particles);
@@ -141,17 +140,17 @@ namespace localisation {
             auto reset = std::make_unique<ResetRobotHypotheses>();
             ResetRobotHypotheses::Self leftSide;
             // Start on goal line
-            leftSide.position     = Eigen::Vector2d(start_state[0], start_state[1]);
+            leftSide.position     = Eigen::Vector2d(start_state.x(), start_state.y());
             leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            leftSide.heading      = start_state[2];
+            leftSide.heading      = start_state.z();
             leftSide.heading_var  = 0.005;
 
             reset->hypotheses.push_back(leftSide);
             ResetRobotHypotheses::Self rightSide;
             // Start on goal line
-            rightSide.position     = Eigen::Vector2d(start_state[0], -start_state[1]);
+            rightSide.position     = Eigen::Vector2d(start_state.x(), -start_state.y());
             rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            rightSide.heading      = -start_state[2];
+            rightSide.heading      = -start_state.z();
             rightSide.heading_var  = 0.005;
 
             reset->hypotheses.push_back(rightSide);

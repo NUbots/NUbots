@@ -66,11 +66,11 @@ namespace localisation {
             return state;
         }
 
-        Eigen::VectorXd predictedObservation(const StateVec& state,
-                                             const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& actual_position,
-                                             const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw,
-                                             const message::vision::Goal::MeasurementType& type,
-                                             const message::support::FieldDescription& fd) {
+        Eigen::VectorXd predict(const StateVec& state,
+                                const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& actual_position,
+                                const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw,
+                                const message::vision::Goal::MeasurementType& type,
+                                const message::support::FieldDescription& fd) {
 
             Scalar c = std::cos(state[2]);
             Scalar s = std::sin(state[2]);
@@ -127,12 +127,12 @@ namespace localisation {
             return processNoiseDiagonal.asDiagonal() * deltaT;
         }
 
-        template <typename... Args>
-        Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
+        // template <typename... Args>
+        // Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
 
-            // Our prediction is the first state
-            return Eigen::Matrix<Scalar, 1, 1>(state[kX]);
-        }
+        //     // Our prediction is the first state
+        //     return Eigen::Matrix<Scalar, 1, 1>(state[kX]);
+        // }
 
         template <typename T, typename U>
         static auto difference(const T& a, const U& b) {
