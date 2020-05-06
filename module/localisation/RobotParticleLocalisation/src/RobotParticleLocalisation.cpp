@@ -7,6 +7,7 @@
 #include "message/vision/Goal.h"
 #include "utility/localisation/transform.h"
 #include "utility/nusight/NUhelpers.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace localisation {
@@ -77,12 +78,12 @@ namespace localisation {
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
                                 if (m.position.allFinite() && m.covariance.allFinite()) {
-                                    filter.measure(Eigen::VectorXd(m.position.cast<double>()),
-                                                   Eigen::MatrixXd(m.covariance.cast<double>()),
-                                                   poss,
-                                                   goals.Hcw,
-                                                   m.type,
-                                                   fd);
+                                    filter.ambiguousMeasurementUpdate(Eigen::Vector3d(m.position.cast<double>()),
+                                                                      Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                                      poss,
+                                                                      goals.Hcw,
+                                                                      m.type,
+                                                                      fd);
                                 }
                                 else {
                                     log("Received non-finite measurements from vision. Discarding ...");
@@ -134,7 +135,8 @@ namespace localisation {
             n_particles                       = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();
 
-            Eigen::Vector3d start_state    = config["start_state"].as<Expression>();
+            Eigen::Vector3d start_state = config["start_state"].as<Expression>();
+            // TODO: This variable is not used?
             Eigen::Vector3d start_variance = config["start_variance"].as<Expression>();
 
             auto reset = std::make_unique<ResetRobotHypotheses>();

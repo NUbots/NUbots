@@ -23,6 +23,8 @@
 #define UTILITY_MATH_FILTER_PARTICLEFILTER_H
 
 #include <Eigen/Dense>
+#include <algorithm>
+#include <numeric>
 #include <random>
 #include <vector>
 
@@ -155,6 +157,77 @@ namespace math {
                     particles.col(i) = model.limit(candidate_particles.col(multinomial(rng)));
                 }
                 return logits.mean();
+            }
+
+
+            template <typename MeasurementScalar, int S, int... VArgs, int... MArgs, typename... Args>
+            double ambiguousMeasurementUpdate(
+                const Eigen::Matrix<MeasurementScalar, S, 1, VArgs...>& measurement,
+                const Eigen::Matrix<MeasurementScalar, S, S, MArgs...>& measurement_variance,
+                const std::vector<Eigen::Matrix<MeasurementScalar, Eigen::Dynamic, 1>>& possibilities,
+                const Args&... params) {
+
+                ParticleList candidate_particles =
+                    ParticleList::Zero(Model::size, particles.cols() + model.getRogueCount());
+                candidate_particles.leftCols(particles.cols()) = particles;
+
+                // Resample some rogues
+                for (int i = 0; i < model.getRogueCount(); ++i) {
+                    candidate_particles.col(i + particles.cols()) =
+                        particles.col(i) + model.getRogueRange().cwiseProduct(StateVec::Random() * 0.5);
+                }
+
+                // Repeat each particle for each possibility
+                ParticleList repCandidateParticles = candidate_particles.replicate(1, possibilities.size());
+
+                // Compute weights
+                Eigen::Matrix<MeasurementScalar, S, Eigen::Dynamic> differences(S, repCandidateParticles.cols());
+                for (unsigned int i = 0; i < repCandidateParticles.cols(); ++i) {
+
+                    differences.col(i) = model.difference(
+                        model.predict(particles.col(i), possibilities[i / candidate_particles.cols()], params...),
+                        measurement);
+                }
+
+                Eigen::Matrix<MeasurementScalar, Eigen::Dynamic, 1> weights =
+                    -differences.cwiseProduct(measurement_variance.inverse() * differences).colwise().sum();
+                weights = Eigen::exp(weights.array());
+
+                // Resample
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::discrete_distribution<> multinomial(
+                    weights.data(),
+                    weights.data() + weights.size());  // class incorrectly named by cpp devs
+
+                // Only sample N particles
+                Eigen::Matrix<MeasurementScalar, Eigen::Dynamic, 1> new_weights =
+                    Eigen::Matrix<MeasurementScalar, Eigen::Dynamic, 1>::Zero(particles.cols(), 1);
+                for (unsigned int i = 0; i < particles.cols(); ++i) {
+                    int index        = multinomial(gen);
+                    particles.col(i) = repCandidateParticles.col(index);
+                    new_weights(i)   = weights(index);
+                }
+
+                // Get a vector of descending sorted indexes to sort particles by descending weight
+                // Uses this method https://stackoverflow.com/a/12399290/11108223
+
+                // Initialise original index locations
+                std::vector<size_t> sorted_indexes(new_weights.rows());
+                std::iota(sorted_indexes.begin(), sorted_indexes.end(), 0);
+
+                // Sort the values in sorted_indexes based on the values in new_weights
+                std::sort(sorted_indexes.begin(), sorted_indexes.end(), [&new_weights](size_t i1, size_t i2) {
+                    return new_weights[i1] > new_weights[i2];
+                });
+
+                Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic> particles_temp = particles;
+                for (unsigned int i = 0; i < sorted_indexes.size(); i++) {
+                    particles.col(i) = model.limit(particles_temp.col(sorted_indexes[i]));
+                }
+
+                // Return mean weight
+                return new_weights.mean();
             }
 
             // Take the mean of all particles, pay no attention to the type of the data
