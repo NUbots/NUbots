@@ -75,8 +75,7 @@ namespace localisation {
             const message::vision::Goal::MeasurementType& type,
             const message::support::FieldDescription& fd) {
 
-            Scalar c = std::cos(state.z());
-            Scalar s = std::sin(state.z());
+            // Create a transform from the field state
             Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
             Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
             Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
@@ -146,8 +145,8 @@ namespace localisation {
         Eigen::Matrix<Scalar, 3, 1> processNoiseDiagonal;
 
         // number and range of reset particles
-        int n_rogues = 0;
-        Eigen::Matrix<Scalar, 3, 1> resetRange(Eigen::Matrix<Scalar, 3, 1>::Zero());
+        int n_rogues                           = 0;
+        Eigen::Matrix<Scalar, 3, 1> resetRange = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
         // Getters
         int getRogueCount() const {
@@ -217,10 +216,16 @@ namespace localisation {
             for (int i = 1; i < goalBaseCornersCam.cols(); ++i) {
                 float angle = std::acos(goalBaseCornersCam.col(i).dot(goalBaseCornersCam.col(0)));
                 // Left side will have cross product point in neg field z direction
+
+                /*
                 bool left_side = (goalBaseCornersCam.block<3, 1>(0, i, 2, i)
                                       .cross(goalBaseCornersCam.block<3, 1>(0, 0, 2, 0))
                                       .dot(goalTopCornersCam - goalBaseCornersCam))
                                  < 0;
+
+                */
+                bool left_side =
+                    true;  // DO NOT MERGE THIS. Trying to build the rest of localisation before finishing above block
                 if (left_side && (type == Goal::MeasurementType::LEFT_NORMAL)) {
                     if (angle > largest_angle) {
                         widest        = i;
@@ -237,9 +242,13 @@ namespace localisation {
 
             // creating the normal vector (following convention stipulated in VisionObjects)
             // Normals point into the goal centre
+            return Eigen::Matrix<Scalar, 3, 1>::Zero();
+            /*
+            // DO NOT MERGE THIS!! Currently debugging the rest of the code.
             return (type == Goal::MeasurementType::LEFT_NORMAL)
                        ? (goalBaseCornersCam.col(widest).cross(goalTopCornersCam.col(widest))).normalize()
                        : (goalTopCornersCam.col(widest).cross(goalBaseCornersCam.col(widest))).normalize();
+                       */
         }
     };
 }  // namespace localisation
