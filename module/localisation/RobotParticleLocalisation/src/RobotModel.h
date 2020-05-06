@@ -67,7 +67,6 @@ namespace localisation {
             return state;
         }
 
-        template <typename... Args>
         Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(
             const StateVec& state,
             const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& actual_position,
@@ -185,7 +184,7 @@ namespace localisation {
                                                                 const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcf,
                                                                 const message::support::FieldDescription& fd) {
             if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
-                return Eigen::Matrix<Scalar, 3, 1>(0, 0, 0);
+                return Eigen::Matrix<Scalar, 3, 1>::Zero();
 
             // Finding 4 corners of goalpost and centre (4 corners and centre)
             Eigen::Matrix<Scalar, 4, 5> goalBaseCorners;

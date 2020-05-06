@@ -59,7 +59,6 @@ namespace localisation {
             return state;
         }
 
-        template <typename... Args>
         Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
                                             const message::support::FieldDescription& field,
                                             const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
