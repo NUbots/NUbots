@@ -129,13 +129,6 @@ namespace localisation {
             return processNoiseDiagonal.asDiagonal() * deltaT;
         }
 
-        // template <typename... Args>
-        // Eigen::Matrix<Scalar, 1, 1> predict(const StateVec& state, const Args&... params) {
-
-        //     // Our prediction is the first state
-        //     return Eigen::Matrix<Scalar, 1, 1>(state[kX]);
-        // }
-
         template <typename T, typename U>
         static auto difference(const T& a, const U& b) {
             return a - b;
