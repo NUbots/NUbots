@@ -205,8 +205,8 @@ namespace motion {
             velocity.translation().y() *= velocity.translation().y() > 0 ? velocityLimits(1, 1) : -velocityLimits(1, 0);
 
             // Rotate velocity transform RHS radians
-            double velocityRot = angle(velocity) > 0 ? velocityLimits(2, 1) : -velocityLimits(2, 0);
-            velocity.linear()  = velocity.rotation() * Eigen::Rotation2Dd(velocityRot).toRotationMatrix();
+            double velocityRotation = angle(velocity) > 0 ? velocityLimits(2, 1) : -velocityLimits(2, 0);
+            velocity.linear()       = velocity.rotation() * Eigen::Rotation2Dd(velocityRotation).toRotationMatrix();
 
             setVelocity(velocity);
             lastVeloctiyUpdateTime = NUClear::clock::now();
