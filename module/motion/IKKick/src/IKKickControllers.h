@@ -196,7 +196,7 @@ namespace motion {
                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
                                   : 1;
 
-                Eigen::Affine3d result = interpolate(anim.previousFrame.pose, anim.currentFrame.pose, alpha);
+                Eigen::Affine3d result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
 
                 bool servosAtGoal = true;
                 for (auto& servo : sensors.servo) {
