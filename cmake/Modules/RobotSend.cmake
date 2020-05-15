@@ -29,18 +29,16 @@ foreach(host_pair ${KNOWN_HOSTS})
       add_custom_target(
         "${target}"
         USES_TERMINAL
-        COMMAND
-          ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--user=${user}"
-          "--toolchain"
+        COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--user=${user}"
+                "--toolchain"
         DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py"
       )
     else()
       add_custom_target(
         "${target}"
         USES_TERMINAL
-        COMMAND
-          ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--config=${config}"
-          "--user=${user}"
+        COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}"
+                "--config=${config}" "--user=${user}"
         DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py"
       )
     endif()

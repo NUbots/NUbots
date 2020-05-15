@@ -35,7 +35,7 @@ RUN install-package \
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-COPY --chown=root:root etc/pip.conf /etc/pip.conf
+COPY --chown=root:root usr/pip.conf /usr/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY --chown=root:root etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
@@ -205,12 +205,7 @@ RUN install-header-from-source https://github.com/catchorg/Catch2/releases/downl
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz
-RUN install-from-source https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.34/util-linux-2.34.tar.xz \
-    --disable-all-programs \
-    --enable-libblkid \
-    --enable-libmount \
-    --enable-libuuid
-RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.62.4/glib-2.62.4.tar.bz2 \
+RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.63.3/glib-2.63.3.tar.bz2 \
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
@@ -246,10 +241,7 @@ RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases
 
 # Install python libraries
 RUN pip install \
-    cmake-format \
-    black \
     pylint \
-    isort \
     termcolor \
     stringcase \
     Pillow \
@@ -269,6 +261,12 @@ RUN install-package \
     vim \
     nano
 
+# Install formatters as last step so if they change the image is easy to update
+RUN pip install --upgrade \
+    cmake-format==0.6.9 \
+    isort \
+    black==19.10b0
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -278,6 +276,7 @@ RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
 COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
+COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 
 # Setup the locations where we will mount our folders
