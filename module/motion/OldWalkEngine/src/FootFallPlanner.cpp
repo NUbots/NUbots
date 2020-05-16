@@ -107,7 +107,7 @@ namespace motion {
             (uTorsoDestination.translation().y() - uSupport.translation().y()) / (stepTime * (1 - phase2Single)),
         };
 
-        zmpCoefficients.block(0, 0, 1, 0) = zmpSolve(uSupport.translation().x(),
+        zmpCoefficients.block(0, 0, 2, 1) = zmpSolve(uSupport.translation().x(),
                                                      uTorsoSource.translation().x(),
                                                      uTorsoDestination.translation().x(),
                                                      uTorsoSource.translation().x(),
@@ -116,7 +116,7 @@ namespace motion {
                                                      phase2Single,
                                                      stepTime,
                                                      zmpTime);
-        zmpCoefficients.block(2, 0, 3, 0) = zmpSolve(uSupport.translation().y(),
+        zmpCoefficients.block(2, 0, 2, 1) = zmpSolve(uSupport.translation().y(),
                                                      uTorsoSource.translation().y(),
                                                      uTorsoDestination.translation().y(),
                                                      uTorsoSource.translation().y(),
