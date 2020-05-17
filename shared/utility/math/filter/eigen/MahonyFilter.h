@@ -35,10 +35,10 @@ namespace math {
         // bias:
         void MahonyUpdate(const Eigen::Vector3d& acc,
                           const Eigen::Vector3d& gyro,
-                          const float ts,
+                          const double ts,
                           const double Ki,
                           const double Kp,
-                          Eigen::Quaternionf& quat,
+                          Eigen::Quaterniond& quat,
                           Eigen::Vector3d& bias) {
             // Normalise the acceleration vector
             Eigen::Vector3d norm_acc = acc.normalized();
@@ -63,9 +63,9 @@ namespace math {
             // Calculate estimated accelerometer reading
             Eigen::Vector3d est_acc = attitude * r_acc;
             // Calculate error between estimate and real
-            auto a_corr = norm_acc * est_acc.transpose() - est_acc * norm_acc.transpose();
+            Eigen::Matrix3d a_corr = norm_acc * est_acc.transpose() - est_acc * norm_acc.transpose();
             // Vex (inverse function of skew-symmetric function) the error
-            Eigen::Vector3d omega_mes(a_corr(3, 2), a_corr(1, 3), a_corr(2, 1));
+            Eigen::Vector3d omega_mes(a_corr(2, 1), a_corr(0, 2), a_corr(1, 0));
             omega_mes = -omega_mes;
 
             // Estimate the bias
@@ -84,9 +84,9 @@ namespace math {
             // Find the quaternions rate of change
             // clang-format off
             Eigen::Matrix3d omega_x;
-            omega_x << 0,        -l_omega.z(), -l_omega.y(),
-                    l_omega.z(),  0,           -l_omega.x(),
-                    -l_omega.y(), l_omega.x(),  0;
+            omega_x <<         0, -l_omega.z(), -l_omega.y(),
+                     l_omega.z(),            0, -l_omega.x(),
+                    -l_omega.y(),  l_omega.x(),            0;
             // clang-format on
             Eigen::Matrix4d ome;
             ome.block<3, 3>(0, 0) = -omega_x;
@@ -94,11 +94,16 @@ namespace math {
             ome.block<3, 1>(0, 3) = l_omega;
             ome(3, 3)             = 0;
 
-            Eigen::Quaternionf q_d(0.5 * ome * quat);
+            ome *= 0.5;
+            Eigen::Vector4d quat_vec(quat.x(), quat.y(), quat.z(), quat.w());
+            Eigen::Vector4d q_d(ome * quat_vec);
 
-
-            // Calculate integral to find the attitude quaternion
-            quat = quat.coeffs() + ts * q_d.coeffs();
+            // // Calculate integral to find the attitude quaternion
+            quat_vec += ts * q_d;
+            quat.x() = quat_vec(0);
+            quat.y() = quat_vec(1);
+            quat.z() = quat_vec(2);
+            quat.w() = quat_vec(3);
         }
 
     }  // namespace filter
