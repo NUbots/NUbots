@@ -465,24 +465,18 @@ namespace platform {
                      *             Motion (IMU+Odometry)            *
                      ************************************************/
 
-                    // MAHONEY STUFF
+                    // Mahony calculation for Rtw
                     Eigen::Vector3d rawGyro = sensors->gyroscope;
                     Eigen::Vector3d rawAcc  = sensors->accelerometer;
                     double ts = 0.009;  // Set this as config, or if we can get it from somewhere like hardware config?
                     double Ki = 0;      // Set as config, integral proportional gain
                     double Kp = 0;      // set as config
-                    Eigen::Quaternionf quat =
+                    Eigen::Quaterniond quat =
                         previousSensors == NULL
-                            ? Eigen::Quaternionf(0, 1, 0, 0)
-                            : Eigen::Quaternionf(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
-                    // bias initialised as 0,0,0. Bias is member variable, mahoney updates it
+                            ? Eigen::Quaterniond(0, 1, 0, 0)
+                            : Eigen::Quaterniond(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
+                    // bias initialised as 0,0,0. Bias is member variable, Mahony updates it
                     utility::math::filter::MahonyUpdate(rawAcc, rawGyro, ts, Ki, Kp, quat, bias);
-
-                    emit(graph("quaternion x:", quat.x()));
-                    emit(graph("quaternion y:", quat.y()));
-                    emit(graph("quaternion z:", quat.z()));
-                    log("Bias: ", bias.transpose());
-
 
                     // Gyroscope measurement update
                     motionFilter.measure(sensors->gyroscope,
@@ -552,9 +546,8 @@ namespace platform {
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
-                    Hwt.linear() =
-                        quat.toRotationMatrix()
-                            .transpose();  // Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
+                    Hwt.linear() = quat.toRotationMatrix();
+                    // Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
                     Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
                     sensors->Htw      = Hwt.inverse().matrix();
 
