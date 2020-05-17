@@ -35,22 +35,23 @@ namespace math {
         // bias:
         void MahonyUpdate(const Eigen::Vector3d& acc,
                           const Eigen::Vector3d& gyro,
-                          const double ts,
+                          const float ts,
                           const double Ki,
                           const double Kp,
-                          Eigen::Quaternion& quat,
+                          Eigen::Quaternionf& quat,
                           Eigen::Vector3d& bias) {
             // Normalise the acceleration vector
-            Eigen::Vector3d norm_acc = acc.normalize();
+            Eigen::Vector3d norm_acc = acc.normalized();
 
             // Compute the 3 by 3 attitude matrix from the quaternion
             Eigen::Vector3d rho(quat.x(), quat.y(), quat.z());
             double q4           = quat.w();
             double rho_norm_squ = std::pow(rho.norm(), 2);
             // clang-format off
-            Eigen::Matrix3d rho_x << 0        << -rho.z() << -rho.y()
-                                  << rho.z()  <<        0 << -rho.x()
-                                  << -rho.y() <<  rho.x() << 0;
+            Eigen::Matrix3d rho_x;
+            rho_x << 0,       -rho.z(), -rho.y()
+                   , rho.z(),  0 ,      -rho.x()
+                   , -rho.y(), rho.x(), 0;
             // clang-format on
 
             Eigen::Matrix3d attitude = ((std::pow(q4, 2) - rho_norm_squ) * Eigen::Matrix3d::Identity())
@@ -60,9 +61,9 @@ namespace math {
             // Reference vector for gravity
             Eigen::Vector3d r_acc(0, 0, 1);
             // Calculate estimated accelerometer reading
-            Eigen::Matrix3d est_acc = attitude * r_acc;
+            Eigen::Vector3d est_acc = attitude * r_acc;
             // Calculate error between estimate and real
-            a_corr = norm_acc * est_acc.transpose() - est_acc * norm_acc.transpose();
+            auto a_corr = norm_acc * est_acc.transpose() - est_acc * norm_acc.transpose();
             // Vex (inverse function of skew-symmetric function) the error
             Eigen::Vector3d omega_mes(a_corr(3, 2), a_corr(1, 3), a_corr(2, 1));
             omega_mes = -omega_mes;
@@ -73,7 +74,7 @@ namespace math {
                 bias += Ki * omega_mes * ts;
             }
             else {
-                bias = Eigen::Vector3d::Zeros();
+                bias = Eigen::Vector3d::Zero();
             }
 
             // Calculate attitude using quaternion dynamics
@@ -82,9 +83,10 @@ namespace math {
 
             // Find the quaternions rate of change
             // clang-format off
-            Eigen::Matrix3d omega_x << 0            << -l_omega.z() << -l_omega.y()
-                                    << l_omega.z()  <<            0 << -l_omega.x()
-                                    << -l_omega.y() <<  l_omega.x() << 0;
+            Eigen::Matrix3d omega_x;
+            omega_x << 0,        -l_omega.z(), -l_omega.y(),
+                    l_omega.z(),  0,           -l_omega.x(),
+                    -l_omega.y(), l_omega.x(),  0;
             // clang-format on
             Eigen::Matrix4d ome;
             ome.block<3, 3>(0, 0) = -omega_x;
@@ -92,10 +94,11 @@ namespace math {
             ome.block<3, 1>(0, 3) = l_omega;
             ome(3, 3)             = 0;
 
-            q_d = 0.5 * ome * quat;
+            Eigen::Quaternionf q_d(0.5 * ome * quat);
+
 
             // Calculate integral to find the attitude quaternion
-            quat = quat + q_d * ts;
+            quat = quat.coeffs() + ts * q_d.coeffs();
         }
 
     }  // namespace filter
