@@ -25,9 +25,11 @@
 #include <mutex>
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/nusight/NUhelpers.h"
@@ -204,8 +206,9 @@ namespace platform {
                             servo.presentPosition = servo.goalPosition;
                         }
                         else {
-                            Eigen::Vector3d present(
-                                std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
+                            Eigen::Vector3d present(std::cos(servo.presentPosition),
+                                                    std::sin(servo.presentPosition),
+                                                    0.0);
                             Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
 
                             Eigen::Vector3d cross = present.cross(goal);

@@ -23,9 +23,11 @@
 #include <fmt/ostream.h>
 
 #include "extension/Configuration.h"
+
 #include "message/support/FieldDescription.h"
 #include "message/vision/Ball.h"
 #include "message/vision/GreenHorizon.h"
+
 #include "utility/math/coordinates.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
@@ -58,7 +60,8 @@ namespace vision {
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
-            "Visual Mesh", [this](const GreenHorizon& horizon, const FieldDescription& field) {
+            "Visual Mesh",
+            [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
@@ -70,7 +73,10 @@ namespace vision {
 
                 // Partition the indices such that we only have the ball points that dont have ball surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
-                    indices.begin(), indices.end(), neighbours, [&](const int& idx) {
+                    indices.begin(),
+                    indices.end(),
+                    neighbours,
+                    [&](const int& idx) {
                         return idx == int(indices.size()) || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
                     });
 
@@ -88,8 +94,11 @@ namespace vision {
                 //    e) Delete all partitions smaller than a given threshold
                 // 2) Discard all clusters are entirely above the green horizon
                 std::vector<std::vector<int>> clusters;
-                utility::vision::visualmesh::cluster_points(
-                    indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
+                utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                            indices.end(),
+                                                            neighbours,
+                                                            config.cluster_points,
+                                                            clusters);
 
                 if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));

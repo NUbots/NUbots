@@ -4,7 +4,6 @@
 
 #include <backtrace.h>
 #include <dlfcn.h>
-
 #include <iostream>
 #include <nuclear>
 

@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "compressor/CompressorFactory.h"
+
 #include "utility/vision/fourcc.h"
 
 namespace module::output::compressor::mosaic {

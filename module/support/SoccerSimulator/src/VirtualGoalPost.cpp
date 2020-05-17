@@ -22,6 +22,7 @@
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Quad.h"
@@ -114,19 +115,26 @@ namespace support {
                 Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, goalNormals.block<3, 1>(0, 3)));
 
             // build the predicted quad
-            utility::math::geometry::Quad<Eigen::Vector2f> quad(
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 0), goalNormals.block<3, 1>(0, 3), image.lens, image.dimensions)
-                    .cast<float>(),
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 0), goalNormals.block<3, 1>(0, 2), image.lens, image.dimensions)
-                    .cast<float>(),
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 1), goalNormals.block<3, 1>(0, 2), image.lens, image.dimensions)
-                    .cast<float>(),
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 1), goalNormals.block<3, 1>(0, 3), image.lens, image.dimensions)
-                    .cast<float>());
+            utility::math::geometry::Quad<Eigen::Vector2f> quad(getCamRay<float>(goalNormals.block<3, 1>(0, 0),
+                                                                                 goalNormals.block<3, 1>(0, 3),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>(),
+                                                                getCamRay<float>(goalNormals.block<3, 1>(0, 0),
+                                                                                 goalNormals.block<3, 1>(0, 2),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>(),
+                                                                getCamRay<float>(goalNormals.block<3, 1>(0, 1),
+                                                                                 goalNormals.block<3, 1>(0, 2),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>(),
+                                                                getCamRay<float>(goalNormals.block<3, 1>(0, 1),
+                                                                                 goalNormals.block<3, 1>(0, 3),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>());
 
 
             // goal base visibility check

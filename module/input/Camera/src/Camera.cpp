@@ -4,16 +4,17 @@ extern "C" {
 #include <aravis-0.8/arv.h>
 }
 
-#include <fmt/format.h>
-
 #include <cmath>
+#include <fmt/format.h>
 
 #include "aravis_wrap.h"
 #include "description_to_fourcc.h"
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
 #include "settings.h"
 #include "time_sync.h"
+
+#include "message/input/Image.h"
+#include "message/input/Sensors.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
@@ -85,7 +86,8 @@ namespace input {
                     std::string device_description = arv_get_device_id(device_no);
                     auto camera =
                         std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
-                            if (ptr) g_object_unref(ptr);
+                            if (ptr)
+                                g_object_unref(ptr);
                         });
 
                     if (!ARV_IS_CAMERA(camera.get())) {
@@ -94,10 +96,12 @@ namespace input {
                     }
                     else {
                         // Create a new stream object: Store as shared pointer
-                        auto stream = std::shared_ptr<ArvStream>(
-                            arv_camera_create_stream(camera.get(), nullptr, nullptr), [](ArvStream* ptr) {
-                                if (ptr) g_object_unref(ptr);
-                            });
+                        auto stream =
+                            std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
+                                                       [](ArvStream* ptr) {
+                                                           if (ptr)
+                                                               g_object_unref(ptr);
+                                                       });
 
                         if (!ARV_IS_STREAM(stream.get())) {
                             throw std::runtime_error(
@@ -179,8 +183,10 @@ namespace input {
                                             config["lens"]["centre"][0].as<double>(),
                                             config["lens"]["centre"][1].as<double>(),
                                             name));
-            log<NUClear::DEBUG>(fmt::format(
-                "Lens Centre: [{} , {}] on {} camera", context.lens.centre[0], context.lens.centre[1], name));
+            log<NUClear::DEBUG>(fmt::format("Lens Centre: [{} , {}] on {} camera",
+                                            context.lens.centre[0],
+                                            context.lens.centre[1],
+                                            name));
 
 
             // If the lens fov was auto we need to correct it
@@ -276,8 +282,10 @@ namespace input {
 
             // Connect signal events
             g_signal_connect(stream.get(), "new-buffer", G_CALLBACK(&Camera::emit_image), &it->second);
-            g_signal_connect(
-                arv_camera_get_device(cam.get()), "control-lost", G_CALLBACK(&Camera::control_lost), &it->second);
+            g_signal_connect(arv_camera_get_device(cam.get()),
+                             "control-lost",
+                             G_CALLBACK(&Camera::control_lost),
+                             &it->second);
             // Start aquisition
             arv::camera_start_acquisition(cam.get());
             arv_stream_set_emit_signals(stream.get(), true);

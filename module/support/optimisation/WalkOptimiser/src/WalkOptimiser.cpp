@@ -22,6 +22,7 @@
 #include <fmt/format.h>
 
 #include "message/support/SaveConfiguration.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 // Comment remains as an example of usage for this module.
@@ -114,7 +115,8 @@ namespace support {
 
 
             on<Every<25, Per<std::chrono::seconds>>, With<Sensors>, Sync<WalkOptimiser>>().then(
-                "Walk Data Manager", [this](const Sensors& sensors) {
+                "Walk Data Manager",
+                [this](const Sensors& sensors) {
                     // Record data
                     data.update(sensors);
                 });

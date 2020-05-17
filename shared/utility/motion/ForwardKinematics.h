@@ -28,6 +28,7 @@
 
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
+
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
@@ -57,8 +58,9 @@ namespace motion {
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Z);
             const float NECK_LENGTH = model.head.NECK_LENGTH;
-            const Eigen::Vector3d NECK_TO_CAMERA(
-                model.head.NECK_TO_CAMERA_X, model.head.NECK_TO_CAMERA_Y, model.head.NECK_TO_CAMERA_Z);
+            const Eigen::Vector3d NECK_TO_CAMERA(model.head.NECK_TO_CAMERA_X,
+                                                 model.head.NECK_TO_CAMERA_Y,
+                                                 model.head.NECK_TO_CAMERA_Z);
 
             // Translate to base of neck from origin
             runningTransform = runningTransform.translate(NECK_POS);
@@ -136,8 +138,9 @@ namespace motion {
             }
 
             // Hip pitch
-            runningTransform = runningTransform.translate(Eigen::Vector3d(
-                model.leg.HIP_OFFSET_X, negativeIfRight * model.leg.HIP_OFFSET_Y, -model.leg.HIP_OFFSET_Z));
+            runningTransform = runningTransform.translate(Eigen::Vector3d(model.leg.HIP_OFFSET_X,
+                                                                          negativeIfRight * model.leg.HIP_OFFSET_Y,
+                                                                          -model.leg.HIP_OFFSET_Z));
             // Rotate to face down the leg (see above for definitions of terms, including 'facing')
             runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
             // Using right hand rule along global z gives positive direction of yaw:
@@ -246,8 +249,9 @@ namespace motion {
             runningTransform =
                 runningTransform.rotate(Eigen::AngleAxisd(shoulder_pitch - M_PI_2, Eigen::Vector3d::UnitY()));
             // Translate to end of shoulder part
-            runningTransform = runningTransform.translate(Eigen::Vector3d(
-                model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT));
+            runningTransform = runningTransform.translate(Eigen::Vector3d(model.arm.SHOULDER_LENGTH,
+                                                                          negativeIfRight * model.arm.SHOULDER_WIDTH,
+                                                                          -model.arm.SHOULDER_HEIGHT));
             // Return matrix pointing forward out of shoulder, y same as global y. Pos = at centre of shoulder roll
             // joint
             positions[SHOULDER_PITCH] = runningTransform;
@@ -546,8 +550,11 @@ namespace motion {
 
             Eigen::Vector2d position =
                 foot.cwiseProduct(Eigen::Vector2d(model.leg.FOOT_LENGTH * 0.5, model.leg.FOOT_WIDTH * 0.5));
-            Eigen::Vector4d centerFoot = Eigen::Vector4d(
-                position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0.0, 1.0);
+            Eigen::Vector4d centerFoot =
+                Eigen::Vector4d(position[0],
+                                position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE,
+                                0.0,
+                                1.0);
 
             return ((left) ? sensors.forward_kinematics[ServoID::L_ANKLE_ROLL] * centerFoot
                            : sensors.forward_kinematics[ServoID::R_ANKLE_ROLL] * centerFoot);
@@ -578,8 +585,9 @@ namespace motion {
         inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const arma::vec3& a, bool isLeft) {
             int negativeIfRight = isLeft ? 1 : -1;
 
-            const arma::vec3 t1 = {
-                model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT};
+            const arma::vec3 t1 = {model.arm.SHOULDER_LENGTH,
+                                   negativeIfRight * model.arm.SHOULDER_WIDTH,
+                                   -model.arm.SHOULDER_HEIGHT};
             const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
                                    -model.arm.UPPER_ARM_LENGTH};
@@ -614,8 +622,9 @@ namespace motion {
                                    negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2.0,
                                    model.arm.SHOULDER_Z_OFFSET};
 
-            const arma::vec3 t1 = {
-                model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT};
+            const arma::vec3 t1 = {model.arm.SHOULDER_LENGTH,
+                                   negativeIfRight * model.arm.SHOULDER_WIDTH,
+                                   -model.arm.SHOULDER_HEIGHT};
             const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
                                    -model.arm.UPPER_ARM_LENGTH};
