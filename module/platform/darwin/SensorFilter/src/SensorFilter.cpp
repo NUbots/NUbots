@@ -24,6 +24,7 @@
 #include "message/platform/darwin/DarwinSensors.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
+#include "utility/math/filter/eigen/MahonyFilter.h"
 #include "utility/math/matrix/matrix.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/nusight/NUhelpers.h"
@@ -92,6 +93,7 @@ namespace platform {
             : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
 
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
+                bias               = Eigen::Vector3d(0, 0, 0);
                 this->config.debug = config["debug"].as<bool>();
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
@@ -463,6 +465,25 @@ namespace platform {
                      *             Motion (IMU+Odometry)            *
                      ************************************************/
 
+                    // MAHONEY STUFF
+                    Eigen::Vector3d rawGyro = sensors->gyroscope;
+                    Eigen::Vector3d rawAcc  = sensors->accelerometer;
+                    double ts = 0.009;  // Set this as config, or if we can get it from somewhere like hardware config?
+                    double Ki = 0;      // Set as config, integral proportional gain
+                    double Kp = 0;      // set as config
+                    Eigen::Quaternionf quat =
+                        previousSensors == NULL
+                            ? Eigen::Quaternionf(0, 1, 0, 0)
+                            : Eigen::Quaternionf(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
+                    // bias initialised as 0,0,0. Bias is member variable, mahoney updates it
+                    utility::math::filter::MahonyUpdate(rawAcc, rawGyro, ts, Ki, Kp, quat, bias);
+
+                    emit(graph("quaternion x:", quat.x()));
+                    emit(graph("quaternion y:", quat.y()));
+                    emit(graph("quaternion z:", quat.z()));
+                    log("Bias: ", bias.transpose());
+
+
                     // Gyroscope measurement update
                     motionFilter.measure(sensors->gyroscope,
                                          config.motionFilter.noise.measurement.gyroscope,
@@ -531,7 +552,9 @@ namespace platform {
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
-                    Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
+                    Hwt.linear() =
+                        quat.toRotationMatrix()
+                            .transpose();  // Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
                     Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
                     sensors->Htw      = Hwt.inverse().matrix();
 

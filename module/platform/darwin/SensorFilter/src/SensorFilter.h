@@ -110,6 +110,8 @@ namespace platform {
             bool leftDown   = false;
             bool middleDown = false;
 
+            Eigen::Vector3d bias;
+
             // Our sensor for foot down
             VirtualLoadSensor<float> load_sensor;
 
