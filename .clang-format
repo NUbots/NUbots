@@ -72,7 +72,7 @@ IncludeCategories:
   - Regex: '^".*"'
     Priority: 2
 IndentCaseLabels: true
-IndentPPDirectives: AfterHash
+IndentPPDirectives: None
 IndentWrappedFunctionNames: true
 IndentWidth: 4
 KeepEmptyLinesAtTheStartOfBlocks: true
