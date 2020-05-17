@@ -473,7 +473,7 @@ namespace platform {
                     double Kp = 0;      // set as config
                     Eigen::Quaterniond quat =
                         previousSensors == NULL
-                            ? Eigen::Quaterniond(0, 1, 0, 0)
+                            ? Eigen::Quaterniond(1, 0, 0, 0)
                             : Eigen::Quaterniond(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
                     // bias initialised as 0,0,0. Bias is member variable, Mahony updates it
                     utility::math::filter::MahonyUpdate(rawAcc, rawGyro, ts, Ki, Kp, quat, bias);
