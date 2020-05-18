@@ -143,10 +143,9 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-# GCC10 changed the default from -fcommon to -fno-common.
-# This causes multiple definition errors during linking for espeak
-RUN CFLAGS="-fcommon" CXXFLAGS="-fcommon" \
-    install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+COPY --chown=nubots:nubots usr/local/package/ocl-icd/gcc10.patch usr/local/package/gcc10.patch
+RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
+    /usr/local/package/gcc10.patch --
 
 # OpenBLAS
 RUN install-package gcc-fortran
