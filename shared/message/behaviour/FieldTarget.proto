@@ -24,7 +24,6 @@ package message.behaviour;
 /**
  * enum saying what the target is (SELF, BALL or GOAL).
  */
-
 message FieldTarget {
     enum Target {
         SELF = 0;

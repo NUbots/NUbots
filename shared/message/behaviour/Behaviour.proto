@@ -22,9 +22,8 @@ syntax = "proto3";
 package message.behaviour;
 
 /**
- * enum with state of robot's behaviour
+ * enum with state of robot's behaviour.
  */
-
 message Behaviour {
 
     enum State {
