@@ -22,26 +22,48 @@ package message.motion;
 
 import "Vector.proto";
 
+/**
+ * Empty message to indicate walk has begun.
+ */
 message WalkStarted {}
+
+/**
+ * Empty message to indicate walk has stopped.
+ */
 message WalkStopped {}
 
+/**
+ * Contains subsumption id and {x, y, radians} command vector.
+ */
 message WalkCommand {
     uint64 subsumptionId = 1;  // reservation identifier for servo control
     vec3   command       = 2;  // x and y are velocity in m/s and angle is in rads/s
 }
 
+/**
+ * Contains subsumption id to be stopped.
+ */
 message StopCommand {
     uint64 subsumptionId = 1;  // reservation identifier for servo control
 }
 
+/**
+ * Is a velocity target vector.
+ */
 message NewWalkCommand {
     vec3 velocityTarget = 1;
 }
 
+/**
+ * Contains subsumption id to be enabled.
+ */
 message EnableWalkEngineCommand {
     uint64 subsumptionId = 1;  // reservation identifier for servo control
 }
 
+/**
+ * Contains subsumption id to be disabled.
+ */
 message DisableWalkEngineCommand {
     uint64 subsumptionId = 1;  // reservation identifier for servo control
 }
