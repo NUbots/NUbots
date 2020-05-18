@@ -107,11 +107,11 @@ def generate_toolchain_script(target):
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 
         # Set our optimisation flags
-        export CFLAGS="{flags}"
-        export CXXFLAGS="${{CFLAGS}}"
-        export CPPFLAGS="${{CFLAGS}}"
-        export FFLAGS="${{CFLAGS}}"
-        export FCFLAGS="${{CFLAGS}}"
+        export CFLAGS="${{CFLAGS}} {flags}"
+        export CXXFLAGS="${{CXXFLAG}} ${{CFLAGS}}"
+        export CPPFLAGS="${{CPPFLAGS}} ${{CFLAGS}}"
+        export FFLAGS="${{FFLAGS}} ${{CFLAGS}}"
+        export FCFLAGS="${{FCFLAGS}} ${{CFLAGS}}"
         """
     )
 
