@@ -22,6 +22,9 @@ package message.behaviour;
 
 import "Vector.proto";
 
+/**
+ * Type of kick (scripted or IK) and kick target.
+ */
 message KickPlan {
     enum KickType {
         SCRIPTED = 0;
@@ -32,6 +35,9 @@ message KickPlan {
     KickType kickType = 2;
 }
 
+/**
+ * Boolean whether the robot wants to kick.
+ */
 message WantsToKick {
     bool kick = 1;
 }
