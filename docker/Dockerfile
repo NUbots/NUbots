@@ -6,7 +6,7 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-FROM archlinux:20200106
+FROM archlinux:20200505
 
 # Arch recommends running this as the first command of the docker image
 RUN pacman -Syu --noconfirm
