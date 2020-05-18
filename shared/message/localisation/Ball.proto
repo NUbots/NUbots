@@ -23,6 +23,9 @@ package message.localisation;
 import "Vector.proto";
 import "Matrix.proto";
 
+/**
+ * Contains ball position and position covariance.
+ */
 message Ball {
     // The ball measured in world space (rBWw)
     vec2 position = 1;
