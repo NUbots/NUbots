@@ -362,7 +362,7 @@ namespace platform {
                     }
                     else {
                         sensors->accelerometer =
-                            Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
+                            Eigen::Vector3d(input.accelerometer.x, -input.accelerometer.y, -input.accelerometer.z);
                     }
 
                     // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
