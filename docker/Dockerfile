@@ -240,10 +240,7 @@ RUN install-from-source ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.2.1.2.tar.
     --without-debug
 RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.gz
 COPY --chown=nubots:nubots usr/local/package/espeak.sh /usr/local/package/espeak.sh
-# GCC10 changed the default from -fcommon to -fno-common.
-# This causes multiple definition errors during linking for espeak
-RUN CFLAGS="-fcommon" CXXFLAGS="-fcommon" \
-    /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
+RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
 
 # Install python libraries
 RUN pip install \
