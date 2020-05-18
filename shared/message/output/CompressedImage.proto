@@ -25,6 +25,9 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Vector.proto";
 
+/**
+ * Contains lens and image output information.
+ */
 message CompressedImage {
     message Lens {
         enum Projection {
