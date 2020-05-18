@@ -143,9 +143,8 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-COPY --chown=nubots:nubots usr/local/package/ocl-icd/gcc10.patch usr/local/package/gcc10.patch
 RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
-    /usr/local/package/gcc10.patch --
+    https://github.com/OCL-dev/ocl-icd/commit/f83df609a3357314ddff2def6b7e7e2c5b93078c.patch --
 
 # OpenBLAS
 RUN install-package gcc-fortran
