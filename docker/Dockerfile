@@ -6,7 +6,7 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-FROM archlinux:20200106
+FROM archlinux:20200505
 
 # Arch recommends running this as the first command of the docker image
 RUN pacman -Syu --noconfirm
@@ -32,10 +32,17 @@ RUN install-package \
     meson \
     git
 
+# Prevent gcc, gcc-libs, and gcc-fortran from being upgraded
+RUN sed -e 's/#IgnorePkg.*$/IgnorePkg = gcc gcc-libs gcc-fortran/' -i /etc/pacman.conf
+
+# Downgrade gcc version
+RUN pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc/gcc-9.3.0-1-x86_64.pkg.tar.zst \
+    https://archive.archlinux.org/packages/g/gcc-libs/gcc-libs-9.3.0-1-x86_64.pkg.tar.zst
+
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-COPY --chown=root:root etc/pip.conf /etc/pip.conf
+COPY --chown=root:root usr/pip.conf /usr/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY --chown=root:root etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
@@ -143,10 +150,12 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
+    https://github.com/OCL-dev/ocl-icd/commit/f83df609a3357314ddff2def6b7e7e2c5b93078c.patch --
 
 # OpenBLAS
-RUN install-package gcc-fortran
+#RUN install-package gcc-fortran
+RUN sudo pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc-fortran/gcc-fortran-9.3.0-1-x86_64.pkg.tar.zst
 COPY --chown=nubots:nubots usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 
@@ -242,7 +251,6 @@ RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases
 # Install python libraries
 RUN pip install \
     pylint \
-    isort \
     termcolor \
     stringcase \
     Pillow \
@@ -263,8 +271,9 @@ RUN install-package \
     nano
 
 # Install formatters as last step so if they change the image is easy to update
-RUN pip install \
+RUN pip install --upgrade \
     cmake-format==0.6.9 \
+    isort \
     black==19.10b0
 
 #######################################
@@ -276,6 +285,7 @@ RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
 COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
 COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
+COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 
 # Setup the locations where we will mount our folders
