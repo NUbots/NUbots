@@ -67,7 +67,7 @@ message KickPlannerConfig {
 message KickFinished {}
 
 /**
- * Contains stand heigh for IK kick.
+ * Contains stand height for IK kick.
  */
 message IKKickParams {
     float stand_height = 1;
