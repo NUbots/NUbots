@@ -41,13 +41,6 @@ RUN install-package \
     meson \
     git
 
-# Prevent gcc, gcc-libs, and gcc-fortran from being upgraded
-RUN sed -e 's/#IgnorePkg.*$/IgnorePkg = gcc gcc-libs gcc-fortran/' -i /etc/pacman.conf
-
-# Downgrade gcc version
-RUN pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc/gcc-9.3.0-1-x86_64.pkg.tar.zst \
-    https://archive.archlinux.org/packages/g/gcc-libs/gcc-libs-9.3.0-1-x86_64.pkg.tar.zst
-
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
@@ -163,8 +156,7 @@ RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/
     https://github.com/OCL-dev/ocl-icd/commit/f83df609a3357314ddff2def6b7e7e2c5b93078c.patch --
 
 # OpenBLAS
-#RUN install-package gcc-fortran
-RUN sudo pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc-fortran/gcc-fortran-9.3.0-1-x86_64.pkg.tar.zst
+RUN install-package gcc-fortran
 COPY --chown=nubots:nubots usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 
