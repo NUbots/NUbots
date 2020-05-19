@@ -8,8 +8,17 @@
 ##############################################
 FROM archlinux:20200505
 
+############################################################################
+###                                                                      ###
+### NOTE: IF YOU CHANGE THE ARCH LINUX IMAGE DATE UPDATE THE MIRRORLIST  ###
+###       TO CONTAIN THE SAME DATE                                       ###
+###                                                                      ###
+############################################################################
+COPY --chown=root:root etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
+
 # Arch recommends running this as the first command of the docker image
-RUN pacman -Syu --noconfirm
+# Use "yyuu" to allow for downgrades
+RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Create the nubots user, and setup sudo so no password is required
 RUN useradd --no-log-init -m -U nubots
