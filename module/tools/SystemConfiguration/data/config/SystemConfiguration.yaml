@@ -42,7 +42,9 @@ groups:
   - u3v
 
 # Necessary symlinks
+# Link format
 # target: name
+# will create a link to target with name
 links:
   /run/systemd/resolve/stub-resolv.conf: /etc/resolv.conf
   /usr/share/zoneinfo/Australia/Sydney: /etc/localtime
