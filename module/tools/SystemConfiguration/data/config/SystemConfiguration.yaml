@@ -8,16 +8,27 @@ permissions:
 
 # Pacman packages that should be installed and updated
 pacman:
-  - dhcp
   - linux-headers
   - screen
+  - wpa_supplicant
+  - openssh
+  - vim
+  - nano
+  - wget
+  - htop
+  - gdb
+  - bluez
+  - bluez-utils
+  - rsync
+  - zsh
+  - zsh-completions
+  - git
 
 # Systemd units that should be enabled
 systemd:
   - systemd-networkd.service
   - systemd-resolved.service
   - systemd-timesyncd.service
-  - dhcpd4.service
   - sshd.service
   - wpa_supplicant.service
 

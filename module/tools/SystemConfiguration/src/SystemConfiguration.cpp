@@ -147,10 +147,10 @@ namespace tools {
                 }
                 else if (!fs::exists(link) || fs::is_symlink(link)) {
                     if (fs::exists(link) && fs::read_symlink(link).compare(target) == 0) {
-                        log<NUClear::DEBUG>(fmt::format("Link '{} -> {}' already exists", link, target));
+                        log<NUClear::TRACE>(fmt::format("Link '{} -> {}' already exists", link, target));
                     }
                     else {
-                        log<NUClear::DEBUG>(fmt::format("Creating link {} -> {}", target, link));
+                        log<NUClear::INFO>(fmt::format("Creating link {} -> {}", target, link));
                         fs::create_symlink(target, link);
                     }
                 }
