@@ -10,8 +10,6 @@ permissions:
 pacman:
   - dhcp
   - linux-headers
-  - nvidia-dkms
-  - ocl-icd
   - screen
 
 # Systemd units that should be enabled
@@ -20,3 +18,17 @@ systemd:
   - systemd-resolved.service
   - systemd-timesyncd.service
   - dhcpd4.service
+  - sshd.service
+  - wpa_supplicant.service
+
+# Necessary symlinks
+# target: name
+links:
+  /run/systemd/resolve/stub-resolv.conf: /etc/resolv.conf
+  /usr/share/zoneinfo/Australia/Sydney: /etc/localtime
+
+# Generate locale
+generate_locale: True
+
+# Generate grub config
+generate_grub: True

@@ -1,0 +1,9 @@
+# Set permissions for ttyUSB0 (CM740) and video* (webcam) devices
+KERNEL=="ttyUSB*", MODE="0666"
+KERNEL=="video*", MODE="0666"
+
+# Symlink the CM740 device to /dev/CM740
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666", SYMLINK+="CM740"
+
+# Make sure FLIR cameras end up in the u3v group
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1e10", GROUP="u3v"

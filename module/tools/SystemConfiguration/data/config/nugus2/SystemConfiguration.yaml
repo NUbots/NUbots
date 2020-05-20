@@ -1,0 +1,9 @@
+# Systemd units that should be enabled
+systemd:
+  - systemd-networkd.service
+  - systemd-resolved.service
+  - systemd-timesyncd.service
+  - dhcpd4.service
+  - sshd.service
+  - wpa_supplicant.service
+  - wpa_supplicant@wlan0

@@ -1,0 +1,17 @@
+[Unit]
+Description="RoboCup auto-start unit"
+Wants=network.target
+After=network.target
+RequiresMountsFor=/home/nubots
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/home/nubots
+User=nubots
+Environment=HOME="/home/nubots/"
+PassEnvironment=HOME
+ExecStart=/home/nubots/robocup
+
+[Install]
+WantedBy=multi-user.target

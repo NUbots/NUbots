@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <string>
 
 #include "extension/Configuration.h"
 
@@ -133,12 +134,37 @@ namespace tools {
                 }
             }
 
+            /************
+             * SYMLINKS *
+             ************/
+            log<NUClear::INFO>("Ensuring relevant symlinks exist");
+            for (const auto& l : config["links"].config) {
+                std::string target = l.first.as<std::string>();
+                std::string link   = l.second.as<std::string>();
+                log<NUClear::TRACE>(fmt::format("Checking link {} -> {}", link, target));
+                if (fs::exists(target)) {
+                    log<NUClear::WARN>(fmt::format("Link target '{}' doesn't exist. Skipping", target));
+                }
+                else if (!fs::exists(link) || fs::is_symlink(link)) {
+                    if (fs::exists(link) && fs::read_symlink(link).compare(target) == 0) {
+                        log<NUClear::DEBUG>(fmt::format("Link '{} -> {}' already exists", link, target));
+                    }
+                    else {
+                        log<NUClear::DEBUG>(fmt::format("Creating link {} -> {}", target, link));
+                        fs::create_symlink(target, link);
+                    }
+                }
+                else {
+                    log<NUClear::WARN>(fmt::format("{} is not a symlink. Skipping", link));
+                }
+            }
+
             /**********
              * PACMAN *
              **********/
             log<NUClear::INFO>("Ensuring relevant pacman packages are installed");
             log<NUClear::DEBUG>("Updating existing packages and upgrading");
-            std::system("pacman -Syu --noconfirm");
+            std::system("pacman -Syyuu --noconfirm --needed --overwrite \\*");
             for (const auto& c : config["pacman"].config) {
                 std::string package = c.as<std::string>();
                 log<NUClear::TRACE>(fmt::format("Checking package {}", package));
@@ -159,6 +185,22 @@ namespace tools {
                     log<NUClear::DEBUG>(fmt::format("Enabling systemd unit {}", unit));
                     std::system(fmt::format("systemctl enable {}", unit).c_str());
                 }
+            }
+
+            /**********
+             * LOCALE *
+             **********/
+            if (config["generate_locale"].as<bool>()) {
+                log<NUClear::INFO>("Ensuring locales are generated");
+                std::system("locale-gen");
+            }
+
+            /********
+             * GRUB *
+             ********/
+            if (config["generate_grub"].as<bool>()) {
+                log<NUClear::INFO>("Ensuring grub config is generated");
+                std::system("grub-mkconfig -o /boot/grub/grub.cfg");
             }
         });
 

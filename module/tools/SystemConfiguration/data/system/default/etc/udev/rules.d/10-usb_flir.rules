@@ -1,2 +1,0 @@
-# Make sure FLIR cameras end up in the u3v group
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1e10", GROUP="u3v"
