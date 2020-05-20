@@ -235,6 +235,32 @@ namespace tools {
             ofs_hosts << "::1             localhost" << std::endl;
             ofs_hosts << "127.0.1.1       " << hostname << std::endl;
             ofs_hosts.close();
+
+            /**********
+             * GROUPS *
+             **********/
+            log<NUClear::INFO>("Ensuring relevant groups exist");
+            std::string groups(utility::file::loadFromFile("/etc/group"));
+            for (const auto& g : config["groups"].config) {
+                std::string group = g.as<std::string>();
+                std::string user  = config["user"].as<std::string>();
+                log<NUClear::TRACE>(fmt::format("Checking group {} for user {}", group, user));
+
+                auto pos = groups.find(group);
+                if (pos == std::string::npos) {
+                    log<NUClear::INFO>(
+                        fmt::format("Group {} doesn't exist. Creating it and adding user {}", group, user));
+                    std::system(fmt::format("groupadd {}", group).c_str());
+                    std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
+                }
+                else {
+                    auto eol = groups.find("\n", pos);
+                    if (groups.substr(pos, eol - pos).find(user) == std::string::npos) {
+                        log<NUClear::INFO>(fmt::format("Adding user {} to group {}", user, group));
+                        std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
+                    }
+                }
+            }
         });
 
         // Exit here once all the reactions have run

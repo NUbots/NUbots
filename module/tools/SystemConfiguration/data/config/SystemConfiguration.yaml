@@ -1,6 +1,9 @@
 # Change this to debug or lower to see the files getting checked
 log_level: DEBUG
 
+# Username
+user: nubots
+
 # File permissions that need to be set
 permissions:
   /etc/sudoers.d/insults: 0440
@@ -31,6 +34,12 @@ systemd:
   - systemd-timesyncd.service
   - sshd.service
   - wpa_supplicant.service
+
+# Groups that should exist and that the user should be a member of
+groups:
+  - wheel
+  - lp
+  - u3v
 
 # Necessary symlinks
 # target: name
