@@ -298,6 +298,15 @@ namespace tools {
                           << "source /usr/share/fzf/completion.zsh" << std::endl;
                 ofs_zshrc.close();
             }
+
+            /***********
+             * CLEANUP *
+             ***********/
+            log<NUClear::INFO>("Ensuring correct ownership is maintained");
+            log<NUClear::INFO>(fmt::format("Forcing ownership to {0}:{0} in {1}", user, home));
+            std::system(fmt::format("chown -R {0}:{0} {1}", user, home).c_str());
+            log<NUClear::INFO>(fmt::format("Forcing ownership to {0}:{0} in /usr/local", user));
+            std::system(fmt::format("chown -R {0}:{0} /usr/local", user).c_str());
         });
 
         // Exit here once all the reactions have run
