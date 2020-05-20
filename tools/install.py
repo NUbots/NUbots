@@ -48,6 +48,10 @@ def run(target, user, config, toolchain, **kwargs):
 
         user = getpass.getuser()
 
+    # Make sure ssh keys are installed on the target
+    # This will ask the user for a password if the key does not already exist on the target
+    subprocess.Popen("ssh-copy-id -i $HOME/.ssh/id_rsa.pub {}@{}".format(user, target), shell=True)
+
     # Target location to install to
     target_dir = "{0}@{1}:/home/{0}/".format(user, target)
     build_dir = b.binary_dir
