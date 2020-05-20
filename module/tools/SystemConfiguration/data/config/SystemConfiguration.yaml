@@ -23,6 +23,7 @@ pacman:
   - bluez
   - bluez-utils
   - rsync
+  - fzf
   - zsh
   - zsh-completions
   - git
