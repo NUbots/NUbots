@@ -73,6 +73,9 @@ namespace tools {
             if (config["log_level"].as<std::string>() == "ERROR") log_level = NUClear::ERROR;
             if (config["log_level"].as<std::string>() == "FATAL") log_level = NUClear::FATAL;
 
+            // The current user
+            std::string user = config["user"].as<std::string>();
+
             // Get the hostname
             char hostname_c[255];
             if (gethostname(hostname_c, 255) != 0) {
@@ -243,7 +246,6 @@ namespace tools {
             std::string groups(utility::file::loadFromFile("/etc/group"));
             for (const auto& g : config["groups"].config) {
                 std::string group = g.as<std::string>();
-                std::string user  = config["user"].as<std::string>();
                 log<NUClear::TRACE>(fmt::format("Checking group {} for user {}", group, user));
 
                 auto pos = groups.find(group);
@@ -260,6 +262,41 @@ namespace tools {
                         std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
                     }
                 }
+            }
+
+            /*******
+             * ZSH *
+             *******/
+            log<NUClear::INFO>("Ensuring zsh is configured");
+            fs::path home         = fs::path("/home") / user;
+            fs::path zprezto_root = home / ".zprezto";
+            if (!fs::exists(zprezto_root) {
+                log<NUClear::INFO>(fmt::format("Cloning zprezto to {}", zprezto_root));
+                std::system(
+                    fmt::format("git clone --recursive https://github.com/sorin-ionescu/prezto.git {}", zprezto_root)
+                        .c_str());
+
+                log<NUClear::INFO>("Making zprezto symlinks");
+                for (const auto& p : fs::directory_iterator(zprezto_root / "runcoms")) {
+                    if (p.is_regular_file() && p.path().filename().string()[0] == 'z') {
+                        fs::path target = p.path();
+                        fs::path link   = home / fmt::format(".{}", p.path().filename());
+
+                        log<NUClear::TRACE>("Making link {} -> {}", link, target);
+                        fs::create_symlink(target, link);
+                    }
+                }
+
+                log<NUClear::INFO>("Changing user shell to zsh");
+                std::system(fmt::format("chsh zsh {}", user).c_str());
+
+                log<NUClear::INFO>("Appending fuzzy find scripts to zshrc");
+                std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
+                ofs_zshrc << std::endl
+                          << "# Source the fuzzy find scripts" << std::endl
+                          << "source /usr/share/fzf/key-bindings.zsh" << std::endl
+                          << "source /usr/share/fzf/completion.zsh" << std::endl;
+                ofs_zshrc.close();
             }
         });
 
