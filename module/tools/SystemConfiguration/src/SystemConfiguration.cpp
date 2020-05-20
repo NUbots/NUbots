@@ -225,6 +225,16 @@ namespace tools {
             ofs_motd << ifs_logo.rdbuf() << big_text(hostname);
             ofs_motd.close();
             ifs_logo.close();
+
+            /*********
+             * HOSTS *
+             *********/
+            log<NUClear::INFO>("Ensuring hosts is generated");
+            std::ofstream ofs_hosts("/etc/hosts");
+            ofs_hosts << "127.0.0.1       localhost" << std::endl;
+            ofs_hosts << "::1             localhost" << std::endl;
+            ofs_hosts << "127.0.1.1       " << hostname << std::endl;
+            ofs_hosts.close();
         });
 
         // Exit here once all the reactions have run
