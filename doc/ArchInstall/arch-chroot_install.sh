@@ -40,9 +40,13 @@ pacman -S --noconfirm --needed sudo
 
 # Setup users of the wheel group to be able to execute sudo commands with no password
 echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel
+chown root:root /etc/sudoers.d/wheel
+chmod 0440 /etc/sudoers.d/wheel
 
 # Get sudo to insult users when they type a password wrong
 echo "Defaults insults" > /etc/sudoers.d/insults
+chown root:root /etc/sudoers.d/wheel
+chmod 0440 /etc/sudoers.d/insults
 
 # Add u3v group and create our user
 groupadd u3v
