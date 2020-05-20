@@ -6,9 +6,11 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <sstream>
 #include <string>
 
 #include "extension/Configuration.h"
+#include "glyphs.h"
 
 namespace module {
 namespace tools {
@@ -41,6 +43,17 @@ namespace tools {
                            ((p & fs::perms::others_read) != fs::perms::none ? "r" : "-"),
                            ((p & fs::perms::others_write) != fs::perms::none ? "w" : "-"),
                            ((p & fs::perms::others_exec) != fs::perms::none ? "x" : "-"));
+    }
+
+    std::string big_text(const std::string& text) {
+        std::stringstream output;
+        for (int row = 0; row < 8; ++row) {
+            for (const char& c : text) {
+                output << glyphs[row][int(c)];
+            }
+            output << "\n";
+        }
+        return output.str();
     }
 
     SystemConfiguration::SystemConfiguration(std::unique_ptr<NUClear::Environment> environment)
@@ -202,6 +215,16 @@ namespace tools {
                 log<NUClear::INFO>("Ensuring grub config is generated");
                 std::system("grub-mkconfig -o /boot/grub/grub.cfg");
             }
+
+            /********
+             * MOTD *
+             ********/
+            log<NUClear::INFO>("Ensuring motd is generated");
+            std::ofstream ofs_motd("/etc/motd");
+            std::ifstream ifs_logo("system/default/etc/motd");
+            ofs_motd << ifs_logo.rdbuf() << big_text(hostname);
+            ofs_motd.close();
+            ifs_logo.close();
         });
 
         // Exit here once all the reactions have run
