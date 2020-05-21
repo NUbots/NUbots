@@ -38,7 +38,7 @@ message KickPlan {
     /**
      * Where the robot wants to kick to.
      */
-    vec2     target   = 1;
+    vec2 target = 1;
 
     /**
      * The type of this kick plan - scripted or IK.
