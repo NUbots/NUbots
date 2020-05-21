@@ -6,7 +6,7 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-FROM archlinux:20200106
+FROM archlinux:20200505
 
 # Arch recommends running this as the first command of the docker image
 RUN pacman -Syu --noconfirm
@@ -31,6 +31,13 @@ RUN install-package \
     cmake \
     meson \
     git
+
+# Prevent gcc, gcc-libs, and gcc-fortran from being upgraded
+RUN sed -e 's/#IgnorePkg.*$/IgnorePkg = gcc gcc-libs gcc-fortran/' -i /etc/pacman.conf
+
+# Downgrade gcc version
+RUN pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc/gcc-9.3.0-1-x86_64.pkg.tar.zst \
+    https://archive.archlinux.org/packages/g/gcc-libs/gcc-libs-9.3.0-1-x86_64.pkg.tar.zst
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -143,10 +150,12 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
+    https://github.com/OCL-dev/ocl-icd/commit/f83df609a3357314ddff2def6b7e7e2c5b93078c.patch --
 
 # OpenBLAS
-RUN install-package gcc-fortran
+#RUN install-package gcc-fortran
+RUN sudo pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc-fortran/gcc-fortran-9.3.0-1-x86_64.pkg.tar.zst
 COPY --chown=nubots:nubots usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 

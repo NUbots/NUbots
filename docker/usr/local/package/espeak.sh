@@ -34,6 +34,9 @@ echo "Configuring using configure file ${AUTOGEN_FILE}"
 # We have to run ldconfig as it wants to do things with the libraries
 sudo ldconfig
 
+# [PATCH] fix #699: avoid samplerate clashing with LTO in gcc 10.
+wget https://github.com/espeak-ng/espeak-ng/commit/812ea8131904a6e171209220feb75842f6453d69.patch -O - | patch -Np1
+
 # Run autogen
 ./autogen.sh
 
