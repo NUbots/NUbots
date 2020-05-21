@@ -55,37 +55,21 @@ namespace platform {
          ***************************
          */
 
-
-        /*
-         * Receive a packet from the sim and emit it for the robot
-         *
-        on<UDP>(config.inPort).then([this](const UDP::Packet packet) {
-            log("UDP message received");
-            log(packet.payload.data());
-
-            if (packet.valid) {
-                std::string data = std::string(packet.payload.begin(), packet.payload.end());
-
-                message::platform::darwin::DarwinSensors sensors =
-                    NUClear::util::serialise::Serialise<message::platform::darwin::DarwinSensors>::deserialise(
-                        packet.payload);
-                emit(std::make_unique<message::platform::darwin::DarwinSensors>(sensors));
-            }
-        });*/
-
         /*
          * Receive a packet from the sim and emit it for the robot
          */
-        on<UDP::Broadcast>(config.inPort).then([this](const UDP::Packet packet) {
+        on<UDP>(config.inPort).then([this](const UDP::Packet& packet) {
             log("UDP message received");
-            log(packet.payload.data());
 
-            if (packet.valid) {
-                std::string data = std::string(packet.payload.begin(), packet.payload.end());
+            if (packet) {
+                std::vector<char> tmp = packet.payload;
+
+                while (tmp.back() == '\0') {
+                    tmp.pop_back();
+                }
 
                 message::platform::darwin::DarwinSensors sensors =
-                    NUClear::util::serialise::Serialise<message::platform::darwin::DarwinSensors>::deserialise(
-                        packet.payload);
+                    NUClear::util::serialise::Serialise<message::platform::darwin::DarwinSensors>::deserialise(tmp);
                 emit(std::make_unique<message::platform::darwin::DarwinSensors>(sensors));
             }
         });
