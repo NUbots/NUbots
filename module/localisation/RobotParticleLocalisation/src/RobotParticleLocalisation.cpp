@@ -1,10 +1,12 @@
 #include "RobotParticleLocalisation.h"
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
 #include "message/localisation/Field.h"
 #include "message/localisation/ResetRobotHypotheses.h"
 #include "message/vision/Goal.h"
+
 #include "utility/localisation/transform.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
@@ -35,7 +37,8 @@ namespace localisation {
         last_time_update_time        = NUClear::clock::now();
 
         on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
-            "Time Update", [this]() {
+            "Time Update",
+            [this]() {
                 /* Perform time update */
                 using namespace std::chrono;
                 auto curr_time        = NUClear::clock::now();
@@ -59,7 +62,8 @@ namespace localisation {
             });
 
         on<Trigger<VisionGoals>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
-            "Measurement Update", [this](const VisionGoals& goals, const FieldDescription& fd) {
+            "Measurement Update",
+            [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.goals.empty()) {
                     /* Perform time update */
                     using namespace std::chrono;
@@ -95,7 +99,8 @@ namespace localisation {
             });
 
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
-            "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
+            "Reset Robot Hypotheses",
+            [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 Transform3D Hfw;
                 const Transform3D& Htw = convert(sensors.Htw);
                 std::vector<arma::vec3> states;

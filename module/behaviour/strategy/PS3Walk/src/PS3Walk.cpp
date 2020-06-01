@@ -25,6 +25,7 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KickCommand.h"
+
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"

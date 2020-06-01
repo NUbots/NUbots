@@ -22,6 +22,7 @@
 #include <atomic>
 
 #include "extension/Configuration.h"
+
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/GlobalConfig.h"
 
