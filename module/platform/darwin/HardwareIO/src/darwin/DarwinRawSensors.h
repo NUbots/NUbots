@@ -54,12 +54,32 @@ namespace Types {
      * @brief This represents the data that comes from one of the MX28 motors
      */
     struct MX28Data {
-        MX28Data() : presentPosition(0), presentSpeed(0), load(0), voltage(0), temperature(0) {}
+        MX28Data()
+            : presentPosition(0)
+            , presentSpeed(0)
+            , load(0)
+            , voltage(0)
+            , temperature(0)
+            , registered_instruction(0)
+            , reserved2(0)
+            , moving(0)
+            , lock(0)
+            , punch(0)
+            , realtime_tick(0)
+            , current(0) {}
         uint16_t presentPosition;
         uint16_t presentSpeed;
         uint16_t load;
         uint8_t voltage;
         uint8_t temperature;
+        uint8_t registered_instruction;
+        uint8_t reserved2;
+        uint8_t moving;
+        uint8_t lock;
+        uint16_t punch;
+        uint16_t realtime_tick;
+        uint8_t reserved[16] = {0};
+        uint16_t current;
     };
 
     /**

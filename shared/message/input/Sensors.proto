@@ -42,6 +42,7 @@ message Sensors {
         float  load             = 11;
         float  voltage          = 12;
         float  temperature      = 13;
+        float  current          = 14;
     }
 
     message Button {
@@ -63,8 +64,8 @@ message Sensors {
     vec3                      accelerometer = 2;
     vec3                      gyroscope     = 3;
 
-    /// This is the transform from the odometry (world) space to robot space (=Htw). It measures the world in robot
-    /// space.
+    /// This is the transform from the odometry (world) space to robot space
+    /// (=Htw). It measures the world in robot space.
     mat4            Htw                = 4;
     repeated FSR    fsr                = 5;
     repeated Servo  servo              = 6;
@@ -75,7 +76,8 @@ message Sensors {
     vec3            centre_of_pressure = 11;
     mat2            robot_to_IMU       = 12;
 
-    /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR sensors have weight this is 0.75
+    /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR
+    /// sensors have weight this is 0.75
     bool          left_foot_down     = 13;
     bool          right_foot_down    = 14;
     repeated mat4 forward_kinematics = 15 [(array_size) = 20];

@@ -118,7 +118,7 @@ void Darwin::buildBulkReadPacket() {
                   "The CM740 type is the wrong size");
 
     // Double check that our type is big enough to hold the result
-    static_assert(sizeof(Types::MX28Data) == MX28::Address::PRESENT_TEMPERATURE - MX28::Address::PRESENT_POSITION_L + 1,
+    static_assert(sizeof(Types::MX28Data) == MX28::Address::CURRENT_H - MX28::Address::PRESENT_POSITION_L + 1,
                   "The MX28 type is the wrong size");
 
     // Double check that our type is big enough to hold the result
