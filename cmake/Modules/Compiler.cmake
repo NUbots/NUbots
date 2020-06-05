@@ -1,6 +1,8 @@
-# We need noncall exceptions so we can throw exceptions from signal handlers. This allows us to catch null pointer
-# exceptions. no-int-in-bool-context is to silence a warning from Eigen.
-add_compile_options(-Wall -Wpedantic -Wextra -Wno-int-in-bool-context -fnon-call-exceptions)
+# We need noncall exceptions so we can throw exceptions from signal handlers.
+# This allows us to catch null pointer exceptions. no-int-in-bool-context is to
+# silence a warning from Eigen.
+add_compile_options(-Wall -Wpedantic -Wextra -Wno-int-in-bool-context
+                    -fnon-call-exceptions)
 
 # C++17 allows eigen to not need to worry about alignment
 set(CMAKE_CXX_STANDARD 17)
@@ -14,7 +16,8 @@ list(APPEND CMAKE_INSTALL_RPATH /usr/local/lib)
 # GNU Compiler
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
   # Enable colours on g++ 4.9 or greater
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9
+     OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
     add_compile_options(-fdiagnostics-color=always)
   endif()
 endif()

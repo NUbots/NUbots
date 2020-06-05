@@ -36,5 +36,7 @@ set(NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
     Eigen3::Eigen
     -ldl
     -lbacktrace
-    CACHE PATH "Additional libraries used when linking roles, extensions, and utilities" FORCE
-)
+    CACHE
+      PATH
+      "Additional libraries used when linking roles, extensions, and utilities"
+      FORCE)

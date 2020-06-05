@@ -11,9 +11,9 @@ function(ToolchainLibraryFinder)
       "BINARY"
       "VERSION_FILE"
       "VERSION_BINARY_ARGUMENTS"
-      "VERSION_REGEX"
-  )
-  cmake_parse_arguments(PACKAGE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+      "VERSION_REGEX")
+  cmake_parse_arguments(PACKAGE "${options}" "${oneValueArgs}"
+                        "${multiValueArgs}" ${ARGN})
 
   # Clear our required_vars variable
   unset(required_vars)
@@ -26,15 +26,13 @@ function(ToolchainLibraryFinder)
       "${PACKAGE_NAME}_INCLUDE_DIR"
       NAMES ${PACKAGE_HEADER}
       DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) include directory"
-      PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
-    )
+      PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX})
 
     # Setup and export our variables
     set(required_vars ${required_vars} "${PACKAGE_NAME}_INCLUDE_DIR")
     set(${PACKAGE_NAME}_INCLUDE_DIRS
         ${${PACKAGE_NAME}_INCLUDE_DIR}
-        PARENT_SCOPE
-    )
+        PARENT_SCOPE)
     mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR ${PACKAGE_NAME}_INCLUDE_DIRS)
 
   endif(PACKAGE_HEADER)
@@ -45,15 +43,13 @@ function(ToolchainLibraryFinder)
       "${PACKAGE_NAME}_LIBRARY"
       NAMES ${PACKAGE_LIBRARY}
       PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
-      DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) library"
-    )
+      DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) library")
 
     # Setup and export our variables
     set(required_vars ${required_vars} "${PACKAGE_NAME}_LIBRARY")
     set(${PACKAGE_NAME}_LIBRARIES
         ${${PACKAGE_NAME}_LIBRARY}
-        PARENT_SCOPE
-    )
+        PARENT_SCOPE)
     mark_as_advanced(${PACKAGE_NAME}_LIBRARY ${PACKAGE_NAME}_LIBRARIES)
 
   endif(PACKAGE_LIBRARY)
@@ -64,26 +60,26 @@ function(ToolchainLibraryFinder)
       "${PACKAGE_NAME}_BINARY"
       NAMES ${PACKAGE_BINARY}
       PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
-      DOC "The ${PACKAGE_NAME} (${PACKAGE_BINARY}) executable prgram"
-    )
+      DOC "The ${PACKAGE_NAME} (${PACKAGE_BINARY}) executable prgram")
 
     # Setup and export our variables
     set(required_vars ${required_vars} "${PACKAGE_NAME}_BINARY")
     set(${PACKAGE_NAME}_BINARY
         ${${PACKAGE_NAME}_BINARY}
-        PARENT_SCOPE
-    )
+        PARENT_SCOPE)
     mark_as_advanced(${PACKAGE_NAME}_BINARY)
 
   endif(PACKAGE_BINARY)
 
   # Find our version if we can
-  if((PACKAGE_VERSION_FILE AND PACKAGE_HEADER) OR (PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY))
+  if((PACKAGE_VERSION_FILE AND PACKAGE_HEADER)
+     OR (PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY))
     unset(full_version_string)
 
     # Read our package version file into a variable
     if(PACKAGE_VERSION_FILE AND PACKAGE_HEADER)
-      file(READ "${${PACKAGE_NAME}_INCLUDE_DIR}/${PACKAGE_VERSION_FILE}" full_version_string)
+      file(READ "${${PACKAGE_NAME}_INCLUDE_DIR}/${PACKAGE_VERSION_FILE}"
+           full_version_string)
     endif(PACKAGE_VERSION_FILE AND PACKAGE_HEADER)
 
     # Execute our binary to get a version string
@@ -91,19 +87,20 @@ function(ToolchainLibraryFinder)
       exec_program(
         ${${PACKAGE_NAME}_BINARY} ARGS
         ${PACKAGE_VERSION_BINARY_ARGUMENTS} OUTPUT_VARIABLE
-        full_version_string
-      )
+        full_version_string)
     endif(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
 
     # Build up our version string
     set(${PACKAGE_NAME}_VERSION "")
     foreach(regex ${PACKAGE_VERSION_REGEX})
-      string(REGEX REPLACE ".*${regex}.*" "\\1" regex_output ${full_version_string})
+      string(REGEX REPLACE ".*${regex}.*" "\\1" regex_output
+                           ${full_version_string})
       set(${PACKAGE_NAME}_VERSION ${${PACKAGE_NAME}_VERSION} ${regex_output})
     endforeach(regex)
     string(REPLACE ";" "." ${PACKAGE_NAME}_VERSION "${${PACKAGE_NAME}_VERSION}")
 
-  endif((PACKAGE_VERSION_FILE AND PACKAGE_HEADER) OR (PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY))
+  endif((PACKAGE_VERSION_FILE AND PACKAGE_HEADER)
+        OR (PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY))
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(
@@ -120,7 +117,6 @@ function(ToolchainLibraryFinder)
   # Export our found variable to parent scope
   set(${PACKAGE_NAME}_FOUND
       ${PACKAGE_NAME}_FOUND
-      PARENT_SCOPE
-  )
+      PARENT_SCOPE)
 
 endfunction(ToolchainLibraryFinder)

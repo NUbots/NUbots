@@ -1,14 +1,16 @@
 include(ExternalProject)
 
-# ######################################################################################################################
+# ##############################################################################
 # CM730 Firmware builds for both Darwin and Igus models
-# ######################################################################################################################
+# ##############################################################################
 
 set(firmware_source "${CMAKE_CURRENT_BINARY_DIR}/CM730Firmware")
 set(firmware_dir "${CMAKE_BINARY_DIR}/firmware")
-set(bin_files "${firmware_source}/build/cm730_3cell.bin" "${firmware_source}/build/cm730_4cell.bin"
-              "${firmware_source}/build/cm740_3cell.bin" "${firmware_source}/build/cm740_4cell.bin"
-)
+set(bin_files
+    "${firmware_source}/build/cm730_3cell.bin"
+    "${firmware_source}/build/cm730_4cell.bin"
+    "${firmware_source}/build/cm740_3cell.bin"
+    "${firmware_source}/build/cm740_4cell.bin")
 
 ExternalProject_Add(
   CM730Firmware
@@ -26,8 +28,7 @@ ExternalProject_Add(
   INSTALL_DIR "${firmware_source}/build"
   INSTALL_COMMAND ""
                   # We dont need to do any testing.
-  TEST_COMMAND ""
-)
+  TEST_COMMAND "")
 
 # Build our NUClear module
 foreach(bin_file ${bin_files})

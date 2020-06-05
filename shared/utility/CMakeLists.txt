@@ -37,11 +37,11 @@ endforeach()
 # Compile the nutilities library
 add_library(nutilities ${NUTILITIES_LIBRARIES_FILES})
 
-# Link in our messaging library to ensure they are built first Also link to our shared libraries
+# Link in our messaging library to ensure they are built first Also link to our
+# shared libraries
 target_link_libraries(nutilities ${NUCLEAR_MESSAGE_LIBRARIES})
 target_link_libraries(nutilities ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
 
 set(NUCLEAR_UTILITY_LIBRARIES
     nutilities
-    CACHE INTERNAL "Library for NUClear utilities" FORCE
-)
+    CACHE INTERNAL "Library for NUClear utilities" FORCE)

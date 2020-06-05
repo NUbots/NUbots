@@ -11,16 +11,19 @@ if(POLICY CMP0079)
 endif()
 
 # Set on to prefer .a files over .so files for linking
-option(STATIC_LIBRARIES
-       "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF
-)
+option(
+  STATIC_LIBRARIES
+  "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!"
+  OFF)
 
 if(STATIC_LIBRARIES)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX}
+                                  ${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
 # We use additional modules that cmake needs to know about
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+                      "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 # Include all of the globally shared link libraries
 include(SharedLibraries)
@@ -29,7 +32,8 @@ include(SharedLibraries)
 include(Compiler)
 
 # Set flag so NUClear uses a custom clock implementation
-option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
+option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation."
+       ON)
 if(USE_CUSTOM_CLOCK)
   add_definitions(-DNUCLEAR_CUSTOM_CLOCK)
   add_subdirectory(shared/clock)
@@ -46,14 +50,14 @@ mark_as_advanced(
   OMPL_DIR
   OMPL_INCLUDE_DIRS
   OMPL_LIBRARIES
-  OMPL_LIBRARY
-)
+  OMPL_LIBRARY)
 
 # Our banner file for placing at the top of the roles
 set(NUCLEAR_ROLE_BANNER_FILE
     "${PROJECT_SOURCE_DIR}/cmake/banner.png"
-    CACHE PATH "The path the banner to print at the start of each role execution" FORCE
-)
+    CACHE PATH
+          "The path the banner to print at the start of each role execution"
+          FORCE)
 
 if(BUILD_TESTS)
   enable_testing()
@@ -64,8 +68,10 @@ add_subdirectory(nuclear)
 
 # Messages and utilities have a dependency on the custom clock implementation
 if(USE_CUSTOM_CLOCK)
-  target_link_libraries(${NUCLEAR_UTILITY_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
-  target_link_libraries(${NUCLEAR_MESSAGE_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
+  target_link_libraries(${NUCLEAR_UTILITY_LIBRARIES}
+                        $<TARGET_OBJECTS:nubots_clock>)
+  target_link_libraries(${NUCLEAR_MESSAGE_LIBRARIES}
+                        $<TARGET_OBJECTS:nubots_clock>)
 endif(USE_CUSTOM_CLOCK)
 
 # Enable sending binaries to robots
