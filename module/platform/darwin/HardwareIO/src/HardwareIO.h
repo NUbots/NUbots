@@ -92,6 +92,7 @@ namespace platform {
                 float presentSpeed    = 0;
                 float load            = 0;
                 float voltage         = 10;
+                float current         = 0.0;
                 float temperature     = 40;
             };
 

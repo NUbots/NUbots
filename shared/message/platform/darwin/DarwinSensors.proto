@@ -104,6 +104,7 @@ message DarwinSensors {
         float  load            = 11;
         float  voltage         = 12;
         float  temperature     = 13;
+        float  current         = 14;
     };
 
     message Servos {

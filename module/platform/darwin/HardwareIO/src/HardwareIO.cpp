@@ -180,6 +180,7 @@ namespace platform {
                     servo.presentSpeed    = servoState[i].goalPosition;
                     servo.load            = servoState[i].load;
                     servo.voltage         = servoState[i].voltage;
+                    servo.current         = servoState[i].current;
                     servo.temperature     = servoState[i].temperature;
                 }
 
@@ -197,6 +198,7 @@ namespace platform {
 
                     // Diagnostic Information
                     servo.voltage     = Convert::voltage(data.servos[i].voltage);
+                    servo.current     = Convert::current(data.servos[i].current);
                     servo.temperature = Convert::temperature(data.servos[i].temperature);
 
                     // Clear Overvoltage flag if current voltage is greater than maximum expected voltage

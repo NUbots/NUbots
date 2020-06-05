@@ -44,6 +44,12 @@ namespace platform {
             /// The value that comes from the darwin is measured in decivolts (0.1 of a volt)
             static constexpr double VOLTAGE_CONVERSION_FACTOR = 0.1;
 
+            /// The value that comes from the darwin is between 0 and 4095, representing a value between -9.2115A
+            /// and 9.2115A.
+            /// This means 2048 = 0.
+            /// It also has a conversion factor of 4.5mA
+            static constexpr double CURRENT_CONVERSION_FACTOR = 4.5e-3;
+
             /// The FSR values that are measured by the darwins feet are measured in millinewtons
             static constexpr double FSR_FORCE_CONVERSION_FACTOR = 0.001;
 
@@ -82,6 +88,7 @@ namespace platform {
             static float accelerometer(const uint16_t value);
             static float gyroscope(const uint16_t value);
             static float voltage(const uint8_t value);
+            static float current(const uint16_t value);
             static float fsrForce(const uint16_t value);
             static float fsrCentre(const bool left, const uint8_t value);
 
