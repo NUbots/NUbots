@@ -23,8 +23,10 @@
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
+
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
+
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -118,7 +120,8 @@ namespace behaviour {
                 id,
                 "Falling Relax",
                 {std::pair<float, std::set<LimbID>>(
-                    0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    0,
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
                 [this](const std::set<LimbID>&) { emit(std::make_unique<Falling>()); },
                 [this](const std::set<LimbID>&) { emit(std::make_unique<KillFalling>()); },
                 [this](const std::set<ServoID>&) {

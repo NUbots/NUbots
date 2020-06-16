@@ -20,8 +20,10 @@
 #include "SensorFilter.h"
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/matrix.h"

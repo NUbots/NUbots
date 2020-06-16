@@ -1,13 +1,12 @@
 #include "Compressor.h"
 
+#include <cstring>
 #include <fcntl.h>
+#include <system_error>
 #include <unistd.h>
 #include <va/va.h>
 #include <va/va_drm.h>
 #include <va/va_enc_jpeg.h>
-
-#include <cstring>
-#include <system_error>
 
 #include "../mosaic.h"
 #include "cl/make_mosaic_kernel.h"
@@ -20,8 +19,9 @@
 #include "operation/quantization_matrix.h"
 #include "operation/slice_parameter.h"
 #include "operation/upload_to_surface.h"
-#include "utility/vision/fourcc.h"
 #include "vaapi_error_category.hpp"
+
+#include "utility/vision/fourcc.h"
 
 namespace module::output::compressor::vaapi {
 
@@ -56,8 +56,9 @@ Compressor::Compressor(CompressionContext cctx,
         cl_surface = cl::mem(cctx.cl.mem_from_surface(cctx.cl.context, CL_MEM_WRITE_ONLY, &surface, 0, &error),
                              ::clReleaseMemObject);
         if (error != CL_SUCCESS) {
-            throw std::system_error(
-                error, cl::opencl_error_category(), "Unable to create an OpenCL memory object for the surface");
+            throw std::system_error(error,
+                                    cl::opencl_error_category(),
+                                    "Unable to create an OpenCL memory object for the surface");
         }
 
         // Compile the kernel that will make the transform
@@ -80,8 +81,13 @@ Compressor::Compressor(CompressionContext cctx,
     }
 
     // Create buffer for Encoded data to be stored
-    va_status = vaCreateBuffer(
-        cctx.va.dpy, context, VAEncCodedBufferType, width * height * (monochrome ? 1 : 4), 1, nullptr, &encoded);
+    va_status = vaCreateBuffer(cctx.va.dpy,
+                               context,
+                               VAEncCodedBufferType,
+                               width * height * (monochrome ? 1 : 4),
+                               1,
+                               nullptr,
+                               &encoded);
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error creating buffer for encoded data");
     }
@@ -156,8 +162,9 @@ std::vector<uint8_t> Compressor::compress(const std::vector<uint8_t>& data,
     // Unmap the buffer back to device space
     va_status = vaUnmapBuffer(cctx.va.dpy, encoded);
     if (va_status != VA_STATUS_SUCCESS) {
-        throw std::system_error(
-            va_status, vaapi_error_category(), "Error unmapping the encoded buffer back to device space");
+        throw std::system_error(va_status,
+                                vaapi_error_category(),
+                                "Error unmapping the encoded buffer back to device space");
     }
 
     return output;

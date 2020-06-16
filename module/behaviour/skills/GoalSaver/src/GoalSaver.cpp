@@ -22,9 +22,11 @@
 #include <armadillo>
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/WalkCommand.h"
+
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -91,7 +93,8 @@ namespace behaviour {
                 RegisterAction{id,
                                "Goal Saver",
                                {std::pair<float, std::set<LimbID>>(
-                                   0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                                   0,
+                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
                                [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteDive>()); },
                                [this](const std::set<LimbID>&) { emit(std::make_unique<FinishDive>()); },
                                [this](const std::set<ServoID>&) { emit(std::make_unique<FinishDive>()); }}));

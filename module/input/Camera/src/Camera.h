@@ -10,6 +10,7 @@ extern "C" {
 #include <mutex>
 
 #include "CameraContext.h"
+
 #include "extension/Configuration.h"
 
 namespace module {

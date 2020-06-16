@@ -1,9 +1,8 @@
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_OPERATION_JPEG_HEADER_H
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_OPERATION_JPEG_HEADER_H
 
-#include <va/va.h>
-
 #include <utility>
+#include <va/va.h>
 
 namespace module::output::compressor::vaapi::operation {
 

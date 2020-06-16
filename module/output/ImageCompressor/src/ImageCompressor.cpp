@@ -4,9 +4,12 @@
 
 #include "compressor/turbojpeg/Factory.h"
 #include "compressor/vaapi/Factory.h"
+
 #include "extension/Configuration.h"
+
 #include "message/input/Image.h"
 #include "message/output/CompressedImage.h"
+
 #include "utility/vision/fourcc.h"
 
 namespace module {

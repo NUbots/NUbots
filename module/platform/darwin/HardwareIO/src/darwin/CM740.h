@@ -23,7 +23,7 @@
 #include "DarwinDevice.h"
 
 #ifdef VERSION
-#undef VERSION
+    #undef VERSION
 #endif
 
 namespace Darwin {

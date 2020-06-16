@@ -20,6 +20,7 @@
 #include <catch.hpp>
 
 #include "Convert.h"
+
 #include "utility/math/angle.h"
 
 using namespace module::platform::darwin;
@@ -139,8 +140,11 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
     {
         INFO("Testing the forward position conversions");
 
-        const std::pair<uint16_t, float> forwardTests[] = {
-            {0, M_PI}, {1023, -M_PI_2}, {2048, 0.0}, {3073, M_PI_2}, {4095, M_PI}};
+        const std::pair<uint16_t, float> forwardTests[] = {{0, M_PI},
+                                                           {1023, -M_PI_2},
+                                                           {2048, 0.0},
+                                                           {3073, M_PI_2},
+                                                           {4095, M_PI}};
 
         for (size_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);

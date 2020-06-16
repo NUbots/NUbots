@@ -23,6 +23,7 @@
 #include <nuclear>
 
 #include "NatNet.h"
+
 #include "message/input/MotionCapture.h"
 
 namespace module {
@@ -66,7 +67,9 @@ namespace input {
                                                                                const uint32_t /*version*/) {
 
             auto data = Eigen::Map<const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(
-                reinterpret_cast<const Scalar*>(ptr), rows, cols);
+                reinterpret_cast<const Scalar*>(ptr),
+                rows,
+                cols);
             ptr += sizeof(Scalar) * rows * cols;
             return data;
         }

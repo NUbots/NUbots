@@ -20,15 +20,14 @@
 #ifndef DARWIN_UART_H
 #define DARWIN_UART_H
 
+#include <cassert>
+#include <cstring>
 #include <errno.h>
 #include <linux/serial.h>
+#include <mutex>
 #include <stdint.h>
 #include <termios.h>
 #include <unistd.h>
-
-#include <cassert>
-#include <cstring>
-#include <mutex>
 #include <vector>
 
 #include "extension/Configuration.h"

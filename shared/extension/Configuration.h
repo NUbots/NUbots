@@ -18,12 +18,12 @@
 #ifndef EXTENSION_CONFIGURATION_H
 #define EXTENSION_CONFIGURATION_H
 
-#include <yaml-cpp/yaml.h>
-
 #include <cstdlib>
 #include <nuclear>
+#include <yaml-cpp/yaml.h>
 
 #include "FileWatch.h"
+
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
 
@@ -130,8 +130,9 @@ struct Configuration {
                     case YAML::NodeType::Null:
                     case YAML::NodeType::Undefined:
                     default: {
-                        NUClear::log<NUClear::WARN>(
-                            "Unsetting key", "'" + key + "'", "in YAML file. Is this what you intended?");
+                        NUClear::log<NUClear::WARN>("Unsetting key",
+                                                    "'" + key + "'",
+                                                    "in YAML file. Is this what you intended?");
                         ret[key] = it->second;
                         break;
                     }

@@ -24,8 +24,10 @@
 #include <nuclear>
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"
+
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -192,8 +194,9 @@ namespace motion {
                 float alpha = (anim.currentFrame().duration != 0)
                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
                                   : 1;
-                result = utility::math::matrix::Transform3D::interpolate(
-                    anim.previousFrame().pose, anim.currentFrame().pose, alpha);
+                result = utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,
+                                                                         anim.currentFrame().pose,
+                                                                         alpha);
 
                 bool servosAtGoal = true;
                 for (auto& servo : sensors.servo) {
