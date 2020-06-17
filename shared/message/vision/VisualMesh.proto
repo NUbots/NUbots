@@ -25,7 +25,7 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 
 /**
- * Contains the details of a Visual Mesh (tm) measurement.
+ * Contains the details of a Visual Mesh™ measurement.
  */
 message VisualMesh {
     message Row {

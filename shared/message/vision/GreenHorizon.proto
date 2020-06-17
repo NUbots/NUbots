@@ -33,8 +33,21 @@ import "message/vision/VisualMesh.proto";
  */
 message GreenHorizon {
     repeated fvec3            horizon   = 1;
+
+    /**
+     * Affine3d transform from world space to camera space.
+     */
     mat4                      Hcw       = 2;
+
+    /**
+     * The camera which spotted the green horizon.
+     */
     uint32                    camera_id = 3;
+
     VisualMesh                mesh      = 4 [(pointer) = SHARED];
+
+    /**
+     * When the horizon was spotted.
+     */
     google.protobuf.Timestamp timestamp = 5;
 }

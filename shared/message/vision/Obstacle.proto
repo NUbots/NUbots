@@ -25,24 +25,47 @@ import "google/protobuf/timestamp.proto";
 import "message/Geometry.proto";
 
 /**
- * Contains details of an obstacle.
+ * Contains details of an on-field obstacle.
  */
 message Obstacle {
+
+    /**
+     * Which team the obstacle is associated with.
+     */
     enum Team {
         UNKNOWN_TEAM = 0;
         MAGENTA      = 1;
         CYAN         = 2;
     }
 
+    /**
+     * Which camera saw the obstacle.
+     */
     uint32                    camera_id = 1;
+
+    /**
+     * When the obstacle was seen.
+     */
     google.protobuf.Timestamp timestamp = 2;
+
+    /**
+     * The {x, y} point location of the obstacle.
+     */
     Polygon                   shape     = 3;
+
+    /**
+     * Which team the obstacle is associated with.
+     */
     Team                      team      = 4;
 }
 
 /**
- * A set of Obstacles.
+ * A set of on-field Obstacles.
  */
 message Obstacles {
+
+    /**
+     * Set of on-field obstacles.
+     */
     repeated Obstacle lines = 1;
 }
