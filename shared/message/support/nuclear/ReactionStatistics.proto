@@ -25,14 +25,40 @@ package message.support.nuclear;
  * Contains reaction metadata.
  */
 message ReactionStatistics {
+
+    /**
+     * The name of the statistic.
+     */
     string name            = 1;
+
+    /**
+     * The trigger which prompts this reaction.
+     */
     string triggerName     = 2;
+
     string functionName    = 3;
+
+    /**
+     * The specific reaction.
+     */
     uint64 reactionId      = 4;
+
     uint64 taskId          = 5;
     uint64 causeReactionId = 6;
     uint64 causeTaskId     = 7;
+
+    /**
+     * Timestamp when the message was emitted.
+     */
     uint64 emitted         = 8;
+
+    /**
+     * Timestamp when the reaction started.
+     */
     uint64 started         = 9;
+
+    /**
+     * Timestamp when the reaction finished.
+     */
     uint64 finished        = 10;
 }

@@ -24,6 +24,14 @@ package message.support;
  * Field dimensions as defined in the Robocup rules.
  */
 message GlobalConfig {
+
+    /**
+     * A number ID, assigned beginning with 0 or 1.
+     */
     uint32 playerId = 1;
+
+    /**
+     * Unique team number.
+     */
     uint32 teamId   = 2;
 }

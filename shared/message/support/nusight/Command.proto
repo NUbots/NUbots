@@ -25,5 +25,9 @@ package message.support.nusight;
  * Command string.
  */
 message Command {
+
+    /**
+     * Command string.
+     */
     string command = 1;
 }
