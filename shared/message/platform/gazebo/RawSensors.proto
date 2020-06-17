@@ -22,9 +22,6 @@ package message.platform.gazebo;
 
 import "message/platform/darwin/DarwinSensors.proto";
 
-/**
- * A set of DarwinSensors with an associated model.
- */
 message RawSensors {
     // The name of the model in the simulation that these sensors are from
     string model = 1;

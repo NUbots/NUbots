@@ -20,12 +20,5 @@ syntax = "proto3";
 
 package message.motion;
 
-/**
- * Empty message asking to execute getup.
- */
 message ExecuteGetup {}
-
-/**
- * Empty message asking to stop getup.
- */
 message KillGetup {}

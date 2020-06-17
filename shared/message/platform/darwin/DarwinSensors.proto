@@ -22,9 +22,10 @@ package message.platform.darwin;
 
 import "google/protobuf/timestamp.proto";
 
-
 /**
- * Contains all of the sensor and servo information.
+ * TODO document
+ *
+ * @author Trent Houliston
  */
 message DarwinSensors {
     // bitmask values
@@ -142,23 +143,7 @@ message DarwinSensors {
 }
 
 // Button press events
-
-/**
- * Empty message to indicate button press.
- */
 message ButtonLeftDown {}
-
-/**
- * Empty message to indicate button press.
- */
 message ButtonLeftUp {}
-
-/**
- * Empty message to indicate button press.
- */
 message ButtonMiddleDown {}
-
-/**
- * Empty message to indicate button press.
- */
 message ButtonMiddleUp {}
