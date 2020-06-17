@@ -20,9 +20,7 @@ syntax = "proto3";
 
 package message.support;
 
-/**
- * Field dimensions as defined in the Robocup rules.
- */
+// Field dimensions as defined in the Robocup rules:
 message GlobalConfig {
     uint32 playerId = 1;
     uint32 teamId   = 2;

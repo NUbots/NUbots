@@ -24,9 +24,6 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "message/Geometry.proto";
 
-/**
- * Contains details of an obstacle.
- */
 message Obstacle {
     enum Team {
         UNKNOWN_TEAM = 0;
@@ -40,9 +37,6 @@ message Obstacle {
     Team                      team      = 4;
 }
 
-/**
- * A set of Obstacles.
- */
 message Obstacles {
     repeated Obstacle lines = 1;
 }
