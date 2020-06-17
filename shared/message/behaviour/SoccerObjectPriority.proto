@@ -24,6 +24,10 @@ package message.behaviour;
  * Information to prioritise what the head behaviour should look at.
  */
 message SoccerObjectPriority {
+
+    /**
+     * Describes what the robot is looking for, and where it is looking.
+     */
     enum SearchType {
         LOST                    = 0;
         FIND_ADDITIONAL_OBJECTS = 1;

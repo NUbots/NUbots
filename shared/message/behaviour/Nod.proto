@@ -24,5 +24,9 @@ package message.behaviour;
  * Boolean indicating to nod.
  */
 message Nod {
+
+    /**
+     * Boolean indicating to nod.
+     */
     bool value = 1;
 }
