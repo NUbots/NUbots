@@ -21,9 +21,6 @@ syntax = "proto3";
 
 package message.support.nusight;
 
-/**
- * Command string.
- */
 message Command {
     string command = 1;
 }

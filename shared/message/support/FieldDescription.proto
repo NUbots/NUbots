@@ -22,9 +22,6 @@ package message.support;
 
 import "Vector.proto";
 
-/**
- * Information about location and size of field objects and markers.
- */
 message FieldDescription {
     enum GoalpostType {
         RECTANGLE = 0;

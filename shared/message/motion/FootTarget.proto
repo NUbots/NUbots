@@ -23,9 +23,6 @@ package message.motion;
 import "Matrix.proto";
 import "google/protobuf/timestamp.proto";
 
-/**
- * Target position for foot, with timestamp.
- */
 message FootTarget {
 
     google.protobuf.Timestamp timestamp = 1;

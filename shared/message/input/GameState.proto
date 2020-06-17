@@ -22,9 +22,6 @@ package message.input;
 
 import "google/protobuf/timestamp.proto";
 
-/**
- * Contains lots of game state information.
- */
 message GameState {
     message Data {
         enum Mode {
