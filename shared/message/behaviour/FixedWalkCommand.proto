@@ -23,22 +23,66 @@ package message.behaviour;
 import "google/protobuf/duration.proto";
 import "Vector.proto";
 
+/**
+ * Empty message declaring the 'fixed' walk is finished.
+ */
 message FixedWalkFinished {}
+
+/**
+ * Empty message declaring the walk config was saved.
+ */
 message WalkConfigSaved {}
+
+/**
+ * Empty message asking to cancel the 'fixed' walk.
+ */
 message CancelFixedWalk {}
 
+/**
+ * string containing walk config.
+ */
 message WalkOptimiserCommand {
     string walkConfig = 1;
 }
 
+/**
+ * Set of 'fixed' walk segments, making up a walk command.
+ */
 message FixedWalkCommand {
+
+    /**
+     * One segment of a larger set, which comprises a command.
+     */
     message WalkSegment {
-        vec2                     direction                 = 1;
-        double                   curvePeriod               = 2;
-        double                   normalisedVelocity        = 3;
-        double                   normalisedAngularVelocity = 4;
-        google.protobuf.Duration duration                  = 5;
+
+        /**
+         * A vector in the direction of movement.
+         */
+        vec2 direction = 1;
+
+        /**
+         * The period of the wave which represents robot rotations.
+         */
+        double curvePeriod = 2;
+
+        /**
+         * The movement speed of the robot for the segment.
+         */
+        double normalisedVelocity = 3;
+
+        /**
+         * The rotational speed of the robot for the segment.
+         */
+        double normalisedAngularVelocity = 4;
+
+        /**
+         * The time length of the segment.
+         */
+        google.protobuf.Duration duration = 5;
     };
 
+    /**
+     * The set of walk segments which comprise a command.
+     */
     repeated WalkSegment segments = 1;
 }

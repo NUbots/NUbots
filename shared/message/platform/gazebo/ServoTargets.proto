@@ -23,6 +23,9 @@ package message.platform.gazebo;
 import "google/protobuf/timestamp.proto";
 import "message/motion/ServoTarget.proto";
 
+/**
+ * Servo targets, the model they are for and a timestamp.
+ */
 message ServoTargets {
     // The name of the model in the simulation that these servo targets are for
     string model = 1;

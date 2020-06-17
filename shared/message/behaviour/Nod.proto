@@ -20,6 +20,9 @@ syntax = "proto3";
 
 package message.behaviour;
 
+/**
+ * Boolean indicating to nod.
+ */
 message Nod {
     bool value = 1;
 }

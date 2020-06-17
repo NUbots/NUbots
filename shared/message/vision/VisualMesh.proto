@@ -24,6 +24,9 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 
+/**
+ * Contains the details of a Visual Mesh (tm) measurement.
+ */
 message VisualMesh {
     message Row {
         float phi      = 1;
