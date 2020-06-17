@@ -23,9 +23,6 @@ package message.localisation;
 import "Vector.proto";
 import "Matrix.proto";
 
-/**
- * Contains field position and position covariance.
- */
 message Field {
     // Measures the position of the field centre in world space position[0,1] = (rFWw)
     // and measures the orientation of the field from the world position[2] = (thetafw)
