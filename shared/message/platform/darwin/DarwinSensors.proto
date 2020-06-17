@@ -96,7 +96,7 @@ message DarwinSensors {
         /**
          * Press-down status of the left button.
          */
-        bool left   = 1;
+        bool left = 1;
 
         /**
          * Press-down status of the middle button.
@@ -170,7 +170,7 @@ message DarwinSensors {
         /**
          * Left foot set of FSRs, with centre coordinates and error flags.
          */
-        FSR left  = 1;
+        FSR left = 1;
 
         /**
          * Right foot set of FSRs, with centre coordinates and error flags.
@@ -189,31 +189,31 @@ message DarwinSensors {
          * Set of things which can or have gone wrong.
          * https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
          */
-        uint32 errorFlags      = 1;
+        uint32 errorFlags = 1;
 
         /**
          * Whether the torque is on or off.
          */
-        bool   torqueEnabled   = 2;
+        bool torqueEnabled = 2;
 
         /**
          * Proportional gain. In proportion to the servo's position error. Gain values are in range 0~254.
          * K_p : p_gain / 8
          */
-        float  pGain           = 3;
+        float pGain = 3;
 
         /**
          * Integral gain. Increases in relation to the error, and how long the error has persisted. Gain values are in
          * range 0~254. K_i : i_gain * 1000 / 2048
          */
-        float  iGain           = 4;
+        float iGain = 4;
 
 
         /**
          * Derivative gain. Does not consider error, just dampens forces to reduce derivatives. Gain values are in range
          * 0~254. K_d : d_gain * 4 / 1000
          */
-        float  dGain           = 5;
+        float dGain = 5;
 
         /**
          * It is a position value of destination. 0 to 4,095 (0xFFF) is available. The unit is 0.088 [°].
@@ -221,26 +221,26 @@ message DarwinSensors {
          * If Goal Position is out of the range, Angle Limit Error Bit (Bit1) of Status Packet is returned as ‘1’ and
          * Alarm is triggered as set in Alarm LED/Shutdown.
          */
-        float  goalPosition    = 6;
+        float goalPosition = 6;
 
-        float  movingSpeed     = 7;
+        float movingSpeed = 7;
 
         /**
          * Used to set the servo on or off. Typically either 0 (off) or 100 (on).
          */
-        float  torque          = 8;
+        float torque = 8;
 
         /**
          * The range of the value is 0~4095 (0xFFF), and the unit is 0.088 [°].
          */
-        float  presentPosition = 9;
+        float presentPosition = 9;
 
         /**
          * 0 ~ 2,047 (0x000 ~ 0x7FF) can be used. The value unit is about 0.11rpm.
          * If a value is in the range of 0 ~ 1,023 then the motor rotates to the counter-clockwise direction.
          * else the motor rotates to the clockwise direction.
          */
-        float  presentSpeed    = 10;
+        float presentSpeed = 10;
 
         /**
          * The range of the value is 0~2047, and the unit is about 0.1%
@@ -250,7 +250,7 @@ message DarwinSensors {
          * For example, the value is 512, it means the load is detected in the direction of CCW about 50% of the maximum
          * torque.
          */
-        float  load            = 11;
+        float load = 11;
 
         /**
          * Present voltage. This value is 10 times larger than the actual voltage.
@@ -258,12 +258,12 @@ message DarwinSensors {
          * If Present Voltage(42) value is out of range, Voltage Range Error Bit (Bit0) of Status Packet is
          * returned as ‘1’ and Alarm is triggered and set the address 17 and set 1 to the Bit 0 of the address 18.
          */
-        float  voltage         = 12;
+        float voltage = 12;
 
         /**
          * Data value is identical to the actual temperature in Celsius.
          */
-        float  temperature     = 13;
+        float temperature = 13;
     };
 
     /**
@@ -295,59 +295,59 @@ message DarwinSensors {
     /**
      * Timestamp when our data was taken
      */
-    google.protobuf.Timestamp timestamp       = 1;
+    google.protobuf.Timestamp timestamp = 1;
 
     /**
      * Holds the error code (if any) from the CM740.
      */
-    uint32                    cm740ErrorFlags = 2;
+    uint32 cm740ErrorFlags = 2;
 
     /**
      * Toggle status of the LEDs on the panel.
      */
-    LEDPanel                  ledPanel        = 3;
+    LEDPanel ledPanel = 3;
 
     /**
      * Toggle status of the HeadLED.
      */
-    HeadLED                   headLED         = 4;
+    HeadLED headLED = 4;
 
     /**
      * Toggle status of the EyeLED.
      */
-    EyeLED                    eyeLED          = 5;
+    EyeLED eyeLED = 5;
 
     /**
      * Push-down status of the left and middle buttons.
      */
-    Buttons                   buttons         = 6;
+    Buttons buttons = 6;
 
     /**
      * Voltage for the whole robot, from the main battery.
      */
-    float                     voltage         = 7;
+    float voltage = 7;
 
     /**
      * The value is between 0 and 1023, representing a value between -4g and 4g => 512 = 0g.
      * Is {x, y, z} acceleration.
      */
-    Accelerometer             accelerometer   = 8;
+    Accelerometer accelerometer = 8;
 
     /**
      * The value is between 0 and 1023, represent a value between -500 degrees per second and 500 degrees per second.
      * => 512 = 0 degrees per second. Is {x, y, z} angular velocity.
      */
-    Gyroscope                 gyroscope       = 9;
+    Gyroscope gyroscope = 9;
 
     /**
      * Pair of sets of FSR sensors for both feet, to detect if they are down.
      */
-    FSRs                      fsr             = 10;
+    FSRs fsr = 10;
 
     /**
      * Set of the robot's servos.
      */
-    Servos                    servo           = 11;
+    Servos servo = 11;
 }
 
 // Button press events
