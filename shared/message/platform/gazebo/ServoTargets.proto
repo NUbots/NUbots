@@ -27,10 +27,19 @@ import "message/motion/ServoTarget.proto";
  * Servo targets, the model they are for and a timestamp.
  */
 message ServoTargets {
-    // The name of the model in the simulation that these servo targets are for
+
+    /**
+     * The name of the model in the simulation that these servo targets are for.
+     */
     string model = 1;
-    // The current time on the client computer so that we can use it to calculate velocities from the command
+
+    /**
+     * The current time on the client computer so that we can use it to calculate velocities from the command.
+     */
     google.protobuf.Timestamp time = 2;
-    // The targets for servos
+
+    /**
+     * The targets for servos.
+     */
     motion.ServoTargets targets = 3;
 }

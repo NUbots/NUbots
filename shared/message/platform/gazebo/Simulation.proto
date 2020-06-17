@@ -24,8 +24,14 @@ package message.platform.gazebo;
  * Time which has passed in the simulation and time passed IRL.
  */
 message Simulation {
-    // The amount of time that has passed in the simulation
+
+    /**
+     * The amount of time that has passed in the simulation.
+     */
     double simulation_time = 1;
-    // The time that has passed on the wall clock
+
+    /**
+     * The time that has passed on the wall clock.
+     */
     double real_time = 2;
 }

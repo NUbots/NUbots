@@ -26,8 +26,14 @@ import "message/platform/darwin/DarwinSensors.proto";
  * A set of DarwinSensors with an associated model.
  */
 message RawSensors {
-    // The name of the model in the simulation that these sensors are from
+
+    /**
+     * The name of the model in the simulation that these sensors are from.
+     */
     string model = 1;
-    // The sensors object for this model
+
+    /**
+     * The sensors object for this model.
+     */
     platform.darwin.DarwinSensors sensors = 2;
 }
