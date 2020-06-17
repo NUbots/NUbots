@@ -22,10 +22,9 @@ package message.motion;
 
 import "google/protobuf/timestamp.proto";
 
+
 /**
- * TODO document
- *
- * @author Trent Houliston
+ * Contains details of a servo's state objective.
  */
 message ServoTarget {
     google.protobuf.Timestamp time     = 1;
@@ -35,6 +34,9 @@ message ServoTarget {
     float                     torque   = 5;
 }
 
+/**
+ * Contains a set of ServoTargets.
+ */
 message ServoTargets {
     repeated ServoTarget targets = 1;
 }
