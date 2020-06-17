@@ -26,6 +26,9 @@ import "Matrix.proto";
 import "Neutron.proto";
 import "Vector.proto";
 
+/**
+ * Contains all sensor information for all sensors.
+ */
 message Sensors {
 
     message Servo {

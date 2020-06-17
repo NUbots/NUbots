@@ -22,16 +22,33 @@ package message.behaviour;
 
 import "Vector.proto";
 
+/**
+ * Type of kick (scripted or IK) and kick target.
+ */
 message KickPlan {
+
+    /**
+     * Whether the kick is scripted or dynamic with inverse kinematics.
+     */
     enum KickType {
         SCRIPTED = 0;
         IK_KICK  = 1;
     }
 
-    vec2     target   = 1;
+    /**
+     * Where the robot wants to kick to.
+     */
+    vec2 target = 1;
+
+    /**
+     * The type of this kick plan - scripted or IK.
+     */
     KickType kickType = 2;
 }
 
+/**
+ * Boolean whether the robot wants to kick.
+ */
 message WantsToKick {
     bool kick = 1;
 }

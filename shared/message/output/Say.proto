@@ -21,9 +21,7 @@ syntax = "proto3";
 package message.output;
 
 /**
- * TODO document
- *
- * @author Trent Houliston
+ * Is a string for the robot to say.
  */
 message Say {
     string message = 1;
