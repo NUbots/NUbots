@@ -28,9 +28,21 @@ package message.motion;
  * @author Jake Fountain
  */
 message HeadCommand {
+
+    /**
+     * Target head yaw in radians.
+     */
     float yaw        = 1;
+
+    /**
+     * Target head pitch in radians.
+     */
     float pitch      = 2;
-    bool  robotSpace = 3;  // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
+
+    /**
+     * If true, the yaw and pitch are interpreted in robot space, instead of IMU space.
+     */
+    bool  robotSpace = 3;
 }
 
 /**

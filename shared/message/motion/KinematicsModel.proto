@@ -32,10 +32,15 @@ enum BodySide {
 }
 
 /**
- * Contains lots of kinematics measurements and transforms.
+ * Contains lots of kinematics config measurements and transforms.
+ * See `KinematicsConfiguration.yaml` for more detail on a particular variable.
+ * Convention: all values positive.
  */
 message KinematicsModel {
-    // Convention: all values positive
+
+    /**
+     * All the leg config info for a single leg.
+     */
     message Leg {
         float HIP_OFFSET_X                = 1;
         float HIP_OFFSET_Y                = 2;
@@ -57,6 +62,9 @@ message KinematicsModel {
         int32 LEFT_TO_RIGHT_ANKLE_ROLL    = 18;
     }
 
+    /**
+     * All the head config info.
+     */
     message Head {
         float NECK_BASE_POS_FROM_ORIGIN_X     = 1;
         float NECK_BASE_POS_FROM_ORIGIN_Y     = 2;
@@ -75,6 +83,9 @@ message KinematicsModel {
         float MIN_PITCH = 12;
     }
 
+    /**
+     * All the arm config info for a single arm.
+     */
     message Arm {
         float DISTANCE_BETWEEN_SHOULDERS = 1;
         float SHOULDER_Z_OFFSET          = 2;
@@ -90,6 +101,10 @@ message KinematicsModel {
         float LOWER_ARM_Z_OFFSET         = 12;
     }
 
+    /**
+     * MassModel config information.
+     * Particles CoM is in particle space. {CoM_x, CoM_y, CoM_z, mass} in SI units.
+     */
     message MassModel {
         vec4 head        = 1;
         vec4 arm_upper   = 2;
@@ -102,6 +117,13 @@ message KinematicsModel {
         vec4 foot        = 9;
     }
 
+    /**
+     * Particle inertial tensors (in partical space)
+     *  [[xx, xy, xz],
+     *   [xy, yy, yz],
+     *   [xz, yz, zz]]
+     *  SI Units.
+     */
     message TensorModel {
         mat3 head        = 1;
         mat3 arm_upper   = 2;
@@ -114,10 +136,12 @@ message KinematicsModel {
         mat3 foot        = 9;
     }
 
+    // Instantiations of the config containers.
     Leg         leg                       = 1;
     Head        head                      = 2;
     Arm         arm                       = 3;
     MassModel   massModel                 = 4;
     TensorModel tensorModel               = 5;
+
     float       TEAMDARWINCHEST_TO_ORIGIN = 6;
 }

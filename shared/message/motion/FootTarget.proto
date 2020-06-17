@@ -29,8 +29,14 @@ import "google/protobuf/timestamp.proto";
 message FootTarget {
 
     google.protobuf.Timestamp timestamp = 1;
-    // identifies which foot is the swing foot
+
+    /**
+     * Identifies which foot is the swing foot.
+     */
     bool isRightFootSwing = 2;
-    // Transform from world oriented support foot space (s) to target (a)
+
+    /**
+     * Transform from world oriented support foot space (s) to target (a).
+     */
     mat4 Haf_s = 3;
 }
