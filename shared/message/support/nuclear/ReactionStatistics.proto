@@ -21,9 +21,6 @@ syntax = "proto3";
 
 package message.support.nuclear;
 
-/**
- * Contains reaction metadata.
- */
 message ReactionStatistics {
     string name            = 1;
     string triggerName     = 2;
