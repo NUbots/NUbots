@@ -23,9 +23,6 @@ package message.behaviour;
 import "message/behaviour/MotionCommand.proto";
 import "Vector.proto";
 
-/**
- * Information used to make a path, to complete a MotionCommand which is included in the message.
- */
 message WalkPath {
     // Sequence of robot states that form a path:
     repeated fvec3 states = 1;
