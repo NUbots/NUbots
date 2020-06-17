@@ -32,16 +32,16 @@ message Line {
     /**
      * Camera which saw the line.
      */
-    uint32                    camera_id = 1;
+    uint32 camera_id = 1;
 
     /**
      * When the line was spotted.
      */
     google.protobuf.Timestamp timestamp = 2;
 
-    ivec2                     start     = 3;
-    ivec2                     end       = 4;
-    vec4                      colour    = 5;
+    ivec2 start  = 3;
+    ivec2 end    = 4;
+    vec4  colour = 5;
 }
 
 /**

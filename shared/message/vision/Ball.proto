@@ -53,7 +53,7 @@ message Ball {
         /**
          * Vector from camera to ball in camera coordinates
          */
-        fvec3 rBCc       = 2;
+        fvec3 rBCc = 2;
 
         /**
          * Covariance of this measurement.
@@ -64,18 +64,18 @@ message Ball {
     /**
      * Axis, gradient, and radius of the vision of the ball.
      */
-    Cone                 cone           = 1;
+    Cone cone = 1;
 
     /**
      * Set of ball measurements.
      */
-    repeated Measurement measurements   = 2;
+    repeated Measurement measurements = 2;
 
     // Angular positions from the camera
-    fvec2                screen_angular = 3;
-    fvec2                angular_size   = 4;
+    fvec2 screen_angular = 3;
+    fvec2 angular_size   = 4;
 
-    fvec4                colour         = 5;
+    fvec4 colour = 5;
 }
 
 /**
@@ -86,7 +86,7 @@ message Balls {
     /**
      * The camera which took the measurements.
      */
-    uint32                    camera_id = 1;
+    uint32 camera_id = 1;
 
     /**
      * When the measurements were taken.
@@ -96,10 +96,10 @@ message Balls {
     /**
      * Affine3d transform from world space to camera space.
      */
-    mat4                      Hcw       = 3;
+    mat4 Hcw = 3;
 
     /**
      * The set of ball measurements.
      */
-    repeated Ball             balls     = 4;
+    repeated Ball balls = 4;
 }

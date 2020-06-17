@@ -32,19 +32,19 @@ import "message/vision/VisualMesh.proto";
  * Contains green horizon measurement details.
  */
 message GreenHorizon {
-    repeated fvec3            horizon   = 1;
+    repeated fvec3 horizon = 1;
 
     /**
      * Affine3d transform from world space to camera space.
      */
-    mat4                      Hcw       = 2;
+    mat4 Hcw = 2;
 
     /**
      * The camera which spotted the green horizon.
      */
-    uint32                    camera_id = 3;
+    uint32 camera_id = 3;
 
-    VisualMesh                mesh      = 4 [(pointer) = SHARED];
+    VisualMesh mesh = 4 [(pointer) = SHARED];
 
     /**
      * When the horizon was spotted.

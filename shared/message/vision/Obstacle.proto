@@ -41,7 +41,7 @@ message Obstacle {
     /**
      * Which camera saw the obstacle.
      */
-    uint32                    camera_id = 1;
+    uint32 camera_id = 1;
 
     /**
      * When the obstacle was seen.
@@ -51,12 +51,12 @@ message Obstacle {
     /**
      * The {x, y} point location of the obstacle.
      */
-    Polygon                   shape     = 3;
+    Polygon shape = 3;
 
     /**
      * Which team the obstacle is associated with.
      */
-    Team                      team      = 4;
+    Team team = 4;
 }
 
 /**

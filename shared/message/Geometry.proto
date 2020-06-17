@@ -119,12 +119,12 @@ message Cone {
     /**
      * 3D axis of the centre of the cone.
      */
-    fvec3 axis     = 1;
+    fvec3 axis = 1;
 
     float gradient = 2;
 
     /**
      * Radius of the circle which is the base of the cone.
      */
-    float radius   = 3;
+    float radius = 3;
 }
