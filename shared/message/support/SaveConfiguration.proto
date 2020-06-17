@@ -20,6 +20,9 @@ syntax = "proto3";
 
 package message.support;
 
+/**
+ * Contains config file to save, and the path.
+ */
 message SaveConfiguration {
     string path   = 1;
     string config = 2;
