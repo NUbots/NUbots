@@ -23,33 +23,34 @@ package message.motion;
 import "Vector.proto";
 
 /**
- * TODO document
- *
- * @author Trent Houliston
- * @author Brendan Annable
+ * Type is NORMAL or POWER (disregard robot safety and smash it).
  */
 enum KickCommandType {
     NORMAL = 0;
     POWER  = 1;
 }
 
+/**
+ * Contains kick target, direction, and magnitude.
+ */
 message KickCommand {
     vec3            target          = 1;  // The point to kick
     vec3            direction       = 2;  // force is the magnitude
     KickCommandType kickCommandType = 3;
 }
 
+
 /**
- * TODO document
- *
- * @author Trent Houliston
- * @author Brendan Annable
+ * Contains kick direction and which leg to kick with.
  */
 message KickScriptCommand {
     vec3   direction = 1;  // Direction to kick with magnitude determining force
     uint32 leg       = 2;  // Leg to kick with
 }
 
+/**
+ * Contains config info for kick planner.
+ */
 message KickPlannerConfig {
     float max_ball_distance        = 1;
     float kick_corridor_width      = 2;
@@ -57,8 +58,14 @@ message KickPlannerConfig {
     float kick_forward_angle_limit = 4;
 }
 
+/**
+ * Empty message which indicates a kick is finished.
+ */
 message KickFinished {}
 
+/**
+ * Contains stand height for IK kick.
+ */
 message IKKickParams {
     float stand_height = 1;
 }
