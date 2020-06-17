@@ -28,6 +28,9 @@ import "message/input/GameState.proto";
  */
 message GameEvents {
 
+    /**
+     * Context describes which actor/team is being referred to by an event.
+     */
     enum Context {
         UNKNOWN_CONTEXT = 0;
         SELF            = 1;
@@ -36,73 +39,191 @@ message GameEvents {
         UNKNOWN         = 4;
     };
 
+    /**
+     * The colour of the party referred to by the context.
+     */
     enum TeamColour {
         UNKNOWN_TEAM_COLOUR = 0;
         CYAN                = 1;
         MAGENTA             = 2;
     };
 
+    /**
+     * Current total score for both teams.
+     */
     message Score {
-        uint32 ownScore      = 1;
+
+        /**
+         * Current total score for our team.
+         */
+        uint32 ownScore = 1;
+
+        /**
+         * Current total score for opposition team.
+         */
         uint32 opponentScore = 2;
     }
 
+    /**
+     * Goal score notification message, with total score for that team.
+     */
     message GoalScored {
-        Context context    = 1;
-        uint32  totalScore = 2;
+
+        /**
+         * The actor/team who scored the goal.
+         */
+        Context context = 1;
+
+        /**
+         * The total score of the actor/team who scored.
+         */
+        uint32 totalScore = 2;
     }
 
+    /**
+     * Penalty notification message, with context and a resume play timestamp.
+     */
     message Penalisation {
-        Context                      context = 1;
-        uint32                       robotId = 2;
-        google.protobuf.Timestamp    ends    = 3;
-        GameState.Data.PenaltyReason reason  = 4;
+
+        /**
+         * The party being penalised.
+         */
+        Context context = 1;
+
+        /**
+         * The exact player being penalised.
+         */
+        uint32 robotId = 2;
+
+        /**
+         * The timestamp when the robot may resume playing.
+         */
+        google.protobuf.Timestamp ends = 3;
+
+        /**
+         * The type of infraction which caused the penalty.
+         */
+        GameState.Data.PenaltyReason reason = 4;
     }
 
+    /**
+     * The context and robot which were unpenalised.
+     */
     message Unpenalisation {
+
+        /**
+         * The context being unpenalised.
+         */
         Context context = 1;
-        uint32  robotId = 2;
+
+        /**
+         * The specific robot being unpenalised.
+         */
+        uint32 robotId = 2;
     }
 
+    /**
+     * Message from a coach, and the intended recipient context.
+     */
     message CoachMessage {
+
+        /**
+         * The intended recipient(s).
+         */
         Context context = 1;
-        string  message = 2;
+
+        /**
+         * The contents of the message.
+         */
+        string message = 2;
     }
 
+    /**
+     * Message indicating half time has occurred.
+     */
     message HalfTime {
+
+        /**
+         * True if currently first half.
+         */
         bool firstHalf = 1;
     }
 
+    /**
+     * Ball kicked out message with context and timestamp.
+     */
     message BallKickedOut {
-        Context                   context = 1;
-        google.protobuf.Timestamp time    = 3;
+
+        /**
+         * The party which kicked the ball out.
+         */
+        Context context = 1;
+
+        /**
+         * The time when the ball was kicked out.
+         */
+        google.protobuf.Timestamp time = 3;
     }
 
+    /**
+     * The context of the team kicking off.
+     */
     message KickOffTeam {
+
+        /**
+         * The party kicking off.
+         */
         Context context = 1;
     }
 
+    /**
+     * Set of timestamps for different parts of the game, with current phase state.
+     */
     message GamePhase {
+
+        /**
+         * Current phase state, such as PLAYING or TIMEOUT.
+         */
         GameState.Data.Phase phase = 1;
 
         // INITIAL
 
         // READY
+
+        /**
+         * Time when play begins.
+         */
         google.protobuf.Timestamp readyTime = 2;
 
         // SET
 
         // PLAYING
-        google.protobuf.Timestamp endHalf  = 3;
+
+        /**
+         * Time when the first half is due to end.
+         */
+        google.protobuf.Timestamp endHalf = 3;
+
         google.protobuf.Timestamp ballFree = 4;
 
         // TIMEOUT
+
+        /**
+         * Timestamp when the current phase will end.
+         */
         google.protobuf.Timestamp ends = 5;
 
         // FINISHED
+
+        /**
+         * Time when the next half is to begin.
+         */
         google.protobuf.Timestamp nextHalf = 6;
     }
 
+    /**
+     * UNKNOWN_MODE, NORMAL, PENALTY_SHOOTOUT or OVERTIME.
+     */
     message GameMode {
         GameState.Data.Mode mode = 1;
     }

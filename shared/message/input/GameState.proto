@@ -26,7 +26,15 @@ import "google/protobuf/timestamp.proto";
  * Contains lots of game state information.
  */
 message GameState {
+
+    /**
+     * All of the information from GameState except the event string.
+     */
     message Data {
+
+        /**
+         * Type of gameplay - UNKNOWN_MODE, NORMAL, PENALTY_SHOOTOUT or OVERTIME.
+         */
         enum Mode {
             UNKNOWN_MODE     = 0;
             NORMAL           = 1;
@@ -34,6 +42,9 @@ message GameState {
             OVERTIME         = 3;
         }
 
+        /**
+         * Current state of the game.
+         */
         enum Phase {
             UNKNOWN_PHASE = 0;
             INITIAL       = 1;
@@ -44,6 +55,9 @@ message GameState {
             FINISHED      = 6;
         }
 
+        /**
+         * The type of infraction which caused the penalty.
+         */
         enum PenaltyReason {
             UNKNOWN_PENALTY_REASON        = 0;
             UNPENALISED                   = 1;
@@ -59,32 +73,110 @@ message GameState {
             PLAYER_PUSHING                = 11;
         }
 
+        /**
+         * A tracking message for robots, with penalty tracking data.
+         */
         message Robot {
-            uint32                    id             = 1;
-            PenaltyReason             penalty_reason = 2;
-            google.protobuf.Timestamp unpenalised    = 3;
+
+            /**
+             * The robot which is being tracked.
+             */
+            uint32 id = 1;
+
+            /**
+             * The infraction the robot being tracked committed.
+             */
+            PenaltyReason penalty_reason = 2;
+
+            /**
+             * The timestamp when the robot will be playing again.
+             */
+            google.protobuf.Timestamp unpenalised = 3;
         }
 
+        /**
+         * Set of robots on a team, with a score and coach message.
+         */
         message Team {
-            uint32         team_id       = 1;  // unique team number
-            uint32         score         = 2;  // team's score
-            string         coach_message = 3;  // the coach's message to the team
-            repeated Robot players       = 4;
+
+            /**
+             * Unique team number.
+             */
+            uint32 team_id = 1;
+
+            /**
+             * The team's current score.
+             */
+            uint32 score = 2;
+
+            /**
+             *  The coach's message to the team - not only for our team.
+             */
+            string coach_message = 3;
+
+            /**
+             * Set of robot players on the team.
+             */
+            repeated Robot players = 4;
         }
 
-        Phase                     phase            = 1;
-        Mode                      mode             = 2;
-        bool                      first_half       = 3;
-        bool                      kicked_out_by_us = 4;
-        google.protobuf.Timestamp kicked_out_time  = 5;
-        bool                      our_kick_off     = 6;
-        google.protobuf.Timestamp primary_time     = 7;
-        google.protobuf.Timestamp secondary_time   = 8;
-        Team                      team             = 9;
-        Team                      opponent         = 10;
-        Robot                     self             = 11;
+        /**
+         * The current state of the game, such as PLAYING or TIMEOUT.
+         */
+        Phase phase = 1;
+
+        /**
+         * Current type of gameplay, such as NORMAL or OVERTIME.
+         */
+        Mode mode = 2;
+
+        /**
+         * Indicator variable, set to false at the end of the first half.
+         */
+        bool first_half = 3;
+
+        /**
+         * Describes who kicked the ball out, when it goes out.
+         */
+        bool kicked_out_by_us = 4;
+
+        /**
+         * Timestamp when the ball was kicked out, when that happens.
+         */
+        google.protobuf.Timestamp kicked_out_time = 5;
+
+        /**
+         * Indicator variable describing whose kick off is next.
+         */
+        bool our_kick_off = 6;
+
+        /**
+         * Timestamp when the robot thinks the half is due to end.
+         */
+        google.protobuf.Timestamp primary_time = 7;
+
+        google.protobuf.Timestamp secondary_time = 8;
+
+        /**
+         * The robot's own team - set of players, score, and coach message.
+         */
+        Team team = 9;
+
+        /**
+         * The opponent's team - set of players, score, and coach message.
+         */
+        Team opponent = 10;
+
+        /**
+         * Tracking information about this robot, including penalty reason and unpenalised timestamp.
+         */
+        Robot self = 11;
     }
 
-    Data   data  = 1;
+    /**
+     * The set of submessages with gamestate information.
+     */
+    Data data = 1;
+
     string event = 2;
 }
