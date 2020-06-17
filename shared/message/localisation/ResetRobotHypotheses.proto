@@ -23,6 +23,9 @@ package message.localisation;
 import "Matrix.proto";
 import "Vector.proto";
 
+/**
+ * Contains the robot's position hypotheses.
+ */
 message ResetRobotHypotheses {
     message Self {
         vec2   position     = 1;

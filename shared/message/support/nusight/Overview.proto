@@ -27,6 +27,9 @@ import "message/input/GameState.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
+/**
+ * Contains almost everything NUsight related.
+ */
 message Overview {
 
     // The timestamp this overview packet was sent

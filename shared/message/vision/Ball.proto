@@ -26,6 +26,9 @@ import "Vector.proto";
 import "message/Geometry.proto";
 import "Matrix.proto";
 
+/**
+ * Contains ball measurement details.
+ */
 message Ball {
     enum MeasurementType {
         UNKNOWN      = 0;
@@ -45,6 +48,9 @@ message Ball {
     fvec4                colour         = 5;
 }
 
+/**
+ * Sets of ball measurements, with timestamps, camera id's, and Hcw transforms.
+ */
 message Balls {
     uint32                    camera_id = 1;
     google.protobuf.Timestamp timestamp = 2;

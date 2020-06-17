@@ -23,6 +23,9 @@ package message.input;
 
 import "Vector.proto";
 
+/**
+ * Contains Marker, Rigidbody, and message metadata information.
+ */
 message MotionCapture {
     message Marker {
         uint32 id       = 1;
