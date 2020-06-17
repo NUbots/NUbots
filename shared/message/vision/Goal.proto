@@ -25,9 +25,6 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
-/**
- * Goal position measurements and information.
- */
 message Goal {
     enum Side {
         UNKNOWN_SIDE = 0;
@@ -66,9 +63,6 @@ message Goal {
     Team                 team           = 7;
 }
 
-/**
- * Set of Goals measurements, with timestamps, camera ids, and Hcw transforms.
- */
 message Goals {
     uint32                    camera_id = 1;
     google.protobuf.Timestamp timestamp = 2;

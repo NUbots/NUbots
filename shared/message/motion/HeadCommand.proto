@@ -33,9 +33,6 @@ message HeadCommand {
     bool  robotSpace = 3;  // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
 }
 
-/**
- * Empty message, not implemented
- */
 message HeadMotionUpdate {
     // TODO...
 }

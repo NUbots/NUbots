@@ -23,9 +23,6 @@ package message.input;
 import "google/protobuf/timestamp.proto";
 import "message/input/GameState.proto";
 
-/**
- * Contains event tracking information.
- */
 message GameEvents {
 
     enum Context {
