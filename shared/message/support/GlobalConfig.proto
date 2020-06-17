@@ -33,5 +33,5 @@ message GlobalConfig {
     /**
      * Unique team number.
      */
-    uint32 teamId   = 2;
+    uint32 teamId = 2;
 }

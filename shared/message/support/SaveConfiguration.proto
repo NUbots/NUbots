@@ -28,7 +28,7 @@ message SaveConfiguration {
     /**
      * Relative path of the config save.
      */
-    string path   = 1;
+    string path = 1;
 
     /**
      * The whole config file as a string.

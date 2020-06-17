@@ -39,66 +39,66 @@ message FieldDescription {
      * Measurements of the field which are loaded from config file. In metres.
      */
     message FieldDimensions {
-        double       line_width             = 1;
-        double       mark_width             = 2;
-        double       field_length           = 3;
-        double       field_width            = 4;
+        double line_width   = 1;
+        double mark_width   = 2;
+        double field_length = 3;
+        double field_width  = 4;
 
         /**
          * Cross-sectional shape of goal-posts.
          */
-        GoalpostType goalpost_type          = 5;
+        GoalpostType goalpost_type = 5;
 
-        double       goal_depth             = 6;
+        double goal_depth = 6;
 
         /**
          * Distance between inner edges of goal posts.
          */
-        double       goal_width             = 7;
+        double goal_width = 7;
 
-        double       goal_area_length       = 8;
-        double       goal_area_width        = 9;
+        double goal_area_length = 8;
+        double goal_area_width  = 9;
 
         /**
          * Height to the bottom of the crossbar.
          */
-        double       goal_crossbar_height   = 10;
+        double goal_crossbar_height = 10;
 
         /**
          * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
          */
-        double       goalpost_width         = 11;
+        double goalpost_width = 11;
 
         /**
          * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
          */
-        double       goalpost_depth         = 12;
+        double goalpost_depth = 12;
 
         /**
          * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
          */
-        double       goal_crossbar_width    = 13;
+        double goal_crossbar_width = 13;
 
         /**
          * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
          */
-        double       goal_crossbar_depth    = 14;
+        double goal_crossbar_depth = 14;
 
-        double       goal_net_height        = 15;
+        double goal_net_height = 15;
 
         /**
          * Measured from the goal line to the middle of the penalty mark.
          */
-        double       penalty_mark_distance  = 16;
+        double penalty_mark_distance = 16;
 
-        double       center_circle_diameter = 17;
-        double       border_strip_min_width = 18;
+        double center_circle_diameter = 17;
+        double border_strip_min_width = 18;
     }
 
     /**
      * Loaded from config file.
      */
-    double ball_radius         = 1;
+    double ball_radius = 1;
 
     /**
      * Calculated as goal_crossbar_height + goal_crossbar_width.

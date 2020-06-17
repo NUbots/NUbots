@@ -65,7 +65,7 @@ message Overview {
     /**
      * Localisation measured in field space.
      */
-    fvec3 robot_position            = 7;
+    fvec3 robot_position = 7;
 
     /**
      * The covariance of the robot_position vector.
@@ -75,7 +75,7 @@ message Overview {
     /**
      * The ball position measured in field space.
      */
-    fvec2 ball_position            = 9;
+    fvec2 ball_position = 9;
 
     /**
      * The covariance of the ball_position vector.
@@ -90,12 +90,12 @@ message Overview {
     /**
      * The type of game being played. For Game Controller.
      */
-    input.GameState.Data.Mode          game_mode      = 12;
+    input.GameState.Data.Mode game_mode = 12;
 
     /**
      * The current stage of gameplay. For Game Controller.
      */
-    input.GameState.Data.Phase         game_phase     = 13;
+    input.GameState.Data.Phase game_phase = 13;
 
     /**
      * Why the penalty was given. For Game Controller.
@@ -125,5 +125,5 @@ message Overview {
     /**
      * Walk command vector, pointing to target spot.
      */
-    fvec3          walk_command   = 19;
+    fvec3 walk_command = 19;
 }
