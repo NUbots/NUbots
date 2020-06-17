@@ -22,9 +22,6 @@ package message.behaviour;
 
 import "google/protobuf/timestamp.proto";
 
-/**
- * A command for a servo to execute.
- */
 message ServoCommand {
     uint64                    source   = 1;
     google.protobuf.Timestamp time     = 2;
