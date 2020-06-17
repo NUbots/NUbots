@@ -137,11 +137,11 @@ message KinematicsModel {
     }
 
     // Instantiations of the config containers.
-    Leg         leg                       = 1;
-    Head        head                      = 2;
-    Arm         arm                       = 3;
-    MassModel   massModel                 = 4;
-    TensorModel tensorModel               = 5;
+    Leg         leg         = 1;
+    Head        head        = 2;
+    Arm         arm         = 3;
+    MassModel   massModel   = 4;
+    TensorModel tensorModel = 5;
 
-    float       TEAMDARWINCHEST_TO_ORIGIN = 6;
+    float TEAMDARWINCHEST_TO_ORIGIN = 6;
 }

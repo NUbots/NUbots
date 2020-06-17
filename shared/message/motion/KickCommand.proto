@@ -38,12 +38,12 @@ message KickCommand {
     /**
      * The {x, y, z} point to kick.
      */
-    vec3            target          = 1;
+    vec3 target = 1;
 
     /**
      * Force is the magnitude.
      */
-    vec3            direction       = 2;
+    vec3 direction = 2;
 
     /**
      * Type is NORMAL or POWER (POWER means disregard robot safety and smash it).
@@ -60,12 +60,12 @@ message KickScriptCommand {
     /**
      * Direction to kick with magnitude determining force.
      */
-    vec3   direction = 1;
+    vec3 direction = 1;
 
     /**
      * Leg to kick with. Use LimbID::LEFT_LEG or LimbID::RIGHT_LEG to check value.
      */
-    uint32 leg       = 2;
+    uint32 leg = 2;
 }
 
 /**
@@ -76,14 +76,14 @@ message KickPlannerConfig {
     /**
      * Maximum distance the ball can be away, in metres.
      */
-    float max_ball_distance        = 1;
+    float max_ball_distance = 1;
 
-    float kick_corridor_width      = 2;
+    float kick_corridor_width = 2;
 
     /**
      * How many seconds without vision until the robot decides to not kick.
      */
-    float seconds_not_seen_limit   = 3;
+    float seconds_not_seen_limit = 3;
 
     float kick_forward_angle_limit = 4;
 }

@@ -45,7 +45,7 @@ message WalkCommand {
     /**
      * x and y are velocity in m/s and angle is in rads/s
      */
-    vec3   command       = 2;
+    vec3 command = 2;
 }
 
 /**
