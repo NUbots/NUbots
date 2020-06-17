@@ -23,6 +23,9 @@ package message.support.nusight;
 
 import "google/protobuf/timestamp.proto";
 
+/**
+ * Contains labels, values, and a timestamp.
+ */
 message DataPoint {
     string                    label     = 1;
     repeated float            value     = 2 [packed = true];
