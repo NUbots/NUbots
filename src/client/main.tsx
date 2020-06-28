@@ -11,6 +11,7 @@ import { installDashboard } from './components/dashboard/install'
 import { installLocalisation } from './components/localisation/install'
 import { withRobotSelectorMenuBar } from './components/menu_bar/view'
 import { installVision } from './components/vision/install'
+import { installVision2 } from './components/vision2/install'
 import { installVisualMesh } from './components/visual_mesh/install'
 import { NavigationConfiguration } from './navigation'
 import { NUsightNetwork } from './network/nusight_network'
@@ -28,6 +29,7 @@ installDashboard({ nav, appModel, nusightNetwork, menu })
 installLocalisation({ nav, appModel, nusightNetwork, menu })
 installChart({ nav, appModel, nusightNetwork, menu })
 installVision({ nav, appModel, nusightNetwork, Menu: menu })
+installVision2({ nav, appModel, nusightNetwork, Menu: menu })
 installVisualMesh({ nav, appModel, nusightNetwork, Menu: menu })
 
 configure({ enforceActions: 'observed' })

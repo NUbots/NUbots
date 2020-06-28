@@ -1,9 +1,11 @@
 import fs from 'fs'
 import { autorun } from 'mobx'
+import { computedFn } from 'mobx-utils'
 import { Vector3 } from 'three'
 import { Matrix4 } from 'three'
 
 import { fourcc } from '../../client/image_decoder/fourcc'
+import { FieldDimensions } from '../../shared/field/dimensions'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { Imat4 } from '../../shared/proto/messages'
 import { message } from '../../shared/proto/messages'
@@ -25,6 +27,7 @@ import image9 from './images/9.jpg'
 import { periodic } from './periodic'
 import CompressedImage = message.output.CompressedImage
 import Projection = message.output.CompressedImage.Lens.Projection
+import MeasurementType = message.vision.Ball.MeasurementType
 import Balls = message.vision.Balls
 import Side = message.vision.Goal.Side
 import Goals = message.vision.Goals
@@ -36,7 +39,10 @@ export class VisionSimulator extends Simulator {
 
   start() {
     const stops = [
-      autorun(() => this.send(this.image)),
+      autorun(() => {
+        this.send(this.image(1))
+        this.send(this.image(2))
+      }),
       autorun(() => this.send(this.goals)),
       autorun(() => this.send(this.balls)),
     ]
@@ -61,31 +67,33 @@ export class VisionSimulator extends Simulator {
     return new VisionSimulator(nuclearnetClient, images)
   }
 
-  private get image(): Message {
-    const time = periodic(10)
-    const t = time / 10
-    const numImages = this.images.length
-    const imageIndex = Math.floor(((Math.cos(2 * Math.PI * t) + 1) / 2) * numImages) % numImages
-    const data = this.images[imageIndex]
-    const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
-    return {
-      messageType: 'message.output.CompressedImage',
-      buffer: CompressedImage.encode({
-        format: fourcc('JPEG'),
-        dimensions: { x: 712, y: 463 },
-        data,
-        cameraId: 1,
-        name: 'Virtual Camera',
-        timestamp: toTimestamp(time),
-        Hcw: toProtoMat44(Hcw),
-        lens: {
-          projection: Projection.RECTILINEAR,
-          focalLength: 1,
-          fov: 1,
-        },
-      }).finish(),
-    }
-  }
+  private image = computedFn(
+    (cameraId: number): Message => {
+      const time = periodic(10)
+      const t = time / 10
+      const numImages = this.images.length
+      const imageIndex = Math.floor(((Math.cos(2 * Math.PI * t) + 1) / 2) * numImages) % numImages
+      const data = this.images[imageIndex]
+      const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
+      return {
+        messageType: 'message.output.CompressedImage',
+        buffer: CompressedImage.encode({
+          format: fourcc('JPEG'),
+          dimensions: { x: 712, y: 463 },
+          data,
+          cameraId,
+          name: `Virtual Camera #${cameraId}`,
+          timestamp: toTimestamp(time),
+          Hcw: toProtoMat44(Hcw),
+          lens: {
+            projection: Projection.RECTILINEAR,
+            focalLength: 415 / 712,
+            fov: 1,
+          },
+        }).finish(),
+      }
+    },
+  )
 
   private get balls(): Message {
     const time = periodic(10)
@@ -106,7 +114,12 @@ export class VisionSimulator extends Simulator {
               axis,
               gradient: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
             },
-            measurements: [],
+            measurements: [
+              {
+                type: MeasurementType.WIDTH_BASED,
+                rBCc: new Vector3(1, 0, 0),
+              },
+            ],
           },
         ],
       }).finish(),
@@ -117,6 +130,7 @@ export class VisionSimulator extends Simulator {
     const time = periodic(10)
     const t = time / 10
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
+    const { goalCrossbarHeight } = FieldDimensions.postYear2017()
     return {
       messageType: 'message.vision.Goals',
       buffer: Goals.encode({
@@ -127,24 +141,27 @@ export class VisionSimulator extends Simulator {
           {
             side: Side.RIGHT,
             post: {
-              top: new Vector3(10, -2, 2).normalize(),
-              bottom: new Vector3(10, -2, -2).normalize(),
+              top: new Vector3(5, -1, goalCrossbarHeight / 2).normalize(),
+              bottom: new Vector3(5, -1, -goalCrossbarHeight / 2).normalize(),
+              distance: new Vector3(5, -1, -goalCrossbarHeight / 2).length(),
             },
             measurements: [],
           },
           {
             side: Side.LEFT,
             post: {
-              top: new Vector3(10, 2, 2).normalize(),
-              bottom: new Vector3(10, 2, -2).normalize(),
+              top: new Vector3(5, 1, goalCrossbarHeight / 2).normalize(),
+              bottom: new Vector3(5, 1, -goalCrossbarHeight / 2).normalize(),
+              distance: new Vector3(5, 1, -goalCrossbarHeight / 2).length(),
             },
             measurements: [],
           },
           {
             side: Side.UNKNOWN_SIDE,
             post: {
-              top: new Vector3(10, 0, 2).normalize(),
-              bottom: new Vector3(10, 0, -2).normalize(),
+              top: new Vector3(5, 0, goalCrossbarHeight / 2).normalize(),
+              bottom: new Vector3(5, 0, -goalCrossbarHeight / 2).normalize(),
+              distance: new Vector3(5, 0, -goalCrossbarHeight / 2).length(),
             },
             measurements: [],
           },
