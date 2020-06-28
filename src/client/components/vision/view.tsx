@@ -1,42 +1,68 @@
+import { computed } from 'mobx'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
 import { Component } from 'react'
 import { ComponentType } from 'react'
+import { RobotModel } from '../robot/model'
+import { RobotSelectorSingle } from '../robot_selector_single/view'
+import { CameraModel } from './camera/model'
+import { CameraViewProps } from './camera/view'
+import { VisionController } from './controller'
+import { GridLayout } from './grid_layout/grid_layout'
 
-import { CameraView } from './camera/view'
-import { VisionNetwork } from './network'
+import { VisionModel } from './model'
 import styles from './styles.css'
-import { VisionViewModel } from './view_model'
 
 @observer
 export class VisionView extends Component<{
-  viewModel: VisionViewModel
-  network: VisionNetwork
+  controller: VisionController
+  model: VisionModel
   Menu: ComponentType
+  CameraView: ComponentType<CameraViewProps>
 }> {
-  componentWillUnmount() {
-    this.props.network.destroy()
-  }
-
   render() {
     const {
-      viewModel: { robots },
+      model: { selectedRobot, robots },
       Menu,
+      CameraView,
     } = this.props
     return (
       <div className={styles.vision}>
-        <Menu />
-        {robots.map(({ id, name, cameras }) => (
-          <div key={id}>
-            <h1>{name}</h1>
-            <div className={styles.cameras}>
-              {cameras.map(camera => (
-                <CameraView key={camera.id} viewModel={camera} />
-              ))}
-            </div>
+        <Menu>
+          <div className={styles.selector}>
+            <RobotSelectorSingle
+              robots={robots}
+              selected={selectedRobot?.robotModel}
+              onSelect={this.onSelectRobot}
+            />
           </div>
-        ))}
+        </Menu>
+        {selectedRobot && (
+          <div className={styles.content}>
+            <GridLayout itemAspectRatio={this.itemAspectRatio}>
+              {Array.from(selectedRobot.cameras.values()).map(camera => (
+                <CameraView key={camera.id} model={camera} />
+              ))}
+            </GridLayout>
+          </div>
+        )}
       </div>
     )
+  }
+
+  @computed
+  private get itemAspectRatio(): number {
+    const {
+      model: { selectedRobot },
+    } = this.props
+    // Assumes aspect ratio for all cameras are the same, grab the first.
+    const firstCamera: CameraModel | undefined = selectedRobot?.cameras.values().next().value
+    return firstCamera ? firstCamera.image.width / firstCamera.image.height : 1
+  }
+
+  @action.bound
+  private onSelectRobot(robot?: RobotModel) {
+    this.props.controller.onSelectRobot(this.props.model, robot)
   }
 }

@@ -16,7 +16,7 @@ import { ImageFormat } from '../image'
 import { VisionModel } from '../model'
 import { VisionView } from '../view'
 
-storiesOf('components.vision2.layout', module)
+storiesOf('components.vision.layout', module)
   .addDecorator(fullscreen)
   .add('renders', () => {
     const appModel = AppModel.of({

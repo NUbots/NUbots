@@ -8,6 +8,8 @@ import { RobotModel } from '../robot/model'
 import { CameraModel } from './camera/model'
 
 export class VisionModel {
+  @observable.ref selectedRobot?: VisionRobotModel
+
   constructor(private appModel: AppModel) {}
 
   static of = memoize((appModel: AppModel) => {
@@ -15,15 +17,20 @@ export class VisionModel {
   })
 
   @computed
-  get robots(): VisionRobotModel[] {
-    return this.appModel.robots.map(VisionRobotModel.of)
+  get robots(): RobotModel[] {
+    return this.appModel.robots.filter(r => r.enabled)
+  }
+
+  @computed
+  get visionRobots(): VisionRobotModel[] {
+    return this.robots.map(VisionRobotModel.of)
   }
 }
 
 export class VisionRobotModel {
   @observable cameras: Map<number, CameraModel> = new Map()
 
-  constructor(private robotModel: RobotModel) {}
+  constructor(readonly robotModel: RobotModel) {}
 
   static of = memoize((robotModel: RobotModel) => {
     return new VisionRobotModel(robotModel)

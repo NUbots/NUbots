@@ -17,7 +17,7 @@ import rggbUrl from './images/image.rggb.jpg'
 
 const createModel = () => observable<{ image: Image | undefined }>({ image: undefined })
 
-storiesOf('components.vision2.image_view', module)
+storiesOf('components.vision.image_view', module)
   .addDecorator(fullscreen)
   .add('JPEG', () => {
     const model = createModel()

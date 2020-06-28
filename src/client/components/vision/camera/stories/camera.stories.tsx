@@ -19,7 +19,7 @@ import { Projection } from '../model'
 import { CameraModel } from '../model'
 import { CameraView } from '../view'
 
-storiesOf('components.vision2.camera', module)
+storiesOf('components.vision.camera', module)
   .addDecorator(fullscreen)
   .add('vision objects', () => {
     const box = observable<{ model: CameraModel | undefined }>({ model: undefined })

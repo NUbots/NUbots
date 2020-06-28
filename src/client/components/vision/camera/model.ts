@@ -1,42 +1,177 @@
-import { action } from 'mobx'
-import { computed } from 'mobx'
 import { observable } from 'mobx'
 
-import { Image } from '../../../image_decoder/image_decoder'
 import { Matrix4 } from '../../../math/matrix4'
 import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
 import { Vector4 } from '../../../math/vector4'
-import { VisionRobotModel } from '../model'
+import { Image } from '../image'
 
-export interface GreenHorizon {
-  readonly horizon: Vector3[]
-  readonly Hcw: Matrix4
+type DrawOptions = {
+  drawImage: boolean
+  drawDistance: boolean
+  drawCompass: boolean
+  drawHorizon: boolean
+  drawGreenhorizon: boolean
+  drawBalls: boolean
+  drawGoals: boolean
 }
 
-export interface VisualMesh {
-  readonly neighbours: number[]
-  readonly rays: number[]
-  readonly classifications: { dim: number; values: number[] }
+export class CameraModel {
+  @observable.ref id: number
+  @observable.ref name: string
+  @observable.ref image: Image
+  @observable.ref params: CameraParams
+
+  @observable.ref greenhorizon?: GreenHorizon
+  @observable.ref balls?: Ball[]
+  @observable.ref goals?: Goal[]
+
+  @observable.shallow drawOptions: DrawOptions
+
+  constructor({
+    id,
+    name,
+    image,
+    params,
+    greenhorizon,
+    balls,
+    goals,
+    drawOptions,
+  }: {
+    id: number
+    name: string
+    image: Image
+    params: CameraParams
+    greenhorizon?: GreenHorizon
+    balls?: Ball[]
+    goals?: Goal[]
+    drawOptions: DrawOptions
+  }) {
+    this.id = id
+    this.name = name
+    this.image = image
+    this.params = params
+    this.greenhorizon = greenhorizon
+    this.balls = balls
+    this.goals = goals
+    this.drawOptions = drawOptions
+  }
+
+  static of(opts: {
+    id: number
+    name: string
+    image: Image
+    params: CameraParams
+    greenhorizon?: GreenHorizon
+    balls?: Ball[]
+    goals?: Goal[]
+  }) {
+    return new CameraModel({
+      drawOptions: {
+        drawImage: true,
+        drawDistance: false,
+        drawCompass: true,
+        drawHorizon: true,
+        drawGreenhorizon: true,
+        drawBalls: true,
+        drawGoals: true,
+      },
+      ...opts,
+    })
+  }
+
+  copy(that: CameraModel) {
+    this.id = that.id
+    this.name = that.name
+    this.image = that.image
+    this.params.copy(that.params)
+    this.greenhorizon =
+      (that.greenhorizon && this.greenhorizon?.copy(that.greenhorizon)) || that.greenhorizon
+    this.balls = that.balls
+    this.goals = that.goals
+    return this
+  }
 }
 
-export interface VisionImage extends Image {
-  readonly Hcw: Matrix4
-  readonly lens: {
-    readonly projection: number
-    readonly focalLength: number
-    readonly centre: Vector2
-    readonly k: Vector2 // The distortion coefficents
+export class CameraParams {
+  @observable.ref Hcw: Matrix4
+  @observable.ref lens: Lens
+
+  constructor({ Hcw, lens }: { Hcw: Matrix4; lens: Lens }) {
+    this.Hcw = Hcw
+    this.lens = lens
+  }
+
+  copy(that: CameraParams) {
+    this.Hcw = that.Hcw
+    this.lens.copy(that.lens)
+    return this
+  }
+}
+
+export class Lens {
+  @observable.ref projection: Projection
+  @observable.ref focalLength: number
+  @observable.ref centre?: Vector2
+  @observable.ref distortionCoeffecients?: Vector2
+
+  constructor({
+    projection,
+    focalLength,
+    centre,
+    distortionCoeffecients,
+  }: {
+    projection: Projection
+    focalLength: number
+    centre?: Vector2
+    distortionCoeffecients?: Vector2
+  }) {
+    this.projection = projection
+    this.focalLength = focalLength
+    this.centre = centre
+    this.distortionCoeffecients = distortionCoeffecients
+  }
+
+  copy(that: Lens) {
+    this.projection = that.projection
+    this.focalLength = that.focalLength
+    this.centre = that.centre
+    this.distortionCoeffecients = that.distortionCoeffecients
+    return this
+  }
+}
+
+export enum Projection {
+  UNKNOWN = 0,
+  RECTILINEAR = 1,
+  EQUIDISTANT = 2,
+  EQUISOLID = 3,
+}
+
+export class GreenHorizon {
+  /** A list of world space camera unit-vector rays. */
+  @observable.ref horizon: Vector3[]
+
+  /** The world to camera transform, at the time the green horizon was measured. */
+  @observable.ref Hcw: Matrix4
+
+  constructor({ horizon, Hcw }: { horizon?: Vector3[]; Hcw?: Matrix4 }) {
+    this.horizon = horizon ?? []
+    this.Hcw = Hcw ?? Matrix4.of()
+  }
+
+  copy(that: GreenHorizon) {
+    this.horizon = that.horizon
+    this.Hcw = that.Hcw
+    return this
   }
 }
 
 export interface Ball {
   readonly timestamp: number
   readonly Hcw: Matrix4
-  readonly cone: {
-    readonly axis: Vector3
-    readonly radius: number
-  }
+  readonly cone: Cone
+  readonly distance: number
   readonly colour: Vector4
 }
 
@@ -47,90 +182,11 @@ export interface Goal {
   readonly post: {
     readonly top: Vector3
     readonly bottom: Vector3
+    readonly distance: number
   }
 }
 
-export class CameraModel {
-  readonly id: number
-
-  @observable.ref greenhorizon?: GreenHorizon
-  @observable.ref visualmesh?: VisualMesh
-  @observable.ref image?: VisionImage
-  @observable.ref balls: Ball[]
-  @observable.ref goals: Goal[]
-  @observable.ref name: string
-  @observable draw = {
-    image: true,
-    compass: true,
-    horizon: true,
-    visualmesh: true,
-    greenhorizon: true,
-    balls: true,
-    goals: true,
-  }
-
-  @computed
-  get drawOptions() {
-    return [
-      {
-        label: 'Image',
-        enabled: this.draw.image,
-        toggle: action(() => (this.draw.image = !this.draw.image)),
-      },
-      {
-        label: 'Compass',
-        enabled: this.draw.compass,
-        toggle: action(() => (this.draw.compass = !this.draw.compass)),
-      },
-      {
-        label: 'Horizon',
-        enabled: this.draw.horizon,
-        toggle: action(() => (this.draw.horizon = !this.draw.horizon)),
-      },
-      {
-        label: 'Visual Mesh',
-        enabled: this.draw.visualmesh,
-        toggle: action(() => (this.draw.visualmesh = !this.draw.visualmesh)),
-      },
-      {
-        label: 'Green Horizon',
-        enabled: this.draw.greenhorizon,
-        toggle: action(() => (this.draw.greenhorizon = !this.draw.greenhorizon)),
-      },
-      {
-        label: 'Balls',
-        enabled: this.draw.balls,
-        toggle: action(() => (this.draw.balls = !this.draw.balls)),
-      },
-      {
-        label: 'Goals',
-        enabled: this.draw.goals,
-        toggle: action(() => (this.draw.goals = !this.draw.goals)),
-      },
-    ]
-  }
-
-  constructor(
-    private model: VisionRobotModel,
-    {
-      id,
-      name,
-      balls,
-      goals,
-    }: {
-      id: number
-      name: string
-      balls: Ball[]
-      goals: Goal[]
-    },
-  ) {
-    this.id = id
-    this.name = name
-    this.balls = balls
-    this.goals = goals
-  }
-
-  static of(model: VisionRobotModel, { id, name }: { id: number; name: string }) {
-    return new CameraModel(model, { id, name, balls: [], goals: [] })
-  }
+export interface Cone {
+  readonly axis: Vector3
+  readonly radius: number
 }
