@@ -33,7 +33,7 @@ export class BallsViewModel {
     const { axis, radius } = transform(m.cone, m.distance, Hcc)
     return this.lineProjection.cone({
       axis,
-      radius: Math.cos(radius),
+      radius,
       color: m.colour,
       lineWidth: 10,
     })
