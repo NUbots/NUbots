@@ -69,7 +69,7 @@ async function fakeCameraModel(): Promise<CameraModel> {
         Hcw,
         cone: {
           axis: unprojectEquidistant(new Vector2(195, 303), viewSize, focalLength),
-          radius: 0.105,
+          radius: 0.994,
         },
         distance: 1,
         colour: new Vector4(1, 0.5, 0, 1),
