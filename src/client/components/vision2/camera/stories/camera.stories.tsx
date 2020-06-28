@@ -12,6 +12,7 @@ import { fullscreen } from '../../../storybook/fullscreen'
 import { ImageFormat } from '../../image'
 import { Image } from '../../image'
 import imageUrl from '../../image_view/stories/images/image.jpg'
+import { Lens } from '../model'
 import { GreenHorizon } from '../model'
 import { CameraParams } from '../model'
 import { Projection } from '../model'
@@ -44,10 +45,10 @@ async function fakeCameraModel(): Promise<CameraModel> {
     image,
     params: new CameraParams({
       Hcw,
-      lens: {
+      lens: new Lens({
         projection: Projection.EQUIDISTANT,
         focalLength,
-      },
+      }),
     }),
     greenhorizon: new GreenHorizon({
       horizon: [

@@ -14,8 +14,12 @@ import { CameraModel } from './model'
 import styles from './styles.css'
 import { CameraViewModel } from './view_model'
 
+export type CameraViewProps = {
+  model: CameraModel
+}
+
 @observer
-export class CameraView extends Component<{ model: CameraModel }> {
+export class CameraView extends Component<CameraViewProps> {
   render() {
     return (
       <div className={styles.camera}>

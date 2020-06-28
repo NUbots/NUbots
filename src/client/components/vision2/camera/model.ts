@@ -79,6 +79,18 @@ export class CameraModel {
       ...opts,
     })
   }
+
+  copy(that: CameraModel) {
+    this.id = that.id
+    this.name = that.name
+    this.image = that.image
+    this.params.copy(that.params)
+    this.greenhorizon =
+      (that.greenhorizon && this.greenhorizon?.copy(that.greenhorizon)) || that.greenhorizon
+    this.balls = that.balls
+    this.goals = that.goals
+    return this
+  }
 }
 
 export class CameraParams {
@@ -88,6 +100,12 @@ export class CameraParams {
   constructor({ Hcw, lens }: { Hcw: Matrix4; lens: Lens }) {
     this.Hcw = Hcw
     this.lens = lens
+  }
+
+  copy(that: CameraParams) {
+    this.Hcw = that.Hcw
+    this.lens.copy(that.lens)
+    return this
   }
 }
 
@@ -113,6 +131,14 @@ export class Lens {
     this.centre = centre
     this.distortionCoeffecients = distortionCoeffecients
   }
+
+  copy(that: Lens) {
+    this.projection = that.projection
+    this.focalLength = that.focalLength
+    this.centre = that.centre
+    this.distortionCoeffecients = that.distortionCoeffecients
+    return this
+  }
 }
 
 export enum Projection {
@@ -132,6 +158,12 @@ export class GreenHorizon {
   constructor({ horizon, Hcw }: { horizon?: Vector3[]; Hcw?: Matrix4 }) {
     this.horizon = horizon ?? []
     this.Hcw = Hcw ?? Matrix4.of()
+  }
+
+  copy(that: GreenHorizon) {
+    this.horizon = that.horizon
+    this.Hcw = that.Hcw
+    return this
   }
 }
 

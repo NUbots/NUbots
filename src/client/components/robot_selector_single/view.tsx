@@ -13,7 +13,7 @@ export type RobotSelectorSingleProps = {
   robots: RobotModel[]
   selected?: RobotModel
   dropDirection?: 'up' | 'down'
-  onSelect(robot: RobotModel): void
+  onSelect(robot?: RobotModel): void
 }
 
 @observer

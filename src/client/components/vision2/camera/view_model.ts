@@ -21,16 +21,6 @@ export class CameraViewModel {
     return new CameraViewModel(canvas, model)
   }
 
-  @computed
-  get id(): number {
-    return this.model.id
-  }
-
-  @computed
-  get name(): string {
-    return this.model.name
-  }
-
   readonly stage = stage(() => ({ camera: this.camera(), scene: this.scene() }))
 
   readonly camera = orthographicCamera(() => ({
