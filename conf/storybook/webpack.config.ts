@@ -21,6 +21,7 @@ export default ({ config: storybookConfig }: { config: webpack.Configuration }) 
       ...storybookConfig.plugins || [],
       ...(config.plugins || []).filter(p => !(
           p instanceof HtmlWebpackPlugin // Storybook handles page generation.
+          || p instanceof webpack.HotModuleReplacementPlugin // Disable HMR.
           || p instanceof CopyWebpackPlugin // Avoids overwriting index.html.
         ),
       ),
