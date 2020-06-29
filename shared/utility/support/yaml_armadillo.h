@@ -20,10 +20,9 @@
 #ifndef UTILITY_SUPPORT_YAML_ARMADILLO_H
 #define UTILITY_SUPPORT_YAML_ARMADILLO_H
 
-#include <yaml-cpp/yaml.h>
-
 #include <armadillo>
 #include <iostream>
+#include <yaml-cpp/yaml.h>
 
 #include "utility/support/yaml_expression.h"
 

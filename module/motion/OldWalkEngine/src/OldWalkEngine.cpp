@@ -26,12 +26,14 @@
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
+
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/SaveConfiguration.h"
+
 #include "utility/math/angle.h"
 #include "utility/math/comparison.h"
 #include "utility/math/matrix/Rotation3D.h"

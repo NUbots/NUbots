@@ -1,9 +1,8 @@
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_H
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_H
 
-#include <va/va.h>
-
 #include <memory>
+#include <va/va.h>
 
 #include "../Compressor.h"
 #include "CompressionContext.h"

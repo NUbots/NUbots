@@ -23,7 +23,9 @@
 #include <Eigen/Core>
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/support/yaml_expression.h"
 

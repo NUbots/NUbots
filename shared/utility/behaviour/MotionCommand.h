@@ -20,6 +20,7 @@
 #define UTILITY_BEHAVIOUR_MOTIONCOMMAND_H
 
 #include "message/behaviour/MotionCommand.h"
+
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/support/eigen_armadillo.h"
 

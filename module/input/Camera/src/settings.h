@@ -2,7 +2,6 @@
 #define MODULE_INPUT_CAMERA_SETTINGS_H
 
 #include <fmt/format.h>
-
 #include <stdexcept>
 #include <string>
 
@@ -177,8 +176,11 @@ namespace input {
             if (SettingsFunctions<T>::valid(setting, std::forward<U>(value))) {
                 SettingsFunctions<T>::write(setting, std::forward<U>(value), &error);
                 if (error) {
-                    std::string msg = fmt::format(
-                        "Failed changing from {0}{2} to {1}{2}: \"{3}\"", current, value, unit, error->message);
+                    std::string msg = fmt::format("Failed changing from {0}{2} to {1}{2}: \"{3}\"",
+                                                  current,
+                                                  value,
+                                                  unit,
+                                                  error->message);
                     g_error_free(error);
                     throw std::runtime_error(msg);
                 }
