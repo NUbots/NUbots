@@ -138,6 +138,7 @@ namespace output {
                         msg->lens.focal_length = image.lens.focal_length;
                         msg->lens.fov          = image.lens.fov;
                         msg->lens.centre       = image.lens.centre;
+                        msg->lens.k            = image.lens.k;
 
                         // Emit the compressed image
                         emit(msg);
