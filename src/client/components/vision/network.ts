@@ -26,6 +26,7 @@ export class VisionNetwork {
   constructor(private network: Network) {
     this.network.on(message.input.Image, this.onImage)
     this.network.on(message.output.CompressedImage, this.onImage)
+    this.network.on(message.vision.VisualMesh, this.onMesh)
     this.network.on(message.vision.Balls, this.onBalls)
     this.network.on(message.vision.Goals, this.onGoals)
     this.network.on(message.vision.GreenHorizon, this.onGreenHorizon)
@@ -46,7 +47,7 @@ export class VisionNetwork {
   ) => {
     const robot = VisionRobotModel.of(robotModel)
     const { cameraId, name, dimensions, format, data, Hcw } = image
-    const { projection, focalLength, centre } = image?.lens!
+    const { projection, focalLength, centre, k } = image?.lens!
 
     const element = await jpegBufferToImage(data)
 
@@ -68,12 +69,28 @@ export class VisionNetwork {
             projection: getProjection(projection!),
             focalLength: focalLength!,
             centre: Vector2.from(centre),
+            distortionCoeffecients: Vector2.from(k),
           }),
           Hcw: Matrix4.from(Hcw),
         }),
       })
       robot.cameras.set(cameraId, (model && camera?.copy(model)) || model)
     })
+  }
+
+  @action
+  onMesh(robotModel: RobotModel, packet: message.vision.VisualMesh) {
+    const robot = VisionRobotModel.of(robotModel)
+    const { cameraId, neighbourhood, rays, classifications } = packet
+    const camera = robot.cameras.get(cameraId)
+    if (!camera) {
+      return
+    }
+    camera.visualmesh = {
+      neighbours: neighbourhood?.v!,
+      rays: rays?.v!,
+      classifications: { dim: classifications?.rows!, values: classifications?.v! },
+    }
   }
 
   @action

@@ -50,4 +50,11 @@ export class VisionRobotModel {
   get visible() {
     return this.robotModel.enabled
   }
+
+  @computed
+  get cameraList() {
+    const cameras = Array.from(this.cameras.values())
+    cameras.sort((a, b) => a.name.localeCompare(b.name))
+    return cameras
+  }
 }

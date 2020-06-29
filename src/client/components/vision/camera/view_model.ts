@@ -13,6 +13,7 @@ import { GoalsViewModel } from './goals'
 import { GreenHorizonViewModel } from './greenhorizon'
 import { HorizonViewModel } from './horizon'
 import { CameraModel } from './model'
+import { VisualMeshViewModel } from './visual_mesh'
 
 export class CameraViewModel {
   constructor(private readonly canvas: Canvas, private readonly model: CameraModel) {}
@@ -37,6 +38,7 @@ export class CameraViewModel {
     return {
       children: [
         drawOptions.drawImage && this.image.image(),
+        drawOptions.drawVisualmesh && this.visualmesh?.visualmesh(),
         drawOptions.drawDistance && this.distance.distance(),
         drawOptions.drawCompass && this.compass.compass(),
         drawOptions.drawHorizon && this.horizon.horizon(),
@@ -76,6 +78,12 @@ export class CameraViewModel {
   @computed
   private get goals(): GoalsViewModel | undefined {
     return this.model.goals && GoalsViewModel.of(this.model.goals, this.canvas, this.model.params)
+  }
+
+  @computed
+  private get visualmesh(): VisualMeshViewModel | undefined {
+    const { visualmesh, params } = this.model
+    return visualmesh && VisualMeshViewModel.of(this.canvas, visualmesh, params)
   }
 
   @computed

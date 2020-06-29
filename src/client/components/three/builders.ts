@@ -1,3 +1,5 @@
+import { InterleavedBufferAttribute } from 'three'
+import { BufferAttribute } from 'three'
 import { LinearMipMapLinearFilter } from 'three'
 import { NearestFilter } from 'three'
 import { InterleavedBuffer } from 'three'
@@ -377,6 +379,26 @@ type InterleavedBufferOpts = {
 export const interleavedBuffer = createUpdatableComputed(
   (opts: InterleavedBufferOpts) => new InterleavedBuffer(opts.buffer, opts.stride),
   buffer => (buffer.needsUpdate = true),
+)
+
+type BufferGeometryOpts = {
+  index: BufferAttribute | number[]
+  attributes: { name: string; buffer: BufferAttribute | InterleavedBufferAttribute }[]
+}
+
+export const bufferGeometry = createUpdatableComputed(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (opts: BufferGeometryOpts) => new BufferGeometry(),
+  (geometry, opts) => {
+    geometry.setIndex(opts.index)
+    for (const [name] of Object.entries(geometry.attributes)) {
+      geometry.removeAttribute(name)
+    }
+    for (const { name, buffer } of opts.attributes) {
+      geometry.addAttribute(name, buffer)
+    }
+  },
+  geometry => geometry.dispose(),
 )
 
 type LightOpts = Object3DOpts & { color?: Color; intensity?: number }

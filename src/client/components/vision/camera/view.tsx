@@ -41,6 +41,11 @@ export class CameraView extends Component<CameraViewProps> {
         toggle: action(() => (drawOptions.drawImage = !drawOptions.drawImage)),
       },
       {
+        label: 'Visual Mesh',
+        enabled: drawOptions.drawVisualmesh,
+        toggle: action(() => (drawOptions.drawVisualmesh = !drawOptions.drawVisualmesh)),
+      },
+      {
         label: 'Distance',
         enabled: drawOptions.drawDistance,
         toggle: action(() => (drawOptions.drawDistance = !drawOptions.drawDistance)),

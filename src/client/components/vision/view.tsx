@@ -41,7 +41,7 @@ export class VisionView extends Component<{
         {selectedRobot && (
           <div className={styles.content}>
             <GridLayout itemAspectRatio={this.itemAspectRatio}>
-              {Array.from(selectedRobot.cameras.values()).map(camera => (
+              {selectedRobot?.cameraList.map(camera => (
                 <CameraView key={camera.id} model={camera} />
               ))}
             </GridLayout>

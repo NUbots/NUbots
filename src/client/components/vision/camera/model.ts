@@ -8,6 +8,7 @@ import { Image } from '../image'
 
 type DrawOptions = {
   drawImage: boolean
+  drawVisualmesh: boolean
   drawDistance: boolean
   drawCompass: boolean
   drawHorizon: boolean
@@ -22,6 +23,7 @@ export class CameraModel {
   @observable.ref image: Image
   @observable.ref params: CameraParams
 
+  @observable.ref visualmesh?: VisualMesh
   @observable.ref greenhorizon?: GreenHorizon
   @observable.ref balls?: Ball[]
   @observable.ref goals?: Goal[]
@@ -33,6 +35,7 @@ export class CameraModel {
     name,
     image,
     params,
+    visualmesh,
     greenhorizon,
     balls,
     goals,
@@ -42,6 +45,7 @@ export class CameraModel {
     name: string
     image: Image
     params: CameraParams
+    visualmesh?: VisualMesh
     greenhorizon?: GreenHorizon
     balls?: Ball[]
     goals?: Goal[]
@@ -51,6 +55,7 @@ export class CameraModel {
     this.name = name
     this.image = image
     this.params = params
+    this.visualmesh = visualmesh
     this.greenhorizon = greenhorizon
     this.balls = balls
     this.goals = goals
@@ -62,6 +67,7 @@ export class CameraModel {
     name: string
     image: Image
     params: CameraParams
+    visualmesh?: VisualMesh
     greenhorizon?: GreenHorizon
     balls?: Ball[]
     goals?: Goal[]
@@ -72,6 +78,7 @@ export class CameraModel {
         drawDistance: false,
         drawCompass: true,
         drawHorizon: true,
+        drawVisualmesh: false,
         drawGreenhorizon: true,
         drawBalls: true,
         drawGoals: true,
@@ -85,6 +92,7 @@ export class CameraModel {
     this.name = that.name
     this.image = that.image
     this.params.copy(that.params)
+    this.visualmesh = that.visualmesh
     this.greenhorizon =
       (that.greenhorizon && this.greenhorizon?.copy(that.greenhorizon)) || that.greenhorizon
     this.balls = that.balls
@@ -112,14 +120,14 @@ export class CameraParams {
 export class Lens {
   @observable.ref projection: Projection
   @observable.ref focalLength: number
-  @observable.ref centre?: Vector2
-  @observable.ref distortionCoeffecients?: Vector2
+  @observable.ref centre: Vector2
+  @observable.ref distortionCoeffecients: Vector2
 
   constructor({
     projection,
     focalLength,
-    centre,
-    distortionCoeffecients,
+    centre = Vector2.of(0, 0),
+    distortionCoeffecients = Vector2.of(0, 0),
   }: {
     projection: Projection
     focalLength: number
@@ -146,6 +154,12 @@ export enum Projection {
   RECTILINEAR = 1,
   EQUIDISTANT = 2,
   EQUISOLID = 3,
+}
+
+export interface VisualMesh {
+  readonly neighbours: number[]
+  readonly rays: number[]
+  readonly classifications: { dim: number; values: number[] }
 }
 
 export class GreenHorizon {
