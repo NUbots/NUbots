@@ -73,7 +73,7 @@ message Sensors {
     mat4 Hgt  = 18;
     // Inertia tensor measured in particle space and relative to the CoM of the
     // particle
-    mat3 Icp = 20;
+    mat3 inertia_tensor = 20;
 
     // DEPRECATED FIELDS, DON'T USE THESE AND DELETE WHEN YOU CAN
     vec3 angular_position = 21;

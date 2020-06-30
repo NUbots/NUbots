@@ -537,7 +537,7 @@ namespace platform {
                      *                  Mass Model                  *
                      ************************************************/
                     sensors->rMTt = calculateCentreOfMass(kinematicsModel, sensors->Htx, sensors->Htw.inverse());
-                    sensors->Icp  = calculateInertialTensor(kinematicsModel, sensors->Htx);
+                    sensors->inertia_tensor = calculateInertialTensor(kinematicsModel, sensors->Htx);
 
                     /************************************************
                      *                  Kinematics Horizon          *

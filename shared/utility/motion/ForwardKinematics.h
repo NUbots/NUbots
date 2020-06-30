@@ -480,12 +480,12 @@ namespace motion {
                 model.tensorModel.torso};
 
             // Calculate the inertial tensor for the entire robot
-            Eigen::Matrix3d Icp = Eigen::Matrix3d::Zero();
+            Eigen::Matrix3d inertia_tensor = Eigen::Matrix3d::Zero();
             for (const auto& particle : particles) {
-                Icp += particle;
+                inertia_tensor += particle;
             }
 
-            return Icp;
+            return inertia_tensor;
         }  // namespace kinematics
 
 
