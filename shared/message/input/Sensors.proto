@@ -60,17 +60,20 @@ message Sensors {
 
     /// This is the transform from the odometry (world) space to robot space
     /// (=Htw).
-    mat4            Htw                = 4;
-    repeated Foot   feet               = 5;
-    repeated Servo  servo              = 6;
-    repeated Button button             = 7;
-    repeated LED    led                = 8;
-    float           voltage            = 9;
-    float           battery            = 10;
+    mat4            Htw     = 4;
+    repeated Foot   feet    = 5;
+    repeated Servo  servo   = 6;
+    repeated Button button  = 7;
+    repeated LED    led     = 8;
+    float           voltage = 9;
+    float           battery = 10;
     repeated mat4   Htp     = 15 [(array_size) = 20];
-    vec4            centre_of_mass     = 17;
-    mat4            Hgt                = 18;
-    mat3            inertial_tensor    = 20;
+    // Torso to CoM in torso space
+    vec4 rMTt = 17;
+    mat4 Hgt  = 18;
+    // Inertia tensor measured in particle space and relative to the CoM of the
+    // particle
+    mat3 Icp = 20;
 
     // DEPRECATED FIELDS, DON'T USE THESE AND DELETE WHEN YOU CAN
     vec3 angular_position = 21;

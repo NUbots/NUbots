@@ -577,8 +577,7 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
-            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+        Transform3D Htc = Transform3D::createTranslation({-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
@@ -619,8 +618,7 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
-            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+        Transform3D Htc = Transform3D::createTranslation({-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
