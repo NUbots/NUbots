@@ -20,6 +20,7 @@
 #include "message/input/Sensors.h"
 
 #include "NUsight.h"
+
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {

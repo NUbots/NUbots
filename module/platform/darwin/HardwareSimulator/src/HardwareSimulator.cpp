@@ -25,9 +25,11 @@
 #include <mutex>
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/nusight/NUhelpers.h"
@@ -175,8 +177,8 @@ namespace platform {
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
                 [this](std::shared_ptr<const Sensors> previousSensors) {
                     if (previousSensors) {
-                        Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics[ServoID::R_ANKLE_ROLL]);
-                        Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                        Eigen::Affine3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
                         Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                         Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
@@ -204,8 +206,9 @@ namespace platform {
                             servo.presentPosition = servo.goalPosition;
                         }
                         else {
-                            Eigen::Vector3d present(
-                                std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
+                            Eigen::Vector3d present(std::cos(servo.presentPosition),
+                                                    std::sin(servo.presentPosition),
+                                                    0.0);
                             Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
 
                             Eigen::Vector3d cross = present.cross(goal);

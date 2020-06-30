@@ -23,6 +23,7 @@
 #include <Eigen/Geometry>
 
 #include "NUsight.h"
+
 #include "message/behaviour/Behaviour.h"
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/WalkPath.h"
@@ -35,6 +36,7 @@
 #include "message/support/GlobalConfig.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
+
 #include "utility/localisation/transform.h"
 
 /**

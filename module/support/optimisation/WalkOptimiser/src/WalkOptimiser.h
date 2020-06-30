@@ -23,11 +23,13 @@
 #include <Eigen/Core>
 #include <nuclear>
 
+#include "running_stat.hpp"
+
 #include "extension/Configuration.h"
+
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"
-#include "running_stat.hpp"
 
 namespace module {
 namespace support {

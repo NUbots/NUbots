@@ -4,6 +4,7 @@
 #include <turbojpeg.h>
 
 #include "../mosaic.h"
+
 #include "utility/vision/fourcc.h"
 
 namespace module {

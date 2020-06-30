@@ -18,9 +18,8 @@
 #ifndef MODULES_EXTENSION_FILEWATCHER_H
 #define MODULES_EXTENSION_FILEWATCHER_H
 
-#include <uv.h>
-
 #include <nuclear>
+#include <uv.h>
 
 namespace module {
 namespace extension {

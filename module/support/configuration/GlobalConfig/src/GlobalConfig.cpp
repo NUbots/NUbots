@@ -20,6 +20,7 @@
 #include "GlobalConfig.h"
 
 #include "extension/Configuration.h"
+
 #include "message/support/GlobalConfig.h"
 
 namespace module {
