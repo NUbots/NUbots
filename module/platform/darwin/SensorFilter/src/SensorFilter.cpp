@@ -422,8 +422,9 @@ namespace platform {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    sensors->right_foot_down = true;
-                    sensors->left_foot_down  = true;
+                    sensors->feet.resize(2);
+                    sensors->feet[ServoSide::RIGHT].down = true;
+                    sensors->feet[ServoSide::LEFT].dowtrue;
 
                     std::array<bool, 2> feet_down = {true};
                     if (config.footDown.fromLoad) {
@@ -458,8 +459,8 @@ namespace platform {
                         }
                     }
 
-                    sensors->right_foot_down = feet_down[0];
-                    sensors->left_foot_down  = feet_down[1];
+                    sensors->feet[ServoSide::RIGHT].down = feet_down[0];
+                    sensors->feet[ServoSide::LEFT].down  = feet_down[1];
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -480,7 +481,7 @@ namespace platform {
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
                     for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
-                        bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
+                        bool foot_down      = sensors->feet[side].down;
                         bool prev_foot_down = previous_foot_down[side];
                         Eigen::Affine3d Htf(
                             sensors->forward_kinematics[side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL
@@ -517,6 +518,8 @@ namespace platform {
                         else if (!foot_down) {
                             previous_foot_down[side] = false;
                         }
+
+                        sensors->feet[side].Hwf = footlanding_Hwf[side];
                     }
 
                     // Calculate our time offset from the last read
@@ -549,8 +552,6 @@ namespace platform {
                             sensors->angular_position.z());
                     }
 
-                    sensors->robot_to_IMU = calculateRobotToIMU(Eigen::Affine3d(sensors->Htw));
-
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
@@ -561,8 +562,6 @@ namespace platform {
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-                    sensors->body_centre_height = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX)).z();
-
                     Eigen::Affine3d Rwt(sensors->Htw.inverse());
                     // remove translation components from the transform
                     Rwt.translation() = Eigen::Vector3d::Zero();
@@ -582,12 +581,6 @@ namespace platform {
                     Hgt.translation() = Eigen::Vector3d(0, 0, Hwt.translation().z());
                     Hgt.linear()      = yawlessWorldInvR.linear();
                     sensors->Hgc      = Hgt * Htc;  // Rwt * Rth
-
-                    /************************************************
-                     *                  CENTRE OF PRESSURE          *
-                     ************************************************/
-                    sensors->centre_of_pressure =
-                        utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors);
 
                     emit(std::move(sensors));
                 });

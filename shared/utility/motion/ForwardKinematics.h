@@ -40,10 +40,11 @@ namespace utility {
 namespace motion {
     namespace kinematics {
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
         using message::input::Sensors;
         using message::motion::KinematicsModel;
+        using utility::input::LimbID;
+        using utility::input::ServoID;
+        using utility::input::ServoSide;
         using BodySide = message::motion::BodySide;
 
 
@@ -540,44 +541,6 @@ namespace motion {
             robotToImu << projXRobot, projYRobot;
 
             return robotToImu;
-        }
-
-        inline Eigen::Vector4d fsrCentreInBodyCoords(const KinematicsModel& model,
-                                                     const Sensors& sensors,
-                                                     const Eigen::Vector2d& foot,
-                                                     bool left) {
-            int negativeIfRight = left ? 1 : -1;
-
-            Eigen::Vector2d position =
-                foot.cwiseProduct(Eigen::Vector2d(model.leg.FOOT_LENGTH * 0.5, model.leg.FOOT_WIDTH * 0.5));
-            Eigen::Vector4d centerFoot =
-                Eigen::Vector4d(position[0],
-                                position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE,
-                                0.0,
-                                1.0);
-
-            return ((left) ? sensors.forward_kinematics[ServoID::L_ANKLE_ROLL] * centerFoot
-                           : sensors.forward_kinematics[ServoID::R_ANKLE_ROLL] * centerFoot);
-        }
-
-        inline Eigen::Vector3d calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
-            Eigen::Vector4d CoP     = Eigen::Vector4d::UnitW();
-            int number_of_feet_down = 0;
-            if (sensors.left_foot_down) {
-                CoP += fsrCentreInBodyCoords(model, sensors, sensors.fsr[LimbID::LEFT_LEG - 1].centre, true);
-                number_of_feet_down++;
-            }
-            if (sensors.right_foot_down) {
-                CoP += fsrCentreInBodyCoords(model, sensors, sensors.fsr[LimbID::RIGHT_LEG - 1].centre, false);
-                number_of_feet_down++;
-            }
-            if (number_of_feet_down == 2) {
-                CoP = CoP * 0.5;
-            }
-            // reset homogeneous coordinate
-            CoP.w()                  = 1;
-            Eigen::Vector4d CoP_body = sensors.Hgt * CoP;
-            return CoP_body.head<3>();
         }
 
         /*! @return matrix J such that \overdot{X} = J * \overdot{theta}

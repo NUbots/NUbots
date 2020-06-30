@@ -34,6 +34,7 @@
 #include "message/vision/Goal.h"
 
 #include "utility/behaviour/MotionCommand.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -74,6 +75,7 @@ namespace behaviour {
         using VisionBalls = message::vision::Balls;
         using VisionGoals = message::vision::Goals;
 
+        using utility::input::ServoSide;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
@@ -400,7 +402,7 @@ namespace behaviour {
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
 
-            bool feetOffGround = !sensors.left_foot_down && !sensors.right_foot_down;
+            bool feetOffGround = !sensors.feet[ServoSide::LEFT].down && !sensors.feet[ServoSide::RIGHT].down;
             return false && feetOffGround && !isGettingUp && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
         }
 
