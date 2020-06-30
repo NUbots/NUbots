@@ -559,12 +559,12 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootCOM = rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp,
-                                                     convert(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
+            rightFootCOM =
+                rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp, convert(sensors.Htx[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootCOM = leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp,
-                                                   convert(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
+            leftFootCOM =
+                leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp, convert(sensors.Htx[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {
@@ -577,8 +577,7 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
-            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+        Transform3D Htc = Transform3D::createTranslation({-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
@@ -619,8 +618,7 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
-            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+        Transform3D Htc = Transform3D::createTranslation({-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
