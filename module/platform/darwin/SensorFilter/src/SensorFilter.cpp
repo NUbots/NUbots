@@ -95,7 +95,6 @@ namespace platform {
             : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
 
             on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
-                bias               = Eigen::Vector3d(0, 0, 0);
                 this->config.debug = config["debug"].as<bool>();
                 // Button config
                 this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
@@ -175,6 +174,13 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
                 this->config.motionFilter.initial.covariance.gyroscopeBias =
                     config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
+
+                // Mahony config
+                this->Kp = config["mahony"]["Kp"].as<double>();
+                this->Ki = config["mahony"]["Ki"].as<double>();
+                this->ts = config["mahony"]["ts"].as<double>();
+                this->initial_quat = config["mahony"]["initial_quat"].as<Expression>();
+                this->bias = config["mahony"]["bias"].as<Expression>();
 
                 // Calculate our mean and covariance
                 MotionModel<double>::StateVec mean;
@@ -453,14 +459,11 @@ namespace platform {
                     // Mahony calculation for Rtw
                     Eigen::Vector3d rawGyro = sensors->gyroscope;
                     Eigen::Vector3d rawAcc  = sensors->accelerometer;
-                    double ts = 0.009;  // Set this as config, or if we can get it from somewhere like hardware config?
-                    double Ki = 0;      // Set as config, integral proportional gain
-                    double Kp = 0;      // set as config
+
                     Eigen::Quaterniond quat =
                         previousSensors == NULL
-                            ? Eigen::Quaterniond(1, 0, 0, 0)
+                            ? Eigen::Quaterniond(initial_quat[0],initial_quat[1],initial_quat[2],initial_quat[3])
                             : Eigen::Quaterniond(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
-                    // bias initialised as 0,0,0. Bias is member variable, Mahony updates it
                     utility::math::filter::MahonyUpdate(rawAcc, rawGyro, ts, Ki, Kp, quat, bias);
 
                     // Gyroscope measurement update
