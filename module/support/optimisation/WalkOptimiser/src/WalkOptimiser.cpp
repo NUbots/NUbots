@@ -221,7 +221,7 @@ namespace support {
             if (recording) {
                 Eigen::Vector3d verticalKinematics = sensors.Hgc.block<3, 1>(0, 2);
                 Eigen::Vector3d verticalOrientation =
-                    (sensors.Hgt * sensors.forward_kinematics[ServoID::HEAD_PITCH]).block<3, 1>(0, 2);
+                    (sensors.Hgt * sensors.Htp[ServoID::HEAD_PITCH]).block<3, 1>(0, 2);
                 double tiltMag = utility::math::angle::acos_clamped(verticalOrientation.dot(verticalKinematics));
                 if (std::fabs(tiltMag) < M_PI_4) {
                     tilt(tiltMag);

@@ -342,7 +342,7 @@ namespace motion {
         */
         inline Eigen::Vector4d calculateCentreOfMass(
             const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics,
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& Htp,
             const Eigen::Matrix4d& Hwt) {
 
             // Convenience function to transform particle-space CoM to torso-space CoM
@@ -362,21 +362,21 @@ namespace motion {
             // Get the centre of mass for each particle in torso space
             // There are 16 particles in total
             std::array<std::pair<Eigen::Vector3d, double>, 16> particles = {
-                com(forward_kinematics[utility::input::ServoID::HEAD_PITCH], model.massModel.head),
-                com(forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH], model.massModel.arm_upper),
-                com(forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH], model.massModel.arm_upper),
-                com(forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL], model.massModel.arm_lower),
-                com(forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL], model.massModel.arm_lower),
-                com(forward_kinematics[utility::input::ServoID::L_HIP_ROLL], model.massModel.hip_block),
-                com(forward_kinematics[utility::input::ServoID::R_HIP_ROLL], model.massModel.hip_block),
-                com(forward_kinematics[utility::input::ServoID::L_HIP_PITCH], model.massModel.leg_upper),
-                com(forward_kinematics[utility::input::ServoID::R_HIP_PITCH], model.massModel.leg_upper),
-                com(forward_kinematics[utility::input::ServoID::L_KNEE], model.massModel.leg_lower),
-                com(forward_kinematics[utility::input::ServoID::R_KNEE], model.massModel.leg_lower),
-                com(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH], model.massModel.ankle_block),
-                com(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH], model.massModel.ankle_block),
-                com(forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL], model.massModel.foot),
-                com(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL], model.massModel.foot),
+                com(Htp[utility::input::ServoID::HEAD_PITCH], model.massModel.head),
+                com(Htp[utility::input::ServoID::L_SHOULDER_PITCH], model.massModel.arm_upper),
+                com(Htp[utility::input::ServoID::R_SHOULDER_PITCH], model.massModel.arm_upper),
+                com(Htp[utility::input::ServoID::L_SHOULDER_ROLL], model.massModel.arm_lower),
+                com(Htp[utility::input::ServoID::R_SHOULDER_ROLL], model.massModel.arm_lower),
+                com(Htp[utility::input::ServoID::L_HIP_ROLL], model.massModel.hip_block),
+                com(Htp[utility::input::ServoID::R_HIP_ROLL], model.massModel.hip_block),
+                com(Htp[utility::input::ServoID::L_HIP_PITCH], model.massModel.leg_upper),
+                com(Htp[utility::input::ServoID::R_HIP_PITCH], model.massModel.leg_upper),
+                com(Htp[utility::input::ServoID::L_KNEE], model.massModel.leg_lower),
+                com(Htp[utility::input::ServoID::R_KNEE], model.massModel.leg_lower),
+                com(Htp[utility::input::ServoID::L_ANKLE_PITCH], model.massModel.ankle_block),
+                com(Htp[utility::input::ServoID::R_ANKLE_PITCH], model.massModel.ankle_block),
+                com(Htp[utility::input::ServoID::L_ANKLE_ROLL], model.massModel.foot),
+                com(Htp[utility::input::ServoID::R_ANKLE_ROLL], model.massModel.foot),
                 std::pair<Eigen::Vector3d, double>{
                     Eigen::Vector3d{model.massModel.torso.x(), model.massModel.torso.y(), model.massModel.torso.z()},
                     model.massModel.torso.w()},
@@ -401,7 +401,7 @@ namespace motion {
         */
         inline Eigen::Matrix3d calculateInertialTensor(
             const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics) {
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& Htp) {
 
             // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
             // Htp - transform from particle space to torso space
@@ -434,49 +434,47 @@ namespace motion {
             // Get the centre of mass for each particle in torso space
             // There are 16 particles in total
             std::array<Eigen::Matrix3d, 16> particles = {
-                translateTensor(forward_kinematics[utility::input::ServoID::HEAD_PITCH],
-                                model.tensorModel.head,
-                                model.massModel.head),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH],
+                translateTensor(Htp[utility::input::ServoID::HEAD_PITCH], model.tensorModel.head, model.massModel.head),
+                translateTensor(Htp[utility::input::ServoID::L_SHOULDER_PITCH],
                                 model.tensorModel.arm_upper,
                                 model.massModel.arm_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH],
+                translateTensor(Htp[utility::input::ServoID::R_SHOULDER_PITCH],
                                 model.tensorModel.arm_upper,
                                 model.massModel.arm_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL],
+                translateTensor(Htp[utility::input::ServoID::L_SHOULDER_ROLL],
                                 model.tensorModel.arm_lower,
                                 model.massModel.arm_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL],
+                translateTensor(Htp[utility::input::ServoID::R_SHOULDER_ROLL],
                                 model.tensorModel.arm_lower,
                                 model.massModel.arm_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_ROLL],
+                translateTensor(Htp[utility::input::ServoID::L_HIP_ROLL],
                                 model.tensorModel.hip_block,
                                 model.massModel.hip_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_ROLL],
+                translateTensor(Htp[utility::input::ServoID::R_HIP_ROLL],
                                 model.tensorModel.hip_block,
                                 model.massModel.hip_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_PITCH],
+                translateTensor(Htp[utility::input::ServoID::L_HIP_PITCH],
                                 model.tensorModel.leg_upper,
                                 model.massModel.leg_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_PITCH],
+                translateTensor(Htp[utility::input::ServoID::R_HIP_PITCH],
                                 model.tensorModel.leg_upper,
                                 model.massModel.leg_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                translateTensor(Htp[utility::input::ServoID::L_ANKLE_PITCH],
                                 model.tensorModel.leg_lower,
                                 model.massModel.leg_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                translateTensor(Htp[utility::input::ServoID::R_ANKLE_PITCH],
                                 model.tensorModel.leg_lower,
                                 model.massModel.leg_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                translateTensor(Htp[utility::input::ServoID::L_ANKLE_PITCH],
                                 model.tensorModel.ankle_block,
                                 model.massModel.ankle_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                translateTensor(Htp[utility::input::ServoID::R_ANKLE_PITCH],
                                 model.tensorModel.ankle_block,
                                 model.massModel.ankle_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL],
+                translateTensor(Htp[utility::input::ServoID::L_ANKLE_ROLL],
                                 model.tensorModel.foot,
                                 model.massModel.foot),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL],
+                translateTensor(Htp[utility::input::ServoID::R_ANKLE_ROLL],
                                 model.tensorModel.foot,
                                 model.massModel.foot),
                 model.tensorModel.torso};

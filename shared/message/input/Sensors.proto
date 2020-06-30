@@ -67,7 +67,7 @@ message Sensors {
     repeated LED    led                = 8;
     float           voltage            = 9;
     float           battery            = 10;
-    repeated mat4   forward_kinematics = 15 [(array_size) = 20];
+    repeated mat4   Htp     = 15 [(array_size) = 20];
     vec4            centre_of_mass     = 17;
     mat4            Hgt                = 18;
     mat3            inertial_tensor    = 20;
