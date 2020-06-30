@@ -73,8 +73,8 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
                 msg = packet.msg
 
                 # Work out how far the foot is from the torso
-                l_height = displacement(msg.Htp[SERVO_ID["L_ANKLE_ROLL"]])
-                r_height = displacement(msg.Htp[SERVO_ID["R_ANKLE_ROLL"]])
+                l_height = displacement(msg.Htx[SERVO_ID["L_ANKLE_ROLL"]])
+                r_height = displacement(msg.Htx[SERVO_ID["R_ANKLE_ROLL"]])
                 delta = abs(l_height - r_height)
 
                 # Calculate what our foot down should be for each foot based on the state

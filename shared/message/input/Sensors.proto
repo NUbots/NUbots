@@ -67,7 +67,7 @@ message Sensors {
     repeated LED    led     = 8;
     float           voltage = 9;
     float           battery = 10;
-    repeated mat4   Htp     = 15 [(array_size) = 20];
+    repeated mat4   Htx     = 15 [(array_size) = 20];
     // Torso to CoM in torso space
     vec4 rMTt = 17;
     mat4 Hgt  = 18;

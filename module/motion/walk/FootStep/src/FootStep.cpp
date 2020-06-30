@@ -67,16 +67,16 @@ namespace motion {
                     // Right foot is the swing foot
                     if (target.isRightFootSwing) {
                         // Transform of left foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.Htp[ServoID::L_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         // Transform of right foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.Htp[ServoID::R_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
                     }
                     // Left foot is the swing foot
                     else {
                         // Transform of right foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.Htp[ServoID::R_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
                         // Transform of left foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.Htp[ServoID::L_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
                     }
                     Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;

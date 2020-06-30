@@ -396,9 +396,9 @@ namespace platform {
                      *                  Kinematics                  *
                      ************************************************/
 
-                    auto Htp = calculateAllPositions(kinematicsModel, *sensors);
-                    for (const auto& entry : Htp) {
-                        sensors->Htp[entry.first] = entry.second.matrix();
+                    auto Htx = calculateAllPositions(kinematicsModel, *sensors);
+                    for (const auto& entry : Htx) {
+                        sensors->Htx[entry.first] = entry.second.matrix();
                     }
 
                     /************************************************
@@ -419,8 +419,8 @@ namespace platform {
                         }
                     }
                     else {
-                        auto rightFootDisplacement = sensors->Htp[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
-                        auto leftFootDisplacement  = sensors->Htp[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
+                        auto rightFootDisplacement = sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
+                        auto leftFootDisplacement  = sensors->Htx[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
 
                         if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
                             feet_down[ServoSide::RIGHT] = true;
@@ -466,7 +466,7 @@ namespace platform {
                         bool foot_down      = sensors->feet[side].down;
                         bool prev_foot_down = previous_foot_down[side];
                         Eigen::Affine3d Htf(
-                            sensors->Htp[side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+                            sensors->Htx[side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                         if (foot_down && !prev_foot_down) {
                             Eigen::Affine3d Hwt;
@@ -536,8 +536,8 @@ namespace platform {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->rMTt = calculateCentreOfMass(kinematicsModel, sensors->Htp, sensors->Htw.inverse());
-                    sensors->Icp  = calculateInertialTensor(kinematicsModel, sensors->Htp);
+                    sensors->rMTt = calculateCentreOfMass(kinematicsModel, sensors->Htx, sensors->Htw.inverse());
+                    sensors->Icp  = calculateInertialTensor(kinematicsModel, sensors->Htx);
 
                     /************************************************
                      *                  Kinematics Horizon          *
@@ -551,7 +551,7 @@ namespace platform {
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
                     sensors->Hgt = Rgt.matrix();
-                    auto Htc     = sensors->Htp[ServoID::HEAD_PITCH];
+                    auto Htc     = sensors->Htx[ServoID::HEAD_PITCH];
 
                     // Get torso to world transform
                     Eigen::Affine3d yawlessWorldInvR(
