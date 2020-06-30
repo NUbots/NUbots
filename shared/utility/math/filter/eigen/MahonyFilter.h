@@ -100,10 +100,12 @@ namespace math {
 
             // // Calculate integral to find the attitude quaternion
             quat_vec += ts * q_d;
+
             quat.x() = quat_vec(0);
             quat.y() = quat_vec(1);
             quat.z() = quat_vec(2);
             quat.w() = quat_vec(3);
+            quat.normalize();
         }
 
     }  // namespace filter
