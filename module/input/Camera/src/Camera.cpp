@@ -301,7 +301,7 @@ namespace input {
             // Get torso to head, and torso to world
             Eigen::Affine3d Htx(sensors.Htx[ServoID::HEAD_PITCH]);
             Eigen::Affine3d Htw(sensors.Htw);
-            Eigen::Affine3d Hpw = Htx.inverse() * Htw;
+            Eigen::Affine3d Hpw = Htp.inverse() * Htw;
 
             Hpws.push_back(std::make_pair(sensors.timestamp, Hpw));
         });
