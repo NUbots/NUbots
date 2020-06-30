@@ -457,8 +457,8 @@ namespace platform {
                      ************************************************/
 
                     // Mahony calculation for Rtw
-                    Eigen::Vector3d rawGyro = sensors->gyroscope;
-                    Eigen::Vector3d rawAcc  = sensors->accelerometer;
+                    Eigen::Vector3d rawGyro = Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z);
+                    Eigen::Vector3d rawAcc  = Eigen::Vector3d(input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
 
                     Eigen::Quaterniond quat =
                         previousSensors == NULL
