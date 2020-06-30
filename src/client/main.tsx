@@ -10,6 +10,7 @@ import { installChart } from './components/chart/install'
 import { installDashboard } from './components/dashboard/install'
 import { installLocalisation } from './components/localisation/install'
 import { withRobotSelectorMenuBar } from './components/menu_bar/view'
+import { installOdometry } from './components/odometry/install'
 import { installVision } from './components/vision/install'
 import { installVisualMesh } from './components/visual_mesh/install'
 import { NavigationConfiguration } from './navigation'
@@ -26,6 +27,7 @@ const menu = withRobotSelectorMenuBar(appModel.robots, appController.toggleRobot
 
 installDashboard({ nav, appModel, nusightNetwork, menu })
 installLocalisation({ nav, appModel, nusightNetwork, menu })
+installOdometry({ nav, appModel, nusightNetwork, Menu: menu })
 installChart({ nav, appModel, nusightNetwork, menu })
 installVision({ nav, appModel, nusightNetwork, Menu: menu })
 installVisualMesh({ nav, appModel, nusightNetwork, Menu: menu })

@@ -57,6 +57,7 @@ export class SensorsSimulator extends Simulator {
 
     const buffer = Sensors.encode({
       Htw: toProtoMat44(Htw),
+      accelerometer: { x: 0, y: 0, z: -9.8 },
       servo: [
         { presentPosition: (3 * Math.PI) / 4 + 0.5 * Math.cos(t - Math.PI) },
         { presentPosition: (3 * Math.PI) / 4 + 0.5 * Math.cos(t) },
