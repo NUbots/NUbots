@@ -423,16 +423,16 @@ namespace platform {
                         auto leftFootDisplacement  = sensors->forward_kinematics[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
 
                         if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
-                            feet_down[0] = true;
-                            feet_down[1] = false;
+                            feet_down[ServoSide::RIGHT] = true;
+                            feet_down[ServoSide::LEFT]  = false;
                         }
                         else if (leftFootDisplacement < rightFootDisplacement - config.footDown.certaintyThreshold) {
-                            feet_down[0] = false;
-                            feet_down[1] = true;
+                            feet_down[ServoSide::RIGHT] = false;
+                            feet_down[ServoSide::LEFT]  = true;
                         }
                         else {
-                            feet_down[0] = true;
-                            feet_down[1] = true;
+                            feet_down[ServoSide::RIGHT] = true;
+                            feet_down[ServoSide::LEFT]  = true;
                         }
 
                         if (this->config.debug) {
@@ -441,8 +441,8 @@ namespace platform {
                         }
                     }
 
-                    sensors->feet[ServoSide::RIGHT].down = feet_down[0];
-                    sensors->feet[ServoSide::LEFT].down  = feet_down[1];
+                    sensors->feet[ServoSide::RIGHT].down = feet_down[ServoSide::RIGHT];
+                    sensors->feet[ServoSide::LEFT].down  = feet_down[ServoSide::LEFT];
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
