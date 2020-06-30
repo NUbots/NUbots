@@ -252,7 +252,7 @@ namespace behaviour {
                               }
                           }
                           else {
-                              Eigen::Matrix4d Htc = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+                              Eigen::Matrix4d Htc = sensors.Htx[ServoID::HEAD_PITCH];
                               headToBodyRotation  = Transform3D(convert(Htc)).rotation();
                               orientation         = Transform3D(convert(sensors.Htw)).rotation().i();
                           }
