@@ -379,24 +379,6 @@ namespace platform {
                         sensors->gyroscope = Eigen::Vector3d(input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z);
                     }
 
-                    // Put in our FSR information
-                    sensors->fsr.emplace_back();
-                    sensors->fsr.emplace_back();
-
-                    sensors->fsr[LimbID::LEFT_LEG - 1].centre << input.fsr.left.centreX, input.fsr.left.centreY;
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.reserve(4);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr1);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr2);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr3);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr4);
-
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].centre << input.fsr.right.centreX, input.fsr.right.centreY;
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.reserve(4);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr1);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr2);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr3);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr4);
-
                     /************************************************
                      *               Buttons and LEDs               *
                      ************************************************/
@@ -424,7 +406,7 @@ namespace platform {
                      ************************************************/
                     sensors->feet.resize(2);
                     sensors->feet[ServoSide::RIGHT].down = true;
-                    sensors->feet[ServoSide::LEFT].dowtrue;
+                    sensors->feet[ServoSide::LEFT].down  = true;
 
                     std::array<bool, 2> feet_down = {true};
                     if (config.footDown.fromLoad) {
@@ -519,7 +501,7 @@ namespace platform {
                             previous_foot_down[side] = false;
                         }
 
-                        sensors->feet[side].Hwf = footlanding_Hwf[side];
+                        sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
                     }
 
                     // Calculate our time offset from the last read
