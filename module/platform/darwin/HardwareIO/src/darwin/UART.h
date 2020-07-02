@@ -20,18 +20,17 @@
 #ifndef DARWIN_UART_H
 #define DARWIN_UART_H
 
+#include <cassert>
+#include <cstring>
 #include <errno.h>
 #include <linux/serial.h>
+#include <mutex>
 #include <stdint.h>
 #include <termios.h>
 #include <unistd.h>
-#include <cassert>
+#include <vector>
 
 #include "extension/Configuration.h"
-
-#include <cstring>
-#include <mutex>
-#include <vector>
 
 
 namespace Darwin {
@@ -74,7 +73,7 @@ struct CommandResult {
     uint8_t checksum;
 };
 
-// This value calculates the checksum for a packet (the command argument is assumed to be in the CM730 format)
+// This value calculates the checksum for a packet (the command argument is assumed to be in the CM740 format)
 uint8_t calculateChecksum(void* command);
 uint8_t calculateChecksum(const CommandResult& result);
 

@@ -25,11 +25,11 @@ extern "C" {
 #include <sys/stat.h>
 }
 
+#include <iostream>
 #include <sstream>
 #include <stack>
 #include <system_error>
 
-#include <iostream>
 #include "utility/strutil/strutil.h"
 
 namespace utility {

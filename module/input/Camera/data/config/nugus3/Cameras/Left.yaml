@@ -1,0 +1,28 @@
+serial_number: 0115138C
+
+lens:
+  # Lens: Lensagon BF10M19828S118C
+  # Camera: FLIR BFS-U3-13Y3C-C
+
+  # Theoretical normalised focal length
+  # Lens Focal Length = 1.98mm
+  # Camera Pixel Size = 4.8µm
+  # focal_length / (camera_pixel_size * width)
+  # 1.98mm / (4.8µm * 1280px) = 0.322265625
+
+  # NOTE: all lens parameters are based on a full size image (without width/height/offset values)
+
+  # Lens projection type
+  projection: EQUIDISTANT
+  # Normalised focal length: focal length in pixels / image width
+  focal_length: 0.322265625
+  # Normalised image centre offset: pixels from centre to optical axis / image width
+  centre: [0, 0]
+  # The angular diameter that the lens covers (the area that light hits on the sensor)
+  fov: 180 * pi / 180
+  # The homogenous transform from the rigid platform this camera is attached to to its optical location
+  Hpc:
+    - [1, 0, 0, 0]
+    - [0, 1, 0, 0.068]
+    - [0, 0, 1, 0]
+    - [0, 0, 0, 1]

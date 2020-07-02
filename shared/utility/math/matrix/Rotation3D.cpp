@@ -18,7 +18,9 @@
  */
 
 #include "Rotation3D.h"
+
 #include "matrix.h"
+
 #include "utility/math/angle.h"
 #include "utility/math/comparison.h"
 
@@ -135,7 +137,8 @@ namespace math {
             arma::vec3 rs = *this * s;
 
             return {
-                axis, std::atan2(arma::dot(rs, t), arma::dot(rs, s))  // Angle of rotation
+                axis,
+                std::atan2(arma::dot(rs, t), arma::dot(rs, s))  // Angle of rotation
             };
         }
 

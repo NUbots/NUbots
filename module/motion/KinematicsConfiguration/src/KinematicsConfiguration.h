@@ -20,11 +20,12 @@
 #ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_H
 #define MODULE_MOTION_KINEMATICSCONFIGURATION_H
 
-#include <yaml-cpp/yaml.h>
 #include <armadillo>
 #include <nuclear>
+#include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"
+
 #include "message/motion/KinematicsModel.h"
 
 namespace module {
@@ -42,6 +43,7 @@ namespace motion {
         void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
         void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
         void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
+        void configureTensorModel(message::motion::KinematicsModel& model, const YAML::Node& objTensorModel);
     };
 }  // namespace motion
 }  // namespace module

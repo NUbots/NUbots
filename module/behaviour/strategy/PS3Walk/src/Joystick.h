@@ -17,8 +17,8 @@
 #include <string>
 
 #define JS_EVENT_BUTTON 0x01  // button pressed/released
-#define JS_EVENT_AXIS 0x02    // joystick moved
-#define JS_EVENT_INIT 0x80    // initial state of device
+#define JS_EVENT_AXIS   0x02  // joystick moved
+#define JS_EVENT_INIT   0x80  // initial state of device
 
 /**
  * Encapsulates all data relevant to a sampled joystick event.

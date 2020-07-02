@@ -22,6 +22,9 @@
 
 #include <Eigen/Core>
 #include <nuclear>
+#include <string>
+
+#include "message/input/Image.h"
 
 namespace module {
 namespace support {
@@ -36,6 +39,7 @@ namespace support {
 
     private:
         Eigen::Matrix4d Hcw;
+        message::input::Image::Lens lens;
     };
 }  // namespace support
 }  // namespace module

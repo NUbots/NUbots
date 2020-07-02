@@ -21,17 +21,16 @@
 
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
+
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace support {
 
     using message::localisation::Ball;
     using message::localisation::Field;
+
     using utility::nusight::graph;
-    using utility::time::getUtcTimestamp;
 
     void NUsight::provideLocalisation() {
 

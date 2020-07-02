@@ -75,13 +75,13 @@ namespace behaviour {
             });
 
             on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
-                if (!falling && !sensors.empty() && fabs(sensors.back()->world(2, 2)) < FALLING_ANGLE) {
+                if (!falling && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < FALLING_ANGLE) {
 
                     // We might be falling, check the accelerometer
                     double magnitude = 0;
 
                     for (const auto& sensor : sensors) {
-                        magnitude += arma::norm(convert<double, 3>(sensor->accelerometer), 2);
+                        magnitude += arma::norm(convert(sensor->accelerometer), 2);
                     }
 
                     magnitude /= sensors.size();
@@ -96,7 +96,7 @@ namespace behaviour {
                     double magnitude = 0;
 
                     for (const auto& sensor : sensors) {
-                        magnitude += arma::norm(convert<double, 3>(sensor->accelerometer), 2);
+                        magnitude += arma::norm(convert(sensor->accelerometer), 2);
                     }
 
                     magnitude /= sensors.size();
@@ -120,7 +120,8 @@ namespace behaviour {
                 id,
                 "Falling Relax",
                 {std::pair<float, std::set<LimbID>>(
-                    0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    0,
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
                 [this](const std::set<LimbID>&) { emit(std::make_unique<Falling>()); },
                 [this](const std::set<LimbID>&) { emit(std::make_unique<KillFalling>()); },
                 [this](const std::set<ServoID>&) {

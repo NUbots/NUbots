@@ -3,21 +3,23 @@
 
 #include <nuclear>
 
-#include "mesh/VisualMesh.hpp"
+#define CL_TARGET_OPENCL_VERSION 120
+
+#include "engine/opencl/opencl_engine.hpp"
+#include "visualmesh.hpp"
 
 namespace module {
 namespace vision {
 
     class VisualMesh : public NUClear::Reactor {
     private:
-        // Build our classification network
-        std::vector<std::vector<std::pair<std::vector<std::vector<float>>, std::vector<float>>>> network;
+        template <typename Scalar>
+        using Engine     = visualmesh::engine::opencl::Engine<Scalar>;
+        using Classifier = visualmesh::engine::opencl::Classifier<float>;
+        using VM         = visualmesh::VisualMesh<float, Engine>;
 
-        std::unique_ptr<mesh::VisualMesh<float>> mesh_ptr;
-        mesh::VisualMesh<float>::Classifier classifier;
-
-        bool draw_mesh;
-        int colour_type;
+        std::unique_ptr<VM> mesh;
+        std::unique_ptr<Classifier> classifier;
 
     public:
         /// @brief Called by the powerplant to build and setup the VisualMesh reactor.

@@ -21,6 +21,8 @@
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 
 #include <armadillo>
+#include <mutex>
+#include <ncurses.h>
 #include <nuclear>
 
 #include "utility/input/LimbID.h"
@@ -28,6 +30,15 @@
 namespace module {
 namespace behaviour {
     namespace strategy {
+
+        enum class LogColours : short {
+            TRACE_COLOURS = 1,
+            DEBUG_COLOURS = 2,
+            INFO_COLOURS  = 3,
+            WARN_COLOURS  = 4,
+            ERROR_COLOURS = 5,
+            FATAL_COLOURS = 6
+        };
 
         class KeyboardWalk : public NUClear::Reactor {
         private:
@@ -40,27 +51,39 @@ namespace behaviour {
             arma::vec2 velocity;
             float rotation = 0;
 
-            float headYaw   = 0;
-            float headPitch = 0;
+            float head_yaw   = 0.0f;
+            float head_pitch = 0.0f;
 
+            std::shared_ptr<WINDOW> command_window;
+            std::shared_ptr<WINDOW> log_window;
+            bool colours_enabled;
+
+            std::mutex mutex;
+
+            void create_windows();
             void forward();
             void left();
             void back();
             void right();
-            void turnLeft();
-            void turnRight();
-            void getUp();
+            void turn_left();
+            void turn_right();
+            void get_up();
             void reset();
             void kick(utility::input::LimbID::Value l);
-            void lookLeft();
-            void lookRight();
-            void lookUp();
-            void lookDown();
-            void walkToggle();
+            void look_left();
+            void look_right();
+            void look_up();
+            void look_down();
+            void walk_toggle();
             void quit();
 
-            void updateCommand();
-            void printStatus();
+            void update_command();
+            void print_status();
+            void update_window(const std::shared_ptr<WINDOW>& window,
+                               const LogColours& colours,
+                               const std::string& source,
+                               const std::string& message,
+                               const bool& print_level);
 
         public:
             /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.

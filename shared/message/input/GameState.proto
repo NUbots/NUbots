@@ -63,10 +63,10 @@ message GameState {
         }
 
         message Team {
-            uint32   team_id       = 1;  // unique team number
-            uint32   score         = 2;  // team's score
-            string   coach_message = 3;  // the coach's message to the team
-            repeated Robot players = 4;
+            uint32         team_id       = 1;  // unique team number
+            uint32         score         = 2;  // team's score
+            string         coach_message = 3;  // the coach's message to the team
+            repeated Robot players       = 4;
         }
 
         Phase                     phase            = 1;

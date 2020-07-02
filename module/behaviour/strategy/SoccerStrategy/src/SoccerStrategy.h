@@ -90,7 +90,6 @@ namespace behaviour {
 
             // TODO: remove horrible
             bool isGettingUp            = false;
-            bool isDiving               = false;
             bool selfPenalised          = false;
             bool manualOrientationReset = false;
             double manualOrientation    = 0.0;

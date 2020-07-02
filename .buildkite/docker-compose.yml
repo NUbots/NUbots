@@ -1,0 +1,43 @@
+version: "3.2"
+services:
+  generic_image:
+    image: nubots/nubots:generic
+  generic:
+    build:
+      context: ./../docker
+      args:
+        platform: generic
+    volumes:
+      - type: bind
+        source: ./..
+        target: /home/nubots/NUbots
+        read_only: true
+        consistency: cached
+
+  nuc7i7bnh_image:
+    image: nubots/nubots:nuc7i7bnh
+  nuc7i7bnh:
+    build:
+      context: ./../docker
+      args:
+        platform: nuc7i7bnh
+    volumes:
+      - type: bind
+        source: ./..
+        target: /home/nubots/NUbots
+        read_only: true
+        consistency: cached
+
+  nuc8i7beh_image:
+    image: nubots/nubots:nuc8i7beh
+  nuc8i7beh:
+    build:
+      context: ./../docker
+      args:
+        platform: nuc8i7beh
+    volumes:
+      - type: bind
+        source: ./..
+        target: /home/nubots/NUbots
+        read_only: true
+        consistency: cached

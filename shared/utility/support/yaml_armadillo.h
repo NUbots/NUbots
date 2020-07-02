@@ -20,9 +20,10 @@
 #ifndef UTILITY_SUPPORT_YAML_ARMADILLO_H
 #define UTILITY_SUPPORT_YAML_ARMADILLO_H
 
-#include <yaml-cpp/yaml.h>
 #include <armadillo>
 #include <iostream>
+#include <yaml-cpp/yaml.h>
+
 #include "utility/support/yaml_expression.h"
 
 namespace YAML {
@@ -84,6 +85,28 @@ struct convert<arma::vec> {
     }
 
     static bool decode(const Node& node, arma::vec& rhs) {
+        rhs.resize(node.size());
+        for (uint i = 0; i < node.size(); ++i) {
+            rhs[i] = node[i].as<utility::support::Expression>();
+        }
+
+        return true;
+    }
+};
+
+template <>
+struct convert<arma::fvec> {
+    static Node encode(const arma::fvec& rhs) {
+        Node node;
+
+        for (const float& d : rhs) {
+            node.push_back(d);
+        }
+
+        return node;
+    }
+
+    static bool decode(const Node& node, arma::fvec& rhs) {
         rhs.resize(node.size());
         for (uint i = 0; i < node.size(); ++i) {
             rhs[i] = node[i].as<utility::support::Expression>();

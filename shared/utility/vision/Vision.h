@@ -19,16 +19,12 @@
 #ifndef UTILITY_VISION_VISION_H
 #define UTILITY_VISION_VISION_H
 
-#include <fmt/format.h>
 #include <Eigen/Core>
+#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-
-extern "C" {
-#include <aravis-0.6/arv.h>
-}
 
 #include "message/input/Image.h"
 
@@ -320,9 +316,6 @@ namespace vision {
     Pixel getUYVYPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
     Pixel getYUV12Pixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data);
     Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc);
-    constexpr FOURCC fourcc(const char (&code)[5]);
-    FOURCC getFourCCFromDescription(const std::string& code);
-    uint32_t getAravisPixelFormat(const std::string& code);
 
 
 }  // namespace vision

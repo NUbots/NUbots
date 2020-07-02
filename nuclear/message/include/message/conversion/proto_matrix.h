@@ -1367,10 +1367,11 @@ namespace conversion {
         // Reserve enough space
         proto.mutable_v()->Reserve(vector.size());
 
-        // Populate the data
-        for (int i = 0; i < vector.size(); ++i) {
-            proto.add_v(vector[i]);
-        }
+        // Copy across
+        Eigen::Map<DynamicVecProto<Proto>>(
+            const_cast<typename DynamicVecProto<Proto>::Scalar*>(proto.mutable_v()->data()),
+            vector.size()) = vector;
+
         return proto;
     }
     template <typename Vector>
@@ -1379,10 +1380,9 @@ namespace conversion {
         // Reserve enough space
         vector.resize(proto.v_size());
 
-        // Populate the data
-        for (int i = 0; i < proto.v_size(); ++i) {
-            vector[i] = proto.v(i);
-        }
+        // Copy across
+        vector = Eigen::Map<const Vector>(proto.v().data(), proto.v_size());
+
         return vector;
     }
 
@@ -1398,7 +1398,9 @@ namespace conversion {
 
         // Copy over
         Eigen::Map<DynamicMatProto<Proto>>(
-            const_cast<double*>(proto.mutable_v()->data()), matrix.rows(), matrix.cols()) = matrix;
+            const_cast<typename DynamicMatProto<Proto>::Scalar*>(proto.mutable_v()->data()),
+            matrix.rows(),
+            matrix.cols()) = matrix;
 
         return proto;
     }
@@ -1425,7 +1427,8 @@ namespace conversion {
 
         // Copy the data across
         Eigen::Map<::message::conversion::math::cvec>(
-            reinterpret_cast<uint8_t*>(const_cast<char*>(proto.mutable_v()->data())), proto.v().size()) = vector;
+            reinterpret_cast<uint8_t*>(const_cast<char*>(proto.mutable_v()->data())),
+            proto.v().size()) = vector;
 
         return proto;
     }
@@ -1433,8 +1436,9 @@ namespace conversion {
     inline ::message::conversion::math::cmat& convert(::message::conversion::math::cmat& matrix, const ::cmat& proto) {
 
         // Map the data and copy it across
-        matrix = Eigen::Map<const ::message::conversion::math::cmat>(
-            reinterpret_cast<const uint8_t*>(proto.v().data()), proto.rows(), proto.cols());
+        matrix = Eigen::Map<const ::message::conversion::math::cmat>(reinterpret_cast<const uint8_t*>(proto.v().data()),
+                                                                     proto.rows(),
+                                                                     proto.cols());
 
         return matrix;
     }
@@ -1450,8 +1454,9 @@ namespace conversion {
 
         // Copy it across
         Eigen::Map<::message::conversion::math::cmat>(
-            reinterpret_cast<uint8_t*>(const_cast<char*>(proto.mutable_v()->data())), matrix.rows(), matrix.cols()) =
-            matrix;
+            reinterpret_cast<uint8_t*>(const_cast<char*>(proto.mutable_v()->data())),
+            matrix.rows(),
+            matrix.cols()) = matrix;
 
         return proto;
     }

@@ -1,1 +1,11 @@
-is_left: true
+buffer_count: 4 # The number of software buffers to use.
+
+settings:
+  PixelFormat: BayerRG8
+  Width: 1280
+  Height: 1024
+  OffsetX: 0
+  OffsetY: 0
+  ExposureAuto: Continuous
+  GainAuto: Continuous
+  BalanceWhiteAuto: Continuous

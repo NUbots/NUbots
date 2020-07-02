@@ -18,12 +18,16 @@
  */
 
 #include "KickAtGoal.h"
+
 #include <armadillo>
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
+
 #include "utility/time/time.h"
 
 namespace module {
@@ -36,8 +40,8 @@ namespace behaviour {
         using message::behaviour::MotionCommand;
         using message::behaviour::WalkApproach;
         using message::behaviour::WalkTarget;
-        using VisionBall = message::vision::Ball;
-        using VisionGoal = message::vision::Goal;
+        using VisionBalls = message::vision::Balls;
+        using VisionGoals = message::vision::Goals;
         using utility::time::durationFromSeconds;
 
         KickAtGoal::KickAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -47,14 +51,14 @@ namespace behaviour {
 
             on<Every<30, Per<std::chrono::seconds>>, Single>().then([this] { doBehaviour(); });
 
-            on<Trigger<std::vector<VisionBall>>>().then([this](const std::vector<VisionBall>& balls) {
-                if (!balls.empty()) {
+            on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+                if (!balls.balls.empty()) {
                     ballLastSeen = NUClear::clock::now();
                 }
             });
 
-            on<Trigger<std::vector<VisionGoal>>>().then([this](const std::vector<VisionGoal>& goals) {
-                if (!goals.empty()) {
+            on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
+                if (!goals.goals.empty()) {
                     goalLastSeen = NUClear::clock::now();
                 }
             });

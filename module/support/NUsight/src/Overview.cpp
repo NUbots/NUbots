@@ -17,6 +17,11 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
+#include "message/support/nusight/Overview.h"
+
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 #include "NUsight.h"
 
 #include "message/behaviour/Behaviour.h"
@@ -29,13 +34,10 @@
 #include "message/localisation/Field.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/GlobalConfig.h"
-#include "message/support/nusight/Overview.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/Ball.h"
+#include "message/vision/Goal.h"
 
 #include "utility/localisation/transform.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/time/time.h"
 
 /**
  * @author Monica Olejniczak
@@ -54,11 +56,9 @@ namespace support {
     using message::support::nusight::Overview;
     using NUClear::message::CommandLineArguments;
     using LocalisationBall = message::localisation::Ball;
-    using VisionBall       = message::vision::Ball;
-    using VisionGoal       = message::vision::Goal;
+    using VisionBalls      = message::vision::Balls;
+    using VisionGoals      = message::vision::Goals;
     using message::motion::WalkCommand;
-    using utility::math::matrix::Rotation3D;
-    using utility::math::matrix::Transform3D;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview
@@ -102,45 +102,40 @@ namespace support {
 
                     if (sensors) {
                         // Get our world transform
-                        Transform3D Htw(convert<double, 4, 4>(sensors->world));
+                        Eigen::Affine3d Htw(sensors->Htw);
 
                         // If we have field information
                         if (field) {
-                            Transform3D Hfw =
-                                utility::localisation::fieldStateToTransform3D(convert<double, 3>(field->position));
+                            Eigen::Affine3d Hfw = utility::localisation::fieldStateToTransform3D(field->position);
 
                             // Get our torso in field space
-                            Transform3D Hft = Hfw * Htw.i();
-                            arma::vec3 rTFf = Hft.translation();
-
-                            // Get the rotation
-                            Rotation3D Rft = Hft.rotation();
+                            Eigen::Affine3d Hft  = Hfw * Htw.inverse();
+                            Eigen::Vector3d rTFf = Hft.translation();
 
                             // Store our position from field to torso
-                            msg->robot_position            = Eigen::Vector3f(rTFf[0], rTFf[1], Rft.yaw());
+                            msg->robot_position =
+                                Eigen::Vector3f(rTFf[0], rTFf[1], Hft.rotation().matrix().eulerAngles(0, 1, 2).z());
                             msg->robot_position_covariance = field->covariance.cast<float>();
 
                             if (loc_ball) {
                                 // Get our ball in field space
-                                arma::vec2 rBWw_2d = convert<double, 2>(loc_ball->position);
-                                arma::vec4 rBWw    = {rBWw_2d[0], rBWw_2d[1], 0, 1};
-                                arma::vec4 rBFf    = Hfw * rBWw;
+                                Eigen::Vector4d rBWw(loc_ball->position.x(), loc_ball->position.y(), 0.0, 1.0);
+                                Eigen::Vector4d rBFf = Hfw * rBWw;
 
                                 // Store our position from field to ball
-                                msg->ball_position            = Eigen::Vector2f(rBFf[0], rBFf[1]);
+                                msg->ball_position            = Eigen::Vector2f(rBFf.x(), rBFf.y());
                                 msg->ball_position_covariance = loc_ball->covariance.cast<float>();
                             }
                         }
 
-                        // if (walk_path) {
-                        //     // Set our walk path plan
-                        //     if (walk_path) {
-                        //         for (const auto& state : walk_path->states) {
-                        //             // Make these positions in field space
-                        //             msg->path_plan.push_back(state);
-                        //         }
-                        //     }
-                        // }
+                        if (walk_path) {
+                            // Set our walk path plan
+                            if (walk_path) {
+                                for (const auto& state : walk_path->states) {
+                                    msg->walk_path_plan.push_back(state);
+                                }
+                            }
+                        }
                     }
 
                     if (kick_plan) {
@@ -173,16 +168,16 @@ namespace support {
         handles["overview"].push_back(
             on<Trigger<Image>, Single, Priority::LOW>().then([this] { last_camera_image = NUClear::clock::now(); }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<VisionBall>>, Single, Priority::LOW>().then(
-            [this](const std::vector<VisionBall>& balls) {
-                if (!balls.empty()) {
+        handles["overview"].push_back(
+            on<Trigger<VisionBalls>, Single, Priority::LOW>().then([this](const VisionBalls& balls) {
+                if (!balls.balls.empty()) {
                     last_seen_ball = NUClear::clock::now();
                 }
             }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<VisionGoal>>, Single, Priority::LOW>().then(
-            [this](const std::vector<VisionGoal>& goals) {
-                if (!goals.empty()) {
+        handles["overview"].push_back(
+            on<Trigger<VisionGoals>, Single, Priority::LOW>().then([this](const VisionGoals& goals) {
+                if (!goals.goals.empty()) {
                     last_seen_goal = NUClear::clock::now();
                 }
             }));

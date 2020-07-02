@@ -20,12 +20,14 @@
 #ifndef MODULES_LOCALISATION_SOCCERSIMULATOR_H
 #define MODULES_LOCALISATION_SOCCERSIMULATOR_H
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
+
+#include "VirtualBall.h"
+#include "VirtualGoalPost.h"
 
 #include "extension/Configuration.h"
 
-#include "message/input/CameraParameters.h"
 #include "message/motion/KickCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
@@ -33,9 +35,6 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Transform2D.h"
-
-#include "VirtualBall.h"
-#include "VirtualGoalPost.h"
 
 namespace module {
 namespace support {
@@ -110,7 +109,7 @@ namespace support {
             bool blind_robot          = false;
             bool auto_start_behaviour = true;
 
-            arma::vec4 vision_error = {0.01, 0.017, 0.017};
+            Eigen::Vector4d vision_error = Eigen::Vector4d(0.01, 0.017, 0.017, 0.0);
 
         } cfg_;
 
@@ -121,10 +120,10 @@ namespace support {
         struct WorldState {
             WorldState() : robotPose(), robotVelocity(), ball() {}
             // Transform2D == (x,y,heading)
-            utility::math::matrix::Transform2D robotPose;
-            utility::math::matrix::Transform2D robotVelocity;
-            // utility::math::matrix::Transform2D ballPose;
-            // utility::math::matrix::Transform2D ballVelocity;
+            Eigen::Affine2d robotPose;
+            Eigen::Affine2d robotVelocity;
+            // Eigen::Affine2d ballPose;
+            // Eigen::Affine2d ballVelocity;
             VirtualBall ball;
         };
 
@@ -132,9 +131,8 @@ namespace support {
 
         std::queue<message::motion::KickCommand> kickQueue;
 
-        utility::math::matrix::Transform2D oldRobotPose;
-        utility::math::matrix::Transform2D oldBallPose;
-
+        Eigen::Affine2d oldRobotPose;
+        Eigen::Affine2d oldBallPose;
 
         bool kicking     = false;
         bool walking     = false;
@@ -150,9 +148,9 @@ namespace support {
         std::unique_ptr<message::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading,
                                                                                          float oldHeading);
 
-        arma::vec2 getPath(Config::Motion::Path p);
+        Eigen::Vector2d getPath(Config::Motion::Path p);
 
-        void setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals);
+        void setGoalLeftRightKnowledge(message::vision::Goals& goals);
 
         void loadFieldDescription(const std::shared_ptr<const message::support::FieldDescription> fd);
 

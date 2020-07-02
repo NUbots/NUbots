@@ -2,11 +2,10 @@
 
 #ifndef NDEBUG
 
-#include <backtrace.h>
-#include <dlfcn.h>
-#include <nuclear>
-
-#include <iostream>
+    #include <backtrace.h>
+    #include <dlfcn.h>
+    #include <iostream>
+    #include <nuclear>
 
 namespace utility {
 namespace support {

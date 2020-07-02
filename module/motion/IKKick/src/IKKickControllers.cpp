@@ -90,9 +90,8 @@ namespace motion {
         // Convert torso to support foot
         Transform3D currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Transform3D currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                          ? convert<double, 4, 4>(sensors.forwardKinematics[ServoID::L_ANKLE_ROLL])
-                                          : convert<double, 4, 4>(sensors.forwardKinematics[ServoID::R_ANKLE_ROLL]);
+        Transform3D currentKickFoot = (supportFoot == LimbID::LEFT_LEG) ? convert(sensors.Htx[ServoID::L_ANKLE_ROLL])
+                                                                        : convert(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();

@@ -19,11 +19,10 @@
 
 #include "ScriptRunner.h"
 
-#include "message/platform/darwin/DarwinSensors.h"
-
 #include "extension/Configuration.h"
 #include "extension/Script.h"
 
+#include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
@@ -97,7 +96,8 @@ namespace behaviour {
                 id,
                 "Script Runner",
                 {std::pair<float, std::set<LimbID>>(
-                    1, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    1,
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
                 [this](const std::set<LimbID>&) {
                     on<Trigger<ButtonMiddleDown>>().then([this] {
                         std::this_thread::sleep_for(std::chrono::seconds(script_delay));

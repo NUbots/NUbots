@@ -20,16 +20,16 @@
 #ifndef MODULES_PLATFORM_DARWIN_SENSORFILTER_H
 #define MODULES_PLATFORM_DARWIN_SENSORFILTER_H
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
-
-#include "utility/math/filter/UKF.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform3D.h"
 
 #include "MotionModel.h"
 #include "VirtualLoadSensor.h"
+
 #include "message/motion/KinematicsModel.h"
-#include "utility/math/matrix/Rotation3D.h"
+
+#include "utility/math/filter/eigen/UKF.h"
 
 
 namespace module {
@@ -46,70 +46,50 @@ namespace platform {
         public:
             explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-            utility::math::filter::UKF<MotionModel> motionFilter;
+            utility::math::filter::UKF<double, MotionModel> motionFilter;
 
             struct Config {
-                Config() : nominal_z(0.0f), motionFilter(), buttons() {}
+                Config() : motionFilter(), buttons(), footDown() {}
 
-                float nominal_z;
+                bool debug;
 
                 struct MotionFilter {
-                    MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
+                    MotionFilter() : velocityDecay(Eigen::Vector3d::Zero()), noise(), initial() {}
 
-                    arma::vec3 velocityDecay;
+                    Eigen::Vector3d velocityDecay;
 
                     struct Noise {
                         Noise() : measurement(), process() {}
                         struct Measurement {
-                            Measurement()
-                                : accelerometer(arma::fill::eye)
-                                , accelerometerMagnitude(arma::fill::eye)
-                                , gyroscope(arma::fill::eye)
-                                , footUpWithZ(arma::fill::eye)
-                                , flatFootOdometry(arma::fill::eye)
-                                , flatFootOrientation(arma::fill::eye) {}
-                            arma::mat33 accelerometer;
-                            arma::mat33 accelerometerMagnitude;
-                            arma::mat33 gyroscope;
-                            arma::mat44 footUpWithZ;
-                            arma::mat33 flatFootOdometry;
-                            arma::mat44 flatFootOrientation;
+                            Eigen::Matrix3d accelerometer;
+                            Eigen::Matrix3d accelerometerMagnitude;
+                            Eigen::Matrix3d gyroscope;
+                            Eigen::Matrix3d flatFootOdometry;
+                            Eigen::Matrix4d flatFootOrientation;
                         } measurement;
                         struct Process {
-                            Process()
-                                : position(arma::fill::ones)
-                                , velocity(arma::fill::ones)
-                                , rotation(arma::fill::ones)
-                                , rotationalVelocity(arma::fill::ones) {}
-                            arma::vec3 position;
-                            arma::vec3 velocity;
-                            arma::vec4 rotation;
-                            arma::vec3 rotationalVelocity;
+                            Eigen::Vector3d position;
+                            Eigen::Vector3d velocity;
+                            Eigen::Vector4d rotation;
+                            Eigen::Vector3d rotationalVelocity;
+                            Eigen::Vector3d gyroscopeBias;
                         } process;
                     } noise;
                     struct Initial {
                         Initial() : mean(), covariance() {}
                         struct Mean {
-                            Mean()
-                                : position(arma::fill::ones)
-                                , velocity(arma::fill::ones)
-                                , rotation(arma::fill::ones)
-                                , rotationalVelocity(arma::fill::ones) {}
-                            arma::vec3 position;
-                            arma::vec3 velocity;
-                            arma::vec4 rotation;
-                            arma::vec3 rotationalVelocity;
+                            Eigen::Vector3d position;
+                            Eigen::Vector3d velocity;
+                            Eigen::Vector4d rotation;
+                            Eigen::Vector3d rotationalVelocity;
+                            Eigen::Vector3d gyroscopeBias;
                         } mean;
                         struct Covariance {
-                            Covariance()
-                                : position(arma::fill::ones)
-                                , velocity(arma::fill::ones)
-                                , rotation(arma::fill::ones)
-                                , rotationalVelocity(arma::fill::ones) {}
-                            arma::vec3 position;
-                            arma::vec3 velocity;
-                            arma::vec4 rotation;
-                            arma::vec3 rotationalVelocity;
+                            Eigen::Vector3d position;
+                            Eigen::Vector3d velocity;
+                            Eigen::Vector4d rotation;
+                            Eigen::Vector3d rotationalVelocity;
+                            Eigen::Vector3d gyroscopeBias;
                         } covariance;
                     } initial;
                 } motionFilter;
@@ -118,6 +98,12 @@ namespace platform {
                     Button() : debounceThreshold(0) {}
                     int debounceThreshold;
                 } buttons;
+
+                struct FootDown {
+                    FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
+                    bool fromLoad;
+                    float certaintyThreshold;
+                } footDown;
             } config;
 
         private:
@@ -127,16 +113,14 @@ namespace platform {
             bool middleDown = false;
 
             // Our sensor for foot down
-            VirtualLoadSensor load_sensor;
-
-            // World to foot in world rotation when the foot landed
-            std::array<arma::vec3, 2> footlanding_rFWw;
+            VirtualLoadSensor<float> load_sensor;
 
             // Foot to world in foot-flat rotation when the foot landed
-            std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rfw;
+            std::array<bool, 2> previous_foot_down = {false, false};
+            std::array<Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>, 2> footlanding_Hwf;
 
-            // World to foot in foot-flat rotation when the foot landed
-            std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
+            // Storage for previous gyroscope values
+            Eigen::Vector3d theta;
         };
     }  // namespace darwin
 }  // namespace platform

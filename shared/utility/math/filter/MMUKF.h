@@ -145,8 +145,9 @@ namespace math {
                     for (auto& measurement : measurements) {
                         Filter split = filter;
 
-                        double weight = applyMeasurement(
-                            split, measurement, std::make_index_sequence<2 + sizeof...(TMeasurementArgs)>());
+                        double weight = applyMeasurement(split,
+                                                         measurement,
+                                                         std::make_index_sequence<2 + sizeof...(TMeasurementArgs)>());
                         split.weight += weight;
                         // std::cerr << split.weight << std::endl;
                         newFilters.push_back(split);
