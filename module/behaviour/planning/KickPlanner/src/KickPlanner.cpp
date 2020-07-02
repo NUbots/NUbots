@@ -52,14 +52,14 @@ namespace behaviour {
         using message::behaviour::KickPlan;
         using KickType = message::behaviour::KickPlan::KickType;
         using message::behaviour::WantsToKick;
+        using message::input::GameState;
         using message::input::Sensors;
         using message::localisation::Ball;
         using message::localisation::Field;
-        using message::input::GameState;
         using Phase         = message::input::GameState::Data::Phase;
         using PenaltyReason = message::input::GameState::Data::PenaltyReason;
         using message::input::Sensors;
-        using VisionBall = message::vision::Ball;
+        using VisionBall  = message::vision::Ball;
         using VisionBalls = message::vision::Balls;
         using message::motion::IKKickParams;
         using message::motion::KickCommand;
@@ -114,7 +114,6 @@ namespace behaviour {
                              const KickPlan& kickPlan,
                              const Sensors& sensors,
                              std::shared_ptr<const GameState> gameState) {
-
                     // Get time since last seen ball
                     auto now = NUClear::clock::now();
                     double secondsSinceLastSeen =
@@ -145,6 +144,8 @@ namespace behaviour {
                     // log("secondsSinceLastSeen",secondsSinceLastSeen);
                     bool correctState = true;
                     if (gameState) {
+                        // If we are playing with GameController, only kick if we are in the playing state, are not
+                        // penalised and are not in ready state
                         correctState = gameState->data.phase == Phase::PLAYING
                                        && gameState->data.self.penalty_reason == PenaltyReason::UNPENALISED
                                        && gameState->data.phase != Phase::READY;
@@ -159,8 +160,7 @@ namespace behaviour {
                     //     , kickIsValid
                     //     , KickAngle < cfg.kick_forward_angle_limit);
                     if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid
-                        && (correctState || forcePlaying)
-                        && KickAngle < cfg.kick_forward_angle_limit) {
+                        && (correctState || forcePlaying) && KickAngle < cfg.kick_forward_angle_limit) {
 
                         switch (kickPlan.kickType.value) {
                             case KickType::IK_KICK:
