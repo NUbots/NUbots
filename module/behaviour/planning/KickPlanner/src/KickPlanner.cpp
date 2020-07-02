@@ -146,7 +146,8 @@ namespace behaviour {
                     bool correctState = true;
                     if (gameState) {
                         correctState = gameState->data.phase == Phase::PLAYING
-                                       && gameState->data.self.penalty_reason == PenaltyReason::UNPENALISED;
+                                       && gameState->data.self.penalty_reason == PenaltyReason::UNPENALISED
+                                       && gameState->data.phase != Phase::READY;
                     }
                     bool kickIsValid = kickValid(ballPosition);
                     if (kickIsValid) {
