@@ -24,7 +24,7 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
-#include "MotionModel.h"
+#include "IMUModel.h"
 #include "VirtualLoadSensor.h"
 
 #include "message/motion/KinematicsModel.h"
@@ -46,7 +46,7 @@ namespace platform {
         public:
             explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-            utility::math::filter::UKF<double, MotionModel> motionFilter;
+            utility::math::filter::UKF<double, IMUModel> motionFilter;
 
             struct Config {
                 Config() : motionFilter(), buttons(), footDown() {}

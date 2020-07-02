@@ -64,7 +64,6 @@ namespace platform {
             s << src;
             s << ":";
 
-
             if (errorCode & DarwinSensors::Error::INPUT_VOLTAGE) {
                 s << " Input Voltage ";
             }
@@ -142,8 +141,10 @@ namespace platform {
 
                 // Set our process noise in our filter
                 MotionModel<double>::StateVec process_noise;
-                process_noise.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.noise.process.position;
-                process_noise.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.noise.process.velocity;
+                // process_noise.segment<3>(MotionModel<double>::PX) =
+                // this->config.motionFilter.noise.process.position;
+                // process_noise.segment<3>(MotionModel<double>::VX) =
+                // this->config.motionFilter.noise.process.velocity;
                 process_noise.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
                 process_noise.segment<3>(MotionModel<double>::WX) =
                     this->config.motionFilter.noise.process.rotationalVelocity;
@@ -176,15 +177,19 @@ namespace platform {
 
                 // Calculate our mean and covariance
                 MotionModel<double>::StateVec mean;
-                mean.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.mean.position;
-                mean.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.mean.velocity;
+                // mean.segment<3>(MotionModel<double>::PX) =
+                // this->config.motionFilter.initial.mean.position;
+                // mean.segment<3>(MotionModel<double>::VX) =
+                // this->config.motionFilter.initial.mean.velocity;
                 mean.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
                 mean.segment<3>(MotionModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
                 mean.segment<3>(MotionModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
                 MotionModel<double>::StateVec covariance;
-                covariance.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.covariance.position;
-                covariance.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.covariance.velocity;
+                // covariance.segment<3>(MotionModel<double>::PX) =
+                // this->config.motionFilter.initial.covariance.position;
+                // covariance.segment<3>(MotionModel<double>::VX) =
+                // this->config.motionFilter.initial.covariance.velocity;
                 covariance.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
                 covariance.segment<3>(MotionModel<double>::WX) =
                     this->config.motionFilter.initial.covariance.rotationalVelocity;
@@ -259,7 +264,6 @@ namespace platform {
                     sensors->timestamp = input.timestamp;
 
                     sensors->voltage = input.voltage;
-
 
                     // This checks for an error on the CM740 and reports it
                     if (input.cm740ErrorFlags != DarwinSensors::Error::OK) {
@@ -356,16 +360,18 @@ namespace platform {
                     // acc_y to the left
                     // acc_z up
 
-                    // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
+                    // If we have a previous sensors and our cm740 has errors then reuse our
+                    // last sensor value
                     if (previousSensors && (input.cm740ErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
                     else {
                         sensors->accelerometer =
-                            Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
+                            Eigen::Vector3d(input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
                     }
 
-                    // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
+                    // If we have a previous sensors and our cm740 has errors then reuse our
+                    // last sensor value
                     if (previousSensors
                         && (input.cm740ErrorFlags
                             || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
@@ -376,7 +382,7 @@ namespace platform {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = Eigen::Vector3d(input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z);
+                        sensors->gyroscope = Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z);
                     }
 
                     /************************************************
@@ -472,7 +478,10 @@ namespace platform {
                             Eigen::Affine3d Hwt;
                             Hwt.linear() = Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX))
                                                .toRotationMatrix();
-                            Hwt.translation() = Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
+                            Hwt.translation() = Eigen::Vector3d(
+                                0,
+                                0,
+                                0);  // Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
 
                             Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
@@ -486,9 +495,9 @@ namespace platform {
                             Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
 
                             // do a foot based position update
-                            motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
-                                                 config.motionFilter.noise.measurement.flatFootOdometry,
-                                                 MeasurementType::FLAT_FOOT_ODOMETRY());
+                            // motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
+                            //                      config.motionFilter.noise.measurement.flatFootOdometry,
+                            //                      MeasurementType::FLAT_FOOT_ODOMETRY());
 
                             // do a foot based orientation update
                             Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
@@ -517,9 +526,12 @@ namespace platform {
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
-                    Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
-                    Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
-                    sensors->Htw      = Hwt.inverse().matrix();
+                    Hwt.linear() = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
+                    Hwt.translation() =
+                        Eigen::Vector3d(0,
+                                        0,
+                                        0);  // Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
+                    sensors->Htw = Hwt.inverse().matrix();
 
                     // Integrate gyro to get angular positions
                     sensors->angular_position = o.segment<3>(MotionModel<double>::WX) / 90.0;
