@@ -14,7 +14,7 @@ function disposableComputedDecorator(
   // Lazily create and store the computed expression per instance.
   // This allows us to bind each computed expression to the correct `this` context.
   const expressionPerInstance = new WeakMap()
-  descriptor.get = function() {
+  descriptor.get = function () {
     let expr = expressionPerInstance.get(this)
     if (!expr) {
       expr = disposableComputedExpr(originalMethod.bind(this))
@@ -44,6 +44,7 @@ const disposableComputedExpr = <T extends { dispose(): void }>(fn: () => T): ICo
 export const disposableComputed: DisposableComputed = function computed(arg1: any, arg2: any) {
   if (typeof arg2 === 'string') {
     // Used as an annotation e.g. @disposableComputed
+    // eslint-disable-next-line
     return disposableComputedDecorator.apply(null, arguments as any)
   }
 

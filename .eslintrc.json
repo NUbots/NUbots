@@ -65,6 +65,10 @@
     "semi": [
       "error",
       "never"
+    ],
+    "arrow-parens": [
+      "error",
+      "as-needed"
     ]
   }
 }

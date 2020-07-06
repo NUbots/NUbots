@@ -55,10 +55,7 @@ export class NbsNUClearPlayback extends stream.Writable {
 
   static fromRawStream(rawStream: ReadStream, nuclearnetClient: NUClearNetClient) {
     const playback = NbsNUClearPlayback.of(nuclearnetClient)
-    rawStream
-      .pipe(new NbsFrameChunker())
-      .pipe(new NbsFrameDecoder())
-      .pipe(playback)
+    rawStream.pipe(new NbsFrameChunker()).pipe(new NbsFrameDecoder()).pipe(playback)
     return playback
   }
 

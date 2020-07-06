@@ -41,12 +41,7 @@ export class GoalsViewModel {
           .applyMatrix4(this.params.Hcw.toThree())
           .normalize(),
       ),
-      end: Vector3.fromThree(
-        bottom
-          .clone()
-          .applyMatrix4(Hcc)
-          .normalize(),
-      ),
+      end: Vector3.fromThree(bottom.clone().applyMatrix4(Hcc).normalize()),
       color: getColor(goal.side),
       lineWidth: 10,
     })

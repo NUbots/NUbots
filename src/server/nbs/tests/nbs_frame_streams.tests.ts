@@ -4,7 +4,7 @@ import { NbsFrameDecoder } from '../nbs_frame_streams'
 import { NbsFrameEncoder } from '../nbs_frame_streams'
 
 describe('NbsFrameEncoder', () => {
-  it('encodes frames to buffers', () => {
+  it('encodes frames to buffers', done => {
     const encoder = new NbsFrameEncoder()
     const frame = {
       timestampInMicroseconds: 0,
@@ -16,6 +16,7 @@ describe('NbsFrameEncoder', () => {
 
     encoder.on('data', spy).on('finish', () => {
       expect(spy).toHaveBeenCalledWith(buffer)
+      done()
     })
 
     encoder.write(frame)
@@ -24,7 +25,7 @@ describe('NbsFrameEncoder', () => {
 })
 
 describe('NbsFrameDecoder', () => {
-  it('decodes buffers to frames', () => {
+  it('decodes buffers to frames', done => {
     const decoder = new NbsFrameDecoder()
     const frame = {
       timestampInMicroseconds: 0,
@@ -36,6 +37,7 @@ describe('NbsFrameDecoder', () => {
 
     decoder.on('data', spy).on('finish', () => {
       expect(spy).toHaveBeenCalledWith(frame)
+      done()
     })
 
     decoder.write(buffer)

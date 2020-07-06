@@ -11,7 +11,9 @@ export const createMockEventHandler = <Y extends any[]>(): MockEventHandler<Y> =
   return Object.assign(
     jest.fn((cb: (...args: Y) => void) => {
       listeners.add(cb)
-      return () => listeners.delete(cb)
+      return () => {
+        listeners.delete(cb)
+      }
     }),
     {
       mockEvent: (...args: Y) => {

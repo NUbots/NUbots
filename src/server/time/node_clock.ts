@@ -7,12 +7,12 @@ const NanosecondsToSeconds = 1e-9
 
 function setTimeout(cb: () => void, seconds: number): CancelTimer {
   const handle = global.setTimeout(cb, seconds * SecondsToMilliseconds)
-  return global.clearTimeout.bind(undefined, handle)
+  return () => global.clearTimeout(handle)
 }
 
 function setInterval(cb: () => void, seconds: number): CancelTimer {
   const handle = global.setInterval(cb, seconds * SecondsToMilliseconds)
-  return global.clearInterval.bind(undefined, handle)
+  return () => global.clearInterval(handle)
 }
 
 function nextTick(cb: () => void): void {
