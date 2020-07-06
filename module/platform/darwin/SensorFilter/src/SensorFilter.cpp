@@ -414,30 +414,35 @@ namespace platform {
                         feet_down = load_sensor.updateFeet(*sensors);
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/Foot Down/Load/Left", load_sensor.state[1]));
-                            emit(graph("Sensor/Foot Down/Load/Right", load_sensor.state[0]));
+                            emit(graph("Sensor/Foot Down/Load/Left", feet_down[ServoSide::LEFT]));
+                            emit(graph("Sensor/Foot Down/Load/Right", feet_down[ServoSide::RIGHT]));
                         }
                     }
                     else {
-                        auto rightFootDisplacement = sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
-                        auto leftFootDisplacement  = sensors->Htx[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
+                        Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
+                        Eigen::Vector3d rRLl = Hlr.translation();
 
-                        if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
+                        // Right foot is below left foot in left foot space
+                        if (rRLl.z() < -config.footDown.certaintyThreshold) {
                             feet_down[ServoSide::RIGHT] = true;
                             feet_down[ServoSide::LEFT]  = false;
                         }
-                        else if (leftFootDisplacement < rightFootDisplacement - config.footDown.certaintyThreshold) {
+                        // Right foot is above left foot in left foot space
+                        else if (rRLl.z() > config.footDown.certaintyThreshold) {
                             feet_down[ServoSide::RIGHT] = false;
                             feet_down[ServoSide::LEFT]  = true;
                         }
+                        // Right foot and left foot are roughly the same height in left foot space
                         else {
                             feet_down[ServoSide::RIGHT] = true;
                             feet_down[ServoSide::LEFT]  = true;
                         }
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[1]));
-                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[0]));
+                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[ServoSide::LEFT]));
+                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[ServoSide::RIGHT]));
                         }
                     }
 
