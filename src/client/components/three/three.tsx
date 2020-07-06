@@ -17,6 +17,7 @@ import { WebGLRenderer } from 'three'
 import { Scene } from 'three'
 import { Camera } from 'three'
 import { debounce } from 'throttle-debounce'
+import { compose } from '../../base/compose'
 
 import styles from './styles.css'
 
@@ -154,13 +155,6 @@ export class Three extends Component<{
 
   private onWheel = (e: WheelEvent<HTMLCanvasElement>) => {
     this.props.onWheel && this.props.onWheel(e.deltaY, () => e.preventDefault())
-  }
-}
-
-/** Take an array of functions and return a function that calls them all. */
-const compose = (fns: (() => void)[]): (() => void) => () => {
-  for (const fn of fns) {
-    fn()
   }
 }
 

@@ -23,7 +23,8 @@ describe('WebSocketProxyNUClearNetClient', () => {
     const disconnect = client.connect({ name: 'bob' })
     disconnect()
     expect(mockWebSocket.disconnect).toHaveBeenCalled()
-    expect(mockWebSocket.send).toHaveBeenCalledWith('nuclear_disconnect')
+    // nuclear_disconnect not forwarded, as clients share a single connection.
+    expect(mockWebSocket.send).not.toHaveBeenCalledWith('nuclear_disconnect')
   })
 
   describe('when connected', () => {

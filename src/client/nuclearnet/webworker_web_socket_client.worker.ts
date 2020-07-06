@@ -1,8 +1,8 @@
-import SocketIO from 'socket.io-client'
-
 import * as NUClearNetProxyParser from '../../shared/nuclearnet/nuclearnet_proxy_parser'
+import { DirectWebSocketClient } from './direct_web_socket_client'
+import { WebSocketClient } from './web_socket_client'
 
-let socket: SocketIOClient.Socket
+let socket: WebSocketClient
 const events: Map<string, number> = new Map()
 let callbackId = 0
 const callbacks: Map<number, Function> = new Map()
@@ -25,7 +25,7 @@ addEventListener('message', (e: MessageEvent) => {
   switch (e.data.command) {
     case 'construct': {
       const { uri, opts } = e.data
-      socket = SocketIO(uri, {
+      socket = DirectWebSocketClient.of(uri, {
         ...opts,
         parser: NUClearNetProxyParser,
       })
@@ -92,7 +92,7 @@ addEventListener('message', (e: MessageEvent) => {
     }
 
     case 'send':
-      socket.emit(e.data.event, ...e.data.args)
+      socket.send(e.data.event, ...e.data.args)
       break
   }
 })

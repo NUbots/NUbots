@@ -46,10 +46,8 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     this.socket.connect()
     this.socket.send('nuclear_connect', options)
 
-    return () => {
-      this.socket.send('nuclear_disconnect')
-      this.socket.disconnect()
-    }
+    // Does not send a nuclear_disconnect message, as all clients share a single server-side NUClearNet connection.
+    return () => this.socket.disconnect()
   }
 
   onJoin(listener: NUClearEventListener): () => void {

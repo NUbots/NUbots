@@ -40,7 +40,7 @@ const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 // Initialize socket.io namespace immediately to catch reconnections.
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
   fakeNetworking: withVirtualRobots,
-  nuclearnetAddress,
+  connectionOpts: { name: 'nusight', address: nuclearnetAddress },
 })
 
 const devMiddleware = webpackDevMiddleware(compiler, {

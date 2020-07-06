@@ -2,6 +2,7 @@ import { NUClearNetSend } from 'nuclearnet.js'
 import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetPacket } from 'nuclearnet.js'
+import { compose } from '../../client/base/compose'
 
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { Clock } from '../../shared/time/clock'
@@ -15,7 +16,7 @@ import { WebSocket } from './web_socket_server'
 
 type Opts = {
   fakeNetworking: boolean
-  nuclearnetAddress: string
+  connectionOpts: NUClearNetOptions
 }
 
 /**
@@ -24,65 +25,111 @@ type Opts = {
  * improved to have more intelligent multiplexing.
  */
 export class WebSocketProxyNUClearNetServer {
-  private nuclearnetAddress: string
+  private readonly peers = new Set<NUClearNetPeer>()
+  private readonly clients = new Set<WebSocketServerClient>()
+  private disconnect?: () => void
 
   constructor(
-    private server: WebSocketServer,
-    private nuclearnetClient: NUClearNetClient,
-    private address: string,
+    private readonly server: WebSocketServer,
+    private readonly nuclearnetClient: NUClearNetClient,
+    private readonly connectionOpts: NUClearNetOptions,
   ) {
     server.onConnection(this.onClientConnection)
-    this.nuclearnetAddress = address
   }
 
   static of(
     server: WebSocketServer,
-    { fakeNetworking, nuclearnetAddress }: Opts,
+    { fakeNetworking, connectionOpts }: Opts,
   ): WebSocketProxyNUClearNetServer {
     const nuclearnetClient: NUClearNetClient = fakeNetworking
       ? FakeNUClearNetClient.of()
       : DirectNUClearNetClient.of()
-    return new WebSocketProxyNUClearNetServer(server, nuclearnetClient, nuclearnetAddress)
+    return new WebSocketProxyNUClearNetServer(server, nuclearnetClient, connectionOpts)
   }
 
   private onClientConnection = (socket: WebSocket) => {
-    WebSocketServerClient.of(this.nuclearnetClient, socket, this.nuclearnetAddress)
+    const client = WebSocketServerClient.of(this.nuclearnetClient, socket)
+    this.clients.add(client)
+    socket.on('nuclear_connect', (opts: NUClearNetOptions) => {
+      if (!this.disconnect && this.clients.size === 1) {
+        // First client, connect to NUClearNet.
+        this.disconnect = compose([
+          this.nuclearnetClient.onJoin(this.onJoin),
+          this.nuclearnetClient.onLeave(this.onLeave),
+          this.nuclearnetClient.connect({
+            ...opts,
+            ...this.connectionOpts,
+          }),
+        ])
+      } else {
+        // Already connected, send fake join packets for everyone already on the network.
+        for (const peer of this.peers) {
+          socket.send('nuclear_join', peer)
+        }
+      }
+    })
+    const stopProcessing = client.startProcessing()
+    socket.onDisconnect(() => {
+      stopProcessing()
+      this.clients.delete(client)
+      if (this.clients.size === 0) {
+        // Last client, disconnect from NUClearNet.
+        this.disconnect?.()
+        this.disconnect = undefined
+      }
+    })
+  }
+
+  private onJoin = (peer: NUClearNetPeer) => {
+    this.peers.add(this.getCanonicalPeer(peer))
+  }
+
+  private onLeave = (leavingPeer: NUClearNetPeer) => {
+    this.peers.delete(this.getCanonicalPeer(leavingPeer))
+  }
+
+  /**
+   * NUClearNet peer objects do not maintain referential identity, this normalizes them so that they do.
+   * This allows them to be used within contexts that require triple equal (===) object equality (e.g. sets).
+   */
+  private getCanonicalPeer(peer: NUClearNetPeer): NUClearNetPeer {
+    const existingPeer = Array.from(this.peers.values()).find(
+      otherPeer =>
+        otherPeer.name === peer.name &&
+        otherPeer.address === peer.address &&
+        otherPeer.port === peer.port,
+    )
+    return existingPeer ?? peer
   }
 }
 
 class WebSocketServerClient {
-  private connected: boolean
-  private offJoin: () => void
-  private offLeave: () => void
-  private offListenMap: Map<string, () => void>
-  private nuclearnetAddress: string
+  private readonly offListenMap = new Map<string, () => void>()
 
   constructor(
     private nuclearnetClient: NUClearNetClient,
     private socket: WebSocket,
     private processor: PacketProcessor,
-    private address: string,
   ) {
-    this.connected = false
-    this.offJoin = this.nuclearnetClient.onJoin(this.onJoin)
-    this.offLeave = this.nuclearnetClient.onLeave(this.onLeave)
     this.offListenMap = new Map()
-    this.nuclearnetAddress = this.address
-
-    this.socket.on('packet', this.onClientPacket)
-    this.socket.on('listen', this.onListen)
-    this.socket.on('unlisten', this.onUnlisten)
-    this.socket.on('nuclear_connect', this.onConnect)
-    this.socket.on('disconnect', this.onDisconnect)
   }
 
-  static of(nuclearnetClient: NUClearNetClient, socket: WebSocket, nuclearnetAddress: string) {
-    return new WebSocketServerClient(
-      nuclearnetClient,
-      socket,
-      PacketProcessor.of(socket),
-      nuclearnetAddress,
-    )
+  static of(nuclearnetClient: NUClearNetClient, socket: WebSocket) {
+    return new WebSocketServerClient(nuclearnetClient, socket, PacketProcessor.of(socket))
+  }
+
+  startProcessing(): () => void {
+    return compose([
+      this.nuclearnetClient.onJoin(this.onJoin),
+      this.nuclearnetClient.onLeave(this.onLeave),
+      this.socket.on('packet', this.onClientPacket),
+      this.socket.on('listen', this.onListen),
+      this.socket.on('unlisten', this.onUnlisten),
+      () => {
+        this.offListenMap.forEach(off => off())
+        this.offListenMap.clear()
+      },
+    ])
   }
 
   private onJoin = (peer: NUClearNetPeer) => {
@@ -93,36 +140,13 @@ class WebSocketServerClient {
     this.socket.send('nuclear_leave', peer)
   }
 
-  private onConnect = (options: NUClearNetOptions) => {
-    // This could be improved.
-    // Currently only listens to the first connection request and ignores subsequent requests.
-    // Smarter multiplexing of the shared connection would be ideal.
-    if (!this.connected) {
-      options.address = this.nuclearnetAddress
-      const disconnect = this.nuclearnetClient.connect(options)
-      this.connected = true
-      this.socket.on('nuclear_disconnect', () => {
-        disconnect()
-        this.connected = false
-      })
-    }
-  }
-
   private onListen = (event: string, requestToken: string) => {
     const off = this.nuclearnetClient.on(event, this.onServerPacket.bind(this, event))
     this.offListenMap.set(requestToken, off)
   }
 
   private onUnlisten = (requestToken: string) => {
-    const off = this.offListenMap.get(requestToken)
-    if (off) {
-      off()
-    }
-  }
-
-  private onDisconnect = () => {
-    this.offJoin()
-    this.offLeave()
+    this.offListenMap.get(requestToken)?.()
   }
 
   private onServerPacket = (event: string, packet: NUClearNetPacket) => {
@@ -138,10 +162,10 @@ class PacketProcessor {
   private outgoingPackets: number = 0
 
   // The maximum number of packets to send before receiving acknowledgements.
-  private outgoingLimit: number
+  private readonly outgoingLimit: number
 
   // The number of seconds before giving up on an acknowledge
-  private timeout: number
+  private readonly timeout: number
 
   constructor(
     private socket: WebSocket,

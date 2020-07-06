@@ -46,5 +46,5 @@ if (withVirtualRobots) {
 
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
   fakeNetworking: withVirtualRobots,
-  nuclearnetAddress,
+  connectionOpts: { name: 'nusight', address: nuclearnetAddress },
 })
