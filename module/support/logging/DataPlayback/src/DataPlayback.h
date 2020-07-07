@@ -24,7 +24,6 @@ namespace support {
                 bool enabled = false;
             };
 
-
             template <typename T>
             void add_player() {
                 uint64_t hash = NUClear::util::serialise::Serialise<T>::hash();
@@ -77,10 +76,13 @@ namespace support {
             NUClear::clock::time_point start_time;
 
             // The last time that we emitted a packet for
-            NUClear::clock::time_point last_emit;
+            NUClear::clock::time_point last_emit_time;
 
             // If we should loop this file after we finish or just disable ourself
             bool loop_playback = false;
+
+            // If we should shutdown the system once we finish playing back
+            bool shutdown_on_end = false;
         };
 
     }  // namespace logging

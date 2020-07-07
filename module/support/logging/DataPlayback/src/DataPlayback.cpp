@@ -61,7 +61,7 @@ namespace support {
                                 // Go to the next file in the list
                                 file_index += 1;
                                 // This resets the timer offset for the new file
-                                first_timecode = 0;
+                                first_timecode = std::chrono::microseconds(0);
                                 // This makes sure we start emitting the new data after the old is finished
                                 start_time = last_emit_time;
 
@@ -90,21 +90,6 @@ namespace support {
                             }
                             // Just stop playing back the recording
                             else {
-                                playback_handle.disable();
-                            }
-
-                            // If we are looping go back to the start of the file and reset our timecode
-                            if (loop_playback) {
-                                input_file.clear();
-                                input_file.seekg(0);
-                                first_timecode = std::chrono::microseconds(0);
-
-                                log<NUClear::INFO>("Restarting playback of file", current_file);
-                            }
-                            // Otherwise disable this reaction and stop
-                            else {
-                                playback_handle.disable();
-                                input_file.clear();
                                 playback_handle.disable();
                                 buffered = true;
                             }
@@ -158,8 +143,9 @@ namespace support {
                         files.insert(files.end(), std::next(args.begin()), args.end());
                     }
 
-                    loop_playback = config["loop_playback"].as<bool>();
-                    buffer_time   = std::chrono::milliseconds(config["buffer_time"].as<uint64_t>());
+                    loop_playback   = config["loop_playback"].as<bool>();
+                    shutdown_on_end = config["shutdown_on_end"].as<bool>();
+                    buffer_time     = std::chrono::milliseconds(config["buffer_time"].as<uint64_t>());
 
                     // Start at the first file again
                     file_index = 0;
@@ -170,7 +156,7 @@ namespace support {
                         playback_handle.disable();
                     }
                     else {
-                        input_file = input_file.open(files[file_index]);
+                        input_file.open(files[file_index]);
                         log<NUClear::INFO>("Starting playback of file", files[file_index]);
                         playback_handle.enable();
                     }

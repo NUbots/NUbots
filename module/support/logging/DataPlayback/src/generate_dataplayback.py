@@ -53,9 +53,7 @@ if __name__ == "__main__":
         namespace support {{
             namespace logging {{
 
-                using extension::Configuration;
-
-                DataPlayback::register_players() {{
+                void DataPlayback::register_players() {{
         {players}
                 }}
 
