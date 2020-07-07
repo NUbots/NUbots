@@ -19,9 +19,8 @@
 #ifndef UTILITY_VISION_VISION_H
 #define UTILITY_VISION_VISION_H
 
-#include <fmt/format.h>
-
 #include <Eigen/Core>
+#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <string>

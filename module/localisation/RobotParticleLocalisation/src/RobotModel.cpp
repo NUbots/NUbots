@@ -25,6 +25,7 @@
 
 #include "message/input/Sensors.h"
 #include "message/vision/Goal.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/angle.h"

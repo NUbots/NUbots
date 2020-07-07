@@ -40,7 +40,7 @@ namespace support {
         Balls result;
         result.balls.reserve(1);
 
-        Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+        Eigen::Affine3d Htc(sensors.Htx[utility::input::ServoID::HEAD_PITCH]);
         result.Hcw       = Htc.inverse() * sensors.Htw;
         result.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
 

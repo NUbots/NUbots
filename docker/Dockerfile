@@ -273,7 +273,7 @@ RUN install-package \
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.9 \
-    isort \
+    isort==4.3.21 \
     black==19.10b0
 
 #######################################

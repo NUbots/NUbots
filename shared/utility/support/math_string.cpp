@@ -2,7 +2,6 @@
 #define UTILITY_SUPPORT_MATH_STRING_H
 
 #include <fmt/format.h>
-
 #include <limits>
 #include <stdexcept>
 

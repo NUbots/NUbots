@@ -22,11 +22,13 @@
 #include <string>
 
 #include "extension/Configuration.h"
+
 #include "message/localisation/Field.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/HeadCommand.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -160,7 +162,8 @@ namespace behaviour {
 
 
             on<Trigger<SoccerObjectPriority>, Sync<HeadBehaviourSoccer>>().then(
-                "Head Behaviour Soccer - Set priorities", [this](const SoccerObjectPriority& p) {
+                "Head Behaviour Soccer - Set priorities",
+                [this](const SoccerObjectPriority& p) {
                     ballPriority = p.ball;
                     goalPriority = p.goal;
                     searchType   = p.searchType;
@@ -249,7 +252,7 @@ namespace behaviour {
                               }
                           }
                           else {
-                              Eigen::Matrix4d Htc = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+                              Eigen::Matrix4d Htc = sensors.Htx[ServoID::HEAD_PITCH];
                               headToBodyRotation  = Transform3D(convert(Htc)).rotation();
                               orientation         = Transform3D(convert(sensors.Htw)).rotation().i();
                           }
