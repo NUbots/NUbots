@@ -22,7 +22,6 @@ namespace support {
             playback_handle = on<Every<2, Per<std::chrono::seconds>>, Sync<DataPlayback>, Single>().then([this] {
                 bool buffered = false;
                 while (!buffered) {
-
                     try {
                         // Read our next packet from the stream
                         Packet p = read_packet(input_file);
@@ -35,6 +34,10 @@ namespace support {
 
                         // Work out when we should emit this packet
                         auto emit_time = start_time + p.timecode - first_timecode;
+
+                        // Since it's possible for NBS files to be a little out of order, we also ensure that we always
+                        // take the most distant emit time as our time
+                        last_emit_time = last_emit_time > emit_time ? last_emit_time : emit_time;
 
                         // Check if we care about this packet
                         if (players.find(p.hash) != players.end() && players[p.hash].enabled) {
@@ -52,7 +55,44 @@ namespace support {
                         // If we reached the end of the file we either terminate or loop depending on the setting
                         if (input_file.eof()) {
 
-                            log<NUClear::INFO>("Playback of file", current_file, "finished");
+                            log<NUClear::INFO>("Playback of file", files[file_index], "finished");
+
+                            // If we have more files to go in our list
+                            if (file_index + 1 < files.size()) {
+                                // Go to the next file in the list
+                                file_index += 1;
+                                // This resets the timer offset for the new file
+                                first_timecode = 0;
+                                // This makes sure we start emitting the new data after the old is finished
+                                start_time = last_emit_time;
+
+                                // Open the first file again
+                                input_file.clear();
+                                input_file.open(files[file_index]);
+                                log<NUClear::INFO>("Starting playback of file", files[file_index]);
+                            }
+                            // We are done and should shutdown the system now
+                            else if (shutdown_on_end) {
+                                playback_handle.disable();
+                                powerplant.shutdown();
+                            }
+                            else if (loop_playback) {
+                                // Go back to the first file in the list
+                                file_index = 0;
+                                // This resets the timer offset for the new file
+                                first_timecode = std::chrono::microseconds(0);
+                                // This makes sure we start emitting the new data after the old is finished
+                                start_time = last_emit_time;
+
+                                // Open the first file again
+                                input_file.clear();
+                                input_file.open(files[file_index]);
+                                log<NUClear::INFO>("Restarting playback with file", files[file_index]);
+                            }
+                            // Just stop playing back the recording
+                            else {
+                                playback_handle.disable();
+                            }
 
                             // If we are looping go back to the start of the file and reset our timecode
                             if (loop_playback) {
@@ -64,6 +104,7 @@ namespace support {
                             }
                             // Otherwise disable this reaction and stop
                             else {
+                                playback_handle.disable();
                                 input_file.clear();
                                 playback_handle.disable();
                                 buffered = true;
@@ -82,70 +123,59 @@ namespace support {
             });
             playback_handle.disable();
 
-            on<Configuration, Sync<DataPlayback>>("DataPlayback.yaml").then([this](const Configuration& config) {
-                // Update which types we will be playing
-                for (auto& setting : config["messages"].config) {
-                    // Get the name of the type
-                    std::string name = setting.first.as<std::string>();
-                    // Hash our type to work out our type on the wire
-                    uint64_t hash = XXH64(name.c_str(), name.size(), 0x4e55436c);
-                    bool enabled  = setting.second.as<bool>();
+            on<Configuration, Trigger<CommandLineArguments>, Sync<DataPlayback>>("DataPlayback.yaml")
+                .then([this](const Configuration& config, const CommandLineArguments& args) {
+                    // Update which types we will be playing
+                    for (auto& setting : config["messages"].config) {
+                        // Get the name of the type
+                        std::string name = setting.first.as<std::string>();
+                        // Hash our type to work out our type on the wire
+                        uint64_t hash = XXH64(name.c_str(), name.size(), 0x4e55436c);
+                        bool enabled  = setting.second.as<bool>();
 
-                    // Message if we have enabled/disabled a particular message type
-                    if (players.find(hash) != players.end()) {
-                        auto& player = players[hash];
+                        // Message if we have enabled/disabled a particular message type
+                        if (players.find(hash) != players.end()) {
+                            auto& player = players[hash];
 
-                        if (enabled && !player.enabled) {
-                            player.enabled = true;
-                            log<NUClear::INFO>("Playback for message type", name, "enabled");
+                            if (enabled && !player.enabled) {
+                                player.enabled = true;
+                                log<NUClear::INFO>("Playback for message type", name, "enabled");
+                            }
+                            else if (!enabled && player.enabled) {
+                                player.enabled = false;
+                                log<NUClear::INFO>("Playback for message type", name, "disabled");
+                            }
                         }
-                        else if (!enabled && player.enabled) {
-                            player.enabled = false;
-                            log<NUClear::INFO>("Playback for message type", name, "disabled");
+                        else {
+                            log<NUClear::WARN>("The playback system does not know about the message type", name);
                         }
+                    }
+
+                    // Get which files the configuration file said to play
+                    files = config["files"].as<std::vector<std::string>>();
+
+                    // If we are provided no files in the configuration file, try to read them from the command line
+                    if (files.empty()) {
+                        files.insert(files.end(), std::next(args.begin()), args.end());
+                    }
+
+                    loop_playback = config["loop_playback"].as<bool>();
+                    buffer_time   = std::chrono::milliseconds(config["buffer_time"].as<uint64_t>());
+
+                    // Start at the first file again
+                    file_index = 0;
+
+                    // If we still have no files
+                    if (files.empty()) {
+                        log<NUClear::WARN>("No files were provided for playback, stopping");
+                        playback_handle.disable();
                     }
                     else {
-                        log<NUClear::WARN>("The playback system does not know about the message type", name);
+                        input_file = input_file.open(files[file_index]);
+                        log<NUClear::INFO>("Starting playback of file", files[file_index]);
+                        playback_handle.enable();
                     }
-                }
-
-                // Get our other config parameters
-                auto file     = config["file"].as<std::string>();
-                loop_playback = config["loop_playback"].as<bool>();
-                buffer_time   = std::chrono::milliseconds(config["buffer_time"].as<uint64_t>());
-
-                // If we are changing files to no file
-                if (file != current_file && file == "") {
-
-                    log<NUClear::WARN>("Stopping playback of file", current_file);
-
-                    current_file = file;
-
-                    // Disable the callback so we stop buffering
-                    playback_handle.enable();
-
-                    // Close the file
-                    if (input_file.is_open()) {
-                        input_file.close();
-                    }
-                }
-                // We are playing a new file
-                else if (file != current_file) {
-
-                    if (input_file.is_open()) {
-                        log<NUClear::WARN>("Stopping playback of file", current_file);
-                        input_file.close();
-                    }
-
-                    current_file = file;
-
-                    log<NUClear::INFO>("Starting playback of file", current_file);
-
-                    first_timecode = std::chrono::microseconds(0);
-                    input_file.open(file);
-                    playback_handle.enable();
-                }
-            });
+                });
         }
 
     }  // namespace logging

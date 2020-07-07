@@ -1,0 +1,19 @@
+# A list of files to load, if this list is empty it will instead look at the arguments on the command line
+# So you can call ./binary a.nbs b.nbs c.nbs etc
+files: []
+
+# Once the NBS file has finished playing should we start again at the beginning
+loop_playback: true
+
+# If the system should shut down once it finishes playing the file
+shutdown_on_end: false
+
+# The amount of time into the future to buffer, should be at least 1000ms
+buffer_time: 1500
+
+# You can put any messages that is emitted in the system here and it will be logged
+# The below ones are just the most common and here as an example
+messages:
+  message.input.Image: false
+  message.input.Sensors: false
+  message.platform.DarwinSensors: false

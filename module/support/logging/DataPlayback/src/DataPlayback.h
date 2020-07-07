@@ -61,8 +61,11 @@ namespace support {
             // Our input file that we read from
             std::ifstream input_file;
 
-            // The file we are currently playing
-            std::string current_file;
+            // The list of files we are playing
+            std::vector<std::string> files;
+
+            // Which file number we are up to
+            int file_index = 0;
 
             // The first time that appears in the file
             std::chrono::microseconds first_timecode;
@@ -72,6 +75,9 @@ namespace support {
 
             // When we started playing this file
             NUClear::clock::time_point start_time;
+
+            // The last time that we emitted a packet for
+            NUClear::clock::time_point last_emit;
 
             // If we should loop this file after we finish or just disable ourself
             bool loop_playback = false;
