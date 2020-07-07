@@ -4,8 +4,6 @@
 
 #include "extension/Configuration.h"
 
-{ includes }
-
 namespace module {
 namespace support {
     namespace logging {
