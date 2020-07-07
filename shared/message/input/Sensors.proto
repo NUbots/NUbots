@@ -51,8 +51,8 @@ message Sensors {
         uint32 colour = 2;
     }
     message Foot {
-        bool            down = 1;
-        mat4            Hwf  = 2;
+        bool down = 1;
+        mat4 Hwf  = 2;
     }
     google.protobuf.Timestamp timestamp     = 1;
     vec3                      accelerometer = 2;
