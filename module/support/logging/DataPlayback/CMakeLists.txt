@@ -2,7 +2,6 @@
 find_package(PythonInterp 3 REQUIRED)
 
 set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/register_players.cpp")
-set(config_file "${CMAKE_CURRENT_BINARY_DIR}/data/config/DataPlayback.yaml")
 
 # Copy across the files
 add_custom_command(
@@ -14,4 +13,4 @@ add_custom_command(
 )
 
 # Build our NUClear module
-nuclear_module(SOURCES "${source_file}" DATA_FILES "${config_file}:config")
+nuclear_module(SOURCES "${source_file}")
