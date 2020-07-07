@@ -10,7 +10,6 @@ import google.protobuf.message
 if __name__ == "__main__":
     shared_folder = sys.argv[1]
     cpp_file = sys.argv[2]
-    yaml_file = sys.argv[3]
 
     # Load all our protocol buffer files as modules into this file
     includes = []
@@ -73,22 +72,3 @@ if __name__ == "__main__":
 
     with open(cpp_file, "w") as f:
         f.write(source.format(includes="\n".join(includes), players="\n".join(players)))
-
-    # Now generate our yaml file
-    yaml_template = dedent(
-        """\
-        file: ""
-        loop_playback: true
-        # The amount of time into the future to buffer, should be at least 1000ms
-        buffer_time: 1500
-
-        messages:
-        {messages}
-    """
-    )
-
-    yaml_keys = ["  {}: false".format(m) for m in sorted(messages)]
-
-    # and write it out
-    with open(yaml_file, "w") as f:
-        f.write(yaml_template.format(messages="\n".join(yaml_keys)))
