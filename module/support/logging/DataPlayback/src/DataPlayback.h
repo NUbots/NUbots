@@ -24,29 +24,6 @@ namespace support {
                 bool enabled = false;
             };
 
-            // Our deserialisation functions that convert the messages and emit them
-            std::map<uint64_t, Player> players;
-
-            // Our reaction that controls the main every loop that queues up actions
-            ReactionHandle playback_handle;
-
-            // Our input file that we read from
-            std::ifstream input_file;
-
-            // The file we are currently playing
-            std::string current_file;
-
-            // The first time that appears in the file
-            std::chrono::microseconds first_timecode;
-
-            // The amount of time into the future to buffer for
-            std::chrono::milliseconds buffer_time;
-
-            // When we started playing this file
-            NUClear::clock::time_point start_time;
-
-            // If we should loop this file after we finish or just disable ourself
-            bool loop_playback = false;
 
             template <typename T>
             void add_player() {
@@ -70,6 +47,34 @@ namespace support {
         public:
             /// @brief Called by the powerplant to build and setup the DataPlayback reactor.
             explicit DataPlayback(std::unique_ptr<NUClear::Environment> environment);
+
+        private:
+            /// @brief Register the functions that will decode and emit the message types
+            void register_players();
+
+            // Our deserialisation functions that convert the messages and emit them
+            std::map<uint64_t, Player> players;
+
+            // Our reaction that controls the main every loop that queues up actions
+            ReactionHandle playback_handle;
+
+            // Our input file that we read from
+            std::ifstream input_file;
+
+            // The file we are currently playing
+            std::string current_file;
+
+            // The first time that appears in the file
+            std::chrono::microseconds first_timecode;
+
+            // The amount of time into the future to buffer for
+            std::chrono::milliseconds buffer_time;
+
+            // When we started playing this file
+            NUClear::clock::time_point start_time;
+
+            // If we should loop this file after we finish or just disable ourself
+            bool loop_playback = false;
         };
 
     }  // namespace logging
