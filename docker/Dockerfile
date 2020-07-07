@@ -6,10 +6,18 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
+### The following two commands are paired
+### The date in the Server command must either match, or be more recent than,
+### the date in the FROM command
+### Date format is ISO year/month/day
 FROM archlinux:20200505
+RUN echo "Server=https://archive.archlinux.org/repos/2020/05/05/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
-RUN pacman -Syu --noconfirm
+# Use "yyuu" to allow for downgrades
+# There wont be any downgrades provided the date in Server line above is the same
+# or newer than the arch image date
+RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Create the nubots user, and setup sudo so no password is required
 RUN useradd --no-log-init -m -U nubots
@@ -31,13 +39,6 @@ RUN install-package \
     cmake \
     meson \
     git
-
-# Prevent gcc, gcc-libs, and gcc-fortran from being upgraded
-RUN sed -e 's/#IgnorePkg.*$/IgnorePkg = gcc gcc-libs gcc-fortran/' -i /etc/pacman.conf
-
-# Downgrade gcc version
-RUN pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc/gcc-9.3.0-1-x86_64.pkg.tar.zst \
-    https://archive.archlinux.org/packages/g/gcc-libs/gcc-libs-9.3.0-1-x86_64.pkg.tar.zst
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -154,8 +155,7 @@ RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/
     https://github.com/OCL-dev/ocl-icd/commit/f83df609a3357314ddff2def6b7e7e2c5b93078c.patch --
 
 # OpenBLAS
-#RUN install-package gcc-fortran
-RUN sudo pacman -U --noconfirm https://archive.archlinux.org/packages/g/gcc-fortran/gcc-fortran-9.3.0-1-x86_64.pkg.tar.zst
+RUN install-package gcc-fortran
 COPY --chown=nubots:nubots usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 
