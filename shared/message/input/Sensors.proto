@@ -25,7 +25,6 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Neutron.proto";
 import "Vector.proto";
-import "message/motion/BodySide.proto";
 
 message Sensors {
     message Servo {
@@ -54,7 +53,6 @@ message Sensors {
     message Foot {
         bool            down = 1;
         mat4            Hwf  = 2;
-        motion.BodySide side = 3;
     }
     google.protobuf.Timestamp timestamp     = 1;
     vec3                      accelerometer = 2;

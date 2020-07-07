@@ -407,8 +407,6 @@ namespace platform {
                     sensors->feet.resize(2);
                     sensors->feet[BodySide::RIGHT].down = true;
                     sensors->feet[BodySide::LEFT].down  = true;
-                    sensors->feet[BodySide::RIGHT].side = BodySide::RIGHT;
-                    sensors->feet[BodySide::LEFT].side  = BodySide::LEFT;
 
                     std::array<bool, 2> feet_down = {true};
                     if (config.footDown.fromLoad) {
