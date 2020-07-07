@@ -27,6 +27,7 @@
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/ResetRobotHypotheses.h"
+#include "message/motion/BodySide.h"
 #include "message/motion/GetupCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
@@ -67,6 +68,7 @@ namespace behaviour {
         using message::localisation::Ball;
         using message::localisation::Field;
         using message::localisation::ResetRobotHypotheses;
+        using message::motion::BodySide;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
         using message::platform::darwin::ButtonLeftDown;
@@ -75,7 +77,6 @@ namespace behaviour {
         using VisionBalls = message::vision::Balls;
         using VisionGoals = message::vision::Goals;
 
-        using utility::input::ServoSide;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
@@ -402,7 +403,7 @@ namespace behaviour {
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
 
-            bool feetOffGround = !sensors.feet[ServoSide::LEFT].down && !sensors.feet[ServoSide::RIGHT].down;
+            bool feetOffGround = !sensors.feet[BodySide::LEFT].down && !sensors.feet[BodySide::RIGHT].down;
             return false && feetOffGround && !isGettingUp && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
         }
 
