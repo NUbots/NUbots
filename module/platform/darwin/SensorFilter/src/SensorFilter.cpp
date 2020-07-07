@@ -22,6 +22,7 @@
 #include "extension/Configuration.h"
 
 #include "message/input/Sensors.h"
+#include "message/motion/BodySide.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/input/LimbID.h"
@@ -49,7 +50,6 @@ namespace platform {
 
         using utility::input::LimbID;
         using utility::input::ServoID;
-        using utility::input::ServoSide;
         using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
         using utility::motion::kinematics::calculateInertialTensor;
@@ -405,8 +405,10 @@ namespace platform {
                      *            Foot down information             *
                      ************************************************/
                     sensors->feet.resize(2);
-                    sensors->feet[ServoSide::RIGHT].down = true;
-                    sensors->feet[ServoSide::LEFT].down  = true;
+                    sensors->feet[BodySide::RIGHT].down = true;
+                    sensors->feet[BodySide::LEFT].down  = true;
+                    sensors->feet[BodySide::RIGHT].side = BodySide::RIGHT;
+                    sensors->feet[BodySide::LEFT].side  = BodySide::LEFT;
 
                     std::array<bool, 2> feet_down = {true};
                     if (config.footDown.fromLoad) {
@@ -414,8 +416,8 @@ namespace platform {
                         feet_down = load_sensor.updateFeet(*sensors);
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/Foot Down/Load/Left", feet_down[ServoSide::LEFT]));
-                            emit(graph("Sensor/Foot Down/Load/Right", feet_down[ServoSide::RIGHT]));
+                            emit(graph("Sensor/Foot Down/Load/Left", feet_down[BodySide::LEFT]));
+                            emit(graph("Sensor/Foot Down/Load/Right", feet_down[BodySide::RIGHT]));
                         }
                     }
                     else {
@@ -426,28 +428,28 @@ namespace platform {
 
                         // Right foot is below left foot in left foot space
                         if (rRLl.z() < -config.footDown.certaintyThreshold) {
-                            feet_down[ServoSide::RIGHT] = true;
-                            feet_down[ServoSide::LEFT]  = false;
+                            feet_down[BodySide::RIGHT] = true;
+                            feet_down[BodySide::LEFT]  = false;
                         }
                         // Right foot is above left foot in left foot space
                         else if (rRLl.z() > config.footDown.certaintyThreshold) {
-                            feet_down[ServoSide::RIGHT] = false;
-                            feet_down[ServoSide::LEFT]  = true;
+                            feet_down[BodySide::RIGHT] = false;
+                            feet_down[BodySide::LEFT]  = true;
                         }
                         // Right foot and left foot are roughly the same height in left foot space
                         else {
-                            feet_down[ServoSide::RIGHT] = true;
-                            feet_down[ServoSide::LEFT]  = true;
+                            feet_down[BodySide::RIGHT] = true;
+                            feet_down[BodySide::LEFT]  = true;
                         }
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[ServoSide::LEFT]));
-                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[ServoSide::RIGHT]));
+                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[BodySide::LEFT]));
+                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[BodySide::RIGHT]));
                         }
                     }
 
-                    sensors->feet[ServoSide::RIGHT].down = feet_down[ServoSide::RIGHT];
-                    sensors->feet[ServoSide::LEFT].down  = feet_down[ServoSide::LEFT];
+                    sensors->feet[BodySide::RIGHT].down = feet_down[BodySide::RIGHT];
+                    sensors->feet[BodySide::LEFT].down  = feet_down[BodySide::LEFT];
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -467,11 +469,11 @@ namespace platform {
                     // Accelerometer measurement update
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
-                    for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
+                    for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
                         bool foot_down      = sensors->feet[side].down;
                         bool prev_foot_down = previous_foot_down[side];
                         Eigen::Affine3d Htf(
-                            sensors->Htx[side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+                            sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                         if (foot_down && !prev_foot_down) {
                             Eigen::Affine3d Hwt;
