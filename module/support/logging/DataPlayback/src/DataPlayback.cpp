@@ -9,6 +9,7 @@ namespace support {
     namespace logging {
 
         using extension::Configuration;
+        using NUClear::message::CommandLineArguments;
 
         DataPlayback::DataPlayback(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), first_timecode(0) {
