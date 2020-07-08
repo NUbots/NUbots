@@ -4,15 +4,14 @@ function(ToolchainLibraryFinder)
   # Extract the arguments from our function call
   set(options, "")
   set(oneValueArgs "NAME")
-  set(
-    multiValueArgs
-    "HEADER"
-    "LIBRARY"
-    "PATH_SUFFIX"
-    "BINARY"
-    "VERSION_FILE"
-    "VERSION_BINARY_ARGUMENTS"
-    "VERSION_REGEX"
+  set(multiValueArgs
+      "HEADER"
+      "LIBRARY"
+      "PATH_SUFFIX"
+      "BINARY"
+      "VERSION_FILE"
+      "VERSION_BINARY_ARGUMENTS"
+      "VERSION_REGEX"
   )
   cmake_parse_arguments(PACKAGE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -32,7 +31,10 @@ function(ToolchainLibraryFinder)
 
     # Setup and export our variables
     set(required_vars ${required_vars} "${PACKAGE_NAME}_INCLUDE_DIR")
-    set(${PACKAGE_NAME}_INCLUDE_DIRS ${${PACKAGE_NAME}_INCLUDE_DIR} PARENT_SCOPE)
+    set(${PACKAGE_NAME}_INCLUDE_DIRS
+        ${${PACKAGE_NAME}_INCLUDE_DIR}
+        PARENT_SCOPE
+    )
     mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR ${PACKAGE_NAME}_INCLUDE_DIRS)
 
   endif(PACKAGE_HEADER)
@@ -48,7 +50,10 @@ function(ToolchainLibraryFinder)
 
     # Setup and export our variables
     set(required_vars ${required_vars} "${PACKAGE_NAME}_LIBRARY")
-    set(${PACKAGE_NAME}_LIBRARIES ${${PACKAGE_NAME}_LIBRARY} PARENT_SCOPE)
+    set(${PACKAGE_NAME}_LIBRARIES
+        ${${PACKAGE_NAME}_LIBRARY}
+        PARENT_SCOPE
+    )
     mark_as_advanced(${PACKAGE_NAME}_LIBRARY ${PACKAGE_NAME}_LIBRARIES)
 
   endif(PACKAGE_LIBRARY)
@@ -64,7 +69,10 @@ function(ToolchainLibraryFinder)
 
     # Setup and export our variables
     set(required_vars ${required_vars} "${PACKAGE_NAME}_BINARY")
-    set(${PACKAGE_NAME}_BINARY ${${PACKAGE_NAME}_BINARY} PARENT_SCOPE)
+    set(${PACKAGE_NAME}_BINARY
+        ${${PACKAGE_NAME}_BINARY}
+        PARENT_SCOPE
+    )
     mark_as_advanced(${PACKAGE_NAME}_BINARY)
 
   endif(PACKAGE_BINARY)
@@ -80,8 +88,11 @@ function(ToolchainLibraryFinder)
 
     # Execute our binary to get a version string
     if(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
-      exec_program(${${PACKAGE_NAME}_BINARY} ARGS ${PACKAGE_VERSION_BINARY_ARGUMENTS} OUTPUT_VARIABLE
-                   full_version_string)
+      exec_program(
+        ${${PACKAGE_NAME}_BINARY} ARGS
+        ${PACKAGE_VERSION_BINARY_ARGUMENTS} OUTPUT_VARIABLE
+        full_version_string
+      )
     endif(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
 
     # Build up our version string
@@ -107,6 +118,9 @@ function(ToolchainLibraryFinder)
   )
 
   # Export our found variable to parent scope
-  set(${PACKAGE_NAME}_FOUND ${PACKAGE_NAME}_FOUND PARENT_SCOPE)
+  set(${PACKAGE_NAME}_FOUND
+      ${PACKAGE_NAME}_FOUND
+      PARENT_SCOPE
+  )
 
 endfunction(ToolchainLibraryFinder)

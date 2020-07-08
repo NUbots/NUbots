@@ -23,6 +23,9 @@
 #include <Eigen/Core>
 #include <nuclear>
 
+#include "VirtualBall.h"
+#include "VirtualGoalPost.h"
+
 #include "extension/Configuration.h"
 
 #include "message/motion/KickCommand.h"
@@ -32,9 +35,6 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Transform2D.h"
-
-#include "VirtualBall.h"
-#include "VirtualGoalPost.h"
 
 namespace module {
 namespace support {
@@ -109,7 +109,7 @@ namespace support {
             bool blind_robot          = false;
             bool auto_start_behaviour = true;
 
-            Eigen::Vector4d vision_error(0.01, 0.017, 0.017, 0.0);
+            Eigen::Vector4d vision_error = Eigen::Vector4d(0.01, 0.017, 0.017, 0.0);
 
         } cfg_;
 

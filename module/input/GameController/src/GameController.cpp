@@ -18,8 +18,11 @@
  */
 
 #include "GameController.h"
+
 #include <atomic>
+
 #include "extension/Configuration.h"
+
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/GlobalConfig.h"
 
@@ -96,7 +99,7 @@ namespace input {
                                           try {
                                               process(gameState, packet, newPacket);
                                           }
-                                          catch (std::runtime_error err) {
+                                          catch (std::runtime_error& err) {
                                               log(err.what());
                                           }
 

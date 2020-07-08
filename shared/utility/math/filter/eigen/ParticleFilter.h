@@ -37,43 +37,55 @@ namespace math {
             // The model
             Model model;
 
+            using StateVec = Eigen::Matrix<Scalar, Model::size, 1>;
+            using StateMat = Eigen::Matrix<Scalar, Model::size, Model::size>;
+
         private:
             // Our random number generator
             std::mt19937 rng;
             std::normal_distribution<Scalar> norm;
 
             // Dimension types for vectors and square matricies
-            using StateVec     = Eigen::Matrix<Scalar, Model::size, 1>;
-            using StateMat     = Eigen::Matrix<Scalar, Model::size, Model::size>;
             using ParticleList = Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic>;
 
             ParticleList sample_particles(const StateVec& mean, const StateMat& covariance, const int& n_particles) {
+                // Sample single gaussian (represented by a gaussian mixture model of size 1)
 
-                // Try to solve with cholesky and if that fails, solve with SelfAdjointEigenSolver
-                StateMat transform;
-                Eigen::LLT<StateMat> cholesky(covariance);
-                if (cholesky.info() == Eigen::Success) {  //
-                    transform = cholesky.matrixL();
-                }
-                else {
-                    Eigen::SelfAdjointEigenSolver<StateMat> solver(covariance);
-                    if (solver.info() == Eigen::Success) {
-                        transform = solver.eigenvectors() * solver.eigenvalues().cwiseMax(0).cwiseSqrt().asDiagonal();
-                    }
-                    else {
-                        throw std::runtime_error("Oh no!");
-                    }
-                }
+                // Implementation based on the work presented in
+                // Conrad Sanderson and Ryan Curtin.
+                // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and Expectation
+                // Maximisation. International Conference on Signal Processing and Communication Systems, 2017.
 
-                // Random normal distribution for each point
-                ParticleList output = ParticleList::Zero(Model::size, n_particles);
-                for (int j = 0; j < output.cols(); ++j) {
-                    for (int i = 0; i < output.rows(); ++i) {
-                        output(i, j) = norm(rng);
-                    }
+                ParticleList new_particles =
+                    ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
+
+                const StateMat sqrt_covariance = covariance.cwiseSqrt();
+
+                for (int i = 0; i < n_particles; ++i) {
+                    new_particles.col(i) = new_particles.col(i).cwiseProduct(sqrt_covariance.col(0)) + mean;
                 }
 
-                return (transform * output).colwise() + mean;
+                return new_particles;
+            }
+
+            ParticleList sample_particles(const StateVec& mean, const StateVec& covariance, const int& n_particles) {
+                // Sample single gaussian (represented by a gaussian mixture model of size 1)
+
+                // Implementation based on the work presented in
+                // Conrad Sanderson and Ryan Curtin.
+                // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and Expectation
+                // Maximisation. International Conference on Signal Processing and Communication Systems, 2017.
+
+                ParticleList new_particles =
+                    ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
+
+                const StateVec sqrt_covariance = covariance.cwiseSqrt();
+
+                for (int i = 0; i < n_particles; ++i) {
+                    new_particles.col(i) = new_particles.col(i).cwiseProduct(sqrt_covariance) + mean;
+                }
+
+                return new_particles;
             }
 
         public:
@@ -95,15 +107,14 @@ namespace math {
             }
 
             template <typename... Args>
-            void time(const double& dt, const Args&... params) {
-
+            void time(const Scalar& dt, const Args&... params) {
                 // Time update our particles
                 for (unsigned int i = 0; i < particles.cols(); ++i) {
                     particles.col(i) = model.time(particles.col(i), dt, params...);
                 }
 
                 // Perturb them by noise
-                particles += sample_particles(StateVec::Zero(), model.noise(dt), particles.cols());
+                particles += sample_particles(StateVec::Zero(), StateVec(model.noise(dt).diagonal()), particles.cols());
 
                 // Limit the state of each particle to ensure they are still valid
                 for (unsigned int i = 0; i < particles.cols(); i++) {
@@ -116,14 +127,24 @@ namespace math {
                                       const Eigen::Matrix<MeasurementScalar, S, S, MArgs...>& measurement_variance,
                                       const Args&... params) {
 
+                ParticleList candidate_particles =
+                    ParticleList::Zero(Model::size, particles.cols() + model.getRogueCount());
+                candidate_particles.leftCols(particles.cols()) = particles;
+
+                // Resample some rogues
+                for (int i = 0; i < model.getRogueCount(); ++i) {
+                    candidate_particles.col(i + particles.cols()) =
+                        particles.col(i) + model.getRogueRange().cwiseProduct(StateVec::Random() * 0.5);
+                }
+
                 Eigen::Matrix<MeasurementScalar, S, Eigen::Dynamic> differences(S, particles.cols());
-                for (int i = 0; i < particles.cols(); ++i) {
+                for (int i = 0; i < candidate_particles.cols(); ++i) {
                     differences.col(i) = model.difference(model.predict(particles.col(i), params...), measurement);
                 }
 
                 // Calculate log probabilities
                 Eigen::Matrix<MeasurementScalar, Eigen::Dynamic, 1> logits =
-                    -(differences.array() * (measurement_variance.inverse() * differences).array()).colwise().sum();
+                    -differences.cwiseProduct(measurement_variance.inverse() * differences).colwise().sum();
 
                 // Subtract the max log prob for numerical stability and then exponentiate
                 logits = Eigen::exp(logits.array() - logits.maxCoeff());
@@ -131,22 +152,22 @@ namespace math {
                 // Resample
                 std::discrete_distribution<> multinomial(logits.data(), logits.data() + logits.size());
                 for (unsigned int i = 0; i < particles.cols(); i++) {
-                    particles.col(i) = particles.col(multinomial(rng));
+                    particles.col(i) = model.limit(candidate_particles.col(multinomial(rng)));
                 }
                 return logits.mean();
             }
 
+            // Take the mean of all particles, pay no attention to the type of the data
             StateVec get() const {
-                // TODO take the mean, but that'll explode quaternions
                 return particles.rowwise().mean();
             }
 
             StateMat getCovariance() const {
-                // return arma::cov(particles.t());
-                return StateMat();
+                auto mean_centered = particles.transpose().rowwise() - particles.transpose().colwise().mean();
+                return (mean_centered.transpose() * mean_centered) / (particles.transpose().rows() - 1);
             }
 
-            ParticleList getParticles() const {
+            const ParticleList& getParticles() const {
                 return particles;
             }
 

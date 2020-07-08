@@ -17,9 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include <nuclear>
-
 #include "PS3Walk.h"
+
+#include <nuclear>
 
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/ServoCommand.h"

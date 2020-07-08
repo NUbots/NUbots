@@ -21,10 +21,10 @@
 #define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 
 #include <nuclear>
-
 #include <yaml-cpp/yaml.h>
 
 #include "darwin/Darwin.h"
+
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {

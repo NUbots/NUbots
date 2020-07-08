@@ -51,7 +51,7 @@ namespace vision {
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return idx == indices.size()
+                    return idx == int(indices.size())
                            || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
                 },
                 {4, 5});
@@ -77,8 +77,11 @@ namespace vision {
             //    Clusters are merged when they are not overlapping
             //    If the clusters do overlap then we keep the largest one
             std::vector<std::vector<int>> clusters;
-            utility::vision::visualmesh::cluster_points(
-                indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
+            utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                        indices.end(),
+                                                        neighbours,
+                                                        config.cluster_points,
+                                                        clusters);
 
             if (config.debug) {
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));

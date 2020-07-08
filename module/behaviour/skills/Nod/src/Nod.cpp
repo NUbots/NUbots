@@ -18,6 +18,7 @@
  */
 
 #include "Nod.h"
+
 #include <nuclear>
 
 #include "extension/Configuration.h"

@@ -8,12 +8,21 @@ check_formatting() {
     # formatting test will still fail
     set -o pipefail
 
-    # Check the formatting
-    cat "$1" | black -q - | colordiff --color=yes -u "$1" -
+    # Check the imports are sorted correctly
+    isort -c "$1"
 
     # Return 1 on failure, 0 on success
     if [ $? -eq 0 ]; then
-        return 0
+
+         # Check the formatting via black
+        cat "$1" | black -q - | colordiff --color=yes -u "$1" -
+
+        # Return 1 on failure, 0 on success
+        if [ $? -eq 0 ]; then
+            return 0
+        else
+            return 1
+        fi
     else
         return 1
     fi

@@ -23,7 +23,9 @@
 #include <Eigen/Core>
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/support/yaml_expression.h"
 
@@ -103,7 +105,7 @@ namespace platform {
                 }
 
                 // Run the neural network
-                for (int i = 0; i < layers.size(); ++i) {
+                for (size_t i = 0; i < layers.size(); ++i) {
 
                     // Weights and bias
                     logits = logits.transpose() * layers[i].first + layers[i].second.transpose();

@@ -18,9 +18,9 @@
 #ifndef EXTENSION_CONFIGURATION_H
 #define EXTENSION_CONFIGURATION_H
 
-#include <yaml-cpp/yaml.h>
 #include <cstdlib>
 #include <nuclear>
+#include <yaml-cpp/yaml.h>
 
 #include "FileWatch.h"
 
@@ -130,8 +130,9 @@ struct Configuration {
                     case YAML::NodeType::Null:
                     case YAML::NodeType::Undefined:
                     default: {
-                        NUClear::log<NUClear::WARN>(
-                            "Unsetting key", "'" + key + "'", "in YAML file. Is this what you intended?");
+                        NUClear::log<NUClear::WARN>("Unsetting key",
+                                                    "'" + key + "'",
+                                                    "in YAML file. Is this what you intended?");
                         ret[key] = it->second;
                         break;
                     }
@@ -207,8 +208,7 @@ namespace dsl {
         struct DSLProxy<::extension::Configuration> {
             template <typename DSL>
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
-                auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED | ::extension::FileWatch::CREATED
-                             | ::extension::FileWatch::UPDATED | ::extension::FileWatch::MOVED_TO;
+                auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
                 char hostname[255];

@@ -1,5 +1,7 @@
 #include "Gazebo.h"
 
+#include "clock/clock.hpp"
+
 #include "extension/Configuration.h"
 
 #include "message/motion/ServoTarget.h"
@@ -10,8 +12,6 @@
 #include "message/platform/gazebo/ServoTargets.h"
 #include "message/platform/gazebo/Simulation.h"
 #include "message/platform/gazebo/Torso.h"
-
-#include "utility/clock/CustomClock.h"
 
 namespace module {
 namespace platform {
@@ -46,8 +46,6 @@ namespace platform {
             msg->type = Command::Type::RESET_TIME;
             emit<Scope::NETWORK>(msg, event.name, false);
         });
-
-        on<Network<Ball>>().then([this](const NetworkSource& network_source, const Ball& simulation) {});
 
         on<Network<Simulation>>().then([this](const NetworkSource& network_source, const Simulation& simulation) {
             // Only listen to our target simulation

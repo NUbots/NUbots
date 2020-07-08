@@ -60,12 +60,12 @@ namespace vision {
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
-            "Visual Mesh", [this](const GreenHorizon& horizon, const FieldDescription& field) {
+            "Visual Mesh",
+            [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
-                const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -73,8 +73,11 @@ namespace vision {
 
                 // Partition the indices such that we only have the ball points that dont have ball surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
-                    indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == indices.size() || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
+                    indices.begin(),
+                    indices.end(),
+                    neighbours,
+                    [&](const int& idx) {
+                        return idx == int(indices.size()) || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -91,8 +94,11 @@ namespace vision {
                 //    e) Delete all partitions smaller than a given threshold
                 // 2) Discard all clusters are entirely above the green horizon
                 std::vector<std::vector<int>> clusters;
-                utility::vision::visualmesh::cluster_points(
-                    indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
+                utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                            indices.end(),
+                                                            neighbours,
+                                                            config.cluster_points,
+                                                            clusters);
 
                 if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));

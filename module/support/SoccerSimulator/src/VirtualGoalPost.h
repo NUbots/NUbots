@@ -33,16 +33,30 @@ namespace support {
 
     class VirtualGoalPost {
     private:
-        Eigen::Vector2d getCamRay(const Eigen::Vector3d& norm1,
-                                  const Eigen::Vector3d& norm2,
-                                  const message::input::Image::Lens& lens,
-                                  const Eigen::Matrix<unsigned int, 2, 1>& dimensions);
+        template <typename Scalar>
+        Eigen::Matrix<Scalar, 2, 1> getCamRay(const Eigen::Matrix<Scalar, 3, 1>& norm1,
+                                              const Eigen::Matrix<Scalar, 3, 1>& norm2,
+                                              const message::input::Image::Lens& lens,
+                                              const Eigen::Matrix<unsigned int, 2, 1>& dimensions);
+
+        Eigen::Affine3d getFieldToCam(const Eigen::Affine2d& Tft, const Eigen::Affine3d& Htc);
+        template <typename Scalar>
+        Eigen::Matrix<Scalar, 2, 1> projectCamSpaceToScreen(const Eigen::Matrix<Scalar, 3, 1>& point,
+                                                            const message::input::Image::Lens& cam);
+        template <typename Scalar>
+        Eigen::Matrix<Scalar, 2, 1> screenToImage(const Eigen::Matrix<Scalar, 2, 1>& screen,
+                                                  const Eigen::Matrix<unsigned int, 2, 1>& imageSize);
+        Eigen::Matrix<double, 3, 4> cameraSpaceGoalProjection(const Eigen::Affine2d& robotPose,
+                                                              const Eigen::Vector3d& goalLocation,
+                                                              const message::support::FieldDescription& field,
+                                                              const Eigen::Affine3d& Hgc,
+                                                              const bool& failIfNegative = true);
 
     public:
-        VirtualGoalPost::VirtualGoalPost(const Eigen::Vector3d& position,
-                                         float height,
-                                         Goal::Side side,
-                                         Goal::Team team)
+        VirtualGoalPost(const Eigen::Vector3d& position,
+                        const float& height,
+                        const message::vision::Goal::Side& side,
+                        const message::vision::Goal::Team& team)
             : position(position), height(height), side(side), team(team) {}
 
         Eigen::Vector3d position         = Eigen::Vector3d::Zero();

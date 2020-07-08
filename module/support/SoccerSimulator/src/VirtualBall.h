@@ -28,16 +28,19 @@
 #include "message/input/Sensors.h"
 #include "message/vision/Ball.h"
 
-#include "utility/math/matrix/Transform2D.h"
-
 namespace module {
 namespace support {
 
     class VirtualBall {
     public:
-        VirtualBall();
+        VirtualBall()
+            : position(Eigen::Vector3d::Zero()), velocity(Eigen::Vector3d::Zero()), diameter(0.1), rd(rand()) {}
 
-        VirtualBall(const Eigen::Vector2d& position, float diameter);
+        VirtualBall(const Eigen::Vector2d& position, float diameter)
+            : position(position.x(), position.y(), diameter * 0.5)
+            , velocity(Eigen::Vector3d::Zero())
+            , diameter(diameter)
+            , rd(rand()) {}
 
         Eigen::Vector3d position;
         Eigen::Vector3d velocity;
@@ -51,6 +54,12 @@ namespace support {
                                       const Eigen::Affine2d& robotPose,
                                       const message::input::Sensors& sensors,
                                       const Eigen::Vector4d& error);
+
+    private:
+        Eigen::Affine3d getFieldToCam(const Eigen::Affine2d& Tft, const Eigen::Affine3d& Htc);
+        Eigen::Vector2d projectCamSpaceToScreen(const Eigen::Vector3d& point, const message::input::Image::Lens& cam);
+        Eigen::Vector2i screenToImage(const Eigen::Vector2d& screen,
+                                      const Eigen::Matrix<unsigned int, 2, 1>& imageSize);
     };
 }  // namespace support
 }  // namespace module

@@ -20,12 +20,11 @@
 #ifndef UTILITY_SUPPORT_EIGEN_ARMADILLO_H
 #define UTILITY_SUPPORT_EIGEN_ARMADILLO_H
 
-#include <armadillo>
-#include <type_traits>
-
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
+#include <armadillo>
+#include <type_traits>
 
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -67,8 +66,9 @@ auto convert(const typename arma::Mat<float>::template fixed<4, 4>& amat) {
 }
 template <int... Args>
 auto convert(const typename arma::Mat<float>& amat) {
-    return (Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
-        const_cast<float*>(amat.memptr()), amat.n_rows, amat.n_cols));
+    return (Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Args...>>(const_cast<float*>(amat.memptr()),
+                                                                                      amat.n_rows,
+                                                                                      amat.n_cols));
 }
 // DOUBLE
 template <int... Args>
@@ -118,8 +118,10 @@ auto convert(const utility::math::matrix::Transform3D& amat) {
 }
 template <int... Args>
 auto convert(const typename arma::Mat<double>& amat) {
-    return (Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
-        const_cast<double*>(amat.memptr()), amat.n_rows, amat.n_cols));
+    return (
+        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Args...>>(const_cast<double*>(amat.memptr()),
+                                                                                   amat.n_rows,
+                                                                                   amat.n_cols));
 }
 // INT
 template <int... Args>
@@ -152,8 +154,9 @@ auto convert(const typename arma::Mat<int>::template fixed<4, 4>& amat) {
 }
 template <int... Args>
 auto convert(const typename arma::Mat<int>& amat) {
-    return (Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
-        const_cast<int*>(amat.memptr()), amat.n_rows, amat.n_cols));
+    return (Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Args...>>(const_cast<int*>(amat.memptr()),
+                                                                                    amat.n_rows,
+                                                                                    amat.n_cols));
 }
 // UINT
 template <int... Args>
@@ -186,8 +189,9 @@ auto convert(const typename arma::Mat<uint>::template fixed<4, 4>& amat) {
 }
 template <int... Args>
 auto convert(const typename arma::Mat<uint>& amat) {
-    return (Eigen::Map<Eigen::Matrix<uint, Eigen::Dynamic, Eigen::Dynamic, Args...>>(
-        const_cast<uint*>(amat.memptr()), amat.n_rows, amat.n_cols));
+    return (Eigen::Map<Eigen::Matrix<uint, Eigen::Dynamic, Eigen::Dynamic, Args...>>(const_cast<uint*>(amat.memptr()),
+                                                                                     amat.n_rows,
+                                                                                     amat.n_cols));
 }
 
 template <typename Scalar, int O, int MR, int MC>
@@ -254,8 +258,9 @@ auto convert(const typename Eigen::Transform<Scalar, Dim, Eigen::Affine, Options
 template <typename Scalar, int O, int MR, int MC>
 auto convert(const typename Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>& emat) {
     typename arma::Mat<Scalar> amat(emat.rows(), emat.cols());
-    Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>>(
-        amat.memptr(), emat.rows(), emat.cols()) = emat;
+    Eigen::Map<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, O, MR, MC>>(amat.memptr(),
+                                                                                 emat.rows(),
+                                                                                 emat.cols()) = emat;
     return (amat);
 }
 

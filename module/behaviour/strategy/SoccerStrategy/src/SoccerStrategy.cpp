@@ -29,6 +29,7 @@
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/ResetRobotHypotheses.h"
+#include "message/motion/BodySide.h"
 #include "message/motion/GetupCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/support/FieldDescription.h"
@@ -65,6 +66,7 @@ namespace behaviour {
         using message::localisation::Ball;
         using message::localisation::Field;
         using message::localisation::ResetRobotHypotheses;
+        using message::motion::BodySide;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
         using message::platform::darwin::ButtonLeftDown;
@@ -249,7 +251,7 @@ namespace behaviour {
                             emit(std::make_unique<Behaviour::State>(currentState));
                         }
                     }
-                    catch (std::runtime_error err) {
+                    catch (std::runtime_error& err) {
                         log(err.what());
                         log("Runtime exception.");
                     }
@@ -393,11 +395,12 @@ namespace behaviour {
 
         void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const Eigen::Vector2d& position) {
             emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(utility::math::transform::lookAt(
-                position, Eigen::Vector2d(fieldDescription.dimensions.field_length * 0.5, 0.0)))));
+                position,
+                Eigen::Vector2d(fieldDescription.dimensions.field_length * 0.5, 0.0)))));
         }
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
-            bool feetOffGround = !sensors.left_foot_down && !sensors.right_foot_down;
+            bool feetOffGround = !sensors.feet[BodySide::LEFT].down && !sensors.feet[BodySide::RIGHT].down;
             return false && feetOffGround && !isGettingUp && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
         }
 

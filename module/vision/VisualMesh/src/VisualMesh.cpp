@@ -2,11 +2,11 @@
 
 #include <Eigen/Geometry>
 
-#include "extension/Configuration.h"
-
 #include "geometry/Circle.hpp"
 #include "geometry/Cylinder.hpp"
 #include "geometry/Sphere.hpp"
+
+#include "extension/Configuration.h"
 
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
@@ -48,7 +48,7 @@ namespace vision {
                     auto& net_layer = net_conv.back();
 
                     // Copy across our weights
-                    for (int i = 0; i < layer["weights"].size(); i++) {
+                    for (unsigned int i = 0; i < layer["weights"].size(); i++) {
                         const auto& l = layer["weights"][i];
 
                         net_layer.first.emplace_back();
@@ -120,9 +120,9 @@ namespace vision {
             // Build our lens object
             visualmesh::Lens<float> lens;
             lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
-            lens.focal_length = img.lens.focal_length;
-            lens.fov          = img.lens.fov[0];
-            lens.centre       = {img.lens.centre[0], img.lens.centre[1]};
+            lens.focal_length = img.lens.focal_length * img.dimensions[0];
+            lens.fov          = img.lens.fov;
+            lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
             switch (img.lens.projection.value) {
                 case Image::Lens::Projection::EQUIDISTANT: lens.projection = visualmesh::EQUIDISTANT; break;
                 case Image::Lens::Projection::EQUISOLID: lens.projection = visualmesh::EQUISOLID; break;
@@ -152,10 +152,14 @@ namespace vision {
             }
 
             msg->coordinates = Eigen::Map<const Eigen::Matrix<float, 2, Eigen::Dynamic>>(
-                reinterpret_cast<float*>(results.pixel_coordinates.data()), 2, results.pixel_coordinates.size());
+                reinterpret_cast<float*>(results.pixel_coordinates.data()),
+                2,
+                results.pixel_coordinates.size());
             msg->indices       = std::move(results.global_indices);
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, 6, Eigen::Dynamic>>(
-                reinterpret_cast<int*>(results.neighbourhood.data()), 6, results.neighbourhood.size());
+                reinterpret_cast<int*>(results.neighbourhood.data()),
+                6,
+                results.neighbourhood.size());
             msg->classifications = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>>(
                 results.classifications.data(),
                 results.classifications.size() / results.neighbourhood.size(),

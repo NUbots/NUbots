@@ -14,11 +14,12 @@
 #include "Joystick.h"
 
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "unistd.h"
 
 Joystick::Joystick() : _fd(-1), path("/dev/input/js0") {
@@ -37,7 +38,8 @@ void Joystick::openPath(std::string devicePath) {
 bool Joystick::sample(JoystickEvent* event) {
     int bytes = read(_fd, event, sizeof(*event));
 
-    if (bytes == -1) return false;
+    if (bytes == -1)
+        return false;
 
     // NOTE if this condition is not met, we're probably out of sync and this
     // Joystick instance is likely unusable

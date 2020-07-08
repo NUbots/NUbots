@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import os
+import sys
 
 # Get our input and output from the list
 input_path = sys.argv[1]

@@ -18,12 +18,12 @@
 #ifndef EXTENSION_SCRIPT_H
 #define EXTENSION_SCRIPT_H
 
-#include <yaml-cpp/yaml.h>
 #include <cstdlib>
 #include <nuclear>
 #include <regex>
 #include <string>
 #include <system_error>
+#include <yaml-cpp/yaml.h>
 
 #include "FileWatch.h"
 
@@ -48,6 +48,25 @@ struct Script {
                 : id(servo), position(pos), gain(gain), torque(torque) {}
             Target(const Target& other)
                 : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
+            Target(Target&& other)
+                : id(std::move(other.id))
+                , position(std::move(other.position))
+                , gain(std::move(other.gain))
+                , torque(std::move(other.torque)) {}
+            Target& operator=(const Target& other) {
+                id       = other.id;
+                position = other.position;
+                gain     = other.gain;
+                torque   = other.torque;
+                return *this;
+            }
+            Target& operator=(Target&& other) {
+                id       = std::move(other.id);
+                position = std::move(other.position);
+                gain     = std::move(other.gain);
+                torque   = std::move(other.torque);
+                return *this;
+            }
 
             ServoID id;
             float position;
@@ -130,8 +149,9 @@ struct Script {
         }
 
         else {
-            throw std::system_error(
-                -1, std::system_category(), ("Failed to extract platform name from '" + hostname + "'."));
+            throw std::system_error(-1,
+                                    std::system_category(),
+                                    ("Failed to extract platform name from '" + hostname + "'."));
         }
     }
 
@@ -285,8 +305,7 @@ namespace dsl {
         struct DSLProxy<::extension::Script> {
             template <typename DSL>
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
-                auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED | ::extension::FileWatch::CREATED
-                             | ::extension::FileWatch::UPDATED | ::extension::FileWatch::MOVED_TO;
+                auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 std::string hostname(::extension::Script::getHostname()),
                     platform(::extension::Script::getPlatform(hostname));

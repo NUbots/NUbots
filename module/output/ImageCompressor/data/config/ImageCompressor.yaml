@@ -1,4 +1,14 @@
-# Quality of compressed image
-quality: 75
-# Method of which to perform debayering
-method: SIMPLE
+# Log level of DEBUG will print out compression rates
+log_level: INFO
+
+# The settings for each compressor
+# These compressors will be tried in order per camera_id until a free compressor is found
+compressors:
+  - name: vaapi
+    concurrent: 2
+    quality: 90
+    device: /dev/dri/renderD128
+    driver: iHD
+  - name: turbojpeg
+    concurrent: 2
+    quality: 90

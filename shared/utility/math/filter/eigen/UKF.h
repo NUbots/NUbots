@@ -83,7 +83,9 @@ namespace math {
                 points.col(0) = mean;
 
                 // Get our Cholesky decomposition
-                Eigen::LLT<StateMat> cholesky(sigma_weight * covariance);
+                // Impose positive semi-definiteness on the covariance matrix
+                Eigen::LLT<StateMat> cholesky(sigma_weight
+                                              * covariance.unaryExpr([](const Scalar& c) { return std::abs(c); }));
                 if (cholesky.info() == Eigen::Success) {
                     // Put our values in either end of the matrix
                     StateMat chol = cholesky.matrixL().toDenseMatrix();
@@ -93,7 +95,19 @@ namespace math {
                     }
                 }
                 else {
-                    throw std::runtime_error("Cholesky decomposition failed");
+                    switch (cholesky.info()) {
+                        case Eigen::NumericalIssue:
+                            throw std::runtime_error(
+                                "Cholesky decomposition failed. The provided data did not satisfy the prerequisites.");
+                        case Eigen::NoConvergence:
+                            throw std::runtime_error(
+                                "Cholesky decomposition failed. Iterative procedure did not converge.");
+                        case Eigen::InvalidInput:
+                            throw std::runtime_error(
+                                "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
+                                "improperly called. When assertions are enabled, such errors trigger an assert.");
+                        default: throw std::runtime_error("Cholesky decomposition failed. Some other reason.");
+                    }
                 }
 
                 return points;
@@ -101,7 +115,6 @@ namespace math {
 
             /**
              * @brief Calculate the the mean given a set of sigma points.
-             *           This version
              *
              * @param mean          the mean to set
              * @param sigma_points  the sigma points to calculate the mean from
@@ -120,6 +133,16 @@ namespace math {
                 const Eigen::Matrix<T2, NUM_SIGMA_POINTS, 1>& weights) {
 
                 Eigen::Matrix<T1, S, NUM_SIGMA_POINTS> mean_centred = sigma_points.colwise() - mean;
+                return mean_centred * weights.template cast<T1>().asDiagonal() * mean_centred.transpose();
+            }
+
+            template <typename T1, typename T2, int S>
+            static Eigen::Matrix<T1, S, S> covariance_from_sigmas(
+                const Eigen::Matrix<T1, S, NUM_SIGMA_POINTS>& sigma_points,
+                const T1& mean,
+                const Eigen::Matrix<T2, NUM_SIGMA_POINTS, 1>& weights) {
+
+                Eigen::Matrix<T1, S, NUM_SIGMA_POINTS> mean_centred = (sigma_points.array() - mean).matrix();
                 return mean_centred * weights.template cast<T1>().asDiagonal() * mean_centred.transpose();
             }
 
@@ -173,8 +196,7 @@ namespace math {
             }
 
             template <typename... Args>
-            void time(Scalar dt, const Args&... params) {
-
+            void time(const Scalar& dt, const Args&... params) {
                 // Generate our sigma points
                 sigma_points = generate_sigma_points(mean, covariance, covariance_sigma_weight);
 
@@ -253,9 +275,10 @@ namespace math {
                             predicted_covariance + measurement_variance;
 
                         MeasurementScalar likelihood_exponent =
-                            ((innovation.transpose()
-                              * innovation_variance.llt().solve(Eigen::Matrix<MeasurementScalar, S, S>::Identity()))
-                             * innovation);
+                            (innovation.transpose()
+                             * innovation_variance.llt().solve(Eigen::Matrix<MeasurementScalar, S, S>::Identity())
+                             * innovation)
+                                .x();
 
                         MeasurementScalar loglikelihood =
                             0.5
@@ -273,8 +296,6 @@ namespace math {
             const StateMat& getCovariance() const {
                 return covariance;
             }
-
-            EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         };
     }  // namespace filter
 }  // namespace math

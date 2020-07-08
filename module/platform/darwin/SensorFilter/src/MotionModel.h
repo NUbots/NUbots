@@ -24,6 +24,8 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "utility/math/quaternion.h"
+
 namespace module {
 namespace platform {
     namespace darwin {
@@ -49,7 +51,7 @@ namespace platform {
                 PZ = 2,
 
                 // Our velocity in global space
-                // rTWw
+                // vTw
                 VX = 3,
                 VY = 4,
                 VZ = 5,
@@ -61,7 +63,7 @@ namespace platform {
                 QZ = 8,
                 QW = 9,
 
-                // Our rotational velocity in robot space
+                // Our rotational velocity in torso space
                 // Gyroscope measures the angular velocity of the torso in torso space
                 // omegaTTt
                 WX = 10,
@@ -78,19 +80,19 @@ namespace platform {
             // The size of our state
             static constexpr size_t size = 16;
 
-            using State      = Eigen::Matrix<Scalar, size, 1>;
-            using Covariance = Eigen::Matrix<Scalar, size, size>;
+            using StateVec = Eigen::Matrix<Scalar, size, 1>;
+            using StateMat = Eigen::Matrix<Scalar, size, size>;
 
-            // Our static process noise matrix
-            State process_noise;
+            // Our static process noise diagonal vector
+            StateVec process_noise;
 
             // The velocity decay for x/y/z velocities (1.0 = no decay)
             Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-            State time(const State& state, Scalar deltaT) {
+            StateVec time(const StateVec& state, Scalar deltaT) {
 
                 // Prepare our new state
-                State newState = state;
+                StateVec newState = state;
 
                 // ********************************
                 // UPDATE LINEAR POSITION/VELOCITY
@@ -103,7 +105,6 @@ namespace platform {
                 newState.template segment<3>(VX) =
                     newState.template segment<3>(VX).cwiseProduct(timeUpdateVelocityDecay);
 
-
                 // ********************************
                 // UPDATE ANGULAR POSITION/VELOCITY
                 // ********************************
@@ -112,57 +113,79 @@ namespace platform {
                 Eigen::Quaternion<Scalar> Rwt(state.template segment<4>(QX));
 
                 // Apply our rotational velocity to our orientation
-                Eigen::Quaternion<Scalar> qGyro;
-                qGyro.vec() = state.template segment<3>(WX) * deltaT * Scalar(0.5);
-                qGyro.w()   = Scalar(1.0) - Scalar(0.5) * qGyro.vec().squaredNorm();
-                qGyro       = Rwt * qGyro;
-
-                newState(QW)                     = qGyro.w();
-                newState.template segment<3>(QX) = qGyro.vec();
+                // https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
+                // Quaternions are stored internally as (x, y, z, w)
+                const Scalar t_2 = deltaT * Scalar(0.5);
+                newState.template segment<4>(QX) =
+                    Rwt.coeffs()
+                    + t_2 * (Eigen::Quaternion<Scalar>(0.0, state[WX], state[WY], state[WZ]) * Rwt).coeffs();
 
                 return newState;
             }
 
-            auto predict(const State& state, const MeasurementType::ACCELEROMETER&) {
-
+            Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
                 // Extract our rotation quaternion
-                Eigen::Quaternion<Scalar> Rwt(state.template segment<4>(QX));
+                Eigen::Matrix<Scalar, 3, 3> Rtw =
+                    Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).toRotationMatrix().transpose();
 
                 // Make a world gravity vector and rotate it into torso space
                 // Where is world gravity with respest to robot orientation?
-                return Rwt.inverse()._transformVector(Eigen::Vector3d(0.0, 0.0, G));
+                // Multiplying a matrix with (0, 0, G) is equivalent to taking the
+                // third column of the matrix and multiplying it by G
+                return Rtw.template rightCols<1>() * G;
             }
 
-            auto predict(const State& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
                 // Add predicted gyroscope bias to our predicted gyroscope
                 return state.template segment<3>(WX) + state.template segment<3>(BX);
             }
 
-            auto predict(const State& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
                 return state.template segment<3>(PX);
             }
 
-            auto predict(const State& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
                 return state.template segment<4>(QX);
             }
 
-            template <typename T, typename U>
-            auto difference(const T& a, const U& b) {
+            // This function is called to determine the difference between position, velocity, and acceleration
+            // measurements/predictions
+            Eigen::Matrix<Scalar, 3, 1> difference(const Eigen::Matrix<Scalar, 3, 1>& a,
+                                                   const Eigen::Matrix<Scalar, 3, 1>& b) {
                 return a - b;
             }
 
-            State limit(const State& state) {
-                State newState                   = state;
-                newState.template segment<4>(QX) = newState.template segment<4>(QX).normalized();
+            // This function is called to determine the difference between quaternion measurements/predictions
+            Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
+                                                   const Eigen::Matrix<Scalar, 4, 1>& b) {
+                // Find the rotation needed to get from orientation a to orientation b
+                Eigen::Quaternion<Scalar> diff =
+                    utility::math::quaternion::difference(Eigen::Quaternion<Scalar>(a), Eigen::Quaternion<Scalar>(b));
+
+                // Take the difference with the identity rotation (1, 0, 0, 0)
+                // If a and b represent very similar orientations, then the real part will be very close to one and the
+                // imaginary part will be very close to (0, 0, 0)
+                diff.w() -= Scalar(1);
+
+                return diff.coeffs();
+            }
+
+            StateVec limit(const StateVec& state) {
+                StateVec newState = state;
+
+                // Make sure the quaternion remains normalised
+                newState.template segment<4>(QX) =
+                    Eigen::Quaternion<Scalar>(newState.template segment<4>(QX)).normalized().coeffs();
+
                 return newState;
             }
 
-            auto noise(const Scalar& dt) {
+            StateMat noise(const Scalar& deltaT) {
                 // Return our process noise matrix
-                return process_noise.asDiagonal();
+                return process_noise.asDiagonal() * deltaT;
             }
-        };  // namespace darwin
-    }       // namespace darwin
+        };
+    }  // namespace darwin
 }  // namespace platform
 }  // namespace module
 

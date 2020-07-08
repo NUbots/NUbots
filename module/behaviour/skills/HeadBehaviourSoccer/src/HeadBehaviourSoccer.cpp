@@ -165,7 +165,8 @@ namespace behaviour {
 
 
             on<Trigger<SoccerObjectPriority>, Sync<HeadBehaviourSoccer>>().then(
-                "Head Behaviour Soccer - Set priorities", [this](const SoccerObjectPriority& p) {
+                "Head Behaviour Soccer - Set priorities",
+                [this](const SoccerObjectPriority& p) {
                     ballPriority = p.ball;
                     goalPriority = p.goal;
                     searchType   = p.searchType;
@@ -254,7 +255,7 @@ namespace behaviour {
                               }
                           }
                           else {
-                              Eigen::Matrix4d Htc = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+                              Eigen::Matrix4d Htc = sensors.Htx[ServoID::HEAD_PITCH];
                               headToBodyRotation  = Transform3D(convert(Htc)).rotation();
                               orientation         = Transform3D(convert(sensors.Htw)).rotation().i();
                           }
@@ -279,8 +280,7 @@ namespace behaviour {
                                   getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
                               // If our objects have moved, we need to replan
                               if ((currentCentroid_world - lastCentroid).norm()
-                                  >= fractional_angular_update_threshold
-                                         * std::fmax(image.lens.fov[0], image.lens.fov[1]) / 2.0) {
+                                  >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
                                   objectMoved  = true;
                                   lastCentroid = currentCentroid_world;
                               }
@@ -600,27 +600,23 @@ namespace behaviour {
             Quad<Eigen::Vector2d> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
             std::vector<Eigen::Vector2d> viewPoints;
-            if (lens.fov.norm() == 0) {
+            if (lens.fov == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
-            float view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
+            float view_padding_radians = fractional_view_padding * lens.fov;
             // 1
             Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tr =
-                boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
             // 2
-            padding = {view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d br =
-                boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
+            padding            = {view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(lens.fov, -lens.fov) / 2.0;
             // 3
-            padding = {-view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d bl =
-                boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            padding            = {-view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
             // 4
-            padding = {-view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tl =
-                boundingBox.getBottomRight() - padding + Eigen::Vector2d({-lens.fov[0], lens.fov[1]}) / 2.0;
+            padding            = {-view_padding_radians, view_padding_radians};
+            Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-lens.fov, lens.fov) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<Eigen::Vector2d> searchPoints;
@@ -693,27 +689,23 @@ namespace behaviour {
             Quad<Eigen::Vector2d> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
             std::vector<Eigen::Vector2d> viewPoints;
-            if (lens.fov.norm() == 0) {
+            if (lens.fov == 0) {
                 log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
             }
             // Get points which keep everything on screen with padding
-            double view_padding_radians = fractional_view_padding * std::fmax(lens.fov[0], lens.fov[1]);
+            double view_padding_radians = fractional_view_padding * lens.fov;
             // 1
             Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tr =
-                boundingBox.getBottomLeft() - padding + Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
             // 2
-            padding = {view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d br =
-                boundingBox.getTopLeft() - padding + Eigen::Vector2d({lens.fov[0], -lens.fov[1]}) / 2.0;
+            padding            = {view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(lens.fov, -lens.fov) / 2.0;
             // 3
-            padding = {-view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d bl =
-                boundingBox.getTopRight() - padding - Eigen::Vector2d({lens.fov[0], lens.fov[1]}) / 2.0;
+            padding            = {-view_padding_radians, -view_padding_radians};
+            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
             // 4
-            padding = {-view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tl =
-                boundingBox.getBottomRight() - padding + Eigen::Vector2d({-lens.fov[0], lens.fov[1]}) / 2.0;
+            padding            = {-view_padding_radians, view_padding_radians};
+            Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-lens.fov, lens.fov) / 2.0;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<Eigen::Vector2d> searchPoints;
@@ -772,7 +764,6 @@ namespace behaviour {
             }
             return Quad<Eigen::Vector2d>::getBoundingBox(boundingPoints);
         }
-
 
         bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors) {
             Rotation3D diff     = Transform3D(convert(sensors.Htw)).rotation().i() * lastPlanOrientation;

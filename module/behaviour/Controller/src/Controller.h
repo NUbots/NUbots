@@ -20,11 +20,10 @@
 #ifndef MODULES_BEHAVIOUR_CONTROLLER_H
 #define MODULES_BEHAVIOUR_CONTROLLER_H
 
-#include <nuclear>
-
 #include <array>
 #include <list>
 #include <map>
+#include <nuclear>
 #include <set>
 #include <vector>
 

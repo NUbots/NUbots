@@ -21,9 +21,11 @@
 #define MODULES_LOCALISATION_ROBOTMODEL_H
 
 #include <armadillo>
+
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
+
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 

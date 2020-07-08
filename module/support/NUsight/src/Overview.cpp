@@ -17,6 +17,11 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
+#include "message/support/nusight/Overview.h"
+
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 #include "NUsight.h"
 
 #include <Eigen/Core>
@@ -32,7 +37,6 @@
 #include "message/localisation/Field.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/GlobalConfig.h"
-#include "message/support/nusight/Overview.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
 
@@ -127,15 +131,14 @@ namespace support {
                             }
                         }
 
-                        // if (walk_path) {
-                        //     // Set our walk path plan
-                        //     if (walk_path) {
-                        //         for (const auto& state : walk_path->states) {
-                        //             // Make these positions in field space
-                        //             msg->path_plan.push_back(state);
-                        //         }
-                        //     }
-                        // }
+                        if (walk_path) {
+                            // Set our walk path plan
+                            if (walk_path) {
+                                for (const auto& state : walk_path->states) {
+                                    msg->walk_path_plan.push_back(state);
+                                }
+                            }
+                        }
                     }
 
                     if (kick_plan) {

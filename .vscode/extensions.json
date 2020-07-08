@@ -2,8 +2,7 @@
     "recommendations": [
         "ms-vscode.cpptools",
         "twxs.cmake",
-        "vector-of-bool.cmake-tools",
-        "maddouri.cmake-tools-helper",
+        "ms-vscode.cmake-tools",
         "cheshirekow.cmake-format",
         "ms-azuretools.vscode-docker",
         "galarius.vscode-opencl",

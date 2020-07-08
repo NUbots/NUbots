@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import sys
-import os
 import argparse
+import os
 import pkgutil
 import re
+import sys
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
@@ -72,16 +72,9 @@ except:
 
 if __name__ == "__main__":
 
-    if binary_dir is not None:
-        # Print some information for the user
-        print("b script for", cmake_cache["CMAKE_PROJECT_NAME"])
-        print("\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"])
-        print("\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + "_BINARY_DIR"])
-        print()
-
     # Add our builtin tools to the path and user tools
-    sys.path.append(nuclear_tools_path)
     sys.path.append(user_tools_path)
+    sys.path.append(nuclear_tools_path)
 
     # Root parser information
     command = argparse.ArgumentParser(
@@ -92,45 +85,69 @@ if __name__ == "__main__":
     )
     subcommands.required = True
 
-    # Get all of the packages that are in the build tools
-    modules = list(pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path]))
+    # Look through the various tools to see if we can find one that matches our arguments
+    # If we do we don't need to load all the tools and can just trigger this one directly
+    # This saves importing things we don't need
+    for path in [user_tools_path, nuclear_tools_path]:
+        for dirpath, dnames, fnames in os.walk(path):
+            for f in fnames:
+                if f != "__init__.py" and f.endswith(".py"):
 
-    # First we try to see if sys.argv[1] gives us all the information we need
-    # If it does we only need to load that module directly
-    # Otherwise we load every module so we can build a help for possible tools
-    target_modules = [] if len(sys.argv) < 2 else [m for m in modules if not m[2] and m[1] == sys.argv[1]]
-    modules = target_modules if len(target_modules) > 0 else modules
+                    # Check if this is the tool for the job
+                    components = os.path.relpath(os.path.join(dirpath, f[:-3]), path).split(os.sep)
+                    if sys.argv[1 : len(components) + 1] == components:
 
-    # Our tools dictionary
+                        # Load the module
+                        module = pkgutil.find_loader(".".join(components)).load_module()
+                        if hasattr(module, "register") and hasattr(module, "run"):
+
+                            # Build up the base subcommands to this point
+                            subcommand = subcommands
+                            for c in components[:-1]:
+                                subcommand = subcommand.add_parser(c).add_subparsers(
+                                    dest="{}_command".format(c),
+                                    help="Commands related to working with {} functionality".format(c),
+                                )
+
+                            module.register(subcommand.add_parser(components[-1]))
+                            module.run(**vars(command.parse_args()))
+
+                            # We're done, exit
+                            exit(0)
+
+    # If we reach this point, we couldn't find a tool to use.
+    # In this case we need to look through all the tools so we can register them all.
+    # This will provide a complete help for the function call so the user can try again
     tools = {}
-
-    # Loop through all the modules we have to set them up in the parser
-    for loader, module_name, ispkg in modules:
-
-        # Skip any packages (folders) as these are used to store useful things that are not tools
+    for importer, modname, ispkg in pkgutil.walk_packages([user_tools_path, nuclear_tools_path]):
+        # Tools aren't in packages
         if not ispkg:
 
-            # Get our module, class name and registration function
+            # Load the modules and check it's a tool
+            components = modname.split(".")
             try:
-                module = loader.find_module(module_name).load_module(module_name)
-                tool = getattr(module, "run")
-                register = getattr(module, "register")
+                module = pkgutil.find_loader(modname).load_module()
+                if hasattr(module, "register") and hasattr(module, "run"):
+
+                    subcommand = subcommands
+                    tool = tools
+                    for c in components[:-1]:
+                        if c in tool:
+                            tool, subcommand = tool[c]
+                        else:
+                            subcommand = subcommand.add_parser(c).add_subparsers(
+                                dest="{}_command".format(c),
+                                help="Commands related to working with {} functionality".format(c),
+                            )
+                            subcommand.required = True
+                            tool[c] = ({}, subcommand)
+                            tool = tool[c][0]
+
+                    module.register(subcommand.add_parser(components[-1]))
+            except ModuleNotFoundError as e:
+                print("Could not load the tool '{}': {}".format(modname.replace(".", " "), e))
             except BaseException as e:
-                # Capture the exception in a variable
-                ex = e
+                pass
 
-                # Swallow arguments for failed commands
-                register = lambda command: command.add_argument("_", nargs="*")
-                tool = lambda **kwargs: print("Cannot run this command due to the following error\n", ex)
-
-            # Let the tool register it's arguments
-            register(subcommands.add_parser(module_name))
-
-            # Associate our module_name with this tool
-            tools[module_name] = tool
-
-    # Parse our arguments
-    args = command.parse_args()
-
-    # Pass to our tool
-    tools[args.command](**vars(args))
+    # Given what we know, this will fail here and give the user some help
+    command.parse_args()

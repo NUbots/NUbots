@@ -2,10 +2,9 @@
 #define MESSAGE_CONVERSION_PROTO_TIME_H
 
 #include <chrono>
-#include <nuclear_bits/clock.hpp>
-
 #include <google/protobuf/duration.pb.h>
 #include <google/protobuf/timestamp.pb.h>
+#include <nuclear_bits/clock.hpp>
 
 
 namespace message {

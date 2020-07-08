@@ -58,27 +58,26 @@ namespace localisation {
         });
 
         /* Run Time Update */
-        on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>, With<FieldDescription>, With<Sensors>>().then(
-            "BallLocalisation Time", [this](const FieldDescription& field, const Sensors& sensors) {
-                /* Perform time update */
-                using namespace std::chrono;
-                auto curr_time        = NUClear::clock::now();
-                double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
-                last_time_update_time = curr_time;
-                filter.timeUpdate(seconds);
+        on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>>().then("BallLocalisation Time", [this] {
+            /* Perform time update */
+            using namespace std::chrono;
+            auto curr_time        = NUClear::clock::now();
+            double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+            last_time_update_time = curr_time;
+            filter.timeUpdate(seconds);
 
-                /* Creating ball state vector and covariance matrix for emission */
-                auto ball        = std::make_unique<Ball>();
-                ball->position   = convert(filter.get());
-                ball->covariance = convert(filter.getCovariance());
+            /* Creating ball state vector and covariance matrix for emission */
+            auto ball        = std::make_unique<Ball>();
+            ball->position   = convert(filter.get());
+            ball->covariance = convert(filter.getCovariance());
 
-                if (ball_pos_log) {
-                    emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
-                    log("localisation ball pos = ", filter.get()[0], filter.get()[1]);
-                    log("localisation seconds elapsed = ", seconds);
-                }
-                emit(ball);
-            });
+            if (ball_pos_log) {
+                emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
+                log("localisation ball pos = ", filter.get()[0], filter.get()[1]);
+                log("localisation seconds elapsed = ", seconds);
+            }
+            emit(ball);
+        });
 
         /* To run whenever a ball has been detected */
         on<Trigger<message::vision::Balls>, With<FieldDescription>>().then(

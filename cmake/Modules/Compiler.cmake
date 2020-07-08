@@ -1,17 +1,15 @@
-# We need noncall exceptions so we can throw exceptions from signal handlers This allows us to catch null pointer
-# exceptions
-add_compile_options(
-  -Wall -Wpedantic -Wextra
-  # -Werror
-  # Because Eigen
-  -Wno-int-in-bool-context -fnon-call-exceptions
-)
+# We need noncall exceptions so we can throw exceptions from signal handlers. This allows us to catch null pointer
+# exceptions. no-int-in-bool-context is to silence a warning from Eigen.
+add_compile_options(-Wall -Wpedantic -Wextra -Wno-int-in-bool-context -fnon-call-exceptions)
 
-list(APPEND CMAKE_INSTALL_RPATH toolchain/)
-list(APPEND CMAKE_INSTALL_RPATH /home/darwin/toolchain/)
+# C++17 allows eigen to not need to worry about alignment
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Make sure our binaries can find our libraries both in docker and on the robot
 list(APPEND CMAKE_INSTALL_RPATH /home/nubots/toolchain/)
-list(APPEND CMAKE_INSTALL_RPATH /nubots/toolchain/${PLATFORM}/lib/)
-list(APPEND CMAKE_INSTALL_RPATH /nubots/toolchain/lib/)
+list(APPEND CMAKE_INSTALL_RPATH /usr/local/lib)
 
 # GNU Compiler
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
@@ -21,8 +19,14 @@ if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
   endif()
 endif()
 
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} /home/darwin/toolchain/ /home/nubots/toolchain/)
-
 # Disable armadillo bounds checking in release and min size release builds
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DARMA_NO_DEBUG")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DARMA_NO_DEBUG")
+
+# Enable address sanitizer
+option(USE_ASAN "Enable address sanitization" OFF)
+if(USE_ASAN)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address)
+  link_libraries(asan)
+endif(USE_ASAN)

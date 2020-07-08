@@ -21,7 +21,6 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/vision.h"
 
 namespace module {
 namespace support {
@@ -32,25 +31,6 @@ namespace support {
     using message::vision::Balls;
 
     using utility::input::ServoID;
-    using utility::math::vision::getFieldToCam;
-    using utility::math::vision::projectCamSpaceToScreen;
-    using utility::math::vision::screenToImage;
-
-    VirtualBall::VirtualBall()
-        : position(Eigen::Vector3d::Zero()), velocity(Eigen::Vector3d::Zero()), diameter(0.1), rd(rand()) {}
-
-    VirtualBall::VirtualBall(const Eigen::Vector2d& position, float diameter)
-        : position(position.x(), position.y(), diameter * 0.5)
-        , velocity(arma::fill::zeros)
-        , diameter(diameter)
-        , rd(rand()) {}
-
-    // utility::math::matrix::Transform2D ballPose;
-    Eigen::Vector3d position;
-    Eigen::Vector3d velocity;
-
-    // arma::vec2 position;
-    float diameter;
 
     Balls VirtualBall::detect(const Image& image,
                               const Eigen::Affine2d& robotPose,
@@ -60,11 +40,11 @@ namespace support {
         Balls result;
         result.balls.reserve(1);
 
-        Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+        Eigen::Affine3d Htc(sensors.Htx[utility::input::ServoID::HEAD_PITCH]);
         result.Hcw       = Htc.inverse() * sensors.Htw;
         result.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
 
-        Eigen::Affine3d Hcf = getFieldToCam(robotPose, sensors.Hgc);
+        Eigen::Affine3d Hcf = getFieldToCam(robotPose, Eigen::Affine3d(sensors.Hgc));
         Eigen::Affine3d Hfc = Hcf.inverse();
 
         // Ball position in field
@@ -100,7 +80,7 @@ namespace support {
             // Get our transform to world coordinates
             Eigen::Affine3d Hwc((Htc.inverse() * sensors.Htw).inverse());
 
-            Eigen::Vector3d rBWw = (Hwc * Eigen::Vector4d(rBCc.x(), rBCc.y(), rBCc.z(), 1.0))).head<3>();
+            Eigen::Vector3d rBWw = (Hwc * Eigen::Vector4d(rBCc.x(), rBCc.y(), rBCc.z(), 1.0)).head<3>();
             // Attach the measurement to the object
             result.balls.at(0).measurements.push_back(Ball::Measurement());
             // TODO: This needs updating to actually provide rBCc
@@ -127,6 +107,60 @@ namespace support {
 
         // If no measurements are in the Ball, then there it was not observed
         return result;
+    }
+
+    Eigen::Affine3d VirtualBall::getFieldToCam(const Eigen::Affine2d& Tft,
+                                               // f = field
+                                               // t = torso
+                                               // c = camera
+                                               const Eigen::Affine3d& Htc) {
+
+        Eigen::Affine3d Htf = Eigen::Affine3d::Identity();
+        Htf                 = Htf.translate(Eigen::Vector3d(Tft.translation().x(), Tft.translation().y(), 0.0))
+                  .rotate(Eigen::AngleAxisd(Eigen::Rotation2Dd(Tft.rotation()).angle(), Eigen::Vector3d::UnitZ()))
+                  .inverse();
+
+
+        return Htc.inverse() * Htf;
+    }
+
+    Eigen::Vector2d VirtualBall::projectCamSpaceToScreen(const Eigen::Vector3d& point,
+                                                         const message::input::Image::Lens& cam) {
+        auto pinhole = [](const Eigen::Vector3d& point, const message::input::Image::Lens& cam) -> Eigen::Vector2d {
+            return Eigen::Vector2d(static_cast<double>(cam.focal_length) * point[1] / point[0],
+                                   static_cast<double>(cam.focal_length) * point[2] / point[0]);
+        };
+
+        auto radial = [](const Eigen::Vector3d& point, const message::input::Image::Lens& cam) -> Eigen::Vector2d {
+            Eigen::Vector3d p = point.normalized();
+            float theta       = std::acos(p.x());
+            if (theta == 0) {
+                return Eigen::Vector2d::Zero();
+            }
+            float r         = theta * cam.focal_length;
+            float sin_theta = std::sin(theta);
+            float px        = r * p.y() / sin_theta;
+            float py        = r * p.z() / sin_theta;
+
+            return Eigen::Vector2d(px, py) + cam.centre.cast<double>();
+        };
+
+        switch (cam.projection.value) {
+            case message::input::Image::Lens::Projection::RECTILINEAR: return pinhole(point, cam);
+            case message::input::Image::Lens::Projection::EQUIDISTANT:
+            case message::input::Image::Lens::Projection::EQUISOLID:  // TODO: do this properly
+                return radial(point, cam);
+            case message::input::Image::Lens::Projection::UNKNOWN:
+            default: return Eigen::Vector2d();
+        }
+    }
+
+    Eigen::Vector2i VirtualBall::screenToImage(const Eigen::Vector2d& screen,
+                                               const Eigen::Matrix<unsigned int, 2, 1>& imageSize) {
+        Eigen::Vector2d v =
+            Eigen::Vector2d(static_cast<double>(imageSize.x() - 1) * 0.5, static_cast<double>(imageSize.y() - 1) * 0.5)
+            - screen;
+        return v.array().round().matrix().cast<int>();
     }
 }  // namespace support
 }  // namespace module

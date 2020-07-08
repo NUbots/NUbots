@@ -17,11 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
+#include "SpeakTest.h"
+
 #include <nuclear>
 
 #include "message/output/Say.h"
-
-#include "SpeakTest.h"
 
 namespace module {
 namespace behaviour {

@@ -6,6 +6,7 @@ find_package(Protobuf REQUIRED)
 find_package(CATCH REQUIRED)
 find_package(YAML-CPP REQUIRED)
 find_package(fmt REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 # Resolve problems when OpenBLAS isn't found:
 if(OpenBLAS_FOUND)
@@ -25,16 +26,15 @@ include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
 include_directories(SYSTEM ${CATCH_INCLUDE_DIRS})
 include_directories(SYSTEM ${YAML-CPP_INCLUDE_DIRS})
 include_directories(SYSTEM ${fmt_INCLUDE_DIRS})
-# INCLUDE_DIRECTORIES(SYSTEM ${OPENRAVE_INCLUDE_DIRS})
 
-set(
-  NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
-  ${BLAS_LIBRARIES}
-  ${LIBGFORTRAN_LIBRARIES}
-  ${PROTOBUF_LIBRARIES}
-  ${YAML-CPP_LIBRARIES}
-  ${fmt_LIBRARIES}
-  -ldl
-  -lbacktrace
-  CACHE PATH "Additional libraries used when linking roles, extensions, and utilities" FORCE
+set(NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
+    ${BLAS_LIBRARIES}
+    ${LIBGFORTRAN_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${YAML-CPP_LIBRARIES}
+    ${fmt_LIBRARIES}
+    Eigen3::Eigen
+    -ldl
+    -lbacktrace
+    CACHE PATH "Additional libraries used when linking roles, extensions, and utilities" FORCE
 )

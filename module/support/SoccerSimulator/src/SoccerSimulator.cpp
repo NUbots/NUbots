@@ -39,6 +39,7 @@
 #include "utility/math/matrix/transform.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/nusight/NUhelpers.h"
+#include "utility/support/yaml_expression.h"
 
 
 namespace module {
@@ -66,13 +67,8 @@ namespace support {
 
     using utility::math::angle::bearingToUnitVector;
     using utility::math::angle::normalizeAngle;
-    using utility::math::angle::vectorToBearing;
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::transform::localToWorld;
-    using utility::math::transform::worldToLocal;
     using utility::motion::kinematics::calculateRobotToIMU;
-    using utility::nusight::drawArrow;
-    using utility::nusight::drawSphere;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -119,8 +115,10 @@ namespace support {
         cfg_.ball.path.y_amp  = config["ball"]["path"]["y_amp"].as<Expression>();
         cfg_.ball.path.type   = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
-        world.robotPose = config["initial"]["robot_pose"].as<Expression>();
-        world.ball      = VirtualBall(config["initial"]["ball"]["position"].as<Expression>(),
+        Eigen::Vector3d initial_pose  = config["initial"]["robot_pose"].as<Expression>();
+        world.robotPose.linear()      = Eigen::Rotation2Dd(initial_pose.z()).toRotationMatrix();
+        world.robotPose.translation() = initial_pose.head<2>();
+        world.ball                    = VirtualBall(config["initial"]["ball"]["position"].as<Expression>(),
                                  config["initial"]["ball"]["diameter"].as<Expression>());
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
@@ -153,8 +151,7 @@ namespace support {
 
 
         on<Trigger<FieldDescription>>().then("FieldDescription Update", [this](const FieldDescription& desc) {
-            auto fdptr = std::make_shared<const FieldDescription>(desc);
-            loadFieldDescription(fdptr);
+            loadFieldDescription(std::make_shared<const FieldDescription>(desc));
         });
 
         on<Configuration, Trigger<GlobalConfig>>("SoccerSimulator.yaml")
@@ -189,6 +186,9 @@ namespace support {
                       double deltaT =
                           1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
                       Eigen::Affine2d diff;
+                      Eigen::Affine2d ball_pose;
+                      ball_pose.linear()      = Eigen::Rotation2Dd(world.ball.position.z()).toRotationMatrix();
+                      ball_pose.translation() = world.ball.position.head<2>();
 
                       switch (cfg_.robot.motion_type) {
                           case MotionType::NONE: world.robotVelocity = Eigen::Affine2d::Identity(); break;
@@ -204,11 +204,13 @@ namespace support {
 
                               // Face along direction of movement
                               world.robotPose.linear() =
-                                  Eigen::Rotation2Dd(vectorToBearing(diff.translation())).toRotationMatrix();
+                                  Eigen::Rotation2Dd(std::atan2(diff.translation().y(), diff.translation().x()))
+                                      .toRotationMatrix();
 
                               // Robot coordinates
-                              world.robotVelocity.linear()      = Eigen::Matrix2d::Zero();
-                              world.robotVelocity.translation() = Eigen::Vector2d(diff.norm() / deltaT, 0.0);
+                              world.robotVelocity.linear() = Eigen::Matrix2d::Zero();
+                              world.robotVelocity.translation() =
+                                  Eigen::Vector2d(diff.translation().norm() / deltaT, 0.0);
 
                               break;
 
@@ -238,7 +240,12 @@ namespace support {
 
                               world.ball.position.head<2>() = getPath(cfg_.ball.path);
 
-                              world.ball.velocity = (world.ball.position - oldBallPose) / deltaT;  // world coordinates
+                              world.ball.velocity =
+                                  (world.ball.position
+                                   - Eigen::Vector3d(oldBallPose.translation().x(),
+                                                     oldBallPose.translation().y(),
+                                                     Eigen::Rotation2Dd(oldBallPose.rotation()).angle()))
+                                  / deltaT;  // world coordinates
                               break;
 
                           case MotionType::MOTION:
@@ -249,7 +256,7 @@ namespace support {
                                   // Empty queue
                                   std::queue<KickCommand>().swap(kickQueue);
                                   // Check if kick worked:
-                                  Eigen::Affine2d relativeBallPose = worldToLocal(world.robotPose, world.ball.position);
+                                  Eigen::Affine2d relativeBallPose = world.robotPose.inverse() * ball_pose;
 
                                   world.ball.position.head<2>() +=
                                       world.robotPose.rotation() * lastKickCommand.direction.head<2>().normalized();
@@ -264,7 +271,7 @@ namespace support {
                                        Eigen::Rotation2Dd(oldRobotPose.linear()).angle()));
 
                       oldRobotPose = world.robotPose;
-                      oldBallPose  = world.ball.position;
+                      oldBallPose  = ball_pose;
                       lastNow      = now;
                       lastKicking  = kicking;
                   });
@@ -275,8 +282,9 @@ namespace support {
             "Vision Simulation",
             [this](const Image& image, const Sensors& sensors, const std::shared_ptr<const FieldDescription> fd) {
                 if (!fd) {
-                    NUClear::log<NUClear::ERROR>(
-                        __FILE__, __LINE__, "Field Description must be available for vision simulation!");
+                    NUClear::log<NUClear::ERROR>(__FILE__,
+                                                 __LINE__,
+                                                 "Field Description must be available for vision simulation!");
                     powerplant.shutdown();
                     return;
                 }
@@ -339,9 +347,12 @@ namespace support {
                 }
                 else {
                     // Emit current ball exactly
-                    auto b        = std::make_unique<message::localisation::Ball>();
-                    b->position   = worldToLocal(world.robotPose, world.ball.position).translation();
-                    b->covariance = Eigen::Matrix2d::Identity() * 0.00001;
+                    auto b = std::make_unique<message::localisation::Ball>();
+                    Eigen::Affine2d ball_pose;
+                    ball_pose.linear()      = Eigen::Rotation2Dd(world.ball.position.z()).toRotationMatrix();
+                    ball_pose.translation() = world.ball.position.head<2>();
+                    b->position             = (world.robotPose.inverse() * ball_pose).translation();
+                    b->covariance           = Eigen::Matrix2d::Identity() * 0.00001;
 
                     emit(std::make_unique<std::vector<message::localisation::Ball>>(1, *b));
                     emit(std::move(b));
@@ -351,15 +362,9 @@ namespace support {
 
         // Emit exact position to NUsight
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
-            Eigen::Vector2d bearingVector      = world.robotPose.rotation() * Eigen::Vector2d::UnitX());
+            Eigen::Vector2d bearingVector = world.robotPose.rotation() * Eigen::Vector2d::UnitX();
             Eigen::Vector3d robotHeadingVector(bearingVector.x(), bearingVector.x(), 0.0);
-            emit(drawArrow("robot",
-                           Eigen::Vector3d(world.robotPose.translation().x(), world.robotPosetranslation()..y(), 0.0),
-                           1.0,
-                           robotHeadingVector,
-                           0.0));
-
-            emit(drawSphere("ball", Eigen::Vector3d(world.ball.position.x(), world.ball.position.y(), 0.0), 0.1, 0.0));
+            // TODO: Fix this.
         });
 
         on<Startup>().then("SoccerSimulator Startup", [this] {
@@ -382,7 +387,7 @@ namespace support {
         g->x   = 0;
         g->y   = 0;
         g->z   = dHeading;
-        return std::move(g);
+        return g;
     }
 
     Eigen::Vector2d SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p) {

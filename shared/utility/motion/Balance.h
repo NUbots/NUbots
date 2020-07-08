@@ -20,8 +20,8 @@
 #ifndef UTILITY_MOTION_BALANCE_H
 #define UTILITY_MOTION_BALANCE_H
 
-#include <yaml-cpp/yaml.h>
 #include <nuclear>
+#include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"
 

@@ -20,8 +20,8 @@
 #include "UART.h"
 
 #include <fcntl.h>
-#include <sys/ioctl.h>
 #include <iostream>
+#include <sys/ioctl.h>
 #include <thread>
 
 namespace Darwin {
