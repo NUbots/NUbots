@@ -118,15 +118,15 @@ namespace behaviour {
                         (Htf * Eigen ::Vector4d(kickPlan.target.x(), kickPlan.target.y(), 0.0, 1.0)).head<3>();
                     float KickAngle = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
 
-                    // log("KickPlan target global",convert(kickPlan.target).t());
-                    // log("Target of Kick",kickTarget.t());
-                    // log("KickAngle",KickAngle);
+                    // log("KickPlan target global",kickPlan. target.transpose());
+                    // log("Target of Kick", kickTarget.transpose());
+                    // log("KickAngle", KickAngle);
 
                     // Check whether to kick
-                    // log("kickTarget",kickTarget.t());
-                    // log("KickAngle",KickAngle);
-                    // log("ballPosition",ballPosition);
-                    // log("secondsSinceLastSeen",secondsSinceLastSeen);
+                    // log("kickTarget", kickTarget.transpose());
+                    // log("KickAngle", KickAngle);
+                    // log("ballPosition", ballPosition);
+                    // log("secondsSinceLastSeen", secondsSinceLastSeen);
                     bool kickIsValid = kickValid(ballPosition);
                     if (kickIsValid) {
                         lastTimeValid = now;

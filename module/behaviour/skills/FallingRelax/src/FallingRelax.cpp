@@ -30,7 +30,6 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace behaviour {
@@ -47,8 +46,8 @@ namespace behaviour {
 
         using utility::behaviour::ActionPriorites;
         using utility::behaviour::RegisterAction;
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+        using utility::input::LimbID;
+        using utility::input::ServoID;
 
         FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -81,7 +80,7 @@ namespace behaviour {
                     double magnitude = 0;
 
                     for (const auto& sensor : sensors) {
-                        magnitude += (Eigen::Vector2d{(convert(sensor->accelerometer), 2)}).norm();
+                        magnitude += sensor->accelerometer.norm();
                     }
 
                     magnitude /= sensors.size();
@@ -96,7 +95,7 @@ namespace behaviour {
                     double magnitude = 0;
 
                     for (const auto& sensor : sensors) {
-                        magnitude += (Eigen::Vector2d{(convert(sensor->accelerometer), 2)}).norm();
+                        magnitude += sensor->accelerometer.norm();
                     }
 
                     magnitude /= sensors.size();

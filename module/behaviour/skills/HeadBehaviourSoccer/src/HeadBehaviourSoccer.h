@@ -36,7 +36,6 @@
 #include "message/vision/Goal.h"
 
 #include "utility/math/geometry/Quad.h"
-#include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
 namespace behaviour {
@@ -65,20 +64,20 @@ namespace behaviour {
                                 const message::vision::Balls& fixationObjects,
                                 const bool& search,
                                 const message::input::Sensors& sensors,
-                                const utility::math::matrix::Rotation3D& headToIMUSpace,
+                                const Eigen::Matrix3d& headToIMUSpace,
                                 const message::input::Image::Lens& lens);
             void updateHeadPlan(const message::motion::KinematicsModel& kinematicsModel,
                                 const message::vision::Goals& fixationObjects,
                                 const bool& search,
                                 const message::input::Sensors& sensors,
-                                const utility::math::matrix::Rotation3D& headToIMUSpace,
+                                const Eigen::Matrix3d& headToIMUSpace,
                                 const message::input::Image::Lens& lens);
 
             /*! @brief Converts from camera space direction to IMU space direction
              */
             Eigen::Vector2d getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
                                                  const Eigen::Vector2d& screenAngles,
-                                                 utility::math::matrix::Rotation3D headToIMUSpace);
+                                                 Eigen::Matrix3d headToIMUSpace);
 
             /*! @brief Gets points which allow for simultaneous search and viewing of key objects
              */
@@ -117,7 +116,7 @@ namespace behaviour {
 
 
             float replan_angle_threshold;
-            utility::math::matrix::Rotation3D lastPlanOrientation;
+            Eigen::Matrix3d lastPlanOrientation;
 
             // CONFIG from HeadBehaviourSoccer.yaml
             float pitch_plan_threshold;

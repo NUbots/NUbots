@@ -50,6 +50,22 @@ namespace math {
             return result;
         }
 
+        template <typename T, typename U = typename T::Scalar>
+        inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
+            double distance  = sphericalCoordinates.x();
+            double cos_theta = std::cos(sphericalCoordinates.y());
+            double sin_theta = std::sin(sphericalCoordinates.y());
+            double cos_phi   = std::cos(sphericalCoordinates.z());
+            double sin_phi   = std::sin(sphericalCoordinates.z());
+            Eigen::Matrix<U, 3, 1> result;
+
+            result.x() = distance * cos_theta * cos_phi;
+            result.y() = distance * sin_theta * cos_phi;
+            result.z() = distance * sin_phi;
+
+            return result;
+        }
+
         inline arma::vec3 cartesianToSpherical(const arma::vec3& cartesianCoordinates) {
             double x = cartesianCoordinates[0];
             double y = cartesianCoordinates[1];
