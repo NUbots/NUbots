@@ -140,15 +140,15 @@ namespace platform {
                     config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
                 // Set our process noise in our filter
-                MotionModel<double>::StateVec process_noise;
-                // process_noise.segment<3>(MotionModel<double>::PX) =
+                IMUModel<double>::StateVec process_noise;
+                // process_noise.segment<3>(IMUModel<double>::PX) =
                 // this->config.motionFilter.noise.process.position;
-                // process_noise.segment<3>(MotionModel<double>::VX) =
+                // process_noise.segment<3>(IMUModel<double>::VX) =
                 // this->config.motionFilter.noise.process.velocity;
-                process_noise.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
-                process_noise.segment<3>(MotionModel<double>::WX) =
+                process_noise.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
+                process_noise.segment<3>(IMUModel<double>::WX) =
                     this->config.motionFilter.noise.process.rotationalVelocity;
-                process_noise.segment<3>(MotionModel<double>::BX) =
+                process_noise.segment<3>(IMUModel<double>::BX) =
                     this->config.motionFilter.noise.process.gyroscopeBias;
                 motionFilter.model.process_noise = process_noise;
 
@@ -176,24 +176,24 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
                 // Calculate our mean and covariance
-                MotionModel<double>::StateVec mean;
-                // mean.segment<3>(MotionModel<double>::PX) =
+                IMUModel<double>::StateVec mean;
+                // mean.segment<3>(IMUModel<double>::PX) =
                 // this->config.motionFilter.initial.mean.position;
-                // mean.segment<3>(MotionModel<double>::VX) =
+                // mean.segment<3>(IMUModel<double>::VX) =
                 // this->config.motionFilter.initial.mean.velocity;
-                mean.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
-                mean.segment<3>(MotionModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
-                mean.segment<3>(MotionModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
+                mean.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
+                mean.segment<3>(IMUModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
+                mean.segment<3>(IMUModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
-                MotionModel<double>::StateVec covariance;
-                // covariance.segment<3>(MotionModel<double>::PX) =
+                IMUModel<double>::StateVec covariance;
+                // covariance.segment<3>(IMUModel<double>::PX) =
                 // this->config.motionFilter.initial.covariance.position;
-                // covariance.segment<3>(MotionModel<double>::VX) =
+                // covariance.segment<3>(IMUModel<double>::VX) =
                 // this->config.motionFilter.initial.covariance.velocity;
-                covariance.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
-                covariance.segment<3>(MotionModel<double>::WX) =
+                covariance.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
+                covariance.segment<3>(IMUModel<double>::WX) =
                     this->config.motionFilter.initial.covariance.rotationalVelocity;
-                covariance.segment<3>(MotionModel<double>::BX) =
+                covariance.segment<3>(IMUModel<double>::BX) =
                     this->config.motionFilter.initial.covariance.gyroscopeBias;
                 motionFilter.set_state(mean, covariance.asDiagonal());
             });
@@ -476,12 +476,12 @@ namespace platform {
 
                         if (foot_down && !prev_foot_down) {
                             Eigen::Affine3d Hwt;
-                            Hwt.linear() = Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX))
+                            Hwt.linear() = Eigen::Quaterniond(motionFilter.get().segment<4>(IMUModel<double>::QX))
                                                .toRotationMatrix();
                             Hwt.translation() = Eigen::Vector3d(
                                 0,
                                 0,
-                                0);  // Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
+                                0);  // Eigen::Vector3d(motionFilter.get().segment<3>(IMUModel<double>::PX));
 
                             Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
@@ -501,9 +501,9 @@ namespace platform {
 
                             // do a foot based orientation update
                             Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                            motionFilter.measure(Rwt.coeffs(),
-                                                 config.motionFilter.noise.measurement.flatFootOrientation,
-                                                 MeasurementType::FLAT_FOOT_ORIENTATION());
+                            // motionFilter.measure(Rwt.coeffs(),
+                            //                      config.motionFilter.noise.measurement.flatFootOrientation,
+                            //                      MeasurementType::FLAT_FOOT_ORIENTATION());
                         }
                         else if (!foot_down) {
                             previous_foot_down[side] = false;
@@ -526,15 +526,15 @@ namespace platform {
 
                     // Map from world to torso coordinates (Rtw)
                     Eigen::Affine3d Hwt;
-                    Hwt.linear() = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
+                    Hwt.linear() = Eigen::Quaterniond(o.segment<4>(IMUModel<double>::QX)).toRotationMatrix();
                     Hwt.translation() =
                         Eigen::Vector3d(0,
                                         0,
-                                        0);  // Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
+                                        0);  // Eigen::Vector3d(o.segment<3>(IMUModel<double>::PX));
                     sensors->Htw = Hwt.inverse().matrix();
 
                     // Integrate gyro to get angular positions
-                    sensors->angular_position = o.segment<3>(MotionModel<double>::WX) / 90.0;
+                    sensors->angular_position = o.segment<3>(IMUModel<double>::WX) / 90.0;
 
                     if (this->config.debug) {
                         log("p_x:",
