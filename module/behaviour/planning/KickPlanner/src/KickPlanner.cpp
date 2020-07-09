@@ -39,7 +39,6 @@
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
 
 
 namespace module {
@@ -103,7 +102,7 @@ namespace behaviour {
                         std::chrono::duration_cast<std::chrono::microseconds>(now - ballLastSeen).count() * 1e-6;
 
                     // Compute target in robot coords
-                    // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
+                    // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
                     // TODO: The heading seems to judder here!!
                     // TODO: use sensors.Htw instead
                     Eigen::Affine3d Hfw = fieldStateToTransform3D(field.position);

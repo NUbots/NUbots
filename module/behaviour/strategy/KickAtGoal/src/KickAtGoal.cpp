@@ -28,7 +28,7 @@
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
 
-#include "utility/time/time.h"
+#include "utility/behaviour/MotionCommand.h"
 
 namespace module {
 namespace behaviour {
@@ -39,12 +39,13 @@ namespace behaviour {
         using message::behaviour::Behaviour;
         using message::behaviour::KickPlan;
         using message::behaviour::MotionCommand;
-        using message::behaviour::WalkApproach;
-        using message::behaviour::WalkTarget;
 
         using message::vision::Balls;
         using message::vision::Goals;
-        using utility::time::durationFromSeconds;
+
+        NUClear::clock::duration KickAtGoal::durationFromSeconds(const double& seconds) {
+            return NUClear::clock::duration(uint64_t(NUClear::clock::period::den * seconds));
+        }
 
         KickAtGoal::KickAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -88,23 +89,17 @@ namespace behaviour {
         }
 
         void KickAtGoal::walkToBall() {
-            auto approach                = std::make_unique<MotionCommand>();
-            approach->targetPositionType = WalkTarget::Ball;
-            approach->targetHeadingType  = WalkTarget::WayPoint;
-            approach->walkMovementType   = WalkApproach::WalkToPoint;
-            approach->heading            = Eigen::Vector2d(3.0, 0.0);  // TODO: unhack
-            emit(std::move(approach));
-            currentState = Behaviour::WALK_TO_BALL;
+            emit(std::make_unique<MotionCommand>(
+                utility::behaviour::BallApproach(Eigen::Vector2d(3.0, 0.0))));  // TODO: unhack
+            currentState = Behaviour::State::WALK_TO_BALL;
         }
 
         void KickAtGoal::spinToWin() {
             // TODO: does this work?
-            auto command              = std::make_unique<MotionCommand>();
-            command->walkMovementType = WalkApproach::DirectCommand;
-            command->target           = Eigen::Vector2d::Zero();
-            command->heading          = Eigen::Vector2d(1.0, 0.0);
-            emit(std::move(command));
-            currentState = Behaviour::SEARCH_FOR_BALL;
+            Eigen::Affine2d spin = Eigen::Affine2d::Identity();
+            spin.linear()        = Eigen::Rotation2Dd(1.0).toRotationMatrix();
+            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(spin)));
+            currentState = Behaviour::State::SEARCH_FOR_BALL;
         }
     }  // namespace strategy
 }  // namespace behaviour

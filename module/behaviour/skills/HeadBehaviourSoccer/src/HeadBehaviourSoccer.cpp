@@ -36,7 +36,6 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 
@@ -437,12 +436,11 @@ namespace behaviour {
                                           sensors.servo.at(ServoID::HEAD_PITCH).present_position};
 
             for (uint i = 0; i < fixationObjects.balls.size(); i++) {
-                // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(Eigen::Vector2d(
-                    {fixationObjects.balls.at(i).screen_angular(0), fixationObjects.balls.at(i).screen_angular(1)}));
-                fixationSizes.push_back(Eigen::Vector2d(
-                    {fixationObjects.balls.at(i).angular_size(0), fixationObjects.balls.at(i).angular_size(1)}));
+                fixationPoints.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).screen_angular(0),
+                                                         fixationObjects.balls.at(i).screen_angular(1)));
+                fixationSizes.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).angular_size(0),
+                                                        fixationObjects.balls.at(i).angular_size(1)));
             }
 
             // If there are objects to find
@@ -484,12 +482,11 @@ namespace behaviour {
             }
 
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
-                // TODO: fix arma meat errors here
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(Eigen::Vector2d(
-                    {fixationObjects.goals.at(i).screen_angular(0), fixationObjects.goals.at(i).screen_angular(1)}));
-                fixationSizes.push_back(Eigen::Vector2d(
-                    {fixationObjects.goals.at(i).angular_size(0), fixationObjects.goals.at(i).angular_size(1)}));
+                fixationPoints.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).screen_angular(0),
+                                                         fixationObjects.goals.at(i).screen_angular(1)));
+                fixationSizes.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).angular_size(0),
+                                                        fixationObjects.goals.at(i).angular_size(1)));
             }
 
             // If there are objects to find

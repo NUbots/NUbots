@@ -341,7 +341,7 @@ namespace behaviour {
             emit(std::move(reset));
         }
 
-        void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fieldDescription) {
+        void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& /*fieldDescription*/) {
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
@@ -438,7 +438,9 @@ namespace behaviour {
         }
 
         void SoccerStrategy::spinWalk() {
-            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 1})));
+            Eigen::Affine2d spin = Eigen::Affine2d::Identity();
+            spin.linear()        = Eigen::Rotation2Dd(1.0).toRotationMatrix();
+            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(spin)));
         }
 
         Eigen::Vector2d SoccerStrategy::getKickPlan(const Field& field, const FieldDescription& fieldDescription) {

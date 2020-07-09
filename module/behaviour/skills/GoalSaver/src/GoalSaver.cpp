@@ -19,9 +19,10 @@
 
 #include "GoalSaver.h"
 
-#include <armadillo>
+#include <Eigen/Core>
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/DiveCommand.h"
@@ -30,7 +31,6 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
@@ -42,16 +42,14 @@ namespace behaviour {
         using extension::Configuration;
         using extension::ExecuteScriptByName;
 
-        using message::localisation::Ball;
-        using message::localisation::Self;
         using message::motion::DiveCommand;
         using message::motion::DiveFinished;
         using message::motion::StopCommand;
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
         using utility::behaviour::ActionPriorites;
         using utility::behaviour::RegisterAction;
+        using utility::input::LimbID;
+        using utility::input::ServoID;
 
         GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
@@ -68,9 +66,9 @@ namespace behaviour {
             });
 
             on<Trigger<ExecuteDive>>().then([this] {
-                Eigen::VectorXd direction = diveCommand.direction;
+                Eigen::Vector2d direction = diveCommand.direction;
 
-                int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
+                int quadrant = getDirectionalQuadrant(direction.x(), direction.y());
                 // assume valid at this point as this is checked on the walkcommand trigger
                 if (quadrant == 1) {
                     // side

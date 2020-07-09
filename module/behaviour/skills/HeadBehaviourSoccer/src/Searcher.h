@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_SKILLS_SEARCHER_H
 
 #include <Eigen/Core>
-#include <armadillo>
 #include <nuclear>
 
 
@@ -34,7 +33,7 @@ namespace behaviour {
          *
          * @author Jake Fountain
 
-         Template argument T must be a normed linear space using arma::norm();
+         Template argument T must be a normed linear space using Eigen::norm();
          */
         template <class T>
         class Searcher {

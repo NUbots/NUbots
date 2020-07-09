@@ -38,7 +38,9 @@ namespace behaviour {
             void walkToBall();
             void spinToWin();
 
-            message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::INIT;
+            message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
+
+            NUClear::clock::duration durationFromSeconds(const double& seconds);
 
         public:
             /// @brief Called by the powerplant to build and setup the KickAtGoal reactor.

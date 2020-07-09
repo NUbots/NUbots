@@ -20,12 +20,12 @@
 #ifndef MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
 #define MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "message/behaviour/WalkPath.h"
 #include "message/motion/WalkCommand.h"
-
-#include "utility/math/matrix/Transform2D.h"
 
 namespace module {
 namespace behaviour {
@@ -33,7 +33,6 @@ namespace behaviour {
 
         using message::behaviour::WalkPath;
         using message::motion::WalkCommand;
-        using utility::math::matrix::Transform2D;
 
         class WalkPathFollower : public NUClear::Reactor {
 
@@ -42,21 +41,21 @@ namespace behaviour {
             explicit WalkPathFollower(std::unique_ptr<NUClear::Environment> environment);
 
             /// @brief The instantaneous walk command required to start moving to the next unvisited node on the path.
-            std::unique_ptr<WalkCommand> walkToNextNode(const Transform2D& currentState, bool noLogging = false);
+            std::unique_ptr<WalkCommand> walkToNextNode(const Eigen::Affine2d& currentState, bool noLogging = false);
 
-            WalkCommand walkBetweenFar(const Transform2D& currentState, const Transform2D& targetState);
+            WalkCommand walkBetweenFar(const Eigen::Affine2d& currentState, const Eigen::Affine2d& targetState);
 
-            WalkCommand walkBetweenNear(const Transform2D& currentState, const Transform2D& targetState);
+            WalkCommand walkBetweenNear(const Eigen::Affine2d& currentState, const Eigen::Affine2d& targetState);
 
             /// @brief Remove already visited states from the given path.
             /// Returns the number of states removed.
-            int trimPath(const Transform2D& currentState, WalkPath& walkPath);
+            int trimPath(const Eigen::Affine2d& currentState, WalkPath& walkPath);
 
             /// @brief The index of the closest state in walkPath to currentState.
-            int closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath);
+            int closestPathIndex(const Eigen::Affine2d& currentState, const WalkPath& walkPath);
 
             /// @brief The path the robot is expected to follow while following the given path.
-            WalkPath estimatedPath(const Transform2D& currentState,
+            WalkPath estimatedPath(const Eigen::Affine2d& currentState,
                                    const WalkPath& walkPath,
                                    double timeStep,
                                    int simSteps,
@@ -64,8 +63,8 @@ namespace behaviour {
 
             /// @brief Return whether currentState is close enough to visitState for us to say that the robot has
             /// 'visited' that state.
-            bool isVisited(const Transform2D& currentState, const Transform2D& visitState);
-            bool isGoalClose(const Transform2D& currentState, const Transform2D& visitState);
+            bool isVisited(const Eigen::Affine2d& currentState, const Eigen::Affine2d& visitState);
+            bool isGoalClose(const Eigen::Affine2d& currentState, const Eigen::Affine2d& visitState);
 
             WalkPath currentPath;
 
