@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "message/input/Sensors.h"
+#include "message/motion/BodySide.h"
 #include "message/motion/KinematicsModel.h"
 
 #include "utility/input/LimbID.h"
@@ -41,11 +42,10 @@ namespace motion {
     namespace kinematics {
 
         using message::input::Sensors;
+        using message::motion::BodySide;
         using message::motion::KinematicsModel;
         using utility::input::LimbID;
         using utility::input::ServoID;
-        using utility::input::ServoSide;
-        using BodySide = message::motion::BodySide;
 
 
         inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
