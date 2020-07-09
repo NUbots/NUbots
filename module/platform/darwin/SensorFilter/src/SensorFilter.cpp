@@ -139,26 +139,11 @@ namespace platform {
                 this->config.motionFilter.noise.process.gyroscopeBias =
                     config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
-                // Set our process noise in our filter
-                IMUModel<double>::StateVec process_noise;
-                // process_noise.segment<3>(IMUModel<double>::PX) =
-                // this->config.motionFilter.noise.process.position;
-                // process_noise.segment<3>(IMUModel<double>::VX) =
-                // this->config.motionFilter.noise.process.velocity;
-                process_noise.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
-                process_noise.segment<3>(IMUModel<double>::WX) =
-                    this->config.motionFilter.noise.process.rotationalVelocity;
-                process_noise.segment<3>(IMUModel<double>::BX) =
-                    this->config.motionFilter.noise.process.gyroscopeBias;
-                motionFilter.model.process_noise = process_noise;
-
                 // Update our mean configs and if it changed, reset the filter
-                this->config.motionFilter.initial.mean.position =
-                    config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
+                 this->config.motionFilter.initial.mean.position =
+                     config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
                 this->config.motionFilter.initial.mean.velocity =
                     config["motion_filter"]["initial"]["mean"]["velocity"].as<Expression>();
-                this->config.motionFilter.initial.mean.rotation =
-                    config["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
                 this->config.motionFilter.initial.mean.rotationalVelocity =
                     config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
                 this->config.motionFilter.initial.mean.gyroscopeBias =
@@ -175,33 +160,58 @@ namespace platform {
                 this->config.motionFilter.initial.covariance.gyroscopeBias =
                     config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
-                // Calculate our mean and covariance
-                IMUModel<double>::StateVec mean;
-                // mean.segment<3>(IMUModel<double>::PX) =
-                // this->config.motionFilter.initial.mean.position;
-                // mean.segment<3>(IMUModel<double>::VX) =
-                // this->config.motionFilter.initial.mean.velocity;
-                mean.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
-                mean.segment<3>(IMUModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
-                mean.segment<3>(IMUModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
 
-                IMUModel<double>::StateVec covariance;
-                // covariance.segment<3>(IMUModel<double>::PX) =
-                // this->config.motionFilter.initial.covariance.position;
-                // covariance.segment<3>(IMUModel<double>::VX) =
-                // this->config.motionFilter.initial.covariance.velocity;
-                covariance.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
-                covariance.segment<3>(IMUModel<double>::WX) =
-                    this->config.motionFilter.initial.covariance.rotationalVelocity;
-                covariance.segment<3>(IMUModel<double>::BX) =
-                    this->config.motionFilter.initial.covariance.gyroscopeBias;
-                motionFilter.set_state(mean, covariance.asDiagonal());
+                // Set our process noise in our filter
+                IMUModel<double>::StateVec process_noise;
+                process_noise.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
+                process_noise.segment<3>(IMUModel<double>::WX) =
+                    this->config.motionFilter.noise.process.rotationalVelocity;
+                process_noise.segment<3>(IMUModel<double>::BX) =
+                    this->config.motionFilter.noise.process.gyroscopeBias;
+                motionFilter.model.process_noise = process_noise;
             });
 
             on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
                 // Foot load sensor config
                 load_sensor = VirtualLoadSensor<float>(config);
             });
+
+            // Initialise the rotation based on the accelerometer
+            initialisationHandle = on<Trigger<DarwinSensors>, Single>().then([this](const DarwinSensors& sensors) {
+                // initialise the filter
+                Eigen::Vector3d accelerometer(sensors.accelerometer.x, sensors.accelerometer.y, sensors.accelerometer.z);
+
+                // When we start, we are likely to be stationary, with the only force being gravity
+                // Therefore, the negation of the accelerometer vector is likely to be the z-axis of the rotation
+                Eigen::Matrix3d rotation = Eigen::Matrix3d::Identity();
+                log(accelerometer.transpose());
+                rotation.col(2) = -accelerometer.normalized(); // z is negative accelerometer
+                rotation.col(0) = Eigen::Vector3d::UnitX(); // the robot is facing forward
+                rotation.col(1) = -rotation.col(0).cross(rotation.col(2)).normalized();  // y is orthogonal
+                rotation.col(0) = rotation.col(1).cross(rotation.col(2)).normalized();   // make x orthogonal
+                Eigen::Quaterniond rot_quat(rotation.transpose());
+                log("\n", rotation.matrix());
+                // We want a quaternion in this form of a vec4
+                this->config.motionFilter.initial.mean.rotation = Eigen::Vector4d(rot_quat.x(), rot_quat.y(), rot_quat.z(), rot_quat.w());
+
+                // Calculate our mean and covariance
+                IMUModel<double>::StateVec mean;
+                mean.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
+                mean.segment<3>(IMUModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
+                mean.segment<3>(IMUModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
+
+                IMUModel<double>::StateVec covariance;
+                covariance.segment<4>(IMUModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
+                covariance.segment<3>(IMUModel<double>::WX) =
+                    this->config.motionFilter.initial.covariance.rotationalVelocity;
+                covariance.segment<3>(IMUModel<double>::BX) =
+                    this->config.motionFilter.initial.covariance.gyroscopeBias;
+                motionFilter.set_state(mean, covariance.asDiagonal());
+
+                // Disable initialisation and start updating odometry
+                initialisationHandle.disable();
+                updateHandle.enable();
+            }).enable();
 
             on<Last<20, Trigger<DarwinSensors>>, Single>().then(
                 [this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {
@@ -249,7 +259,7 @@ namespace platform {
                     }
                 });
 
-            on<Trigger<DarwinSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>().then(
+            updateHandle = on<Trigger<DarwinSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>().then(
                 "Main Sensors Loop",
                 [this](const DarwinSensors& input,
                        std::shared_ptr<const Sensors> previousSensors,
@@ -530,7 +540,7 @@ namespace platform {
                     Hwt.translation() =
                         Eigen::Vector3d(0,
                                         0,
-                                        0);  // Eigen::Vector3d(o.segment<3>(IMUModel<double>::PX));
+                                        0.49);  // Eigen::Vector3d(o.segment<3>(IMUModel<double>::PX));
                     sensors->Htw = Hwt.inverse().matrix();
 
                     // Integrate gyro to get angular positions
@@ -575,7 +585,7 @@ namespace platform {
                     sensors->Hgc      = Hgt * Htc;  // Rwt * Rth
 
                     emit(std::move(sensors));
-                });
+                }).disable();
         }
     }  // namespace darwin
 }  // namespace platform

@@ -115,6 +115,11 @@ namespace platform {
             // Our sensor for foot down
             VirtualLoadSensor<float> load_sensor;
 
+            // Disabled after we initialise the filter
+            ReactionHandle initialisationHandle;
+            // Enabled after filter is initialised
+            ReactionHandle updateHandle;
+
             // Foot to world in foot-flat rotation when the foot landed
             std::array<bool, 2> previous_foot_down = {false, false};
             std::array<Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>, 2> footlanding_Hwf;
