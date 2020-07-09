@@ -63,8 +63,8 @@ namespace motion {
     using message::motion::WalkStopped;
     using message::support::SaveConfiguration;
 
-    using ServoID = utility::input::ServoID;
-    using LimbID  = utility::input::LimbID;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
     using utility::math::clamp;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Rotation3D;
@@ -320,8 +320,8 @@ namespace motion {
 
         for (auto& gain : balance["servo_gains"]) {
             float p = gain["p"].as<Expression>();
-            ServoID sr(gain["id"].as<std::string>(), utility::input::ServoSide::RIGHT);
-            ServoID sl(gain["id"].as<std::string>(), utility::input::ServoSide::LEFT);
+            ServoID sr(gain["id"].as<std::string>());
+            ServoID sl(gain["id"].as<std::string>());
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
