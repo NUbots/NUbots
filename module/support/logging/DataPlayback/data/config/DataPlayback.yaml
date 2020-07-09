@@ -11,7 +11,7 @@ shutdown_on_end: false
 # The amount of time into the future to buffer, should be at least 1000ms
 buffer_time: 1500
 
-# You can put any messages that is emitted in the system here and it will be logged
+# You can put any messages that is emitted in the system here and it will be played back
 # The below ones are just the most common and here as an example
 messages:
   message.input.Image: false
