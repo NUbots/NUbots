@@ -26,8 +26,6 @@
 namespace utility {
 namespace input {
 
-    enum ServoSide { RIGHT = 0, LEFT = 1 };
-
     struct ServoID {
         enum Value {
             R_SHOULDER_PITCH = 0,
@@ -62,7 +60,6 @@ namespace input {
         ServoID(int const& v) : value(static_cast<Value>(v)) {}
         ServoID(Value const& value) : value(value) {}
         ServoID(std::string const& str);
-        ServoID(std::string const& str, ServoSide const& side);
 
         // Operators
         bool operator<(ServoID const& other) const {
