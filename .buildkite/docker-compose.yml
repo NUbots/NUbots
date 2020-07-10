@@ -14,9 +14,6 @@ services:
         target: /home/nubots/NUbots
         read_only: true
         consistency: cached
-    environment:
-      COMPOSE_DOCKER_CLI_BUILD: 1
-      DOCKER_BUILDKIT: 1
 
   nuc7i7bnh_image:
     image: nubots/nubots:nuc7i7bnh
@@ -32,9 +29,6 @@ services:
         target: /home/nubots/NUbots
         read_only: true
         consistency: cached
-    environment:
-      COMPOSE_DOCKER_CLI_BUILD: 1
-      DOCKER_BUILDKIT: 1
 
   nuc8i7beh_image:
     image: nubots/nubots:nuc8i7beh
@@ -50,6 +44,3 @@ services:
         target: /home/nubots/NUbots
         read_only: true
         consistency: cached
-    environment:
-      COMPOSE_DOCKER_CLI_BUILD: 1
-      DOCKER_BUILDKIT: 1
