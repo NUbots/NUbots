@@ -145,8 +145,6 @@ def run_on_docker(func):
                 func(rebuild=rebuild, clean=clean, platform=platform, **kwargs)
             # Otherwise go and re-run the b script in docker
             else:
-                pty = WrapPty()
-
                 # If the platform was "selected" that means to use the currently selected platform
                 selected_platform = platform == "selected"
                 if selected_platform:
@@ -210,6 +208,7 @@ def run_on_docker(func):
                     else subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
                 )
 
+                pty = WrapPty()
                 exit(
                     pty.spawn(
                         [
