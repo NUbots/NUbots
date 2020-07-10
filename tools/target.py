@@ -2,9 +2,10 @@
 
 import os
 
-import b
-from dockerise import WrapPty, build_platform, repository, get_selected_platform, platforms
 from termcolor import cprint
+
+import b
+from dockerise import WrapPty, build_platform, get_selected_platform, platforms, repository
 
 
 def register(command):

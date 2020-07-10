@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import re
 import shutil
 import stat
 import subprocess
 import sys
-import json
+
 from termcolor import cprint
 
 import b
