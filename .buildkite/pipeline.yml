@@ -1,4 +1,6 @@
+# Global environment variables used for all steps
 env:
+  # These two environment variables are needed to make docker-compose use buildkit
   COMPOSE_DOCKER_CLI_BUILD: 1
   DOCKER_BUILDKIT: 1
 
