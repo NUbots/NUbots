@@ -1,3 +1,7 @@
+env:
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  DOCKER_BUILDKIT: 1
+
 steps:
   # Push up new images to DockerHub when they get to master
   # Makes development faster as you can just pull the images rather than building them yourself
@@ -14,9 +18,6 @@ steps:
           config: .buildkite/docker-compose.yml
           push:
             - generic:nubots/nubots:generic
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
 
   - label: "Push nuc7i7bnh :docker: image"
     branches: master
@@ -30,9 +31,6 @@ steps:
           config: .buildkite/docker-compose.yml
           push:
             - nuc7i7bnh:nubots/nubots:nuc7i7bnh
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
 
   - label: "Push nuc8i7beh :docker: image"
     branches: master
@@ -46,9 +44,6 @@ steps:
           config: .buildkite/docker-compose.yml
           push:
             - nuc8i7beh:nubots/nubots:nuc8i7beh
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
 
   # Wait to finish uploading the image before doing the next steps
   - wait
@@ -62,9 +57,6 @@ steps:
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
 
   # Build for both nuc targets
   - label: "Build nuc7i7bnh"
@@ -75,9 +67,6 @@ steps:
           pull: nuc7i7bnh_image
           run: nuc7i7bnh
           workdir: /home/nubots/NUbots/
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
   - label: "Build nuc8i7beh"
     command: echo "nuc8i7beh image successfully built!"
     plugins:
@@ -86,9 +75,6 @@ steps:
           pull: nuc8i7beh_image
           run: nuc8i7beh
           workdir: /home/nubots/NUbots/
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
 
   # Formatting
   - label: "Validate C++ and Protobuf formatting"
@@ -99,9 +85,6 @@ steps:
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
   - label: "Validate CMake formatting"
     command: ".buildkite/scripts/validate_cmake_format.sh"
     plugins:
@@ -110,9 +93,6 @@ steps:
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
   - label: "Validate Python formatting"
     command: ".buildkite/scripts/validate_python_format.sh"
     plugins:
@@ -121,6 +101,3 @@ steps:
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
-          env:
-            - COMPOSE_DOCKER_CLI_BUILD=1
-            - DOCKER_BUILDKIT=1
