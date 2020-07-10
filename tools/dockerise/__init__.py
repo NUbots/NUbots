@@ -54,8 +54,6 @@ def build_platform(platform):
             "docker",
             "build",
             ".",
-            "--cache-from",
-            remote_tag,
             "--build-arg",
             "BUILDKIT_INLINE_CACHE=1",
             "--build-arg",
