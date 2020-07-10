@@ -154,9 +154,7 @@ def run_on_docker(func):
 
                 # Check if the image we want exists
                 tag = "{}:{}".format(repository, platform)
-                try:
-                    subprocess.Popen(["docker", "image", "inspect", tag], stdout=subprocess.DEVNULL).communicate()
-                except subprocess.CalledProcessError:
+                if subprocess.call(["docker", "image", "inspect", tag], stdout=subprocess.DEVNULL) != 0:
                     print("Could not find the image {}, rebuilding from source".format(tag))
                     rebuild = True
 
@@ -165,33 +163,26 @@ def run_on_docker(func):
                     build_platform(platform)
                     # If we were building the selected platform we have to move our selected tag up
                     if selected_platform:
-                        try:
-                            subprocess.Popen(
+                        if (
+                            subprocess.call(
                                 ["docker", "image", "tag", tag, "{}:selected".format(repository)],
                                 stdout=subprocess.DEVNULL,
-                            ).communicate()
-                        except subprocess.CalledProcessError:
+                            )
+                            != 0
+                        ):
                             cprint("docker image tag returned a non-zero exit code", "red", attrs=["bold"])
                             exit(1)
 
                 # Find the volume for this platform
                 build_volume_name = "{}_{}_build".format(repository, platform)
-                try:
-                    subprocess.Popen(
-                        ["docker", "volume", "inspect", build_volume_name], stdout=subprocess.DEVNULL
-                    ).communicate()
-
+                if subprocess.call(["docker", "volume", "inspect", build_volume_name], stdout=subprocess.DEVNULL) == 0:
                     build_volume = build_volume_name
-                except subprocess.CalledProcessError:
+                else:
                     build_volume = None
 
                 # If we are cleaning, remove this volume so we can recreate it
                 if build_volume and clean:
-                    try:
-                        subprocess.Popen(
-                            ["docker", "volume", "rm", build_volume_name], stdout=subprocess.DEVNULL
-                        ).communicate()
-                    except subprocess.CalledProcessError:
+                    if subprocess.call(["docker", "volume", "rm", build_volume_name], stdout=subprocess.DEVNULL) != 0:
                         cprint("Docker volume rm returned a non-zero exit", "red", attrs=["bold"])
                         exit(1)
 
@@ -199,12 +190,12 @@ def run_on_docker(func):
 
                 # If we don't have a volume, make one
                 if build_volume is None:
-                    try:
-                        subprocess.Popen(
-                            ["docker", "volume", "create", build_volume_name], stdout=subprocess.DEVNULL
-                        ).communicate()
+                    if (
+                        subprocess.call(["docker", "volume", "create", build_volume_name], stdout=subprocess.DEVNULL)
+                        == 0
+                    ):
                         build_volume = build_volume_name
-                    except subprocess.CalledProcessError:
+                    else:
                         cprint("Docker volume create returned a non-zero exit code", "red", attrs=["bold"])
                         exit(1)
 
