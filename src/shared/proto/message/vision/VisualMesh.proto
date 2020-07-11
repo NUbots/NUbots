@@ -22,7 +22,6 @@ syntax = "proto3";
 package message.vision;
 
 import "google/protobuf/timestamp.proto";
-import "Neutron.proto";
 import "Matrix.proto";
 
 message VisualMesh {
@@ -30,13 +29,13 @@ message VisualMesh {
         float phi      = 1;
         int32 segments = 2;
     }
-    uint32   camera_id                  = 1;
-    fmat     rays                       = 2;
-    imat     neighbourhood              = 3;
-    fmat     classifications            = 4;
-    fmat     coordinates                = 5;
-    repeated int32 indices              = 6 [packed = true];
-    mat4           Hcw                  = 7;
-    repeated Row              mesh      = 8;
-    google.protobuf.Timestamp timestamp = 9;
+    uint32                    camera_id       = 1;
+    fmat                      rays            = 2;
+    imat                      neighbourhood   = 3;
+    fmat                      classifications = 4;
+    fmat                      coordinates     = 5;
+    repeated int32            indices         = 6 [packed = true];
+    mat4                      Hcw             = 7;
+    repeated Row              mesh            = 8;
+    google.protobuf.Timestamp timestamp       = 9;
 }

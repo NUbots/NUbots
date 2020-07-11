@@ -14,34 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2019 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.motion;
+package message.platform.gazebo;
 
-import "Vector.proto";
+import "message/platform/darwin/DarwinSensors.proto";
 
-message WalkStarted {}
-message WalkStopped {}
-
-message WalkCommand {
-    uint64 subsumptionId = 1;  // reservation identifier for servo control
-    vec3   command       = 2;  // x and y are velocity in m/s and angle is in rads/s
-}
-
-message StopCommand {
-    uint64 subsumptionId = 1;  // reservation identifier for servo control
-}
-
-message NewWalkCommand {
-    vec3 velocityTarget = 1;
-}
-
-message EnableWalkEngineCommand {
-    uint64 subsumptionId = 1;  // reservation identifier for servo control
-}
-
-message DisableWalkEngineCommand {
-    uint64 subsumptionId = 1;  // reservation identifier for servo control
+message RawSensors {
+    // The name of the model in the simulation that these sensors are from
+    string model = 1;
+    // The sensors object for this model
+    platform.darwin.DarwinSensors sensors = 2;
 }
