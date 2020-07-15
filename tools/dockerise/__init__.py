@@ -40,13 +40,13 @@ def build_platform(platform):
             os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
 
     # Pull the latest version from dockerhub
-    err = pty.spawn(["docker", "pull", remote_tag])
+    build_env = os.environ
+    build_env["DOCKER_BUILDKIT"] = "1"
+    err = pty.spawn(["docker", "pull", remote_tag], env=build_env)
     if err != 0:
         cprint("Docker pull returned exit code {}".format(err), "red", attrs=["bold"])
         exit(err)
 
-    build_env = os.environ
-    build_env["DOCKER_BUILDKIT"] = "1"
     old_cwd = os.getcwd()
     os.chdir(dockerdir)
     # The following link suggets that a comma-separated list should be used for caching from multiple images
