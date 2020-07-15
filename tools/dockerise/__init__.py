@@ -49,11 +49,17 @@ def build_platform(platform):
     build_env["DOCKER_BUILDKIT"] = "1"
     old_cwd = os.getcwd()
     os.chdir(dockerdir)
+    # The following link suggets that a comma-separated list should be used for caching from multiple images
+    # and that the order is important. Since the local_tag may contain local modifications we should specify
+    # it first
+    # https://github.com/moby/moby/issues/34715#issuecomment-425933774
     err = pty.spawn(
         [
             "docker",
             "build",
             ".",
+            "--cache-from",
+            "{},{}".format(local_tag, remote_tag),
             "--build-arg",
             "BUILDKIT_INLINE_CACHE=1",
             "--build-arg",
