@@ -8,8 +8,8 @@ services:
       # Use these two images as a cache when building this image
       # Assumingly, order is important here as well
       cache_from:
-        - generic
-        - generic_image
+        - nubots:generic
+        - nubots/nubots:generic
       args:
         platform: generic
         BUILDKIT_INLINE_CACHE: 1
@@ -28,8 +28,8 @@ services:
       # Use these two images as a cache when building this image
       # Assumingly, order is important here as well
       cache_from:
-        - nuc7i7bnh
-        - nuc7i7bnh_image
+        - nubots:nuc7i7bnh
+        - nubots/nubots:nuc7i7bnh
       args:
         platform: nuc7i7bnh
         BUILDKIT_INLINE_CACHE: 1
@@ -48,8 +48,8 @@ services:
       # Use these two images as a cache when building this image
       # Assumingly, order is important here as well
       cache_from:
-        - nuc8i7beh
-        - nuc8i7beh_image
+        - nubots:nuc8i7beh
+        - nubots/nubots:nuc8i7beh
       args:
         platform: nuc8i7beh
         BUILDKIT_INLINE_CACHE: 1
