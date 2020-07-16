@@ -6,9 +6,8 @@ https://github.com/Rhoban/model/
 #ifndef MODULE_MOTION_QUINTICWALK_SPLINECONTAINER_HPP
 #define MODULE_MOTION_QUINTICWALK_SPLINECONTAINER_HPP
 
-#include <fmt/format.h>
-
 #include <algorithm>
+#include <fmt/format.h>
 #include <fstream>
 #include <map>
 #include <set>
@@ -182,20 +181,24 @@ namespace motion {
                 while (file.good()) {
                     isParseError = true;
                     // Skip name delimitor
-                    if (file.peek() != '\'') break;
+                    if (file.peek() != '\'')
+                        break;
                     file.ignore();
-                    if (!file.good()) break;
+                    if (!file.good())
+                        break;
                     // Parse spline name
                     char name[256];
                     file.getline(name, 256, '\'');
                     // Import founded spline
                     add(U(name));
-                    if (!file.good()) break;
+                    if (!file.good())
+                        break;
                     container.at(U(name)).importData(file);
                     isParseError = false;
                     // Skip end line
                     while (file.peek() == ' ' || file.peek() == '\n') {
-                        if (!file.good()) break;
+                        if (!file.good())
+                            break;
                         file.ignore();
                     }
                 }

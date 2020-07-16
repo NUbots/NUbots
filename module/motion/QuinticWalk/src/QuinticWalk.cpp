@@ -3,12 +3,14 @@
 #include <fmt/format.h>
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/motion/GetupCommand.h"
 #include "message/motion/KinematicsModel.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/WalkCommand.h"
 #include "message/support/SaveConfiguration.h"
+
 #include "utility/math/comparison.h"
 #include "utility/math/euler.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -151,13 +153,15 @@ namespace motion {
 
                 // threshold pitch and roll
                 if (std::abs(RPY[0]) > config.imu_roll_threshold) {
-                    log<NUClear::WARN>(fmt::format(
-                        "Robot roll exceeds threshold - {} > {}", std::abs(RPY.x()), config.imu_roll_threshold));
+                    log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
+                                                   std::abs(RPY.x()),
+                                                   config.imu_roll_threshold));
                     walk_engine.requestPause();
                 }
                 else if (std::abs(RPY[1]) > config.imu_pitch_threshold) {
-                    log<NUClear::WARN>(fmt::format(
-                        "Robot pitch exceeds threshold - {} > {}", std::abs(RPY.y()), config.imu_pitch_threshold));
+                    log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
+                                                   std::abs(RPY.y()),
+                                                   config.imu_pitch_threshold));
                     walk_engine.requestPause();
                 }
             }

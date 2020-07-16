@@ -98,8 +98,9 @@ namespace motion {
         Eigen::Vector3f Footstep::diffInv(const Eigen::Vector3f& diff) const {
             const float cos_z = std::cos(-diff.z());
             const float sin_z = std::sin(-diff.z());
-            return Eigen::Vector3f(
-                -diff.x() * cos_z + diff.y() * sin_z, -diff.x() * sin_z - diff.y() * cos_z, -diff.z());
+            return Eigen::Vector3f(-diff.x() * cos_z + diff.y() * sin_z,
+                                   -diff.x() * sin_z - diff.y() * cos_z,
+                                   -diff.z());
         }
 
     }  // namespace engine

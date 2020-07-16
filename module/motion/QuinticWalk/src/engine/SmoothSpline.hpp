@@ -137,8 +137,13 @@ namespace motion {
             /**
              * Fit a polynom between 0 and t with given pos, vel and acc initial and final conditions
              */
-            Polynom<Scalar>
-            polynomFit(Scalar t, Scalar pos1, Scalar vel1, Scalar acc1, Scalar pos2, Scalar vel2, Scalar acc2) const {
+            Polynom<Scalar> polynomFit(Scalar t,
+                                       Scalar pos1,
+                                       Scalar vel1,
+                                       Scalar acc1,
+                                       Scalar pos2,
+                                       Scalar vel2,
+                                       Scalar acc2) const {
                 if (t <= static_cast<Scalar>(0.00001)) {
                     throw std::logic_error("SmoothSpline invalid spline interval");
                 }

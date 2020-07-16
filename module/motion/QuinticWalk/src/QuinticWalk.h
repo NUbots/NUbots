@@ -7,8 +7,10 @@
 #include <vector>
 
 #include "engine/WalkEngine.hpp"
+
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/KinematicsModel.h"
+
 #include "utility/input/ServoID.h"
 
 namespace module {

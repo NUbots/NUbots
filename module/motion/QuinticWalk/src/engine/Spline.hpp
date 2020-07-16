@@ -110,14 +110,17 @@ namespace motion {
                     Polynom<Scalar> p;
                     // Load spline interval and degree
                     is >> min;
-                    if (!is.good()) break;
+                    if (!is.good())
+                        break;
                     is >> max;
-                    if (!is.good()) break;
+                    if (!is.good())
+                        break;
                     is >> size;
                     // Load polynom coefficients
                     p.getCoefs().resize(size);
                     for (size_t i = 0; i < size; i++) {
-                        if (!is.good()) break;
+                        if (!is.good())
+                            break;
                         is >> p.getCoefs()[i];
                     }
                     // Save spline part
@@ -125,7 +128,8 @@ namespace motion {
                     splines.push_back({p, min, max});
                     // Exit on line break
                     while (is.peek() == ' ') {
-                        if (!is.good()) break;
+                        if (!is.good())
+                            break;
                         is.ignore();
                     }
                     if (is.peek() == '\n') {
