@@ -59,7 +59,7 @@ def build_platform(platform):
             "build",
             ".",
             "--cache-from",
-            "{},{}".format(local_tag, remote_tag),
+            ','.join([local_tag, remote_tag]),
             "--build-arg",
             "BUILDKIT_INLINE_CACHE=1",
             "--build-arg",
