@@ -11,7 +11,12 @@ from dockerise import WrapPty, build_platform, get_selected_platform, platforms,
 def register(command):
     command.help = "Select the default platform to use for docker commands"
 
-    command.add_argument("--local-only", action="store_true", default=False, help="Don't update any images from Docker Hub and let Docker auto-decide what to use as a layer cache.")
+    command.add_argument(
+        "--local-only",
+        action="store_true",
+        default=False,
+        help="Don't update any images from Docker Hub and let Docker auto-decide what to use as a layer cache.",
+    )
 
     command.add_argument(
         "platform",
