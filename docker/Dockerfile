@@ -6,10 +6,18 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-FROM archlinux:20200106
+### The following two commands are paired
+### The date in the Server command must either match, or be more recent than,
+### the date in the FROM command
+### Date format is ISO year/month/day
+FROM archlinux:20200505
+RUN echo "Server=https://archive.archlinux.org/repos/2020/05/05/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
-RUN pacman -Syu --noconfirm
+# Use "yyuu" to allow for downgrades
+# There wont be any downgrades provided the date in Server line above is the same
+# or newer than the arch image date
+RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Create the nubots user, and setup sudo so no password is required
 RUN useradd --no-log-init -m -U nubots
@@ -143,7 +151,8 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
+    https://github.com/OCL-dev/ocl-icd/commit/f83df609a3357314ddff2def6b7e7e2c5b93078c.patch --
 
 # OpenBLAS
 RUN install-package gcc-fortran
@@ -264,7 +273,7 @@ RUN install-package \
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.9 \
-    isort \
+    isort==4.3.21 \
     black==19.10b0
 
 #######################################

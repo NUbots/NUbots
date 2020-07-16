@@ -174,8 +174,10 @@ namespace math {
                 // Compute weights
                 arma::mat observationDifferences = arma::mat(measurement.n_elem, repCandidateParticles.n_cols);
                 for (unsigned int i = 0; i < repCandidateParticles.n_cols; ++i) {
-                    arma::vec predictedObservation = model.predictedObservation(
-                        repCandidateParticles.col(i), possibilities[i / candidateParticles.n_cols], measurementArgs...);
+                    arma::vec predictedObservation =
+                        model.predictedObservation(repCandidateParticles.col(i),
+                                                   possibilities[i / candidateParticles.n_cols],
+                                                   measurementArgs...);
                     observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
                 }
                 arma::vec weights =

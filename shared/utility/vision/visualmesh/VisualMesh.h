@@ -116,8 +116,9 @@ namespace vision {
             return std::partition(first, last, [&](const value_type& cluster) {
                 bool above = false, below = false;
                 for (unsigned int idx = 0; idx < cluster.size() && !success(above, below); ++idx) {
-                    if (utility::math::geometry::point_under_hull(
-                            rays.col(cluster[idx]), horizon_first, horizon_last)) {
+                    if (utility::math::geometry::point_under_hull(rays.col(cluster[idx]),
+                                                                  horizon_first,
+                                                                  horizon_last)) {
                         above = true;
                     }
                     else {

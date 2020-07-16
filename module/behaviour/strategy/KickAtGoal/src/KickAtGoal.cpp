@@ -22,10 +22,12 @@
 #include <armadillo>
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/vision/Ball.h"
 #include "message/vision/Goal.h"
+
 #include "utility/time/time.h"
 
 namespace module {

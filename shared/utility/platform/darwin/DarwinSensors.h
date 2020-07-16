@@ -20,6 +20,7 @@
 #define UTILITY_PLATFORM_DARWIN_DARWINSENSORS_H
 
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/input/ServoID.h"
 
 namespace utility {

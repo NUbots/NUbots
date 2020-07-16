@@ -4,8 +4,10 @@
 #include <nuclear>
 
 #include "RobotModel.h"
+
 #include "message/support/FieldDescription.h"
 #include "message/vision/Goal.h"
+
 #include "utility/math/filter/ParticleFilter.h"
 
 namespace module {

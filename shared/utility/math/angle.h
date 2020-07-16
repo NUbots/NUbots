@@ -45,9 +45,11 @@ namespace math {
 
             T angle = std::fmod(value, static_cast<T>(2.0 * M_PI));
 
-            if (angle <= -M_PI) angle += static_cast<T>(M_PI * 2.0);
+            if (angle <= -M_PI)
+                angle += M_PI * 2;
 
-            if (angle > M_PI) angle -= static_cast<T>(M_PI * 2.0);
+            if (angle > M_PI)
+                angle -= 2 * M_PI;
 
             return angle;
         }

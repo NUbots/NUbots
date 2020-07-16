@@ -22,11 +22,13 @@
 #include <limits>
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/WalkPath.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/WalkCommand.h"
+
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -129,23 +131,24 @@ namespace behaviour {
 
             updatePathReaction =
                 on<Trigger<WalkPath>, With<std::vector<Self>>, Sync<WalkPathFollower>, Single>()
-                    .then("Update current path plan",
-                          [this](const WalkPath& walkPath, const std::vector<Self>& selfs) {
-                              currentPath = walkPath;
+                    .then(
+                        "Update current path plan",
+                        [this](const WalkPath& walkPath, const std::vector<Self>& selfs) {
+                            currentPath = walkPath;
 
-                              // Draw the robot's estimated path:
-                              if (cfg_.draw_estimated_path) {
-                                  if (selfs.empty() || currentPath.states.empty()) {
-                                      NUClear::log(__FILE__, __LINE__, "empty self and current states");
-                                      return;
-                                  }
-                                  auto self                = selfs.front();
-                                  Transform2D currentState = {self.position, vectorToBearing(self.heading)};
-                                  auto estPath             = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
-                                  emit(utility::nusight::drawPath(
-                                      "WPF_EstimatedPath", estPath.states, 0.05, {1, 0.8, 0}));
-                              }
-                          })
+                            // Draw the robot's estimated path:
+                            if (cfg_.draw_estimated_path) {
+                                if (selfs.empty() || currentPath.states.empty()) {
+                                    NUClear::log(__FILE__, __LINE__, "empty self and current states");
+                                    return;
+                                }
+                                auto self                = selfs.front();
+                                Transform2D currentState = {self.position, vectorToBearing(self.heading)};
+                                auto estPath             = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
+                                emit(
+                                    utility::nusight::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1, 0.8, 0}));
+                            }
+                        })
                     .disable();
 
             followPathReaction =
@@ -231,8 +234,9 @@ namespace behaviour {
 
                             emit(std::move(walkCommand));
 
-                            emit(utility::nusight::drawRectangle(
-                                "WPF_Closest", RotatedRectangle(targetState, {0.12, 0.17}), {0, 0, 0}));
+                            emit(utility::nusight::drawRectangle("WPF_Closest",
+                                                                 RotatedRectangle(targetState, {0.12, 0.17}),
+                                                                 {0, 0, 0}));
 
                             emit(utility::nusight::drawArrow("WPF_Closest_Arrow", targetState, {1, 0, 1}, 1));
 
@@ -306,8 +310,9 @@ namespace behaviour {
             // Aim for the index after the closest state:
             int targetIndex         = std::min(1, int(currentPath.states.size()) - 1);
             Transform2D targetState = currentPath.states[targetIndex];  // {3, 3, 3.14};
-            emit(utility::nusight::drawRectangle(
-                "WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
+            emit(utility::nusight::drawRectangle("WPF_TargetState",
+                                                 RotatedRectangle(targetState, {0.12, 0.17}),
+                                                 {1, 0, 0}));
 
             std::unique_ptr<WalkCommand> command;
 

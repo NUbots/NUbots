@@ -19,7 +19,6 @@
 #include "Vision.h"
 
 #include <fmt/format.h>
-
 #include <fstream>
 #include <string>
 
@@ -51,8 +50,9 @@ namespace vision {
         x = x < 2 ? 2 : x > (width - 3) ? width - 3 : x;
         y = y < 2 ? 2 : y > (height - 3) ? height - 3 : y;
 
-        return Eigen::Map<const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
-                   data.data(), height, width)
+        return Eigen::Map<const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(data.data(),
+                                                                                                         height,
+                                                                                                         width)
             .block<5, 5>(y - 2, x - 2);
     }
 

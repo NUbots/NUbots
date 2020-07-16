@@ -86,8 +86,9 @@ namespace strutil {
     }
 
     inline void removeAll(std::string& str, const std::string& tokens) {
-        str.erase(std::remove_if(
-                      str.begin(), str.end(), [&tokens](const char& c) { return tokens.find(c) != std::string::npos; }),
+        str.erase(std::remove_if(str.begin(),
+                                 str.end(),
+                                 [&tokens](const char& c) { return tokens.find(c) != std::string::npos; }),
                   str.end());  // remove all tokens from the string.
     }
 

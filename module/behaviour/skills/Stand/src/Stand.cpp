@@ -20,7 +20,9 @@
 #include "Stand.h"
 
 #include "extension/Script.h"
+
 #include "message/behaviour/ServoCommand.h"
+
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"

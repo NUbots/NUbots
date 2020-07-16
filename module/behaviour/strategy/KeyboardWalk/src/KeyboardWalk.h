@@ -20,10 +20,9 @@
 #ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 
-#include <ncurses.h>
-
 #include <armadillo>
 #include <mutex>
+#include <ncurses.h>
 #include <nuclear>
 
 #include "utility/input/LimbID.h"
