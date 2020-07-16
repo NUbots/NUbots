@@ -109,24 +109,29 @@ def get_selected_platform():
             ).communicate()[0],
         )
 
-        names = [
-            tag.split(":")[-1]
-            for tag in img_info[0]["RepoTags"]
-            if tag != "{}:selected".format(repository) and tag.startswith("{}:".format(repository))
-        ]
-        if len(names) == 0:
-            print("ERROR the currently selected platform is a dangling tag.")
-            print("      The system is unable to work out what platform this was and will need to be reset")
-            print("      run `./b target {platform}` to correct this")
-            exit(1)
-        elif len(names) == 1:
-            return names[0]
+        if len(img_info) > 0:
+            names = [
+                tag.split(":")[-1]
+                for tag in img_info[0]["RepoTags"]
+                if tag != "{}:selected".format(repository) and tag.startswith("{}:".format(repository))
+            ]
+            if len(names) == 0:
+                print("ERROR the currently selected platform is a dangling tag.")
+                print("      The system is unable to work out what platform this was and will need to be reset")
+                print("      run `./b target {platform}` to correct this")
+                exit(1)
+            elif len(names) == 1:
+                return names[0]
+            else:
+                print("WARNING There are multiple platforms with the same image tag.")
+                print("        The possible tags are [{}]".format(", ".join(names)))
+                platform = list(sorted(names))[0]
+                print("        The platform chosen will be {}".format(platform))
+                return platform
         else:
-            print("WARNING There are multiple platforms with the same image tag.")
-            print("        The possible tags are [{}]".format(", ".join(names)))
-            platform = list(sorted(names))[0]
-            print("        The platform chosen will be {}".format(platform))
-            return platform
+            print("WARNING There are no is no selected platform.")
+            print("        run `./b target {platform}` to correct this")
+            exit(1)
 
     except subprocess.CalledProcessError:
         cprint("Docker image inspect call returned a non-zero exit code.", "blue", attrs=["bold"])
