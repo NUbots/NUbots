@@ -52,7 +52,7 @@ def build_platform(platform, local_only):
     old_cwd = os.getcwd()
     os.chdir(dockerdir)
 
-    # Start contructing our build command
+    # Start constructing our build command
     build_command = [
         "docker",
         "build",
@@ -67,15 +67,12 @@ def build_platform(platform, local_only):
 
     # Only add --cache-from argument if we aren't only using the local cache (the cache that docker decides to use)
     if not local_only:
-        # The following link suggets that a comma-separated list should be used for caching from multiple images
+        # The following link suggests that a comma-separated list should be used for caching from multiple images
         # and that the order is important. Since the local_tag may contain local modifications we should specify
         # it first
         # https://github.com/moby/moby/issues/34715#issuecomment-425933774
         build_command.extend(
-            [
-                "--cache-from",
-                "{},{}".format(local_tag, remote_tag),
-            ]
+            ["--cache-from", ",".join([local_tag, remote_tag]),]
         )
 
     # Run our build command
@@ -116,21 +113,24 @@ def get_selected_platform():
                 if tag != "{}:selected".format(repository) and tag.startswith("{}:".format(repository))
             ]
             if len(names) == 0:
-                print("ERROR the currently selected platform is a dangling tag.")
-                print("      The system is unable to work out what platform this was and will need to be reset")
-                print("      run `./b target {platform}` to correct this")
+                cprint("ERROR the currently selected platform is a dangling tag.", "orange", attrs=["bold"])
+                cprint(
+                    "      The system is unable to work out what platform this was and will need to be reset orange",
+                    attrs=["bold"],
+                )
+                cprint("      run `./b target {platform}` to correct this", "orange", attrs=["bold"])
                 exit(1)
             elif len(names) == 1:
                 return names[0]
             else:
-                print("WARNING There are multiple platforms with the same image tag.")
-                print("        The possible tags are [{}]".format(", ".join(names)))
+                cprint("WARNING There are multiple platforms with the same image tag.", "orange", attrs=["bold"])
+                cprint("        The possible tags are [{}]".format(", ".join(names)), "orange", attrs=["bold"])
                 platform = list(sorted(names))[0]
-                print("        The platform chosen will be {}".format(platform))
+                cprint("        The platform chosen will be {}".format(platform), "orange", attrs=["bold"])
                 return platform
         else:
-            print("WARNING There are no is no selected platform.")
-            print("        run `./b target {platform}` to correct this")
+            cprint("WARNING There are no is no selected platform.", "orange", attrs=["bold"])
+            cprint("        run `./b target {platform}` to correct this", "orange", attrs=["bold"])
             exit(1)
 
     except subprocess.CalledProcessError:
@@ -156,7 +156,12 @@ def run_on_docker(func):
                 nargs="?",
                 help="The image to use for the docker container",
             )
-            command.add_argument("--local-only", action="store_true", default=False, help="Don't update any images from Docker Hub and let Docker auto-decide what to use as a layer cache.")
+            command.add_argument(
+                "--local-only",
+                action="store_true",
+                default=False,
+                help="Don't update any images from Docker Hub and let Docker auto-decide what to use as a layer cache.",
+            )
 
             func(command)
 
