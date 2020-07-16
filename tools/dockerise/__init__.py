@@ -24,7 +24,7 @@ def is_docker():
     return os.path.exists("/.dockerenv") or os.path.isfile(path) and any("docker" in line for line in open(path))
 
 
-def build_platform(platform):
+def build_platform(platform, local_only):
     pty = WrapPty()
 
     remote_tag = "{0}/{0}:{1}".format(repository, platform)
@@ -42,34 +42,49 @@ def build_platform(platform):
     # Pull the latest version from dockerhub
     build_env = os.environ
     build_env["DOCKER_BUILDKIT"] = "1"
-    err = pty.spawn(["docker", "pull", remote_tag], env=build_env)
-    if err != 0:
-        cprint("Docker pull returned exit code {}".format(err), "red", attrs=["bold"])
-        exit(err)
+    if not local_only:
+        err = pty.spawn(["docker", "pull", remote_tag], env=build_env)
+        if err != 0:
+            cprint("Docker pull returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)
 
+    # Preserve the current working directory and change to the directory containing the docker file
     old_cwd = os.getcwd()
     os.chdir(dockerdir)
-    # The following link suggets that a comma-separated list should be used for caching from multiple images
-    # and that the order is important. Since the local_tag may contain local modifications we should specify
-    # it first
-    # https://github.com/moby/moby/issues/34715#issuecomment-425933774
-    err = pty.spawn(
-        [
-            "docker",
-            "build",
-            ".",
-            "--cache-from",
-            "{},{}".format(local_tag, remote_tag),
-            "--build-arg",
-            "BUILDKIT_INLINE_CACHE=1",
-            "--build-arg",
-            "platform={}".format(platform if platform != "buildkit" else "generic"),
-            "-t",
-            local_tag,
-        ],
-        env=build_env,
-    )
+
+    # Start contructing our build command
+    build_command = [
+        "docker",
+        "build",
+        ".",
+        "--build-arg",
+        "BUILDKIT_INLINE_CACHE=1",
+        "--build-arg",
+        "platform={}".format(platform if platform != "buildkit" else "generic"),
+        "-t",
+        local_tag,
+    ]
+
+    # Only add --cache-from argument if we aren't only using the local cache (the cache that docker decides to use)
+    if not local_only:
+        # The following link suggets that a comma-separated list should be used for caching from multiple images
+        # and that the order is important. Since the local_tag may contain local modifications we should specify
+        # it first
+        # https://github.com/moby/moby/issues/34715#issuecomment-425933774
+        build_command.extend(
+            [
+                "--cache-from",
+                "{},{}".format(local_tag, remote_tag),
+            ]
+        )
+
+    # Run our build command
+    err = pty.spawn(build_command, env=build_env)
+
+    # Return to the original working directory
     os.chdir(old_cwd)
+
+    # Check for errors during the build
     if err != 0:
         cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
         exit(err)
@@ -136,6 +151,7 @@ def run_on_docker(func):
                 nargs="?",
                 help="The image to use for the docker container",
             )
+            command.add_argument("--local-only", action="store_true", default=False, help="Don't update any images from Docker Hub and let Docker auto-decide what to use as a layer cache.")
 
             func(command)
 
@@ -143,10 +159,10 @@ def run_on_docker(func):
 
     elif func.__name__ == "run":
 
-        def run(rebuild, clean, platform, **kwargs):
+        def run(rebuild, clean, platform, local_only, **kwargs):
             # If we are running in docker, then execute the command as normal
             if is_docker():
-                func(rebuild=rebuild, clean=clean, platform=platform, **kwargs)
+                func(rebuild=rebuild, clean=clean, platform=platform, local_only=local_only, **kwargs)
             # Otherwise go and re-run the b script in docker
             else:
                 # If the platform was "selected" that means to use the currently selected platform
@@ -162,7 +178,7 @@ def run_on_docker(func):
 
                 # If we are requesting a rebuild, then run build
                 if rebuild:
-                    build_platform(platform)
+                    build_platform(platform, local_only)
                     # If we were building the selected platform we have to move our selected tag up
                     if selected_platform:
                         if (

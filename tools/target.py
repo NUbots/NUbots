@@ -11,6 +11,8 @@ from dockerise import WrapPty, build_platform, get_selected_platform, platforms,
 def register(command):
     command.help = "Select the default platform to use for docker commands"
 
+    command.add_argument("--local-only", action="store_true", default=False, help="Don't update any images from Docker Hub and let Docker auto-decide what to use as a layer cache.")
+
     command.add_argument(
         "platform",
         metavar="platform",
@@ -20,14 +22,14 @@ def register(command):
     )
 
 
-def run(platform, **kwargs):
+def run(platform, local_only, **kwargs):
 
     if platform is None:
         platform = get_selected_platform()
         print("Currently selected platform is {}".format(platform))
     else:
         # Ensure the platform image is built
-        build_platform(platform)
+        build_platform(platform, local_only)
 
         # Tag the built platform image is the selected image
         pty = WrapPty()
