@@ -10,6 +10,7 @@ extern "C" {
 #include <mutex>
 
 #include "CameraContext.h"
+
 #include "extension/Configuration.h"
 
 namespace module {
@@ -27,7 +28,7 @@ namespace input {
 
         std::mutex sensors_mutex;
         std::vector<std::pair<NUClear::clock::time_point, Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>>>
-            Hpws;
+            Hwps;
         std::map<std::string, CameraContext> cameras;
         uint32_t num_cameras = 0;
     };

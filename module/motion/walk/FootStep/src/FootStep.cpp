@@ -4,10 +4,12 @@
 #include <vector>
 
 #include "extension/Configuration.h"
+
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/FootTarget.h"
 #include "message/motion/KinematicsModel.h"
+
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
@@ -65,16 +67,16 @@ namespace motion {
                     // Right foot is the swing foot
                     if (target.isRightFootSwing) {
                         // Transform of left foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         // Transform of right foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
                     }
                     // Left foot is the swing foot
                     else {
                         // Transform of right foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
                         // Transform of left foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
                     }
                     Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;

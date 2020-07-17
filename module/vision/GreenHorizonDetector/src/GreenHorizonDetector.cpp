@@ -1,13 +1,14 @@
 #include "GreenHorizonDetector.h"
 
 #include <fmt/format.h>
-
 #include <numeric>
 #include <set>
 
 #include "extension/Configuration.h"
+
 #include "message/vision/GreenHorizon.h"
 #include "message/vision/VisualMesh.h"
+
 #include "utility/math/geometry/ConvexHull.h"
 #include "utility/vision/visualmesh/VisualMesh.h"
 
@@ -76,8 +77,11 @@ namespace vision {
             //    Clusters are merged when they are not overlapping
             //    If the clusters do overlap then we keep the largest one
             std::vector<std::vector<int>> clusters;
-            utility::vision::visualmesh::cluster_points(
-                indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
+            utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                        indices.end(),
+                                                        neighbours,
+                                                        config.cluster_points,
+                                                        clusters);
 
             if (config.debug) {
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));

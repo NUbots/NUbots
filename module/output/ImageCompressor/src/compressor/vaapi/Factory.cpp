@@ -1,20 +1,20 @@
 #include "Factory.h"
 
+#include <cstring>
 #include <fcntl.h>
+#include <nuclear>
+#include <system_error>
 #include <unistd.h>
 #include <va/va.h>
 #include <va/va_drm.h>
 #include <va/va_enc_jpeg.h>
 
-#include <cstring>
-#include <nuclear>
-#include <system_error>
-
 #include "cl/opencl_context_for_display.h"
 #include "cl/opencl_error_category.h"
 #include "operation/create_surface.h"
-#include "utility/vision/fourcc.h"
 #include "vaapi_error_category.hpp"
+
+#include "utility/vision/fourcc.h"
 
 namespace module::output::compressor::vaapi {
 

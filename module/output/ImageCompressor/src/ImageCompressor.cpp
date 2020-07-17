@@ -4,9 +4,12 @@
 
 #include "compressor/turbojpeg/Factory.h"
 #include "compressor/vaapi/Factory.h"
+
 #include "extension/Configuration.h"
+
 #include "message/input/Image.h"
 #include "message/output/CompressedImage.h"
+
 #include "utility/vision/fourcc.h"
 
 namespace module {
@@ -61,6 +64,7 @@ namespace output {
             else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
             else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            //clang-format on
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(compressor_mutex);
@@ -137,6 +141,7 @@ namespace output {
                         msg->lens.focal_length = image.lens.focal_length;
                         msg->lens.fov          = image.lens.fov;
                         msg->lens.centre       = image.lens.centre;
+                        msg->lens.k            = image.lens.k;
 
                         // Emit the compressed image
                         emit(msg);

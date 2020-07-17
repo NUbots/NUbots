@@ -44,8 +44,13 @@ VABufferID picture_parameter(VADisplay dpy,
 
     // Upload to device
     VABufferID bufferid;
-    VAStatus va_status = vaCreateBuffer(
-        dpy, context, VAEncPictureParameterBufferType, sizeof(VAEncPictureParameterBufferJPEG), 1, &params, &bufferid);
+    VAStatus va_status = vaCreateBuffer(dpy,
+                                        context,
+                                        VAEncPictureParameterBufferType,
+                                        sizeof(VAEncPictureParameterBufferJPEG),
+                                        1,
+                                        &params,
+                                        &bufferid);
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error creating the picture parameter buffer");
     }

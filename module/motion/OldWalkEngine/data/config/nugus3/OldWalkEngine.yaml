@@ -6,24 +6,24 @@ stance:
   body_tilt: 22 * pi / 180
   # Default arm positions while walking
   arms:
-      left:
-        start:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
-        end:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
-      right:
-        start:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
-        end:
-          -  120 * pi / 180 # Shoulder Pitch
-          -  0 * pi / 180 # Shoulder Roll
-          - -50 * pi / 180 # Elbow
+    left:
+      start:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
+      end:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
+    right:
+      start:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
+      end:
+        - 120 * pi / 180 # Shoulder Pitch
+        - 0 * pi / 180 # Shoulder Roll
+        - -50 * pi / 180 # Elbow
 
   foot_offset:
     - -0.05 # The distance the ankles are offset from the torso, in meters.
@@ -50,7 +50,7 @@ walk_cycle:
     # These limit the distance a footstep will take
     limits:
       - [-0.1, 0.3] # [min_x, max_x]
-      - [0.0 , 0.3] # [min_y, max_y]
+      - [0.0, 0.3] # [min_y, max_y]
       - [0, 15 * pi / 180] # [min_angle, max_angle]
     # Angle in which the leg will be rotated about z when walking
     leg_yaw: 0 * pi / 180
@@ -129,22 +129,40 @@ walk_cycle:
           d: 0
     servo_gains:
       # -
-      #   id: "HIP_YAW"
+      #   id: "R_HIP_YAW"
       #   p: 100
       # -
-      #   id: "HIP_ROLL"
+      #   id: "L_HIP_YAW"
       #   p: 100
       # -
-      #   id: "HIP_PITCH"
+      #   id: "R_HIP_ROLL"
       #   p: 100
       # -
-      #   id: "KNEE"
+      #   id: "L_HIP_ROLL"
+      #   p: 100
+      # -
+      #   id: "R_HIP_PITCH"
+      #   p: 100
+      # -
+      #   id: "L_HIP_PITCH"
+      #   p: 100
+      # -
+      #   id: "R_KNEE"
       #   p: 1000
       # -
-      #   id: "ANKLE_PITCH"
+      #   id: "L_KNEE"
+      #   p: 1000
+      # -
+      #   id: "R_ANKLE_PITCH"
       #   p: 100
       # -
-      #   id: "ANKLE_ROLL"
+      #   id: "L_ANKLE_PITCH"
+      #   p: 100
+      # -
+      #   id: "R_ANKLE_ROLL"
+      #   p: 100
+      # -
+      #   id: "L_ANKLE_ROLL"
       #   p: 100
 
     # Support bias parameters to reduce backlash-based instability

@@ -18,8 +18,10 @@
  */
 
 #include "NUsight.h"
+
 #include "message/localisation/Ball.h"
 #include "message/localisation/Field.h"
+
 #include "utility/nusight/NUhelpers.h"
 
 namespace module {

@@ -23,6 +23,7 @@
 #include <nuclear>
 
 #include "GameControllerData.h"
+
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
 

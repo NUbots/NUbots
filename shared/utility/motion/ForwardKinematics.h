@@ -27,7 +27,9 @@
 #include <vector>
 
 #include "message/input/Sensors.h"
+#include "message/motion/BodySide.h"
 #include "message/motion/KinematicsModel.h"
+
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
@@ -39,11 +41,11 @@ namespace utility {
 namespace motion {
     namespace kinematics {
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
         using message::input::Sensors;
+        using message::motion::BodySide;
         using message::motion::KinematicsModel;
-        using BodySide = message::motion::BodySide;
+        using utility::input::LimbID;
+        using utility::input::ServoID;
 
 
         inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
@@ -57,8 +59,9 @@ namespace motion {
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Z);
             const float NECK_LENGTH = model.head.NECK_LENGTH;
-            const Eigen::Vector3d NECK_TO_CAMERA(
-                model.head.NECK_TO_CAMERA_X, model.head.NECK_TO_CAMERA_Y, model.head.NECK_TO_CAMERA_Z);
+            const Eigen::Vector3d NECK_TO_CAMERA(model.head.NECK_TO_CAMERA_X,
+                                                 model.head.NECK_TO_CAMERA_Y,
+                                                 model.head.NECK_TO_CAMERA_Z);
 
             // Translate to base of neck from origin
             runningTransform = runningTransform.translate(NECK_POS);
@@ -80,11 +83,6 @@ namespace motion {
             runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
             // Rotate pitch
             runningTransform = runningTransform.rotate(Eigen::AngleAxisd(HEAD_PITCH, Eigen::Vector3d::UnitY()));
-            // Translate to camera
-            runningTransform = runningTransform.translate(NECK_TO_CAMERA);
-            // Rotate to set x to camera vector
-            runningTransform = runningTransform.rotate(
-                Eigen::AngleAxisd(model.head.CAMERA_DECLINATION_ANGLE_OFFSET, Eigen::Vector3d::UnitY()));
             // PITCH
             // Return basis pointing along camera vector (ie x is camera vector, z out of top of head). Pos at camera
             // position
@@ -136,8 +134,9 @@ namespace motion {
             }
 
             // Hip pitch
-            runningTransform = runningTransform.translate(Eigen::Vector3d(
-                model.leg.HIP_OFFSET_X, negativeIfRight * model.leg.HIP_OFFSET_Y, -model.leg.HIP_OFFSET_Z));
+            runningTransform = runningTransform.translate(Eigen::Vector3d(model.leg.HIP_OFFSET_X,
+                                                                          negativeIfRight * model.leg.HIP_OFFSET_Y,
+                                                                          -model.leg.HIP_OFFSET_Z));
             // Rotate to face down the leg (see above for definitions of terms, including 'facing')
             runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
             // Using right hand rule along global z gives positive direction of yaw:
@@ -246,8 +245,9 @@ namespace motion {
             runningTransform =
                 runningTransform.rotate(Eigen::AngleAxisd(shoulder_pitch - M_PI_2, Eigen::Vector3d::UnitY()));
             // Translate to end of shoulder part
-            runningTransform = runningTransform.translate(Eigen::Vector3d(
-                model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT));
+            runningTransform = runningTransform.translate(Eigen::Vector3d(model.arm.SHOULDER_LENGTH,
+                                                                          negativeIfRight * model.arm.SHOULDER_WIDTH,
+                                                                          -model.arm.SHOULDER_HEIGHT));
             // Return matrix pointing forward out of shoulder, y same as global y. Pos = at centre of shoulder roll
             // joint
             positions[SHOULDER_PITCH] = runningTransform;
@@ -337,19 +337,19 @@ namespace motion {
         */
         inline Eigen::Vector4d calculateCentreOfMass(
             const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics,
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& Htx,
             const Eigen::Matrix4d& Hwt) {
 
             // Convenience function to transform particle-space CoM to torso-space CoM
-            // Htp - transform from particle space to torso space
+            // Htx - transform from particle space to torso space
             // particle - CoM coordinates in particle space
-            auto com = [&Hwt](const Eigen::Matrix4d& Htp, const Eigen::Vector4d& particle) {
+            auto com = [&Hwt](const Eigen::Matrix4d& Htx, const Eigen::Vector4d& particle) {
                 // Split out CoM and mass
                 Eigen::Vector4d com(particle.x(), particle.y(), particle.z(), 1.0);
                 double mass = particle.w();
 
                 // Calculate CoM in torso space
-                com = Htp * com;
+                com = Htx * com;
 
                 return std::pair<Eigen::Vector3d, double>{Eigen::Vector3d(com.x(), com.y(), com.z()), mass};
             };
@@ -357,21 +357,21 @@ namespace motion {
             // Get the centre of mass for each particle in torso space
             // There are 16 particles in total
             std::array<std::pair<Eigen::Vector3d, double>, 16> particles = {
-                com(forward_kinematics[utility::input::ServoID::HEAD_PITCH], model.massModel.head),
-                com(forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH], model.massModel.arm_upper),
-                com(forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH], model.massModel.arm_upper),
-                com(forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL], model.massModel.arm_lower),
-                com(forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL], model.massModel.arm_lower),
-                com(forward_kinematics[utility::input::ServoID::L_HIP_ROLL], model.massModel.hip_block),
-                com(forward_kinematics[utility::input::ServoID::R_HIP_ROLL], model.massModel.hip_block),
-                com(forward_kinematics[utility::input::ServoID::L_HIP_PITCH], model.massModel.leg_upper),
-                com(forward_kinematics[utility::input::ServoID::R_HIP_PITCH], model.massModel.leg_upper),
-                com(forward_kinematics[utility::input::ServoID::L_KNEE], model.massModel.leg_lower),
-                com(forward_kinematics[utility::input::ServoID::R_KNEE], model.massModel.leg_lower),
-                com(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH], model.massModel.ankle_block),
-                com(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH], model.massModel.ankle_block),
-                com(forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL], model.massModel.foot),
-                com(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL], model.massModel.foot),
+                com(Htx[utility::input::ServoID::HEAD_PITCH], model.massModel.head),
+                com(Htx[utility::input::ServoID::L_SHOULDER_PITCH], model.massModel.arm_upper),
+                com(Htx[utility::input::ServoID::R_SHOULDER_PITCH], model.massModel.arm_upper),
+                com(Htx[utility::input::ServoID::L_SHOULDER_ROLL], model.massModel.arm_lower),
+                com(Htx[utility::input::ServoID::R_SHOULDER_ROLL], model.massModel.arm_lower),
+                com(Htx[utility::input::ServoID::L_HIP_ROLL], model.massModel.hip_block),
+                com(Htx[utility::input::ServoID::R_HIP_ROLL], model.massModel.hip_block),
+                com(Htx[utility::input::ServoID::L_HIP_PITCH], model.massModel.leg_upper),
+                com(Htx[utility::input::ServoID::R_HIP_PITCH], model.massModel.leg_upper),
+                com(Htx[utility::input::ServoID::L_KNEE], model.massModel.leg_lower),
+                com(Htx[utility::input::ServoID::R_KNEE], model.massModel.leg_lower),
+                com(Htx[utility::input::ServoID::L_ANKLE_PITCH], model.massModel.ankle_block),
+                com(Htx[utility::input::ServoID::R_ANKLE_PITCH], model.massModel.ankle_block),
+                com(Htx[utility::input::ServoID::L_ANKLE_ROLL], model.massModel.foot),
+                com(Htx[utility::input::ServoID::R_ANKLE_ROLL], model.massModel.foot),
                 std::pair<Eigen::Vector3d, double>{
                     Eigen::Vector3d{model.massModel.torso.x(), model.massModel.torso.y(), model.massModel.torso.z()},
                     model.massModel.torso.w()},
@@ -396,15 +396,15 @@ namespace motion {
         */
         inline Eigen::Matrix3d calculateInertialTensor(
             const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& forward_kinematics) {
+            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& Htx) {
 
             // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
-            // Htp - transform from particle space to torso space
+            // Htx - transform from particle space to torso space
             // particle - CoM coordinates in particle space
             auto translateTensor =
-                [](const Eigen::Matrix4d& Htp, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
+                [](const Eigen::Matrix4d& Htx, const Eigen::Matrix3d& tensor, const Eigen::Vector4d& com_mass) {
                     Eigen::Vector4d com(com_mass.x(), com_mass.y(), com_mass.z(), 1.0);
-                    com = Htp * com;
+                    com = Htx * com;
 
                     // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
                     double x = com.x(), y = com.y(), z = com.z();
@@ -418,7 +418,7 @@ namespace motion {
                     // We need to rotate the tensor into our torso reference frame
                     // https://en.wikipedia.org/wiki/Moment_of_inertia#Body_frame
                     Eigen::Matrix3d torso_tensor =
-                        Htp.topLeftCorner<3, 3>() * tensor * Htp.topLeftCorner<3, 3>().transpose();
+                        Htx.topLeftCorner<3, 3>() * tensor * Htx.topLeftCorner<3, 3>().transpose();
 
                     // Translate tensor using the parallel axis theorem
                     Eigen::Matrix3d tensor_com = com_mass.w() * (torso_tensor - d);
@@ -429,60 +429,58 @@ namespace motion {
             // Get the centre of mass for each particle in torso space
             // There are 16 particles in total
             std::array<Eigen::Matrix3d, 16> particles = {
-                translateTensor(forward_kinematics[utility::input::ServoID::HEAD_PITCH],
-                                model.tensorModel.head,
-                                model.massModel.head),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_PITCH],
+                translateTensor(Htx[utility::input::ServoID::HEAD_PITCH], model.tensorModel.head, model.massModel.head),
+                translateTensor(Htx[utility::input::ServoID::L_SHOULDER_PITCH],
                                 model.tensorModel.arm_upper,
                                 model.massModel.arm_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_PITCH],
+                translateTensor(Htx[utility::input::ServoID::R_SHOULDER_PITCH],
                                 model.tensorModel.arm_upper,
                                 model.massModel.arm_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_SHOULDER_ROLL],
+                translateTensor(Htx[utility::input::ServoID::L_SHOULDER_ROLL],
                                 model.tensorModel.arm_lower,
                                 model.massModel.arm_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_SHOULDER_ROLL],
+                translateTensor(Htx[utility::input::ServoID::R_SHOULDER_ROLL],
                                 model.tensorModel.arm_lower,
                                 model.massModel.arm_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_ROLL],
+                translateTensor(Htx[utility::input::ServoID::L_HIP_ROLL],
                                 model.tensorModel.hip_block,
                                 model.massModel.hip_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_ROLL],
+                translateTensor(Htx[utility::input::ServoID::R_HIP_ROLL],
                                 model.tensorModel.hip_block,
                                 model.massModel.hip_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_HIP_PITCH],
+                translateTensor(Htx[utility::input::ServoID::L_HIP_PITCH],
                                 model.tensorModel.leg_upper,
                                 model.massModel.leg_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_HIP_PITCH],
+                translateTensor(Htx[utility::input::ServoID::R_HIP_PITCH],
                                 model.tensorModel.leg_upper,
                                 model.massModel.leg_upper),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                translateTensor(Htx[utility::input::ServoID::L_ANKLE_PITCH],
                                 model.tensorModel.leg_lower,
                                 model.massModel.leg_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                translateTensor(Htx[utility::input::ServoID::R_ANKLE_PITCH],
                                 model.tensorModel.leg_lower,
                                 model.massModel.leg_lower),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_PITCH],
+                translateTensor(Htx[utility::input::ServoID::L_ANKLE_PITCH],
                                 model.tensorModel.ankle_block,
                                 model.massModel.ankle_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_PITCH],
+                translateTensor(Htx[utility::input::ServoID::R_ANKLE_PITCH],
                                 model.tensorModel.ankle_block,
                                 model.massModel.ankle_block),
-                translateTensor(forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL],
+                translateTensor(Htx[utility::input::ServoID::L_ANKLE_ROLL],
                                 model.tensorModel.foot,
                                 model.massModel.foot),
-                translateTensor(forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL],
+                translateTensor(Htx[utility::input::ServoID::R_ANKLE_ROLL],
                                 model.tensorModel.foot,
                                 model.massModel.foot),
                 model.tensorModel.torso};
 
             // Calculate the inertial tensor for the entire robot
-            Eigen::Matrix3d inertial_tensor = Eigen::Matrix3d::Zero();
+            Eigen::Matrix3d inertia_tensor = Eigen::Matrix3d::Zero();
             for (const auto& particle : particles) {
-                inertial_tensor += particle;
+                inertia_tensor += particle;
             }
 
-            return inertial_tensor;
+            return inertia_tensor;
         }  // namespace kinematics
 
 
@@ -538,48 +536,14 @@ namespace motion {
             return robotToImu;
         }
 
-        inline Eigen::Vector4d fsrCentreInBodyCoords(const KinematicsModel& model,
-                                                     const Sensors& sensors,
-                                                     const Eigen::Vector2d& foot,
-                                                     bool left) {
-            int negativeIfRight = left ? 1 : -1;
-
-            Eigen::Vector2d position =
-                foot.cwiseProduct(Eigen::Vector2d(model.leg.FOOT_LENGTH * 0.5, model.leg.FOOT_WIDTH * 0.5));
-            Eigen::Vector4d centerFoot = Eigen::Vector4d(
-                position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0.0, 1.0);
-
-            return ((left) ? sensors.forward_kinematics[ServoID::L_ANKLE_ROLL] * centerFoot
-                           : sensors.forward_kinematics[ServoID::R_ANKLE_ROLL] * centerFoot);
-        }
-
-        inline Eigen::Vector3d calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
-            Eigen::Vector4d CoP     = Eigen::Vector4d::UnitW();
-            int number_of_feet_down = 0;
-            if (sensors.left_foot_down) {
-                CoP += fsrCentreInBodyCoords(model, sensors, sensors.fsr[LimbID::LEFT_LEG - 1].centre, true);
-                number_of_feet_down++;
-            }
-            if (sensors.right_foot_down) {
-                CoP += fsrCentreInBodyCoords(model, sensors, sensors.fsr[LimbID::RIGHT_LEG - 1].centre, false);
-                number_of_feet_down++;
-            }
-            if (number_of_feet_down == 2) {
-                CoP = CoP * 0.5;
-            }
-            // reset homogeneous coordinate
-            CoP.w()                  = 1;
-            Eigen::Vector4d CoP_body = sensors.Hgt * CoP;
-            return CoP_body.head<3>();
-        }
-
         /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
          */
         inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const arma::vec3& a, bool isLeft) {
             int negativeIfRight = isLeft ? 1 : -1;
 
-            const arma::vec3 t1 = {
-                model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT};
+            const arma::vec3 t1 = {model.arm.SHOULDER_LENGTH,
+                                   negativeIfRight * model.arm.SHOULDER_WIDTH,
+                                   -model.arm.SHOULDER_HEIGHT};
             const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
                                    -model.arm.UPPER_ARM_LENGTH};
@@ -614,8 +578,9 @@ namespace motion {
                                    negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2.0,
                                    model.arm.SHOULDER_Z_OFFSET};
 
-            const arma::vec3 t1 = {
-                model.arm.SHOULDER_LENGTH, negativeIfRight * model.arm.SHOULDER_WIDTH, -model.arm.SHOULDER_HEIGHT};
+            const arma::vec3 t1 = {model.arm.SHOULDER_LENGTH,
+                                   negativeIfRight * model.arm.SHOULDER_WIDTH,
+                                   -model.arm.SHOULDER_HEIGHT};
             const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
                                    negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
                                    -model.arm.UPPER_ARM_LENGTH};
