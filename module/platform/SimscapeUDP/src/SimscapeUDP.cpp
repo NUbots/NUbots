@@ -37,17 +37,16 @@ namespace platform {
         });
 
         /*TEST*/
-        on<NUClear::dsl::word::Every<2, std::chrono::seconds>>().then("", [this]() {
+        /*on<NUClear::dsl::word::Every<2, std::chrono::seconds>>().then("", [this]() {
             log("sending test data");
             message::motion::ServoTarget testData;
             testData.time     = NUClear::clock::now();
             testData.id       = 0;
-            testData.position = test;
-            testData.gain     = 3;
-            testData.torque   = 3;
-            test += 1;
+            testData.position = 0.7853981634;
+            testData.gain     = 1;
+            testData.torque   = 1;
             emit(std::make_unique<message::motion::ServoTarget>(testData));
-        });
+        });*/
 
         /*
          ***************************
@@ -59,8 +58,6 @@ namespace platform {
          * Receive a packet from the sim and emit it for the robot
          */
         on<UDP>(config.inPort).then([this](const UDP::Packet& packet) {
-            log("UDP message received");
-
             if (packet) {
                 std::vector<char> tmp = packet.payload;
 
@@ -68,9 +65,11 @@ namespace platform {
                     tmp.pop_back();
                 }
 
-                message::platform::darwin::DarwinSensors sensors =
-                    NUClear::util::serialise::Serialise<message::platform::darwin::DarwinSensors>::deserialise(tmp);
-                emit(std::make_unique<message::platform::darwin::DarwinSensors>(sensors));
+                message::platform::darwin::DarwinSensors::Servos sensors =
+                    NUClear::util::serialise::Serialise<message::platform::darwin::DarwinSensors::Servos>::deserialise(
+                        tmp);
+                emit(std::make_unique<message::platform::darwin::DarwinSensors::Servos>(sensors));
+                log(sensors.rShoulderPitch.torque);
             }
         });
 
