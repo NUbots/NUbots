@@ -3,11 +3,12 @@
 import os
 import re
 
+from tqdm import tqdm
+
 import numpy as np
 import tensorflow as tf
 import yaml
 from tensorflow import keras
-from tqdm import tqdm
 
 from .nbs import Decoder
 

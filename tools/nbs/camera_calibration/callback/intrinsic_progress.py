@@ -2,8 +2,9 @@
 
 import math
 
-import tensorflow as tf
 from tqdm import tqdm
+
+import tensorflow as tf
 
 
 class IntrinsicProgress(tf.keras.callbacks.Callback):

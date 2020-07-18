@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import stringcase
+
 from generator.Field import Field
 
 

@@ -8,8 +8,9 @@ import stat
 import subprocess
 import sys
 
-import b
 from termcolor import cprint
+
+import b
 
 from .wrappty import WrapPty
 

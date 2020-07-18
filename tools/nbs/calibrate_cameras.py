@@ -8,12 +8,13 @@ import multiprocessing
 import os
 import pickle
 
+from tqdm import tqdm, trange
+
 import b
 import cv2
 import numpy as np
 import tensorflow as tf
 from ruamel.yaml import YAML
-from tqdm import tqdm, trange
 
 from .camera_calibration.callback import ExtrinsicProgress, IntrinsicProgress
 from .camera_calibration.grid_distance import grid_distance

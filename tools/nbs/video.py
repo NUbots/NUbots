@@ -3,9 +3,10 @@
 import multiprocessing
 import os
 
+from tqdm import tqdm
+
 import numpy as np
 import tensorflow as tf
-from tqdm import tqdm
 
 from .images import decode_image
 from .images.video_recorder import Recorder

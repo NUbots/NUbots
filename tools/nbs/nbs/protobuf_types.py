@@ -8,8 +8,9 @@ import struct
 import sys
 import tempfile
 
-import b
 import google.protobuf.message
+
+import b
 import xxhash
 
 if shutil.which("protoc") is None:
