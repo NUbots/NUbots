@@ -3,8 +3,9 @@
 import os
 
 import b
-import docker
 import dockerise
+
+import docker
 
 
 def register(command):

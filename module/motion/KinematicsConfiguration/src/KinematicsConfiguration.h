@@ -20,8 +20,6 @@
 #ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_H
 #define MODULE_MOTION_KINEMATICSCONFIGURATION_H
 
-#include <yaml-cpp/yaml.h>
-
 #include <Eigen/Core>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>

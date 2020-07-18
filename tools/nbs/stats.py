@@ -3,10 +3,9 @@
 import json
 import os
 
-from tqdm import tqdm
-
 import numpy as np
 from si_prefix import si_format
+from tqdm import tqdm
 
 from .nbs import Decoder
 

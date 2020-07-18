@@ -5,10 +5,9 @@ import os
 import re
 import subprocess
 
-from termcolor import cprint
-
 import b
 from dockerise import run_on_docker
+from termcolor import cprint
 
 
 @run_on_docker

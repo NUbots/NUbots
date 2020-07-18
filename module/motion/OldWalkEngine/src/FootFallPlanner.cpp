@@ -140,10 +140,12 @@ namespace motion {
                       * deltaT;  // TODO: use a function instead
 
 
-        velocityDifference.translation().x() = std::min(
-            std::max(velocityCommand.translation().x() - velocityCurrent.translation().x(), -limit.x()), limit.x());
-        velocityDifference.translation().y() = std::min(
-            std::max(velocityCommand.translation().y() - velocityCurrent.translation().y(), -limit.y()), limit.y());
+        velocityDifference.translation().x() =
+            std::min(std::max(velocityCommand.translation().x() - velocityCurrent.translation().x(), -limit.x()),
+                     limit.x());
+        velocityDifference.translation().y() =
+            std::min(std::max(velocityCommand.translation().y() - velocityCurrent.translation().y(), -limit.y()),
+                     limit.y());
         velocityDifference.linear() =
             Eigen::Rotation2Dd(
                 std::min(std::max(angle(velocityCommand) - angle(velocityCurrent), -limit.z()), limit.z()))

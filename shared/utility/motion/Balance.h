@@ -20,12 +20,10 @@
 #ifndef UTILITY_MOTION_BALANCE_H
 #define UTILITY_MOTION_BALANCE_H
 
-#include <nuclear>
-#include <yaml-cpp/yaml.h>
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <yaml-cpp/yaml.h>
 
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModel.h"

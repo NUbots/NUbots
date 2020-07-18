@@ -13,8 +13,9 @@ from .wrappty import WrapPty
 
 # Try to import docker, if we are already in docker this will fail
 try:
-    import docker
     import dockerpty
+
+    import docker
 
     client = docker.from_env()
 except:

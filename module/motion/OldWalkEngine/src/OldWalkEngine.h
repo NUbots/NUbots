@@ -20,8 +20,6 @@
 #ifndef MODULES_MOTION_OLDWALKENGINE_H
 #define MODULES_MOTION_OLDWALKENGINE_H
 
-#include <yaml-cpp/yaml.h>
-
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
