@@ -120,7 +120,7 @@ export class ChartNetwork {
 
   @action
   private onSensorData = (robotModel: RobotModel, sensorData: Sensors) => {
-    const { accelerometer, gyroscope } = sensorData
+    const { accelerometer, gyroscope, battery, voltage, button, servo, feet } = sensorData
     const timestamp = sensorData.timestamp!
 
     if (accelerometer) {
@@ -128,7 +128,7 @@ export class ChartNetwork {
         robotModel,
         new DataPoint({
           label: 'Sensor/Accelerometer',
-          value: [accelerometer!.x!, accelerometer!.y!, accelerometer!.z!],
+          value: [accelerometer.x!, accelerometer.y!, accelerometer.z!],
           timestamp,
         }),
       )
@@ -139,48 +139,74 @@ export class ChartNetwork {
         robotModel,
         new DataPoint({
           label: 'Sensor/Gyroscope',
-          value: [gyroscope!.x!, gyroscope!.y!, gyroscope!.z!],
+          value: [gyroscope.x!, gyroscope.y!, gyroscope.z!],
           timestamp,
         }),
       )
     }
 
-    // FSRs
-    if (sensorData.fsr) {
-      sensorData.fsr.forEach((fsr: Sensors.IFSR, index: number) => {
-        // Our FSR values
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/FSR/${index ? 'Right' : 'Left'}/Values`,
-            value: fsr.value,
-            timestamp,
-          }),
-        )
+    if (battery) {
+      this.onDataPoint(
+        robotModel,
+        new DataPoint({
+          label: 'Sensor/Battery',
+          value: [battery],
+          timestamp,
+        }),
+      )
+    }
 
-        // Our FSR centre
-        this.onDataPoint(
-          robotModel,
-          new DataPoint({
-            label: `Sensor/FSR/${index ? 'Right' : 'Left'}/Centre`,
-            value: [fsr!.centre!.x!, fsr!.centre!.y!],
-            timestamp,
-          }),
-        )
-      })
+    if (voltage) {
+      this.onDataPoint(
+        robotModel,
+        new DataPoint({
+          label: 'Sensor/CM740 Voltage',
+          value: [voltage],
+          timestamp,
+        }),
+      )
+    }
+
+    this.onDataPoint(
+      robotModel,
+      new DataPoint({
+        label: 'Sensor/Buttons',
+        value: button.map(b => (b.value ? 1 : 0)),
+        timestamp,
+      }),
+    )
+
+    if (feet.length == 2) {
+      this.onDataPoint(
+        robotModel,
+        new DataPoint({
+          label: 'Sensor/Foot Down/Right',
+          value: [feet[0].down ? 1 : 0],
+          timestamp,
+        }),
+      )
+
+      this.onDataPoint(
+        robotModel,
+        new DataPoint({
+          label: 'Sensor/Foot Down/Left',
+          value: [feet[1].down ? 1 : 0],
+          timestamp,
+        }),
+      )
     }
 
     // Servos
-    if (sensorData.servo) {
-      sensorData.servo.forEach((servo: Sensors.IServo, index: number) => {
-        const name = ServoIds[servo!.id! || index]
+    if (servo.length) {
+      servo.forEach((servo: Sensors.IServo, index: number) => {
+        const name = ServoIds[index]
 
         // PID gain
         this.onDataPoint(
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Gain`,
-            value: [servo!.pGain!, servo!.iGain!, servo!.dGain!],
+            value: [servo.pGain!, servo.iGain!, servo.dGain!],
             timestamp,
           }),
         )
@@ -190,7 +216,7 @@ export class ChartNetwork {
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Position/Goal`,
-            value: [servo!.goalPosition!],
+            value: [servo.goalPosition!],
             timestamp,
           }),
         )
@@ -200,7 +226,7 @@ export class ChartNetwork {
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Velocity/Goal`,
-            value: [servo!.goalVelocity!],
+            value: [servo.goalVelocity!],
             timestamp,
           }),
         )
@@ -210,7 +236,7 @@ export class ChartNetwork {
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Position/Present`,
-            value: [servo!.presentPosition!],
+            value: [servo.presentPosition!],
             timestamp,
           }),
         )
@@ -220,7 +246,7 @@ export class ChartNetwork {
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Velocity/Present`,
-            value: [servo!.presentVelocity!],
+            value: [servo.presentVelocity!],
             timestamp,
           }),
         )
@@ -230,7 +256,7 @@ export class ChartNetwork {
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Load`,
-            value: [servo!.load!],
+            value: [servo.load!],
             timestamp,
           }),
         )
@@ -240,7 +266,7 @@ export class ChartNetwork {
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Voltage`,
-            value: [servo!.voltage!],
+            value: [servo.voltage!],
             timestamp,
           }),
         )
@@ -250,7 +276,7 @@ export class ChartNetwork {
           robotModel,
           new DataPoint({
             label: `Sensor/Servos/${name}/Temperature`,
-            value: [servo!.temperature!],
+            value: [servo.temperature!],
             timestamp,
           }),
         )
