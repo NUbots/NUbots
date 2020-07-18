@@ -22,6 +22,7 @@
 #include "extension/Configuration.h"
 
 #include "message/motion/KinematicsModel.h"
+
 #include "utility/support/yaml_expression.h"
 
 namespace module {
@@ -55,7 +56,7 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureLeg(KinematicsModel& model, const YAML::Node& objLeg) {
-        Eigen::Vector3d leg_hipOffset = objLeg["hip_offset"].as<Expression>();
+        Eigen::Vector3f leg_hipOffset = objLeg["hip_offset"].as<Expression>();
         model.leg.HIP_OFFSET_X        = leg_hipOffset.x();
         model.leg.HIP_OFFSET_Y        = leg_hipOffset.y();
         model.leg.HIP_OFFSET_Z        = leg_hipOffset.z();
@@ -87,7 +88,7 @@ namespace motion {
     void KinematicsConfiguration::configureHead(KinematicsModel& model, const YAML::Node& objHead) {
         model.head.CAMERA_DECLINATION_ANGLE_OFFSET = objHead["camera_declination_angle_offset"].as<Expression>();
 
-        Eigen::Vector3d head_neckToCamera  = objHead["neck_to_camera"].as<Expression>();
+        Eigen::Vector3f head_neckToCamera  = objHead["neck_to_camera"].as<Expression>();
         model.head.NECK_TO_CAMERA_X        = head_neckToCamera.x();
         model.head.NECK_TO_CAMERA_Y        = head_neckToCamera.y();
         model.head.NECK_TO_CAMERA_Z        = head_neckToCamera.z();
@@ -97,15 +98,15 @@ namespace motion {
 
         model.head.NECK_LENGTH = objNeck["length"].as<float>();
 
-        Eigen::Vector3d neck_basePositionFromOrigin = objNeck["base_position_from_origin"].as<Expression>();
+        Eigen::Vector3f neck_basePositionFromOrigin = objNeck["base_position_from_origin"].as<Expression>();
         model.head.NECK_BASE_POS_FROM_ORIGIN_X      = neck_basePositionFromOrigin.x();
         model.head.NECK_BASE_POS_FROM_ORIGIN_Y      = neck_basePositionFromOrigin.y();
         model.head.NECK_BASE_POS_FROM_ORIGIN_Z      = neck_basePositionFromOrigin.z();
 
         auto& objHeadMovementLimits = objHead["limits"];
 
-        Eigen::Vector2d headMovementLimits_yaw   = objHeadMovementLimits["yaw"].as<Expression>();
-        Eigen::Vector2d headMovementLimits_pitch = objHeadMovementLimits["pitch"].as<Expression>();
+        Eigen::Vector2f headMovementLimits_yaw   = objHeadMovementLimits["yaw"].as<Expression>();
+        Eigen::Vector2f headMovementLimits_pitch = objHeadMovementLimits["pitch"].as<Expression>();
         model.head.MIN_YAW                       = headMovementLimits_yaw.x();
         model.head.MAX_YAW                       = headMovementLimits_yaw.y();
         model.head.MIN_PITCH                     = headMovementLimits_pitch.x();
@@ -118,7 +119,7 @@ namespace motion {
         auto& objLowerArm = objArm["lower_arm"];
 
         model.arm.DISTANCE_BETWEEN_SHOULDERS = objArm["distance_between_shoulders"].as<float>();
-        Eigen::Vector2d shoulderOffset       = objShoulder["offset"].as<Expression>();
+        Eigen::Vector2f shoulderOffset       = objShoulder["offset"].as<Expression>();
         model.arm.SHOULDER_X_OFFSET          = shoulderOffset.x();
         model.arm.SHOULDER_Z_OFFSET          = shoulderOffset.y();
         model.arm.SHOULDER_LENGTH            = objShoulder["length"].as<float>();
@@ -126,12 +127,12 @@ namespace motion {
         model.arm.SHOULDER_HEIGHT            = objShoulder["height"].as<float>();
 
         model.arm.UPPER_ARM_LENGTH     = objUpperArm["length"].as<float>();
-        Eigen::Vector2d upperArmOffset = objUpperArm["offset"].as<Expression>();
+        Eigen::Vector2f upperArmOffset = objUpperArm["offset"].as<Expression>();
         model.arm.UPPER_ARM_Y_OFFSET   = upperArmOffset.x();
         model.arm.UPPER_ARM_X_OFFSET   = upperArmOffset.y();
 
         model.arm.LOWER_ARM_LENGTH     = objLowerArm["length"].as<float>();
-        Eigen::Vector2d lowerArmOffset = objLowerArm["offset"].as<Expression>();
+        Eigen::Vector2f lowerArmOffset = objLowerArm["offset"].as<Expression>();
         model.arm.LOWER_ARM_Y_OFFSET   = lowerArmOffset.x();
         model.arm.LOWER_ARM_Z_OFFSET   = lowerArmOffset.y();
     }
