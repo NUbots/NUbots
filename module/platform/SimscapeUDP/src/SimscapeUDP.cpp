@@ -20,6 +20,7 @@
 #include "SimscapeUDP.h"
 
 #include "extension/Configuration.h"
+
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
@@ -69,7 +70,7 @@ namespace platform {
                     NUClear::util::serialise::Serialise<message::platform::darwin::DarwinSensors::Servos>::deserialise(
                         tmp);
                 emit(std::make_unique<message::platform::darwin::DarwinSensors::Servos>(sensors));
-                log(sensors.rShoulderPitch.torque);
+                log(sensors.rShoulderPitch.goalPosition);
             }
         });
 
