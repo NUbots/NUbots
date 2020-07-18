@@ -183,8 +183,8 @@ namespace motion {
         Eigen::Affine3d getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? sensors.forward_kinematics[utility::input::ServoID::L_ANKLE_ROLL]
-                        : sensors.forward_kinematics[utility::input::ServoID::R_ANKLE_ROLL]);
+                        ? sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL]
+                        : sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]);
         }
 
         Eigen::Affine3d getFootPose(const message::input::Sensors& sensors) {

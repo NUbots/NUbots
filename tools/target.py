@@ -2,8 +2,11 @@
 
 import os
 
+from termcolor import cprint
+
 import b
-import dockerise
+
+from dockerise import WrapPty, build_platform, get_selected_platform, platforms, repository
 
 import docker
 
@@ -15,7 +18,7 @@ def register(command):
         "platform",
         metavar="platform",
         nargs="?",
-        choices=dockerise.platforms(),
+        choices=platforms(),
         help="the platform to select as the default platform",
     )
 
@@ -23,11 +26,16 @@ def register(command):
 def run(platform, **kwargs):
 
     if platform is None:
-        platform = dockerise.get_selected_platform()
+        platform = get_selected_platform()
         print("Currently selected platform is {}".format(platform))
     else:
-        tag = "{}:{}".format(dockerise.repository, platform)
-        dockerise.build_platform(platform)
-        img = dockerise.client.images.get(tag)
+        # Ensure the platform image is built
+        build_platform(platform)
 
-        img.tag(dockerise.repository, "selected")
+        # Tag the built platform image is the selected image
+        pty = WrapPty()
+        tag = "{}:{}".format(repository, platform)
+        err = pty.spawn(["docker", "image", "tag", tag, "{}:selected".format(repository)])
+        if err != 0:
+            cprint("docker image tag returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)

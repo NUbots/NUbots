@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import re
 import shutil
@@ -7,19 +8,11 @@ import stat
 import subprocess
 import sys
 
+from termcolor import cprint
+
 import b
 
 from .wrappty import WrapPty
-
-# Try to import docker, if we are already in docker this will fail
-try:
-    import dockerpty
-
-    import docker
-
-    client = docker.from_env()
-except:
-    client = None
 
 repository = "nubots"
 user = "nubots"
@@ -32,9 +25,10 @@ def is_docker():
 
 
 def build_platform(platform):
-    from tqdm import tqdm
+    pty = WrapPty()
 
-    tag = "{}:{}".format(repository, platform)
+    remote_tag = "{0}/{0}:{1}".format(repository, platform)
+    local_tag = "{0}:{1}".format(repository, platform)
     dockerdir = os.path.join(b.project_dir, "docker")
 
     # Go through all the files and try to ensure that their permissions are correct
@@ -45,119 +39,34 @@ def build_platform(platform):
             current = stat.S_IMODE(os.lstat(p).st_mode)
             os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
 
-    # Determine how many progress bars we can make
-    num_bars = int(os.environ.get("LINES", 0))
-    if num_bars == 0:
-        num_bars = int(subprocess.check_output(["tput", "lines"])[:-1].decode("utf-8"))
-
-    # Make the progress bars
-    bars = {
-        pos: {
-            "bar": tqdm(unit="B", unit_scale=True, dynamic_ncols=True, leave=True, position=pos, desc="Pending ..."),
-            "available": True,
-            "id": None,
-        }
-        for pos in range(num_bars)
-    }
-
     # Pull the latest version from dockerhub
-    progress = {}
-    queue = {}
-    for event in client.api.pull(repository="nubots/nubots", tag=platform, stream=True, decode=True):
-        try:
-            # Check for available bars and move items from the queue to progress bars
-            for pos in range(num_bars):
-                if bars[pos]["available"]:
-                    for id, data in queue.items():
-                        bars[pos]["available"] = False
-                        bars[pos]["id"] = id
-                        bars[pos]["bar"].total = data["total"]
-                        bars[pos]["bar"].n = data["current"]
-                        bars[pos]["bar"].set_description("{} - {}".format(id, data["status"]))
-                        progress[id] = {"bar": bars[pos]["bar"]}
+    err = pty.spawn(["docker", "pull", remote_tag])
+    if err != 0:
+        cprint("Docker pull returned exit code {}".format(err), "red", attrs=["bold"])
+        exit(err)
 
-                        del queue[id]
-                        break
-
-            # Get id and status from the current event
-            id = int(event["id"], 16)
-            status = event["status"]
-
-            # If this is the first time we have seen this id, assign a progress bar if one is available otherwise add
-            # it to the queue
-            if id not in progress and id not in queue:
-                # Check for an available progress bar
-                bar = None
-                for pos in range(num_bars):
-                    if bars[pos]["available"]:
-                        bars[pos]["available"] = False
-                        bars[pos]["id"] = id
-                        bar = bars[pos]["bar"]
-                        break
-
-                if bar is not None:
-                    progress[id] = {"bar": bar}
-                else:
-                    # No available progress bars, add to queue
-                    queue[id] = {"current": 0, "total": 0, "status": status}
-
-            # If we have a value in progressDetail
-            if (
-                "progressDetail" in event
-                and "current" in event["progressDetail"]
-                and "total" in event["progressDetail"]
-            ):
-                current = int(event["progressDetail"]["current"])
-                total = int(event["progressDetail"]["total"])
-            else:
-                current = None
-                total = None
-
-            if id in progress:
-                # Update the status
-                progress[id]["bar"].set_description("{} - {}".format(id, status))
-
-                # Update bar values
-                if current is not None and total is not None:
-                    progress[id]["bar"].total = total
-                    progress[id]["bar"].n = current
-
-                # Complete statuses need to finish off the bar
-                if "complete" in status or "exists" in status:
-                    # Remove from progress
-                    del progress[id]
-
-                    # Free the progress bar
-                    for pos in range(num_bars):
-                        if bars[pos]["id"] == id:
-                            bars[pos]["bar"].set_description("Pending ...")
-                            bars[pos]["bar"].reset()
-                            bars[pos]["id"] = None
-                            bars[pos]["available"] = True
-
-            else:
-                # Find our position in the queue
-                if current is not None and total is not None:
-                    queue[id]["current"] = current
-                    queue[id]["total"] = total
-                queue[id]["status"] = status
-
-        except KeyError:
-            print(event["status"])
-        except ValueError:
-            print(event["status"])
-
-    # Clean up all the bars
-    for k, v in bars.items():
-        v["bar"].reset()
-        v["bar"].close()
-
-    # Build the image
-    for event in client.api.build(
-        path=dockerdir, tag=tag, buildargs={"platform": platform}, quiet=False, pull=True, rm=True, decode=True,
-    ):
-        if "stream" in event:
-            sys.stdout.write(event["stream"])
+    build_env = os.environ
+    build_env["DOCKER_BUILDKIT"] = "1"
+    old_cwd = os.getcwd()
+    os.chdir(dockerdir)
+    err = pty.spawn(
+        [
+            "docker",
+            "build",
+            ".",
+            "--build-arg",
+            "BUILDKIT_INLINE_CACHE=1",
+            "--build-arg",
+            "platform={}".format(platform if platform != "buildkit" else "generic"),
+            "-t",
+            local_tag,
+        ],
+        env=build_env,
+    )
+    os.chdir(old_cwd)
+    if err != 0:
+        cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
+        exit(err)
 
 
 def platforms():
@@ -171,12 +80,18 @@ def platforms():
 
 
 def get_selected_platform():
+    # Get information about the selected image
     try:
-        selected = client.images.get("{}:selected".format(repository))
+        img_info = json.loads(
+            subprocess.Popen(
+                ["docker", "image", "inspect", "{}:selected".format(repository)], stdout=subprocess.PIPE
+            ).communicate()[0],
+        )
+
         names = [
-            t.split(":")[-1]
-            for t in selected.tags
-            if t != "{}:selected".format(repository) and t.startswith("{}:".format(repository))
+            tag.split(":")[-1]
+            for tag in img_info[0]["RepoTags"]
+            if tag != "{}:selected".format(repository) and tag.startswith("{}:".format(repository))
         ]
         if len(names) == 0:
             print("ERROR the currently selected platform is a dangling tag.")
@@ -191,8 +106,10 @@ def get_selected_platform():
             platform = list(sorted(names))[0]
             print("        The platform chosen will be {}".format(platform))
             return platform
-    except docker.errors.ImageNotFound:
-        print("No platform has been selected yet, defaulting to generic")
+
+    except subprocess.CalledProcessError:
+        cprint("Docker image inspect call returned a non-zero exit code.", "blue", attrs=["bold"])
+        cprint("We are assuming no platform has been selected yet, defaulting to generic", "blue", attrs=["bold"])
         return "generic"
 
 
@@ -233,9 +150,7 @@ def run_on_docker(func):
 
                 # Check if the image we want exists
                 tag = "{}:{}".format(repository, platform)
-                try:
-                    client.images.get(tag)
-                except docker.errors.ImageNotFound:
+                if subprocess.call(["docker", "image", "inspect", tag], stdout=subprocess.DEVNULL) != 0:
                     print("Could not find the image {}, rebuilding from source".format(tag))
                     rebuild = True
 
@@ -244,23 +159,41 @@ def run_on_docker(func):
                     build_platform(platform)
                     # If we were building the selected platform we have to move our selected tag up
                     if selected_platform:
-                        client.images.get(tag).tag(repository, "selected")
+                        if (
+                            subprocess.call(
+                                ["docker", "image", "tag", tag, "{}:selected".format(repository)],
+                                stdout=subprocess.DEVNULL,
+                            )
+                            != 0
+                        ):
+                            cprint("docker image tag returned a non-zero exit code", "red", attrs=["bold"])
+                            exit(1)
 
                 # Find the volume for this platform
                 build_volume_name = "{}_{}_build".format(repository, platform)
-                try:
-                    build_volume = client.volumes.get(build_volume_name)
+                if subprocess.call(["docker", "volume", "inspect", build_volume_name], stdout=subprocess.DEVNULL) == 0:
+                    build_volume = build_volume_name
+                else:
+                    build_volume = None
 
-                    # If we are cleaning, remove this volume so we can recreate it
-                    if clean:
-                        build_volume.remove(force=True)
-                        build_volume = None
-                except docker.errors.NotFound:
+                # If we are cleaning, remove this volume so we can recreate it
+                if build_volume and clean:
+                    if subprocess.call(["docker", "volume", "rm", build_volume_name], stdout=subprocess.DEVNULL) != 0:
+                        cprint("Docker volume rm returned a non-zero exit", "red", attrs=["bold"])
+                        exit(1)
+
                     build_volume = None
 
                 # If we don't have a volume, make one
                 if build_volume is None:
-                    build_volume = client.volumes.create(build_volume_name)
+                    if (
+                        subprocess.call(["docker", "volume", "create", build_volume_name], stdout=subprocess.DEVNULL)
+                        == 0
+                    ):
+                        build_volume = build_volume_name
+                    else:
+                        cprint("Docker volume create returned a non-zero exit code", "red", attrs=["bold"])
+                        exit(1)
 
                 # Work out what cwd we need to have on docker to mirror the cwd we have here
                 code_to_cwd = os.path.relpath(os.getcwd(), b.project_dir)
@@ -273,35 +206,46 @@ def run_on_docker(func):
                     else subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
                 )
 
-                container = client.containers.create(
-                    tag,
-                    command=["{}/b".format(cwd_to_code), *sys.argv[1:]],
-                    working_dir="/home/{}/{}/{}".format(user, directory, code_to_cwd),
-                    auto_remove=True,
-                    tty=True,
-                    stdin_open=True,
-                    hostname="docker",
-                    network_mode="host",
-                    mounts=[
-                        docker.types.Mount(
-                            type="bind",
-                            source=bind_path,
-                            target="/home/{}/{}".format(user, directory),
-                            consistency="cached",
-                        ),
-                        docker.types.Mount(
-                            type="volume",
-                            source=build_volume.name,
-                            target="/home/{}/build".format(user),
-                            consistency="delegated",
-                        ),
-                    ],
-                    environment={"EDITOR": os.environ.get("EDITOR", "nano")},
+                pty = WrapPty()
+                exit(
+                    pty.spawn(
+                        [
+                            "docker",
+                            "container",
+                            "run",
+                            "--rm",
+                            "--tty",
+                            "--workdir",
+                            "/home/{}/{}/{}".format(user, directory, code_to_cwd),
+                            "--name",
+                            "{}_{}".format(repository, platform),
+                            "--attach",
+                            "stdin",
+                            "--attach",
+                            "stdout",
+                            "--attach",
+                            "stderr",
+                            "--hostname",
+                            "docker",
+                            "--network",
+                            "host",
+                            "--mount",
+                            "type=bind,source={},target=/home/{}/{},consistency=cached".format(
+                                bind_path, user, directory
+                            ),
+                            "--mount",
+                            "type=volume,source={},target=/home/{}/build,consistency=delegated".format(
+                                build_volume, user
+                            ),
+                            "--env",
+                            "EDITOR={}".format(os.environ.get("EDITOR", "nano")),
+                            "--interactive",
+                            tag,
+                            "{}/b".format(cwd_to_code),
+                            *sys.argv[1:],
+                        ]
+                    )
                 )
-
-                # Attach a pty to this terminal
-                dockerpty.start(client.api, container.id)
-                exit(container.wait()["StatusCode"])
 
         return run
 

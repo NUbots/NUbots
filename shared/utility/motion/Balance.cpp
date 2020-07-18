@@ -165,11 +165,9 @@ namespace motion {
 
         // Compute torso position adjustment
         Eigen::Vector3f torsoAdjustment_world =
-            Eigen::Vector3f(-translationPGainX * sensors.body_centre_height * pitch
-                                - translationDGainX * sensors.body_centre_height * dPitch,
-                            translationPGainY * sensors.body_centre_height * roll
-                                + translationDGainY * sensors.body_centre_height * dRoll,
-                            -translationPGainZ * total - translationDGainY * dTotal)
+            Eigen::Vector3f(-translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
+                        translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
+                        -translationPGainZ * total - translationDGainY * dTotal)
                 .cast<float>();
 
         // //Rotate from world space to torso space

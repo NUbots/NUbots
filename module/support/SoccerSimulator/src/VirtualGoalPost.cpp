@@ -80,15 +80,15 @@ namespace support {
         result.goals.reserve(1);
 
         // t = torso; c = camera; g = ground; f = foot;
-        Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+        Eigen::Affine3d Htc(sensors.Htx[utility::input::ServoID::HEAD_PITCH]);
         result.Hcw              = Htc.inverse() * sensors.Htw;
         result.timestamp        = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
         result.goals.at(0).side = side;
         result.goals.at(0).team = team;
 
         // get the torso to foot transform
-        Eigen::Affine3d Hgt(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
-        Eigen::Affine3d Hgt2(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+        Eigen::Affine3d Hgt(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+        Eigen::Affine3d Hgt2(sensors.Htx[ServoID::L_ANKLE_ROLL]);
 
         if (Hgt2(3, 2) < Hgt(3, 2)) {
             Hgt = Hgt2;

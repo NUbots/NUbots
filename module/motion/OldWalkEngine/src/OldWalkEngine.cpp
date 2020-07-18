@@ -61,8 +61,8 @@ namespace motion {
     using message::motion::WalkStopped;
     using message::support::SaveConfiguration;
 
-    using ServoID = utility::input::ServoID;
-    using LimbID  = utility::input::LimbID;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
     using utility::math::clamp;
     using utility::math::angle::normalizeAngle;
     using utility::math::transform::angle;
@@ -329,8 +329,8 @@ namespace motion {
 
         for (auto& gain : balance["servo_gains"]) {
             float p = gain["p"].as<Expression>();
-            ServoID sr(gain["id"].as<std::string>(), utility::input::ServoSide::RIGHT);
-            ServoID sl(gain["id"].as<std::string>(), utility::input::ServoSide::LEFT);
+            ServoID sr(gain["id"].as<std::string>());
+            ServoID sl(gain["id"].as<std::string>());
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
@@ -594,14 +594,12 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootCOM = rotateZLocal(rightFootCOM,
-                                        -hipRollCompensation * phaseComp,
-                                        Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
+            rightFootCOM =
+                rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp, sensors.Htx[ServoID::R_HIP_ROLL]);
         }
         else {
-            leftFootCOM = rotateZLocal(rightFootCOM,
-                                       hipRollCompensation * phaseComp,
-                                       Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
+            leftFootCOM =
+                leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp, sensors.Htx[ServoID::L_HIP_ROLL]);
         }
 
         if (balanceEnabled) {
@@ -615,7 +613,7 @@ namespace motion {
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
         Eigen::Affine3f Htc = Eigen::Affine3f::Identity();
-        Htc.translation()   = Eigen::Vector3f(-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0f);
+        Htc.translation()   = Eigen::Vector3f(-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0f);
 
         Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM.cast<float>();
         Eigen::Affine3f rightFootTorso = Htc * rightFootCOM.cast<float>();
@@ -661,7 +659,7 @@ namespace motion {
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
         Eigen::Affine3f Htc = Eigen::Affine3f::Identity();
-        Htc.translation()   = Eigen::Vector3f(-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0f);
+        Htc.translation()   = Eigen::Vector3f(-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0f);
 
         Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM.cast<float>();
         Eigen::Affine3f rightFootTorso = Htc * rightFootCOM.cast<float>();
