@@ -2,11 +2,9 @@
 
 import os
 
-from termcolor import cprint
-
 import b
-
 from dockerise import WrapPty, build_platform, get_selected_platform, platforms, repository
+from termcolor import cprint
 
 import docker
 

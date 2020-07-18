@@ -598,8 +598,7 @@ namespace motion {
                 rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp, sensors.Htx[ServoID::R_HIP_ROLL]);
         }
         else {
-            leftFootCOM =
-                leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp, sensors.Htx[ServoID::L_HIP_ROLL]);
+            leftFootCOM = leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp, sensors.Htx[ServoID::L_HIP_ROLL]);
         }
 
         if (balanceEnabled) {

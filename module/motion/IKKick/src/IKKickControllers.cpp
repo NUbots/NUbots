@@ -88,9 +88,8 @@ namespace motion {
         // Convert torso to support foot
         Eigen::Affine3d currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Eigen::Affine3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                              ? sensors.Htx[ServoID::L_ANKLE_ROLL]
-                                              : sensors.Htx[ServoID::R_ANKLE_ROLL];
+        Eigen::Affine3d currentKickFoot =
+            (supportFoot == LimbID::LEFT_LEG) ? sensors.Htx[ServoID::L_ANKLE_ROLL] : sensors.Htx[ServoID::R_ANKLE_ROLL];
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Eigen::Affine3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
