@@ -1,7 +1,9 @@
 #include "Gazebo.h"
 
 #include "clock/clock.hpp"
+
 #include "extension/Configuration.h"
+
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/platform/gazebo/Ball.h"

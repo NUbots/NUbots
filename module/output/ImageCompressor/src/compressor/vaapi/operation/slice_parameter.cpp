@@ -26,8 +26,13 @@ VABufferID slice_parameter(VADisplay dpy, VAContextID context, const bool& monoc
 
     // Upload to device
     VABufferID bufferid;
-    VAStatus va_status = vaCreateBuffer(
-        dpy, context, VAEncSliceParameterBufferType, sizeof(VAEncSliceParameterBufferJPEG), 1, &params, &bufferid);
+    VAStatus va_status = vaCreateBuffer(dpy,
+                                        context,
+                                        VAEncSliceParameterBufferType,
+                                        sizeof(VAEncSliceParameterBufferJPEG),
+                                        1,
+                                        &params,
+                                        &bufferid);
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error creating slice parameters buffer");
     }

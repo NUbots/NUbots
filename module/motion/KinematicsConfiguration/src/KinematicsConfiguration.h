@@ -24,8 +24,10 @@
 
 #include <Eigen/Core>
 #include <nuclear>
+#include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"
+
 #include "message/motion/KinematicsModel.h"
 
 namespace module {

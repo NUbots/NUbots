@@ -22,8 +22,10 @@
 #include <armadillo>
 
 #include "extension/Configuration.h"
+
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
+
 #include "utility/math/angle.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -45,8 +47,9 @@ namespace localisation {
 
         on<Configuration>("NUcapLocalisation.yaml").then([this](const Configuration& config) {
             robot_id = config["robot_id"].as<int>();
-            NUClear::log(
-                "NUcapLocalisation::robot_id = ", robot_id, ". If incorrect change config/NUcapLocalisation.yaml");
+            NUClear::log("NUcapLocalisation::robot_id = ",
+                         robot_id,
+                         ". If incorrect change config/NUcapLocalisation.yaml");
         });
 
         on<Network<MotionCapture>>([this](const MotionCapture& mocap) {

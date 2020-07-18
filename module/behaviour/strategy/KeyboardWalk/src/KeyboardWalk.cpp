@@ -19,15 +19,15 @@
 
 #include "KeyboardWalk.h"
 
-#include <fmt/format.h>
-
 #include <clocale>
 #include <csignal>
 #include <cstdio>
+#include <fmt/format.h>
 
 #include "message/behaviour/MotionCommand.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KickCommand.h"
+
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"
 #include "utility/math/matrix/Transform2D.h"

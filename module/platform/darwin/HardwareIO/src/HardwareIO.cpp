@@ -22,9 +22,12 @@
 #include <iomanip>
 
 #include "Convert.h"
+
 #include "extension/Configuration.h"
+
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/yaml_expression.h"
@@ -239,7 +242,8 @@ namespace platform {
 
             // This trigger gets the sensor data from the CM740
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
-                "Hardware Loop", [this] {
+                "Hardware Loop",
+                [this] {
                     // Our final sensor output
                     auto sensors = std::make_unique<DarwinSensors>();
 

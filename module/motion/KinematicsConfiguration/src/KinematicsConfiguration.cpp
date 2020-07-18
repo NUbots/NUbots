@@ -20,6 +20,7 @@
 #include "KinematicsConfiguration.h"
 
 #include "extension/Configuration.h"
+
 #include "message/motion/KinematicsModel.h"
 #include "utility/support/yaml_expression.h"
 

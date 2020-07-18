@@ -20,6 +20,7 @@
 #include "FixedWalk.h"
 
 #include "message/motion/GetupCommand.h"
+
 #include "utility/math/matrix/Rotation2D.h"
 
 namespace module {
@@ -54,7 +55,8 @@ namespace behaviour {
             });
 
             on<Every<30, Per<std::chrono::seconds>>, With<Sensors>, Sync<FixedWalk>>().then(
-                "Fixed Walk Manager", [this](const Sensors& sensors) {
+                "Fixed Walk Manager",
+                [this](const Sensors& sensors) {
                     if (active && t > segmentStart + walkSegments.front().duration && !fallen) {
                         // Move to next segment
                         segmentStart += walkSegments.front().duration;

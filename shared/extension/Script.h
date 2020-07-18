@@ -18,15 +18,15 @@
 #ifndef EXTENSION_SCRIPT_H
 #define EXTENSION_SCRIPT_H
 
-#include <yaml-cpp/yaml.h>
-
 #include <cstdlib>
 #include <nuclear>
 #include <regex>
 #include <string>
 #include <system_error>
+#include <yaml-cpp/yaml.h>
 
 #include "FileWatch.h"
+
 #include "utility/file/fileutil.h"
 #include "utility/input/ServoID.h"
 #include "utility/strutil/strutil.h"
@@ -149,8 +149,9 @@ struct Script {
         }
 
         else {
-            throw std::system_error(
-                -1, std::system_category(), ("Failed to extract platform name from '" + hostname + "'."));
+            throw std::system_error(-1,
+                                    std::system_category(),
+                                    ("Failed to extract platform name from '" + hostname + "'."));
         }
     }
 

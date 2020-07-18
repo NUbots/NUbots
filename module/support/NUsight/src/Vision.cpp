@@ -18,6 +18,7 @@
  */
 
 #include "NUsight.h"
+
 #include "message/input/Image.h"
 #include "message/output/CompressedImage.h"
 #include "message/vision/Ball.h"

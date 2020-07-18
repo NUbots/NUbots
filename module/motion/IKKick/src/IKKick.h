@@ -23,7 +23,9 @@
 #include <nuclear>
 
 #include "IKKickControllers.h"
+
 #include "message/motion/KickCommand.h"
+
 #include "utility/input/LimbID.h"
 #include "utility/motion/Balance.h"
 

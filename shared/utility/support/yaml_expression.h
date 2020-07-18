@@ -20,9 +20,8 @@
 #ifndef UTILITY_SUPPORT_yaml_expression_H
 #define UTILITY_SUPPORT_yaml_expression_H
 
-#include <fmt/format.h>
-
 #include <Eigen/Core>
+#include <fmt/format.h>
 #include <limits>
 #include <system_error>
 

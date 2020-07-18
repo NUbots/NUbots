@@ -18,7 +18,9 @@
  */
 
 #include "OldWalkEngine.h"
+
 #include "message/motion/KinematicsModel.h"
+
 #include "utility/nusight/NUhelpers.h"
 
 namespace module {

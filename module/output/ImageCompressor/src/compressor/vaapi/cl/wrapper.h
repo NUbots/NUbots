@@ -19,7 +19,6 @@
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_WRAPPER_H
 
 #include <CL/opencl.h>
-
 #include <memory>
 #include <string>
 #include <type_traits>

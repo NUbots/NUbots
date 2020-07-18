@@ -21,6 +21,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "NUsight.h"
+
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
 

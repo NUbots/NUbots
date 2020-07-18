@@ -20,8 +20,10 @@
 #include "NUsight.h"
 
 #include "extension/Configuration.h"
+
 #include "message/support/SaveConfiguration.h"
 #include "message/support/nusight/Command.h"
+
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nusight/NUhelpers.h"

@@ -1,6 +1,7 @@
 #include "FileLogHandler.h"
 
 #include "extension/Configuration.h"
+
 #include "utility/strutil/ansi.h"
 #include "utility/support/evil/pure_evil.h"
 
