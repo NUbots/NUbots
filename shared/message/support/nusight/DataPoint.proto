@@ -28,9 +28,9 @@ import "google/protobuf/timestamp.proto";
  */
 message DataPoint {
 
-    string                    label     = 1;
+    string label = 1;
     /// The actual data
-    repeated float            value     = 2 [packed = true];
+    repeated float value = 2 [packed = true];
     /// The time which the data point refers to
     google.protobuf.Timestamp timestamp = 4;
 }
