@@ -21,17 +21,12 @@ syntax = "proto3";
 package message.support;
 
 /**
- * Contains config file to save, and the path.
+ * Contains config file to save, and the path
  */
 message SaveConfiguration {
 
-    /**
-     * Relative path of the config save.
-     */
+    /// Relative path of the config save
     string path = 1;
-
-    /**
-     * The whole config file as a string.
-     */
+    /// The whole config file as a valid YAML-formatted string
     string config = 2;
 }

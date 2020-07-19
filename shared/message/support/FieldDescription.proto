@@ -24,118 +24,82 @@ import "Vector.proto";
 
 /**
  * Information about location and size of field objects and markers.
+ * Details about field measurements can be found in 'Law 1 - The Field of Play',
+ * in the RoboCup rulebook
  */
 message FieldDescription {
 
-    /**
-     * The cross-sectional shape of the goalposts
-     */
+    /// The cross-sectional shape of the goalposts
     enum GoalpostType {
         RECTANGLE = 0;
         CIRCLE    = 1;
     }
-
-    /**
-     * Measurements of the field which are loaded from config file. In metres.
-     */
+    /// Measurements of the field which are loaded from config file. In metres
     message FieldDimensions {
-        double line_width   = 1;
-        double mark_width   = 2;
+
+        /// The rules say that the lines must be the same width - approximately
+        /// 5 cm, and no more than 12 cm
+        double line_width = 1;
+
+        double mark_width = 2;
+        /// The 'touch line' length, approximately 9 m for kid size according to the rules
         double field_length = 3;
-        double field_width  = 4;
-
-        /**
-         * Cross-sectional shape of goal-posts.
-         */
+        /// The 'goal line' length, approximately 6 m for kid size according to the rules
+        double field_width = 4;
+        /// Cross-sectional shape of goal-posts
         GoalpostType goalpost_type = 5;
-
+        /// Distance behind the keeper to the net, approximately 0.6 m according to the rules
         double goal_depth = 6;
-
-        /**
-         * Distance between inner edges of goal posts.
-         */
+        /// Distance between inner edges of goal posts, approximately 2.6 m for both sizes
         double goal_width = 7;
-
+        /// 'Goal area' is equivalent to 6-yard box in soccer
+        /// Approximately 1 m for kid size according to the rules
         double goal_area_length = 8;
-        double goal_area_width  = 9;
-
-        /**
-         * Height to the bottom of the crossbar.
-         */
+        /// 'Goal area' is equivalent to 6-yard box in soccer
+        /// Approximately 3 m for kid size according to the rules
+        double goal_area_width = 9;
+        /// Height to the bottom of the crossbar, approximately 1.2 m for kids size according to the rules
         double goal_crossbar_height = 10;
-
-        /**
-         * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
-         */
+        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
+        /// Between 8 cm and 12 cm
         double goalpost_width = 11;
-
-        /**
-         * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
-         */
+        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
+        /// Between 8 cm and 12 cm
         double goalpost_depth = 12;
-
-        /**
-         * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
-         */
+        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
+        /// Between 8 cm and 12 cm
         double goal_crossbar_width = 13;
-
-        /**
-         * The crossbar diameter and the goalpost diameter are (supposed to be) equal.
-         */
+        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
+        /// Between 8 cm and 12 cm
         double goal_crossbar_depth = 14;
 
         double goal_net_height = 15;
-
-        /**
-         * Measured from the goal line to the middle of the penalty mark.
-         */
+        /// Measured from the goal line to the middle of the penalty mark
         double penalty_mark_distance = 16;
-
+        /// Approximately 1.5 m for kids size according to the rules
         double center_circle_diameter = 17;
+        /// 1 m for both sizes
         double border_strip_min_width = 18;
     }
-
-    /**
-     * Loaded from config file.
-     */
+    /// Kids size use FIFA size 1 - between 7.3 cm and 8.1 cm radius. See Law 2
     double ball_radius = 1;
-
-    /**
-     * Calculated as goal_crossbar_height + goal_crossbar_width.
-     */
+    /// Calculated as goal_crossbar_height + goal_crossbar_width
     double goalpost_top_height = 2;
 
-    /**
-     * Loaded from config file.
-     */
     double penalty_robot_start = 3;
 
     // Coordinates of goalpost centers calculated from the FieldDimensions:
 
-    /**
-     * {x, y} of our left goalpost, calculated from goal_width and half_length.
-     * It's the left one, as if you were looking from halfway.
-     */
+    /// {x, y} of our left goalpost, calculated from goal_width and half_length
+    /// It's the left one, as if you were looking from halfway
     vec2 goalpost_own_l = 4;
-
-    /**
-     * {x, y} of our right goalpost, calculated from goal_width and half_length.
-     * It's the right one, as if you were looking from halfway.
-     */
+    /// {x, y} of our right goalpost, calculated from goal_width and half_length
+    /// It's the right one, as if you were looking from halfway
     vec2 goalpost_own_r = 5;
-
-    /**
-     * {x, y} of opposition left goalpost, calculated from goal_width and half_length.
-     */
+    /// {x, y} of opposition left goalpost, calculated from goal_width and half_length
     vec2 goalpost_opp_l = 6;
-
-    /**
-     * {x, y} of opposition right goalpost, calculated from goal_width and half_length.
-     */
+    /// {x, y} of opposition right goalpost, calculated from goal_width and half_length
     vec2 goalpost_opp_r = 7;
-
-    /**
-     * Set of field dimensions loaded from config.
-     */
+    /// Set of field dimensions loaded from config
     FieldDimensions dimensions = 8;
 }

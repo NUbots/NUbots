@@ -21,17 +21,12 @@ syntax = "proto3";
 package message.support;
 
 /**
- * Field dimensions as defined in the Robocup rules.
+ * Player and team IDs
  */
 message GlobalConfig {
 
-    /**
-     * A number ID, assigned beginning with 0 or 1.
-     */
+    /// The robots number in the team. Starts at 1. Should be the same as the robots number (nugus1, nugus2, etc)
     uint32 playerId = 1;
-
-    /**
-     * Unique team number.
-     */
+    /// Unique team number
     uint32 teamId = 2;
 }

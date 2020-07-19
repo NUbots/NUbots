@@ -22,12 +22,9 @@ syntax = "proto3";
 package message.support.nusight;
 
 /**
- * Command string.
+ * Command string
  */
 message Command {
 
-    /**
-     * Command string.
-     */
     string command = 1;
 }
