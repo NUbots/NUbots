@@ -31,7 +31,7 @@ message ResetRobotHypotheses {
     message Self {
 
         /**
-         * Estimate of the robot's {x, y} position.
+         * Estimate of the robot's {x, y} position in field space.
          */
         vec2 position = 1;
 
