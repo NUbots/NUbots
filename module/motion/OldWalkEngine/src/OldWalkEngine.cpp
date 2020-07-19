@@ -594,11 +594,14 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootCOM =
-                rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp, sensors.Htx[ServoID::R_HIP_ROLL]);
+            rightFootCOM = rotateZLocal(rightFootCOM,
+                                        -hipRollCompensation * phaseComp,
+                                        Eigen::Affine3d(sensors.Htx[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootCOM = leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp, sensors.Htx[ServoID::L_HIP_ROLL]);
+            leftFootCOM = rotateZLocal(leftFootCOM,
+                                       hipRollCompensation * phaseComp,
+                                       Eigen::Affine3d(sensors.Htx[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {
