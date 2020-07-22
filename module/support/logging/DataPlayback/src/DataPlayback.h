@@ -80,7 +80,7 @@ namespace support {
             NUClear::clock::time_point last_emit_time;
 
             // If we should stop, loop or shutdown when we finish the files
-            enum OnEnd { SHUTDOWN_ON_END, STOP_ON_END, LOOP_ON_END } on_end = STOP_ON_END;
+            enum { SHUTDOWN_ON_END, STOP_ON_END, LOOP_ON_END } on_end = STOP_ON_END;
         };
 
     }  // namespace logging
