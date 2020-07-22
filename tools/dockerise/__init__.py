@@ -217,7 +217,7 @@ def run_on_docker(func):
 
                 # If we are running in WSL 1 we need to translate our path to a windows one for docker.
                 # Docker with WSL 2 doesn't need this as it supports binding paths directly from WSL into a container.
-                if (is_wsl1()):
+                if is_wsl1():
                     bind_path = subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
 
                 pty = WrapPty()
