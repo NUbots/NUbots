@@ -27,7 +27,7 @@ def is_wsl1():
     if shutil.which("wslpath") is None:
         return False
 
-    kernel_release = strip(subprocess.check_output(["uname", "-r"]).decode("utf-8"))
+    kernel_release = subprocess.check_output(["uname", "-r"]).decode("utf-8").strip()
     search = re.search("^(\d+)\.(\d+)\.\d+", kernel_release)
     major = search.group(1)
     minor = search.group(2)
