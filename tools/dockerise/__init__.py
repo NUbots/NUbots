@@ -23,6 +23,7 @@ def is_docker():
     path = "/proc/self/cgroup"
     return os.path.exists("/.dockerenv") or os.path.isfile(path) and any("docker" in line for line in open(path))
 
+
 def is_wsl1():
     if shutil.which("wslpath") is None:
         return False
@@ -37,6 +38,7 @@ def is_wsl1():
 
     # WSL 2 has kernel release version >= 4.19 (https://askubuntu.com/a/1177730)
     return int(major) <= 4 and int(minor) < 19
+
 
 def build_platform(platform):
     pty = WrapPty()
