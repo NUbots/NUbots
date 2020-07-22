@@ -2,6 +2,8 @@
 
 import fnmatch
 
+from tqdm import tqdm
+
 from .nbs import Decoder, Encoder
 
 
