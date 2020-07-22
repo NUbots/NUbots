@@ -63,7 +63,7 @@ namespace support {
                             // Don't print this on the first loop
                             if (file_index >= 0) {
                                 log<NUClear::INFO>("Playback of file", files[file_index], "finished");
-                            };
+                            }
 
                             // If we have more files to go in our list
                             if (file_index + 1 < int(files.size())) {
