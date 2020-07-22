@@ -59,6 +59,6 @@ def run(files, keep, remove, output, **kwargs):
                 if valid:
                     out.write(packet.timestamp, packet.msg)
 
-            # Update the progress bar
-            progress.n = decoder.bytes_read()
-            progress.update(0)
+                # Update the progress bar
+                progress.n = decoder.bytes_read()
+                progress.update(0)
