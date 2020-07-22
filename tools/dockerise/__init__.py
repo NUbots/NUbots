@@ -61,7 +61,7 @@ def build_platform(platform, local_only):
         "BUILDKIT_INLINE_CACHE=1",
         "--build-arg",
         "platform={}".format(platform if platform != "buildkit" else "generic"),
-        "-t",
+        "--tag",
         local_tag,
     ]
 
@@ -71,9 +71,7 @@ def build_platform(platform, local_only):
         # and that the order is important. Since the local_tag may contain local modifications we should specify
         # it first
         # https://github.com/moby/moby/issues/34715#issuecomment-425933774
-        build_command.extend(
-            ["--cache-from", ",".join([local_tag, remote_tag]),]
-        )
+        build_command.extend(["--cache-from", ",".join([local_tag, remote_tag])])
 
     # Run our build command
     err = pty.spawn(build_command, env=build_env)
@@ -129,7 +127,7 @@ def get_selected_platform():
                 cprint("        The platform chosen will be {}".format(platform), "orange", attrs=["bold"])
                 return platform
         else:
-            cprint("WARNING There are no is no selected platform.", "orange", attrs=["bold"])
+            cprint("WARNING There is no selected platform.", "orange", attrs=["bold"])
             cprint("        run `./b target {platform}` to correct this", "orange", attrs=["bold"])
             exit(1)
 
@@ -193,12 +191,11 @@ def run_on_docker(func):
                     if selected_platform:
                         if (
                             subprocess.call(
-                                ["docker", "image", "tag", tag, "{}:selected".format(repository)],
-                                stdout=subprocess.DEVNULL,
+                                ["docker", "tag", tag, "{}:selected".format(repository)], stdout=subprocess.DEVNULL,
                             )
                             != 0
                         ):
-                            cprint("docker image tag returned a non-zero exit code", "red", attrs=["bold"])
+                            cprint("docker tag returned a non-zero exit code", "red", attrs=["bold"])
                             exit(1)
 
                 # Find the volume for this platform
