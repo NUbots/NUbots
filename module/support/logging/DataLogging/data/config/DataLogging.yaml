@@ -5,6 +5,6 @@ output:
 # You can put any messages that is emitted in the system here and it will be logged
 # The below ones are just the most common and here as an example
 messages:
-  message.input.Image: false
+  message.output.CompressedImage: false
   message.input.Sensors: false
   message.platform.darwin.DarwinSensors: false
