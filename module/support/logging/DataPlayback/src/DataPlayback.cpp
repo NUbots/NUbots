@@ -1,9 +1,10 @@
 #include "DataPlayback.h"
 
+#include <filesystem>
+
 #include "read_packet.h"
 
 #include "extension/Configuration.h"
-
 namespace module {
 namespace support {
     namespace logging {
@@ -22,8 +23,13 @@ namespace support {
                 bool buffered = false;
                 while (!buffered) {
                     try {
+                        // If we haven't loaded a file yet we need to load one
+                        if (!input_file) {
+                            throw std::runtime_error("No file loaded yet");
+                        }
+
                         // Read our next packet from the stream
-                        Packet p = read_packet(input_file);
+                        Packet p = read_packet(*input_file);
 
                         // If our first_timecode is 0, this is our first packet for this cycle
                         if (first_timecode.count() == 0) {
@@ -52,12 +58,15 @@ namespace support {
                     catch (const std::exception& ex) {
 
                         // If we reached the end of the file we either terminate or loop depending on the setting
-                        if (input_file.eof()) {
+                        if (!input_file || input_file->eof()) {
 
-                            log<NUClear::INFO>("Playback of file", files[file_index], "finished");
+                            // Don't print this on the first loop
+                            if (file_index >= 0) {
+                                log<NUClear::INFO>("Playback of file", files[file_index], "finished")
+                            };
 
                             // If we have more files to go in our list
-                            if (file_index + 1 < files.size()) {
+                            if (file_index + 1 < int(files.size())) {
                                 // Go to the next file in the list
                                 file_index += 1;
                                 // This resets the timer offset for the new file
@@ -66,16 +75,20 @@ namespace support {
                                 start_time = last_emit_time;
 
                                 // Open the first file again
-                                input_file.clear();
-                                input_file.open(files[file_index]);
-                                log<NUClear::INFO>("Starting playback of file", files[file_index]);
+                                if (std::filesystem::exists(files[file_index])) {
+                                    input_file = std::make_unique<std::ifstream>(files[file_index]);
+                                    log<NUClear::INFO>("Starting playback of file", files[file_index]);
+                                }
+                                else {
+                                    log<NUClear::ERROR>("The file", files[file_index], "does not exist!");
+                                }
                             }
                             // We are done and should shutdown the system now
-                            else if (shutdown_on_end) {
+                            else if (on_end == SHUTDOWN_ON_END) {
                                 playback_handle.disable();
                                 powerplant.shutdown();
                             }
-                            else if (loop_playback) {
+                            else if (on_end == LOOP_ON_END) {
                                 // Go back to the first file in the list
                                 file_index = 0;
                                 // This resets the timer offset for the new file
@@ -84,19 +97,26 @@ namespace support {
                                 start_time = last_emit_time;
 
                                 // Open the first file again
-                                input_file.clear();
-                                input_file.open(files[file_index]);
-                                log<NUClear::INFO>("Restarting playback with file", files[file_index]);
+                                if (std::filesystem::exists(files[file_index])) {
+                                    input_file = std::make_unique<std::ifstream>(files[file_index]);
+                                    log<NUClear::INFO>("Restarting playback with file", files[file_index]);
+                                }
+                                else {
+                                    log<NUClear::ERROR>("Cannot restart with file",
+                                                        files[file_index],
+                                                        "as it does not exist!");
+                                }
                             }
                             // Just stop playing back the recording
                             else {
                                 playback_handle.disable();
-                                buffered = true;
+                                input_file = nullptr;
+                                buffered   = true;
                             }
                         }
                         // We tried to read something funny (possibly tried to read too many bytes)
-                        else if (input_file.bad() || input_file.fail()) {
-                            input_file.clear();
+                        else if (input_file->bad() || input_file->fail()) {
+                            input_file->clear();
                         }
                         else {
                             // We don't know what's up, throw the exception again
@@ -143,12 +163,24 @@ namespace support {
                         files.insert(files.end(), std::next(args.begin()), args.end());
                     }
 
-                    loop_playback   = config["loop_playback"].as<bool>();
-                    shutdown_on_end = config["shutdown_on_end"].as<bool>();
-                    buffer_time     = std::chrono::milliseconds(config["buffer_time"].as<uint64_t>());
+                    // Work out what to do on the end of the file
+                    std::string end_string = config["on_end"].as<std::string>();
+                    if (end_string == "STOP") {
+                        on_end = STOP_ON_END;
+                    }
+                    else if (end_string == "LOOP") {
+                        on_end = LOOP_ON_END;
+                    }
+                    else if (end_string == "SHUTDOWN") {
+                        on_end = SHUTDOWN_ON_END;
+                    }
+                    else {
+                        throw std::runtime_error("Unknown on end option " + end_string
+                                                 + " must be one of STOP, LOOP or SHUTDOWN");
+                    }
 
-                    // Start at the first file again
-                    file_index = 0;
+                    buffer_time = std::chrono::milliseconds(config["buffer_time"].as<uint64_t>());
+
 
                     // If we still have no files
                     if (files.empty()) {
@@ -156,8 +188,8 @@ namespace support {
                         playback_handle.disable();
                     }
                     else {
-                        input_file.open(files[file_index]);
-                        log<NUClear::INFO>("Starting playback of file", files[file_index]);
+                        // Start at -1 so we skip ahead and start at 0
+                        file_index = -1;
                         playback_handle.enable();
                     }
                 });

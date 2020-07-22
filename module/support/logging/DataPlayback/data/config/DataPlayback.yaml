@@ -2,8 +2,12 @@
 # So you can call ./binary a.nbs b.nbs c.nbs etc
 files: []
 
-# Once the NBS file has finished playing should we start again at the beginning
-loop_playback: true
+# What should we do when we finish playing back
+# Options are:
+#   STOP      to just stop emitting when the file is done
+#   LOOP      to start playback again from the first file
+#   SHUTDOWN  to shutdown the program and terminate on the end of the file
+on_end: LOOP
 
 # If the system should shut down once it finishes playing the file
 shutdown_on_end: false
@@ -16,4 +20,4 @@ buffer_time: 1500
 messages:
   message.input.Image: false
   message.input.Sensors: false
-  message.platform.DarwinSensors: false
+  message.platform.darwin.DarwinSensors: true

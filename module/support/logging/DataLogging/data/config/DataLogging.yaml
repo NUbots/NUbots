@@ -7,4 +7,4 @@ output:
 messages:
   message.input.Image: false
   message.input.Sensors: false
-  message.platform.DarwinSensors: false
+  message.platform.darwin.DarwinSensors: false

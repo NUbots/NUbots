@@ -2,6 +2,7 @@
 #define MODULE_SUPPORT_LOGGING_DATAPLAYBACK_H
 
 #include <fstream>
+#include <memory>
 #include <nuclear>
 
 namespace module {
@@ -58,7 +59,7 @@ namespace support {
             ReactionHandle playback_handle;
 
             // Our input file that we read from
-            std::ifstream input_file;
+            std::unique_ptr<std::ifstream> input_file;
 
             // The list of files we are playing
             std::vector<std::string> files;
@@ -78,11 +79,8 @@ namespace support {
             // The last time that we emitted a packet for
             NUClear::clock::time_point last_emit_time;
 
-            // If we should loop this file after we finish or just disable ourself
-            bool loop_playback = false;
-
-            // If we should shutdown the system once we finish playing back
-            bool shutdown_on_end = false;
+            // If we should stop, loop or shutdown when we finish the files
+            enum OnEnd { SHUTDOWN_ON_END, STOP_ON_END, LOOP_ON_END } on_end = STOP_ON_END;
         };
 
     }  // namespace logging
