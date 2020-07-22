@@ -115,7 +115,7 @@ namespace support {
                             }
                         }
                         // We tried to read something funny (possibly tried to read too many bytes)
-                        else if (input_file->bad() || input_file->fail()) {
+                        else if (!input_file->good()) {
                             input_file->clear();
                         }
                         else {
