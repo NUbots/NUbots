@@ -41,4 +41,4 @@ namespace platform {
 }  // namespace platform
 }  // namespace module
 
-#endif
+#endif  // MODULE_PLATFORM_SimscapeUDP_H
