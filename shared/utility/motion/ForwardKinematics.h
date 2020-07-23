@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "message/input/Sensors.h"
+#include "message/motion/BodySide.h"
 #include "message/motion/KinematicsModel.h"
 
 #include "utility/input/LimbID.h"
@@ -41,11 +42,10 @@ namespace motion {
     namespace kinematics {
 
         using message::input::Sensors;
+        using message::motion::BodySide;
         using message::motion::KinematicsModel;
         using utility::input::LimbID;
         using utility::input::ServoID;
-        using utility::input::ServoSide;
-        using BodySide = message::motion::BodySide;
 
 
         inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
@@ -83,11 +83,6 @@ namespace motion {
             runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
             // Rotate pitch
             runningTransform = runningTransform.rotate(Eigen::AngleAxisd(HEAD_PITCH, Eigen::Vector3d::UnitY()));
-            // Translate to camera
-            runningTransform = runningTransform.translate(NECK_TO_CAMERA);
-            // Rotate to set x to camera vector
-            runningTransform = runningTransform.rotate(
-                Eigen::AngleAxisd(model.head.CAMERA_DECLINATION_ANGLE_OFFSET, Eigen::Vector3d::UnitY()));
             // PITCH
             // Return basis pointing along camera vector (ie x is camera vector, z out of top of head). Pos at camera
             // position
