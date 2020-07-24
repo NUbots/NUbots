@@ -25,7 +25,7 @@ import "Vector.proto";
 import "Matrix.proto";
 
 /**
- * A normal vector and the distance to the line.
+ * A normal vector and the distance to the line
  */
 message Line {
     fvec3 normal   = 1;
@@ -33,7 +33,7 @@ message Line {
 }
 
 /**
- * The circle's centre position and radius.
+ * The circle's centre position and radius
  */
 message Circle {
     double radius = 1;
@@ -41,90 +41,61 @@ message Circle {
 }
 
 /**
- * A 3D matrix representation of the Ellipse.
+ * A 3D matrix representation of the Ellipse
  */
 message Ellipse {
-    // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
+    /// See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
     mat3 ellipse = 1;
 }
 
 /**
- * Four corner points of a quadrilateral.
+ * Four corner points of a quadrilateral
  */
 message Quad {
 
-    /**
-     * Top left corner of the quadrilateral.
-     */
+    /// Top left corner of the quadrilateral
     vec2 tl = 1;
-
-    /**
-     * Top right corner of the quadrilateral.
-     */
+    /// Top right corner of the quadrilateral
     vec2 tr = 2;
-
-    /**
-     * Bottom left corner of the quadrilateral.
-     */
+    /// Bottom left corner of the quadrilateral
     vec2 bl = 3;
-
-    /**
-     * Bottom right corner of the quadrilateral.
-     */
+    /// Bottom right corner of the quadrilateral
     vec2 br = 4;
 }
 
 /**
- * Contains the polygon's location.
+ * Contains the polygon's location
  */
 message Polygon {
 
-    /**
-     * {x, y} location of the polygon.
-     */
+    /// {x, y} location of the polygon
     vec2 point = 1;
 }
 
 /**
- * Contains the positions of the four corners of a frustrum.
+ * Contains the positions of the four corners of a frustrum
  */
 message Frustum {
 
-    /**
-     * Top left corner of the frustrum
-     */
+    /// Top left corner of the frustrum
     vec3 tl = 1;
-
-    /**
-     * Top right corner of the frustrum
-     */
+    /// Top right corner of the frustrum
     vec3 tr = 2;
-
-    /**
-     * Bottom left corner of the frustrum
-     */
+    /// Bottom left corner of the frustrum
     vec3 bl = 3;
-
-    /**
-     * Bottom right corner of the frustrum
-     */
+    /// Bottom right corner of the frustrum
     vec3 br = 4;
 }
 
 /**
- * Contains the cone's axis, gradient, and radius.
+ * Contains the cone's axis, gradient, and radius
  */
 message Cone {
 
-    /**
-     * 3D axis of the centre of the cone.
-     */
+    /// 3D axis of the centre of the cone
     fvec3 axis = 1;
 
     float gradient = 2;
-
-    /**
-     * Radius of the circle which is the base of the cone.
-     */
+    /// Radius of the circle which is the base of the cone
     float radius = 3;
 }
