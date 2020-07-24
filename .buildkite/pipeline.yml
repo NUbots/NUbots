@@ -1,3 +1,9 @@
+# Global environment variables used for all steps
+env:
+  # These two environment variables are needed to make docker-compose use buildkit
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  DOCKER_BUILDKIT: 1
+
 steps:
   # Push up new images to DockerHub when they get to master
   # Makes development faster as you can just pull the images rather than building them yourself
@@ -14,7 +20,7 @@ steps:
           config: .buildkite/docker-compose.yml
           push:
             - generic:nubots/nubots:generic
-  
+
   - label: "Push nuc7i7bnh :docker: image"
     branches: master
     agents:
@@ -27,7 +33,7 @@ steps:
           config: .buildkite/docker-compose.yml
           push:
             - nuc7i7bnh:nubots/nubots:nuc7i7bnh
-            
+
   - label: "Push nuc8i7beh :docker: image"
     branches: master
     agents:

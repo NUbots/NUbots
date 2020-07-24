@@ -7,6 +7,7 @@ services:
       context: ./../docker
       args:
         platform: generic
+        BUILDKIT_INLINE_CACHE: 1
     volumes:
       - type: bind
         source: ./..
@@ -21,6 +22,7 @@ services:
       context: ./../docker
       args:
         platform: nuc7i7bnh
+        BUILDKIT_INLINE_CACHE: 1
     volumes:
       - type: bind
         source: ./..
@@ -35,6 +37,7 @@ services:
       context: ./../docker
       args:
         platform: nuc8i7beh
+        BUILDKIT_INLINE_CACHE: 1
     volumes:
       - type: bind
         source: ./..

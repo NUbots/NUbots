@@ -73,7 +73,6 @@ namespace input {
             }
         }
 
-
         inline guint camera_get_payload(ArvCamera* camera) {
             GError* error = nullptr;
             guint result  = arv_camera_get_payload(camera, &error);
