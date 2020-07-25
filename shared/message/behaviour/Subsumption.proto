@@ -31,19 +31,18 @@ message Subsumption {
 
     /// The set of libs required to move for a given action
     message LimbSet {
-
         /// How important this set of limbs' movements are to the ActionRegister
         float priority = 1;
         /// The LimbIDs of those limbs
         repeated uint32 limbs = 2;
     }
+
     /// The set of limbs that you want to control. Related to ActionRegister in the controller module
     /// There are 3 callbacks associated with ActionRegister:
     /// 1. The actions you want to take when you have control
     /// 2. The actions you want to take when control is taken away from you
     /// 3. The actions you want to take once you have completed your actions with the limbs
     message ActionRegister {
-
         /// Unique identifier for the action
         uint32 id   = 1;
         string name = 2;
@@ -52,6 +51,7 @@ message Subsumption {
         /// e.g. higher priorities for legs than arms when executing a kick
         repeated LimbSet limb_set = 3;
     }
+
     /// Prompt indicating that there should be a change to a given ActionRegister
     message ActionStateChange {
         enum State {
@@ -59,11 +59,11 @@ message Subsumption {
             START   = 1;
             KILL    = 2;
         }
-
         State           state = 1;
         string          name  = 2;
         repeated uint32 limbs = 3;
     }
+
     /// How important this set of actions is to the controller
     message ActionPriorites {
         uint32         id         = 1;

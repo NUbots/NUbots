@@ -52,7 +52,6 @@ message FixedWalkCommand {
 
     /// One segment of a larger set, which comprises a command
     message WalkSegment {
-
         /// A vector in the direction of movement
         vec2 direction = 1;
         /// The period of the wave which represents robot rotations
