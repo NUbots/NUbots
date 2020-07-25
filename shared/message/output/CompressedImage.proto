@@ -30,80 +30,40 @@ import "Vector.proto";
  */
 message CompressedImage {
 
-    /**
-     * The lens type and details about the images it makes.
-     */
+    /// The lens type and details about the images it makes
     message Lens {
 
-        /**
-         * Types of projection of our lenses.
-         */
+        /// Types of projection of our lenses
         enum Projection {
             UNKNOWN     = 0;
             RECTILINEAR = 1;
             EQUIDISTANT = 2;
             EQUISOLID   = 3;
         }
-
-        /**
-         * The type of projection this lens is using.
-         */
+        /// The type of projection this lens is using
         Projection projection = 1;
-
-        /**
-         * Normalised focal length: focal length in pixels / image width.
-         */
+        /// Normalised focal length: focal length in pixels / image width
         float focal_length = 2;
-
-        /**
-         * The angular diameter that the lens covers (the area that light hits on the sensor). In radians.
-         */
+        /// The angular diameter that the lens covers (the area that light hits on the sensor). In radians
         float fov = 3;
-
-        /**
-         * Normalised image centre offset: pixels from centre to optical axis / image width
-         */
+        /// Normalised image centre offset: pixels from centre to optical axis / image width
         fvec2 centre = 4;
     }
-
-    /**
-     * Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
-     * see module::output::compressor::turbojpeg::Compressor::compress for full list.
-     */
+    /// Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
+    /// see module::output::compressor::turbojpeg::Compressor::compress for full list
     uint32 format = 1;
-
-    /**
-     * Number of pixels of {x, y} of the image.
-     */
+    /// Number of pixels of {x, y} of the image
     uvec2 dimensions = 2;
-
-    /**
-     * The actual image pixel data.
-     */
+    /// The actual image pixel data
     bytes data = 3;
-
-    /**
-     * Unique identifying number for the camera which took the image.
-     */
+    /// Unique identifier for the camera which took the image
     uint32 camera_id = 4;
-
-    /**
-     * Identifying name of the image.
-     */
+    /// Name of the camera that took the image
     string name = 5;
-
-    /**
-     * Time when the image was taken.
-     */
+    /// Time when the image was taken
     google.protobuf.Timestamp timestamp = 6;
-
-    /**
-     * World to camera Affine3D transform.
-     */
+    /// World to camera Affine3D transform
     mat4 Hcw = 7;
-
-    /**
-     * The lens information of the camera which took the image.
-     */
+    /// The lens information of the camera which took the image
     Lens lens = 8;
 }
