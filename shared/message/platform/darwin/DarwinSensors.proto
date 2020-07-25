@@ -43,9 +43,9 @@ message DarwinSensors {
         CORRUPT_DATA  = 128;
         TIMEOUT       = 256;
     }
+
     /// Toggle status of the LEDs on the panel
     message LEDPanel {
-
         /// led2 toggle status
         bool led2 = 1;
         /// led3 toggle status
@@ -53,29 +53,29 @@ message DarwinSensors {
         /// led4 toggle status
         bool led4 = 3;
     }
+
     /// The colour for the HeadLED to display
     message HeadLED {
-
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
+
     /// The colour for the EyeLED to display
     message EyeLED {
-
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
+
     /// Press-down status of left and middle buttons
     message Buttons {
-
         /// Press-down status of the left button
         bool left = 1;
         /// Press-down status of the middle button
         bool middle = 2;
     }
+
     /// Raw accelerometer values from the CM740: x, y, z
     message Accelerometer {
-
         /// Raw x acceleration value from the CM740
         float x = 1;
         /// Raw y acceleration value from the CM740
@@ -83,9 +83,9 @@ message DarwinSensors {
         /// Raw z acceleration value from the CM740
         float z = 3;
     }
+
     /// The raw gyro values from the CM740 (they are read from the board in ZYX): x, y, z
     message Gyroscope {
-
         /// Raw x gyro value from the CM740
         float x = 1;
         /// Raw y gyro value from the CM740
@@ -93,11 +93,11 @@ message DarwinSensors {
         /// Raw z gyro value from the CM740
         float z = 3;
     }
+
     /// The data from the force sensitive resistors.
     /// The robot has FSRs on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
-
         float  fsr1       = 1;
         float  fsr2       = 2;
         float  fsr3       = 3;
@@ -106,18 +106,18 @@ message DarwinSensors {
         float  centreY    = 6;
         uint32 errorFlags = 7;
     }
+
     /// Pair of FSR messages - one for each foot
     message FSRs {
-
         /// Left foot set of FSRs, with centre coordinates and error flags
         FSR left = 1;
         /// Right foot set of FSRs, with centre coordinates and error flags
         FSR right = 2;
     }
+
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
     message Servo {
-
         /// Set of things which can or have gone wrong.
         /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
         uint32 errorFlags = 1;
@@ -162,6 +162,7 @@ message DarwinSensors {
         /// Data value is identical to the actual temperature in Celsius
         float temperature = 13;
     };
+
     /// Set of all the servos on the robot
     message Servos {
         Servo rShoulderPitch = 1;
