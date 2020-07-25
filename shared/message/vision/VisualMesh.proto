@@ -28,20 +28,38 @@ import "Matrix.proto";
  * Contains the details of a Visual Mesh™ measurement
  */
 message VisualMesh {
+    /// The "almost" concentric rings of the mesh centred about the robot
     message Row {
-        float phi      = 1;
+
+        /// The angle out from the camera
+        float phi = 1;
+        /// The on-screen nodes in the row
         int32 segments = 2;
     }
     /// The camera which took the measurements
     uint32 camera_id = 1;
-    /// Unit vectors with the origin at the camera position, which represent rays of light
-    fmat           rays            = 2;
-    imat           neighbourhood   = 3;
-    fmat           classifications = 4;
-    fmat           coordinates     = 5;
-    repeated int32 indices         = 6 [packed = true];
+    /// Unit vectors in world space at camera origin. They represent points in the
+    /// mesh (vector projected from optical axis through a pixel coordinate and on
+    /// to the observation plane). This matrix has shape `3 x N`, where N is the
+    /// number of rays in the Visual Mesh
+    fmat rays = 2;
+    /// For a given ray, this provides you with its N neighbours in the mesh. N is
+    /// defined during training. For example with the `RING6` graph, this matrix
+    /// has shape `6 x N`
+    imat neighbourhood = 3;
+    /// For a given ray, this provides you the confidence level that this ray belongs to each of
+    /// the classes (ball, goal post, field line, etc.). The ordering of the columns is
+    /// defined when the network is trained. The shape of this matrix is N x M, where
+    /// N is the number of classes and M is the ray index
+    fmat classifications = 4;
+    /// Pixel coordinates corresponding to each ray. It's a 2 x N matrix
+    fmat coordinates = 5;
+    /// Indexes to the rays
+    repeated int32 indices = 6 [packed = true];
     /// Affine3d transform from world space to camera space at the time that the image was taken
-    mat4                      Hcw       = 7;
+    mat4 Hcw = 7;
+    /// This whole graph/set of rows. There may be separate meshes looking for different
+    /// objects, but this message refers to this mesh alone
     repeated Row              mesh      = 8;
     google.protobuf.Timestamp timestamp = 9;
 }
