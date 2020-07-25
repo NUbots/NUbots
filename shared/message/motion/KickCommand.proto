@@ -23,7 +23,7 @@ package message.motion;
 import "Vector.proto";
 
 /**
- * Type is NORMAL or POWER (POWER means disregard robot safety and smash it).
+ * Type is NORMAL or POWER (POWER means disregard robot safety and smash it)
  */
 enum KickCommandType {
     NORMAL = 0;
@@ -31,70 +31,52 @@ enum KickCommandType {
 }
 
 /**
- * Contains kick target, direction, and magnitude.
+ * Contains kick target, direction, and magnitude
  */
 message KickCommand {
 
-    /**
-     * The {x, y, z} point to kick.
-     */
+    /// The {x, y, z} point to kick to
     vec3 target = 1;
-
-    /**
-     * Force is the magnitude.
-     */
+    /// Force is the magnitude
     vec3 direction = 2;
-
-    /**
-     * Type is NORMAL or POWER (POWER means disregard robot safety and smash it).
-     */
+    /// Type is NORMAL or POWER (POWER means disregard robot safety and smash it)
     KickCommandType kickCommandType = 3;
 }
 
-
 /**
- * Contains kick direction and which leg to kick with.
+ * Contains kick direction and which leg to kick with
  */
 message KickScriptCommand {
 
-    /**
-     * Direction to kick with magnitude determining force.
-     */
+    /// Direction to kick with magnitude determining force
     vec3 direction = 1;
-
-    /**
-     * Leg to kick with. Use LimbID::LEFT_LEG or LimbID::RIGHT_LEG to check value.
-     */
+    /// Leg to kick with. Use LimbID::LEFT_LEG or LimbID::RIGHT_LEG to check value
     uint32 leg = 2;
 }
 
 /**
- * Contains config info for kick planner.
+ * Contains config info for kick planner
  */
 message KickPlannerConfig {
 
-    /**
-     * Maximum distance the ball can be away, in metres.
-     */
+    /// Maximum distance the ball can be away, in metres
     float max_ball_distance = 1;
-
+    /// Used to determine how far apart (laterally) the ball center and foot center are allowed to
+    /// be while still allowing a kick to happen
     float kick_corridor_width = 2;
-
-    /**
-     * How many seconds without vision until the robot decides to not kick.
-     */
+    /// How many seconds without vision until the robot decides to not kick
     float seconds_not_seen_limit = 3;
 
     float kick_forward_angle_limit = 4;
 }
 
 /**
- * Empty message which indicates a kick is finished.
+ * Empty message which indicates a kick is finished
  */
 message KickFinished {}
 
 /**
- * Contains stand height for IK kick.
+ * Contains stand height for IK kick
  */
 message IKKickParams {
 
