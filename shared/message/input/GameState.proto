@@ -29,8 +29,7 @@ message GameState {
 
     /// All of the information from GameState except the event string
     message Data {
-
-        /// Type of gameplay - UNKNOWN_MODE, NORMAL, PENALTY_SHOOTOUT or OVERTIME
+        /// Type of gameplay
         enum Mode {
             UNKNOWN_MODE     = 0;
             NORMAL           = 1;
@@ -62,9 +61,9 @@ message GameState {
             MANUAL                        = 10;
             PLAYER_PUSHING                = 11;
         }
+
         /// A tracking message for robots, with penalty tracking data
         message Robot {
-
             /// The robot which is being tracked
             uint32 id = 1;
             /// The infraction the robot being tracked committed
@@ -72,9 +71,9 @@ message GameState {
             /// The timestamp when the robot will be playing again
             google.protobuf.Timestamp unpenalised = 3;
         }
+
         /// Set of robots on a team, with a score and coach message
         message Team {
-
             /// Unique team number
             uint32 team_id = 1;
             /// The team's current score

@@ -32,7 +32,6 @@ message MotionCapture {
 
     /// Mocap reference points to track
     message Marker {
-
         /// Identifier for the marker
         uint32 id = 1;
         /// Position of the marker in 3D space
@@ -40,6 +39,7 @@ message MotionCapture {
 
         float size = 3;
     }
+
     /// A named set of Mocap markers
     message MarkerSet {
 
@@ -48,11 +48,11 @@ message MotionCapture {
         /// The associated set of markers
         repeated Marker markers = 2;
     }
+
     /// A collection of three or more markers on an object that are interconnected to each other with an assumption
     /// that the tracked object is undeformable. See https://v22.wiki.optitrack.com/index.php?title=Rigid_Body_Tracking
     /// The bones which make up skeletons are RigidBodys
     message RigidBody {
-
         /// Unique identifying number for the rigid body
         uint32 id = 1;
         /// Position of the centre of the rigidbody in 3D space
@@ -74,9 +74,9 @@ message MotionCapture {
         uint32          parent   = 9;
         repeated uint32 children = 10;
     }
+
     /// The whole character for which the motion represents
     message Skeleton {
-
         /// Identifying number of the skeleton
         uint32 id = 1;
         /// Set of bones which make up the skeleton
@@ -89,7 +89,6 @@ message MotionCapture {
     }
 
     message LabeledMarker {
-
         /// The marker the information refers to
         Marker marker = 1;
 
@@ -102,13 +101,12 @@ message MotionCapture {
     /// orientation and scale changes over the course of the animation,
     /// where each parameter is referred to as a Channel or Degree of Freedom (DOF)
     message Channel {
-
         /// The changes for this degree of freedom over a given timespan
         repeated float channel = 1;
     }
+
     /// Contains the data output from the force plate, which can be synced with mocap footage
     message ForcePlate {
-
         /// Unique number identifier for the forceplate
         uint32 id = 1;
         /// Set of Channels/Degrees of Freedom and their data, representing their change over time
@@ -118,14 +116,12 @@ message MotionCapture {
     uint32 frameNumber = 1;
 
     float latency = 2;
-
     /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame bytes, in binary coded decimal
     /// see https://en.wikipedia.org/wiki/SMPTE_timecode
     uint32 timecode = 3;
 
     uint32 timecodeSub = 4;
     double timestamp   = 5;
-
     /// Whether or not this frame is to be recorded
     bool recording = 6;
 

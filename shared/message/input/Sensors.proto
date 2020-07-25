@@ -34,7 +34,6 @@ message Sensors {
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
     message Servo {
-
         /// Set of things which can or have gone wrong.
         /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
         uint32 error_flags = 1;
@@ -79,25 +78,25 @@ message Sensors {
         /// Data value is identical to the actual temperature in Celsius
         float temperature = 13;
     }
+
     /// Button ID and press status
     message Button {
-
         /// Unique identifying number for the button
         uint32 id = 1;
         /// True is pressed, false is unpressed
         bool value = 2;
     }
+
     /// LED id and colour
     message LED {
-
         /// Unique identifying number for the LED
         uint32 id = 1;
 
         uint32 colour = 2;
     }
+
     /// Force sensitive resistor. Used to feel if foot is on the ground
     message FSR {
-
         /// Vector of outputs for this FSR
         repeated float value = 1 [packed = true];
         /// X, Y coordinates of the location of the centre of this FSR

@@ -27,7 +27,6 @@ import "message/input/GameState.proto";
  * Contains event tracking information
  */
 message GameEvents {
-
     /// Context describes which actor/team is being referred to by an event
     enum Context {
         UNKNOWN_CONTEXT = 0;
@@ -42,25 +41,25 @@ message GameEvents {
         CYAN                = 1;
         MAGENTA             = 2;
     };
+
     /// Current total score for both teams
     message Score {
-
         /// Current total score for our team
         uint32 ownScore = 1;
         /// Current total score for opposition team
         uint32 opponentScore = 2;
     }
+
     /// Goal score notification message, with total score for that team
     message GoalScored {
-
         /// The actor/team who scored the goal
         Context context = 1;
         /// The total score of the actor/team who scored
         uint32 totalScore = 2;
     }
+
     /// Penalty notification message, with context and a resume play timestamp
     message Penalisation {
-
         /// The party being penalised
         Context context = 1;
         /// The exact player being penalised
@@ -70,45 +69,45 @@ message GameEvents {
         /// The type of infraction which caused the penalty
         GameState.Data.PenaltyReason reason = 4;
     }
+
     /// The context and robot which were unpenalised
     message Unpenalisation {
-
         /// The context being unpenalised
         Context context = 1;
         /// The specific robot being unpenalised
         uint32 robotId = 2;
     }
+
     /// Message from a coach, and the intended recipient context
     message CoachMessage {
-
         /// The intended recipient(s)
         Context context = 1;
         /// The contents of the message
         string message = 2;
     }
+
     /// Message indicating half time has occurred
     message HalfTime {
-
         /// True if currently first half
         bool firstHalf = 1;
     }
+
     /// Ball kicked out message with context and timestamp
     message BallKickedOut {
-
         /// The party which kicked the ball out
         Context context = 1;
         /// The time when the ball was kicked out
         google.protobuf.Timestamp time = 3;
     }
+
     /// The context of the team kicking off
     message KickOffTeam {
-
         /// The party kicking off
         Context context = 1;
     }
+
     /// Set of timestamps for different parts of the game, with current phase state
     message GamePhase {
-
         /// Current phase state, such as PLAYING or TIMEOUT
         GameState.Data.Phase phase = 1;
 
@@ -136,9 +135,9 @@ message GameEvents {
         /// Time when the next half is to begin
         google.protobuf.Timestamp nextHalf = 6;
     }
+
     /// UNKNOWN_MODE, NORMAL, PENALTY_SHOOTOUT or OVERTIME
     message GameMode {
-
         GameState.Data.Mode mode = 1;
     }
 }

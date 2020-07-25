@@ -32,15 +32,14 @@ message Image {
 
     /// The lens type and details about the images it makes
     message Lens {
-
-        /// Types of projection of our lenses
+        /// Lens projection types
         enum Projection {
             UNKNOWN     = 0;
             RECTILINEAR = 1;
             EQUIDISTANT = 2;
             EQUISOLID   = 3;
         }
-        /// The type of projection this lens is using
+        /// This lens' projection type
         Projection projection = 1;
         /// Normalised focal length: focal length in pixels / image width
         float focal_length = 2;
