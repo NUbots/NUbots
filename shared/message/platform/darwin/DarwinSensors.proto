@@ -24,14 +24,13 @@ import "google/protobuf/timestamp.proto";
 
 
 /**
- * Contains all of the sensor and servo information.
+ * Contains all of the sensor and servo information
  */
 message DarwinSensors {
 
-    /**
-     * Set of error flags/statuses.
-     * bitmask values.
-     */
+    /// Set of error flags/statuses.
+    /// bitmask values.
+    /// See https://emanual.robotis.com/docs/en/dxl/protocol1/#protocol
     enum Error {
         OK            = 0;  // not really a flag but the lack of any other flag
         INPUT_VOLTAGE = 1;
@@ -44,113 +43,59 @@ message DarwinSensors {
         CORRUPT_DATA  = 128;
         TIMEOUT       = 256;
     }
-
-    /**
-     * Toggle status of the LEDs on the panel.
-     */
+    /// Toggle status of the LEDs on the panel
     message LEDPanel {
 
-        /**
-         * led2 toggle status.
-         */
+        /// led2 toggle status
         bool led2 = 1;
-
-        /**
-         * led3 toggle status.
-         */
+        /// led3 toggle status
         bool led3 = 2;
-
-        /**
-         * led4 toggle status.
-         */
+        /// led4 toggle status
         bool led4 = 3;
     }
-
-    /**
-     * The colour for the HeadLED to display.
-     */
+    /// The colour for the HeadLED to display
     message HeadLED {
 
-        /**
-         * Encode as 0x00 0xRR 0xGG 0xBB.
-         */
+        /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
-
-    /**
-     * The colour for the EyeLED to display.
-     */
+    /// The colour for the EyeLED to display
     message EyeLED {
 
-        /**
-         * Encode as 0x00 0xRR 0xGG 0xBB.
-         */
+        /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
-
-    /**
-     * Press-down status of left and middle buttons.
-     */
+    /// Press-down status of left and middle buttons
     message Buttons {
 
-        /**
-         * Press-down status of the left button.
-         */
+        /// Press-down status of the left button
         bool left = 1;
-
-        /**
-         * Press-down status of the middle button.
-         */
+        /// Press-down status of the middle button
         bool middle = 2;
     }
-
-    /**
-     * Raw accelerometer values from the CM740: x, y, z.
-     */
+    /// Raw accelerometer values from the CM740: x, y, z
     message Accelerometer {
 
-        /**
-         * Raw x acceleration value from the CM740.
-         */
+        /// Raw x acceleration value from the CM740
         float x = 1;
-
-        /**
-         * Raw y acceleration value from the CM740.
-         */
+        /// Raw y acceleration value from the CM740
         float y = 2;
-
-        /**
-         * Raw z acceleration value from the CM740.
-         */
+        /// Raw z acceleration value from the CM740
         float z = 3;
     }
-
-    /**
-     * The raw gyro values from the CM740 (they are read from the board in ZYX): x, y, z.
-     */
+    /// The raw gyro values from the CM740 (they are read from the board in ZYX): x, y, z
     message Gyroscope {
 
-        /**
-         * Raw x gyro value from the CM740.
-         */
+        /// Raw x gyro value from the CM740
         float x = 1;
-
-        /**
-         * Raw y gyro value from the CM740.
-         */
+        /// Raw y gyro value from the CM740
         float y = 2;
-
-        /**
-         * Raw z gyro value from the CM740.
-         */
+        /// Raw z gyro value from the CM740
         float z = 3;
     }
-
-    /**
-     * The data from the force sensitive resistors.
-     * The robot has FSRs on its feet to detect whether a foot is down.
-     * There are four FSRs per foot, so this message is for one foot.
-     */
+    /// The data from the force sensitive resistors.
+    /// The robot has FSRs on its feet to detect whether a foot is down.
+    /// There are four FSRs per foot, so this message is for one foot
     message FSR {
 
         float  fsr1       = 1;
@@ -161,114 +106,63 @@ message DarwinSensors {
         float  centreY    = 6;
         uint32 errorFlags = 7;
     }
-
-    /**
-     * Pair of FSR messages - one for each foot.
-     */
+    /// Pair of FSR messages - one for each foot
     message FSRs {
 
-        /**
-         * Left foot set of FSRs, with centre coordinates and error flags.
-         */
+        /// Left foot set of FSRs, with centre coordinates and error flags
         FSR left = 1;
-
-        /**
-         * Right foot set of FSRs, with centre coordinates and error flags.
-         */
+        /// Right foot set of FSRs, with centre coordinates and error flags
         FSR right = 2;
     }
-
-
-    /**
-     * Full set of information to use a given servo.
-     * Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
-     */
+    /// Full set of information to use a given servo.
+    /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
     message Servo {
 
-        /**
-         * Set of things which can or have gone wrong.
-         * https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
-         */
+        /// Set of things which can or have gone wrong.
+        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
         uint32 errorFlags = 1;
-
-        /**
-         * Whether the torque is on or off.
-         */
+        /// Whether the torque is on or off
         bool torqueEnabled = 2;
-
-        /**
-         * Proportional gain. In proportion to the servo's position error. Gain values are in range 0~254.
-         * K_p : p_gain / 8
-         */
+        /// Proportional gain. In proportion to the servo's position error. Gain values are in range 0~254.
+        /// K_p : p_gain / 8
         float pGain = 3;
-
-        /**
-         * Integral gain. Increases in relation to the error, and how long the error has persisted. Gain values are in
-         * range 0~254. K_i : i_gain * 1000 / 2048
-         */
+        /// Integral gain. Increases in relation to the error, and how long the error has persisted. Gain values are in
+        /// range 0~254. K_i : i_gain * 1000 / 2048
         float iGain = 4;
-
-
-        /**
-         * Derivative gain. Does not consider error, just dampens forces to reduce derivatives. Gain values are in range
-         * 0~254. K_d : d_gain * 4 / 1000
-         */
+        /// Derivative gain. Does not consider error, just dampens forces to reduce derivatives. Gain values are in
+        /// range 0~254. K_d : d_gain * 4 / 1000
         float dGain = 5;
-
-        /**
-         * It is a position value of destination. 0 to 4,095 (0xFFF) is available. The unit is 0.088 [°].
-         * (FROM https://emanual.robotis.com/docs/en/dxl/mx/mx-64/#specifications):
-         * If Goal Position is out of the range, Angle Limit Error Bit (Bit1) of Status Packet is returned as ‘1’ and
-         * Alarm is triggered as set in Alarm LED/Shutdown.
-         */
+        /// It is a position value of destination. 0 to 4,095 (0xFFF) is available. The unit is 0.088 [°].
+        /// (FROM https://emanual.robotis.com/docs/en/dxl/mx/mx-64/#specifications):
+        /// If Goal Position is out of the range, Angle Limit Error Bit (Bit1) of Status Packet is returned as ‘1’ and
+        /// Alarm is triggered as set in Alarm LED/Shutdown
         float goalPosition = 6;
-
+        /// What dynamixel servos call velocity
         float movingSpeed = 7;
-
-        /**
-         * Used to set the servo on or off. Typically either 0 (off) or 100 (on).
-         */
+        /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
         float torque = 8;
-
-        /**
-         * The range of the value is 0~4095 (0xFFF), and the unit is 0.088 [°].
-         */
+        /// The range of the value is 0~4095 (0xFFF), and the unit is 0.088 [°]
         float presentPosition = 9;
-
-        /**
-         * 0 ~ 2,047 (0x000 ~ 0x7FF) can be used. The value unit is about 0.11rpm.
-         * If a value is in the range of 0 ~ 1,023 then the motor rotates to the counter-clockwise direction.
-         * else the motor rotates to the clockwise direction.
-         */
+        /// 0 ~ 2,047 (0x000 ~ 0x7FF) can be used. The value unit is about 0.11rpm.
+        /// If a value is in the range of 0 ~ 1,023 then the motor rotates to the counter-clockwise direction.
+        /// else the motor rotates to the clockwise direction
         float presentSpeed = 10;
-
-        /**
-         * The range of the value is 0~2047, and the unit is about 0.1%
-         * If the value is 0~1,023, it means the load works to the CCW direction.
-         * If the value is 1,024~2,047, it means the load works to the CW direction.
-         * That is, the 10th bit becomes the direction bit to control the direction, and 1,024 is equal to 0.
-         * For example, the value is 512, it means the load is detected in the direction of CCW about 50% of the maximum
-         * torque.
-         */
+        /// The range of the value is 0~2047, and the unit is about 0.1%
+        /// If the value is 0~1,023, it means the load works to the CCW direction.
+        /// If the value is 1,024~2,047, it means the load works to the CW direction.
+        /// That is, the 10th bit becomes the direction bit to control the direction, and 1,024 is equal to 0.
+        /// For example, the value is 512, it means the load is detected in the direction of CCW about 50% of the
+        /// maximum torque
         float load = 11;
-
-        /**
-         * Present voltage. This value is 10 times larger than the actual voltage.
-         * For example, when 10V is supplied, the data value is 100 (0x64).
-         * If Present Voltage(42) value is out of range, Voltage Range Error Bit (Bit0) of Status Packet is
-         * returned as ‘1’ and Alarm is triggered and set the address 17 and set 1 to the Bit 0 of the address 18.
-         */
+        /// Present voltage. This value is 10 times larger than the actual voltage.
+        /// For example, when 10V is supplied, the data value is 100 (0x64).
+        /// If Present Voltage(42) value is out of range, Voltage Range Error Bit (Bit0) of Status Packet is
+        /// returned as ‘1’ and Alarm is triggered and set the address 17 and set 1 to the Bit 0 of the address 18
         float voltage = 12;
-
-        /**
-         * Data value is identical to the actual temperature in Celsius.
-         */
+        /// Data value is identical to the actual temperature in Celsius
         float temperature = 13;
     };
-
-    /**
-     * Set of all the servos on the robot.
-     */
+    /// Set of all the servos on the robot
     message Servos {
         Servo rShoulderPitch = 1;
         Servo lShoulderPitch = 2;
@@ -291,83 +185,51 @@ message DarwinSensors {
         Servo headPan        = 19;
         Servo headTilt       = 20;
     }
-
-    /**
-     * Timestamp when our data was taken
-     */
+    /// Timestamp when our data was taken
     google.protobuf.Timestamp timestamp = 1;
-
-    /**
-     * Holds the error code (if any) from the CM740.
-     */
+    /// Holds the error code (if any) from the CM740
+    /// The list of errors is here: https://emanual.robotis.com/docs/en/dxl/protocol1/#status-packetreturn-packet
     uint32 cm740ErrorFlags = 2;
-
-    /**
-     * Toggle status of the LEDs on the panel.
-     */
+    /// Toggle status of the LEDs on the panel
     LEDPanel ledPanel = 3;
-
-    /**
-     * Toggle status of the HeadLED.
-     */
+    /// Toggle status of the HeadLED
     HeadLED headLED = 4;
-
-    /**
-     * Toggle status of the EyeLED.
-     */
+    /// Toggle status of the EyeLED
     EyeLED eyeLED = 5;
-
-    /**
-     * Push-down status of the left and middle buttons.
-     */
+    /// Push-down status of the left and middle buttons
     Buttons buttons = 6;
-
-    /**
-     * Voltage for the whole robot, from the main battery.
-     */
+    /// Voltage for the whole robot, from the main battery
     float voltage = 7;
-
-    /**
-     * The value is between 0 and 1023, representing a value between -4g and 4g => 512 = 0g.
-     * Is {x, y, z} acceleration.
-     */
+    /// The value is between 0 and 1023, representing a value between -4g and 4g => 512 = 0g.
+    /// Is {x, y, z} acceleration
     Accelerometer accelerometer = 8;
-
-    /**
-     * The value is between 0 and 1023, represent a value between -500 degrees per second and 500 degrees per second.
-     * => 512 = 0 degrees per second. Is {x, y, z} angular velocity.
-     */
+    /// The value is between 0 and 1023, represent a value between -500 degrees per second and 500 degrees per second.
+    /// => 512 = 0 degrees per second. Is {x, y, z} angular velocity
     Gyroscope gyroscope = 9;
-
-    /**
-     * Pair of sets of FSR sensors for both feet, to detect if they are down.
-     */
+    /// Pair of sets of FSR sensors for both feet, to detect if they are down
     FSRs fsr = 10;
-
-    /**
-     * Set of the robot's servos.
-     */
+    /// Set of the robot's servos
     Servos servo = 11;
 }
 
 // Button press events
 
 /**
- * Empty message to indicate button press.
+ * Empty message to indicate button press
  */
 message ButtonLeftDown {}
 
 /**
- * Empty message to indicate button press.
+ * Empty message to indicate button press
  */
 message ButtonLeftUp {}
 
 /**
- * Empty message to indicate button press.
+ * Empty message to indicate button press
  */
 message ButtonMiddleDown {}
 
 /**
- * Empty message to indicate button press.
+ * Empty message to indicate button press
  */
 message ButtonMiddleUp {}
