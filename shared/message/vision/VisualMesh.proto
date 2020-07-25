@@ -28,6 +28,7 @@ import "Matrix.proto";
  * Contains the details of a Visual Mesh™ measurement
  */
 message VisualMesh {
+
     /// The "almost" concentric rings of the mesh centred about the robot
     message Row {
 

@@ -51,6 +51,7 @@ message Goal {
         TOP_NORMAL          = 4;
         BASE_NORMAL         = 5;
     }
+
     /// Instance of goal measurement
     message Measurement {
         MeasurementType type = 1;

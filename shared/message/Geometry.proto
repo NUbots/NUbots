@@ -44,6 +44,7 @@ message Circle {
  * A 3D matrix representation of the Ellipse
  */
 message Ellipse {
+
     /// See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
     mat3 ellipse = 1;
 }
