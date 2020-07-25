@@ -32,7 +32,6 @@ message CompressedImage {
 
     /// The lens type and details about the images it makes
     message Lens {
-
         /// Types of projection of our lenses
         enum Projection {
             UNKNOWN     = 0;
