@@ -110,29 +110,19 @@ message GameEvents {
     message GamePhase {
         /// Current phase state, such as PLAYING or TIMEOUT
         GameState.Data.Phase phase = 1;
-
-        // INITIAL
-        // READY
-
-        /// Time when play begins
+        /// Time when play begins.
+        /// Set some time after game-states INITIAL or READY
         google.protobuf.Timestamp readyTime = 2;
-
-        // SET
-        // PLAYING
-
         /// Time when the first half is due to end
+        /// Set some time after game-states SET or PLAYING
         google.protobuf.Timestamp endHalf = 3;
 
         google.protobuf.Timestamp ballFree = 4;
-
-        // TIMEOUT
-
         /// Timestamp when the current phase will end
+        /// Set some time after game-state TIMEOUT
         google.protobuf.Timestamp ends = 5;
-
-        // FINISHED
-
         /// Time when the next half is to begin
+        /// Set somet time after game-state FINISHED
         google.protobuf.Timestamp nextHalf = 6;
     }
 
