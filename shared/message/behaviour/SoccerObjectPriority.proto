@@ -25,9 +25,7 @@ package message.behaviour;
  */
 message SoccerObjectPriority {
 
-    /**
-     * Describes what the robot is looking for, and where it is looking.
-     */
+    /// Describes what the robot is looking for, and where it is looking
     enum SearchType {
         LOST                    = 0;
         FIND_ADDITIONAL_OBJECTS = 1;

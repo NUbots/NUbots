@@ -22,21 +22,37 @@ syntax = "proto3";
 package message.behaviour;
 
 /**
- *
+ * The system we use to grant different modules access to different limbs of the robot.
+ * Each module requests the limbs that it needs to function, and a priority for how important the module is.
+ * The controller module implements subsumption - what modules want what limbs at what priority levels, and it
+ * works out when and what modules get what limbs
  */
 message Subsumption {
 
+    /// The set of libs required to move for a given action
     message LimbSet {
-        float           priority = 1;
-        repeated uint32 limbs    = 2;
-    }
 
+        /// How important this set of limbs' movements are to the ActionRegister
+        float priority = 1;
+        /// The LimbIDs of those limbs
+        repeated uint32 limbs = 2;
+    }
+    /// The set of limbs that you want to control. Related to ActionRegister in the controller module
+    /// There are 3 callbacks associated with ActionRegister:
+    /// 1. The actions you want to take when you have control
+    /// 2. The actions you want to take when control is taken away from you
+    /// 3. The actions you want to take once you have completed your actions with the limbs
     message ActionRegister {
-        uint32           id       = 1;
-        string           name     = 2;
+
+        /// Unique identifier for the action
+        uint32 id   = 1;
+        string name = 2;
+        /// Groups of limbs required to move by this action.
+        /// They are grouped separately to facilitate different priority levels for each group,
+        /// e.g. higher priorities for legs than arms when executing a kick
         repeated LimbSet limb_set = 3;
     }
-
+    /// Prompt indicating that there should be a change to a given ActionRegister
     message ActionStateChange {
         enum State {
             UNKNOWN = 0;
@@ -48,7 +64,7 @@ message Subsumption {
         string          name  = 2;
         repeated uint32 limbs = 3;
     }
-
+    /// How important this set of actions is to the controller
     message ActionPriorites {
         uint32         id         = 1;
         repeated float priorities = 2;

@@ -22,13 +22,11 @@ syntax = "proto3";
 package message.behaviour;
 
 /**
- * enum with state of robot's behaviour.
+ * enum with state of robot's behaviour
  */
 message Behaviour {
 
-    /**
-     * Behaviour state enum.
-     */
+    /// Behaviour state enum
     enum State {
         UNKNOWN          = 0;
         INIT             = 1;
@@ -46,9 +44,6 @@ message Behaviour {
         MOVE_TO_CENTRE   = 13;
         LOCALISING       = 14;
     }
-
-    /**
-     * Robot's current behaviour state.
-     */
+    /// Robot's current behaviour state
     State state = 1;
 }

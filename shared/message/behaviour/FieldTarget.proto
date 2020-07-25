@@ -22,21 +22,16 @@ syntax = "proto3";
 package message.behaviour;
 
 /**
- * enum saying what the target is (SELF, BALL or GOAL).
+ * enum saying what the target is (SELF, BALL or GOAL)
  */
 message FieldTarget {
 
-    /**
-     * Robot targets enum.
-     */
+    /// Robot targets enum
     enum Target {
         SELF = 0;
         BALL = 1;
         GOAL = 2;
     }
-
-    /**
-     * The current target of the robot's behaviour.
-     */
+    /// The current target of the robot's behaviour
     Target target = 1;
 }

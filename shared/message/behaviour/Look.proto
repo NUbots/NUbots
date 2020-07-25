@@ -24,7 +24,7 @@ import "google/protobuf/duration.proto";
 import "Vector.proto";
 
 /**
- * Details of where and when to look.
+ * Details of where and when to look
  */
 message Look {
     message Fixation {
