@@ -67,11 +67,11 @@ namespace behaviour {
         private:
             Joystick joystick;  // TODO: make configurable
             Eigen::Vector2d strafe = Eigen::Vector2d::Zero();
-            float rotationalSpeed  = 0;
+            float rotationalSpeed  = 0.0;
             bool moving            = false;
             bool headLocked        = false;
-            float headPitch        = 0;
-            float headYaw          = 0;
+            float headPitch        = 0.0;
+            float headYaw          = 0.0;
         };
     }  // namespace strategy
 }  // namespace behaviour
