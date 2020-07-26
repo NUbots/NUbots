@@ -438,8 +438,8 @@ namespace behaviour {
         }
 
         void SoccerStrategy::spinWalk() {
-            Eigen::Affine2d spin = Eigen::Affine2d::Identity();
-            spin.linear()        = Eigen::Rotation2Dd(1.0).toRotationMatrix();
+            Eigen::Affine2d spin(Eigen::Affine2d::Identity());
+            spin.linear() = Eigen::Rotation2Dd(1.0).toRotationMatrix();
             emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(spin)));
         }
 

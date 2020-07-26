@@ -183,8 +183,7 @@ namespace behaviour {
                         return;
                     }
 
-                    Eigen::Affine3d Htw;
-                    Htw.matrix() = sensors.Htw;
+                    Eigen::Affine3d Htw(sensors.Htw);
 
                     auto now = NUClear::clock::now();
                     float timeSinceBallSeen =

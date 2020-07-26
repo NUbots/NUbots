@@ -172,178 +172,178 @@ namespace behaviour {
                With<Image>,
                Single,
                Sync<HeadBehaviourSoccer>>()
-                .then(
-                    "Head Behaviour Main Loop",
-                    [this](const Sensors& sensors,
-                           std::shared_ptr<const Balls> vballs,
-                           std::shared_ptr<const Goals> vgoals,
-                           std::shared_ptr<const LocBall> locBall,
-                           const KinematicsModel& kinematicsModel,
-                           const Image& image) {
-                        max_yaw   = kinematicsModel.head.MAX_YAW;
-                        min_yaw   = kinematicsModel.head.MIN_YAW;
-                        max_pitch = kinematicsModel.head.MAX_PITCH;
-                        min_pitch = kinematicsModel.head.MIN_PITCH;
+                .then("Head Behaviour Main Loop",
+                      [this](const Sensors& sensors,
+                             std::shared_ptr<const Balls> vballs,
+                             std::shared_ptr<const Goals> vgoals,
+                             std::shared_ptr<const LocBall> locBall,
+                             const KinematicsModel& kinematicsModel,
+                             const Image& image) {
+                          max_yaw   = kinematicsModel.head.MAX_YAW;
+                          min_yaw   = kinematicsModel.head.MIN_YAW;
+                          max_pitch = kinematicsModel.head.MAX_PITCH;
+                          min_pitch = kinematicsModel.head.MIN_PITCH;
 
-                        // std::cout << "Seen: Balls: " <<
-                        // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
-                        // "Goals: " <<
-                        // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) <<
-                        // std::endl;
+                          // std::cout << "Seen: Balls: " <<
+                          // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
+                          // "Goals: " <<
+                          // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) <<
+                          // std::endl;
 
-                        if (locBall) {
-                            locBallReceived = true;
-                            lastLocBall     = *locBall;
-                        }
-                        auto now = NUClear::clock::now();
+                          if (locBall) {
+                              locBallReceived = true;
+                              lastLocBall     = *locBall;
+                          }
+                          auto now = NUClear::clock::now();
 
-                        bool objectsMissing = false;
+                          bool objectsMissing = false;
 
-                        // Get the list of objects which are currently visible
-                        Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
-                        Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
+                          // Get the list of objects which are currently visible
+                          Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
+                          Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
-                        // Determine state transition variables
-                        bool lost =
-                            ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
-                        // Do we need to update our plan?
-                        bool updatePlan =
-                            !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
-                        // Has it been a long time since we have seen anything of interest?
-                        bool searchTimedOut =
-                            std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
-                            > search_timeout_ms;
-                        // Did the object move in IMUspace?
-                        bool objectMoved = false;
+                          // Determine state transition variables
+                          bool lost =
+                              ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
+                          // Do we need to update our plan?
+                          bool updatePlan =
+                              !isGettingUp
+                              && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
+                          // Has it been a long time since we have seen anything of interest?
+                          bool searchTimedOut =
+                              std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
+                              > search_timeout_ms;
+                          // Did the object move in IMUspace?
+                          bool objectMoved = false;
 
-                        bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
+                          bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
 
-                        // log("updatePlan", updatePlan);
-                        // log("lost", lost);
-                        // log("isGettingUp", isGettingUp);
-                        // log("searchType", int(searchType));
-                        // log("headSearcher.size()", headSearcher.size());
+                          // log("updatePlan", updatePlan);
+                          // log("lost", lost);
+                          // log("isGettingUp", isGettingUp);
+                          // log("searchType", int(searchType));
+                          // log("headSearcher.size()", headSearcher.size());
 
-                        // State execution
+                          // State execution
 
-                        // Get robot heat to body transform
-                        Eigen::Matrix3d orientation, headToBodyRotation;
-                        if (!lost) {
-                            // We need to transform our view points to orientation space
-                            if (ballMaxPriority) {
-                                Eigen::Affine3d Htc = Eigen::Affine3d(sensors.Htw * ballFixationObjects.Hcw.inverse());
-                                headToBodyRotation  = Htc.rotation();
-                                orientation         = Eigen::Affine3d(ballFixationObjects.Hcw).inverse().rotation();
-                            }
-                            else {
-                                Eigen::Affine3d Htc = Eigen::Affine3d(sensors.Htw * goalFixationObjects.Hcw.inverse());
-                                headToBodyRotation  = Htc.rotation();
-                                orientation         = Eigen::Affine3d(goalFixationObjects.Hcw).inverse().rotation();
-                            }
-                        }
-                        else {
-                            Eigen::Affine3d Htc = Eigen::Affine3d(sensors.Htx[ServoID::HEAD_PITCH]);
-                            headToBodyRotation  = Htc.rotation();
-                            orientation         = Eigen::Affine3d(sensors.Htw).inverse().rotation();
-                        }
-                        Eigen::Matrix3d headToIMUSpace = orientation * headToBodyRotation;
+                          // Get robot heat to body transform
+                          Eigen::Matrix3d orientation, headToBodyRotation;
+                          if (!lost) {
+                              // We need to transform our view points to orientation space
+                              if (ballMaxPriority) {
+                                  Eigen::Affine3d Htc(sensors.Htw * ballFixationObjects.Hcw.inverse());
+                                  headToBodyRotation = Htc.rotation();
+                                  orientation        = Eigen::Affine3d(ballFixationObjects.Hcw).inverse().rotation();
+                              }
+                              else {
+                                  Eigen::Affine3d Htc(sensors.Htw * goalFixationObjects.Hcw.inverse());
+                                  headToBodyRotation = Htc.rotation();
+                                  orientation        = Eigen::Affine3d(goalFixationObjects.Hcw).inverse().rotation();
+                              }
+                          }
+                          else {
+                              Eigen::Affine3d Htc(sensors.Htx[ServoID::HEAD_PITCH]);
+                              headToBodyRotation = Htc.rotation();
+                              orientation        = Eigen::Affine3d(sensors.Htw).inverse().rotation();
+                          }
+                          Eigen::Matrix3d headToIMUSpace = orientation * headToBodyRotation;
 
-                        // If objects visible, check current centroid to see if it moved
-                        if (!lost) {
-                            Eigen::Vector2d currentCentroid = Eigen::Vector2d::Zero();
-                            if (ballMaxPriority) {
-                                for (auto& ob : ballFixationObjects.balls) {
-                                    currentCentroid +=
-                                        (ob.screen_angular.cast<double>() / double(ballFixationObjects.balls.size()));
-                                }
-                            }
-                            else {
-                                for (auto& ob : goalFixationObjects.goals) {
-                                    currentCentroid +=
-                                        ob.screen_angular.cast<double>() / double(goalFixationObjects.goals.size());
-                                }
-                            }
-                            Eigen::Vector2d currentCentroid_world =
-                                getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
-                            // If our objects have moved, we need to replan
-                            if ((currentCentroid_world - lastCentroid).norm()
-                                >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
-                                objectMoved  = true;
-                                lastCentroid = currentCentroid_world;
-                            }
-                        }
+                          // If objects visible, check current centroid to see if it moved
+                          if (!lost) {
+                              Eigen::Vector2d currentCentroid(Eigen::Vector2d::Zero());
+                              if (ballMaxPriority) {
+                                  for (auto& ob : ballFixationObjects.balls) {
+                                      currentCentroid +=
+                                          (ob.screen_angular.cast<double>() / double(ballFixationObjects.balls.size()));
+                                  }
+                              }
+                              else {
+                                  for (auto& ob : goalFixationObjects.goals) {
+                                      currentCentroid +=
+                                          ob.screen_angular.cast<double>() / double(goalFixationObjects.goals.size());
+                                  }
+                              }
+                              Eigen::Vector2d currentCentroid_world =
+                                  getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
+                              // If our objects have moved, we need to replan
+                              if ((currentCentroid_world - lastCentroid).norm()
+                                  >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
+                                  objectMoved  = true;
+                                  lastCentroid = currentCentroid_world;
+                              }
+                          }
 
-                        // State Transitions
-                        if (!isGettingUp) {
-                            switch (state) {
-                                case FIXATION:
-                                    if (lost) {
-                                        state = WAIT;
-                                    }
-                                    else if (objectMoved) {
-                                        updatePlan = true;
-                                    }
-                                    break;
-                                case WAIT:
-                                    if (!lost) {
-                                        state      = FIXATION;
-                                        updatePlan = true;
-                                    }
-                                    else if (searchTimedOut) {
-                                        state      = SEARCH;
-                                        updatePlan = true;
-                                    }
-                                    break;
-                                case SEARCH:
-                                    if (!lost) {
-                                        state      = FIXATION;
-                                        updatePlan = true;
-                                    }
-                                    break;
-                            }
-                        }
+                          // State Transitions
+                          if (!isGettingUp) {
+                              switch (state) {
+                                  case FIXATION:
+                                      if (lost) {
+                                          state = WAIT;
+                                      }
+                                      else if (objectMoved) {
+                                          updatePlan = true;
+                                      }
+                                      break;
+                                  case WAIT:
+                                      if (!lost) {
+                                          state      = FIXATION;
+                                          updatePlan = true;
+                                      }
+                                      else if (searchTimedOut) {
+                                          state      = SEARCH;
+                                          updatePlan = true;
+                                      }
+                                      break;
+                                  case SEARCH:
+                                      if (!lost) {
+                                          state      = FIXATION;
+                                          updatePlan = true;
+                                      }
+                                      break;
+                              }
+                          }
 
-                        // If we arent getting up, then we can update the plan if necessary
-                        if (updatePlan) {
-                            if (lost) {
-                                lastPlanOrientation = Eigen::Affine3d(sensors.Htw).rotation();
-                            }
-                            if (ballMaxPriority) {
-                                updateHeadPlan(kinematicsModel,
-                                               ballFixationObjects,
-                                               objectsMissing,
-                                               sensors,
-                                               headToIMUSpace,
-                                               image.lens);
-                            }
+                          // If we arent getting up, then we can update the plan if necessary
+                          if (updatePlan) {
+                              if (lost) {
+                                  lastPlanOrientation = Eigen::Affine3d(sensors.Htw).rotation();
+                              }
+                              if (ballMaxPriority) {
+                                  updateHeadPlan(kinematicsModel,
+                                                 ballFixationObjects,
+                                                 objectsMissing,
+                                                 sensors,
+                                                 headToIMUSpace,
+                                                 image.lens);
+                              }
 
-                            else {
-                                updateHeadPlan(kinematicsModel,
-                                               goalFixationObjects,
-                                               objectsMissing,
-                                               sensors,
-                                               headToIMUSpace,
-                                               image.lens);
-                            }
-                        }
+                              else {
+                                  updateHeadPlan(kinematicsModel,
+                                                 goalFixationObjects,
+                                                 objectsMissing,
+                                                 sensors,
+                                                 headToIMUSpace,
+                                                 image.lens);
+                              }
+                          }
 
-                        // Update searcher
-                        headSearcher.update(oscillate_search);
-                        // Emit new result if possible
-                        if (headSearcher.newGoal()) {
-                            // Emit result
-                            Eigen::Vector2d direction            = headSearcher.getState();
-                            std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
-                            command->yaw                         = direction[0];
-                            command->pitch                       = direction[1];
-                            command->robotSpace                  = (state == SEARCH);
-                            // log("head angles robot space :", command->robotSpace);
-                            emit(std::move(command));
-                        }
+                          // Update searcher
+                          headSearcher.update(oscillate_search);
+                          // Emit new result if possible
+                          if (headSearcher.newGoal()) {
+                              // Emit result
+                              Eigen::Vector2d direction            = headSearcher.getState();
+                              std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
+                              command->yaw                         = direction[0];
+                              command->pitch                       = direction[1];
+                              command->robotSpace                  = (state == SEARCH);
+                              // log("head angles robot space :", command->robotSpace);
+                              emit(std::move(command));
+                          }
 
-                        lastGoalPriority = goalPriority;
-                        lastBallPriority = ballPriority;
-                    });
+                          lastGoalPriority = goalPriority;
+                          lastBallPriority = ballPriority;
+                      });
         }
 
         Balls HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Balls> vballs, bool& search) {

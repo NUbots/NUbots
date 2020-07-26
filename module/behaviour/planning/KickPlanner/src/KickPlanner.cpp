@@ -107,8 +107,7 @@ namespace behaviour {
                     // TODO: use sensors.Htw instead
                     Eigen::Affine3d Hfw = fieldStateToTransform3D(field.position);
 
-                    Eigen::Affine3d Htw;
-                    Htw.matrix() = sensors.Htw;
+                    Eigen::Affine3d Htw(sensors.Htw);
                     Eigen::Vector3d ballPosition =
                         (Htw * Eigen::Vector4d(ball.position.x(), ball.position.y(), fd.ball_radius, 1.0)).head<3>();
 
