@@ -150,9 +150,6 @@ namespace behaviour {
                                   currentState.linear()      = Eigen::Rotation2Dd(self.heading).toRotationMatrix();
                                   currentState.translation() = self.position;
                                   auto estPath               = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
-                                  // emit(
-                                  //     utility::nusight::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1, 0.8,
-                                  //     0}));
                               }
                           })
                     .disable();
@@ -176,14 +173,6 @@ namespace behaviour {
                             Eigen::Affine2d currentState = Eigen::Affine2d::Identity();
                             currentState.linear()        = Eigen::Rotation2Dd(self.heading).toRotationMatrix();
                             currentState.translation()   = self.position;
-                            // emit(utility::nusight::drawRectangle(
-                            //     "WPF_RobotFootprint",
-                            //     RotatedRectangle<double>(currentState, Eigen::Vector2d(0.12, 0.17))));
-                            // emit(utility::nusight::drawRectangle(
-                            //     "WPF_GoalState",
-                            //     RotatedRectangle<double>(currentPath.goal, Eigen::Vector2d(0.12, 0.17)),
-                            //     {0.4, 0.4, 0.4},
-                            //     0.123));
 
                             // if (cfg_.follow_path_in_ball_space
                             //     && currentPath.command.type == MotionCommand::Type::BallApproach) {
@@ -235,8 +224,6 @@ namespace behaviour {
                                 walkCommand = std::make_unique<WalkCommand>(walkBetweenFar(currentState, targetState));
                             }
 
-                            // emit(utility::nusight::drawArrow("WPF_Closest_Arrow",
-                            // currentState.localToWorld(walkCommand->command), {1,1,1}, 1));
                             Eigen::Affine2d command;
                             command.linear()      = Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix();
                             command.translation() = walkCommand->command.head<2>();
@@ -245,28 +232,7 @@ namespace behaviour {
                             walk.translation() = Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix()
                                                  * walkCommand->command.head<2>();
 
-                            // Eigen::Vector2d arrowTip = localToWorld(currentState, command).translation();
-                            // Eigen::Vector2d dirPoint = localToWorld(currentState, walk).translation();
-                            // emit(utility::nusight::drawArrow("WPF_Closest_Arrow", currentState.xy(), arrowTip,
-                            // 1)); emit(utility::nusight::drawArrow("WPF_Closest_Arrow_Rotation", arrowTip,
-                            // dirPoint, 1));
-
                             emit(std::move(walkCommand));
-
-                            // emit(utility::nusight::drawRectangle(
-                            //     "WPF_Closest",
-                            //     RotatedRectangle<double>(targetState, Eigen::Vector2d(0.12, 0.17)),
-                            //     {0, 0, 0}));
-
-                            // emit(utility::nusight::drawArrow("WPF_Closest_Arrow", targetState, {1, 0, 1}, 1));
-
-                            // // Remove unnecessary (visited) states from the path:
-                            // int removed = trimPath(currentState, currentPath);
-                            // if (removed && cfg_.draw_estimated_path) {
-                            //     auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
-                            //     emit(utility::nusight::drawPath("WPF_EstimatedPath", estPath.states, 0.05,
-                            //     {1,0.8,0}));
-                            // }
 
                             // // Emit a walk command to move towards the target state:
                             // emit(std::move(walkToNextNode(currentState)));
@@ -279,10 +245,6 @@ namespace behaviour {
 
             // Find the index of the closest state:
             auto closestIndex = closestPathIndex(currentState, walkPath);
-            // emit(utility::nusight::drawRectangle(
-            //     "WPF_Closest",
-            //     RotatedRectangle<double>(walkPath.states[closestIndex], Eigen::Vector2d(0.12, 0.17)),
-            //     {0, 0, 0}));
 
             // Check if we're close enough to have 'visited' the closest state:
             Eigen::Affine2d walk_path;
@@ -295,7 +257,6 @@ namespace behaviour {
             // Remove all states before the closest state:
             if (closestIndex != 0) {
                 walkPath.states.erase(walkPath.states.begin(), walkPath.states.begin() + closestIndex);
-                // emit(utility::nusight::drawPath("OMPLPP_Path", walkPath.states, 0.1, {0,0.5,0.5}));
             }
 
             // Return the number of states removed from the path.
@@ -339,9 +300,6 @@ namespace behaviour {
             Eigen::Affine2d targetState;
             targetState.linear()      = Eigen::Rotation2Dd(currentPath.states[targetIndex].z()).toRotationMatrix();
             targetState.translation() = currentPath.states[targetIndex].head<2>().cast<double>();
-            // emit(utility::nusight::drawRectangle("WPF_TargetState",
-            //                                      RotatedRectangle<double>(targetState, Eigen::Vector2d(0.12, 0.17)),
-            //                                      {1, 0, 0}));
 
             std::unique_ptr<WalkCommand> command;
 
