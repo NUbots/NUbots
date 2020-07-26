@@ -1,12 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
+import os
 import re
 
-toRead = open(sys.argv[1], "r")
-toWrite = open(sys.argv[2], "w")
-
-textToParse = toRead.read()
+import b
+from dockerise import run_on_docker
 
 # add '(//.*|/\*.*\*/)' for comments?
 # Find an on statement and grab the DSL, then grab the arguments, pass over the .then, grab the capture, then the
@@ -18,23 +17,33 @@ paramsPattern = re.compile(r"(\(|, ?)(const)? ([^,) ]*?) ([^,) ]*)")
 emitPattern = re.compile(r"emit<(.*?)>\((.*)\);")
 argsPattern = re.compile(r"[^,\s]+")
 
-for thing in re.findall(onPattern, textToParse):
-    toWrite.write("On " + thing[0].replace("<", "\<") + "\n")
-    toWrite.write("* Params: " + thing[1] + "\n")
-    toWrite.write("* Capture: " + thing[2] + "\n")
-    toWrite.write("* Lambda Params: \n")
-    for param in re.findall(paramsPattern, thing[3]):
-        toWrite.write("    * " + param[3] + " : " + param[1] + " " + param[2].replace("<", "\<") + "\n")
-    toWrite.write("\n")
 
-for thing in re.findall(emitPattern, textToParse):
-    toWrite.write("Emit " + thing[0].replace("<", "\<") + "\n")
-    toWrite.write("* Params: \n")
-    for arg in re.findall(argsPattern, thing[1]):
-        print(arg)
-        toWrite.write("    * " + arg + "\n")
-    toWrite.write("\n")
+@run_on_docker
+def register(command):
+    command.help = "Generate markdown from all the on and emit statements"
 
 
-toRead.close()
-toWrite.close()
+@run_on_docker
+def run(**kwargs):
+    toRead = open(b.project_dir + "/module/platform/Gazebo/src/Gazebo.cpp", "r")
+    toWrite = open(b.project_dir + "/doc/NUdoc/cool.md", "w")
+    textToParse = toRead.read()
+
+    for thing in re.findall(onPattern, textToParse):
+        toWrite.write("On " + thing[0].replace("<", "\<") + "\n")
+        toWrite.write("* Params: " + thing[1] + "\n")
+        toWrite.write("* Capture: " + thing[2] + "\n")
+        toWrite.write("* Lambda Params: \n")
+        for param in re.findall(paramsPattern, thing[3]):
+            toWrite.write("    * " + param[3] + " : " + param[1] + " " + param[2].replace("<", "\<") + "\n")
+        toWrite.write("\n")
+
+    for thing in re.findall(emitPattern, textToParse):
+        toWrite.write("Emit " + thing[0].replace("<", "\<") + "\n")
+        toWrite.write("* Params: \n")
+        for arg in re.findall(argsPattern, thing[1]):
+            toWrite.write("    * " + arg + "\n")
+        toWrite.write("\n")
+
+    toRead.close()
+    toWrite.close()
