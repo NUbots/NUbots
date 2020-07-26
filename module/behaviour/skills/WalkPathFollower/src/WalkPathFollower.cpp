@@ -145,11 +145,11 @@ namespace behaviour {
                                       NUClear::log(__FILE__, __LINE__, "empty self and current states");
                                       return;
                                   }
-                                  auto self                    = selfs.hypotheses.front();
-                                  Eigen::Affine2d currentState = Eigen::Affine2d::Identity();
-                                  currentState.linear()        = Eigen::Rotation2Dd(self.heading).toRotationMatrix();
-                                  currentState.translation()   = self.position;
-                                  auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
+                                  auto self = selfs.hypotheses.front();
+                                  Eigen::Affine2d currentState;
+                                  currentState.linear()      = Eigen::Rotation2Dd(self.heading).toRotationMatrix();
+                                  currentState.translation() = self.position;
+                                  auto estPath               = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
                                   // emit(
                                   //     utility::nusight::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1, 0.8,
                                   //     0}));
@@ -192,8 +192,8 @@ namespace behaviour {
                             //     // target from the ball.
 
                             //     // Find current ball space.
-                            //     Eigen::Affine2d ball             = Eigen::Affine2d::Identity();
-                            //     ball.rotation()                  = Eigen::Rotation2Dd(0.0).toRotationMatrix();
+                            //     Eigen::Affine2d ball;
+                            //     ball.linear()                    = Eigen::Rotation2Dd(0.0).toRotationMatrix();
                             //     ball.translation()               = ball.position;
                             //     Eigen::Vector2d worldBall        = localToWorld(currentState, ball).translation();
                             //     Eigen::Affine2d currentBallSpace = lookAt(worldBall, currentPath.command.kickTarget);
@@ -210,9 +210,9 @@ namespace behaviour {
 
                             // TODO: Remove.
                             // RoboCup HACK - Just aim for the goal state:
-                            Eigen::Affine2d targetState = Eigen::Affine2d::Identity();
+                            Eigen::Affine2d targetState;
                             if (currentPath.command.type == MotionCommand::Type::BallApproach) {
-                                Eigen::Affine2d ball_aff         = Eigen::Affine2d::Identity();
+                                Eigen::Affine2d ball_aff;
                                 ball_aff.linear()                = Eigen::Rotation2Dd(0.0).toRotationMatrix();
                                 ball_aff.translation()           = ball.position;
                                 Eigen::Vector2d worldBall        = localToWorld(currentState, ball_aff).translation();
@@ -237,12 +237,12 @@ namespace behaviour {
 
                             // emit(utility::nusight::drawArrow("WPF_Closest_Arrow",
                             // currentState.localToWorld(walkCommand->command), {1,1,1}, 1));
-                            Eigen::Affine2d command = Eigen::Affine2d::Identity();
-                            command.linear()        = Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix();
-                            command.translation()   = walkCommand->command.head<2>();
-                            Eigen::Affine2d walk    = Eigen::Affine2d::Identity();
-                            walk.linear()           = Eigen::Rotation2Dd(0.0).toRotationMatrix();
-                            walk.translation()      = Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix()
+                            Eigen::Affine2d command;
+                            command.linear()      = Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix();
+                            command.translation() = walkCommand->command.head<2>();
+                            Eigen::Affine2d walk;
+                            walk.linear()      = Eigen::Rotation2Dd(0.0).toRotationMatrix();
+                            walk.translation() = Eigen::Rotation2Dd(walkCommand->command.z()).toRotationMatrix()
                                                  * walkCommand->command.head<2>();
 
                             // Eigen::Vector2d arrowTip = localToWorld(currentState, command).translation();
@@ -285,9 +285,9 @@ namespace behaviour {
             //     {0, 0, 0}));
 
             // Check if we're close enough to have 'visited' the closest state:
-            Eigen::Affine2d walk_path = Eigen::Affine2d::Identity();
-            walk_path.linear()        = Eigen::Rotation2Dd(walkPath.states[closestIndex].z()).toRotationMatrix();
-            walk_path.translation()   = walkPath.states[closestIndex].head<2>().cast<double>();
+            Eigen::Affine2d walk_path;
+            walk_path.linear()      = Eigen::Rotation2Dd(walkPath.states[closestIndex].z()).toRotationMatrix();
+            walk_path.translation() = walkPath.states[closestIndex].head<2>().cast<double>();
             if (!isVisited(currentState, walk_path)) {
                 return 0;
             }
@@ -335,10 +335,10 @@ namespace behaviour {
         std::unique_ptr<WalkCommand> WalkPathFollower::walkToNextNode(const Eigen::Affine2d& currentState,
                                                                       bool /*noLogging*/) {
             // Aim for the index after the closest state:
-            int targetIndex             = std::min(1, int(currentPath.states.size()) - 1);
-            Eigen::Affine2d targetState = Eigen::Affine2d::Identity();
-            targetState.linear()        = Eigen::Rotation2Dd(currentPath.states[targetIndex].z()).toRotationMatrix();
-            targetState.translation()   = currentPath.states[targetIndex].head<2>().cast<double>();
+            int targetIndex = std::min(1, int(currentPath.states.size()) - 1);
+            Eigen::Affine2d targetState;
+            targetState.linear()      = Eigen::Rotation2Dd(currentPath.states[targetIndex].z()).toRotationMatrix();
+            targetState.translation() = currentPath.states[targetIndex].head<2>().cast<double>();
             // emit(utility::nusight::drawRectangle("WPF_TargetState",
             //                                      RotatedRectangle<double>(targetState, Eigen::Vector2d(0.12, 0.17)),
             //                                      {1, 0, 0}));
@@ -401,8 +401,8 @@ namespace behaviour {
 
             // if (std::abs(walkAboutAngle) < M_PI * 0.125) {
             //     // TODO make 20 seconds the variable update_frequency
-            //     Eigen::Affine2d velocity = Eigen::Affine2d::Identity();
-            //     velocity.rotation()      = Eigen::Rotation2Dd(rotationSpeed).toRotationMatrix();
+            //     Eigen::Affine2d velocity;
+            //     velocity.linear()        = Eigen::Rotation2Dd(rotationSpeed).toRotationMatrix();
             //     velocity.translation() =
             //         cfg_.walk_to_near_speed * (targetState.translation() - currentState.translation()).normalize();
             //     WalkCommand command(subsumptionId, velocity);
@@ -414,9 +414,9 @@ namespace behaviour {
             //     strafe.norm());
 
             //     // TODO make 20 seconds the variable
-            //     Eigen::Affine2d velocity = Eigen::Affine2d::Identity();
-            //     velocity.rotation()      = Eigen::Rotation2Dd(rotationSpeed).toRotationMatrix();
-            //     velocity.translation()   = strafeClipped;
+            //     Eigen::Affine2d velocity;
+            //     velocity.rotation()    = Eigen::Rotation2Dd(rotationSpeed).toRotationMatrix();
+            //     velocity.translation() = strafeClipped;
             //     update_frequency WalkCommand command(subsumptionId, velocity);
             //     return command;
             // }
@@ -449,7 +449,6 @@ namespace behaviour {
 
                 command->command.head<2>()  = state.rotation() * command->command.head<2>() * 0.2;
                 Eigen::Vector3d new_command = command->command + (command->command * timeStep);
-                state                       = Eigen::Affine2d::Identity();
                 state.linear()              = Eigen::Rotation2Dd(new_command.z()).toRotationMatrix();
                 state.translation()         = new_command.head<2>();
                 stepNum++;
