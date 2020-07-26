@@ -406,11 +406,22 @@ namespace motion {
                                                                          arma::vec3 cameraUnitVector) {
             std::vector<std::pair<ServoID, float>> positions;
             positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1], cameraUnitVector[0])));
-            positions.push_back(std::make_pair(
-                ServoID::HEAD_PITCH,
-                atan2(-cameraUnitVector[2],
-                      std::sqrt(cameraUnitVector[0] * cameraUnitVector[0] + cameraUnitVector[1] * cameraUnitVector[1]))
-                    - model.head.CAMERA_DECLINATION_ANGLE_OFFSET));
+            positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
+                                               atan2(-cameraUnitVector[2],
+                                                     std::sqrt(cameraUnitVector[0] * cameraUnitVector[0]
+                                                               + cameraUnitVector[1] * cameraUnitVector[1]))));
+            return positions;
+        }
+
+        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
+                                                                          const Eigen::Vector3d& cameraUnitVector) {
+            std::vector<std::pair<ServoID, double>> positions;
+            positions.push_back(
+                std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())));
+            positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
+                                               std::atan2(-cameraUnitVector.z(),
+                                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
+                                                                    + cameraUnitVector.y() * cameraUnitVector.y()))));
             return positions;
         }
 
