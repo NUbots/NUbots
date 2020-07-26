@@ -65,16 +65,16 @@ namespace behaviour {
         using utility::support::Expression;
 
         inline Eigen::Vector2d screenAngularFromObjectDirection(const Eigen::Vector3d& v) {
-            return {std::atan2(v(1), v(0)), std::atan2(v(2), v(0))};
+            return {std::atan2(v.y(), v.x()), std::atan2(v.z(), v.x())};
         }
 
         inline Eigen::Vector3d objectDirectionFromScreenAngular(const Eigen::Vector2d& screen_angular) {
-            if (std::fmod(std::fabs(screen_angular(0)), M_PI) == M_PI_2
-                || std::fmod(std::fabs(screen_angular(1)), M_PI) == M_PI_2) {
+            if (std::fmod(std::fabs(screen_angular.x()), M_PI) == M_PI_2
+                || std::fmod(std::fabs(screen_angular.y()), M_PI) == M_PI_2) {
                 return {0, 0, 0};
             }
-            double tanTheta        = std::tan(screen_angular(0));
-            double tanPhi          = std::tan(screen_angular(1));
+            double tanTheta        = std::tan(screen_angular.x());
+            double tanPhi          = std::tan(screen_angular.y());
             double x               = 0;
             double y               = 0;
             double z               = 0;
@@ -425,10 +425,10 @@ namespace behaviour {
 
             for (uint i = 0; i < fixationObjects.balls.size(); i++) {
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).screen_angular(0),
-                                                         fixationObjects.balls.at(i).screen_angular(1)));
-                fixationSizes.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).angular_size(0),
-                                                        fixationObjects.balls.at(i).angular_size(1)));
+                fixationPoints.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).screen_angular.x(),
+                                                         fixationObjects.balls.at(i).screen_angular.y()));
+                fixationSizes.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).angular_size.x(),
+                                                        fixationObjects.balls.at(i).angular_size.y()));
             }
 
             // If there are objects to find
@@ -471,10 +471,10 @@ namespace behaviour {
 
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // Should be vec2 (yaw,pitch)
-                fixationPoints.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).screen_angular(0),
-                                                         fixationObjects.goals.at(i).screen_angular(1)));
-                fixationSizes.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).angular_size(0),
-                                                        fixationObjects.goals.at(i).angular_size(1)));
+                fixationPoints.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).screen_angular.x(),
+                                                         fixationObjects.goals.at(i).screen_angular.y()));
+                fixationSizes.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).angular_size.x(),
+                                                        fixationObjects.goals.at(i).angular_size.y()));
             }
 
             // If there are objects to find

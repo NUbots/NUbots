@@ -22,6 +22,8 @@ package message.motion;
 
 import "Vector.proto";
 
-message DiveCommand { vec2 direction = 1; }
+message DiveCommand {
+    vec2 direction = 1;
+}
 
 message DiveFinished {}
