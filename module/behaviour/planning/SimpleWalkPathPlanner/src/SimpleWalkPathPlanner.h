@@ -60,9 +60,9 @@ namespace behaviour {
             Eigen::Vector2d targetPosition = Eigen::Vector2d::Zero();
 
             NUClear::clock::time_point timeBallLastSeen;
-            Eigen::Vector3d rBWw{Eigen::Vector3d(10.0, 0.0, 0.0)};
-            bool robot_ground_space = true;
-            Eigen::Vector2d position{Eigen::Vector2d(Eigen::Vector2d::UnitX())};  // ball pos rel to robot
+            Eigen::Vector3d rBWw     = Eigen::Vector3d(10.0, 0.0, 0.0);
+            bool robot_ground_space  = true;
+            Eigen::Vector2d position = Eigen::Vector2d::UnitX();  // ball pos rel to robot
             float ball_approach_dist = 0.2;
             float slowdown_distance  = 0.2;
             bool useLocalisation     = true;
