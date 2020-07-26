@@ -24,9 +24,6 @@
 
 #include "NUsight.h"
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-
 #include "message/behaviour/Behaviour.h"
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/WalkPath.h"

@@ -22,8 +22,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <fmt/format.h>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
 
