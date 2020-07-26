@@ -91,11 +91,11 @@ namespace behaviour {
             }
 
             static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b) {
-                return Eigen::VectorXd{(a.second)}.norm() < Eigen::VectorXd{(b.second)}.norm();
+                return a.second.norm() < b.second.norm();
             }
 
             static bool comparator(const T& a, const T& b) {
-                return Eigen::VectorXd{(a)}.norm() < Eigen::VectorXd{(b)}.norm();
+                return a.norm() < b.norm();
             }
 
             void setSwitchTime(float dt) {

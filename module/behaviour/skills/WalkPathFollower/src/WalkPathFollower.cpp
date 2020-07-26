@@ -304,13 +304,13 @@ namespace behaviour {
 
         bool WalkPathFollower::isVisited(const Eigen::Affine2d& currentState, const Eigen::Affine2d& visitState) {
             // TODO: Abstract away the distance metric used between states.
-            double dist = Eigen::Vector2d(visitState.translation() - currentState.translation()).norm();
+            double dist = (visitState.translation() - currentState.translation()).norm();
             return dist < cfg_.waypoint_visit_distance;
         }
 
         bool WalkPathFollower::isGoalClose(const Eigen::Affine2d& currentState, const Eigen::Affine2d& visitState) {
             // TODO: Abstract away the distance metric used between states.
-            double dist = Eigen::Vector2d(visitState.translation() - currentState.translation()).norm();
+            double dist = (visitState.translation() - currentState.translation()).norm();
             return dist < cfg_.goal_close_distance;
         }
 
