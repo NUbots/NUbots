@@ -593,16 +593,16 @@ namespace behaviour {
             float view_padding_radians = fractional_view_padding * lens.fov;
             // 1
             Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
+            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) * 0.5;
             // 2
             padding            = {view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(lens.fov, -lens.fov) / 2.0;
+            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(lens.fov, -lens.fov) * 0.5;
             // 3
             padding            = {-view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
+            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d(lens.fov, lens.fov) * 0.5;
             // 4
             padding            = {-view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-lens.fov, lens.fov) / 2.0;
+            Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-lens.fov, lens.fov) * 0.5;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<Eigen::Vector2d> searchPoints;
@@ -683,16 +683,16 @@ namespace behaviour {
             double view_padding_radians = fractional_view_padding * lens.fov;
             // 1
             Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
+            Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) * 0.5;
             // 2
             padding            = {view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(lens.fov, -lens.fov) / 2.0;
+            Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(lens.fov, -lens.fov) * 0.5;
             // 3
             padding            = {-view_padding_radians, -view_padding_radians};
-            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d(lens.fov, lens.fov) / 2.0;
+            Eigen::Vector2d bl = boundingBox.getTopRight() - padding - Eigen::Vector2d(lens.fov, lens.fov) * 0.5;
             // 4
             padding            = {-view_padding_radians, view_padding_radians};
-            Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-lens.fov, lens.fov) / 2.0;
+            Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-lens.fov, lens.fov) * 0.5;
 
             // Interpolate between max and min allowed angles with -1 = min and 1 = max
             std::vector<Eigen::Vector2d> searchPoints;
@@ -724,9 +724,9 @@ namespace behaviour {
             std::vector<Eigen::Vector2d> boundingPoints;
             for (uint i = 0; i < ob.balls.size(); i++) {
                 boundingPoints.push_back(
-                    (ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size / 2).cast<double>());
+                    (ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size * 0.5).cast<double>());
                 boundingPoints.push_back(
-                    (ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size / 2).cast<double>());
+                    (ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size * 0.5).cast<double>());
             }
             return Quad<Eigen::Vector2d>::getBoundingBox(boundingPoints);
         }
@@ -745,9 +745,9 @@ namespace behaviour {
             std::vector<Eigen::Vector2d> boundingPoints;
             for (uint i = 0; i < ob.goals.size(); i++) {
                 boundingPoints.push_back(
-                    (ob.goals.at(i).screen_angular + ob.goals.at(i).angular_size / 2).cast<double>());
+                    (ob.goals.at(i).screen_angular + ob.goals.at(i).angular_size * 0.5).cast<double>());
                 boundingPoints.push_back(
-                    (ob.goals.at(i).screen_angular - ob.goals.at(i).angular_size / 2).cast<double>());
+                    (ob.goals.at(i).screen_angular - ob.goals.at(i).angular_size * 0.5).cast<double>());
             }
             return Quad<Eigen::Vector2d>::getBoundingBox(boundingPoints);
         }
