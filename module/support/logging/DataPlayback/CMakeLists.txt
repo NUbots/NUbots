@@ -12,7 +12,7 @@ add_custom_command(
   COMMENT "Generating DataPlayback system for current messages"
 )
 
-# Create a symlink from to recordings so we can access them from build (helpful for docker)
+# Create a symlink to recordings so we can access them from build (helpful for docker)
 add_custom_target(
   recordings_link ALL
   COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_SOURCE_DIR}/recordings" ${CMAKE_BINARY_DIR}/recordings
