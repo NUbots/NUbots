@@ -238,6 +238,10 @@ RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.
 COPY usr/local/package/espeak.sh /usr/local/package/espeak.sh
 RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
 
+#######################################
+### ADD NEW PROGRAMS/LIBRARIES HERE ###
+#######################################
+
 # Install python libraries
 RUN pip install \
     pylint \
@@ -274,7 +278,7 @@ RUN pip install --upgrade \
 COPY etc/sudoers.d/user /etc/sudoers.d/user
 RUN chmod 440 /etc/sudoers.d/user
 
-# Create the fourtel user, and setup sudo so no password is required
+# Create the user, and setup sudo so no password is required
 ARG user_uid=1000
 ARG user_gid=$user_uid
 RUN groupadd --gid $user_gid nubots \
