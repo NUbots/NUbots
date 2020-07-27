@@ -13,6 +13,9 @@ def register(command):
         "The command will first remove any patterns provided with -r ",
         "(or everything if no remove patterns are given) ",
         "and then keep any of those removed that match the -k patterns",
+        "for example to keep only Sensors and DarwinSensors ",
+        "`./b nbs filter -k message.input.Sensors -k message.platform ",
+        "`or to remove all CompressedImages `./b nbs filter -r message.output.CompressedImage",
     )
 
     # Command arguments
