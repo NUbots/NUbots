@@ -3,7 +3,7 @@ find_package(PythonInterp 3 REQUIRED)
 
 set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/message_handles.cpp")
 
-# Copy across the files
+# Generate the encoders for different message types
 add_custom_command(
   USES_TERMINAL
   OUTPUT "${source_file}" "${config_file}"
