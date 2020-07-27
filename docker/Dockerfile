@@ -38,7 +38,7 @@ RUN install-package \
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-COPY etc/pip.conf /etc/pip.conf
+COPY etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
