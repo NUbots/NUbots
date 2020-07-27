@@ -18,6 +18,6 @@ buffer_time: 1500
 # You can put any messages that are emitted in the system here and they will be played back
 # The below ones are just the most common and here as an example
 messages:
-  message.input.Image: false
+  message.output.CompressedImage: false
   message.input.Sensors: false
   message.platform.darwin.DarwinSensors: true
