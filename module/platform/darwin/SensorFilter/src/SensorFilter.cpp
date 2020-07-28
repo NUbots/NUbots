@@ -176,11 +176,11 @@ namespace platform {
                     config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
                 // Mahony config
-                this->Kp = config["mahony"]["Kp"].as<double>();
-                this->Ki = config["mahony"]["Ki"].as<double>();
-                this->ts = config["mahony"]["ts"].as<double>();
+                this->Kp           = config["mahony"]["Kp"].as<double>();
+                this->Ki           = config["mahony"]["Ki"].as<double>();
+                this->ts           = config["mahony"]["ts"].as<double>();
                 this->initial_quat = config["mahony"]["initial_quat"].as<Expression>();
-                this->bias = config["mahony"]["bias"].as<Expression>();
+                this->bias         = config["mahony"]["bias"].as<Expression>();
 
                 // Calculate our mean and covariance
                 MotionModel<double>::StateVec mean;
@@ -356,13 +356,13 @@ namespace platform {
                         }
                     }
 
-                    // gyro_x to the right
-                    // gyro_y to the back
-                    // gyro_z down
-
                     // acc_x to the back
                     // acc_y to the left
                     // acc_z up
+
+                    // gyro_x to the right
+                    // gyro_y to the back
+                    // gyro_z down
 
                     // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
                     if (previousSensors && (input.cm740ErrorFlags)) {
@@ -462,14 +462,17 @@ namespace platform {
                      ************************************************/
 
                     // Mahony calculation for Rtw
-                    Eigen::Vector3d rawGyro = Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z);
-                    Eigen::Vector3d rawAcc  = Eigen::Vector3d(input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
-
                     Eigen::Quaterniond quat =
                         previousSensors == NULL
-                            ? Eigen::Quaterniond(initial_quat[0],initial_quat[1],initial_quat[2],initial_quat[3])
+                            ? Eigen::Quaterniond(initial_quat[0], initial_quat[1], initial_quat[2], initial_quat[3])
                             : Eigen::Quaterniond(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
-                    utility::math::filter::MahonyUpdate(rawAcc, rawGyro, ts, Ki, Kp, quat, bias);
+                    utility::math::filter::MahonyUpdate(sensors->accelerometer,
+                                                        sensors->gyroscope,
+                                                        ts,
+                                                        Ki,
+                                                        Kp,
+                                                        quat,
+                                                        bias);
 
                     // Gyroscope measurement update
                     motionFilter.measure(sensors->gyroscope,
@@ -483,7 +486,7 @@ namespace platform {
                                                       * config.motionFilter.noise.measurement.accelerometerMagnitude;
 
                     // Accelerometer measurement update
-                    motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
+                    // motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
                     for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
                         bool foot_down      = sensors->feet[side].down;
@@ -542,7 +545,8 @@ namespace platform {
                     Eigen::Affine3d Hwt;
                     Hwt.linear() = quat.toRotationMatrix();
                     // Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
-                    Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
+                    // Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
+                    Hwt.translation() = Eigen::Vector3d(0, 0, 0.49);
                     sensors->Htw      = Hwt.inverse().matrix();
 
                     // Integrate gyro to get angular positions
