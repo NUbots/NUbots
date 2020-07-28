@@ -47,5 +47,5 @@ mahony:
   Kp: 10.8279
   Ki: 17.8421
   ts: 0.009
-  initial_quat: [0, 0, 0, 1]
+  initial_quat: [1, 0, 0, 0]
   bias: [0, 0, 0]
