@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# clang --include-directory /home/nubots/build/shared --include-directory /home/nubots/NUbots/shared --include-directory /home/nubots/NUbots/nuclear/message/include -c -Xclang -ast-dump -fsyntax-only test.cpp
+
 import sys
 import os
 import re
@@ -7,43 +9,35 @@ import re
 import b
 from dockerise import run_on_docker
 
-# add '(//.*|/\*.*\*/)' for comments?
-# Find an on statement and grab the DSL, then grab the arguments, pass over the .then, grab the capture, then the
-# arguments, then optionally have a -> then pass through the body and finally end with });.
-onPattern = re.compile(r"on<(.*)>\((.*)\)\.then\((\[.*\])(\(.*\))?\s*(-> (ret)?)?{(.|\n)*?}\);")
-# Start with a , or a ( then check if const, then grab the type, then grab the name
-paramsPattern = re.compile(r"(\(|, ?)(const)? ([^,) ]*?) ([^,) ]*)")
-# Start with emit, then grab DSL, then the things we are passing in, then end with );
-emitPattern = re.compile(r"emit<(.*?)>\((.*)\);")
-argsPattern = re.compile(r"[^,\s]+")
+import clang.cindex
+
+libraryFile = "/usr/local/lib/"  # llvm-config --libdir
+parseArgs = [
+    "--include-directory /home/nubots/build/shared",
+    "--include-directory /home/nubots/NUbots/shared",
+    "--include-directory /home/nubots/NUbots/nuclear/message/include",
+    "-c",
+]
 
 
 @run_on_docker
 def register(command):
-    command.help = "Generate markdown from all the on and emit statements"
+    command.help = "documentation generation?"
+
+    command.add_argument("file", help="The file to do")
 
 
 @run_on_docker
-def run(**kwargs):
-    toRead = open(b.project_dir + "/module/platform/Gazebo/src/Gazebo.cpp", "r")
-    toWrite = open(b.project_dir + "/doc/NUdoc/cool.md", "w")
-    textToParse = toRead.read()
+def run(file, **kwargs):
 
-    for thing in re.findall(onPattern, textToParse):
-        toWrite.write("On " + thing[0].replace("<", "\<") + "\n")
-        toWrite.write("* Params: " + thing[1] + "\n")
-        toWrite.write("* Capture: " + thing[2] + "\n")
-        toWrite.write("* Lambda Params: \n")
-        for param in re.findall(paramsPattern, thing[3]):
-            toWrite.write("    * " + param[3] + " : " + param[1] + " " + param[2].replace("<", "\<") + "\n")
-        toWrite.write("\n")
+    clang.cindex.Config.set_library_path(libraryFile)
 
-    for thing in re.findall(emitPattern, textToParse):
-        toWrite.write("Emit " + thing[0].replace("<", "\<") + "\n")
-        toWrite.write("* Params: \n")
-        for arg in re.findall(argsPattern, thing[1]):
-            toWrite.write("    * " + arg + "\n")
-        toWrite.write("\n")
+    index = clang.cindex.Index.create()
 
-    toRead.close()
-    toWrite.close()
+    translationUnit = index.parse(file, parseArgs)
+
+    cursor = translationUnit.cursor
+
+    for node in cursor.walk_preorder():
+        if str(node.location.file) == file:
+            print(node.location)
