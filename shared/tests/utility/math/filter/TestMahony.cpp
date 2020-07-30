@@ -26,35 +26,51 @@
 
 using utility::math::filter::MahonyUpdate;
 
-static const double ERROR_THRESHOLD = 1.0;
+static const double ERROR_THRESHOLD = 0.1;
 
 // Mahony config
+// Optimal parameters determined in MATLAB optimisation routine.
+// To see report on this, go to public/projects folder on the NAS.
 static const double Kp = 10.8279;
 static const double Ki = 17.8421;
-static const double ts = 0.0111;
+static const double ts = 0.0085;
 static const Eigen::Vector4d initial_quat = Eigen::Vector4d(1, 0, 0, 0);
 
-TEST_CASE("Test the Mahony Filter", "[utility][math][filter][mahony]") {
-    Eigen::Vector3d bias(0,0,0);
+std::vector<Eigen::Vector3d> gyro;
+std::vector<Eigen::Vector3d> acc;
+std::vector<Eigen::Matrix3d> Rtw_ground;
 
+void init() {
+    Eigen::Matrix3d Rtw;
+    gyro.push_back(Eigen::Vector3d( 0.0 ,  0.0 ,  0.0 ));
+    acc.push_back(Eigen::Vector3d( 0.0 ,  0.0 ,  -9.80665 ));
+    Rtw <<  1.0 ,  0.0 ,  0.0 ,  0.0 ,  1.0 ,  0.0 ,  0.0 ,  0.0 ,  1.0 ;
+    Rtw_ground.push_back(Rtw);
+}
+
+TEST_CASE("Test the Mahony Filter", "[utility][math][filter][mahony]") {
+    // Set the bias. Mahony will update this.
+    Eigen::Vector3d bias(0, 0, 0);
+
+    // Set the initial quaternion
     Eigen::Quaterniond Rwt(initial_quat[0],initial_quat[1],initial_quat[2],initial_quat[3]);
 
-    Eigen::Vector3d gyro;
-    Eigen::Vector3d acc;
-    Eigen::Matrix3d Rtw_ground;
+    // Init variables
     double diff = 0;
 
-    gyro <<  0.0 ,  0.0 ,  0.0 ;
-    acc <<  0.0 ,  0.0 ,  -9.80665 ;
-    MahonyUpdate(acc, gyro, ts, Ki, Kp, Rwt, bias);
-    Rtw_ground <<  1.0 ,  0.0 ,  0.0 ,  0.0 ,  1.0 ,  0.0 ,  0.0 ,  0.0 ,  1.0 ;
-    Rtw_ground.col(0).normalize();
-    Rtw_ground.col(1).normalize();
-    Rtw_ground.col(2).normalize();
-    diff = ((Rtw_ground - Rwt.toRotationMatrix().transpose())).cwiseAbs().maxCoeff();
-    INFO("Simscape: " << Rtw_ground.matrix());
-    INFO("Mahony: " << Rwt.toRotationMatrix().transpose().matrix());
-    INFO("Threshold is " << ERROR_THRESHOLD << ", got " << diff);
-    REQUIRE(diff < ERROR_THRESHOLD);
+    // Populate data from Simscape
+    init();
 
+    for (int i = 0 ; i < gyro.size() ; i++) {
+        MahonyUpdate(acc.at(i), gyro.at(i), ts, Ki, Kp, Rwt, bias);
+        Rtw_ground.at(i).col(0).normalize();
+        Rtw_ground.at(i).col(1).normalize();
+        Rtw_ground.at(i).col(2).normalize();
+        diff = abs(Eigen::Quaterniond(Rtw_ground.at(i)).normalized().dot(Rwt.inverse()));
+        INFO("Iteration: " << i);
+        INFO("Simscape: " << Rtw_ground.at(i).matrix());
+        INFO("Mahony: " << Rwt.toRotationMatrix().transpose().matrix());
+        INFO("Threshold is " << ERROR_THRESHOLD << ", got " << diff);
+        REQUIRE(diff > 1 - ERROR_THRESHOLD);
+    }
 }
