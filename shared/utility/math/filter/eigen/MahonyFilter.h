@@ -23,7 +23,6 @@ namespace utility {
 namespace math {
     namespace filter {
 
-        // For quaternion q = w + ix + jy + kz, the vector is [x, y, z, w]
         // The Mahony update uses the IMU data to compute the attitude
         // INPUT
         // acc:     accelerometer reading as a column vector, [a_x, a_y, a_z]'. g force
@@ -33,6 +32,7 @@ namespace math {
         // Kp:      integral proportional gain
         // quat:    quaternion representing the rotation of the torso. Hwt.
         // bias:
+        // To see report on this, go to "public/Projects/Final Year Projects/NUgus Pose Estimation" folder on the NAS.
         void MahonyUpdate(Eigen::Vector3d acc,
                           Eigen::Vector3d gyro,
                           const double ts,
@@ -101,6 +101,7 @@ namespace math {
             // // Calculate integral to find the attitude quaternion
             quat_vec += ts * q_d;
 
+            // Set quat (Rwt) and normalise
             quat.x() = quat_vec(0);
             quat.y() = quat_vec(1);
             quat.z() = quat_vec(2);
