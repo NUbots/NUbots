@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # clang --include-directory /home/nubots/build/shared --include-directory /home/nubots/NUbots/shared --include-directory /home/nubots/NUbots/nuclear/message/include -c -Xclang -ast-dump -fsyntax-only test.cpp
+# pydoc -b tools/clang/cindex.py
 
 import sys
 import os
@@ -13,10 +14,12 @@ import clang.cindex
 
 libraryFile = "/usr/local/lib/"  # llvm-config --libdir
 parseArgs = [
-    "--include-directory /home/nubots/build/shared",
-    "--include-directory /home/nubots/NUbots/shared",
-    "--include-directory /home/nubots/NUbots/nuclear/message/include",
-    "-c",
+    "-I../build/shared",
+    "-Ishared",
+    "-Inuclear/message/include",
+    "-I/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include",  # gcc include path
+    "-I/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed",  # gcc include path
+    # "-Wall",
 ]
 
 
@@ -36,8 +39,12 @@ def run(file, **kwargs):
 
     translationUnit = index.parse(file, parseArgs)
 
+    print("Diagnostics")
+    for diag in translationUnit.diagnostics:
+        print(diag)
+
     cursor = translationUnit.cursor
 
     for node in cursor.walk_preorder():
         if str(node.location.file) == file:
-            print(node.location)
+            print(str(node.location))
