@@ -33,15 +33,15 @@ namespace math {
         // Kp:      integral proportional gain
         // quat:    quaternion representing the rotation of the torso. Hwt.
         // bias:
-        void MahonyUpdate(const Eigen::Vector3d& acc,
-                          const Eigen::Vector3d& gyro,
+        void MahonyUpdate(Eigen::Vector3d acc,
+                          Eigen::Vector3d gyro,
                           const double ts,
                           const double Ki,
                           const double Kp,
                           Eigen::Quaterniond& quat,
                           Eigen::Vector3d& bias) {
             // Normalise the acceleration vector
-            Eigen::Vector3d norm_acc = acc.normalized();
+            acc.normalize();
 
             // Compute the 3 by 3 attitude matrix from the quaternion
             Eigen::Vector3d rho(quat.x(), quat.y(), quat.z());
@@ -49,9 +49,9 @@ namespace math {
             double rho_norm_squ = std::pow(rho.norm(), 2);
             // clang-format off
             Eigen::Matrix3d rho_x;
-            rho_x << 0,       -rho.z(), -rho.y()
-                   , rho.z(),  0 ,      -rho.x()
-                   , -rho.y(), rho.x(), 0;
+            rho_x << 0, -rho.z(),  rho.y(),
+               rho.z(),       0 , -rho.x(),
+              -rho.y(),  rho.x(),        0;
             // clang-format on
 
             Eigen::Matrix3d attitude = ((std::pow(q4, 2) - rho_norm_squ) * Eigen::Matrix3d::Identity())
@@ -63,7 +63,7 @@ namespace math {
             // Calculate estimated accelerometer reading
             Eigen::Vector3d est_acc = attitude * r_acc;
             // Calculate error between estimate and real
-            Eigen::Matrix3d a_corr = norm_acc * est_acc.transpose() - est_acc * norm_acc.transpose();
+            Eigen::Matrix3d a_corr = acc * est_acc.transpose() - est_acc * acc.transpose();
             // Vex (inverse function of skew-symmetric function) the error
             Eigen::Vector3d omega_mes(a_corr(2, 1), a_corr(0, 2), a_corr(1, 0));
             omega_mes = -omega_mes;
@@ -84,7 +84,7 @@ namespace math {
             // Find the quaternions rate of change
             // clang-format off
             Eigen::Matrix3d omega_x;
-            omega_x <<         0, -l_omega.z(), -l_omega.y(),
+            omega_x <<         0, -l_omega.z(),  l_omega.y(),
                      l_omega.z(),            0, -l_omega.x(),
                     -l_omega.y(),  l_omega.x(),            0;
             // clang-format on
