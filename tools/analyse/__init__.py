@@ -20,7 +20,7 @@ def translate(index, path):
 def printNode(node, tab=0):
     print(
         "  " * tab
-        + "{} {} {} {}:{}".format(
+        + "{} {}#{} {}:{}".format(
             node.kind.name, node.type.spelling, node.spelling, node.location.line, node.location.column
         )
     )

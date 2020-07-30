@@ -23,7 +23,6 @@ def register(command):
 def run(path, **kwargs):
     index = analyse.createIndex()
     tu = analyse.translate(index, path)
-    for c in tu._findClassNodes():
-        analyse.printNode(c)
-        for child in c.get_children():
-            analyse.printNode(child, 1)
+    reactors = tu.getReactors()
+    for reactor in reactors:
+        print(reactor)

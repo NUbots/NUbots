@@ -1,9 +1,13 @@
-from .Class import Class
+class Reactor:
+    def __init__(self, node, methods):
+        self.node = node
+        self.methods = methods
 
-
-class Reactor(Class):
-    def __init__(self):
-        pass
+    def __repr__(self):
+        reperesentation = self.node.spelling
+        for method in self.methods:
+            reperesentation += " {}".format(method.spelling)
+        return reperesentation
 
     # def _findOnNodes(self, node):
     #    for child in node.walk_preorder():
