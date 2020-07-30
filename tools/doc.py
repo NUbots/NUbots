@@ -17,8 +17,7 @@ parseArgs = [
     "-I../build/shared",
     "-Ishared",
     "-Inuclear/message/include",
-    "-I/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include",  # gcc include path
-    "-I/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed",  # gcc include path
+    "-I/usr/lib/clang/9.0.1/include",  # clang include path
     # "-Wall",
 ]
 
