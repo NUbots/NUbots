@@ -4,18 +4,17 @@ import clang.cindex
 class On:
     def __init__(self, node):
         self.node = node
-        self.dsl, self.lmbda = self._findDSLAndLambda()
+        self.dsl = self._findDSL()
+        self.lmbda = self._findLambda()
 
     def __repr__(self):
-        return "on<{}>".format(self.dsl)
+        return "on<{}>(){{{}}}".format(self.dsl, self.lmbda.type.spelling)
 
-    def _findDSLAndLambda(self):
+    def _findDSL(self):
         DSL = ""
-        lmbda = None
-        children = self.node.get_children()
         try:
             for dslChild in next(
-                next(next(next(children).get_children()).get_children()).get_children()
+                next(next(next(self.node.get_children()).get_children()).get_children()).get_children()
             ).get_children():
                 if dslChild.kind == clang.cindex.CursorKind.TEMPLATE_REF:
                     DSL += "{}::".format(dslChild.spelling)
@@ -25,7 +24,22 @@ class On:
                     DSL += dslChild.type.spelling
         except StopIteration:
             pass
-        return (DSL, lmbda)
+        return DSL
+
+    def _findLambda(self):
+        for child in self.node.get_children():
+            try:
+                if child.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
+                    lmbda = next(child.get_children())
+                    if lmbda.kind != clang.cindex.CursorKind.LAMBDA_EXPR:
+                        raise AssertionError("Was not a lambda")
+                    else:
+                        return lmbda
+            except StopIteration:
+                pass
+            except AssertionError as e:
+                print(e)
+        return None
 
 
 class Emit:
@@ -42,7 +56,7 @@ class Emit:
         try:
             memberRefExpr = next(children)
             if memberRefExpr.kind != clang.cindex.CursorKind.MEMBER_REF_EXPR:
-                raise AssertionError
+                raise AssertionError("First node in subtree of emit was not MEMBER_REF_EXPR, did not no was possible.")
             for part in memberRefExpr.get_children():
                 if part.kind == clang.cindex.CursorKind.TEMPLATE_REF:
                     scope = part.spelling
@@ -50,8 +64,8 @@ class Emit:
                 scope = "Local"
         except StopIteration:
             pass
-        except AssertionError:
-            print("First node in subtree of emit was not MEMBER_REF_EXPR, did not no was possible.")
+        except AssertionError as e:
+            print(e)
         return scope
 
 
@@ -62,11 +76,12 @@ class Method:
         self.emit = [Emit(emit) for emit in self._findEmitNodes()]
 
     def __repr__(self):
-        representation = self.node.spelling
+        representation = self.node.spelling + "("
         for on in self.on:
             representation += " " + str(on)
         for emit in self.emit:
             representation += " " + str(emit)
+        representation += ")"
         return representation
 
     def _findOnNodes(self):
