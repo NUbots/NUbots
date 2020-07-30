@@ -46,6 +46,6 @@ motion_filter:
 mahony:
   Kp: 10.8279
   Ki: 17.8421
-  ts: 0.009
+  ts: 0.0085
   initial_quat: [1, 0, 0, 0]
   bias: [0, 0, 0]
