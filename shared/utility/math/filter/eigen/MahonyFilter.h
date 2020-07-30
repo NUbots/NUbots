@@ -58,8 +58,8 @@ namespace math {
                                        - (2 * q4 * rho_x) + (2 * rho * rho.transpose());
 
             // Calculate the sensor error
-            // Reference vector for gravity
-            Eigen::Vector3d r_acc(0, 0, 1);
+            // Reference vector for gravity (gravity is negative)
+            Eigen::Vector3d r_acc(0, 0, -1);
             // Calculate estimated accelerometer reading
             Eigen::Vector3d est_acc = attitude * r_acc;
             // Calculate error between estimate and real
