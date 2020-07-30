@@ -21,6 +21,33 @@ parseArgs = [
     # "-Wall",
 ]
 
+# Print out a kinda readable tree
+def printOutTree(node, tab=0):
+    print(
+        "  " * tab
+        + "{} {} {} {}:{}".format(
+            node.kind.name, node.type.spelling, node.spelling, node.location.line, node.location.column
+        )
+    )
+    for child in node.get_children():
+        printOut(child, tab + 1)
+
+
+# Find emit statement
+def findEmit(node):
+    for child in node.walk_preorder():
+        if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
+            yield child
+
+
+# Find reactor inheritance
+def findReactor(root):
+    for node in root.walk_preorder():
+        if node.kind == clang.cindex.CursorKind.CLASS_DECL:
+            for child in node.get_children():
+                if child.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER and child.spelling == "NUClear::Reactor":
+                    yield node
+
 
 @run_on_docker
 def register(command):
@@ -38,12 +65,24 @@ def run(file, **kwargs):
 
     translationUnit = index.parse(file, parseArgs)
 
-    print("Diagnostics")
-    for diag in translationUnit.diagnostics:
-        print(diag)
+    diagnostics = translationUnit.diagnostics
+    if len(diagnostics) > 0:
+        print("Diagnostics")
+        for diag in translationUnit.diagnostics:
+            print(diag)
+            return
 
     cursor = translationUnit.cursor
 
-    for node in cursor.walk_preorder():
-        if str(node.location.file) == file:
-            print(str(node.location))
+    # Should make topLevel[0] the h file and topLevel[1] the cpp file
+    # topLevel = []
+    # for node in cursor.get_children():
+    #    if (
+    #        node.location.file
+    #        and os.path.splitext(os.path.basename(node.location.file.name))[0]
+    #        == os.path.splitext(os.path.basename(file))[0]
+    #    ):
+    #        topLevel.append(node)
+
+    for thing in findReactor(cursor):
+        print(thing.type.spelling)
