@@ -7,7 +7,7 @@ parseArgs = [
     "-I../build/shared",
     "-Ishared",
     "-Inuclear/message/include",
-    "-I/usr/local/lib/clang/9.0.1/include",  # clang include path
+    "-I/usr/local/lib/clang/9.0.1/include",  # clang include path, clang -E -v -
     # "-Wall",
 ]
 

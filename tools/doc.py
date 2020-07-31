@@ -5,11 +5,26 @@
 
 import sys
 import os
-import re
 
 import b
 from dockerise import run_on_docker
 import analyse
+
+
+def generateReactorMarkdown(reactor):
+    out = "# {}".format(reactor.getType())
+    out += "\n{}".format(reactor.getBrief())
+    for method in reactor.getMethods():
+        out += "\n## {}".format(method.getName())
+        out += "\n{}".format(method.getBrief())
+        for on in method.getOns():
+            out += "\n* {}".format(str(on).replace("<", "\<"))
+            out += "\n{}".format(on.getBrief())
+        for emit in method.getEmits():
+            out += "\n* {}".format(str(emit).replace("<", "\<"))
+            out += "\n{}".format(emit.getBrief())
+    out += "\n"
+    return out
 
 
 @run_on_docker
@@ -18,9 +33,11 @@ def register(command):
 
     command.add_argument("path", help="The file to do")
 
+    command.add_argument("outpath", help="The file to write to")
+
 
 @run_on_docker
-def run(path, **kwargs):
+def run(path, outpath, **kwargs):
     index = analyse.createIndex()
     tu = analyse.translate(index, path)
 
@@ -32,6 +49,10 @@ def run(path, **kwargs):
     if failed:
         return
 
+    toWrite = open(outpath, "w")
+
     reactors = tu.getReactors()
     for reactor in reactors:
-        print(reactor)
+        toWrite.write(generateReactorMarkdown(reactor))
+
+    toWrite.close()

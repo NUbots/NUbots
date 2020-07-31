@@ -12,6 +12,9 @@ class On:
     def __repr__(self):
         return "on<{}>(){{{}}}".format(self.dsl, self.lmbda)
 
+    def getBrief(self):
+        return self.node.brief_comment
+
     def _findDSL(self):
         DSL = ""
         try:
@@ -58,6 +61,9 @@ class Emit:
 
     def __eq__(self, value):
         return self.node == value.node
+
+    def getBrief(self):
+        return self.node.brief_comment
 
     def _findScope(self):
         try:
@@ -110,6 +116,18 @@ class Method:
         representation += ")"
         return representation
 
+    def getName(self):
+        return self.node.spelling
+
+    def getOns(self):
+        return self.on
+
+    def getEmits(self):
+        return self.emit
+
+    def getBrief(self):
+        return self.node.brief_comment
+
     def _findOnNodes(self):
         ons = []
         for child in self.node.walk_preorder():
@@ -161,7 +179,16 @@ class Reactor:
         self.methods = [Method(method) for method in methods]
 
     def __repr__(self):
-        reperesentation = self.node.spelling
+        reperesentation = self.node.type.spelling
         for method in self.methods:
             reperesentation += " {}".format(method)
         return reperesentation
+
+    def getType(self):
+        return self.node.type.spelling
+
+    def getMethods(self):
+        return self.methods
+
+    def getBrief(self):
+        return self.node.brief_comment
