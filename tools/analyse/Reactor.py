@@ -8,7 +8,7 @@ class On:
         self.lmbda = self._findLambda()
 
     def __repr__(self):
-        return "on<{}>(){{{}}}".format(self.dsl, self.lmbda.type.spelling)
+        return "on<{}>(){{{}}}".format(self.dsl, self.lmbda)
 
     def _findDSL(self):
         DSL = ""
@@ -34,7 +34,7 @@ class On:
                     if lmbda.kind != clang.cindex.CursorKind.LAMBDA_EXPR:
                         raise AssertionError("Was not a lambda")
                     else:
-                        return lmbda
+                        return Method(lmbda)
             except StopIteration:
                 pass
             except AssertionError as e:
@@ -72,6 +72,7 @@ class Emit:
 class Method:
     def __init__(self, node):
         self.node = node
+        self.calls = [node]
         self.on = [On(on) for on in self._findOnNodes()]
         self.emit = [Emit(emit) for emit in self._findEmitNodes()]
 
@@ -101,6 +102,27 @@ class Method:
         for child in self.node.walk_preorder():
             if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
                 emits.append(child)
+            elif (
+                child.kind == clang.cindex.CursorKind.CALL_EXPR
+                and child.get_definition()
+                and child.get_definition() not in self.calls
+            ):
+                self.calls.append(child.get_definition())
+                emits += self._checkFunction(child.get_definition())
+        return emits
+
+    def _checkFunction(self, node):
+        emits = []
+        for child in node.walk_preorder():
+            if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
+                emits.append(child)
+            elif (
+                child.kind == clang.cindex.CursorKind.CALL_EXPR
+                and child.get_definition()
+                and child.get_definition() not in self.calls
+            ):
+                self.calls.append(child.get_definition())
+                emits += self._checkFunction(child.get_definition())
         return emits
 
 
