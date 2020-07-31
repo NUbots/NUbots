@@ -1,5 +1,7 @@
 import clang.cindex
 
+import re
+
 
 class On:
     def __init__(self, node):
@@ -43,6 +45,8 @@ class On:
 
 
 class Emit:
+    decl_ref_exprRegex = re.compile(r"std::unique_ptr<([^,]*), std::default_delete<[^,]*> >")
+
     def __init__(self, node):
         self.node = node
         self.scope = self._findScope()
@@ -79,6 +83,10 @@ class Emit:
                 ).get_children():
                     if child.kind == clang.cindex.CursorKind.TYPE_REF:
                         return child.type.spelling
+            elif expr.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+                return re.findall(Emit.decl_ref_exprRegex, expr.type.spelling)[0]
+            elif expr.kind == clang.cindex.CursorKind.MEMBER_REF_EXPR:
+                return expr.type.spelling
         except StopIteration:
             pass
         return ""
