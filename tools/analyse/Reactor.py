@@ -28,6 +28,7 @@ class On:
             pass
         return DSL
 
+    # TODO not just lambda
     def _findLambda(self):
         for child in self.node.get_children():
             try:

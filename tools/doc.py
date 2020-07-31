@@ -23,6 +23,15 @@ def register(command):
 def run(path, **kwargs):
     index = analyse.createIndex()
     tu = analyse.translate(index, path)
+
+    # Check that the parsing of the tu succeeded
+    failed = False
+    for diagnostic in tu.getDiagnostics():
+        print(diagnostic)
+        failed = True
+    if failed:
+        return
+
     reactors = tu.getReactors()
     for reactor in reactors:
         print(reactor)
