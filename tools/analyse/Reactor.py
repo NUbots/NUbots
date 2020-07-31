@@ -51,6 +51,9 @@ class Emit:
     def __repr__(self):
         return "emit<{}>({})".format(self.scope, self.type)
 
+    def __eq__(self, value):
+        return self.node == value.node
+
     def _findScope(self):
         try:
             memberRefExpr = next(self.node.get_children())
@@ -85,8 +88,9 @@ class Method:
     def __init__(self, node):
         self.node = node
         self.calls = [node]
-        self.on = [On(on) for on in self._findOnNodes()]
-        self.emit = [Emit(emit) for emit in self._findEmitNodes()]
+        self.emit = []
+        self.on = self._findOnNodes()
+        self._addEmitNodes()
 
     def __repr__(self):
         representation = self.node.spelling + "("
@@ -105,37 +109,41 @@ class Method:
                 and child.type.spelling == "NUClear::threading::ReactionHandle"
                 and child.spelling == "then"
             ):
-                ons.append(child)
+                on = On(child)
+                for emit in on.lmbda.emit:
+                    if emit not in self.emit:
+                        self.emit.append(emit)
+                ons.append(on)
         return ons
 
-    # Find emit statement
-    def _findEmitNodes(self):
-        emits = []
+    # Find and add emit statement
+    def _addEmitNodes(self):
         for child in self.node.walk_preorder():
             if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
-                emits.append(child)
+                emit = Emit(child)
+                if emit not in self.emit:
+                    self.emit.append(emit)
             elif (
                 child.kind == clang.cindex.CursorKind.CALL_EXPR
                 and child.get_definition()
                 and child.get_definition() not in self.calls
             ):
                 self.calls.append(child.get_definition())
-                emits += self._checkFunction(child.get_definition())
-        return emits
+                self._addEmitFunction(child.get_definition())
 
-    def _checkFunction(self, node):
-        emits = []
+    def _addEmitFunction(self, node):
         for child in node.walk_preorder():
             if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
-                emits.append(child)
+                emit = Emit(child)
+                if emit not in self.emit:
+                    self.emit.append(emit)
             elif (
                 child.kind == clang.cindex.CursorKind.CALL_EXPR
                 and child.get_definition()
                 and child.get_definition() not in self.calls
             ):
                 self.calls.append(child.get_definition())
-                emits += self._checkFunction(child.get_definition())
-        return emits
+                self._addEmitFunction(child.get_definition())
 
 
 class Reactor:
