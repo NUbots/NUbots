@@ -14,7 +14,7 @@ import analyse
 def generateReactorMarkdown(reactor):
     out = "# {}".format(reactor.getType())
     out += "\n{}".format(reactor.getBrief())
-    for method in reactor.getMethods():
+    for _, method in reactor.getMethodsNoDuplicate().items():
         out += "\n## {}".format(method.getName())
         out += "\n{}".format(method.getBrief())
         for on in method.getOns():

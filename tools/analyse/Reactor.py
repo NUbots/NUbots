@@ -116,6 +116,9 @@ class Method:
         representation += ")"
         return representation
 
+    def __eq__(self, value):
+        return self.node == value.node
+
     def getName(self):
         return self.node.spelling
 
@@ -177,6 +180,7 @@ class Reactor:
     def __init__(self, node, methods):
         self.node = node
         self.methods = [Method(method) for method in methods]
+        self.notDuplicateMethods = Reactor._removeDuplicateMethods(self.methods)
 
     def __repr__(self):
         reperesentation = self.node.type.spelling
@@ -190,5 +194,15 @@ class Reactor:
     def getMethods(self):
         return self.methods
 
+    def getMethodsNoDuplicate(self):
+        return self.notDuplicateMethods
+
     def getBrief(self):
         return self.node.brief_comment
+
+    @staticmethod
+    def _removeDuplicateMethods(methods):
+        out = {}
+        for method in methods:
+            out[method.getName()] = method
+        return out
