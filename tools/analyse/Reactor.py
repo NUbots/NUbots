@@ -46,27 +46,39 @@ class Emit:
     def __init__(self, node):
         self.node = node
         self.scope = self._findScope()
+        self.type = self._findType()
 
     def __repr__(self):
-        return "emit<{}>".format(self.scope)
+        return "emit<{}>({})".format(self.scope, self.type)
 
     def _findScope(self):
-        scope = ""
-        children = self.node.get_children()
         try:
-            memberRefExpr = next(children)
+            memberRefExpr = next(self.node.get_children())
             if memberRefExpr.kind != clang.cindex.CursorKind.MEMBER_REF_EXPR:
                 raise AssertionError("First node in subtree of emit was not MEMBER_REF_EXPR, did not no was possible.")
             for part in memberRefExpr.get_children():
                 if part.kind == clang.cindex.CursorKind.TEMPLATE_REF:
-                    scope = part.spelling
-            if scope == "":
-                scope = "Local"
+                    return part.spelling
         except StopIteration:
             pass
         except AssertionError as e:
             print(e)
-        return scope
+        return "Local"
+
+    def _findType(self):
+        try:
+            children = self.node.get_children()
+            next(children)
+            expr = next(children)
+            if expr.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
+                for child in next(
+                    next(next(next(expr.get_children()).get_children()).get_children()).get_children()
+                ).get_children():
+                    if child.kind == clang.cindex.CursorKind.TYPE_REF:
+                        return child.type.spelling
+        except StopIteration:
+            pass
+        return ""
 
 
 class Method:
