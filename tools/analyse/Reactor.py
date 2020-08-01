@@ -121,6 +121,7 @@ class Method:
     def __init__(self, node):
         self.node = node
         self.calls = [node]
+        self.onEmit = []
         self.emit = []
         self.on = self._findOnNodes()
         self._addEmitNodes()
@@ -159,8 +160,8 @@ class Method:
             ):
                 on = On(child)
                 for emit in on.lmbda.emit:
-                    if emit not in self.emit:
-                        self.emit.append(emit)
+                    if emit not in (self.emit + self.onEmit):
+                        self.onEmit.append(emit)
                 ons.append(on)
         return ons
 
@@ -169,7 +170,7 @@ class Method:
         for child in self.node.walk_preorder():
             if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
                 emit = Emit(child)
-                if emit not in self.emit:
+                if emit not in (self.emit + self.onEmit):
                     self.emit.append(emit)
             elif (
                 child.kind == clang.cindex.CursorKind.CALL_EXPR
@@ -183,7 +184,7 @@ class Method:
         for child in node.walk_preorder():
             if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
                 emit = Emit(child)
-                if emit not in self.emit:
+                if emit not in (self.emit + self.onEmit):
                     self.emit.append(emit)
             elif (
                 child.kind == clang.cindex.CursorKind.CALL_EXPR
