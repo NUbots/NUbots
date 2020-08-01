@@ -1,6 +1,7 @@
 from .Reactor import Reactor
 
 import clang.cindex
+from os import path
 
 # TODO put in config
 parseArgs = [
@@ -14,22 +15,30 @@ parseArgs = [
 
 class TranslationUnit:
     def __init__(self, index, file):
+        self.file = path.splitext(file)[0]
+        print(self.file)
         self.translationUnit = index.parse(file, parseArgs)
+        self.toLook = self._filesToLookAt()
+        print(self.toLook)
 
     # See if there are any errors in parsing
     def getDiagnostics(self):
         return self.translationUnit.diagnostics
 
-    # The root node in the tree of the Translation Unit
-    def _root(self):
-        return self.translationUnit.cursor
+    def _filesToLookAt(self):
+        out = []
+        for node in self.translationUnit.cursor.get_children():
+            if path.splitext(node.location.file.name)[0] == self.file:
+                out.append(node)
+        return out
 
     # Find class definitions
     def _findClassNodes(self):
         classes = []
-        for node in self.translationUnit.cursor.walk_preorder():
-            if node.kind == clang.cindex.CursorKind.CLASS_DECL:
-                classes.append(node)
+        for look in self.toLook:
+            for node in look.walk_preorder():
+                if node.kind == clang.cindex.CursorKind.CLASS_DECL:
+                    classes.append(node)
         return classes
 
     # Find classes that inherit a type
@@ -48,24 +57,25 @@ class TranslationUnit:
     # Find member definitions for a class
     def _findMethodNodes(self):
         methods = []
-        for member in self.translationUnit.cursor.walk_preorder():
-            if (
-                member.kind == clang.cindex.CursorKind.CXX_METHOD
-                or member.kind == clang.cindex.CursorKind.CONSTRUCTOR
-                or member.kind == clang.cindex.CursorKind.DESTRUCTOR
-            ):
-                methods.append(member)
+        for look in self.toLook:
+            for node in look.walk_preorder():
+                if (
+                    node.kind == clang.cindex.CursorKind.CXX_METHOD
+                    or node.kind == clang.cindex.CursorKind.CONSTRUCTOR
+                    or node.kind == clang.cindex.CursorKind.DESTRUCTOR
+                ):
+                    methods.append(node)
         return methods
 
     def _findMethodsInClassNodes(self, node):
         methods = []
-        for member in node.get_children():
+        for child in node.get_children():
             if (
-                member.kind == clang.cindex.CursorKind.CXX_METHOD
-                or member.kind == clang.cindex.CursorKind.CONSTRUCTOR
-                or member.kind == clang.cindex.CursorKind.DESTRUCTOR
+                child.kind == clang.cindex.CursorKind.CXX_METHOD
+                or child.kind == clang.cindex.CursorKind.CONSTRUCTOR
+                or child.kind == clang.cindex.CursorKind.DESTRUCTOR
             ):
-                methods.append(member)
+                methods.append(child)
         return methods
 
     def _findMethodsOutClassNodes(self, name):
