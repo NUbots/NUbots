@@ -10,10 +10,10 @@ class On:
     def __init__(self, node):
         self.node = node
         self.dsl = self._findDSL()
-        self.lmbda = self._findLambda()
+        self.callback = self._findLambda()
 
     def __repr__(self):
-        return "on<{}>(){{{}}}".format(self.dsl, self.lmbda)
+        return "on<{}>(){{{}}}".format(self.dsl, self.callback)
 
     def getBrief(self):
         comment = ""
@@ -41,16 +41,17 @@ class On:
             pass
         return DSL
 
-    # TODO not just lambda
     def _findLambda(self):
         for child in self.node.get_children():
             try:
                 if child.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
-                    lmbda = next(child.get_children())
-                    if lmbda.kind != clang.cindex.CursorKind.LAMBDA_EXPR:
+                    callback = next(child.get_children())
+                    if callback.kind != clang.cindex.CursorKind.LAMBDA_EXPR:
                         raise AssertionError("Was not a lambda")
                     else:
-                        return Method(lmbda)
+                        return Method(callback)
+                elif child.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+                    return Method(child.referenced)
             except StopIteration:
                 pass
             except AssertionError as e:
@@ -159,7 +160,7 @@ class Method:
                 and child.spelling == "then"
             ):
                 on = On(child)
-                for emit in on.lmbda.emit:
+                for emit in on.callback.emit:
                     if emit not in (self.emit + self.onEmit):
                         self.onEmit.append(emit)
                 ons.append(on)
