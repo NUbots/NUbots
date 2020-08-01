@@ -20,8 +20,14 @@ def translate(index, path):
 def printNode(node, tab=0):
     print(
         "  " * tab
-        + "{} {}#{} {}:{}".format(
-            node.kind.name, node.type.spelling, node.spelling, node.location.line, node.location.column
+        + "{} {}#{} {}:{}:{} {}".format(
+            node.kind.name,
+            node.type.spelling,
+            node.spelling,
+            node.location.file,
+            node.location.line,
+            node.location.column,
+            node.raw_comment,
         )
     )
 
@@ -31,3 +37,9 @@ def printTree(node, tab=0):
     printNode(node, tab)
     for child in node.get_children():
         printTree(child, tab + 1)
+
+
+def printReactorAst(reactor):
+    analyse.printTree(reactor.node)
+    for _, method in reactor.getMethodsNoDuplicate().items():
+        analyse.printTree(method.node)

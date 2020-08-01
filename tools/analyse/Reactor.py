@@ -1,9 +1,12 @@
 import clang.cindex
 
 import re
+import itertools
 
 
 class On:
+    briefRegex = re.compile(r"//.*@brief (.*)")
+
     def __init__(self, node):
         self.node = node
         self.dsl = self._findDSL()
@@ -13,7 +16,14 @@ class On:
         return "on<{}>(){{{}}}".format(self.dsl, self.lmbda)
 
     def getBrief(self):
-        return self.node.brief_comment
+        comment = ""
+        f = open(self.node.location.file.name, "r")
+        for line in itertools.islice(f, self.node.location.line - 2, self.node.location.line - 1):
+            regexed = re.findall(On.briefRegex, line)
+            if regexed:
+                comment = regexed[0]
+        f.close()
+        return comment
 
     def _findDSL(self):
         DSL = ""
@@ -50,6 +60,7 @@ class On:
 
 class Emit:
     decl_ref_exprRegex = re.compile(r"std::unique_ptr<([^,]*), std::default_delete<[^,]*> >")
+    briefRegex = re.compile(r"//.*@brief (.*)")
 
     def __init__(self, node):
         self.node = node
@@ -63,7 +74,14 @@ class Emit:
         return self.node == value.node
 
     def getBrief(self):
-        return self.node.brief_comment
+        comment = ""
+        f = open(self.node.location.file.name, "r")
+        for line in itertools.islice(f, self.node.location.line - 2, self.node.location.line - 1):
+            regexed = re.findall(Emit.briefRegex, line)
+            if regexed:
+                comment = regexed[0]
+        f.close()
+        return comment
 
     def _findScope(self):
         try:

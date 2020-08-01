@@ -19,10 +19,10 @@ def generateReactorMarkdown(reactor):
         out += "\n{}".format(method.getBrief())
         for on in method.getOns():
             out += "\n* {}".format(str(on).replace("<", "\<"))
-            out += "\n{}".format(on.getBrief())
+            out += " {}".format(on.getBrief())
         for emit in method.getEmits():
             out += "\n* {}".format(str(emit).replace("<", "\<"))
-            out += "\n{}".format(emit.getBrief())
+            out += " {}".format(emit.getBrief())
     out += "\n"
     return out
 
@@ -56,3 +56,5 @@ def run(path, outpath, **kwargs):
         toWrite.write(generateReactorMarkdown(reactor))
 
     toWrite.close()
+
+    # analyse.printReactorAst(reactors[-1])
