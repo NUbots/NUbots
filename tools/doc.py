@@ -9,6 +9,7 @@ import os
 import b
 from dockerise import run_on_docker
 import analyse
+from clang.cindex import Diagnostic
 
 
 def generateReactorMarkdown(reactor):
@@ -41,14 +42,18 @@ def register(command):
 
     command.add_argument("outdir", help="The output directory")
 
-    command.add_argument("--indir", default="module", help="The root of the directories that you want to scan")
+    command.add_argument(
+        "--indir", default="module", help="The root of the directories that you want to scan. Default: module."
+    )
 
 
 @run_on_docker
 def run(outdir, indir, **kwargs):
     index = analyse.createIndex()
 
-    # analyse.printTree(analyse.translate(index, os.path.join(indir)).translationUnit.cursor)
+    # toWrite = open("out.txt", "w")
+    # toWrite.write(analyse.printTree(analyse.translate(index, indir).translationUnit.cursor))
+    # toWrite.close()
     # return
 
     modules = {}
@@ -69,7 +74,7 @@ def run(outdir, indir, **kwargs):
                 failed = False
                 for diagnostic in translationUnit.getDiagnostics():
                     # If the diagnostic is an error or fatal, print and don't look at the errornous translation unit
-                    if diagnostic.category_number > 2:
+                    if diagnostic.severity >= Diagnostic.Error:
                         print(diagnostic, ", ", module, "/src/", f, " will not be looked at", sep="")
                         failed = True
                 if failed:
