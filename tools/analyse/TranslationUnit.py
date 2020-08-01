@@ -16,10 +16,8 @@ parseArgs = [
 class TranslationUnit:
     def __init__(self, index, file):
         self.file = path.splitext(file)[0]
-        print(self.file)
         self.translationUnit = index.parse(file, parseArgs)
         self.toLook = self._filesToLookAt()
-        print(self.toLook)
 
     # See if there are any errors in parsing
     def getDiagnostics(self):
