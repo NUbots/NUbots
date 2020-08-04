@@ -7,11 +7,12 @@ import clang.cindex
 libraryFile = "/usr/local/lib"  # llvm-config --libdir
 clang.cindex.Config.set_library_path(libraryFile)
 
-
+# Creates a index for parsing
 def createIndex():
     return clang.cindex.Index.create()
 
 
+# Parse a file with the given index
 def translate(index, path):
     return TranslationUnit(index, path)
 
@@ -32,6 +33,7 @@ def printTree(node, tab=0):
     return out
 
 
+# Print out the tree for each unique method in a reactor
 def printReactorAst(reactor):
     analyse.printTree(reactor.node)
     for _, method in reactor.getMethodsNoDuplicate().items():

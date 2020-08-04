@@ -11,7 +11,7 @@ from dockerise import run_on_docker
 import analyse
 from clang.cindex import Diagnostic
 
-
+# Returns a formatted string of  the given reactor
 def generateReactorMarkdown(reactor):
     out = "## {}".format(reactor.getType())
     out += "\n{}".format(reactor.getBrief())
@@ -28,6 +28,7 @@ def generateReactorMarkdown(reactor):
     return out
 
 
+# Returns a formatted string of the given module and all reactors in it
 def generateModuleMarkdown(module, reactors):
     out = "# " + "::".join(module.split("/"))
     for reactor in reactors:
@@ -58,10 +59,12 @@ def run(outdir, indir, **kwargs):
 
     modules = {}
 
+    # Find all modules and each file in them by walking the file tree
     for dirpath, dirnames, filenames in os.walk(indir):
         if dirpath.split("/")[-1] == "src":
             modules["/".join(dirpath.split("/")[0:-1])] = filenames
 
+    # Loop through each module, looking for reactors then printing them
     for module, files in modules.items():
         print("Working on module", module)
         reactors = []

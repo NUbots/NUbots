@@ -3,7 +3,7 @@ import clang.cindex
 import re
 import itertools
 
-
+# A class for generating and holding information about on statements
 class On:
     briefRegex = re.compile(r"//.*@brief (.*)")
 
@@ -15,6 +15,7 @@ class On:
     def __repr__(self):
         return "on<{}>(){{{}}}".format(self.dsl, self.callback)
 
+    # Find the brief comment one line above
     def getBrief(self):
         comment = ""
         f = open(self.node.location.file.name, "r")
@@ -25,12 +26,14 @@ class On:
         f.close()
         return comment
 
+    # Look at the AST for the type that corresponds to the DSL
     def _findDSL(self):
         DSL = ""
         try:
             for dslChild in next(
                 next(next(next(self.node.get_children()).get_children()).get_children()).get_children()
             ).get_children():
+                # Build up the full typename
                 if dslChild.kind == clang.cindex.CursorKind.TEMPLATE_REF:
                     DSL += "{}::".format(dslChild.spelling)
                 elif dslChild.kind == clang.cindex.CursorKind.NAMESPACE_REF:
@@ -41,13 +44,14 @@ class On:
             pass
         return DSL
 
+    # Find the definition of the callback
     def _findLambda(self):
         for child in self.node.get_children():
             try:
                 if child.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
                     callback = next(child.get_children())
                     if callback.kind != clang.cindex.CursorKind.LAMBDA_EXPR:
-                        raise AssertionError("Was not a lambda")
+                        raise AssertionError("Was not a lambda, did not know was possible")
                     else:
                         return Method(callback)
                 elif child.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
@@ -59,6 +63,7 @@ class On:
         return None
 
 
+# A class for finding and storing data about emit statements
 class Emit:
     existingUniqueRegex = re.compile(r"std::unique_ptr<(.*), std::default_delete<.*> >")
     makeUniqueRegex = re.compile(r"typename _MakeUniq<(.*)>::__single_object")
@@ -78,6 +83,7 @@ class Emit:
     def __eq__(self, value):
         return self.node == value.node
 
+    # Gets the brief comment one line above
     def getBrief(self):
         comment = ""
         f = open(self.node.location.file.name, "r")
@@ -88,6 +94,7 @@ class Emit:
         f.close()
         return comment
 
+    # Looks for the templated type, which is the scope
     def _findScope(self):
         try:
             memberRefExpr = next(self.node.get_children())
@@ -102,26 +109,32 @@ class Emit:
             print(e)
         return "Local"
 
+    # Find the type that is in the unique pointer that is passed to the emit
     def _findType(self):
         try:
             children = self.node.get_children()
             next(children)
             expr = next(children)
-            if expr.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
+            if (
+                expr.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR
+            ):  # The parameter is constructed in the emit statement
                 regexed = re.findall(Emit.makeUniqueRegex, expr.type.spelling)
                 if regexed:
                     return regexed[0]
                 else:
                     return re.findall(Emit.nusightDataRegex, expr.type.spelling)[0]
-            elif expr.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+            elif (
+                expr.kind == clang.cindex.CursorKind.DECL_REF_EXPR
+            ):  # The parameter is constructed outside the emit statement
                 return re.findall(Emit.existingUniqueRegex, expr.type.spelling)[0]
-            elif expr.kind == clang.cindex.CursorKind.MEMBER_REF_EXPR:
+            elif expr.kind == clang.cindex.CursorKind.MEMBER_REF_EXPR:  # the parameter is a member of a class
                 return expr.type.spelling
         except StopIteration:
             pass
         return ""
 
 
+# A class for finding on and emit statements within a method
 class Method:
     def __init__(self, node):
         self.node = node
@@ -155,6 +168,7 @@ class Method:
     def getBrief(self):
         return self.node.brief_comment
 
+    # Walks the tree and finds on calls
     def _findOnNodes(self):
         ons = []
         for child in self.node.walk_preorder():
@@ -164,13 +178,14 @@ class Method:
                 and child.spelling == "then"
             ):
                 on = On(child)
+                # We will hit these nodes again when we search for emit statements, so we add them now so we don't duplicate
                 for emit in on.callback.emit:
                     if emit not in (self.emit + self.onEmit):
                         self.onEmit.append(emit)
                 ons.append(on)
         return ons
 
-    # Find and add emit statement
+    # Walks the tree of this method looking for emit calls, and follows definitions of functions
     def _addEmitNodes(self):
         for child in self.node.walk_preorder():
             if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
@@ -185,6 +200,7 @@ class Method:
                 self.calls.append(child.get_definition())
                 self._addEmitFunction(child.get_definition())
 
+    # Walks a tree of a function looking for emit calls, and follows definitions of functions
     def _addEmitFunction(self, node):
         for child in node.walk_preorder():
             if child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit":
@@ -200,6 +216,7 @@ class Method:
                 self._addEmitFunction(child.get_definition())
 
 
+# A class for holding information about reactors
 class Reactor:
     def __init__(self, node, methods):
         self.node = node
@@ -224,6 +241,7 @@ class Reactor:
     def getBrief(self):
         return self.node.brief_comment
 
+    # Tries to remove forward declared methods
     @staticmethod
     def _removeDuplicateMethods(methods):
         out = {}

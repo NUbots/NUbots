@@ -13,7 +13,7 @@ parseArgs = [
     # "-Wall",
 ]
 
-
+# A class for parsing a translation unit and finding classes and methods
 class TranslationUnit:
     def __init__(self, index, file):
         self.file = path.splitext(file)[0]
@@ -24,6 +24,7 @@ class TranslationUnit:
     def getDiagnostics(self):
         return self.translationUnit.diagnostics
 
+    # Find all nodes under the root node that have the same filename as the given file, but with different extension
     def _filesToLookAt(self):
         out = []
         for node in self.translationUnit.cursor.get_children():
@@ -53,7 +54,7 @@ class TranslationUnit:
                 pass
         return classes
 
-    # Find member definitions for a class
+    # Find method definitions
     def _findMethodNodes(self):
         methods = []
         for look in self.toLook:
@@ -66,6 +67,7 @@ class TranslationUnit:
                     methods.append(node)
         return methods
 
+    # Finds methods that are defined inside a class definition
     def _findMethodsInClassNodes(self, node):
         methods = []
         for child in node.get_children():
@@ -77,6 +79,7 @@ class TranslationUnit:
                 methods.append(child)
         return methods
 
+    # Finds methods outside a class definition
     def _findMethodsOutClassNodes(self, name):
         methods = []
         for node in self._findMethodNodes():
