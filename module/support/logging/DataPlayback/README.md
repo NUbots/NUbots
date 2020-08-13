@@ -8,7 +8,7 @@ This can be very useful for when you are trying to diagnose a problem for which 
 The module will buffer up packets from the future and emit them at the same rate that they were emitted originally.
 
 ## Usage
-In order to play back the messages, you need to create a role with this module that has the modules you wish to test. You then need to enable the message types that are the input to these modules by setting them to true in the configuration (e.g. `message.input.sensors: true`). Make sure the `.nbs` file contains the messages you are trying to emit (you can check with `./b nbs stats file`).
+In order to play back the messages, you need to create a role with this module that has the modules you wish to test. You then need to enable the message types that are the input to these modules by setting them to true in the configuration (e.g. `message.input.Sensors: true`). Make sure the `.nbs` file contains the messages you are trying to emit (you can check with `./b nbs stats file`).
 
 There are two methods to provide nbs files to this module, via the configuration file or via the command line. If the configuration file has arguments those are used first. If there are no files provided in the configuration file, the arguments from the command line are used instead. This is so that if you have another module in your role that relies on command line arguments you have an alternate way to provide these files.
 
