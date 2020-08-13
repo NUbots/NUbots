@@ -23,11 +23,6 @@ package message.motion;
 import "Vector.proto";
 import "Matrix.proto";
 
-enum BodySide {
-    LEFT  = 0;
-    RIGHT = 1;
-}
-
 message KinematicsModel {
     // Convention: all values positive
     message Leg {
