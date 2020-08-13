@@ -9,9 +9,6 @@ files: []
 #   SHUTDOWN  to shutdown the program and terminate on the end of the file
 on_end: LOOP
 
-# If the system should shut down once it finishes playing the file
-shutdown_on_end: false
-
 # The amount of time into the future to buffer, should be at least 1000ms
 buffer_time: 1500
 
