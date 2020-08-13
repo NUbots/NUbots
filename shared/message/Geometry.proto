@@ -58,7 +58,7 @@ message Frustum {
 }
 
 message Cone {
-    fvec3 axis   = 1;
+    fvec3 axis = 1;
     // Cos(theta) of the cone angle
     float radius = 3;
 }
