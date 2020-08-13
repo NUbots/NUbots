@@ -74,8 +74,8 @@ namespace support {
             && centre.y() < int(image.dimensions.y())) {
 
             // Set our circle parameters for simulating the ball
-            result.balls.at(0).cone.axis     = rBCc.normalized().cast<float>();
-            result.balls.at(0).cone.gradient = std::tan(angle * 0.5);
+            result.balls.at(0).cone.axis   = rBCc.normalized().cast<float>();
+            result.balls.at(0).cone.radius = std::cos(angle * 0.5);
 
             // Get our transform to world coordinates
             Eigen::Affine3d Hwc((Htc.inverse() * sensors.Htw).inverse());
