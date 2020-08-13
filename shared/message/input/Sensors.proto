@@ -30,7 +30,6 @@ import "Vector.proto";
  * Contains all sensor information for all sensors
  */
 message Sensors {
-
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
     message Servo {
@@ -95,12 +94,9 @@ message Sensors {
         uint32 colour = 2;
     }
 
-    /// Force sensitive resistor. Used to feel if foot is on the ground
-    message FSR {
-        /// Vector of outputs for this FSR
-        repeated float value = 1 [packed = true];
-        /// X, Y coordinates of the location of the centre of this FSR
-        vec2 centre = 2;
+    message Foot {
+        bool down = 1;
+        mat4 Hwf  = 2;
     }
     /// When the data were taken/captured
     google.protobuf.Timestamp timestamp = 1;
@@ -134,18 +130,16 @@ message Sensors {
     /// True if right foot on ground
     bool right_foot_down = 14;
     /// A set of transforms; one for each servo
-    repeated mat4 forward_kinematics = 15 [(array_size) = 20];
+    repeated mat4   Htx     = 15 [(array_size) = 20];
+    /// Torso to CoM in torso space
+    vec4 rMTt = 17;
 
-    float body_centre_height = 16;
-    /// Normalized mass vectors from the robot model, relative to the torso basis.
-    /// {x_com, y_com, z_com, total_mass}
-    vec4 centre_of_mass = 17;
-    /// Torso to ground Affine3d tranform
-    mat4 Hgt = 18;
-    /// Camera to ground Affine3d transform
-    mat4 Hgc = 19;
+    mat4 Hgt  = 18;
+    /// Inertia tensor measured in particle space and relative to the CoM of the
+    /// particle
+    mat3 inertia_tensor = 20;
 
-    mat3 inertial_tensor = 20;
-    /// Integrated {x, y, z} gyroscope readings
+    // DEPRECATED FIELDS, DON'T USE THESE AND DELETE WHEN YOU CAN
     vec3 angular_position = 21;
+    mat4 Hgc              = 19;
 }
