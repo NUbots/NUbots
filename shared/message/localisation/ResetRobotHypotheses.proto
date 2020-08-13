@@ -28,25 +28,16 @@ import "Vector.proto";
  */
 message ResetRobotHypotheses {
 
+    /// Set of robot's past position hypotheses about itself
     message Self {
-
-        /**
-         * Estimate of the robot's {x, y} position in field space.
-         */
+        /// Estimate of the robot's {x, y} position in field space
         vec2 position = 1;
-
-        /**
-         * Covariance of the estimate.
-         */
+        /// Covariance of the estimate
         mat2 position_cov = 2;
-
         double heading     = 3;
         double heading_var = 4;
         bool   absoluteYaw = 5;
     }
 
-    /**
-     * Set of robot's past position hypotheses about itself.
-     */
     repeated Self hypotheses = 1;
 }

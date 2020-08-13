@@ -27,14 +27,8 @@ import "Matrix.proto";
  * Contains ball position and position covariance.
  */
 message Ball {
-
-    /**
-     * The ball measured in world space (rBWw).
-     */
+    /// The ball measured in world space (rBWw)
     vec2 position = 1;
-
-    /**
-     * Covariance in the balls measurement.
-     */
+    /// Covariance in the balls measurement
     mat2 covariance = 2;
 }
