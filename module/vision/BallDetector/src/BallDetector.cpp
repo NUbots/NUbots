@@ -148,7 +148,6 @@ namespace vision {
 
                         // Ball cam space info
                         b.cone.axis   = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * axis;
-                        float proj    = 1.0f / radius;
                         b.cone.radius = radius;
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
