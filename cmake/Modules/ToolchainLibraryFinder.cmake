@@ -110,7 +110,7 @@ function(ToolchainLibraryFinder)
     ${PACKAGE_NAME}
     FOUND_VAR ${PACKAGE_NAME}_FOUND
     REQUIRED_VARS ${required_vars}
-    VERSION_VAR ${PACKAGE_NAME}_VERSION # VERSION_VAR "${MAJOR}.${MINOR}.${PATCH}")
+    VERSION_VAR ${PACKAGE_NAME}_VERSION # VERSION_VAR "${MAJOR}.${MINOR}.${PATCH}"
   )
 
   # Export our found variable to parent scope
