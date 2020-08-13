@@ -470,15 +470,8 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec2 currentPos;
-            for (const auto& servo : sensors.servo) {
-                if (servo.id == ServoID::HEAD_YAW) {
-                    currentPos[0] = servo.present_position;
-                }
-                if (servo.id == ServoID::HEAD_PITCH) {
-                    currentPos[1] = servo.present_position;
-                }
-            }
+            arma::vec2 currentPos = {sensors.servo[ServoID::HEAD_YAW].present_position,
+                                     sensors.servo[ServoID::HEAD_PITCH].present_position};
 
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // TODO: fix arma meat errors here

@@ -29,7 +29,6 @@ import "Vector.proto";
 message Sensors {
     message Servo {
         uint32 error_flags      = 1;
-        uint32 id               = 2;
         bool   enabled          = 3;
         float  p_gain           = 4;
         float  i_gain           = 5;
