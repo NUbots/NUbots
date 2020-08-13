@@ -4,9 +4,8 @@
   "image": "nubots:generic",
   "workspaceMount": "type=bind,consistency=delegated,src=${localWorkspaceFolder},dst=/home/nubots/NUbots",
   "workspaceFolder": "/home/nubots/NUbots",
-  "runArgs": [
-    "--mount",
-    "type=volume,src=nubots_generic_build,dst=/home/nubots/build,consistency=delegated"
+  "mounts": [
+    "type=volume,src=horus_generic_build,dst=/home/fourtel/build,consistency=delegated"
   ],
   "extensions": [
     "ms-vscode.cpptools",
@@ -24,6 +23,7 @@
     "C_Cpp.clang_format_path": "/usr/local/bin/clang-format",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "cmake.buildDirectory": "/home/nubots/build",
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+    "python.pythonPath": "/usr/bin/python"
   }
 }
