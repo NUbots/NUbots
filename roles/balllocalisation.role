@@ -9,7 +9,7 @@ nuclear_role(
   support::configuration::SoccerConfig
   # Support
   support::configuration::GlobalConfig
-  support::configuration::NetworkConfiguration
+  support::network::NUClearNet
   support::NUsight
   # Sensors
   input::Camera

@@ -1,5 +1,5 @@
-NetworkConfiguration
-====================
+NUClearNet
+==========
 
 ## Description
 
@@ -11,4 +11,3 @@ NetworkConfiguration
 
 
 ## Dependencies
-
