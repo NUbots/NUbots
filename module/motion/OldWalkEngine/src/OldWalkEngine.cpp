@@ -63,8 +63,8 @@ namespace motion {
     using message::motion::WalkStopped;
     using message::support::SaveConfiguration;
 
-    using ServoID = utility::input::ServoID;
-    using LimbID  = utility::input::LimbID;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
     using utility::math::clamp;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Rotation3D;
@@ -320,8 +320,8 @@ namespace motion {
 
         for (auto& gain : balance["servo_gains"]) {
             float p = gain["p"].as<Expression>();
-            ServoID sr(gain["id"].as<std::string>(), utility::input::ServoSide::RIGHT);
-            ServoID sl(gain["id"].as<std::string>(), utility::input::ServoSide::LEFT);
+            ServoID sr(gain["id"].as<std::string>());
+            ServoID sl(gain["id"].as<std::string>());
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
@@ -559,12 +559,12 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootCOM = rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp,
-                                                     convert(sensors.forward_kinematics[ServoID::R_HIP_ROLL]));
+            rightFootCOM =
+                rightFootCOM.rotateZLocal(-hipRollCompensation * phaseComp, convert(sensors.Htx[ServoID::R_HIP_ROLL]));
         }
         else {
-            leftFootCOM = leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp,
-                                                   convert(sensors.forward_kinematics[ServoID::L_HIP_ROLL]));
+            leftFootCOM =
+                leftFootCOM.rotateZLocal(hipRollCompensation * phaseComp, convert(sensors.Htx[ServoID::L_HIP_ROLL]));
         }
 
         if (balanceEnabled) {
@@ -577,8 +577,7 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
-            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+        Transform3D Htc = Transform3D::createTranslation({-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;
@@ -619,8 +618,7 @@ namespace motion {
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
         // Height of CoM is assumed to be constant
-        Transform3D Htc =
-            Transform3D::createTranslation({-sensors.centre_of_mass.x(), -sensors.centre_of_mass.y(), 0.0});
+        Transform3D Htc = Transform3D::createTranslation({-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0});
 
         Transform3D leftFootTorso  = Htc * leftFootCOM;
         Transform3D rightFootTorso = Htc * rightFootCOM;

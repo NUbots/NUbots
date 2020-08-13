@@ -187,9 +187,9 @@ foreach(proto ${protobufs})
     "${outputpath}/${file_we}.py.cpp"
     "${outputpath}/${file_we}.h"
     "${outputpath}/${file_we}_pb2.py"
-    PROPERTIES
-      GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated files.
-      COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+    PROPERTIES GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated
+                              # files.
+               COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
   )
 
   # Add the generated files to our list
