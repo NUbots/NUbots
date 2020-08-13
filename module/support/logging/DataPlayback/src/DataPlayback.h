@@ -2,6 +2,7 @@
 #define MODULE_SUPPORT_LOGGING_DATAPLAYBACK_H
 
 #include <fstream>
+#include <memory>
 #include <nuclear>
 
 namespace module {
@@ -23,30 +24,6 @@ namespace support {
                 // If this player should execute and send messages
                 bool enabled = false;
             };
-
-            // Our deserialisation functions that convert the messages and emit them
-            std::map<uint64_t, Player> players;
-
-            // Our reaction that controls the main every loop that queues up actions
-            ReactionHandle playback_handle;
-
-            // Our input file that we read from
-            std::ifstream input_file;
-
-            // The file we are currently playing
-            std::string current_file;
-
-            // The first time that appears in the file
-            std::chrono::microseconds first_timecode;
-
-            // The amount of time into the future to buffer for
-            std::chrono::milliseconds buffer_time;
-
-            // When we started playing this file
-            NUClear::clock::time_point start_time;
-
-            // If we should loop this file after we finish or just disable ourself
-            bool loop_playback = false;
 
             template <typename T>
             void add_player() {
@@ -70,6 +47,40 @@ namespace support {
         public:
             /// @brief Called by the powerplant to build and setup the DataPlayback reactor.
             explicit DataPlayback(std::unique_ptr<NUClear::Environment> environment);
+
+        private:
+            /// @brief Register the functions that will decode and emit the message types
+            void register_players();
+
+            // Our deserialisation functions that convert the messages and emit them
+            std::map<uint64_t, Player> players;
+
+            // Our reaction that controls the main every loop that queues up actions
+            ReactionHandle playback_handle;
+
+            // Our input file that we read from
+            std::unique_ptr<std::ifstream> input_file;
+
+            // The list of files we are playing
+            std::vector<std::string> files;
+
+            // Which file number we are up to
+            int file_index = 0;
+
+            // The first time that appears in the file
+            std::chrono::microseconds first_timecode;
+
+            // The amount of time into the future to buffer for
+            std::chrono::milliseconds buffer_time;
+
+            // When we started playing this file
+            NUClear::clock::time_point start_time;
+
+            // The last time that we emitted a packet for
+            NUClear::clock::time_point last_emit_time;
+
+            // If we should stop, loop or shutdown when we finish the files
+            enum { SHUTDOWN_ON_END, STOP_ON_END, LOOP_ON_END } on_end = STOP_ON_END;
         };
 
     }  // namespace logging
