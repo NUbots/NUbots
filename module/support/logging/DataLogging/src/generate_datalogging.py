@@ -10,7 +10,6 @@ import google.protobuf.message
 if __name__ == "__main__":
     shared_folder = sys.argv[1]
     cpp_file = sys.argv[2]
-    yaml_file = sys.argv[3]
 
     # Load all our protocol buffer files as modules into this file
     includes = []
@@ -95,21 +94,3 @@ if __name__ == "__main__":
 
     with open(cpp_file, "w") as f:
         f.write(source.format(includes="\n".join(includes), record_handles="\n".join(handles)))
-
-    # Now generate our yaml file
-    yaml_template = dedent(
-        """\
-        output:
-          directory: log
-          split_size: 5 * GiB
-
-        messages:
-        {messages}
-    """
-    )
-
-    yaml_keys = ["  {}: false".format(m) for m in sorted(messages)]
-
-    # and write it out
-    with open(yaml_file, "w") as f:
-        f.write(yaml_template.format(messages="\n".join(yaml_keys)))

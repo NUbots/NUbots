@@ -38,6 +38,7 @@ message CompressedImage {
         float      focal_length = 2;
         float      fov          = 3;
         fvec2      centre       = 4;
+        fvec2      k            = 5;
     }
 
     uint32                    format     = 1;

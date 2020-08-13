@@ -5,9 +5,6 @@ import os
 import b
 from dockerise import WrapPty, run_on_docker
 
-# import pty
-# import subprocess
-
 
 @run_on_docker
 def register(command):
