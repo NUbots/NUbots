@@ -147,10 +147,8 @@ namespace vision {
                         }
 
                         // Ball cam space info
-                        b.cone.axis     = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * axis;
-                        float proj      = 1.0f / radius;
-                        b.cone.gradient = std::sqrt(proj * proj - 1.0f);
-                        b.cone.radius   = radius;
+                        b.cone.axis   = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * axis;
+                        b.cone.radius = radius;
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
                         float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
@@ -264,8 +262,7 @@ namespace vision {
 
                         if (config.debug) {
                             log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
-                            log<NUClear::DEBUG>(
-                                fmt::format("Gradient {} - cos(theta) {}", b.cone.gradient, b.cone.radius));
+                            log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                             log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
                             log<NUClear::DEBUG>(
                                 fmt::format("Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));
