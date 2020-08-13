@@ -22,6 +22,7 @@
 #include <catch.hpp>
 
 #include "message/input/Sensors.h"
+#include "message/motion/BodySide.h"
 #include "message/motion/KinematicsModel.h"
 
 #include "utility/input/LimbID.h"
