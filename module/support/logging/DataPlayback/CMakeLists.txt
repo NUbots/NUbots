@@ -13,11 +13,11 @@ add_custom_command(
 )
 
 # Create a symlink to recordings so we can access them from build (helpful for docker)
-add_custom_target(
-  recordings_link ALL
-  COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_SOURCE_DIR}/recordings" ${CMAKE_BINARY_DIR}/recordings
+add_custom_command(
+  OUTPUT "${CMAKE_BINARY_DIR}/recordings"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_SOURCE_DIR}/recordings" "${CMAKE_BINARY_DIR}/recordings"
   COMMENT "Creating a link to the recordings directory"
 )
 
 # Build our NUClear module
-nuclear_module(SOURCES "${source_file}")
+nuclear_module(SOURCES "${source_file}" "${CMAKE_BINARY_DIR}/recordings")
