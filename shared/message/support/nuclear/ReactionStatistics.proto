@@ -25,7 +25,6 @@ package message.support.nuclear;
  * Contains reaction metadata.
  */
 message ReactionStatistics {
-
     /// The name of this statistic
     string name = 1;
     /// The trigger which prompts this reaction

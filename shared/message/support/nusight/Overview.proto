@@ -31,7 +31,6 @@ import "Matrix.proto";
  * Contains almost everything NUsight related
  */
 message Overview {
-
     /// The timestamp when this overview packet was sent
     google.protobuf.Timestamp timestamp = 1;
     /// The ID number of this robot

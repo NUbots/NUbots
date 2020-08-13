@@ -28,7 +28,6 @@ import "Vector.proto";
  * in the RoboCup rulebook
  */
 message FieldDescription {
-
     /// The cross-sectional shape of the goalposts
     enum GoalpostType {
         RECTANGLE = 0;
@@ -36,7 +35,6 @@ message FieldDescription {
     }
     /// Measurements of the field which are loaded from config file. In metres
     message FieldDimensions {
-
         /// The rules say that the lines must be the same width - approximately
         /// 5 cm, and no more than 12 cm
         double line_width = 1;
