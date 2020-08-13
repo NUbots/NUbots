@@ -252,7 +252,7 @@ namespace behaviour {
                               }
                           }
                           else {
-                              Eigen::Matrix4d Htc = sensors.forward_kinematics[ServoID::HEAD_PITCH];
+                              Eigen::Matrix4d Htc = sensors.Htx[ServoID::HEAD_PITCH];
                               headToBodyRotation  = Transform3D(convert(Htc)).rotation();
                               orientation         = Transform3D(convert(sensors.Htw)).rotation().i();
                           }
@@ -470,15 +470,8 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec2 currentPos;
-            for (const auto& servo : sensors.servo) {
-                if (servo.id == ServoID::HEAD_YAW) {
-                    currentPos[0] = servo.present_position;
-                }
-                if (servo.id == ServoID::HEAD_PITCH) {
-                    currentPos[1] = servo.present_position;
-                }
-            }
+            arma::vec2 currentPos = {sensors.servo[ServoID::HEAD_YAW].present_position,
+                                     sensors.servo[ServoID::HEAD_PITCH].present_position};
 
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // TODO: fix arma meat errors here

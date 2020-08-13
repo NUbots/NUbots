@@ -24,14 +24,6 @@ import "Vector.proto";
 import "Matrix.proto";
 
 /**
- * enum which is LEFT or RIGHT
- */
-enum BodySide {
-    LEFT  = 0;
-    RIGHT = 1;
-}
-
-/**
  * Contains lots of kinematics config measurements and transforms.
  * See `KinematicsConfiguration.yaml` for more detail on a particular variable.
  * Convention: all values positive
