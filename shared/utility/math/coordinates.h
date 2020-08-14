@@ -59,9 +59,9 @@ namespace math {
             U sin_phi   = sin(sphericalCoordinates[2]);
             Eigen::Matrix<U, 3, 1> result;
 
-            result[0] = distance * cos_theta * sin_phi;
-            result[1] = distance * sin_theta * sin_phi;
-            result[2] = distance * cos_phi;
+            result.x() = distance * cos_theta * sin_phi;
+            result.y() = distance * sin_theta * sin_phi;
+            result.z() = distance * cos_phi;
 
             return result;
         }
