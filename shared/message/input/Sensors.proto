@@ -110,7 +110,7 @@ message Sensors {
     /// It measures the world in robot space
     mat4 Htw = 4;
     /// Set of force sensitive resistors. Used to sense if a foot is on the ground
-    repeated FSR fsr = 5;
+    repeated Foot feet = 5;
     /// Set of the robot's servos
     repeated Servo servo = 6;
     /// Set of the robot's buttons
@@ -121,20 +121,13 @@ message Sensors {
     float voltage = 9;
 
     float battery = 10;
-    /// The centre point of the force the feet are applying to the ground
-    vec3 centre_of_pressure = 11;
 
-    mat2 robot_to_IMU = 12;
-    /// True if left foot on ground
-    bool left_foot_down = 13;
-    /// True if right foot on ground
-    bool right_foot_down = 14;
     /// A set of transforms; one for each servo
-    repeated mat4   Htx     = 15 [(array_size) = 20];
+    repeated mat4 Htx = 15 [(array_size) = 20];
     /// Torso to CoM in torso space
     vec4 rMTt = 17;
 
-    mat4 Hgt  = 18;
+    mat4 Hgt = 18;
     /// Inertia tensor measured in particle space and relative to the CoM of the
     /// particle
     mat3 inertia_tensor = 20;
