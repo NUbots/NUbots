@@ -120,7 +120,7 @@ namespace input {
                     }
                 }
             }
-            // We failed to compress this image
+            // We failed to find an available decompressor for this image
             ++dropped;
         });
 
