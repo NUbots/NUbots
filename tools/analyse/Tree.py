@@ -10,6 +10,12 @@ class Tree:
         self.reactors = reactors
         self.functions = functions
 
+    def appendFunction(self, function):
+        self.functions.append(function)
+
+    def appendReactor(self, reactor):
+        self.reactors.append(reactor)
+
 
 # A class for generating and holding information about on statements
 class On:
@@ -35,10 +41,14 @@ class Emit:
 
 # A class for finding on and emit statements within a method
 class Function:
-    def __init__(self, node, emit=[], on=[]):
+    def __init__(self, node, emit=[], on=[], calls=[]):
         self.node = node
         self.emit = emit
         self.on = on
+        self.calls = [node] + calls
+
+    def appendOn(self, on):
+        self.on.append(on)
 
 
 # A class for holding information about reactors

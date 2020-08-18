@@ -1,6 +1,8 @@
-from .Reactor import Reactor
+from .Tree import Tree, On, Emit, Function, Reactor
 
 import clang.cindex
+
+import itertools
 
 # TODO put in config file
 libraryFile = "/usr/local/lib"  # llvm-config --libdir
@@ -38,37 +40,86 @@ def printTree(node, tab=0):
 # Creates a tree of reactors, on statements and emit statements
 def createTree(index, file):
     translationUnit = index.parse(file, parseArgs)
-    root = Reactor.Tree(translationUnit.diagnostics)
+    root = Tree(translationUnit.diagnostics)
 
     for diagnostic in translationUnit.getDiagnostics():
         if diagnostic.severity >= Diagnostic.Error:
             print(diagnostic, ", ", module, "/src/", f, " will not be looked at", sep="")
             return root
 
-    subTree(translationUnit.cursor)
+    _traverseTree(translationUnit.cursor, root)
+
+    return root
 
 
-def subTree(node):
+def _traverseTree(node, root):
     for child in node.get_children():
         if isFunction(child):
-            pass
+            root.appendFunction(makeFunction(child))
         elif isClass(child):
             if isInherited(child, "NUClear::Reactor"):
+                root.appendReactor(makeReactor(child))
+            else:
+                _traverseTree(child, root)
+        else:
+            _traverseTree(child, root)
+
+
+def makeFunction(node):
+    function = Function(node)
+    _functionTree(node, function)
+    return function
+
+
+def _functionTree(node, function):
+    for child in node.get_children():
+        if isCall(child):
+            if isOnCall(child):
+                function.appendOn(makeOn(child))
+            elif isEmitCall(child):
+                pass
+            else:
                 pass
         else:
-            subTree(child)
+            _functionTree(child, function)
 
 
-def functionTree(node):
-    pass
+def makeOn(node):
+    on = On(node)
+    children = node.get_children()
+
+    try:
+        dsl = ""
+        for dslChild in next(next(next(next(children).get_children()).get_children()).get_children()).get_children():
+            # Build up the full typename
+            if dslChild.kind == clang.cindex.CursorKind.TEMPLATE_REF:
+                dsl += "{}::".format(dslChild.spelling)
+            elif dslChild.kind == clang.cindex.CursorKind.NAMESPACE_REF:
+                dsl += "{}::".format(dslChild.spelling)
+            elif dslChild.kind == clang.cindex.CursorKind.TYPE_REF:
+                dsl += dslChild.type.spelling
+        on.dsl = dsl
+    except StopIteration as e:
+        print(e)
+
+    try:
+        callbackChild = next(children)
+        if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
+            callback = next(callbackChild.get_children())
+            on.callback = makeFunction(callback)
+        elif callbackChild.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+            pass
+            # TODO work out how to find the function referenced
+            # on.callback = callbackChild.referenced
+    except StopIteration as e:
+        print(e)
+
+    return on
 
 
-def isOn(node):
-    return (
-        child.kind == clang.cindex.CursorKind.CALL_EXPR
-        and child.type.spelling == "NUClear::threading::ReactionHandle"
-        and child.spelling == "then"
-    )
+def makeReactor(node):
+    reactor = Reactor(node)
+    return reactor
 
 
 def isFunction(node):
@@ -81,8 +132,18 @@ def isFunction(node):
     )
 
 
-def isEmit(node):
-    return child.kind == clang.cindex.CursorKind.CALL_EXPR and child.spelling == "emit"
+def isCall(node):
+    return child.kind == clang.cindex.CursorKind.CALL_EXPR
+
+
+# node must be a call
+def isOnCall(node):
+    return child.type.spelling == "NUClear::threading::ReactionHandle" and child.spelling == "then"
+
+
+# node must be a call
+def isEmitCall(node):
+    return child.spelling == "emit"
 
 
 def isClass(node):
