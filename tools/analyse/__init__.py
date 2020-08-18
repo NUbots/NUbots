@@ -38,6 +38,8 @@ def printTree(node, tab=0):
     return out
 
 
+root = None
+
 # Creates a tree of reactors, on statements and emit statements
 def createTree(index, file):
     translationUnit = index.parse(file, parseArgs)
@@ -71,7 +73,19 @@ def _traverseTree(node, root):
 
 def makeFunction(node):
     function = Function(node)
+
     _functionTree(node, function)
+
+    # You can't declare a method before declaring a class
+    try:
+        child = next(node.get_children())
+        if isMethod(child):
+            for reactor in root.reactors:
+                if child.type.spelling == reactor.node.type.spelling:
+                    reactor.appendFunction(function)
+    except StopIteration as e:
+        print(e)
+
     return function
 
 
@@ -158,6 +172,10 @@ def makeEmit(node):
 def makeReactor(node):
     reactor = Reactor(node)
 
+    for child in node.get_children():
+        if isCall(child):
+            reactor.appendMethod(makeFunction(child))
+
     return reactor
 
 
@@ -169,6 +187,11 @@ def isFunction(node):
         or node.kind == clang.cindex.CursorKind.FUNCTION_DECL
         or node.kind == clang.cindex.CursorKind.CONVERSION_FUNCTION
     )
+
+
+# node must be a function outside a class
+def isMethod(node):
+    return child.kind == clang.cindex.CursorKind.TYPE_REF
 
 
 def isCall(node):

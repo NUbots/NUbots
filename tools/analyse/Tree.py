@@ -62,3 +62,6 @@ class Reactor:
     def __init__(self, node, methods=[]):
         self.node = node
         self.methods = methods
+
+    def appendMethod(self, mehtod):
+        self.methods.append(method)
