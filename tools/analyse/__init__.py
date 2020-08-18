@@ -2,9 +2,10 @@ from .Tree import Tree, On, Emit, Function, Reactor
 
 import clang.cindex
 
+import re
 import itertools
 
-# TODO put in config file
+# TODO put in a config file
 libraryFile = "/usr/local/lib"  # llvm-config --libdir
 clang.cindex.Config.set_library_path(libraryFile)
 parseArgs = [
@@ -57,10 +58,13 @@ def _traverseTree(node, root):
         if isFunction(child):
             root.appendFunction(makeFunction(child))
         elif isClass(child):
-            if isInherited(child, "NUClear::Reactor"):
-                root.appendReactor(makeReactor(child))
-            else:
-                _traverseTree(child, root)
+            try:
+                if isInherited(next(child.get_children()), "NUClear::Reactor"):
+                    root.appendReactor(makeReactor(child))
+                    continue
+            except StopIteration as e:
+                print(e)
+            _traverseTree(child, root)
         else:
             _traverseTree(child, root)
 
@@ -77,9 +81,9 @@ def _functionTree(node, function):
             if isOnCall(child):
                 function.appendOn(makeOn(child))
             elif isEmitCall(child):
-                pass
+                function.appendEmit(makeEmit(child))
             else:
-                pass
+                function.appendCall(child)
         else:
             _functionTree(child, function)
 
@@ -117,8 +121,43 @@ def makeOn(node):
     return on
 
 
+def makeEmit(node):
+    emit = Emit(node)
+
+    children = node.get_children()
+
+    emit.scope = "Local"
+    try:
+        memberRefExpr = next(children)
+        for part in memberRefExpr.get_children():
+            if part.kind == clang.cindex.CursorKind.TEMPLATE_REF:
+                emit.scop = part.spelling
+    except StopIteration:
+        pass
+
+    try:
+        expr = next(children)
+        if expr.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # The parameter is constructed in the emit statement
+            regexed = re.findall(Emit.makeUniqueRegex, expr.type.spelling)
+            if regexed:
+                return regexed[0]
+            else:
+                return re.findall(Emit.nusightDataRegex, expr.type.spelling)[0]
+        elif (
+            expr.kind == clang.cindex.CursorKind.DECL_REF_EXPR
+        ):  # The parameter is constructed outside the emit statement
+            return re.findall(Emit.existingUniqueRegex, expr.type.spelling)[0]
+        elif expr.kind == clang.cindex.CursorKind.MEMBER_REF_EXPR:  # the parameter is a member of a class
+            return expr.type.spelling
+    except StopIteration:
+        pass
+
+    return emit
+
+
 def makeReactor(node):
     reactor = Reactor(node)
+
     return reactor
 
 
@@ -133,17 +172,17 @@ def isFunction(node):
 
 
 def isCall(node):
-    return child.kind == clang.cindex.CursorKind.CALL_EXPR
+    return node.kind == clang.cindex.CursorKind.CALL_EXPR
 
 
 # node must be a call
 def isOnCall(node):
-    return child.type.spelling == "NUClear::threading::ReactionHandle" and child.spelling == "then"
+    return node.type.spelling == "NUClear::threading::ReactionHandle" and node.spelling == "then"
 
 
 # node must be a call
 def isEmitCall(node):
-    return child.spelling == "emit"
+    return node.spelling == "emit"
 
 
 def isClass(node):
@@ -151,4 +190,4 @@ def isClass(node):
 
 
 def isInherited(node, name):
-    return child.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER and child.type.spelling == name
+    return node.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER and node.type.spelling == name

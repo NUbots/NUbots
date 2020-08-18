@@ -3,7 +3,7 @@ import clang.cindex
 import re
 import itertools
 
-
+# A structure for holding reactors and functions
 class Tree:
     def __init__(self, diagnostics, reactors=[], functions=[]):
         self.diagnostics = diagnostics
@@ -17,7 +17,7 @@ class Tree:
         self.reactors.append(reactor)
 
 
-# A class for generating and holding information about on statements
+# A structure for holding information about on statements
 class On:
     def __init__(self, node, dsl=None, callback=None):
         self.node = node
@@ -25,7 +25,7 @@ class On:
         self.callback = callback
 
 
-# A class for finding and storing data about emit statements
+# A structure for holding data about emit statements
 class Emit:
     existingUniqueRegex = re.compile(r"std::unique_ptr<(.*), std::default_delete<.*> >")
     makeUniqueRegex = re.compile(r"typename _MakeUniq<(.*)>::__single_object")
@@ -39,7 +39,7 @@ class Emit:
         self.type = tpe
 
 
-# A class for finding on and emit statements within a method
+# A structure for holding information about functions
 class Function:
     def __init__(self, node, emit=[], on=[], calls=[]):
         self.node = node
@@ -50,8 +50,14 @@ class Function:
     def appendOn(self, on):
         self.on.append(on)
 
+    def appendEmit(self, emit):
+        self.emit.append(emit)
 
-# A class for holding information about reactors
+    def appendCall(self, call):
+        self.calls.append(call)
+
+
+# A structure for holding information about reactors
 class Reactor:
     def __init__(self, node, methods=[]):
         self.node = node
