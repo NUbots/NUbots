@@ -41,7 +41,7 @@ class Emit:
 
 # A structure for holding information about functions
 class Function:
-    def __init__(self, node, emit=[], on=[], calls=[]):
+    def __init__(self, node, emit=[], on=[], calls=[], calledBy=[]):
         self.node = node
         self.emit = emit
         self.on = on
@@ -65,3 +65,6 @@ class Reactor:
 
     def appendMethod(self, mehtod):
         self.methods.append(method)
+
+    def addMethods(self, methods):
+        self.methods.extend(methods)
