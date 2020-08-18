@@ -31,6 +31,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/nusight/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
+#include "utility/platform/darwin/SensorFilter.h"
 #include "utility/support/yaml_expression.h"
 
 namespace module {
@@ -417,26 +418,8 @@ namespace platform {
                         }
                     }
                     else {
-                        Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                        Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-                        Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
-                        Eigen::Vector3d rRLl = Hlr.translation();
-
-                        // Right foot is below left foot in left foot space
-                        if (rRLl.z() < -config.footDown.certaintyThreshold) {
-                            feet_down[BodySide::RIGHT] = true;
-                            feet_down[BodySide::LEFT]  = false;
-                        }
-                        // Right foot is above left foot in left foot space
-                        else if (rRLl.z() > config.footDown.certaintyThreshold) {
-                            feet_down[BodySide::RIGHT] = false;
-                            feet_down[BodySide::LEFT]  = true;
-                        }
-                        // Right foot and left foot are roughly the same height in left foot space
-                        else {
-                            feet_down[BodySide::RIGHT] = true;
-                            feet_down[BodySide::LEFT]  = true;
-                        }
+                        feet_down = utility::platform::darwin::calculate_foot_down(*sensors,
+                                                                                   config.footDown.certaintyThreshold);
 
                         if (this->config.debug) {
                             emit(graph("Sensor/Foot Down/Z/Left", feet_down[BodySide::LEFT]));
@@ -466,44 +449,20 @@ namespace platform {
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
                     for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
-                        bool foot_down      = sensors->feet[side].down;
-                        bool prev_foot_down = previous_foot_down[side];
                         Eigen::Affine3d Htf(
                             sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Hwf = footlanding_Hwf[side];
+                        utility::platform::darwin::update_flat_foot(
+                            motionFilter,
+                            sensors->feet[side].down,
+                            previous_foot_down[side],
+                            config.motionFilter.noise.measurement.flatFootOdometry,
+                            config.motionFilter.noise.measurement.flatFootOrientation,
+                            Htf,
+                            Hwf);
 
-                        if (foot_down && !prev_foot_down) {
-                            Eigen::Affine3d Hwt;
-                            Hwt.linear() = Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX))
-                                               .toRotationMatrix();
-                            Hwt.translation() = Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
-
-                            Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
-
-                            footlanding_Hwf[side]                   = Hwt * Htg;
-                            footlanding_Hwf[side].translation().z() = 0.0;
-
-                            previous_foot_down[side] = true;
-                        }
-                        else if (foot_down && prev_foot_down) {
-                            // Use stored Hwf and Htf to calculate Hwt
-                            Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
-
-                            // do a foot based position update
-                            motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
-                                                 config.motionFilter.noise.measurement.flatFootOdometry,
-                                                 MeasurementType::FLAT_FOOT_ODOMETRY());
-
-                            // do a foot based orientation update
-                            Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                            motionFilter.measure(Rwt.coeffs(),
-                                                 config.motionFilter.noise.measurement.flatFootOrientation,
-                                                 MeasurementType::FLAT_FOOT_ORIENTATION());
-                        }
-                        else if (!foot_down) {
-                            previous_foot_down[side] = false;
-                        }
-
-                        sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
+                        footlanding_Hwf[side]   = Hwf;
+                        sensors->feet[side].Hwf = Hwf.matrix();
                     }
 
                     // Calculate our time offset from the last read
