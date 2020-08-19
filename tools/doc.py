@@ -12,16 +12,29 @@ import analyse
 from clang.cindex import Diagnostic
 
 
+def generateEmitJSON(emit):
+    out = "{"
+    out += "scope:{},".format(emit.scope)
+    out += "type:{}".format(emit.type)
+    out += "}"
+    return out
+
+
 def generateOnJSON(on):
     calls = on.callback
-    emits = on.callback.emits
-
-    for call in on.callback.calls:
-        calls.append(call)
-        emits.extend(call.emits)
 
     out = "{"
-    out += "dsl:{}".format(on.dsl)
+    out += "dsl:{},".format(on.dsl)
+    out += "emit:["
+    for call in on.callback.calls:
+        if call not in calls:
+            calls.append(call)
+            for emit in call.emits:
+                out += generateEmitJSON(emit)
+                out += ","
+            # TODO the call's calls
+    out = out[:-1]
+    out += "]"
     out += "}"
     return out
 
@@ -41,8 +54,8 @@ def generateReactorJSON(reactor):
 
 def generateModuleJSON(module, reactors):
     out = "{"
-    out += "name:{}".format(module)
-    out += "["
+    out += "name:{},".format(module)
+    out += "reactors:["
     for reactor in reactors:
         out += generateReactorJSON(reactor) + ","
     out = out[:-1]
