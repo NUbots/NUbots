@@ -182,7 +182,9 @@ def makeReactor(node):
 
     for child in node.get_children():
         if isCall(child):
-            reactor.appendMethod(makeFunction(child))
+            function = makeFunction(child)
+            reactor.appendMethod(function)
+            root.appendFunction(function)
 
     return reactor
 
