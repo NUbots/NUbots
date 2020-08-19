@@ -26,13 +26,16 @@ def generateOnJSON(on):
     out = "{"
     out += "dsl:{},".format(on.dsl)
     out += "emit:["
-    for call in on.callback.calls:
-        if call not in calls:
-            calls.append(call)
-            for emit in call.emits:
-                out += generateEmitJSON(emit)
-                out += ","
-            # TODO the call's calls
+    if on.callback:
+        for call in on.callback.calls:
+            if call not in calls:
+                calls.append(call)
+                for emit in call.emits:
+                    out += generateEmitJSON(emit)
+                    out += ","
+                # TODO the call's calls
+    else:
+        print("???", on.node.location)
     out = out[:-1]
     out += "]"
     out += "}"
@@ -99,10 +102,10 @@ def run(outdir, indir, **kwargs):
             if os.path.splitext(f)[1] == ".cpp":
                 print("    Working on file", f)
 
-                tree = createTree(index, f)
+                tree = analyse.createTree(index, os.path.join(module, "src", f))
 
-                reactors.extend(translationUnit.reactors())
+                reactors.extend(tree.reactors)
 
-        toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".md",), "w")
+        toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json",), "w")
         toWrite.write(generateModuleJSON(module, reactors))
         toWrite.close()
