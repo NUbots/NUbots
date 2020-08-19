@@ -58,11 +58,11 @@ def createTree(index, file):
 def _traverseTree(node, root):
     for child in node.get_children():
         if isFunction(child):
-            root.appendFunction(makeFunction(child))
+            root.functions.append(makeFunction(child))
         elif isClass(child):
             try:
                 if isInherited(next(child.get_children()), "NUClear::Reactor"):
-                    root.appendReactor(makeReactor(child))
+                    root.reactors.append(makeReactor(child))
                     continue
             except StopIteration as e:
                 print(e)
@@ -82,7 +82,7 @@ def makeFunction(node):
         if isMethod(child):
             for reactor in root.reactors:
                 if child.type.spelling == reactor.node.type.spelling:
-                    reactor.appendFunction(function)
+                    reactor.functions.append(function)
     except StopIteration as e:
         print(e)
 
@@ -93,11 +93,11 @@ def _functionTree(node, function):
     for child in node.get_children():
         if isCall(child):
             if isOnCall(child):
-                function.appendOn(makeOn(child))
+                function.ons.append(makeOn(child))
             elif isEmitCall(child):
-                function.appendEmit(makeEmit(child))
+                function.emits.append(makeEmit(child))
             else:
-                function.appendCall(child)
+                function.calls.append(child)
         else:
             _functionTree(child, function)
 
@@ -176,15 +176,15 @@ def makeReactor(node):
     shift = 0
     for i in range(root.reactors.length):
         if root.reactors[i - shift].node.type.name == node.type.name:
-            reactor.addMethods(root.reactors[i - shift].methods)
+            reactor.methods.extend(root.reactors[i - shift].methods)
             del root.rectors[i - shift]
             shift += 1
 
     for child in node.get_children():
         if isCall(child):
             function = makeFunction(child)
-            reactor.appendMethod(function)
-            root.appendFunction(function)
+            reactor.methods.append(function)
+            root.functions.append(function)
 
     return reactor
 
