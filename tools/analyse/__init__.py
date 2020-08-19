@@ -119,14 +119,14 @@ def makeOn(node):
         print("On DSL find StopIter:", e)
 
     try:
-        callbackChild = next(children)
-        if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
-            callback = next(callbackChild.get_children())
-            on.callback = makeFunction(callback, root)
-        elif callbackChild.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
-            for function in root.functions:
-                if function.node == callbackChild.referenced:
-                    on.callback = function
+        for callbackChild in children:
+            if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
+                callback = next(callbackChild.get_children())
+                on.callback = makeFunction(callback, root)
+            elif callbackChild.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+                for function in root.functions:
+                    if function.node == callbackChild.referenced:
+                        on.callback = function
     except StopIteration as e:
         print("On callback find StopIter:", e)
 
