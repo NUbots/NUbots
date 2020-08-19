@@ -14,28 +14,25 @@ from clang.cindex import Diagnostic
 
 def generateEmitJSON(emit):
     out = "{"
-    out += "scope:{},".format(emit.scope)
-    out += "type:{}".format(emit.type)
+    out += '"scope":"{}",'.format(emit.scope)
+    out += '"type":"{}"'.format(emit.type)
     out += "}"
     return out
 
 
 def generateOnJSON(on):
-    calls = on.callback
+    calls = [on.callback]
 
     out = "{"
-    out += "dsl:{},".format(on.dsl)
-    out += "emit:["
-    if on.callback:
-        for call in on.callback.calls:
-            if call not in calls:
-                calls.append(call)
-                for emit in call.emits:
-                    out += generateEmitJSON(emit)
-                    out += ","
-                # TODO the call's calls
-    else:
-        print("???", on.node.location)
+    out += '"dsl":"{}",'.format(on.dsl)
+    out += '"emit":['
+    # for call in on.callback.calls:
+    #    if call not in calls:
+    #        calls.append(call)
+    #        for emit in call.emits:
+    #            out += generateEmitJSON(emit)
+    #            out += ","
+    #            # TODO the call's calls
     out = out[:-1]
     out += "]"
     out += "}"
@@ -44,8 +41,8 @@ def generateOnJSON(on):
 
 def generateReactorJSON(reactor):
     out = "{"
-    out += "name:{},".format(reactor.getName())
-    out += "on:["
+    out += '"name":"{}",'.format(reactor.getName())
+    out += '"on":['
     for method in reactor.methods:
         for on in method.ons:
             out += generateOnJSON(on) + ","
@@ -57,8 +54,8 @@ def generateReactorJSON(reactor):
 
 def generateModuleJSON(module, reactors):
     out = "{"
-    out += "name:{},".format(module)
-    out += "reactors:["
+    out += '"name":"{}",'.format(module)
+    out += '"reactors":['
     for reactor in reactors:
         out += generateReactorJSON(reactor) + ","
     out = out[:-1]

@@ -39,7 +39,8 @@ class Function:
         self.node = node
         self.emits = emit
         self.ons = on
-        self.calls = [node] + calls
+        self.nodeCalls = [node] + calls
+        self.calls = []
 
 
 # A structure for holding information about reactors

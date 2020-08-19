@@ -44,7 +44,7 @@ def createTree(index, f):
     root = Tree(translationUnit.diagnostics)
 
     for diagnostic in translationUnit.diagnostics:
-        if diagnostic.severity >= Diagnostic.Error:
+        if diagnostic.severity >= clang.cindex.Diagnostic.Error:
             print(diagnostic)
             return root
 
@@ -72,7 +72,7 @@ def _traverseTree(node, root):
 def makeFunction(node, root):
     function = Function(node)
 
-    _functionTree(node, function)
+    _functionTree(node, function, root)
 
     # You can't declare a method before declaring a class
     try:
@@ -87,20 +87,20 @@ def makeFunction(node, root):
     return function
 
 
-def _functionTree(node, function):
+def _functionTree(node, function, root):
     for child in node.get_children():
         if isCall(child):
             if isOnCall(child):
-                function.ons.append(makeOn(child))
+                function.ons.append(makeOn(child, root))
             elif isEmitCall(child):
                 function.emits.append(makeEmit(child))
             else:
-                function.calls.append(child)
+                function.nodeCalls.append(child)
         else:
-            _functionTree(child, function)
+            _functionTree(child, function, root)
 
 
-def makeOn(node):
+def makeOn(node, root):
     on = On(node)
     children = node.get_children()
 
@@ -120,10 +120,10 @@ def makeOn(node):
 
     try:
         for callbackChild in children:
-            if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:
+            if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # lambda
                 callback = next(callbackChild.get_children())
                 on.callback = makeFunction(callback, root)
-            elif callbackChild.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+            elif callbackChild.kind == clang.cindex.CursorKind.DECL_REF_EXPR:  # reference to predefined function
                 for function in root.functions:
                     if function.node == callbackChild.referenced:
                         on.callback = function
@@ -180,7 +180,7 @@ def makeReactor(node, root):
     for i in range(last):
         if root.reactors[i - shift].node.type.spelling == node.type.spelling:
             reactor.methods.extend(root.reactors[i - shift].methods)
-            del root.rectors[i - shift]
+            del root.reactors[i - shift]
             shift += 1
 
     for child in node.get_children():
