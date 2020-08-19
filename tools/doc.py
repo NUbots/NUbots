@@ -11,29 +11,43 @@ from dockerise import run_on_docker
 import analyse
 from clang.cindex import Diagnostic
 
-# Returns a formatted string of  the given reactor
-def generateReactorMarkdown(reactor):
-    out = "## {}".format(reactor.getType())
-    out += "\n{}".format(reactor.getBrief())
-    for _, method in reactor.getMethodsNoDuplicate().items():
-        out += "\n### {}".format(method.getName())
-        out += "\n{}".format(method.getBrief())
-        for on in method.getOns():
-            out += "\n* {}".format(str(on).replace("<", "\<"))
-            out += " {}".format(on.getBrief())
-        for emit in method.getEmits():
-            out += "\n* {}".format(str(emit).replace("<", "\<"))
-            out += " {}".format(emit.getBrief())
-    out += "\n"
+
+def generateOnJSON(on):
+    calls = on.callback
+    emits = on.callback.emits
+
+    for call in on.callback.calls:
+        calls.append(call)
+        emits.extend(call.emits)
+
+    out = "{"
+    out += "dsl:{}".format(on.dsl)
+    out += "}"
     return out
 
 
-# Returns a formatted string of the given module and all reactors in it
-def generateModuleMarkdown(module, reactors):
-    out = "# " + "::".join(module.split("/"))
+def generateReactorJSON(reactor):
+    out = "{"
+    out += "name:{},".format(reactor.getName())
+    out += "on:["
+    for method in reactor.methods:
+        for on in method.ons:
+            out += generateOnJSON(on) + ","
+    out = out[:-1]
+    out += "]"
+    out += "}"
+    return out
+
+
+def generateModuleJSON(module, reactors):
+    out = "{"
+    out += "name:{}".format(module)
+    out += "["
     for reactor in reactors:
-        out += "\n" + generateReactorMarkdown(reactor)
-    out += "\n"
+        out += generateReactorJSON(reactor) + ","
+    out = out[:-1]
+    out += "]"
+    out += "}"
     return out
 
 
@@ -71,20 +85,11 @@ def run(outdir, indir, **kwargs):
         for f in files:
             if os.path.splitext(f)[1] == ".cpp":
                 print("    Working on file", f)
-                translationUnit = analyse.translate(index, os.path.join(module, "src", f))
 
-                # Check that the parsing of the tu succeeded
-                failed = False
-                for diagnostic in translationUnit.getDiagnostics():
-                    # If the diagnostic is an error or fatal, print and don't look at the errornous translation unit
-                    if diagnostic.severity >= Diagnostic.Error:
-                        print(diagnostic, ", ", module, "/src/", f, " will not be looked at", sep="")
-                        failed = True
-                if failed:
-                    continue
+                tree = createTree(index, f)
 
-                reactors += translationUnit.getReactors()
+                reactors.extend(translationUnit.reactors())
 
         toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".md",), "w")
-        toWrite.write(generateModuleMarkdown(module, reactors))
+        toWrite.write(generateModuleJSON(module, reactors))
         toWrite.close()

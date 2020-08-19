@@ -47,7 +47,7 @@ def createTree(index, file):
 
     for diagnostic in translationUnit.getDiagnostics():
         if diagnostic.severity >= Diagnostic.Error:
-            print(diagnostic, ", ", module, "/src/", f, " will not be looked at", sep="")
+            print(diagnostic)
             return root
 
     _traverseTree(translationUnit.cursor, root)

@@ -47,3 +47,6 @@ class Reactor:
     def __init__(self, node, methods=[]):
         self.node = node
         self.methods = methods
+
+    def getName(self):
+        return self.node.type.spelling
