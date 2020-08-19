@@ -9,32 +9,40 @@ import os
 import b
 from dockerise import run_on_docker
 import analyse
-from clang.cindex import Diagnostic
+from clang.cindex import SourceLocation
+
+
+def generateLocationJSON(location):
+    out = "{"
+    out += '"file":"{}",'.format(location.file)
+    out += '"line":"{}",'.format(location.line)
+    out += '"column":"{}",'.format(location.column)
+    out += '"offset":"{}"'.format(location.offset)
+    out += "}"
+    return out
 
 
 def generateEmitJSON(emit):
     out = "{"
     out += '"scope":"{}",'.format(emit.scope)
-    out += '"type":"{}"'.format(emit.type)
+    out += '"type":"{}",'.format(emit.type)
+    out += '"location":{}'.format(generateLocationJSON(emit.node.location))
     out += "}"
     return out
 
 
 def generateOnJSON(on):
-    calls = [on.callback]
-
     out = "{"
     out += '"dsl":"{}",'.format(on.dsl)
     out += '"emit":['
-    # for call in on.callback.calls:
-    #    if call not in calls:
-    #        calls.append(call)
-    #        for emit in call.emits:
-    #            out += generateEmitJSON(emit)
-    #            out += ","
-    #            # TODO the call's calls
-    out = out[:-1]
-    out += "]"
+    if on.callback.calls:
+        for call in on.callback.calls:
+            for emit in call.emits:
+                out += generateEmitJSON(emit)
+                out += ","
+        out = out[:-1]
+    out += "],"
+    out += '"location":{}'.format(generateLocationJSON(on.node.location))
     out += "}"
     return out
 
@@ -47,7 +55,8 @@ def generateReactorJSON(reactor):
         for on in method.ons:
             out += generateOnJSON(on) + ","
     out = out[:-1]
-    out += "]"
+    out += "],"
+    out += '"location":{}'.format(generateLocationJSON(reactor.node.location))
     out += "}"
     return out
 
