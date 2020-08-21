@@ -23,7 +23,7 @@ package message.platform.gazebo;
 import "message/platform/darwin/DarwinSensors.proto";
 
 /**
- * A set of DarwinSensors with an associated model
+ * A set of DarwinSensors with an associated model, for use with Gazebo
  */
 message RawSensors {
 

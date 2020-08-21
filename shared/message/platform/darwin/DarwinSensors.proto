@@ -46,11 +46,8 @@ message DarwinSensors {
 
     /// Toggle status of the LEDs on the panel
     message LEDPanel {
-        /// led2 toggle status
         bool led2 = 1;
-        /// led3 toggle status
         bool led3 = 2;
-        /// led4 toggle status
         bool led4 = 3;
     }
 
@@ -68,29 +65,22 @@ message DarwinSensors {
 
     /// Press-down status of left and middle buttons
     message Buttons {
-        /// Press-down status of the left button
-        bool left = 1;
-        /// Press-down status of the middle button
+        bool left   = 1;
         bool middle = 2;
     }
 
-    /// Raw accelerometer values from the CM740: x, y, z
+    /// Raw accelerometer values from the CM740: {x, y, z}
+    /// The value is between 0 and 1023, representing a value between -4g and 4g => 512 = 0g
     message Accelerometer {
-        /// Raw x acceleration value from the CM740
         float x = 1;
-        /// Raw y acceleration value from the CM740
         float y = 2;
-        /// Raw z acceleration value from the CM740
         float z = 3;
     }
 
     /// The raw gyro values from the CM740 (they are read from the board in ZYX): x, y, z
     message Gyroscope {
-        /// Raw x gyro value from the CM740
         float x = 1;
-        /// Raw y gyro value from the CM740
         float y = 2;
-        /// Raw z gyro value from the CM740
         float z = 3;
     }
 
@@ -132,7 +122,7 @@ message DarwinSensors {
         /// Derivative gain. Does not consider error, just dampens forces to reduce derivatives. Gain values are in
         /// range 0~254. K_d : d_gain * 4 / 1000
         float dGain = 5;
-        /// It is a position value of destination. 0 to 4,095 (0xFFF) is available. The unit is 0.088 [°].
+        /// Position value of destination. 0 to 4,095 (0xFFF) is available. The unit is 0.088 degrees.
         /// (FROM https://emanual.robotis.com/docs/en/dxl/mx/mx-64/#specifications):
         /// If Goal Position is out of the range, Angle Limit Error Bit (Bit1) of Status Packet is returned as ‘1’ and
         /// Alarm is triggered as set in Alarm LED/Shutdown
@@ -141,7 +131,7 @@ message DarwinSensors {
         float movingSpeed = 7;
         /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
         float torque = 8;
-        /// The range of the value is 0~4095 (0xFFF), and the unit is 0.088 [°]
+        /// The range of the value is 0~4095 (0xFFF), and the unit is 0.088 degrees
         float presentPosition = 9;
         /// 0 ~ 2,047 (0x000 ~ 0x7FF) can be used. The value unit is about 0.11rpm.
         /// If a value is in the range of 0 ~ 1,023 then the motor rotates to the counter-clockwise direction.
@@ -201,7 +191,6 @@ message DarwinSensors {
     Buttons buttons = 6;
     /// Voltage for the whole robot, from the main battery
     float voltage = 7;
-    /// The value is between 0 and 1023, representing a value between -4g and 4g => 512 = 0g.
     /// Is {x, y, z} acceleration
     Accelerometer accelerometer = 8;
     /// The value is between 0 and 1023, represent a value between -500 degrees per second and 500 degrees per second.
@@ -216,21 +205,21 @@ message DarwinSensors {
 // Button press events
 
 /**
- * Empty message to indicate button press
+ * Empty message to indicate button press. Emitted when the button is pressed in
  */
 message ButtonLeftDown {}
 
 /**
- * Empty message to indicate button press
+ * Empty message to indicate button press. Emitted when the button is released
  */
 message ButtonLeftUp {}
 
 /**
- * Empty message to indicate button press
+ * Empty message to indicate button press. Emitted when the button is pressed in
  */
 message ButtonMiddleDown {}
 
 /**
- * Empty message to indicate button press
+ * Empty message to indicate button press. Emitted when the button is released
  */
 message ButtonMiddleUp {}

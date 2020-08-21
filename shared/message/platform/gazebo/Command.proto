@@ -21,7 +21,7 @@ syntax = "proto3";
 package message.platform.gazebo;
 
 /**
- * Command to reset time, or entire simulation
+ * Command to reset time, or entire simulation, in Gazebo
  */
 message Command {
 
