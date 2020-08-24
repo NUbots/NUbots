@@ -5,6 +5,8 @@ import clang.cindex
 import re
 import itertools
 
+import os.path
+
 # TODO put in a config file
 libraryFile = "/usr/local/lib"  # llvm-config --libdir
 clang.cindex.Config.set_library_path(libraryFile)
@@ -15,6 +17,10 @@ parseArgs = [
     "-I/usr/local/lib/clang/9.0.1/include",  # clang include path, clang -E -v -
     "-I/usr/local/include/eigen3",
     # "-Wall",
+]
+
+whitelist = [
+    "/usr/local/include/nuclear_bits/",
 ]
 
 # Creates a index for parsing
@@ -48,25 +54,39 @@ def createTree(index, f):
             print(diagnostic)
             return root
 
-    _traverseTree(translationUnit.cursor, root)
+    for child in translationUnit.cursor.get_children():
+        good = not os.path.isabs(child.location.file.name)
+        if not good:
+            for path in whitelist:
+                if os.path.commonpath([child.location.file.name, path]) == path:
+                    good = True
+                    break
+        if not good:
+            continue
+
+        _treeNodeStuff(child, root)
 
     return root
 
 
 def _traverseTree(node, root):
     for child in node.get_children():
-        if isFunction(child):
-            root.functions.append(makeFunction(child, root))
-        elif isClass(child):
-            try:
-                if isInherited(next(child.get_children()), "NUClear::Reactor"):
-                    root.reactors.append(makeReactor(child, root))
-                    continue
-            except StopIteration as e:
-                pass  # Class was a forward declare with no inheritance
-            _traverseTree(child, root)
-        else:
-            _traverseTree(child, root)
+        _treeNodeStuff(child, root)
+
+
+def _treeNodeStuff(node, root):
+    if isFunction(node):
+        root.functions.append(makeFunction(node, root))
+    elif isClass(node):
+        try:
+            if isInherited(next(node.get_children()), "NUClear::Reactor"):
+                root.reactors.append(makeReactor(node, root))
+            else:
+                _traverseTree(node, root)
+        except StopIteration as e:
+            _traverseTree(node, root)  # Class was a forward declare with no inheritance
+    else:
+        _traverseTree(node, root)
 
 
 def makeFunction(node, root):
