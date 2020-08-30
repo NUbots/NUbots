@@ -49,11 +49,13 @@ def createTree(index, f):
     translationUnit = index.parse(f, parseArgs)
     root = Tree(translationUnit.diagnostics)
 
+    # Make sure that there are no errors in the parsing
     for diagnostic in translationUnit.diagnostics:
         if diagnostic.severity >= clang.cindex.Diagnostic.Error:
             print(diagnostic)
             return root
 
+    # For the initial loop through make sure that the file the node comes from is interesting to us
     for child in translationUnit.cursor.get_children():
         good = not os.path.isabs(child.location.file.name)
         if not good:
@@ -69,11 +71,13 @@ def createTree(index, f):
     return root
 
 
+# Just loop through the tree
 def _traverseTree(node, root):
     for child in node.get_children():
         _treeNodeStuff(child, root)
 
 
+# Find interesting nodes in the tree
 def _treeNodeStuff(node, root):
     if isFunction(node):
         root.functions.append(makeFunction(node, root))
@@ -89,15 +93,17 @@ def _treeNodeStuff(node, root):
         _traverseTree(node, root)
 
 
+# Find information about a function
 def makeFunction(node, root):
     function = Function(node)
 
     _functionTree(node, function, root)
 
+    # Find if the function was a method
     # You can't declare a method before declaring a class
     try:
         child = next(node.get_children())
-        if isMethod(child):
+        if isTypeRef(child):
             for reactor in root.reactors:
                 if child.type.spelling == reactor.node.type.spelling:
                     reactor.methods.append(function)
@@ -107,6 +113,7 @@ def makeFunction(node, root):
     return function
 
 
+# loop through the function finding interesting information
 def _functionTree(node, function, root):
     for child in node.get_children():
         if isCall(child):
@@ -120,10 +127,12 @@ def _functionTree(node, function, root):
             _functionTree(child, function, root)
 
 
+# Find information about an on node
 def makeOn(node, root):
     on = On(node)
     children = node.get_children()
 
+    # Find the dsl type by looping through the expected part of the tree
     try:
         dsl = ""
         for dslChild in next(next(next(next(children).get_children()).get_children()).get_children()).get_children():
@@ -138,6 +147,7 @@ def makeOn(node, root):
     except StopIteration as e:
         print("On DSL find StopIter:", e)
 
+    # Find the callback for the function
     try:
         for callbackChild in children:
             if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # lambda
@@ -153,11 +163,13 @@ def makeOn(node, root):
     return on
 
 
+# Find information about an emit node
 def makeEmit(node):
     emit = Emit(node)
 
     children = node.get_children()
 
+    # Work out the scope of the node
     emit.scope = "Local"
     try:
         memberRefExpr = next(children)
@@ -167,6 +179,7 @@ def makeEmit(node):
     except StopIteration:
         print("Emit scope StopIter:", e)
 
+    # Work out the type that is being emitted
     try:
         expr = next(children)
         if expr.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # The parameter is constructed in the emit statement
@@ -191,6 +204,7 @@ def makeEmit(node):
     return emit
 
 
+# Information about a reactor
 def makeReactor(node, root):
     reactor = Reactor(node)
 
@@ -203,6 +217,7 @@ def makeReactor(node, root):
             del root.reactors[i - shift]
             shift += 1
 
+    # Find the methods in the reactor
     for child in node.get_children():
         if isCall(child):
             function = makeFunction(child)
@@ -212,6 +227,7 @@ def makeReactor(node, root):
     return reactor
 
 
+# Checks all nodes types that could be functions
 def isFunction(node):
     return (
         node.kind == clang.cindex.CursorKind.CXX_METHOD
@@ -222,28 +238,34 @@ def isFunction(node):
     )
 
 
+# Checks that a node is a type ref, the first child of a function that is a method will be a type ref.
 # node the first child of a function outside a class
-def isMethod(node):
+def isTypeRef(node):
     return node.kind == clang.cindex.CursorKind.TYPE_REF
 
 
+# Is a function call
 def isCall(node):
     return node.kind == clang.cindex.CursorKind.CALL_EXPR
 
 
-# node must be a call
+# Check that a call is an on node
+# Node must be a call
 def isOnCall(node):
     return node.type.spelling == "NUClear::threading::ReactionHandle" and node.spelling == "then"
 
 
+# Check that a call is an emit statement
 # node must be a call
 def isEmitCall(node):
     return node.spelling == "emit"
 
 
+# Check that the node is a class decleration
 def isClass(node):
     return node.kind == clang.cindex.CursorKind.CLASS_DECL
 
 
+# The first child of a class decleration will have information about the parent if it is an child
 def isInherited(node, name):
     return node.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER and node.type.spelling == name
