@@ -5,7 +5,7 @@ import itertools
 
 # A structure for holding reactors and functions
 class Tree:
-    def __init__(self, diagnostics, reactors=[], functions=[]):
+    def __init__(self, diagnostics, reactors=[], functions={}):
         self.diagnostics = diagnostics
         self.reactors = reactors
         self.functions = functions
