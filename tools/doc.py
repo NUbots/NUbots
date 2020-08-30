@@ -100,6 +100,8 @@ def run(outdir, indir, **kwargs):
         if dirpath.split("/")[-1] == "src":
             modules["/".join(dirpath.split("/")[0:-1])] = filenames
 
+    toOutput = "{"
+
     # Loop through each module, looking for reactors then printing them
     for module, files in modules.items():
         print("Working on module", module)
@@ -111,7 +113,10 @@ def run(outdir, indir, **kwargs):
                 tree = analyse.createTree(index, os.path.join(module, "src", f))
 
                 reactors.extend(tree.reactors)
+        toOutput += generateModuleJSON(module, reactors)
 
-        toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json",), "w")
-        toWrite.write(generateModuleJSON(module, reactors))
-        toWrite.close()
+    toOutput = toOutput[:-1] + "}"
+
+    toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json",), "w")
+    toWrite.write(toOutput)
+    toWrite.close()
