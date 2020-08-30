@@ -68,6 +68,13 @@ def createTree(index, f):
 
         _treeNodeStuff(child, root)
 
+    # Find the transitive calls
+    for function in root.functions:
+        for call in function.nodeCalls:
+            for fn in root.functions:
+                if call == fn.node:
+                    function.calls.append(fn)
+
     return root
 
 
@@ -80,7 +87,9 @@ def _traverseTree(node, root):
 # Find interesting nodes in the tree
 def _treeNodeStuff(node, root):
     if isFunction(node):
-        root.functions.append(makeFunction(node, root))
+        fn = makeFunction(node, root)
+        if fn:
+            root.functions.append(fn)
     elif isClass(node):
         try:
             if isInherited(next(node.get_children()), "NUClear::Reactor"):
@@ -110,7 +119,9 @@ def makeFunction(node, root):
     except StopIteration as e:
         pass  # Function was a forward declared and not a method
 
-    return function
+    # Check that the function is interesting
+    if function.emits or function.ons or not function.nodeCalls == [node]:
+        return function
 
 
 # loop through the function finding interesting information
