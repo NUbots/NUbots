@@ -77,7 +77,7 @@ def generateModuleJSON(module, reactors):
 def register(command):
     command.help = "documentation generation?"
 
-    command.add_argument("outdir", help="The output directory")
+    command.add_argument("outdir", default="doc/NUdoc", help="The output directory")
 
     command.add_argument(
         "--indir", default="module", help="The root of the directories that you want to scan. Default: module."
@@ -117,6 +117,6 @@ def run(outdir, indir, **kwargs):
 
     toOutput = toOutput[:-1] + "}"
 
-    toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json",), "w")
+    toWrite = open(os.path.join(outdir, "documentation.json"), "w")
     toWrite.write(toOutput)
     toWrite.close()
