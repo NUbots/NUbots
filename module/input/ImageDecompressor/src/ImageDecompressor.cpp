@@ -28,7 +28,7 @@ namespace input {
             else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
             else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            //clang-format on
+            // clang-format on
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(decompressor_mutex);
@@ -37,9 +37,8 @@ namespace input {
 
             for (const auto& c : cfg["decompressors"].config) {
                 if (c["name"].as<std::string>() == "turbojpeg") {
-                    config.factories.emplace_back(
-                        std::make_shared<decompressor::turbojpeg::Factory>(),
-                        c["concurrent"].as<int>());
+                    config.factories.emplace_back(std::make_shared<decompressor::turbojpeg::Factory>(),
+                                                  c["concurrent"].as<int>());
                 }
             }
         });
@@ -84,7 +83,7 @@ namespace input {
 
                         // Compress the data
                         auto result = ctx.decompressor->decompress(image.data);
-                        msg->data = result.first;
+                        msg->data   = result.first;
                         msg->format = result.second;
 
                         // Copy across the other attributes
@@ -131,9 +130,9 @@ namespace input {
                                             dropped,
                                             100 * double(decompressed) / double(decompressed + dropped)));
             decompressed = 0;
-            dropped    = 0;
+            dropped      = 0;
         });
     }
 
-}  // namespace output
+}  // namespace input
 }  // namespace module
