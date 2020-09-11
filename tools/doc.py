@@ -35,7 +35,7 @@ def generateOnJSON(on):
     out = "{"
     out += '"dsl":"{}",'.format(on.dsl)
     out += '"emit":['
-    if on.callback.calls:
+    if on.callback and on.callback.calls:
         for call in on.callback.calls:
             for emit in call.emits:
                 out += generateEmitJSON(emit)
