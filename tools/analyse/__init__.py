@@ -164,9 +164,11 @@ def makeOn(node, root):
         for callbackChild in children:
             if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # lambda
                 callback = next(callbackChild.get_children())
-                on.callback = makeFunction(callback, root)
+                function = makeFunction(callback, root)
+                if function:
+                    on.callback = function
             elif callbackChild.kind == clang.cindex.CursorKind.DECL_REF_EXPR:  # reference to predefined function
-                for function in root.functions:
+                for function in root.functions.values():
                     if function.node == callbackChild.referenced:
                         on.callback = function
     except StopIteration as e:
@@ -233,8 +235,9 @@ def makeReactor(node, root):
     for child in node.get_children():
         if isCall(child):
             function = makeFunction(child)
-            reactor.methods.append(function)
-            root.functions[function.node.displayname] = function
+            if function:
+                reactor.methods.append(function)
+                root.functions[function.node.displayname] = function
 
     return reactor
 
