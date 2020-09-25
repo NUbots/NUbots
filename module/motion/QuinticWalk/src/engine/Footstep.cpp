@@ -15,7 +15,7 @@ namespace motion {
     namespace engine {
 
         Footstep::Footstep(float foot_distance, bool is_left_support_foot) {
-            if (foot_distance <= 0.0) {
+            if (foot_distance <= 0.0f) {
                 throw std::logic_error("Footstep invalid distance");
             }
 

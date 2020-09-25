@@ -152,13 +152,13 @@ namespace motion {
                 RPY.y() += wanted_pitch;
 
                 // threshold pitch and roll
-                if (std::abs(RPY[0]) > config.imu_roll_threshold) {
+                if (std::abs(RPY.x()) > config.imu_roll_threshold) {
                     log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
                                                    std::abs(RPY.x()),
                                                    config.imu_roll_threshold));
                     walk_engine.requestPause();
                 }
-                else if (std::abs(RPY[1]) > config.imu_pitch_threshold) {
+                else if (std::abs(RPY.y()) > config.imu_pitch_threshold) {
                     log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
                                                    std::abs(RPY.y()),
                                                    config.imu_pitch_threshold));
@@ -194,16 +194,14 @@ namespace motion {
                 }
             }
         });
-    }  // namespace motion
+    }
 
     float QuinticWalk::getTimeDelta() {
         // compute time delta depended if we are currently in simulation or reality
-        float dt;
         auto current_time = NUClear::clock::now();
         // only take real time difference if walking was not stopped before
         // TODO Is this really necessary?
-        auto time_diff_ms = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time);
-        dt                = time_diff_ms.count() / 1000.0f;
+        float dt = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
         if (dt == 0.0f) {
             // log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));
             dt = 0.001f;
