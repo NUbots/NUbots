@@ -23,24 +23,12 @@ package message.behaviour;
 import "google/protobuf/duration.proto";
 import "Vector.proto";
 
-/**
- * Empty message declaring the 'fixed' walk is finished
- */
 message FixedWalkFinished {}
 
-/**
- * Empty message declaring the walk config was saved
- */
 message WalkConfigSaved {}
 
-/**
- * Empty message asking to cancel the 'fixed' walk
- */
 message CancelFixedWalk {}
 
-/**
- * string containing walk config
- */
 message WalkOptimiserCommand {
     string walkConfig = 1;
 }
