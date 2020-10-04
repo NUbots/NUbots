@@ -196,20 +196,21 @@ namespace motion {
     float QuinticWalk::getTimeDelta() {
         // compute time delta depended if we are currently in simulation or reality
         auto current_time = NUClear::clock::now();
-        // only take real time difference if walking was not stopped before
-        // TODO Is this really necessary?
         float dt =
             std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
+
         if (dt == 0.0f) {
             // log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));
             dt = 0.001f;
         }
-        last_update_time = current_time;
+
         // time is wrong when we run it for the first time
         if (first_run) {
             first_run = false;
             dt        = 0.0001f;
         }
+
+        last_update_time = current_time;
         return dt;
     }
 
