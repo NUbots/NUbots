@@ -184,13 +184,9 @@ namespace motion {
                 walk_engine.reset();
             }
             else {
-                // we don't want to walk, even if we have orders, if we are not in the right state
-                bool walkableState = true;  // TODO: what is our equivalent here?
 
                 // see if the walk engine has new goals for us
-                walkableState = walk_engine.updateState(dt, current_orders, walkableState);
-
-                if ((walk_engine.getState() != engine::WalkEngineState::IDLE) && walkableState) {  // todo
+                if (walk_engine.updateState(dt, current_orders)) {
                     calculateJointGoals();
                 }
             }
