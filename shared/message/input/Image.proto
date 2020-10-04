@@ -25,21 +25,15 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Vector.proto";
 
-/**
- * Camera, lens, and output image information
- */
 message Image {
 
-    /// The lens type and details about the images it makes
     message Lens {
-        /// Lens projection types
         enum Projection {
             UNKNOWN     = 0;
             RECTILINEAR = 1;
             EQUIDISTANT = 2;
             EQUISOLID   = 3;
         }
-        /// This lens' projection type
         Projection projection = 1;
         /// Normalised focal length: focal length in pixels / image width
         float focal_length = 2;
@@ -50,20 +44,17 @@ message Image {
         fvec2 k      = 5;
     }
     /// Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
-    /// see module::output::compressor::turbojpeg::Compressor::compress for full list
+    /// see module::output::compressor::turbojpeg::Compressor::compress for currently supported formats
     uint32 format = 1;
     /// Number of pixels of {x, y} of the image
     uvec2 dimensions = 2;
     /// The actual image pixel data
-    bytes data = 3;
-    /// Unique identifying number for the camera which took the image
+    bytes  data      = 3;
     uint32 camera_id = 4;
-    /// Identifying name of the image
-    string name = 5;
+    string name      = 5;
     /// Time when the image was taken
     google.protobuf.Timestamp timestamp = 6;
     /// World to camera Affine3D transform
-    mat4 Hcw = 7;
-    /// The lens information of the camera which took the image
+    mat4 Hcw  = 7;
     Lens lens = 8;
 }

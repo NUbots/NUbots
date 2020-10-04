@@ -23,9 +23,6 @@ package message.input;
 import "google/protobuf/timestamp.proto";
 import "message/input/GameState.proto";
 
-/**
- * Contains event tracking information
- */
 message GameEvents {
     /// Context describes which actor/team is being referred to by an event
     enum Context {
@@ -42,11 +39,9 @@ message GameEvents {
         MAGENTA             = 2;
     };
 
-    /// Current total score for both teams
+    /// Current total scores for both teams
     message Score {
-        /// Current total score for our team
-        uint32 ownScore = 1;
-        /// Current total score for opposition team
+        uint32 ownScore      = 1;
         uint32 opponentScore = 2;
     }
 
@@ -72,18 +67,15 @@ message GameEvents {
 
     /// The context and robot which were unpenalised
     message Unpenalisation {
-        /// The context being unpenalised
         Context context = 1;
-        /// The specific robot being unpenalised
-        uint32 robotId = 2;
+        uint32  robotId = 2;
     }
 
     /// Message from a coach, and the intended recipient context
     message CoachMessage {
         /// The intended recipient(s)
         Context context = 1;
-        /// The contents of the message
-        string message = 2;
+        string  message = 2;
     }
 
     /// Message indicating half time has occurred
@@ -92,7 +84,6 @@ message GameEvents {
         bool firstHalf = 1;
     }
 
-    /// Ball kicked out message with context and timestamp
     message BallKickedOut {
         /// The party which kicked the ball out
         Context context = 1;
@@ -100,13 +91,13 @@ message GameEvents {
         google.protobuf.Timestamp time = 3;
     }
 
-    /// The context of the team kicking off
     message KickOffTeam {
         /// The party kicking off
         Context context = 1;
     }
 
-    /// Set of timestamps for different parts of the game, with current phase state
+    /// Set of timestamps for different parts of the game, with current phase
+    /// state
     message GamePhase {
         /// Current phase state, such as PLAYING or TIMEOUT
         GameState.Data.Phase phase = 1;
@@ -115,8 +106,7 @@ message GameEvents {
         google.protobuf.Timestamp readyTime = 2;
         /// Time when the first half is due to end
         /// Set some time after game-states SET or PLAYING
-        google.protobuf.Timestamp endHalf = 3;
-
+        google.protobuf.Timestamp endHalf  = 3;
         google.protobuf.Timestamp ballFree = 4;
         /// Timestamp when the current phase will end
         /// Set some time after game-state TIMEOUT
@@ -126,7 +116,6 @@ message GameEvents {
         google.protobuf.Timestamp nextHalf = 6;
     }
 
-    /// UNKNOWN_MODE, NORMAL, PENALTY_SHOOTOUT or OVERTIME
     message GameMode {
         GameState.Data.Mode mode = 1;
     }
