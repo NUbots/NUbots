@@ -80,7 +80,7 @@ namespace motion {
             config.max_step_xy = cfg["max_step"]["xy"].as<float>();
 
             config.imu_active          = cfg["imu"]["active"].as<bool>();
-            config.imu_pitch_threshold = cfg["imu"]["pitch"]["threshold"].as<float>();
+            config.imu_pitch_threshold = 1.0f + cfg["imu"]["pitch"]["threshold"].as<float>();
             config.imu_roll_threshold  = cfg["imu"]["roll"]["threshold"].as<float>();
 
             for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; ++i) {
@@ -140,30 +140,31 @@ namespace motion {
             current_orders = orders;
         });
 
-        on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            if (config.imu_active) {
-                Eigen::Vector3f RPY =
-                    utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<float>());
+        imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
+            if (!config.imu_active) {
+                imu_reaction.disable();
+            }
+            Eigen::Vector3f RPY =
+                utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<float>());
 
-                // compute the pitch offset to the currently wanted pitch of the engine
-                float wanted_pitch =
-                    params.trunk_pitch + params.trunk_pitch_p_coef_forward * walk_engine.getFootstep().getNext().x()
-                    + params.trunk_pitch_p_coef_turn * std::abs(walk_engine.getFootstep().getNext().z());
-                RPY.y() += wanted_pitch;
+            // compute the pitch offset to the currently wanted pitch of the engine
+            float wanted_pitch = params.trunk_pitch
+                                 + params.trunk_pitch_p_coef_forward * walk_engine.getFootstep().getNext().x()
+                                 + params.trunk_pitch_p_coef_turn * std::abs(walk_engine.getFootstep().getNext().z());
+            RPY.y() += wanted_pitch;
 
-                // threshold pitch and roll
-                if (std::abs(RPY.x()) > config.imu_roll_threshold) {
-                    log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
-                                                   std::abs(RPY.x()),
-                                                   config.imu_roll_threshold));
-                    walk_engine.requestPause();
-                }
-                else if (std::abs(RPY.y()) > config.imu_pitch_threshold) {
-                    log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
-                                                   std::abs(RPY.y()),
-                                                   config.imu_pitch_threshold));
-                    walk_engine.requestPause();
-                }
+            // threshold pitch and roll
+            if (std::abs(RPY.x()) > config.imu_roll_threshold) {
+                log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
+                                               std::abs(RPY.x()),
+                                               config.imu_roll_threshold));
+                walk_engine.requestPause();
+            }
+            else if (std::abs(RPY.y()) > config.imu_pitch_threshold) {
+                log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
+                                               std::abs(RPY.y()),
+                                               config.imu_pitch_threshold));
+                walk_engine.requestPause();
             }
         });
 
@@ -201,7 +202,8 @@ namespace motion {
         auto current_time = NUClear::clock::now();
         // only take real time difference if walking was not stopped before
         // TODO Is this really necessary?
-        float dt = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
+        float dt =
+            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
         if (dt == 0.0f) {
             // log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));
             dt = 0.001f;
