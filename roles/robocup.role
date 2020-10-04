@@ -8,7 +8,7 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
-  support::configuration::NetworkConfiguration
+  network::NUClearNet
   support::NUsight
   support::configuration::SoccerConfig
   # input

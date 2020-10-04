@@ -316,7 +316,6 @@ namespace platform {
                         if (previousSensors && error != DarwinSensors::Error::OK) {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({error,
-                                                      i,
                                                       original.torqueEnabled,
                                                       original.pGain,
                                                       original.iGain,
@@ -333,7 +332,6 @@ namespace platform {
                         else {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({error,
-                                                      i,
                                                       original.torqueEnabled,
                                                       original.pGain,
                                                       original.iGain,
