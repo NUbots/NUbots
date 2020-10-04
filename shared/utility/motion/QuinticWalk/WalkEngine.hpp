@@ -3,8 +3,8 @@ This code is based on the original code by Quentin "Leph" Rouxel and Team Rhoban
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef MODULE_MOTION_QUINTICWALK_HPP
-#define MODULE_MOTION_QUINTICWALK_HPP
+#ifndef UTILITY_MOTION_QUINTICWALK_HPP
+#define UTILITY_MOTION_QUINTICWALK_HPP
 
 #include <Eigen/Core>
 #include <algorithm>
@@ -13,9 +13,9 @@ https://github.com/Rhoban/model/
 #include "Footstep.hpp"
 #include "TrajectoryUtils.hpp"
 
-namespace module {
+namespace utility {
 namespace motion {
-    namespace engine {
+    namespace quinticwalk {
 
         struct WalkingParameter {
             // Full walk cycle frequency
@@ -174,7 +174,7 @@ namespace motion {
              * (phase, trajectories) from given
              * elapsed time since last update() call
              */
-            bool updateState(const float dt, const Eigen::Vector3f& orders, const bool walkableState);
+            bool updateState(const float dt, const Eigen::Vector3f& orders);
 
             /**
              * Compute current cartesian
@@ -322,7 +322,7 @@ namespace motion {
             void resetTrunkLastState();
         };
 
-    }  // namespace engine
+    }  // namespace quinticwalk
 }  // namespace motion
-}  // namespace module
+}  // namespace utility
 #endif

@@ -3,8 +3,8 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef MODULE_MOTION_QUINTICWALK_SPLINECONTAINER_HPP
-#define MODULE_MOTION_QUINTICWALK_SPLINECONTAINER_HPP
+#ifndef UTILITY_MOTION_QUINTICWALK_SPLINECONTAINER_HPP
+#define UTILITY_MOTION_QUINTICWALK_SPLINECONTAINER_HPP
 
 #include <algorithm>
 #include <fmt/format.h>
@@ -17,9 +17,9 @@ https://github.com/Rhoban/model/
 
 #include "Spline.hpp"
 
-namespace module {
+namespace utility {
 namespace motion {
-    namespace engine {
+    namespace quinticwalk {
 
         /**
          * SplineContainer
@@ -216,8 +216,8 @@ namespace motion {
             Map container;
         };
 
-    }  // namespace engine
+    }  // namespace quinticwalk
 }  // namespace motion
-}  // namespace module
+}  // namespace utility
 
 #endif  // SPLINECONTAINER_HPP

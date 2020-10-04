@@ -3,16 +3,16 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef MODULE_MOTION_QUINTICWALK_SMOOTHSPLINE_HPP
-#define MODULE_MOTION_QUINTICWALK_SMOOTHSPLINE_HPP
+#ifndef UTILITY_MOTION_QUINTICWALK_SMOOTHSPLINE_HPP
+#define UTILITY_MOTION_QUINTICWALK_SMOOTHSPLINE_HPP
 
 #include <vector>
 
 #include "Spline.hpp"
 
-namespace module {
+namespace utility {
 namespace motion {
-    namespace engine {
+    namespace quinticwalk {
 
         /**
          * SmoothSpline
@@ -167,8 +167,8 @@ namespace motion {
             }
         };
 
-    }  // namespace engine
+    }  // namespace quinticwalk
 }  // namespace motion
-}  // namespace module
+}  // namespace utility
 
 #endif  // MODULE_MOTION_QUINTICWALK_SMOOTHSPLINE_HPP

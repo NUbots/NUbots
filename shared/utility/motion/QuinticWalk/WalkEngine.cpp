@@ -11,9 +11,9 @@ https://github.com/Rhoban/model/
 #include "utility/math/angle.h"
 #include "utility/math/euler.h"
 
-namespace module {
+namespace utility {
 namespace motion {
-    namespace engine {
+    namespace quinticwalk {
 
         QuinticWalkEngine::QuinticWalkEngine()
             : foot_step(0.14f, true)
@@ -36,7 +36,7 @@ namespace motion {
             TrajectoriesInit(trajs);
         }
 
-        bool QuinticWalkEngine::updateState(const float dt, const Eigen::Vector3f& orders, const bool walkableState) {
+        bool QuinticWalkEngine::updateState(const float dt, const Eigen::Vector3f& orders) {
             bool ordersZero = orders.isZero();
             // First check if we are currently in pause state or idle, since we don't want to update the phase in this
             // case
@@ -62,8 +62,8 @@ namespace motion {
                 // we don't have to update anything more
             }
             else if (engine_state == WalkEngineState::IDLE) {
-                if (ordersZero || !walkableState) {
-                    // we are in idle and are not supposed to walk. current state is fine, just do nothing
+                if (ordersZero) {
+                    // we are in idle and don't have orders. current state is fine, just do nothing
                     return false;
                 }
             }
@@ -727,6 +727,6 @@ namespace motion {
             TrajectoriesTrunkFootPos(time, trajs, trunkPos, trunkAxis, footPos, footAxis);
             TrajectoriesSupportFootState(time, trajs, isDoubleSupport, isLeftsupportFoot);
         }
-    }  // namespace engine
+    }  // namespace quinticwalk
 }  // namespace motion
-}  // namespace module
+}  // namespace utility

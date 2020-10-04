@@ -10,9 +10,9 @@ https://github.com/Rhoban/model/
 
 #include "utility/math/angle.h"
 
-namespace module {
+namespace utility {
 namespace motion {
-    namespace engine {
+    namespace quinticwalk {
 
         Footstep::Footstep(float foot_distance, bool is_left_support_foot) {
             if (foot_distance <= 0.0f) {
@@ -103,6 +103,6 @@ namespace motion {
                                    -diff.z());
         }
 
-    }  // namespace engine
+    }  // namespace quinticwalk
 }  // namespace motion
-}  // namespace module
+}  // namespace utility

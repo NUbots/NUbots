@@ -3,8 +3,8 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef MODULE_MOTION_ENGINE_POLYNOM_HPP
-#define MODULE_MOTION_ENGINE_POLYNOM_HPP
+#ifndef UTILITY_MOTION_QUINTICWALK_POLYNOM_HPP
+#define UTILITY_MOTION_QUINTICWALK_POLYNOM_HPP
 
 #include <cstdlib>
 #include <iostream>
@@ -12,9 +12,9 @@ https://github.com/Rhoban/model/
 
 #include "Combination.hpp"
 
-namespace module {
+namespace utility {
 namespace motion {
-    namespace engine {
+    namespace quinticwalk {
 
         /**
          * Polynom
@@ -173,8 +173,8 @@ namespace motion {
             return os;
         }
 
-    }  // namespace engine
+    }  // namespace quinticwalk
 }  // namespace motion
-}  // namespace module
+}  // namespace utility
 
-#endif  // MODULE_MOTION_ENGINE_POLYNOM_HPP
+#endif  // UTILITY_MOTION_QUINTICWALK_POLYNOM_HPP

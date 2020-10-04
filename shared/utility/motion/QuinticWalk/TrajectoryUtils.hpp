@@ -3,17 +3,18 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef MODULE_MOTION_ENGINE_TRAJECTORYUTILS_H
-#define MODULE_MOTION_ENGINE_TRAJECTORYUTILS_H
+#ifndef UTILITY_MOTION_QUINTICWALK_TRAJECTORYUTILS_H
+#define UTILITY_MOTION_QUINTICWALK_TRAJECTORYUTILS_H
 
 #include <Eigen/Core>
 #include <nuclear>
 
 #include "SmoothSpline.hpp"
 #include "SplineContainer.hpp"
-namespace module {
+
+namespace utility {
 namespace motion {
-    namespace engine {
+    namespace quinticwalk {
 
         struct TrajectoryTypes {
             enum Value {
@@ -298,8 +299,8 @@ namespace motion {
             return cost;
         }
 
-    }  // namespace engine
+    }  // namespace quinticwalk
 }  // namespace motion
-}  // namespace module
+}  // namespace utility
 
 #endif  // MODULE_MOTION_ENGINE_TRAJECTORYUTILS_H
