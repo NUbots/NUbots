@@ -197,9 +197,6 @@ namespace motion {
                                              Eigen::Vector3f& trunkAxis,
                                              Eigen::Vector3f& footPos,
                                              Eigen::Vector3f& footAxis) {
-            if (traj.size() != 14) {
-                NUClear::log(traj.size());
-            }
             // Compute Cartesian positions
             trunkPos  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
                                        traj.get(TrajectoryTypes::TRUNK_POS_Y).pos(t),
