@@ -3,8 +3,8 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef UTILITY_MOTION_QUINTICWALK_TRAJECTORYUTILS_H
-#define UTILITY_MOTION_QUINTICWALK_TRAJECTORYUTILS_H
+#ifndef UTILITY_MOTION_SPLINES_TRAJECTORYUTILS_H
+#define UTILITY_MOTION_SPLINES_TRAJECTORYUTILS_H
 
 #include <Eigen/Core>
 #include <nuclear>
@@ -14,7 +14,7 @@ https://github.com/Rhoban/model/
 
 namespace utility {
 namespace motion {
-    namespace quinticwalk {
+    namespace splines {
 
         struct TrajectoryTypes {
             enum Value {
@@ -299,8 +299,8 @@ namespace motion {
             return cost;
         }
 
-    }  // namespace quinticwalk
+    }  // namespace splines
 }  // namespace motion
 }  // namespace utility
 
-#endif  // MODULE_MOTION_ENGINE_TRAJECTORYUTILS_H
+#endif

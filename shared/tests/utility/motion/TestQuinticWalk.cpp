@@ -21,14 +21,13 @@
 #include <Eigen/Geometry>
 #include <catch.hpp>
 
-#include "utility/motion/QuinticWalk/Combination.hpp"
-#include "utility/motion/QuinticWalk/Footstep.hpp"
-#include "utility/motion/QuinticWalk/Polynom.hpp"
-#include "utility/motion/QuinticWalk/SmoothSpline.hpp"
-#include "utility/motion/QuinticWalk/Spline.hpp"
-#include "utility/motion/QuinticWalk/SplineContainer.hpp"
-#include "utility/motion/QuinticWalk/TrajectoryUtils.hpp"
-#include "utility/motion/QuinticWalk/WalkEngine.hpp"
+#include "utility/motion/splines/Combination.hpp"
+#include "utility/motion/splines/Footstep.hpp"
+#include "utility/motion/splines/Polynom.hpp"
+#include "utility/motion/splines/SmoothSpline.hpp"
+#include "utility/motion/splines/Spline.hpp"
+#include "utility/motion/splines/SplineContainer.hpp"
+#include "utility/motion/splines/TrajectoryUtils.hpp"
 
 std::vector<std::vector<long int>> C = {{3, 0, 1},
                                         {3, 0, 1},
@@ -131,8 +130,8 @@ std::vector<std::vector<long int>> C = {{3, 0, 1},
                                         {1, 0, 1},
                                         {39, 21, 62359143990}};
 
-TEST_CASE("Test Combination", "[utility][motion][QuinticWalk][Combination]") {
-    utility::motion::quinticwalk::Combination comb;
+TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
+    utility::motion::splines::Combination comb;
 
     for (size_t i = 0; i < C.size(); i++) {
         int n          = C.at(i).at(0);

@@ -3,8 +3,8 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef UTILITY_MOTION_QUINTICWALK_COMBINATION_HPP
-#define UTILITY_MOTION_QUINTICWALK_COMBINATION_HPP
+#ifndef UTILITY_MOTION_SPLINES_COMBINATION_HPP
+#define UTILITY_MOTION_SPLINES_COMBINATION_HPP
 
 #include <limits>
 #include <map>
@@ -13,7 +13,7 @@ https://github.com/Rhoban/model/
 
 namespace utility {
 namespace motion {
-    namespace quinticwalk {
+    namespace splines {
 
         /**
          * Combination
@@ -139,8 +139,8 @@ namespace motion {
             }
         };
 
-    }  // namespace quinticwalk
+    }  // namespace splines
 }  // namespace motion
 }  // namespace utility
 
-#endif  // UTILITY_MOTION_QUINTICWALK_COMBINATION_HPP
+#endif

@@ -6,11 +6,12 @@
 #include <nuclear>
 #include <vector>
 
+#include "WalkEngine.hpp"
+
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/KinematicsModel.h"
 
 #include "utility/input/ServoID.h"
-#include "utility/motion/QuinticWalk/WalkEngine.hpp"
 
 namespace module {
 namespace motion {
@@ -52,8 +53,8 @@ namespace motion {
 
         NUClear::clock::time_point last_update_time;
 
-        utility::motion::quinticwalk::QuinticWalkEngine walk_engine;
-        utility::motion::quinticwalk::WalkingParameter params;
+        QuinticWalkEngine walk_engine;
+        WalkingParameter params;
 
         message::motion::KinematicsModel kinematicsModel;
 
@@ -68,4 +69,4 @@ namespace motion {
 }  // namespace motion
 }  // namespace module
 
-#endif  // MODULE_MOTION_QUINTICWALK_H
+#endif

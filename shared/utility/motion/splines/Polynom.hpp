@@ -3,8 +3,8 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef UTILITY_MOTION_QUINTICWALK_POLYNOM_HPP
-#define UTILITY_MOTION_QUINTICWALK_POLYNOM_HPP
+#ifndef UTILITY_MOTION_SPLINES_POLYNOM_HPP
+#define UTILITY_MOTION_SPLINES_POLYNOM_HPP
 
 #include <cstdlib>
 #include <iostream>
@@ -14,7 +14,7 @@ https://github.com/Rhoban/model/
 
 namespace utility {
 namespace motion {
-    namespace quinticwalk {
+    namespace splines {
 
         /**
          * Polynom
@@ -173,8 +173,8 @@ namespace motion {
             return os;
         }
 
-    }  // namespace quinticwalk
+    }  // namespace splines
 }  // namespace motion
 }  // namespace utility
 
-#endif  // UTILITY_MOTION_QUINTICWALK_POLYNOM_HPP
+#endif

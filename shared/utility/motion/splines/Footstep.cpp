@@ -12,7 +12,7 @@ https://github.com/Rhoban/model/
 
 namespace utility {
 namespace motion {
-    namespace quinticwalk {
+    namespace splines {
 
         Footstep::Footstep(float foot_distance, bool is_left_support_foot) {
             if (foot_distance <= 0.0f) {
@@ -103,6 +103,6 @@ namespace motion {
                                    -diff.z());
         }
 
-    }  // namespace quinticwalk
+    }  // namespace splines
 }  // namespace motion
 }  // namespace utility

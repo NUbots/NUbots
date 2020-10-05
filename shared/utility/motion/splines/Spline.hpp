@@ -3,8 +3,8 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef UTILITY_MOTION_QUINTICWALK_SPLINE_HPP
-#define UTILITY_MOTION_QUINTICWALK_SPLINE_HPP
+#ifndef UTILITY_MOTION_SPLINES_SPLINE_HPP
+#define UTILITY_MOTION_SPLINES_SPLINE_HPP
 
 #include <iomanip>
 #include <iostream>
@@ -14,7 +14,7 @@ https://github.com/Rhoban/model/
 
 namespace utility {
 namespace motion {
-    namespace quinticwalk {
+    namespace splines {
 
         /**
          * Spline
@@ -235,8 +235,8 @@ namespace motion {
             }
         };
 
-    }  // namespace quinticwalk
+    }  // namespace splines
 }  // namespace motion
 }  // namespace utility
 
-#endif  // MODULE_MOTION_QUINTICWALK_SPLINE_HPP
+#endif

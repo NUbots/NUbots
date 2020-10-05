@@ -3,14 +3,14 @@ This code is based on the original code by Quentin "Leph" Rouxel and Team Rhoban
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef UTILITY_MOTION_QUINTICWALK_FOOTSTEP_HPP
-#define UTILITY_MOTION_QUINTICWALK_FOOTSTEP_HPP
+#ifndef UTILITY_MOTION_SPLINES_FOOTSTEP_HPP
+#define UTILITY_MOTION_SPLINES_FOOTSTEP_HPP
 
 #include <Eigen/Core>
 
 namespace utility {
 namespace motion {
-    namespace quinticwalk {
+    namespace splines {
 
         /**
          * Footstep
@@ -127,7 +127,7 @@ namespace motion {
             Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) const;
         };
 
-    }  // namespace quinticwalk
+    }  // namespace splines
 }  // namespace motion
 }  // namespace utility
 #endif
