@@ -19,7 +19,7 @@ namespace motion {
         /**
          * Polynom
          *
-         * Simple one dimentional polynom class for spline generation
+         * Simple one dimensional polynom class for spline generation
          */
         template <typename Scalar>
         class Polynom {
@@ -29,6 +29,7 @@ namespace motion {
              */
             Polynom() {}
             Polynom(size_t degree) : coefs(degree + 1, static_cast<Scalar>(0)) {}
+            Polynom(std::vector<Scalar> coefs) : coefs(coefs) {}
 
             /**
              * Access to coefficient indexed from constant to higher degree
@@ -51,7 +52,7 @@ namespace motion {
             }
 
             /**
-             * Return polynom degree -1 mean empty polynom
+             * Return polynom degree -1 means empty polynom
              */
             size_t degree() const {
                 return coefs.size() - 1;
