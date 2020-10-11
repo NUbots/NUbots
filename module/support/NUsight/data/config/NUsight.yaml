@@ -28,7 +28,7 @@ reaction_handles:
   # Localisation state estimates and uncertainties
   localisation: false
   # Data for chart tool in NUsight
-  data_point: true
+  data_point: false
   # Field drawn objects such as an arrow, sphere, etc
   draw_objects: false
   # Subsumption data
