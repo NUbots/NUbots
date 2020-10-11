@@ -131,9 +131,9 @@ TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
     utility::motion::splines::Combination comb;
 
     for (size_t i = 0; i < C.size(); i++) {
-        int n          = C.at(i).at(0);
-        int k          = C.at(i).at(1);
-        int nCk        = C.at(i).at(2);
+        int n          = C[i][0];
+        int k          = C[i][1];
+        int nCk        = C[i][2];
         int combResult = comb.binomialCoefficient(k, n);
         INFO(n << " choose " << k << " = " << nCk << ", got " << combResult);
         REQUIRE(combResult == nCk);
@@ -194,17 +194,17 @@ std::vector<std::vector<long int>> P = {{3, 3, 2, 2, 0, 5, 11, 529985, 236357, 8
 
 TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
     for (size_t i = 0; i < P.size(); i++) {
-        int one       = P.at(i).at(5);
-        int two       = P.at(i).at(4);
-        int three     = P.at(i).at(3);
-        int four      = P.at(i).at(2);
-        int five      = P.at(i).at(1);
-        int six       = P.at(i).at(0);
-        int x         = P.at(i).at(6);
-        long int pos  = P.at(i).at(7);
-        long int vel  = P.at(i).at(8);
-        long int acc  = P.at(i).at(9);
-        long int jerk = P.at(i).at(10);
+        int one       = P[i][5];
+        int two       = P[i][4];
+        int three     = P[i][3];
+        int four      = P[i][2];
+        int five      = P[i][1];
+        int six       = P[i][0];
+        int x         = P[i][6];
+        long int pos  = P[i][7];
+        long int vel  = P[i][8];
+        long int acc  = P[i][9];
+        long int jerk = P[i][10];
 
         std::vector<int> coefs = {one, two, three, four, five, six};
         utility::motion::splines::Polynom poly(coefs);
