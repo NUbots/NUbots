@@ -168,7 +168,7 @@ vec3 unproject(vec2 point, float f, vec2 c, vec2 k, int projection) {
   if (projection == RECTILINEAR_PROJECTION) theta = rectilinearTheta(rU, f);
   else if (projection == EQUIDISTANT_PROJECTION) theta = equidistantTheta(rU, f);
   else if (projection == EQUISOLID_PROJECTION) theta = equisolidTheta(rU, f);
-  return vec3(cos(theta), sin(theta) * p / rD);
+  return vec3(cos(theta), sin(theta) * p / rU);
 }
 
 /**
