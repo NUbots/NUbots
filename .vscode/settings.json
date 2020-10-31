@@ -11,6 +11,7 @@
     ],
     "python.formatting.provider": "black",
     "files.associations": {
-        "*.role": "cmake"
+        "*.role": "cmake",
+        "core": "cpp"
     }
 }

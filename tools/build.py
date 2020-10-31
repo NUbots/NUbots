@@ -30,4 +30,4 @@ def run(args, **kwargs):
             exit(exitcode)
 
     # Return the exit code of ninja
-    exit(subprocess.call(["ninja", *args]))
+    exit(subprocess.call(["ninja", "-j6", *args]))
