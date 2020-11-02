@@ -22,8 +22,8 @@ package message.motion;
 
 /**
  * Tell the head where to look in world space.
- * This command is interpreted such that the robot will use IMU data to fixate at these angles in the world even when
- * rotating.
+ * This command is interpreted such that the robot will use IMU data to fixate
+ * at these angles in the world even when rotating.
  *
  * @author Jake Fountain
  */
@@ -33,7 +33,8 @@ message HeadCommand {
     float yaw = 1;
     /// Target head pitch in radians
     float pitch = 2;
-    /// If true, the yaw and pitch are interpreted in robot space, instead of IMU space
+    /// If true, the yaw and pitch are interpreted in
+    /// robot space, instead of IMU space
     bool robotSpace = 3;
 }
 

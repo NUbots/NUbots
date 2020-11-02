@@ -23,14 +23,10 @@ package message.motion;
 import "Matrix.proto";
 import "google/protobuf/timestamp.proto";
 
-/**
- * Target position for foot, with timestamp
- */
 message FootTarget {
 
-    google.protobuf.Timestamp timestamp = 1;
-    /// Identifies which foot is the swing foot
-    bool isRightFootSwing = 2;
+    google.protobuf.Timestamp timestamp        = 1;
+    bool                      isRightFootSwing = 2;
     /// Transform from world oriented support foot space (s) to target (a)
     mat4 Haf_s = 3;
 }

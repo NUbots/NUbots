@@ -29,8 +29,6 @@ import "Matrix.proto";
  * Convention: all values positive
  */
 message KinematicsModel {
-
-    /// All the leg config info for a single leg
     message Leg {
         float HIP_OFFSET_X                = 1;
         float HIP_OFFSET_Y                = 2;
@@ -52,7 +50,6 @@ message KinematicsModel {
         int32 LEFT_TO_RIGHT_ANKLE_ROLL    = 18;
     }
 
-    /// All the head config info
     message Head {
         float NECK_BASE_POS_FROM_ORIGIN_X     = 1;
         float NECK_BASE_POS_FROM_ORIGIN_Y     = 2;
@@ -64,14 +61,13 @@ message KinematicsModel {
         float CAMERA_DECLINATION_ANGLE_OFFSET = 8;
         float INTERPUPILLARY_DISTANCE         = 13;
 
-        // Head movement limits
+        // Head movement limits, in radians
         float MAX_YAW   = 9;
         float MIN_YAW   = 10;
         float MAX_PITCH = 11;
         float MIN_PITCH = 12;
     }
 
-    /// All the arm config info for a single arm
     message Arm {
         float DISTANCE_BETWEEN_SHOULDERS = 1;
         float SHOULDER_Z_OFFSET          = 2;
@@ -87,8 +83,8 @@ message KinematicsModel {
         float LOWER_ARM_Z_OFFSET         = 12;
     }
 
-    /// MassModel config information. Particles CoM is in particle space.
     /// {CoM_x, CoM_y, CoM_z, mass} in SI units
+    /// A Particles CoM is in particle space
     message MassModel {
         vec4 head        = 1;
         vec4 arm_upper   = 2;
@@ -101,7 +97,8 @@ message KinematicsModel {
         vec4 foot        = 9;
     }
 
-    /// Particle inertial tensors (in particle space) with respect to the CoM of the particle
+    /// Particle inertial tensors (in particle space) with respect to the CoM of
+    /// the particle
     ///  [[xx, xy, xz],
     ///  [xy, yy, yz],
     ///  [xz, yz, zz]]
