@@ -20,11 +20,8 @@ syntax = "proto3";
 
 package message.support;
 
-/**
- * Contains config file to save, and the path
- */
 message SaveConfiguration {
-    /// Relative path of the config save
+    /// Path of the config save, relative to the build directory by default
     string path = 1;
     /// The whole config file as a valid YAML-formatted string
     string config = 2;
