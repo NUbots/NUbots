@@ -20,17 +20,10 @@ syntax = "proto3";
 
 package message.platform.gazebo;
 
-/**
- * Command to reset time, or entire simulation, in Gazebo
- */
 message Command {
-
-    /// RESET - reset entire simulation
-    /// RESET_TIME - Reset simulation time and realtime clocks back to 0
     enum Type {
-        RESET      = 0;
-        RESET_TIME = 1;
+        RESET      = 0;  /// Reset entire simulation
+        RESET_TIME = 1;  /// Reset simulation time and realtime clocks back to 0
     }
-    /// Whether to reset simulation time or reset the whole simulation
     Type type = 1;
 }

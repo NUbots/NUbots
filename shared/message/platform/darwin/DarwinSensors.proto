@@ -22,12 +22,7 @@ package message.platform.darwin;
 
 import "google/protobuf/timestamp.proto";
 
-
-/**
- * Contains all of the sensor and servo information
- */
 message DarwinSensors {
-
     /// Set of error flags/statuses.
     /// bitmask values.
     /// See https://emanual.robotis.com/docs/en/dxl/protocol1/#protocol
@@ -43,32 +38,23 @@ message DarwinSensors {
         CORRUPT_DATA  = 128;
         TIMEOUT       = 256;
     }
-
-    /// Toggle status of the LEDs on the panel
     message LEDPanel {
         bool led2 = 1;
         bool led3 = 2;
         bool led4 = 3;
     }
-
-    /// The colour for the HeadLED to display
     message HeadLED {
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
-
-    /// The colour for the EyeLED to display
     message EyeLED {
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
-
-    /// Press-down status of left and middle buttons
     message Buttons {
         bool left   = 1;
         bool middle = 2;
     }
-
     /// Raw accelerometer values from the CM740: {x, y, z}
     /// The value is between 0 and 1023, representing a value between -4g and 4g => 512 = 0g
     message Accelerometer {
@@ -76,16 +62,14 @@ message DarwinSensors {
         float y = 2;
         float z = 3;
     }
-
-    /// The raw gyro values from the CM740 (they are read from the board in ZYX): x, y, z
+    /// The raw gyro values from the CM740 (they are read from the board in ZYX)
     message Gyroscope {
         float x = 1;
         float y = 2;
         float z = 3;
     }
-
-    /// The data from the force sensitive resistors.
-    /// The robot has FSRs on its feet to detect whether a foot is down.
+    /// The robot has Force Sensitive Resistors on its feet
+    /// to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
         float  fsr1       = 1;
@@ -96,23 +80,18 @@ message DarwinSensors {
         float  centreY    = 6;
         uint32 errorFlags = 7;
     }
-
     /// Pair of FSR messages - one for each foot
     message FSRs {
-        /// Left foot set of FSRs, with centre coordinates and error flags
-        FSR left = 1;
-        /// Right foot set of FSRs, with centre coordinates and error flags
+        FSR left  = 1;
         FSR right = 2;
     }
-
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
     message Servo {
         /// Set of things which can or have gone wrong.
         /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
-        uint32 errorFlags = 1;
-        /// Whether the torque is on or off
-        bool torqueEnabled = 2;
+        uint32 errorFlags    = 1;
+        bool   torqueEnabled = 2;
         /// Proportional gain. In proportion to the servo's position error. Gain values are in range 0~254.
         /// K_p : p_gain / 8
         float pGain = 3;
@@ -152,7 +131,6 @@ message DarwinSensors {
         /// Data value is identical to the actual temperature in Celsius
         float temperature = 13;
     };
-
     /// Set of all the servos on the robot
     message Servos {
         Servo rShoulderPitch = 1;
@@ -176,19 +154,15 @@ message DarwinSensors {
         Servo headPan        = 19;
         Servo headTilt       = 20;
     }
-    /// Timestamp when our data was taken
+    /// Timestamp when our data were taken
     google.protobuf.Timestamp timestamp = 1;
     /// Holds the error code (if any) from the CM740
     /// The list of errors is here: https://emanual.robotis.com/docs/en/dxl/protocol1/#status-packetreturn-packet
-    uint32 cm740ErrorFlags = 2;
-    /// Toggle status of the LEDs on the panel
-    LEDPanel ledPanel = 3;
-    /// Toggle status of the HeadLED
-    HeadLED headLED = 4;
-    /// Toggle status of the EyeLED
-    EyeLED eyeLED = 5;
-    /// Push-down status of the left and middle buttons
-    Buttons buttons = 6;
+    uint32   cm740ErrorFlags = 2;
+    LEDPanel ledPanel        = 3;
+    HeadLED  headLED         = 4;
+    EyeLED   eyeLED          = 5;
+    Buttons  buttons         = 6;
     /// Voltage for the whole robot, from the main battery
     float voltage = 7;
     /// Is {x, y, z} acceleration
@@ -196,30 +170,16 @@ message DarwinSensors {
     /// The value is between 0 and 1023, represent a value between -500 degrees per second and 500 degrees per second.
     /// => 512 = 0 degrees per second. Is {x, y, z} angular velocity
     Gyroscope gyroscope = 9;
-    /// Pair of sets of FSR sensors for both feet, to detect if they are down
-    FSRs fsr = 10;
-    /// Set of the robot's servos
-    Servos servo = 11;
+    FSRs      fsr       = 10;
+    Servos    servo     = 11;
 }
 
 // Button press events
 
-/**
- * Empty message to indicate button press. Emitted when the button is pressed in
- */
 message ButtonLeftDown {}
 
-/**
- * Empty message to indicate button press. Emitted when the button is released
- */
 message ButtonLeftUp {}
 
-/**
- * Empty message to indicate button press. Emitted when the button is pressed in
- */
 message ButtonMiddleDown {}
 
-/**
- * Empty message to indicate button press. Emitted when the button is released
- */
 message ButtonMiddleUp {}

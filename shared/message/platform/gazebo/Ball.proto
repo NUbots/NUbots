@@ -22,11 +22,7 @@ package message.platform.gazebo;
 
 import "Vector.proto";
 
-/**
- * Contains ball position and velocity
- */
 message Ball {
-
     /// Vector from world origin to ball in world space
     vec3 rBWw = 1;
     /// Velocity vector for the ball in world space

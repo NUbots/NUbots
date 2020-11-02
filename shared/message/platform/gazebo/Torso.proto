@@ -23,12 +23,7 @@ package message.platform.gazebo;
 import "Matrix.proto";
 import "Vector.proto";
 
-/**
- * Contains torso transforms and velocities
- */
 message Torso {
-
-    /// The name of the model in the simulation that this position is for
     string model = 1;
     /// The transform from world space to torso space
     mat4 Htw = 2;
