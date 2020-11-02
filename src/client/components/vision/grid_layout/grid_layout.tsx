@@ -44,7 +44,7 @@ export class GridLayout extends Component<{
   @computed
   get gridTemplate() {
     const n = React.Children.count(this.props.children)
-    if (!this.width || !this.height) {
+    if (!this.width || !this.height || n < 2) {
       return '1fr'
     }
     const cols = bestFitCols({
