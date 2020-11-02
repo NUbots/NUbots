@@ -20,9 +20,6 @@ syntax = "proto3";
 
 package message.behaviour;
 
-/**
- * Information to prioritise what the head behaviour should look at.
- */
 message SoccerObjectPriority {
 
     enum SearchType {

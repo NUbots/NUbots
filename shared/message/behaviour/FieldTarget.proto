@@ -28,6 +28,5 @@ message FieldTarget {
         BALL = 1;
         GOAL = 2;
     }
-    /// The current target of the robot's behaviour
     Target target = 1;
 }

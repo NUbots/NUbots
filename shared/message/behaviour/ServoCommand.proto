@@ -22,11 +22,7 @@ package message.behaviour;
 
 import "google/protobuf/timestamp.proto";
 
-/**
- * A command for a servo to execute
- */
 message ServoCommand {
-
     /// The subsumption which created the command
     uint64 source = 1;
     /// The time when the command was created

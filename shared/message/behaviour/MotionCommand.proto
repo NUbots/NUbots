@@ -26,7 +26,6 @@ import "Vector.proto";
  * Details of which walk behaviour to execute and where on the field to do it
  */
 message MotionCommand {
-    /// Defines the possible types of motion command:
     enum Type {
         /// Stop moving and just stand still, (equivalent to a VelocityCommand of {0} m/s)
         StandStill = 0;

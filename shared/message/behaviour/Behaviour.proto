@@ -39,6 +39,5 @@ message Behaviour {
         MOVE_TO_CENTRE   = 13;
         LOCALISING       = 14;
     }
-    /// Robot's current behaviour state
     State state = 1;
 }

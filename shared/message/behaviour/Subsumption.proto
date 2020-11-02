@@ -64,7 +64,6 @@ message Subsumption {
         repeated uint32 limbs = 3;
     }
 
-    /// How important this set of actions is to the controller
     message ActionPriorites {
         uint32         id         = 1;
         repeated float priorities = 2;
