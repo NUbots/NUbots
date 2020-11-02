@@ -20,12 +20,8 @@ syntax = "proto3";
 
 package message.support;
 
-/**
- * Player and team IDs
- */
 message GlobalConfig {
     /// The robots number in the team. Starts at 1. Should be the same as the robots number (nugus1, nugus2, etc)
     uint32 playerId = 1;
-    /// Unique team number
-    uint32 teamId = 2;
+    uint32 teamId   = 2;
 }

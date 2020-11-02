@@ -27,30 +27,31 @@ import "message/input/GameState.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
-/**
- * Contains almost everything NUsight related
- */
 message Overview {
-    /// The timestamp when this overview packet was sent
+    /// The timestamp this overview packet was sent
     google.protobuf.Timestamp timestamp = 1;
-    /// The ID number of this robot
-    uint32 robot_id = 2;
+    uint32                    robot_id  = 2;
+
     /// The name of the binary this robot is executing
     string role_name = 3;
+
     /// The current battery voltage as a percentage
     float battery = 4;
+
     /// The current voltage of the battery
     float voltage = 5;
+
     /// The current behaviour state. List of possible states in message::behaviour::Behaviour
     behaviour.Behaviour.State behaviour_state = 6;
+
     /// Localisation measured in field space
-    fvec3 robot_position = 7;
-    /// The covariance of the robot_position vector
+    fvec3 robot_position            = 7;
     fmat3 robot_position_covariance = 8;
+
     /// The ball position measured in field space
-    fvec2 ball_position = 9;
-    /// The covariance of the ball_position vector
+    fvec2 ball_position            = 9;
     fmat2 ball_position_covariance = 10;
+
     /// The {x, y} location we are kicking to
     fvec2 kick_target = 11;
     /// The type of game being played. For Game Controller
@@ -61,10 +62,10 @@ message Overview {
     input.GameState.Data.PenaltyReason penalty_reason = 14;
     /// Last time the camera image was seen
     google.protobuf.Timestamp last_camera_image = 15;
-    /// Last time the ball was seen
+    /// Last time vision objects were seen
     google.protobuf.Timestamp last_seen_ball = 16;
-    /// Last time the goals were seen
     google.protobuf.Timestamp last_seen_goal = 17;
+
     /// Walking path, as a sequence of coordinates
     repeated fvec3 walk_path_plan = 18;
     /// Walk command vector, pointing to target spot
