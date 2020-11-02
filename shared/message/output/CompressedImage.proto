@@ -25,21 +25,14 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Vector.proto";
 
-/**
- * Contains lens and image output information
- */
 message CompressedImage {
-
-    /// The lens type and details about the images it makes
     message Lens {
-        /// Types of projection of our lenses
         enum Projection {
             UNKNOWN     = 0;
             RECTILINEAR = 1;
             EQUIDISTANT = 2;
             EQUISOLID   = 3;
         }
-        /// The type of projection this lens is using
         Projection projection = 1;
         /// Normalised focal length: focal length in pixels / image width
         float focal_length = 2;
@@ -50,14 +43,12 @@ message CompressedImage {
         fvec2 k      = 5;
     }
     /// Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
-    /// see module::output::compressor::turbojpeg::Compressor::compress for full list
+    /// see module::output::compressor::turbojpeg::Compressor::compress for full list we use
     uint32 format = 1;
     /// Number of pixels of {x, y} of the image
-    uvec2 dimensions = 2;
-    /// The actual image pixel data
-    bytes data = 3;
-    /// Unique identifier for the camera which took the image
-    uint32 camera_id = 4;
+    uvec2  dimensions = 2;
+    bytes  data       = 3;
+    uint32 camera_id  = 4;
     /// Name of the camera that took the image
     string name = 5;
     /// Time when the image was taken

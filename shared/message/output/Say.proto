@@ -20,11 +20,6 @@ syntax = "proto3";
 
 package message.output;
 
-/**
- * Is a string for the robot to say
- */
 message Say {
-
-    /// The string to say
     string message = 1;
 }
