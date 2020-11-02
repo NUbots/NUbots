@@ -29,7 +29,6 @@ import "Vector.proto";
  * https://v22.wiki.optitrack.com/index.php?title=OptiTrack_Documentation_Wiki
  */
 message MotionCapture {
-
     /// Mocap reference points to track
     message Marker {
         uint32 id       = 1;
@@ -56,8 +55,6 @@ message MotionCapture {
         bool            trackingValid = 6;
 
         // Information added by the model
-
-        /// Identifying name of the rigid body
         string          name     = 7;
         fvec3           offset   = 8;
         uint32          parent   = 9;
@@ -70,7 +67,6 @@ message MotionCapture {
         repeated RigidBody bones = 2;
 
         // Information added by the model
-
         string name = 3;
     }
 
@@ -98,7 +94,6 @@ message MotionCapture {
         /// change over time
         repeated Channel channels = 2;
     }
-    /// Indicates the chronological order of the frame
     uint32 frameNumber = 1;
     float  latency     = 2;
     /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame

@@ -32,36 +32,29 @@ message GameEvents {
         OPPONENT        = 3;
         UNKNOWN         = 4;
     };
-    /// The colour of the party referred to by the context
+
     enum TeamColour {
         UNKNOWN_TEAM_COLOUR = 0;
         CYAN                = 1;
         MAGENTA             = 2;
     };
 
-    /// Current total scores for both teams
     message Score {
         uint32 ownScore      = 1;
         uint32 opponentScore = 2;
     }
 
-    /// Goal score notification message, with total score for that team
     message GoalScored {
         /// The actor/team who scored the goal
-        Context context = 1;
-        /// The total score of the actor/team who scored
-        uint32 totalScore = 2;
+        Context context    = 1;
+        uint32  totalScore = 2;
     }
 
-    /// Penalty notification message, with context and a resume play timestamp
     message Penalisation {
-        /// The party being penalised
         Context context = 1;
-        /// The exact player being penalised
-        uint32 robotId = 2;
+        uint32  robotId = 2;
         /// The timestamp when the robot may resume playing
-        google.protobuf.Timestamp ends = 3;
-        /// The type of infraction which caused the penalty
+        google.protobuf.Timestamp    ends   = 3;
         GameState.Data.PenaltyReason reason = 4;
     }
 
@@ -71,35 +64,27 @@ message GameEvents {
         uint32  robotId = 2;
     }
 
-    /// Message from a coach, and the intended recipient context
     message CoachMessage {
         /// The intended recipient(s)
         Context context = 1;
         string  message = 2;
     }
 
-    /// Message indicating half time has occurred
     message HalfTime {
-        /// True if currently first half
         bool firstHalf = 1;
     }
 
     message BallKickedOut {
         /// The party which kicked the ball out
-        Context context = 1;
-        /// The time when the ball was kicked out
-        google.protobuf.Timestamp time = 3;
+        Context                   context = 1;
+        google.protobuf.Timestamp time    = 3;
     }
 
     message KickOffTeam {
-        /// The party kicking off
         Context context = 1;
     }
 
-    /// Set of timestamps for different parts of the game, with current phase
-    /// state
     message GamePhase {
-        /// Current phase state, such as PLAYING or TIMEOUT
         GameState.Data.Phase phase = 1;
         /// Time when play begins.
         /// Set some time after game-states INITIAL or READY

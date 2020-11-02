@@ -57,17 +57,14 @@ message GameState {
 
         /// Used to keep track of penalised robots
         message Robot {
-            /// The robot which is being tracked
-            uint32 id = 1;
-            /// The infraction the robot being tracked committed
+            uint32        id             = 1;
             PenaltyReason penalty_reason = 2;
             /// The timestamp when the robot will be playing again
             google.protobuf.Timestamp unpenalised = 3;
         }
 
         message Team {
-            uint32 team_id = 1;
-            /// The team's current score
+            uint32         team_id       = 1;
             uint32         score         = 2;
             string         coach_message = 3;
             repeated Robot players       = 4;

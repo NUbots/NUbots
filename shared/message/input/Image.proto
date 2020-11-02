@@ -47,13 +47,11 @@ message Image {
     /// see module::output::compressor::turbojpeg::Compressor::compress for currently supported formats
     uint32 format = 1;
     /// Number of pixels of {x, y} of the image
-    uvec2 dimensions = 2;
-    /// The actual image pixel data
-    bytes  data      = 3;
-    uint32 camera_id = 4;
-    string name      = 5;
-    /// Time when the image was taken
-    google.protobuf.Timestamp timestamp = 6;
+    uvec2                     dimensions = 2;
+    bytes                     data       = 3;
+    uint32                    camera_id  = 4;
+    string                    name       = 5;
+    google.protobuf.Timestamp timestamp  = 6;
     /// World to camera Affine3D transform
     mat4 Hcw  = 7;
     Lens lens = 8;

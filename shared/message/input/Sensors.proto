@@ -26,9 +26,6 @@ import "Matrix.proto";
 import "Neutron.proto";
 import "Vector.proto";
 
-/**
- * Contains all sensor information for all sensors
- */
 message Sensors {
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ;
