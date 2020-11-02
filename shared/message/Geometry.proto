@@ -24,17 +24,11 @@ package message;
 import "Vector.proto";
 import "Matrix.proto";
 
-/**
- * A normal vector and the distance to the line
- */
 message Line {
     fvec3 normal   = 1;
     float distance = 2;
 }
 
-/**
- * The circle's centre position and radius
- */
 message Circle {
     double radius = 1;
     vec2   centre = 2;
@@ -44,7 +38,6 @@ message Circle {
  * A 3D matrix representation of the Ellipse
  */
 message Ellipse {
-
     /// See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
     mat3 ellipse = 1;
 }
@@ -53,23 +46,13 @@ message Ellipse {
  * Four corner points of a quadrilateral
  */
 message Quad {
-
-    /// Top left corner of the quadrilateral
     vec2 tl = 1;
-    /// Top right corner of the quadrilateral
     vec2 tr = 2;
-    /// Bottom left corner of the quadrilateral
     vec2 bl = 3;
-    /// Bottom right corner of the quadrilateral
     vec2 br = 4;
 }
 
-/**
- * Contains the polygon's location
- */
 message Polygon {
-
-    /// {x, y} location of the polygon
     vec2 point = 1;
 }
 
@@ -77,23 +60,15 @@ message Polygon {
  * Contains the positions of the four corners of a frustrum
  */
 message Frustum {
-
-    /// Top left corner of the frustrum
     vec3 tl = 1;
-    /// Top right corner of the frustrum
     vec3 tr = 2;
-    /// Bottom left corner of the frustrum
     vec3 bl = 3;
-    /// Bottom right corner of the frustrum
     vec3 br = 4;
 }
 
-/**
- * Contains the cone's axis, gradient, and radius
- */
 message Cone {
     /// 3D axis of the centre of the cone
     fvec3 axis = 1;
-    // Cos(theta) of the cone angle
+    /// Cos(theta) of the cone angle
     float radius = 3;
 }

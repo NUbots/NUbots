@@ -26,31 +26,20 @@ import "Vector.proto";
 import "message/Geometry.proto";
 import "Matrix.proto";
 
-/**
- * Contains ball measurement details
- */
 message Ball {
-
-    /// The technique used to make the measurement
     enum MeasurementType {
         UNKNOWN      = 0;
         REPROJECTION = 1;
         WIDTH_BASED  = 2;
     }
-
-    /// An instance of a ball measurement with covariance
     message Measurement {
-        /// The technique used to make the measurement
         MeasurementType type = 1;
         /// Vector from camera to ball in camera coordinates
-        fvec3 rBCc = 2;
-        /// Covariance of this measurement
+        fvec3 rBCc       = 2;
         fmat3 covariance = 3;
     }
-
     /// Cone describing the ball from the camera's perspective
-    Cone cone = 1;
-    /// Set of ball measurements
+    Cone                 cone         = 1;
     repeated Measurement measurements = 2;
     // Angular positions from the camera
 
@@ -58,18 +47,11 @@ message Ball {
     fvec2 angular_size   = 4;
     fvec4 colour         = 5;
 }
-
-/**
- * Sets of ball measurements, with timestamp, camera id's, and Hcw transforms
- */
 message Balls {
-
-    /// The camera which took the measurements
     uint32 camera_id = 1;
     /// When the measurements were taken
     google.protobuf.Timestamp timestamp = 2;
     /// Affine3d transform from world space to camera space at the time that the image was taken
-    mat4 Hcw = 3;
-    /// The set of ball measurements
+    mat4          Hcw   = 3;
     repeated Ball balls = 4;
 }

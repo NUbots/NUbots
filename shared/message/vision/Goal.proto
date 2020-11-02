@@ -25,12 +25,7 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
-/**
- * Goal position measurements and information
- */
 message Goal {
-
-    /// Side is UNKNOWN_SIDE, LEFT, or RIGHT
     enum Side {
         UNKNOWN_SIDE = 0;
         LEFT         = 1;
@@ -42,7 +37,6 @@ message Goal {
         OWN          = 1;
         OPPONENT     = 2;
     }
-
     enum MeasurementType {
         UNKNOWN_MEASUREMENT = 0;
         CENTRE              = 1;
@@ -51,21 +45,17 @@ message Goal {
         TOP_NORMAL          = 4;
         BASE_NORMAL         = 5;
     }
-
-    /// Instance of goal measurement
     message Measurement {
         MeasurementType type = 1;
         // Normal vectors point inwards towards the centre of the object
         fvec3 position   = 2;
         fmat3 covariance = 3;
     }
-
     message Post {
         fvec3 top      = 1;
         fvec3 bottom   = 2;
         float distance = 3;
     }
-
     Side                 side           = 1;
     Post                 post           = 3;
     repeated Measurement measurements   = 4;
@@ -74,17 +64,10 @@ message Goal {
     Team                 team           = 7;
 }
 
-/**
- * Set of Goals measurements, with timestamp, camera ids, and Hcw transforms
- */
 message Goals {
-
-    /// The camera which took the measurements
-    uint32 camera_id = 1;
-    /// When the measurements were taken
+    uint32                    camera_id = 1;
     google.protobuf.Timestamp timestamp = 2;
     /// Affine3d transform from world space to camera space at the time that the image was taken
-    mat4 Hcw = 3;
-    /// The set of goal measurements
+    mat4          Hcw   = 3;
     repeated Goal goals = 4;
 }

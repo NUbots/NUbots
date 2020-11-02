@@ -24,14 +24,9 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 
-/**
- * Contains the details of a Visual Mesh™ measurement
- */
 message VisualMesh {
-
     /// The "almost" concentric rings of the mesh centred about the robot
     message Row {
-
         /// The angle out from the camera
         float phi = 1;
         /// The on-screen nodes in the row
