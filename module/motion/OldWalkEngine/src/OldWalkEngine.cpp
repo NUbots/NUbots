@@ -71,7 +71,6 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::nusight::graph;
     using utility::support::Expression;
 
