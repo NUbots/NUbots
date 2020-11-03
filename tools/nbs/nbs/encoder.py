@@ -10,6 +10,12 @@ class Encoder:
     def __init__(self, path):
         self._file = gzip.open(path, "rb") if path.endswith("nbz") or path.endswith(".gz") else open(path, "wb")
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
     def write(self, timestamp, message):
         # NBS File Format:
         # 3 Bytes - NUClear radiation symbol header, useful for synchronisation when attaching to an existing stream

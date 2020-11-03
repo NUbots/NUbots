@@ -19,13 +19,8 @@ RUN echo "Server=https://archive.archlinux.org/repos/2020/05/05/\$repo/os/\$arch
 # or newer than the arch image date
 RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
-# Create the nubots user, and setup sudo so no password is required
-RUN useradd --no-log-init -m -U nubots
-COPY --chown=root:root etc/sudoers.d/user /etc/sudoers.d/user
-RUN chmod 440 /etc/sudoers.d/user
-
 # Add a script that installs packages
-COPY --chown=nubots:nubots usr/local/bin/install-package /usr/local/bin/install-package
+COPY usr/local/bin/install-package /usr/local/bin/install-package
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
@@ -43,27 +38,23 @@ RUN install-package \
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-COPY --chown=root:root usr/pip.conf /usr/pip.conf
+COPY etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
 
 # Make sure /usr/local is checked for libraries and binaries
-COPY --chown=root:root etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
+COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
 RUN ldconfig
-
-# Setup /usr/local owned by nubots and swap to the nubots user
-RUN chown -R nubots:nubots /usr/local
-USER nubots
 
 # Make a symlink from /usr/local/lib to /usr/local/lib64 so library install location is irrelevant
 RUN cd /usr/local && ln -sf lib lib64
 
 # Generate toolchain files for the generic platform
-COPY --chown=nubots:nubots usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
-COPY --chown=nubots:nubots usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
-RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
+COPY usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
+COPY usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
+RUN python /usr/local/generate_toolchain.py --prefix /usr
 
 # Copy over a tool to install simple standard conforming libraries from source
-COPY --chown=nubots:nubots usr/local/bin/download-and-extract /usr/local/bin/download-and-extract
-COPY --chown=nubots:nubots usr/local/bin/install-from-source /usr/local/bin/install-from-source
+COPY usr/local/bin/download-and-extract /usr/local/bin/download-and-extract
+COPY usr/local/bin/install-from-source /usr/local/bin/install-from-source
 RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
@@ -74,8 +65,8 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
 # Generate toolchain files for generic
-COPY --chown=nubots:nubots usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
-RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
+COPY usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
+RUN python /usr/local/generate_toolchain.py --prefix /usr
 
 #############################################
 ### ADD NEW SYTEM PROGRAMS/LIBRARIES HERE ###
@@ -91,7 +82,7 @@ RUN sudo python /usr/local/generate_toolchain.py --prefix /usr
 ARG platform=generic
 
 # Generate toolchain files for the current platform
-COPY --chown=nubots:nubots usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_toolchain.py
+COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_toolchain.py
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
@@ -110,7 +101,7 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.100.
 
 # Intel graphics compiler
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v9.0.0-1.tar.gz
-COPY --chown=nubots:nubots usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
+COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v9.0.0.tar.gz
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.3041.tar.gz \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
@@ -132,7 +123,7 @@ RUN install-from-source https://github.com/intel/media-driver/archive/intel-medi
 
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
-COPY --chown=nubots:nubots usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
+COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.01.15264.tar.gz \
     -DNEO_DRIVER_VERSION=19.40.14409 \
     -DSKIP_ALL_ULT=ON \
@@ -140,7 +131,7 @@ RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute
     -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
 
 # Install OpenCL C and C++ headers
-COPY --chown=nubots:nubots usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
+COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
 RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
     -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
@@ -151,23 +142,22 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source-with-patches https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz \
-    https://github.com/OCL-dev/ocl-icd/commit/f83df609a3357314ddff2def6b7e7e2c5b93078c.patch --
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
 
 # OpenBLAS
 RUN install-package gcc-fortran
-COPY --chown=nubots:nubots usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
+COPY usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 
 # Armadillo
 RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
     -DDETECT_HDF5=OFF \
     -DBUILD_SHARED_LIBS=ON
-COPY --chown=nubots:nubots usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
+COPY usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
 
 # Eigen3
-COPY --chown=nubots:nubots usr/local/package/eigen3/deprecated-copy.patch usr/local/package/deprecated-copy.patch
-COPY --chown=nubots:nubots usr/local/package/eigen3/cxx17-overalign.patch usr/local/package/cxx17-overalign.patch
+COPY usr/local/package/eigen3/deprecated-copy.patch usr/local/package/deprecated-copy.patch
+COPY usr/local/package/eigen3/cxx17-overalign.patch usr/local/package/cxx17-overalign.patch
 RUN install-from-source-with-patches https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2 \
     /usr/local/package/deprecated-copy.patch \
     /usr/local/package/cxx17-overalign.patch --
@@ -179,7 +169,7 @@ RUN install-from-source \
     --enable-minimal
 
 # Protobuf
-RUN sudo install-package protobuf
+RUN install-package protobuf
 RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-cpp-3.11.2.tar.gz \
     --with-zlib=/usr/local \
     --with-protoc=/usr/sbin/protoc
@@ -245,8 +235,12 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/m
 RUN install-from-source ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.2.1.2.tar.bz2 \
     --without-debug
 RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.gz
-COPY --chown=nubots:nubots usr/local/package/espeak.sh /usr/local/package/espeak.sh
+COPY usr/local/package/espeak.sh /usr/local/package/espeak.sh
 RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
+
+#######################################
+### ADD NEW PROGRAMS/LIBRARIES HERE ###
+#######################################
 
 # Install python libraries
 RUN pip install \
@@ -272,13 +266,24 @@ RUN install-package \
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
-    cmake-format==0.6.9 \
+    cmake-format==0.6.10 \
     isort==4.3.21 \
     black==19.10b0
 
-#######################################
-### ADD NEW PROGRAMS/LIBRARIES HERE ###
-#######################################
+##############################
+### SETUP THE USER ACCOUNT ###
+##############################
+
+# Setup the sudo so it can be run without a password
+COPY etc/sudoers.d/user /etc/sudoers.d/user
+RUN chmod 440 /etc/sudoers.d/user
+
+# Create the user, and setup sudo so no password is required
+ARG user_uid=1000
+ARG user_gid=$user_uid
+RUN groupadd --gid $user_gid nubots \
+    && useradd --uid $user_uid --gid $user_gid -m nubots
+USER nubots
 
 # Copy ssh keys over to the system
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
@@ -289,6 +294,6 @@ COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 
 # Setup the locations where we will mount our folders
-RUN install -d -m 0755 -o nubots -g nubots /home/nubots/NUbots
-RUN install -d -m 0755 -o nubots -g nubots /home/nubots/build
+RUN install -d -m 0755 /home/nubots/NUbots
+RUN install -d -m 0777 /home/nubots/build
 WORKDIR /home/nubots/NUbots
