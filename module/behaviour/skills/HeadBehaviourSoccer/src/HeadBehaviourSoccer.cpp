@@ -459,15 +459,9 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<Eigen::Vector2d> fixationPoints;
             std::vector<Eigen::Vector2d> fixationSizes;
-            Eigen::Vector2d currentPos;
-            for (const auto& servo : sensors.servo) {
-                if (servo.id == ServoID::HEAD_YAW) {
-                    currentPos[0] = servo.present_position;
-                }
-                if (servo.id == ServoID::HEAD_PITCH) {
-                    currentPos[1] = servo.present_position;
-                }
-            }
+
+            Eigen::Vector2d currentPos(sensors.servo[ServoID::HEAD_YAW].present_position,
+                                       sensors.servo[ServoID::HEAD_PITCH].present_position);
 
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // Should be vec2 (yaw,pitch)
