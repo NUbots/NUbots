@@ -74,6 +74,8 @@ def build_platform(platform):
             "BUILDKIT_INLINE_CACHE=1",
             "--build-arg",
             "platform={}".format(platform if platform != "buildkit" else "generic"),
+            "--build-arg",
+            "user_uid={}".format(os.getuid()),
             "-t",
             local_tag,
         ],
