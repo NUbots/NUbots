@@ -1,7 +1,4 @@
-import clang.cindex
-
 import re
-import itertools
 
 # A structure for holding reactors and functions
 class Tree:

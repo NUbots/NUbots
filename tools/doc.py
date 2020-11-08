@@ -9,7 +9,8 @@ import os
 import b
 from dockerise import run_on_docker
 import analyse
-from clang.cindex import SourceLocation
+
+# from clang.cindex import SourceLocation
 
 
 def generateLocationJSON(location):
@@ -61,14 +62,15 @@ def generateReactorJSON(reactor):
     return out
 
 
-def generateModuleJSON(module, reactors):
+def generateModuleJSONStart(module):
     out = "{"
     out += '"name":"{}",'.format(module)
     out += '"reactors":['
-    for reactor in reactors:
-        out += generateReactorJSON(reactor) + ","
-    out = out[:-1]
-    out += "]"
+    return out
+
+
+def generateModuleJSONEnd():
+    out = "]"
     out += "}"
     return out
 
@@ -86,8 +88,6 @@ def register(command):
 
 @run_on_docker
 def run(outdir, indir, **kwargs):
-    index = analyse.createIndex()
-
     # toWrite = open("out.txt", "w")
     # toWrite.write(analyse.printTree(analyse.translate(index, indir).translationUnit.cursor))
     # toWrite.close()
@@ -100,23 +100,19 @@ def run(outdir, indir, **kwargs):
         if dirpath.split("/")[-1] == "src":
             modules["/".join(dirpath.split("/")[0:-1])] = filenames
 
-    toOutput = "{"
-
     # Loop through each module, looking for reactors then printing them
     for module, files in modules.items():
+        index = analyse.createIndex()
         print("Working on module", module)
-        reactors = []
+
+        toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json"), "w")
+        toWrite.write(generateModuleJSONStart(module))
+
         for f in files:
             if os.path.splitext(f)[1] == ".cpp":
                 print("    Working on file", f)
+                for reactor in analyse.createTree(index, os.path.join(module, "src", f)).reactors:
+                    toWrite.write(generateReactorJSON(reactor))
 
-                tree = analyse.createTree(index, os.path.join(module, "src", f))
-
-                reactors.extend(tree.reactors)
-        toOutput += generateModuleJSON(module, reactors)
-
-    toOutput = toOutput[:-1] + "}"
-
-    toWrite = open(os.path.join(outdir, "/documentation.json"), "w")
-    toWrite.write(toOutput)
-    toWrite.close()
+        toWrite.write(generateModuleJSONEnd())
+        toWrite.close()

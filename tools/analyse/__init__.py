@@ -3,9 +3,8 @@ from .Tree import Tree, On, Emit, Function, Reactor
 import clang.cindex
 
 import re
-import itertools
-
 import os.path
+
 
 # TODO put in a config file
 libraryFile = "/usr/local/lib"  # llvm-config --libdir
