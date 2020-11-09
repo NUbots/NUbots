@@ -111,8 +111,8 @@ def run(outdir, indir, **kwargs):
         for f in files:
             if os.path.splitext(f)[1] == ".cpp":
                 print("    Working on file", f)
-                for reactor in analyse.createTree(index, os.path.join(module, "src", f)).reactors:
-                    toWrite.write(generateReactorJSON(reactor))
+                for reactor in analyse.createTree(index, os.path.join(module, "src", f), indir).reactors:
+                    toWrite.write(generateReactorJSON(reactor) + ",")
 
         toWrite.write(generateModuleJSONEnd())
         toWrite.close()

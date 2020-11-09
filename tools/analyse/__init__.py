@@ -15,11 +15,21 @@ parseArgs = [
     "-Inuclear/message/include",
     "-I/usr/local/lib/clang/9.0.1/include",  # clang include path, clang -E -v -
     "-I/usr/local/include/eigen3",
-    # "-Wall",
 ]
 
 whitelist = [
-    "/usr/local/include/nuclear_bits/",
+    "/"
+    # "/usr/local/include/nuclear_bits/clock.hpp",
+    "/usr/local/include/nuclear_bits/dsl/",
+    # "/usr/local/include/nuclear_bits/Environment.hpp",
+    "/usr/local/include/nuclear_bits/extension/",
+    # "/usr/local/include/nuclear_bits/LogLevel.hpp",
+    # "/usr/local/include/nuclear_bits/message/",
+    # "/usr/local/include/nuclear_bits/threading/",
+    "/usr/local/include/nuclear_bits/util/",
+    "/usr/local/include/nuclear_bits/PowerPlant.hpp",
+    "/usr/local/include/nuclear_bits/PowerPlant.ipp",
+    "/usr/local/include/nuclear_bits/Reactor.hpp",
 ]
 
 # Creates a index for parsing
@@ -44,7 +54,7 @@ def printTree(node, tab=0):
 
 
 # Creates a tree of reactors, on statements and emit statements
-def createTree(index, f):
+def createTree(index, f, indir):
     translationUnit = index.parse(f, parseArgs)
     root = Tree(translationUnit.diagnostics)
 
@@ -56,7 +66,10 @@ def createTree(index, f):
 
     # For the initial loop through make sure that the file the node comes from is interesting to us
     for child in translationUnit.cursor.get_children():
-        good = not os.path.isabs(child.location.file.name)
+
+        # Check that the file is in the folder that was given
+        good = os.path.commonpath([child.location.file.name, indir]) == indir
+
         if not good:
             for path in whitelist:
                 if os.path.commonpath([child.location.file.name, path]) == path:
