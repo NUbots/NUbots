@@ -22,11 +22,16 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
 
+# Install latest archlinux-keyring package so we have the most up-to-date keys
+RUN install-package wget
+RUN wget https://archive.archlinux.org/repos/last/core/os/x86_64/archlinux-keyring-20201028-1-any.pkg.tar.zst \
+    -O /var/tmp/archlinux-keyring-20201028-1-any.pkg.tar.zst
+RUN pacman -U /var/tmp/archlinux-keyring-20201028-1-any.pkg.tar.zst --noconfirm
+
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
 RUN install-package \
     sudo \
-    wget \
     python \
     python-pip \
     base-devel \
