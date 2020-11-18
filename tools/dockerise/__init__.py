@@ -148,9 +148,7 @@ def run_on_docker(func):
                 nargs="?",
                 help="The image to use for the docker container",
             )
-            command.add_argument(
-                "--network", dest="network", help="Run the container on the specified docker network"
-            )
+            command.add_argument("--network", dest="network", help="Run the container on the specified docker network")
 
             func(command)
 
