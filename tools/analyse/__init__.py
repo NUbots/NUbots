@@ -296,3 +296,45 @@ def isClass(node):
 # The first child of a class decleration will have information about the parent if it is an child
 def isInherited(node, name):
     return node.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER and node.type.spelling == name
+
+
+class adjacencyList:
+    def __init__(self):
+        innerList = {}
+        size = 0
+
+    def add_edge(self, u, v):
+        if not self.innerList[u]:
+            self.innerlist[u] = []
+        self.innerList[u].append(v)
+
+    def __getitem__(self, key):
+        return self.innerList[key]
+
+    def __len__(self):
+        return self.size
+
+
+# Topological sorts a given adjacency list
+def topologicalSort(adj):
+    tSorted = []
+    visit = [False for i in range(len(adj))]
+
+    for i in range(len(adj)):
+        if not visit[i]:
+            topologicalSortRecurs(adj, i, tSorted, visit)
+
+    return tSorted
+
+
+def topologicalSortRecurs(adj, start, tSorted, visit):
+    visit[start] = True
+    trav = adj[start]
+    travIndex = 0
+    while trav != None:
+        v = trav[travIndex]
+        if not visit[v]:
+            topologicalSortRecurs(adj, v, tSorted, visit)
+        travIndex += 1
+
+    tSorted.append(start)
