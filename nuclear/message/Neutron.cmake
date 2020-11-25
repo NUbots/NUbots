@@ -58,8 +58,8 @@ foreach(proto ${message_protobufs})
   # buffer files have. If these change we just have to hope that it'll work until someone runs cmake again
   execute_process(
     COMMAND
-    ${PROTOBUF_PROTOC_EXECUTABLE} --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/dependencies.txt
-    --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/descriptor.pb -I${message_parent_dir} -I${builtin_dir} ${proto}
+      ${PROTOBUF_PROTOC_EXECUTABLE} --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/dependencies.txt
+      --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/descriptor.pb -I${message_parent_dir} -I${builtin_dir} ${proto}
   )
 
   file(READ ${CMAKE_CURRENT_BINARY_DIR}/dependencies.txt dependencies)
@@ -134,7 +134,7 @@ endforeach(proto ${message_protobufs})
 
 # * Make this library be a system include when it's linked into other libraries
 # * This will prevent clang-tidy from looking at the headers
-add_library(nuclear_message_protobuf ${NUCLEAR_LINK_TYPE} ${protobuf_src})
+add_library(nuclear_message_protobuf OBJECT ${protobuf_src})
 set_target_properties(nuclear_message_protobuf PROPERTIES CXX_CLANG_TIDY "")
 target_include_directories(nuclear_message_protobuf PRIVATE ${pb_out})
 target_include_directories(nuclear_message_protobuf SYSTEM INTERFACE ${pb_out})
@@ -146,4 +146,11 @@ target_link_libraries(nuclear_message PUBLIC nuclear_message_protobuf)
 target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
 target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(nuclear_message PUBLIC ${nt_out})
+
+# Generate in the lib folder so it gets installed
+if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
+  set_property(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+endif()
+
+# Alias to the namespaced version
 add_library(nuclear::message ALIAS nuclear_message)

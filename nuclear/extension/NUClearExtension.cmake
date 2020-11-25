@@ -25,5 +25,10 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/${NUCLEAR_EXTENSION_DIR}/libraries.cmake")
   include("${PROJECT_SOURCE_DIR}/${NUCLEAR_EXTENSION_DIR}/libraries.cmake")
 endif()
 
+# Generate in the lib folder so it gets installed
+if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
+  set_property(TARGET nuclear_extension PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+endif()
+
 # Alias to the namespaced version
 add_library(nuclear::extension ALIAS nuclear_extension)

@@ -83,8 +83,8 @@ endif(USE_CUSTOM_CLOCK)
 
 # Our banner file for placing at the top of the roles
 set(NUCLEAR_ROLE_BANNER_FILE
-"${PROJECT_SOURCE_DIR}/cmake/banner.png"
-CACHE PATH "The path the banner to print at the start of each role execution" FORCE
+    "${PROJECT_SOURCE_DIR}/cmake/banner.png"
+    CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
 
 # Include the NUClear roles system
