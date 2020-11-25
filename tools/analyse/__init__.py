@@ -5,10 +5,9 @@ import clang.cindex
 import re
 import os.path
 
-
 # TODO put in a config file
-libraryFile = "/usr/local/lib"  # llvm-config --libdir
-clang.cindex.Config.set_library_path(libraryFile)
+libraryPath = "/usr/local/lib"  # llvm-config --libdir
+clang.cindex.Config.set_library_path(libraryPath)
 parseArgs = [
     "-I../build/shared",
     "-Ishared",
@@ -18,18 +17,18 @@ parseArgs = [
 ]
 
 whitelist = [
-    "/"
+    "/usr/local/include/nuclear_bits/",
     # "/usr/local/include/nuclear_bits/clock.hpp",
-    "/usr/local/include/nuclear_bits/dsl/",
+    # "/usr/local/include/nuclear_bits/dsl/",
     # "/usr/local/include/nuclear_bits/Environment.hpp",
-    "/usr/local/include/nuclear_bits/extension/",
+    # "/usr/local/include/nuclear_bits/extension/",
     # "/usr/local/include/nuclear_bits/LogLevel.hpp",
     # "/usr/local/include/nuclear_bits/message/",
     # "/usr/local/include/nuclear_bits/threading/",
-    "/usr/local/include/nuclear_bits/util/",
-    "/usr/local/include/nuclear_bits/PowerPlant.hpp",
-    "/usr/local/include/nuclear_bits/PowerPlant.ipp",
-    "/usr/local/include/nuclear_bits/Reactor.hpp",
+    # "/usr/local/include/nuclear_bits/util/",
+    # "/usr/local/include/nuclear_bits/PowerPlant.hpp",
+    # "/usr/local/include/nuclear_bits/PowerPlant.ipp",
+    # "/usr/local/include/nuclear_bits/Reactor.hpp",
 ]
 
 # Creates a index for parsing
@@ -54,21 +53,38 @@ def printTree(node, tab=0):
 
 
 # Creates a tree of reactors, on statements and emit statements
-def createTree(index, f, indir):
-    translationUnit = index.parse(f, parseArgs)
-    root = Tree(translationUnit.diagnostics)
+def createTree(files, folder):
+    index = createIndex()
+    translationUnits = []
+    diagnostics = list()
+    for f in files:
+        print(f)
+        if os.path.splitext(f)[1] == ".cpp":  # TODO remember why this is necessary
+            translationUnits.append(index.parse(f, parseArgs))
+            diagnostics += list(translationUnits[-1].diagnostics)
+    root = Tree(diagnostics)
 
     # Make sure that there are no errors in the parsing
-    for diagnostic in translationUnit.diagnostics:
+    for diagnostic in diagnostics:
         if diagnostic.severity >= clang.cindex.Diagnostic.Error:
             print(diagnostic)
             return root
 
+    adjList = adjacencyList()
+
+    for tu in translationUnits:
+        for fileInclusion in tu.get_includes():
+            if os.path.commonpath([fileInclusion.include, folder]) == folder:
+                print(tu.spelling, fileInclusion.include.name)
+                adjList.add_edge(tu.spelling, fileInclusion.include.name)
+
+    order = topologicalSort(adjList)
+
     # For the initial loop through make sure that the file the node comes from is interesting to us
-    for child in translationUnit.cursor.get_children():
+    for child in translationUnits.cursor.get_children():
 
         # Check that the file is in the folder that was given
-        good = os.path.commonpath([child.location.file.name, indir]) == indir
+        good = os.path.commonpath([child.location.file.name, folder]) == folder
 
         if not good:
             for path in whitelist:
@@ -314,27 +330,32 @@ class adjacencyList:
     def __len__(self):
         return self.size
 
+    def __iter__(self):
+        return iter(self.innerList)
+
 
 # Topological sorts a given adjacency list
 def topologicalSort(adj):
     tSorted = []
-    visit = [False for i in range(len(adj))]
+    visit = {}
+    for u in adj:
+        visit[u] = False
 
-    for i in range(len(adj)):
-        if not visit[i]:
-            topologicalSortRecurs(adj, i, tSorted, visit)
+    for u in adj:
+        if not visit[u]:
+            _topologicalSortRecurs(adj, u, tSorted, visit)
 
     return tSorted
 
 
-def topologicalSortRecurs(adj, start, tSorted, visit):
+def _topologicalSortRecurs(adj, start, tSorted, visit):
     visit[start] = True
     trav = adj[start]
     travIndex = 0
     while trav != None:
         v = trav[travIndex]
         if not visit[v]:
-            topologicalSortRecurs(adj, v, tSorted, visit)
+            _topologicalSortRecurs(adj, v, tSorted, visit)
         travIndex += 1
 
     tSorted.append(start)

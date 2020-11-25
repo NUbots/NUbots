@@ -62,16 +62,15 @@ def generateReactorJSON(reactor):
     return out
 
 
-def generateModuleJSONStart(module):
+def generateModuleJSON(tree, name):
     out = "{"
-    out += '"name":"{}",'.format(module)
+    out += '"name":"{}",'.format(name)
     out += '"reactors":['
-    return out
-
-
-def generateModuleJSONEnd():
-    out = "]"
-    out += "}"
+    for reactor in tree.reactors:
+        out += generateReactorJSON(reactor)
+        out += ","
+    out = out[:-1]
+    out += "]}"
     return out
 
 
@@ -88,31 +87,21 @@ def register(command):
 
 @run_on_docker
 def run(outdir, indir, **kwargs):
-    # toWrite = open("out.txt", "w")
-    # toWrite.write(analyse.printTree(analyse.translate(index, indir).translationUnit.cursor))
-    # toWrite.close()
-    # return
-
     modules = {}
 
     # Find all modules and each file in them by walking the file tree
     for dirpath, dirnames, filenames in os.walk(indir):
         if dirpath.split("/")[-1] == "src":
-            modules["/".join(dirpath.split("/")[0:-1])] = filenames
+            modules["/".join(dirpath.split("/")[0:-1])] = []
+            for filename in filenames:
+                modules["/".join(dirpath.split("/")[0:-1])].append(os.path.join(dirpath, filename))
 
     # Loop through each module, looking for reactors then printing them
     for module, files in modules.items():
-        index = analyse.createIndex()
         print("Working on module", module)
 
         toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json"), "w")
-        toWrite.write(generateModuleJSONStart(module))
 
-        for f in files:
-            if os.path.splitext(f)[1] == ".cpp":
-                print("    Working on file", f)
-                for reactor in analyse.createTree(index, os.path.join(module, "src", f), indir).reactors:
-                    toWrite.write(generateReactorJSON(reactor) + ",")
+        toWrite.write(generateModuleJSON(analyse.createTree(files, module), module))
 
-        toWrite.write(generateModuleJSONEnd())
         toWrite.close()
