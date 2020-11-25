@@ -41,6 +41,31 @@ namespace motion {
 
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
+        imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
+            Eigen::Vector3f RPY =
+                utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<float>());
+
+            // compute the pitch offset to the currently wanted pitch of the engine
+            float wanted_pitch = params.trunk_pitch
+                                 + params.trunk_pitch_p_coef_forward * walk_engine.getFootstep().getNext().x()
+                                 + params.trunk_pitch_p_coef_turn * std::abs(walk_engine.getFootstep().getNext().z());
+            RPY.y() += wanted_pitch;
+
+            // threshold pitch and roll
+            if (std::abs(RPY.x()) > config.imu_roll_threshold) {
+                log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
+                                               std::abs(RPY.x()),
+                                               config.imu_roll_threshold));
+                walk_engine.requestPause();
+            }
+            else if (std::abs(RPY.y()) > config.imu_pitch_threshold) {
+                log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
+                                               std::abs(RPY.y()),
+                                               config.imu_pitch_threshold));
+                walk_engine.requestPause();
+            }
+        });
+
         on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file QuinticWalk.yaml
             params.freq                          = cfg["walk"]["freq"].as<float>();
@@ -87,6 +112,10 @@ namespace motion {
                 if ((i >= 6) && (i < 18)) {
                     jointGains[i] = cfg["gains"]["legs"].as<float>();
                 }
+            }
+
+            if (!config.imu_active) {
+                imu_reaction.disable();
             }
         });
 
@@ -138,34 +167,6 @@ namespace motion {
 
             // Update orders
             current_orders = orders;
-        });
-
-        imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            if (!config.imu_active) {
-                imu_reaction.disable();
-            }
-            Eigen::Vector3f RPY =
-                utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<float>());
-
-            // compute the pitch offset to the currently wanted pitch of the engine
-            float wanted_pitch = params.trunk_pitch
-                                 + params.trunk_pitch_p_coef_forward * walk_engine.getFootstep().getNext().x()
-                                 + params.trunk_pitch_p_coef_turn * std::abs(walk_engine.getFootstep().getNext().z());
-            RPY.y() += wanted_pitch;
-
-            // threshold pitch and roll
-            if (std::abs(RPY.x()) > config.imu_roll_threshold) {
-                log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
-                                               std::abs(RPY.x()),
-                                               config.imu_roll_threshold));
-                walk_engine.requestPause();
-            }
-            else if (std::abs(RPY.y()) > config.imu_pitch_threshold) {
-                log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
-                                               std::abs(RPY.y()),
-                                               config.imu_pitch_threshold));
-                walk_engine.requestPause();
-            }
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
