@@ -29,6 +29,7 @@
 #include "utility/motion/splines/SplineContainer.hpp"
 #include "utility/motion/splines/TrajectoryUtils.hpp"
 
+// Stores values of n, k and n choose k.
 std::vector<std::vector<long int>> C = {{3, 0, 1},
                                         {13, 5, 1287},
                                         {39, 38, 39},
@@ -130,6 +131,7 @@ std::vector<std::vector<long int>> C = {{3, 0, 1},
 TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
     utility::motion::splines::Combination comb;
 
+    // Loop over all our test values and see if Combination gives the correct result
     for (size_t i = 0; i < C.size(); i++) {
         int n          = C[i][0];
         int k          = C[i][1];
@@ -140,6 +142,7 @@ TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
     }
 }
 
+// Each vector represents
 std::vector<std::vector<long int>> P = {{3, 3, 2, 2, 0, 5, 11, 529985, 236357, 84352, 22584},
                                         {2, 3, 2, 3, 3, 1, 20, 6897261, 1698523, 334646, 49452},
                                         {1, 3, 2, 1, 5, 5, 2, 115, 209, 330, 396},
@@ -226,5 +229,35 @@ TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
         REQUIRE(vel == poly_vel);
         REQUIRE(acc == poly_acc);
         REQUIRE(jerk == poly_jerk);
+    }
+}
+
+std::vector<float> times                = {1.0f, 2.0f, 3.0f};
+std::vector<float> position             = {1.0f, 2.0f, 1.0f};
+std::vector<float> velocity             = {-2.0f, 0.0f, -2.0f};
+std::vector<float> acceleration         = {0.0f, 0.0f, 0.0f};
+std::vector<std::vector<float>> splines = {{12.0f, -91.0f, 266.0f, -372.0f, 248.0f, -62.0f},
+                                           {-12.0f, 149.0f, -730.0f, 1764.0f, -2104.0f, 994.0f}};
+
+TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
+    utility::motion::splines::SmoothSpline<float> spline();
+
+
+    for (int i = 0; i < times.size(); i++) {
+        spline.addPoint(times[i], position[i], velocity[i], acceleration[i]);
+    }
+
+    spline.computerSplines();
+
+    if (spline.size() != splines.size()) {
+        INFO("Incorrect size. Expected " << splines.size() << ", got " << spline.size() << ".");
+        REQUIRE(false);
+    }
+
+    for (int i = 0; i < spline.size(); i++) {
+        std::vector<Scalar> splineResult = spline.get(i).polynom.getCoefs();
+        for (int j = 0; j < splineResult.size(); j++) {
+            REQUIRE(splineResult[j] == splines[i][j]);
+        }
     }
 }
