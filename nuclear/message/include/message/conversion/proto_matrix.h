@@ -1368,9 +1368,7 @@ namespace conversion {
         proto.mutable_v()->Reserve(vector.size());
 
         // Copy across
-        Eigen::Map<DynamicVecProto<Proto>>(
-            const_cast<typename DynamicVecProto<Proto>::Scalar*>(proto.mutable_v()->data()),
-            vector.size()) = vector;
+        Eigen::Map<DynamicVecProto<Proto>>(proto.mutable_v()->data(), vector.size()) = vector;
 
         return proto;
     }
@@ -1397,10 +1395,7 @@ namespace conversion {
         proto.mutable_v()->Resize(matrix.size(), 0);
 
         // Copy over
-        Eigen::Map<DynamicMatProto<Proto>>(
-            const_cast<typename DynamicMatProto<Proto>::Scalar*>(proto.mutable_v()->data()),
-            matrix.rows(),
-            matrix.cols()) = matrix;
+        Eigen::Map<DynamicMatProto<Proto>>(proto.mutable_v()->data(), matrix.rows(), matrix.cols()) = matrix;
 
         return proto;
     }
@@ -1426,9 +1421,8 @@ namespace conversion {
         proto.mutable_v()->resize(vector.size());
 
         // Copy the data across
-        Eigen::Map<::message::conversion::math::cvec>(
-            reinterpret_cast<uint8_t*>(const_cast<char*>(proto.mutable_v()->data())),
-            proto.v().size()) = vector;
+        Eigen::Map<::message::conversion::math::cvec>(reinterpret_cast<uint8_t*>(proto.mutable_v()->data()),
+                                                      proto.v().size()) = vector;
 
         return proto;
     }
@@ -1453,10 +1447,9 @@ namespace conversion {
         proto.mutable_v()->resize(matrix.size());
 
         // Copy it across
-        Eigen::Map<::message::conversion::math::cmat>(
-            reinterpret_cast<uint8_t*>(const_cast<char*>(proto.mutable_v()->data())),
-            matrix.rows(),
-            matrix.cols()) = matrix;
+        Eigen::Map<::message::conversion::math::cmat>(reinterpret_cast<uint8_t*>(proto.mutable_v()->data()),
+                                                      matrix.rows(),
+                                                      matrix.cols()) = matrix;
 
         return proto;
     }

@@ -98,7 +98,7 @@ namespace support {
 
                         // Rescue any existing recorders that we want to keep
                         std::map<std::string, ReactionHandle> new_handles;
-                        for (auto& setting : cfg["messages"].config) {
+                        for (const auto& setting : cfg["messages"].config) {
                             std::string name = setting.first.as<std::string>();
                             bool enabled     = setting.second.as<bool>();
 
@@ -116,7 +116,7 @@ namespace support {
                         }
 
                         // Add any new recorders that we don't have yet
-                        for (auto& setting : cfg["messages"].config) {
+                        for (const auto& setting : cfg["messages"].config) {
                             std::string name = setting.first.as<std::string>();
                             bool enabled     = setting.second.as<bool>();
 

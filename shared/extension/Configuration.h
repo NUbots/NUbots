@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <nuclear>
+#include <utility>
 #include <yaml-cpp/yaml.h>
 
 #include "FileWatch.h"

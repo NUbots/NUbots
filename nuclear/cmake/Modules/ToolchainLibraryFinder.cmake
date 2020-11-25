@@ -30,7 +30,7 @@ function(ToolchainLibraryFinder)
     )
 
     # Setup and export our variables
-    set(required_vars ${required_vars} "${PACKAGE_NAME}_INCLUDE_DIR")
+    list(APPEND required_vars "${PACKAGE_NAME}_INCLUDE_DIR")
     set(${PACKAGE_NAME}_INCLUDE_DIRS
         ${${PACKAGE_NAME}_INCLUDE_DIR}
         PARENT_SCOPE
@@ -49,7 +49,7 @@ function(ToolchainLibraryFinder)
     )
 
     # Setup and export our variables
-    set(required_vars ${required_vars} "${PACKAGE_NAME}_LIBRARY")
+    list(APPEND required_vars "${PACKAGE_NAME}_LIBRARY")
     set(${PACKAGE_NAME}_LIBRARIES
         ${${PACKAGE_NAME}_LIBRARY}
         PARENT_SCOPE
@@ -68,7 +68,7 @@ function(ToolchainLibraryFinder)
     )
 
     # Setup and export our variables
-    set(required_vars ${required_vars} "${PACKAGE_NAME}_BINARY")
+    list(APPEND required_vars "${PACKAGE_NAME}_BINARY")
     set(${PACKAGE_NAME}_BINARY
         ${${PACKAGE_NAME}_BINARY}
         PARENT_SCOPE
@@ -90,8 +90,8 @@ function(ToolchainLibraryFinder)
     if(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
       exec_program(
         ${${PACKAGE_NAME}_BINARY} ARGS
-        ${PACKAGE_VERSION_BINARY_ARGUMENTS} OUTPUT_VARIABLE
-        full_version_string
+        ${PACKAGE_VERSION_BINARY_ARGUMENTS}
+        OUTPUT_VARIABLE full_version_string
       )
     endif(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
 
@@ -118,5 +118,16 @@ function(ToolchainLibraryFinder)
       ${PACKAGE_NAME}_FOUND
       PARENT_SCOPE
   )
+
+  # Create our imported library
+  add_library(${PACKAGE_NAME}::${PACKAGE_NAME} UNKNOWN IMPORTED)
+
+  if(PACKAGE_LIBRARY)
+    set_target_properties(${PACKAGE_NAME}::${PACKAGE_NAME} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_LIBRARY})
+  endif(PACKAGE_LIBRARY)
+
+  if(PACKAGE_HEADER)
+    target_include_directories(${PACKAGE_NAME}::${PACKAGE_NAME} SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIR})
+  endif(PACKAGE_HEADER)
 
 endfunction(ToolchainLibraryFinder)

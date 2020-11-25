@@ -20,13 +20,59 @@ if(STATIC_LIBRARIES)
 endif()
 
 # We use additional modules that cmake needs to know about
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
 
-# Include all of the globally shared link libraries
-include(SharedLibraries)
+# Default to do a debug build
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  set(CMAKE_BUILD_TYPE
+      Debug
+      CACHE STRING "Choose the type of build." FORCE
+  )
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
 
-# Include specific compiler options
-include(Compiler)
+# Default not to run the clang-tidy checks
+option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
+if(ENABLE_CLANG_TIDY)
+  set(CMAKE_CXX_CLANG_TIDY clang-tidy)
+  set(CMAKE_C_CLANG_TIDY clang-tidy)
+endif(ENABLE_CLANG_TIDY)
+
+# Enable address sanitizer
+option(USE_ASAN "Enable address sanitization" OFF)
+if(USE_ASAN)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common)
+  add_link_options(-fsanitize=address)
+  link_libraries(asan)
+endif(USE_ASAN)
+
+# Enable testing if we are building tests
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(shared/tests)
+endif(BUILD_TESTS)
+
+# Output the compilation database
+set(CMAKE_EXPORT_COMPILE_COMMANDS
+    ON
+    CACHE STRING "Enable/Disable output of compile commands during generation." FORCE
+)
+
+# Enable all warnings that we can
+add_compile_options(-Wall -Wpedantic -Wextra)
+
+# This is needed everywhere so that we can catch segmentation faults
+add_compile_options(-fnon-call-exceptions)
+
+# Make the compiler display colours always (even when we build with ninja)
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
+  add_compile_options(-fdiagnostics-color=always)
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
+  add_compile_options(-fcolor-diagnostics)
+endif()
 
 # Set flag so NUClear uses a custom clock implementation
 option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
@@ -34,6 +80,18 @@ if(USE_CUSTOM_CLOCK)
   add_definitions(-DNUCLEAR_CUSTOM_CLOCK)
   add_subdirectory(shared/clock)
 endif(USE_CUSTOM_CLOCK)
+
+# Our banner file for placing at the top of the roles
+set(NUCLEAR_ROLE_BANNER_FILE
+"${PROJECT_SOURCE_DIR}/cmake/banner.png"
+CACHE PATH "The path the banner to print at the start of each role execution" FORCE
+)
+
+# Include the NUClear roles system
+add_subdirectory(nuclear)
+
+# Some libraries seem to not know when to make things advanced so we give them a hand here
+mark_as_advanced(SQLiteCpp_DIR fmt_DIR yaml-cpp_DIR NUClear_DIR Eigen3_DIR)
 
 # Hide some cmake variables that will never be used
 mark_as_advanced(
@@ -49,19 +107,6 @@ mark_as_advanced(
   OMPL_LIBRARY
 )
 
-# Our banner file for placing at the top of the roles
-set(NUCLEAR_ROLE_BANNER_FILE
-    "${PROJECT_SOURCE_DIR}/cmake/banner.png"
-    CACHE PATH "The path the banner to print at the start of each role execution" FORCE
-)
-
-if(BUILD_TESTS)
-  enable_testing()
-endif(BUILD_TESTS)
-
-# Include the NUClear roles system
-add_subdirectory(nuclear)
-
 # Messages and utilities have a dependency on the custom clock implementation
 if(USE_CUSTOM_CLOCK)
   target_link_libraries(${NUCLEAR_UTILITY_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
@@ -70,7 +115,3 @@ endif(USE_CUSTOM_CLOCK)
 
 # Enable sending binaries to robots
 include(RobotSend)
-
-if(BUILD_TESTS)
-  add_subdirectory(shared/tests)
-endif(BUILD_TESTS)
