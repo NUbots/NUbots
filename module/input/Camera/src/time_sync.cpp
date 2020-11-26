@@ -1,4 +1,4 @@
-#include "time_sync.h"
+#include "time_sync.hpp"
 
 extern "C" {
 #include <aravis-0.8/arv.h>

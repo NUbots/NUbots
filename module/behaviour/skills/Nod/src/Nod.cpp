@@ -17,18 +17,18 @@
  * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#include "Nod.h"
+#include "Nod.hpp"
 
 #include <nuclear>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/Nod.h"
+#include "message/behaviour/Nod.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace behaviour {

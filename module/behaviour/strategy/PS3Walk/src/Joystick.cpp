@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-#include "Joystick.h"
+#include "Joystick.hpp"
 
 #include <fcntl.h>
 #include <iostream>
@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "unistd.h"
+#include "unistd.hpp"
 
 Joystick::Joystick() : _fd(-1), path("/dev/input/js0") {
     openPath(path);

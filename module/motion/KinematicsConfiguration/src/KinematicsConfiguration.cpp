@@ -17,15 +17,15 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "KinematicsConfiguration.h"
+#include "KinematicsConfiguration.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/motion/KinematicsModel.h"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace motion {

@@ -1,4 +1,4 @@
-#include "slice_parameter.h"
+#include "slice_parameter.hpp"
 
 #include "../vaapi_error_category.hpp"
 

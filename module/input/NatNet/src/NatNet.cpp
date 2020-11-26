@@ -17,13 +17,13 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "NatNet.h"
+#include "NatNet.hpp"
 
 #include <fmt/format.h>
 
-#include "Parse.h"
+#include "Parse.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 namespace module {
 namespace input {
