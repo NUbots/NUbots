@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "unistd.hpp"
+#include "unistd.h"
 
 Joystick::Joystick() : _fd(-1), path("/dev/input/js0") {
     openPath(path);

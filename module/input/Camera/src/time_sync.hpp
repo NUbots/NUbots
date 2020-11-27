@@ -5,7 +5,7 @@ extern "C" {
 #include <aravis-0.8/arv.h>
 }
 
-#include "CameraContext.h"
+#include "CameraContext.hpp"
 
 namespace module {
 namespace input {

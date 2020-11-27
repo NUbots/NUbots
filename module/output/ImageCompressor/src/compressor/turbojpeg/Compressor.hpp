@@ -1,7 +1,7 @@
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_COMPRESSOR_HPP
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_COMPRESSOR_HPP
 
-#include "../Compressor.h"
+#include "../Compressor.hpp"
 
 namespace module {
 namespace output {
