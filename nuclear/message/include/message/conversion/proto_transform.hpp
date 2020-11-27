@@ -1,7 +1,7 @@
-#ifndef MESSAGE_CONVERSION_PROTO_TRANSFORM_H
-#define MESSAGE_CONVERSION_PROTO_TRANSFORM_H
+#ifndef MESSAGE_CONVERSION_PROTO_TRANSFORM_HPP
+#define MESSAGE_CONVERSION_PROTO_TRANSFORM_HPP
 
-#include "utility/conversion/proto_matrix.h"
+#include "utility/conversion/proto_matrix.hpp"
 
 /**
  * @brief Functions to convert the transform classes
@@ -65,4 +65,4 @@ utility::math::matrix::Rotation3D& operator<<(utility::math::matrix::Rotation3D&
     return transform;
 }
 
-#endif  // MESSAGE_CONVERSION_PROTO_TRANSFORM_H
+#endif  // MESSAGE_CONVERSION_PROTO_TRANSFORM_HPP

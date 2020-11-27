@@ -1,9 +1,9 @@
-#ifndef MESSAGE_CONVERSION_PROTO_MATRIX_H
-#define MESSAGE_CONVERSION_PROTO_MATRIX_H
+#ifndef MESSAGE_CONVERSION_PROTO_MATRIX_HPP
+#define MESSAGE_CONVERSION_PROTO_MATRIX_HPP
 
 #include "Matrix.pb.h"
 #include "Vector.pb.h"
-#include "math_types.h"
+#include "math_types.hpp"
 
 namespace message {
 namespace conversion {
@@ -1464,4 +1464,4 @@ namespace conversion {
 }  // namespace conversion
 }  // namespace message
 
-#endif  // MESSAGE_CONVERSION_PROTO_MATRIX_H
+#endif  // MESSAGE_CONVERSION_PROTO_MATRIX_HPP

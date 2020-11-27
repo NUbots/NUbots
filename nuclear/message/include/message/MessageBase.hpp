@@ -1,5 +1,5 @@
-#ifndef MESSAGE_MESSAGEBASE_H
-#define MESSAGE_MESSAGEBASE_H
+#ifndef MESSAGE_MESSAGEBASE_HPP
+#define MESSAGE_MESSAGEBASE_HPP
 
 #include <nuclear>
 
@@ -58,4 +58,4 @@ namespace util {
 }  // namespace util
 }  // namespace NUClear
 
-#endif  // MESSAGE_MESSAGEBASE_H
+#endif  // MESSAGE_MESSAGEBASE_HPP

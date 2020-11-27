@@ -1,5 +1,5 @@
-#ifndef MESSAGE_CONVERSION_PROTO_TIME_H
-#define MESSAGE_CONVERSION_PROTO_TIME_H
+#ifndef MESSAGE_CONVERSION_PROTO_TIME_HPP
+#define MESSAGE_CONVERSION_PROTO_TIME_HPP
 
 #include <chrono>
 #include <google/protobuf/duration.pb.h>
@@ -70,4 +70,4 @@ namespace conversion {
 }  // namespace conversion
 }  // namespace message
 
-#endif  // MESSAGE_CONVERSION_PROTO_TIME_H
+#endif  // MESSAGE_CONVERSION_PROTO_TIME_HPP

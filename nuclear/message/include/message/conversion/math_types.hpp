@@ -1,5 +1,5 @@
-#ifndef MESSAGE_CONVERSION_MATRIX_TYPES_H
-#define MESSAGE_CONVERSION_MATRIX_TYPES_H
+#ifndef MESSAGE_CONVERSION_MATRIX_TYPES_HPP
+#define MESSAGE_CONVERSION_MATRIX_TYPES_HPP
 
 #include <eigen3/Eigen/Core>
 
@@ -143,4 +143,4 @@ namespace conversion {
 }  // namespace conversion
 }  // namespace message
 
-#endif  // MESSAGE_CONVERSION_MATRIX_TYPES_H
+#endif  // MESSAGE_CONVERSION_MATRIX_TYPES_HPP
