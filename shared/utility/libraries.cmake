@@ -1,6 +1,8 @@
 find_package(Eigen3 REQUIRED)
 find_package(ExprTk REQUIRED)
 find_package(fmt REQUIRED)
+find_package(Aravis REQUIRED)
+find_package(glib2 REQUIRED)
 
 target_link_libraries(nuclear_utility PRIVATE ExprTk::ExprTk)
 target_link_libraries(nuclear_utility PUBLIC Eigen3::Eigen)
