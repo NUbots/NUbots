@@ -15,13 +15,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "FileWatcher.h"
+#include "FileWatcher.hpp"
 
 #include <fmt/format.h>
 
-#include "extension/FileWatch.h"
+#include "extension/FileWatch.hpp"
 
-#include "utility/file/fileutil.h"
+#include "utility/file/fileutil.hpp"
 
 namespace module {
 namespace extension {

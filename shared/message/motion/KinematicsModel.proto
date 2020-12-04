@@ -103,10 +103,9 @@ message KinematicsModel {
         mat3 foot        = 9;
     }
 
-    Leg         leg                       = 1;
-    Head        head                      = 2;
-    Arm         arm                       = 3;
-    MassModel   massModel                 = 4;
-    TensorModel tensorModel               = 5;
-    float       TEAMDARWINCHEST_TO_ORIGIN = 6;
+    Leg         leg         = 1;
+    Head        head        = 2;
+    Arm         arm         = 3;
+    MassModel   massModel   = 4;
+    TensorModel tensorModel = 5;
 }

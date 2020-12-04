@@ -16,19 +16,19 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "KickScript.h"
+#include "KickScript.hpp"
 
 #include <nuclear>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/WalkCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace behaviour {

@@ -1,4 +1,4 @@
-#include "picture_parameter.h"
+#include "picture_parameter.hpp"
 
 #include "../vaapi_error_category.hpp"
 

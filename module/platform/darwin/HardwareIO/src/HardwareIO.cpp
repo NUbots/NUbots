@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "HardwareIO.h"
+#include "HardwareIO.hpp"
 
 #include <iomanip>
 
-#include "Convert.h"
+#include "Convert.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/DarwinSensors.h"
+#include "message/motion/ServoTarget.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/platform/darwin/DarwinSensors.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/math/angle.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 
 namespace module {
