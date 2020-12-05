@@ -2,7 +2,7 @@ import re
 
 # A structure for holding reactors and functions
 class Tree:
-    def __init__(self, diagnostics, reactors=[], functions={}):
+    def __init__(self, diagnostics, reactors, functions):
         self.diagnostics = diagnostics
         self.reactors = reactors
         self.functions = functions
@@ -32,7 +32,7 @@ class Emit:
 
 # A structure for holding information about functions
 class Function:
-    def __init__(self, node, emit=[], on=[]):
+    def __init__(self, node, emit, on):
         self.node = node
         self.emits = emit
         self.ons = on
@@ -41,7 +41,7 @@ class Function:
 
 # A structure for holding information about reactors
 class Reactor:
-    def __init__(self, node, methods=[]):
+    def __init__(self, node, methods):
         self.node = node
         self.methods = methods
 

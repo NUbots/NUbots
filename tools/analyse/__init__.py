@@ -49,11 +49,16 @@ def createTree(files, folder):
     diagnostics = []
 
     # Construct AST for each file
+    i = 1
+    total = len(files)
     for f in files:
         f = os.path.abspath(f)
+        print("  [{}/{}] generating AST for file".format(i, total), f)
         translationUnits[f] = index.parse(f, parseArgs)
         diagnostics += list(translationUnits[f].diagnostics)
-    root = Tree(diagnostics)
+        i += 1
+    # Somehow the defaults don't work
+    root = Tree(diagnostics, [], {})
 
     # Make sure that there are no errors in the parsing
     for diagnostic in diagnostics:
@@ -75,16 +80,20 @@ def createTree(files, folder):
     # Topological sort the adjacency list so we do everything in the right order
     order = topologicalSort(adjList)
 
-    for i in order:
+    i = 1
+    total = len(order)
+    for fileName in order:
+        print("  [{}/{}] working on file".format(i, total), fileName)
         # For the initial loop through make sure that the file the node comes from is interesting to us
-        for child in translationUnits[i].cursor.get_children():
+        for child in translationUnits[fileName].cursor.get_children():
             childPath = os.path.abspath(child.location.file.name)
 
             # Check that the file is the one we want to parse
-            good = os.path.commonpath([childPath, i]) == i
+            good = os.path.commonpath([childPath, fileName]) == fileName
 
             if good:
                 _treeNodeStuff(child, root)
+        i += 1
 
     return root
 
@@ -115,7 +124,7 @@ def _treeNodeStuff(node, root):
 
 # Find information about a function
 def makeFunction(node, root):
-    function = Function(node)
+    function = Function(node, [], [])
 
     _functionTree(node, function, root)
 
@@ -241,7 +250,7 @@ def makeEmit(node):
 
 # Information about a reactor
 def makeReactor(node, root):
-    reactor = Reactor(node)
+    reactor = Reactor(node, [])
 
     # Remove forward declared reactors
     shift = 0

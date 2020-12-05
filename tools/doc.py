@@ -96,14 +96,18 @@ def run(outdir, indir, **kwargs):
         if dirpath.split("/")[-1] == "src":
             modules["/".join(dirpath.split("/")[0:-1])] = []
             for filename in filenames:
-                modules["/".join(dirpath.split("/")[0:-1])].append(os.path.join(dirpath, filename))
+                if not os.path.splitext(filename)[1] == ".py":
+                    modules["/".join(dirpath.split("/")[0:-1])].append(os.path.join(dirpath, filename))
 
     # Loop through each module, looking for reactors then printing them
+    i = 1
+    total = len(modules)
     for module, files in modules.items():
-        print("Working on module", module)
+        print("[{}/{}]".format(i, total), "Working on module", module)
 
         toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json"), "w")
 
         toWrite.write(generateModuleJSON(analyse.createTree(files, module), module))
 
         toWrite.close()
+        i += 1
