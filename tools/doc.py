@@ -87,6 +87,8 @@ def register(command):
 
 @run_on_docker
 def run(outdir, indir, **kwargs):
+    indir = os.path.abspath(indir)
+
     modules = {}
 
     # Find all modules and each file in them by walking the file tree

@@ -16,19 +16,9 @@ parseArgs = [
     "-I/usr/local/include/eigen3",
 ]
 
+# A list of folders that could have interesting things
 whitelist = [
     "/usr/local/include/nuclear_bits/",
-    # "/usr/local/include/nuclear_bits/clock.hpp",
-    # "/usr/local/include/nuclear_bits/dsl/",
-    # "/usr/local/include/nuclear_bits/Environment.hpp",
-    # "/usr/local/include/nuclear_bits/extension/",
-    # "/usr/local/include/nuclear_bits/LogLevel.hpp",
-    # "/usr/local/include/nuclear_bits/message/",
-    # "/usr/local/include/nuclear_bits/threading/",
-    # "/usr/local/include/nuclear_bits/util/",
-    # "/usr/local/include/nuclear_bits/PowerPlant.hpp",
-    # "/usr/local/include/nuclear_bits/PowerPlant.ipp",
-    # "/usr/local/include/nuclear_bits/Reactor.hpp",
 ]
 
 # Creates a index for parsing
@@ -55,13 +45,14 @@ def printTree(node, tab=0):
 # Creates a tree of reactors, on statements and emit statements
 def createTree(files, folder):
     index = createIndex()
-    translationUnits = []
+    translationUnits = {}
     diagnostics = list()
+
+    # Construct AST for each file
     for f in files:
-        print(f)
-        if os.path.splitext(f)[1] == ".cpp":  # TODO remember why this is necessary
-            translationUnits.append(index.parse(f, parseArgs))
-            diagnostics += list(translationUnits[-1].diagnostics)
+        f = os.path.abspath(f)
+        translationUnits[f] = index.parse(f, parseArgs)
+        diagnostics += list(translationUnits[f].diagnostics)
     root = Tree(diagnostics)
 
     # Make sure that there are no errors in the parsing
@@ -70,31 +61,29 @@ def createTree(files, folder):
             print(diagnostic)
             return root
 
+    # Create an adjacency list for the topological sort
     adjList = adjacencyList()
 
-    for tu in translationUnits:
+    for tu in translationUnits.values():
+        currentFile = os.path.abspath(tu.spelling)
+        adjList.init_vertex(currentFile)
         for fileInclusion in tu.get_includes():
-            if os.path.commonpath([fileInclusion.include, folder]) == folder:
-                print(tu.spelling, fileInclusion.include.name)
-                adjList.add_edge(tu.spelling, fileInclusion.include.name)
+            includePath = os.path.abspath(fileInclusion.include.name)
+            if os.path.commonpath([includePath, folder]) == folder:
+                adjList.add_edge(currentFile, includePath)
 
+    # Topological sort the adjacency list so we do everything in the right order
     order = topologicalSort(adjList)
 
-    # For the initial loop through make sure that the file the node comes from is interesting to us
-    for child in translationUnits.cursor.get_children():
+    for i in order:
+        # For the initial loop through make sure that the file the node comes from is interesting to us
+        for child in translationUnits[i].cursor.get_children():
+            childPath = os.path.abspath(child.location.file.name)
 
-        # Check that the file is in the folder that was given
-        good = os.path.commonpath([child.location.file.name, folder]) == folder
+            # Check that the file is the one we want to parse
+            good = os.path.commonpath([childPath, i]) == i
 
-        if not good:
-            for path in whitelist:
-                if os.path.commonpath([child.location.file.name, path]) == path:
-                    good = True
-                    break
-        if not good:
-            continue
-
-        _treeNodeStuff(child, root)
+            _treeNodeStuff(child, root)
 
     # Find the transitive calls
     for function in root.functions.values():
@@ -316,13 +305,20 @@ def isInherited(node, name):
 
 class adjacencyList:
     def __init__(self):
-        innerList = {}
-        size = 0
+        self.innerList = {}
+        self.size = 0
+
+    def init_vertex(self, u):
+        if not self.innerList.get(u):
+            self.innerList[u] = []
 
     def add_edge(self, u, v):
-        if not self.innerList[u]:
-            self.innerlist[u] = []
+        if not self.innerList.get(u):
+            self.innerList[u] = []
         self.innerList[u].append(v)
+
+    def get(self, key):
+        return self.innerList.get(key)
 
     def __getitem__(self, key):
         return self.innerList[key]
@@ -332,6 +328,12 @@ class adjacencyList:
 
     def __iter__(self):
         return iter(self.innerList)
+
+    def __repr__(self):
+        out = ""
+        for u in self:
+            out += repr(u) + " -> " + repr([v for v in self.innerList[u]]) + ","
+        return out
 
 
 # Topological sorts a given adjacency list
@@ -351,11 +353,9 @@ def topologicalSort(adj):
 def _topologicalSortRecurs(adj, start, tSorted, visit):
     visit[start] = True
     trav = adj[start]
-    travIndex = 0
-    while trav != None:
+    for travIndex in range(len(trav)):
         v = trav[travIndex]
         if not visit[v]:
             _topologicalSortRecurs(adj, v, tSorted, visit)
-        travIndex += 1
 
     tSorted.append(start)
