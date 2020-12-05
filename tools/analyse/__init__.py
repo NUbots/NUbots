@@ -18,7 +18,7 @@ parseArgs = [
 
 # A list of folders that could have interesting things
 whitelist = [
-    "/usr/local/include/nuclear_bits/",
+    os.path.abspath("/usr/local/include/nuclear_bits/"),
 ]
 
 # Creates a index for parsing
@@ -28,7 +28,7 @@ def createIndex():
 
 # Prints out one node
 def printNode(node, tab=0):
-    return "  " * tab + "{} {}#{} {}:{}:{}\n".format(
+    return "  " * tab + "{} {}#{} {}:{}:{}".format(
         node.kind.name, node.type.spelling, node.spelling, node.location.file, node.location.line, node.location.column
     )
 
@@ -46,7 +46,7 @@ def printTree(node, tab=0):
 def createTree(files, folder):
     index = createIndex()
     translationUnits = {}
-    diagnostics = list()
+    diagnostics = []
 
     # Construct AST for each file
     for f in files:
@@ -83,15 +83,8 @@ def createTree(files, folder):
             # Check that the file is the one we want to parse
             good = os.path.commonpath([childPath, i]) == i
 
-            _treeNodeStuff(child, root)
-
-    # Find the transitive calls
-    for function in root.functions.values():
-        for call in function.nodeCalls:
-            try:
-                function.calls.append(root.functions[call.displayname])
-            except KeyError:
-                pass  # A function that is not intresting
+            if good:
+                _treeNodeStuff(child, root)
 
     return root
 
@@ -138,7 +131,7 @@ def makeFunction(node, root):
         pass  # Function was a forward declared and not a method
 
     # Check that the function is interesting
-    if function.emits or function.ons or not function.nodeCalls == [node]:
+    if function.emits or function.ons or not function.calls == []:
         return function
 
 
@@ -151,7 +144,18 @@ def _functionTree(node, function, root):
             elif isEmitCall(child):
                 function.emits.append(makeEmit(child))
             else:
-                function.nodeCalls.append(child)
+                # If the function is calling another function, if the other function is in the whitelist, give it a look
+                definition = child.get_definition()
+                if definition and not root.functions.get(definition.displayname):
+                    for fileName in whitelist:
+                        if os.path.commonpath([os.path.abspath(definition.location.file.name), fileName]) == fileName:
+                            calledFunction = makeFunction(definition, root)
+                            if calledFunction:
+                                root.functions[calledFunction.node.displayname] = calledFunction
+                                function.calls.append(calledFunction)
+                                function.calls.extend(calledFunction.calls)
+                            break
+
         else:
             _functionTree(child, function, root)
 
@@ -207,7 +211,7 @@ def makeEmit(node):
         for part in memberRefExpr.get_children():
             if part.kind == clang.cindex.CursorKind.TEMPLATE_REF:
                 emit.scope = part.spelling
-    except StopIteration:
+    except StopIteration as e:
         print("Emit scope StopIter:", e)
 
     # Work out the type that is being emitted
@@ -229,7 +233,7 @@ def makeEmit(node):
                 emit.type = expr.type.spelling
         elif expr.kind == clang.cindex.CursorKind.MEMBER_REF_EXPR:  # the parameter is a member of a class
             emit.type = expr.type.spelling
-    except StopIteration:
+    except StopIteration as e:
         print("Emit type StopIter:", e)
 
     return emit

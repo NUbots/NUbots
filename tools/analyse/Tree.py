@@ -32,11 +32,10 @@ class Emit:
 
 # A structure for holding information about functions
 class Function:
-    def __init__(self, node, emit=[], on=[], calls=[], calledBy=[]):
+    def __init__(self, node, emit=[], on=[]):
         self.node = node
         self.emits = emit
         self.ons = on
-        self.nodeCalls = [node] + calls
         self.calls = []
 
 
