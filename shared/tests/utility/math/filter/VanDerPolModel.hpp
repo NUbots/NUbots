@@ -77,4 +77,4 @@ namespace tests {
     };
 }  // namespace tests
 }  // namespace shared
-#endif  // SHARED_TESTS_VANDERPOLMODEL_H
+#endif  // SHARED_TESTS_VANDERPOLMODEL_HPP
