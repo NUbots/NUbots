@@ -20,7 +20,7 @@ if __name__ == "__main__":
             if module_name.endswith("pb2"):
 
                 # Work out what header file this came from
-                include = os.path.join(os.path.relpath(dir_name, shared_folder), "{}.h".format(module_name[:-4]))
+                include = os.path.join(os.path.relpath(dir_name, shared_folder), "{}.hpp".format(module_name[:-4]))
 
                 # If it's one of ours include it
                 if include.startswith("message"):
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     # The base of our source file we will be filling in
     source = dedent(
         """\
-        #include "DataLogging.h"
+        #include "DataLogging.hpp"
 
         #include <nuclear>
         #include <fmt/format.h>

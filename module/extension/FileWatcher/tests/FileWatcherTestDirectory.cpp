@@ -24,9 +24,9 @@
 #include <iostream>
 #include <nuclear>
 
-#include "FileWatcher.h"
+#include "FileWatcher.hpp"
 
-#include "extension/FileWatch.h"
+#include "extension/FileWatch.hpp"
 
 namespace {
 

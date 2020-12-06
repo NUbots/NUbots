@@ -1,16 +1,16 @@
-#include "ImageCompressor.h"
+#include "ImageCompressor.hpp"
 
 #include <fmt/format.h>
 
-#include "compressor/turbojpeg/Factory.h"
-#include "compressor/vaapi/Factory.h"
+#include "compressor/turbojpeg/Factory.hpp"
+#include "compressor/vaapi/Factory.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Image.h"
-#include "message/output/CompressedImage.h"
+#include "message/input/Image.hpp"
+#include "message/output/CompressedImage.hpp"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module {
 namespace output {

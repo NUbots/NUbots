@@ -17,27 +17,27 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "message/support/nusight/Overview.h"
+#include "message/support/nusight/Overview.hpp"
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "message/behaviour/Behaviour.h"
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/WalkPath.h"
-#include "message/input/GameState.h"
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/GlobalConfig.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/behaviour/Behaviour.hpp"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/WalkPath.hpp"
+#include "message/input/GameState.hpp"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/GlobalConfig.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/localisation/transform.h"
+#include "utility/localisation/transform.hpp"
 
 /**
  * @author Monica Olejniczak

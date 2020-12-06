@@ -17,11 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GlobalConfig.h"
+#include "GlobalConfig.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/GlobalConfig.h"
+#include "message/support/GlobalConfig.hpp"
 
 namespace module {
 namespace support {

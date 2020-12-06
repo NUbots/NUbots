@@ -1,13 +1,13 @@
-#include "DataLogging.h"
+#include "DataLogging.hpp"
 
 #include <fmt/format.h>
 #include <iomanip>
 #include <sstream>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "utility/file/fileutil.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/file/fileutil.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace support {
