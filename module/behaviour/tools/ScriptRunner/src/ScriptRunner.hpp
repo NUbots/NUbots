@@ -58,4 +58,4 @@ namespace behaviour {
 }  // namespace behaviour
 }  // namespace module
 
-#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
+#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_HPP

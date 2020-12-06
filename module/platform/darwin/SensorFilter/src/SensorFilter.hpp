@@ -125,4 +125,4 @@ namespace platform {
     }  // namespace darwin
 }  // namespace platform
 }  // namespace module
-#endif  // MODULES_PLATFORM_DARWIN_SENSORFILTER_H
+#endif  // MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP

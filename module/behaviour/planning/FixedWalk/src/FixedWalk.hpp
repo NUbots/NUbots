@@ -62,4 +62,4 @@ namespace behaviour {
 }  // namespace behaviour
 }  // namespace module
 
-#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_HPP
+#endif  // MODULES_BEHAVIOUR_PLANNERS_FIXEDWALK_HPP

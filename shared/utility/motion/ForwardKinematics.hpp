@@ -628,4 +628,4 @@ namespace motion {
 }  // namespace motion
 }  // namespace utility
 
-#endif  // UTILITY_MOTION_FORWARDKINEMATICS_H
+#endif  // UTILITY_MOTION_FORWARDKINEMATICS_HPP
