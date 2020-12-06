@@ -1,8 +1,8 @@
 #ifndef MODULE_INPUT_IMAGEDECOMPRESSOR_DECOMPRESSOR_TURBOJPEG_FACTORY_HPP
 #define MODULE_INPUT_IMAGEDECOMPRESSOR_DECOMPRESSOR_TURBOJPEG_FACTORY_HPP
 
-#include "../DecompressorFactory.h"
-#include "Decompressor.h"
+#include "../DecompressorFactory.hpp"
+#include "Decompressor.hpp"
 
 namespace module::input::decompressor::turbojpeg {
 
