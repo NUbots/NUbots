@@ -91,13 +91,21 @@ def run(outdir, indir, **kwargs):
 
     modules = {}
 
+    srcDirs = []
+
     # Find all modules and each file in them by walking the file tree
     for dirpath, dirnames, filenames in os.walk(indir):
-        if dirpath.split("/")[-1] == "src":
-            modules["/".join(dirpath.split("/")[0:-1])] = []
+        for dir in dirnames:
+            if dir == "src":
+                dirnames.remove("src")
+                srcDirs.append(os.path.join(dirpath, dir))
+
+    for srcDir in srcDirs:
+        modules["/".join(srcDir.split("/")[0:-1])] = []
+        for dirpath, dirnames, filenames in os.walk(srcDir):
             for filename in filenames:
                 if not os.path.splitext(filename)[1] == ".py":
-                    modules["/".join(dirpath.split("/")[0:-1])].append(os.path.join(dirpath, filename))
+                    modules["/".join(srcDir.split("/")[0:-1])].append(os.path.join(dirpath, filename))
 
     # Loop through each module, looking for reactors then printing them
     i = 1
