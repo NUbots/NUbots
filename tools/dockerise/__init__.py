@@ -113,7 +113,8 @@ def get_selected_platform():
             if len(names) == 0:
                 cprint("ERROR the currently selected platform is a dangling tag.", "orange", attrs=["bold"])
                 cprint(
-                    "      The system is unable to work out what platform this was and will need to be reset orange",
+                    "      The system is unable to work out what platform this was and will need to be reset",
+                    "orange",
                     attrs=["bold"],
                 )
                 cprint("      run `./b target {platform}` to correct this", "orange", attrs=["bold"])
@@ -191,7 +192,8 @@ def run_on_docker(func):
                     if selected_platform:
                         if (
                             subprocess.call(
-                                ["docker", "tag", tag, "{}:selected".format(repository)], stdout=subprocess.DEVNULL,
+                                ["docker", "tag", tag, "{}:selected".format(repository)],
+                                stdout=subprocess.DEVNULL,
                             )
                             != 0
                         ):
