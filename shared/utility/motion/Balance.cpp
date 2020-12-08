@@ -16,11 +16,11 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "Balance.h"
+#include "Balance.hpp"
 
-#include "message/motion/KinematicsModel.h"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace utility {
 namespace motion {

@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "UART.h"
+#include "UART.hpp"
 
 #include <fcntl.h>
 #include <iostream>

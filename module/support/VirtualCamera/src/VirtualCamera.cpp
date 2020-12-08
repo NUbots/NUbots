@@ -17,14 +17,14 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "VirtualCamera.h"
+#include "VirtualCamera.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Image.h"
+#include "message/input/Image.hpp"
 
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/Vision.h"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
 
 namespace module {
 namespace support {

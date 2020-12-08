@@ -24,6 +24,22 @@ def is_docker():
     return os.path.exists("/.dockerenv") or os.path.isfile(path) and any("docker" in line for line in open(path))
 
 
+def is_wsl1():
+    if shutil.which("wslpath") is None:
+        return False
+
+    kernel_release = subprocess.check_output(["uname", "-r"]).decode("utf-8").strip()
+    search = re.search("^(\d+)\.(\d+)\.\d+", kernel_release)
+    major = search.group(1)
+    minor = search.group(2)
+
+    if major is None or minor is None:
+        return False
+
+    # WSL 2 has kernel release version >= 4.19 (https://askubuntu.com/a/1177730)
+    return int(major) <= 4 and int(minor) < 19
+
+
 def build_platform(platform, local_only):
     pty = WrapPty()
 
@@ -61,6 +77,8 @@ def build_platform(platform, local_only):
         "BUILDKIT_INLINE_CACHE=1",
         "--build-arg",
         "platform={}".format(platform if platform != "buildkit" else "generic"),
+        "--build-arg",
+        "user_uid={}".format(os.getuid()),
         "--tag",
         local_tag,
     ]
@@ -161,6 +179,7 @@ def run_on_docker(func):
                 default=False,
                 help="Don't update any images from Docker Hub and let Docker auto-decide what to use as a layer cache.",
             )
+            command.add_argument("--network", dest="network", help="Run the container on the specified docker network")
 
             func(command)
 
@@ -168,7 +187,7 @@ def run_on_docker(func):
 
     elif func.__name__ == "run":
 
-        def run(rebuild, clean, platform, local_only, **kwargs):
+        def run(rebuild, clean, platform, local_only, network, **kwargs):
             # If we are running in docker, then execute the command as normal
             if is_docker():
                 func(rebuild=rebuild, clean=clean, platform=platform, local_only=local_only, **kwargs)
@@ -230,12 +249,12 @@ def run_on_docker(func):
                 code_to_cwd = os.path.relpath(os.getcwd(), b.project_dir)
                 cwd_to_code = os.path.relpath(b.project_dir, os.getcwd())
 
-                # If we are running in WSL we need to translate our path to a windows one for docker
-                bind_path = (
-                    b.project_dir
-                    if shutil.which("wslpath") is None
-                    else subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
-                )
+                bind_path = b.project_dir
+
+                # If we are running in WSL 1 we need to translate our path to a windows one for docker.
+                # Docker with WSL 2 doesn't need this as it supports binding paths directly from WSL into a container.
+                if is_wsl1():
+                    bind_path = subprocess.check_output(["wslpath", "-m", b.project_dir])[:-1].decode("utf-8")
 
                 pty = WrapPty()
                 exit(
@@ -259,7 +278,7 @@ def run_on_docker(func):
                             "--hostname",
                             "docker",
                             "--network",
-                            "host",
+                            network or "host",
                             "--mount",
                             "type=bind,source={},target=/home/{}/{},consistency=cached".format(
                                 bind_path, user, directory
