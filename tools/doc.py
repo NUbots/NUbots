@@ -41,7 +41,8 @@ def generateOnJSON(on):
             for emit in call.emits:
                 out += generateEmitJSON(emit)
                 out += ","
-        out = out[:-1]
+        if out[-1] != "[":
+            out = out[:-1]
     out += "],"
     out += '"location":{}'.format(generateLocationJSON(on.node.location))
     out += "}"
@@ -55,7 +56,8 @@ def generateReactorJSON(reactor):
     for method in reactor.methods:
         for on in method.ons:
             out += generateOnJSON(on) + ","
-    out = out[:-1]
+    if out[-1] != "[":
+        out = out[:-1]
     out += "],"
     out += '"location":{}'.format(generateLocationJSON(reactor.node.location))
     out += "}"
@@ -69,7 +71,8 @@ def generateModuleJSON(tree, name):
     for reactor in tree.reactors:
         out += generateReactorJSON(reactor)
         out += ","
-    out = out[:-1]
+    if out[-1] != "[":
+        out = out[:-1]
     out += "]}"
     return out
 
