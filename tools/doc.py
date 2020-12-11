@@ -3,8 +3,9 @@
 # clang --include-directory /home/nubots/build/shared --include-directory /home/nubots/NUbots/shared --include-directory /home/nubots/NUbots/nuclear/message/include -c -Xclang -ast-dump -fsyntax-only test.cpp
 # pydoc -b tools/clang/cindex.py
 
-import sys
+import multiprocessing
 import os
+import itertools
 
 import b
 from dockerise import run_on_docker
@@ -77,6 +78,13 @@ def generateModuleJSON(tree, name):
     return out
 
 
+def parse(module, files, outdir):
+    print("Working on module", module)
+
+    with open(os.path.join(outdir, "_".join(module.split("/")) + ".json"), "w") as toWrite:
+        toWrite.write(generateModuleJSON(analyse.createTree(files, module), module))
+
+
 @run_on_docker
 def register(command):
     command.help = "documentation generation?"
@@ -113,12 +121,7 @@ def run(outdir, indir, **kwargs):
     # Loop through each module, looking for reactors then printing them
     i = 1
     total = len(modules)
-    for module, files in modules.items():
-        print("[{}/{}]".format(i, total), "Working on module", module)
-
-        toWrite = open(os.path.join(outdir, "_".join(module.split("/")) + ".json"), "w")
-
-        toWrite.write(generateModuleJSON(analyse.createTree(files, module), module))
-
-        toWrite.close()
-        i += 1
+    with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
+        pool.starmap(
+            parse, itertools.zip_longest(iter(modules.keys()), iter(modules.values()), iter([]), fillvalue=outdir)
+        )
