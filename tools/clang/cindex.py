@@ -45,6 +45,12 @@ call is efficient.
 """
 from __future__ import absolute_import, division, print_function
 
+import os
+import sys
+from ctypes import *
+
+import clang.enumerations
+
 # TODO
 # ====
 #
@@ -62,12 +68,6 @@ from __future__ import absolute_import, division, print_function
 #
 # o implement additional SourceLocation, SourceRange, and File methods.
 
-from ctypes import *
-
-import clang.enumerations
-
-import os
-import sys
 
 if sys.version_info[0] == 3:
     # Python 3 strings are unicode, translate them to/from utf8 for C-interop.

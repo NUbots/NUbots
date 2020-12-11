@@ -1,5 +1,6 @@
 import re
 
+
 # A structure for holding reactors and functions
 class Tree:
     def __init__(self, diagnostics, reactors, functions):

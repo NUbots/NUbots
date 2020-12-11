@@ -1,9 +1,9 @@
-from .Tree import Tree, On, Emit, Function, Reactor
+import os.path
+import re
 
 import clang.cindex
 
-import re
-import os.path
+from .Tree import Emit, Function, On, Reactor, Tree
 
 # TODO put in a config file
 libraryPath = "/usr/local/lib"  # llvm-config --libdir
