@@ -3,13 +3,13 @@
 # clang --include-directory /home/nubots/build/shared --include-directory /home/nubots/NUbots/shared --include-directory /home/nubots/NUbots/nuclear/message/include -c -Xclang -ast-dump -fsyntax-only test.cpp
 # pydoc -b tools/clang/cindex.py
 
+import itertools
 import multiprocessing
 import os
-import itertools
 
+import analyse
 import b
 from dockerise import run_on_docker
-import analyse
 
 # from clang.cindex import SourceLocation
 
@@ -95,9 +95,18 @@ def register(command):
         "--indir", default="module", help="The root of the directories that you want to scan. Default: module."
     )
 
+    command.add_argument(
+        "-m",
+        "--multiprocess",
+        dest="multiprocess",
+        action="store_true",
+        default=False,
+        help="enable multiprocessing for faster generation, uses a lot more RAM.",
+    )
+
 
 @run_on_docker
-def run(outdir, indir, **kwargs):
+def run(outdir, indir, multiprocess, **kwargs):
     indir = os.path.abspath(indir)
 
     modules = {}
@@ -119,9 +128,12 @@ def run(outdir, indir, **kwargs):
                     modules["/".join(srcDir.split("/")[0:-1])].append(os.path.join(dirpath, filename))
 
     # Loop through each module, looking for reactors then printing them
-    i = 1
-    total = len(modules)
-    with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
-        pool.starmap(
-            parse, itertools.zip_longest(iter(modules.keys()), iter(modules.values()), iter([]), fillvalue=outdir)
-        )
+    if multiprocess:
+        process_count = min(multiprocessing.cpu_count(), len(modules))
+        with multiprocessing.Pool(process_count) as pool:
+            pool.starmap(
+                parse, itertools.zip_longest(iter(modules.keys()), iter(modules.values()), iter([]), fillvalue=outdir)
+            )
+    else:
+        for k, v in modules.items():
+            parse(k, v, outdir)
