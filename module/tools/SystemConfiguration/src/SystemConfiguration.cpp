@@ -325,7 +325,14 @@ namespace tools {
                       << "source /usr/share/fzf/key-bindings.zsh" << std::endl
                       << "source /usr/share/fzf/completion.zsh" << std::endl;
             ofs_zshrc.close();
-            }
+
+            /**********
+             * PYTHON *
+             **********/
+            // Make sure python checks /usr/local for packages
+            std::system(
+                R"X(echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))")
+            > $(python - c "import site; print(site.getsitepackages()[0])") / local.pth)X");
 
             /***********
              * CLEANUP *
