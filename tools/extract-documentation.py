@@ -87,9 +87,9 @@ def parse(module, files, outdir):
 
 @run_on_docker
 def register(command):
-    command.help = "documentation generation?"
+    command.help = "Generates documentation in JSON format for NUClear reactors and NUClear on and emit statements"
 
-    command.add_argument("--outdir", default="doc/NUdoc/", help="The output directory")
+    command.add_argument("--outdir", default="doc/extract-documentation/", help="The output directory")
 
     command.add_argument(
         "--indir", default="module", help="The root of the directories that you want to scan. Default: module."
