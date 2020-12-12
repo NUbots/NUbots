@@ -101,7 +101,7 @@ def register(command):
         dest="multiprocess",
         action="store_true",
         default=False,
-        help="enable multiprocessing for faster generation, uses a lot more RAM.",
+        help="enable multiprocessing for faster generation, multiplies ram usage by thread count.",
     )
 
 
@@ -113,13 +113,14 @@ def run(outdir, indir, multiprocess, **kwargs):
 
     srcDirs = []
 
-    # Find all modules and each file in them by walking the file tree
+    # Find all modules by walking the file tree
     for dirpath, dirnames, filenames in os.walk(indir):
         for dir in dirnames:
             if dir == "src":
-                dirnames.remove("src")
+                dirnames.remove("src")  # Don't look into the src directory
                 srcDirs.append(os.path.join(dirpath, dir))
 
+    # Find all the files in the source directories that aren't python files
     for srcDir in srcDirs:
         modules["/".join(srcDir.split("/")[0:-1])] = []
         for dirpath, dirnames, filenames in os.walk(srcDir):
@@ -129,6 +130,7 @@ def run(outdir, indir, multiprocess, **kwargs):
 
     # Loop through each module, looking for reactors then printing them
     if multiprocess:
+        # Make sure we don't create more subprocesses than we need.
         process_count = min(multiprocessing.cpu_count(), len(modules))
         with multiprocessing.Pool(process_count) as pool:
             pool.starmap(

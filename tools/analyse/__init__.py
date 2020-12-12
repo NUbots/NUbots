@@ -5,9 +5,11 @@ import clang.cindex
 
 from .Tree import Emit, Function, On, Reactor, Tree
 
-# TODO put in a config file
+# The path to the folder that contains libclang
 libraryPath = "/usr/local/lib"  # llvm-config --libdir
 clang.cindex.Config.set_library_path(libraryPath)
+
+# The arguments to pass to clang
 parseArgs = [
     "-I../build/shared",
     "-Ishared",
@@ -57,7 +59,7 @@ def createTree(files, folder):
         translationUnits[f] = index.parse(f, parseArgs)
         diagnostics += list(translationUnits[f].diagnostics)
         i += 1
-    # Somehow the defaults don't work
+
     root = Tree(diagnostics, [], {})
 
     # Make sure that there are no errors in the parsing
@@ -69,6 +71,7 @@ def createTree(files, folder):
     # Create an adjacency list for the topological sort
     adjList = adjacencyList()
 
+    # Add edges to the adjacency list
     for tu in translationUnits.values():
         currentFile = os.path.abspath(tu.spelling)
         adjList.init_vertex(currentFile)
@@ -80,6 +83,7 @@ def createTree(files, folder):
     # Topological sort the adjacency list so we do everything in the right order
     order = topologicalSort(adjList)
 
+    # Go through the files, pulling out relevant information
     i = 1
     total = len(order)
     for fileName in order:
@@ -88,17 +92,14 @@ def createTree(files, folder):
         for child in translationUnits[fileName].cursor.get_children():
             childPath = os.path.abspath(child.location.file.name)
 
-            # Check that the file is the one we want to parse
-            good = os.path.commonpath([childPath, fileName]) == fileName
-
-            if good:
+            if os.path.commonpath([childPath, fileName]) == fileName:
                 _treeNodeStuff(child, root)
         i += 1
 
     return root
 
 
-# Just loop through the tree
+# Just loop through the children of the current node
 def _traverseTree(node, root):
     for child in node.get_children():
         _treeNodeStuff(child, root)
@@ -153,17 +154,28 @@ def _functionTree(node, function, root):
             elif isEmitCall(child):
                 function.emits.append(makeEmit(child))
             else:
-                # If the function is calling another function, if the other function is in the whitelist, give it a look
+                # If the function is calling another function, if the other function is in the whitelist
+                # or if the other function is already parsed, give it a look
                 definition = child.get_definition()
-                if definition and not root.functions.get(definition.displayname):
-                    for fileName in whitelist:
-                        if os.path.commonpath([os.path.abspath(definition.location.file.name), fileName]) == fileName:
-                            calledFunction = makeFunction(definition, root)
-                            if calledFunction:
-                                root.functions[calledFunction.node.displayname] = calledFunction
-                                function.calls.append(calledFunction)
-                                function.calls.extend(calledFunction.calls)
-                            break
+                if definition:
+                    calledFunction = root.functions.get(definition.displayname)
+                    if not calledFunction:
+                        # A new function that we have not seen yet
+                        for fileName in whitelist:
+                            if (
+                                os.path.commonpath([os.path.abspath(definition.location.file.name), fileName])
+                                == fileName
+                            ):
+                                calledFunction = makeFunction(definition, root)
+                                if calledFunction:
+                                    root.functions[calledFunction.node.displayname] = calledFunction
+                                    function.calls.append(calledFunction)
+                                    function.calls.extend(calledFunction.calls)
+                                break
+                    else:
+                        # A function we have already seen
+                        function.calls.append(calledFunction)
+                        function.calls.extend(calledFunction.calls)
 
         else:
             _functionTree(child, function, root)
@@ -252,7 +264,7 @@ def makeEmit(node):
 def makeReactor(node, root):
     reactor = Reactor(node, [])
 
-    # Remove forward declared reactors
+    # Remove forward declared versions of this reactor
     shift = 0
     last = len(root.reactors)
     for i in range(last):
@@ -316,6 +328,7 @@ def isInherited(node, name):
     return node.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER and node.type.spelling == name
 
 
+# The datatype used for topological sort, represents a digraph
 class adjacencyList:
     def __init__(self):
         self.innerList = {}
@@ -363,6 +376,7 @@ def topologicalSort(adj):
     return tSorted
 
 
+# The recursive part of topological sort
 def _topologicalSortRecurs(adj, start, tSorted, visit):
     visit[start] = True
     trav = adj[start]
