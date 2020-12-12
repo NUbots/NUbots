@@ -1,16 +1,16 @@
 #include "SystemConfiguration.h"
 
-#include <fmt/format.h>
-#include <unistd.h>
-
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <unistd.h>
+
+#include "glyphs.h"
 
 #include "extension/Configuration.h"
-#include "glyphs.h"
 
 namespace module {
 namespace tools {
@@ -66,12 +66,14 @@ namespace tools {
         }
 
         on<Configuration>("SystemConfiguration.yaml").then([this](const Configuration& config) {
+            // clang-format off
             if (config["log_level"].as<std::string>() == "TRACE") log_level = NUClear::TRACE;
             if (config["log_level"].as<std::string>() == "DEBUG") log_level = NUClear::DEBUG;
-            if (config["log_level"].as<std::string>() == "INFO") log_level = NUClear::INFO;
-            if (config["log_level"].as<std::string>() == "WARN") log_level = NUClear::WARN;
+            if (config["log_level"].as<std::string>() == "INFO")  log_level = NUClear::INFO;
+            if (config["log_level"].as<std::string>() == "WARN")  log_level = NUClear::WARN;
             if (config["log_level"].as<std::string>() == "ERROR") log_level = NUClear::ERROR;
             if (config["log_level"].as<std::string>() == "FATAL") log_level = NUClear::FATAL;
+            // clang-format on
 
             // The current user
             std::string user = config["user"].as<std::string>();

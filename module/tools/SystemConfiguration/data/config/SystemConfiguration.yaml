@@ -44,7 +44,6 @@ groups:
   - u3v
 
 # Necessary symlinks
-# Link format
 # target: name
 # will create a link to target with name
 links:
