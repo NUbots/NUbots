@@ -257,6 +257,10 @@ namespace tools {
             ofs_hosts << "::1             localhost" << std::endl;
             ofs_hosts << "127.0.1.1       " << hostname << std::endl;
             ofs_hosts.close();
+            log<NUClear::INFO>("Ensuring hostname is generated");
+            std::ofstream ofs_hostname("/etc/hostname");
+            ofs_hostname << hostname << std::endl;
+            ofs_hostname.close();
 
             /**********
              * GROUPS *
