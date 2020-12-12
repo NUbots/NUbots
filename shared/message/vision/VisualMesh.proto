@@ -25,17 +25,11 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 
 message VisualMesh {
-    message Row {
-        float phi      = 1;
-        int32 segments = 2;
-    }
-    uint32                    camera_id       = 1;
-    fmat                      rays            = 2;
-    imat                      neighbourhood   = 3;
-    fmat                      classifications = 4;
-    fmat                      coordinates     = 5;
-    repeated int32            indices         = 6 [packed = true];
-    mat4                      Hcw             = 7;
-    repeated Row              mesh            = 8;
-    google.protobuf.Timestamp timestamp       = 9;
+    google.protobuf.Timestamp timestamp         = 1;
+    uint32                    camera_id         = 2;
+    mat4                      Hcw               = 3;
+    fmat                      pixel_coordinates = 4;
+    imat                      neighbourhood     = 5;
+    imat                      global_indices    = 6;
+    fmat                      classifications   = 7;
 }

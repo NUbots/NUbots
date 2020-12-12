@@ -2,174 +2,105 @@
 
 #include <Eigen/Geometry>
 
-#include "geometry/Circle.hpp"
-#include "geometry/Cylinder.hpp"
-#include "geometry/Sphere.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/support/FieldDescription.hpp"
 #include "message/vision/VisualMesh.hpp"
 
-#include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/Timer.hpp"
+namespace module::vision {
 
-namespace module {
-namespace vision {
+using extension::Configuration;
 
-    using extension::Configuration;
+using message::input::Image;
 
-    using message::input::Image;
-    using message::input::Sensors;
-    using message::support::FieldDescription;
+VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-    using VisualMeshMsg = message::vision::VisualMesh;
+    on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
+        // clang-format off
+        std::string lvl = config["log_level"].as<std::string>();
+        if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
+        else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+        else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
+        else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
+        else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+        else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+        // clang-format on
 
-    VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        // Delete all the old engines
+        engines.clear();
 
-        on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
-            // Load our weights and biases
-            std::vector<std::vector<std::pair<std::vector<std::vector<float>>, std::vector<float>>>> network;
+        for (const auto& camera : config["cameras"].config) {
+            std::string name        = camera.first.as<std::string>();
+            std::string engine_type = camera["engine"].as<std::string>();
+            int concurrent          = camera["concurrent"].as<int>();
+            std::string network     = camera["network"].as<std::string>();
 
-            bool first_loop = true;
+            double min_height   = camera["classifier"]["height"][0].as<double>();
+            double max_height   = camera["classifier"]["height"][1].as<double>();
+            double max_distance = camera["classifier"]["max_distance"].as<double>();
+            double tolerance    = camera["classifier"]["intersection_tolerance"].as<double>();
 
-            for (const auto& conv : config["network"].config) {
+            // Create a network runner for each concurrent system
+            auto& runners = engines[name];
+            for (int i = 0; i < concurrent; ++i) {
+                runners.emplace_back(engine_type, min_height, max_height, max_distance, tolerance, network);
+            }
+        }
+    });
 
-                // New conv layer
-                network.emplace_back();
-                auto& net_conv = network.back();
+    on<Trigger<Image>>().then([this](const Image& image) {
+        // Check we have a network for this camera
+        auto it = engines.find(image.name);
+        if (it != engines.end()) {
+            auto& engine = it->second;
 
-                for (const auto& layer : conv) {
+            // Look through our engines and try to find the first free one
+            for (auto& runner : engine) {
+                // We swap in true to the atomic and if we got false back then it wasn't active previously
+                if (!runner.active->exchange(true)) {
 
-                    // New network layer
-                    net_conv.emplace_back();
-                    auto& net_layer = net_conv.back();
+                    // Extract the camera position now that we need it
+                    Eigen::Affine3d Hcw(image.Hcw);
 
-                    // Copy across our weights
-                    for (unsigned int i = 0; i < layer["weights"].size(); i++) {
-                        const auto& l = layer["weights"][i];
+                    std::exception_ptr eptr;
+                    try {
 
-                        net_layer.first.emplace_back();
-                        auto& weight = net_layer.first.back();
+                        // Run the inference
+                        auto result = runner(image, Hcw.cast<float>());
 
-                        for (const auto& v : l) {
-                            weight.push_back(v.as<float>());
-                        }
-                        if (first_loop && i % 3 == 2) {
-                            int size = net_layer.first.back().size();
+                        // Move stuff into the emit message
+                        auto msg               = std::make_unique<message::vision::VisualMesh>();
+                        msg->timestamp         = image.timestamp;
+                        msg->camera_id         = image.camera_id;
+                        msg->name              = image.name;
+                        msg->Hcw               = image.Hcw;
+                        msg->pixel_coordinates = std::move(result.pixel_coordinates);
+                        msg->neighbourhood     = std::move(result.neighbourhood);
+                        msg->global_indices    = std::move(result.global_indices);
+                        msg->classifications   = std::move(result.classifications);
 
-                            net_layer.first.emplace_back();
-                            auto& weight = net_layer.first.back();
-                            for (int j = 0; j < size; ++j) {
-                                weight.push_back(0.0f);
-                            }
-                        }
+                        // Emit the inference
+                        emit(msg);
+                    }
+                    catch (...) {
+                        eptr = std::current_exception();
                     }
 
-                    // Copy across our biases
-                    for (const auto& v : layer["biases"]) {
-                        net_layer.second.push_back(v.as<float>());
+                    // This sets the atomic integer back to false so another thread can use this engine
+                    runner.active->store(false);
+
+                    if (eptr) {
+                        // Exception :(
+                        std::rethrow_exception(eptr);
                     }
 
-                    first_loop = false;
+                    // Finish processing
+                    break;
                 }
             }
-
-            if (config["geometry"]["shape"].as<std::string>() == "SPHERE") {
-                auto shape = visualmesh::geometry::Sphere<float>(config["geometry"]["radius"].as<float>(),
-                                                                 config["geometry"]["intersections"].as<float>(),
-                                                                 config["geometry"]["max_distance"].as<float>());
-                mesh       = std::make_unique<VM>(shape,
-                                            config["height"]["minimum"].as<float>(),
-                                            config["height"]["maximum"].as<float>(),
-                                            config["height"]["steps"].as<int>());
-            }
-            else if (config["geometry"]["shape"].as<std::string>() == "CIRCLE") {
-                auto shape = visualmesh::geometry::Circle<float>(config["geometry"]["radius"].as<float>(),
-                                                                 config["geometry"]["intersections"].as<float>(),
-                                                                 config["geometry"]["max_distance"].as<float>());
-                mesh       = std::make_unique<VM>(shape,
-                                            config["height"]["minimum"].as<float>(),
-                                            config["height"]["maximum"].as<float>(),
-                                            config["height"]["steps"].as<int>());
-            }
-            else if (config["geometry"]["shape"].as<std::string>() == "CYLINDER") {
-                auto shape = visualmesh::geometry::Cylinder<float>(config["geometry"]["height"].as<float>(),
-                                                                   config["geometry"]["radius"].as<float>(),
-                                                                   config["geometry"]["intersections"].as<float>(),
-                                                                   config["geometry"]["max_distance"].as<float>());
-                mesh       = std::make_unique<VM>(shape,
-                                            config["height"]["minimum"].as<float>(),
-                                            config["height"]["maximum"].as<float>(),
-                                            config["height"]["steps"].as<int>());
-            }
-
-            classifier = std::make_unique<Classifier>(mesh->make_classifier(network));
-        });
-
-        on<Trigger<Image>, Buffer<2>>().then([this](const Image& img) {
-            // Get our camera to world matrix
-            Eigen::Affine3f Hcw(img.Hcw.cast<float>());
-
-            // Transpose and store in our row major array
-            std::array<std::array<float, 4>, 4> Hoc;
-            Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
-
-            // Build our lens object
-            visualmesh::Lens<float> lens;
-            lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
-            lens.focal_length = img.lens.focal_length * img.dimensions[0];
-            lens.fov          = img.lens.fov;
-            lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
-            switch (img.lens.projection.value) {
-                case Image::Lens::Projection::EQUIDISTANT: lens.projection = visualmesh::EQUIDISTANT; break;
-                case Image::Lens::Projection::EQUISOLID: lens.projection = visualmesh::EQUISOLID; break;
-                case Image::Lens::Projection::RECTILINEAR: lens.projection = visualmesh::RECTILINEAR; break;
-                default: throw std::runtime_error("Unknown lens projection");
-            }
-
-            // Get the mesh that was used so we can make our message
-            const auto& m = mesh->height(Hoc[2][3]);
-
-            // Perform the classification
-            auto results = (*classifier)(m, img.data.data(), img.format, Hoc, lens);
-
-            // Copy the data into the message
-            auto msg       = std::make_unique<VisualMeshMsg>();
-            msg->camera_id = img.camera_id;
-
-            // Get all the rays
-            msg->rays.resize(3, results.global_indices.size());
-            int col = 0;
-            for (const auto& i : results.global_indices) {
-                msg->rays.col(col++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
-            }
-
-            for (const auto& r : m.rows) {
-                msg->mesh.emplace_back(r.phi, r.end - r.begin);
-            }
-
-            msg->coordinates = Eigen::Map<const Eigen::Matrix<float, 2, Eigen::Dynamic>>(
-                reinterpret_cast<float*>(results.pixel_coordinates.data()),
-                2,
-                results.pixel_coordinates.size());
-            msg->indices       = std::move(results.global_indices);
-            msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, 6, Eigen::Dynamic>>(
-                reinterpret_cast<int*>(results.neighbourhood.data()),
-                6,
-                results.neighbourhood.size());
-            msg->classifications = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>>(
-                results.classifications.data(),
-                results.classifications.size() / results.neighbourhood.size(),
-                results.neighbourhood.size());
-
-            msg->Hcw       = img.Hcw;
-            msg->timestamp = img.timestamp;
-
-            emit(msg);
-        });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+        }
+        else {
+            log<NUClear::TRACE>("There is no network loaded for", image.name);
+        }
+    });
+}
