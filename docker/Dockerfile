@@ -229,6 +229,11 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
     -DBUILD_TESTS=OFF
 
+# Visual Mesh
+RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/v2.0.0.tar.gz \
+    -DBUILD_TENSORFLOW_OP=OFF \
+    -DBUILD_EXAMPLES=OFF
+
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
     --without-system-libunwind \
@@ -266,13 +271,17 @@ RUN install-package \
     colordiff \
     parallel \
     vim \
-    nano
+    nano \
+    clinfo
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.10 \
     isort==4.3.21 \
     black==19.10b0
+
+# Enable all the driver capabilities so we can use OpenCL in the container
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 
 ##############################
 ### SETUP THE USER ACCOUNT ###
