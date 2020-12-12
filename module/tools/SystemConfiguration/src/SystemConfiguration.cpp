@@ -164,20 +164,33 @@ namespace tools {
                 std::string target = l.first.as<std::string>();
                 std::string link   = l.second.as<std::string>();
                 log<NUClear::TRACE>(fmt::format("Checking link {} -> {}", link, target));
-                if (fs::exists(target)) {
+                if (!fs::exists(target)) {
                     log<NUClear::WARN>(fmt::format("Link target '{}' doesn't exist. Skipping", target));
                 }
-                else if (!fs::exists(link) || fs::is_symlink(link)) {
-                    if (fs::exists(link) && fs::read_symlink(link).compare(target) == 0) {
-                        log<NUClear::TRACE>(fmt::format("Link '{} -> {}' already exists", link, target));
+                else if (fs::exists(link)) {
+                    if (!fs::is_symlink(link)) {
+                        log<NUClear::WARN>(
+                            fmt::format("File '{}' already exists but is not a symlink. Deleting it", link));
+
+                        // Backup the old file and the delete the conflict
+                        fs::path new_link = link;
+                        new_link += ".old";
+                        fs::copy_file(link, new_link);
+                        fs::remove(link);
                     }
-                    else {
-                        log<NUClear::INFO>(fmt::format("Creating link {} -> {}", target, link));
-                        fs::create_symlink(target, link);
+                    else if (fs::read_symlink(link).compare(target) != 0) {
+                        log<NUClear::WARN>(
+                            fmt::format("Link '{}' already exists but has a different target. Deleting it", link));
+                        fs::remove(link);
                     }
                 }
+
+                if (fs::exists(link) && fs::is_symlink(link) && fs::read_symlink(link).compare(target) == 0) {
+                    log<NUClear::INFO>(fmt::format("Link {} -> {} already exists. Skipping", target, link));
+                }
                 else {
-                    log<NUClear::WARN>(fmt::format("{} is not a symlink. Skipping", link));
+                    log<NUClear::INFO>(fmt::format("Creating link {} -> {}", target, link));
+                    fs::create_symlink(target, link);
                 }
             }
 
