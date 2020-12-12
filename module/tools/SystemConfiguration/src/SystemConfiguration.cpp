@@ -293,33 +293,38 @@ namespace tools {
             log<NUClear::INFO>("Ensuring zsh is configured");
             fs::path home         = fs::path("/home") / user;
             fs::path zprezto_root = home / ".zprezto";
-            if (!fs::exists(zprezto_root) {
-                log<NUClear::INFO>(fmt::format("Cloning zprezto to {}", zprezto_root));
-                std::system(
-                    fmt::format("git clone --recursive https://github.com/sorin-ionescu/prezto.git {}", zprezto_root)
-                        .c_str());
+            if (!fs::exists(zprezto_root)) {
+                log<NUClear::INFO>(fmt::format("Cloning zprezto to {}", zprezto_root.string()));
+                std::system(fmt::format("git clone --recursive https://github.com/sorin-ionescu/prezto.git {}",
+                                        zprezto_root.string())
+                                .c_str());
+            }
+            else {
+                log<NUClear::INFO>(fmt::format("Pulling latest zprezto in {}", zprezto_root.string()));
+                std::system(fmt::format("git -C {} pull --recurse-submodules=yes", zprezto_root.string()).c_str());
+            }
 
-                log<NUClear::INFO>("Making zprezto symlinks");
-                for (const auto& p : fs::directory_iterator(zprezto_root / "runcoms")) {
-                    if (p.is_regular_file() && p.path().filename().string()[0] == 'z') {
-                        fs::path target = p.path();
-                        fs::path link   = home / fmt::format(".{}", p.path().filename());
+            log<NUClear::INFO>("Making zprezto symlinks");
+            for (const auto& p : fs::directory_iterator(zprezto_root / "runcoms")) {
+                if (p.is_regular_file() && p.path().filename().string()[0] == 'z') {
+                    fs::path target = p.path();
+                    fs::path link   = home / fmt::format(".{}", p.path().filename().string());
 
-                        log<NUClear::TRACE>("Making link {} -> {}", link, target);
-                        fs::create_symlink(target, link);
-                    }
+                    log<NUClear::TRACE>("Making link {} -> {}", link.string(), target.string());
+                    fs::create_symlink(target, link);
                 }
+            }
 
-                log<NUClear::INFO>("Changing user shell to zsh");
-                std::system(fmt::format("chsh zsh {}", user).c_str());
+            log<NUClear::INFO>("Changing user shell to zsh");
+            std::system(fmt::format("chsh -s /usr/bin/zsh {}", user).c_str());
 
-                log<NUClear::INFO>("Appending fuzzy find scripts to zshrc");
-                std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
-                ofs_zshrc << std::endl
-                          << "# Source the fuzzy find scripts" << std::endl
-                          << "source /usr/share/fzf/key-bindings.zsh" << std::endl
-                          << "source /usr/share/fzf/completion.zsh" << std::endl;
-                ofs_zshrc.close();
+            log<NUClear::INFO>("Appending fuzzy find scripts to zshrc");
+            std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
+            ofs_zshrc << std::endl
+                      << "# Source the fuzzy find scripts" << std::endl
+                      << "source /usr/share/fzf/key-bindings.zsh" << std::endl
+                      << "source /usr/share/fzf/completion.zsh" << std::endl;
+            ofs_zshrc.close();
             }
 
             /***********
