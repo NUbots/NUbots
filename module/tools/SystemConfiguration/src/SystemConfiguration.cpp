@@ -77,11 +77,17 @@ namespace tools {
             std::string user = config["user"].as<std::string>();
 
             // Get the hostname
-            char hostname_c[255];
-            if (gethostname(hostname_c, 255) != 0) {
-                throw std::system_error(errno, std::system_category(), "Error getting hostname.");
+            std::string hostname;
+            if (config["hostname"]) {
+                hostname = config["hostname"].as<std::string>();
             }
-            std::string hostname = hostname_c;
+            else {
+                char hostname_c[255];
+                if (gethostname(hostname_c, 255) != 0) {
+                    throw std::system_error(errno, std::system_category(), "Error getting hostname.");
+                }
+                hostname = hostname_c;
+            }
 
             // The base path that stores the files
             fs::path base_path = "system";

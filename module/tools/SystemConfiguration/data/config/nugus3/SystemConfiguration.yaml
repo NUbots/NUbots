@@ -1,3 +1,5 @@
+hostname: nugus3
+
 # Systemd units that should be enabled
 systemd:
   - systemd-networkd.service
