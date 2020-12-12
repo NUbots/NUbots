@@ -6,15 +6,17 @@
 #include <Eigen/Geometry>
 #include <functional>
 #include <memory>
+#include <vector>
 
 #include "message/input/Image.hpp"
 
 namespace module::vision::visualmesh {
 
 struct VisualMeshResults {
-    Eigen::Matrix<float, Eigen::Dynamic, 2> pixel_coordinates;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> rays;
+    Eigen::Matrix<float, 2, Eigen::Dynamic> coordinates;
     Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> neighbourhood;
-    Eigen::VectorXi global_indices;
+    std::vector<int> indices;
     Eigen::MatrixXf classifications;
 };
 

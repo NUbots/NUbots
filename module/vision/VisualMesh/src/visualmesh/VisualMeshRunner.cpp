@@ -96,30 +96,33 @@ namespace generate_runner {
             // Assemble the results
             VisualMeshResults results;
 
+            // Get all the rays
+            results.rays.resize(3, output.global_indices.size());
+            int col = 0;
+            for (const auto& i : output.global_indices) {
+                results.rays.col(col++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
+            }
+
             // The pixels that were projected in the mesh
-            results.pixel_coordinates = Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(
+            results.coordinates = Eigen::Map<Eigen::Matrix<float, 2, Eigen::Dynamic>>(
                 reinterpret_cast<float*>(output.pixel_coordinates.data()),
-                output.pixel_coordinates.size(),
-                2);
+                2,
+                output.pixel_coordinates.size());
 
             // The neighbourhood graph
-            results.neighbourhood =
-                Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, Model<float>::N_NEIGHBOURS, Eigen::RowMajor>>(
-                    reinterpret_cast<int*>(output.neighbourhood.data()),
-                    output.neighbourhood.size(),
-                    Model<float>::N_NEIGHBOURS);
+            results.neighbourhood = Eigen::Map<Eigen::Matrix<int, Model<float>::N_NEIGHBOURS, Eigen::Dynamic>>(
+                reinterpret_cast<int*>(output.neighbourhood.data()),
+                Model<float>::N_NEIGHBOURS,
+                output.neighbourhood.size());
 
             // The indices of the projected pixels in the global mesh
-            results.global_indices = Eigen::Map<Eigen::Matrix<int, Eigen::Dynamic, 1, Eigen::RowMajor>>(
-                reinterpret_cast<int*>(output.global_indices.data()),
-                output.neighbourhood.size(),
-                1);
+            results.indices = std::move(output.global_indices);
 
             // The predicted classification of each projected pixel
-            results.classifications = Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
-                reinterpret_cast<int*>(output.classifications.data()),
-                output.classifications.size() / cfg.num_classes,
-                cfg.num_classes);
+            results.classifications = Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>>(
+                reinterpret_cast<float*>(output.classifications.data()),
+                output.classifications.size() / output.neighbourhood.size(),
+                output.neighbourhood.size());
 
             return results;
         };

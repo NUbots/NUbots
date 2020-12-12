@@ -27,9 +27,11 @@ import "Matrix.proto";
 message VisualMesh {
     google.protobuf.Timestamp timestamp         = 1;
     uint32                    camera_id         = 2;
-    mat4                      Hcw               = 3;
-    fmat                      pixel_coordinates = 4;
-    imat                      neighbourhood     = 5;
-    imat                      global_indices    = 6;
-    fmat                      classifications   = 7;
+    string                    name = 3;
+    mat4                      Hcw               = 4;
+    fmat                      coordinates = 5;
+    imat                      neighbourhood     = 6;
+    repeated int32            indices    = 7;
+    fmat                      classifications   = 8;
+    fmat                      rays = 9;
 }

@@ -69,15 +69,16 @@ VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment) : Reac
                         auto result = runner(image, Hcw.cast<float>());
 
                         // Move stuff into the emit message
-                        auto msg               = std::make_unique<message::vision::VisualMesh>();
-                        msg->timestamp         = image.timestamp;
-                        msg->camera_id         = image.camera_id;
-                        msg->name              = image.name;
-                        msg->Hcw               = image.Hcw;
-                        msg->pixel_coordinates = std::move(result.pixel_coordinates);
-                        msg->neighbourhood     = std::move(result.neighbourhood);
-                        msg->global_indices    = std::move(result.global_indices);
-                        msg->classifications   = std::move(result.classifications);
+                        auto msg             = std::make_unique<message::vision::VisualMesh>();
+                        msg->timestamp       = image.timestamp;
+                        msg->camera_id       = image.camera_id;
+                        msg->name            = image.name;
+                        msg->Hcw             = image.Hcw;
+                        msg->rays            = std::move(result.rays);
+                        msg->coordinates     = std::move(result.coordinates);
+                        msg->neighbourhood   = std::move(result.neighbourhood);
+                        msg->indices         = std::move(result.indices);
+                        msg->classifications = std::move(result.classifications);
 
                         // Emit the inference
                         emit(msg);
@@ -104,3 +105,4 @@ VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment) : Reac
         }
     });
 }
+}  // namespace module::vision
