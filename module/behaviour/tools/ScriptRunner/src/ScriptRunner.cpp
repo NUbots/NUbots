@@ -17,16 +17,16 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ScriptRunner.h"
+#include "ScriptRunner.hpp"
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/platform/darwin/DarwinSensors.h"
+#include "message/platform/darwin/DarwinSensors.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 
 namespace module {

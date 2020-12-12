@@ -17,18 +17,18 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "KickAtGoal.h"
+#include "KickAtGoal.hpp"
 
 #include <armadillo>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/time/time.h"
+#include "utility/time/time.hpp"
 
 namespace module {
 namespace behaviour {

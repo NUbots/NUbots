@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GoalSaver.h"
+#include "GoalSaver.hpp"
 
 #include <armadillo>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/DiveCommand.h"
-#include "message/motion/WalkCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/DiveCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/motion/Script.hpp"
 
 namespace module {
 namespace behaviour {

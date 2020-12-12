@@ -17,11 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "FixedWalk.h"
+#include "FixedWalk.hpp"
 
-#include "message/motion/GetupCommand.h"
+#include "message/motion/GetupCommand.hpp"
 
-#include "utility/math/matrix/Rotation2D.h"
+#include "utility/math/matrix/Rotation2D.hpp"
 
 namespace module {
 namespace behaviour {

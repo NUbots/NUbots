@@ -17,12 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 
-#include "utility/nusight/NUhelpers.h"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace support {

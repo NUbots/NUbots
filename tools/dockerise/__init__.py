@@ -74,6 +74,8 @@ def build_platform(platform):
             "BUILDKIT_INLINE_CACHE=1",
             "--build-arg",
             "platform={}".format(platform if platform != "buildkit" else "generic"),
+            "--build-arg",
+            "user_uid={}".format(os.getuid()),
             "-t",
             local_tag,
         ],
@@ -146,6 +148,7 @@ def run_on_docker(func):
                 nargs="?",
                 help="The image to use for the docker container",
             )
+            command.add_argument("--network", dest="network", help="Run the container on the specified docker network")
 
             func(command)
 
@@ -153,7 +156,7 @@ def run_on_docker(func):
 
     elif func.__name__ == "run":
 
-        def run(rebuild, clean, platform, **kwargs):
+        def run(rebuild, clean, platform, network, **kwargs):
             # If we are running in docker, then execute the command as normal
             if is_docker():
                 func(rebuild=rebuild, clean=clean, platform=platform, **kwargs)
@@ -244,7 +247,7 @@ def run_on_docker(func):
                             "--hostname",
                             "docker",
                             "--network",
-                            "host",
+                            network or "host",
                             "--mount",
                             "type=bind,source={},target=/home/{}/{},consistency=cached".format(
                                 bind_path, user, directory

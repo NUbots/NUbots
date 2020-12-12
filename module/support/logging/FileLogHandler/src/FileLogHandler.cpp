@@ -1,9 +1,9 @@
-#include "FileLogHandler.h"
+#include "FileLogHandler.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "utility/strutil/ansi.h"
-#include "utility/support/evil/pure_evil.h"
+#include "utility/strutil/ansi.hpp"
+#include "utility/support/evil/pure_evil.hpp"
 
 namespace module {
 namespace support {

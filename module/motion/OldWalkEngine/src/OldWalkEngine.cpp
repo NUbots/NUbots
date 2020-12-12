@@ -17,32 +17,32 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "OldWalkEngine.h"
+#include "OldWalkEngine.hpp"
 
 #include <algorithm>
 #include <armadillo>
 #include <chrono>
 #include <cmath>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/FixedWalkCommand.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/KinematicsModel.h"
-#include "message/motion/ServoTarget.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/SaveConfiguration.h"
+#include "message/behaviour/FixedWalkCommand.hpp"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
+#include "message/motion/ServoTarget.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/SaveConfiguration.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/math/comparison.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/motion/Balance.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/math/angle.hpp"
+#include "utility/math/comparison.hpp"
+#include "utility/math/matrix/Rotation3D.hpp"
+#include "utility/motion/Balance.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace motion {
@@ -71,7 +71,6 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::nusight::graph;
     using utility::support::Expression;
 
