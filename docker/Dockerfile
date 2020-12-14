@@ -230,7 +230,7 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.g
     -DBUILD_TESTS=OFF
 
 # Visual Mesh
-RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/v2.0.0.tar.gz \
+RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/v2.0.1.tar.gz \
     -DBUILD_TENSORFLOW_OP=OFF \
     -DBUILD_EXAMPLES=OFF
 
