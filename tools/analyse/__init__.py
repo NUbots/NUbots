@@ -1,5 +1,6 @@
 import os.path
 import re
+import sys
 
 import clang.cindex
 
@@ -16,6 +17,8 @@ parseArgs = [
     "-Inuclear/message/include",
     "-I/usr/local/lib/clang/9.0.1/include",  # clang include path, clang -E -v -
     "-I/usr/local/include/eigen3",
+    "--include=/usr/local/lib/clang/9.0.1/include/stddef.h",
+    "--std=c++17",
 ]
 
 # A list of folders that could have interesting things
@@ -65,7 +68,7 @@ def createTree(files, folder):
     # Make sure that there are no errors in the parsing
     for diagnostic in diagnostics:
         if diagnostic.severity >= clang.cindex.Diagnostic.Error:
-            print(diagnostic)
+            print(diagnostic, file=sys.stderr)
             return root
 
     # Create an adjacency list for the topological sort
@@ -276,7 +279,7 @@ def makeReactor(node, root):
     # Find the methods in the reactor
     for child in node.get_children():
         if isCall(child):
-            function = makeFunction(child)
+            function = makeFunction(child, root)
             if function:
                 reactor.methods.append(function)
                 root.functions[function.node.displayname] = function
