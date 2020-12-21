@@ -125,7 +125,7 @@ def run(outdir, indir, multiprocess, **kwargs):
         modules["/".join(srcDir.split("/")[0:-1])] = []
         for dirpath, dirnames, filenames in os.walk(srcDir):
             for filename in filenames:
-                if not os.path.splitext(filename)[1] == ".py":
+                if os.path.splitext(filename)[1] == ".hpp" or os.path.splitext(filename)[1] == ".cpp":
                     modules["/".join(srcDir.split("/")[0:-1])].append(os.path.join(dirpath, filename))
 
     # Loop through each module, looking for reactors then printing them

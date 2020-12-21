@@ -17,7 +17,6 @@ parseArgs = [
     "-Inuclear/message/include",
     "-I/usr/local/lib/clang/9.0.1/include",  # clang include path, clang -E -v -
     "-I/usr/local/include/eigen3",
-    "--include=/usr/local/lib/clang/9.0.1/include/stddef.h",
     "--std=c++17",
 ]
 
@@ -59,7 +58,7 @@ def createTree(files, folder):
     for f in files:
         f = os.path.abspath(f)
         print("  [{}/{}] generating AST for file".format(i, total), f)
-        translationUnits[f] = index.parse(f, parseArgs)
+        translationUnits[f] = index.parse(f, parseArgs.copy() + ["-I" + folder + "/src"])
         diagnostics += list(translationUnits[f].diagnostics)
         i += 1
 
