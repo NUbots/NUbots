@@ -20,6 +20,9 @@
 #ifndef MODULES_INPUT_GAMECONTROLLERDATA_HPP
 #define MODULES_INPUT_GAMECONTROLLERDATA_HPP
 
+#include <array>
+#include <ostream>
+
 namespace module {
 namespace input {
     namespace gamecontroller {

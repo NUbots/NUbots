@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 
-# clang --include-directory /home/nubots/build/shared --include-directory /home/nubots/NUbots/shared --include-directory /home/nubots/NUbots/nuclear/message/include -c -Xclang -ast-dump -fsyntax-only test.cpp
-# pydoc -b tools/clang/cindex.py
-
 import itertools
 import multiprocessing
 import os

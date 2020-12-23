@@ -17,6 +17,8 @@ parseArgs = [
     "-Inuclear/message/include",
     "-I/usr/local/lib/clang/9.0.1/include",  # clang include path, clang -E -v -
     "-I/usr/local/include/eigen3",
+    "-I/usr/local/include/aravis-0.8/",
+    "-I/usr/local/include/glib-2.0/",
     "--std=c++17",
 ]
 

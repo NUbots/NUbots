@@ -1,6 +1,7 @@
 #ifndef MODULE_INPUT_CAMERA_DESCRIPTION_TO_FOURCC_HPP
 #define MODULE_INPUT_CAMERA_DESCRIPTION_TO_FOURCC_HPP
 
+#include <stdexcept>
 #include <string>
 
 #include "utility/vision/fourcc.hpp"
