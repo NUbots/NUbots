@@ -42,7 +42,7 @@ def printNode(node, tab=0):
 # Print out a kinda readable tree
 def printTree(node, tab=0):
     out = ""
-    out += printNode(node, tab)
+    out += printNode(node, tab) + "\n"
     for child in node.get_children():
         out += printTree(child, tab + 1)
     return out
@@ -129,7 +129,7 @@ def _treeNodeStuff(node, root):
 
 # Find information about a function
 def makeFunction(node, root):
-    function = Function(node, [], [])
+    function = Function(node)
 
     _functionTree(node, function, root)
 
@@ -145,7 +145,7 @@ def makeFunction(node, root):
         pass  # Function was a forward declared and not a method
 
     # Check that the function is interesting
-    if function.emits or function.ons or not function.calls == []:
+    if (not function.emits == []) or (not function.ons == []) or (not function.calls == []):
         return function
 
 
@@ -268,14 +268,11 @@ def makeEmit(node):
 def makeReactor(node, root):
     reactor = Reactor(node, [])
 
-    # Remove forward declared versions of this reactor
-    shift = 0
-    last = len(root.reactors)
-    for i in range(last):
-        if root.reactors[i - shift].node.type.spelling == node.type.spelling:
-            reactor.methods.extend(root.reactors[i - shift].methods)
-            del root.reactors[i - shift]
-            shift += 1
+    # Find if this reactor is forward declared
+    for candidateReactor in root.reactors:
+        if candidateReactor.node.type.spelling == node.type.spelling:
+            reactor = candidateReactor
+            reactor.node = node
 
     # Find the methods in the reactor
     for child in node.get_children():

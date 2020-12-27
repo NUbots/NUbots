@@ -34,13 +34,17 @@ def generateOnJSON(on):
     out = "{"
     out += '"dsl":"{}",'.format(on.dsl)
     out += '"emit":['
+    if on.callback:
+        for emit in on.callback.emits:
+            out += generateEmitJSON(emit)
+            out += ","
     if on.callback and on.callback.calls:
         for call in on.callback.calls:
             for emit in call.emits:
                 out += generateEmitJSON(emit)
                 out += ","
-        if out[-1] != "[":
-            out = out[:-1]
+    if out[-1] != "[":
+        out = out[:-1]
     out += "],"
     out += '"location":{}'.format(generateLocationJSON(on.node.location))
     out += "}"
