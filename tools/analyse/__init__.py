@@ -7,11 +7,11 @@ import clang.cindex
 from .Tree import Emit, Function, On, Reactor, Tree
 
 # The path to the folder that contains libclang
-libraryPath = "/usr/local/lib"  # llvm-config --libdir
-clang.cindex.Config.set_library_path(libraryPath)
+library_path = "/usr/local/lib"  # llvm-config --libdir
+clang.cindex.Config.set_library_path(library_path)
 
 # The arguments to pass to clang
-parseArgs = [
+parse_args = [
     "-I../build/shared",
     "-Ishared",
     "-Inuclear/message/include",
@@ -28,30 +28,30 @@ whitelist = [
 ]
 
 # Creates a index for parsing
-def createIndex():
+def create_index():
     return clang.cindex.Index.create()
 
 
 # Prints out one node
-def printNode(node, tab=0):
+def print_node(node, tab=0):
     return "  " * tab + "{} {}#{} {}:{}:{}".format(
         node.kind.name, node.type.spelling, node.spelling, node.location.file, node.location.line, node.location.column
     )
 
 
 # Print out a kinda readable tree
-def printTree(node, tab=0):
+def print_tree(node, tab=0):
     out = ""
-    out += printNode(node, tab) + "\n"
+    out += print_node(node, tab) + "\n"
     for child in node.get_children():
-        out += printTree(child, tab + 1)
+        out += print_tree(child, tab + 1)
     return out
 
 
 # Creates a tree of reactors, on statements and emit statements
-def createTree(files, folder):
-    index = createIndex()
-    translationUnits = {}
+def create_tree(files, folder):
+    index = create_index()
+    translation_units = {}
     diagnostics = []
 
     # Construct AST for each file
@@ -60,8 +60,8 @@ def createTree(files, folder):
     for f in files:
         f = os.path.abspath(f)
         print("  [{}/{}] generating AST for file".format(i, total), f)
-        translationUnits[f] = index.parse(f, parseArgs.copy() + ["-I" + folder + "/src"])
-        diagnostics += list(translationUnits[f].diagnostics)
+        translation_units[f] = index.parse(f, parse_args.copy() + ["-I" + folder + "/src"])
+        diagnostics += list(translation_units[f].diagnostics)
         i += 1
 
     root = Tree(diagnostics, [], {})
@@ -73,71 +73,71 @@ def createTree(files, folder):
             return root
 
     # Create an adjacency list for the topological sort
-    adjList = adjacencyList()
+    adj_list = AdjacencyList()
 
     # Add edges to the adjacency list
-    for tu in translationUnits.values():
-        currentFile = os.path.abspath(tu.spelling)
-        adjList.init_vertex(currentFile)
-        for fileInclusion in tu.get_includes():
-            includePath = os.path.abspath(fileInclusion.include.name)
-            if os.path.commonpath([includePath, folder]) == folder:
-                adjList.add_edge(currentFile, includePath)
+    for tu in translation_units.values():
+        current_file = os.path.abspath(tu.spelling)
+        adj_list.init_vertex(current_file)
+        for file_inclusion in tu.get_includes():
+            include_path = os.path.abspath(file_inclusion.include.name)
+            if os.path.commonpath([include_path, folder]) == folder:
+                adj_list.add_edge(current_file, include_path)
 
     # Topological sort the adjacency list so we do everything in the right order
-    order = topologicalSort(adjList)
+    order = topological_sort(adj_list)
 
     # Go through the files, pulling out relevant information
     i = 1
     total = len(order)
-    for fileName in order:
-        print("  [{}/{}] working on file".format(i, total), fileName)
+    for file_name in order:
+        print("  [{}/{}] working on file".format(i, total), file_name)
         # For the initial loop through make sure that the file the node comes from is interesting to us
-        for child in translationUnits[fileName].cursor.get_children():
-            childPath = os.path.abspath(child.location.file.name)
+        for child in translation_units[file_name].cursor.get_children():
+            child_path = os.path.abspath(child.location.file.name)
 
-            if os.path.commonpath([childPath, fileName]) == fileName:
-                _treeNodeStuff(child, root)
+            if os.path.commonpath([child_path, file_name]) == file_name:
+                _tree_node_stuff(child, root)
         i += 1
 
     return root
 
 
 # Just loop through the children of the current node
-def _traverseTree(node, root):
+def _traverse_tree(node, root):
     for child in node.get_children():
-        _treeNodeStuff(child, root)
+        _tree_node_stuff(child, root)
 
 
 # Find interesting nodes in the tree
-def _treeNodeStuff(node, root):
-    if isFunction(node):
-        function = makeFunction(node, root)
+def _tree_node_stuff(node, root):
+    if is_function(node):
+        function = make_function(node, root)
         if function:
             root.functions[function.node.displayname] = function
-    elif isClass(node):
+    elif is_class(node):
         try:
-            if isInherited(next(node.get_children()), "NUClear::Reactor"):
-                root.reactors.append(makeReactor(node, root))
+            if is_inherited(next(node.get_children()), "NUClear::Reactor"):
+                root.reactors.append(make_reactor(node, root))
             else:
-                _traverseTree(node, root)
+                _traverse_tree(node, root)
         except StopIteration as e:
-            _traverseTree(node, root)  # Class was a forward declare with no inheritance
+            _traverse_tree(node, root)  # Class was a forward declare with no inheritance
     else:
-        _traverseTree(node, root)
+        _traverse_tree(node, root)
 
 
 # Find information about a function
-def makeFunction(node, root):
+def make_function(node, root):
     function = Function(node)
 
-    _functionTree(node, function, root)
+    _function_tree(node, function, root)
 
     # Find if the function was a method
     # You can't declare a method before declaring a class
     try:
         child = next(node.get_children())
-        if isTypeRef(child):
+        if is_type_ref(child):
             for reactor in root.reactors:
                 if child.type.spelling == reactor.node.type.spelling:
                     reactor.methods.append(function)
@@ -150,72 +150,72 @@ def makeFunction(node, root):
 
 
 # loop through the function finding interesting information
-def _functionTree(node, function, root):
+def _function_tree(node, function, root):
     for child in node.get_children():
-        if isCall(child):
-            if isOnCall(child):
-                function.ons.append(makeOn(child, root))
-            elif isEmitCall(child):
-                function.emits.append(makeEmit(child))
+        if is_call(child):
+            if is_on_call(child):
+                function.ons.append(make_on(child, root))
+            elif is_emit_call(child):
+                function.emits.append(make_emit(child))
             else:
                 # If the function is calling another function, if the other function is in the whitelist
                 # or if the other function is already parsed, give it a look
                 definition = child.get_definition()
                 if definition:
-                    calledFunction = root.functions.get(definition.displayname)
-                    if not calledFunction:
+                    called_function = root.functions.get(definition.displayname)
+                    if not called_function:
                         # A new function that we have not seen yet
-                        for fileName in whitelist:
+                        for file_name in whitelist:
                             if (
-                                os.path.commonpath([os.path.abspath(definition.location.file.name), fileName])
-                                == fileName
+                                os.path.commonpath([os.path.abspath(definition.location.file.name), file_name])
+                                == file_name
                             ):
-                                calledFunction = makeFunction(definition, root)
-                                if calledFunction:
-                                    root.functions[calledFunction.node.displayname] = calledFunction
-                                    function.calls.append(calledFunction)
-                                    function.calls.extend(calledFunction.calls)
+                                called_function = make_function(definition, root)
+                                if called_function:
+                                    root.functions[called_function.node.displayname] = called_function
+                                    function.calls.append(called_function)
+                                    function.calls.extend(called_function.calls)
                                 break
                     else:
                         # A function we have already seen
-                        function.calls.append(calledFunction)
-                        function.calls.extend(calledFunction.calls)
+                        function.calls.append(called_function)
+                        function.calls.extend(called_function.calls)
 
         else:
-            _functionTree(child, function, root)
+            _function_tree(child, function, root)
 
 
 # Find information about an on node
-def makeOn(node, root):
+def make_on(node, root):
     on = On(node)
     children = node.get_children()
 
     # Find the dsl type by looping through the expected part of the tree
     try:
         dsl = ""
-        for dslChild in next(next(next(next(children).get_children()).get_children()).get_children()).get_children():
+        for dsl_child in next(next(next(next(children).get_children()).get_children()).get_children()).get_children():
             # Build up the full typename
-            if dslChild.kind == clang.cindex.CursorKind.TEMPLATE_REF:
-                dsl += "{}::".format(dslChild.spelling)
-            elif dslChild.kind == clang.cindex.CursorKind.NAMESPACE_REF:
-                dsl += "{}::".format(dslChild.spelling)
-            elif dslChild.kind == clang.cindex.CursorKind.TYPE_REF:
-                dsl += dslChild.type.spelling
+            if dsl_child.kind == clang.cindex.CursorKind.TEMPLATE_REF:
+                dsl += "{}::".format(dsl_child.spelling)
+            elif dsl_child.kind == clang.cindex.CursorKind.NAMESPACE_REF:
+                dsl += "{}::".format(dsl_child.spelling)
+            elif dsl_child.kind == clang.cindex.CursorKind.TYPE_REF:
+                dsl += dsl_child.type.spelling
         on.dsl = dsl
     except StopIteration as e:
         print("On DSL find StopIter:", e)
 
     # Find the callback for the function
     try:
-        for callbackChild in children:
-            if callbackChild.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # lambda
-                callback = next(callbackChild.get_children())
-                function = makeFunction(callback, root)
+        for callback_child in children:
+            if callback_child.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # lambda
+                callback = next(callback_child.get_children())
+                function = make_function(callback, root)
                 if function:
                     on.callback = function
-            elif callbackChild.kind == clang.cindex.CursorKind.DECL_REF_EXPR:  # reference to predefined function
+            elif callback_child.kind == clang.cindex.CursorKind.DECL_REF_EXPR:  # reference to predefined function
                 for function in root.functions.values():
-                    if function.node == callbackChild.referenced:
+                    if function.node == callback_child.referenced:
                         on.callback = function
     except StopIteration as e:
         print("On callback find StopIter:", e)
@@ -224,7 +224,7 @@ def makeOn(node, root):
 
 
 # Find information about an emit node
-def makeEmit(node):
+def make_emit(node):
     emit = Emit(node)
 
     children = node.get_children()
@@ -232,8 +232,8 @@ def makeEmit(node):
     # Work out the scope of the node
     emit.scope = "Local"
     try:
-        memberRefExpr = next(children)
-        for part in memberRefExpr.get_children():
+        member_ref_expr = next(children)
+        for part in member_ref_expr.get_children():
             if part.kind == clang.cindex.CursorKind.TEMPLATE_REF:
                 emit.scope = part.spelling
     except StopIteration as e:
@@ -243,15 +243,15 @@ def makeEmit(node):
     try:
         expr = next(children)
         if expr.kind == clang.cindex.CursorKind.UNEXPOSED_EXPR:  # The parameter is constructed in the emit statement
-            regexed = re.findall(Emit.makeUniqueRegex, expr.type.spelling)
+            regexed = re.findall(Emit.make_unique_regex, expr.type.spelling)
             if regexed:
                 emit.type = regexed[0]
             else:
-                emit.type = re.findall(Emit.nusightDataRegex, expr.type.spelling)[0]
+                emit.type = re.findall(Emit.nusight_data_regex, expr.type.spelling)[0]
         elif (
             expr.kind == clang.cindex.CursorKind.DECL_REF_EXPR
         ):  # The parameter is constructed outside the emit statement
-            regexed = re.findall(Emit.existingUniqueRegex, expr.type.spelling)
+            regexed = re.findall(Emit.existing_unique_regex, expr.type.spelling)
             if regexed:
                 emit.type = regexed[0]
             else:  # The parameter is not a unique pointer
@@ -265,19 +265,19 @@ def makeEmit(node):
 
 
 # Information about a reactor
-def makeReactor(node, root):
+def make_reactor(node, root):
     reactor = Reactor(node, [])
 
     # Find if this reactor is forward declared
-    for candidateReactor in root.reactors:
-        if candidateReactor.node.type.spelling == node.type.spelling:
-            reactor = candidateReactor
+    for candidate_reactor in root.reactors:
+        if candidate_reactor.node.type.spelling == node.type.spelling:
+            reactor = candidate_reactor
             reactor.node = node
 
     # Find the methods in the reactor
     for child in node.get_children():
-        if isCall(child):
-            function = makeFunction(child, root)
+        if is_call(child):
+            function = make_function(child, root)
             if function:
                 reactor.methods.append(function)
                 root.functions[function.node.displayname] = function
@@ -286,7 +286,7 @@ def makeReactor(node, root):
 
 
 # Checks all nodes types that could be functions
-def isFunction(node):
+def is_function(node):
     return (
         node.kind == clang.cindex.CursorKind.CXX_METHOD
         or node.kind == clang.cindex.CursorKind.CONSTRUCTOR
@@ -298,92 +298,92 @@ def isFunction(node):
 
 # Checks that a node is a type ref, the first child of a function that is a method will be a type ref.
 # node the first child of a function outside a class
-def isTypeRef(node):
+def is_type_ref(node):
     return node.kind == clang.cindex.CursorKind.TYPE_REF
 
 
 # Is a function call
-def isCall(node):
+def is_call(node):
     return node.kind == clang.cindex.CursorKind.CALL_EXPR
 
 
 # Check that a call is an on node
 # Node must be a call
-def isOnCall(node):
+def is_on_call(node):
     return node.type.spelling == "NUClear::threading::ReactionHandle" and node.spelling == "then"
 
 
 # Check that a call is an emit statement
 # node must be a call
-def isEmitCall(node):
+def is_emit_call(node):
     return node.spelling == "emit"
 
 
 # Check that the node is a class decleration
-def isClass(node):
+def is_class(node):
     return node.kind == clang.cindex.CursorKind.CLASS_DECL
 
 
 # The first child of a class decleration will have information about the parent if it is an child
-def isInherited(node, name):
+def is_inherited(node, name):
     return node.kind == clang.cindex.CursorKind.CXX_BASE_SPECIFIER and node.type.spelling == name
 
 
 # The datatype used for topological sort, represents a digraph
-class adjacencyList:
+class AdjacencyList:
     def __init__(self):
-        self.innerList = {}
+        self.inner_list = {}
         self.size = 0
 
     def init_vertex(self, u):
-        if not self.innerList.get(u):
-            self.innerList[u] = []
+        if not self.inner_list.get(u):
+            self.inner_list[u] = []
 
     def add_edge(self, u, v):
-        if not self.innerList.get(u):
-            self.innerList[u] = []
-        self.innerList[u].append(v)
+        if not self.inner_list.get(u):
+            self.inner_list[u] = []
+        self.inner_list[u].append(v)
 
     def get(self, key):
-        return self.innerList.get(key)
+        return self.inner_list.get(key)
 
     def __getitem__(self, key):
-        return self.innerList[key]
+        return self.inner_list[key]
 
     def __len__(self):
         return self.size
 
     def __iter__(self):
-        return iter(self.innerList)
+        return iter(self.inner_list)
 
     def __repr__(self):
         out = ""
         for u in self:
-            out += repr(u) + " -> " + repr([v for v in self.innerList[u]]) + ","
+            out += repr(u) + " -> " + repr([v for v in self.inner_list[u]]) + ","
         return out
 
 
 # Topological sorts a given adjacency list
-def topologicalSort(adj):
-    tSorted = []
+def topological_sort(adj):
+    t_sorted = []
     visit = {}
     for u in adj:
         visit[u] = False
 
     for u in adj:
         if not visit[u]:
-            _topologicalSortRecurs(adj, u, tSorted, visit)
+            _topological_sort_recurs(adj, u, t_sorted, visit)
 
-    return tSorted
+    return t_sorted
 
 
 # The recursive part of topological sort
-def _topologicalSortRecurs(adj, start, tSorted, visit):
+def _topological_sort_recurs(adj, start, t_sorted, visit):
     visit[start] = True
     trav = adj[start]
-    for travIndex in range(len(trav)):
-        v = trav[travIndex]
+    for trav_index in range(len(trav)):
+        v = trav[trav_index]
         if not visit[v]:
-            _topologicalSortRecurs(adj, v, tSorted, visit)
+            _topological_sort_recurs(adj, v, t_sorted, visit)
 
-    tSorted.append(start)
+    t_sorted.append(start)
