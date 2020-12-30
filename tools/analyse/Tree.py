@@ -7,6 +7,7 @@ class Tree:
         self.diagnostics = diagnostics
         self.reactors = reactors
         self.functions = functions
+        self.alias_stack = []
 
 
 # A structure for holding information about on statements
@@ -48,3 +49,11 @@ class Reactor:
 
     def get_name(self):
         return self.node.type.spelling
+
+
+# A structure for holding information about type aliases
+class Alias:
+    def __init__(self, node, original, aliased):
+        self.node = node
+        self.original = original
+        self.aliased = aliased

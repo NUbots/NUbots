@@ -4,7 +4,7 @@ import sys
 
 import clang.cindex
 
-from .Tree import Emit, Function, On, Reactor, Tree
+from .Tree import Alias, Emit, Function, On, Reactor, Tree
 
 # The path to the folder that contains libclang
 library_path = "/usr/local/lib"  # llvm-config --libdir
@@ -111,6 +111,7 @@ def _traverse_tree(node, root):
 
 # Find interesting nodes in the tree
 def _tree_node_stuff(node, root):
+    root.alias_stack.append([])
     if is_function(node):
         function = make_function(node, root)
         if function:
@@ -123,8 +124,11 @@ def _tree_node_stuff(node, root):
                 _traverse_tree(node, root)
         except StopIteration as e:
             _traverse_tree(node, root)  # Class was a forward declare with no inheritance
+    elif is_using(node):
+        root.alias_stack[-1].append(parse_alias(node))
     else:
         _traverse_tree(node, root)
+    root.alias_stack.pop()
 
 
 # Find information about a function
@@ -285,6 +289,43 @@ def make_reactor(node, root):
     return reactor
 
 
+# Works out type aliases from using statements
+def parse_alias(node):
+    original = ""
+    aliased = ""
+
+    if node.kind == clang.cindex.CursorKind.USING_DECLARATION:
+        # A using declaration. i.e. `using namespace::typename;`
+        aliased = node.spelling
+        for child in node.get_children():
+            original += child.spelling + "::"
+        if original:
+            original = original[:-2]
+    elif node.kind == clang.cindex.CursorKind.TYPE_ALIAS_DECL:
+        # A type alias declaration. i.e. `using typename = namespace::typename`
+        aliased = node.type.spelling
+        template_level = 0
+        for child in node.get_children():
+            if child.kind == clang.cindex.CursorKind.NAMESPACE_REF:
+                original += child.spelling + "::"
+            if child.kind == clang.cindex.CursorKind.TEMPLATE_REF:
+                original += child.spelling + "<"
+                template_level += 1
+            if child.kind == clang.cindex.CursorKind.TYPE_REF:
+                if template_level == 0:
+                    # In this case there was no templated types
+                    original = child.type.spelling
+                else:
+                    original += child.type.spelling + ">"
+                    template_level -= 1
+        if original == "" or original.endswith("::") or original.endswith("<"):
+            print("Did not find TYPE_REF under TYPE_ALIAS_DECL")  # TODO
+    elif node.kind == clang.cindex.CursorKind.NAMESPACE_ALIAS:
+        print("A namespace alias was used, this is currently a TODO")
+
+    return Alias(node, original, aliased)
+
+
 # Checks all nodes types that could be functions
 def is_function(node):
     return (
@@ -293,6 +334,15 @@ def is_function(node):
         or node.kind == clang.cindex.CursorKind.DESTRUCTOR
         or node.kind == clang.cindex.CursorKind.FUNCTION_DECL
         or node.kind == clang.cindex.CursorKind.CONVERSION_FUNCTION
+    )
+
+
+# Checks that a node is a using statement
+def is_using(node):
+    return (
+        node.kind == clang.cindex.CursorKind.USING_DECLARATION
+        or node.kind == clang.cindex.CursorKind.TYPE_ALIAS_DECL
+        or node.kind == clang.cindex.CursorKind.NAMESPACE_ALIAS
     )
 
 
