@@ -16,13 +16,13 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "Vision.h"
+#include "Vision.hpp"
 
 #include <fmt/format.h>
 #include <fstream>
 #include <string>
 
-#include "message/input/Image.h"
+#include "message/input/Image.hpp"
 
 namespace utility {
 namespace vision {

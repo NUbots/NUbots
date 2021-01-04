@@ -1,4 +1,4 @@
-#include "Compressor.h"
+#include "Compressor.hpp"
 
 #include <cstring>
 #include <fcntl.h>
@@ -8,20 +8,20 @@
 #include <va/va_drm.h>
 #include <va/va_enc_jpeg.h>
 
-#include "../mosaic.h"
-#include "cl/make_mosaic_kernel.h"
-#include "cl/mosaic_to_surface.h"
-#include "cl/opencl_error_category.h"
-#include "operation/create_surface.h"
-#include "operation/huffman_table.h"
-#include "operation/jpeg_header.h"
-#include "operation/picture_parameter.h"
-#include "operation/quantization_matrix.h"
-#include "operation/slice_parameter.h"
-#include "operation/upload_to_surface.h"
+#include "../mosaic.hpp"
+#include "cl/make_mosaic_kernel.hpp"
+#include "cl/mosaic_to_surface.hpp"
+#include "cl/opencl_error_category.hpp"
+#include "operation/create_surface.hpp"
+#include "operation/huffman_table.hpp"
+#include "operation/jpeg_header.hpp"
+#include "operation/picture_parameter.hpp"
+#include "operation/quantization_matrix.hpp"
+#include "operation/slice_parameter.hpp"
+#include "operation/upload_to_surface.hpp"
 #include "vaapi_error_category.hpp"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module::output::compressor::vaapi {
 

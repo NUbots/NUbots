@@ -17,11 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Transform2D.h"
+#include "Transform2D.hpp"
 
-#include "Rotation2D.h"
+#include "Rotation2D.hpp"
 
-#include "utility/math/angle.h"
+#include "utility/math/angle.hpp"
 
 namespace utility {
 namespace math {

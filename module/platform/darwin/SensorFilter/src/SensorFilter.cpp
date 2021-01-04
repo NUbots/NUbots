@@ -17,21 +17,21 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SensorFilter.h"
+#include "SensorFilter.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Sensors.h"
-#include "message/motion/BodySide.h"
-#include "message/platform/darwin/DarwinSensors.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/BodySide.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
 
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/matrix/matrix.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/platform/darwin/DarwinSensors.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/matrix/matrix.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace platform {

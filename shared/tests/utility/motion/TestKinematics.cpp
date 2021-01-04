@@ -21,14 +21,14 @@
 #include <Eigen/Geometry>
 #include <catch.hpp>
 
-#include "message/input/Sensors.h"
-#include "message/motion/BodySide.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/BodySide.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/InverseKinematics.h"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/motion/InverseKinematics.hpp"
 
 using message::input::Sensors;
 using message::motion::BodySide;

@@ -17,12 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Rotation3D.h"
+#include "Rotation3D.hpp"
 
-#include "matrix.h"
+#include "matrix.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/math/comparison.h"
+#include "utility/math/angle.hpp"
+#include "utility/math/comparison.hpp"
 
 
 namespace utility {
