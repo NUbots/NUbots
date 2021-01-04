@@ -42,7 +42,7 @@ static const std::array<Eigen::Vector3d, 1> cart_coords = {
 
 // vec3 spherical test coords
 // distance, theta, phi
-static const std::array<Eigen::MatrixBase<double>, 17> spher_coords = {
+static const std::array<Eigen::MatrixBase<double>, 65> spher_coords = {
     // NOTE: should the valid/invalid radial boundaries be tested with each angle value?
     // Edge cases
     //
@@ -51,24 +51,91 @@ static const std::array<Eigen::MatrixBase<double>, 17> spher_coords = {
     Eigen::MatrixBase<double>(0, 0, 0),         // valid boundary radial dist
     Eigen::MatrixBase<double>(DBL_MIN, 0, 0),   // valid open boundary
     Eigen::MatrixBase<double>(1, 0, 0),         // valid
+    // the following tests values of theta and phi, from 0 to 2pi
     //(pi/2)
+    Eigen::MatrixBase<double>(-5, (cmath::M_PI / 2), 0),
+    Eigen::MatrixBase<double>(-5, 0, (cmath::M_PI / 2)),
+    Eigen::MatrixBase<double>(-5, (cmath::M_PI / 2), (cmath::M_PI / 2)),
+
+    Eigen::MatrixBase<double>(-DBL_MIN, (cmath::M_PI / 2), 0),
+    Eigen::MatrixBase<double>(-DBL_MIN, 0, (cmath::M_PI / 2)),
+    Eigen::MatrixBase<double>(-DBL_MIN, (cmath::M_PI / 2), (cmath::M_PI / 2)),
+
+    Eigen::MatrixBase<double>(0, (cmath::M_PI / 2), 0),
+    Eigen::MatrixBase<double>(0, 0, (cmath::M_PI / 2)),
+    Eigen::MatrixBase<double>(0, (cmath::M_PI / 2), (cmath::M_PI / 2)),
+
+    Eigen::MatrixBase<double>(DBL_MIN, (cmath::M_PI / 2), 0),
+    Eigen::MatrixBase<double>(DBL_MIN, 0, (cmath::M_PI / 2)),
+    Eigen::MatrixBase<double>(DBL_MIN, (cmath::M_PI / 2), (cmath::M_PI / 2)),
+
     Eigen::MatrixBase<double>(1, (cmath::M_PI / 2), 0),
     Eigen::MatrixBase<double>(1, 0, (cmath::M_PI / 2)),
-    Eigen::MatrixBase<double>(1, (cmath::M_PI / 2), (cmath::M_PI / 2))
+    Eigen::MatrixBase<double>(1, (cmath::M_PI / 2), (cmath::M_PI / 2)),
+
     //(pi)
+    Eigen::MatrixBase<double>(-5, (cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(-5, 0, (cmath::M_PI)),
+    Eigen::MatrixBase<double>(-5, (cmath::M_PI), (cmath::M_PI)),
+
+    Eigen::MatrixBase<double>(-DBL_MIN, (cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(-DBL_MIN, 0, (cmath::M_PI)),
+    Eigen::MatrixBase<double>(-DBL_MIN, (cmath::M_PI), (cmath::M_PI)),
+
+    Eigen::MatrixBase<double>(0, (cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(0, 0, (cmath::M_PI)),
+    Eigen::MatrixBase<double>(0, (cmath::M_PI), (cmath::M_PI)),
+
+    Eigen::MatrixBase<double>(DBL_MIN, (cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(DBL_MIN, 0, (cmath::M_PI)),
+    Eigen::MatrixBase<double>(DBL_MIN, (cmath::M_PI), (cmath::M_PI)),
+
     Eigen::MatrixBase<double>(1, cmath::M_PI, 0),
     Eigen::MatrixBase<double>(1, 0, cmath::M_PI),
     Eigen::MatrixBase<double>(1, cmath::M_PI, cmath::M_PI),
+
     //(3pi/2)
+    Eigen::MatrixBase<double>(-5, ((3 * cmath::M_PI) / 2), 0),
+    Eigen::MatrixBase<double>(-5, 0, ((3 * cmath::M_PI) / 2)),
+    Eigen::MatrixBase<double>(-5, ((3 * cmath::M_PI) / 2), ((3 * cmath::M_PI) / 2)),
+
+    Eigen::MatrixBase<double>(-DBL_MIN, ((3 * cmath::M_PI) / 2), 0),
+    Eigen::MatrixBase<double>(-DBL_MIN, 0, ((3 * cmath::M_PI) / 2)),
+    Eigen::MatrixBase<double>(-DBL_MIN, ((3 * cmath::M_PI) / 2), ((3 * cmath::M_PI) / 2)),
+
+    Eigen::MatrixBase<double>(0, ((3 * cmath::M_PI) / 2), 0),
+    Eigen::MatrixBase<double>(0, 0, ((3 * cmath::M_PI) / 2)),
+    Eigen::MatrixBase<double>(0, ((3 * cmath::M_PI) / 2), ((3 * cmath::M_PI) / 2)),
+
+    Eigen::MatrixBase<double>(DBL_MIN, ((3 * cmath::M_PI) / 2), 0),
+    Eigen::MatrixBase<double>(DBL_MIN, 0, ((3 * cmath::M_PI) / 2)),
+    Eigen::MatrixBase<double>(DBL_MIN, ((3 * cmath::M_PI) / 2), ((3 * cmath::M_PI) / 2)),
+
     Eigen::MatrixBase<double>(1, ((3 * cmath::M_PI) / 2), 0),
     Eigen::MatrixBase<double>(1, 0, ((3 * cmath::M_PI) / 2)),
-    Eigen::MatrixBase<double>(1, ((3 * cmath::M_PI) / 2), ((3 * cmath::M_PI) / 2))
+    Eigen::MatrixBase<double>(1, ((3 * cmath::M_PI) / 2), ((3 * cmath::M_PI) / 2)),
     //(2pi)
+    Eigen::MatrixBase<double>(-5, (2 * cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(-5, 0, (2 * cmath::M_PI)),
+    Eigen::MatrixBase<double>(-5, (2 * cmath::M_PI), (2 * cmath::M_PI)),
+
+    Eigen::MatrixBase<double>(-DBL_MIN, (2 * cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(-DBL_MIN, 0, (2 * cmath::M_PI)),
+    Eigen::MatrixBase<double>(-DBL_MIN, (2 * cmath::M_PI), (2 * cmath::M_PI)),
+
+    Eigen::MatrixBase<double>(0, (2 * cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(0, 0, (2 * cmath::M_PI)),
+    Eigen::MatrixBase<double>(0, (2 * cmath::M_PI), (2 * cmath::M_PI)),
+
+    Eigen::MatrixBase<double>(DBL_MIN, (2 * cmath::M_PI), 0),
+    Eigen::MatrixBase<double>(DBL_MIN, 0, (2 * cmath::M_PI)),
+    Eigen::MatrixBase<double>(DBL_MIN, (2 * cmath::M_PI), (2 * cmath::M_PI)),
+
     Eigen::MatrixBase<double>(1, 2 * cmath::M_PI, 0),
     Eigen::MatrixBase<double>(1, 0, 2 * cmath::M_PI),
     Eigen::MatrixBase<double>(1, 2 * cmath::M_PI, 2 * cmath::M_PI)
 
-    // TODO: add random values between boundaries - Add angle boundaries
+    // TODO: add random values between boundaries
 
 
 };
