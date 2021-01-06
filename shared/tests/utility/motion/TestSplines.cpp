@@ -230,32 +230,78 @@ TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
     }
 }
 
-std::vector<float> times                = {1.0f, 2.0f, 3.0f};
-std::vector<float> position             = {1.0f, 2.0f, 1.0f};
-std::vector<float> velocity             = {-2.0f, 0.0f, -2.0f};
-std::vector<float> acceleration         = {0.0f, 0.0f, 0.0f};
-std::vector<std::vector<float>> splines = {{12.0f, -91.0f, 266.0f, -372.0f, 248.0f, -62.0f},
-                                           {-12.0f, 149.0f, -730.0f, 1764.0f, -2104.0f, 994.0f}};
+// Test values for the smooth spline
+// std::vector<float> times        = {1.0f, 2.0f};
+// std::vector<float> position     = {1.0f, 2.0f};
+// std::vector<float> velocity     = {0.0f, 0.0f};
+// std::vector<float> acceleration = {0.0f, 0.0f};
 
 TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
-    utility::motion::splines::SmoothSpline<float> spline();
+    utility::motion::splines::SmoothSpline<double> spline;
+    // Repeat random spline generation and testing 100 times
+    for (int i = 0; i < 100; i++) {
+        // Get a random number of points for this spline
+        int noPoints = rand() % 6;
+        std::vector<Eigen::Vector4d> points;
 
+        // Add our points to the spline
+        for (int i = 0; i < noPoints; i++) {
+            Eigen::Vector4d point = Eigen::Vector4d::Random();  // random 4d array of numbers between -1 and 1
+            point *= 10;                                        // values are between -10 and 10
+            point.x() += (i + 1) * 10;  // this will ensure no t values are negative and they are always consecutive
+            spline.addPoint(point[0], point[1], point[2], point[3]);
+            points.push_back(point);
+        }
 
-    for (int i = 0; i < times.size(); i++) {
-        spline.addPoint(times[i], position[i], velocity[i], acceleration[i]);
-    }
+        // Ensure it has computed the correct number of splines
+        if (spline.size() != (noPoints - 1)) {
+            INFO("Incorrect size. Expected " << (noPoints - 1) << ", got " << spline.size() << ".");
+            REQUIRE(false);
+        }
 
-    spline.computerSplines();
+        // For each spline, check contraints
+        for (size_t i = 0; i < spline.size(); i++) {
+            std::vector<double> splineResult = spline.part(i).polynom.getCoefs();
 
-    if (spline.size() != splines.size()) {
-        INFO("Incorrect size. Expected " << splines.size() << ", got " << spline.size() << ".");
-        REQUIRE(false);
-    }
+            for (int k = 0; k < 2; k++) {
 
-    for (int i = 0; i < spline.size(); i++) {
-        std::vector<Scalar> splineResult = spline.get(i).polynom.getCoefs();
-        for (int j = 0; j < splineResult.size(); j++) {
-            REQUIRE(splineResult[j] == splines[i][j]);
+                // We need to check what this spline actually gives for y, and the first, second and third derivatives
+                // of y, given an input of times[i] which is our x value. We will then check they match the expected
+                // values.
+                double y   = 0;
+                double yd  = 0;
+                double ydd = 0;
+
+                // Each spline is not made using the given t values. Each spline starts at t = 0 and the next point has
+                // t = second-first
+                double t = k == 0 ? 0 : points[i + 1][0] - points[i][0];
+
+                // Loop over the coefficients
+                for (int j = 0; j < splineResult.size(); j++) {
+                    // Add to the calculations for this coefficient.
+                    // Position 'y += a_j x^j'
+                    // First derivative 'yd = j * a_j * x^(j-1)'
+                    // Second derivative 'ydd = j * (j-1) * a_j * x^(j-2)'
+                    // Note that if j is less than 0, don't add anything since our derivative has become 0 for that
+                    // term.
+                    y += splineResult[j] * pow(t, j);
+                    yd += (j - 1) >= 0 ? j * splineResult[j] * pow(t, j - 1) : 0;
+                    ydd += (j - 2) >= 0 ? j * (j - 1) * splineResult[j] * pow(t, j - 2) : 0;
+                }
+
+                // Get the y and first and second derivative values to check the contraints hold. This is for the first
+                // point in the spline. True y value is position[i]; true derivative of y is velocity[i]; true second
+                // derivative of y is acceleration[i].
+                INFO(y << " " << points[i + k][1] << "\n"
+                       << yd << " " << points[i + k][2] << "\n"
+                       << ydd << " " << points[i + k][3] << "\n"
+                       << "\n"
+                       << splineResult[0] << " " << splineResult[1] << " " << splineResult[2] << " " << splineResult[3]
+                       << " " << splineResult[4] << " " << splineResult[5]);
+                REQUIRE(y == points[i + k][1]);
+                REQUIRE(yd == points[i + k][2]);
+                REQUIRE(ydd == points[i + k][3]);
+            }
         }
     }
 }
