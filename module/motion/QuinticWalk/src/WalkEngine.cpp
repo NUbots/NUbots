@@ -8,7 +8,7 @@ https://github.com/Rhoban/model/
 #include <fmt/format.h>
 #include <nuclear>
 
-#include "utility/math/angle.h"
+#include "utility/math/angle.hpp"
 #include "utility/math/euler.h"
 
 namespace module {

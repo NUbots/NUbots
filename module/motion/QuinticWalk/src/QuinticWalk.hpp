@@ -8,10 +8,10 @@
 
 #include "WalkEngine.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/input/ServoID.h"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace motion {

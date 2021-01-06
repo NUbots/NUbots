@@ -8,7 +8,7 @@ https://github.com/Rhoban/model/
 #include <cmath>
 #include <stdexcept>
 
-#include "utility/math/angle.h"
+#include "utility/math/angle.hpp"
 
 namespace utility {
 namespace motion {

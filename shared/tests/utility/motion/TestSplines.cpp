@@ -20,14 +20,12 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <catch.hpp>
+// #include <cmath>
 
 #include "utility/motion/splines/Combination.hpp"
-#include "utility/motion/splines/Footstep.hpp"
 #include "utility/motion/splines/Polynom.hpp"
 #include "utility/motion/splines/SmoothSpline.hpp"
 #include "utility/motion/splines/Spline.hpp"
-#include "utility/motion/splines/SplineContainer.hpp"
-#include "utility/motion/splines/TrajectoryUtils.hpp"
 
 // Stores values of n, k and n choose k.
 std::vector<std::vector<long int>> C = {{3, 0, 1},
