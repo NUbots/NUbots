@@ -17,15 +17,12 @@
  * Copyright 2020 NUbots <nubots@nubots.net>
  */
 
-#include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <catch.hpp>
-// #include <cmath>
 
 #include "utility/motion/splines/Combination.hpp"
 #include "utility/motion/splines/Polynom.hpp"
 #include "utility/motion/splines/SmoothSpline.hpp"
-#include "utility/motion/splines/Spline.hpp"
 
 // Stores values of n, k and n choose k.
 std::vector<std::vector<long int>> C = {{3, 0, 1},
