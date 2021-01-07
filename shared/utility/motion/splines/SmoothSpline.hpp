@@ -34,6 +34,7 @@ namespace motion {
 
             void reset() {
                 points.clear();
+                Spline<Scalar>::splines.clear();
             }
 
             /**
