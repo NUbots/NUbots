@@ -34,4 +34,4 @@ Open loop walk engine that uses quintic splines to create trajectories. [Created
 
 - InverseKinematics
 
-- utility::motion::splines::*
+- `utility::motion::splines::*`
