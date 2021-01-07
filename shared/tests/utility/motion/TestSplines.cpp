@@ -130,9 +130,9 @@ TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
 
     // Loop over all our test values and see if Combination gives the correct result for n choose k
     for (size_t i = 0; i < C.size(); i++) {
-        int n          = C[i][0];
-        int k          = C[i][1];
-        int nCk        = C[i][2];
+        const int& n          = C[i][0];
+        const int& k          = C[i][1];
+        const int& nCk        = C[i][2];
         int combResult = comb.binomialCoefficient(k, n);
         INFO(n << " choose " << k << " = " << nCk << ", got " << combResult);
         REQUIRE(combResult == nCk);
@@ -273,23 +273,23 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
 
                 // We need to check what this spline actually gives for x, and the first and second derivatives
                 // of x, given an input of t. We will then check they match the expected values.
-                double x   = 0;
-                double xd  = 0;
-                double xdd = 0;
+                double x   = 0.0;
+                double xd  = 0.0;
+                double xdd = 0.0;
 
                 // Each spline is not made using the given t values. Each spline starts at t = 0 and the next point is
                 // defined as t = second-first
-                double t = k == 0 ? 0 : points[i + 1][0] - points[i][0];
+                double t = ((k == 0) ? 0.0 : points[i + 1][0] - points[i][0]);
 
                 // Loop over the coefficients, add to the calculations for each coefficient.
                 // Position: x += a_j t^j
                 // Velocity: xd = j * a_j * t^(j-1)
                 // Acceleration: xdd = j * (j-1) * a_j * t^(j-2)
                 // If j is less than 0, don't add anything since our derivative has become 0 for that term.
-                for (int j = 0; j < splineResult.size(); j++) {
+                for (int j = 0; j < int(splineResult.size()); j++) {
                     x += splineResult[j] * pow(t, j);
-                    xd += (j - 1) >= 0 ? j * splineResult[j] * pow(t, j - 1) : 0;
-                    xdd += (j - 2) >= 0 ? j * (j - 1) * splineResult[j] * pow(t, j - 2) : 0;
+                    xd += (((j - 1) >= 0) ? j * splineResult[j] * pow(t, j - 1) : 0.0);
+                    xdd += (((j - 2) >= 0) ? j * (j - 1) * splineResult[j] * pow(t, j - 2) : 0.0);
                 }
 
                 // Log calculated and expected values of each contraint, and the spline coefficients a_0 to a_5

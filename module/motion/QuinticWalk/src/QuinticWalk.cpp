@@ -114,9 +114,7 @@ namespace motion {
                 }
             }
 
-            if (!config.imu_active) {
-                imu_reaction.disable();
-            }
+            imu_reaction.enable(config.imu_active);
         });
 
         on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
