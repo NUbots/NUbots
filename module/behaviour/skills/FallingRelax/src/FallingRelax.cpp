@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "FallingRelax.h"
+#include "FallingRelax.hpp"
 
 #include <cmath>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace module {
 namespace behaviour {

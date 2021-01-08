@@ -22,7 +22,7 @@
 #include <catch.hpp>
 #include <utility>
 
-#include "utility/math/quaternion.h"
+#include "utility/math/quaternion.hpp"
 
 static const std::array<Eigen::Quaterniond, 200> Q = {
     Eigen::Quaterniond(0.812886533020004, -0.185088524394760, -0.548059268662397, -0.0677403912398385),

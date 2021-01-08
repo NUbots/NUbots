@@ -1,11 +1,11 @@
-#include "create_surface.h"
+#include "create_surface.hpp"
 
 #include <fmt/format.h>
 #include <iostream>
 
 #include "../vaapi_error_category.hpp"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module::output::compressor::vaapi::operation {
 

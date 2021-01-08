@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ScriptTuner.h"
+#include "ScriptTuner.hpp"
 
 extern "C" {
 #include <ncurses.h>
@@ -27,15 +27,15 @@ extern "C" {
 #include <cstdio>
 #include <sstream>
 
-#include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/DarwinSensors.h"
+#include "message/motion/ServoTarget.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/file/fileutil.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
-#include "utility/platform/darwin/DarwinSensors.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/file/fileutil.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
 
 namespace module {
 namespace behaviour {

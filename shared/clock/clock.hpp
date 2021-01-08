@@ -1,5 +1,5 @@
-#ifndef UTILITY_CLOCK_H
-#define UTILITY_CLOCK_H
+#ifndef UTILITY_CLOCK_HPP
+#define UTILITY_CLOCK_HPP
 
 #include <nuclear>
 
@@ -10,4 +10,4 @@ namespace clock {
 }  // namespace clock
 }  // namespace utility
 
-#endif  // UTILITY_CLOCK_H
+#endif  // UTILITY_CLOCK_HPP

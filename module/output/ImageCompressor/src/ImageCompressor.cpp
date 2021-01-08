@@ -1,16 +1,16 @@
-#include "ImageCompressor.h"
+#include "ImageCompressor.hpp"
 
 #include <fmt/format.h>
 
-#include "compressor/turbojpeg/Factory.h"
-#include "compressor/vaapi/Factory.h"
+#include "compressor/turbojpeg/Factory.hpp"
+#include "compressor/vaapi/Factory.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Image.h"
-#include "message/output/CompressedImage.h"
+#include "message/input/Image.hpp"
+#include "message/output/CompressedImage.hpp"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module {
 namespace output {
@@ -64,7 +64,7 @@ namespace output {
             else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
             else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            //clang-format on
+            // clang-format on
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(compressor_mutex);
@@ -74,8 +74,9 @@ namespace output {
             for (const auto& c : cfg["compressors"].config) {
                 if (c["name"].as<std::string>() == "vaapi") {
                     config.factories.emplace_back(
-                        std::make_shared<compressor::vaapi::Factory>(
-                            c["device"].as<std::string>(), c["driver"].as<std::string>(), c["quality"].as<int>()),
+                        std::make_shared<compressor::vaapi::Factory>(c["device"].as<std::string>(),
+                                                                     c["driver"].as<std::string>(),
+                                                                     c["quality"].as<int>()),
                         c["concurrent"].as<int>());
                 }
                 else if (c["name"].as<std::string>() == "turbojpeg") {
@@ -125,8 +126,10 @@ namespace output {
                         auto msg = std::make_unique<CompressedImage>();
 
                         // Compress the data
-                        msg->data = ctx.compressor->compress(
-                            image.data, image.dimensions[0], image.dimensions[1], image.format);
+                        msg->data = ctx.compressor->compress(image.data,
+                                                             image.dimensions[0],
+                                                             image.dimensions[1],
+                                                             image.format);
 
                         // The format depends on what kind of data we took in
                         msg->format = compressed_fourcc(image.format);

@@ -20,10 +20,10 @@
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "utility/file/fileutil.h"
-#include "utility/strutil/strutil.h"
+#include "utility/file/fileutil.hpp"
+#include "utility/strutil/strutil.hpp"
 
 /**
  * @author Monica Olejniczak
