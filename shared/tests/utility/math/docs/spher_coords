@@ -1,0 +1,97 @@
+format longe;
+DBL_MIN = realmin('single');
+DBL_MAX = realmin('single');
+sv1 = [-5  0  0]
+sv2 = [-DBL_MIN  0  0]
+sv3 = [0  0  0]
+sv4 = [DBL_MIN  0  0]
+sv5 = [1  0  0]
+% the following tests values of theta and phi  from 0 to 2pi
+%(pi/2)
+sv6 = [-5  pi/2  0]
+sv7 = [-5  0  pi/2]
+sv8 = [-5  pi/2  pi/2]
+
+sv9 = [-DBL_MIN  pi/2  0]
+sv10 = [-DBL_MIN  0  pi/2]
+sv11 = [-DBL_MIN  pi/2  pi/2]
+
+sv12 = [0  pi/2  0]
+sv13 = [0  0  pi/2]
+sv14 = [0  pi/2  pi/2]
+
+sv15 = [DBL_MIN  pi/2  0]
+sv16 = [DBL_MIN  0  pi/2]
+sv17 = [DBL_MIN  pi/2  pi/2]
+
+sv18 = [1  pi/2  0]
+sv19 = [1  0  pi/2]
+sv20 = [1  pi/2  pi/2]
+
+%(pi)
+sv21 = [-5  pi  0]
+sv22 = [-5  0  pi]
+sv23 = [-5  pi  pi]
+
+sv24 = [-DBL_MIN  pi  0]
+sv25 = [-DBL_MIN  0  pi]
+sv26 = [-DBL_MIN  pi  pi]
+
+sv27 = [0  pi  0]
+sv28 = [0  0  pi]
+sv29 = [0  pi  pi]
+
+sv30 = [DBL_MIN  pi  0]
+sv31 = [DBL_MIN  0  pi]
+sv32 = [DBL_MIN  pi  pi]
+
+sv33 = [1  pi  0]
+sv34 = [1  0  pi]
+sv35 = [1  pi  pi]
+
+%(3pi/2)
+sv36 = [-5  ((3 * pi) / 2) 0]
+sv37 = [-5  0  ((3 * pi) / 2)]
+sv38 = [-5  ((3 * pi) / 2) ((3 * pi) / 2)]
+
+sv39 = [-DBL_MIN  ((3 * pi) / 2) 0]
+sv40 = [-DBL_MIN  0  ((3 * pi) / 2)]
+sv41 = [-DBL_MIN  ((3 * pi) / 2) ((3 * pi) / 2)]
+
+sv42 = [0  ((3 * pi) / 2) 0]
+sv43 = [0  0  ((3 * pi) / 2)]
+sv44 = [0  ((3 * pi) / 2) ((3 * pi) / 2)]
+
+sv45 = [DBL_MIN  ((3 * pi) / 2) 0]
+sv46 = [DBL_MIN  0  ((3 * pi) / 2)]
+sv47 = [DBL_MIN  ((3 * pi) / 2) ((3 * pi) / 2)]
+
+sv48 = [1  ((3 * pi) / 2) 0]
+sv49 = [1  0  ((3 * pi) / 2)]
+sv50 = [1  ((3 * pi) / 2) ((3 * pi) / 2)]
+%(2pi)
+sv51 = [-5  (2 * pi) 0]
+sv52 = [-5  0  (2 * pi)]
+sv53 = [-5  (2 * pi) (2 * pi)]
+
+sv54 = [-DBL_MIN  (2 * pi) 0]
+sv55 = [-DBL_MIN  0  (2 * pi)]
+sv56 = [-DBL_MIN  (2 * pi) (2 * pi)]
+
+sv57 = [0  (2 * pi) 0]
+sv58 = [0  0  (2 * pi)]
+sv59 = [0  (2 * pi) (2 * pi)]
+
+sv60 = [DBL_MIN  (2 * pi) 0]
+sv61 = [DBL_MIN  0  (2 * pi)]
+sv62 = [DBL_MIN  (2 * pi) (2 * pi)]
+
+sv63 = [1  (2 * pi)  0]
+sv64 = [1  0  (2 * pi)]
+sv65 = [1  (2 * pi)  (2 * pi)]
+
+spher_coords = [sv1;sv2;sv3;sv4;sv5;sv6;sv7;sv8;sv9;sv10;sv11;sv12;sv13;sv14;sv15;sv16;sv17;sv18;sv19;sv20;sv21;sv22;sv23;sv24;sv25;sv26;sv27;sv28;sv29;sv30;sv31;sv32;sv33;sv34;sv35;sv36;sv37;sv38;sv39;sv40;sv41;sv42;sv43;sv44;sv45;sv46;sv47;sv48;sv49;sv50;sv51;sv52;sv53;sv54;sv55;sv56;sv57;sv58;sv59;sv60;sv61;sv62;sv63;sv64;sv65];
+
+for i = 1 : length(spher_coords)
+fprintf(cartesianToSpherical(spher_coords(i,:)));
+end

@@ -52,6 +52,9 @@ namespace math {
 
         template <typename T, typename U = typename T::Scalar>
         inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
+            if (sphericalCoordinates.x() < 0) {
+                throw std::domain_error("Radial distance must not be negative!");
+            }
             U distance  = sphericalCoordinates[0];
             U cos_theta = cos(sphericalCoordinates[1]);
             U sin_theta = sin(sphericalCoordinates[1]);
