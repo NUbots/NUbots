@@ -106,12 +106,19 @@ def create_tree(files, folder):
 # Just loop through the children of the current node
 def _traverse_tree(node, root):
     for child in node.get_children():
+        root.alias_stack.append([])
         _tree_node_stuff(child, root)
+        root.alias_stack.pop()
 
 
 # Find interesting nodes in the tree
 def _tree_node_stuff(node, root):
-    root.alias_stack.append([])
+    # Work out where the start of the scope is so we know where our using statements are meant to be
+    scope_start = False
+    if is_scope_start(node):
+        root.alias_stack.append([])
+        scope_start = True
+
     if is_function(node):
         function = make_function(node, root)
         if function:
@@ -128,7 +135,10 @@ def _tree_node_stuff(node, root):
         root.alias_stack[-1].append(parse_alias(node))
     else:
         _traverse_tree(node, root)
-    root.alias_stack.pop()
+
+    # If the node was the start of a scope, only it's children will be in that scope
+    if scope_start:
+        root.alias_stack.pop()
 
 
 # Find information about a function
@@ -160,7 +170,7 @@ def _function_tree(node, function, root):
             if is_on_call(child):
                 function.ons.append(make_on(child, root))
             elif is_emit_call(child):
-                function.emits.append(make_emit(child))
+                function.emits.append(make_emit(child, root))
             else:
                 # If the function is calling another function, if the other function is in the whitelist
                 # or if the other function is already parsed, give it a look
@@ -209,6 +219,13 @@ def make_on(node, root):
     except StopIteration as e:
         print("On DSL find StopIter:", e)
 
+    # If the type was aliased, instead store the original type
+    if on.dsl:
+        for l in root.alias_stack:
+            for alias in l:
+                if on.dsl == alias.aliased:
+                    on.dsl = alias.original
+
     # Find the callback for the function
     try:
         for callback_child in children:
@@ -228,7 +245,7 @@ def make_on(node, root):
 
 
 # Find information about an emit node
-def make_emit(node):
+def make_emit(node, root):
     emit = Emit(node)
 
     children = node.get_children()
@@ -264,6 +281,13 @@ def make_emit(node):
             emit.type = expr.type.spelling
     except StopIteration as e:
         print("Emit type StopIter:", e)
+
+    # If the type was aliased, instead store the original type
+    if emit.type:
+        for l in root.alias_stack:
+            for alias in l:
+                if emit.type == alias.aliased:
+                    emit.type = alias.original
 
     return emit
 
@@ -316,10 +340,12 @@ def parse_alias(node):
                     # In this case there was no templated types
                     original = child.type.spelling
                 else:
-                    original += child.type.spelling + ">"
+                    original += child.type.spelling + "> "
                     template_level -= 1
         if original == "" or original.endswith("::") or original.endswith("<"):
             print("Did not find TYPE_REF under TYPE_ALIAS_DECL")  # TODO
+        for _ in range(template_level):
+            original += ">"
     elif node.kind == clang.cindex.CursorKind.NAMESPACE_ALIAS:
         print("A namespace alias was used, this is currently a TODO")
 
@@ -343,6 +369,27 @@ def is_using(node):
         node.kind == clang.cindex.CursorKind.USING_DECLARATION
         or node.kind == clang.cindex.CursorKind.TYPE_ALIAS_DECL
         or node.kind == clang.cindex.CursorKind.NAMESPACE_ALIAS
+    )
+
+
+def is_scope_start(node):
+    return (
+        is_function(node)
+        or node.kind == clang.cindex.CursorKind.STRUCT_DECL
+        or node.kind == clang.cindex.CursorKind.UNION_DECL
+        or node.kind == clang.cindex.CursorKind.CLASS_DECL
+        or node.kind == clang.cindex.CursorKind.ENUM_DECL
+        or node.kind == clang.cindex.CursorKind.NAMESPACE
+        or node.kind == clang.cindex.CursorKind.LINKAGE_SPEC
+        or node.kind == clang.cindex.CursorKind.COMPOUND_STMT
+        or node.kind == clang.cindex.CursorKind.IF_STMT
+        or node.kind == clang.cindex.CursorKind.SWITCH_STMT
+        or node.kind == clang.cindex.CursorKind.WHILE_STMT
+        or node.kind == clang.cindex.CursorKind.DO_STMT
+        or node.kind == clang.cindex.CursorKind.FOR_STMT
+        or node.kind == clang.cindex.CursorKind.CXX_CATCH_STMT
+        or node.kind == clang.cindex.CursorKind.CXX_TRY_STMT
+        or node.kind == clang.cindex.CursorKind.CXX_FOR_RANGE_STMT
     )
 
 
