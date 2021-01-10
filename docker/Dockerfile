@@ -25,6 +25,7 @@ COPY usr/local/bin/install-package /usr/local/bin/install-package
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
 RUN install-package \
+    wget \
     sudo \
     python \
     python-pip \
