@@ -1,6 +1,7 @@
 import os.path
 import re
-import sys
+from sys import stderr
+from itertools import chain
 
 import clang.cindex
 
@@ -69,7 +70,7 @@ def create_tree(files, folder):
     # Make sure that there are no errors in the parsing
     for diagnostic in diagnostics:
         if diagnostic.severity >= clang.cindex.Diagnostic.Error:
-            print(diagnostic, file=sys.stderr)
+            print(diagnostic, file=stderr)
             return root
 
     # Create an adjacency list for the topological sort
@@ -210,11 +211,11 @@ def make_on(node, root):
         for dsl_child in next(next(next(next(children).get_children()).get_children()).get_children()).get_children():
             # Build up the full typename
             if dsl_child.kind == clang.cindex.CursorKind.TEMPLATE_REF:
-                dsl += "{}::".format(dsl_child.spelling)
+                dsl += apply_aliases("{}::".format(dsl_child.spelling), chain.from_iterable(root.alias_stack))
             elif dsl_child.kind == clang.cindex.CursorKind.NAMESPACE_REF:
-                dsl += "{}::".format(dsl_child.spelling)
+                dsl += apply_aliases("{}::".format(dsl_child.spelling), chain.from_iterable(root.alias_stack))
             elif dsl_child.kind == clang.cindex.CursorKind.TYPE_REF:
-                dsl += dsl_child.type.spelling
+                dsl += apply_aliases(dsl_child.type.spelling, chain.from_iterable(root.alias_stack))
         on.dsl = dsl
     except StopIteration as e:
         print("On DSL find StopIter:", e)
@@ -281,6 +282,8 @@ def make_emit(node, root):
             emit.type = expr.type.spelling
     except StopIteration as e:
         print("Emit type StopIter:", e)
+
+    emit.type = apply_aliases(emit.type, chain.from_iterable(root.alias_stack))
 
     # If the type was aliased, instead store the original type
     if emit.type:
@@ -350,6 +353,15 @@ def parse_alias(node):
         print("A namespace alias was used, this is currently a TODO")
 
     return Alias(node, original, aliased)
+
+
+def apply_aliases(dsl, aliases):
+    # If the type was aliased, instead store the original type
+    for alias in aliases:
+        if dsl == alias.aliased:
+            dsl = alias.original
+
+    return dsl
 
 
 # Checks all nodes types that could be functions

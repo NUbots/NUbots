@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-import itertools
-import multiprocessing
+from io import SEEK_END
 import os
 
 import analyse
@@ -79,11 +78,8 @@ def generate_module_JSON(tree, name):
     return out
 
 
-def parse(module, files, outdir):
-    print("Working on module", module)
-
-    with open(os.path.join(outdir, "_".join(module.split("/")) + ".json"), "w") as to_write:
-        to_write.write(generate_module_JSON(analyse.create_tree(files, module), module))
+def parse(module, files):
+    return generate_module_JSON(analyse.create_tree(files, module), module)
 
 
 @run_on_docker
@@ -96,18 +92,9 @@ def register(command):
         "--indir", default="module", help="The root of the directories that you want to scan. Default: module."
     )
 
-    command.add_argument(
-        "-m",
-        "--multiprocess",
-        dest="multiprocess",
-        action="store_true",
-        default=False,
-        help="enable multiprocessing for faster generation, multiplies ram usage by thread count.",
-    )
-
 
 @run_on_docker
-def run(outdir, indir, multiprocess, **kwargs):
+def run(outdir, indir, **kwargs):
     indir = os.path.abspath(indir)
 
     modules = {}
@@ -129,14 +116,14 @@ def run(outdir, indir, multiprocess, **kwargs):
                 if os.path.splitext(filename)[1] == ".hpp" or os.path.splitext(filename)[1] == ".cpp":
                     modules["/".join(src_dir.split("/")[0:-1])].append(os.path.join(dirpath, filename))
 
-    # Loop through each module, looking for reactors then printing them
-    if multiprocess:
-        # Make sure we don't create more subprocesses than we need.
-        process_count = min(multiprocessing.cpu_count(), len(modules))
-        with multiprocessing.Pool(process_count) as pool:
-            pool.starmap(
-                parse, itertools.zip_longest(iter(modules.keys()), iter(modules.values()), iter([]), fillvalue=outdir)
-            )
-    else:
-        for k, v in modules.items():
-            parse(k, v, outdir)
+    with open(os.path.join(outdir, "_reactors" + ".json"), "w") as to_write:
+        to_write.write("[")
+        for module, files in modules.items():
+            print("Working on module", module)
+            to_write.write(generate_module_JSON(analyse.create_tree(files, module), module) + ",")
+
+    with open(os.path.join(outdir, "_reactors" + ".json"), "rb+") as to_write:
+        to_write.seek(-1, SEEK_END)
+        to_write.write("]\n".encode("utf-8"))
+
+    os.rename(os.path.join(outdir, "_reactors" + ".json"), os.path.join(outdir, "reactors" + ".json"))
