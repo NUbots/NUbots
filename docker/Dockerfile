@@ -10,8 +10,8 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:20200505
-RUN echo "Server=https://archive.archlinux.org/repos/2020/05/05/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+FROM archlinux:base
+RUN echo "Server=https://archive.archlinux.org/repos/month/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
