@@ -88,10 +88,12 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
-# LLVM and Clang
-RUN BUILD_FILE_DIR='llvm' install-cmake-from-source \
-    https://github.com/llvm/llvm-project/archive/llvmorg-9.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang"
+# TODO: make nicer
+COPY usr/local/bin/llvm.sh /usr/local/bin/llvm.sh
+RUN /usr/local/bin/llvm.sh
+
+RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
+    -DRUN_TEST_SUITE=OFF
 
 # Libpci access and libdrm for communicating with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
@@ -99,19 +101,9 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.100.
     -Dudev=false \
     -Dvalgrind=false
 
-# Intel graphics compiler
-RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v9.0.0-1.tar.gz
-COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v9.0.0.tar.gz
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.3041.tar.gz \
-    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='9.0.1'
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.4.1.tar.gz \
-    -DRUN_TEST_SUITE=OFF
-
 # Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/releases/download/2.6.0/libva-2.6.0.tar.bz2
-RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.4.0r.tar.gz \
+RUN install-from-source https://github.com/intel/libva/releases/download/2.10.0/libva-2.10.0.tar.bz2
+RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-20.4.5.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
