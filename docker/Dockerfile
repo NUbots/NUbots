@@ -89,8 +89,8 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # TODO: make nicer
-COPY usr/local/bin/llvm.sh /usr/local/bin/llvm.sh
-RUN /usr/local/bin/llvm.sh
+COPY usr/local/package/llvm.sh /usr/local/package/llvm.sh
+RUN /usr/local/package/llvm.sh
 
 RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
     -DRUN_TEST_SUITE=OFF
