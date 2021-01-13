@@ -17,22 +17,20 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "BallDetector.h"
+#include "BallDetector.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/FieldDescription.h"
-#include "message/vision/Ball.h"
-#include "message/vision/GreenHorizon.h"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/GreenHorizon.hpp"
 
-#include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/visualmesh/VisualMesh.h"
+#include "utility/math/coordinates.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module {
 namespace vision {
@@ -45,6 +43,7 @@ namespace vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::support::Expression;
 
     static constexpr int BALL_INDEX = 0;
 
@@ -56,17 +55,17 @@ namespace vision {
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
             config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
-            config.ball_angular_cov      = convert(cfg["ball_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.ball_angular_cov      = Eigen::Vector3f(cfg["ball_angular_cov"].as<Expression>()).asDiagonal();
             config.debug                 = cfg["debug"].as<bool>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
-            "Visual Mesh", [this](const GreenHorizon& horizon, const FieldDescription& field) {
+            "Visual Mesh",
+            [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
-                const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -74,8 +73,11 @@ namespace vision {
 
                 // Partition the indices such that we only have the ball points that dont have ball surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
-                    indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == indices.size() || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
+                    indices.begin(),
+                    indices.end(),
+                    neighbours,
+                    [&](const int& idx) {
+                        return idx == int(indices.size()) || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -92,8 +94,11 @@ namespace vision {
                 //    e) Delete all partitions smaller than a given threshold
                 // 2) Discard all clusters are entirely above the green horizon
                 std::vector<std::vector<int>> clusters;
-                utility::vision::visualmesh::cluster_points(
-                    indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
+                utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                            indices.end(),
+                                                            neighbours,
+                                                            config.cluster_points,
+                                                            clusters);
 
                 if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
@@ -142,10 +147,8 @@ namespace vision {
                         }
 
                         // Ball cam space info
-                        b.cone.axis     = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * axis;
-                        float proj      = 1.0f / radius;
-                        b.cone.gradient = std::sqrt(proj * proj - 1.0f);
-                        b.cone.radius   = radius;
+                        b.cone.axis   = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * axis;
+                        b.cone.radius = radius;
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
                         float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
@@ -259,8 +262,7 @@ namespace vision {
 
                         if (config.debug) {
                             log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
-                            log<NUClear::DEBUG>(
-                                fmt::format("Gradient {} - cos(theta) {}", b.cone.gradient, b.cone.radius));
+                            log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                             log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
                             log<NUClear::DEBUG>(
                                 fmt::format("Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));

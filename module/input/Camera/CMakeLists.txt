@@ -1,9 +1,5 @@
-# Find libjpeg library
-FIND_PACKAGE(JPEG REQUIRED)
-
-FIND_PACKAGE(Aravis REQUIRED)
-FIND_PACKAGE(glib2 REQUIRED)
+# Find Aravis
+find_package(Aravis REQUIRED)
 
 # Build our NUClear module
-NUCLEAR_MODULE(INCLUDES ${JPEG_INCLUDE_DIR} ${Aravis_INCLUDE_DIRS} ${glib2_INCLUDE_DIRS}
-               LIBRARIES ${JPEG_LIBRARIES} ${Aravis_LIBRARY} ${glib2_LIBRARIES})
+nuclear_module(INCLUDES ${Aravis_INCLUDE_DIRS} LIBRARIES ${Aravis_LIBRARIES})

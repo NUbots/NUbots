@@ -17,7 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SignalCatcher.h"
+#include "SignalCatcher.hpp"
+
 #include <csignal>
 
 namespace module {

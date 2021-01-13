@@ -16,19 +16,19 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
+#include "KickScript.hpp"
+
 #include <nuclear>
 
-#include "KickScript.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/WalkCommand.h"
-
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace behaviour {
@@ -100,11 +100,13 @@ namespace behaviour {
 
                 if (leg == LimbID::RIGHT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
                 }
                 else {  // if (leg == LimbID::LEFT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
                 }
 
                 // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
@@ -146,7 +148,8 @@ namespace behaviour {
                 RegisterAction{id,
                                "Kick Script",
                                {std::pair<float, std::set<LimbID>>(
-                                   0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                                   0,
+                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
                                [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
                                [this](const std::set<LimbID>&) { emit(std::make_unique<FinishKick>()); },
                                [this](const std::set<ServoID>&) { emit(std::make_unique<FinishKick>()); }}));

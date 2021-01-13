@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GoalSaver.h"
+#include "GoalSaver.hpp"
 
 #include <armadillo>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/DiveCommand.h"
-#include "message/motion/WalkCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/DiveCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/motion/Script.hpp"
 
 namespace module {
 namespace behaviour {
@@ -93,7 +93,8 @@ namespace behaviour {
                 RegisterAction{id,
                                "Goal Saver",
                                {std::pair<float, std::set<LimbID>>(
-                                   0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                                   0,
+                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
                                [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteDive>()); },
                                [this](const std::set<LimbID>&) { emit(std::make_unique<FinishDive>()); },
                                [this](const std::set<ServoID>&) { emit(std::make_unique<FinishDive>()); }}));

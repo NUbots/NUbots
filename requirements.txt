@@ -1,0 +1,7 @@
+PyYAML
+termcolor
+tqdm
+xxhash
+stringcase
+si-prefix
+numpy

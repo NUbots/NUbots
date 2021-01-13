@@ -17,29 +17,31 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SoccerStrategy.h"
+#include "SoccerStrategy.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/Look.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/Nod.h"
-#include "message/behaviour/SoccerObjectPriority.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/ResetRobotHypotheses.h"
-#include "message/motion/GetupCommand.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/behaviour/Look.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/Nod.hpp"
+#include "message/behaviour/SoccerObjectPriority.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/motion/BodySide.hpp"
+#include "message/motion/GetupCommand.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/matrix/Rotation3D.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_armadillo.hpp"
 
 namespace module {
 namespace behaviour {
@@ -66,6 +68,7 @@ namespace behaviour {
         using message::localisation::Ball;
         using message::localisation::Field;
         using message::localisation::ResetRobotHypotheses;
+        using message::motion::BodySide;
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
         using message::platform::darwin::ButtonLeftDown;
@@ -252,7 +255,7 @@ namespace behaviour {
                             emit(std::make_unique<Behaviour::State>(currentState));
                         }
                     }
-                    catch (std::runtime_error err) {
+                    catch (std::runtime_error& err) {
                         log(err.what());
                         log("Runtime exception.");
                     }
@@ -400,7 +403,7 @@ namespace behaviour {
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
 
-            bool feetOffGround = !sensors.left_foot_down && !sensors.right_foot_down;
+            bool feetOffGround = !sensors.feet[BodySide::LEFT].down && !sensors.feet[BodySide::RIGHT].down;
             return false && feetOffGround && !isGettingUp && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
         }
 

@@ -17,13 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
-
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
-#include "utility/file/fileutil.h"
-#include "utility/strutil/strutil.h"
+#include "NUsight.hpp"
+
+#include "utility/file/fileutil.hpp"
+#include "utility/strutil/strutil.hpp"
 
 /**
  * @author Monica Olejniczak
@@ -46,11 +46,6 @@ namespace support {
         std::string tempName(fmt::format("{}.tmp", path));
         utility::file::writeToFile(tempName, root);
         rename(tempName.c_str(), path.c_str());
-
-        // YAML::Emitter emitter;          // create a YAML emitter
-        // emitter << root;                // send the root node to the emitter's output stream
-        // std::ofstream fout(path);       // create an output stream to the specified path
-        // fout << emitter.c_str();        // write to the file
     }
 }  // namespace support
 }  // namespace module

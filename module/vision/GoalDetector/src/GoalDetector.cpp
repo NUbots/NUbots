@@ -17,22 +17,23 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GoalDetector.h"
+#include "GoalDetector.hpp"
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <fmt/format.h>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/FieldDescription.h"
-#include "message/vision/Goal.h"
-#include "message/vision/GreenHorizon.h"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
+#include "message/vision/GreenHorizon.hpp"
 
-#include "utility/math/coordinates.h"
-#include "utility/math/geometry/ConvexHull.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/vision/Vision.h"
-#include "utility/vision/visualmesh/VisualMesh.h"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/ConvexHull.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module {
 namespace vision {
@@ -45,6 +46,7 @@ namespace vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::support::Expression;
 
     static constexpr int GOAL_INDEX = 1;
 
@@ -55,13 +57,14 @@ namespace vision {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<int>();
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
-            config.goal_angular_cov     = convert(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
+            config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>()).asDiagonal();
             config.use_median           = cfg["use_median"].as<bool>();
             config.debug                = cfg["debug"].as<bool>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
-            "Goal Detector", [this](const GreenHorizon& horizon, const FieldDescription& field) {
+            "Goal Detector",
+            [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
@@ -74,8 +77,11 @@ namespace vision {
 
                 // Partition the indices such that we only have the goal points that dont have goal surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
-                    indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
+                    indices.begin(),
+                    indices.end(),
+                    neighbours,
+                    [&](const int& idx) {
+                        return idx == int(indices.size()) || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -92,15 +98,23 @@ namespace vision {
                 //    e) Delete all partitions smaller than a given threshold
                 // 2) Discard all clusters that do not intersect the green horizon
                 std::vector<std::vector<int>> clusters;
-                utility::vision::visualmesh::cluster_points(
-                    indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
+                utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                            indices.end(),
+                                                            neighbours,
+                                                            config.cluster_points,
+                                                            clusters);
 
                 if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
                 }
 
-                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(
-                    clusters.begin(), clusters.end(), horizon.horizon.begin(), horizon.horizon.end(), rays, true, true);
+                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters.begin(),
+                                                                                            clusters.end(),
+                                                                                            horizon.horizon.begin(),
+                                                                                            horizon.horizon.end(),
+                                                                                            rays,
+                                                                                            true,
+                                                                                            true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 if (config.debug) {
@@ -124,7 +138,8 @@ namespace vision {
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
+                                return idx == int(indices.size())
+                                       || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
                             {2});
                         // Return true if the right neighbour is NOT a goal point
@@ -133,7 +148,8 @@ namespace vision {
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
+                                return idx == int(indices.size())
+                                       || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
                             {3});
 
@@ -262,12 +278,16 @@ namespace vision {
                             // Check the width between the posts
                             // If they are close enough then assign left and right sides
                             if (config.debug) {
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Camera {}: Goal post 0 distance = {}", horizon.camera_id, it1->post.distance));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Camera {}: Goal post 1 distance = {}", horizon.camera_id, it2->post.distance));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Camera {}: Goal width = {} ({})", horizon.camera_id, width, disagreement));
+                                log<NUClear::DEBUG>(fmt::format("Camera {}: Goal post 0 distance = {}",
+                                                                horizon.camera_id,
+                                                                it1->post.distance));
+                                log<NUClear::DEBUG>(fmt::format("Camera {}: Goal post 1 distance = {}",
+                                                                horizon.camera_id,
+                                                                it2->post.distance));
+                                log<NUClear::DEBUG>(fmt::format("Camera {}: Goal width = {} ({})",
+                                                                horizon.camera_id,
+                                                                width,
+                                                                disagreement));
                             }
                             if (disagreement < config.disagreement_ratio) {
                                 auto it = pairs.find(it1);

@@ -17,17 +17,16 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ScriptRunner.h"
+#include "ScriptRunner.hpp"
 
-#include "message/platform/darwin/DarwinSensors.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "message/platform/darwin/DarwinSensors.hpp"
 
-
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 
 namespace module {
@@ -97,7 +96,8 @@ namespace behaviour {
                 id,
                 "Script Runner",
                 {std::pair<float, std::set<LimbID>>(
-                    1, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    1,
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
                 [this](const std::set<LimbID>&) {
                     on<Trigger<ButtonMiddleDown>>().then([this] {
                         std::this_thread::sleep_for(std::chrono::seconds(script_delay));

@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
-from info.type_to_string import type_to_string
-
+import json
 import math
 import random
-import sys
-import json
 import re
+import sys
 from collections import Counter
-from pydotplus.graphviz import Dot, Node, Edge, Cluster
+
+from info.type_to_string import type_to_string
+from pydotplus.graphviz import Cluster, Dot, Edge, Node
 
 
 class NUClearGraphBuilder:

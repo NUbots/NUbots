@@ -16,13 +16,13 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "Vision.h"
+#include "Vision.hpp"
 
 #include <fmt/format.h>
 #include <fstream>
 #include <string>
 
-#include "message/input/Image.h"
+#include "message/input/Image.hpp"
 
 namespace utility {
 namespace vision {
@@ -50,8 +50,9 @@ namespace vision {
         x = x < 2 ? 2 : x > (width - 3) ? width - 3 : x;
         y = y < 2 ? 2 : y > (height - 3) ? height - 3 : y;
 
-        return Eigen::Map<const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
-                   data.data(), height, width)
+        return Eigen::Map<const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(data.data(),
+                                                                                                         height,
+                                                                                                         width)
             .block<5, 5>(y - 2, x - 2);
     }
 
@@ -317,219 +318,9 @@ namespace vision {
             case GB16:
             case BG16:
             case UNKNOWN:
-            default: { return {0, 0, 0}; }
-        }
-    }
-
-    FOURCC getFourCCFromDescription(const std::string& code) {
-        if (code.compare("Mono8") == 0) {
-            return (fourcc("GREY"));
-        }
-
-        else if (code.compare("Mono12Packed") == 0) {
-            return (fourcc("Y12 "));
-        }
-
-        else if (code.compare("Mono12p") == 0) {
-            return (fourcc("Y12 "));
-        }
-
-        else if (code.compare("Mono16") == 0) {
-            return (fourcc("Y16 "));
-        }
-
-        else if (code.compare("BayerGR8") == 0) {
-            return (fourcc("GRBG"));
-        }
-
-        else if (code.compare("BayerRG8") == 0) {
-            return (fourcc("RGGB"));
-        }
-
-        else if (code.compare("BayerGB8") == 0) {
-            return (fourcc("GBRG"));
-        }
-
-        else if (code.compare("BayerBG8") == 0) {
-            return (fourcc("BGGR"));
-        }
-
-        else if (code.compare("BayerGR12p") == 0) {
-            return (fourcc("GR12"));
-        }
-
-        else if (code.compare("BayerRG12p") == 0) {
-            return (fourcc("RG12"));
-        }
-
-        else if (code.compare("BayerGB12p") == 0) {
-            return (fourcc("GB12"));
-        }
-
-        else if (code.compare("BayerBG12p") == 0) {
-            return (fourcc("BG12"));
-        }
-
-        else if (code.compare("BayerGR12Packed") == 0) {
-            return (fourcc("GR12"));
-        }
-
-        else if (code.compare("BayerRG12Packed") == 0) {
-            return (fourcc("RG12"));
-        }
-
-        else if (code.compare("BayerGB12Packed") == 0) {
-            return (fourcc("GB12"));
-        }
-
-        else if (code.compare("BayerBG12Packed") == 0) {
-            return (fourcc("BG12"));
-        }
-
-        else if (code.compare("BayerGR16") == 0) {
-            return (fourcc("GR16"));
-        }
-
-        else if (code.compare("BayerRG16") == 0) {
-            return (fourcc("RG16"));
-        }
-
-        else if (code.compare("BayerGB16") == 0) {
-            return (fourcc("GB16"));
-        }
-
-        else if (code.compare("BayerBG16") == 0) {
-            return (fourcc("BG16"));
-        }
-
-        else if (code.compare("YCbCr411_8_CbYYCrYY") == 0) {
-            return (fourcc("Y411"));
-        }
-
-        else if (code.compare("YCbCr422_8_CbYCrY") == 0) {
-            return (fourcc("UYVY"));
-        }
-
-        else if (code.compare("YCbCr8_CbYCr") == 0) {
-            return (fourcc("YM24"));
-        }
-
-        else if (code.compare("YUYV") == 0) {
-            return (fourcc("YUYV"));
-        }
-
-        else if (code.compare("RGB8") == 0) {
-            return (fourcc("RGB3"));
-        }
-
-        else {
-            return (FOURCC::UNKNOWN);
-        }
-    }
-
-    uint32_t getAravisPixelFormat(const std::string& code) {
-        if (code.compare("Mono8") == 0) {
-            return ARV_PIXEL_FORMAT_MONO_8;
-        }
-
-        else if (code.compare("Mono12Packed") == 0) {
-            return ARV_PIXEL_FORMAT_MONO_12_PACKED;
-        }
-
-        else if (code.compare("Mono12p") == 0) {
-            return ARV_PIXEL_FORMAT_MONO_12;
-        }
-
-        else if (code.compare("Mono16") == 0) {
-            return ARV_PIXEL_FORMAT_MONO_16;
-        }
-
-        else if (code.compare("BayerGR8") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GR_8;
-        }
-
-        else if (code.compare("BayerRG8") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_RG_8;
-        }
-
-        else if (code.compare("BayerGB8") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GB_8;
-        }
-
-        else if (code.compare("BayerBG8") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_BG_8;
-        }
-
-        else if (code.compare("BayerGR12p") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GR_12;
-        }
-
-        else if (code.compare("BayerRG12p") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_RG_12;
-        }
-
-        else if (code.compare("BayerGB12p") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GB_12;
-        }
-
-        else if (code.compare("BayerBG12p") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_BG_12;
-        }
-
-        else if (code.compare("BayerGR12Packed") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GR_12_PACKED;
-        }
-
-        else if (code.compare("BayerRG12Packed") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_RG_12_PACKED;
-        }
-
-        else if (code.compare("BayerGB12Packed") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GB_12_PACKED;
-        }
-
-        else if (code.compare("BayerBG12Packed") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_BG_12_PACKED;
-        }
-
-        else if (code.compare("BayerGR16") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GR_16;
-        }
-
-        else if (code.compare("BayerRG16") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_RG_16;
-        }
-
-        else if (code.compare("BayerGB16") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_GB_16;
-        }
-
-        else if (code.compare("BayerBG16") == 0) {
-            return ARV_PIXEL_FORMAT_BAYER_BG_16;
-        }
-
-        else if (code.compare("YCbCr411_8_CbYYCrYY") == 0) {
-            return ARV_PIXEL_FORMAT_YUV_411_PACKED;
-        }
-
-        else if (code.compare("YCbCr422_8_CbYCrY") == 0) {
-            return ARV_PIXEL_FORMAT_YUV_422_PACKED;
-        }
-
-        else if (code.compare("YCbCr8_CbYCr") == 0) {
-            return ARV_PIXEL_FORMAT_YUV_444_PACKED;
-        }
-
-        else if (code.compare("YUYV") == 0) {
-            return ARV_PIXEL_FORMAT_YUV_422_YUYV_PACKED;
-        }
-
-        else if (code.compare("RGB8") == 0) {
-            return ARV_PIXEL_FORMAT_RGB_8_PACKED;
-        }
-
-        else {
-            return 0;
+            default: {
+                return {0, 0, 0};
+            }
         }
     }
 

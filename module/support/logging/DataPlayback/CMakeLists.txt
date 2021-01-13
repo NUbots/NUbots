@@ -1,24 +1,23 @@
 # Generate our data logging module to handle all the message types
-FIND_PACKAGE(PythonInterp 3 REQUIRED)
+find_package(PythonInterp 3 REQUIRED)
 
-SET(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/DataPlayback.cpp")
-SET(config_file "${CMAKE_CURRENT_BINARY_DIR}/data/config/DataPlayback.yaml")
+set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/register_players.cpp")
 
-# Copy across the files
-ADD_CUSTOM_COMMAND(
-    USES_TERMINAL
-    OUTPUT "${source_file}"
-           "${config_file}"
-    COMMAND ${PYTHON_EXECUTABLE}
-    ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
-         "${PROJECT_BINARY_DIR}/shared"
-         "${source_file}"
-         "${config_file}"
-    DEPENDS ${NUCLEAR_MESSAGE_LIBRARIES}
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
-    COMMENT "Generating DataPlayback system for current messages"
+# Generate the decoders for each of the message types we know
+add_custom_command(
+  OUTPUT "${source_file}"
+  COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
+          "${PROJECT_BINARY_DIR}/shared" "${source_file}"
+  DEPENDS ${NUCLEAR_MESSAGE_LIBRARIES} "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
+  COMMENT "Generating DataPlayback system for current messages"
+)
+
+# Create a symlink to recordings so we can access them from build (helpful for docker)
+add_custom_command(
+  OUTPUT "${CMAKE_BINARY_DIR}/recordings"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_SOURCE_DIR}/recordings" "${CMAKE_BINARY_DIR}/recordings"
+  COMMENT "Creating a link to the recordings directory"
 )
 
 # Build our NUClear module
-NUCLEAR_MODULE(SOURCES "${source_file}"
-               DATA_FILES "${config_file}:config")
+nuclear_module(SOURCES "${source_file}" "${CMAKE_BINARY_DIR}/recordings")

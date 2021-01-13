@@ -16,9 +16,9 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include <stdexcept>
+#include "ServoID.hpp"
 
-#include "ServoID.h"
+#include <stdexcept>
 
 namespace utility {
 namespace input {
@@ -66,34 +66,6 @@ namespace input {
             value = Value::HEAD_PITCH;
         else
             throw std::runtime_error("String " + str + " did not match any enum for ServoID");
-    }
-
-    ServoID::ServoID(std::string const& str, ServoSide const& side) : value(Value::R_SHOULDER_PITCH) {
-        if (str == "SHOULDER_PITCH")
-            value = static_cast<Value>(static_cast<int>(Value::R_SHOULDER_PITCH) + static_cast<int>(side));
-        else if (str == "SHOULDER_ROLL")
-            value = static_cast<Value>(static_cast<int>(Value::R_SHOULDER_ROLL) + static_cast<int>(side));
-        else if (str == "ELBOW")
-            value = static_cast<Value>(static_cast<int>(Value::R_ELBOW) + static_cast<int>(side));
-        else if (str == "HIP_YAW")
-            value = static_cast<Value>(static_cast<int>(Value::R_HIP_YAW) + static_cast<int>(side));
-        else if (str == "HIP_ROLL")
-            value = static_cast<Value>(static_cast<int>(Value::R_HIP_ROLL) + static_cast<int>(side));
-        else if (str == "HIP_PITCH")
-            value = static_cast<Value>(static_cast<int>(Value::R_HIP_PITCH) + static_cast<int>(side));
-        else if (str == "KNEE")
-            value = static_cast<Value>(static_cast<int>(Value::R_KNEE) + static_cast<int>(side));
-        else if (str == "ANKLE_PITCH")
-            value = static_cast<Value>(static_cast<int>(Value::R_ANKLE_PITCH) + static_cast<int>(side));
-        else if (str == "ANKLE_ROLL")
-            value = static_cast<Value>(static_cast<int>(Value::R_ANKLE_ROLL) + static_cast<int>(side));
-        else if (str == "HEAD_YAW")
-            value = static_cast<Value>(static_cast<int>(Value::HEAD_YAW) + static_cast<int>(side));
-        else if (str == "HEAD_PITCH")
-            value = static_cast<Value>(static_cast<int>(Value::HEAD_PITCH) + static_cast<int>(side));
-        else
-            throw std::runtime_error("String " + str + " on side " + std::to_string(side)
-                                     + " did not match any enum for ServoID");
     }
 
     ServoID::operator std::string() const {

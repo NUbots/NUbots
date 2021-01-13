@@ -17,21 +17,25 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "extension/Configuration.h"
-#include "message/support/SaveConfiguration.h"
-#include "message/support/nusight/Command.h"
-#include "utility/math/angle.h"
-#include "utility/math/coordinates.h"
-#include "utility/nusight/NUhelpers.h"
+#include "extension/Configuration.hpp"
+
+#include "message/support/SaveConfiguration.hpp"
+#include "message/support/nusight/Command.hpp"
+
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace support {
 
     using extension::Configuration;
+
     using message::support::SaveConfiguration;
     using message::support::nusight::Command;
+
     using utility::nusight::graph;
 
     NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment)

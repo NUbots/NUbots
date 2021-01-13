@@ -6,8 +6,18 @@
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
     "files.eol": "\n",
+    "cSpell.language": "en-GB",
     "editor.rulers": [
         120
     ],
+    "protoc": {
+        "options": [
+            "-I${workspaceFolder}/nuclear/message/proto"
+        ]
+    },
     "python.formatting.provider": "black",
+    "yaml.format.printWidth": 120,
+    "files.associations": {
+        "*.role": "cmake"
+    }
 }

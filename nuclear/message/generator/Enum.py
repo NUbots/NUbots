@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from generator.textutil import indent, dedent
+from generator.textutil import dedent, indent
 
 
 class Enum:
@@ -175,9 +175,13 @@ class Enum:
                 return static_cast<{protobuf_name}>(value);
             }}
 
-            std::ostream& {namespace}::operator<< (std::ostream& out, const {fqn}& val) {{
-                return out << static_cast<std::string>(val);
-            }}"""
+            namespace {namespace} {{
+                std::ostream& operator<< (std::ostream& out, const {fqn}& val) {{
+                    return out << static_cast<std::string>(val);
+                }}
+            }}
+
+            """
         )
 
         python_template = dedent(

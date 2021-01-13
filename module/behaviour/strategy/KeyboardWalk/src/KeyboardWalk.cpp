@@ -17,19 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "KeyboardWalk.h"
+#include "KeyboardWalk.hpp"
 
-#include <fmt/format.h>
-#include <ncurses.h>
+#include <clocale>
 #include <csignal>
 #include <cstdio>
+#include <fmt/format.h>
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KickCommand.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
-#include "utility/math/matrix/Transform2D.h"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KickCommand.hpp"
+
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
 
 namespace module {
 namespace behaviour {
@@ -45,8 +46,27 @@ namespace behaviour {
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), velocity(arma::fill::zeros) {
 
+            // Ensure UTF-8 is enabled
+            std::setlocale(LC_ALL, "en_US.UTF-8");
+
             // Start curses mode
             initscr();
+
+            // Initialise colours
+            if (has_colors() == TRUE) {
+                colours_enabled = true;
+                start_color();
+                init_pair(short(LogColours::TRACE_COLOURS), COLOR_WHITE, COLOR_BLACK);
+                init_pair(short(LogColours::DEBUG_COLOURS), COLOR_GREEN, COLOR_BLACK);
+                init_pair(short(LogColours::INFO_COLOURS), COLOR_CYAN, COLOR_BLACK);
+                init_pair(short(LogColours::WARN_COLOURS), COLOR_YELLOW, COLOR_BLACK);
+                init_pair(short(LogColours::ERROR_COLOURS), COLOR_MAGENTA, COLOR_BLACK);
+                init_pair(short(LogColours::FATAL_COLOURS), COLOR_RED, COLOR_BLACK);
+            }
+            else {
+                colours_enabled = false;
+            }
+
             // Capture our characters immediately (but pass through signals)
             cbreak();
             // Capture arrows and function keys
@@ -54,8 +74,8 @@ namespace behaviour {
             // Don't echo the users messages
             noecho();
 
-            updateCommand();
-            printStatus();
+            // Set up windows
+            create_windows();
 
             // Trigger when stdin has something to read
             on<IO>(STDIN_FILENO, IO::READ).then([this] {
@@ -64,76 +84,190 @@ namespace behaviour {
                     case 'a': left(); break;
                     case 's': back(); break;
                     case 'd': right(); break;
-                    case 'z': turnLeft(); break;
-                    case 'x': turnRight(); break;
+                    case 'z': turn_left(); break;
+                    case 'x': turn_right(); break;
                     case 'r': reset(); break;
-                    case 'g': getUp(); break;
-                    case 'e': walkToggle(); break;
+                    case 'g': get_up(); break;
+                    case 'e': walk_toggle(); break;
                     case '.': kick(LimbID::RIGHT_LEG); break;
                     case ',': kick(LimbID::LEFT_LEG); break;
-                    case KEY_LEFT: lookLeft(); break;
-                    case KEY_RIGHT: lookRight(); break;
-                    case KEY_UP: lookUp(); break;
-                    case KEY_DOWN: lookDown(); break;
+                    case KEY_LEFT: look_left(); break;
+                    case KEY_RIGHT: look_right(); break;
+                    case KEY_UP: look_up(); break;
+                    case KEY_DOWN: look_down(); break;
                     case 'q': quit(); return;
-                    default: log("Unknown Command");
+                    default:
+                        log<NUClear::ERROR>("Unknown Command");
+                        print_status();
+                        break;
                 }
             });
 
-            on<Trigger<LogMessage>, Sync<KeyboardWalk>>().then([this](const LogMessage& message) {
-                printw((message.message + "\n").c_str());
-                refresh();
+            on<Trigger<LogMessage>>().then([this](const LogMessage& packet) {
+                // Where this message came from
+                std::string source = "";
+
+                // If we know where this log message came from, we display that
+                if (packet.task) {
+                    // Get our reactor name
+                    std::string reactor = packet.task->identifier[1];
+
+                    // Strip to the last semicolon if we have one
+                    size_t lastC = reactor.find_last_of(':');
+                    reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+
+                    // This is our source
+                    source = reactor + " "
+                             + (packet.task->identifier[0].empty() ? "" : "- " + packet.task->identifier[0] + " ");
+                }
+
+                LogColours colours;
+                switch (packet.level) {
+                    default:
+                    case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
+                    case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
+                    case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
+                    case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
+                    case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
+                    case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
+                }
+
+                update_window(log_window, colours, source, packet.message, true);
             });
 
             on<Shutdown>().then(endwin);
+
+            update_command();
+            print_status();
+        }
+
+        void KeyboardWalk::create_windows() {
+            command_window = std::shared_ptr<WINDOW>(newwin(5, COLS, 0, 0), [](auto p) {
+                /* box(local_win, ' ', ' '); : This won't produce the desired
+                 * result of erasing the window. It will leave it's four corners
+                 * and so an ugly remnant of window.
+                 */
+                wborder(p, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+                /* The parameters taken are
+                 * 1. win: the window on which to operate
+                 * 2. ls: character to be used for the left side of the window
+                 * 3. rs: character to be used for the right side of the window
+                 * 4. ts: character to be used for the top side of the window
+                 * 5. bs: character to be used for the bottom side of the window
+                 * 6. tl: character to be used for the top left corner of the window
+                 * 7. tr: character to be used for the top right corner of the window
+                 * 8. bl: character to be used for the bottom left corner of the window
+                 * 9. br: character to be used for the bottom right corner of the window
+                 */
+                wrefresh(p);
+                delwin(p);
+            });
+            wrefresh(command_window.get());
+
+            log_window = std::shared_ptr<WINDOW>(newwin(LINES - 5, COLS, 5, 0), [](auto p) {
+                /* box(local_win, ' ', ' '); : This won't produce the desired
+                 * result of erasing the window. It will leave it's four corners
+                 * and so an ugly remnant of window.
+                 */
+                wborder(p, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+                /* The parameters taken are
+                 * 1. win: the window on which to operate
+                 * 2. ls: character to be used for the left side of the window
+                 * 3. rs: character to be used for the right side of the window
+                 * 4. ts: character to be used for the top side of the window
+                 * 5. bs: character to be used for the bottom side of the window
+                 * 6. tl: character to be used for the top left corner of the window
+                 * 7. tr: character to be used for the top right corner of the window
+                 * 8. bl: character to be used for the bottom left corner of the window
+                 * 9. br: character to be used for the bottom right corner of the window
+                 */
+                wrefresh(p);
+                delwin(p);
+            });
+            scrollok(log_window.get(), true);
+            wrefresh(log_window.get());
+        }
+
+        void KeyboardWalk::update_window(const std::shared_ptr<WINDOW>& window,
+                                         const LogColours& colours,
+                                         const std::string& source,
+                                         const std::string& message,
+                                         const bool& print_level) {
+            std::lock_guard<std::mutex> lock(mutex);
+
+            // Print the message source
+            wprintw(window.get(), source.c_str());
+
+            // Print the log level if it is enabled
+            if (print_level) {
+                // Print it in colour if the functionality is available
+                if (colours_enabled) {
+                    wattron(window.get(), COLOR_PAIR(short(colours)));
+                }
+                switch (colours) {
+                    case LogColours::TRACE_COLOURS: wprintw(window.get(), "TRACE: "); break;
+                    case LogColours::DEBUG_COLOURS: wprintw(window.get(), "DEBUG: "); break;
+                    case LogColours::INFO_COLOURS: wprintw(window.get(), "INFO: "); break;
+                    case LogColours::WARN_COLOURS: wprintw(window.get(), "WARN: "); break;
+                    case LogColours::ERROR_COLOURS: waddwstr(window.get(), L"(╯°□°）╯︵ ┻━┻: "); break;
+                    case LogColours::FATAL_COLOURS: waddwstr(window.get(), L"(ノಠ益ಠ)ノ彡┻━┻: "); break;
+                }
+                if (colours_enabled) {
+                    wattroff(window.get(), COLOR_PAIR(short(colours)));
+                }
+            }
+
+            // Print the log message and refresh the screen
+            wprintw(window.get(), "%s\n", message.c_str());
+            wrefresh(window.get());
         }
 
         void KeyboardWalk::forward() {
             velocity[0] += DIFF;
-            updateCommand();
-            printStatus();
-            log("forward");
+            update_command();
+            print_status();
+            log<NUClear::INFO>("forward");
         }
 
         void KeyboardWalk::left() {
             velocity[1] += DIFF;
-            updateCommand();
-            printStatus();
-            log("left");
+            update_command();
+            print_status();
+            log<NUClear::INFO>("left");
         }
 
         void KeyboardWalk::back() {
             velocity[0] -= DIFF;
-            updateCommand();
-            printStatus();
-            log("back");
+            update_command();
+            print_status();
+            log<NUClear::INFO>("back");
         }
 
         void KeyboardWalk::right() {
             velocity[1] -= DIFF;
-            updateCommand();
-            printStatus();
-            log("right");
+            update_command();
+            print_status();
+            log<NUClear::INFO>("right");
         }
 
-        void KeyboardWalk::turnLeft() {
+        void KeyboardWalk::turn_left() {
             rotation += ROT_DIFF;
-            updateCommand();
-            printStatus();
-            log("turn left");
+            update_command();
+            print_status();
+            log<NUClear::INFO>("turn left");
         }
 
-        void KeyboardWalk::turnRight() {
+        void KeyboardWalk::turn_right() {
             rotation -= ROT_DIFF;
-            updateCommand();
-            printStatus();
-            log("turn right");
+            update_command();
+            print_status();
+            log<NUClear::INFO>("turn right");
         }
 
-        void KeyboardWalk::getUp() {
-            updateCommand();
-            printStatus();
-            log("getup");
+        void KeyboardWalk::get_up() {
+            update_command();
+            print_status();
+            log<NUClear::INFO>("getup");
         }
 
         void KeyboardWalk::kick(LimbID::Value l) {
@@ -142,79 +276,90 @@ namespace behaviour {
             ks.leg          = l;
             std::string leg = (l == 1) ? "left" : "right";
             emit(std::make_unique<message::motion::KickScriptCommand>(ks));
-            log("kick", leg);
+            log<NUClear::INFO>(fmt::format("kick {}", leg));
         }
 
-        void KeyboardWalk::lookLeft() {
-            headYaw += HEAD_DIFF;
-            updateCommand();
-            printStatus();
-            log("look left");
+        void KeyboardWalk::look_left() {
+            head_yaw += HEAD_DIFF;
+            update_command();
+            print_status();
+            log<NUClear::INFO>("look left");
         }
 
-        void KeyboardWalk::lookRight() {
-            headYaw -= HEAD_DIFF;
-            updateCommand();
-            printStatus();
-            log("look right");
+        void KeyboardWalk::look_right() {
+            head_yaw -= HEAD_DIFF;
+            update_command();
+            print_status();
+            log<NUClear::INFO>("look right");
         }
 
-        void KeyboardWalk::lookUp() {
-            headPitch += HEAD_DIFF;
-            updateCommand();
-            printStatus();
-            log("look up");
+        void KeyboardWalk::look_up() {
+            head_pitch += HEAD_DIFF;
+            update_command();
+            print_status();
+            log<NUClear::INFO>("look up");
         }
 
-        void KeyboardWalk::lookDown() {
-            headPitch -= HEAD_DIFF;
-            updateCommand();
-            printStatus();
-            log("look down");
+        void KeyboardWalk::look_down() {
+            head_pitch -= HEAD_DIFF;
+            update_command();
+            print_status();
+            log<NUClear::INFO>("look down");
         }
 
-        void KeyboardWalk::walkToggle() {
+        void KeyboardWalk::walk_toggle() {
             if (moving) {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                 moving = false;
             }
             else {
                 moving = true;
-                updateCommand();
+                update_command();
             }
-            printStatus();
+            print_status();
         }
 
         void KeyboardWalk::reset() {
-            velocity  = {0, 0};
-            rotation  = 0;
-            headYaw   = 0;
-            headPitch = 0;
-            updateCommand();
-            printStatus();
-            log("reset");
+            velocity   = {0, 0};
+            rotation   = 0;
+            head_yaw   = 0;
+            head_pitch = 0;
+            update_command();
+            print_status();
+            log<NUClear::INFO>("reset");
         }
 
-        void KeyboardWalk::updateCommand() {
+        void KeyboardWalk::update_command() {
             if (moving) {
-                std::cout << "New command " << velocity.t() << " " << rotation << std::endl;
                 emit(std::make_unique<MotionCommand>(
                     utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
             }
 
-            auto headCommand        = std::make_unique<HeadCommand>();
-            headCommand->yaw        = headYaw;
-            headCommand->pitch      = headPitch;
-            headCommand->robotSpace = true;
-            emit(std::move(headCommand));
+            auto head_command        = std::make_unique<HeadCommand>();
+            head_command->yaw        = head_yaw;
+            head_command->pitch      = head_pitch;
+            head_command->robotSpace = true;
+            emit(head_command);
         }
 
-        void KeyboardWalk::printStatus() {
-            erase();
-            log(fmt::format("Velocity: {:.4f}, {:.4f}", velocity[0], velocity[1]));
-            log(fmt::format("Rotation: {:.4f}", rotation));
-            log(fmt::format("Moving: {}", moving));
-            log(fmt::format("Head Yaw: {:.2f}, Head Pitch: {:.2f}", headYaw * 180 / M_PI, headPitch * 180 / M_PI));
+        void KeyboardWalk::print_status() {
+            // Clear the command window and move to top-left corner
+            wmove(command_window.get(), 0, 0);
+            wclear(command_window.get());
+            werase(command_window.get());
+
+            // Construct the log command message
+            std::string message = fmt::format(
+                "Velocity: {:.4f}, {:.4f}\nRotation: {:.4f}\nMoving: {}\nHead Yaw: {:.2f}, Head Pitch: {:.2f}",
+                velocity[0],
+                velocity[1],
+                rotation,
+                moving,
+                head_yaw * 180.0 / M_PI,
+                head_pitch * 180.0 / M_PI);
+
+            // Update the command window
+            update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);
         }
 
         void KeyboardWalk::quit() {

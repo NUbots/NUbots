@@ -1,4 +1,4 @@
-#include "read_packet.h"
+#include "read_packet.hpp"
 
 #include <iostream>
 namespace module {
@@ -29,11 +29,8 @@ namespace support {
 
             // Build our packet!
             Packet p;
-            std::cout << "Length:   " << length << std::endl;
             p.timecode = std::chrono::microseconds(timecode);
-            std::cout << "Timecode: " << p.timecode.count() << std::endl;
             in.read(reinterpret_cast<char*>(&p.hash), sizeof(p.hash));
-            std::cout << "Hash:     " << p.hash << std::endl;
             p.payload.resize(length - sizeof(p.hash) - sizeof(p.timecode));
             in.read(p.payload.data(), p.payload.size());
 

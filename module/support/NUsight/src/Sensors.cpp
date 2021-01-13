@@ -17,11 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "message/input/Sensors.hpp"
 
-#include "message/input/Sensors.h"
+#include "NUsight.hpp"
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace module {
 namespace support {

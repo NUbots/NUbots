@@ -17,11 +17,14 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GameController.h"
+#include "GameController.hpp"
+
 #include <atomic>
-#include "extension/Configuration.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "message/support/GlobalConfig.h"
+
+#include "extension/Configuration.hpp"
+
+#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 namespace module {
 namespace input {
@@ -96,7 +99,7 @@ namespace input {
                                           try {
                                               process(gameState, packet, newPacket);
                                           }
-                                          catch (std::runtime_error err) {
+                                          catch (std::runtime_error& err) {
                                               log(err.what());
                                           }
 
