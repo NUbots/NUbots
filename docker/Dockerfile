@@ -221,10 +221,7 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz \
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-# RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
-# Hacky fix for now
-RUN wget https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp && \
-    mv catch.hpp /usr/local/include
+RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
 
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python

@@ -36,8 +36,8 @@ else
       *.tbz2)    tar xf "${ARCHIVE_FILE}" ;;
       *.txz)     tar xf "${ARCHIVE_FILE}" ;;
       *.zip)     unzip "${ARCHIVE_FILE}" ;;
-      *.h)       ;;
-      *.hpp)     ;;
+      *.h)       exit 0 ;;
+      *.hpp)     exit 0 ;;
       *)         echo "Unknown archive format"; exit 1 ;;
     esac
 fi
