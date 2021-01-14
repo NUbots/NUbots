@@ -87,7 +87,7 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
-RUN touch nice.kevin && rm nice.kevin
+
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang" \
@@ -128,7 +128,7 @@ RUN /usr/local/package/ncurses.sh https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
 RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz \
-    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
     -DCMAKE_INSTALL_LIBDIR=lib \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
@@ -168,7 +168,8 @@ COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.ic
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
-    -DCMAKE_INSTALL_LIBDIR=lib
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DIGC_DIR=/usr/local
 
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
