@@ -89,7 +89,7 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
-# llvm
+# LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang" \
     -DCMAKE_INSTALL_PREFIX=/usr \
@@ -126,9 +126,8 @@ RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmml
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INSTALL_LIBDIR=lib \
     -DRUN_TEST_SUITE=OFF
-# libpciaccess
+# libpciaccess and libdrm help communicate with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
-# libdrm
 RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.tar.xz \
     -Dudev=false \
     -Dvalgrind=false
@@ -148,7 +147,7 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INSTALL_LIBDIR=lib
 
-# intel compute runtime
+# Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz
