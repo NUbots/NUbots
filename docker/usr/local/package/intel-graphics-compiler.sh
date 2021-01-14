@@ -38,20 +38,13 @@ mkdir -p build
 cd build
 
 # Configure using cmake
-cmake .. -GNinja \
+cmake .. "$@" -GNinja \
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
-    -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
-    -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
-    -DINSTALL_SPIRVDLL=0 \
-    -DINSTALL_GENX_IR=ON \
     -Wno-dev
 
 # Build the package
-ninja -j `nproc`
+ninja -j $(nproc)
 
 # Now install
 ninja install

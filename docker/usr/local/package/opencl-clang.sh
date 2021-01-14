@@ -44,10 +44,6 @@ cmake .. "$@" \
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
     -DLINUX_RESOURCE_LINKER_COMMAND:PATH="${PREFIX}/bin/linux_resource_linker" \
-	-DCMAKE_INSTALL_PREFIX=/usr \
-    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DSPIRV_TRANSLATOR_DIR=/usr \
-    -DLLVM_NO_DEAD_STRIP=ON \
     -Wno-dev
 
 # Run make

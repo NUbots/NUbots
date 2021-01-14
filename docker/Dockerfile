@@ -87,11 +87,11 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
-
+RUN touch nice.kevin && rm nice.kevin
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang" \
-    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
     -DLLVM_APPEND_VC_REV=ON \
     -DLLVM_ENABLE_RTTI=ON \
     -DLLVM_ENABLE_FFI=ON \
@@ -105,7 +105,7 @@ RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm
 # SPIRV LLVM Translator
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
     -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
     -DCMAKE_SKIP_RPATH=ON \
     -DLLVM_INCLUDE_TESTS=ON \
@@ -113,7 +113,11 @@ RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Transla
 
 # opencl-clang
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
+    -DSPIRV_TRANSLATOR_DIR=/usr/local \
+    -DLLVM_NO_DEAD_STRIP=ON
 
 # ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
 COPY usr/local/package/ncurses.sh /usr/local/package/ncurses.sh
@@ -123,12 +127,19 @@ RUN /usr/local/package/ncurses.sh https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.
 
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
-RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz
+RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
+    -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
+    -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
+    -DINSTALL_SPIRVDLL=0 \
+    -DINSTALL_GENX_IR=ON
 
 # intel compute runtime dependencies
 # gmmlib
 RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
-    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
     -DCMAKE_INSTALL_LIBDIR=lib \
     -DRUN_TEST_SUITE=OFF
 # libpciaccess and libdrm help communicate with graphics hardware
@@ -149,7 +160,7 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
     -DENABLE_NONFREE_KERNELS=ON \
-    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
     -DCMAKE_INSTALL_LIBDIR=lib
 
 # Install intel compute runtime (OpenCL implementation)
