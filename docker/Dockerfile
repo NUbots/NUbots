@@ -103,6 +103,7 @@ RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm
     -DLLVM_LINK_LLVM_DYLIB=ON \
     -DLLVM_BINUTILS_INCDIR=/usr/include
 
+# SPIRV LLVM Translator
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
     -DBUILD_SHARED_LIBS=ON \
     -DCMAKE_INSTALL_PREFIX=/usr \
@@ -111,31 +112,43 @@ RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Transla
     -DLLVM_INCLUDE_TESTS=ON \
     -DLLVM_EXTERNAL_LIT=/usr/bin/lit
 
+# opencl-clang
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
 
+# intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
 RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz
 
+# intel compute runtime dependencies
+# gmmlib
 RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INSTALL_LIBDIR=lib \
-    -DRUN_TEST_SUITE=ON
-
+    -DRUN_TEST_SUITE=OFF
+# libpciaccess
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
+# libdrm
 RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.tar.xz \
     -Dudev=false \
     -Dvalgrind=false
-
-
+# libva
 RUN install-from-source https://github.com/intel/libva/releases/download/2.10.0/libva-2.10.0.tar.bz2 \
     -DENABLE_VA_MESSAGING=ON
 
+# intel media driver
 RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-20.4.5.tar.gz \
+    -DINSTALL_DRIVER_SYSCONF=OFF \
+    -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
+    -DMEDIA_RUN_TEST_SUITE=OFF \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_KERNELS=ON \
+    -DENABLE_KERNELS=ON \
+    -DENABLE_NONFREE_KERNELS=ON \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DINSTALL_DRIVER_SYSCONF=OFF
+    -DCMAKE_INSTALL_LIBDIR=lib
 
+# intel compute runtime
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz

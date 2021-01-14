@@ -43,6 +43,7 @@ cmake .. "$@" \
     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
     -DCMAKE_PREFIX_PATH:PATH="${PREFIX}" \
     -DCMAKE_INSTALL_LIBDIR=lib \
+    -DSKIP_UNIT_TESTS=ON \
     -Wno-dev
 
 # Run make
