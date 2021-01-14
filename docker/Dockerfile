@@ -10,8 +10,8 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:base
-RUN echo "Server=https://archive.archlinux.org/repos/month/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+FROM archlinux:base-20210110.0.13332
+RUN echo "Server=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -33,8 +33,7 @@ RUN install-package \
     ninja \
     cmake \
     meson \
-    git \
-    ncurses
+    git
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -116,6 +115,12 @@ RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Transla
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
 
+# ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
+COPY usr/local/package/ncurses.sh /usr/local/package/ncurses.sh
+RUN /usr/local/package/ncurses.sh https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
+    --with-shared --with-normal --without-debug --without-ada \
+    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
+
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
 RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz
@@ -150,7 +155,9 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz
+RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz \
+    -DSKIP_UNIT_TESTS=ON \
+    -DCMAKE_INSTALL_LIBDIR=lib
 
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
@@ -223,6 +230,9 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz \
 # Catch unit testing library
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
 
+# libusb - a dependency of aravis
+COPY usr/local/package/libusb.sh /usr/local/package/libusb.sh
+RUN /usr/local/package/libusb.sh https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz
@@ -230,7 +240,6 @@ RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.63.3/gli
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
-RUN install-package libusb
 RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_7_3.tar.gz \
     -Ddefault_library=both \
     -Dviewer=false \
