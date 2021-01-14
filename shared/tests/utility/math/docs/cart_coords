@@ -1,3 +1,4 @@
+format longe;
 DBL_MIN = realmin('single');
 DBL_MAX = realmin('single');
 cv1 = [0 0 0];
@@ -21,7 +22,6 @@ cv18 = [0 DBL_MIN -DBL_MIN];
 cv19 = [0 -DBL_MIN DBL_MIN];
 cv20 = [-DBL_MIN 0 DBL_MIN];
 cv21 = [DBL_MIN 0 -DBL_MIN];
-
 cv22 = [-DBL_MAX 0 0];
 cv23 = [0 -DBL_MAX 0];
 cv24 = [0 0 -DBL_MAX];
@@ -40,7 +40,7 @@ cv36 = [-DBL_MAX DBL_MAX 0];
 cv37 = [DBL_MAX -DBL_MAX 0];
 cv38 = [0 DBL_MAX -DBL_MAX];
 cv39 = [0 -DBL_MAX DBL_MAX];
-cv30 = [-DBL_MAX 0 DBL_MAX];
-cv31 = [DBL_MAX 0 -DBL_MAX];
+cv40 = [-DBL_MAX 0 DBL_MAX];
+cv41 = [DBL_MAX 0 -DBL_MAX];
 
-cart_coords = [cv1;cv2;cv3;cv4;cv5;cv6;cv7;cv8;cv9;cv10;cv11;cv12;cv13;cv14;cv15;cv16;cv17;cv18;cv19;cv20;cv21;cv22;cv23;cv24;cv25;cv26;cv27;cv28;cv29;cv30;cv31]
+cart_coords = [cv1;cv2;cv3;cv4;cv5;cv6;cv7;cv8;cv9;cv10;cv11;cv12;cv13;cv14;cv15;cv16;cv17;cv18;cv19;cv20;cv21;cv22;cv23;cv24;cv25;cv26;cv27;cv28;cv29;cv30;cv31;cv32;cv33;cv34;cv35;cv36;cv37;cv38;cv39;cv40;cv41]

@@ -1,5 +1,6 @@
 function conversion = cartesianToSpherical(inputVec)
-%This function converts cartesian coordinate vectors (x,y,z) to spherical form(r,theta,phi)
+%This function converts cartesian coordinate vectors to spherical(r,theta,phi)
+%coordinate vectors 
 x = double(inputVec(1));
 y = double(inputVec(2));
 z = double(inputVec(3));
