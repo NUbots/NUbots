@@ -28,33 +28,33 @@ echo "Configuring using cmake"
 CMAKELISTS_FILE=$(find -type f -name 'CMakeLists.txt' -printf '%d\t%P\n' | sort -nk1 | cut -f2- | head -n 1)
 cd $(dirname "${CMAKELISTS_FILE}")
 
-echo "Building linux resource linker"
-cd "linux_linker"
-"${CXX}" -mtune=generic ./linux_resource_linker.cpp -o "${PREFIX}/bin/linux_resource_linker"
-
 echo "Configuring using cmake file ${CMAKELISTS_FILE}"
-cd ..
+
+# Clone the dependency
+git clone https://github.com/intel/vc-intrinsics vc-intrinsics
 
 # Do an out of source build
 mkdir -p build
 cd build
 
 # Configure using cmake
-cmake .. "$@" \
+cmake .. -GNinja \
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
-    -DLINUX_RESOURCE_LINKER_COMMAND:PATH="${PREFIX}/bin/linux_resource_linker" \
-	-DCMAKE_INSTALL_PREFIX=/usr \
-    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DSPIRV_TRANSLATOR_DIR=/usr \
-    -DLLVM_NO_DEAD_STRIP=ON \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
+    -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
+    -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
+    -DINSTALL_SPIRVDLL=0 \
+    -DINSTALL_GENX_IR=ON \
     -Wno-dev
 
-# Run make
-make -j$(nproc)
+# Build the package
+ninja -j `nproc`
 
 # Now install
-make install
+ninja install
 
 # Now that we have built, cleanup the build directory
 rm -rf "${BUILD_FOLDER}"

@@ -33,7 +33,8 @@ RUN install-package \
     ninja \
     cmake \
     meson \
-    git
+    git \
+    ncurses
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -88,39 +89,56 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
-# TODO: make nicer
-COPY usr/local/package/llvm.sh /usr/local/package/llvm.sh
-RUN /usr/local/package/llvm.sh
+# llvm
+RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
+    -DLLVM_ENABLE_PROJECTS="clang" \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DLLVM_APPEND_VC_REV=ON \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_ENABLE_FFI=ON \
+    -DFFI_INCLUDE_DIR="$(pkg-config --variable=includedir libffi)" \
+    -DFFI_LIBRARY_DIR="$(pkg-config --variable=libdir libffi)" \
+    -DLLVM_ENABLE_SPHINX=OFF \
+    -DLLVM_BUILD_LLVM_DYLIB=ON \
+    -DLLVM_LINK_LLVM_DYLIB=ON \
+    -DLLVM_BINUTILS_INCDIR=/usr/include
 
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
-    -DRUN_TEST_SUITE=OFF
+RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+    -DCMAKE_SKIP_RPATH=ON \
+    -DLLVM_INCLUDE_TESTS=ON \
+    -DLLVM_EXTERNAL_LIT=/usr/bin/lit
 
-# Libpci access and libdrm for communicating with graphics hardware
+COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
+
+COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
+RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz
+
+RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DRUN_TEST_SUITE=ON
+
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
-RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.100.tar.bz2 \
+RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.tar.xz \
     -Dudev=false \
     -Dvalgrind=false
 
-# Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/releases/download/2.10.0/libva-2.10.0.tar.bz2
-RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-20.4.5.tar.gz \
-    -DINSTALL_DRIVER_SYSCONF=OFF \
-    -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
-    -DMEDIA_RUN_TEST_SUITE=OFF \
-    -DBUILD_TESTING=OFF \
-    -DBUILD_KERNELS=ON \
-    -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON \
-    -DBUILD_TYPE=Release
 
-# Install intel compute runtime (OpenCL implementation)
+RUN install-from-source https://github.com/intel/libva/releases/download/2.10.0/libva-2.10.0.tar.bz2 \
+    -DENABLE_VA_MESSAGING=ON
+
+RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-20.4.5.tar.gz \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DINSTALL_DRIVER_SYSCONF=OFF
+
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.01.15264.tar.gz \
-    -DNEO_DRIVER_VERSION=19.40.14409 \
-    -DSKIP_ALL_ULT=ON \
-    -DSKIP_UNIT_TESTS=ON \
-    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
+RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz
 
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
@@ -134,12 +152,12 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.14.tar.gz
 
 # OpenBLAS
 RUN install-package gcc-fortran
-COPY usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
-RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
+COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
+RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
 # Armadillo
 RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
@@ -148,8 +166,8 @@ RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/arm
 COPY usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
 
 # Eigen3
-COPY usr/local/package/eigen3/deprecated-copy.patch usr/local/package/deprecated-copy.patch
-COPY usr/local/package/eigen3/cxx17-overalign.patch usr/local/package/cxx17-overalign.patch
+COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
+COPY usr/local/package/eigen3/cxx17-overalign.patch /usr/local/package/cxx17-overalign.patch
 RUN install-from-source-with-patches https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2 \
     /usr/local/package/deprecated-copy.patch \
     /usr/local/package/cxx17-overalign.patch --
@@ -191,7 +209,10 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz \
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
+# RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
+# Hacky fix for now
+RUN wget https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp && \
+    mv catch.hpp /usr/local/include
 
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
@@ -200,6 +221,7 @@ RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.63.3/gli
     -Ddefault_library=both \
     -Dinternal_pcre=true \
     && cp /usr/local/lib/glib-2.0/include/glibconfig.h /usr/local/include/glibconfig.h
+RUN install-package libusb
 RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/ARAVIS_0_7_3.tar.gz \
     -Ddefault_library=both \
     -Dviewer=false \
