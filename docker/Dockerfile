@@ -120,7 +120,7 @@ RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/arc
     -DLLVM_NO_DEAD_STRIP=ON
 
 # ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
-COPY usr/local/package/ncurses.sh /usr/local/package/ncurses.sh
+RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
 RUN /usr/local/package/ncurses.sh https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
     --with-shared --with-normal --without-debug --without-ada \
     --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
@@ -243,7 +243,7 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz \
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
 
 # libusb - a dependency of aravis
-COPY usr/local/package/libusb.sh /usr/local/package/libusb.sh
+RUN install-from-source https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
 RUN /usr/local/package/libusb.sh https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
