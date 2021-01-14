@@ -244,7 +244,6 @@ RUN install-header-from-source https://github.com/catchorg/Catch2/releases/downl
 
 # libusb - a dependency of aravis
 RUN install-from-source https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
-RUN /usr/local/package/libusb.sh https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz
