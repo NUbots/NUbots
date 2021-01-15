@@ -91,30 +91,17 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang" \
-    -DLLVM_APPEND_VC_REV=ON \
-    -DLLVM_ENABLE_RTTI=ON \
-    -DLLVM_ENABLE_FFI=ON \
-    -DFFI_INCLUDE_DIR="$(pkg-config --variable=includedir libffi)" \
-    -DFFI_LIBRARY_DIR="$(pkg-config --variable=libdir libffi)" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_LINK_LLVM_DYLIB=ON \
-    -DLLVM_BINUTILS_INCDIR=/usr/include
+    -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
-    -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-    -DCMAKE_SKIP_RPATH=ON \
-    -DLLVM_INCLUDE_TESTS=ON \
-    -DLLVM_EXTERNAL_LIT=/usr/bin/lit
+    -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz \
-    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DSPIRV_TRANSLATOR_DIR=/usr/local \
-    -DLLVM_NO_DEAD_STRIP=ON
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
 
 # ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
 RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
@@ -127,8 +114,7 @@ RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
     -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
-    -DINSTALL_SPIRVDLL=0 \
-    -DINSTALL_GENX_IR=ON
+    -DINSTALL_SPIRVDLL=0
 
 # intel compute runtime dependencies
 # gmmlib
