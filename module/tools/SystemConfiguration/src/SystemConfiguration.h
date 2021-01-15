@@ -3,17 +3,15 @@
 
 #include <nuclear>
 
-namespace module {
-namespace tools {
+namespace module::tools {
 
-    class SystemConfiguration : public NUClear::Reactor {
+class SystemConfiguration : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the SystemConfiguration reactor.
-        explicit SystemConfiguration(std::unique_ptr<NUClear::Environment> environment);
-    };
+public:
+    /// @brief Called by the powerplant to build and setup the SystemConfiguration reactor.
+    explicit SystemConfiguration(std::unique_ptr<NUClear::Environment> environment);
+};
 
-}  // namespace tools
-}  // namespace module
+}  // namespace module::tools
 
 #endif  // MODULE_TOOLS_SYSTEMCONFIGURATION_H
