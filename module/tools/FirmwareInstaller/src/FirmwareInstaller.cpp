@@ -1,15 +1,15 @@
-#include "FirmwareInstaller.h"
+#include "FirmwareInstaller.hpp"
 
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <numeric>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "utility/file/fileutil.h"
-#include "utility/io/uart.h"
-#include "utility/strutil/strutil.h"
+#include "utility/file/fileutil.hpp"
+#include "utility/io/uart.hpp"
+#include "utility/strutil/strutil.hpp"
 
 namespace module {
 namespace tools {

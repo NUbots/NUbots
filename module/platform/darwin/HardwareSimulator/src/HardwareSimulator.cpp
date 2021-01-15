@@ -17,25 +17,25 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "HardwareSimulator.h"
+#include "HardwareSimulator.hpp"
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <limits>
 #include <mutex>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Sensors.h"
-#include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/DarwinSensors.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/ServoTarget.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/platform/darwin/DarwinSensors.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_armadillo.hpp"
 
 namespace module {
 namespace platform {

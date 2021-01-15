@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "Camera.hpp"
 
 extern "C" {
 #include <aravis-0.8/arv.h>
@@ -7,18 +7,18 @@ extern "C" {
 #include <cmath>
 #include <fmt/format.h>
 
-#include "aravis_wrap.h"
-#include "description_to_fourcc.h"
-#include "settings.h"
-#include "time_sync.h"
+#include "aravis_wrap.hpp"
+#include "description_to_fourcc.hpp"
+#include "settings.hpp"
+#include "time_sync.hpp"
 
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/fourcc.h"
-#include "utility/vision/projection.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/fourcc.hpp"
+#include "utility/vision/projection.hpp"
 
 namespace module {
 namespace input {
@@ -162,32 +162,35 @@ namespace input {
             int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
             int full_height = arv::device_get_integer_feature_value(device, "HeightMax");
 
-            log<NUClear::DEBUG>(fmt::format("Max. resolution: {} by {} on {} camera", full_width, full_height, name));
-
             int offset_x = config["settings"]["OffsetX"].as<Expression>();
             int offset_y = config["settings"]["OffsetY"].as<Expression>();
             int width    = config["settings"]["Width"].as<Expression>();
             int height   = config["settings"]["Height"].as<Expression>();
 
-            // Set the lens paramters from configuration
-            context.lens = Image::Lens{config["lens"]["projection"].as<std::string>(),
-                                       float(config["lens"]["focal_length"].as<Expression>() * full_width / width),
-                                       float(config["lens"]["fov"].as<Expression>()),
-                                       ((Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width)
-                                        + Eigen::Vector2f(offset_x - (full_width - width - offset_x),
-                                                          offset_y - (full_height - height - offset_y))
-                                              * 0.5)
-                                           / width};
+            // Renormalise the focal length
+            float focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
+            float fov          = config["lens"]["fov"].as<Expression>();
 
-            log<NUClear::DEBUG>(fmt::format("Lens Centre: [{} , {}] on {} camera",
-                                            config["lens"]["centre"][0].as<double>(),
-                                            config["lens"]["centre"][1].as<double>(),
-                                            name));
-            log<NUClear::DEBUG>(fmt::format("Lens Centre: [{} , {}] on {} camera",
-                                            context.lens.centre[0],
-                                            context.lens.centre[1],
-                                            name));
+            // Recentre/renormalise the centre
+            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width;
+            centre += Eigen::Vector2f(offset_x - (full_width - width - offset_x),
+                                      offset_y - (full_height - height - offset_y))
+                      * 0.5;
+            centre /= width;
 
+            // Adjust the distortion parameters for the new width units
+            Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
+            k[0]              = k[0] * std::pow(width / full_height, 2);
+            k[1]              = k[1] * std::pow(width / full_height, 4);
+
+            // Set the lens parameters from configuration
+            context.lens = Image::Lens{
+                config["lens"]["projection"].as<std::string>(),
+                focal_length,
+                fov,
+                centre,
+                k,
+            };
 
             // If the lens fov was auto we need to correct it
             if (!std::isfinite(context.lens.fov)) {
@@ -197,9 +200,7 @@ namespace input {
                     utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
                     utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
                     utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
-
                 context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
-                log<NUClear::DEBUG>(fmt::format("Calculated fov for {} camera as {}", name, context.lens.fov));
             }
 
             // Apply the region to the camera
@@ -294,16 +295,16 @@ namespace input {
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
             std::lock_guard<std::mutex> lock(sensors_mutex);
             auto now = NUClear::clock::now();
-            Hpws.resize(std::distance(Hpws.begin(), std::remove_if(Hpws.begin(), Hpws.end(), [now](const auto& v) {
+            Hwps.resize(std::distance(Hwps.begin(), std::remove_if(Hwps.begin(), Hwps.end(), [now](const auto& v) {
                                           return v.first < (now - std::chrono::milliseconds(500));
                                       })));
 
             // Get torso to head, and torso to world
             Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
             Eigen::Affine3d Htw(sensors.Htw);
-            Eigen::Affine3d Hpw = Htp.inverse() * Htw;
+            Eigen::Affine3d Hwp = Htw.inverse() * Htp;
 
-            Hpws.push_back(std::make_pair(sensors.timestamp, Hpw));
+            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
         });
 
         on<Shutdown>().then([this] {
@@ -409,35 +410,35 @@ namespace input {
                     std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
 
                     Eigen::Affine3d Hpc = context->Hpc;
-                    Eigen::Affine3d Hpw;
-                    if (reactor.Hpws.empty()) {
-                        Hpw = Eigen::Affine3d::Identity();
+                    Eigen::Affine3d Hwp;
+                    if (reactor.Hwps.empty()) {
+                        Hwp = Eigen::Affine3d::Identity();
                     }
                     else {
                         // Find the first time that is not less than the target time
-                        auto Hpw_it = std::lower_bound(reactor.Hpws.begin(),
-                                                       reactor.Hpws.end(),
+                        auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
+                                                       reactor.Hwps.end(),
                                                        std::make_pair(msg->timestamp, Eigen::Affine3d::Identity()),
                                                        [](const auto& a, const auto& b) { return a.first < b.first; });
 
-                        if (Hpw_it == reactor.Hpws.end()) {
+                        if (Hwp_it == reactor.Hwps.end()) {
                             // Image is newer than most recent sensors
-                            Hpw = std::prev(Hpw_it)->second;
+                            Hwp = std::prev(Hwp_it)->second;
                         }
-                        else if (Hpw_it == reactor.Hpws.begin()) {
+                        else if (Hwp_it == reactor.Hwps.begin()) {
                             // Image is older than oldest sensors
-                            Hpw = Hpw_it->second;
+                            Hwp = Hwp_it->second;
                         }
                         else {
-                            // Check Hpw_it and std::prev(Hpw) for closest match
-                            Hpw = std::abs((Hpw_it->first - msg->timestamp).count())
-                                          < std::abs((std::prev(Hpw_it)->first - msg->timestamp).count())
-                                      ? Hpw_it->second
-                                      : std::prev(Hpw_it)->second;
+                            // Check Hwp_it and std::prev(Hwp) for closest match
+                            Hwp = std::abs((Hwp_it->first - msg->timestamp).count())
+                                          < std::abs((std::prev(Hwp_it)->first - msg->timestamp).count())
+                                      ? Hwp_it->second
+                                      : std::prev(Hwp_it)->second;
                         }
                     }
 
-                    Hcw = Hpc.inverse() * Hpw;  // Transform: From world to platform to camera to image.
+                    Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
                 }
 
                 msg->lens = context->lens;

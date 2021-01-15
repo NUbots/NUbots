@@ -17,15 +17,15 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "VirtualGoalPost.h"
+#include "VirtualGoalPost.hpp"
 
-#include "message/input/Sensors.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/Goal.h"
+#include "message/input/Sensors.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/math/coordinates.h"
-#include "utility/math/geometry/Quad.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/Quad.hpp"
 
 namespace module {
 namespace support {

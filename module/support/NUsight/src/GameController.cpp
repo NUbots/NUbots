@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
 namespace module {
 namespace support {
