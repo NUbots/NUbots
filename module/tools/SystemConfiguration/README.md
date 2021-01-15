@@ -40,11 +40,11 @@ The system will then go through the list of configuration entries for systems an
 
 ### Locale
 
-If `generate_locale` is set in the `Systemconfigrration.yaml` then `locale-gen` is called to ensure that system locales have been generated
+If `generate_locale` is set in the `SystemConfiguration.yaml` then `locale-gen` is called to ensure that system locales have been generated
 
 ### Grub
 
-If `generate_grub` is set in the `Systemconfigrration.yaml` then `grub-mkconfig` is called to ensure that the grub configuration file is up to date
+If `generate_grub` is set in the `SystemConfiguration.yaml` then `grub-mkconfig` is called to ensure that the grub configuration file is up to date
 
 ### Message Of The Day
 
