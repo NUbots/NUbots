@@ -154,7 +154,6 @@ elif [ "${METHOD}" = 'install-cmake-from-source' ]; then
         "$@" \
         -DCMAKE_BUILD_TYPE="Release" \
         -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
-        -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
         -Wno-dev
 
     # Run ninja
