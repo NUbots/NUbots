@@ -43,11 +43,6 @@ echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel
 chown root:root /etc/sudoers.d/wheel
 chmod 0440 /etc/sudoers.d/wheel
 
-# Get sudo to insult users when they type a password wrong
-echo "Defaults insults" > /etc/sudoers.d/insults
-chown root:root /etc/sudoers.d/wheel
-chmod 0440 /etc/sudoers.d/insults
-
 # Add u3v group and create our user
 groupadd u3v
 useradd -m -G wheel,lp,u3v ${USER}
@@ -79,16 +74,12 @@ pacman -Syu
 pacman -S --noconfirm --needed \
 	wpa_supplicant \
 	openssh \
+	wget \
+	linux-headers \
 	vim \
 	nano \
-	wget \
-	screen \
-	htop \
-	gdb \
-	linux-headers \
-	bluez \
-	bluez-utils \
-	rsync
+	rsync \
+	zsh
 
 ##############
 # NETWORKING #
@@ -97,20 +88,10 @@ pacman -S --noconfirm --needed \
 # Enable the ssh server
 systemctl enable sshd.service
 
-# Setup the ssh issue file
-mkdir banner
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/bigtext.py -O bigtext.py
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/cmake/banner.png -O banner.png
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/motd -O /etc/motd
-cat << EOF > generate_banner.py
-import bigtext
-
-with open("/etc/motd", "a") as f:
-    f.write(bigtext.bigtext("NUgus ${ROBOT_NUMBER}"))
-
+# Setup a simple version of the MOTD file
+cat << EOF > /etc/motd
+NUgus ${ROBOT_NUMBER}
 EOF
-python ./generate_banner.py
-rm -rf banner.png bigtext.py generate_banner.py
 
 # Setup the fallback ethernet static connection
 cat << EOF > /etc/systemd/network/99-${ETHERNET_INTERFACE}-static.network
@@ -158,122 +139,18 @@ network={
 }
 EOF
 
-# Create the bond interface
-cat << EOF > /etc/systemd/network/10-bond0.netdev
-[NetDev]
-Name=bond0
-Kind=bond
-
-[Bond]
-Mode=active-backup
-MIIMonitorSec=1s
-EOF
-
-# Configure the bond
-cat << EOF > /etc/systemd/network/10-bond0.network
-[Match]
-Name=bond0
-
-[Network]
-Address=${IP_ADDR}/16
-Gateway=10.1.3.1
-DNS=10.1.3.1
-DNS=8.8.8.8
-EOF
-
-# Setup the bond ethernet connection
-cat << EOF > /etc/systemd/network/20-${ETHERNET_INTERFACE}.network
-[Match]
-Name=${ETHERNET_INTERFACE}
-
-[Network]
-Bond=bond0
-PrimarySlave=true
-EOF
-
-# Setup the bond wireless connection
-cat << EOF > /etc/systemd/network/30-${WIFI_INTERFACE}.network
-[Match]
-Name=${WIFI_INTERFACE}
-
-[Network]
-Bond=bond0
-EOF
-
 # Enable and start both networking and dns services
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 systemctl enable wpa_supplicant
 systemctl enable wpa_supplicant@${WIFI_INTERFACE}
 
-# Populate udev rules.
-cat << EOF > /etc/udev/rules.d/10-nubots.rules
-# Set permissions for ttyUSB0 (CM740) and video* (webcam) devices
-KERNEL=="ttyUSB*", MODE="0666"
-KERNEL=="video*", MODE="0666"
-
-# Symlink the CM740 device to /dev/CM740
-KERNEL=="ttyUSB*", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666", SYMLINK+="CM740"
-
-# Make sure FLIR cameras end up in the u3v group
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1e10", GROUP="u3v"
-EOF
-
-# Install robocup.service to allow robocup to autostart
-cat << EOF > /etc/systemd/system/robocup.service
-[Unit]
-Description="RoboCup auto-start unit"
-Wants=network.target
-After=network.target
-RequiresMountsFor=${HOME}
-
-[Service]
-Type=simple
-Restart=always
-WorkingDirectory=${HOME}
-User=${USER}
-Environment=HOME="${HOME}/"
-PassEnvironment=HOME
-ExecStart=${HOME}/robocup
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Make sure the system checks /usr/local for libraries
-echo -e "/usr/local/lib\n/usr/local/lib64" > /etc/ld.so.conf.d/usrlocal.conf
-ldconfig
-
-# Make sure python checks /usr/local for packages
-echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
-    > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/etc/pip.conf -O /etc/pip.conf
-
 #############
 # ZSH SHELL #
 #############
 
-# Install zsh and git
-pacman -S --noconfirm --needed zsh zsh-completions git
-
-# Download zprezto to the user home directory
-cd ${HOME}
-git clone --recursive https://github.com/sorin-ionescu/prezto.git .zprezto
-for f in .zprezto/runcoms/z*; do
-    ln -s $f .$(basename $f)
-done
-
 # Change user shell to zsh
 chsh -s /usr/bin/zsh ${USER}
-
-# Get fuzzy find and install it
-pacman -S --noconfirm --needed fzf
-cat << EOF >> ${HOME}/.zshrc
-
-# Source the fuzzy find scripts
-source /usr/share/fzf/key-bindings.zsh
-source /usr/share/fzf/completion.zsh
-EOF
 
 ############
 # SSH KEYS #
@@ -288,15 +165,6 @@ wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.
 
 # Fix permissions so ssh will accept our authorized keys
 chmod 600 ${HOME}/.ssh/authorized_keys
-
-##########
-# OpenCL #
-##########
-
-# Install the OpenCL icd file
-mkdir -p /etc/OpenCL/vendors
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/etc/OpenCL/vendors/intel.icd \
-    -O /etc/OpenCL/vendors/intel.icd
 
 ###############
 # PERMISSIONS #
