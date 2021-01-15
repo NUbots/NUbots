@@ -36,6 +36,7 @@ systemd:
   - systemd-timesyncd.service
   - sshd.service
   - wpa_supplicant.service
+  - wpa_supplicant@wlan0
 
 # Groups that should exist and that the user should be a member of
 groups:

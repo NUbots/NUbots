@@ -1,10 +1,1 @@
 hostname: nugus3
-
-# Systemd units that should be enabled
-systemd:
-  - systemd-networkd.service
-  - systemd-resolved.service
-  - systemd-timesyncd.service
-  - sshd.service
-  - wpa_supplicant.service
-  - wpa_supplicant@wlan0

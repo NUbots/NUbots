@@ -1,5 +1,1 @@
 hostname: nugus4
-
-# Systemd units that should be enabled
-systemd:
-  - wpa_supplicant@wlan0
