@@ -121,7 +121,6 @@ RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/arc
 
 # ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
 RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
-RUN /usr/local/package/ncurses.sh https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
     --with-shared --with-normal --without-debug --without-ada \
     --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
 
