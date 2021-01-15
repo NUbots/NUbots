@@ -321,12 +321,25 @@ namespace tools {
             std::system(fmt::format("chsh -s /usr/bin/zsh {}", user).c_str());
 
             log<NUClear::INFO>("Appending fuzzy find scripts to zshrc");
-            std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
-            ofs_zshrc << std::endl
-                      << "# Source the fuzzy find scripts" << std::endl
-                      << "source /usr/share/fzf/key-bindings.zsh" << std::endl
-                      << "source /usr/share/fzf/completion.zsh" << std::endl;
-            ofs_zshrc.close();
+            std::ifstream ifs_zshrc(home / ".zshrc");
+            std::string line;
+            bool fuzzy_found = false;
+            while (std::getline(ifs_zshrc, line)) {
+                if (line.compare("# Source the fuzzy find scripts") == 0) {
+                    fuzzy_found = true;
+                    break;
+                }
+            }
+            ifs_zshrc.close();
+
+            if (fuzzy_found) {
+                std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
+                ofs_zshrc << std::endl
+                          << "# Source the fuzzy find scripts" << std::endl
+                          << "source /usr/share/fzf/key-bindings.zsh" << std::endl
+                          << "source /usr/share/fzf/completion.zsh" << std::endl;
+                ofs_zshrc.close();
+            }
 
             /**********
              * PYTHON *
