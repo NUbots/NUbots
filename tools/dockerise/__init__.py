@@ -211,8 +211,7 @@ def run_on_docker(func):
                     if selected_platform:
                         if (
                             subprocess.call(
-                                ["docker", "tag", tag, "{}:selected".format(repository)],
-                                stdout=subprocess.DEVNULL,
+                                ["docker", "tag", tag, "{}:selected".format(repository)], stdout=subprocess.DEVNULL,
                             )
                             != 0
                         ):
