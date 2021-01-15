@@ -124,7 +124,6 @@ RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
 RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz \
-    -DCMAKE_INSTALL_LIBDIR=lib \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
     -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
@@ -134,7 +133,6 @@ RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel
 # intel compute runtime dependencies
 # gmmlib
 RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
-    -DCMAKE_INSTALL_LIBDIR=lib \
     -DRUN_TEST_SUITE=OFF
 # libpciaccess and libdrm help communicate with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
@@ -153,15 +151,13 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
     -DBUILD_TESTING=OFF \
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON \
-    -DCMAKE_INSTALL_LIBDIR=lib
+    -DENABLE_NONFREE_KERNELS=ON
 
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
-    -DCMAKE_INSTALL_LIBDIR=lib \
     -DIGC_DIR=/usr/local
 
 # Install OpenCL C and C++ headers
