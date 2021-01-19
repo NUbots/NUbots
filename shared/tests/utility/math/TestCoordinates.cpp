@@ -34,12 +34,13 @@ static constexpr double ERROR_THRESHOLD = 1e-6;
 
 // vec3 caretesian test coords
 static const std::array<Eigen::Vector3d, 41> cart_coords = {
+    // NOTE: DBL_MIN == -DBL_MAX?????
     Eigen::Vector3d(0, 0, 0),
     Eigen::Vector3d(-DBL_MIN, 0, 0),
     Eigen::Vector3d(0, -DBL_MIN, 0),
     Eigen::Vector3d(0, 0, -DBL_MIN),
     Eigen::Vector3d(0, -DBL_MIN, -DBL_MIN),
-    Eigen::Vector3d(-DBL_MIN, 0, -DBL_MIN),
+    Eigen::Vector3d(-DBL_MIN, 0, -DBL_MIN),  // errors
     Eigen::Vector3d(-DBL_MIN, -DBL_MIN, 0),
     Eigen::Vector3d(-DBL_MIN, -DBL_MIN, -DBL_MIN),
     Eigen::Vector3d(DBL_MIN, 0, 0),
@@ -59,7 +60,7 @@ static const std::array<Eigen::Vector3d, 41> cart_coords = {
     Eigen::Vector3d(0, -DBL_MAX, 0),
     Eigen::Vector3d(0, 0, -DBL_MAX),
     Eigen::Vector3d(0, -DBL_MAX, -DBL_MAX),
-    Eigen::Vector3d(-DBL_MAX, 0, -DBL_MAX),
+    Eigen::Vector3d(-DBL_MAX, 0, -DBL_MAX),  // errors
     Eigen::Vector3d(-DBL_MAX, -DBL_MAX, 0),
     Eigen::Vector3d(-DBL_MAX, -DBL_MAX, -DBL_MAX),
     Eigen::Vector3d(DBL_MAX, 0, 0),
@@ -296,29 +297,57 @@ static const std::array<Eigen::Matrix<double, 3, 1>, 65> spherToCart_results = {
     // TODO: add values between edge cases
 };
 
-// Test cartesianToSpherical conversion (Vector3d)
-TEST_CASE("Test coordinate conversion - Cartesian to spherical (Vector3d).", "[utility][math][coordinates]") {
+// Test cartesianToSpherical conversion
+TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][math][coordinates]") {
     INFO("Calculating Spherical coordinates for the origin...");
     // Loop through test values and compare to results array
 
     for (size_t i = 0; i < cart_coords.size(); i++) {
-        Eigen::Vector3d cart_input      = cart_coords[i];
-        Eigen::Vector3d cart_compare    = cartToSpher_results[i];
-        Eigen::Vector3d spher_result    = utility::math::coordinates::cartesianToSpherical(cart_input);
-        Eigen::Vector3d result_to_truth = (spher_result - cart_compare);
-        // TEST:
-        // double result_to_truth = 1;  // TEST: fail
-        // std::cout << "test result to truth: " << result_to_truth << std::endl;
+        Eigen::Vector3d cart_input   = cart_coords[i];
+        Eigen::Vector3d cart_compare = cartToSpher_results[i];
+        Eigen::Vector3d spher_result = utility::math::coordinates::cartesianToSpherical(cart_input);
+        // NOTE: possibly use epsilon
+        Eigen::Vector3d result_diff = (spher_result - cart_compare);
         INFO("Input: \n"
              << cart_input << "\nExternally calculated result: \n"
              << cart_compare << "\nUtilities method result: \n"
              << spher_result
-             << "\nThe distance between the externally calculated result and utilities method result: \n"
-             << result_to_truth << ". This should be within the error threshold: \n"
+             << "\nThe difference between the externally calculated result and utilities method result: \n"
+             << result_diff << ". This should be within the error threshold: \n"
              << ERROR_THRESHOLD << ".");
 
-        REQUIRE(result_to_truth[0] <= ERROR_THRESHOLD);
+        REQUIRE(result_diff[0] <= ERROR_THRESHOLD);
+        REQUIRE(result_diff[1] <= ERROR_THRESHOLD);
+        REQUIRE(result_diff[2] <= ERROR_THRESHOLD);
     }
 }
 
-// sphericalToCartesian
+// Test sphericalToCartesian conversion
+TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][math][coordinates]") {
+    INFO("Calculating cartesian coordinates for the origin...");
+
+    for (size_t i = 0; i < spher_coords.size(); i++) {
+        Eigen::Matrix<double, 3, 1> spher_input   = spher_coords[i];  // cast vector3d to matrix
+        Eigen::Matrix<double, 3, 1> spher_compare = spherToCart_results[i];
+        Eigen::Matrix<double, 3, 1> cart_result   = utility::math::coordinates::sphericalToCartesian(spher_input);
+        // NOTE: possibly use epsilon
+        Eigen::Matrix<double, 3, 1> result_diff = (cart_result - spher_compare);
+        INFO("Input: \n"
+             << spher_input << "\nExternally calculated result: \n"
+             << spher_compare << "\nUtilities method result: \n"
+             << cart_result
+             << "\nThe difference between the externally calculated result and utilities method result: \n"
+             << result_diff << ". This should be within the error threshold: \n"
+             << ERROR_THRESHOLD << ".");
+        // Exception should be thrown if radial distance is negative
+        // NOTE: .x()?
+        if (spher_input.x() < 0) {
+            REQUIRE_THROWS_AS(utility::math::coordinates::sphericalToCartesian(spher_input), std::domain_error);
+        }
+        else {
+            REQUIRE(result_diff.x() <= ERROR_THRESHOLD);
+            REQUIRE(result_diff.y() <= ERROR_THRESHOLD);
+            REQUIRE(result_diff.z() <= ERROR_THRESHOLD);
+        }
+    }
+}
