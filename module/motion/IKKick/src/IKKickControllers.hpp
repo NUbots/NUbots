@@ -194,7 +194,7 @@ namespace motion {
                 float alpha = (anim.currentFrame().duration != 0)
                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
                                   : 1;
-                result = utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,
+                result      = utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,
                                                                          anim.currentFrame().pose,
                                                                          alpha);
 
