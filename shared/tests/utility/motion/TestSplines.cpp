@@ -130,9 +130,9 @@ TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
 
     // Loop over all our test values and see if Combination gives the correct result for n choose k
     for (size_t i = 0; i < C.size(); i++) {
-        const int& n          = C[i][0];
-        const int& k          = C[i][1];
-        const int& nCk        = C[i][2];
+        const int& n   = C[i][0];
+        const int& k   = C[i][1];
+        const int& nCk = C[i][2];
         int combResult = comb.binomialCoefficient(k, n);
         INFO(n << " choose " << k << " = " << nCk << ", got " << combResult);
         REQUIRE(combResult == nCk);

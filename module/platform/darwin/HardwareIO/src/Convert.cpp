@@ -77,9 +77,10 @@ namespace platform {
         }
 
         uint8_t Convert::gainInverse(const float value) {
-            return value >= 100 ? 254  // If we are greater then 100, then set to 100
-                   : value < 0  ? 0    // If we are less then 0, then set to 0
-                                : std::round(value / GAIN_CONVERSION_FACTOR);  // Otherwise do our conversion
+            return value >= 100
+                       ? 254            // If we are greater then 100, then set to 100
+                       : value < 0 ? 0  // If we are less then 0, then set to 0
+                                   : std::round(value / GAIN_CONVERSION_FACTOR);  // Otherwise do our conversion
         }
 
         float Convert::servoPosition(const uint8_t id, const uint16_t value) {
