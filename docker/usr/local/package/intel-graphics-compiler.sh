@@ -30,26 +30,24 @@ cd $(dirname "${CMAKELISTS_FILE}")
 
 echo "Configuring using cmake file ${CMAKELISTS_FILE}"
 
+# Clone the dependency
+git clone https://github.com/intel/vc-intrinsics vc-intrinsics
+
 # Do an out of source build
 mkdir -p build
 cd build
 
 # Configure using cmake
-cmake .. "$@" \
+cmake .. "$@" -GNinja \
     -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
-    -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
-    -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+    -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
     -Wno-dev
 
-# Run make
-make -j$(nproc)
+# Build the package
+ninja -j $(nproc)
 
 # Now install
-install -dm755 "${PREFIX}/lib/intel-opencl"
-install -dm755 "${PREFIX}/bin"
-install -m 644 "bin/libigdrcl.so" "${PREFIX}/lib/intel-opencl/"
-install -m 644 "bin/ocloc" "${PREFIX}/bin/"
+ninja install
 
 # Now that we have built, cleanup the build directory
 rm -rf "${BUILD_FOLDER}"
