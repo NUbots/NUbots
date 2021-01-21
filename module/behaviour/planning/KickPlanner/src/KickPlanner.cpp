@@ -23,10 +23,12 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/input/GameState.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
