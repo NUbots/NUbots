@@ -45,7 +45,7 @@ else(LIBGFORTRAN_LIBRARIES)
   endif(GFORTRAN_LIBRARY AND QUADMATH_LIBRARY)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(LIBGFORTRAN DEFAULT_MSG GFORTRAN_LIBRARY QUADMATH_LIBRARY)
+  find_package_handle_standard_args(LibGFortran DEFAULT_MSG GFORTRAN_LIBRARY QUADMATH_LIBRARY)
 
   # show the LIBGFORTRAN_LIBRARIES variables only in the advanced view
   mark_as_advanced(LIBGFORTRAN_LIBRARIES GFORTRAN_LIBRARY QUADMATH_LIBRARY _GFORTRAN_EXECUTABLE)
