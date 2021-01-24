@@ -21,7 +21,7 @@
 
 #include <Eigen/Geometry>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 #include "message/behaviour/Look.hpp"
 #include "message/behaviour/MotionCommand.hpp"
@@ -36,10 +36,10 @@
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/math/matrix/transform.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/math/matrix/transform.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace behaviour {

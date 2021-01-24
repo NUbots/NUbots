@@ -24,8 +24,8 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
-#include "message/behaviour/WalkPath.h"
-#include "message/motion/WalkCommand.h"
+#include "message/behaviour/WalkPath.hpp"
+#include "message/motion/WalkCommand.hpp"
 
 namespace module {
 namespace behaviour {

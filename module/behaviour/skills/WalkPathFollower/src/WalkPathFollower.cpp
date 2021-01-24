@@ -23,21 +23,21 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/WalkPath.h"
-#include "message/localisation/Ball.h"
-#include "message/localisation/ResetRobotHypotheses.h"
-#include "message/motion/KickCommand.h"
-#include "message/motion/WalkCommand.h"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/WalkPath.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
-#include "utility/math/geometry/RotatedRectangle.h"
-#include "utility/math/matrix/transform.h"
-#include "utility/nusight/NUhelpers.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/math/geometry/RotatedRectangle.hpp"
+#include "utility/math/matrix/transform.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace behaviour {

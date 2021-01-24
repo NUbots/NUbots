@@ -22,7 +22,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/ServoCommand.hpp"
@@ -33,12 +33,12 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/coordinates.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 
 namespace module {

@@ -26,9 +26,9 @@
 #include "message/motion/HeadCommand.hpp"
 #include "message/motion/KickCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
 
 namespace module {
 namespace behaviour {

@@ -2,7 +2,7 @@
 
 #include <Eigen/Geometry>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"

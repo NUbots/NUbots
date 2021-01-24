@@ -22,10 +22,10 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "message/behaviour/MotionCommand.h"
+#include "message/behaviour/MotionCommand.hpp"
 
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace utility {
 namespace behaviour {

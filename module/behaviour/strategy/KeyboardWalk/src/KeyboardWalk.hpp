@@ -25,7 +25,7 @@
 #include <ncurses.h>
 #include <nuclear>
 
-#include "utility/input/LimbID.h"
+#include "utility/input/LimbID.hpp"
 
 namespace module {
 namespace behaviour {

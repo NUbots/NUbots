@@ -34,12 +34,12 @@
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/math/coordinates.h"
-#include "utility/math/matrix/transform.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/matrix/transform.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 
 namespace module {

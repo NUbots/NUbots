@@ -26,7 +26,7 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 // Comment remains as an example of usage for this module.
-// #include "utility/math/optimisation/PGAoptimiser.h"
+// #include "utility/math/optimisation/PGAoptimiser.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module {

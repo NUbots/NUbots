@@ -35,12 +35,12 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
-#include "utility/nusight/NUhelpers.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 
 namespace module {

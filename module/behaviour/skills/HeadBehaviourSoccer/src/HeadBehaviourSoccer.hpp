@@ -24,18 +24,18 @@
 #include <nuclear>
 #include <set>
 
-#include "Searcher.h"
+#include "Searcher.hpp"
 
-#include "message/behaviour/SoccerObjectPriority.h"
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Ball.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KinematicsModel.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/behaviour/SoccerObjectPriority.hpp"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/math/geometry/Quad.h"
+#include "utility/math/geometry/Quad.hpp"
 
 namespace module {
 namespace behaviour {

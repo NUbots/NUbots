@@ -28,7 +28,7 @@
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 
-#include "utility/behaviour/MotionCommand.h"
+#include "utility/behaviour/MotionCommand.hpp"
 
 namespace module {
 namespace behaviour {

@@ -20,8 +20,8 @@
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 
-#include "message/input/Sensors.h"
-#include "message/motion/KickCommand.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/KickCommand.hpp"
 namespace module {
 namespace behaviour {
     namespace planning {
