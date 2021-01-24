@@ -17,10 +17,10 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "VirtualBall.h"
+#include "VirtualBall.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/math/coordinates.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/coordinates.hpp"
 
 namespace module {
 namespace support {

@@ -17,23 +17,23 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SimpleWalkPathPlanner.h"
+#include "SimpleWalkPathPlanner.hpp"
 
 #include <Eigen/Geometry>
 #include <cmath>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
-#include "message/motion/KickCommand.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/Ball.h"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/Subsumption.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
 
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"

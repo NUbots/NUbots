@@ -1,18 +1,18 @@
-#include "RobotParticleLocalisation.h"
+#include "RobotParticleLocalisation.hpp"
 
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
 
-#include "message/input/Sensors.h"
-#include "message/localisation/Field.h"
-#include "message/localisation/ResetRobotHypotheses.h"
-#include "message/vision/Goal.h"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/localisation/transform.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/localisation/transform.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_armadillo.hpp"
 
 namespace module {
 namespace localisation {

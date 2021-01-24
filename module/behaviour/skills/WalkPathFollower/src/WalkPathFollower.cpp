@@ -17,11 +17,11 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "WalkPathFollower.h"
+#include "WalkPathFollower.hpp"
 
 #include <limits>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"

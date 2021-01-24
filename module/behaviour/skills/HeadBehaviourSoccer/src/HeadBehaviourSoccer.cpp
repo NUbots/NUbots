@@ -17,17 +17,17 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "HeadBehaviourSoccer.h"
+#include "HeadBehaviourSoccer.hpp"
 
 #include <string>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/localisation/Field.h"
-#include "message/motion/GetupCommand.h"
-#include "message/motion/HeadCommand.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/localisation/Field.hpp"
+#include "message/motion/GetupCommand.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
 #include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"

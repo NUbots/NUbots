@@ -17,20 +17,20 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "RobotModel.h"
+#include "RobotModel.hpp"
 
 #include <armadillo>
 #include <iostream>
 #include <nuclear>
 
-#include "message/input/Sensors.h"
-#include "message/vision/Goal.h"
+#include "message/input/Sensors.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/angle.h"
-#include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 
 namespace module {

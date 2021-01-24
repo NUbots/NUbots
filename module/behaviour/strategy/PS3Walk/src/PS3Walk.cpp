@@ -17,14 +17,14 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "PS3Walk.h"
+#include "PS3Walk.hpp"
 
 #include <nuclear>
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KickCommand.h"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KickCommand.hpp"
 
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"

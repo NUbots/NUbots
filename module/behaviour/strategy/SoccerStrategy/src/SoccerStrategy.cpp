@@ -17,24 +17,24 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SoccerStrategy.h"
+#include "SoccerStrategy.hpp"
 
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/Look.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/Nod.h"
-#include "message/behaviour/SoccerObjectPriority.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/ResetRobotHypotheses.h"
-#include "message/motion/BodySide.h"
-#include "message/motion/GetupCommand.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/behaviour/Look.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/Nod.hpp"
+#include "message/behaviour/SoccerObjectPriority.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/motion/BodySide.hpp"
+#include "message/motion/GetupCommand.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/math/matrix/transform.h"

@@ -17,11 +17,11 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "SoccerConfig.h"
+#include "SoccerConfig.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/FieldDescription.h"
+#include "message/support/FieldDescription.hpp"
 
 namespace module {
 namespace support {

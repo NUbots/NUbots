@@ -17,19 +17,19 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUcapLocalisation.h"
+#include "NUcapLocalisation.hpp"
 
 #include <armadillo>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/MotionCapture.h"
-#include "message/input/Sensors.h"
+#include "message/input/MotionCapture.hpp"
+#include "message/input/Sensors.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/nusight/NUhelpers.h"
+#include "utility/math/angle.hpp"
+#include "utility/math/geometry/UnitQuaternion.hpp"
+#include "utility/math/matrix/Rotation3D.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace localisation {

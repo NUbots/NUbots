@@ -17,15 +17,15 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "FallingRelax.h"
+#include "FallingRelax.hpp"
 
 #include <cmath>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"

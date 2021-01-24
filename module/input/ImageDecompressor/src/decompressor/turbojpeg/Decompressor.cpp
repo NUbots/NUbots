@@ -1,9 +1,9 @@
-#include "Decompressor.h"
+#include "Decompressor.hpp"
 
 #include <fmt/format.h>
 #include <turbojpeg.h>
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module::input::decompressor::turbojpeg {
 

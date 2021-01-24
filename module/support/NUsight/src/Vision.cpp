@@ -17,16 +17,16 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "message/input/Image.h"
-#include "message/output/CompressedImage.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
-#include "message/vision/GreenHorizon.h"
-#include "message/vision/Line.h"
-#include "message/vision/Obstacle.h"
-#include "message/vision/VisualMesh.h"
+#include "message/input/Image.hpp"
+#include "message/output/CompressedImage.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
+#include "message/vision/GreenHorizon.hpp"
+#include "message/vision/Line.hpp"
+#include "message/vision/Obstacle.hpp"
+#include "message/vision/VisualMesh.hpp"
 
 namespace module {
 namespace support {

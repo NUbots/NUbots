@@ -1,4 +1,4 @@
-#include "pure_evil.h"
+#include "pure_evil.hpp"
 
 #ifndef NDEBUG
 
