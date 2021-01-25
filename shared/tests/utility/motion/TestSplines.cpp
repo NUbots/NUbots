@@ -19,6 +19,7 @@
 
 #include <Eigen/Geometry>
 #include <catch.hpp>
+#include <fmt/format.h>
 
 #include "utility/motion/splines/Combination.hpp"
 #include "utility/motion/splines/Polynom.hpp"
@@ -303,11 +304,17 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
                 }
 
                 // Log calculated and expected values of each contraint, and the spline coefficients a_0 to a_5
-                INFO(x << " " << points[i + k][1] << "\n"
-                       << xd << " " << points[i + k][2] << "\n"
-                       << xdd << " " << points[i + k][3]);
-                INFO(splineResult[0] << " " << splineResult[1] << " " << splineResult[2] << " " << splineResult[3]
-                                     << " " << splineResult[4] << " " << splineResult[5]);
+                INFO(fmt::format("{} points. t = {}.", noPoints, t));
+                INFO(fmt::format("For x, expected {}, got {}", points[i + k][1], x));
+                INFO(fmt::format("For x', expected {}, got {}", points[i + k][2], x));
+                INFO(fmt::format("For x'', expected {}, got {}", points[i + k][3], x));
+                INFO(fmt::format("f(t) = {} + {}t + {}t^2 + {}t^3 + {}t^4 + {}t^5",
+                                 splineResult[0],
+                                 splineResult[1],
+                                 splineResult[2],
+                                 splineResult[3],
+                                 splineResult[4],
+                                 splineResult[5]));
 
                 // Check that the contraints hold - do the computed values from the spline match the given random values
                 // Check the difference is within a small error since we are using floating point values
