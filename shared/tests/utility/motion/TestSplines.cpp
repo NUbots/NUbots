@@ -229,7 +229,7 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
     utility::motion::splines::SmoothSpline<double> spline;
 
     // Generate random splines and test that the contraints hold
-    for (int i = 0; i < 100; i++) {
+    for (int j = 0; j < 100; j++) {
         spline.reset();
 
         // Get a random number of points for this spline
