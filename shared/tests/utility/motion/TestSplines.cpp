@@ -220,7 +220,7 @@ TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
     }
 }
 
-const float ERROR = 1e6;  // Error for testing floats
+const float ERROR = 1e-6;  // Error for testing floats
 
 // Test the smooth spline. Given a set of points (with first and second derivatives), the smooth spline will create
 // piecewise polynomials. We will test that each polynomial satisfies the original contraints given, which are the
