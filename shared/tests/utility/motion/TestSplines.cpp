@@ -236,13 +236,23 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
         size_t noPoints = rand() % 6;
         std::vector<Eigen::Vector4d> points;
 
+        // This value will keep track of the last t value - we want them to be consecutive, so we will check against
+        // this. Start it negative since the generated t values will not be negative
+        double point_t = -1;
+
         // Add our points to the spline
         for (size_t i = 0; i < noPoints; i++) {
             Eigen::Vector4d point = Eigen::Vector4d::Random();  // random 4d array of numbers between -1 and 1
             point *= 10;                                        // values are between -10 and 10
-            point.x() += (i + 1) * 10;  // this will ensure no t values are negative and they are always consecutive
+            point[0] += 10;                                     // this will ensure no t values are negative
+
+            // If the last t and this t are not consecutive, add them together... plus 1 incase point_t is 0
+            point[0] = (point[0] < point_t) ? (point[0] + point_t + 1) : point[0];
+
             spline.addPoint(point[0], point[1], point[2], point[3]);
             points.push_back(point);
+
+            point_t = point[0];  // update the previous t value
         }
 
         // If there were not enough points to create any polynomials, make sure no splines were created and then jump to
