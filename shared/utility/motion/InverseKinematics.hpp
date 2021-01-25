@@ -80,20 +80,9 @@ namespace motion {
 
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector);
-        template <typename Scalar>
-        std::vector<std::pair<ServoID, Scalar>> calculateCameraLookJoints(
-            const KinematicsModel& model,
-            const Eigen::Matrix<Scalar, 3, 1>& cameraUnitVector) {
-            std::vector<std::pair<ServoID, Scalar>> positions;
-            positions.push_back(
-                std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())));
-            positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
-                                               std::atan2(-cameraUnitVector.z(),
-                                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
-                                                                    + cameraUnitVector.y() * cameraUnitVector.y()))
-                                                   - model.head.CAMERA_DECLINATION_ANGLE_OFFSET));
-            return positions;
-        }
+
+        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
+                                                                          const Eigen::Vector3d& cameraUnitVector);
 
         std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
 
