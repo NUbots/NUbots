@@ -192,7 +192,7 @@ namespace behaviour {
 
 
                     Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
-                    rBWw = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
+                    rBWw                = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
                                Htw.inverse().linear().leftCols<1>()
                                    + Htw.inverse().translation();  // In front of the robot
                     Eigen::Vector3d pos = (Htw * Eigen::Vector4d(rBWw.x(), rBWw.y(), rBWw.z(), 1.0)).head<3>();
