@@ -22,6 +22,7 @@
 #include <catch.hpp>
 #include <cfloat>
 #include <cmath>
+#include <iomanip>
 #include <utility>
 
 #include "utility/math/coordinates.h"
@@ -297,9 +298,14 @@ static const std::array<Eigen::Matrix<double, 3, 1>, 65> spherToCart_results = {
     // TODO: add values between edge cases
 };
 
-// Test cartesianToSpherical conversion
+// Test cartesianToSpherical conversion'
 TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][math][coordinates]") {
-    INFO("Calculating Spherical coordinates for the origin...");
+    //***Table heading***
+    INFO("************Calculating Spherical coordinates for the origin****************");
+    INFO("----------------------------------------------------------------------------");
+    INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18) << "Util result"
+                   << std::setw(18) << "Difference");
+    INFO("----------------------------------------------------------------------------");
     // Loop through test values and compare to results array
 
     for (size_t i = 0; i < cart_coords.size(); i++) {
@@ -308,13 +314,25 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
         Eigen::Vector3d spher_result = utility::math::coordinates::cartesianToSpherical(cart_input);
         // NOTE: possibly use epsilon
         Eigen::Vector3d result_diff = (spher_result - cart_compare);
-        INFO("Input: \n"
-             << cart_input << "\nExternally calculated result: \n"
-             << cart_compare << "\nUtilities method result: \n"
-             << spher_result
-             << "\nThe difference between the externally calculated result and utilities method result: \n"
-             << result_diff << ". This should be within the error threshold: \n"
-             << ERROR_THRESHOLD << ".");
+
+        //***New output - Table format***
+        INFO(std::left << std::setw(18) << cart_input.x() << std::setw(18) << cart_compare.x() << std::setw(18)
+                       << spher_result.x() << std::setw(18) << result_diff.x() << "\n"
+                       << std::left << std::setw(18) << cart_input.y() << std::setw(18) << cart_compare.y()
+                       << std::setw(18) << spher_result.y() << std::setw(18) << result_diff.y() << "\n"
+                       << std::left << std::setw(18) << cart_input.z() << std::setw(18) << cart_compare.z()
+                       << std::setw(18) << spher_result.z() << std::setw(18) << result_diff.z());
+        // old output
+        // INFO("Input: \n"
+        //      << std::left << cart_input << "\nExternally calculated result: \n"
+        //      << std::left << cart_compare << "\nUtilities method result: \n"
+        //      << std::left << spher_result
+        //      << "\nThe difference between the externally calculated result and utilities method result: \n"
+        //      << std::left << result_diff);
+        INFO("----------------------------------------------------------------------------");
+        INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
+        // TEST purposes only
+        // REQUIRE(true);
 
         REQUIRE(result_diff[0] <= ERROR_THRESHOLD);
         REQUIRE(result_diff[1] <= ERROR_THRESHOLD);
@@ -324,27 +342,47 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
 
 // Test sphericalToCartesian conversion
 TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][math][coordinates]") {
-    INFO("Calculating cartesian coordinates for the origin...");
+    INFO("************Calculating cartesian coordinates for the origin****************");
 
     for (size_t i = 0; i < spher_coords.size(); i++) {
         Eigen::Matrix<double, 3, 1> spher_input   = spher_coords[i];  // cast vector3d to matrix
         Eigen::Matrix<double, 3, 1> spher_compare = spherToCart_results[i];
-        Eigen::Matrix<double, 3, 1> cart_result   = utility::math::coordinates::sphericalToCartesian(spher_input);
-        // NOTE: possibly use epsilon
-        Eigen::Matrix<double, 3, 1> result_diff = (cart_result - spher_compare);
-        INFO("Input: \n"
-             << spher_input << "\nExternally calculated result: \n"
-             << spher_compare << "\nUtilities method result: \n"
-             << cart_result
-             << "\nThe difference between the externally calculated result and utilities method result: \n"
-             << result_diff << ". This should be within the error threshold: \n"
-             << ERROR_THRESHOLD << ".");
-        // Exception should be thrown if radial distance is negative
-        // NOTE: .x()?
+        Eigen::Matrix<double, 3, 1> cart_result   = Eigen::Matrix<double, 3, 1>(0, 0, 0);
+        //
         if (spher_input.x() < 0) {
+            //
             REQUIRE_THROWS_AS(utility::math::coordinates::sphericalToCartesian(spher_input), std::domain_error);
         }
         else {
+            cart_result = utility::math::coordinates::sphericalToCartesian(spher_input);
+            // NOTE: possibly use epsilon
+            Eigen::Matrix<double, 3, 1> result_diff = (cart_result - spher_compare);
+            // NOTE: changed table heading from outside of for loop (as in the above example) to inside,
+            // so it doesn't show up when testing for exception.
+            //***Table heading***
+            INFO("----------------------------------------------------------------------------");
+            INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18)
+                           << "Util result" << std::setw(18) << "Difference");
+            INFO("----------------------------------------------------------------------------");
+            // New output - Table format
+            INFO(std::left << std::setw(18) << spher_input.x() << std::setw(18) << spher_compare.x() << std::setw(18)
+                           << cart_result.x() << std::setw(18) << result_diff.x() << "\n"
+                           << std::left << std::setw(18) << spher_input.y() << std::setw(18) << spher_compare.y()
+                           << std::setw(18) << cart_result.y() << std::setw(18) << result_diff.y() << "\n"
+                           << std::left << std::setw(18) << spher_input.z() << std::setw(18) << spher_compare.z()
+                           << std::setw(18) << cart_result.z() << std::setw(18) << result_diff.y());
+
+            // old output
+            // INFO("Input: \n"
+            //      << std::left << spher_input << "\nExternally calculated result: \n"
+            //      << std::left << spher_compare << "\nUtilities method result: \n"
+            //      << std::left << cart_result
+            //      << "\nThe difference between the externally calculated result and utilities method result: \n"
+            //      << std::left << result_diff << ". \nThis should be within the error threshold: \n"
+            //      << std::left << ERROR_THRESHOLD << ".");
+            // Exception should be thrown if radial distance is negative
+            // NOTE: .x()?
+            // TEST for fail - set <= to >
             REQUIRE(result_diff.x() <= ERROR_THRESHOLD);
             REQUIRE(result_diff.y() <= ERROR_THRESHOLD);
             REQUIRE(result_diff.z() <= ERROR_THRESHOLD);
