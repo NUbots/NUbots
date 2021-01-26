@@ -245,7 +245,7 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
         for (size_t i = 0; i < noPoints; i++) {
             Eigen::Vector4d point = Eigen::Vector4d::Random();  // random 4d array of numbers between -1 and 1
             point *= 10;                                        // values are between -10 and 10
-            point[0] += 10;                                     // this will ensure no t values are negative
+            point[0] = std::abs(point[0]);
 
             // If the last t and this t are not consecutive, add them together... plus 1 incase point_t is 0
             point[0] = (point[0] < point_t) ? (point[0] + point_t + 1) : point[0];
