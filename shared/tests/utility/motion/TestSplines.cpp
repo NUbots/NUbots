@@ -221,7 +221,7 @@ TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
     }
 }
 
-const float ERROR = 1e-6;  // Error for testing floats
+const float ERROR = 1e-6f;  // Error for testing floats
 
 // Test the smooth spline. Given a set of points (with first and second derivatives), the smooth spline will create
 // piecewise polynomials. We will test that each polynomial satisfies the original contraints given, which are the
@@ -239,7 +239,7 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
 
         // This value will keep track of the last t value - we want them to be consecutive, so we will check against
         // this. Start it negative since the generated t values will not be negative
-        double point_t = -1;
+        double point_t = -1.0;
 
         // Add our points to the spline
         for (size_t i = 0; i < noPoints; i++) {
