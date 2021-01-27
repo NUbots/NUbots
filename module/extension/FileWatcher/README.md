@@ -12,4 +12,4 @@ FileWatcher
 
 ## Dependencies
 
-libuv for monitoring the file system
+libfswatch for monitoring the file system
