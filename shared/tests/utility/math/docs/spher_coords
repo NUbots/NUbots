@@ -1,6 +1,6 @@
 format longe;
 DBL_MIN = realmin('single');
-DBL_MAX = realmin('single');
+DBL_MAX = realmax('single');
 sv1 = [-5  0  0]
 sv2 = [-DBL_MIN  0  0]
 sv3 = [0  0  0]

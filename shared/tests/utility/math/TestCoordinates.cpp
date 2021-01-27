@@ -33,17 +33,11 @@ static constexpr double ERROR_THRESHOLD = 1e-6;
 // static constexpr double DBL_LWR_VALID_EDGE = 1e-8;
 
 
-// vec3 caretesian test coords
-static const std::array<Eigen::Vector3d, 41> cart_coords = {
-    // NOTE: DBL_MIN == -DBL_MAX?????
+// vec3 cartesian test coords
+static const std::array<Eigen::Vector3d, 15> cart_coords = {
+    // NOTE: Get rid of min and max double vals - causing inf return values.
+    // Add comments in the method being tested to explain.
     Eigen::Vector3d(0, 0, 0),
-    Eigen::Vector3d(-DBL_MIN, 0, 0),
-    Eigen::Vector3d(0, -DBL_MIN, 0),
-    Eigen::Vector3d(0, 0, -DBL_MIN),
-    Eigen::Vector3d(0, -DBL_MIN, -DBL_MIN),
-    Eigen::Vector3d(-DBL_MIN, 0, -DBL_MIN),  // errors
-    Eigen::Vector3d(-DBL_MIN, -DBL_MIN, 0),
-    Eigen::Vector3d(-DBL_MIN, -DBL_MIN, -DBL_MIN),
     Eigen::Vector3d(DBL_MIN, 0, 0),
     Eigen::Vector3d(0, DBL_MIN, 0),
     Eigen::Vector3d(0, 0, DBL_MIN),
@@ -51,46 +45,20 @@ static const std::array<Eigen::Vector3d, 41> cart_coords = {
     Eigen::Vector3d(DBL_MIN, 0, DBL_MIN),
     Eigen::Vector3d(DBL_MIN, DBL_MIN, 0),
     Eigen::Vector3d(DBL_MIN, DBL_MIN, DBL_MIN),
-    Eigen::Vector3d(-DBL_MIN, DBL_MIN, 0),
-    Eigen::Vector3d(DBL_MIN, -DBL_MIN, 0),
-    Eigen::Vector3d(0, DBL_MIN, -DBL_MIN),
-    Eigen::Vector3d(0, -DBL_MIN, DBL_MIN),
-    Eigen::Vector3d(-DBL_MIN, 0, DBL_MIN),
-    Eigen::Vector3d(DBL_MIN, 0, -DBL_MIN),
-    Eigen::Vector3d(-DBL_MAX, 0, 0),
-    Eigen::Vector3d(0, -DBL_MAX, 0),
-    Eigen::Vector3d(0, 0, -DBL_MAX),
-    Eigen::Vector3d(0, -DBL_MAX, -DBL_MAX),
-    Eigen::Vector3d(-DBL_MAX, 0, -DBL_MAX),  // errors
-    Eigen::Vector3d(-DBL_MAX, -DBL_MAX, 0),
-    Eigen::Vector3d(-DBL_MAX, -DBL_MAX, -DBL_MAX),
-    Eigen::Vector3d(DBL_MAX, 0, 0),
+    Eigen::Vector3d(DBL_MAX, 0, 0),  // error (r = inf)
     Eigen::Vector3d(0, DBL_MAX, 0),
     Eigen::Vector3d(0, 0, DBL_MAX),
     Eigen::Vector3d(0, DBL_MAX, DBL_MAX),
     Eigen::Vector3d(DBL_MAX, 0, DBL_MAX),
     Eigen::Vector3d(DBL_MAX, DBL_MAX, 0),
-    Eigen::Vector3d(DBL_MAX, DBL_MAX, DBL_MAX),
-    Eigen::Vector3d(-DBL_MAX, DBL_MAX, 0),
-    Eigen::Vector3d(DBL_MAX, -DBL_MAX, 0),
-    Eigen::Vector3d(0, DBL_MAX, -DBL_MAX),
-    Eigen::Vector3d(0, -DBL_MAX, DBL_MAX),
-    Eigen::Vector3d(-DBL_MAX, 0, DBL_MAX),
-    Eigen::Vector3d(DBL_MAX, 0, -DBL_MAX)
-    // TODO: input edge cases first
+    Eigen::Vector3d(DBL_MAX, DBL_MAX, DBL_MAX)
+    // TODO: remove edge cases
     // TODO: Add around 200 test values in between edge cases
 };
 
 // pre-calculated cartesian to spherical results
 static const std::array<Eigen::Vector3d, 41> cartToSpher_results = {
     Eigen::Vector3d(0, 0, 0),
-    Eigen::Vector3d(1.175494350822288e-38, 3.141592653589793e+00, 0),
-    Eigen::Vector3d(1.175494350822288e-38, -1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.175494350822288e-38, 0, 0),
-    Eigen::Vector3d(1.662400053425836e-38, -1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 3.141592653589793e+00, -7.853981633974482e-01),
-    Eigen::Vector3d(1.662400053425836e-38, -2.356194490192345e+00, 0),
-    Eigen::Vector3d(2.036015939634396e-38, -2.356194490192345e+00, -6.154797086703874e-01),
     Eigen::Vector3d(1.175494350822288e-38, 0, 0),
     Eigen::Vector3d(1.175494350822288e-38, 1.570796326794897e+00, 0),
     Eigen::Vector3d(1.175494350822288e-38, 0, 0),
@@ -98,32 +66,13 @@ static const std::array<Eigen::Vector3d, 41> cartToSpher_results = {
     Eigen::Vector3d(1.662400053425836e-38, 0, 7.853981633974482e-01),
     Eigen::Vector3d(1.662400053425836e-38, 7.853981633974483e-01, 0),
     Eigen::Vector3d(2.036015939634396e-38, 7.853981633974483e-01, 6.154797086703874e-01),
-    Eigen::Vector3d(1.662400053425836e-38, 2.356194490192345e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, -7.853981633974483e-01, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, -1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 3.141592653589793e+00, 7.853981633974482e-01),
-    Eigen::Vector3d(1.662400053425836e-38, 0, -7.853981633974482e-01),
-    Eigen::Vector3d(1.175494350822288e-38, 3.141592653589793e+00, 0),
-    Eigen::Vector3d(1.175494350822288e-38, -1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.175494350822288e-38, 0, 0),
-    Eigen::Vector3d(1.662400053425836e-38, -1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 3.141592653589793e+00, -7.853981633974482e-01),
-    Eigen::Vector3d(1.662400053425836e-38, -2.356194490192345e+00, 0),
-    Eigen::Vector3d(2.036015939634396e-38, -2.356194490192345e+00, -6.154797086703874e-01),
-    Eigen::Vector3d(1.175494350822288e-38, 0, 0),
-    Eigen::Vector3d(1.175494350822288e-38, 1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.175494350822288e-38, 0, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 0, 7.853981633974482e-01),
-    Eigen::Vector3d(1.662400053425836e-38, 7.853981633974483e-01, 0),
-    Eigen::Vector3d(2.036015939634396e-38, 7.853981633974483e-01, 6.154797086703874e-01),
-    Eigen::Vector3d(1.662400053425836e-38, 2.356194490192345e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, -7.853981633974483e-01, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, -1.570796326794897e+00, 0),
-    Eigen::Vector3d(1.662400053425836e-38, 3.141592653589793e+00, 7.853981633974482e-01),
-    Eigen::Vector3d(1.662400053425836e-38, 0, -7.853981633974482e-01)
+    Eigen::Vector3d(3.402823466385289e+38, 0, 0),  // error (inf)
+    Eigen::Vector3d(3.402823466385289e+38, 1.570796326794897e+00, 0),
+    Eigen::Vector3d(3.402823466385289e+38, 0, 0),
+    Eigen::Vector3d(4.812319096523503e+38, 1.570796326794897e+00, 0),
+    Eigen::Vector3d(4.812319096523503e+38, 0, 7.853981633974484e-01),
+    Eigen::Vector3d(4.812319096523503e+38, 7.853981633974483e-01, 0),
+    Eigen::Vector3d(5.893863132966965e+38, 7.853981633974483e-01, 6.154797086703874e-01)
 
 };
 
@@ -331,6 +280,7 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
         //      << std::left << result_diff);
         INFO("----------------------------------------------------------------------------");
         INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
+        INFO("Failed test value at index: " << i);
         // TEST purposes only
         // REQUIRE(true);
 
@@ -371,7 +321,9 @@ TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][mat
                            << std::setw(18) << cart_result.y() << std::setw(18) << result_diff.y() << "\n"
                            << std::left << std::setw(18) << spher_input.z() << std::setw(18) << spher_compare.z()
                            << std::setw(18) << cart_result.z() << std::setw(18) << result_diff.y());
-
+            INFO("----------------------------------------------------------------------------");
+            INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
+            INFO("Failed test value at index: " << i);
             // old output
             // INFO("Input: \n"
             //      << std::left << spher_input << "\nExternally calculated result: \n"
