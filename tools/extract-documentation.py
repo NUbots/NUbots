@@ -21,10 +21,10 @@ def generate_location_JSON(location):
         str: The JSON representation of the code location
     """
     out = "{"
-    out += '"file":"{}",'.format(location.file)
-    out += '"line":"{}",'.format(location.line)
-    out += '"column":"{}",'.format(location.column)
-    out += '"offset":"{}"'.format(location.offset)
+    out += f'"file":"{location.file}",'
+    out += f'"line":"{location.line}",'
+    out += f'"column":"{location.column}",'
+    out += f'"offset":"{location.offset}"'
     out += "}"
     return out
 
