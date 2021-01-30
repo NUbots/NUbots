@@ -135,7 +135,7 @@ def parse(module, files, outdir):
         outdir (str): The path to the directory to write the file _reactors.json to
     """
     print("Working on module", module)
-    out = generate_module_JSON(analyse.create_tree(files, module), module)
+    out = generate_module_JSON(analyse.parse_module(files, module), module)
     lock.acquire()
     try:
         with open(os.path.join(outdir, "_reactors" + ".json"), "a") as to_write:
@@ -216,7 +216,7 @@ def run(outdir, indir, multiprocess, **kwargs):
         with open(os.path.join(outdir, "_reactors" + ".json"), "a") as to_write:
             for module, files in modules.items():
                 print("Working on module", module)
-                to_write.write(generate_module_JSON(analyse.create_tree(files, module), module) + ",")
+                to_write.write(generate_module_JSON(analyse.parse_module(files, module), module) + ",")
 
     # Remove the last comma and end the JSON list
     with open(os.path.join(outdir, "_reactors" + ".json"), "rb+") as to_write:

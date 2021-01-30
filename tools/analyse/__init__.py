@@ -120,7 +120,9 @@ def parse_module(files, folder):
             child_path = os.path.abspath(child.location.file.name)
 
             if os.path.commonpath([child_path, file_name]) == file_name:
+                module.alias_stack.append([])
                 _tree_parse(child, module)
+                module.alias_stack.pop()
 
     return module
 

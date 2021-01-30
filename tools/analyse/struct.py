@@ -54,10 +54,10 @@ class Emit:
     # special case for `emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));`
     nusight_data_regex = re.compile(r"std::unique_ptr<(.*)>")
 
-    def __init__(self, node, scope=None, tpe=None):
+    def __init__(self, node, scope=None, type_=None):
         self.node = node
         self.scope = scope
-        self.type = tpe
+        self.type = type_
 
 
 class Function:

@@ -4,12 +4,10 @@ class AdjacencyList:
 
     Attr:
         inner_list: A map that defines what a vertex's edges are
-        size: The number of vertices
     """
 
     def __init__(self):
         self.inner_list = {}
-        self.size = 0
 
     def init_vertex(self, u):
         """
@@ -56,15 +54,6 @@ class AdjacencyList:
             list(hashable): The list of vertices that the key goes to
         """
         return self.inner_list[key]
-
-    def __len__(self):
-        """
-        Gets the size
-
-        Returns:
-            int: The size of the list
-        """
-        return self.size
 
     def __iter__(self):
         """
