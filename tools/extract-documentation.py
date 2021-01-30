@@ -40,9 +40,9 @@ def generate_emit_JSON(emit):
         str: The JSON representation of the emit statement information
     """
     out = "{"
-    out += '"scope":"{}",'.format(emit.scope)
-    out += '"type":"{}",'.format(emit.type)
-    out += '"location":{}'.format(generate_location_JSON(emit.node.location))
+    out += f'"scope":"{emit.scope}",'
+    out += f'"type":"{emit.type}",'
+    out += f'"location":{emit.node.location}'
     out += "}"
     return out
 
