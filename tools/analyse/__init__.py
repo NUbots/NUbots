@@ -1,11 +1,11 @@
 import os.path
 import re
-from sys import stderr
 from itertools import chain
+from sys import stderr
 
 import clang.cindex
 
-from .struct import Alias, Emit, Function, On, Reactor, Module
+from .struct import Alias, Emit, Function, Module, On, Reactor
 from .topological_sort import AdjacencyList, topological_sort
 
 # The path to the folder that contains libclang
