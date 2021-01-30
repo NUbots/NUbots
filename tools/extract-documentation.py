@@ -21,10 +21,10 @@ def generate_location_JSON(location):
         str: The JSON representation of the code location
     """
     out = "{"
-    out += '"file":"{}",'.format(location.file)
-    out += '"line":"{}",'.format(location.line)
-    out += '"column":"{}",'.format(location.column)
-    out += '"offset":"{}"'.format(location.offset)
+    out += f'"file":"{location.file}",'
+    out += f'"line":"{location.line}",'
+    out += f'"column":"{location.column}",'
+    out += f'"offset":"{location.offset}"'
     out += "}"
     return out
 
@@ -40,9 +40,9 @@ def generate_emit_JSON(emit):
         str: The JSON representation of the emit statement information
     """
     out = "{"
-    out += '"scope":"{}",'.format(emit.scope)
-    out += '"type":"{}",'.format(emit.type)
-    out += '"location":{}'.format(generate_location_JSON(emit.node.location))
+    out += f'"scope":"{emit.scope}",'
+    out += f'"type":"{emit.type}",'
+    out += f'"location":{emit.node.location}'
     out += "}"
     return out
 
