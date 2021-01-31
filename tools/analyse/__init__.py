@@ -9,8 +9,8 @@ from .struct import Alias, Emit, Function, Module, On, Reactor
 from .topological_sort import AdjacencyList, topological_sort
 
 # The path to the folder that contains libclang
-library_path = "/usr/local/lib"  # llvm-config --libdir
-clang.cindex.Config.set_library_path(library_path)
+library_path = "/usr/local/lib/libclang.so"  # llvm-config --libdir
+clang.cindex.Config.set_library_file(library_path)
 
 # The arguments to pass to clang
 parse_args = [
