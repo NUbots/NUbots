@@ -37,9 +37,16 @@ def register(command):
 
 @run_on_docker
 def run(ctest_args, jobs, **kwargs):
-    os.chdir(os.path.join(b.project_dir, "..", "build"))  # Change into the build directory
+    tests_dir = os.path.join(b.project_dir, "tests")
+
+    # If tests dir not at /home/nubots/Nubots/tests , create it
+    if not os.path.exists(tests_dir):
+        os.makedirs(tests_dir)
+
+    # Change into the build directory
+    os.chdir(os.path.join(b.project_dir, "..", "build"))
     filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"  # Windows friendly (container time, not host)
-    logPath = os.path.join(b.project_dir, filename)
+    logPath = os.path.join(tests_dir, filename)
 
     if not ctest_args:
         ctest_args = [
