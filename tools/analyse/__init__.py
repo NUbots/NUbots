@@ -86,15 +86,13 @@ def parse_module(files, folder):
         f = os.path.abspath(f)
         print("  [{}/{}] generating AST for file".format(i + 1, total), f)
         translation_units[f] = index.parse(f, parse_args + ["-I" + folder + "/src"])
-        diagnostics += list(translation_units[f].diagnostics)
 
-    module = Module(diagnostics, [], {})
+        for diagnostic in translation_units[f].diagnostics:
+            if diagnostic.severity >= clang.cindex.Diagnostic.Error:
+                print("From", f, "error", diagnostic, file=stderr)
+                return Module([], {})
 
-    # Make sure that there are no errors in the parsing
-    for diagnostic in diagnostics:
-        if diagnostic.severity >= clang.cindex.Diagnostic.Error:
-            print(diagnostic, file=stderr)
-            return module
+    module = Module([], {})
 
     # Create an adjacency list of the include digraph for the topological sort
     adj_list = AdjacencyList()

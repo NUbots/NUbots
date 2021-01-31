@@ -6,14 +6,12 @@ class Module:
     A structure for holding information of a NUClearRoles module
 
     Attr:
-        diagnostics: The diagnostics provided by clang, when it generated the AST
         reactors: Reactors present in this module
         functions: Functions present in this module that are interesting
         alias_stack: The
     """
 
-    def __init__(self, diagnostics, reactors, functions):
-        self.diagnostics = diagnostics
+    def __init__(self, reactors, functions):
         self.reactors = reactors
         self.functions = functions
         self.alias_stack = []
