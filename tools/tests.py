@@ -53,7 +53,11 @@ def run(ctest_args, jobs, **kwargs):
             "--force-new-ctest-process",
             "--output-on-failure",
         ]
-        exit(subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]))
+        exit(
+            subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]).returncode
+        )
 
     else:
-        exit(subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]))
+        exit(
+            subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]).returncode
+        )
