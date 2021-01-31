@@ -42,7 +42,7 @@ def generate_emit_JSON(emit):
     out = "{"
     out += f'"scope":"{emit.scope}",'
     out += f'"type":"{emit.type}",'
-    out += f'"location":{emit.node.location}'
+    out += f'"location":{generate_location_JSON(emit.node.location)}'
     out += "}"
     return out
 
