@@ -67,7 +67,7 @@ packer/build.pwi
 *TSWLatexianTemp*
 
 # Tests
-tests/
+tests_output/
 
 # Misc
 tags

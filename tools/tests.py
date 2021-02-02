@@ -4,11 +4,15 @@ import os
 import time
 import subprocess
 import shlex
+import multiprocessing
 
 import b
 from dockerise import WrapPty, run_on_docker
 
 # File cannot be named `test.py` for some reason?
+
+# Directory to create in project root for storing output of tests
+TESTS_OUTPUT_DIR = "tests_output"
 
 
 @run_on_docker
@@ -17,27 +21,43 @@ def register(command):
     command.help = "Run tests"
 
     command.add_argument(
-        "-VV", action="append_const", dest="argss", const="-VV", help="Enable more verbose output from tests"
+        "-VV",
+        "--extra-verbose",
+        action="append_const",
+        dest="ctest_args",
+        const="-VV",
+        help="Enable more verbose output from tests",
     )
 
     command.add_argument(
-        "-V", action="append_const", dest="ctest_args", const="-V", help="Enable verbose output from tests"
+        "-V", "--verbose", action="append_const", dest="ctest_args", const="-V", help="Enable verbose output from tests"
     )
 
-    command.add_argument("-Q", action="append_const", dest="ctest_args", const="-Q", help="Make ctest quiet")
+    command.add_argument(
+        "-Q", "--quiet", action="append_const", dest="ctest_args", const="-Q", help="Make ctest not print to stdout"
+    )
 
     command.add_argument(
-        "-J",
+        "-j",
+        "--parallel",
         action="store",
-        dest="jobs",
-        default=1,
+        dest="num_jobs",
+        default=multiprocessing.cpu_count(),
         help="Run the tests in parallel using the given number of jobs.",
+    )
+
+    command.add_argument(
+        "--debug",
+        action="append_const",
+        dest="ctest_args",
+        const="--debug",
+        help="Displaying more verbose internals of CTest",
     )
 
 
 @run_on_docker
-def run(ctest_args, jobs, **kwargs):
-    tests_dir = os.path.join(b.project_dir, "tests")
+def run(ctest_args, num_jobs, **kwargs):
+    tests_dir = os.path.join(b.project_dir, TESTS_OUTPUT_DIR)
 
     # If tests dir not at /home/nubots/Nubots/tests , create it
     if not os.path.exists(tests_dir):
@@ -45,19 +65,15 @@ def run(ctest_args, jobs, **kwargs):
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
-    filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"  # Windows friendly (container time, not host)
+
+    # Windows friendly (container time, not host)
+    filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"
     logPath = os.path.join(tests_dir, filename)
 
-    if not ctest_args:
-        ctest_args = [
-            "--force-new-ctest-process",
-            "--output-on-failure",
-        ]
-        exit(
-            subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]).returncode
-        )
+    default_ctest_args = [
+        "--force-new-ctest-process",
+        "--output-on-failure",
+    ]
+    ctest_args.extend(default_ctest_args)
 
-    else:
-        exit(
-            subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]).returncode
-        )
+    exit(subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]).returncode)
