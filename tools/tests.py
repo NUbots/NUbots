@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 
-# TODO: add ability to list tests like `./b tests list` (ctest -N)
-# TODO: add ability to run individual test like `./b tests run <test_name>`
-
 import os
 import time
 import subprocess
-import shlex
 import multiprocessing
 
 import b
 from dockerise import WrapPty, run_on_docker
 
-# File cannot be named `test.py` for some reason?
 
 # Directory to create in project root for storing output of tests
 TESTS_OUTPUT_DIR = "tests_output"
@@ -21,9 +16,13 @@ TESTS_OUTPUT_DIR = "tests_output"
 @run_on_docker
 def register(command):
 
-    command.help = "Run tests"
+    command.help = "Run and list tests"
+    subparsers = command.add_subparsers(help="sub-command help", dest="sub_command")
 
-    command.add_argument(
+    command_run = subparsers.add_parser("run")
+    command_list = subparsers.add_parser("list")
+
+    command_run.add_argument(
         "-VV",
         "--extra-verbose",
         action="append_const",
@@ -32,7 +31,7 @@ def register(command):
         help="Enable more verbose output from tests",
     )
 
-    command.add_argument(
+    command_run.add_argument(
         "-V",
         "--verbose",
         action="append_const",
@@ -41,7 +40,7 @@ def register(command):
         help="Enable verbose output from tests",
     )
 
-    command.add_argument(
+    command_run.add_argument(
         "-Q",
         "--quiet",
         action="append_const",
@@ -50,7 +49,7 @@ def register(command):
         help="Make ctest not print to stdout",
     )
 
-    command.add_argument(
+    command_run.add_argument(
         "-j",
         "--parallel",
         action="store",
@@ -59,7 +58,7 @@ def register(command):
         help="Run the tests in parallel using the given number of jobs.",
     )
 
-    command.add_argument(
+    command_run.add_argument(
         "--debug",
         action="append_const",
         dest="given_ctest_args",
@@ -67,32 +66,58 @@ def register(command):
         help="Displaying more verbose internals of CTest",
     )
 
+    command_run.add_argument(
+        "test", nargs="?", help="Name of test to run (will run all tests cointaining given string)"
+    )
+
 
 @run_on_docker
-def run(given_ctest_args, num_jobs, **kwargs):
-    tests_dir = os.path.join(b.project_dir, TESTS_OUTPUT_DIR)
-
-    # If tests dir not at /home/nubots/Nubots/tests , create it
-    if not os.path.exists(tests_dir):
-        os.makedirs(tests_dir)
+def run(sub_command, num_jobs=0, test="", given_ctest_args=[], **kwargs):
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
-    # Windows friendly (container time, not host)
-    filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"
-    logPath = os.path.join(tests_dir, filename)
+    if sub_command == "list":
+        exit(subprocess.run(["/usr/bin/ctest", "-N"]).returncode)
 
-    # Default ctest args
-    ctest_args = [
-        "--force-new-ctest-process",
-        "--output-on-failure",
-    ]
+    if sub_command == "run":
+        tests_dir = os.path.join(b.project_dir, TESTS_OUTPUT_DIR)
 
-    # Add given args to default args
-    if given_ctest_args:
-        ctest_args.extend(given_ctest_args)
+        # If tests dir not at /home/nubots/Nubots/tests_output, create it
+        if not os.path.exists(tests_dir):
+            os.makedirs(tests_dir)
 
-    exit(
-        subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), *ctest_args]).returncode
-    )
+        # Windows friendly (container time, not host)
+        filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"
+        logPath = os.path.join(tests_dir, filename)
+
+        # Default ctest args
+        ctest_args = [
+            "--force-new-ctest-process",
+            "--output-on-failure",
+        ]
+
+        # Add given args to default args
+        if given_ctest_args:
+            ctest_args.extend(given_ctest_args)
+
+        # If a test was given to run
+        if test:
+            exit(
+                subprocess.run(
+                    ["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), "-R", test, *ctest_args]
+                ).returncode
+            )
+
+        # If no test was given to run, run all
+        exit(
+            subprocess.run(
+                ["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), *ctest_args]
+            ).returncode
+        )
+
+    else:
+        # Probably a better way to call help when no arguments are given?
+        os.chdir(b.project_dir)
+        tool_name = os.path.basename(__file__)[:-3]
+        exit(subprocess.run(["./b", tool_name, "--help"]).returncode)
