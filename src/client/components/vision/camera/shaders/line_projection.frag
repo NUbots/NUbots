@@ -1,6 +1,7 @@
 precision lowp float;
 
-#define M_PI 3.1415926535897932384626433832795
+#define M_PI 3.141592653589793238462643383279502884
+#define M_PI_2 1.570796326794896619231321691639751442
 
 // Lens/projection parameters
 uniform vec2 viewSize;
@@ -23,6 +24,7 @@ varying vec2 vUv;
 #define RECTILINEAR_PROJECTION 1
 #define EQUIDISTANT_PROJECTION 2
 #define EQUISOLID_PROJECTION 3
+
 
 /**
  * Takes an undistorted radial distance from the optical axis and computes and applies an inverse distortion
@@ -144,7 +146,8 @@ float rectilinearTheta(float r, float f) {
  * @return the distance from the optical centre when the point is projected onto the screen
  */
 float rectilinearR(float theta, float f) {
-  return f * tan(theta);
+  // Clamp the angle so we can't get negative R values, which happens if the ray is behind the camera for rectilinear cameras
+  return f * tan(clamp(theta, 0.0, M_PI_2));
 }
 
 /**
@@ -276,4 +279,3 @@ void main() {
 
   gl_FragColor = vec4(color.rgb, color.a * alpha);
 }
-

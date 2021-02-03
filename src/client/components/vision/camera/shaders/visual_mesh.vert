@@ -28,6 +28,8 @@ varying float vEnvironment;
 #define EQUIDISTANT_PROJECTION 2
 #define EQUISOLID_PROJECTION 3
 
+#define M_PI_2 1.57079632679489661923
+
 // TODO(trent) these should be moved into a separate GLSL file once there is a decent #include system
 
 /**
@@ -99,7 +101,7 @@ float equisolidR(float theta, float f) {
  * @return the distance from the optical centre when the point is projected onto the screen
  */
 float rectilinearR(float theta, float f) {
-  return f * tan(theta);
+  return f * tan(clamp(theta, 0.0, M_PI_2));
 }
 
 /**
