@@ -7,6 +7,7 @@ import favicon from 'serve-favicon'
 import sio from 'socket.io'
 import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
+import * as path from 'path'
 
 import { getClientConfig } from '../../webpack.config'
 import faviconPath from '../assets/favicon.ico'
@@ -26,6 +27,7 @@ const compiler = webpack(
     mode: 'development',
     context: args.context || undefined,
     transpileOnly: args.t || args.transpileOnly || false,
+    rootDir: path.join(__dirname, '..'),
   }),
 )
 

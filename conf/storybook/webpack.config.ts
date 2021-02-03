@@ -9,6 +9,7 @@ export default ({ config: storybookConfig }: { config: webpack.Configuration }) 
     mode: 'development',
     context: path.resolve(path.join(__dirname, '..', '..', 'src')),
     sourceMap: 'eval-source-map',
+    rootDir: path.join(__dirname, '..', '..'),
   })
   return {
     ...config,
@@ -18,19 +19,23 @@ export default ({ config: storybookConfig }: { config: webpack.Configuration }) 
       rules: config.module && config.module.rules,
     },
     plugins: [
-      ...storybookConfig.plugins || [],
-      ...(config.plugins || []).filter(p => !(
-          p instanceof HtmlWebpackPlugin // Storybook handles page generation.
-          || p instanceof webpack.HotModuleReplacementPlugin // Disable HMR.
-          || p instanceof CopyWebpackPlugin // Avoids overwriting index.html.
-        ),
+      ...(storybookConfig.plugins || []),
+      ...(config.plugins || []).filter(
+        p =>
+          !(
+            (
+              p instanceof HtmlWebpackPlugin || // Storybook handles page generation.
+              p instanceof webpack.HotModuleReplacementPlugin || // Disable HMR.
+              p instanceof CopyWebpackPlugin
+            ) // Avoids overwriting index.html.
+          ),
       ),
     ],
     resolve: {
       ...storybookConfig.resolve,
       extensions: [
-        ...(storybookConfig.resolve && storybookConfig.resolve.extensions || []),
-        ...(config.resolve && config.resolve.extensions || []),
+        ...((storybookConfig.resolve && storybookConfig.resolve.extensions) || []),
+        ...((config.resolve && config.resolve.extensions) || []),
       ],
     },
   }

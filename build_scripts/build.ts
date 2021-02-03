@@ -13,8 +13,8 @@ const opts: ConfigOptions = {
   mode: isProduction ? 'production' : 'development',
   context: path.join(__dirname, '..', 'src'),
   sourceMap: isContinuousIntegration ? false : 'source-map',
+  rootDir: path.join(__dirname, '..'),
 }
-webpack([getClientConfig(opts), getServerConfig(opts)])
-  .run((err, stats) => {
-    process.stdout.write(stats.toString({ colors: true }) + '\n')
-  })
+webpack([getClientConfig(opts), getServerConfig(opts)]).run((err, stats) => {
+  process.stdout.write(stats.toString({ colors: true }) + '\n')
+})

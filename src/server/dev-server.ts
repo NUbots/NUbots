@@ -23,6 +23,7 @@ const compiler = webpack(
     mode: 'development',
     context: path.join(__dirname, '..'),
     transpileOnly: args.t || args.transpileOnly || false,
+    rootDir: path.join(__dirname, '..', '..'),
   }),
 )
 

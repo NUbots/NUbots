@@ -11,6 +11,7 @@ export type ConfigOptions = {
   context?: string
   sourceMap?: 'source-map' | 'eval-source-map' | false
   transpileOnly?: boolean
+  rootDir?: string
 }
 
 export function getClientConfig({
@@ -18,6 +19,7 @@ export function getClientConfig({
   context,
   sourceMap,
   transpileOnly,
+  rootDir = __dirname,
 }: ConfigOptions): webpack.Configuration {
   const isProduction = mode === 'production'
   return {
@@ -28,7 +30,7 @@ export function getClientConfig({
       main: './client/main.tsx',
     },
     output: {
-      path: path.join(__dirname, 'dist', 'public'),
+      path: path.join(rootDir, 'dist', 'public'),
       filename: '[name].js',
       publicPath: '/',
       globalObject: 'this',
@@ -47,7 +49,7 @@ export function getClientConfig({
         // .ts, .tsx
         {
           test: /\.tsx?$/,
-          exclude: [path.resolve(__dirname, 'node_modules')],
+          exclude: [path.resolve(rootDir, 'node_modules')],
           use: {
             loader: 'ts-loader',
             options: {
@@ -59,7 +61,7 @@ export function getClientConfig({
         // local css
         {
           test: /\.css$/,
-          exclude: [path.resolve(__dirname, 'node_modules')],
+          exclude: [path.resolve(rootDir, 'node_modules')],
           use: ExtractTextPlugin.extract({
             fallback: 'style-loader',
             use: [
@@ -95,7 +97,7 @@ export function getClientConfig({
         */
         {
           test: /\.css$/,
-          include: [path.resolve(__dirname, 'node_modules')],
+          include: [path.resolve(rootDir, 'node_modules')],
           use: ['style-loader', 'css-loader'],
         },
         { test: /\.file.svg$/, use: 'url-loader' },
@@ -164,6 +166,7 @@ export function getServerConfig({
   context,
   sourceMap,
   transpileOnly,
+  rootDir = __dirname,
 }: ConfigOptions): webpack.Configuration {
   return {
     mode,
@@ -174,7 +177,7 @@ export function getServerConfig({
       ...(mode === 'development' ? { dev: './server/dev.ts' } : {}),
     },
     output: {
-      path: path.join(__dirname, 'dist'),
+      path: path.join(rootDir, 'dist'),
       filename: '[name].js',
       globalObject: 'this',
     },
@@ -187,7 +190,7 @@ export function getServerConfig({
       rules: [
         {
           test: /\.ts$/,
-          exclude: [path.resolve(__dirname, 'node_modules')],
+          exclude: [path.resolve(rootDir, 'node_modules')],
           use: {
             loader: 'ts-loader',
             options: {
