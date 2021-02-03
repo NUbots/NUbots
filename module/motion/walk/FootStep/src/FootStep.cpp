@@ -15,8 +15,8 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
+#include "utility/motion/walk/vectorfield.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-
 namespace module {
 namespace motion {
     namespace walk {
@@ -35,13 +35,6 @@ namespace motion {
         using utility::motion::kinematics::calculateLegJoints;
         using utility::nusight::graph;
 
-        double FootStep::f_x(const Eigen::Vector3d& pos) {
-            return (pos.x() < 0 ? 1 : -1) * std::exp(-std::abs(std::pow(c * pos.x(), -step_steep)));
-        }
-
-        double FootStep::f_y(const Eigen::Vector3d& pos) {
-            return std::exp(-std::abs(std::pow(c * pos.x(), -step_steep))) - pos.y() / step_height;
-        }
 
         FootStep::FootStep(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
@@ -126,7 +119,14 @@ namespace motion {
                     Eigen::Vector3d rF_wPp = Hgp.inverse() * rF_wGg;
 
                     // Swing foot's new target position on the plane
-                    Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() * 0.001;
+                    // Eigen::Vector3d rF_tPp = rF_wPp + Eigen::Vector3d(f_x(rF_wPp), f_y(rF_wPp), 0).normalized() *
+                    // 0.001;
+
+                    Eigen::Vector3d rF_tPp =
+                        rF_wPp
+                        + Eigen::Vector3d(utility::motion::walk::vx(rF_wPp.x()),
+                                          0,
+                                          utility::motion::walk::vy(rF_wPp.y(), rF_wPp.x(), step_height));
 
                     // Foot target's position relative to torso
                     Eigen::Vector3d rF_tTt = Htp * rF_tPp;
