@@ -48,8 +48,6 @@ jobs:
           context: docker
           build-args: |
             platform=generic
-            user_uid=0
-            user_gid=0
           push: true
           cache-from: type=registry,ref=nubots/nubots:generic
           cache-to: type=inline
@@ -69,6 +67,7 @@ jobs:
     # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
+      options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -107,6 +106,7 @@ jobs:
     # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
+      options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -127,6 +127,7 @@ jobs:
     # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
+      options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
