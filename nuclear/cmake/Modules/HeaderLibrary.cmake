@@ -58,9 +58,12 @@ function(HeaderLibrary)
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(
     ${PACKAGE_NAME}
-    FOUND_VAR ${PACKAGE_NAME}_FOUND
-    REQUIRED_VARS ${required_vars}
-    VERSION_VAR ${PACKAGE_NAME}_VERSION
+    FOUND_VAR
+    ${PACKAGE_NAME}_FOUND
+    REQUIRED_VARS
+    ${required_vars}
+    VERSION_VAR
+    ${PACKAGE_NAME}_VERSION
   )
 
 endfunction(HeaderLibrary)

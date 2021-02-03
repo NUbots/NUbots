@@ -109,10 +109,10 @@ namespace behaviour {
             // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph of
             // the 4 quadrants
             // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
-            return x >= std::abs(y)    ? 0   // forward
-                   : y >= std::abs(x)  ? 1   // left
-                   : x <= -std::abs(y) ? 2   // backward
-                                       : 3;  // right
+            return x >= std::abs(y) ? 0                                          // forward
+                                    : y >= std::abs(x) ? 1                       // left
+                                                       : x <= -std::abs(y) ? 2   // backward
+                                                                           : 3;  // right
         }
     }  // namespace skills
 }  // namespace behaviour

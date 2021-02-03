@@ -124,11 +124,10 @@ namespace vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::GB : BayerPixelType::B
-                              : col ? BayerPixelType::R
-                                    : BayerPixelType::GR;
+        const int row = y % 2;
+        const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::GB : BayerPixelType::B : col ? BayerPixelType::R : BayerPixelType::GR;
 
         return getBayerPixel(patch, type);
     }
@@ -145,11 +144,10 @@ namespace vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::B : BayerPixelType::GB
-                              : col ? BayerPixelType::GR
-                                    : BayerPixelType::R;
+        const int row = y % 2;
+        const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::B : BayerPixelType::GB : col ? BayerPixelType::GR : BayerPixelType::R;
 
         return getBayerPixel(patch, type);
     }
@@ -166,11 +164,10 @@ namespace vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::GR : BayerPixelType::R
-                              : col ? BayerPixelType::B
-                                    : BayerPixelType::GB;
+        const int row = y % 2;
+        const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::GR : BayerPixelType::R : col ? BayerPixelType::B : BayerPixelType::GB;
 
         return getBayerPixel(patch, type);
     }
@@ -187,11 +184,10 @@ namespace vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::R : BayerPixelType::GR
-                              : col ? BayerPixelType::GB
-                                    : BayerPixelType::B;
+        const int row = y % 2;
+        const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::R : BayerPixelType::GR : col ? BayerPixelType::GB : BayerPixelType::B;
 
         return getBayerPixel(patch, type);
     }
