@@ -1,0 +1,113 @@
+# Continuous Integration tests for NUsight
+name: NUsight CI
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# Set the yarn cache folder to a writable folder
+env:
+  HOME: ${{ github.workspace }}
+  YARN_CACHE_FOLDER: ${{ github.workspace }}/.yarn
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Validate the NUsight code style and formatting are correct according to eslint and prettier
+  nusight-format:
+    name: NUsight Formatting
+    # The type of runner that the job will run on
+    runs-on: [self-hosted, Linux, X64, docker]
+
+    # Run on the Node 12 container
+    container:
+      image: node:12
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn
+
+      - name: Run eslint
+        working-directory: nusight2
+        run: yarn eslint
+
+  # Build the NUsight code
+  build-nusight:
+    name: Build NUsight
+    # The type of runner that the job will run on
+    runs-on: [self-hosted, Linux, X64, docker]
+
+    # Run on the Node 12 container
+    container:
+      image: node:12
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn
+
+      - name: Build NUsight
+        working-directory: nusight2
+        run: yarn build
+
+  # Build the NUsight Storybook code
+  build-nusight-storybook:
+    name: Build NUsight Storybook
+    # The type of runner that the job will run on
+    runs-on: [self-hosted, Linux, X64, docker]
+
+    # Run on the Node 12 container
+    container:
+      image: node:12
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn
+
+      - name: Build NUsight
+        working-directory: nusight2
+        run: yarn storybook:build
+
+  # Test the NUsight code
+  test-nusight:
+    name: Test NUsight
+    # The type of runner that the job will run on
+    runs-on: [self-hosted, Linux, X64, docker]
+
+    # Run on the Node 12 container
+    container:
+      image: node:12
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn
+
+      - name: Build NUsight
+        working-directory: nusight2
+        run: yarn test:ci
