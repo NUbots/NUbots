@@ -67,8 +67,6 @@ jobs:
     # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
-      volumes:
-        - "${{ github.workspace }}:/home/nubots/NUbots"
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

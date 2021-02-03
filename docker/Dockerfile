@@ -301,6 +301,9 @@ ARG user_uid=1000
 ARG user_gid=$user_uid
 RUN groupadd --gid $user_gid nubots \
     && useradd --uid $user_uid --gid $user_gid -m nubots
+
+# Create a folder owned by NUbots to help out the CI system
+RUN install -d -m 0755 -o nubots -g nubots /__w/NUbots/NUbots
 USER nubots
 
 # Copy ssh keys over to the system
