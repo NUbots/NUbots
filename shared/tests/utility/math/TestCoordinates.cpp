@@ -32,12 +32,16 @@ static constexpr double ERROR_THRESHOLD = 1e-6;
 // static constexpr double DBL_LWR_INVLD_EDGE = -1e-8;
 // static constexpr double DBL_LWR_VALID_EDGE = 1e-8;
 
+// NOTE: Test values won't exceed 1.8447e+19 (18447000000000000000), anything higher causes inf return values
+// when used with any arithmetic operations.
+// This means edge cases - TEST_DBL_MAX and TEST_DBL_MIN - have been left out or replaced. It has been determined that
+// inputs approaching these edge cases will not be possible in normal operation. See coordinates.h comments for more
+// details.
+static constexpr double TEST_DBL_MAX = 1.8447e+19;
+static constexpr double TEST_DBL_MIN = 1.8447e-19;
+
 
 // ****Cartesian test coords****
-// NOTE: Test values won't exceed 1.8447e+19 (18447000000000000000), anything higher causes inf return values.
-// This means edge cases - DBL_MAX and DBL_MIN - have been left out. It has been determined that inputs
-// approaching these edge cases will not be possible in normal operation.
-// See coordinates.h comments for more details.
 static const std::array<Eigen::Vector3d, 200> cart_coords = {
     Eigen::Vector3d(-0.492109181440401e+19, -0.080404385128274e+19, -1.673196359027018e+19),
     Eigen::Vector3d(1.787029403214489e+19, 1.018729997593175e+19, -1.615238543127342e+19),
@@ -449,173 +453,499 @@ static const std::array<Eigen::Vector3d, 200> cartToSpher_results = {
 
 // ****Spherical test coords****
 // distance, theta, phi
-static const std::array<Eigen::Vector3d, 65> spher_coords = {
-    // NOTE: should the valid/invalid radial boundaries be tested with each angle value?
-    // Edge cases
-    //
-    Eigen::Vector3d(-5, 0, 0),        // invalid radial dist
-    Eigen::Vector3d(-DBL_MIN, 0, 0),  // invalid edge radial distance....
-    Eigen::Vector3d(0, 0, 0),         // valid boundary radial dist
-    Eigen::Vector3d(DBL_MIN, 0, 0),   // valid open boundary
-    Eigen::Vector3d(1, 0, 0),         // valid
-    // the following tests values of theta and phi, from 0 to 2pi
-    //(pi/2)
-    Eigen::Vector3d(-5, (M_PI / 2), 0),
-    Eigen::Vector3d(-5, 0, (M_PI / 2)),
-    Eigen::Vector3d(-5, (M_PI / 2), (M_PI / 2)),
+static const std::array<Eigen::Vector3d, 226> spher_coords = {
+    Eigen::Matrix<double, 3, 1>(-5, 0, 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, 0, 0),
+    Eigen::Matrix<double, 3, 1>(0, 0, 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, 0, 0),
+    Eigen::Matrix<double, 3, 1>(1, 0, 0),
+    // Test values from 0 to 2*M_PI
+    // PI/2
+    Eigen::Matrix<double, 3, 1>(-5, M_PI / 2, 0),
+    Eigen::Matrix<double, 3, 1>(-5, 0, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(-5, M_PI / 2, M_PI / 2),
 
-    Eigen::Vector3d(-DBL_MIN, (M_PI / 2), 0),
-    Eigen::Vector3d(-DBL_MIN, 0, (M_PI / 2)),
-    Eigen::Vector3d(-DBL_MIN, (M_PI / 2), (M_PI / 2)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, M_PI / 2, 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, 0, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, M_PI / 2, M_PI / 2),
 
-    Eigen::Vector3d(0, (M_PI / 2), 0),
-    Eigen::Vector3d(0, 0, (M_PI / 2)),
-    Eigen::Vector3d(0, (M_PI / 2), (M_PI / 2)),
+    Eigen::Matrix<double, 3, 1>(0, M_PI / 2, 0),
+    Eigen::Matrix<double, 3, 1>(0, 0, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(0, M_PI / 2, M_PI / 2),
 
-    Eigen::Vector3d(DBL_MIN, (M_PI / 2), 0),
-    Eigen::Vector3d(DBL_MIN, 0, (M_PI / 2)),
-    Eigen::Vector3d(DBL_MIN, (M_PI / 2), (M_PI / 2)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, M_PI / 2, 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, 0, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, M_PI / 2, M_PI / 2),
 
-    Eigen::Vector3d(1, (M_PI / 2), 0),
-    Eigen::Vector3d(1, 0, (M_PI / 2)),
-    Eigen::Vector3d(1, (M_PI / 2), (M_PI / 2)),
+    Eigen::Matrix<double, 3, 1>(1, M_PI / 2, 0),
+    Eigen::Matrix<double, 3, 1>(1, 0, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(1, M_PI / 2, M_PI / 2),
 
-    //(pi)
-    Eigen::Vector3d(-5, (M_PI), 0),
-    Eigen::Vector3d(-5, 0, (M_PI)),
-    Eigen::Vector3d(-5, (M_PI), (M_PI)),
+    // PI
+    Eigen::Matrix<double, 3, 1>(-5, M_PI, 0),
+    Eigen::Matrix<double, 3, 1>(-5, 0, M_PI),
+    Eigen::Matrix<double, 3, 1>(-5, M_PI, M_PI),
 
-    Eigen::Vector3d(-DBL_MIN, (M_PI), 0),
-    Eigen::Vector3d(-DBL_MIN, 0, (M_PI)),
-    Eigen::Vector3d(-DBL_MIN, (M_PI), (M_PI)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, M_PI, 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, 0, M_PI),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, M_PI, M_PI),
 
-    Eigen::Vector3d(0, (M_PI), 0),
-    Eigen::Vector3d(0, 0, (M_PI)),
-    Eigen::Vector3d(0, (M_PI), (M_PI)),
+    Eigen::Matrix<double, 3, 1>(0, M_PI, 0),
+    Eigen::Matrix<double, 3, 1>(0, 0, M_PI),
+    Eigen::Matrix<double, 3, 1>(0, M_PI, M_PI),
 
-    Eigen::Vector3d(DBL_MIN, (M_PI), 0),
-    Eigen::Vector3d(DBL_MIN, 0, (M_PI)),
-    Eigen::Vector3d(DBL_MIN, (M_PI), (M_PI)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, M_PI, 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, 0, M_PI),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, M_PI, M_PI),
 
-    Eigen::Vector3d(1, M_PI, 0),
-    Eigen::Vector3d(1, 0, M_PI),
-    Eigen::Vector3d(1, M_PI, M_PI),
+    Eigen::Matrix<double, 3, 1>(1, M_PI, 0),
+    Eigen::Matrix<double, 3, 1>(1, 0, M_PI),
+    Eigen::Matrix<double, 3, 1>(1, M_PI, M_PI),
 
-    //(3pi/2)
-    Eigen::Vector3d(-5, ((3 * M_PI) / 2), 0),
-    Eigen::Vector3d(-5, 0, ((3 * M_PI) / 2)),
-    Eigen::Vector3d(-5, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    // 3_PI/2
+    Eigen::Matrix<double, 3, 1>(-5, ((3 * M_PI) / 2), 0),
+    Eigen::Matrix<double, 3, 1>(-5, 0, ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(-5, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
 
-    Eigen::Vector3d(-DBL_MIN, ((3 * M_PI) / 2), 0),
-    Eigen::Vector3d(-DBL_MIN, 0, ((3 * M_PI) / 2)),
-    Eigen::Vector3d(-DBL_MIN, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, ((3 * M_PI) / 2), 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, 0, ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
 
-    Eigen::Vector3d(0, ((3 * M_PI) / 2), 0),
-    Eigen::Vector3d(0, 0, ((3 * M_PI) / 2)),
-    Eigen::Vector3d(0, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(0, ((3 * M_PI) / 2), 0),
+    Eigen::Matrix<double, 3, 1>(0, 0, ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(0, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, ((3 * M_PI) / 2), 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, 0, ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
 
-    Eigen::Vector3d(DBL_MIN, ((3 * M_PI) / 2), 0),
-    Eigen::Vector3d(DBL_MIN, 0, ((3 * M_PI) / 2)),
-    Eigen::Vector3d(DBL_MIN, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(1, ((3 * M_PI) / 2), 0),
+    Eigen::Matrix<double, 3, 1>(1, 0, ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(1, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    // 2_PI
+    Eigen::Matrix<double, 3, 1>(-5, (2 * M_PI), 0),
+    Eigen::Matrix<double, 3, 1>(-5, 0, (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(-5, (2 * M_PI), (2 * M_PI)),
 
-    Eigen::Vector3d(1, ((3 * M_PI) / 2), 0),
-    Eigen::Vector3d(1, 0, ((3 * M_PI) / 2)),
-    Eigen::Vector3d(1, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
-    //(2pi)
-    Eigen::Vector3d(-5, (2 * M_PI), 0),
-    Eigen::Vector3d(-5, 0, (2 * M_PI)),
-    Eigen::Vector3d(-5, (2 * M_PI), (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, (2 * M_PI), 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, 0, (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, (2 * M_PI), (2 * M_PI)),
 
-    Eigen::Vector3d(-DBL_MIN, (2 * M_PI), 0),
-    Eigen::Vector3d(-DBL_MIN, 0, (2 * M_PI)),
-    Eigen::Vector3d(-DBL_MIN, (2 * M_PI), (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(0, (2 * M_PI), 0),
+    Eigen::Matrix<double, 3, 1>(0, 0, (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(0, (2 * M_PI), (2 * M_PI)),
 
-    Eigen::Vector3d(0, (2 * M_PI), 0),
-    Eigen::Vector3d(0, 0, (2 * M_PI)),
-    Eigen::Vector3d(0, (2 * M_PI), (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, (2 * M_PI), 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, 0, (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MIN, (2 * M_PI), (2 * M_PI)),
 
-    Eigen::Vector3d(DBL_MIN, (2 * M_PI), 0),
-    Eigen::Vector3d(DBL_MIN, 0, (2 * M_PI)),
-    Eigen::Vector3d(DBL_MIN, (2 * M_PI), (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(1, (2 * M_PI), 0),
+    Eigen::Matrix<double, 3, 1>(1, 0, (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(1, (2 * M_PI), (2 * M_PI)),
 
-    Eigen::Vector3d(1, 2 * M_PI, 0),
-    Eigen::Vector3d(1, 0, 2 * M_PI),
-    Eigen::Vector3d(1, 2 * M_PI, 2 * M_PI)
+    // max values
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, 0, 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, 0, 0),
+    // PI/2
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, M_PI / 2, 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, 0, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, M_PI / 2, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, M_PI / 2, 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, 0, M_PI / 2),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, M_PI / 2, M_PI / 2),
+    // PI
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, M_PI, 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, 0, M_PI),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, M_PI, M_PI),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, M_PI, 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, 0, M_PI),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, M_PI, M_PI),
+    // 3_PI/2
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, ((3 * M_PI) / 2), 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, 0, ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, ((3 * M_PI) / 2), 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, 0, ((3 * M_PI) / 2)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, ((3 * M_PI) / 2), ((3 * M_PI) / 2)),
+    // 2_PI
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, (2 * M_PI), 0),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, 0, (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, (2 * M_PI), (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, (2 * M_PI), 0),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, 0, (2 * M_PI)),
+    Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, (2 * M_PI), (2 * M_PI)),
 
-    // TODO: add random values between boundaries
+    // Random values between boundaries
+    Eigen::Matrix<double, 3, 1>(1.50E+19, 0.6708, 4.3975),
+    Eigen::Matrix<double, 3, 1>(1.67E+19, 4.1077, 4.012),
+    Eigen::Matrix<double, 3, 1>(2.34E+18, 3.105, 0.2111),
+    Eigen::Matrix<double, 3, 1>(1.68E+19, 4.8949, 0.4323),
+    Eigen::Matrix<double, 3, 1>(1.17E+19, 4.4927, 2.0081),
+    Eigen::Matrix<double, 3, 1>(1.80E+18, 5.6782, 3.3355),
+    Eigen::Matrix<double, 3, 1>(5.14E+18, 5.5978, 4.112),
+    Eigen::Matrix<double, 3, 1>(1.01E+19, 2.0996, 2.5611),
+    Eigen::Matrix<double, 3, 1>(1.77E+19, 4.3903, 5.1521),
+    Eigen::Matrix<double, 3, 1>(1.78E+19, 1.2429, 4.5136),
+    Eigen::Matrix<double, 3, 1>(2.91E+18, 0.1919, 6.0862),
+    Eigen::Matrix<double, 3, 1>(1.79E+19, 4.6752, 3.3385),
+    Eigen::Matrix<double, 3, 1>(1.77E+19, 3.1417, 2.043),
+    Eigen::Matrix<double, 3, 1>(8.95E+18, 3.0154, 0.6637),
+    Eigen::Matrix<double, 3, 1>(1.48E+19, 5.6845, 3.8388),
+    Eigen::Matrix<double, 3, 1>(2.62E+18, 3.8319, 4.8934),
+    Eigen::Matrix<double, 3, 1>(7.78E+18, 3.8809, 2.6606),
+    Eigen::Matrix<double, 3, 1>(1.69E+19, 5.4000, 0.5707),
+    Eigen::Matrix<double, 3, 1>(1.46E+19, 5.061, 1.6743),
+    Eigen::Matrix<double, 3, 1>(1.77E+19, 3.6236, 0.9655),
+    Eigen::Matrix<double, 3, 1>(1.21E+19, 1.1493, 1.7656),
+    Eigen::Matrix<double, 3, 1>(6.59E+17, 1.5075, 2.7651),
+    Eigen::Matrix<double, 3, 1>(1.57E+19, 5.5701, 3.3121),
+    Eigen::Matrix<double, 3, 1>(1.72E+19, 0.1802, 2.8741),
+    Eigen::Matrix<double, 3, 1>(1.25E+19, 3.0781, 5.5001),
+    Eigen::Matrix<double, 3, 1>(1.40E+19, 1.0551, 3.255),
+    Eigen::Matrix<double, 3, 1>(1.37E+19, 6.1492, 5.929),
+    Eigen::Matrix<double, 3, 1>(7.24E+18, 4.478, 4.0068),
+    Eigen::Matrix<double, 3, 1>(1.21E+19, 3.1446, 6.0174),
+    Eigen::Matrix<double, 3, 1>(3.16E+18, 2.9599, 1.5124),
+    Eigen::Matrix<double, 3, 1>(1.30E+19, 0.3746, 4.2482),
+    Eigen::Matrix<double, 3, 1>(5.87E+17, 4.285, 1.8162),
+    Eigen::Matrix<double, 3, 1>(5.11E+18, 0.2666, 4.2211),
+    Eigen::Matrix<double, 3, 1>(8.52E+17, 0.4489, 4.3677),
+    Eigen::Matrix<double, 3, 1>(1.79E+18, 3.2776, 0.4272),
+    Eigen::Matrix<double, 3, 1>(1.52E+19, 0.6078, 1.6009),
+    Eigen::Matrix<double, 3, 1>(1.28E+19, 5.1406, 1.4077),
+    Eigen::Matrix<double, 3, 1>(5.85E+18, 5.1368, 4.1961),
+    Eigen::Matrix<double, 3, 1>(1.75E+19, 4.5392, 5.3055),
+    Eigen::Matrix<double, 3, 1>(6.35E+17, 0.9416, 2.1643),
+    Eigen::Matrix<double, 3, 1>(8.09E+18, 4.1444, 4.9041),
+    Eigen::Matrix<double, 3, 1>(7.04E+18, 3.2584, 4.2432),
+    Eigen::Matrix<double, 3, 1>(1.41E+19, 6.1134, 0.0422),
+    Eigen::Matrix<double, 3, 1>(1.47E+19, 4.0777, 3.7835),
+    Eigen::Matrix<double, 3, 1>(3.45E+18, 5.0286, 2.4302),
+    Eigen::Matrix<double, 3, 1>(9.04E+18, 2.8513, 5.7553),
+    Eigen::Matrix<double, 3, 1>(8.22E+18, 2.7168, 0.0072),
+    Eigen::Matrix<double, 3, 1>(1.19E+19, 5.1856, 2.9057),
+    Eigen::Matrix<double, 3, 1>(1.31E+19, 0.5245, 2.6663),
+    Eigen::Matrix<double, 3, 1>(1.39E+19, 0.8367, 2.896),
+    Eigen::Matrix<double, 3, 1>(5.09E+18, 1.0894, 4.8391),
+    Eigen::Matrix<double, 3, 1>(1.25E+19, 2.4563, 2.0262),
+    Eigen::Matrix<double, 3, 1>(1.21E+19, 5.2237, 4.9307),
+    Eigen::Matrix<double, 3, 1>(3.00E+18, 5.0477, 2.9616),
+    Eigen::Matrix<double, 3, 1>(2.20E+18, 0.38, 0.2247),
+    Eigen::Matrix<double, 3, 1>(9.19E+18, 2.5086, 1.1051),
+    Eigen::Matrix<double, 3, 1>(1.77E+19, 3.3105, 4.5349),
+    Eigen::Matrix<double, 3, 1>(6.28E+18, 2.6188, 2.975),
+    Eigen::Matrix<double, 3, 1>(1.08E+19, 4.1272, 0.9596),
+    Eigen::Matrix<double, 3, 1>(4.13E+18, 3.9457, 2.1433),
+    Eigen::Matrix<double, 3, 1>(1.39E+19, 1.8346, 3.8163),
+    Eigen::Matrix<double, 3, 1>(4.71E+18, 2.7121, 1.2048),
+    Eigen::Matrix<double, 3, 1>(9.33E+18, 0.0973, 4.6397),
+    Eigen::Matrix<double, 3, 1>(1.29E+19, 6.1831, 1.5259),
+    Eigen::Matrix<double, 3, 1>(1.64E+19, 1.0504, 5.7643),
+    Eigen::Matrix<double, 3, 1>(1.77E+19, 0.6674, 1.6906),
+    Eigen::Matrix<double, 3, 1>(1.01E+19, 2.3399, 4.8098),
+    Eigen::Matrix<double, 3, 1>(2.56E+18, 1.2448, 1.1854),
+    Eigen::Matrix<double, 3, 1>(2.75E+18, 3.0768, 1.8064),
+    Eigen::Matrix<double, 3, 1>(4.75E+18, 2.1331, 0.5725),
+    Eigen::Matrix<double, 3, 1>(1.55E+19, 5.9793, 3.6204),
+    Eigen::Matrix<double, 3, 1>(4.69E+18, 5.7826, 4.2937),
+    Eigen::Matrix<double, 3, 1>(1.50E+19, 0.331, 3.4343),
+    Eigen::Matrix<double, 3, 1>(4.49E+18, 4.6361, 2.6749),
+    Eigen::Matrix<double, 3, 1>(1.71E+19, 1.6909, 4.0492),
+    Eigen::Matrix<double, 3, 1>(6.46E+18, 2.6568, 4.0691),
+    Eigen::Matrix<double, 3, 1>(3.63E+18, 3.4424, 4.2664),
+    Eigen::Matrix<double, 3, 1>(4.63E+18, 5.9234, 3.9948),
+    Eigen::Matrix<double, 3, 1>(1.14E+19, 2.6248, 5.9387),
+    Eigen::Matrix<double, 3, 1>(8.73E+18, 6.1767, 1.3128),
+    Eigen::Matrix<double, 3, 1>(6.49E+18, 1.8941, 4.4565),
+    Eigen::Matrix<double, 3, 1>(1.53E+19, 4.4051, 1.4843),
+    Eigen::Matrix<double, 3, 1>(1.08E+19, 4.1867, 0.7502),
+    Eigen::Matrix<double, 3, 1>(1.01E+19, 3.3874, 3.8158),
+    Eigen::Matrix<double, 3, 1>(1.69E+19, 4.3863, 2.8283),
+    Eigen::Matrix<double, 3, 1>(5.27E+18, 4.1879, 2.8823),
+    Eigen::Matrix<double, 3, 1>(1.40E+19, 1.1192, 4.1591),
+    Eigen::Matrix<double, 3, 1>(1.39E+19, 0.8043, 4.8398),
+    Eigen::Matrix<double, 3, 1>(7.02E+18, 6.2774, 2.2005),
+    Eigen::Matrix<double, 3, 1>(1.05E+19, 1.0752, 4.1595),
+    Eigen::Matrix<double, 3, 1>(1.40E+18, 0.2048, 2.6148),
+    Eigen::Matrix<double, 3, 1>(9.95E+17, 3.5261, 5.29),
+    Eigen::Matrix<double, 3, 1>(9.79E+18, 5.5409, 5.2334),
+    Eigen::Matrix<double, 3, 1>(1.44E+19, 4.2046, 1.6113),
+    Eigen::Matrix<double, 3, 1>(1.72E+19, 1.1965, 3.8545),
+    Eigen::Matrix<double, 3, 1>(2.40E+18, 2.318, 3.6584),
+    Eigen::Matrix<double, 3, 1>(1.05E+19, 2.8948, 3.3976),
+    Eigen::Matrix<double, 3, 1>(8.66E+18, 6.1678, 5.466),
+    Eigen::Matrix<double, 3, 1>(2.20E+17, 0.9827, 1.6637),
+    Eigen::Matrix<double, 3, 1>(6.22E+18, 5.3754, 1.9985),
+    Eigen::Matrix<double, 3, 1>(2.99E+18, 4.0512, 0.749),
+    Eigen::Matrix<double, 3, 1>(1.47E+19, 2.3642, 5.9051),
+    Eigen::Matrix<double, 3, 1>(5.74E+18, 1.1996, 4.0561),
+    Eigen::Matrix<double, 3, 1>(9.75E+18, 2.6908, 3.0126),
+    Eigen::Matrix<double, 3, 1>(3.06E+18, 3.0286, 4.0169),
+    Eigen::Matrix<double, 3, 1>(1.11E+19, 0.7578, 3.4226),
+    Eigen::Matrix<double, 3, 1>(4.85E+18, 3.704, 4.0672),
+    Eigen::Matrix<double, 3, 1>(1.21E+19, 1.4212, 3.4173),
+    Eigen::Matrix<double, 3, 1>(1.27E+19, 2.4166, 4.5305),
+    Eigen::Matrix<double, 3, 1>(1.38E+19, 3.663, 3.2829),
+    Eigen::Matrix<double, 3, 1>(8.31E+18, 1.5821, 6.2436),
+    Eigen::Matrix<double, 3, 1>(1.55E+18, 1.8249, 1.374),
+    Eigen::Matrix<double, 3, 1>(4.22E+18, 3.8773, 0.6648),
+    Eigen::Matrix<double, 3, 1>(1.68E+19, 1.6668, 0.6892),
+    Eigen::Matrix<double, 3, 1>(2.81E+18, 5.1797, 0.3996),
+    Eigen::Matrix<double, 3, 1>(1.52E+19, 6.1743, 2.5421),
+    Eigen::Matrix<double, 3, 1>(9.93E+18, 4.5883, 2.8172),
+    Eigen::Matrix<double, 3, 1>(1.84E+19, 2.1606, 2.2985),
+    Eigen::Matrix<double, 3, 1>(1.44E+18, 3.6698, 4.7972),
+    Eigen::Matrix<double, 3, 1>(8.17E+18, 0.6771, 3.9452),
+    Eigen::Matrix<double, 3, 1>(1.97E+18, 5.6945, 4.8505),
+    Eigen::Matrix<double, 3, 1>(1.77E+19, 5.527, 5.8613),
+    Eigen::Matrix<double, 3, 1>(8.50E+16, 5.1381, 6.1119),
+    Eigen::Matrix<double, 3, 1>(1.43E+19, 1.6382, 1.2065),
+    Eigen::Matrix<double, 3, 1>(1.51E+19, 3.7345, 0.8726),
+    Eigen::Matrix<double, 3, 1>(1.60E+19, 0.1415, 4.3748),
+    Eigen::Matrix<double, 3, 1>(1.56E+18, 2.672, 0.5895),
+    Eigen::Matrix<double, 3, 1>(7.38E+18, 1.9649, 3.3012),
+    Eigen::Matrix<double, 3, 1>(4.79E+18, 1.0146, 3.3323),
+    Eigen::Matrix<double, 3, 1>(1.48E+19, 1.1232, 5.4107),
+    Eigen::Matrix<double, 3, 1>(7.96E+18, 2.6571, 3.0464),
+    Eigen::Matrix<double, 3, 1>(1.68E+19, 0.5921, 2.4722),
+    Eigen::Matrix<double, 3, 1>(3.36E+18, 3.7606, 4.2187),
+    Eigen::Matrix<double, 3, 1>(4.87E+18, 2.9589, 4.6575),
+    Eigen::Matrix<double, 3, 1>(2.69E+18, 4.3728, 3.2676),
 
 
 };
 
 // ****Pre-calculated spherical to cartesian conversion results****
 // Calculated using matlab - The scripts used can be found in shared/tests/utility/math/docs
-static const std::array<Eigen::Matrix<double, 3, 1>, 65> spherToCart_results = {
+static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = {
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.175494350822288e-38),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.175494350822288e-38),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
-    Eigen::Matrix<double, 3, 1>(-5.000000000000000e+00, 0, 2.185569414336896e-07),
-    Eigen::Matrix<double, 3, 1>(2.185569414336896e-07, -5.000000000000000e+00, 2.185569414336896e-07),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(-1.175494350822288e-38, 0, 5.138248999765994e-46),
-    Eigen::Matrix<double, 3, 1>(5.138248999765994e-46, -1.175494350822288e-38, 5.138248999765994e-46),
+    Eigen::Matrix<double, 3, 1>(-5.000000000000000e+00, 0, -3.061616997868383e-16),
+    Eigen::Matrix<double, 3, 1>(-3.061616997868383e-16, -5.000000000000000e+00, -3.061616997868383e-16),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(-1.844700000000000e-19, 0, -1.129552975193561e-35),
+    Eigen::Matrix<double, 3, 1>(-1.129552975193561e-35, -1.844700000000000e-19, -1.129552975193561e-35),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(1.175494350822288e-38, 0, -5.138248999765994e-46),
-    Eigen::Matrix<double, 3, 1>(-5.138248999765994e-46, 1.175494350822288e-38, -5.138248999765994e-46),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(1.844700000000000e-19, 0, 1.129552975193561e-35),
+    Eigen::Matrix<double, 3, 1>(1.129552975193561e-35, 1.844700000000000e-19, 1.129552975193561e-35),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
-    Eigen::Matrix<double, 3, 1>(1.000000000000000e+00, 0, -4.371138828673793e-08),
-    Eigen::Matrix<double, 3, 1>(-4.371138828673793e-08, 1.000000000000000e+00, -4.371138828673793e-08),
+    Eigen::Matrix<double, 3, 1>(1.000000000000000e+00, 0, 6.123233995736766e-17),
+    Eigen::Matrix<double, 3, 1>(6.123233995736766e-17, 1.000000000000000e+00, 6.123233995736766e-17),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
-    Eigen::Matrix<double, 3, 1>(4.371138828673793e-07, 0, 5.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(-4.371138828673793e-07, -3.821370931907940e-14, 5.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(1.027649799953199e-45, 0, 1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(-1.027649799953199e-45, -8.983999885708567e-53, 1.175494350822288e-38),
+    Eigen::Matrix<double, 3, 1>(-6.123233995736766e-16, 0, 5.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(6.123233995736766e-16, -7.498798913309289e-32, 5.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(-2.259105950387122e-35, 0, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(2.259105950387122e-35, -2.766606871076328e-51, 1.844700000000000e-19),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(-1.027649799953199e-45, 0, -1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(1.027649799953199e-45, 8.983999885708567e-53, -1.175494350822288e-38),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(2.259105950387122e-35, 0, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(-2.259105950387122e-35, 2.766606871076328e-51, -1.844700000000000e-19),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
-    Eigen::Matrix<double, 3, 1>(-8.742277657347586e-08, 0, -1.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(8.742277657347586e-08, 7.642741863815879e-15, -1.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(1.224646799147353e-16, 0, -1.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(-1.224646799147353e-16, 1.499759782661858e-32, -1.000000000000000e+00),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
-    Eigen::Matrix<double, 3, 1>(5.000000000000000e+00, 0, -5.962440319251527e-08),
-    Eigen::Matrix<double, 3, 1>(5.962440319251527e-08, -5.000000000000000e+00, -5.962440319251527e-08),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(1.175494350822288e-38, 0, -1.401762982479041e-46),
-    Eigen::Matrix<double, 3, 1>(1.401762982479041e-46, -1.175494350822288e-38, -1.401762982479041e-46),
+    Eigen::Matrix<double, 3, 1>(5.000000000000000e+00, 0, 9.184850993605148e-16),
+    Eigen::Matrix<double, 3, 1>(-9.184850993605148e-16, -5.000000000000000e+00, 9.184850993605148e-16),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(1.844700000000000e-19, 0, 3.388658925580683e-35),
+    Eigen::Matrix<double, 3, 1>(-3.388658925580683e-35, -1.844700000000000e-19, 3.388658925580683e-35),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(-1.175494350822288e-38, 0, 1.401762982479041e-46),
-    Eigen::Matrix<double, 3, 1>(-1.401762982479041e-46, 1.175494350822288e-38, 1.401762982479041e-46),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(-1.844700000000000e-19, 0, -3.388658925580683e-35),
+    Eigen::Matrix<double, 3, 1>(3.388658925580683e-35, 1.844700000000000e-19, -3.388658925580683e-35),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
-    Eigen::Matrix<double, 3, 1>(-1.000000000000000e+00, 0, 1.192488063850305e-08),
-    Eigen::Matrix<double, 3, 1>(-1.192488063850305e-08, 1.000000000000000e+00, 1.192488063850305e-08),
+    Eigen::Matrix<double, 3, 1>(-1.000000000000000e+00, 0, -1.836970198721030e-16),
+    Eigen::Matrix<double, 3, 1>(1.836970198721030e-16, 1.000000000000000e+00, -1.836970198721030e-16),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
-    Eigen::Matrix<double, 3, 1>(-8.742277657347586e-07, 0, -5.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(-8.742277657347586e-07, -1.528548372763176e-13, -5.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(-2.055299599906398e-45, 0, -1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(-2.055299599906398e-45, -3.593599954283427e-52, -1.175494350822288e-38),
+    Eigen::Matrix<double, 3, 1>(1.224646799147353e-15, 0, -5.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(1.224646799147353e-15, -2.999519565323716e-31, -5.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(4.518211900774245e-35, 0, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(4.518211900774245e-35, -1.106642748430531e-50, -1.844700000000000e-19),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(2.055299599906398e-45, 0, 1.175494350822288e-38),
-    Eigen::Matrix<double, 3, 1>(2.055299599906398e-45, 3.593599954283427e-52, 1.175494350822288e-38),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(-4.518211900774245e-35, 0, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(-4.518211900774245e-35, 1.106642748430531e-50, 1.844700000000000e-19),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
-    Eigen::Matrix<double, 3, 1>(1.748455531469517e-07, 0, 1.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(1.748455531469517e-07, 3.057096745526352e-14, 1.000000000000000e+00)
-    // TODO: add values between edge cases
+    Eigen::Matrix<double, 3, 1>(-2.449293598294706e-16, 0, 1.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(-2.449293598294706e-16, 5.999039130647430e-32, 1.000000000000000e+00),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(-1.844700000000000e+19, 0, -1.129552975193561e+03),
+    Eigen::Matrix<double, 3, 1>(-1.129552975193561e+03, -1.844700000000000e+19, -1.129552975193561e+03),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(1.844700000000000e+19, 0, 1.129552975193561e+03),
+    Eigen::Matrix<double, 3, 1>(1.129552975193561e+03, 1.844700000000000e+19, 1.129552975193561e+03),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(-2.259105950387122e+03, 0, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(2.259105950387122e+03, -2.766606871076329e-13, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(2.259105950387122e+03, 0, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(-2.259105950387122e+03, 2.766606871076329e-13, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(1.844700000000000e+19, 0, 3.388658925580683e+03),
+    Eigen::Matrix<double, 3, 1>(-3.388658925580683e+03, -1.844700000000000e+19, 3.388658925580683e+03),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(-1.844700000000000e+19, 0, -3.388658925580683e+03),
+    Eigen::Matrix<double, 3, 1>(3.388658925580683e+03, 1.844700000000000e+19, -3.388658925580683e+03),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(4.518211900774245e+03, 0, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(4.518211900774245e+03, -1.106642748430532e-12, -1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(-4.518211900774245e+03, 0, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(-4.518211900774245e+03, 1.106642748430532e-12, 1.844700000000000e+19),
+
+    // Values between edge cases
+    Eigen::Matrix<double, 3, 1>(-1.117213734950550e+19, -8.865729297606710e+18, -4.645663684054431e+18),
+    Eigen::Matrix<double, 3, 1>(7.259073470245566e+18, 1.050452327083597e+19, -1.076340295659521e+19),
+    Eigen::Matrix<double, 3, 1>(-4.899850879834991e+17, 1.793786170247732e+16, 2.288054380182286e+18),
+    Eigen::Matrix<double, 3, 1>(1.277489984965898e+18, -6.921630677175218e+18, 1.525447633014974e+19),
+    Eigen::Matrix<double, 3, 1>(-2.309797113586031e+18, -1.034424921076115e+19, -4.954931438449669e+18),
+    Eigen::Matrix<double, 3, 1>(-2.852877951882317e+17, 1.972709650031247e+17, -1.766265846435177e+18),
+    Eigen::Matrix<double, 3, 1>(-3.283351270578308e+18, 2.684492160486780e+18, -2.903912235980426e+18),
+    Eigen::Matrix<double, 3, 1>(-2.794532318253458e+18, 4.782610248401681e+18, -8.445544880830375e+18),
+    Eigen::Matrix<double, 3, 1>(5.069935095713787e+18, 1.519266471099518e+19, 7.534500454876320e+18),
+    Eigen::Matrix<double, 3, 1>(-5.619634428007408e+18, -1.651978156750621e+19, -3.515185038861516e+18),
+    Eigen::Matrix<double, 3, 1>(-5.590728009942069e+17, -1.086227214946367e+17, 2.853723656481754e+18),
+    Eigen::Matrix<double, 3, 1>(1.302024113788787e+17, 3.499487759723081e+18, -1.755410586591124e+19),
+    Eigen::Matrix<double, 3, 1>(-1.576305547079636e+19, -1.692107425182078e+15, -8.050843394413380e+18),
+    Eigen::Matrix<double, 3, 1>(-5.469676772271565e+18, 6.939204076499447e+17, 7.050078756632429e+18),
+    Eigen::Matrix<double, 3, 1>(-7.850024202606523e+18, 5.355353360061550e+18, -1.134624653387054e+19),
+    Eigen::Matrix<double, 3, 1>(1.987147031137334e+18, 1.641091219724198e+18, 4.716633176177912e+17),
+    Eigen::Matrix<double, 3, 1>(-2.659790939440766e+18, -2.425251091663003e+18, -6.897250850944615e+18),
+    Eigen::Matrix<double, 3, 1>(5.794580351374590e+18, -7.055138139342683e+18, 1.422173914773632e+19),
+    Eigen::Matrix<double, 3, 1>(4.960563111076854e+18, -1.364834683699470e+19, -1.508456906285467e+18),
+    Eigen::Matrix<double, 3, 1>(-1.289696211124078e+19, -6.747238223478172e+18, 1.007140231828989e+19),
+    Eigen::Matrix<double, 3, 1>(4.856794016026598e+18, 1.083214856836355e+19, -2.342244495945678e+18),
+    Eigen::Matrix<double, 3, 1>(1.532574190526855e+16, 2.418034357824021e+17, -6.128435526942246e+17),
+    Eigen::Matrix<double, 3, 1>(-2.014918714175682e+18, 1.742718603306102e+18, -1.547233125437002e+19),
+    Eigen::Matrix<double, 3, 1>(4.472589691372091e+18, 8.147992114053752e+17, -1.658831045338027e+19),
+    Eigen::Matrix<double, 3, 1>(8.800599339783595e+18, -5.595254822848452e+17, 8.859254059754380e+18),
+    Eigen::Matrix<double, 3, 1>(-7.812837272012079e+17, -1.378262576750275e+18, -1.391006786493654e+19),
+    Eigen::Matrix<double, 3, 1>(-4.708935043022910e+18, 6.347309047330510e+17, 1.284963219081261e+19),
+    Eigen::Matrix<double, 3, 1>(1.279993123895610e+18, 5.360604620638662e+18, -4.695011789545090e+18),
+    Eigen::Matrix<double, 3, 1>(3.178257312364086e+18, 9.558149534125820e+15, 1.167512694141617e+19),
+    Eigen::Matrix<double, 3, 1>(-3.102686214692659e+18, 5.700217005583592e+17, 1.844275306148641e+17),
+    Eigen::Matrix<double, 3, 1>(-1.081829907818812e+19, -4.253373007327632e+18, -5.820070713952773e+18),
+    Eigen::Matrix<double, 3, 1>(-2.360194796875120e+17, -5.181950117069630e+17, -1.426104310702996e+17),
+    Eigen::Matrix<double, 3, 1>(-4.346443798539312e+18, -1.187018755072920e+18, -2.410707941921687e+18),
+    Eigen::Matrix<double, 3, 1>(-7.224390387478017e+17, -3.479982413839122e+17, -2.878941807103028e+17),
+    Eigen::Matrix<double, 3, 1>(-7.347912196877376e+17, -1.005578093319243e+17, 1.629131667623023e+18),
+    Eigen::Matrix<double, 3, 1>(1.247212294594129e+19, 8.676222497064706e+18, -4.575067242709366e+17),
+    Eigen::Matrix<double, 3, 1>(5.244587712456572e+18, -1.148976043545235e+19, 2.078389968765079e+18),
+    Eigen::Matrix<double, 3, 1>(-2.094949362772737e+18, 4.636138976819230e+18, -2.887888944373667e+18),
+    Eigen::Matrix<double, 3, 1>(2.500618255328003e+18, 1.429401904770129e+19, 9.781509484996325e+18),
+    Eigen::Matrix<double, 3, 1>(3.097875602652822e+17, 4.255998642571066e+17, -3.551357811446442e+17),
+    Eigen::Matrix<double, 3, 1>(4.272188821385678e+18, 6.694804403869227e+18, 1.541459265877780e+18),
+    Eigen::Matrix<double, 3, 1>(6.236436425278422e+18, 7.317928041203369e+17, -3.183227922298088e+18),
+    Eigen::Matrix<double, 3, 1>(5.862901959479021e+17, -1.005111354223349e+17, 1.408744694108168e+19),
+    Eigen::Matrix<double, 3, 1>(5.218497297069810e+18, 7.087257575349377e+18, -1.177404204260915e+19),
+    Eigen::Matrix<double, 3, 1>(7.004447395827400e+17, -2.140791731112220e+18, -2.613214099684986e+18),
+    Eigen::Matrix<double, 3, 1>(4.362998595026107e+18, -1.303365240718019e+18, 7.809422661700946e+18),
+    Eigen::Matrix<double, 3, 1>(-5.392350914168109e+16, 2.439140198547448e+16, 8.219786938520428e+18),
+    Eigen::Matrix<double, 3, 1>(1.267505209633930e+18, -2.475537765102635e+18, -1.157044265864973e+19),
+    Eigen::Matrix<double, 3, 1>(5.188722973286252e+18, 3.001948791275337e+18, -1.164798082763927e+19),
+    Eigen::Matrix<double, 3, 1>(2.263999056388225e+18, 2.509081924113822e+18, -1.348290829794368e+19),
+    Eigen::Matrix<double, 3, 1>(-2.337863474693102e+18, -4.475348436165175e+18, 6.432345984241027e+17),
+    Eigen::Matrix<double, 3, 1>(-8.691583724384787e+18, 7.104959275698296e+18, -5.497811023732826e+18),
+    Eigen::Matrix<double, 3, 1>(-5.780252318251672e+18, 1.030198905160589e+19, 2.620630595474779e+18),
+    Eigen::Matrix<double, 3, 1>(1.767288281842119e+17, -5.071567052039387e+17, -2.951535023958774e+18),
+    Eigen::Matrix<double, 3, 1>(4.552226846642125e+17, 1.818217313489770e+17, 2.144694189243858e+18),
+    Eigen::Matrix<double, 3, 1>(-6.620488404237647e+18, 4.857507551751236e+18, 4.126724327361178e+18),
+    Eigen::Matrix<double, 3, 1>(1.717400450031914e+19, 2.928720476067110e+18, -3.125086526175441e+18),
+    Eigen::Matrix<double, 3, 1>(-9.022717532549997e+17, 5.199575024005816e+17, -6.193056586127362e+18),
+    Eigen::Matrix<double, 3, 1>(-4.885481374994484e+18, -7.373085711547446e+18, 6.197554261541960e+18),
+    Eigen::Matrix<double, 3, 1>(-2.408340859294191e+18, -2.500186105150299e+18, -2.237378766563118e+18),
+    Eigen::Matrix<double, 3, 1>(2.264104466713231e+18, -8.382512909208828e+18, -1.085436816635388e+19),
+    Eigen::Matrix<double, 3, 1>(-3.998602547861920e+18, 1.831388389197499e+18, 1.685613903640082e+18),
+    Eigen::Matrix<double, 3, 1>(-9.261348905153954e+18, -9.039838095830911e+17, -6.775911222966993e+17),
+    Eigen::Matrix<double, 3, 1>(1.282250992048259e+19, -1.287647201660626e+18, 5.789680674969443e+17),
+    Eigen::Matrix<double, 3, 1>(-4.043905521597232e+18, -7.056340541082361e+18, 1.424130914981740e+19),
+    Eigen::Matrix<double, 3, 1>(1.380252521088156e+19, 1.087681679408111e+19, -2.115456033807872e+18),
+    Eigen::Matrix<double, 3, 1>(6.991163016140882e+18, -7.222792678188322e+18, 9.822960906229297e+17),
+    Eigen::Matrix<double, 3, 1>(7.597109741577179e+17, 2.247282817137118e+18, 9.623716410745853e+17),
+    Eigen::Matrix<double, 3, 1>(-2.668416470648526e+18, 1.731361320878744e+17, -6.419325657242456e+17),
+    Eigen::Matrix<double, 3, 1>(-1.371889339209436e+18, 2.177037648962135e+18, 3.992609011156103e+18),
+    Eigen::Matrix<double, 3, 1>(-6.813974206687177e+18, 2.136851965555099e+18, -1.375694803319054e+19),
+    Eigen::Matrix<double, 3, 1>(-3.759142271541041e+18, 2.056486607308045e+18, -1.906780589442821e+18),
+    Eigen::Matrix<double, 3, 1>(-4.093238954959043e+18, -1.406611170600990e+18, -1.436199289347918e+19),
+    Eigen::Matrix<double, 3, 1>(-1.539701975024086e+17, -2.014332583101824e+18, -4.009845062210684e+18),
+    Eigen::Matrix<double, 3, 1>(1.614552583839724e+18, -1.337829073860569e+19, -1.052732429762443e+19),
+    Eigen::Matrix<double, 3, 1>(4.573226976767147e+18, -2.408799878050137e+18, -3.874903633185588e+18),
+    Eigen::Matrix<double, 3, 1>(3.127877532829003e+18, 9.703335191014523e+17, -1.565801712009456e+18),
+    Eigen::Matrix<double, 3, 1>(-3.264869454359286e+18, 1.228105984355838e+18, -3.044549742930977e+18),
+    Eigen::Matrix<double, 3, 1>(3.347152581477286e+18, -1.902223031342160e+18, 1.073024310700095e+19),
+    Eigen::Matrix<double, 3, 1>(8.393252521515775e+18, -8.971516092468369e+17, 2.227404565878166e+18),
+    Eigen::Matrix<double, 3, 1>(1.994740712091460e+18, -5.953385099047587e+18, -1.642654971064531e+18),
+    Eigen::Matrix<double, 3, 1>(-4.610577359808829e+18, -1.452878414043672e+19, 1.321744230103830e+18),
+    Eigen::Matrix<double, 3, 1>(-3.694960192171964e+18, -6.369077285562057e+18, 7.900767286080636e+18),
+    Eigen::Matrix<double, 3, 1>(6.115683549335605e+18, 1.534306716872242e+18, -7.890140532522001e+18),
+    Eigen::Matrix<double, 3, 1>(-1.668479863182724e+18, -4.933983399420022e+18, -1.607737487155168e+19),
+    Eigen::Matrix<double, 3, 1>(-6.766473067216429e+17, -1.169581804042425e+18, -5.093832233786191e+18),
+    Eigen::Matrix<double, 3, 1>(-5.198081038461032e+18, -1.071713150961083e+19, -7.356836665530822e+18),
+    Eigen::Matrix<double, 3, 1>(-9.563107291111533e+18, -9.931637665373159e+18, 1.766225416652888e+18),
+    Eigen::Matrix<double, 3, 1>(5.673483460079103e+18, -3.282321079088286e+16, -4.134115148981971e+18),
+    Eigen::Matrix<double, 3, 1>(-4.249388052807032e+18, -7.860528801003697e+18, -5.514053694447694e+18),
+    Eigen::Matrix<double, 3, 1>(6.891591179373080e+17, 1.431467424593800e+17, -1.210193670569773e+18),
+    Eigen::Matrix<double, 3, 1>(7.727153597460813e+17, 3.126781798145959e+17, 5.432939615717401e+17),
+    Eigen::Matrix<double, 3, 1>(-6.257256088079566e+18, 5.739711838725174e+18, 4.873043633766199e+18),
+    Eigen::Matrix<double, 3, 1>(-6.996205430402872e+18, -1.257271297794091e+19, -5.830934315505970e+17),
+    Eigen::Matrix<double, 3, 1>(-4.112985336904460e+18, -1.047056443618944e+19, -1.301117335239270e+19),
+    Eigen::Matrix<double, 3, 1>(8.058964312623680e+17, -8.699351057768952e+17, -2.086562688685754e+18),
+    Eigen::Matrix<double, 3, 1>(2.578251110592529e+18, -6.495342682687791e+17, -1.015779141571006e+19),
+    Eigen::Matrix<double, 3, 1>(-6.273076458653110e+18, 7.270503149959258e+17, 5.925834083346957e+18),
+    Eigen::Matrix<double, 3, 1>(1.215248599176040e+17, 1.822502785398979e+17, -2.040941925034587e+16),
+    Eigen::Matrix<double, 3, 1>(3.483508189357365e+18, -4.460655319242336e+18, -2.579946669525403e+18),
+    Eigen::Matrix<double, 3, 1>(-1.250162837848825e+18, -1.606868689084425e+18, 2.189786723610743e+18),
+    Eigen::Matrix<double, 3, 1>(3.867626149620258e+18, -3.806192010669424e+18, 1.366178503507832e+19),
+    Eigen::Matrix<double, 3, 1>(-1.649547718099080e+18, -4.237866845096357e+18, -3.502438711661800e+18),
+    Eigen::Matrix<double, 3, 1>(-1.128902130473412e+18, 5.464259452116115e+17, -9.668996776616081e+18),
+    Eigen::Matrix<double, 3, 1>(2.334304734570223e+18, -2.648875500422908e+17, -1.960728434025384e+18),
+    Eigen::Matrix<double, 3, 1>(-2.235917196680187e+18, -2.115787634893310e+18, -1.066461987009487e+19),
+    Eigen::Matrix<double, 3, 1>(3.278218914040308e+18, 2.066288271062122e+18, -2.916544793501290e+18),
+    Eigen::Matrix<double, 3, 1>(-4.909276047775410e+17, -3.257165289772526e+18, -1.164301783739802e+19),
+    Eigen::Matrix<double, 3, 1>(9.349191142893425e+18, -8.282823025409770e+18, -2.297273972208117e+18),
+    Eigen::Matrix<double, 3, 1>(1.685296312271108e+18, 9.680882174170592e+17, -1.366245152024861e+19),
+    Eigen::Matrix<double, 3, 1>(3.717337210865680e+15, -3.288469877822557e+17, 8.303489979522502e+18),
+    Eigen::Matrix<double, 3, 1>(-3.821151018419716e+17, 1.471270580389178e+18, 3.030691805934574e+17),
+    Eigen::Matrix<double, 3, 1>(-1.929991453461471e+18, -1.747122137915309e+18, 3.321309564730743e+18),
+    Eigen::Matrix<double, 3, 1>(-1.024076194561851e+18, 1.063426036510015e+19, 1.296548396454956e+19),
+    Eigen::Matrix<double, 3, 1>(4.924862487203657e+17, -9.760171746725010e+17, 2.588618892298681e+18),
+    Eigen::Matrix<double, 3, 1>(8.525410233356061e+18, -9.319780067967624e+17, -1.254945406572871e+19),
+    Eigen::Matrix<double, 3, 1>(-3.917370158277358e+17, -3.140684065896992e+18, -9.412095712892592e+18),
+    Eigen::Matrix<double, 3, 1>(-7.641797112946607e+18, 1.141808506244429e+19, -1.223888354349969e+19),
+    Eigen::Matrix<double, 3, 1>(1.239274786533388e+18, 7.231310491504572e+17, 1.219815117843094e+17),
+    Eigen::Matrix<double, 3, 1>(-4.583839400878947e+18, -3.684839294682394e+18, -5.670914892617796e+18),
+    Eigen::Matrix<double, 3, 1>(-1.622791603116365e+18, 1.083462077044538e+18, 2.712145653561990e+17),
+    Eigen::Matrix<double, 3, 1>(-5.272487849080346e+18, 4.973099800345554e+18, 1.614803858854391e+19),
+    Eigen::Matrix<double, 3, 1>(-5.983154538657204e+15, 1.319502776222251e+16, 8.375615263442275e+16),
+    Eigen::Matrix<double, 3, 1>(-8.999363070143180e+17, 1.333121729459132e+19, 5.094974002652679e+18),
+    Eigen::Matrix<double, 3, 1>(-9.592444819019354e+18, -6.463145612895186e+18, 9.706840432426117e+18),
+    Eigen::Matrix<double, 3, 1>(-1.494601059566613e+19, -2.129089221787754e+18, -5.299410001113628e+18),
+    Eigen::Matrix<double, 3, 1>(-7.733947778490496e+17, 3.924619250990513e+17, 1.296701258942616e+18),
+    Eigen::Matrix<double, 3, 1>(4.503738767552534e+17, -1.082993713041953e+18, -7.286198459323493e+18),
+    Eigen::Matrix<double, 3, 1>(-4.793668514184680e+17, -7.711036082725997e+17, -4.703159219829807e+18),
+    Eigen::Matrix<double, 3, 1>(-4.906112178815113e+18, -1.021906694429197e+19, 9.515289489918910e+18),
+    Eigen::Matrix<double, 3, 1>(-6.695147848240914e+17, 3.523887917749655e+17, -7.923961893669941e+18),
+    Eigen::Matrix<double, 3, 1>(8.649996401425574e+18, 5.817999453015102e+18, -1.317453773838158e+19),
+    Eigen::Matrix<double, 3, 1>(2.409796589198986e+18, 1.716766783429139e+18, -1.592228692744638e+18),
+    Eigen::Matrix<double, 3, 1>(4.781741493243726e+18, -8.834397216735164e+17, -2.671751297570155e+17),
+    Eigen::Matrix<double, 3, 1>(1.126088014672571e+17, 3.187572358457569e+17, -2.668672531883236e+18)
+
 };
 
 // ****Test cartesianToSpherical conversion****
@@ -624,28 +954,37 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
     INFO("************Calculating Spherical coordinates for the origin****************");
     INFO("----------------------------------------------------------------------------");
     INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18) << "Util result"
-                   << std::setw(18) << "Difference");
+                   << std::setw(18) << "Epsilon");
     INFO("----------------------------------------------------------------------------");
     // Loop through test values and compare to results array
     for (size_t i = 0; i < cart_coords.size(); i++) {
         Eigen::Vector3d cart_input   = cart_coords[i];
         Eigen::Vector3d cart_compare = cartToSpher_results[i];
         Eigen::Vector3d spher_result = utility::math::coordinates::cartesianToSpherical(cart_input);
+        // Note: changed from outputting difference to outputting epsilon values
+        Approx epsilon_x = Approx(cart_compare.x()).epsilon(ERROR_THRESHOLD);
+        Approx epsilon_y = Approx(cart_compare.y()).epsilon(ERROR_THRESHOLD);
+        Approx epsilon_z = Approx(cart_compare.z()).epsilon(ERROR_THRESHOLD);
+
         // NOTE: result_diff only used for output purposes
-        Eigen::Vector3d result_diff = (spher_result - cart_compare);
+        // Eigen::Vector3d result_diff = (spher_result - cart_compare);
+
         //***Output - Table format***
         INFO(std::left << std::setw(18) << cart_input.x() << std::setw(18) << cart_compare.x() << std::setw(18)
-                       << spher_result.x() << std::setw(18) << result_diff.x() << "\n"
+                       << spher_result.x() << std::setw(18) << epsilon_x.toString() << "\n"
                        << std::left << std::setw(18) << cart_input.y() << std::setw(18) << cart_compare.y()
-                       << std::setw(18) << spher_result.y() << std::setw(18) << result_diff.y() << "\n"
+                       << std::setw(18) << spher_result.y() << std::setw(18) << epsilon_y.toString() << "\n"
                        << std::left << std::setw(18) << cart_input.z() << std::setw(18) << cart_compare.z()
-                       << std::setw(18) << spher_result.z() << std::setw(18) << result_diff.z());
+                       << std::setw(18) << spher_result.z() << std::setw(18) << epsilon_z.toString());
         INFO("----------------------------------------------------------------------------");
         INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
         INFO("Failed test value at index: " << i);
-        REQUIRE(spher_result.x() == Approx(cart_compare.x()).epsilon(ERROR_THRESHOLD));
-        REQUIRE(spher_result.y() == Approx(cart_compare.y()).epsilon(ERROR_THRESHOLD));
-        REQUIRE(spher_result.z() == Approx(cart_compare.z()).epsilon(ERROR_THRESHOLD));
+        // force test fail
+        // REQUIRE(1 == 2);
+        //
+        REQUIRE(spher_result.x() == epsilon_x);
+        REQUIRE(spher_result.y() == epsilon_y);
+        REQUIRE(spher_result.z() == epsilon_z);
     }
 }
 
@@ -664,31 +1003,43 @@ TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][mat
         }
         else {
             cart_result = utility::math::coordinates::sphericalToCartesian(spher_input);
+            // Note: changed from outputting difference to outputting epsilon values
+            Approx epsilon_x = Approx(spher_compare.x()).epsilon(ERROR_THRESHOLD);
+            Approx epsilon_y = Approx(spher_compare.y()).epsilon(ERROR_THRESHOLD);
+            Approx epsilon_z = Approx(spher_compare.z()).epsilon(ERROR_THRESHOLD);
+
             // NOTE: possibly use epsilon
-            Eigen::Matrix<double, 3, 1> result_diff = (cart_result - spher_compare);
+            // Eigen::Matrix<double, 3, 1> result_diff = (cart_result - spher_compare);
             //***Table heading***
             INFO("----------------------------------------------------------------------------");
             INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18)
-                           << "Util result" << std::setw(18) << "Difference");
+                           << "Util result" << std::setw(18) << "Epsilon");
             INFO("----------------------------------------------------------------------------");
             // New output - Table format
             INFO(std::left << std::setw(18) << spher_input.x() << std::setw(18) << spher_compare.x() << std::setw(18)
-                           << cart_result.x() << std::setw(18) << result_diff.x() << "\n"
+                           << cart_result.x() << std::setw(18) << epsilon_x.toString() << "\n"
                            << std::left << std::setw(18) << spher_input.y() << std::setw(18) << spher_compare.y()
-                           << std::setw(18) << cart_result.y() << std::setw(18) << result_diff.y() << "\n"
+                           << std::setw(18) << cart_result.y() << std::setw(18) << epsilon_y.toString() << "\n"
                            << std::left << std::setw(18) << spher_input.z() << std::setw(18) << spher_compare.z()
-                           << std::setw(18) << cart_result.z() << std::setw(18) << result_diff.y());
+                           << std::setw(18) << cart_result.z() << std::setw(18) << epsilon_z.toString());
             INFO("----------------------------------------------------------------------------");
             INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
             INFO("Failed test value at index: " << i);
+            // test output
+            INFO("Test output TEST_DBL_MIN = " << TEST_DBL_MIN << "|input val = " << spher_input[0]);
+
 
             // REQUIRE(result_diff.x() <= ERROR_THRESHOLD);
             // REQUIRE(result_diff.y() <= ERROR_THRESHOLD);
             // REQUIRE(result_diff.z() <= ERROR_THRESHOLD);
             // NOTE: Still looking into why using epsilon fails in this case.
-            REQUIRE(cart_result.x() == Approx(spher_compare.x()).epsilon(ERROR_THRESHOLD));
-            REQUIRE(cart_result.y() == Approx(spher_compare.y()).epsilon(ERROR_THRESHOLD));
-            REQUIRE(cart_result.z() == Approx(spher_compare.z()).epsilon(ERROR_THRESHOLD));
+            // REQUIRE(cart_result.x() == Approx(spher_compare.x()).epsilon(ERROR_THRESHOLD));
+            // REQUIRE(cart_result.y() == Approx(spher_compare.y()).epsilon(ERROR_THRESHOLD));
+            // REQUIRE(cart_result.z() == Approx(spher_compare.z()).epsilon(ERROR_THRESHOLD));
+            // test purposes
+            REQUIRE(cart_result.x() == epsilon_x);
+            REQUIRE(cart_result.y() == epsilon_y);
+            REQUIRE(cart_result.z() == epsilon_z);
         }
     }
 }
