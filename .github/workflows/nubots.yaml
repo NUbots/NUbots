@@ -49,8 +49,8 @@ jobs:
           build-args: |
             platform=generic
           push: true
-          cache-from: type=local,mode=max,src=/var/lib/github-actions/buildx-cache
-          cache-to: type=local,mode=max,dest=/var/lib/github-actions/buildx-cache
+          cache-from: type=registry,ref=nubots/nubots:generic
+          cache-to: type=inline
 
       - id: image_output
         name: Output the created image
