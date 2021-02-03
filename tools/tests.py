@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# TODO: add ability to list tests like `./b tests list` (ctest -N)
+# TODO: add ability to run individual test like `./b tests run <test_name>`
+
 import os
 import time
 import subprocess
@@ -24,17 +27,27 @@ def register(command):
         "-VV",
         "--extra-verbose",
         action="append_const",
-        dest="ctest_args",
+        dest="given_ctest_args",
         const="-VV",
         help="Enable more verbose output from tests",
     )
 
     command.add_argument(
-        "-V", "--verbose", action="append_const", dest="ctest_args", const="-V", help="Enable verbose output from tests"
+        "-V",
+        "--verbose",
+        action="append_const",
+        dest="given_ctest_args",
+        const="-V",
+        help="Enable verbose output from tests",
     )
 
     command.add_argument(
-        "-Q", "--quiet", action="append_const", dest="ctest_args", const="-Q", help="Make ctest not print to stdout"
+        "-Q",
+        "--quiet",
+        action="append_const",
+        dest="given_ctest_args",
+        const="-Q",
+        help="Make ctest not print to stdout",
     )
 
     command.add_argument(
@@ -49,14 +62,14 @@ def register(command):
     command.add_argument(
         "--debug",
         action="append_const",
-        dest="ctest_args",
+        dest="given_ctest_args",
         const="--debug",
         help="Displaying more verbose internals of CTest",
     )
 
 
 @run_on_docker
-def run(ctest_args, num_jobs, **kwargs):
+def run(given_ctest_args, num_jobs, **kwargs):
     tests_dir = os.path.join(b.project_dir, TESTS_OUTPUT_DIR)
 
     # If tests dir not at /home/nubots/Nubots/tests , create it
@@ -70,10 +83,16 @@ def run(ctest_args, num_jobs, **kwargs):
     filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"
     logPath = os.path.join(tests_dir, filename)
 
-    default_ctest_args = [
+    # Default ctest args
+    ctest_args = [
         "--force-new-ctest-process",
         "--output-on-failure",
     ]
-    ctest_args.extend(default_ctest_args)
 
-    exit(subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(jobs), *ctest_args]).returncode)
+    # Add given args to default args
+    if given_ctest_args:
+        ctest_args.extend(given_ctest_args)
+
+    exit(
+        subprocess.run(["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), *ctest_args]).returncode
+    )
