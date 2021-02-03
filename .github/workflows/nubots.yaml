@@ -74,6 +74,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          submodules: true
 
       - name: Configure the code
         run: |
@@ -113,6 +115,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          submodules: true
 
       - name: Check clang-format
         run: .github/workflows/format/validate_clang_format.sh
@@ -134,6 +138,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          submodules: true
 
       - name: Check cmake-format
         run: .github/workflows/format/validate_cmake_format.sh
@@ -154,6 +160,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          submodules: true
 
       - name: Check isort and black
         run: .github/workflows/format/validate_python_format.sh
