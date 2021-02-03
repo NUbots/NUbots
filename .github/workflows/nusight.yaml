@@ -20,7 +20,7 @@ jobs:
   nusight-format:
     name: NUsight Formatting
     # The type of runner that the job will run on
-    runs-on: [self-hosted, Linux, X64, docker]
+    runs-on: ubuntu-20.04
 
     # Run on the Node 12 container
     container:
@@ -44,7 +44,7 @@ jobs:
   build-nusight:
     name: Build NUsight
     # The type of runner that the job will run on
-    runs-on: [self-hosted, Linux, X64, docker]
+    runs-on: ubuntu-20.04
 
     # Run on the Node 12 container
     container:
@@ -68,7 +68,7 @@ jobs:
   build-nusight-storybook:
     name: Build NUsight Storybook
     # The type of runner that the job will run on
-    runs-on: [self-hosted, Linux, X64, docker]
+    runs-on: ubuntu-20.04
 
     # Run on the Node 12 container
     container:
@@ -92,7 +92,7 @@ jobs:
   test-nusight:
     name: Test NUsight
     # The type of runner that the job will run on
-    runs-on: [self-hosted, Linux, X64, docker]
+    runs-on: ubuntu-20.04
 
     # Run on the Node 12 container
     container:
