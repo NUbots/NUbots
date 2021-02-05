@@ -31,7 +31,5 @@ message BalanceBodyUpdate {
     vec3   armRPosition = 5;
 }
 
-message EnableBalanceResponse {
-}
-message DisableBalanceResponse {
-}
+message EnableBalanceResponse {}
+message DisableBalanceResponse {}
