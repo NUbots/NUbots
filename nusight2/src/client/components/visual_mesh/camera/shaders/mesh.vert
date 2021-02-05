@@ -22,19 +22,19 @@ varying vec2 vUv;
 #define M_PI 3.1415926535897932384626433832795
 
 void main() {
-  // Forward our varyings
-  vUv = uv;
+    // Forward our varyings
+    vUv = uv;
 
-  // Classifications
-  vBall = ball;
-  vGoal = goal;
-  vFieldLine = fieldLine;
-  vField = field;
-  vEnvironment = environment;
+    // Classifications
+    vBall        = ball;
+    vGoal        = goal;
+    vFieldLine   = fieldLine;
+    vField       = field;
+    vEnvironment = environment;
 
-  // Calculate our position in the mesh
-  float theta = M_PI * 2.0 * position.y;
-  vec2 pos = vec2(cos(theta) * position.x, sin(theta) * position.x);
+    // Calculate our position in the mesh
+    float theta = M_PI * 2.0 * position.y;
+    vec2 pos    = vec2(cos(theta) * position.x, sin(theta) * position.x);
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 0.0, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 0.0, 1.0);
 }
