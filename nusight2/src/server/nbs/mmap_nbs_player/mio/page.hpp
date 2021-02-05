@@ -22,12 +22,12 @@
 #define MIO_PAGE_HEADER
 
 #ifdef _WIN32
-# ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-# endif // WIN32_LEAN_AND_MEAN
-# include <windows.h>
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif  // WIN32_LEAN_AND_MEAN
+    #include <windows.h>
 #else
-# include <unistd.h>
+    #include <unistd.h>
 #endif
 
 namespace mio {
@@ -39,10 +39,8 @@ namespace mio {
  * to determine the page size, caches the value, and returns it. Any subsequent call to
  * this function serves the cached value, so no further syscalls are made.
  */
-inline size_t page_size()
-{
-    static const size_t page_size = []
-    {
+inline size_t page_size() {
+    static const size_t page_size = [] {
 #ifdef _WIN32
         SYSTEM_INFO SystemInfo;
         GetSystemInfo(&SystemInfo);
@@ -59,13 +57,12 @@ inline size_t page_size()
  * difference until the nearest page boundary before `offset`, or does nothing if
  * `offset` is already page aligned.
  */
-inline size_t make_offset_page_aligned(size_t offset) noexcept
-{
+inline size_t make_offset_page_aligned(size_t offset) noexcept {
     const size_t page_size_ = page_size();
     // Use integer division to round down to the nearest page alignment.
     return offset / page_size_ * page_size_;
 }
 
-} // namespace mio
+}  // namespace mio
 
-#endif // MIO_PAGE_HEADER
+#endif  // MIO_PAGE_HEADER
