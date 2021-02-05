@@ -5,6 +5,8 @@ import pkgutil
 import re
 import sys
 
+from dependencies import find_dependency, install_dependency
+
 # Don't make .pyc files
 sys.dont_write_bytecode = True
 
@@ -98,7 +100,23 @@ if __name__ == "__main__":
                     if sys.argv[1 : len(components) + 1] == components:
 
                         # Load the module
-                        module = pkgutil.find_loader(".".join(components)).load_module()
+                        try:
+                            module = pkgutil.find_loader(".".join(components)).load_module()
+                        except ModuleNotFoundError as e:
+                            print(f'missing command dependency "{e.name}"')
+
+                            dependency = find_dependency(e.name, user_tools_path)
+                            package = dependency["version"]
+
+                            print(f'installing missing dependency "{package}"...')
+                            print()
+
+                            install_dependency(package)
+
+                            print()
+                            print("missing dependency installed, re-run command to continue")
+                            sys.exit(1)
+
                         if hasattr(module, "register") and hasattr(module, "run"):
 
                             # Build up the base subcommands to this point
@@ -108,6 +126,7 @@ if __name__ == "__main__":
                                     dest="{}_command".format(c),
                                     help="Commands related to working with {} functionality".format(c),
                                 )
+                            subcommand.required = True
 
                             module.register(subcommand.add_parser(components[-1]))
                             module.run(**vars(command.parse_args()))
