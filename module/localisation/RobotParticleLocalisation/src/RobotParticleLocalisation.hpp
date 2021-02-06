@@ -4,18 +4,19 @@
 #include <nuclear>
 
 #include "RobotModel.hpp"
-
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
 
-#include "utility/math/filter/ParticleFilter.hpp"
+#include "utility/math/filter/eigen/ParticleFilter.hpp"
 
 namespace module {
 namespace localisation {
 
     class RobotParticleLocalisation : public NUClear::Reactor {
     private:
-        utility::math::filter::ParticleFilter<RobotModel> filter;
+        utility::math::filter::ParticleFilter<double, RobotModel> filter;
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
 
@@ -24,8 +25,11 @@ namespace localisation {
         int draw_particles                             = 10;
         int n_particles;
 
-        std::vector<arma::vec> getPossibleFieldPositions(const message::vision::Goal& goal,
-                                                         const message::support::FieldDescription& fd) const;
+        /*std::vector<Eigen::VectorXd> getPossibleFieldPositions(const message::vision::Goal& goal,
+                                                               const message::support::FieldDescription& fd) const;*/
+
+        Eigen::VectorXd getFieldPosition(const message::vision::Goal& goal,
+                                                               const message::support::FieldDescription& fd) const;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotParticleLocalisation reactor.

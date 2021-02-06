@@ -17,10 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATION_ROBOTMODEL_HPP
-#define MODULES_LOCALISATION_ROBOTMODEL_HPP
+#ifndef MODULES_LOCALISATION_ROBOTMODEL_H
+#define MODULES_LOCALISATION_ROBOTMODEL_H
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <nuclear>
+#include <vector>
 
 #include "message/input/Sensors.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -29,13 +32,32 @@
 #include "utility/math/matrix/Rotation3D.hpp"
 #include "utility/math/matrix/Transform3D.hpp"
 
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace module {
 namespace localisation {
 
+    using message::input::Sensors;
+    using message::support::FieldDescription;
+    using message::vision::Goal;
+    using utility::input::ServoID;
+    using utility::localisation::fieldStateToTransform3D;
+    using utility::math::angle::normalizeAngle;
+    using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::matrix::Transform3D;
+
+    template <typename Scalar>
     class RobotModel {
     public:
         static constexpr size_t size = 3;
+
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
+
 
         enum Components : int {
             // Field center in world space
@@ -48,42 +70,184 @@ namespace localisation {
 
         RobotModel() {}
 
-        arma::vec::fixed<RobotModel::size> timeUpdate(const arma::vec::fixed<RobotModel::size>& state, double deltaT);
+        StateVec time(const StateVec& state, double /*deltaT*/) {
+            return state;
+        }
 
-        arma::vec predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
-                                       const arma::vec& actual_position,
-                                       const utility::math::matrix::Transform3D& Hcw,
-                                       const message::vision::Goal::MeasurementType& type,
-                                       const message::support::FieldDescription& fd);
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(
+            const StateVec& state,
+            const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& actual_position,
+            const Eigen::Matrix<Scalar, 4, 4>& Hcw,
+            const message::vision::Goal::MeasurementType& type,
+            const message::support::FieldDescription& fd) {
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+            // Create a transform from the field state
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
+            Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
+            Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf;
+            Hcf.matrix() = Hcw.matrix() * Hfw.inverse().matrix();
 
-        arma::mat::fixed<size, size> processNoise();
+            // rZFf = vector from field origin to zenith high in the sky
+            Eigen::Matrix<Scalar, 4, 1> rZFf(0, 0, 1, 0);
+            rZFf = Hcf * rZFf;
 
-        arma::vec3 processNoiseDiagonal;
+            if (type == Goal::MeasurementType::CENTRE) {
+                // rGCc = vector from camera to goal post expected position
+                Eigen::Matrix<Scalar, 4, 1> rGCc_4(actual_position.x(), actual_position.y(), actual_position.z(), 1);
+                rGCc_4 = Hcf * rGCc_4;
+                Eigen::Matrix<Scalar, 3, 1> rGCc(rGCc_4.x(), rGCc_4.y(), rGCc_4.z());
+                Eigen::Matrix<Scalar, 3, 1> rGCc_sph(cartesianToSpherical(rGCc));  // in r,theta,phi
+                return rGCc_sph;
+            }
+
+            switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
+                case FieldDescription::GoalpostType::CIRCLE: {
+                    if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
+                        Eigen::Matrix<Scalar, 3, 1> rNCc(
+                            getCylindricalPostCamSpaceNormal(type, actual_position, Hcf, fd));
+                        Eigen::Matrix<Scalar, 2, 1> angles(
+                            std::atan2(rNCc.y(), rNCc.x()),
+                            std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
+                        return angles;
+                    }
+                    break;
+                }
+                case FieldDescription::GoalpostType::RECTANGLE: {
+                    if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
+                        Eigen::Matrix<Scalar, 3, 1> rNCc(getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd));
+                        Eigen::Matrix<Scalar, 2, 1> angles(
+                            std::atan2(rNCc.y(), rNCc.x()),
+                            std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
+                        return angles;
+                    }
+                    break;
+                }
+            }
+            return Eigen::Matrix<Scalar, 2, 1>::Zero();
+        }
+
+        StateVec limit(const StateVec& state) {
+            return state;
+        }
+
+        StateMat noise(const Scalar& deltaT) {
+            return processNoiseDiagonal.asDiagonal() * deltaT;
+        }
+
+        template <typename T, typename U>
+        static auto difference(const T& a, const U& b) {
+            return a - b;
+        }
+
+        Eigen::Matrix<Scalar, 3, 1> processNoiseDiagonal;
 
         // number and range of reset particles
-        int n_rogues          = 0;
-        arma::vec3 resetRange = {0, 0, 0};
+        int n_rogues                           = 0;
+        Eigen::Matrix<Scalar, 3, 1> resetRange = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
         // Getters
         int getRogueCount() const {
             return n_rogues;
         }
-        arma::vec getRogueRange() const {
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> getRogueRange() const {
             return resetRange;
         }
 
-        arma::vec3 getCylindricalPostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                                    const arma::vec3& post_centre,
-                                                    const utility::math::matrix::Transform3D& Hcf,
-                                                    const message::support::FieldDescription& fd);
-        arma::vec3 getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                               const arma::vec3& post_centre,
-                                               const utility::math::matrix::Transform3D& Hcf,
-                                               const message::support::FieldDescription& fd);
+        Eigen::Matrix<Scalar, 3, 1> getCylindricalPostCamSpaceNormal(
+            const message::vision::Goal::MeasurementType& type,
+            const Eigen::Matrix<Scalar, 3, 1>& post_centre,
+            const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcf,
+            const message::support::FieldDescription& fd) {
+            if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
+                return Eigen::Matrix<Scalar, 3, 1>(0, 0, 0);
+            // rZFf = field vertical
+            Eigen::Matrix<Scalar, 4, 1> rZFf(0, 0, 1, 0);
+            rZFf = Hcf * rZFf;
+            Eigen::Matrix<Scalar, 3, 1> rZCc(rZFf.x(), rZFf.y(), rZFf.z());
+
+            // The vector direction across the field perpendicular to the camera view vector
+            Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>(1, 0, 0)).normalized();
+
+            float dir                           = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1.0 : -1.0;
+            Eigen::Matrix<Scalar, 3, 1> rG_blCc = post_centre + 0.5 * dir * fd.dimensions.goalpost_width * rLRf;
+            Eigen::Matrix<Scalar, 3, 1> rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height * rZCc;
+
+            // creating the normal vector (following convention stipulated in VisionObjects)
+            return (type == Goal::MeasurementType::LEFT_NORMAL) ? rG_blCc.cross(rG_tlCc).normalized()
+                                                                : rG_tlCc.cross(rG_blCc).normalized();
+        }
+
+        Eigen::Matrix<Scalar, 3, 1> getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
+                                                                const Eigen::Matrix<Scalar, 3, 1>& post_centre,
+                                                                const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcf,
+                                                                const message::support::FieldDescription& fd) {
+            if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
+                return Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+            // Finding 4 corners of goalpost and centre (4 corners and centre)
+            Eigen::Matrix<Scalar, 4, 5> goalBaseCorners;
+            for (int i = 0; i < 5; ++i)
+                goalBaseCorners.col(i) =
+                    Eigen::Matrix<Scalar, 4, 1>(post_centre.x(), post_centre.y(), post_centre.z(), 1);
+            //
+            goalBaseCorners.col(1) += Eigen::Matrix<Scalar, 4, 1>(
+                0.5 * fd.dimensions.goalpost_depth, 0.5 * fd.dimensions.goalpost_width, 0, 0);
+            goalBaseCorners.col(2) += Eigen::Matrix<Scalar, 4, 1>(
+                0.5 * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width, 0, 0);
+            goalBaseCorners.col(3) += Eigen::Matrix<Scalar, 4, 1>(
+                -0.5 * fd.dimensions.goalpost_depth, 0.5 * fd.dimensions.goalpost_width, 0, 0);
+            goalBaseCorners.col(4) += Eigen::Matrix<Scalar, 4, 1>(
+                -0.5 * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width, 0, 0);
+
+            Eigen::Matrix<Scalar, 4, 5> goalTopCorners = goalBaseCorners;
+            for (int i = 0; i < 5; ++i)
+                goalTopCorners.col(i) += Eigen::Matrix<Scalar, 4, 1>(0, 0, fd.dimensions.goal_crossbar_height, 0);
+
+            // Transform to robot camera space
+            Eigen::Matrix<Scalar, 4, 5> goalBaseCornersCam = Hcf * goalBaseCorners;
+            Eigen::Matrix<Scalar, 4, 5> goalTopCornersCam  = Hcf * goalTopCorners;
+
+            // Get widest line
+            int widest          = 0;
+            float largest_angle = 0;
+            for (int i = 1; i < goalBaseCornersCam.cols(); ++i) {
+                float angle = std::acos(goalBaseCornersCam.col(i).dot(goalBaseCornersCam.col(0)));
+                // Left side will have cross product point in neg field z direction
+
+                /*
+                bool left_side = (goalBaseCornersCam.block<3, 1>(0, i, 2, i)
+                                      .cross(goalBaseCornersCam.block<3, 1>(0, 0, 2, 0))
+                                      .dot(goalTopCornersCam - goalBaseCornersCam))
+                                 < 0;
+                */
+                bool left_side =
+                    true;  // DO NOT MERGE THIS. Trying to build the rest of localisation before finishing above block
+                if (left_side && (type == Goal::MeasurementType::LEFT_NORMAL)) {
+                    if (angle > largest_angle) {
+                        widest        = i;
+                        largest_angle = angle;
+                    }
+                }
+                else if (!left_side && (type == Goal::MeasurementType::RIGHT_NORMAL)) {
+                    if (angle > largest_angle) {
+                        widest        = i;
+                        largest_angle = angle;
+                    }
+                }
+            }
+
+            // creating the normal vector (following convention stipulated in VisionObjects)
+            // Normals point into the goal centre
+            return Eigen::Matrix<Scalar, 3, 1>::Zero();
+            /*
+            // DO NOT MERGE THIS!! Currently debugging the rest of the code.
+            return (type == Goal::MeasurementType::LEFT_NORMAL)
+                       ? (goalBaseCornersCam.col(widest).cross(goalTopCornersCam.col(widest))).normalize()
+                       : (goalTopCornersCam.col(widest).cross(goalBaseCornersCam.col(widest))).normalize();
+                       */
+        }
     };
 }  // namespace localisation
 }  // namespace module
