@@ -1,8 +1,7 @@
-#ifndef UTILITY_SUPPORT_MATH_STRING_H
-#define UTILITY_SUPPORT_MATH_STRING_H
+#ifndef UTILITY_SUPPORT_MATH_STRING_HPP
+#define UTILITY_SUPPORT_MATH_STRING_HPP
 
 #include <fmt/format.h>
-
 #include <limits>
 #include <stdexcept>
 
@@ -39,4 +38,4 @@ namespace support {
 }  // namespace support
 }  // namespace utility
 
-#endif  // UTILITY_SUPPORT_MATH_STRING_H
+#endif  // UTILITY_SUPPORT_MATH_STRING_HPP

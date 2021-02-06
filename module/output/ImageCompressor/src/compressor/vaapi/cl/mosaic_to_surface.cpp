@@ -1,10 +1,9 @@
-#include "mosaic_to_surface.h"
-
-#include <fmt/format.h>
+#include "mosaic_to_surface.hpp"
 
 #include <array>
+#include <fmt/format.h>
 
-#include "opencl_error_category.h"
+#include "opencl_error_category.hpp"
 
 namespace module::output::compressor::vaapi::cl {
 
@@ -25,8 +24,17 @@ void mosaic_to_surface(CompressionContext::OpenCLContext context,
     std::array<size_t, 3> region = {{size_t(width), size_t(height), 1}};
 
     // Upload our image to device memory
-    error = clEnqueueWriteImage(
-        command_queue, image, false, origin.data(), region.data(), 0, 0, data.data(), 0, nullptr, &ev);
+    error = clEnqueueWriteImage(command_queue,
+                                image,
+                                false,
+                                origin.data(),
+                                region.data(),
+                                0,
+                                0,
+                                data.data(),
+                                0,
+                                nullptr,
+                                &ev);
     cl::event copied_ev(ev, ::clReleaseEvent);
     if (error != CL_SUCCESS) {
         throw std::system_error(error, cl::opencl_error_category(), "Error mapping the image into device memory");

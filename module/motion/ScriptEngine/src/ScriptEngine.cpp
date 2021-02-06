@@ -17,11 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ScriptEngine.h"
+#include "ScriptEngine.hpp"
 
-#include "extension/Script.h"
-#include "message/behaviour/ServoCommand.h"
-#include "utility/file/fileutil.h"
+#include "extension/Script.hpp"
+
+#include "message/behaviour/ServoCommand.hpp"
+
+#include "utility/file/fileutil.hpp"
 
 namespace module {
 namespace motion {
@@ -60,8 +62,10 @@ namespace motion {
                     scriptList.push_back(script->second);
                 }
             }
-            emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(
-                command.sourceId, scriptList, command.duration_modifier, command.start));
+            emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(command.sourceId,
+                                                                scriptList,
+                                                                command.duration_modifier,
+                                                                command.start));
         });
 
         on<Trigger<ExecuteScript>>().then([this](const ExecuteScript& command) {

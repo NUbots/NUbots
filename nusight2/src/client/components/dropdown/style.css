@@ -1,0 +1,24 @@
+.dropdown {
+  position: relative;
+}
+
+.dropdownMenu {
+  position: absolute;
+  z-index: 1;
+}
+
+.dropdownMenuFullwidth {
+  width: 100%;
+}
+
+.dropdownMenuRight {
+  right: 0;
+}
+
+.dropdownMenuUp {
+  bottom: 100%;
+}
+
+.dropdownMenuDown {
+  top: 100%;
+}

@@ -1,13 +1,16 @@
-#include "RobotParticleLocalisation.h"
+#include "RobotParticleLocalisation.hpp"
 
-#include "extension/Configuration.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Field.h"
-#include "message/localisation/ResetRobotHypotheses.h"
-#include "message/vision/Goal.h"
-#include "utility/localisation/transform.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_expression.h"
+#include "extension/Configuration.hpp"
+
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/vision/Goal.hpp"
+
+#include "utility/localisation/transform.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_armadillo.hpp"
 
 namespace module {
 namespace localisation {
@@ -31,7 +34,8 @@ namespace localisation {
         last_time_update_time        = NUClear::clock::now();
 
         on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
-            "Time Update", [this]() {
+            "Time Update",
+            [this]() {
                 /* Perform time update */
                 using namespace std::chrono;
                 auto curr_time        = NUClear::clock::now();
@@ -57,7 +61,8 @@ namespace localisation {
             });
 
         on<Trigger<VisionGoals>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
-            "Measurement Update", [this](const VisionGoals& goals, const FieldDescription& fd) {
+            "Measurement Update",
+            [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.goals.empty()) {
                     /* Perform time update */
                     using namespace std::chrono;

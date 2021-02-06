@@ -15,12 +15,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "FileWatcher.h"
+#include "FileWatcher.hpp"
 
 #include <fmt/format.h>
 
-#include "extension/FileWatch.h"
-#include "utility/file/fileutil.h"
+#include "extension/FileWatch.hpp"
+
+#include "utility/file/fileutil.hpp"
 
 namespace module {
 namespace extension {
@@ -119,8 +120,10 @@ namespace extension {
             for (auto it = reactor.add_queue.begin(); it != reactor.add_queue.end();) {
                 auto& map = *it;
                 uv_fs_event_init(async_handle->loop, map->handle.get());
-                uv_fs_event_start(
-                    map->handle.get(), &FileWatcher::file_watch_callback, map->path.c_str(), UV_RENAME | UV_CHANGE);
+                uv_fs_event_start(map->handle.get(),
+                                  &FileWatcher::file_watch_callback,
+                                  map->path.c_str(),
+                                  UV_RENAME | UV_CHANGE);
                 it = reactor.add_queue.erase(it);
             }
         });
@@ -198,8 +201,9 @@ namespace extension {
 
             // If this happens then the config file does not exist
             if (!realPath) {
-                throw std::system_error(
-                    errno, std::system_category(), fmt::format("Cannot get real path to {}", req.path));
+                throw std::system_error(errno,
+                                        std::system_category(),
+                                        fmt::format("Cannot get real path to {}", req.path));
             }
 
             std::string path = realPath.get();

@@ -16,17 +16,19 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "KickScript.h"
+#include "KickScript.hpp"
 
 #include <nuclear>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/WalkCommand.h"
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
+
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace behaviour {
@@ -98,11 +100,13 @@ namespace behaviour {
 
                 if (leg == LimbID::RIGHT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
                 }
                 else {  // if (leg == LimbID::LEFT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
                 }
 
                 // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
@@ -144,7 +148,8 @@ namespace behaviour {
                 RegisterAction{id,
                                "Kick Script",
                                {std::pair<float, std::set<LimbID>>(
-                                   0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                                   0,
+                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
                                [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
                                [this](const std::set<LimbID>&) { emit(std::make_unique<FinishKick>()); },
                                [this](const std::set<ServoID>&) { emit(std::make_unique<FinishKick>()); }}));
@@ -159,10 +164,10 @@ namespace behaviour {
             // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph of
             // the 4 quadrants
             // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
-            return x >= std::abs(y) ? 0                                          // forward
-                                    : y >= std::abs(x) ? 1                       // left
-                                                       : x <= -std::abs(y) ? 2   // backward
-                                                                           : 3;  // right
+            return x >= std::abs(y)    ? 0   // forward
+                   : y >= std::abs(x)  ? 1   // left
+                   : x <= -std::abs(y) ? 2   // backward
+                                       : 3;  // right
         }
     }  // namespace skills
 }  // namespace behaviour

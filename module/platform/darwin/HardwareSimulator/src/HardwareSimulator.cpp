@@ -17,23 +17,25 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "HardwareSimulator.h"
+#include "HardwareSimulator.hpp"
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <limits>
 #include <mutex>
 
-#include "extension/Configuration.h"
-#include "message/input/Sensors.h"
-#include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/platform/darwin/DarwinSensors.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "extension/Configuration.hpp"
+
+#include "message/input/Sensors.hpp"
+#include "message/motion/ServoTarget.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
+
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_armadillo.hpp"
 
 namespace module {
 namespace platform {
@@ -175,8 +177,8 @@ namespace platform {
             on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
                 [this](std::shared_ptr<const Sensors> previousSensors) {
                     if (previousSensors) {
-                        Eigen::Affine3d Hf_rt(previousSensors->forward_kinematics[ServoID::R_ANKLE_ROLL]);
-                        Eigen::Affine3d Hf_lt(previousSensors->forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                        Eigen::Affine3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
                         Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                         Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
@@ -204,8 +206,9 @@ namespace platform {
                             servo.presentPosition = servo.goalPosition;
                         }
                         else {
-                            Eigen::Vector3d present(
-                                std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
+                            Eigen::Vector3d present(std::cos(servo.presentPosition),
+                                                    std::sin(servo.presentPosition),
+                                                    0.0);
                             Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
 
                             Eigen::Vector3d cross = present.cross(goal);
@@ -235,11 +238,15 @@ namespace platform {
                             gyroQueue.pop();
                         }
                     }
-                    sumGyro               = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
-                    sumGyro.x()           = -sumGyro.x();
-                    sensors.gyroscope     = sumGyro;
-                    sensors.accelerometer = Eigen::Vector3d(-9.8 * std::sin(bodyTilt), 0.0, -9.8 * std::cos(bodyTilt));
-                    sensors.timestamp     = NUClear::clock::now();
+                    sumGyro                 = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
+                    sumGyro.x()             = -sumGyro.x();
+                    sensors.gyroscope.x     = sumGyro.x();
+                    sensors.gyroscope.y     = sumGyro.y();
+                    sensors.gyroscope.z     = sumGyro.z();
+                    sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
+                    sensors.accelerometer.y = 0.0;
+                    sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
+                    sensors.timestamp       = NUClear::clock::now();
 
                     // Add some noise so that sensor fusion doesnt converge to a singularity
                     auto sensors_message = std::make_unique<DarwinSensors>(sensors);

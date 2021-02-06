@@ -17,18 +17,21 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SensorFilter.h"
+#include "SensorFilter.hpp"
 
-#include "extension/Configuration.h"
-#include "message/input/Sensors.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/matrix/matrix.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/platform/darwin/DarwinSensors.h"
-#include "utility/support/yaml_expression.h"
+#include "extension/Configuration.hpp"
+
+#include "message/input/Sensors.hpp"
+#include "message/motion/BodySide.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
+
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/matrix/matrix.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace platform {
@@ -47,7 +50,6 @@ namespace platform {
 
         using utility::input::LimbID;
         using utility::input::ServoID;
-        using utility::input::ServoSide;
         using utility::motion::kinematics::calculateAllPositions;
         using utility::motion::kinematics::calculateCentreOfMass;
         using utility::motion::kinematics::calculateInertialTensor;
@@ -314,7 +316,6 @@ namespace platform {
                         if (previousSensors && error != DarwinSensors::Error::OK) {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({error,
-                                                      i,
                                                       original.torqueEnabled,
                                                       original.pGain,
                                                       original.iGain,
@@ -331,7 +332,6 @@ namespace platform {
                         else {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({error,
-                                                      i,
                                                       original.torqueEnabled,
                                                       original.pGain,
                                                       original.iGain,
@@ -377,24 +377,6 @@ namespace platform {
                         sensors->gyroscope = Eigen::Vector3d(input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z);
                     }
 
-                    // Put in our FSR information
-                    sensors->fsr.emplace_back();
-                    sensors->fsr.emplace_back();
-
-                    sensors->fsr[LimbID::LEFT_LEG - 1].centre << input.fsr.left.centreX, input.fsr.left.centreY;
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.reserve(4);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr1);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr2);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr3);
-                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr4);
-
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].centre << input.fsr.right.centreX, input.fsr.right.centreY;
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.reserve(4);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr1);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr2);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr3);
-                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr4);
-
                     /************************************************
                      *               Buttons and LEDs               *
                      ************************************************/
@@ -412,16 +394,17 @@ namespace platform {
                      *                  Kinematics                  *
                      ************************************************/
 
-                    auto forward_kinematics = calculateAllPositions(kinematicsModel, *sensors);
-                    for (const auto& entry : forward_kinematics) {
-                        sensors->forward_kinematics[entry.first] = entry.second.matrix();
+                    auto Htx = calculateAllPositions(kinematicsModel, *sensors);
+                    for (const auto& entry : Htx) {
+                        sensors->Htx[entry.first] = entry.second.matrix();
                     }
 
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    sensors->right_foot_down = true;
-                    sensors->left_foot_down  = true;
+                    sensors->feet.resize(2);
+                    sensors->feet[BodySide::RIGHT].down = true;
+                    sensors->feet[BodySide::LEFT].down  = true;
 
                     std::array<bool, 2> feet_down = {true};
                     if (config.footDown.fromLoad) {
@@ -429,35 +412,40 @@ namespace platform {
                         feet_down = load_sensor.updateFeet(*sensors);
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/Foot Down/Load/Left", load_sensor.state[1]));
-                            emit(graph("Sensor/Foot Down/Load/Right", load_sensor.state[0]));
+                            emit(graph("Sensor/Foot Down/Load/Left", feet_down[BodySide::LEFT]));
+                            emit(graph("Sensor/Foot Down/Load/Right", feet_down[BodySide::RIGHT]));
                         }
                     }
                     else {
-                        auto rightFootDisplacement = sensors->forward_kinematics[ServoID::R_ANKLE_ROLL].inverse()(2, 3);
-                        auto leftFootDisplacement  = sensors->forward_kinematics[ServoID::L_ANKLE_ROLL].inverse()(2, 3);
+                        Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
+                        Eigen::Vector3d rRLl = Hlr.translation();
 
-                        if (rightFootDisplacement < leftFootDisplacement - config.footDown.certaintyThreshold) {
-                            feet_down[0] = true;
-                            feet_down[1] = false;
+                        // Right foot is below left foot in left foot space
+                        if (rRLl.z() < -config.footDown.certaintyThreshold) {
+                            feet_down[BodySide::RIGHT] = true;
+                            feet_down[BodySide::LEFT]  = false;
                         }
-                        else if (leftFootDisplacement < rightFootDisplacement - config.footDown.certaintyThreshold) {
-                            feet_down[0] = false;
-                            feet_down[1] = true;
+                        // Right foot is above left foot in left foot space
+                        else if (rRLl.z() > config.footDown.certaintyThreshold) {
+                            feet_down[BodySide::RIGHT] = false;
+                            feet_down[BodySide::LEFT]  = true;
                         }
+                        // Right foot and left foot are roughly the same height in left foot space
                         else {
-                            feet_down[0] = true;
-                            feet_down[1] = true;
+                            feet_down[BodySide::RIGHT] = true;
+                            feet_down[BodySide::LEFT]  = true;
                         }
 
                         if (this->config.debug) {
-                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[1]));
-                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[0]));
+                            emit(graph("Sensor/Foot Down/Z/Left", feet_down[BodySide::LEFT]));
+                            emit(graph("Sensor/Foot Down/Z/Right", feet_down[BodySide::RIGHT]));
                         }
                     }
 
-                    sensors->right_foot_down = feet_down[0];
-                    sensors->left_foot_down  = feet_down[1];
+                    sensors->feet[BodySide::RIGHT].down = feet_down[BodySide::RIGHT];
+                    sensors->feet[BodySide::LEFT].down  = feet_down[BodySide::LEFT];
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -477,12 +465,11 @@ namespace platform {
                     // Accelerometer measurement update
                     motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
-                    for (auto& side : {ServoSide::LEFT, ServoSide::RIGHT}) {
-                        bool foot_down = side == ServoSide::LEFT ? sensors->left_foot_down : sensors->right_foot_down;
+                    for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                        bool foot_down      = sensors->feet[side].down;
                         bool prev_foot_down = previous_foot_down[side];
                         Eigen::Affine3d Htf(
-                            sensors->forward_kinematics[side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL
-                                                                                : ServoID::R_ANKLE_ROLL]);
+                            sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                         if (foot_down && !prev_foot_down) {
                             Eigen::Affine3d Hwt;
@@ -515,6 +502,8 @@ namespace platform {
                         else if (!foot_down) {
                             previous_foot_down[side] = false;
                         }
+
+                        sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
                     }
 
                     // Calculate our time offset from the last read
@@ -547,20 +536,15 @@ namespace platform {
                             sensors->angular_position.z());
                     }
 
-                    sensors->robot_to_IMU = calculateRobotToIMU(Eigen::Affine3d(sensors->Htw));
-
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centre_of_mass =
-                        calculateCentreOfMass(kinematicsModel, sensors->forward_kinematics, sensors->Htw.inverse());
-                    sensors->inertial_tensor = calculateInertialTensor(kinematicsModel, sensors->forward_kinematics);
+                    sensors->rMTt = calculateCentreOfMass(kinematicsModel, sensors->Htx, sensors->Htw.inverse());
+                    sensors->inertia_tensor = calculateInertialTensor(kinematicsModel, sensors->Htx);
 
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-                    sensors->body_centre_height = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX)).z();
-
                     Eigen::Affine3d Rwt(sensors->Htw.inverse());
                     // remove translation components from the transform
                     Rwt.translation() = Eigen::Vector3d::Zero();
@@ -570,7 +554,7 @@ namespace platform {
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
                     sensors->Hgt = Rgt.matrix();
-                    auto Htc     = sensors->forward_kinematics[ServoID::HEAD_PITCH];
+                    auto Htc     = sensors->Htx[ServoID::HEAD_PITCH];
 
                     // Get torso to world transform
                     Eigen::Affine3d yawlessWorldInvR(
@@ -580,12 +564,6 @@ namespace platform {
                     Hgt.translation() = Eigen::Vector3d(0, 0, Hwt.translation().z());
                     Hgt.linear()      = yawlessWorldInvR.linear();
                     sensors->Hgc      = Hgt * Htc;  // Rwt * Rth
-
-                    /************************************************
-                     *                  CENTRE OF PRESSURE          *
-                     ************************************************/
-                    sensors->centre_of_pressure =
-                        utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors);
 
                     emit(std::move(sensors));
                 });

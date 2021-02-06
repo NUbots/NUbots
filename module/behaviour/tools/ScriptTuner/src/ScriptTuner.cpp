@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ScriptTuner.h"
+#include "ScriptTuner.hpp"
 
 extern "C" {
 #include <ncurses.h>
@@ -27,14 +27,15 @@ extern "C" {
 #include <cstdio>
 #include <sstream>
 
-#include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "utility/behaviour/Action.h"
-#include "utility/file/fileutil.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
-#include "utility/platform/darwin/DarwinSensors.h"
+#include "message/motion/ServoTarget.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
+
+#include "utility/behaviour/Action.hpp"
+#include "utility/file/fileutil.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
 
 namespace module {
 namespace behaviour {
@@ -113,7 +114,8 @@ namespace behaviour {
                 id,
                 "Script Tuner",
                 {std::pair<float, std::set<LimbID>>(
-                    1, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    1,
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
                 [this](const std::set<LimbID>&) {},
                 [this](const std::set<LimbID>&) {},
                 [this](const std::set<ServoID>&) {}}));
@@ -358,8 +360,9 @@ namespace behaviour {
             };
 
             // See if we have this target in our frame
-            auto it = std::find_if(
-                std::begin(script.frames[frame].targets), std::end(script.frames[frame].targets), targetFinder);
+            auto it = std::find_if(std::begin(script.frames[frame].targets),
+                                   std::end(script.frames[frame].targets),
+                                   targetFinder);
 
             // If we don't then save our current motor position as the position
             if (it == std::end(script.frames[frame].targets)) {
@@ -476,8 +479,9 @@ namespace behaviour {
                     };
 
                     // See if we have this target in our frame
-                    auto it = std::find_if(
-                        std::begin(script.frames[frame].targets), std::end(script.frames[frame].targets), targetFinder);
+                    auto it = std::find_if(std::begin(script.frames[frame].targets),
+                                           std::end(script.frames[frame].targets),
+                                           targetFinder);
 
                     // If we don't have this frame
                     if (it == std::end(script.frames[frame].targets)) {
@@ -525,8 +529,8 @@ namespace behaviour {
             if (tempcommand.compare("help") == 0) {
                 curs_set(false);
 
-                const char* ALL_COMMANDS[] = {
-                    ",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
+                const char* ALL_COMMANDS[] =
+                    {",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
 
                 const char* ALL_MEANINGS[] = {"Left a frame",
                                               "Right a frame",

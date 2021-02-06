@@ -1,19 +1,21 @@
-#include "FootStep.h"
+#include "FootStep.hpp"
 
 #include <Eigen/Geometry>
 #include <vector>
 
-#include "extension/Configuration.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/FootTarget.h"
-#include "message/motion/KinematicsModel.h"
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
+#include "extension/Configuration.hpp"
+
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/FootTarget.hpp"
+#include "message/motion/KinematicsModel.hpp"
+
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace motion {
@@ -65,16 +67,16 @@ namespace motion {
                     // Right foot is the swing foot
                     if (target.isRightFootSwing) {
                         // Transform of left foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         // Transform of right foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
                     }
                     // Left foot is the swing foot
                     else {
                         // Transform of right foot to torso
-                        Htf_s = Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                        Htf_s = Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
                         // Transform of left foot to torso
-                        Htf_w = Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                        Htf_w = Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
                     }
                     Eigen::Affine3d Haf_s;
                     Haf_s = target.Haf_s;

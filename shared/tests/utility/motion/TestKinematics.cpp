@@ -21,12 +21,14 @@
 #include <Eigen/Geometry>
 #include <catch.hpp>
 
-#include "message/input/Sensors.h"
-#include "message/motion/KinematicsModel.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/InverseKinematics.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/BodySide.hpp"
+#include "message/motion/KinematicsModel.hpp"
+
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/motion/InverseKinematics.hpp"
 
 using message::input::Sensors;
 using message::motion::BodySide;
@@ -72,8 +74,9 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
         }
 
         // Do our forward kinematics
-        Eigen::Affine3d Htc = utility::motion::kinematics::calculatePosition(
-            kinematics_model, sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+        Eigen::Affine3d Htc = utility::motion::kinematics::calculatePosition(kinematics_model,
+                                                                             sensors,
+                                                                             ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
         REQUIRE(double(Htc(0, 0) - camera_vector[0]) == Approx(0.0).margin(ERROR_THRESHOLD));
@@ -122,10 +125,14 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         }
 
         INFO("Calculating forward kinematics");
-        Eigen::Affine3d left_foot_position = utility::motion::kinematics::calculatePosition(
-            kinematics_model, sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
-        Eigen::Affine3d right_foot_position = utility::motion::kinematics::calculatePosition(
-            kinematics_model, sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+        Eigen::Affine3d left_foot_position =
+            utility::motion::kinematics::calculatePosition(kinematics_model,
+                                                           sensors,
+                                                           ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+        Eigen::Affine3d right_foot_position =
+            utility::motion::kinematics::calculatePosition(kinematics_model,
+                                                           sensors,
+                                                           ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
         INFO("Forward Kinematics predicts left foot: \n" << left_foot_position.matrix());
         INFO("Forward Kinematics predicts right foot: \n" << right_foot_position.matrix());
         INFO("Compared to request: \n" << ik_request.matrix());

@@ -17,12 +17,13 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "NatNet.h"
+#include "NatNet.hpp"
 
 #include <fmt/format.h>
 
-#include "Parse.h"
-#include "extension/Configuration.h"
+#include "Parse.hpp"
+
+#include "extension/Configuration.hpp"
 
 namespace module {
 namespace input {
@@ -112,8 +113,12 @@ namespace input {
             address.sin_addr.s_addr = htonl(remote);
 
             // Send to our remote server
-            ::sendto(
-                commandFd, packet.data(), packet.size(), 0, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr));
+            ::sendto(commandFd,
+                     packet.data(),
+                     packet.size(),
+                     0,
+                     reinterpret_cast<sockaddr*>(&address),
+                     sizeof(sockaddr));
         }
         else {
             log<NUClear::WARN>("NatNet is not yet connected to a remote server");
@@ -214,16 +219,16 @@ namespace input {
                 rigidBody.name   = model->second.name;
                 rigidBody.offset = model->second.offset;
 
-                auto parent = std::find_if(
-                    mocap->rigidBodies.begin(), mocap->rigidBodies.end(), [model](const MotionCapture::RigidBody& rb) {
-                        return rb.id == model->second.id;
-                    });
+                auto parent =
+                    std::find_if(mocap->rigidBodies.begin(),
+                                 mocap->rigidBodies.end(),
+                                 [model](const MotionCapture::RigidBody& rb) { return rb.id == model->second.id; });
 
                 // Get a pointer to our parent if it exists and is not us
-                rigidBody.parent =
-                    parent->id == rigidBody.id
-                        ? 0
-                        : parent == mocap->rigidBodies.end() ? -1 : std::distance(mocap->rigidBodies.begin(), parent);
+                rigidBody.parent = parent->id == rigidBody.id ? 0
+                                   : parent == mocap->rigidBodies.end()
+                                       ? -1
+                                       : std::distance(mocap->rigidBodies.begin(), parent);
             }
             // We need to update our models
             else {
@@ -266,10 +271,9 @@ namespace input {
                             skeleton.bones.end(),
                             [boneModel](const MotionCapture::RigidBody& rb) { return rb.id == boneModel->second.id; });
 
-                        bone.parent =
-                            parent->id == bone.id
-                                ? 0
-                                : parent == skeleton.bones.end() ? -1 : std::distance(skeleton.bones.begin(), parent);
+                        bone.parent = parent->id == bone.id            ? 0
+                                      : parent == skeleton.bones.end() ? -1
+                                                                       : std::distance(skeleton.bones.begin(), parent);
                     }
                     // We need to update our models
                     else {

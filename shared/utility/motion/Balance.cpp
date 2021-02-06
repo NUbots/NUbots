@@ -16,10 +16,11 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "Balance.h"
+#include "Balance.hpp"
 
-#include "message/motion/KinematicsModel.h"
-#include "utility/support/eigen_armadillo.h"
+#include "message/motion/KinematicsModel.hpp"
+
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace utility {
 namespace motion {
@@ -135,7 +136,7 @@ namespace motion {
             std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastBalanceTime).count() * 1e-9;
         double newdPitch = timeSinceLastMeasurement != 0 ? (pitch - lastPitch) / timeSinceLastMeasurement
                                                          : 0;  // note that this is not a great computation of the diff
-        double newdRoll = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
+        double newdRoll  = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
 
         // Exponential filter for velocity
         dPitch = newdPitch * 0.1 + dPitch * 0.9;
@@ -153,11 +154,10 @@ namespace motion {
         // sensors.bodyCentreHeight * dPitch));
 
         // Compute torso position adjustment
-        arma::vec3 torsoAdjustment_world = arma::vec3({-translationPGainX * sensors.body_centre_height * pitch
-                                                           - translationDGainX * sensors.body_centre_height * dPitch,
-                                                       translationPGainY * sensors.body_centre_height * roll
-                                                           + translationDGainY * sensors.body_centre_height * dRoll,
-                                                       -translationPGainZ * total - translationDGainY * dTotal});
+        arma::vec3 torsoAdjustment_world =
+            arma::vec3({-translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
+                        translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
+                        -translationPGainZ * total - translationDGainY * dTotal});
 
         // //Rotate from world space to torso space
         // Rotation3D yawLessOrientation =

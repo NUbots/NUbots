@@ -1,16 +1,19 @@
-#include "VisualMesh.h"
+#include "VisualMesh.hpp"
 
 #include <Eigen/Geometry>
 
-#include "extension/Configuration.h"
 #include "geometry/Circle.hpp"
 #include "geometry/Cylinder.hpp"
 #include "geometry/Sphere.hpp"
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/VisualMesh.h"
-#include "utility/nusight/NUhelpers.h"
+
+#include "extension/Configuration.hpp"
+
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/VisualMesh.hpp"
+
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/Timer.hpp"
 
 namespace module {
@@ -149,10 +152,14 @@ namespace vision {
             }
 
             msg->coordinates = Eigen::Map<const Eigen::Matrix<float, 2, Eigen::Dynamic>>(
-                reinterpret_cast<float*>(results.pixel_coordinates.data()), 2, results.pixel_coordinates.size());
+                reinterpret_cast<float*>(results.pixel_coordinates.data()),
+                2,
+                results.pixel_coordinates.size());
             msg->indices       = std::move(results.global_indices);
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, 6, Eigen::Dynamic>>(
-                reinterpret_cast<int*>(results.neighbourhood.data()), 6, results.neighbourhood.size());
+                reinterpret_cast<int*>(results.neighbourhood.data()),
+                6,
+                results.neighbourhood.size());
             msg->classifications = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>>(
                 results.classifications.data(),
                 results.classifications.size() / results.neighbourhood.size(),

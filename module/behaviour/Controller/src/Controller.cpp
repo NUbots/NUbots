@@ -17,9 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Controller.h"
+#include "Controller.hpp"
 
-#include "message/motion/ServoTarget.h"
+#include "message/motion/ServoTarget.hpp"
 
 namespace module {
 namespace behaviour {
@@ -41,7 +41,8 @@ namespace behaviour {
         : Reactor(std::move(environment)), actions(), limbAccess(), requests(), currentActions(), commandQueues() {
 
         on<Trigger<RegisterAction>, Sync<Controller>, Priority::HIGH>().then(
-            "Action Registration", [this](const RegisterAction& action) {
+            "Action Registration",
+            [this](const RegisterAction& action) {
                 if (action.id == 0) {
                     throw std::runtime_error("Action ID 0 is reserved for internal use");
                 }
@@ -87,7 +88,8 @@ namespace behaviour {
         });
 
         on<Trigger<ActionPriorites>, Sync<Controller>, Priority::HIGH>().then(
-            "Action Priority Update", [this](const ActionPriorites& update) {
+            "Action Priority Update",
+            [this](const ActionPriorites& update) {
                 auto& request = requests[update.id];
 
                 // Find the largest priority
@@ -135,7 +137,8 @@ namespace behaviour {
         });
 
         on<Trigger<std::vector<ServoCommand>>, Sync<Controller>>().then(
-            "Command Filter", [this](const std::vector<ServoCommand>& commands) {
+            "Command Filter",
+            [this](const std::vector<ServoCommand>& commands) {
                 for (auto& command : commands) {
 
                     // Check if we have access
@@ -165,15 +168,18 @@ namespace behaviour {
                         }
                         else {
                             auto& name = requests.find(command.source)->second->name;
-                            log<NUClear::WARN>(
-                                "Motor command (from ", name, ") denied access: SERVO ", int(command.id));
+                            log<NUClear::WARN>("Motor command (from ",
+                                               name,
+                                               ") denied access: SERVO ",
+                                               int(command.id));
                         }
                     }
                 }
             });
 
         on<Every<90, Per<std::chrono::seconds>>, Single, Sync<Controller>, Priority::HIGH>().then(
-            "Controller Update Waypoints", [this] {
+            "Controller Update Waypoints",
+            [this] {
                 auto now = NUClear::clock::now();
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;

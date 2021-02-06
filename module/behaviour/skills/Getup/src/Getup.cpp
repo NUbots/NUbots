@@ -17,17 +17,19 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Getup.h"
+#include "Getup.hpp"
 
 #include <cmath>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/GetupCommand.h"
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
+
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/GetupCommand.hpp"
+
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
 
 namespace module {
 namespace behaviour {
@@ -79,11 +81,13 @@ namespace behaviour {
                 // Check with side we're getting up from
                 if (sensors.Htw(0, 2) < 0.0) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
                 }
                 else {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id, std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
+                        id,
+                        std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
                 }
                 updatePriority(EXECUTION_PRIORITY);
             });
@@ -98,7 +102,8 @@ namespace behaviour {
                 id,
                 "Get Up",
                 {std::pair<float, std::set<LimbID>>(
-                    0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    0,
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
                 [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
                 [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
                 [this](const std::set<ServoID>& servoSet) {

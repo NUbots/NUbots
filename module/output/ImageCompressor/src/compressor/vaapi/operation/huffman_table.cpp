@@ -1,9 +1,9 @@
-#include "huffman_table.h"
+#include "huffman_table.hpp"
 
 #include <cstring>
 
 #include "../vaapi_error_category.hpp"
-#include "jpeg_constants.h"
+#include "jpeg_constants.hpp"
 
 namespace module::output::compressor::vaapi::operation {
 
@@ -39,8 +39,13 @@ VABufferID huffman_table(VADisplay dpy, VAContextID context, const bool& monochr
     }
 
     VABufferID bufferid;
-    VAStatus va_status = vaCreateBuffer(
-        dpy, context, VAHuffmanTableBufferType, sizeof(VAHuffmanTableBufferJPEGBaseline), 1, &params, &bufferid);
+    VAStatus va_status = vaCreateBuffer(dpy,
+                                        context,
+                                        VAHuffmanTableBufferType,
+                                        sizeof(VAHuffmanTableBufferJPEGBaseline),
+                                        1,
+                                        &params,
+                                        &bufferid);
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error creating huffman table buffer");
     }

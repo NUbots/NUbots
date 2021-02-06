@@ -17,10 +17,10 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "VirtualBall.h"
+#include "VirtualBall.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/math/coordinates.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/coordinates.hpp"
 
 namespace module {
 namespace support {
@@ -40,7 +40,7 @@ namespace support {
         Balls result;
         result.balls.reserve(1);
 
-        Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+        Eigen::Affine3d Htc(sensors.Htx[utility::input::ServoID::HEAD_PITCH]);
         result.Hcw       = Htc.inverse() * sensors.Htw;
         result.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
 
@@ -74,8 +74,8 @@ namespace support {
             && centre.y() < int(image.dimensions.y())) {
 
             // Set our circle parameters for simulating the ball
-            result.balls.at(0).cone.axis     = rBCc.normalized().cast<float>();
-            result.balls.at(0).cone.gradient = std::tan(angle * 0.5);
+            result.balls.at(0).cone.axis   = rBCc.normalized().cast<float>();
+            result.balls.at(0).cone.radius = std::cos(angle * 0.5);
 
             // Get our transform to world coordinates
             Eigen::Affine3d Hwc((Htc.inverse() * sensors.Htw).inverse());

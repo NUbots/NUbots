@@ -17,16 +17,16 @@
 
 // Uncomment this line when other test files are added
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <fmt/format.h>
-
 #include <catch.hpp>
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <nuclear>
 
-#include "FileWatcher.h"
-#include "extension/FileWatch.h"
+#include "FileWatcher.hpp"
+
+#include "extension/FileWatch.hpp"
 
 namespace {
 
@@ -99,11 +99,12 @@ private:
 };
 
 bool eventTriggered(std::string fileName, extension::FileWatch::Event event) {
-    auto iterator = std::find_if(
-        fileWatchEvents.begin(), fileWatchEvents.end(), [fileName, event](extension::FileWatch const& fileWatch) {
-            std::filesystem::path filePath = fileWatch.path;
-            return filePath.filename() == fileName && fileWatch.events == event;
-        });
+    auto iterator = std::find_if(fileWatchEvents.begin(),
+                                 fileWatchEvents.end(),
+                                 [fileName, event](extension::FileWatch const& fileWatch) {
+                                     std::filesystem::path filePath = fileWatch.path;
+                                     return filePath.filename() == fileName && fileWatch.events == event;
+                                 });
 
     return iterator != fileWatchEvents.end();
 }
