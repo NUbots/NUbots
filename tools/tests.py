@@ -88,7 +88,6 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
 
         # Windows friendly (container time, not host)
         filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"
-        # logPath = os.path.join(tests_dir, filename)
 
         # Default ctest args
         ctest_args = [
