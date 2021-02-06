@@ -88,7 +88,7 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
 
         # Windows friendly (container time, not host)
         filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"
-        logPath = os.path.join(tests_dir, filename)
+        # logPath = os.path.join(tests_dir, filename)
 
         # Default ctest args
         ctest_args = [
@@ -102,13 +102,26 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
 
         # If a test was given to run
         if test:
+            filename = test + "-" + filename
+            logPath = os.path.join(tests_dir, filename)
             exit(
                 subprocess.run(
-                    ["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), "-R", test, *ctest_args]
+                    [
+                        "/usr/bin/ctest",
+                        "--output-log",
+                        logPath,
+                        "--parallel",
+                        str(num_jobs),
+                        "-R",
+                        test,
+                        *ctest_args,
+                    ]
                 ).returncode
             )
 
         # If no test was given to run, run all
+        filename = "all-" + filename
+        logPath = os.path.join(tests_dir, filename)
         exit(
             subprocess.run(
                 ["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), *ctest_args]
