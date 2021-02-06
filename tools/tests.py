@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
-import os
-import time
-import subprocess
 import multiprocessing
+import os
+import subprocess
+import time
 
 import b
-from dockerise import WrapPty, run_on_docker
-
+from dockerise import run_on_docker
 
 # Directory to create in project root for storing output of tests
 TESTS_OUTPUT_DIR = "tests_output"
@@ -72,7 +71,7 @@ def register(command):
 
 
 @run_on_docker
-def run(sub_command, num_jobs=0, test="", given_ctest_args=[], **kwargs):
+def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
@@ -117,7 +116,7 @@ def run(sub_command, num_jobs=0, test="", given_ctest_args=[], **kwargs):
         )
 
     else:
-        # Probably a better way to call help when no arguments are given?
+        # Probably a better way to call help when no sub commands are given?
         os.chdir(b.project_dir)
         tool_name = os.path.basename(__file__)[:-3]
         exit(subprocess.run(["./b", tool_name, "--help"]).returncode)
