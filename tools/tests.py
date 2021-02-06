@@ -105,16 +105,7 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
             logPath = os.path.join(tests_dir, filename)
             exit(
                 subprocess.run(
-                    [
-                        "/usr/bin/ctest",
-                        "--output-log",
-                        logPath,
-                        "--parallel",
-                        str(num_jobs),
-                        "-R",
-                        test,
-                        *ctest_args,
-                    ]
+                    ["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), "-R", test, *ctest_args,]
                 ).returncode
             )
 
