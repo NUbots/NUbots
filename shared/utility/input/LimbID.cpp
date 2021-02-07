@@ -16,7 +16,7 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "LimbID.h"
+#include "LimbID.hpp"
 
 #include <stdexcept>
 

@@ -17,13 +17,13 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "NatNet.h"
+#include "NatNet.hpp"
 
 #include <fmt/format.h>
 
-#include "Parse.h"
+#include "Parse.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 namespace module {
 namespace input {
@@ -225,10 +225,10 @@ namespace input {
                                  [model](const MotionCapture::RigidBody& rb) { return rb.id == model->second.id; });
 
                 // Get a pointer to our parent if it exists and is not us
-                rigidBody.parent =
-                    parent->id == rigidBody.id
-                        ? 0
-                        : parent == mocap->rigidBodies.end() ? -1 : std::distance(mocap->rigidBodies.begin(), parent);
+                rigidBody.parent = parent->id == rigidBody.id ? 0
+                                   : parent == mocap->rigidBodies.end()
+                                       ? -1
+                                       : std::distance(mocap->rigidBodies.begin(), parent);
             }
             // We need to update our models
             else {
@@ -271,10 +271,9 @@ namespace input {
                             skeleton.bones.end(),
                             [boneModel](const MotionCapture::RigidBody& rb) { return rb.id == boneModel->second.id; });
 
-                        bone.parent =
-                            parent->id == bone.id
-                                ? 0
-                                : parent == skeleton.bones.end() ? -1 : std::distance(skeleton.bones.begin(), parent);
+                        bone.parent = parent->id == bone.id            ? 0
+                                      : parent == skeleton.bones.end() ? -1
+                                                                       : std::distance(skeleton.bones.begin(), parent);
                     }
                     // We need to update our models
                     else {

@@ -16,11 +16,11 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#include "Balance.h"
+#include "Balance.hpp"
 
-#include "message/motion/KinematicsModel.h"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace utility {
 namespace motion {
@@ -136,7 +136,7 @@ namespace motion {
             std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastBalanceTime).count() * 1e-9;
         double newdPitch = timeSinceLastMeasurement != 0 ? (pitch - lastPitch) / timeSinceLastMeasurement
                                                          : 0;  // note that this is not a great computation of the diff
-        double newdRoll = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
+        double newdRoll  = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
 
         // Exponential filter for velocity
         dPitch = newdPitch * 0.1 + dPitch * 0.9;

@@ -1,9 +1,9 @@
-#include "huffman_table.h"
+#include "huffman_table.hpp"
 
 #include <cstring>
 
 #include "../vaapi_error_category.hpp"
-#include "jpeg_constants.h"
+#include "jpeg_constants.hpp"
 
 namespace module::output::compressor::vaapi::operation {
 
