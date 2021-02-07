@@ -14,7 +14,7 @@ class File:
         self.package = f.package
         self.name = f.name
         self.base_file = base_file
-        self.include_path = "{}.h".format(base_file)
+        self.include_path = "{}.hpp".format(base_file)
         self.fqn = ".{}".format(self.package)
         self.dependencies = [d for d in f.dependency]
         self.enums = [Enum(e, self) for e in f.enum_type]
@@ -22,7 +22,7 @@ class File:
 
     def generate_cpp(self):
 
-        define = "{}_H".format("_".join([s.upper() for s in self.name[:-6].strip().split("/")]))
+        define = "{}_HPP".format("_".join([s.upper() for s in self.name[:-6].strip().split("/")]))
         parts = self.package.split(".")
         ns_open = "\n".join(["namespace {} {{".format(x) for x in parts])
         ns_close = "\n".join("}" * len(parts))
@@ -50,7 +50,7 @@ class File:
             '2<memory>',
             '2<vector>',
             '4"{}"'.format(self.name[:-6] + '.pb.h'),
-            '5"message/MessageBase.h"'
+            '5"message/MessageBase.hpp"'
         }
         # yapf: enable
 
@@ -58,13 +58,13 @@ class File:
         # to make the includes be in a better order
         for d in self.dependencies:
             if d in ["Vector.proto", "Matrix.proto"]:
-                includes.add('4"message/conversion/proto_matrix.h"')
+                includes.add('4"message/conversion/proto_matrix.hpp"')
             elif d in ["Neutron.proto"]:
                 pass  # We don't need to do anything for these ones
             elif d in ["google/protobuf/timestamp.proto", "google/protobuf/duration.proto"]:
-                includes.add('4"message/conversion/proto_time.h"')
+                includes.add('4"message/conversion/proto_time.hpp"')
             else:
-                includes.add('4"{}"'.format(d[:-6] + ".h"))
+                includes.add('4"{}"'.format(d[:-6] + ".hpp"))
 
         # Don't forget to remove the first character
         includes = "\n".join(["#include {}".format(i[1:]) for i in sorted(list(includes))])
@@ -136,10 +136,10 @@ class File:
                 close_namespace=ns_close,
             ),
             impl_template.format(
-                include='#include "{}"'.format(self.name[:-6] + ".h"), enums=enum_impls, messages=message_impls
+                include='#include "{}"'.format(self.name[:-6] + ".hpp"), enums=enum_impls, messages=message_impls
             ),
             python_template.format(
-                include='#include "{}"'.format(self.name[:-6] + ".h"),
+                include='#include "{}"'.format(self.name[:-6] + ".hpp"),
                 messages=indent(message_python),
                 enums=indent(enum_python),
                 filename=re.sub(r"[^A-Za-z0-9]", "_", self.name),

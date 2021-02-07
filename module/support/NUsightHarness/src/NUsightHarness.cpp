@@ -17,9 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsightHarness.h"
+#include "NUsightHarness.hpp"
 
-#include "utility/nusight/NUhelpers.h"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace support {

@@ -61,9 +61,9 @@ def run(path, **kwargs):
         output.write(generate_readme(parts))
         print("\t", os.path.join(src_path, "README.md"))
 
-    with open(os.path.join(src_path, "{}.h".format(module_name)), "w") as output:
+    with open(os.path.join(src_path, "{}.hpp".format(module_name)), "w") as output:
         output.write(generate_header(parts))
-        print("\t", os.path.join(src_path, "{}.h".format(module_name)))
+        print("\t", os.path.join(src_path, "{}.hpp".format(module_name)))
 
     with open(os.path.join(src_path, "{}.cpp".format(module_name)), "w") as output:
         output.write(generate_cpp(parts))
@@ -107,7 +107,7 @@ def generate_header(parts):
     )
 
     return template.format(
-        define="{}_H".format("_".join([p.upper() for p in parts])),
+        define="{}_HPP".format("_".join([p.upper() for p in parts])),
         className=parts[-1],
         openNamespace="\n".join(["namespace {} {{".format(x) for x in parts[:-1]]),
         closeNamespace="\n".join("}" * (len(parts) - 1)),
@@ -117,7 +117,7 @@ def generate_header(parts):
 def generate_cpp(parts):
     template = textwrap.dedent(
         """\
-        #include "{className}.h"
+        #include "{className}.hpp"
 
         {openNamespace}
 
