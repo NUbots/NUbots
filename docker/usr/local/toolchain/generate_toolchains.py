@@ -84,8 +84,8 @@ def generate_meson_cross_file(target):
     return template.format(
         flags=", ".join(
             [
-                '"{}"'.format(flag)
-                for flag in target["release_flags"] + [param.replace(" ", '", "') for param in target["flags"]]
+                "'{}'".format(flag)
+                for flag in target["release_flags"] + [param.replace(" ", "', '") for param in target["flags"]]
             ]
         )
     )

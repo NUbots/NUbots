@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+
+enum PointerType {
+    NONE   = 0;
+    RAW    = 1;
+    SHARED = 2;
+    UNIQUE = 3;
+}
+
+extend google.protobuf.FieldOptions {
+    PointerType pointer    = 50000;
+    uint32      array_size = 50001;
+}
