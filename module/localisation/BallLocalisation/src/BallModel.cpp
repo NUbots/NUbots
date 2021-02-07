@@ -18,14 +18,14 @@
  * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#include "BallModel.h"
+#include "BallModel.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/math/coordinates.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/matrix/Rotation3D.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace module {
 namespace localisation {

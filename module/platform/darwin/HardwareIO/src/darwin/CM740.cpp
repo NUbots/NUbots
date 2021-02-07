@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "CM740.h"
+#include "CM740.hpp"
 
 namespace Darwin {
 CM740::CM740(UART& coms, int id) : DarwinDevice(coms, id) {}

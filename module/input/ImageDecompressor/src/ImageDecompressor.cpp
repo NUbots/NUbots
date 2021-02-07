@@ -1,13 +1,13 @@
-#include "ImageDecompressor.h"
+#include "ImageDecompressor.hpp"
 
 #include <fmt/format.h>
 
-#include "decompressor/turbojpeg/Factory.h"
+#include "decompressor/turbojpeg/Factory.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Image.h"
-#include "message/output/CompressedImage.h"
+#include "message/input/Image.hpp"
+#include "message/output/CompressedImage.hpp"
 
 namespace module {
 namespace input {

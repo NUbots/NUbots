@@ -74,7 +74,7 @@ foreach(proto ${builtin})
     "${message_binary_include_dir}/${file_we}.pb.h"
     "${message_binary_include_dir}/${file_we}.cpp"
     "${message_binary_include_dir}/${file_we}.py.cpp"
-    "${message_binary_include_dir}/${file_we}.h"
+    "${message_binary_include_dir}/${file_we}.hpp"
     "${message_binary_include_dir}/${file_we}_pb2.py"
     PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
   )
@@ -185,7 +185,7 @@ foreach(proto ${protobufs})
     "${outputpath}/${file_we}.pb.h"
     "${outputpath}/${file_we}.cpp"
     "${outputpath}/${file_we}.py.cpp"
-    "${outputpath}/${file_we}.h"
+    "${outputpath}/${file_we}.hpp"
     "${outputpath}/${file_we}_pb2.py"
     PROPERTIES GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated
                               # files.
@@ -194,7 +194,7 @@ foreach(proto ${protobufs})
 
   # Add the generated files to our list
   set(src ${src} "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h" "${outputpath}/${file_we}.cpp"
-          "${outputpath}/${file_we}.h"
+          "${outputpath}/${file_we}.hpp"
   )
 
   # If we have pybind11 also add the python bindings

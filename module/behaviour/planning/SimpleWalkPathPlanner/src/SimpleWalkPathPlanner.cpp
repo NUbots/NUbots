@@ -17,32 +17,32 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SimpleWalkPathPlanner.h"
+#include "SimpleWalkPathPlanner.hpp"
 
 #include <cmath>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
-#include "message/motion/KickCommand.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/Ball.h"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/Subsumption.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 
 namespace module {
@@ -201,9 +201,9 @@ namespace behaviour {
 
                     arma::vec3 rBWw_temp = {ball.position[0], ball.position[1], fieldDescription.ball_radius};
                     rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
-                               Htw.i().x() + Htw.i().translation();                          // In front of the robot
-                    arma::vec3 pos = Htw.transformPoint(rBWw);
-                    position       = pos.rows(0, 1);
+                               Htw.i().x() + Htw.i().translation();          // In front of the robot
+                    arma::vec3 pos       = Htw.transformPoint(rBWw);
+                    position             = pos.rows(0, 1);
 
                     // Hack Planner:
                     float headingChange = 0;

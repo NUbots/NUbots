@@ -17,9 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Controller.h"
+#include "Controller.hpp"
 
-#include "message/motion/ServoTarget.h"
+#include "message/motion/ServoTarget.hpp"
 
 namespace module {
 namespace behaviour {
