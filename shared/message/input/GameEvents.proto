@@ -97,7 +97,7 @@ message GameEvents {
         /// Set some time after game-state TIMEOUT
         google.protobuf.Timestamp ends = 5;
         /// Time when the next half is to begin
-        /// Set somet time after game-state FINISHED
+        /// Set some time after game-state FINISHED
         google.protobuf.Timestamp nextHalf = 6;
     }
 
