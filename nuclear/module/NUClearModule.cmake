@@ -96,7 +96,7 @@ function(NUCLEAR_MODULE)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/src")
 
     add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.h" "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.cpp"
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.hpp" "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.cpp"
       COMMAND
         ${CMAKE_COMMAND} ARGS -E env PYTHONPATH="${PROJECT_BINARY_DIR}/python/nuclear/"
         NUCLEAR_MODULE_DIR="${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}" ${PYTHON_EXECUTABLE}
@@ -106,7 +106,7 @@ function(NUCLEAR_MODULE)
       COMMENT "Generating bindings for python module ${module_name}"
     )
 
-    set(src "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.h" "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.cpp"
+    set(src "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.hpp" "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.cpp"
             ${python_code}
     )
   endif()

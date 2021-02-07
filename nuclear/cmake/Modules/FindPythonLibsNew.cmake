@@ -99,8 +99,8 @@ if(CMAKE_SIZEOF_VOID_P AND (NOT "${PYTHON_SIZEOF_VOID_P}" STREQUAL "${CMAKE_SIZE
   if(PythonLibsNew_FIND_REQUIRED)
     math(EXPR _PYTHON_BITS "${PYTHON_SIZEOF_VOID_P} * 8")
     math(EXPR _CMAKE_BITS "${CMAKE_SIZEOF_VOID_P} * 8")
-    message(
-      FATAL_ERROR "Python config failure: Python is ${_PYTHON_BITS}-bit, " "chosen compiler is  ${_CMAKE_BITS}-bit"
+    message(FATAL_ERROR "Python config failure: Python is ${_PYTHON_BITS}-bit, "
+                        "chosen compiler is  ${_CMAKE_BITS}-bit"
     )
   endif()
   set(PYTHONLIBS_FOUND FALSE)

@@ -17,9 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "message/support/nuclear/ReactionStatistics.h"
+#include "message/support/nuclear/ReactionStatistics.hpp"
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
 namespace module {
 namespace support {

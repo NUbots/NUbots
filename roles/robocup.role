@@ -8,7 +8,7 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
-  support::configuration::NetworkConfiguration
+  network::NUClearNet
   support::NUsight
   support::configuration::SoccerConfig
   # input
@@ -39,6 +39,6 @@ nuclear_role(
   behaviour::skills::Nod
   # Motion
   motion::ScriptEngine
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::HeadController
 )

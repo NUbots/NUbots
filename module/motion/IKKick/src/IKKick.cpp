@@ -17,24 +17,26 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "IKKick.h"
+#include "IKKick.hpp"
 
-#include "extension/Configuration.h"
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/KickCommand.h"
-#include "message/motion/KinematicsModel.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/FieldDescription.h"
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
+#include "extension/Configuration.hpp"
+
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/FieldDescription.hpp"
+
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_armadillo.hpp"
 
 namespace module {
 namespace motion {
@@ -120,8 +122,8 @@ namespace motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Transform3D leftFoot  = convert(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
-                Transform3D rightFoot = convert(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                Transform3D leftFoot  = convert(sensors.Htx[ServoID::L_ANKLE_ROLL]);
+                Transform3D rightFoot = convert(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -249,7 +251,8 @@ namespace motion {
             RegisterAction{subsumptionId,
                            "IK Kick",
                            {std::pair<float, std::set<LimbID>>(
-                               0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                               0,
+                               {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
                            [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
                            [this](const std::set<LimbID>&) { emit(std::make_unique<FinishKick>()); },
                            [this](const std::set<ServoID>&) {}}));

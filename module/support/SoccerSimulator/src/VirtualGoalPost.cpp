@@ -17,14 +17,15 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "VirtualGoalPost.h"
+#include "VirtualGoalPost.hpp"
 
-#include "message/input/Sensors.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/Goal.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/coordinates.h"
-#include "utility/math/geometry/Quad.h"
+#include "message/input/Sensors.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
+
+#include "utility/input/ServoID.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/Quad.hpp"
 
 namespace module {
 namespace support {
@@ -79,15 +80,15 @@ namespace support {
         result.goals.reserve(1);
 
         // t = torso; c = camera; g = ground; f = foot;
-        Eigen::Affine3d Htc(sensors.forward_kinematics[utility::input::ServoID::HEAD_PITCH]);
+        Eigen::Affine3d Htc(sensors.Htx[utility::input::ServoID::HEAD_PITCH]);
         result.Hcw              = Htc.inverse() * sensors.Htw;
         result.timestamp        = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
         result.goals.at(0).side = side;
         result.goals.at(0).team = team;
 
         // get the torso to foot transform
-        Eigen::Affine3d Hgt(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
-        Eigen::Affine3d Hgt2(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+        Eigen::Affine3d Hgt(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+        Eigen::Affine3d Hgt2(sensors.Htx[ServoID::L_ANKLE_ROLL]);
 
         if (Hgt2(3, 2) < Hgt(3, 2)) {
             Hgt = Hgt2;
@@ -114,19 +115,26 @@ namespace support {
                 Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, goalNormals.block<3, 1>(0, 3)));
 
             // build the predicted quad
-            utility::math::geometry::Quad<Eigen::Vector2f> quad(
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 0), goalNormals.block<3, 1>(0, 3), image.lens, image.dimensions)
-                    .cast<float>(),
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 0), goalNormals.block<3, 1>(0, 2), image.lens, image.dimensions)
-                    .cast<float>(),
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 1), goalNormals.block<3, 1>(0, 2), image.lens, image.dimensions)
-                    .cast<float>(),
-                getCamRay<float>(
-                    goalNormals.block<3, 1>(0, 1), goalNormals.block<3, 1>(0, 3), image.lens, image.dimensions)
-                    .cast<float>());
+            utility::math::geometry::Quad<Eigen::Vector2f> quad(getCamRay<float>(goalNormals.block<3, 1>(0, 0),
+                                                                                 goalNormals.block<3, 1>(0, 3),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>(),
+                                                                getCamRay<float>(goalNormals.block<3, 1>(0, 0),
+                                                                                 goalNormals.block<3, 1>(0, 2),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>(),
+                                                                getCamRay<float>(goalNormals.block<3, 1>(0, 1),
+                                                                                 goalNormals.block<3, 1>(0, 2),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>(),
+                                                                getCamRay<float>(goalNormals.block<3, 1>(0, 1),
+                                                                                 goalNormals.block<3, 1>(0, 3),
+                                                                                 image.lens,
+                                                                                 image.dimensions)
+                                                                    .cast<float>());
 
 
             // goal base visibility check

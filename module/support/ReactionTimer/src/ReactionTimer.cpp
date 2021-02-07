@@ -1,6 +1,6 @@
-#include "ReactionTimer.h"
+#include "ReactionTimer.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 namespace module {
 namespace support {

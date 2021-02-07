@@ -6,7 +6,7 @@ include_directories(${NUCLEAR_UTILITY_INCLUDE_DIRS})
 include_directories(${NUCLEAR_EXTENSION_INCLUDE_DIRS})
 
 # This gets all of our source files
-file(GLOB_RECURSE test_src "*/**.cpp" "*/**.h")
+file(GLOB_RECURSE test_src "*/**.cpp" "*/**.hpp")
 
 if(test_src)
   add_executable(TestShared "${CMAKE_SOURCE_DIR}/${NUCLEAR_SHARED_DIR}/tests/test.cpp" ${test_src})

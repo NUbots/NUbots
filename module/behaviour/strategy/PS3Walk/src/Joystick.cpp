@@ -11,15 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-#include "Joystick.h"
+#include "Joystick.hpp"
 
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "unistd.h"
 
@@ -39,7 +38,8 @@ void Joystick::openPath(std::string devicePath) {
 bool Joystick::sample(JoystickEvent* event) {
     int bytes = read(_fd, event, sizeof(*event));
 
-    if (bytes == -1) return false;
+    if (bytes == -1)
+        return false;
 
     // NOTE if this condition is not met, we're probably out of sync and this
     // Joystick instance is likely unusable

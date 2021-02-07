@@ -17,13 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Darwin.h"
+#include "Darwin.hpp"
 
 #include <algorithm>
 #include <nuclear>
 #include <thread>
 
-#include "utility/input/ServoID.h"
+#include "utility/input/ServoID.hpp"
 
 namespace Darwin {
 using ServoID = utility::input::ServoID;

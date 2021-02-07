@@ -22,3 +22,11 @@ endif()
 # Disable armadillo bounds checking in release and min size release builds
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DARMA_NO_DEBUG")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DARMA_NO_DEBUG")
+
+# Enable address sanitizer
+option(USE_ASAN "Enable address sanitization" OFF)
+if(USE_ASAN)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address)
+  link_libraries(asan)
+endif(USE_ASAN)

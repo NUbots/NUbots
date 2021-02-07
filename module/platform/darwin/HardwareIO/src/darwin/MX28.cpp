@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "MX28.h"
+#include "MX28.hpp"
 
 namespace Darwin {
 MX28::MX28(UART& coms, int id) : DarwinDevice(coms, id) {}

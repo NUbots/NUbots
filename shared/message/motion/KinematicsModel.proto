@@ -23,11 +23,6 @@ package message.motion;
 import "Vector.proto";
 import "Matrix.proto";
 
-enum BodySide {
-    LEFT  = 0;
-    RIGHT = 1;
-}
-
 message KinematicsModel {
     // Convention: all values positive
     message Leg {
@@ -108,10 +103,9 @@ message KinematicsModel {
         mat3 foot        = 9;
     }
 
-    Leg         leg                       = 1;
-    Head        head                      = 2;
-    Arm         arm                       = 3;
-    MassModel   massModel                 = 4;
-    TensorModel tensorModel               = 5;
-    float       TEAMDARWINCHEST_TO_ORIGIN = 6;
+    Leg         leg         = 1;
+    Head        head        = 2;
+    Arm         arm         = 3;
+    MassModel   massModel   = 4;
+    TensorModel tensorModel = 5;
 }

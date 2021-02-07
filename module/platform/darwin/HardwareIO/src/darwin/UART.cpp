@@ -17,12 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "UART.h"
+#include "UART.hpp"
 
 #include <fcntl.h>
-#include <sys/ioctl.h>
-
 #include <iostream>
+#include <sys/ioctl.h>
 #include <thread>
 
 namespace Darwin {

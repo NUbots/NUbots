@@ -17,9 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "UnitQuaternion.h"
+#include "UnitQuaternion.hpp"
 
-#include "utility/math/angle.h"
+#include "utility/math/angle.hpp"
 
 namespace utility {
 namespace math {

@@ -17,19 +17,20 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "RobotModel.h"
+#include "RobotModel.hpp"
 
 #include <armadillo>
 #include <iostream>
 #include <nuclear>
 
-#include "message/input/Sensors.h"
-#include "message/vision/Goal.h"
-#include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/angle.h"
-#include "utility/math/coordinates.h"
-#include "utility/support/eigen_armadillo.h"
+#include "message/input/Sensors.hpp"
+#include "message/vision/Goal.hpp"
+
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 
 namespace module {
@@ -166,7 +167,7 @@ namespace localisation {
         // Get widest line
         int widest          = 0;
         float largest_angle = 0;
-        for (int i = 1; i < goalBaseCornersCam.n_cols; i++) {
+        for (unsigned int i = 1; i < goalBaseCornersCam.n_cols; i++) {
             float angle = std::acos(arma::dot(goalBaseCornersCam.col(i), goalBaseCornersCam.col(0)));
             // Left side will have cross product point in neg field z direction
             float left_side = arma::dot(arma::cross(goalBaseCornersCam.col(i), goalBaseCornersCam.col(0)),

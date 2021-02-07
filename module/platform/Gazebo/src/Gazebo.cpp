@@ -1,15 +1,17 @@
-#include "Gazebo.h"
+#include "Gazebo.hpp"
 
 #include "clock/clock.hpp"
-#include "extension/Configuration.h"
-#include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "message/platform/gazebo/Ball.h"
-#include "message/platform/gazebo/Command.h"
-#include "message/platform/gazebo/RawSensors.h"
-#include "message/platform/gazebo/ServoTargets.h"
-#include "message/platform/gazebo/Simulation.h"
-#include "message/platform/gazebo/Torso.h"
+
+#include "extension/Configuration.hpp"
+
+#include "message/motion/ServoTarget.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/gazebo/Ball.hpp"
+#include "message/platform/gazebo/Command.hpp"
+#include "message/platform/gazebo/RawSensors.hpp"
+#include "message/platform/gazebo/ServoTargets.hpp"
+#include "message/platform/gazebo/Simulation.hpp"
+#include "message/platform/gazebo/Torso.hpp"
 
 namespace module {
 namespace platform {
@@ -44,8 +46,6 @@ namespace platform {
             msg->type = Command::Type::RESET_TIME;
             emit<Scope::NETWORK>(msg, event.name, false);
         });
-
-        on<Network<Ball>>().then([this](const NetworkSource& network_source, const Ball& simulation) {});
 
         on<Network<Simulation>>().then([this](const NetworkSource& network_source, const Simulation& simulation) {
             // Only listen to our target simulation

@@ -17,16 +17,17 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "WalkOptimiser.h"
+#include "WalkOptimiser.hpp"
 
 #include <fmt/format.h>
 
-#include "message/support/SaveConfiguration.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
+#include "message/support/SaveConfiguration.hpp"
+
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
 // Comment remains as an example of usage for this module.
 // #include "utility/math/optimisation/PGAoptimiser.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace support {
@@ -114,7 +115,8 @@ namespace support {
 
 
             on<Every<25, Per<std::chrono::seconds>>, With<Sensors>, Sync<WalkOptimiser>>().then(
-                "Walk Data Manager", [this](const Sensors& sensors) {
+                "Walk Data Manager",
+                [this](const Sensors& sensors) {
                     // Record data
                     data.update(sensors);
                 });
@@ -219,7 +221,7 @@ namespace support {
             if (recording) {
                 Eigen::Vector3d verticalKinematics = sensors.Hgc.block<3, 1>(0, 2);
                 Eigen::Vector3d verticalOrientation =
-                    (sensors.Hgt * sensors.forward_kinematics[ServoID::HEAD_PITCH]).block<3, 1>(0, 2);
+                    (sensors.Hgt * sensors.Htx[ServoID::HEAD_PITCH]).block<3, 1>(0, 2);
                 double tiltMag = utility::math::angle::acos_clamped(verticalOrientation.dot(verticalKinematics));
                 if (std::fabs(tiltMag) < M_PI_4) {
                     tilt(tiltMag);

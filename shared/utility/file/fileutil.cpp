@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "fileutil.h"
+#include "fileutil.hpp"
 
 extern "C" {
 #include <dirent.h>
@@ -30,7 +30,7 @@ extern "C" {
 #include <stack>
 #include <system_error>
 
-#include "utility/strutil/strutil.h"
+#include "utility/strutil/strutil.hpp"
 
 namespace utility {
 namespace file {

@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "DarwinDevice.h"
+#include "DarwinDevice.hpp"
 
 namespace Darwin {
 DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}

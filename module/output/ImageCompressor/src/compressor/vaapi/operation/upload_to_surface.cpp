@@ -1,9 +1,10 @@
-#include "upload_to_surface.h"
+#include "upload_to_surface.hpp"
 
 #include <fmt/format.h>
 
 #include "../vaapi_error_category.hpp"
-#include "utility/vision/fourcc.h"
+
+#include "utility/vision/fourcc.hpp"
 
 namespace module::output::compressor::vaapi::operation {
 
@@ -124,8 +125,9 @@ void upload_to_surface(VADisplay dpy,
     }
     va_status = vaMapBuffer(dpy, surface_image.buf, &ptr);
     if (va_status != VA_STATUS_SUCCESS) {
-        throw std::system_error(
-            va_status, vaapi_error_category(), "Error when mapping the image's buffer into user space");
+        throw std::system_error(va_status,
+                                vaapi_error_category(),
+                                "Error when mapping the image's buffer into user space");
     }
 
     // Copy the image over to the GPU buffer
@@ -134,8 +136,9 @@ void upload_to_surface(VADisplay dpy,
     // Cleanup the buffer and unmap so that VAAPI knows it can use the data now
     va_status = vaUnmapBuffer(dpy, surface_image.buf);
     if (va_status != VA_STATUS_SUCCESS) {
-        throw std::system_error(
-            va_status, vaapi_error_category(), "Error when unmapping the buffer back to device space");
+        throw std::system_error(va_status,
+                                vaapi_error_category(),
+                                "Error when unmapping the buffer back to device space");
     }
     va_status = vaDestroyImage(dpy, surface_image.image_id);
     if (va_status != VA_STATUS_SUCCESS) {

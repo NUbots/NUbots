@@ -1,5 +1,3 @@
-docker
-dockerpty
 PyYAML
 termcolor
 tqdm

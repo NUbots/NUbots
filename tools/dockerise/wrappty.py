@@ -25,7 +25,7 @@ class WrapPty:
         """
         self._set_pty_size()
 
-    def spawn(self, args):
+    def spawn(self, args, env=os.environ):
         pid, self.fd = pty.fork()
 
         if len(args) == 0:
@@ -33,7 +33,7 @@ class WrapPty:
 
         if pid == pty.CHILD:
             # If no arguments run bash
-            os.execlp(args[0], *args)
+            os.execlpe(args[0], *args, env)
 
         old_handler = signal.signal(signal.SIGWINCH, self._signal_winch)
         try:

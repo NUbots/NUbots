@@ -4,7 +4,7 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   # Config
   extension::FileWatcher
-  support::configuration::NetworkConfiguration
+  network::NUClearNet
   support::NUsight
   support::NUsightHarness
 )

@@ -40,14 +40,10 @@ mkdir -p build
 cd build
 
 # Configure using cmake
-cmake .. \
+cmake .. "$@" \
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
     -DLINUX_RESOURCE_LINKER_COMMAND:PATH="${PREFIX}/bin/linux_resource_linker" \
-    -DLLVMSPIRV_INCLUDED_IN_LLVM=OFF \
-    -DSPIRV_TRANSLATOR_DIR=/usr/local \
-    -DLLVM_NO_DEAD_STRIP=ON \
-    -DUSE_PREBUILT_LLVM=ON \
     -Wno-dev
 
 # Run make

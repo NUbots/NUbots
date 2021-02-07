@@ -1,11 +1,10 @@
-#include "opencl_context_for_display.h"
+#include "opencl_context_for_display.hpp"
 
 #include <CL/cl.h>
 #include <va/va.h>
-
 #include <vector>
 
-#include "opencl_error_category.h"
+#include "opencl_error_category.hpp"
 
 namespace module::output::compressor::vaapi::cl {
 
@@ -76,11 +75,13 @@ CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy) {
                     }
 
                     // create context for the first device only
-                    cl::context context = cl::context(
-                        clCreateContext(props, 1, device_ids.data(), nullptr, nullptr, &err), ::clReleaseContext);
+                    cl::context context =
+                        cl::context(clCreateContext(props, 1, device_ids.data(), nullptr, nullptr, &err),
+                                    ::clReleaseContext);
                     if (err != CL_SUCCESS) {
-                        throw std::system_error(
-                            err, cl::opencl_error_category(), "Error while trying to create an OpenCL context");
+                        throw std::system_error(err,
+                                                cl::opencl_error_category(),
+                                                "Error while trying to create an OpenCL context");
                     }
 
                     return CompressionContext::OpenCLContext{

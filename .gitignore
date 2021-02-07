@@ -66,6 +66,9 @@ packer/build.pwi
 *.tdo
 *TSWLatexianTemp*
 
+# Tests
+tests_output/
+
 # Misc
 tags
 *.swp
@@ -75,5 +78,3 @@ tags
 .idea
 *.sublime-workspace
 \.vscode/ipch
-
-*.nbs*

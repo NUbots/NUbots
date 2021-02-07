@@ -1,0 +1,20 @@
+# A list of files to load, if this list is empty it will instead look at the arguments on the command line
+# So you can call ./binary a.nbs b.nbs c.nbs etc
+files: []
+
+# What should we do when we finish playing back
+# Options are:
+#   STOP      to just stop emitting when the file is done
+#   LOOP      to start playback again from the first file
+#   SHUTDOWN  to shutdown the program and terminate on the end of the file
+on_end: LOOP
+
+# The amount of time into the future to buffer, should be at least 1000ms
+buffer_time: 1500
+
+# You can put any messages that are emitted in the system here and they will be played back
+# The below ones are just the most common and here as an example
+messages:
+  message.output.CompressedImage: false
+  message.input.Sensors: false
+  message.platform.darwin.DarwinSensors: true

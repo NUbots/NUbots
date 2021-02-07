@@ -17,10 +17,10 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ConsoleLogHandler.h"
+#include "ConsoleLogHandler.hpp"
 
-#include "utility/strutil/ansi.h"
-#include "utility/support/evil/pure_evil.h"
+#include "utility/strutil/ansi.hpp"
+#include "utility/support/evil/pure_evil.hpp"
 
 namespace module {
 namespace support {

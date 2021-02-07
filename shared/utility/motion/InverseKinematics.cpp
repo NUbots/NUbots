@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "InverseKinematics.h"
+#include "InverseKinematics.hpp"
 
 namespace utility {
 namespace motion {
@@ -382,35 +382,14 @@ namespace motion {
             return joints;
         }
 
-        std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(const KinematicsModel& model,
-                                                                            utility::math::matrix::Transform3D target,
-                                                                            LimbID limb) {
-            target(2, 3) += model.TEAMDARWINCHEST_TO_ORIGIN;  // translate without regard to rotation
-            // target = target.translateZ(model.leg.FOOT_HEIGHT); THIS HAS BEEN WRONG THE WHOLE TIME!!!! THIS ASSUMES
-            // THE FOOT IS FLAT RELATIVE TO THE TORSO (WHICH IT ISN'T BECAUSE THE BODY IS TILTED)
-            return calculateLegJoints(model, target, limb);
-        }
-
-        std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(
-            const KinematicsModel& model,
-            utility::math::matrix::Transform3D leftTarget,
-            utility::math::matrix::Transform3D rightTarget) {
-            auto joints  = calculateLegJointsTeamDarwin(model, leftTarget, LimbID::LEFT_LEG);
-            auto joints2 = calculateLegJointsTeamDarwin(model, rightTarget, LimbID::RIGHT_LEG);
-            joints.insert(joints.end(), joints2.begin(), joints2.end());
-            return joints;
-        }
-
-
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector) {
             std::vector<std::pair<ServoID, float>> positions;
             positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1], cameraUnitVector[0])));
-            positions.push_back(std::make_pair(
-                ServoID::HEAD_PITCH,
-                atan2(-cameraUnitVector[2],
-                      std::sqrt(cameraUnitVector[0] * cameraUnitVector[0] + cameraUnitVector[1] * cameraUnitVector[1]))
-                    - model.head.CAMERA_DECLINATION_ANGLE_OFFSET));
+            positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
+                                               atan2(-cameraUnitVector[2],
+                                                     std::sqrt(cameraUnitVector[0] * cameraUnitVector[0]
+                                                               + cameraUnitVector[1] * cameraUnitVector[1]))));
             return positions;
         }
 
@@ -422,8 +401,7 @@ namespace motion {
             positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
                                                std::atan2(-cameraUnitVector.z(),
                                                           std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
-                                                                    + cameraUnitVector.y() * cameraUnitVector.y()))
-                                                   - model.head.CAMERA_DECLINATION_ANGLE_OFFSET));
+                                                                    + cameraUnitVector.y() * cameraUnitVector.y()))));
             return positions;
         }
 

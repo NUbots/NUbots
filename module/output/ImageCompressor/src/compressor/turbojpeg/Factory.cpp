@@ -1,4 +1,4 @@
-#include "Factory.h"
+#include "Factory.hpp"
 
 namespace module {
 namespace output {
