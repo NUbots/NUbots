@@ -19,9 +19,9 @@
 
 #include <catch.hpp>
 
-#include "Convert.h"
+#include "Convert.hpp"
 
-#include "utility/math/angle.h"
+#include "utility/math/angle.hpp"
 
 using namespace module::platform::darwin;
 

@@ -17,17 +17,17 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "WalkOptimiser.h"
+#include "WalkOptimiser.hpp"
 
 #include <fmt/format.h>
 
-#include "message/support/SaveConfiguration.h"
+#include "message/support/SaveConfiguration.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
 // Comment remains as an example of usage for this module.
 // #include "utility/math/optimisation/PGAoptimiser.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace support {

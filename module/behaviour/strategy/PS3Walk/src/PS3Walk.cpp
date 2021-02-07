@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "PS3Walk.h"
+#include "PS3Walk.hpp"
 
 #include <nuclear>
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KickCommand.h"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KickCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace module {
 namespace behaviour {

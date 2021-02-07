@@ -17,9 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "message/support/nusight/DataPoint.h"
+#include "message/support/nusight/DataPoint.hpp"
 
 namespace module {
 namespace support {
