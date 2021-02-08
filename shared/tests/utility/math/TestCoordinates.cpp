@@ -22,6 +22,7 @@
 #include <catch.hpp>
 #include <cfloat>
 #include <cmath>
+#include <fmt/format.h>
 #include <iomanip>
 #include <utility>
 
@@ -29,16 +30,14 @@
 //#include "utility/math/quaternion.h"
 
 static constexpr double ERROR_THRESHOLD = 1e-6;
-// static constexpr double DBL_LWR_INVLD_EDGE = -1e-8;
-// static constexpr double DBL_LWR_VALID_EDGE = 1e-8;
 
-// NOTE: Test values won't exceed 1.8447e+19 (18447000000000000000), anything higher causes inf return values
-// when used with any arithmetic operations.
-// This means edge cases - TEST_DBL_MAX and TEST_DBL_MIN - have been left out or replaced. It has been determined that
+// NOTE: Test value domain to stay between the values of TEST_DBL_MAX = 5.9667e+153, and TEST_DBL_MIN = 1.4853e-307
+// This means edge cases - DBL_MAX and DBL_MIN - have been left out or replaced. It has been determined that
 // inputs approaching these edge cases will not be possible in normal operation. See coordinates.h comments for more
 // details.
-static constexpr double TEST_DBL_MAX = 1.8447e+19;
-static constexpr double TEST_DBL_MIN = 1.8447e-19;
+//
+static constexpr double TEST_DBL_MAX = 5.9667e+153;
+static constexpr double TEST_DBL_MIN = 1.4853e-307;
 
 
 // ****Cartesian test coords****
@@ -709,7 +708,7 @@ static const std::array<Eigen::Vector3d, 226> spher_coords = {
     Eigen::Matrix<double, 3, 1>(1.68E+19, 0.5921, 2.4722),
     Eigen::Matrix<double, 3, 1>(3.36E+18, 3.7606, 4.2187),
     Eigen::Matrix<double, 3, 1>(4.87E+18, 2.9589, 4.6575),
-    Eigen::Matrix<double, 3, 1>(2.69E+18, 4.3728, 3.2676),
+    Eigen::Matrix<double, 3, 1>(2.69E+18, 4.3728, 3.2676)
 
 
 };
@@ -718,96 +717,97 @@ static const std::array<Eigen::Vector3d, 226> spher_coords = {
 // Calculated using matlab - The scripts used can be found in shared/tests/utility/math/docs
 static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = {
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.485300000000000e-307),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.485300000000000e-307),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
     Eigen::Matrix<double, 3, 1>(-5.000000000000000e+00, 0, -3.061616997868383e-16),
     Eigen::Matrix<double, 3, 1>(-3.061616997868383e-16, -5.000000000000000e+00, -3.061616997868383e-16),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(-1.844700000000000e-19, 0, -1.129552975193561e-35),
-    Eigen::Matrix<double, 3, 1>(-1.129552975193561e-35, -1.844700000000000e-19, -1.129552975193561e-35),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(-1.485300000000000e-307, 0, -9.881312916824931e-324),
+    Eigen::Matrix<double, 3, 1>(-9.881312916824931e-324, -1.485300000000000e-307, -9.881312916824931e-324),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(1.844700000000000e-19, 0, 1.129552975193561e-35),
-    Eigen::Matrix<double, 3, 1>(1.129552975193561e-35, 1.844700000000000e-19, 1.129552975193561e-35),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(1.485300000000000e-307, 0, 9.881312916824931e-324),
+    Eigen::Matrix<double, 3, 1>(9.881312916824931e-324, 1.485300000000000e-307, 9.881312916824931e-324),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
     Eigen::Matrix<double, 3, 1>(1.000000000000000e+00, 0, 6.123233995736766e-17),
     Eigen::Matrix<double, 3, 1>(6.123233995736766e-17, 1.000000000000000e+00, 6.123233995736766e-17),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
     Eigen::Matrix<double, 3, 1>(-6.123233995736766e-16, 0, 5.000000000000000e+00),
     Eigen::Matrix<double, 3, 1>(6.123233995736766e-16, -7.498798913309289e-32, 5.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(-2.259105950387122e-35, 0, 1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(2.259105950387122e-35, -2.766606871076328e-51, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(-1.976262583364986e-323, 0, 1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(1.976262583364986e-323, 0, 1.485300000000000e-307),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(2.259105950387122e-35, 0, -1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(-2.259105950387122e-35, 2.766606871076328e-51, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(1.976262583364986e-323, 0, -1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(-1.976262583364986e-323, 0, -1.485300000000000e-307),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
     Eigen::Matrix<double, 3, 1>(1.224646799147353e-16, 0, -1.000000000000000e+00),
     Eigen::Matrix<double, 3, 1>(-1.224646799147353e-16, 1.499759782661858e-32, -1.000000000000000e+00),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
     Eigen::Matrix<double, 3, 1>(5.000000000000000e+00, 0, 9.184850993605148e-16),
     Eigen::Matrix<double, 3, 1>(-9.184850993605148e-16, -5.000000000000000e+00, 9.184850993605148e-16),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(1.844700000000000e-19, 0, 3.388658925580683e-35),
-    Eigen::Matrix<double, 3, 1>(-3.388658925580683e-35, -1.844700000000000e-19, 3.388658925580683e-35),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(1.485300000000000e-307, 0, 2.964393875047479e-323),
+    Eigen::Matrix<double, 3, 1>(-2.964393875047479e-323, -1.485300000000000e-307, 2.964393875047479e-323),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(-1.844700000000000e-19, 0, -3.388658925580683e-35),
-    Eigen::Matrix<double, 3, 1>(3.388658925580683e-35, 1.844700000000000e-19, -3.388658925580683e-35),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(-1.485300000000000e-307, 0, -2.964393875047479e-323),
+    Eigen::Matrix<double, 3, 1>(2.964393875047479e-323, 1.485300000000000e-307, -2.964393875047479e-323),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
     Eigen::Matrix<double, 3, 1>(-1.000000000000000e+00, 0, -1.836970198721030e-16),
     Eigen::Matrix<double, 3, 1>(1.836970198721030e-16, 1.000000000000000e+00, -1.836970198721030e-16),
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
     Eigen::Matrix<double, 3, 1>(1.224646799147353e-15, 0, -5.000000000000000e+00),
     Eigen::Matrix<double, 3, 1>(1.224646799147353e-15, -2.999519565323716e-31, -5.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(4.518211900774245e-35, 0, -1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(4.518211900774245e-35, -1.106642748430531e-50, -1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(0, 0, -1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(3.458459520888726e-323, 0, -1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(3.458459520888726e-323, 0, -1.485300000000000e-307),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
     Eigen::Matrix<double, 3, 1>(0, 0, 0),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(-4.518211900774245e-35, 0, 1.844700000000000e-19),
-    Eigen::Matrix<double, 3, 1>(-4.518211900774245e-35, 1.106642748430531e-50, 1.844700000000000e-19),
+    Eigen::Matrix<double, 3, 1>(0, 0, 1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(-3.458459520888726e-323, 0, 1.485300000000000e-307),
+    Eigen::Matrix<double, 3, 1>(-3.458459520888726e-323, 0, 1.485300000000000e-307),
     Eigen::Matrix<double, 3, 1>(0, 0, 1),
     Eigen::Matrix<double, 3, 1>(-2.449293598294706e-16, 0, 1.000000000000000e+00),
     Eigen::Matrix<double, 3, 1>(-2.449293598294706e-16, 5.999039130647430e-32, 1.000000000000000e+00),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(-1.844700000000000e+19, 0, -1.129552975193561e+03),
-    Eigen::Matrix<double, 3, 1>(-1.129552975193561e+03, -1.844700000000000e+19, -1.129552975193561e+03),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(1.844700000000000e+19, 0, 1.129552975193561e+03),
-    Eigen::Matrix<double, 3, 1>(1.129552975193561e+03, 1.844700000000000e+19, 1.129552975193561e+03),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(-2.259105950387122e+03, 0, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(2.259105950387122e+03, -2.766606871076329e-13, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(2.259105950387122e+03, 0, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(-2.259105950387122e+03, 2.766606871076329e-13, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(1.844700000000000e+19, 0, 3.388658925580683e+03),
-    Eigen::Matrix<double, 3, 1>(-3.388658925580683e+03, -1.844700000000000e+19, 3.388658925580683e+03),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(-1.844700000000000e+19, 0, -3.388658925580683e+03),
-    Eigen::Matrix<double, 3, 1>(3.388658925580683e+03, 1.844700000000000e+19, -3.388658925580683e+03),
-    Eigen::Matrix<double, 3, 1>(0, 0, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(4.518211900774245e+03, 0, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(4.518211900774245e+03, -1.106642748430532e-12, -1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(0, 0, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(-4.518211900774245e+03, 0, 1.844700000000000e+19),
-    Eigen::Matrix<double, 3, 1>(-4.518211900774245e+03, 1.106642748430532e-12, 1.844700000000000e+19),
+    Eigen::Matrix<double, 3, 1>(0, 0, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(0, 0, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(0, 0, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(-5.966700000000000e+153, 0, -3.653550028236256e+137),
+    Eigen::Matrix<double, 3, 1>(-3.653550028236256e+137, -5.966700000000000e+153, -3.653550028236256e+137),
+    Eigen::Matrix<double, 3, 1>(0, 0, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(5.966700000000000e+153, 0, 3.653550028236256e+137),
+    Eigen::Matrix<double, 3, 1>(3.653550028236256e+137, 5.966700000000000e+153, 3.653550028236256e+137),
+    Eigen::Matrix<double, 3, 1>(0, 0, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(-7.307100056472512e+137, 0, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(7.307100056472512e+137, -8.948616695208505e+121, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(0, 0, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(7.307100056472512e+137, 0, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(-7.307100056472512e+137, 8.948616695208505e+121, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(0, 0, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(5.966700000000000e+153, 0, 1.096065008470877e+138),
+    Eigen::Matrix<double, 3, 1>(-1.096065008470877e+138, -5.966700000000000e+153, 1.096065008470877e+138),
+    Eigen::Matrix<double, 3, 1>(0, 0, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(-5.966700000000000e+153, 0, -1.096065008470877e+138),
+    Eigen::Matrix<double, 3, 1>(1.096065008470877e+138, 5.966700000000000e+153, -1.096065008470877e+138),
+    Eigen::Matrix<double, 3, 1>(0, 0, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(1.461420011294502e+138, 0, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(1.461420011294502e+138, -3.579446678083402e+122, -5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(0, 0, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(-1.461420011294502e+138, 0, 5.966700000000000e+153),
+    Eigen::Matrix<double, 3, 1>(-1.461420011294502e+138, 3.579446678083402e+122, 5.966700000000000e+153),
+
 
     // Values between edge cases
     Eigen::Matrix<double, 3, 1>(-1.117213734950550e+19, -8.865729297606710e+18, -4.645663684054431e+18),
@@ -950,12 +950,7 @@ static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = 
 
 // ****Test cartesianToSpherical conversion****
 TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][math][coordinates]") {
-    //***Table heading***
-    INFO("************Calculating Spherical coordinates for the origin****************");
-    INFO("----------------------------------------------------------------------------");
-    INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18) << "Util result"
-                   << std::setw(18) << "Epsilon");
-    INFO("----------------------------------------------------------------------------");
+    //****
     // Loop through test values and compare to results array
     for (size_t i = 0; i < cart_coords.size(); i++) {
         Eigen::Vector3d cart_input   = cart_coords[i];
@@ -965,21 +960,26 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
         Approx epsilon_x = Approx(cart_compare.x()).epsilon(ERROR_THRESHOLD);
         Approx epsilon_y = Approx(cart_compare.y()).epsilon(ERROR_THRESHOLD);
         Approx epsilon_z = Approx(cart_compare.z()).epsilon(ERROR_THRESHOLD);
-
-        // NOTE: result_diff only used for output purposes
-        // Eigen::Vector3d result_diff = (spher_result - cart_compare);
-
-        //***Output - Table format***
-        INFO(std::left << std::setw(18) << cart_input.x() << std::setw(18) << cart_compare.x() << std::setw(18)
-                       << spher_result.x() << std::setw(18) << epsilon_x.toString() << "\n"
-                       << std::left << std::setw(18) << cart_input.y() << std::setw(18) << cart_compare.y()
-                       << std::setw(18) << spher_result.y() << std::setw(18) << epsilon_y.toString() << "\n"
-                       << std::left << std::setw(18) << cart_input.z() << std::setw(18) << cart_compare.z()
-                       << std::setw(18) << spher_result.z() << std::setw(18) << epsilon_z.toString());
-        INFO("----------------------------------------------------------------------------");
+        //***Output table***
+        INFO(fmt::format("{:*^50}", "Calculating Spherical coordinates for the origin"));
+        INFO(fmt::format("{:-^50}", ""));
+        INFO(fmt::format("Input:\n x = {}\n y = {}\n z = {}", cart_input.x(), cart_input.y(), cart_input.z()));
+        INFO(fmt::format("Ext result:\n x = {}\n y = {}\n z = {}",
+                         cart_compare.x(),
+                         cart_compare.y(),
+                         cart_compare.z()));
+        INFO(fmt::format("Util result\n x = {}\n y = {}\n z = {}",
+                         spher_result.x(),
+                         spher_result.y(),
+                         spher_result.z()));
+        INFO(fmt::format("Epsilon:\n x = {}\n y = {}\n z = {}",
+                         epsilon_x.toString(),
+                         epsilon_y.toString(),
+                         epsilon_z.toString()));
+        INFO(fmt::format("{:-^50}", ""));
         INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
         INFO("Failed test value at index: " << i);
-        // force test fail
+        // FORCE FAIL
         // REQUIRE(1 == 2);
         //
         REQUIRE(spher_result.x() == epsilon_x);
@@ -990,7 +990,8 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
 
 // ****Test sphericalToCartesian conversion****
 TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][math][coordinates]") {
-    INFO("************Calculating cartesian coordinates for the origin****************");
+    // INFO("************Calculating cartesian coordinates for the origin****************");
+    INFO(fmt::format("{:*^50}", "Calculating cartesian coordinates for the origin"));
 
     for (size_t i = 0; i < spher_coords.size(); i++) {
         Eigen::Matrix<double, 3, 1> spher_input   = spher_coords[i];
@@ -1007,36 +1008,40 @@ TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][mat
             Approx epsilon_x = Approx(spher_compare.x()).epsilon(ERROR_THRESHOLD);
             Approx epsilon_y = Approx(spher_compare.y()).epsilon(ERROR_THRESHOLD);
             Approx epsilon_z = Approx(spher_compare.z()).epsilon(ERROR_THRESHOLD);
-
-            // NOTE: possibly use epsilon
-            // Eigen::Matrix<double, 3, 1> result_diff = (cart_result - spher_compare);
             //***Table heading***
-            INFO("----------------------------------------------------------------------------");
-            INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18)
-                           << "Util result" << std::setw(18) << "Epsilon");
-            INFO("----------------------------------------------------------------------------");
-            // New output - Table format
-            INFO(std::left << std::setw(18) << spher_input.x() << std::setw(18) << spher_compare.x() << std::setw(18)
-                           << cart_result.x() << std::setw(18) << epsilon_x.toString() << "\n"
-                           << std::left << std::setw(18) << spher_input.y() << std::setw(18) << spher_compare.y()
-                           << std::setw(18) << cart_result.y() << std::setw(18) << epsilon_y.toString() << "\n"
-                           << std::left << std::setw(18) << spher_input.z() << std::setw(18) << spher_compare.z()
-                           << std::setw(18) << cart_result.z() << std::setw(18) << epsilon_z.toString());
-            INFO("----------------------------------------------------------------------------");
+            // INFO("----------------------------------------------------------------------------");
+            // INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18)
+            //                << "Util result" << std::setw(18) << "Epsilon");
+            // INFO("----------------------------------------------------------------------------");
+            // // New output - Table format
+            // INFO(std::left << std::setw(18) << spher_input.x() << std::setw(18) << spher_compare.x() << std::setw(18)
+            //                << cart_result.x() << std::setw(18) << epsilon_x.toString() << "\n"
+            //                << std::left << std::setw(18) << spher_input.y() << std::setw(18) << spher_compare.y()
+            //                << std::setw(18) << cart_result.y() << std::setw(18) << epsilon_y.toString() << "\n"
+            //                << std::left << std::setw(18) << spher_input.z() << std::setw(18) << spher_compare.z()
+            //                << std::setw(18) << cart_result.z() << std::setw(18) << epsilon_z.toString());
+            // INFO("----------------------------------------------------------------------------");
+            //****Output table****
+            INFO(fmt::format("{:*^50}", "Calculating Spherical coordinates for the origin"));
+            INFO(fmt::format("{:-^50}", ""));
+            INFO(fmt::format("Input:\n x = {}\n y = {}\n z = {}", spher_input.x(), spher_input.y(), spher_input.z()));
+            INFO(fmt::format("Ext result:\n x = {}\n y = {}\n z = {}",
+                             spher_compare.x(),
+                             spher_compare.y(),
+                             spher_compare.z()));
+            INFO(fmt::format("Util result\n x = {}\n y = {}\n z = {}",
+                             cart_result.x(),
+                             cart_result.y(),
+                             cart_result.z()));
+            INFO(fmt::format("Epsilon:\n x = {}\n y = {}\n z = {}",
+                             epsilon_x.toString(),
+                             epsilon_y.toString(),
+                             epsilon_z.toString()));
             INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
             INFO("Failed test value at index: " << i);
             // test output
-            INFO("Test output TEST_DBL_MIN = " << TEST_DBL_MIN << "|input val = " << spher_input[0]);
+            // INFO("Test output TEST_DBL_MIN = " << TEST_DBL_MIN << "|input val = " << spher_input[0]);
 
-
-            // REQUIRE(result_diff.x() <= ERROR_THRESHOLD);
-            // REQUIRE(result_diff.y() <= ERROR_THRESHOLD);
-            // REQUIRE(result_diff.z() <= ERROR_THRESHOLD);
-            // NOTE: Still looking into why using epsilon fails in this case.
-            // REQUIRE(cart_result.x() == Approx(spher_compare.x()).epsilon(ERROR_THRESHOLD));
-            // REQUIRE(cart_result.y() == Approx(spher_compare.y()).epsilon(ERROR_THRESHOLD));
-            // REQUIRE(cart_result.z() == Approx(spher_compare.z()).epsilon(ERROR_THRESHOLD));
-            // test purposes
             REQUIRE(cart_result.x() == epsilon_x);
             REQUIRE(cart_result.y() == epsilon_y);
             REQUIRE(cart_result.z() == epsilon_z);
