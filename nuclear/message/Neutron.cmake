@@ -22,6 +22,14 @@ find_package(PythonInterp 3 REQUIRED)
 # We need Eigen for neutron messages
 find_package(Eigen3 REQUIRED)
 
+# If we have pybind11 we need to generate our final binding class
+if(pybind11_FOUND)
+  find_package(PythonLibsNew 3 REQUIRED)
+
+  include_directories(SYSTEM ${pybind11_INCLUDE_DIRS})
+  include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
+endif()
+
 # Build the builtin protocol buffers as normal
 foreach(proto ${builtin_protobufs})
 
@@ -155,10 +163,6 @@ foreach(proto ${message_protobufs})
     set(src ${src} "${outputpath}/${file_we}.py.cpp")
   endif()
 
-endforeach(proto)
-
-# If we have pybind11 we need to generate our final binding class
-if(pybind11_FOUND)
   # Build our outer python binding wrapper class
   add_custom_command(
     OUTPUT "${nt}.cpp" "${nt}.py.cpp" "${nt}.h"
