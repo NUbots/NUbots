@@ -1,10 +1,10 @@
-#include "jpeg_header.h"
+#include "jpeg_header.hpp"
 
 #include <cstring>
 #include <vector>
 
 #include "../vaapi_error_category.hpp"
-#include "jpeg_constants.h"
+#include "jpeg_constants.hpp"
 
 // Included for htons!
 #include <arpa/inet.h>

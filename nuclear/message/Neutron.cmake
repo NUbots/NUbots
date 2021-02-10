@@ -37,6 +37,18 @@ foreach(proto ${builtin_protobufs})
 
   list(APPEND protobuf_src "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h")
 
+  # Prevent Effective C++ and unused parameter error checks being performed on generated files.
+  set_source_files_properties(
+    "${message_binary_include_dir}/${file_we}.pb"
+    "${message_binary_include_dir}/${file_we}.proto"
+    "${message_binary_include_dir}/${file_we}.pb.cc"
+    "${message_binary_include_dir}/${file_we}.pb.h"
+    "${message_binary_include_dir}/${file_we}.cpp"
+    "${message_binary_include_dir}/${file_we}.py.cpp"
+    "${message_binary_include_dir}/${file_we}.hpp"
+    "${message_binary_include_dir}/${file_we}_pb2.py"
+    PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+  )
 endforeach(proto ${builtin_protobufs})
 
 # Build the user protocol buffers
@@ -117,7 +129,37 @@ foreach(proto ${message_protobufs})
     DEPENDS ${source_depends}
     COMMENT "Extracting protocol buffer information from ${proto}"
   )
-  # Build our C++ class from the extracted information
+
+  # The protobuf descriptions are generated
+  set_source_files_properties(
+    "${outputpath}/${file_we}.pb"
+    "${outputpath}/${file_we}.proto"
+    "${outputpath}/${file_we}.pb.cc"
+    "${outputpath}/${file_we}.pb.h"
+    "${outputpath}/${file_we}.cpp"
+    "${outputpath}/${file_we}.py.cpp"
+    "${outputpath}/${file_we}.hpp"
+    "${outputpath}/${file_we}_pb2.py"
+    PROPERTIES GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated
+                              # files.
+               COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+  )
+
+  # Add the generated files to our list
+  set(src ${src} "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h" "${outputpath}/${file_we}.cpp"
+          "${outputpath}/${file_we}.hpp"
+  )
+
+  # If we have pybind11 also add the python bindings
+  if(pybind11_FOUND)
+    set(src ${src} "${outputpath}/${file_we}.py.cpp")
+  endif()
+
+endforeach(proto)
+
+# If we have pybind11 we need to generate our final binding class
+if(pybind11_FOUND)
+  # Build our outer python binding wrapper class
   add_custom_command(
     OUTPUT "${nt}.cpp" "${nt}.py.cpp" "${nt}.h"
     COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${nt}"

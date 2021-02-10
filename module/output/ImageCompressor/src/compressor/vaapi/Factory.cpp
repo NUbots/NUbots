@@ -1,4 +1,4 @@
-#include "Factory.h"
+#include "Factory.hpp"
 
 #include <cstring>
 #include <fcntl.h>
@@ -9,12 +9,12 @@
 #include <va/va_drm.h>
 #include <va/va_enc_jpeg.h>
 
-#include "cl/opencl_context_for_display.h"
-#include "cl/opencl_error_category.h"
-#include "operation/create_surface.h"
+#include "cl/opencl_context_for_display.hpp"
+#include "cl/opencl_error_category.hpp"
+#include "operation/create_surface.hpp"
 #include "vaapi_error_category.hpp"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module::output::compressor::vaapi {
 

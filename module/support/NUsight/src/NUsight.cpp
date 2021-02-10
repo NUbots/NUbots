@@ -17,16 +17,16 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/SaveConfiguration.h"
-#include "message/support/nusight/Command.h"
+#include "message/support/SaveConfiguration.hpp"
+#include "message/support/nusight/Command.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/math/coordinates.h"
-#include "utility/nusight/NUhelpers.h"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace support {

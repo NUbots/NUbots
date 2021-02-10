@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GoalSaver.h"
+#include "GoalSaver.hpp"
 
 #include <armadillo>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/DiveCommand.h"
-#include "message/motion/WalkCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/DiveCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/motion/Script.hpp"
 
 namespace module {
 namespace behaviour {
@@ -109,10 +109,10 @@ namespace behaviour {
             // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph of
             // the 4 quadrants
             // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
-            return x >= std::abs(y) ? 0                                          // forward
-                                    : y >= std::abs(x) ? 1                       // left
-                                                       : x <= -std::abs(y) ? 2   // backward
-                                                                           : 3;  // right
+            return x >= std::abs(y)    ? 0   // forward
+                   : y >= std::abs(x)  ? 1   // left
+                   : x <= -std::abs(y) ? 2   // backward
+                                       : 3;  // right
         }
     }  // namespace skills
 }  // namespace behaviour
