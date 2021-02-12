@@ -1,4 +1,7 @@
 include(ToolchainLibraryFinder)
+
+find_package(glib2 REQUIRED)
+
 ToolchainLibraryFinder(
   NAME Aravis
   HEADER arv.h
