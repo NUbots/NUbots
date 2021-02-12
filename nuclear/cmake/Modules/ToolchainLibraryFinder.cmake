@@ -7,6 +7,7 @@ function(ToolchainLibraryFinder)
   set(multiValueArgs
       "HEADER"
       "LIBRARY"
+      "LIBRARIES"
       "PATH_SUFFIX"
       "BINARY"
       "VERSION_FILE"
@@ -17,6 +18,58 @@ function(ToolchainLibraryFinder)
 
   # Clear our required_vars variable
   unset(required_vars)
+
+  # Find our library from the named library files
+  if(PACKAGE_LIBRARY)
+    find_library(
+      "${PACKAGE_NAME}_LIBRARY"
+      NAMES ${PACKAGE_LIBRARY}
+      PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
+      DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) library"
+    )
+
+    # Setup an imported target for this library
+    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} UNKNOWN IMPORTED)
+    set_target_properties(${PACKAGE_NAME}::${PACKAGE_NAME} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_LIBRARY})
+
+    # Setup and export our variables
+    list(APPEND required_vars "${PACKAGE_NAME}_LIBRARY")
+    set(${PACKAGE_NAME}_LIBRARIES
+        ${${PACKAGE_NAME}_LIBRARY}
+        PARENT_SCOPE
+    )
+    mark_as_advanced(${PACKAGE_NAME}_LIBRARY ${PACKAGE_NAME}_LIBRARIES)
+
+  elseif(PACKAGE_LIBRARIES)
+    foreach(lib ${PACKAGE_LIBRARIES})
+      find_library(
+        "${PACKAGE_NAME}_${lib}_LIBRARY"
+        NAMES ${lib}
+        PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
+        DOC "The ${PACKAGE_NAME} (${lib}) library"
+      )
+
+      # Setup an imported target for this library
+      add_library(${PACKAGE_NAME}::${lib} UNKNOWN IMPORTED)
+      set_target_properties(${PACKAGE_NAME}::${lib} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_${lib}_LIBRARY})
+
+      # Setup and export our variables
+      set(required_vars ${required_vars} "${PACKAGE_NAME}_${lib}_LIBRARY")
+      list(APPEND ${PACKAGE_NAME}_LIBRARIES ${PACKAGE_NAME}::${lib})
+      mark_as_advanced(${PACKAGE_NAME}_${lib}_LIBRARY)
+    endforeach(lib ${PACKAGE_LIBRARIES})
+
+    # Link all of our imported targets to our imported library
+    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} INTERFACE IMPORTED)
+    target_link_libraries(${PACKAGE_NAME}::${PACKAGE_NAME} INTERFACE ${${PACKAGE_NAME}_LIBRARIES})
+
+    # Make sure the libraries exist in the parent scope
+    set(${PACKAGE_NAME}_LIBRARIES
+        ${${PACKAGE_NAME}_LIBRARIES}
+        PARENT_SCOPE
+    )
+    mark_as_advanced(${PACKAGE_NAME}_LIBRARIES)
+  endif(PACKAGE_LIBRARY)
 
   # Find our include path from our named headers
   if(PACKAGE_HEADER)
@@ -29,6 +82,9 @@ function(ToolchainLibraryFinder)
       PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
     )
 
+    # Add include directories to our imported library
+    target_include_directories(${PACKAGE_NAME}::${PACKAGE_NAME} SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIR})
+
     # Setup and export our variables
     list(APPEND required_vars "${PACKAGE_NAME}_INCLUDE_DIR")
     set(${PACKAGE_NAME}_INCLUDE_DIRS
@@ -39,33 +95,18 @@ function(ToolchainLibraryFinder)
 
   endif(PACKAGE_HEADER)
 
-  # Find our library from the named library files
-  if(PACKAGE_LIBRARY)
-    find_library(
-      "${PACKAGE_NAME}_LIBRARY"
-      NAMES ${PACKAGE_LIBRARY}
-      PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
-      DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) library"
-    )
-
-    # Setup and export our variables
-    list(APPEND required_vars "${PACKAGE_NAME}_LIBRARY")
-    set(${PACKAGE_NAME}_LIBRARIES
-        ${${PACKAGE_NAME}_LIBRARY}
-        PARENT_SCOPE
-    )
-    mark_as_advanced(${PACKAGE_NAME}_LIBRARY ${PACKAGE_NAME}_LIBRARIES)
-
-  endif(PACKAGE_LIBRARY)
-
   # Find our binary from the named binary files
   if(PACKAGE_BINARY)
     find_program(
       "${PACKAGE_NAME}_BINARY"
       NAMES ${PACKAGE_BINARY}
       PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
-      DOC "The ${PACKAGE_NAME} (${PACKAGE_BINARY}) executable prgram"
+      DOC "The ${PACKAGE_NAME} (${PACKAGE_BINARY}) executable program"
     )
+
+    # Created an imported executable
+    add_executable(${PACKAGE_NAME}::${PACKAGE_BINARY} IMPORTED GLOBAL)
+    set_target_properties(${PACKAGE_NAME}::${PACKAGE_BINARY} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_BINARY})
 
     # Setup and export our variables
     list(APPEND required_vars "${PACKAGE_NAME}_BINARY")
@@ -90,8 +131,8 @@ function(ToolchainLibraryFinder)
     if(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
       exec_program(
         ${${PACKAGE_NAME}_BINARY} ARGS
-        ${PACKAGE_VERSION_BINARY_ARGUMENTS} OUTPUT_VARIABLE
-        full_version_string
+        ${PACKAGE_VERSION_BINARY_ARGUMENTS}
+        OUTPUT_VARIABLE full_version_string
       )
     endif(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
 
@@ -110,7 +151,7 @@ function(ToolchainLibraryFinder)
     ${PACKAGE_NAME}
     FOUND_VAR ${PACKAGE_NAME}_FOUND
     REQUIRED_VARS ${required_vars}
-    VERSION_VAR ${PACKAGE_NAME}_VERSION # VERSION_VAR "${MAJOR}.${MINOR}.${PATCH}"
+    VERSION_VAR ${PACKAGE_NAME}_VERSION # VERSION_VAR "${MAJOR}.${MINOR}.${PATCH}")
   )
 
   # Export our found variable to parent scope
@@ -118,16 +159,5 @@ function(ToolchainLibraryFinder)
       ${PACKAGE_NAME}_FOUND
       PARENT_SCOPE
   )
-
-  # Create our imported library
-  add_library(${PACKAGE_NAME}::${PACKAGE_NAME} UNKNOWN IMPORTED)
-
-  if(PACKAGE_LIBRARY)
-    set_target_properties(${PACKAGE_NAME}::${PACKAGE_NAME} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_LIBRARY})
-  endif(PACKAGE_LIBRARY)
-
-  if(PACKAGE_HEADER)
-    target_include_directories(${PACKAGE_NAME}::${PACKAGE_NAME} SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIR})
-  endif(PACKAGE_HEADER)
 
 endfunction(ToolchainLibraryFinder)
