@@ -28,7 +28,7 @@
 
 #include "utility/math/coordinates.h"
 
-/*
+/**
  * Test data and functions to validate coordinates.cpp functions.
  *
  * Test value domain to stay between the values of TEST_DBL_MAX = 5.9667e+153, and TEST_DBL_MIN = 1.4853e-307
@@ -246,7 +246,7 @@ static const std::array<Eigen::Vector3d, 200> cart_coords = {
     Eigen::Vector3d(-0.383002588349182e+19, -1.486132196006383e+19, 1.272020870169739e+19),
     Eigen::Vector3d(-1.463015950215163e+19, 0.790902876388827e+19, 1.508782570074385)};
 
-/* Pre-calculated cartesian to spherical results
+/** Pre-calculated cartesian to spherical results
  * Calculated using matlab - The scripts and associated files can be found in shared/tests/utility/math/docs
  */
 static const std::array<Eigen::Vector3d, 200> cartToSpher_results = {
@@ -454,7 +454,7 @@ static const std::array<Eigen::Vector3d, 200> cartToSpher_results = {
 
 };
 
-/* Spherical test coords (radial distance, theta, phi)
+/** Spherical test coords (radial distance, theta, phi)
  */
 static const std::array<Eigen::Vector3d, 226> spher_coords = {
     Eigen::Matrix<double, 3, 1>(-5, 0, 0),
@@ -716,7 +716,7 @@ static const std::array<Eigen::Vector3d, 226> spher_coords = {
 
 };
 
-/* Pre-calculated spherical to cartesian conversion results
+/** Pre-calculated spherical to cartesian conversion results
  * Calculated using matlab - The scripts and associated files can be found in shared/tests/utility/math/docs
  */
 static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = {
@@ -951,7 +951,7 @@ static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = 
 
 };
 
-/* Test cartesianToSpherical conversion */
+/** Test cartesianToSpherical conversion */
 TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][math][coordinates]") {
     // Loops through test values and compare to results array
     for (size_t i = 0; i < cart_coords.size(); i++) {
@@ -986,7 +986,7 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
     }
 }
 
-/* Test sphericalToCartesian conversion */
+/** Test sphericalToCartesian conversion */
 TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][math][coordinates]") {
     INFO(fmt::format("{:*^50}", "Calculating cartesian coordinates for the origin"));
 
