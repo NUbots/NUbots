@@ -33,6 +33,10 @@ namespace math {
      * (r,phi,theta) represent radial distance, bearing (counter-clockwise from x-axis in xy-plane) and elevation
      * (measured from the xy plane) (in radians)
      * @author Alex Biddulph
+     *
+     * NOTE: Some of the functions below lack mechanisms to deal with large input values that would lead to
+     * infinite return values. This has been noted during testing and it has been determined that during
+     * normal operation, such values won't be possible.
      */
     namespace coordinates {
         inline arma::vec3 sphericalToCartesian(const arma::vec3& sphericalCoordinates) {
@@ -55,6 +59,11 @@ namespace math {
             if (sphericalCoordinates.x() < 0) {
                 throw std::domain_error("Radial distance must not be negative!");
             }
+            /*
+             *  Very large input values may cause inf return values due to arithmetic overflow.
+             *  Checks have been left out for performance reasons as it
+             *  is assumed that these values won't be possible in normal operation.
+             */
             U distance  = sphericalCoordinates[0];
             U cos_theta = cos(sphericalCoordinates[1]);
             U sin_theta = sin(sphericalCoordinates[1]);
@@ -93,7 +102,11 @@ namespace math {
             U y = cartesianCoordinates.y();
             U z = cartesianCoordinates.z();
             Eigen::Matrix<U, 3, 1> result;
-
+            /*
+             *  Very large input values may cause inf return values due to arithmetic overflow.
+             *  Checks have been left out for performance reasons as it
+             *  is assumed that these values won't be possible in normal operation.
+             */
             result.x() = std::sqrt(x * x + y * y + z * z);  // r
             result.y() = std::atan2(y, x);                  // theta
             if (result.x() == static_cast<U>(0)) {

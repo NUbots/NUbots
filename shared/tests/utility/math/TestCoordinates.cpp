@@ -27,20 +27,23 @@
 #include <utility>
 
 #include "utility/math/coordinates.h"
-//#include "utility/math/quaternion.h"
+
+/*
+ * Test data and functions to validate coordinates.cpp functions.
+ *
+ * Test value domain to stay between the values of TEST_DBL_MAX = 5.9667e+153, and TEST_DBL_MIN = 1.4853e-307
+ * This means the usual domain edge cases - DBL_MAX and DBL_MIN - have been left out or replaced. It has been determined
+ * that inputs approaching these edge cases will not be possible in normal operation. See coordinates.h comments for
+ * more details.
+ * @author Liam Craft
+ */
 
 static constexpr double ERROR_THRESHOLD = 1e-6;
-
-// NOTE: Test value domain to stay between the values of TEST_DBL_MAX = 5.9667e+153, and TEST_DBL_MIN = 1.4853e-307
-// This means edge cases - DBL_MAX and DBL_MIN - have been left out or replaced. It has been determined that
-// inputs approaching these edge cases will not be possible in normal operation. See coordinates.h comments for more
-// details.
-//
-static constexpr double TEST_DBL_MAX = 5.9667e+153;
-static constexpr double TEST_DBL_MIN = 1.4853e-307;
+static constexpr double TEST_DBL_MAX    = 5.9667e+153;
+static constexpr double TEST_DBL_MIN    = 1.4853e-307;
 
 
-// ****Cartesian test coords****
+/** Cartesian test coords */
 static const std::array<Eigen::Vector3d, 200> cart_coords = {
     Eigen::Vector3d(-0.492109181440401e+19, -0.080404385128274e+19, -1.673196359027018e+19),
     Eigen::Vector3d(1.787029403214489e+19, 1.018729997593175e+19, -1.615238543127342e+19),
@@ -243,8 +246,9 @@ static const std::array<Eigen::Vector3d, 200> cart_coords = {
     Eigen::Vector3d(-0.383002588349182e+19, -1.486132196006383e+19, 1.272020870169739e+19),
     Eigen::Vector3d(-1.463015950215163e+19, 0.790902876388827e+19, 1.508782570074385)};
 
-// ****Pre-calculated cartesian to spherical results****
-// Calculated using matlab - The scripts used can be found in shared/tests/utility/math/docs
+/* Pre-calculated cartesian to spherical results
+ * Calculated using matlab - The scripts and associated files can be found in shared/tests/utility/math/docs
+ */
 static const std::array<Eigen::Vector3d, 200> cartToSpher_results = {
     Eigen::Vector3d(1.745915910766343e+19, -2.979636408720502e+00, -1.281163364564730e+00),
     Eigen::Vector3d(2.615392981399442e+19, 5.181205779032036e-01, -6.656738190677697e-01),
@@ -450,8 +454,8 @@ static const std::array<Eigen::Vector3d, 200> cartToSpher_results = {
 
 };
 
-// ****Spherical test coords****
-// distance, theta, phi
+/* Spherical test coords (radial distance, theta, phi)
+ */
 static const std::array<Eigen::Vector3d, 226> spher_coords = {
     Eigen::Matrix<double, 3, 1>(-5, 0, 0),
     Eigen::Matrix<double, 3, 1>(-TEST_DBL_MIN, 0, 0),
@@ -541,7 +545,7 @@ static const std::array<Eigen::Vector3d, 226> spher_coords = {
     Eigen::Matrix<double, 3, 1>(1, 0, (2 * M_PI)),
     Eigen::Matrix<double, 3, 1>(1, (2 * M_PI), (2 * M_PI)),
 
-    // max values
+    // "max" values
     Eigen::Matrix<double, 3, 1>(-TEST_DBL_MAX, 0, 0),
     Eigen::Matrix<double, 3, 1>(TEST_DBL_MAX, 0, 0),
     // PI/2
@@ -710,11 +714,11 @@ static const std::array<Eigen::Vector3d, 226> spher_coords = {
     Eigen::Matrix<double, 3, 1>(4.87E+18, 2.9589, 4.6575),
     Eigen::Matrix<double, 3, 1>(2.69E+18, 4.3728, 3.2676)
 
-
 };
 
-// ****Pre-calculated spherical to cartesian conversion results****
-// Calculated using matlab - The scripts used can be found in shared/tests/utility/math/docs
+/* Pre-calculated spherical to cartesian conversion results
+ * Calculated using matlab - The scripts and associated files can be found in shared/tests/utility/math/docs
+ */
 static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = {
     Eigen::Matrix<double, 3, 1>(0, 0, -5),
     Eigen::Matrix<double, 3, 1>(0, 0, -1.485300000000000e-307),
@@ -807,7 +811,6 @@ static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = 
     Eigen::Matrix<double, 3, 1>(0, 0, 5.966700000000000e+153),
     Eigen::Matrix<double, 3, 1>(-1.461420011294502e+138, 0, 5.966700000000000e+153),
     Eigen::Matrix<double, 3, 1>(-1.461420011294502e+138, 3.579446678083402e+122, 5.966700000000000e+153),
-
 
     // Values between edge cases
     Eigen::Matrix<double, 3, 1>(-1.117213734950550e+19, -8.865729297606710e+18, -4.645663684054431e+18),
@@ -948,18 +951,16 @@ static const std::array<Eigen::Matrix<double, 3, 1>, 226> spherToCart_results = 
 
 };
 
-// ****Test cartesianToSpherical conversion****
+/* Test cartesianToSpherical conversion */
 TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][math][coordinates]") {
-    //****
-    // Loop through test values and compare to results array
+    // Loops through test values and compare to results array
     for (size_t i = 0; i < cart_coords.size(); i++) {
         Eigen::Vector3d cart_input   = cart_coords[i];
         Eigen::Vector3d cart_compare = cartToSpher_results[i];
         Eigen::Vector3d spher_result = utility::math::coordinates::cartesianToSpherical(cart_input);
-        // Note: changed from outputting difference to outputting epsilon values
-        Approx epsilon_x = Approx(cart_compare.x()).epsilon(ERROR_THRESHOLD);
-        Approx epsilon_y = Approx(cart_compare.y()).epsilon(ERROR_THRESHOLD);
-        Approx epsilon_z = Approx(cart_compare.z()).epsilon(ERROR_THRESHOLD);
+        Approx epsilon_x             = Approx(cart_compare.x()).epsilon(ERROR_THRESHOLD);
+        Approx epsilon_y             = Approx(cart_compare.y()).epsilon(ERROR_THRESHOLD);
+        Approx epsilon_z             = Approx(cart_compare.z()).epsilon(ERROR_THRESHOLD);
         //***Output table***
         INFO(fmt::format("{:*^50}", "Calculating Spherical coordinates for the origin"));
         INFO(fmt::format("{:-^50}", ""));
@@ -979,48 +980,29 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
         INFO(fmt::format("{:-^50}", ""));
         INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
         INFO("Failed test value at index: " << i);
-        // FORCE FAIL
-        // REQUIRE(1 == 2);
-        //
         REQUIRE(spher_result.x() == epsilon_x);
         REQUIRE(spher_result.y() == epsilon_y);
         REQUIRE(spher_result.z() == epsilon_z);
     }
 }
 
-// ****Test sphericalToCartesian conversion****
+/* Test sphericalToCartesian conversion */
 TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][math][coordinates]") {
-    // INFO("************Calculating cartesian coordinates for the origin****************");
     INFO(fmt::format("{:*^50}", "Calculating cartesian coordinates for the origin"));
 
     for (size_t i = 0; i < spher_coords.size(); i++) {
         Eigen::Matrix<double, 3, 1> spher_input   = spher_coords[i];
         Eigen::Matrix<double, 3, 1> spher_compare = spherToCart_results[i];
         Eigen::Matrix<double, 3, 1> cart_result   = Eigen::Matrix<double, 3, 1>(0, 0, 0);
-        //
+        // Throws a domain error if radial dist is negative
         if (spher_input.x() < 0) {
-            //
             REQUIRE_THROWS_AS(utility::math::coordinates::sphericalToCartesian(spher_input), std::domain_error);
         }
         else {
-            cart_result = utility::math::coordinates::sphericalToCartesian(spher_input);
-            // Note: changed from outputting difference to outputting epsilon values
+            cart_result      = utility::math::coordinates::sphericalToCartesian(spher_input);
             Approx epsilon_x = Approx(spher_compare.x()).epsilon(ERROR_THRESHOLD);
             Approx epsilon_y = Approx(spher_compare.y()).epsilon(ERROR_THRESHOLD);
             Approx epsilon_z = Approx(spher_compare.z()).epsilon(ERROR_THRESHOLD);
-            //***Table heading***
-            // INFO("----------------------------------------------------------------------------");
-            // INFO(std::left << std::setw(18) << "Input" << std::setw(18) << "Ext calc result" << std::setw(18)
-            //                << "Util result" << std::setw(18) << "Epsilon");
-            // INFO("----------------------------------------------------------------------------");
-            // // New output - Table format
-            // INFO(std::left << std::setw(18) << spher_input.x() << std::setw(18) << spher_compare.x() << std::setw(18)
-            //                << cart_result.x() << std::setw(18) << epsilon_x.toString() << "\n"
-            //                << std::left << std::setw(18) << spher_input.y() << std::setw(18) << spher_compare.y()
-            //                << std::setw(18) << cart_result.y() << std::setw(18) << epsilon_y.toString() << "\n"
-            //                << std::left << std::setw(18) << spher_input.z() << std::setw(18) << spher_compare.z()
-            //                << std::setw(18) << cart_result.z() << std::setw(18) << epsilon_z.toString());
-            // INFO("----------------------------------------------------------------------------");
             //****Output table****
             INFO(fmt::format("{:*^50}", "Calculating Spherical coordinates for the origin"));
             INFO(fmt::format("{:-^50}", ""));
@@ -1039,9 +1021,6 @@ TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][mat
                              epsilon_z.toString()));
             INFO("Difference should be within the error threshold: " << ERROR_THRESHOLD << ".");
             INFO("Failed test value at index: " << i);
-            // test output
-            // INFO("Test output TEST_DBL_MIN = " << TEST_DBL_MIN << "|input val = " << spher_input[0]);
-
             REQUIRE(cart_result.x() == epsilon_x);
             REQUIRE(cart_result.y() == epsilon_y);
             REQUIRE(cart_result.z() == epsilon_z);
