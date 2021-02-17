@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "KeyboardWalk.h"
+#include "KeyboardWalk.hpp"
 
 #include <clocale>
 #include <csignal>
 #include <cstdio>
 #include <fmt/format.h>
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KickCommand.h"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KickCommand.hpp"
 
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
-#include "utility/math/matrix/Transform2D.h"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
 
 namespace module {
 namespace behaviour {

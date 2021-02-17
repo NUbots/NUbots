@@ -17,15 +17,15 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Stand.h"
+#include "Stand.hpp"
 
-#include "extension/Script.h"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace behaviour {

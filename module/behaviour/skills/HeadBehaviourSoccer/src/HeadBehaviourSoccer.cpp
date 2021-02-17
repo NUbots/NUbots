@@ -17,26 +17,26 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "HeadBehaviourSoccer.h"
+#include "HeadBehaviourSoccer.hpp"
 
 #include <string>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/localisation/Field.h"
-#include "message/motion/GetupCommand.h"
-#include "message/motion/HeadCommand.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/localisation/Field.hpp"
+#include "message/motion/GetupCommand.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/math/coordinates.h"
-#include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/UnitQuaternion.hpp"
+#include "utility/math/matrix/Rotation3D.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_armadillo.hpp"
 
 
 namespace module {
@@ -470,15 +470,8 @@ namespace behaviour {
                                                  const Image::Lens& lens) {
             std::vector<arma::vec2> fixationPoints;
             std::vector<arma::vec2> fixationSizes;
-            arma::vec2 currentPos;
-            for (const auto& servo : sensors.servo) {
-                if (servo.id == ServoID::HEAD_YAW) {
-                    currentPos[0] = servo.present_position;
-                }
-                if (servo.id == ServoID::HEAD_PITCH) {
-                    currentPos[1] = servo.present_position;
-                }
-            }
+            arma::vec2 currentPos = {sensors.servo[ServoID::HEAD_YAW].present_position,
+                                     sensors.servo[ServoID::HEAD_PITCH].present_position};
 
             for (uint i = 0; i < fixationObjects.goals.size(); i++) {
                 // TODO: fix arma meat errors here

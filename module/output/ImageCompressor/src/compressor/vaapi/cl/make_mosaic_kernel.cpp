@@ -1,9 +1,9 @@
-#include "make_mosaic_kernel.h"
+#include "make_mosaic_kernel.hpp"
 
 #include <fmt/format.h>
 
-#include "../../mosaic.h"
-#include "opencl_error_category.h"
+#include "../../mosaic.hpp"
+#include "opencl_error_category.hpp"
 
 namespace module::output::compressor::vaapi::cl {
 std::pair<cl::program, cl::kernel> make_mosaic_kernel(CompressionContext::OpenCLContext context,

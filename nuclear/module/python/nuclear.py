@@ -284,8 +284,8 @@ def Reactor(reactor):
             for include in reaction[1].include_paths():
                 includes.add('#include "{}"'.format(include))
 
-        macro_guard = "{}_H".format(reactor_name.upper())
-        header_file = "{}.h".format(reactor_name)
+        macro_guard = "{}_HPP".format(reactor_name.upper())
+        header_file = "{}.hpp".format(reactor_name)
         open_namespace = "\n".join("namespace {} {{".format(n) for n in reactor_namespace.split(os.path.sep))
         close_namespace = "\n".join("}}  // namespace {}".format(n) for n in reactor_namespace.split(os.path.sep))
 
@@ -326,7 +326,7 @@ def Reactor(reactor):
             """
         )
 
-        with open(os.getcwd() + os.sep + reactor_name + ".h", "w") as f:
+        with open(os.getcwd() + os.sep + reactor_name + ".hpp", "w") as f:
             f.write(
                 header_template.format(
                     class_name=reactor_name,

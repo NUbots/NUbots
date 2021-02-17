@@ -7,20 +7,19 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
-  support::configuration::NetworkConfiguration
+  network::NUClearNet
   support::NUsight
   # Hardware Interface
   platform::darwin::HardwareIO
   platform::darwin::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::ScriptEngine
   motion::HeadController
   # Behaviour
   behaviour::Controller
   behaviour::skills::Stand
-  # behaviour::skills::FallingRelax
-  behaviour::skills::Getup
+  # behaviour::skills::FallingRelax behaviour::skills::Getup
   behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
   behaviour::strategy::KeyboardWalk
