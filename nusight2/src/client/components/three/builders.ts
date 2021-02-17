@@ -143,7 +143,11 @@ type MeshOpts = Object3DOpts & {
 }
 
 export const mesh = createUpdatableComputed(
-  (opts: MeshOpts) => new Mesh(opts.geometry, opts.material),
+  (opts: MeshOpts) => {
+    const mesh = new Mesh(opts.geometry, opts.material)
+    updateObject3D(mesh, opts)
+    return mesh
+  }
   (mesh, opts) => {
     mesh.geometry = opts.geometry
     mesh.material = opts.material
@@ -427,7 +431,7 @@ function updateObject3D(object: Object3D, opts: Object3DOpts) {
     object.rotation.set(opts.rotation.x, opts.rotation.y, opts.rotation.z, opts.rotationOrder)
   opts.scale && object.scale.set(opts.scale.x, opts.scale.y, opts.scale.z)
   opts.up && object.up.set(opts.up.x, opts.up.y, opts.up.z)
-  object.frustumCulled = opts.frustumCulled != null ? opts.frustumCulled : true
+  object.frustumCulled = opts.frustumCulled ?? true
 }
 
 function truthy<T>(x: T | undefined | null | false): x is T {
