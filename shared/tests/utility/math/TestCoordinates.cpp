@@ -26,7 +26,7 @@
 #include <iomanip>
 #include <utility>
 
-#include "utility/math/coordinates.h"
+#include "utility/math/coordinates.hpp"
 
 /**
  * Test data and functions to validate coordinates.cpp functions.
