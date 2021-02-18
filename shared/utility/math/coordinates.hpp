@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_COORDINATES_H
-#define UTILITY_MATH_COORDINATES_H
+#ifndef UTILITY_MATH_COORDINATES_HPP
+#define UTILITY_MATH_COORDINATES_HPP
 
 #include <Eigen/Core>
 #include <armadillo>
