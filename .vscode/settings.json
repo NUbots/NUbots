@@ -19,5 +19,8 @@
     "yaml.format.printWidth": 120,
     "files.associations": {
         "*.role": "cmake"
+    },
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
     }
 }
