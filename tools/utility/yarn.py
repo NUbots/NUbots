@@ -23,6 +23,13 @@ def find_eslint(node_modules_path):
 def find_package_json(project_root=".", package_name="NUsight"):
     # Find path to package.json
     # We need to run the eslint command from this directory
+
+    # First check where we expect NUsight's package.json to be
+    nusight_root = os.path.join(project_root, "nusight2")
+    if os.path.exists(os.path.join(nusight_root, "package.json")):
+        return nusight_root
+
+    # Walk the files in the project to find NUsight's package.json
     package_path = project_root
     for root, _, files in os.walk(project_root):
         for entry in files:
