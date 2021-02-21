@@ -66,6 +66,9 @@ packer/build.pwi
 *.tdo
 *TSWLatexianTemp*
 
+# Tests
+tests_output/
+
 # Misc
 tags
 *.swp
