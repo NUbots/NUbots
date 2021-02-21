@@ -19,6 +19,7 @@
 
 #include <Eigen/Geometry>
 #include <catch.hpp>
+#include <fmt/format.h>
 
 #include "utility/motion/splines/Combination.hpp"
 #include "utility/motion/splines/Polynom.hpp"
@@ -220,7 +221,7 @@ TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
     }
 }
 
-const float ERROR = 1e6;  // Error for testing floats
+const float ERROR = 1e-6f;  // Error for testing floats
 
 // Test the smooth spline. Given a set of points (with first and second derivatives), the smooth spline will create
 // piecewise polynomials. We will test that each polynomial satisfies the original contraints given, which are the
@@ -229,20 +230,30 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
     utility::motion::splines::SmoothSpline<double> spline;
 
     // Generate random splines and test that the contraints hold
-    for (int i = 0; i < 100; i++) {
+    for (int j = 0; j < 100; j++) {
         spline.reset();
 
         // Get a random number of points for this spline
         size_t noPoints = rand() % 6;
         std::vector<Eigen::Vector4d> points;
 
+        // This value will keep track of the last t value - we want them to be consecutive, so we will check against
+        // this. Start it negative since the generated t values will not be negative
+        double point_t = -1.0;
+
         // Add our points to the spline
         for (size_t i = 0; i < noPoints; i++) {
             Eigen::Vector4d point = Eigen::Vector4d::Random();  // random 4d array of numbers between -1 and 1
             point *= 10;                                        // values are between -10 and 10
-            point.x() += (i + 1) * 10;  // this will ensure no t values are negative and they are always consecutive
+            point[0] = std::abs(point[0]);
+
+            // If the last t and this t are not consecutive, add them together... plus 1 incase point_t is 0
+            point[0] = (point[0] < point_t) ? (point[0] + point_t + 1) : point[0];
+
             spline.addPoint(point[0], point[1], point[2], point[3]);
             points.push_back(point);
+
+            point_t = point[0];  // update the previous t value
         }
 
         // If there were not enough points to create any polynomials, make sure no splines were created and then jump to
@@ -293,11 +304,17 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
                 }
 
                 // Log calculated and expected values of each contraint, and the spline coefficients a_0 to a_5
-                INFO(x << " " << points[i + k][1] << "\n"
-                       << xd << " " << points[i + k][2] << "\n"
-                       << xdd << " " << points[i + k][3]);
-                INFO(splineResult[0] << " " << splineResult[1] << " " << splineResult[2] << " " << splineResult[3]
-                                     << " " << splineResult[4] << " " << splineResult[5]);
+                INFO(fmt::format("{} points. t = {}.", noPoints, t));
+                INFO(fmt::format("For x, expected {}, got {}", points[i + k][1], x));
+                INFO(fmt::format("For x', expected {}, got {}", points[i + k][2], x));
+                INFO(fmt::format("For x'', expected {}, got {}", points[i + k][3], x));
+                INFO(fmt::format("f(t) = {} + {}t + {}t^2 + {}t^3 + {}t^4 + {}t^5",
+                                 splineResult[0],
+                                 splineResult[1],
+                                 splineResult[2],
+                                 splineResult[3],
+                                 splineResult[4],
+                                 splineResult[5]));
 
                 // Check that the contraints hold - do the computed values from the spline match the given random values
                 // Check the difference is within a small error since we are using floating point values
