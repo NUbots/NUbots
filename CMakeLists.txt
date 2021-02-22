@@ -74,13 +74,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
   add_compile_options(-fcolor-diagnostics)
 endif()
 
-# Set flag so NUClear uses a custom clock implementation
-option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
-if(USE_CUSTOM_CLOCK)
-  add_definitions(-DNUCLEAR_CUSTOM_CLOCK)
-  add_subdirectory(shared/clock)
-endif(USE_CUSTOM_CLOCK)
-
 # Our banner file for placing at the top of the roles
 set(NUCLEAR_ROLE_BANNER_FILE
     "${PROJECT_SOURCE_DIR}/cmake/banner.png"
@@ -90,27 +83,10 @@ set(NUCLEAR_ROLE_BANNER_FILE
 # Include the NUClear roles system
 add_subdirectory(nuclear)
 
-# Some libraries seem to not know when to make things advanced so we give them a hand here
-mark_as_advanced(SQLiteCpp_DIR fmt_DIR yaml-cpp_DIR NUClear_DIR Eigen3_DIR)
-
-# Hide some cmake variables that will never be used
-mark_as_advanced(
-  CMAKE_INSTALL_PREFIX
-  CURSES_CURSES_H_PATH
-  CURSES_FORM_LIBRARY
-  CURSES_HAVE_CURSES_H
-  OMPLAPP_LIBRARY
-  OMPL_CONFIG
-  OMPL_DIR
-  OMPL_INCLUDE_DIRS
-  OMPL_LIBRARIES
-  OMPL_LIBRARY
-)
-
-# Messages and utilities have a dependency on the custom clock implementation
+# Setting to use the custom clock with an adaptable rate
+option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
 if(USE_CUSTOM_CLOCK)
-  target_link_libraries(${NUCLEAR_UTILITY_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
-  target_link_libraries(${NUCLEAR_MESSAGE_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
+  add_subdirectory(shared/clock)
 endif(USE_CUSTOM_CLOCK)
 
 # Enable sending binaries to robots
