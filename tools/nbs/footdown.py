@@ -9,8 +9,7 @@ import numpy as np
 import tensorflow as tf
 import yaml
 from tensorflow import keras
-
-from .nbs import Decoder
+from utility.nbs import LinearDecoder
 
 SERVO_ID = {
     "R_SHOULDER_PITCH": 0,
@@ -66,48 +65,46 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
     xs = []
     ys = []
 
-    decoder = Decoder(path)
-    with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
-        for packet in decoder:
-            if packet.type == "message.input.Sensors":
-                msg = packet.msg
+    for packet in tqdm(LinearDecoder(path, show_progress=True), unit="packet", unit_scale=True, dynamic_ncols=True):
+        if packet.type == "message.input.Sensors":
+            msg = packet.msg
 
-                # Work out how far the foot is from the torso
-                l_height = displacement(msg.Htx[SERVO_ID["L_ANKLE_ROLL"]])
-                r_height = displacement(msg.Htx[SERVO_ID["R_ANKLE_ROLL"]])
-                delta = abs(l_height - r_height)
+            # Work out how far the foot is from the torso
+            l_height = displacement(msg.Htx[SERVO_ID["L_ANKLE_ROLL"]])
+            r_height = displacement(msg.Htx[SERVO_ID["R_ANKLE_ROLL"]])
+            delta = abs(l_height - r_height)
 
-                # Calculate what our foot down should be for each foot based on the state
-                y = {
-                    "R_": {"up": 0, "down": 1, "mixed": 1 if r_height - foot_delta < l_height else 0}[right_state],
-                    "L_": {"up": 0, "down": 1, "mixed": 1 if l_height - foot_delta < r_height else 0}[left_state],
-                }
+            # Calculate what our foot down should be for each foot based on the state
+            y = {
+                "R_": {"up": 0, "down": 1, "mixed": 1 if r_height - foot_delta < l_height else 0}[right_state],
+                "L_": {"up": 0, "down": 1, "mixed": 1 if l_height - foot_delta < r_height else 0}[left_state],
+            }
 
-                # If we are duplicating left right/right left do that here
-                for sides in [("R_", "L_"), ("L_", "R_")] if lr_duplicate else [("R_", "L_")]:
-                    x = []
-                    for servo in servos:
-                        for s in sides:
-                            s = msg.servo[SERVO_ID[s + servo]]
-                            values = {"LOAD": s.load, "POSITION": s.present_position, "VELOCITY": s.present_velocity}
+            # If we are duplicating left right/right left do that here
+            for sides in [("R_", "L_"), ("L_", "R_")] if lr_duplicate else [("R_", "L_")]:
+                x = []
+                for servo in servos:
+                    for s in sides:
+                        s = msg.servo[SERVO_ID[s + servo]]
+                        values = {"LOAD": s.load, "POSITION": s.present_position, "VELOCITY": s.present_velocity}
 
-                            for field in fields:
-                                x.append(values[field])
-                    if accelerometer:
-                        # If we mirror the robot, it means we mirror the y axis
-                        x.extend(
-                            [
-                                msg.accelerometer.x,
-                                msg.accelerometer.y if sides[0] == "R_" else -msg.accelerometer.y,
-                                msg.accelerometer.z,
-                            ]
-                        )
-                    if gryoscope:
-                        x.extend([msg.gyroscope.x, msg.gyroscope.y, msg.gyroscope.z])
+                        for field in fields:
+                            x.append(values[field])
+                if accelerometer:
+                    # If we mirror the robot, it means we mirror the y axis
+                    x.extend(
+                        [
+                            msg.accelerometer.x,
+                            msg.accelerometer.y if sides[0] == "R_" else -msg.accelerometer.y,
+                            msg.accelerometer.z,
+                        ]
+                    )
+                if gryoscope:
+                    x.extend([msg.gyroscope.x, msg.gyroscope.y, msg.gyroscope.z])
 
-                    # Swap the truth values if we are swap
-                    ys.append((y[sides[0]], y[sides[1]]))
-                    xs.append(x)
+                # Swap the truth values if we are swap
+                ys.append((y[sides[0]], y[sides[1]]))
+                xs.append(x)
 
     return np.array(xs), np.array(ys)
 
@@ -115,9 +112,7 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
 def register(command):
     command.help = "Train a foot down network using sensor data from the legs"
     command.add_argument(
-        "data_dir",
-        metavar="data_dir",
-        help="The foldering containing the segmented training data and configuration file",
+        "data_dir", metavar="data_dir", help="The folder containing the segmented training data and configuration file",
     )
 
 
