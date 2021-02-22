@@ -99,24 +99,21 @@ if __name__ == "__main__":
                     if sys.argv[1 : len(components) + 1] == components:
 
                         # Load the module
-                        loaded = False
-                        while not loaded:
-                            try:
-                                module = pkgutil.find_loader(".".join(components)).load_module()
-                                loaded = True
-                            except ModuleNotFoundError as e:
-                                print(f'missing command dependency "{e.name}"')
+                        try:
+                            module = pkgutil.find_loader(".".join(components)).load_module()
+                        except ModuleNotFoundError as e:
+                            print(f'missing command dependency "{e.name}"')
 
-                                dependency = find_dependency(e.name, user_tools_path)
-                                package = dependency["version"]
+                            dependency = find_dependency(e.name, user_tools_path)
+                            package = dependency["version"]
 
-                                print(f'installing missing dependency "{package}"...')
-                                print()
+                            print(f'installing missing dependency "{package}"...')
+                            print()
 
-                                install_dependency(package)
+                            install_dependency(package)
 
-                                # Try rerunning ourself now the library exists
-                                sys.exit(subprocess.call([sys.executable, *sys.argv]))
+                            # Try rerunning ourself now the library exists
+                            sys.exit(subprocess.call([sys.executable, *sys.argv]))
 
     # If we reach this point, we couldn't find a tool to use.
     # In this case we need to look through all the tools so we can register them all.
