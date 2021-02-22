@@ -10,5 +10,4 @@ ToolchainLibraryFinder(
   LIBRARY armadillo
 )
 
-target_compile_definitions(Armadillo::Armadillo INTERFACE ARMA_DONT_USE_WRAPPER)
 target_link_libraries(Armadillo::Armadillo INTERFACE OpenBLAS::OpenBLAS)
