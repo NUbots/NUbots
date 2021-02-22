@@ -54,7 +54,7 @@ def run(target, user, config, toolchain, **kwargs):
 
     cprint("Installing binaries to " + target_dir, "blue", attrs=["bold"])
     files = glob.glob(os.path.join(build_dir, "bin", "*"))
-    subprocess.call(["rsync", "-avzPl", "--checksum", "-e ssh"] + files + [target_dir])
+    subprocess.call(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_dir])
 
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
@@ -65,13 +65,15 @@ def run(target, user, config, toolchain, **kwargs):
         subprocess.call(
             [
                 "rsync",
-                "-avzlP",
+                "-avPl",
                 "--include=local",
                 "--include=local/lib",
                 "--include=local/lib/**/",
                 "--include=local/lib/**.so",
                 "--include=local/lib/**.so.*",
                 "--include=local/lib/python3.7/**",
+                "--include=local/sbin",
+                "--include=local/sbin/**",
                 "--include=local/share",
                 "--include=local/share/**",
                 "--exclude=*",
@@ -100,15 +102,15 @@ def run(target, user, config, toolchain, **kwargs):
 
     if config in ["overwrite", "o"]:
         cprint("Overwriting configuration files on target", "blue", attrs=["bold"])
-        subprocess.call(["rsync", "-avzPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
+        subprocess.call(["rsync", "-avPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
 
     if config in ["update", "u"]:
         cprint("Updating configuration files that are older on target", "blue", attrs=["bold"])
-        subprocess.call(["rsync", "-avzuPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
+        subprocess.call(["rsync", "-avuPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
 
     if config in ["new", "n"]:
         cprint("Adding new configuration files to the target", "blue", attrs=["bold"])
-        subprocess.call(["rsync", "-avzPLR", "--checksum", "--ignore-existing", "-e ssh"] + config_files + [target_dir])
+        subprocess.call(["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e ssh"] + config_files + [target_dir])
 
     if config in ["ignore", "i"]:
         cprint("Ignoring configuration changes", "blue", attrs=["bold"])
