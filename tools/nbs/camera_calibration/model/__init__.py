@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
+from .camera_system_model import CameraSystemModel
 from .equidistant import EquidistantModel
 from .equisolid import EquisolidModel
-from .extrinsic_cluster import ExtrinsicCluster
 from .rectilinear import RectilinearModel
