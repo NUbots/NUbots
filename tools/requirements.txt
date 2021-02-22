@@ -1,0 +1,20 @@
+# Packages for all ./b commands, installed on demand when a command is run
+pillow>=6.2.0
+protobuf~=3.11.2
+pybind11~=2.2.4
+stringcase~=1.2.0
+numpy~=1.18.5
+tensorflow~=2.2.0
+ruamel.yaml~=0.16.12
+opencv-contrib-python~=4.2.0.32
+Pillow~=7.2.0
+moderngl~=5.6.2
+moderngl-window~=2.2.3
+termcolor~=1.1.0
+tqdm~=4.48.2
+xxhash~=1.4.2
+PySide2~=5.15.1
+scipy~=1.5.2
+PyOpenGL~=3.1.5
+si-prefix~=1.2.2
+pytimeparse~=1.1.8
