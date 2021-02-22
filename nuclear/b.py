@@ -114,7 +114,7 @@ if __name__ == "__main__":
 
                             install_dependency(package)
 
-                            # Try rerunning ourself now the library exists
+                            # Try re-running the current command now that the library exists
                             sys.exit(subprocess.call([sys.executable, *sys.argv]))
 
                         if hasattr(module, "register") and hasattr(module, "run"):
