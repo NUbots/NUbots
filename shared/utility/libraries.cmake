@@ -1,12 +1,17 @@
 find_package(Eigen3 REQUIRED)
-find_package(ExprTk REQUIRED)
-find_package(fmt REQUIRED)
-find_package(Aravis REQUIRED)
-
-target_link_libraries(nuclear_utility PRIVATE ExprTk::ExprTk)
 target_link_libraries(nuclear_utility PUBLIC Eigen3::Eigen)
+
+find_package(ExprTk REQUIRED)
+target_link_libraries(nuclear_utility PRIVATE ExprTk::ExprTk)
+
+find_package(fmt REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC fmt::fmt)
+
+find_package(Aravis REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC Aravis::Aravis)
+
+find_package(Armadillo REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC ${ARMADILLO_LIBRARIES})
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
