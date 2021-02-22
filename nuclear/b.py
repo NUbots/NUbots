@@ -3,6 +3,7 @@ import argparse
 import os
 import pkgutil
 import re
+import subprocess
 import sys
 
 # Don't make .pyc files
@@ -98,22 +99,24 @@ if __name__ == "__main__":
                     if sys.argv[1 : len(components) + 1] == components:
 
                         # Load the module
-                        module = pkgutil.find_loader(".".join(components)).load_module()
-                        if hasattr(module, "register") and hasattr(module, "run"):
+                        loaded = False
+                        while not loaded:
+                            try:
+                                module = pkgutil.find_loader(".".join(components)).load_module()
+                                loaded = True
+                            except ModuleNotFoundError as e:
+                                print(f'missing command dependency "{e.name}"')
 
-                            # Build up the base subcommands to this point
-                            subcommand = subcommands
-                            for c in components[:-1]:
-                                subcommand = subcommand.add_parser(c).add_subparsers(
-                                    dest="{}_command".format(c),
-                                    help="Commands related to working with {} functionality".format(c),
-                                )
+                                dependency = find_dependency(e.name, user_tools_path)
+                                package = dependency["version"]
 
-                            module.register(subcommand.add_parser(components[-1]))
-                            module.run(**vars(command.parse_args()))
+                                print(f'installing missing dependency "{package}"...')
+                                print()
 
-                            # We're done, exit
-                            exit(0)
+                                install_dependency(package)
+
+                                # Try rerunning ourself now the library exists
+                                sys.exit(subprocess.call([sys.executable, *sys.argv]))
 
     # If we reach this point, we couldn't find a tool to use.
     # In this case we need to look through all the tools so we can register them all.
