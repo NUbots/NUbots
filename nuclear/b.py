@@ -6,6 +6,8 @@ import re
 import subprocess
 import sys
 
+from dependencies import find_dependency, install_dependency
+
 # Don't make .pyc files
 sys.dont_write_bytecode = True
 
@@ -73,9 +75,9 @@ except:
 
 if __name__ == "__main__":
 
-    # Prepend nuclear and user tools to the path, so we prefer our packages
-    sys.path.insert(0, nuclear_tools_path)
-    sys.path.insert(0, user_tools_path)
+    # Add our builtin tools to the path and user tools
+    sys.path.append(user_tools_path)
+    sys.path.append(nuclear_tools_path)
 
     # Root parser information
     command = argparse.ArgumentParser(
@@ -114,6 +116,23 @@ if __name__ == "__main__":
 
                             # Try rerunning ourself now the library exists
                             sys.exit(subprocess.call([sys.executable, *sys.argv]))
+
+                        if hasattr(module, "register") and hasattr(module, "run"):
+
+                            # Build up the base subcommands to this point
+                            subcommand = subcommands
+                            for c in components[:-1]:
+                                subcommand = subcommand.add_parser(c).add_subparsers(
+                                    dest="{}_command".format(c),
+                                    help="Commands related to working with {} functionality".format(c),
+                                )
+                            subcommand.required = True
+
+                            module.register(subcommand.add_parser(components[-1]))
+                            module.run(**vars(command.parse_args()))
+
+                            # We're done, exit
+                            exit(0)
 
     # If we reach this point, we couldn't find a tool to use.
     # In this case we need to look through all the tools so we can register them all.
