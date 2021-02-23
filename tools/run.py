@@ -2,10 +2,10 @@
 
 import os
 
+from dockerise import WrapPty, run_on_docker
 from termcolor import cprint
 
 import b
-from dockerise import WrapPty, run_on_docker
 
 
 @run_on_docker
