@@ -5,8 +5,9 @@ import os
 import sys
 from subprocess import STDOUT, CalledProcessError, check_output
 
-import b
 from dockerise import run_on_docker
+
+import b
 
 
 def _do_format(path):
