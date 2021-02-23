@@ -2,9 +2,8 @@
 
 import subprocess
 
-from termcolor import cprint
-
 import b
+from termcolor import cprint
 from utility.dockerise import defaults, platform
 
 
@@ -19,15 +18,15 @@ def register(command):
 def run(target, **kwargs):
 
     if target is None:
-        target = platform.selected(defaults.repository)
+        target = platform.selected(defaults.image)
         print("Currently selected platform is {}".format(target))
     else:
         # Ensure the platform image is built
-        platform.build(defaults.repository, target)
+        platform.build(defaults.image, target)
 
         # Tag the built platform image is the selected image
-        tag = "{}:{}".format(defaults.repository, target)
-        err = subprocess.call(["docker", "image", "tag", tag, "{}:selected".format(defaults.repository)])
+        tag = "{}:{}".format(defaults.image, target)
+        err = subprocess.call(["docker", "image", "tag", tag, "{}:selected".format(defaults.image)])
         if err != 0:
             cprint("docker image tag returned exit code {}".format(err), "red", attrs=["bold"])
             exit(err)

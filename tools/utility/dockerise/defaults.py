@@ -2,6 +2,7 @@
 from . import platform
 
 repository = "nubots"
+image = "nubots"
 user = "nubots"
 directory = "NUbots"
 

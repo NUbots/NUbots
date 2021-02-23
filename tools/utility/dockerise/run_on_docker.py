@@ -8,7 +8,7 @@ from .run import run
 
 def run_on_docker(_func=None, image=None, **kwargs):
 
-    image = "{}:selected".format(defaults.repository) if image is None else image
+    image = "{}:selected".format(defaults.image) if image is None else image
 
     # Someone just used the decorator with no arguments they want to run on our default image
     # Either that or they
