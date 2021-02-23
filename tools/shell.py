@@ -5,6 +5,7 @@ from utility.dockerise import run_on_docker
 from utility.shell import WrapPty
 
 
+
 @run_on_docker
 def register(command):
     # Install help
