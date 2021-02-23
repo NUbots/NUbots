@@ -90,8 +90,8 @@ function(ToolchainLibraryFinder)
     if(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
       exec_program(
         ${${PACKAGE_NAME}_BINARY} ARGS
-        ${PACKAGE_VERSION_BINARY_ARGUMENTS} OUTPUT_VARIABLE
-        full_version_string
+        ${PACKAGE_VERSION_BINARY_ARGUMENTS}
+        OUTPUT_VARIABLE full_version_string
       )
     endif(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
 
