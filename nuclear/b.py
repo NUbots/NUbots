@@ -3,6 +3,7 @@ import argparse
 import os
 import pkgutil
 import re
+import subprocess
 import sys
 
 from dependencies import find_dependency, install_dependency
@@ -113,9 +114,8 @@ if __name__ == "__main__":
 
                             install_dependency(package)
 
-                            print()
-                            print("missing dependency installed, re-run command to continue")
-                            sys.exit(1)
+                            # Try re-running the current command now that the library exists
+                            sys.exit(subprocess.call([sys.executable, *sys.argv]))
 
                         if hasattr(module, "register") and hasattr(module, "run"):
 
