@@ -2,8 +2,9 @@
 
 import subprocess
 
-import b
 from termcolor import cprint
+
+import b
 from utility.dockerise import defaults, platform
 
 
