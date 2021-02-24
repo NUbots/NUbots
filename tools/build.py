@@ -3,8 +3,9 @@
 import os
 import subprocess
 
-import b
 from dockerise import run_on_docker
+
+import b
 
 
 @run_on_docker

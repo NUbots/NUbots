@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import b
 from dockerise import WrapPty, run_on_docker
+
+import b
 
 
 @run_on_docker
