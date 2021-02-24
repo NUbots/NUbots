@@ -5,6 +5,7 @@ import fcntl
 import os
 import pty
 import signal
+import sys
 import termios
 import tty
 
@@ -35,7 +36,9 @@ class WrapPty:
             # If no arguments run bash
             os.execlpe(args[0], *args, env)
 
-        old_handler = signal.signal(signal.SIGWINCH, self._signal_winch)
+        if sys.stdout.isatty():
+            old_handler = signal.signal(signal.SIGWINCH, self._signal_winch)
+
         try:
             mode = tty.tcgetattr(pty.STDIN_FILENO)
             tty.setraw(pty.STDIN_FILENO)
@@ -43,7 +46,8 @@ class WrapPty:
         except tty.error:  # This is the same as termios.error
             restore = False
 
-        self._set_pty_size()
+        if sys.stdout.isatty():
+            self._set_pty_size()
 
         try:
             pty._copy(self.fd)
@@ -52,6 +56,9 @@ class WrapPty:
                 tty.tcsetattr(pty.STDIN_FILENO, tty.TCSAFLUSH, mode)
 
         os.close(self.fd)
-        signal.signal(signal.SIGWINCH, old_handler)
+
+        if sys.stdout.isatty():
+            signal.signal(signal.SIGWINCH, old_handler)
+
         self.fd = None
         return os.waitpid(pid, 0)[1] >> 8

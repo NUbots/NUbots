@@ -266,8 +266,6 @@ def run_on_docker(func):
                             "--tty",
                             "--workdir",
                             "/home/{}/{}/{}".format(user, directory, code_to_cwd),
-                            "--name",
-                            "{}_{}".format(repository, platform),
                             "--attach",
                             "stdin",
                             "--attach",
