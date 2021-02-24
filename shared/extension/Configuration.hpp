@@ -21,7 +21,6 @@
 #include <cstdlib>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
-#include <type_traits>
 
 #include "FileWatch.hpp"
 
@@ -30,14 +29,11 @@
 
 namespace extension {
 
-using SetLogLevel = std::true_type;
-
 /**
  * TODO document
  *
  * @author Trent Houliston
  */
-template<typename DoLogLevel = std::false_type>
 struct Configuration {
     // Rules:
     // 1) Default config file should define a value for every node.
@@ -49,7 +45,7 @@ struct Configuration {
     // Per-robot and per-binary files need not exist.
     // Per-robot and per-binary files can add new nodes to the file, but this is probably unwise.
     //
-    // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher priority
+    // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher priotity
     // tree.
 
     std::string fileName, hostname, binary;
@@ -147,36 +143,36 @@ struct Configuration {
         return ret;
     }
 
-    Configuration<DoLogLevel> operator[](const std::string& key) {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[key]);
+    Configuration operator[](const std::string& key) {
+        return Configuration(fileName, hostname, binary, config[key]);
     }
 
-    const Configuration<DoLogLevel> operator[](const std::string& key) const {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[key]);
+    const Configuration operator[](const std::string& key) const {
+        return Configuration(fileName, hostname, binary, config[key]);
     }
 
-    Configuration<DoLogLevel> operator[](const char* key) {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[key]);
+    Configuration operator[](const char* key) {
+        return Configuration(fileName, hostname, binary, config[key]);
     }
 
-    const Configuration<DoLogLevel> operator[](const char* key) const {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[key]);
+    const Configuration operator[](const char* key) const {
+        return Configuration(fileName, hostname, binary, config[key]);
     }
 
-    Configuration<DoLogLevel> operator[](size_t index) {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[index]);
+    Configuration operator[](size_t index) {
+        return Configuration(fileName, hostname, binary, config[index]);
     }
 
-    const Configuration<DoLogLevel> operator[](size_t index) const {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[index]);
+    const Configuration operator[](size_t index) const {
+        return Configuration(fileName, hostname, binary, config[index]);
     }
 
-    Configuration<DoLogLevel> operator[](int index) {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[index]);
+    Configuration operator[](int index) {
+        return Configuration(fileName, hostname, binary, config[index]);
     }
 
-    const Configuration<DoLogLevel> operator[](int index) const {
-        return Configuration<DoLogLevel>(fileName, hostname, binary, config[index]);
+    const Configuration operator[](int index) const {
+        return Configuration(fileName, hostname, binary, config[index]);
     }
 
     template <typename T>
@@ -209,7 +205,7 @@ namespace NUClear {
 namespace dsl {
     namespace operation {
         template <>
-        struct DSLProxy<::extension::Configuration<std::false_type>> {
+        struct DSLProxy<::extension::Configuration> {
             template <typename DSL>
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
@@ -265,7 +261,7 @@ namespace dsl {
             }
 
             template <typename DSL>
-            static inline std::shared_ptr<::extension::Configuration<std::false_type>> get(threading::Reaction& t) {
+            static inline std::shared_ptr<::extension::Configuration> get(threading::Reaction& t) {
 
                 // Get the file watch event
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
@@ -305,7 +301,7 @@ namespace dsl {
                         // There will be a trailing / character.
                         relativePath.pop_back();
 
-                        return std::make_shared<::extension::Configuration<std::false_type>>(relativePath, hostname, binary);
+                        return std::make_shared<::extension::Configuration>(relativePath, hostname, binary);
                     }
                     catch (const YAML::ParserException& e) {
                         throw std::runtime_error(watch.path + " " + std::string(e.what()));
@@ -313,42 +309,16 @@ namespace dsl {
                 }
                 else {
                     // Return an empty configuration (which will show up invalid)
-                    return std::shared_ptr<::extension::Configuration<std::false_type>>(nullptr);
+                    return std::shared_ptr<::extension::Configuration>(nullptr);
                 }
-            }
-        };
-
-
-        template <>
-        struct DSLProxy<::extension::Configuration<::extension::SetLogLevel>> {
-            template <typename DSL>
-            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
-                DSLProxy<::extension::Configuration<std::false_type>>::bind<DSL>(reaction, path);
-            }
-
-            template <typename DSL>
-            static inline std::shared_ptr<::extension::Configuration<std::false_type>> get(threading::Reaction& t) {
-                std::shared_ptr<::extension::Configuration<std::false_type>> cfg = DSLProxy<::extension::Configuration<std::false_type>>::get<DSL>(t);
-
-                // clang-format off
-                std::string lvl = cfg->operator[]("log_level").as<std::string>();
-                if (lvl == "TRACE") { t.reactor.log_level = NUClear::TRACE; }
-                else if (lvl == "DEBUG") { t.reactor.log_level = NUClear::DEBUG; }
-                else if (lvl == "INFO") { t.reactor.log_level = NUClear::INFO; }
-                else if (lvl == "WARN") { t.reactor.log_level = NUClear::WARN; }
-                else if (lvl == "ERROR") { t.reactor.log_level = NUClear::ERROR; }
-                else if (lvl == "FATAL") { t.reactor.log_level = NUClear::FATAL; }
-                // clang-format on
-
-                return cfg;
             }
         };
     }  // namespace operation
 
     // Configuration is transient
     namespace trait {
-        template <typename T>
-        struct is_transient<std::shared_ptr<::extension::Configuration<T>>> : public std::true_type {};
+        template <>
+        struct is_transient<std::shared_ptr<::extension::Configuration>> : public std::true_type {};
     }  // namespace trait
 }  // namespace dsl
 }  // namespace NUClear
