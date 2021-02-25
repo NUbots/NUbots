@@ -127,9 +127,7 @@ def run(func, image):
         # Perform the tasks that we only perform on the internal image and add on any extra arguments needed
         if internal_image:
             docker_args.extend(
-                _setup_internal_image(
-                    image=image, rebuild=(rebuild or kwargs["rebuild"]), clean_volume=kwargs["clean"],
-                )
+                _setup_internal_image(image=image, rebuild=(rebuild or kwargs["rebuild"]), clean_volume=kwargs["clean"])
             )
 
         # Work out what cwd we need to have on docker to mirror the cwd we have here
