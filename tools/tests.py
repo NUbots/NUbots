@@ -5,9 +5,8 @@ import os
 import subprocess
 import time
 
-from dockerise import run_on_docker
-
 import b
+from utility.dockerise import run_on_docker
 
 # Directory to create in project root for storing output of tests
 TESTS_OUTPUT_DIR = "tests_output"
