@@ -12,7 +12,7 @@ reaction_handles:
   # Overview information for the dashboard, designed for minimum bandwidth
   overview: true
   # Motor positions, orientation, etc.
-  sensor_data: false
+  sensor_data: true
   # Raw image
   image: false
   # compressed image

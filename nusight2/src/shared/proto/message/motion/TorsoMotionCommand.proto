@@ -34,7 +34,5 @@ message TorsoPositionUpdate {
     vec3 destination = 2;
 }
 
-message EnableTorsoMotion {
-}
-message DisableTorsoMotion {
-}
+message EnableTorsoMotion {}
+message DisableTorsoMotion {}

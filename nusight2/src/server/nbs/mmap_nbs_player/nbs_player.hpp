@@ -1,8 +1,9 @@
 #ifndef NBS_PLAYER_H
 #define NBS_PLAYER_H
 
-#include <nan.h>
 #include <memory>
+#include <nan.h>
+
 #include "mio/mmap.hpp"
 #include "packet.hpp"
 

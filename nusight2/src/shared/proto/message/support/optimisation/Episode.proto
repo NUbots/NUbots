@@ -30,9 +30,9 @@ message Episode {
         double weight  = 2;
     }
 
-    string   group           = 1;
-    int32    generation      = 2;
-    vec      values          = 3;
-    mat      covariance      = 4;
-    repeated Fitness fitness = 5;
+    string           group      = 1;
+    int32            generation = 2;
+    vec              values     = 3;
+    mat              covariance = 4;
+    repeated Fitness fitness    = 5;
 }

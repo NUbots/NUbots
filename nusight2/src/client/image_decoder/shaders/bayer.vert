@@ -17,12 +17,12 @@ varying vec4 xCoord;
 varying vec4 yCoord;
 
 void main() {
-  center.xy = uv;
-  center.zw = uv * sourceSize.xy + firstRed;
+    center.xy = uv;
+    center.zw = uv * sourceSize.xy + firstRed;
 
-  vec2 invSize = sourceSize.zw;
-  xCoord = center.x + vec4(-2.0 * invSize.x, -invSize.x, invSize.x, 2.0 * invSize.x);
-  yCoord = center.y + vec4(-2.0 * invSize.y, -invSize.y, invSize.y, 2.0 * invSize.y);
+    vec2 invSize = sourceSize.zw;
+    xCoord       = center.x + vec4(-2.0 * invSize.x, -invSize.x, invSize.x, 2.0 * invSize.x);
+    yCoord       = center.y + vec4(-2.0 * invSize.y, -invSize.y, invSize.y, 2.0 * invSize.y);
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }

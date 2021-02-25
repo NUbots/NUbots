@@ -13,11 +13,11 @@ def register(command):
     command.help = "build the codebase"
 
     command.add_argument("args", nargs="...", help="the arguments to pass through to ninja")
+    command.add_argument("-j", help="number of jobs to spawn")
 
 
 @run_on_docker
-def run(args, **kwargs):
-
+def run(j, args, **kwargs):
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
@@ -29,5 +29,10 @@ def run(args, **kwargs):
         if exitcode != 0:
             exit(exitcode)
 
+    command = ["ninja", *args]
+
+    if j:
+        command.insert(1, "-j{}".format(j))
+
     # Return the exit code of ninja
-    exit(subprocess.call(["ninja", *args]))
+    exit(subprocess.call(command))

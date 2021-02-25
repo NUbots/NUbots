@@ -148,6 +148,12 @@ namespace behaviour {
                         // Get our queue
                         auto& queue = commandQueues[uint(command.id)];
 
+                        // Zero timestamp means clear the queue
+                        if (command.time.time_since_epoch().count() == 0) {
+                            queue.clear();
+                            continue;
+                        }
+
                         // Clear commands until we get back one that we are after
                         while (!queue.empty() && queue.back().time > command.time) {
                             queue.pop_back();

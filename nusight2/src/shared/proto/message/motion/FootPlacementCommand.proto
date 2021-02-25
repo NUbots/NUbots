@@ -22,8 +22,7 @@ package message.motion;
 
 import "Vector.proto";
 
-message FootPlacementStopped {
-}
+message FootPlacementStopped {}
 
 message NewStepTargetInfo {
     double targetTime        = 1;
@@ -39,7 +38,5 @@ message NewFootTargetInfo {
     vec3 rightFootDestination = 5;
 }
 
-message EnableFootPlacement {
-}
-message DisableFootPlacement {
-}
+message EnableFootPlacement {}
+message DisableFootPlacement {}

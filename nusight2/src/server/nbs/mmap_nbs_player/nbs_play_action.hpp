@@ -2,9 +2,10 @@
 #define NBS_PLAY_ACTION_H
 
 #include <condition_variable>
-#include <nan.h>
 #include <memory>
 #include <mutex>
+#include <nan.h>
+
 #include "nbs_player.hpp"
 
 class NBSPlayAction : public Nan::AsyncProgressQueueWorker<Packet> {

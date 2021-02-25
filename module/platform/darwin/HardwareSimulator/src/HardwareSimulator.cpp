@@ -250,7 +250,7 @@ namespace platform {
 
                     // Add some noise so that sensor fusion doesnt converge to a singularity
                     auto sensors_message = std::make_unique<DarwinSensors>(sensors);
-                    addNoise(sensors_message);
+                    //addNoise(sensors_message);
 
                     // Send our nicely computed sensor data out to the world
                     emit(std::move(sensors_message));

@@ -6,37 +6,46 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Circle
 
-xmin = -30
-xmax = 30
+xmin = -10
+xmax = 10
 ymin = -3
 ymax = 10
 
 # Grid of x, y points
-nx, ny = 256, 256
+nx, ny = 656, 656
 xs = np.linspace(xmin, xmax, nx)
 ys = np.linspace(ymin, ymax, ny)
 
 dx = np.zeros((ny, nx))
 dy = np.zeros((ny, nx))
 
-d = 2
-u = 10
-h = 7
+step_steep = 2
+well_width = 0.02
+step_height = 1
+
+c = (
+    step_steep ** (2 / step_steep)
+    * step_height ** (1 / step_steep)
+    * (step_steep * step_height + step_steep ** 2 * step_height) ** (-1 / step_steep)
+    / well_width
+)
 
 # Fills xs and ys with values from dx and dy function
 for xi, x in enumerate(xs):
     for yi, y in enumerate(ys):
-        dx[yi, xi] = -np.tanh(x) * h * 2 ** (u / -abs(x ** d))
-        dy[yi, xi] = h * 2 ** (u / -abs(x ** d)) - y * abs((np.tanh(10 * y)))
+        dx[yi, xi] = -x / abs(x) * np.exp(-abs(c * x ** -step_steep))
+        dy[yi, xi] = np.exp(-abs(c * x ** -step_steep)) - y / step_height
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 # Plot the streamlines with an appropriate colormap and arrow style
 color = np.hypot(dx, dy)
-ax.streamplot(xs, ys, dx, dy, color=color, linewidth=1, cmap=plt.cm.jet, density=2, arrowstyle="->", arrowsize=1.5)
+ax.streamplot(
+    xs, ys, dx, dy, color=color, linewidth=1, cmap=plt.get_cmap("plasma"), density=2, arrowstyle="->", arrowsize=1.7
+)
 
-ax.axhline(y=h)
+ax.axhline(y=step_height)
 ax.axhline(y=0)
 
 ax.set_xlabel("$x$")

@@ -27,7 +27,9 @@ message FootTarget {
 
     google.protobuf.Timestamp timestamp = 1;
     // identifies which foot is the swing foot
-    bool isRightFootSwing = 2;
-    // Transform from world oriented support foot space (s) to target (a)
-    mat4 Haf_s = 3;
+    bool is_right_foot_swing = 2;
+    // Transform from world oriented support foot space (g) to target (a)
+    mat4  Hw_tg          = 3;
+    bool  lift           = 4;
+    int64 subsumption_id = 5;
 }

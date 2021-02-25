@@ -28,5 +28,4 @@ message LookUpTable {
     uint32 bits_cr = 4;
 }
 
-message SaveLookUpTable {
-}
+message SaveLookUpTable {}

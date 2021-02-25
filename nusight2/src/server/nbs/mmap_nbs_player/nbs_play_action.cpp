@@ -1,7 +1,8 @@
 #include "nbs_play_action.hpp"
+
 #include <iostream>
 
-void dont_delete(char*, void*) {};
+void dont_delete(char*, void*){};
 
 NBSPlayAction::NBSPlayAction(NBSPlayer* player)
     : Nan::AsyncProgressQueueWorker<Packet>(new Nan::Callback()), player(player) {
@@ -62,7 +63,8 @@ void NBSPlayAction::HandleProgressCallback(const Packet* packet, size_t size) {
     Nan::HandleScope scope;
 
     // For some reason it throws nulls sometimes
-    if (!packet) return;
+    if (!packet)
+        return;
 
     // This means we reached the end of the file
     if (packet->payload == nullptr) {

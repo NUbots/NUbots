@@ -1,6 +1,7 @@
 #include "nbs_player.hpp"
 
 #include <iostream>
+
 #include "nbs_play_action.hpp"
 
 NBSPlayer::~NBSPlayer() {
