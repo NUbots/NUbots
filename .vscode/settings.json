@@ -22,7 +22,21 @@
     ],
     "yaml.format.printWidth": 120,
     "files.associations": {
-        "*.role": "cmake"
+        "*.m": "matlab",
+        "*.role": "cmake",
+        "*.tcc": "cpp",
+        "optional": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "regex": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "stdexcept": "cpp"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
