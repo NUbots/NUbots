@@ -79,8 +79,8 @@ def build(repository, platform):
 
     # Create a buildx instance for building this image
     builder_name = "{}_{}".format(defaults.image, platform)
-    if subprocess.call(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL) != 0:
-        subprocess.call(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
+    if subprocess.run(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
+        subprocess.run(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
     subprocess.run(["docker", "buildx", "use", builder_name])
 
     # Build the image!
