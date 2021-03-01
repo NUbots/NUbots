@@ -20,13 +20,13 @@
 #ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
 #define MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
-#include "extension/Configuration.hpp"
+#include "extension/Configuration.h"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/motion/KinematicsModel.h"
 
 namespace module {
 namespace motion {

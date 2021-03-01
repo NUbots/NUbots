@@ -20,21 +20,21 @@
 #ifndef MODULES_MOTION_OLDWALKENGINE_HPP
 #define MODULES_MOTION_OLDWALKENGINE_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
-#include "message/behaviour/ServoCommand.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/motion/KinematicsModel.hpp"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/Sensors.h"
+#include "message/motion/KinematicsModel.h"
 
-#include "utility/behaviour/Action.hpp"
-#include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
-#include "utility/math/geometry/UnitQuaternion.hpp"
-#include "utility/math/matrix/Transform2D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
-#include "utility/motion/Balance.hpp"
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
+#include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/motion/Balance.h"
 
 
 namespace module {
@@ -62,8 +62,6 @@ namespace motion {
         using Sensors        = message::input::Sensors;
         using LimbID         = utility::input::LimbID;
         using ServoID        = utility::input::ServoID;
-        using Transform2D    = utility::math::matrix::Transform2D;
-        using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
         enum State {
@@ -107,40 +105,40 @@ namespace motion {
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
         // Current torso position
-        Transform2D uTorso;
+        Eigen::Affine2d uTorso;
         // Pre-step torso position
-        Transform2D uTorsoSource;
+        Eigen::Affine2d uTorsoSource;
         // Torso step target position
-        Transform2D uTorsoDestination;
+        Eigen::Affine2d uTorsoDestination;
         // Current left foot position
-        Transform2D uLeftFoot;
+        Eigen::Affine2d uLeftFoot;
         // Pre-step left foot position
-        Transform2D uLeftFootSource;
+        Eigen::Affine2d uLeftFootSource;
         // Left foot step target position
-        Transform2D uLeftFootDestination;
+        Eigen::Affine2d uLeftFootDestination;
         // Current right foot position
-        Transform2D uRightFoot;
+        Eigen::Affine2d uRightFoot;
         // Pre-step right foot position
-        Transform2D uRightFootSource;
+        Eigen::Affine2d uRightFootSource;
         // Right foot step target position
-        Transform2D uRightFootDestination;
+        Eigen::Affine2d uRightFootDestination;
         // TODO: ??? Appears to be support foot pre-step position
-        Transform2D uSupport;
+        Eigen::Affine2d uSupport;
         // Current robot velocity
-        Transform2D velocityCurrent;
+        Eigen::Affine2d velocityCurrent;
         // Current velocity command
-        Transform2D velocityCommand;
+        Eigen::Affine2d velocityCommand;
         // Difference between current velocity and commanded velocity
-        Transform2D velocityDifference;
+        Eigen::Affine2d velocityDifference;
         // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpCoefficients;
+        Eigen::Vector4d zmpCoefficients;
         // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParams;
+        Eigen::Vector4d zmpParams;
         // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID swingLeg;
         // The last foot goal rotation
-        UnitQuaternion lastFootGoalRotation;
-        UnitQuaternion footGoalErrorSum;
+        Eigen::Quaternion<double> lastFootGoalRotation;
+        Eigen::Quaternion<double> footGoalErrorSum;
 
         // end state
 
@@ -148,10 +146,10 @@ namespace motion {
 
         bool use_com;
         double stanceLimitY2;
-        arma::mat::fixed<3, 2> stepLimits;
-        arma::mat::fixed<3, 2> velocityLimits;
-        arma::vec3 accelerationLimits;
-        arma::vec3 accelerationLimitsHigh;
+        Eigen::Matrix<double, 3, 2> stepLimits;
+        Eigen::Matrix<double, 3, 2> velocityLimits;
+        Eigen::Vector3d accelerationLimits;
+        Eigen::Vector3d accelerationLimitsHigh;
         double velocityHigh;
         double accelerationTurningFactor;
         double bodyHeight;
@@ -165,20 +163,20 @@ namespace motion {
         float step_height_fast_fraction;
         double phase1Single;
         double phase2Single;
-        arma::vec2 footOffset;
-        double legYaw;
+        Eigen::Vector2d footOffset;
+        float legYaw;
         // Ankle feedback parameters
         double ankleRollComp;
         double ankleRollLimit;
         double anklePitchComp;
         double anklePitchLimit;
         // standard offset
-        Transform2D uLRFootOffset;
+        Eigen::Affine2d uLRFootOffset;
         // arm poses
-        arma::vec3 qLArmStart;
-        arma::vec3 qLArmEnd;
-        arma::vec3 qRArmStart;
-        arma::vec3 qRArmEnd;
+        Eigen::Vector3d qLArmStart;
+        Eigen::Vector3d qLArmEnd;
+        Eigen::Vector3d qRArmStart;
+        Eigen::Vector3d qRArmEnd;
         LimbID swingLegInitial = LimbID::LEFT_LEG;
 
         double balanceEnabled;
@@ -243,58 +241,58 @@ namespace motion {
         std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
 
         void calculateNewStep();
-        void setVelocity(Transform2D velocity);
+        void setVelocity(Eigen::Affine2d velocity);
         void updateVelocity();
         void stanceReset();
 
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
         std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
 
-        Transform2D getNewFootTarget(const Transform2D& velocity,
-                                     const Transform2D& leftFoot,
-                                     const Transform2D& rightFoot,
-                                     const LimbID& swingLeg);
+        Eigen::Affine2d getNewFootTarget(const Eigen::Affine2d& velocity,
+                                         const Eigen::Affine2d& leftFoot,
+                                         const Eigen::Affine2d& rightFoot,
+                                         const LimbID& swingLeg);
 
         /**
          * Get the next torso position
          */
-        Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
+        Eigen::Affine2d stepTorso(Eigen::Affine2d uLeftFoot, Eigen::Affine2d uRightFoot, double shiftFactor);
 
         /**
          * @return The current velocity
          */
-        Transform2D getVelocity();
+        Eigen::Affine2d getVelocity();
 
         /**
          * Solve the ZMP equation
          */
-        arma::vec2 zmpSolve(double zs,
-                            double z1,
-                            double z2,
-                            double x1,
-                            double x2,
-                            double phase1Single,
-                            double phase2Single,
-                            double stepTime,
-                            double zmpTime);
+        Eigen::Vector2d zmpSolve(double zs,
+                                 double z1,
+                                 double z2,
+                                 double x1,
+                                 double x2,
+                                 double phase1Single,
+                                 double phase2Single,
+                                 double stepTime,
+                                 double zmpTime);
 
         /**
          * Uses ZMP to determine the torso position
          *
-         * @return The torso position in Transform2D
+         * @return The torso position in Eigen::Affine2d
          */
-        Transform2D zmpCom(double phase,
-                           arma::vec4 zmpCoefficients,
-                           arma::vec4 zmpParams,
-                           double stepTime,
-                           double zmpTime,
-                           double phase1Zmp,
-                           double phase2Zmp,
-                           Transform2D uSupport,
-                           Transform2D uLeftFootDestination,
-                           Transform2D uLeftFootSource,
-                           Transform2D uRightFootDestination,
-                           Transform2D uRightFootSource);
+        Eigen::Affine2d zmpCom(double phase,
+                               Eigen::Vector4d zmpCoefficients,
+                               Eigen::Vector4d zmpParams,
+                               double stepTime,
+                               double zmpTime,
+                               double phase1Zmp,
+                               double phase2Zmp,
+                               Eigen::Affine2d uSupport,
+                               Eigen::Affine2d uLeftFootDestination,
+                               Eigen::Affine2d uLeftFootSource,
+                               Eigen::Affine2d uRightFootDestination,
+                               Eigen::Affine2d uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -309,7 +307,7 @@ namespace motion {
          * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when
          * phase >= 0.9
          */
-        arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
+        Eigen::Vector3d footPhase(double phase, double phase1Single, double phase2Single);
 
         /**
          * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)

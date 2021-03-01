@@ -22,12 +22,12 @@
 
 #include <nuclear>
 
-#include "IKKickControllers.hpp"
+#include "IKKickControllers.h"
 
-#include "message/motion/KickCommand.hpp"
+#include "message/motion/KickCommand.h"
 
-#include "utility/input/LimbID.hpp"
-#include "utility/motion/Balance.hpp"
+#include "utility/input/LimbID.h"
+#include "utility/motion/Balance.h"
 
 namespace module {
 namespace motion {
@@ -41,9 +41,9 @@ namespace motion {
         // which is rightFootFront
         // KickPlanner has to add the radius of the all to get the location of the centre of the ball
         // point position of ball
-        arma::vec3 ballPosition;
+        Eigen::Vector3d ballPosition;
         // direction we want to kick the ball
-        arma::vec3 goalPosition;
+        Eigen::Vector3d goalPosition;
 
         /// Subsumption ID key to access motors
         const size_t subsumptionId;
