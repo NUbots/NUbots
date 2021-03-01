@@ -108,5 +108,4 @@ message KinematicsModel {
     Arm         arm                       = 3;
     MassModel   massModel                 = 4;
     TensorModel tensorModel               = 5;
-    float       TEAMDARWINCHEST_TO_ORIGIN = 6;
 }

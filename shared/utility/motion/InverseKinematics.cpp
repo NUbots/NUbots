@@ -538,27 +538,6 @@ namespace motion {
             return joints;
         }
 
-
-        std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(const KinematicsModel& model,
-                                                                            utility::math::matrix::Transform3D target,
-                                                                            LimbID limb) {
-            target(2, 3) += model.TEAMDARWINCHEST_TO_ORIGIN;  // translate without regard to rotation
-            // target = target.translateZ(model.leg.FOOT_HEIGHT); THIS HAS BEEN WRONG THE WHOLE TIME!!!! THIS ASSUMES
-            // THE FOOT IS FLAT RELATIVE TO THE TORSO (WHICH IT ISN'T BECAUSE THE BODY IS TILTED)
-            return calculateLegJoints(model, target, limb);
-        }
-
-        std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(
-            const KinematicsModel& model,
-            utility::math::matrix::Transform3D leftTarget,
-            utility::math::matrix::Transform3D rightTarget) {
-            auto joints  = calculateLegJointsTeamDarwin(model, leftTarget, LimbID::LEFT_LEG);
-            auto joints2 = calculateLegJointsTeamDarwin(model, rightTarget, LimbID::RIGHT_LEG);
-            joints.insert(joints.end(), joints2.begin(), joints2.end());
-            return joints;
-        }
-
-
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector) {
             std::vector<std::pair<ServoID, float>> positions;

@@ -87,16 +87,6 @@ namespace motion {
                                                                   const Eigen::Affine3f& leftTarget,
                                                                   const Eigen::Affine3f& rightTarget);
 
-        std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(
-            const message::motion::KinematicsModel& model,
-            utility::math::matrix::Transform3D target,
-            LimbID limb);
-
-        std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(
-            const message::motion::KinematicsModel& model,
-            utility::math::matrix::Transform3D leftTarget,
-            utility::math::matrix::Transform3D rightTarget);
-
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector);
         std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
