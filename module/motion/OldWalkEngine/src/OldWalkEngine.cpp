@@ -33,14 +33,14 @@
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/SaveConfiguration.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/math/comparison.h"
-#include "utility/math/matrix/transform.h"
-#include "utility/motion/Balance.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/math/angle.hpp"
+#include "utility/math/comparison.hpp"
+#include "utility/math/matrix/transform.hpp"
+#include "utility/motion/Balance.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace motion {

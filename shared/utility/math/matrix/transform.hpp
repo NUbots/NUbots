@@ -23,7 +23,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "utility/math/angle.h"
+#include "utility/math/angle.hpp"
 
 /**
  * Matrix related helper methods

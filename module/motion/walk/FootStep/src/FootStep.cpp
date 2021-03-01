@@ -10,11 +10,11 @@
 #include "message/motion/FootTarget.hpp"
 #include "message/motion/KinematicsModel.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
 namespace motion {

@@ -29,16 +29,16 @@
 #include <nuclear>
 #include <vector>
 
-#include "message/input/Sensors.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/angle.h"
-#include "utility/math/coordinates.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/ForwardKinematics.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
 
 namespace utility {
 namespace motion {

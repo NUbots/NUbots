@@ -25,12 +25,12 @@
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
-#include "message/input/Sensors.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/input/LimbID.h"
-#include "utility/math/matrix/transform.h"
-//#include "utility/input/ServoID.h"
+#include "utility/input/LimbID.hpp"
+#include "utility/math/matrix/transform.hpp"
+//#include "utility/input/ServoID.hpp"
 
 namespace utility {
 namespace motion {

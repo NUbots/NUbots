@@ -26,15 +26,15 @@
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/motion/Balance.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/geometry/UnitQuaternion.hpp"
+#include "utility/motion/Balance.hpp"
 
 
 namespace module {
