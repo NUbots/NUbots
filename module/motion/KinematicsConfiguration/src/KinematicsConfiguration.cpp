@@ -23,7 +23,7 @@
 
 #include "message/motion/KinematicsModel.hpp"
 
-#include "utility/support/yaml_expression.h"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace motion {

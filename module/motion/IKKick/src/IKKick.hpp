@@ -22,12 +22,12 @@
 
 #include <nuclear>
 
-#include "IKKickControllers.h"
+#include "IKKickControllers.hpp"
 
-#include "message/motion/KickCommand.h"
+#include "message/motion/KickCommand.hpp"
 
-#include "utility/input/LimbID.h"
-#include "utility/motion/Balance.h"
+#include "utility/input/LimbID.hpp"
+#include "utility/motion/Balance.hpp"
 
 namespace module {
 namespace motion {

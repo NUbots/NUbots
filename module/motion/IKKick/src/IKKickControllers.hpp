@@ -24,15 +24,15 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Sensors.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/input/Sensors.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/matrix/transform.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/matrix/transform.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace motion {

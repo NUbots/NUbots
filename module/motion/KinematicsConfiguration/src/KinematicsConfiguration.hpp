@@ -24,9 +24,9 @@
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/motion/KinematicsModel.h"
+#include "message/motion/KinematicsModel.hpp"
 
 namespace module {
 namespace motion {
