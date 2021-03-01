@@ -5,9 +5,8 @@ import mmap
 import os
 import struct
 
-from tqdm import tqdm
-
 import numpy as np
+from tqdm import tqdm
 
 from .protobuf_types import MessageTypes
 

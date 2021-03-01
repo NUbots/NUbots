@@ -3,12 +3,11 @@
 import json
 import os
 
-from tqdm import tqdm
-
 import numpy as np
 from si_prefix import si_format
-from utility.nbs import LinearDecoder
+from tqdm import tqdm
 
+from utility.nbs import LinearDecoder
 
 def register(command):
     command.help = "Decode an nbs file into a series of file statistics"

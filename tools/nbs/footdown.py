@@ -3,12 +3,12 @@
 import os
 import re
 
-from tqdm import tqdm
-
 import numpy as np
 import tensorflow as tf
 import yaml
 from tensorflow import keras
+from tqdm import tqdm
+
 from utility.nbs import LinearDecoder
 
 SERVO_ID = {
@@ -112,7 +112,7 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
 def register(command):
     command.help = "Train a foot down network using sensor data from the legs"
     command.add_argument(
-        "data_dir", metavar="data_dir", help="The folder containing the segmented training data and configuration file",
+        "data_dir", metavar="data_dir", help="The folder containing the segmented training data and configuration file"
     )
 
 
