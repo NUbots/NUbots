@@ -17,11 +17,11 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "KinematicsConfiguration.h"
+#include "KinematicsConfiguration.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/motion/KinematicsModel.h"
+#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/support/yaml_expression.h"
 
@@ -50,9 +50,6 @@ namespace motion {
 
         configureMassModel(model, objDarwinModel["mass_model"]);
         configureTensorModel(model, objDarwinModel["tensor_model"]);
-
-        model.TEAMDARWINCHEST_TO_ORIGIN =
-            objDarwinModel["team_darwin_chest_to_origin"].as<float>() - model.leg.HIP_OFFSET_Z;
     }
 
     void KinematicsConfiguration::configureLeg(KinematicsModel& model, const YAML::Node& objLeg) {

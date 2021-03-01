@@ -17,28 +17,28 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SoccerSimulator.h"
+#include "SoccerSimulator.hpp"
 
 #include <nuclear>
 #include <sstream>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/GameEvents.h"
-#include "message/input/GameState.h"
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
-#include "message/motion/WalkCommand.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/input/GameEvents.hpp"
+#include "message/input/GameState.hpp"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/math/coordinates.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 
 namespace module {

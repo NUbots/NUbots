@@ -17,12 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "message/behaviour/Subsumption.h"
+#include "message/behaviour/Subsumption.hpp"
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
 
 namespace module {
 namespace support {

@@ -15,9 +15,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "NUClearNet.h"
+#include "NUClearNet.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 namespace module {
 namespace network {

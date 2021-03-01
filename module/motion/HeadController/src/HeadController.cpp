@@ -17,14 +17,14 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "HeadController.h"
+#include "HeadController.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"

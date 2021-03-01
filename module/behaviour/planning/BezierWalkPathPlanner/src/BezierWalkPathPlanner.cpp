@@ -17,24 +17,24 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "BezierWalkPathPlanner.h"
+#include "BezierWalkPathPlanner.hpp"
 
 #include <cmath>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/motion/KickCommand.h"
-#include "message/motion/WalkCommand.h"
-#include "message/vision/Ball.h"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/vision/Ball.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/nusight/NUhelpers.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 
 namespace module {

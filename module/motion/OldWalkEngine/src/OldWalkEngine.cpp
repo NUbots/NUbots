@@ -17,21 +17,21 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "OldWalkEngine.h"
+#include "OldWalkEngine.hpp"
 
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/FixedWalkCommand.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/motion/KinematicsModel.h"
-#include "message/motion/ServoTarget.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/SaveConfiguration.h"
+#include "message/behaviour/FixedWalkCommand.hpp"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
+#include "message/motion/ServoTarget.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/SaveConfiguration.hpp"
 
 #include "utility/math/angle.h"
 #include "utility/math/comparison.h"

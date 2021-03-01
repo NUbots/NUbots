@@ -13,14 +13,13 @@ nuclear_role(
   platform::darwin::HardwareIO
   platform::darwin::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::ScriptEngine
   motion::HeadController
   # Behaviour
   behaviour::Controller
   behaviour::skills::Stand
-  # behaviour::skills::FallingRelax
-  behaviour::skills::Getup
+  # behaviour::skills::FallingRelax behaviour::skills::Getup
   behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
   behaviour::strategy::KeyboardWalk

@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "InverseKinematics.h"
+#include "InverseKinematics.hpp"
 
 namespace utility {
 namespace motion {
