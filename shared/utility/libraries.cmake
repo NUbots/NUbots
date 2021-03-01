@@ -1,6 +1,9 @@
 find_package(Eigen3 REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC Eigen3::Eigen)
 
+find_package(YAML-CPP REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC YAML-CPP::YAML-CPP)
+
 find_package(ExprTk REQUIRED)
 target_link_libraries(nuclear_utility PRIVATE ExprTk::ExprTk)
 
@@ -11,7 +14,7 @@ find_package(Aravis REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC Aravis::Aravis)
 
 find_package(Armadillo REQUIRED)
-target_link_libraries(nuclear_utility PUBLIC ${ARMADILLO_LIBRARIES})
+target_link_libraries(nuclear_utility PUBLIC Armadillo::Armadillo)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
