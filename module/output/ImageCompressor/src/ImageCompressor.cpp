@@ -10,6 +10,7 @@
 #include "message/input/Image.hpp"
 #include "message/output/CompressedImage.hpp"
 
+#include "utility/support/yaml_LogLevel.hpp"
 #include "utility/vision/fourcc.hpp"
 
 namespace module {
@@ -56,15 +57,8 @@ namespace output {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
-            // clang-format off
-            std::string lvl = cfg["log_level"].as<std::string>();
-            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            this->log_level = cfg["log_level"].as<utility::support::LogLevel>();
+
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(compressor_mutex);
