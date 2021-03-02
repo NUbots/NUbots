@@ -1365,7 +1365,7 @@ namespace conversion {
     inline Proto& convert(Proto& proto, const DynamicVecProto<Proto> vector) {
 
         // Reserve enough space
-        proto.mutable_v()->Reserve(vector.size());
+        proto.mutable_v()->Resize(vector.size());
 
         // Copy across
         Eigen::Map<DynamicVecProto<Proto>>(

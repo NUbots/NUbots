@@ -10,10 +10,9 @@ import struct
 import sys
 from subprocess import PIPE, Popen
 
-import pyparsing as pp
-
 import pybfd.bfd
 import pybfd.opcodes
+import pyparsing as pp
 from info.collapse_output_type import collapse_output_type
 from info.parse_dsl_type import parse_dsl_type
 from info.parse_output_type import parse_output_type

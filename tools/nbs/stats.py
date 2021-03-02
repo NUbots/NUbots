@@ -3,12 +3,11 @@
 import json
 import os
 
-from tqdm import tqdm
-
 import numpy as np
 from si_prefix import si_format
+from tqdm import tqdm
 
-from .nbs import Decoder
+from utility.nbs import LinearDecoder
 
 
 def register(command):
@@ -85,30 +84,24 @@ def run(files, use_message_timestamp, **kwargs):
     max_cat_len = 0
     max_subcat_len = 0
 
-    decoder = Decoder(*files)
-    with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
-        for packet in decoder:
+    for packet in tqdm(LinearDecoder(*files, show_progress=True), unit="packet", unit_scale=True, dynamic_ncols=True):
 
-            # If our object has a timestamp field of its own, we can decide to use that instead of the nbs timestamp
-            # This can sometimes give better rates but can also cause problems when the timebases aren't synchronized
-            if use_message_timestamp and hasattr(packet.msg, "timestamp"):
-                ts = packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos
-            else:
-                ts = packet.timestamp * 1e3
+        # If our object has a timestamp field of its own, we can decide to use that instead of the nbs timestamp
+        # This can sometimes give better rates but can also cause problems when the timebases aren't synchronized
+        if use_message_timestamp and hasattr(packet.msg, "timestamp"):
+            ts = packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos
+        else:
+            ts = packet.emit_timestamp * 1e3
 
-            # Treat some objects specially as they have sub categories
-            if packet.type in ("message.input.Image", "message.output.CompressedImage"):
-                data.append((packet.type, packet.msg.name, ts, len(packet.raw)))
-            else:
-                data.append((packet.type, "", ts, len(packet.raw)))
+        # Treat some objects specially as they have sub categories
+        if packet.type in ("message.input.Image", "message.output.CompressedImage"):
+            data.append((packet.type, packet.msg.name, ts, len(packet.raw)))
+        else:
+            data.append((packet.type, "", ts, len(packet.raw)))
 
-            # Work out the largest name length so we can put it into numpy
-            max_cat_len = max(max_cat_len, len(data[-1][0]))
-            max_subcat_len = max(max_subcat_len, len(data[-1][1]))
-
-            # Update the progress bar
-            progress.n = decoder.bytes_read()
-            progress.update(0)
+        # Work out the largest name length so we can put it into numpy
+        max_cat_len = max(max_cat_len, len(data[-1][0]))
+        max_subcat_len = max(max_subcat_len, len(data[-1][1]))
 
     data = np.array(
         data,

@@ -110,10 +110,10 @@ class LensModel(tf.keras.Model):
             tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", v[:, :, 1:-1, :], vp)))), axis=[1, 2]
         )
         h1_co = tf.reduce_mean(
-            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_1[:, :, 1:-1, :], hp_1)))), axis=[1, 2],
+            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_1[:, :, 1:-1, :], hp_1)))), axis=[1, 2]
         )
         h2_co = tf.reduce_mean(
-            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_2[:, :, 1:-1, :], hp_2)))), axis=[1, 2],
+            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_2[:, :, 1:-1, :], hp_2)))), axis=[1, 2]
         )
         collinearity_loss = tf.math.accumulate_n([v_co, h1_co, h2_co]) / 3.0
 

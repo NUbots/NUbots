@@ -148,7 +148,7 @@ RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute
 
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
-RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
+RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.12.18.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
     -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
     -DOPENCL_LIB_DIR=/usr/local/lib \
@@ -284,9 +284,9 @@ RUN install-package \
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
-    cmake-format==0.6.10 \
-    isort==4.3.21 \
-    black==19.10b0
+    cmake-format==0.6.13 \
+    isort==5.7.0 \
+    black==20.8b1
 
 ##############################
 ### SETUP THE USER ACCOUNT ###

@@ -120,5 +120,9 @@ export class LineProjection {
 
   private static readonly shader = rawShader(() => ({ vertexShader, fragmentShader }))
 
-  private static readonly geometry = planeGeometry(() => ({ width: 2, height: 2 }))
+  private static readonly geometry = planeGeometry(() => ({
+    width: 2,
+    height: 2,
+    widthSegments: 100,
+  }))
 }

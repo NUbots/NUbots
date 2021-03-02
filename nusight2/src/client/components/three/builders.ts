@@ -358,14 +358,27 @@ export const boxGeometry = createUpdatableComputed(
   box => box.dispose(),
 )
 
-type PlaneGeometryOpts = { width: number; height: number }
+type PlaneGeometryOpts = {
+  width: number
+  height: number
+  widthSegments?: number
+  heightSegments?: number
+}
 
 export const planeGeometry = createUpdatableComputed(
-  (opts: PlaneGeometryOpts) => new PlaneGeometry(opts.width, opts.height),
+  (opts: PlaneGeometryOpts) =>
+    new PlaneGeometry(opts.width, opts.height, opts.widthSegments, opts.heightSegments),
   (geometry, opts) => {
-    const { width, height } = geometry.parameters
-    if (opts.width !== width || opts.height !== height) {
-      geometry.copy(new PlaneGeometry(opts.width, opts.height))
+    const { width, height, widthSegments, heightSegments } = geometry.parameters
+    if (
+      opts.width !== width ||
+      opts.height !== height ||
+      opts.widthSegments !== widthSegments ||
+      opts.heightSegments !== heightSegments
+    ) {
+      geometry.copy(
+        new PlaneGeometry(opts.width, opts.height, opts.widthSegments, opts.heightSegments),
+      )
     }
   },
   plane => plane.dispose(),

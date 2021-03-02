@@ -4,7 +4,7 @@ import re
 
 from google.protobuf.json_format import MessageToJson
 
-from .nbs import Decoder
+from utility.nbs import LinearDecoder
 
 
 def register(command):
@@ -16,8 +16,8 @@ def register(command):
 
 def run(files, **kwargs):
 
-    for packet in Decoder(*files):
+    for packet in LinearDecoder(*files):
         out = re.sub(r"\s+", " ", MessageToJson(packet.msg, True))
-        out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type, packet.timestamp, out)
+        out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type, packet.emit_timestamp, out)
         # Print as a json object
         print(out)
