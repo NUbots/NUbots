@@ -20,6 +20,7 @@
 #ifndef UTILITY_SUPPORT_yaml_LogLevel_HPP
 #define UTILITY_SUPPORT_yaml_LogLevel_HPP
 
+#include <fmt/format.h>
 #include <map>
 #include <nuclear>
 #include <string>
@@ -28,23 +29,25 @@
 namespace utility::support {
 
 struct LogLevel {
-
-    // A map so we can move from strings returned by YAML to our enum.
-    constexpr std::map<std::string, ::NUClear::LogLevel> string_to_LogLevel{{"TRACE", NUClear::TRACE},
-                                                                            {"DEBUG", NUClear::DEBUG},
-                                                                            {"INFO", NUClear::INFO},
-                                                                            {"WARN", NUClear::WARN},
-                                                                            {"ERROR", NUClear::ERROR},
-                                                                            {"FATAL", NUClear::FATAL}};
-
     LogLevel() {}
     LogLevel(const YAML::Node& node) : node(node) {}
+    LogLevel(const LogLevel& other) {
+        this->node = other.node;
+    }
 
     operator ::NUClear::LogLevel() {
         ::NUClear::LogLevel value;
 
         try {
-            value = string_to_LogLevel.at(ode.as<std::string>());
+            // clang-format off
+            auto lvl = node.as<std::string>();
+            if (lvl == "TRACE") { value = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { value = NUClear::DEBUG; }
+            else if (lvl == "INFO") { value = NUClear::INFO; }
+            else if (lvl == "WARN") { value = NUClear::WARN; }
+            else if (lvl == "ERROR") { value = NUClear::ERROR; }
+            else if (lvl == "FATAL") { value = NUClear::FATAL; }
+            // clang-format on
         }
 
         catch (const std::invalid_argument& ex) {
