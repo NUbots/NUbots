@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
-#define UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
+#ifndef UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_HPP
+#define UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -62,4 +62,4 @@ namespace math {
 }  // namespace math
 }  // namespace utility
 
-#endif  // UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
+#endif  // UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_HPP

@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
-#define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
+#ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
+#define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 
 #include "message/input/Sensors.hpp"
 #include "message/motion/KickCommand.hpp"

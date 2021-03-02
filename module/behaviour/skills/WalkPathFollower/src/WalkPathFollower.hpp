@@ -17,8 +17,8 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
-#define MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
+#ifndef MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_HPP
+#define MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -98,4 +98,4 @@ namespace behaviour {
 }  // namespace behaviour
 }  // namespace module
 
-#endif  // MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
+#endif  // MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_HPP

@@ -16,8 +16,8 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#ifndef UTILITY_BEHAVIOUR_MOTIONCOMMAND_H
-#define UTILITY_BEHAVIOUR_MOTIONCOMMAND_H
+#ifndef UTILITY_BEHAVIOUR_MOTIONCOMMAND_HPP
+#define UTILITY_BEHAVIOUR_MOTIONCOMMAND_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

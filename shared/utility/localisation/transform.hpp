@@ -16,8 +16,8 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-#ifndef UTILITY_LOCALISATION_TRANSFORM_H
-#define UTILITY_LOCALISATION_TRANSFORM_H
+#ifndef UTILITY_LOCALISATION_TRANSFORM_HPP
+#define UTILITY_LOCALISATION_TRANSFORM_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
