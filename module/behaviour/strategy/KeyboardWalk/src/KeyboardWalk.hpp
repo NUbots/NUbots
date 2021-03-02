@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
-#define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
+#ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
+#define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
 
 #include <Eigen/Core>
 #include <mutex>
@@ -42,7 +42,7 @@ namespace behaviour {
 
         class KeyboardWalk : public NUClear::Reactor {
         private:
-            static constexpr const float DIFF     = 0.10f;
+            static constexpr const float DIFF     = 0.01f;
             static constexpr const float ROT_DIFF = 0.10f;
 
             static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
