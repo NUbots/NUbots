@@ -233,18 +233,18 @@ namespace behaviour {
                               if (ballMaxPriority) {
                                   Eigen::Affine3d Htc(sensors.Htw * ballFixationObjects.Hcw.inverse());
                                   headToBodyRotation = Htc.rotation();
-                                  orientation        = Eigen::Affine3d(ballFixationObjects.Hcw).inverse().rotation();
+                                  orientation        = Eigen::Affine3d(ballFixationObjects.Hcw).rotation().inverse();
                               }
                               else {
                                   Eigen::Affine3d Htc(sensors.Htw * goalFixationObjects.Hcw.inverse());
                                   headToBodyRotation = Htc.rotation();
-                                  orientation        = Eigen::Affine3d(goalFixationObjects.Hcw).inverse().rotation();
+                                  orientation        = Eigen::Affine3d(goalFixationObjects.Hcw).rotation().inverse();
                               }
                           }
                           else {
                               Eigen::Affine3d Htc(sensors.Htx[ServoID::HEAD_PITCH]);
                               headToBodyRotation = Htc.rotation();
-                              orientation        = Eigen::Affine3d(sensors.Htw).inverse().rotation();
+                              orientation        = Eigen::Affine3d(sensors.Htw).rotation().inverse();
                           }
                           Eigen::Matrix3d headToIMUSpace = orientation * headToBodyRotation;
 
