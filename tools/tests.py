@@ -5,15 +5,14 @@ import os
 import subprocess
 import time
 
-from dockerise import run_on_docker
-
 import b
+from utility.dockerise import run_on_docker
 
 # Directory to create in project root for storing output of tests
 TESTS_OUTPUT_DIR = "tests_output"
 
 
-@run_on_docker
+@run_on_docker(image="nubots:generic")
 def register(command):
 
     command.help = "Run and list tests"
@@ -71,7 +70,7 @@ def register(command):
     )
 
 
-@run_on_docker
+@run_on_docker(image="nubots:generic")
 def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
 
     # Change into the build directory

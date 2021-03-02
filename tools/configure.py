@@ -2,9 +2,9 @@
 
 import os
 
-from dockerise import WrapPty, run_on_docker
-
 import b
+from utility.dockerise import run_on_docker
+from utility.shell import WrapPty
 
 
 @run_on_docker
