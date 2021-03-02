@@ -22,7 +22,9 @@
     ],
     "yaml.format.printWidth": 120,
     "files.associations": {
-        "*.role": "cmake"
+        "*.role": "cmake",
+        "cmath": "cpp",
+        "complex": "cpp"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true

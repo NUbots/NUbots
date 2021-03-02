@@ -5,6 +5,7 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
+
 namespace module {
 namespace motion {
     namespace walk {
@@ -22,6 +23,7 @@ namespace motion {
                 double step_height;
                 double well_width;
                 double step_steep;
+                double scaling_factor;
                 double c;
             } config;
 
@@ -29,7 +31,8 @@ namespace motion {
             // Returns x and z positions of vector field. See vectorfield.py for graphical representation of vector
             // field
             double f_x(const Eigen::Vector3d& pos);
-            double f_z(const Eigen::Vector3d& pos);
+            double f_z(const Eigen::Vector3d& pos, double height);
+            double pathlength(double x, double y, double h);
 
             Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hw_ong;
         };

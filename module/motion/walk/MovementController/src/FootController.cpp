@@ -7,17 +7,42 @@ namespace motion {
         // Returns x-position of vector field. See vectorfield.py for graphical representation of the vector field
         double FootController::f_x(const Eigen::Vector3d& pos) {
             // Prevent divide by zero error with 0 position
-            if (pos.x() == 0) {
-                return 0;
-            }
-            return (-pos.x() / std::abs(pos.x()))
-                   * std::exp(-std::abs(std::pow(config.c * pos.x(), -config.step_steep)));
+            return -tanh(pos.x() * config.scaling_factor);
         }
 
         // Returns z-position of vector field. See vectorfield.py for graphical representation of the vector field
-        double FootController::f_z(const Eigen::Vector3d& pos) {
-            return std::exp(-std::abs(std::pow(config.c * pos.x(), -config.step_steep)))
-                   - (pos.z() / config.step_height);
+        double FootController::f_z(const Eigen::Vector3d& pos, double height) {
+            return height * pow(tanh(pos.x() * config.scaling_factor), 2) - pos.z() * config.scaling_factor;
+        }
+
+        double integral(double x, double h, double c) {
+            return sqrt(1 + pow(cosh(x) * (c + h * atan(1 / sinh(x))) - h * tanh(x), 2));
+        }
+
+        // path length to origin; x,y=foots starting location; h=step height; -1<x<1 0<y<1 0<h<1
+        double FootController::pathlength(double x, double y, double h) {
+            x = config.scaling_factor * x;
+            y = config.scaling_factor * y;
+            h = config.scaling_factor * h;
+
+            double c      = y / sinh(x) - h * atan(1 / sinh(x));
+            int num_steps = 30;
+
+            double x2   = x / num_steps;
+            double x1   = 0;
+            double path = 0;
+
+            int i = 0;
+            while (i < num_steps) {
+                path =
+                    path
+                    + ((x2 - x1) / 6) * (integral(x1, h, c) + 4 * (integral((x1 + x2) / 2, h, c)) + integral(x2, h, c));
+                x1 = x2;
+                x2 = x2 + x / num_steps;
+                i++;
+            }
+
+            return path / config.scaling_factor;
         }
 
         /**
@@ -63,7 +88,10 @@ namespace motion {
             // rNWg + rWTg = rNTg
             // We normalize the vector and multiply it by the distance and factor to reach the target at the right
             // time
-            Eigen::Vector3d rNWg = Eigen::Vector3d(f_x(rWTg), 0, f_z(rWTg)).normalized() * factor * rWTg.norm();
+            Eigen::Vector3d rNWg = Eigen::Vector3d(
+                f_x(rWTg) * factor * pathlength(rWTg.x(), rWTg.z(), config.step_height),
+                0,
+                f_z(rWTg, config.step_height) * factor * pathlength(rWTg.x(), rWTg.z(), config.step_height));
             Eigen::Vector3d rNTg = rWTg + rNWg;
 
             if (rWTg.z() + rNWg.z() < 0) {

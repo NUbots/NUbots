@@ -408,10 +408,10 @@ namespace platform {
                     sensors->feet[BodySide::RIGHT].down = true;
                     sensors->feet[BodySide::LEFT].down  = true;
 
-                    // std::array<bool, 2> feet_down = {true};
-                    // if (config.footDown.fromLoad) {
-                    //     // Use our virtual load sensor class to work out which feet are down
-                    //     feet_down = load_sensor.updateFeet(*sensors);
+                    std::array<bool, 2> feet_down = {true};
+                    if (config.footDown.fromLoad) {
+                        // Use our virtual load sensor class to work out which feet are down
+                        feet_down = load_sensor.updateFeet(*sensors);
 
                         if (this->config.debug) {
                             emit(graph("Sensor/Foot Down/Load/Left", feet_down[BodySide::LEFT]));

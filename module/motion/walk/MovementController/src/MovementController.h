@@ -2,6 +2,7 @@
 #define MODULE_MOTION_WALK_MOVEMENTCONTROLLER_H
 
 #include <nuclear>
+
 #include "FootController.h"
 #include "TorsoController.h"
 

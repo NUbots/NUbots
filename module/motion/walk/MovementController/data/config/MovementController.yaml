@@ -6,6 +6,7 @@ foot:
   # Size of the well near the target
   # well_width must be an even number
   well_width: 0.02
+  scaling_factor: 100
 
 # Gain for the support and swing legs
 gains:

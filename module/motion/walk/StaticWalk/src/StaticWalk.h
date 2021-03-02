@@ -4,7 +4,8 @@
 
 #include <Eigen/Geometry>
 #include <nuclear>
-#include "message/motion/KinematicsModel.h"
+
+#include "message/motion/KinematicsModel.hpp"
 
 namespace module {
 namespace motion {

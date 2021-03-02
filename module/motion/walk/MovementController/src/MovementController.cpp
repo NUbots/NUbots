@@ -1,21 +1,25 @@
 #include "MovementController.h"
+
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <vector>
-#include "extension/Configuration.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/FootTarget.h"
-#include "message/motion/KinematicsModel.h"
-#include "message/motion/TorsoTarget.h"
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/yaml_expression.h"
+
+#include "extension/Configuration.hpp"
+
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/FootTarget.hpp"
+#include "message/motion/KinematicsModel.hpp"
+#include "message/motion/TorsoTarget.hpp"
+
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/motion/ForwardKinematics.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace motion {
@@ -42,9 +46,10 @@ namespace motion {
                 // Use configuration here from file MovementController.yaml
 
                 // Foot controller config
-                foot_controller.config.step_height = cfg["foot"]["step_height"].as<Expression>();
-                foot_controller.config.well_width  = cfg["foot"]["well_width"].as<Expression>();
-                foot_controller.config.step_steep  = cfg["foot"]["step_steep"].as<Expression>();
+                foot_controller.config.step_height    = cfg["foot"]["step_height"].as<Expression>();
+                foot_controller.config.well_width     = cfg["foot"]["well_width"].as<Expression>();
+                foot_controller.config.step_steep     = cfg["foot"]["step_steep"].as<Expression>();
+                foot_controller.config.scaling_factor = cfg["foot"]["scaling_factor"].as<Expression>();
 
                 const auto& h = foot_controller.config.step_height;
                 const auto& s = foot_controller.config.step_steep;
@@ -71,11 +76,11 @@ namespace motion {
 
                     // Set the support and swing matrices
                     Eigen::Affine3d Hts = torso_target.is_right_foot_support
-                                              ? Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL])
-                                              : Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL]);
+                                              ? Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL])
+                                              : Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
                     Eigen::Affine3d Htw = torso_target.is_right_foot_support
-                                              ? Eigen::Affine3d(sensors.forward_kinematics[ServoID::L_ANKLE_ROLL])
-                                              : Eigen::Affine3d(sensors.forward_kinematics[ServoID::R_ANKLE_ROLL]);
+                                              ? Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
+                                              : Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
                     // Set the time now so the calculations are consistent across the methods
                     const auto now       = NUClear::clock::now();
@@ -114,11 +119,14 @@ namespace motion {
                     // Calculate the next torso and next swing foot positions we are targeting
                     Eigen::Affine3d Ht_ng =
                         torso_controller.next_torso(config.time_horizon, torso_time_left, Htg, Ht_tg);
-                    Eigen::Affine3d Hw_ng = foot_target.lift
-                                                ? foot_controller.next_swing(
-                                                      config.time_horizon, swing_time_left, Htw.inverse() * Htg, Hw_tg)
-                                                : torso_controller.next_torso(
-                                                      config.time_horizon, swing_time_left, Htw.inverse() * Htg, Hw_tg);
+                    Eigen::Affine3d Hw_ng = foot_target.lift ? foot_controller.next_swing(config.time_horizon,
+                                                                                          swing_time_left,
+                                                                                          Htw.inverse() * Htg,
+                                                                                          Hw_tg)
+                                                             : torso_controller.next_torso(config.time_horizon,
+                                                                                           swing_time_left,
+                                                                                           Htw.inverse() * Htg,
+                                                                                           Hw_tg);
 
                     // Perform IK for the support and swing feet based on the target torso position
                     Eigen::Affine3d Ht_nw_n = Ht_ng * Hw_ng.inverse();
