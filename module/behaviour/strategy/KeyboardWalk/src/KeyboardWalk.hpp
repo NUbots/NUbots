@@ -43,7 +43,7 @@ namespace behaviour {
         class KeyboardWalk : public NUClear::Reactor {
         private:
             static constexpr const float DIFF     = 0.01f;
-            static constexpr const float ROT_DIFF = 0.10f;
+            static constexpr const float ROT_DIFF = 0.1f;
 
             static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
 
