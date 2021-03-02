@@ -4,7 +4,7 @@ import fnmatch
 
 from tqdm import tqdm
 
-from .nbs import Decoder, Encoder
+from utility.nbs import Encoder, LinearDecoder
 
 
 def register(command):
@@ -41,28 +41,23 @@ def run(files, keep, remove, output, **kwargs):
         keep = []
 
     with Encoder(output) as out:
+        for packet in tqdm(
+            LinearDecoder(*files, show_progress=True), unit="packet", unit_scale=True, dynamic_ncols=True
+        ):
 
-        decoder = Decoder(*files)
-        with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
-            for packet in decoder:
+            # To start with we keep messages
+            valid = True
 
-                # To start with we keep messages
-                valid = True
+            # If remove flags any message mark it as invalid
+            for pattern in remove:
+                if fnmatch.fnmatch(packet.type, pattern):
+                    valid = False
 
-                # If remove flags any message mark it as invalid
-                for pattern in remove:
-                    if fnmatch.fnmatch(packet.type, pattern):
-                        valid = False
+            # If keep flags any message mark it as valid
+            for pattern in keep:
+                if fnmatch.fnmatch(packet.type, pattern):
+                    valid = True
 
-                # If keep flags any message mark it as valid
-                for pattern in keep:
-                    if fnmatch.fnmatch(packet.type, pattern):
-                        valid = True
-
-                # If it's still valid write it to the new file
-                if valid:
-                    out.write(packet.timestamp, packet.msg)
-
-                # Update the progress bar
-                progress.n = decoder.bytes_read()
-                progress.update(0)
+            # If it's still valid write it to the new file
+            if valid:
+                out.write(packet.emit_timestamp, packet.msg)

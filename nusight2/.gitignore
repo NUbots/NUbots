@@ -1,0 +1,31 @@
+.DS_Store
+/node_modules
+.module-cache
+.awcache
+.eslintcache
+/build
+/dist
+
+# IntelliJ IDEA
+/.idea/workspace.xml
+/.idea/tasks.xml
+
+# Sublime Text
+NUsight2.sublime-workspace
+
+# Jest coverage report
+/coverage
+
+# Log files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated protocol buffer files
+/src/shared/proto/messages.js
+/src/shared/proto/messages.d.ts
+
+# NBS recordings
+recordings
