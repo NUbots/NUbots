@@ -90,22 +90,22 @@ namespace behaviour {
                                     headLocked = !headLocked;
                                 }
                                 break;
-                            case BUTTON_L1:
-                                if (event.value > 0) {  // button down
-                                    NUClear::log("Requesting Left Front Kick");
-                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
-                                        Eigen::Vector3d::UnitX(),  // vector pointing forward relative to robot
-                                        LimbID::LEFT_LEG)));
-                                }
-                                break;
-                            case BUTTON_R1:
-                                if (event.value > 0) {  // button down
-                                    NUClear::log("Requesting Right Front Kick");
-                                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand(KickScriptCommand(
-                                        Eigen::Vector3d::UnitX(),  // vector pointing forward relative to robot
-                                        LimbID::RIGHT_LEG))));
-                                }
-                                break;
+                                // case BUTTON_L1:
+                                //     if (event.value > 0) {  // button down
+                                //         NUClear::log("Requesting Left Front Kick");
+                                //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
+                                //             Eigen::Vector3d::UnitX(),  // vector pointing forward relative to robot
+                                //             LimbID::LEFT_LEG)));
+                                //     }
+                                //     break;
+                                // case BUTTON_R1:
+                                //     if (event.value > 0) {  // button down
+                                //         NUClear::log("Requesting Right Front Kick");
+                                //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand(KickScriptCommand(
+                                //             Eigen::Vector3d::UnitX(),  // vector pointing forward relative to robot
+                                //             LimbID::RIGHT_LEG))));
+                                //     }
+                                //     break;
                                 // case BUTTON_L2:
                                 //     if (event.value > 0) {  // button down
                                 //         NUClear::log("Requesting Left Side Kick");
