@@ -127,62 +127,6 @@ walk_cycle:
         Z:
           p: 0.035
           d: 0
-    servo_gains:
-      # -
-      #   id: "R_HIP_YAW"
-      #   p: 100
-      # -
-      #   id: "L_HIP_YAW"
-      #   p: 100
-      # -
-      #   id: "R_HIP_ROLL"
-      #   p: 100
-      # -
-      #   id: "L_HIP_ROLL"
-      #   p: 100
-      # -
-      #   id: "R_HIP_PITCH"
-      #   p: 100
-      # -
-      #   id: "L_HIP_PITCH"
-      #   p: 100
-      # -
-      #   id: "R_KNEE"
-      #   p: 1000
-      # -
-      #   id: "L_KNEE"
-      #   p: 1000
-      # -
-      #   id: "R_ANKLE_PITCH"
-      #   p: 100
-      # -
-      #   id: "L_ANKLE_PITCH"
-      #   p: 100
-      # -
-      #   id: "R_ANKLE_ROLL"
-      #   p: 100
-      # -
-      #   id: "L_ANKLE_ROLL"
-      #   p: 100
-
-    # Support bias parameters to reduce backlash-based instability
-    # velFastForward: 0.05
-    # velFastTurn: 0.15
-    # supportFront: 0.03
-    # supportFront2: 0.03
-    # supportBack: -0.02
-    # supportSideX: -0.01
-    # supportSideY: -0.005
-    # toeTipCompensation: 0 * pi / 180
-    gyro:
-      # Ratio to normalize gyro gains into units of degree/second
-      # gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
-      # ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-      # ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-      # kneeImuParamX: [0.5, 0.7 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-      # hipImuParamY: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-      # armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
-      # armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]   # supportTurn: 0.02
 
 STAND_SCRIPT_DURATION: 1
 

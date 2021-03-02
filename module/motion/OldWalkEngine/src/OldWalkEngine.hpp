@@ -201,23 +201,6 @@ namespace motion {
 
         message::motion::KinematicsModel kinematicsModel;
 
-
-        /*arma::vec4 ankleImuParamX;
-        arma::vec4 ankleImuParamY;
-        arma::vec4 kneeImuParamX;
-        arma::vec4 hipImuParamY;
-        arma::vec4 armImuParamX;
-        arma::vec4 armImuParamY;
-
-        double velFastForward;
-        double velFastTurn;
-        double supportFront;
-        double supportFront2;
-        double supportBack;
-        double supportSideX;
-        double supportSideY;
-        double supportTurn;*/
-
         // Initial body swing
         // double toeTipCompensation;
         double hipRollCompensation;
