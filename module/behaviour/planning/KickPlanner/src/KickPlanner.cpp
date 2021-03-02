@@ -130,7 +130,7 @@ namespace behaviour {
                     if (kickIsValid) {
                         lastTimeValid = now;
                     }
-                    float timeSinceValid = (now - lastTimeValid).count() * (1.0f / double(NUClear::clock::period::den));
+                    float timeSinceValid = (now - lastTimeValid).count() * (1.0 / double(NUClear::clock::period::den));
 
                     // log("kick checks",secondsSinceLastSeen < cfg.seconds_not_seen_limit
                     //     , kickIsValid
