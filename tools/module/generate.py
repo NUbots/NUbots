@@ -138,7 +138,7 @@ def generate_cpp(parts):
 
             on<Configuration>("{className}.yaml").then([this](const Configuration& cfg) {{
                 // Use configuration here from file {className}.yaml
-                this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+                this->log_level = cfg["log_level"];
             }});
         }}
 

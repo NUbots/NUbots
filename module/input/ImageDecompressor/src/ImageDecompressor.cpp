@@ -20,7 +20,7 @@ namespace input {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageDecompressor.yaml").then("Configure Decompressors", [this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            this->log_level = cfg["log_level"];
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(decompressor_mutex);
