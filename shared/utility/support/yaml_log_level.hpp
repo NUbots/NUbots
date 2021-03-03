@@ -33,6 +33,14 @@ struct convert<::NUclear::LogLevel> {
     static Node encode(const ::NUclear::LogLevel& rhs) {
         Node node;
 
+        switch (rhs) {
+            case NUClear::TRACE: node = "TRACE"; break;
+            case NUClear::DEBUG: node = "DEBUG"; break;
+            case NUClear::INFO: node = "INFO"; break;
+            case NUClear::WARN: node = "WARN"; break;
+            case NUClear::ERROR: node = "ERROR"; break;
+            case NUClear::FATAL: node = "FATAL"; break;
+        }
 
         // Treat as a int???
         node = rhs;
