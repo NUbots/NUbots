@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_yaml_LogLevel_HPP
-#define UTILITY_SUPPORT_yaml_LogLevel_HPP
+#ifndef UTILITY_SUPPORT_YAML_LOG_LEVEL_HPP
+#define UTILITY_SUPPORT_YAML_LOG_LEVEL_HPP
 
 #include <fmt/format.h>
 #include <map>
@@ -29,8 +29,8 @@
 namespace YAML {
 
 template <>
-struct convert<::NUclear::LogLevel> {
-    static Node encode(const ::NUclear::LogLevel& rhs) {
+struct convert<::NUClear::LogLevel> {
+    static Node encode(const ::NUClear::LogLevel& rhs) {
         Node node;
 
         switch (rhs) {
@@ -45,7 +45,7 @@ struct convert<::NUclear::LogLevel> {
         return node;
     }
 
-    static bool decode(const Node& node, ::NUclear::LogLevel& rhs) {
+    static bool decode(const Node& node, ::NUClear::LogLevel& rhs) {
         try {
             // clang-format off
             auto lvl = node.as<std::string>();
@@ -66,4 +66,4 @@ struct convert<::NUclear::LogLevel> {
 };
 }  // namespace YAML
 
-#endif  // UTILITY_SUPPORT_yaml_LogLevel_HPP
+#endif  // UTILITY_SUPPORT_YAML_LOG_LEVEL_HPP
