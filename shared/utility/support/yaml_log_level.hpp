@@ -26,49 +26,13 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 
-namespace utility::support {
-
-struct LogLevel {
-    LogLevel() {}
-    LogLevel(const YAML::Node& node) : node(node) {}
-    LogLevel(const LogLevel& other) {
-        this->node = other.node;
-    }
-
-    operator ::NUClear::LogLevel() {
-        ::NUClear::LogLevel value;
-
-        try {
-            // clang-format off
-            auto lvl = node.as<std::string>();
-            if (lvl == "TRACE") { value = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { value = NUClear::DEBUG; }
-            else if (lvl == "INFO") { value = NUClear::INFO; }
-            else if (lvl == "WARN") { value = NUClear::WARN; }
-            else if (lvl == "ERROR") { value = NUClear::ERROR; }
-            else if (lvl == "FATAL") { value = NUClear::FATAL; }
-            // clang-format on
-        }
-
-        catch (const std::invalid_argument& ex) {
-            throw std::invalid_argument(
-                fmt::format("Unable to convert node to NUClear::LogLevel type.\n{}", ex.what()));
-        }
-
-        return value;
-    }
-
-private:
-    YAML::Node node;
-};
-}  // namespace utility::support
-
 namespace YAML {
 
 template <>
-struct convert<utility::support::LogLevel> {
-    static Node encode(const utility::support::LogLevel& rhs) {
+struct convert<::NUclear::LogLevel> {
+    static Node encode(const ::NUclear::LogLevel& rhs) {
         Node node;
+
 
         // Treat as a int???
         node = rhs;
@@ -76,8 +40,22 @@ struct convert<utility::support::LogLevel> {
         return node;
     }
 
-    static bool decode(const Node& node, utility::support::LogLevel& rhs) {
-        rhs = utility::support::LogLevel(node);
+    static bool decode(const Node& node, ::NUclear::LogLevel& rhs) {
+        try {
+            // clang-format off
+            auto lvl = node.as<std::string>();
+            if (lvl == "TRACE") { rhs = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { rhs = NUClear::DEBUG; }
+            else if (lvl == "INFO") { rhs = NUClear::INFO; }
+            else if (lvl == "WARN") { rhs = NUClear::WARN; }
+            else if (lvl == "ERROR") { rhs = NUClear::ERROR; }
+            else if (lvl == "FATAL") { rhs = NUClear::FATAL; }
+            // clang-format on
+        }
+        catch (const std::invalid_argument& ex) {
+            return false;
+        }
+
         return true;
     }
 };
