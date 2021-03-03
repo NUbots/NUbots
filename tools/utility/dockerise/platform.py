@@ -4,11 +4,14 @@ import os
 import re
 import stat
 import subprocess
+from subprocess import DEVNULL
 
 from termcolor import cprint
 
 import b
 from utility.shell import WrapPty
+
+from . import defaults
 
 
 def selected(repository):
@@ -74,33 +77,31 @@ def build(repository, platform):
             current = stat.S_IMODE(os.lstat(p).st_mode)
             os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
 
-    # Pull the latest version
-    err = pty.spawn(["docker", "pull", remote_tag])
-    if err != 0:
-        cprint("Docker pull returned exit code {}".format(err), "red", attrs=["bold"])
-        exit(err)
+    # Create a buildx instance for building this image
+    builder_name = "{}_{}".format(defaults.image, platform)
+    if subprocess.run(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
+        subprocess.run(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
+    subprocess.run(["docker", "buildx", "use", builder_name])
 
-    build_env = os.environ
-    build_env["DOCKER_BUILDKIT"] = "1"
-    old_cwd = os.getcwd()
-    os.chdir(dockerdir)
+    # Build the image!
     err = pty.spawn(
         [
             "docker",
+            "buildx",
             "build",
-            ".",
-            "--build-arg",
-            "BUILDKIT_INLINE_CACHE=1",
+            "-t",
+            local_tag,
+            "--pull",
+            "--cache-from=type=registry,ref={}/{}:{}".format(defaults.repository, defaults.image, platform),
+            "--cache-to=type=inline,mode=max",
             "--build-arg",
             "platform={}".format(platform),
             "--build-arg",
             "user_uid={}".format(os.getuid()),
-            "-t",
-            local_tag,
-        ],
-        env=build_env,
+            "--output=type=docker",
+            dockerdir,
+        ]
     )
-    os.chdir(old_cwd)
     if err != 0:
         cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
         exit(err)
