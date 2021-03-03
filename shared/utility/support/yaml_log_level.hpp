@@ -42,9 +42,6 @@ struct convert<::NUclear::LogLevel> {
             case NUClear::FATAL: node = "FATAL"; break;
         }
 
-        // Treat as a int???
-        node = rhs;
-
         return node;
     }
 
