@@ -9,8 +9,6 @@
 #include "message/input/Image.hpp"
 #include "message/output/CompressedImage.hpp"
 
-#include "utility/support/yaml_LogLevel.hpp"
-
 namespace module {
 namespace input {
 
@@ -22,7 +20,7 @@ namespace input {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageDecompressor.yaml").then("Configure Decompressors", [this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"].as<utility::support::LogLevel>();
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(decompressor_mutex);

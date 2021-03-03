@@ -10,7 +10,6 @@
 #include "message/input/Image.hpp"
 #include "message/output/CompressedImage.hpp"
 
-#include "utility/support/yaml_LogLevel.hpp"
 #include "utility/vision/fourcc.hpp"
 
 namespace module {
@@ -57,7 +56,7 @@ namespace output {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"].as<utility::support::LogLevel>();
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
 
             // Clear the compressors and factories
