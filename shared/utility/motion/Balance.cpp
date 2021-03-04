@@ -50,7 +50,7 @@ namespace motion {
 
 
     void Balancer::balance(const KinematicsModel& model,
-                           Eigen::Affine3f footToTorso,
+                           Eigen::Affine3f& footToTorso,
                            const LimbID& leg,
                            const Sensors& sensors) {
 
