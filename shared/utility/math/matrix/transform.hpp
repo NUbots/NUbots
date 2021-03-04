@@ -61,7 +61,7 @@ namespace math {
         inline Eigen::Transform<Scalar, 2, Eigen::Affine> interpolate(
             const Eigen::Transform<Scalar, 2, Eigen::Affine>& current,
             const Eigen::Transform<Scalar, 2, Eigen::Affine>& target,
-            double t) {
+            const Scalar& t) {
             Eigen::Transform<Scalar, 2, Eigen::Affine> result;
             // result = current * CreateRotation(t * ( current(theta) - target(theta) ))
             result.linear() =
@@ -74,7 +74,7 @@ namespace math {
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> interpolate(
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& t1,
             Eigen::Transform<Scalar, 3, Eigen::Affine>& t2,
-            Scalar alpha) {
+            const Scalar& alpha) {
 
             // Create quaternions from the transforms' rotation matrices
             Eigen::Quaternion t1Rot = Eigen::Quaternion(t1.rotation());
@@ -107,7 +107,7 @@ namespace math {
         template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateXLocal(
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& world,
-            const Scalar radians,
+            const Scalar& radians,
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& local) {
             // Do the local rotation with an AngleAxis on the UnitX vector
             return localToWorld(
@@ -119,7 +119,7 @@ namespace math {
         template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateYLocal(
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& world,
-            const Scalar radians,
+            const Scalar& radians,
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& local) {
             // Do the local rotation with an AngleAxis on the UnitY vector
             return localToWorld(
@@ -131,7 +131,7 @@ namespace math {
         template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZLocal(
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& world,
-            const Scalar radians,
+            const Scalar& radians,
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& local) {
             // Do the local rotation with an AngleAxis on the UnitZ vector
             return localToWorld(
@@ -141,7 +141,7 @@ namespace math {
         }
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateX(const Scalar radians,
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateX(const Scalar& radians,
                                                                   const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
             Eigen::Transform<Scalar, 3, Eigen::Affine> rotationMatrix =
                 Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
@@ -152,7 +152,7 @@ namespace math {
 
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateY(const Scalar radians,
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateY(const Scalar& radians,
                                                                   const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
             Eigen::Transform<Scalar, 3, Eigen::Affine> rotationMatrix =
                 Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
@@ -163,7 +163,7 @@ namespace math {
 
 
         template <typename Scalar>
-        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZ(const Scalar radians,
+        inline Eigen::Transform<Scalar, 3, Eigen::Affine> rotateZ(const Scalar& radians,
                                                                   const Eigen::Transform<Scalar, 3, Eigen::Affine>& t) {
             Eigen::Transform<Scalar, 3, Eigen::Affine> rotationMatrix;
             rotationMatrix.translation() = Eigen::Matrix<Scalar, 3, 1>::Zero();
