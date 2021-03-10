@@ -22,9 +22,9 @@ namespace motion {
 
         // path length to origin; x,y=foots starting location; h=step height; -1<x<1 0<y<1 0<h<1
         double FootController::pathlength(const Eigen::Vector3d& pos) {
-            x = config.scaling_factor * pos.x();
-            y = config.scaling_factor * pos.y();
-            h = config.scaling_factor * config.step_height;
+            double x = config.scaling_factor * pos.x();
+            double y = config.scaling_factor * pos.y();
+            double h = config.scaling_factor * config.step_height;
 
             double c      = y / sinh(x) - h * atan(1 / sinh(x));
             int num_steps = 30;
@@ -89,7 +89,7 @@ namespace motion {
             // rNWg + rWTg = rNTg
             // We normalize the vector and multiply it by the distance and factor to reach the target at the right
             // time
-            Eigen::Vector3d rNWg = Eigen::Vector3d(f_x(rWTg), 0, f_z(rWTg)).normalize() * factor * pathlength(rWTg);
+            Eigen::Vector3d rNWg = Eigen::Vector3d(f_x(rWTg), 0, f_z(rWTg)).normalized() * factor * pathlength(rWTg);
             Eigen::Vector3d rNTg = rWTg + rNWg;
 
             if (rWTg.z() + rNWg.z() < 0) {
