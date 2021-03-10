@@ -31,8 +31,8 @@ namespace motion {
             // Returns x and z positions of vector field. See vectorfield.py for graphical representation of vector
             // field
             double f_x(const Eigen::Vector3d& pos);
-            double f_z(const Eigen::Vector3d& pos, double height);
-            double pathlength(double x, double y, double h);
+            double f_z(const Eigen::Vector3d& pos);
+            double pathlength(const Eigen::Vector3d& pos);
 
             Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hw_ong;
         };
