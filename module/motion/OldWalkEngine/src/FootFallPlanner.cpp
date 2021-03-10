@@ -94,8 +94,7 @@ namespace motion {
             uSupport                        = localToWorld(uLeftFootModded, footOffsetNeg);
         }
         else {
-            Eigen::Affine2d uRightFootTorso = worldToLocal(uTorsoSource, uRightFootSource);
-
+            Eigen::Affine2d uRightFootTorso  = worldToLocal(uTorsoSource, uRightFootSource);
             Eigen::Affine2d uTorsoModded     = localToWorld(uTorso, supportModTranslate);
             Eigen::Affine2d uRightFootModded = localToWorld(uTorsoModded, uRightFootTorso);
             uSupport                         = localToWorld(uRightFootModded, footOffsetNeg);
