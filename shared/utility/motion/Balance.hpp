@@ -66,7 +66,7 @@ namespace motion {
         Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
         void configure(const YAML::Node& config);
         void balance(const message::motion::KinematicsModel& hip,
-                     Eigen::Affine3f footToTorso,
+                     Eigen::Affine3f& footToTorso,
                      const utility::input::LimbID& leg,
                      const message::input::Sensors& sensors);
     };
