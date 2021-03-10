@@ -563,8 +563,8 @@ namespace motion {
         torso.rotate(Eigen::AngleAxisd(angle(uTorsoActual), Eigen::Vector3d::UnitX()));
 
         // Transform feet targets to be relative to the torso
-        Eigen::Affine3d leftFootCOM  = worldToLocal(leftFoot, torso);
-        Eigen::Affine3d rightFootCOM = worldToLocal(rightFoot, torso);
+        Eigen::Affine3f leftFootCOM  = worldToLocal(leftFoot, torso).cast<float>();
+        Eigen::Affine3f rightFootCOM = worldToLocal(rightFoot, torso).cast<float>();
 
         // TODO: what is this magic?
         double phaseComp = std::min({1.0, foot.y() / 0.1, (1 - foot.y()) / 0.1});
@@ -572,19 +572,19 @@ namespace motion {
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
             rightFootCOM = rotateZLocal(rightFootCOM,
-                                        -hipRollCompensation * phaseComp,
-                                        Eigen::Affine3d(sensors.Htx[ServoID::R_HIP_ROLL]));
+                                        float(-hipRollCompensation * phaseComp),
+                                        Eigen::Affine3f(sensors.Htx[ServoID::R_HIP_ROLL].cast<float>()));
         }
         else {
             leftFootCOM = rotateZLocal(leftFootCOM,
-                                       hipRollCompensation * phaseComp,
-                                       Eigen::Affine3d(sensors.Htx[ServoID::L_HIP_ROLL]));
+                                       float(hipRollCompensation * phaseComp),
+                                       Eigen::Affine3f(sensors.Htx[ServoID::L_HIP_ROLL].cast<float>()));
         }
 
         if (balanceEnabled) {
             // Apply balance to our support foot
             balancer.balance(kinematicsModel,
-                             swingLeg == LimbID::LEFT_LEG ? rightFootCOM.cast<float>() : leftFootCOM.cast<float>(),
+                             swingLeg == LimbID::LEFT_LEG ? rightFootCOM : leftFootCOM,
                              swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG,
                              sensors);
         }
@@ -626,13 +626,13 @@ namespace motion {
         torso.rotate(Eigen::AngleAxisd(angle(uTorsoActual), Eigen::Vector3d::UnitX()));
 
         // Transform feet targets to be relative to the torso
-        Eigen::Affine3d leftFootCOM  = worldToLocal(twoD_to_threeD(uLeftFoot), torso);
-        Eigen::Affine3d rightFootCOM = worldToLocal(twoD_to_threeD(uRightFoot), torso);
+        Eigen::Affine3f leftFootCOM  = worldToLocal(twoD_to_threeD(uLeftFoot), torso).cast<float>();
+        Eigen::Affine3f rightFootCOM = worldToLocal(twoD_to_threeD(uRightFoot), torso).cast<float>();
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            balancer.balance(kinematicsModel, leftFootCOM.cast<float>(), LimbID::LEFT_LEG, sensors);
-            balancer.balance(kinematicsModel, rightFootCOM.cast<float>(), LimbID::RIGHT_LEG, sensors);
+            balancer.balance(kinematicsModel, leftFootCOM, LimbID::LEFT_LEG, sensors);
+            balancer.balance(kinematicsModel, rightFootCOM, LimbID::RIGHT_LEG, sensors);
         }
 
         // Assume the previous calculations were done in CoM space, now convert them to torso space
@@ -640,8 +640,8 @@ namespace motion {
         Eigen::Affine3f Htc = Eigen::Affine3f::Identity();
         Htc.translation()   = Eigen::Vector3f(-sensors.rMTt.x(), -sensors.rMTt.y(), 0.0f);
 
-        Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM.cast<float>();
-        Eigen::Affine3f rightFootTorso = Htc * rightFootCOM.cast<float>();
+        Eigen::Affine3f leftFootTorso  = Htc * leftFootCOM;
+        Eigen::Affine3f rightFootTorso = Htc * rightFootCOM;
 
         std::vector<std::pair<ServoID, float>> joints;
         joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
