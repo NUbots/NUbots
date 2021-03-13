@@ -78,6 +78,12 @@ namespace localisation {
         return projectTo2D(m, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
     }
 
+    // Transforms the transform
+    inline arma::vec3 transform3DToFieldState(const utility::math::matrix::Transform3D& m) {
+        utility::math::matrix::Transform2D ax = m.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0}));
+        return arma::vec3({ax.x(), ax.y(), ax.angle()});
+    }
+
 }  // namespace localisation
 }  // namespace utility
 
