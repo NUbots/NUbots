@@ -62,14 +62,14 @@ namespace localisation {
                     Eigen::Quaternionf q(rigidBody.rotation());
 
 
-                    Eigen::Matrix3f groundToWorldRotation = q.normalized().toRotationMatrix();
+                    Eigen::Matrix3f Rwg = q.normalized().toRotationMatrix();
 
-                    double heading = utility::math::angle::acos_clamped(groundToWorldRotation(0, 0));
+                    double heading = utility::math::angle::acos_clamped(Rwg(0, 0));
 
                     // TODO: transform from head to field
                     auto selfs = std::make_unique<std::vector<Self>>();
                     selfs->push_back(Self());
-                    selfs->back().heading  = groundToWorldRotation.block<1, 0>(0, 0).normalized();
+                    selfs->back().heading  = Rwg.block<2, 1>(0, 0).normalized();
                     selfs->back().position = Eigen::Vector2f(x, y);
                     emit(std::move(selfs));
 
