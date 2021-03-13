@@ -81,16 +81,18 @@ namespace behaviour {
 
             /*! @brief Gets points which allow for simultaneous search and viewing of key objects
              */
-            std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                         const message::vision::Balls& fixationObjects,
-                                                         const message::behaviour::SoccerObjectPriority::SearchType& sType,
-                                                         const message::input::Sensors& sensors,
-                                                         const message::input::Image::Lens& lens);
-            std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                         const message::vision::Goals& fixationObjects,
-                                                         const message::behaviour::SoccerObjectPriority::SearchType& sType,
-                                                         const message::input::Sensors& sensors,
-                                                         const message::input::Image::Lens& lens);
+            std::vector<Eigen::Vector2d> getSearchPoints(
+                const message::motion::KinematicsModel& kinematicsModel,
+                const message::vision::Balls& fixationObjects,
+                const message::behaviour::SoccerObjectPriority::SearchType& sType,
+                const message::input::Sensors& sensors,
+                const message::input::Image::Lens& lens);
+            std::vector<Eigen::Vector2d> getSearchPoints(
+                const message::motion::KinematicsModel& kinematicsModel,
+                const message::vision::Goals& fixationObjects,
+                const message::behaviour::SoccerObjectPriority::SearchType& sType,
+                const message::input::Sensors& sensors,
+                const message::input::Image::Lens& lens);
 
             /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the
              * bounding box of the objects
