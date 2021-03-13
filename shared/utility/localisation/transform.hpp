@@ -21,6 +21,11 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <armadillo>
+
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+
 
 namespace utility {
 namespace localisation {
@@ -30,6 +35,14 @@ namespace localisation {
         Eigen::Affine3d Hfw;
         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0.0);
         Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        return Hfw;
+    }
+
+    // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
+    inline utility::math::matrix::Transform3D fieldStateToTransform3D(const arma::vec3& state) {
+        utility::math::matrix::Transform3D Hfw;
+        Hfw.translation() = arma::vec3({state[0], state[1], 0});
+        Hfw               = Hfw.rotateZ(state[2]);
         return Hfw;
     }
 
