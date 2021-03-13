@@ -133,19 +133,19 @@ namespace motion {
                 Eigen::Affine3d torsoPose =
                     (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
 
-                Eigen::Affine3d kinematicsGroundToBody = Eigen::Affine3d(sensors.kinematicsBodyToGround).inverse();
+                Eigen::Affine3d Htg = Eigen::Affine3d(sensors.Hgt).inverse();
 
                 // Create the command target point object so we can transform it
                 Eigen::Vector4d commandTargetPoint(command.target[0], command.target[1], command.target[2], 1);
 
-                // Put the ball position from vision into torso coordinates by transforming the command target point.
-                Eigen::Vector3d targetTorso = (kinematicsGroundToBody * commandTargetPoint).block<3, 1>(0, 0);
+                // Put the ball position from vision into torso coordinates by transforming the command target point
+                Eigen::Vector3d targetTorso = (Htg * commandTargetPoint).head<3>;
 
                 // Put the ball position into support foot coordinates
                 Eigen::Vector3d targetSupportFoot = torsoPose * targetTorso;
 
                 // Put the goal from vision into torso coordinates
-                Eigen::Vector3d directionTorso(kinematicsGroundToBody * command.direction);
+                Eigen::Vector3d directionTorso(Htg * command.direction);
 
                 // Put the goal into support foot coordinates
                 Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
