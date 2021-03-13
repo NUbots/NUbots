@@ -493,7 +493,7 @@ namespace behaviour {
 
         Eigen::Vector2d HeadBehaviourSoccer::getIMUSpaceDirection(const KinematicsModel& kinematicsModel,
                                                                   const Eigen::Vector2d& screenAngles,
-                                                                  Eigen::Matrix3d headToIMUSpace) {
+                                                                  const Eigen::Matrix3d& headToIMUSpace) {
 
             // Eigen::Vector3d lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
             // This is an approximation relying on the robots small FOV
@@ -522,8 +522,8 @@ namespace behaviour {
         Returns vector of Eigen::Vector2d
         */
         std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                          Balls fixationObjects,
-                                                                          SearchType sType,
+                                                                          const Balls& fixationObjects,
+                                                                          const SearchType& sType,
                                                                           const Sensors&,
                                                                           const Image::Lens& lens) {
             // If there is nothing of interest, we search fot points of interest
@@ -612,8 +612,8 @@ namespace behaviour {
         }
 
         std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
-                                                                          Goals fixationObjects,
-                                                                          SearchType sType,
+                                                                          const Goals& fixationObjects,
+                                                                          const SearchType& sType,
                                                                           const Sensors&,
                                                                           const Image::Lens& lens) {
             // If there is nothing of interest, we search fot points of interest

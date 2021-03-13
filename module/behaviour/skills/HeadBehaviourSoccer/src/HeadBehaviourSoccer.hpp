@@ -77,18 +77,18 @@ namespace behaviour {
              */
             Eigen::Vector2d getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
                                                  const Eigen::Vector2d& screenAngles,
-                                                 Eigen::Matrix3d headToIMUSpace);
+                                                 const Eigen::Matrix3d& headToIMUSpace);
 
             /*! @brief Gets points which allow for simultaneous search and viewing of key objects
              */
             std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                         message::vision::Balls fixationObjects,
-                                                         message::behaviour::SoccerObjectPriority::SearchType sType,
+                                                         const message::vision::Balls& fixationObjects,
+                                                         const message::behaviour::SoccerObjectPriority::SearchType& sType,
                                                          const message::input::Sensors& sensors,
                                                          const message::input::Image::Lens& lens);
             std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                         message::vision::Goals fixationObjects,
-                                                         message::behaviour::SoccerObjectPriority::SearchType sType,
+                                                         const message::vision::Goals& fixationObjects,
+                                                         const message::behaviour::SoccerObjectPriority::SearchType& sType,
                                                          const message::input::Sensors& sensors,
                                                          const message::input::Image::Lens& lens);
 
