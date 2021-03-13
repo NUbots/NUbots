@@ -113,7 +113,7 @@ namespace localisation {
                     arma::vec3 rTFf   = {s.position[0], s.position[1], 0};
                     Hft.translation() = rTFf;
                     Hft.rotateZ(s.heading);
-                    Hfw      = Hft * Htw;
+                    Hfw = Hft * Htw;
                     states.push_back(transform3DToFieldState(Hfw));
 
                     Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0})).rotation();
