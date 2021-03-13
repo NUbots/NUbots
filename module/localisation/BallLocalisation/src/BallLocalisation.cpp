@@ -52,7 +52,7 @@ namespace localisation {
             Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
             Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
 
-            filter.set_state(start_state, Eigen::DiagonalMatrix<double, 2, 2>{start_variance}, n_particles);
+            filter.set_state(start_state, Eigen::DiagonalMatrix(start_variance), n_particles);
 
             // Use configuration here from file BallLocalisation.yaml
         });
@@ -94,11 +94,8 @@ namespace localisation {
                      * and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls.balls[0].measurements) {
-                        /* These parameters must be cast because Eigen doesn't do implicit conversion of float to
-                           double. They must also be wrapped, because Eigen converts to an intermediate type after the
-                           cast and that intermediate type screws up the function call */
-                        filter.measure(Eigen::VectorXd{measurement.rBCc.cast<double>()},
-                                       Eigen::MatrixXd{measurement.covariance.cast<double>()},
+                        filter.measure(Eigen::VectorXd(measurement.rBCc.cast<double>()),
+                                       Eigen::MatrixXd(measurement.covariance.cast<double>()),
                                        field,
                                        balls.Hcw);
                     }
