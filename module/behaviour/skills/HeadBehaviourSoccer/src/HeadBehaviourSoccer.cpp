@@ -94,7 +94,7 @@ namespace behaviour {
             , max_pitch(0.0f)
             , min_pitch(0.0f)
             , replan_angle_threshold(0.0f)
-            , lastPlanOrientation()
+            , Rtw()
             , pitch_plan_threshold(0.0f)
             , fractional_view_padding(0.0)
             , search_timeout_ms(0.0f)
@@ -306,7 +306,7 @@ namespace behaviour {
                           // If we arent getting up, then we can update the plan if necessary
                           if (updatePlan) {
                               if (lost) {
-                                  lastPlanOrientation = Eigen::Affine3d(sensors.Htw).rotation();
+                                  Rtw = Eigen::Affine3d(sensors.Htw).rotation();
                               }
                               if (ballMaxPriority) {
                                   updateHeadPlan(kinematicsModel,
@@ -747,7 +747,7 @@ namespace behaviour {
         }
 
         bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors) {
-            Eigen::Matrix3d diff = Eigen::Affine3d(sensors.Htw).inverse().rotation() * lastPlanOrientation;
+            Eigen::Matrix3d diff = Eigen::Affine3d(sensors.Htw).inverse().rotation() * Rtw;
             Eigen::Quaterniond quat(diff);
 
             // Max and min prevent nand error, presumably due to computational limitations

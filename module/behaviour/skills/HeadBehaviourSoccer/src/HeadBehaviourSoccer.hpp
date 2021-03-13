@@ -118,7 +118,7 @@ namespace behaviour {
 
 
             float replan_angle_threshold;
-            Eigen::Matrix3d lastPlanOrientation;
+            Eigen::Matrix3d Rtw;
 
             // CONFIG from HeadBehaviourSoccer.yaml
             float pitch_plan_threshold;
