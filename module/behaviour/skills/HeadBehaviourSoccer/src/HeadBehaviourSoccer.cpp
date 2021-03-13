@@ -544,33 +544,6 @@ namespace behaviour {
 
                     // New absolute referencing
                     Eigen::Vector2d angles = p * M_PI / 180;
-                    // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
-                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian(1.0,angles.x(),angles.y());//This is an
-                    // approximation relying on the robots small FOV
-
-
-                    // TODO: Fix trying to look underneath and behind self!!
-
-
-                    // Eigen::Vector3d adjustedLookVector = lookVectorFromHead;
-                    // TODO: fix:
-                    // Eigen::Vector3d adjustedLookVector =
-                    // Eigen::Matrix3d::createRotationX(sensors.Htw.rotation().pitch())
-                    // * lookVectorFromHead; Eigen::Vector3d adjustedLookVector =
-                    // Eigen::Matrix3d::createRotationY(-pitch_plan_value) * lookVectorFromHead; std::vector<
-                    // std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
-                    // adjustedLookVector);
-
-                    // for(auto& angle : goalAngles){
-                    //     if(angle.first == ServoID::HEAD_PITCH){
-                    //         angles[1] = angle.second;
-                    //     } else if(angle.first == ServoID::HEAD_YAW){
-                    //         angles[0] = angle.second;
-                    //     }
-                    // }
-                    // log("goalAngles",angles.t());
-                    // }
-                    // emit(graph("IMUSpace Head Lost Angles", angles));
 
                     scaledResults.push_back(angles);
                 }
@@ -634,33 +607,6 @@ namespace behaviour {
 
                     // New absolute referencing
                     Eigen::Vector2d angles = p * M_PI / 180;
-                    // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
-                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian(1.0,angles.x(),angles.y());//This is an
-                    // approximation relying on the robots small FOV
-
-
-                    // TODO: Fix trying to look underneath and behind self!!
-
-
-                    // Eigen::Vector3d adjustedLookVector = lookVectorFromHead;
-                    // TODO: fix:
-                    // Eigen::Vector3d adjustedLookVector =
-                    // Eigen::Matrix3d::createRotationX(sensors.Htw.rotation().pitch())
-                    // * lookVectorFromHead; Eigen::Vector3d adjustedLookVector =
-                    // Eigen::Matrix3d::createRotationY(-pitch_plan_value) * lookVectorFromHead; std::vector<
-                    // std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel,
-                    // adjustedLookVector);
-
-                    // for(auto& angle : goalAngles){
-                    //     if(angle.first == ServoID::HEAD_PITCH){
-                    //         angles[1] = angle.second;
-                    //     } else if(angle.first == ServoID::HEAD_YAW){
-                    //         angles[0] = angle.second;
-                    //     }
-                    // }
-                    // log("goalAngles",angles.t());
-                    // }
-                    // emit(graph("IMUSpace Head Lost Angles", angles));
 
                     scaledResults.push_back(angles);
                 }
