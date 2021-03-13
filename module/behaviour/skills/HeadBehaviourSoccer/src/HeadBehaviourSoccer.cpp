@@ -538,14 +538,14 @@ namespace behaviour {
                     // log("adding search point", p.t());
                     // old angles thing
                     // Interpolate between max and min allowed angles with -1 = min and 1 = max
-                    // auto angles = Eigen::Vector2d({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                    // auto angles = Eigen::Vector2d(((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                     //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) /
-                    //                                    2});
+                    //                                    2);
 
                     // New absolute referencing
                     Eigen::Vector2d angles = p * M_PI / 180;
                     // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
-                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
+                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian(1.0,angles.x(),angles.y());//This is an
                     // approximation relying on the robots small FOV
 
 
@@ -628,14 +628,14 @@ namespace behaviour {
                     // log("adding search point", p.t());
                     // old angles thing
                     // Interpolate between max and min allowed angles with -1 = min and 1 = max
-                    // auto angles = Eigen::Vector2d({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                    // auto angles = Eigen::Vector2d(((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                     //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) /
-                    //                                    2});
+                    //                                    2);
 
                     // New absolute referencing
                     Eigen::Vector2d angles = p * M_PI / 180;
                     // if(std::fabs(sensors.Htw.rotation().pitch()) < pitch_plan_threshold){
-                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an
+                    // Eigen::Vector3d lookVectorFromHead = sphericalToCartesian(1.0,angles.x(),angles.y());//This is an
                     // approximation relying on the robots small FOV
 
 
