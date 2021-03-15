@@ -13,7 +13,7 @@ nuclear_role(
   platform::Gazebo
   platform::darwin::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::ScriptEngine
   # Behaviour
   behaviour::Controller
