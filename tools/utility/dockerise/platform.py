@@ -108,9 +108,9 @@ def build(repository, platform):
 
     # If we were building the selected platform then update our selected tag
     if _selected:
-        err = subprocess.call(
+        err = subprocess.run(
             ["docker", "image", "tag", "{}:{}".format(repository, platform), "{}:selected".format(repository)],
             stdout=subprocess.DEVNULL,
-        )
+        ).returncode
         if err != 0:
             raise RuntimeError("docker image tag returned a non-zero exit code")
