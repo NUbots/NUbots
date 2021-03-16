@@ -59,7 +59,7 @@ namespace localisation {
         // Diagonal noise matrix
         Eigen::Matrix<Scalar, 2, 2> processNoiseDiagonal;
 
-        BallModel() : resetRange(), processNoiseDiagonal(), NUM_ROGUES() {}
+        BallModel() : NUM_ROGUES(), resetRange(), processNoiseDiagonal() {}
 
         StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
             return state;
