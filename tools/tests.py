@@ -72,6 +72,7 @@ def register(command):
 
 @run_on_docker(image="nubots:generic")
 def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
+    dirExists = False
 
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
@@ -82,9 +83,15 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
     if sub_command == "run":
         tests_dir = os.path.join(b.project_dir, TESTS_OUTPUT_DIR)
 
-        # If tests dir not at /home/nubots/Nubots/tests_output, create it
+        # If tests dir not at /home/nubots/Nubots/tests_output, try to create it
         if not os.path.exists(tests_dir):
-            os.makedirs(tests_dir)
+            try:
+                os.makedirs(tests_dir)
+                dirExists = True
+            except:
+                pass
+        else:
+            dirExists = True
 
         # Windows friendly (container time, not host)
         filename = time.strftime("%Y-%m-%d-%H-%M-%S") + ".log"
@@ -101,22 +108,19 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
 
         # If a test was given to run
         if test:
-            filename = test + "-" + filename
-            logPath = os.path.join(tests_dir, filename)
-            exit(
-                subprocess.run(
-                    ["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), "-R", test, *ctest_args]
-                ).returncode
-            )
+            if dirExists:
+                filename = test + "-" + filename
+                logPath = os.path.join(tests_dir, filename)
+                ctest_args.extend(["--output-log", logPath])
+            exit(subprocess.run(["/usr/bin/ctest", "--parallel", str(num_jobs), "-R", test, *ctest_args]).returncode)
 
         # If no test was given to run, run all
-        filename = "all-" + filename
-        logPath = os.path.join(tests_dir, filename)
-        exit(
-            subprocess.run(
-                ["/usr/bin/ctest", "--output-log", logPath, "--parallel", str(num_jobs), *ctest_args]
-            ).returncode
-        )
+        else:
+            if dirExists:
+                filename = "all-" + filename
+                logPath = os.path.join(tests_dir, filename)
+                ctest_args.extend(["--output-log", logPath])
+            exit(subprocess.run(["/usr/bin/ctest", "--parallel", str(num_jobs), *ctest_args]).returncode)
 
     else:
         # Probably a better way to call help when no sub commands are given?
