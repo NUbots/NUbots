@@ -47,7 +47,7 @@ namespace localisation {
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
             filter.model.n_rogues             = config["n_rogues"].as<int>();
             filter.model.resetRange           = config["reset_range"].as<Expression>();
-            int n_particles                   = config["n_particles"].as<int>();
+            filter.model.NUM_ROGUES = config["NUM_ROGUES"].as<int>();
 
             Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
             Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
