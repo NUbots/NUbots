@@ -87,7 +87,7 @@ namespace localisation {
                 // rGCc = vector from camera to goal post expected position
                 Eigen::Matrix<Scalar, 4, 1> rGCc_4(actual_position.x(), actual_position.y(), actual_position.z(), 1);
                 Eigen::Matrix<Scalar, 3, 1> rGCc((Hcf * rGCc_4).head(3));
-                return cartesianToSpherical(rGCc);  // rGCc in spherical coords (rho, theta, phi)
+                return cartesianToSpherical(rGCc);
             }
 
             switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {

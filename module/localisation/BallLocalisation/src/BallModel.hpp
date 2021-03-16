@@ -71,7 +71,7 @@ namespace localisation {
 
             const Eigen::Matrix<Scalar, 4, 1> rBWw(state[PX], state[PY], field.ball_radius, 1.0);
             const Eigen::Matrix<Scalar, 3, 1> rBCc_cart((Hcw * rBWw).head(3));
-            return cartesianToSpherical(rBCc_cart);  // rBCc returned, in (rho, theta, phi) form
+            return cartesianToSpherical(rBCc_cart);
         }
 
         StateVec limit(const StateVec& state) const {
