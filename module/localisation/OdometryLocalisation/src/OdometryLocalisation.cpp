@@ -7,10 +7,9 @@
 #include "message/localisation/Field.hpp"
 #include "message/platform/darwin/DarwinSensors.hpp"
 
-#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/localisation/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace localisation {
@@ -25,26 +24,33 @@ namespace localisation {
     using utility::support::Expression;
 
     OdometryLocalisation::OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)), localisationOffset(Eigen::Affine2d::Identity()) {
 
         on<Configuration>("OdometryLocalisation.yaml").then([this](const Configuration& config) {
             // Use configuration here from file OdometryLocalisation.yaml
-            localisationOffset = config["localisationOffset"].as<Expression>();
+            localisationOffset.matrix() = config["localisationOffset"].as<Expression>();
         });
 
         on<Trigger<ButtonLeftDown>, Single, With<Sensors>, Sync<OdometryLocalisation>>().then(
             [this](const Sensors& sensors) {
                 NUClear::log("Localisation Orientation reset. This direction is now forward.");
                 emit(std::make_unique<Nod>(true));
-                localisationOffset = projectTo2D(sensors.Htw);  // (= Hrw)
+                // Set localisationOffset = Hrw
+                localisationOffset =
+                    projectTo2D(Eigen::Affine3d(sensors.Htw), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
             });
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
-            Eigen::Affine2d Hrw = projectTo2D(sensors.Htw);
+            Eigen::Affine2d Hrw =
+                projectTo2D(Eigen::Affine3d(sensors.Htw), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
+            Eigen::Affine2d Hwr = Hrw.inverse();
 
-            // Local to world transform
-            Eigen::Affine2d state = Hrw.inverse() * localisationOffset;
+            // Assign the local to world transform to `state`, which becomes the field's position transform
+            Eigen::Affine2d state;
+            state.translation() =
+                localisationOffset.translation() + (localisationOffset.rotation() * Hwr.translation());
+            state.linear() = localisationOffset.rotation() * Hwr.rotation();
 
             auto field        = std::make_unique<Field>();
             field->position   = state.matrix();
