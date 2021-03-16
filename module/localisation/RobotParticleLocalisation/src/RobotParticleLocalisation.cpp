@@ -75,12 +75,8 @@ namespace localisation {
                     for (auto goal : goals.goals) {
 
                         // Check side and team
-                        Eigen::VectorXd poss = getFieldPosition(goal, fd);
-                        // std::vector<Eigen::VectorXd> poss = getPossibleFieldPositions(goal, fd); // Ambiguous version
+                        Eigen::Vector3d poss = getFieldPosition(goal, fd);
 
-                        /* These parameters must be cast because Eigen doesn't do implicit conversion of float to
-                           double. They must also be wrapped, because Eigen converts to an intermediate type after the
-                           cast and that intermediate type screws up the function call */
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
                                 if (m.position.allFinite() && m.covariance.allFinite()) {
@@ -103,41 +99,40 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
-                Eigen::Affine3d Hfw;
-                const Eigen::Matrix<double, 4, 4>& Htw(sensors.Htw);
                 std::vector<Eigen::Vector3d> states;
                 std::vector<Eigen::Matrix<double, 3, 3>> cov;
 
+                const Eigen::Matrix<double, 4, 4>& Htw(sensors.Htw);
+
                 for (auto& s : locReset.hypotheses) {
+                    const Eigen::Vector3d rTFf(s.position.x(), s.position.y(), 0);
                     Eigen::Affine3d Hft;
-                    Eigen::Vector3d rTFf(s.position[0], s.position[1], 0);
                     Hft.translation() = rTFf;
-                    Hfw               = Hft * Htw;
-                    Eigen::Affine2d hfw_2d_projection(
+                    // Linear part of transform is `s.heading` radians rotation about Z axis
+                    Hft.linear() = Eigen::AngleAxisd(s.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                    const Eigen::Affine3d Hfw(Hft * Htw);
+
+                    const Eigen::Affine2d hfw_2d_projection(
                         utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(1, 0, 0)));
-                    Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),
-                                                  hfw_2d_projection.translation().y(),
-                                                  0);
-                    Eigen::Rotation2D<double> hfw_2d_rotation;
-                    hfw_2d_rotation.matrix() = hfw_2d_projection.rotation();
-                    hfw_state_vec(2)         = hfw_2d_rotation.angle();
+
+                    const Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),
+                                                        hfw_2d_projection.translation().y(),
+                                                        hfw_2d_projection.rotation().angle());
 
                     states.push_back(hfw_state_vec);
 
-                    Eigen::Rotation2D<double> Hfw_xy;
-                    Hfw_xy.matrix() =
+                    const Eigen::Rotation2D<double> Hfw_xy(
                         utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(1, 0, 0))
-                            .rotation();
-                    Eigen::Rotation2D<double> pos_cov;
-                    pos_cov.matrix() = Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose();
+                            .rotation());
+
+                    const Eigen::Rotation2D<double> pos_cov(Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose());
+
                     Eigen::Matrix<double, 3, 3> state_cov(Eigen::Matrix<double, 3, 3>::Identity());
-                    state_cov.block(0, 0, 1, 1) = pos_cov.matrix();
-                    state_cov(2, 2)             = s.heading_var;
+                    state_cov.topLeftCorner(2, 2) = pos_cov.matrix();
+                    state_cov(2, 2)               = s.heading_var;
                     cov.push_back(state_cov);
                     filter.set_state(hfw_state_vec, state_cov, n_particles);
                 }
-                // filter.resetAmbiguous(states, cov, n_particles); // This has been commented out due to no ambiguous
-                // option anymore
             });
 
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
@@ -149,8 +144,8 @@ namespace localisation {
             draw_particles                    = config["draw_particles"].as<int>();
 
             Eigen::Vector3d start_state = config["start_state"].as<Expression>();
-            // TODO: This variable is not used?
-            Eigen::Vector3d start_variance = config["start_variance"].as<Expression>();
+            // TODO: This variable is not used. Probably remove it
+            /* Eigen::Vector3d start_variance = config["start_variance"].as<Expression>(); */
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
             ResetRobotHypotheses::Self leftSide;
@@ -175,24 +170,24 @@ namespace localisation {
 
     Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
                                                                 const message::support::FieldDescription& fd) const {
-        Eigen::VectorXd position;
+        Eigen::Vector3d position;
 
-        bool left  = (goal.side != VisionGoal::Side::RIGHT);
-        bool right = (goal.side != VisionGoal::Side::LEFT);
-        bool own   = (goal.team != VisionGoal::Team::OPPONENT);
-        bool opp   = (goal.team != VisionGoal::Team::OWN);
+        const bool left  = (goal.side != VisionGoal::Side::RIGHT);
+        const bool right = (goal.side != VisionGoal::Side::LEFT);
+        const bool own   = (goal.team != VisionGoal::Team::OPPONENT);
+        const bool opp   = (goal.team != VisionGoal::Team::OWN);
 
         if (own && left) {
-            position = Eigen::Vector3d({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0});
+            position = Eigen::Vector3d((fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0));
         }
         if (own && right) {
-            position = Eigen::Vector3d({fd.goalpost_own_r[0], fd.goalpost_own_r[1], 0});
+            position = Eigen::Vector3d((fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0));
         }
         if (opp && left) {
-            position = Eigen::Vector3d({fd.goalpost_opp_l[0], fd.goalpost_opp_l[1], 0});
+            position = Eigen::Vector3d((fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0));
         }
         if (opp && right) {
-            position = Eigen::Vector3d({fd.goalpost_opp_r[0], fd.goalpost_opp_r[1], 0});
+            position = Eigen::Vector3d((fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0));
         }
 
         return position;
