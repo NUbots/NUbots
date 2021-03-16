@@ -57,7 +57,7 @@ namespace localisation {
         // Range of reset particles
         Eigen::Matrix<Scalar, 2, 1> resetRange;
         // Diagonal noise matrix
-        Eigen::Matrix<Scalar, 2, 2> processNoiseDiagonal;
+        Eigen::Matrix<Scalar, 2, 1> processNoiseDiagonal;
 
         BallModel() : NUM_ROGUES(), resetRange(), processNoiseDiagonal() {}
 
@@ -79,7 +79,7 @@ namespace localisation {
         }
 
         StateMat noise(const Scalar& deltaT) {
-            return processNoiseDiagonal * deltaT;
+            return processNoiseDiagonal.asDiagonal() * deltaT;
         }
 
         template <typename T, typename U>

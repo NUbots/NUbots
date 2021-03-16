@@ -62,8 +62,15 @@ namespace localisation {
             kAngle = 2
         };
 
+        // Local variables for this model. Set their values from config file
+        // Number of reset particles
+        int NUM_ROGUES;
+        // Range of reset particles
+        Eigen::Matrix<Scalar, 3, 1> resetRange = Eigen::Matrix<Scalar, 3, 1>::Zero();
+        // Diagonal for 3x3 noise matrix (which is diagonal)
+        Eigen::Matrix<Scalar, 3, 1> processNoiseDiagonal;
 
-        RobotModel() {}
+        RobotModel() : NUM_ROGUES(), resetRange(), processNoiseDiagonal() {}
 
         StateVec time(const StateVec& state, double /*deltaT*/) {
             return state;
@@ -129,15 +136,9 @@ namespace localisation {
             return a - b;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> processNoiseDiagonal;
-
-        // number and range of reset particles
-        int n_rogues                           = 0;
-        Eigen::Matrix<Scalar, 3, 1> resetRange = Eigen::Matrix<Scalar, 3, 1>::Zero();
-
         // Getters
         int getRogueCount() const {
-            return n_rogues;
+            return NUM_ROGUES;
         }
         Eigen::Matrix<Scalar, Eigen::Dynamic, 1> getRogueRange() const {
             return resetRange;

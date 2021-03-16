@@ -42,20 +42,16 @@ namespace localisation {
 
             ball_pos_log = config["ball_pos_log"].as<bool>();
             // Use configuration here from file RobotParticleLocalisation.yaml
-            Eigen::Vector2d processNoiseValues = config["process_noise_diagonal"].as<Expression>();
-            // Assign the values from the config file to the diagonal
-            filter.model.processNoiseDiagonal << processNoiseValues.x(), 0.0, 0.0, processNoiseValues.y();
-            filter.model.NUM_ROGUES = config["NUM_ROGUES"].as<int>();
-            filter.model.resetRange = config["reset_range"].as<Expression>();
-            int n_particles         = config["n_particles"].as<int>();
+            Eigen::Vector2d processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
+            filter.model.NUM_ROGUES              = config["NUM_ROGUES"].as<int>();
+            filter.model.resetRange              = config["reset_range"].as<Expression>();
+            int n_particles                      = config["n_particles"].as<int>();
 
             Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
             Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
 
-            Eigen::Matrix2d start_covariance;
-            start_covariance << start_variance.x(), 0.0, 0.0, start_variance.y();
-
-            filter.set_state(start_state, start_covariance, n_particles);
+            // start_variance.asDiagonal() == the starting covariance matrix
+            filter.set_state(start_state, start_variance.asDiagonal(), n_particles);
 
             // Use configuration here from file BallLocalisation.yaml
         });
