@@ -59,18 +59,18 @@ namespace localisation {
         // Translation
         Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
         Eigen::Vector3d r                = m.translation();
-        Eigen::Affine3d newSpaceToWorld;
-        newSpaceToWorld.linear().block<3, 1>(0, 0) = orthoForwardAxis;
-        newSpaceToWorld.linear().block<3, 1>(0, 1) = yawAxis.cross(orthoForwardAxis);
-        newSpaceToWorld.linear().block<3, 1>(0, 2) = yawAxis;
-        Eigen::Affine3d worldToNewSpace            = newSpaceToWorld.inverse();
-        Eigen::Vector3d rNewSpace                  = worldToNewSpace * r;
-        result.translation()                       = rNewSpace.head<2>();
+        Eigen::Affine3d newSpaceToWorld(Eigen::Affined3d::Identity());
+        newSpaceToWorld.linear().col(0) = orthoForwardAxis;
+        newSpaceToWorld.linear().col(1) = yawAxis.cross(orthoForwardAxis);
+        newSpaceToWorld.linear().col(2) = yawAxis;
+        Eigen::Affine3d worldToNewSpace(newSpaceToWorld.inverse());
+        Eigen::Vector3d rNewSpace = worldToNewSpace * r;
+        result.translation()      = rNewSpace.head<2>();
 
         // Rotation
         Eigen::Affine3d rot(m);
         rot.translation()    = Eigen::Vector3d::Zero();
-        Eigen::Vector3d x    = rot.linear().block<3, 1>(0, 0);
+        Eigen::Vector3d x    = rot.linear().col(0);
         Eigen::Vector3d xNew = worldToNewSpace * x;
         float theta_x_from_f = std::atan2(xNew.y(), xNew.x());  // sin/cos
         result.linear()      = Eigen::Rotation2Dd(theta_x_from_f).toRotationMatrix();
