@@ -88,21 +88,24 @@ namespace localisation {
             Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
             Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
 
-            Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw.matrix() * Hfw.inverse().matrix());
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw.matrix() * Hfw.inverse().matrix());
 
             if (type == Goal::MeasurementType::CENTRE) {
                 // rGCc = vector from camera to goal post expected position
-                Eigen::Matrix<Scalar, 4, 1> rGCc_4(actual_position.x(), actual_position.y(), actual_position.z(), 1);
-                Eigen::Matrix<Scalar, 3, 1> rGCc((Hcf * rGCc_4).head(3));
+                const Eigen::Matrix<Scalar, 4, 1> rGCc_4(actual_position.x(),
+                                                         actual_position.y(),
+                                                         actual_position.z(),
+                                                         1);
+                const Eigen::Matrix<Scalar, 3, 1> rGCc((Hcf * rGCc_4).head(3));
                 return cartesianToSpherical(rGCc);
             }
 
             switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
                 case FieldDescription::GoalpostType::CIRCLE: {
                     if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                        Eigen::Matrix<Scalar, 3, 1> rNCc(
+                        const Eigen::Matrix<Scalar, 3, 1> rNCc(
                             getCylindricalPostCamSpaceNormal(type, actual_position, Hcf, fd));
-                        Eigen::Matrix<Scalar, 2, 1> angles(
+                        const Eigen::Matrix<Scalar, 2, 1> angles(
                             std::atan2(rNCc.y(), rNCc.x()),
                             std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
                         return angles;
@@ -111,8 +114,9 @@ namespace localisation {
                 }
                 case FieldDescription::GoalpostType::RECTANGLE: {
                     if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                        Eigen::Matrix<Scalar, 3, 1> rNCc(getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd));
-                        Eigen::Matrix<Scalar, 2, 1> angles(
+                        const Eigen::Matrix<Scalar, 3, 1> rNCc(
+                            getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd));
+                        const Eigen::Matrix<Scalar, 2, 1> angles(
                             std::atan2(rNCc.y(), rNCc.x()),
                             std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
                         return angles;
@@ -157,11 +161,11 @@ namespace localisation {
             const Eigen::Matrix<Scalar, 3, 1> rZCc(rZFf.head(3));
 
             // The vector direction across the field perpendicular to the camera view vector
-            Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>(1, 0, 0)).normalized();
+            const Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>(1, 0, 0)).normalized();
 
-            float dir                           = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1.0f : -1.0f;
-            Eigen::Matrix<Scalar, 3, 1> rG_blCc = post_centre + 0.5 * dir * fd.dimensions.goalpost_width * rLRf;
-            Eigen::Matrix<Scalar, 3, 1> rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height * rZCc;
+            const float dir                           = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1.0f : -1.0f;
+            const Eigen::Matrix<Scalar, 3, 1> rG_blCc = post_centre + 0.5 * dir * fd.dimensions.goalpost_width * rLRf;
+            const Eigen::Matrix<Scalar, 3, 1> rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height * rZCc;
 
             // creating the normal vector (following convention stipulated in VisionObjects)
             return (type == Goal::MeasurementType::LEFT_NORMAL) ? rG_blCc.cross(rG_tlCc).normalized()
@@ -203,25 +207,25 @@ namespace localisation {
                 goalTopCorners.col(i) += Eigen::Matrix<Scalar, 4, 1>(0, 0, fd.dimensions.goal_crossbar_height, 0);
 
             // Transform to robot camera space
-            Eigen::Matrix<Scalar, 4, 5> goalBaseCornersCam = Hcf * goalBaseCorners;
-            Eigen::Matrix<Scalar, 4, 5> goalTopCornersCam  = Hcf * goalTopCorners;
+            const Eigen::Matrix<Scalar, 4, 5> goalBaseCornersCam = Hcf * goalBaseCorners;
+            const Eigen::Matrix<Scalar, 4, 5> goalTopCornersCam  = Hcf * goalTopCorners;
 
             // Get widest lines
             Eigen::Matrix<Scalar, 3, 1> widestBase(goalBaseCornersCam.col(0).head(3));
             Eigen::Matrix<Scalar, 3, 1> widestTop(goalTopCornersCam.col(0).head(3));
-
             float largest_angle = 0;
+
             for (int i = 1; i < goalBaseCornersCam.cols(); ++i) {
-                Eigen::Matrix<Scalar, 4, 1> baseCorner(goalBaseCornersCam.col(i));
-                Eigen::Matrix<Scalar, 3, 1> baseCorner3(baseCorner.head(3));
-                Eigen::Matrix<Scalar, 4, 1> topCorner(goalTopCornersCam.col(i));
-                float angle(std::acos(baseCorner.dot(goalBaseCornersCam.col(0))));
+                const Eigen::Matrix<Scalar, 4, 1> baseCorner(goalBaseCornersCam.col(i));
+                const Eigen::Matrix<Scalar, 3, 1> baseCorner3(baseCorner.head(3));
+                const Eigen::Matrix<Scalar, 4, 1> topCorner(goalTopCornersCam.col(i));
+                const float angle(std::acos(baseCorner.dot(goalBaseCornersCam.col(0))));
 
                 // Left side will have cross product point in neg field z direction
-                Eigen::Matrix<Scalar, 3, 1> goalBaseCorner0(goalBaseCornersCam.col(0).head(3));
-                Eigen::Matrix<Scalar, 3, 1> crossResult(baseCorner3.cross(goalBaseCorner0));
-                Eigen::Matrix<Scalar, 3, 1> topBaseDifference((topCorner - baseCorner).head(3));
-                bool left_side = crossResult.dot(topBaseDifference) < 0;
+                const Eigen::Matrix<Scalar, 3, 1> goalBaseCorner0(goalBaseCornersCam.col(0).head(3));
+                const Eigen::Matrix<Scalar, 3, 1> crossResult(baseCorner3.cross(goalBaseCorner0));
+                const Eigen::Matrix<Scalar, 3, 1> topBaseDifference((topCorner - baseCorner).head(3));
+                const bool left_side = crossResult.dot(topBaseDifference) < 0;
 
                 // If its the largest angle so far for that side, then update our results so far
                 if ((left_side && (type == Goal::MeasurementType::LEFT_NORMAL))

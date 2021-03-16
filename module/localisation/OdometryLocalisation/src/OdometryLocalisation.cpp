@@ -42,9 +42,9 @@ namespace localisation {
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
-            Eigen::Affine2d Hrw =
+            const Eigen::Affine2d Hrw =
                 projectTo2D(Eigen::Affine3d(sensors.Htw), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
-            Eigen::Affine2d Hwr = Hrw.inverse();
+            const Eigen::Affine2d Hwr = Hrw.inverse();
 
             // Assign the local to world transform to `state`, which becomes the field's position transform
             Eigen::Affine2d state;

@@ -23,7 +23,9 @@ namespace localisation {
 
         static constexpr int TIME_UPDATE_FREQUENCY     = 10;
         static constexpr int PARTICLE_UPDATE_FREQUENCY = 1;
-        int draw_particles                             = 10;
+
+        // Member variables, to be set by config
+        int draw_particles;
         int n_particles;
 
         Eigen::Vector3d getFieldPosition(const message::vision::Goal& goal,

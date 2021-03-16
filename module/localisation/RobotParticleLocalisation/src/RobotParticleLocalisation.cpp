@@ -37,8 +37,8 @@ namespace localisation {
             [this]() {
                 /* Perform time update */
                 using namespace std::chrono;
-                auto curr_time        = NUClear::clock::now();
-                double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                const auto curr_time  = NUClear::clock::now();
+                const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
 
                 filter.time(seconds);
@@ -65,8 +65,8 @@ namespace localisation {
                 if (!goals.goals.empty()) {
                     /* Perform time update */
                     using namespace std::chrono;
-                    auto curr_time        = NUClear::clock::now();
-                    double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                    const auto curr_time  = NUClear::clock::now();
+                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
 
                     filter.time(seconds);
@@ -74,7 +74,7 @@ namespace localisation {
                     for (auto goal : goals.goals) {
 
                         // Check side and team
-                        Eigen::Vector3d poss = getFieldPosition(goal, fd);
+                        const Eigen::Vector3d poss = getFieldPosition(goal, fd);
 
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
