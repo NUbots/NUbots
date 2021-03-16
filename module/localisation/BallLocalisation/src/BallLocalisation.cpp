@@ -97,8 +97,8 @@ namespace localisation {
                      * and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls.balls[0].measurements) {
-                        filter.measure(Eigen::VectorXd(measurement.rBCc.cast<double>()),
-                                       Eigen::MatrixXd(measurement.covariance.cast<double>()),
+                        filter.measure(Eigen::Vector3d(measurement.rBCc.cast<double>()),
+                                       Eigen::Matrix3d(measurement.covariance.cast<double>()),
                                        field,
                                        balls.Hcw);
                     }
