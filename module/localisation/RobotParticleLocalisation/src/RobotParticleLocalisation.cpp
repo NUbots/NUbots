@@ -76,7 +76,7 @@ namespace localisation {
 
                         // Check side and team
                         Eigen::VectorXd poss = getFieldPosition(goal, fd);
-                        //std::vector<Eigen::VectorXd> poss = getPossibleFieldPositions(goal, fd); // Ambiguous version
+                        // std::vector<Eigen::VectorXd> poss = getPossibleFieldPositions(goal, fd); // Ambiguous version
 
                         /* These parameters must be cast because Eigen doesn't do implicit conversion of float to
                            double. They must also be wrapped, because Eigen converts to an intermediate type after the
@@ -85,11 +85,11 @@ namespace localisation {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
                                 if (m.position.allFinite() && m.covariance.allFinite()) {
                                     filter.measure(Eigen::Vector3d(m.position.cast<double>()),
-                                                                      Eigen::Matrix3d(m.covariance.cast<double>()),
-                                                                      poss,
-                                                                      goals.Hcw,
-                                                                      m.type,
-                                                                      fd);
+                                                   Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                   poss,
+                                                   goals.Hcw,
+                                                   m.type,
+                                                   fd);
                                 }
                                 else {
                                     log("Received non-finite measurements from vision. Discarding ...");
@@ -101,7 +101,8 @@ namespace localisation {
             });
 
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
-            "Reset Robot Hypotheses", [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
+            "Reset Robot Hypotheses",
+            [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 Eigen::Affine3d Hfw;
                 const Eigen::Matrix<double, 4, 4>& Htw(sensors.Htw);
                 std::vector<Eigen::Vector3d> states;
@@ -112,9 +113,11 @@ namespace localisation {
                     Eigen::Vector3d rTFf(s.position[0], s.position[1], 0);
                     Hft.translation() = rTFf;
                     Hfw               = Hft * Htw;
-                    Eigen::Affine2d hfw_2d_projection(utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0,0,1), Eigen::Vector3d(1,0,0)));
-                    Eigen::Vector3d hfw_state_vec(
-                        hfw_2d_projection.translation().x(), hfw_2d_projection.translation().y(), 0);
+                    Eigen::Affine2d hfw_2d_projection(
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(1, 0, 0)));
+                    Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),
+                                                  hfw_2d_projection.translation().y(),
+                                                  0);
                     Eigen::Rotation2D<double> hfw_2d_rotation;
                     hfw_2d_rotation.matrix() = hfw_2d_projection.rotation();
                     hfw_state_vec(2)         = hfw_2d_rotation.angle();
@@ -122,7 +125,9 @@ namespace localisation {
                     states.push_back(hfw_state_vec);
 
                     Eigen::Rotation2D<double> Hfw_xy;
-                    Hfw_xy.matrix() = utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0,0,1), Eigen::Vector3d(1,0,0)).rotation();
+                    Hfw_xy.matrix() =
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(1, 0, 0))
+                            .rotation();
                     Eigen::Rotation2D<double> pos_cov;
                     pos_cov.matrix() = Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose();
                     Eigen::Matrix<double, 3, 3> state_cov(Eigen::Matrix<double, 3, 3>::Identity());
@@ -131,7 +136,8 @@ namespace localisation {
                     cov.push_back(state_cov);
                     filter.set_state(hfw_state_vec, state_cov, n_particles);
                 }
-                //filter.resetAmbiguous(states, cov, n_particles); // This has been commented out due to no ambiguous option anymore
+                // filter.resetAmbiguous(states, cov, n_particles); // This has been commented out due to no ambiguous
+                // option anymore
             });
 
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
@@ -167,9 +173,8 @@ namespace localisation {
         });
     }
 
-    Eigen::VectorXd RobotParticleLocalisation::getFieldPosition(
-        const VisionGoal& goal,
-        const message::support::FieldDescription& fd) const {
+    Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
+                                                                const message::support::FieldDescription& fd) const {
         Eigen::VectorXd position;
 
         bool left  = (goal.side != VisionGoal::Side::RIGHT);
@@ -193,32 +198,5 @@ namespace localisation {
         return position;
     }
 
-    /* This is the ambiguous version
-    std::vector<Eigen::VectorXd> RobotParticleLocalisation::getPossibleFieldPositions(
-        const VisionGoal& goal,
-        const message::support::FieldDescription& fd) const {
-        std::vector<Eigen::VectorXd> possibilities;
-
-        bool left  = (goal.side != VisionGoal::Side::RIGHT);
-        bool right = (goal.side != VisionGoal::Side::LEFT);
-        bool own   = (goal.team != VisionGoal::Team::OPPONENT);
-        bool opp   = (goal.team != VisionGoal::Team::OWN);
-
-        if (own && left) {
-            possibilities.push_back(Eigen::Vector3d({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0}));
-        }
-        if (own && right) {
-            possibilities.push_back(Eigen::Vector3d({fd.goalpost_own_r[0], fd.goalpost_own_r[1], 0}));
-        }
-        if (opp && left) {
-            possibilities.push_back(Eigen::Vector3d({fd.goalpost_opp_l[0], fd.goalpost_opp_l[1], 0}));
-        }
-        if (opp && right) {
-            possibilities.push_back(Eigen::Vector3d({fd.goalpost_opp_r[0], fd.goalpost_opp_r[1], 0}));
-        }
-
-        return possibilities;
-    }
-    */
 }  // namespace localisation
 }  // namespace module

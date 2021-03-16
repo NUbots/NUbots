@@ -1,11 +1,12 @@
 #ifndef MODULE_LOCALISATION_ROBOTPARTICLELOCALISATION_HPP
 #define MODULE_LOCALISATION_ROBOTPARTICLELOCALISATION_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "RobotModel.hpp"
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
 
@@ -25,11 +26,8 @@ namespace localisation {
         int draw_particles                             = 10;
         int n_particles;
 
-        /*std::vector<Eigen::VectorXd> getPossibleFieldPositions(const message::vision::Goal& goal,
-                                                               const message::support::FieldDescription& fd) const;*/
-
-        Eigen::VectorXd getFieldPosition(const message::vision::Goal& goal,
-                                                               const message::support::FieldDescription& fd) const;
+        Eigen::Vector3d getFieldPosition(const message::vision::Goal& goal,
+                                         const message::support::FieldDescription& fd) const;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotParticleLocalisation reactor.
