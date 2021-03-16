@@ -36,17 +36,15 @@ namespace localisation {
             [this](const Sensors& sensors) {
                 NUClear::log("Localisation Orientation reset. This direction is now forward.");
                 emit(std::make_unique<Nod>(true));
-                Eigen::Affine2d Hrw = projectTo2D(sensors.Htw);
-                localisationOffset  = Hrw;
+                localisationOffset = projectTo2D(sensors.Htw);  // (= Hrw)
             });
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
             Eigen::Affine2d Hrw = projectTo2D(sensors.Htw);
-            Eigen::Affine2d Hwr = Hrw.inverse();
 
             // Local to world transform
-            Eigen::Affine2d state = Hwr * localisationOffset;
+            Eigen::Affine2d state = Hrw.inverse() * localisationOffset;
 
             auto field        = std::make_unique<Field>();
             field->position   = state.matrix();
