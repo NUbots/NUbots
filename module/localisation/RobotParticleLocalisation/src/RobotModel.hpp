@@ -83,16 +83,11 @@ namespace localisation {
 
             Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw.matrix() * Hfw.inverse().matrix());
 
-            // rZFf = vector from field origin to zenith high in the sky
-            Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>(0, 0, 1, 0);
-
             if (type == Goal::MeasurementType::CENTRE) {
                 // rGCc = vector from camera to goal post expected position
                 Eigen::Matrix<Scalar, 4, 1> rGCc_4(actual_position.x(), actual_position.y(), actual_position.z(), 1);
-                rGCc_4 = Hcf * rGCc_4;
-                Eigen::Matrix<Scalar, 3, 1> rGCc(rGCc_4.head<3>());
-                Eigen::Matrix<Scalar, 3, 1> rGCc_sph(cartesianToSpherical(rGCc));  // in rho,theta,phi
-                return rGCc_sph;
+                Eigen::Matrix<Scalar, 3, 1> rGCc((Hcf * rGCc_4).head(3));
+                return cartesianToSpherical(rGCc);  // rGCc in spherical coords (rho, theta, phi)
             }
 
             switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
@@ -156,9 +151,9 @@ namespace localisation {
             if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
                 return Eigen::Matrix<Scalar, 3, 1>(0, 0, 0);
             // rZFf = field vertical
-            Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>(0, 0, 1, 0);
+            const Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>(0, 0, 1, 0);
 
-            Eigen::Matrix<Scalar, 3, 1> rZCc(rZFf.x(), rZFf.y(), rZFf.z());
+            const Eigen::Matrix<Scalar, 3, 1> rZCc(rZFf.head(3));
 
             // The vector direction across the field perpendicular to the camera view vector
             Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>(1, 0, 0)).normalized();
@@ -211,35 +206,37 @@ namespace localisation {
             Eigen::Matrix<Scalar, 4, 5> goalTopCornersCam  = Hcf * goalTopCorners;
 
             // Get widest lines
-            Eigen::Matrix<Scalar, 3, 1> widestBase(goalBaseCornersCam.block<3, 1>(0, 0));
-            Eigen::Matrix<Scalar, 3, 1> widestTop(goalTopCornersCam.block<3, 1>(0, 0));
+            Eigen::Matrix<Scalar, 3, 1> widestBase(goalBaseCornersCam.col(0).head(3));
+            Eigen::Matrix<Scalar, 3, 1> widestTop(goalTopCornersCam.col(0).head(3));
 
             float largest_angle = 0;
             for (int i = 1; i < goalBaseCornersCam.cols(); ++i) {
-                Eigen::Matrix<Scalar, 4, 1> baseCorner = goalBaseCornersCam.block<4, 1>(0, i);
-                Eigen::Matrix<Scalar, 4, 1> topCorner  = goalTopCornersCam.block<4, 1>(0, i);
-                float angle = std::acos(baseCorner.dot(goalBaseCornersCam.block<4, 1>(0, 0)));
+                Eigen::Matrix<Scalar, 4, 1> baseCorner(goalBaseCornersCam.col(i));
+                Eigen::Matrix<Scalar, 3, 1> baseCorner3(baseCorner.head(3));
+                Eigen::Matrix<Scalar, 4, 1> topCorner(goalTopCornersCam.col(i));
+                float angle(std::acos(baseCorner.dot(goalBaseCornersCam.col(0))));
 
                 // Left side will have cross product point in neg field z direction
-                Eigen::Matrix<Scalar, 3, 1> crossResult(baseCorner.cross(goalBaseCornersCam.block<3, 1>(0, 0)));
-                Eigen::Matrix<Scalar, 3, 1> topBaseDifference((topCorner - baseCorner).head<3>());
+                Eigen::Matrix<Scalar, 3, 1> goalBaseCorner0(goalBaseCornersCam.col(0).head(3));
+                Eigen::Matrix<Scalar, 3, 1> crossResult(baseCorner3.cross(goalBaseCorner0));
+                Eigen::Matrix<Scalar, 3, 1> topBaseDifference((topCorner - baseCorner).head(3));
                 bool left_side = crossResult.dot(topBaseDifference) < 0;
 
                 // If its the largest angle so far for that side, then update our results so far
-                if (left_side && (type == Goal::MeasurementType::LEFT_NORMAL)
-                    || !left_side && (type == Goal::MeasurementType::RIGHT_NORMAL)) {
+                if ((left_side && (type == Goal::MeasurementType::LEFT_NORMAL))
+                    || (!left_side && (type == Goal::MeasurementType::RIGHT_NORMAL))) {
                     if (angle > largest_angle) {
-                        widestBase    = goalBaseCornersCam.block<3, 1>(0, i);
-                        widestTop     = goalTopCornersCam.block<3, 1>(0, i);
+                        widestBase    = goalBaseCornersCam.col(i).head(3);
+                        widestTop     = goalTopCornersCam.col(i).head(3);
                         largest_angle = angle;
                     }
                 }
             }
 
-            // creating the normal vector (following convention stipulated in VisionObjects)
+            // Returning the normal vector (following convention stipulated in VisionObjects)
             // Normals point into the goal centre
-            return (type == Goal::MeasurementType::LEFT_NORMAL) ? (widestBase.cross(widestTop)).normalize()
-                                                                : (widestTop.cross(widestBase)).normalize();
+            return (type == Goal::MeasurementType::LEFT_NORMAL) ? (widestBase.cross(widestTop)).normalized()
+                                                                : (widestTop.cross(widestBase)).normalized();
         }
     };
 }  // namespace localisation
