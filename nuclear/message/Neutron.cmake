@@ -168,7 +168,7 @@ foreach(proto ${protobufs})
 
   # Build our c++ class from the extracted information
   add_custom_command(
-    OUTPUT "${outputpath}/${file_we}.cpp" "${outputpath}/${file_we}.py.cpp" "${outputpath}/${file_we}.h"
+    OUTPUT "${outputpath}/${file_we}.cpp" "${outputpath}/${file_we}.py.cpp" "${outputpath}/${file_we}.hpp"
     COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${outputpath}/${file_we}"
             ${outputpath}
     WORKING_DIRECTORY ${message_binary_dir}
