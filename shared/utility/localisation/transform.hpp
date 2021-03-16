@@ -59,7 +59,7 @@ namespace localisation {
         // Translation
         Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
         Eigen::Vector3d r                = m.translation();
-        Eigen::Affine3d newSpaceToWorld(Eigen::Affined3d::Identity());
+        Eigen::Affine3d newSpaceToWorld(Eigen::Affine3d::Identity());
         newSpaceToWorld.linear().col(0) = orthoForwardAxis;
         newSpaceToWorld.linear().col(1) = yawAxis.cross(orthoForwardAxis);
         newSpaceToWorld.linear().col(2) = yawAxis;
