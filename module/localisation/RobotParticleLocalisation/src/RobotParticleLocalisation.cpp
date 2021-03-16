@@ -99,9 +99,10 @@ namespace localisation {
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 std::vector<Eigen::Vector3d> states;
-                std::vector<Eigen::Matrix<double, 3, 3>> cov;
+                std::vector<Eigen::Matrix3d> cov;
 
-                const Eigen::Matrix<double, 4, 4>& Htw(sensors.Htw);
+                Eigen::Affine3d Htw;
+                Htw.matrix() = (sensors.Htw);
 
                 for (auto& s : locReset.hypotheses) {
                     const Eigen::Vector3d rTFf(s.position.x(), s.position.y(), 0);
@@ -177,16 +178,16 @@ namespace localisation {
         const bool opp   = (goal.team != VisionGoal::Team::OWN);
 
         if (own && left) {
-            position = Eigen::Vector3d((fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0));
+            position = Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
         }
         if (own && right) {
-            position = Eigen::Vector3d((fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0));
+            position = Eigen::Vector3d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
         }
         if (opp && left) {
-            position = Eigen::Vector3d((fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0));
+            position = Eigen::Vector3d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
         }
         if (opp && right) {
-            position = Eigen::Vector3d((fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0));
+            position = Eigen::Vector3d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
         }
 
         return position;
