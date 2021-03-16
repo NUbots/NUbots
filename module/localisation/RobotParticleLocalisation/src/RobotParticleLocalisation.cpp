@@ -117,7 +117,7 @@ namespace localisation {
 
                     const Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),
                                                         hfw_2d_projection.translation().y(),
-                                                        hfw_2d_projection.rotation().angle());
+                                                        Eigen::Rotation2Dd(hfw_2d_projection.rotation()).angle());
 
                     states.push_back(hfw_state_vec);
 
