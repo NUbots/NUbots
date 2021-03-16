@@ -301,7 +301,7 @@ namespace behaviour {
                 else {  // ball has not been seen recently
                     Eigen::Affine2d position(field.position);
                     if (mode != GameMode::PENALTY_SHOOTOUT
-                        && (position.translation.norm() > 1)) {  // a long way away from centre
+                        && (position.translation().norm() > 1)) {  // a long way away from centre
                         // walk to centre of field
                         find({FieldTarget(FieldTarget::Target::BALL)});
                         walkTo(fieldDescription, arma::vec2({0, 0}));
