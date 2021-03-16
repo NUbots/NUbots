@@ -42,13 +42,12 @@ namespace localisation {
 
             ball_pos_log = config["ball_pos_log"].as<bool>();
             // Use configuration here from file RobotParticleLocalisation.yaml
-            Eigen::Vector2d processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
-            filter.model.NUM_ROGUES              = config["NUM_ROGUES"].as<int>();
-            filter.model.resetRange              = config["reset_range"].as<Expression>();
-            int n_particles                      = config["n_particles"].as<int>();
+            filter.model.NUM_ROGUES = config["NUM_ROGUES"].as<int>();
+            filter.model.resetRange = config["reset_range"].as<Expression>();
+            int n_particles         = config["n_particles"].as<int>();
 
-            Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
-            Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
+            const Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
+            const Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
 
             // start_variance.asDiagonal() == the starting covariance matrix
             filter.set_state(start_state, start_variance.asDiagonal(), n_particles);
@@ -60,8 +59,8 @@ namespace localisation {
         on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>>().then("BallLocalisation Time", [this] {
             /* Perform time update */
             using namespace std::chrono;
-            auto curr_time        = NUClear::clock::now();
-            double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+            const auto curr_time  = NUClear::clock::now();
+            const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
             last_time_update_time = curr_time;
             filter.time(seconds);
 
@@ -84,8 +83,8 @@ namespace localisation {
                 if (balls.balls.size() > 0) {
                     /* Call Time Update first */
                     using namespace std::chrono;
-                    auto curr_time        = NUClear::clock::now();
-                    double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                    const auto curr_time  = NUClear::clock::now();
+                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
                     filter.time(seconds);
 
