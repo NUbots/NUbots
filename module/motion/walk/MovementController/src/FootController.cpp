@@ -59,7 +59,7 @@ namespace motion {
                                                    const double& time_left,
                                                    const Eigen::Affine3d& Hwg,
                                                    const Eigen::Affine3d& Htg) {
-            double factor = time_horizon * time_left;
+            double factor = time_horizon / time_left;
 
 
             //---------------------------------------------------------------
