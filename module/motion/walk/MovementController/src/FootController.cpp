@@ -7,12 +7,12 @@ namespace motion {
         // Returns x-position of vector field. See vectorfield.py for graphical representation of the vector field
         double FootController::f_x(const Eigen::Vector3d& pos) {
             // Prevent divide by zero error with 0 position
-            return -tanh(pos.x() * config.scaling_factor);
+            return tanh(pos.x() * config.scaling_factor);
         }
 
         // Returns z-position of vector field. See vectorfield.py for graphical representation of the vector field
         double FootController::f_z(const Eigen::Vector3d& pos) {
-            return (config.step_height * pow(tanh(pos.x() * config.scaling_factor), 2) - pos.z())
+            return -(config.step_height * pow(tanh(pos.x() * config.scaling_factor), 2) - pos.z())
                    * config.scaling_factor;
         }
 
@@ -22,12 +22,11 @@ namespace motion {
 
         // path length to origin; x,y=foots starting location; h=step height; -1<x<1 0<y<1 0<h<1
         double FootController::pathlength(const Eigen::Vector3d& pos) {
-            double x = config.scaling_factor * pos.x();
-            double y = config.scaling_factor * pos.y();
-            double h = config.scaling_factor * config.step_height;
-
+            double x      = config.scaling_factor * pos.x();
+            double y      = config.scaling_factor * pos.z();
+            double h      = config.scaling_factor * config.step_height;
             double c      = y / sinh(x) - h * atan(1 / sinh(x));
-            int num_steps = 30;
+            int num_steps = 32;
 
             double x2   = x / num_steps;
             double x1   = 0;
@@ -60,7 +59,8 @@ namespace motion {
                                                    const double& time_left,
                                                    const Eigen::Affine3d& Hwg,
                                                    const Eigen::Affine3d& Htg) {
-            double factor = time_horizon / time_left;
+            double factor = time_horizon * time_left;
+
 
             //---------------------------------------------------------------
             //-------------VECTOR FIELD--------------------------------------
@@ -120,9 +120,9 @@ namespace motion {
                                .transpose();
 
             // If we are very close to the target, just go to the target directly
-            if (distance < config.well_width / 5 || factor == 1) {
-                rNGg = rTGg;
-            }
+            // if (rWTg.norm() < 0.025) {
+            //    rNGg = rTGg;
+            //}
             if ((Htg.rotation() - Hwg.rotation()).maxCoeff() < 0.001 || factor == 1) {
                 Hgn.linear() = Htg.rotation().transpose();
             }

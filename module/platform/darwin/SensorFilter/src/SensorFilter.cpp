@@ -525,7 +525,7 @@ namespace platform {
                     Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
                     Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
                     sensors->Htw      = Hwt.inverse().matrix();
-
+                    // sensors->Htw = Eigen::Affine3d::Identity();
                     // Integrate gyro to get angular positions
                     sensors->angular_position = o.segment<3>(MotionModel<double>::WX) / 90.0;
 
