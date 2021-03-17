@@ -8,14 +8,14 @@ Sets up a package cache for caching [pacman](https://wiki.archlinux.org/index.ph
 
 ## Install
 
-1. Create a directory do store cache config
+1. Create a directory to store cache config
 ```
 mkdir ~/pacman-cache && cd ~/pacman-cache
 ```
 
 2. Download install script
 ```
-wget https://raw.githubusercontent.com/NUbots/NUbots/deKoeyer/pacman-cache/doc/PacmanCache/install.sh
+wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/PacmanCache/install.sh
 ```
 
 3. Make install script executable
