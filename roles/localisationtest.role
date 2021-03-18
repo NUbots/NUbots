@@ -12,8 +12,9 @@ nuclear_role(
   network::NUClearNet
   support::NUsight
   # Sensors
-  platform::darwin::HardwareSimulator
+  #platform::darwin::HardwareSimulator
   platform::darwin::SensorFilter
   # Localisation
   localisation::RobotParticleLocalisation
+  support::LocalisationSimulator
 )
