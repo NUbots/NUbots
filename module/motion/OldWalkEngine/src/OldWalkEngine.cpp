@@ -458,7 +458,7 @@ namespace motion {
 
     void OldWalkEngine::stop() {
         state = State::STOPPED;
-        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, {
+        // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, {
         // 0, 0 }})); // TODO: config
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());

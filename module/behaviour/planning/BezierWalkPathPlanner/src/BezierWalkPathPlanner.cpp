@@ -56,7 +56,7 @@ namespace behaviour {
         using Self             = message::localisation::Self;
         using VisionBall       = message::vision::Ball;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
@@ -127,7 +127,7 @@ namespace behaviour {
                 std::unique_ptr<WalkCommand> command =
                     std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
                 emit(std::move(command));
-                emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {26, 11}}));
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
             });
 
             on<Trigger<MotionCommand>, Sync<BezierWalkPathPlanner>>().then([this](const MotionCommand& cmd) {
@@ -150,7 +150,7 @@ namespace behaviour {
                             // log("Stand still motion command");
 
                             emit(std::make_unique<StopCommand>(subsumptionId));
-                            emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {26, 11}}));
+                            emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
 
                             return;
                         }
@@ -161,7 +161,7 @@ namespace behaviour {
                             std::unique_ptr<WalkCommand> command =
                                 std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
                             emit(std::move(command));
-                            emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {26, 11}}));
+                            emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                         }
                         else {
                             // log("MotionCommand:", int(latestCommand.type));
@@ -353,7 +353,7 @@ namespace behaviour {
                                                               Transform2D({finalForwardSpeed, 0, angle}));
                             // command->command = Transform2D({bezXdash[1], bezYdash[1], angle});
                             emit(std::move(command));
-                            emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {26, 11}}));
+                            emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                         }
                     });
         }
