@@ -2,7 +2,7 @@ import { action } from 'mobx'
 import { runInAction } from 'mobx'
 
 import { UnreachableError } from '../../../shared/base/unreachable_error'
-import { message } from '../../../shared/proto/messages'
+import { message } from '../../../shared/messages'
 import { toSeconds } from '../../../shared/time/timestamp'
 import { fourccToString } from '../../image_decoder/fourcc'
 import { fourcc } from '../../image_decoder/fourcc'
@@ -128,8 +128,8 @@ export class VisionNetwork {
         goal.side === message.vision.Goal.Side.LEFT
           ? 'left'
           : goal.side === message.vision.Goal.Side.RIGHT
-          ? 'right'
-          : 'unknown',
+            ? 'right'
+            : 'unknown',
       post: {
         top: Vector3.from(goal.post?.top),
         bottom: Vector3.from(goal.post?.bottom),

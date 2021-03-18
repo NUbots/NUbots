@@ -2,16 +2,24 @@ const path = require('path')
 const pbjs = require('protobufjs/cli/pbjs')
 const pbts = require('protobufjs/cli/pbts')
 
-const messagesDir = path.resolve(__dirname, '..', 'src/shared/proto')
-const messagesFileJs = path.join(messagesDir, 'messages.js')
-const messagesFileTs = path.join(messagesDir, 'messages.d.ts')
+const messagesDir = path.resolve(__dirname, '..', '..', 'shared/message')
+const nuclearMessagesDir = path.resolve(__dirname, '..', '..', 'nuclear/message/proto')
+const googleMessagesDir = path.resolve(__dirname, '..', 'src/shared/proto')
+
+const messagesOutputDir = path.resolve(__dirname, '..', 'src/shared')
+const messagesFileJs = path.join(messagesOutputDir, 'messages.js')
+const messagesFileTs = path.join(messagesOutputDir, 'messages.d.ts')
 
 const argsJs = [
   '--target', 'static-module',
   '--wrap', 'commonjs',
   '--out', messagesFileJs,
   '--path', messagesDir,
+  '--path', nuclearMessagesDir,
+  '--path', googleMessagesDir,
   `${messagesDir}/**/*.proto`,
+  `${nuclearMessagesDir}/**/*.proto`,
+  `${googleMessagesDir}/**/*.proto`,
 ]
 
 const argsTs = [
