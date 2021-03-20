@@ -112,12 +112,12 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
         else:
             filename = "all-" + filename
 
-        # If directory was created suscessfully
+        # If directory was created successfully
         if os.path.exists(tests_dir):
             logPath = os.path.join(tests_dir, filename)
             ctest_command.extend(["--output-log", logPath])
 
-        exit(subprocess.run([*ctest_command]).returncode)
+        exit(subprocess.run(ctest_command).returncode)
 
     else:
         # Probably a better way to call help when no sub commands are given?
