@@ -1,0 +1,9 @@
+syntax = "proto3"
+
+    // The message to send when we connect or want to reconnect to the webots robocup
+    // https://cdn.robocup.org/hl/wp/2021/03/v-hsc_simulator_api.pdf
+
+    message ConnectRequest {
+    int teamId   = 1;
+    int playerId = 2;
+}

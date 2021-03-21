@@ -7,6 +7,8 @@
 #include "message/motion/ServoTarget.proto"
 #include "message/output/CompressedImage.proto"
 #include "message/platform/darwin/DarwinSensors.proto"
+#include "message/platform/webots/ConnectRequest.proto"
+#include "message/platform/webots/messages.proto"
 
 namespace module::platform {
 
@@ -14,6 +16,7 @@ using extension::Configuration;
 using message::motion::ServoTargets;
 using message::platform::darwin::DarwinSensors;
 using msessage::output::CompressedImage;
+// TODO(cmurtagh) work out namespace of protobuf files from webots
 
 namespace {
     // Should probs go in shared
@@ -159,7 +162,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             position_msg.name     = command.id;
             position_msg.position = command.position;
 
-            // TODO work out if gain is velocity or force
+            // TODO(cmurtagh) work out if gain is velocity or force
             MotorVelocity velocity_msg = to_send.add_motor_velocity();
             velocity_msg.name          = command.id;
             velocity_msg.velocity      = command.gain;
