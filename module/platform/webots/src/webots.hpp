@@ -11,7 +11,7 @@ private:
     void send_connect(int fd, int teamId, int robotId);
 
     /// @brief A single message that stores all the data that webots needs from us.
-    ActingMessage to_send;
+    ActuatorRequests to_send;
 
 public:
     /// @brief Called by the powerplant to build and setup the webots reactor.

@@ -4,10 +4,14 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/motion/ServoTarget.proto"
+#include "message/platform/darwin/DarwinSensors.proto"
 
 namespace module::platform {
 
 using extension::Configuration;
+using message::motion::ServoTargets;
+using message::platform::darwin::DarwinSensors;
 
 namespace {
     // Should probs go in shared
@@ -77,12 +81,15 @@ webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
             SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>.deserialise(data);
 
-            if (msg.ParseFromArray(data.data(), N)) {
-                log<NUClear::ERROR>("Error: Failed to parse serialised message");
-                return;
+            // Read each field of msg, translate it to our protobuf and emit the data
+            auto sensor_data = std::make_unique<DarwinSensors>();
+            sensor_data.FromSeconds(msg.time);
+
+            for (auto& position : position_sensor) {
+                //
             }
 
-            // Read each field of msg, translate it to our protobuf and emit the data
+            emit(sensor_data);
         });
 
         on<Every<1, std::chrono::seconds>>().then([this]() {
@@ -95,22 +102,21 @@ webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
     // Create the message that we are going to send.
     on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-        to_send = ActingMessage();
+        // Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
+        to_send = ActuatorRequests();
         for (auto& command : commands) {
-            SetMotorTarget position_msg = to_send.add_SetMotorTarget();
-            position_msg.id             = command.id;
-            position_msg.type           = "position";
-            position_msg.value          = command.position;
+            MotorPosition position_msg to_send.add_motor_position();
+            position_msg.name     = command.id;
+            position_msg.position = command.position;
 
-            SetMotorTarget velocity_msg = to_send.add_SetMotorTarget();
-            velocity_msg.id             = command.id;
-            velocity_msg.type           = "velocity";
-            velocity_msg.value          = command.gain;
+            // TODO work out if gain is velocity or force
+            MotorVelocity velocity_msg = to_send.add_motor_velocity();
+            velocity_msg.name          = command.id;
+            velocity_msg.velocity      = command.gain;
 
-            SetMotorTarget effort_msg = to_send.add_SetMotorTarget();
-            effort_msg.id             = command.id;
-            effort_msg.type           = "effort";
-            effort_msg.value          = command.torque;
+            MotorTorque torque_msg = to_send.add_motor_torque();
+            torque_msg.name        = command.id;
+            torque_msg.torque      = command.torque;
         }
     });
 }
