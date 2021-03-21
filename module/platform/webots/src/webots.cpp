@@ -168,4 +168,15 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
     });
 }
 
+void Webots::send_connect(int& fd, int& team_id, int& robot_id) {
+    ConnectRequest connect_request = ConnectRequest;
+    connect_request.teamId         = team_id;
+    connect_request.playerId       = robot_id;
+
+    std::vector<char> data = NUClear::util::Serialise<ConnectRequest>.serialise(connect_request);
+    uint64_t N             = data.size();
+    send(fd, &N, sizeof(N), 0);
+    send(fd, data.data(), N, 0;
+}
+
 }  // namespace module::platform

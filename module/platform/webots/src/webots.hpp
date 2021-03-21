@@ -7,8 +7,9 @@ namespace module::platform {
 
 class Webots : public NUClear::Reactor {
 private:
-    /// @brief Send the inital message that tells webots who we are
-    void send_connect(int fd, int team_id, int robot_id);
+    /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
+    /// want to reconnect.
+    void send_connect(int& fd, int& team_id, int& robot_id);
 
     /// @brief A single message that stores all the data that webots needs from us.
     ActuatorRequests to_send;
