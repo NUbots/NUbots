@@ -42,7 +42,7 @@ namespace behaviour {
         using message::motion::WalkCommand;
         using message::motion::WalkStopped;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         // internal only callback messages to start and stop our action
