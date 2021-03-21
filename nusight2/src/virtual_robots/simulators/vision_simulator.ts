@@ -112,7 +112,7 @@ export class VisionSimulator extends Simulator {
           {
             cone: {
               axis,
-              gradient: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
+              radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
             },
             measurements: [
               {
