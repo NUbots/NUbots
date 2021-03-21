@@ -31,6 +31,7 @@ namespace {
         address.sin_port   = htons(port);
         hostent* server    = gethostbyname(server_address);
 
+        // Check that dns was successful
         if (server) {
             std::memcpy(reinterpret_cast<char*>(&address.sin_addr.s_addr),
                         reinterpret_cast<char*>(server->h_addr),
@@ -70,24 +71,27 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
         int fd = tcpip_connect(cfg["port"].as<int>(), cfg["server_address"].as<std::string>());
 
+        // Tell webots who we are
         send_connect(fd, cfg["team_id"].as<int>(), cfg["robot_id"].as<int>());
 
         on<IO>(fd).then([this]() {
             // Receiveing
 
+            // Get the size of the message
             uint64_t N;
             if (recv(fd, &N, sizeof(N), 0 != sizeof(N))) {
                 log<NUClear::ERROR>("Failed to read message size from TCP connection");
                 return;
             }
 
-
+            // Get the message
             std::vector<char> data(N, 0);
             if (recv(fd, data.data(), N, 0) != N) {
                 log<NUClear::ERROR>("Error: Failed to read message from TCP connection");
                 return;
             }
 
+            // Deserialise the message into a neutron
             SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>.deserialise(data);
 
             // Read each field of msg, translate it to our protobuf and emit the data
@@ -157,6 +161,8 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
     on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
         // Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
         to_send = ActuatorRequests();
+
+        // Store each servotarget to send in the next lot
         for (auto& command : commands) {
             MotorPosition position_msg to_send.add_motor_position();
             position_msg.name     = command.id;
@@ -177,6 +183,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 }
 
 void Webots::send_connect(int& fd, int& team_id, int& robot_id) {
+    // TODO(cameron) workout what to do if failes
     ConnectRequest connect_request = ConnectRequest;
     connect_request.teamId         = team_id;
     connect_request.playerId       = robot_id;
