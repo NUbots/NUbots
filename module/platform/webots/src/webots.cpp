@@ -73,7 +73,11 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // Receiveing
 
             uint64_t N;
-            // Somehow work out how big the message was
+            if (recv(fd, &N, sizeof(N), 0 != sizeof(N))) {
+                log<NUClear::ERROR>("Failed to read message size from TCP connection");
+                return;
+            }
+
 
             std::vector<char> data(N, 0);
             if (recv(fd, data.data(), N, 0) != N) {
