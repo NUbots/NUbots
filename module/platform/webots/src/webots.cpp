@@ -5,6 +5,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/motion/ServoTarget.proto"
+#include "message/output/CompressedImage.proto"
 #include "message/platform/darwin/DarwinSensors.proto"
 
 namespace module::platform {
@@ -12,6 +13,7 @@ namespace module::platform {
 using extension::Configuration;
 using message::motion::ServoTargets;
 using message::platform::darwin::DarwinSensors;
+using msessage::output::CompressedImage;
 
 namespace {
     // Should probs go in shared
@@ -85,11 +87,48 @@ webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             auto sensor_data = std::make_unique<DarwinSensors>();
             sensor_data.FromSeconds(msg.time);
 
-            for (auto& position : position_sensor) {
+            for (auto& position : msg.position_sensor) {
+                //
+            }
+
+            for (auto& accelerometer : msg.accelerometer) {
+                //
+            }
+
+            for (auto& gyro : msg.gyro) {
+                //
+            }
+
+            for (auto& bumper : msg.bumper) {
+                //
+            }
+
+            for (auto& force_3d : msg.force_3d) {
+                //
+            }
+
+            for (auto& force_6d : msg.force6d) {
                 //
             }
 
             emit(sensor_data);
+
+            for (auto& camera : msg.camera) {
+                // Convert the incoming image so we can emit it to the PowerPlant.
+                auto compressed_image = std::make_unique<CompressedImage>();
+                compressed_image->timestamp.FromSeconds(msg.time);
+                compressed_image->name          = camera.name;
+                compressed_image->dimensions.x  = camera.width;
+                compressed_image->dimensions.y  = camera.height;
+                compressed_image->format        = camera.quality;  // This is probably wrong, we havent documented :(
+                compressed_image->data          = camera.data;
+                compressed_image->lens.fov      = (float) camera.horizontalFieldOfView;
+                compressed_image->lens.centre.x = (float) camera.centreX;
+                compressed_image->lens.centre.y = (float) camera.centreY;
+                // Radial coefficients
+                // tangential coefficients
+                emit(compressed_image);
+            }
         });
 
         on<Every<1, std::chrono::seconds>>().then([this]() {
@@ -117,6 +156,8 @@ webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             MotorTorque torque_msg = to_send.add_motor_torque();
             torque_msg.name        = command.id;
             torque_msg.torque      = command.torque;
+
+            // MotorPID ? Do we need to send this?
         }
     });
 }
