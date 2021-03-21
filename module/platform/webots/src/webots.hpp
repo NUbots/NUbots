@@ -10,6 +10,9 @@ private:
     /// @brief Send the inital message that tells webots who we are
     void send_connect(int fd, int teamId, int robotId);
 
+    /// @brief A single message that stores all the data that webots needs from us.
+    ActingMessage to_send;
+
 public:
     /// @brief Called by the powerplant to build and setup the webots reactor.
     explicit webots(std::unique_ptr<NUClear::Environment> environment);
