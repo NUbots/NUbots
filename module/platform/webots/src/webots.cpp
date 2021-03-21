@@ -92,6 +92,27 @@ webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             send(fd, data.data(), N, 0);
         });
     });
+
+    // Create the message that we are going to send.
+    on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+        to_send = ActingMessage();
+        for (auto& command : commands) {
+            SetMotorTarget position_msg = to_send.add_SetMotorTarget();
+            position_msg.id             = command.id;
+            position_msg.type           = "position";
+            position_msg.value          = command.position;
+
+            SetMotorTarget velocity_msg = to_send.add_SetMotorTarget();
+            velocity_msg.id             = command.id;
+            velocity_msg.type           = "velocity";
+            velocity_msg.value          = command.gain;
+
+            SetMotorTarget effort_msg = to_send.add_SetMotorTarget();
+            effort_msg.id             = command.id;
+            effort_msg.type           = "effort";
+            effort_msg.value          = command.torque;
+        }
+    });
 }
 
 }  // namespace module::platform
