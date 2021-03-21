@@ -88,27 +88,33 @@ webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             sensor_data.FromSeconds(msg.time);
 
             for (auto& position : msg.position_sensor) {
-                //
+                // string name
+                // double valvue
             }
 
             for (auto& accelerometer : msg.accelerometer) {
-                //
+                // string name
+                // Vector3 value
             }
 
             for (auto& gyro : msg.gyro) {
-                //
+                // string name
+                // Vector3 value
             }
 
             for (auto& bumper : msg.bumper) {
-                //
+                // string name
+                // bool value
             }
 
             for (auto& force_3d : msg.force_3d) {
-                //
+                // string name
+                // Vector3 value
             }
 
             for (auto& force_6d : msg.force6d) {
-                //
+                // string name
+                // Vector3 value
             }
 
             emit(sensor_data);
