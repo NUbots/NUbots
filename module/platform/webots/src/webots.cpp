@@ -50,7 +50,7 @@ namespace {
     }
 }  // namespace
 
-webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
+Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
 
     on<Configuration>("webots.yaml").then([this](const Configuration& cfg) {
         // Use configuration here from file webots.yaml
@@ -67,7 +67,7 @@ webots::webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
         int fd = tcpip_connect(cfg["port"].as<int>(), cfg["server_address"].as<std::string>());
 
-        send_connect(fd, cfg["teamId"].as<int>(), cfg["robotId"].as<int>());
+        send_connect(fd, cfg["team_id"].as<int>(), cfg["robot_id"].as<int>());
 
         on<IO>(fd).then([this]() {
             // Receiveing
