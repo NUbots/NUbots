@@ -45,17 +45,10 @@ foreach(proto ${builtin_protobufs})
 
   list(APPEND protobuf_src "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h")
 
-  # Prevent Effective C++ and unused parameter error checks being performed on generated files.
+  # Compile flags prevent Effective C++ and unused parameter error checks being performed on generated files.
   set_source_files_properties(
-    "${message_binary_include_dir}/${file_we}.pb"
-    "${message_binary_include_dir}/${file_we}.proto"
-    "${message_binary_include_dir}/${file_we}.pb.cc"
-    "${message_binary_include_dir}/${file_we}.pb.h"
-    "${message_binary_include_dir}/${file_we}.cpp"
-    "${message_binary_include_dir}/${file_we}.py.cpp"
-    "${message_binary_include_dir}/${file_we}.hpp"
-    "${message_binary_include_dir}/${file_we}_pb2.py"
-    PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+    "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h" "${pb_out}/${file_we}_pb2.py"
+    PROPERTIES GENERATED TRUE COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
   )
 endforeach(proto ${builtin_protobufs})
 
@@ -138,43 +131,41 @@ foreach(proto ${message_protobufs})
     COMMENT "Extracting protocol buffer information from ${proto}"
   )
 
-  # The protobuf descriptions are generated
-  set_source_files_properties(
-    "${outputpath}/${file_we}.pb"
-    "${outputpath}/${file_we}.proto"
-    "${outputpath}/${file_we}.pb.cc"
-    "${outputpath}/${file_we}.pb.h"
-    "${outputpath}/${file_we}.cpp"
-    "${outputpath}/${file_we}.py.cpp"
-    "${outputpath}/${file_we}.hpp"
-    "${outputpath}/${file_we}_pb2.py"
-    PROPERTIES GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated
-                              # files.
-               COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
-  )
-
-  # Add the generated files to our list
-  set(src ${src} "${outputpath}/${file_we}.pb.cc" "${outputpath}/${file_we}.pb.h" "${outputpath}/${file_we}.cpp"
-          "${outputpath}/${file_we}.hpp"
-  )
-
-  # If we have pybind11 also add the python bindings
-  if(pybind11_FOUND)
-    set(src ${src} "${outputpath}/${file_we}.py.cpp")
-  endif()
-
   # Build our outer python binding wrapper class
   add_custom_command(
-    OUTPUT "${nt}.cpp" "${nt}.py.cpp" "${nt}.h"
+    OUTPUT "${nt}.cpp" "${nt}.py.cpp" "${nt}.hpp"
     COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${nt}"
     WORKING_DIRECTORY ${nt_out}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" ${message_class_generator_files} "${nt}.pb"
     COMMENT "Building classes for ${proto}"
   )
 
+  # The protobuf descriptions are generated
+  set_source_files_properties(
+    "${nt}.pb"
+    "${pb}.proto"
+    "${pb}.pb.cc"
+    "${pb}.pb.h"
+    "${py}_pb2.py"
+    "${nt}.cpp"
+    "${nt}.py.cpp"
+    "${nt}.hpp"
+    PROPERTIES GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated
+                              # files.
+               COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+  )
+
+  # Add the generated files to our list
+  set(src ${src} "${pb}.pb.cc" "${pb}.pb.h" "${nt}.cpp" "${nt}.hpp")
+
+  # If we have pybind11 also add the python bindings
+  if(pybind11_FOUND)
+    set(src ${src} "${nt}.py.cpp")
+  endif()
+
   # Add to the respective outputs
   list(APPEND protobuf_src "${pb}.pb.cc" "${pb}.pb.h")
-  list(APPEND neutron_src "${nt}.cpp" "${nt}.h")
+  list(APPEND neutron_src "${nt}.cpp" "${nt}.hpp")
 
 endforeach(proto ${message_protobufs})
 
