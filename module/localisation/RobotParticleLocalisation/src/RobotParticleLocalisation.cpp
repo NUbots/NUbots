@@ -10,7 +10,7 @@
 #include "utility/localisation/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace localisation {
@@ -29,6 +29,7 @@ namespace localisation {
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nusight::graph;
+    using utility::support::Expression;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -126,14 +127,14 @@ namespace localisation {
 
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
+            filter.model.processNoiseDiagonal = arma::vec2(config["process_noise_diagonal"].as<Expression>());
             filter.model.n_rogues             = config["n_rogues"].as<int>();
-            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
+            filter.model.resetRange           = arma::vec2(config["reset_range"].as<Expression>());
             n_particles                       = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();
 
-            arma::vec3 start_state    = config["start_state"].as<arma::vec>();
-            arma::vec3 start_variance = config["start_variance"].as<arma::vec>();
+            arma::vec3 start_state    = config["start_state"].as<Expression>();
+            arma::vec3 start_variance = config["start_variance"].as<Expression>();
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
             ResetRobotHypotheses::Self leftSide;

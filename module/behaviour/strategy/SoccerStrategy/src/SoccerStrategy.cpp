@@ -41,7 +41,7 @@
 #include "utility/math/matrix/Transform3D.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace behaviour {
@@ -81,6 +81,8 @@ namespace behaviour {
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
 
+        using utility::support::Expression;
+
         SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , cfg_()
@@ -102,8 +104,8 @@ namespace behaviour {
                 cfg_.localisation_duration = duration_cast<NUClear::clock::duration>(
                     duration<double>(config["localisation_duration"].as<double>()));
 
-                cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
-                cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
+                cfg_.start_position_offensive = arma::vec2(config["start_position_offensive"].as<Expression>());
+                cfg_.start_position_defensive = arma::vec2(config["start_position_defensive"].as<Expression>());
 
                 cfg_.is_goalie = config["goalie"].as<bool>();
 

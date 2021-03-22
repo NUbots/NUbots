@@ -14,7 +14,7 @@
 #include "utility/math/matrix/Transform3D.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace localisation {
@@ -28,6 +28,7 @@ namespace localisation {
     using utility::math::matrix::Transform3D;
     using ServoID = utility::input::ServoID;
     using utility::nusight::graph;
+    using utility::support::Expression;
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), filter() {
@@ -44,13 +45,13 @@ namespace localisation {
 
             ball_pos_log = config["ball_pos_log"].as<bool>();
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
+            filter.model.processNoiseDiagonal = arma::vec2(config["process_noise_diagonal"].as<Expression>());
             filter.model.n_rogues             = config["n_rogues"].as<int>();
-            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
+            filter.model.resetRange           = arma::vec2(config["reset_range"].as<Expression>());
             int n_particles                   = config["n_particles"].as<int>();
 
-            arma::vec2 start_state    = config["start_state"].as<arma::vec>();
-            arma::vec2 start_variance = config["start_variance"].as<arma::vec>();
+            arma::vec2 start_state    = config["start_state"].as<Expression>();
+            arma::vec2 start_variance = config["start_variance"].as<Expression>();
 
             filter.reset(start_state, arma::diagmat(start_variance), n_particles);
 
