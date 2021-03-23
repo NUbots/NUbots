@@ -8,7 +8,7 @@ import subprocess
 from termcolor import cprint
 
 import b
-from dockerise import run_on_docker
+from utility.dockerise import run_on_docker
 
 
 @run_on_docker
