@@ -3,7 +3,7 @@
 Sets up a package cache for caching [pacman](https://wiki.archlinux.org/index.php/pacman) packages locally.
 
 ## Prerequisites
- - [wget](https://www.gnu.org/software/wget/)
+ - [wget](https://www.gnu.org/software/wget/) or [curl](https://curl.se/)
  - [docker-compose](https://docs.docker.com/compose/)
 
 ## Install
