@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from utility.nbs import LinearDecoder
 
+
 def register(command):
     command.help = "Decode an nbs file into a series of file statistics"
 
