@@ -66,11 +66,14 @@ namespace localisation {
         // Number of reset particles
         int n_rogues;
         // Range of reset particles
-        Eigen::Matrix<Scalar, 3, 1> resetRange = Eigen::Matrix<Scalar, 3, 1>::Zero();
+        Eigen::Matrix<Scalar, 3, 1> resetRange;
         // Diagonal for 3x3 noise matrix (which is diagonal)
         Eigen::Matrix<Scalar, 3, 1> processNoiseDiagonal;
 
-        RobotModel() : n_rogues(), resetRange(), processNoiseDiagonal() {}
+        RobotModel()
+            : n_rogues(0)
+            , resetRange(Eigen::Matrix<Scalar, 3, 1>::Zero())
+            , processNoiseDiagonal(Eigen::Matrix<Scalar, 3, 1>::Ones()) {}
 
         StateVec time(const StateVec& state, double /*deltaT*/) {
             return state;
