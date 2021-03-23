@@ -99,7 +99,7 @@ namespace localisation {
                                                          actual_position.y(),
                                                          actual_position.z(),
                                                          1);
-                const Eigen::Matrix<Scalar, 3, 1> rGCc((Hcf * rGCc_4).head(3));
+                const Eigen::Matrix<Scalar, 3, 1> rGCc((Hcf * rGCc_4).template head<3>());
                 return cartesianToSpherical(rGCc);
             }
 
@@ -161,7 +161,7 @@ namespace localisation {
             // rZFf = field vertical
             const Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>::UnitZ();
 
-            const Eigen::Matrix<Scalar, 3, 1> rZCc(rZFf.head(3));
+            const Eigen::Matrix<Scalar, 3, 1> rZCc(rZFf.template head<3>());
 
             // The vector direction across the field perpendicular to the camera view vector
             const Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>::UnitX()).normalized();
@@ -212,28 +212,28 @@ namespace localisation {
             const Eigen::Matrix<Scalar, 4, 5> goalTopCornersCam  = Hcf * goalTopCorners;
 
             // Get widest lines
-            Eigen::Matrix<Scalar, 3, 1> widestBase(goalBaseCornersCam.col(0).head(3));
-            Eigen::Matrix<Scalar, 3, 1> widestTop(goalTopCornersCam.col(0).head(3));
+            Eigen::Matrix<Scalar, 3, 1> widestBase(goalBaseCornersCam.col(0).template head<3>());
+            Eigen::Matrix<Scalar, 3, 1> widestTop(goalTopCornersCam.col(0).template head<3>());
             float largest_angle = 0;
 
             for (int i = 1; i < goalBaseCornersCam.cols(); ++i) {
                 const Eigen::Matrix<Scalar, 4, 1> baseCorner(goalBaseCornersCam.col(i));
-                const Eigen::Matrix<Scalar, 3, 1> baseCorner3(baseCorner.head(3));
+                const Eigen::Matrix<Scalar, 3, 1> baseCorner3(baseCorner.template head<3>());
                 const Eigen::Matrix<Scalar, 4, 1> topCorner(goalTopCornersCam.col(i));
                 const float angle(std::acos(baseCorner.dot(goalBaseCornersCam.col(0))));
 
                 // Left side will have cross product point in neg field z direction
-                const Eigen::Matrix<Scalar, 3, 1> goalBaseCorner0(goalBaseCornersCam.col(0).head(3));
+                const Eigen::Matrix<Scalar, 3, 1> goalBaseCorner0(goalBaseCornersCam.col(0).template head<3>());
                 const Eigen::Matrix<Scalar, 3, 1> crossResult(baseCorner3.cross(goalBaseCorner0));
-                const Eigen::Matrix<Scalar, 3, 1> topBaseDifference((topCorner - baseCorner).head(3));
+                const Eigen::Matrix<Scalar, 3, 1> topBaseDifference((topCorner - baseCorner).template head<3>());
                 const bool left_side = crossResult.dot(topBaseDifference) < 0;
 
                 // If its the largest angle so far for that side, then update our results so far
                 if ((left_side && (type == Goal::MeasurementType::LEFT_NORMAL))
                     || (!left_side && (type == Goal::MeasurementType::RIGHT_NORMAL))) {
                     if (angle > largest_angle) {
-                        widestBase    = goalBaseCornersCam.col(i).head(3);
-                        widestTop     = goalTopCornersCam.col(i).head(3);
+                        widestBase    = goalBaseCornersCam.col(i).template head<3>();
+                        widestTop     = goalTopCornersCam.col(i).template head<3>();
                         largest_angle = angle;
                     }
                 }
