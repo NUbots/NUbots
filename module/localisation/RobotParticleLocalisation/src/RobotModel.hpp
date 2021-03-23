@@ -154,7 +154,7 @@ namespace localisation {
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcf,
             const message::support::FieldDescription& fd) {
             if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
-                return Eigen::Matrix<Scalar, 3, 1>(0, 0, 0);
+                return Eigen::Matrix<Scalar, 3, 1>::Zero();
             // rZFf = field vertical
             const Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>(0, 0, 1, 0);
 
