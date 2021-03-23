@@ -44,8 +44,8 @@ cmake .. -GNinja \
     -DCMAKE_TOOLCHAIN_FILE="${PREFIX}/toolchain.cmake" \
     -Wno-dev
 
-# Copy our config file over the generated on
-# The generated config file doesn't enable LAPACK because its "too hard" to determine if
+# Copy our config file over the generated one
+# The generated config file doesn't enable LAPACK because it's "too hard" to determine if
 # OpenBLAS has included LAPACK or not
 cp "${CONFIG_PATH}" "tmp/include/armadillo_bits/config.hpp"
 
