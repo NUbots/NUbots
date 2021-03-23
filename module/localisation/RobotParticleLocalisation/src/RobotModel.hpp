@@ -159,12 +159,12 @@ namespace localisation {
             if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
                 return Eigen::Matrix<Scalar, 3, 1>::Zero();
             // rZFf = field vertical
-            const Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>(0, 0, 1, 0);
+            const Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>::UnitZ();
 
             const Eigen::Matrix<Scalar, 3, 1> rZCc(rZFf.head(3));
 
             // The vector direction across the field perpendicular to the camera view vector
-            const Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>(1, 0, 0)).normalized();
+            const Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>::UnitX()).normalized();
 
             const float dir                           = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1.0f : -1.0f;
             const Eigen::Matrix<Scalar, 3, 1> rG_blCc = post_centre + 0.5 * dir * fd.dimensions.goalpost_width * rLRf;

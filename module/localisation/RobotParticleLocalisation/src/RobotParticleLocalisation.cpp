@@ -113,7 +113,7 @@ namespace localisation {
                     const Eigen::Affine3d Hfw(Hft * Htw);
 
                     const Eigen::Affine2d hfw_2d_projection(
-                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(1, 0, 0)));
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX()));
 
                     const Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),
                                                         hfw_2d_projection.translation().y(),
@@ -122,7 +122,7 @@ namespace localisation {
                     states.push_back(hfw_state_vec);
 
                     const Eigen::Rotation2D<double> Hfw_xy(
-                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d(0, 0, 1), Eigen::Vector3d(1, 0, 0))
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX())
                             .rotation());
 
                     const Eigen::Rotation2D<double> pos_cov(Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose());
