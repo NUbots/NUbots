@@ -2,7 +2,7 @@
 file(GLOB_RECURSE test_src "*/**.cpp" "*/**.hpp")
 
 if(test_src)
-  add_executable(TestShared "${CMAKE_SOURCE_DIR}/${NUCLEAR_SHARED_DIR}/tests/test.cpp" ${test_src})
+  add_executable(TestShared "${CMAKE_SOURCE_DIR}/shared/tests/test.cpp" ${test_src})
   target_link_libraries(TestShared nuclear::message nuclear::utility)
 
   set_property(TARGET TestShared PROPERTY FOLDER "shared/tests")
