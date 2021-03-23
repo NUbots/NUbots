@@ -1,6 +1,3 @@
-# This directory contains our message types and other shared types
-include_directories(${CMAKE_SOURCE_DIR}/shared/)
-
 # This gets all of our source files
 file(GLOB_RECURSE test_src "*/**.cpp" "*/**.hpp")
 
