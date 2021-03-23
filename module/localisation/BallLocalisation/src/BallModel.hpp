@@ -53,13 +53,13 @@ namespace localisation {
 
         // Local variables for this model. Set their values from config file
         // Number of reset particles
-        int NUM_ROGUES;
+        int n_rogues;
         // Range of reset particles
         Eigen::Matrix<Scalar, 2, 1> resetRange;
         // Diagonal noise matrix
         Eigen::Matrix<Scalar, 2, 1> processNoiseDiagonal;
 
-        BallModel() : NUM_ROGUES(), resetRange(), processNoiseDiagonal() {}
+        BallModel() : n_rogues(), resetRange(), processNoiseDiagonal() {}
 
         StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
             return state;
@@ -89,7 +89,7 @@ namespace localisation {
 
         // Getters
         inline int getRogueCount() const {
-            return NUM_ROGUES;
+            return n_rogues;
         }
         Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
             return resetRange;

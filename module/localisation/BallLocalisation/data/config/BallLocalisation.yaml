@@ -1,5 +1,5 @@
 process_noise_diagonal: [0.01, 0.01]
-NUM_ROGUES: 1
+n_rogues: 1
 
 reset_range: [2, 2]
 n_particles: 30

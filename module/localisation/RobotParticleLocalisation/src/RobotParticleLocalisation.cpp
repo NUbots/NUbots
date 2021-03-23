@@ -138,7 +138,7 @@ namespace localisation {
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RobotParticleLocalisation.yaml
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
-            filter.model.NUM_ROGUES           = config["NUM_ROGUES"].as<int>();
+            filter.model.n_rogues             = config["n_rogues"].as<int>();
             filter.model.resetRange           = config["reset_range"].as<Expression>();
             n_particles                       = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();

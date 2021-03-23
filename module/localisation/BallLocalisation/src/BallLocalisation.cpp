@@ -42,7 +42,7 @@ namespace localisation {
 
             ball_pos_log = config["ball_pos_log"].as<bool>();
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.NUM_ROGUES = config["NUM_ROGUES"].as<int>();
+            filter.model.n_rogues   = config["n_rogues"].as<int>();
             filter.model.resetRange = config["reset_range"].as<Expression>();
             int n_particles         = config["n_particles"].as<int>();
 
