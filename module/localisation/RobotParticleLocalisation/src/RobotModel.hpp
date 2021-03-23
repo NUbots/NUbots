@@ -88,7 +88,7 @@ namespace localisation {
             Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
             Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
 
-            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw.matrix() * Hfw.inverse().matrix());
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
 
             if (type == Goal::MeasurementType::CENTRE) {
                 // rGCc = vector from camera to goal post expected position
