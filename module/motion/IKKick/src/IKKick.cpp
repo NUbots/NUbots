@@ -53,7 +53,7 @@ namespace motion {
     using message::motion::KinematicsModel;
     using message::support::FieldDescription;
 
-    using utility::behaviour::ActionPriorites;
+    using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
@@ -260,7 +260,7 @@ namespace motion {
     }
 
     void IKKick::updatePriority(const float& priority) {
-        emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {priority}}));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {priority}}));
     }
 
 

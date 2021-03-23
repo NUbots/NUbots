@@ -42,7 +42,7 @@ namespace behaviour {
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
@@ -120,7 +120,7 @@ namespace behaviour {
         }
 
         void Getup::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
         }
 
     }  // namespace skills

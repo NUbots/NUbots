@@ -68,7 +68,7 @@ namespace behaviour {
         using utility::math::matrix::Transform3D;
         using utility::nusight::graph;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         using message::motion::DisableWalkEngineCommand;
@@ -131,7 +131,7 @@ namespace behaviour {
                 }}));
 
             on<Trigger<WalkStopped>>().then([this] {
-                emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {0, 0}}));
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
             });
 
             // on<Trigger<std::vector<Ball>>>().then([this]{
@@ -179,7 +179,7 @@ namespace behaviour {
 
 
                         emit(std::make_unique<StopCommand>(subsumptionId));
-                        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
+                        // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
 
                         return;
                     }
@@ -188,7 +188,7 @@ namespace behaviour {
                         std::unique_ptr<WalkCommand> command =
                             std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
                         emit(std::move(command));
-                        emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
+                        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                         return;
                     }
 
@@ -263,7 +263,7 @@ namespace behaviour {
                     command->command = convert(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
 
                     emit(std::move(command));
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                 });
 
             on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this](const MotionCommand& cmd) {
