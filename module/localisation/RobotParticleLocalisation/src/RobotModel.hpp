@@ -184,9 +184,8 @@ namespace localisation {
 
             // Finding 4 corners of goalpost and centre (4 corners and centre)
             Eigen::Matrix<Scalar, 4, 5> goalBaseCorners;
-            for (int i = 0; i < 5; ++i)
-                goalBaseCorners.col(i) =
-                    Eigen::Matrix<Scalar, 4, 1>(post_centre.x(), post_centre.y(), post_centre.z(), 1);
+            goalBaseCorners.colwise() =
+                Eigen::Matrix<Scalar, 4, 1>(post_centre.x(), post_centre.y(), post_centre.z(), 1);
             //
             goalBaseCorners.col(1) += Eigen::Matrix<Scalar, 4, 1>(0.5 * fd.dimensions.goalpost_depth,
                                                                   0.5 * fd.dimensions.goalpost_width,
@@ -206,8 +205,7 @@ namespace localisation {
                                                                   0);
 
             Eigen::Matrix<Scalar, 4, 5> goalTopCorners = goalBaseCorners;
-            for (int i = 0; i < 5; ++i)
-                goalTopCorners.col(i) += Eigen::Matrix<Scalar, 4, 1>(0, 0, fd.dimensions.goal_crossbar_height, 0);
+            goalTopCorners.colwise() += Eigen::Matrix<Scalar, 4, 1>(0, 0, fd.dimensions.goal_crossbar_height, 0);
 
             // Transform to robot camera space
             const Eigen::Matrix<Scalar, 4, 5> goalBaseCornersCam = Hcf * goalBaseCorners;
