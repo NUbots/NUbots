@@ -68,7 +68,7 @@ class GreenHorizonHarness extends Component<{ animate?: boolean }> {
 
   private generateHorizon(time: number): Vector3[] {
     const focalLength = 415 / 800
-    const n = 50
+    const n = 1000
     return range(n + 1).map(i => {
       const t = mod2pi(2 * Math.PI * (i / n) + time / 10)
       const p = lissajous(t).multiplyScalar(0.4) // Why lissajous? Why not.
