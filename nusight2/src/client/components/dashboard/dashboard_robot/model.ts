@@ -1,7 +1,7 @@
 import { computed } from 'mobx'
 import { observable } from 'mobx'
 
-import { message } from '../../../../shared/proto/messages'
+import { message } from '../../../../shared/messages'
 import { memoize } from '../../../base/memoize'
 import { Matrix2 } from '../../../math/matrix2'
 import { Matrix3 } from '../../../math/matrix3'
