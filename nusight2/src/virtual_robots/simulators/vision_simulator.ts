@@ -7,8 +7,8 @@ import { Matrix4 } from 'three'
 import { fourcc } from '../../client/image_decoder/fourcc'
 import { FieldDimensions } from '../../shared/field/dimensions'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
-import { Imat4 } from '../../shared/proto/messages'
-import { message } from '../../shared/proto/messages'
+import { Imat4 } from '../../shared/messages'
+import { message } from '../../shared/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
 import { Simulator } from '../simulator'
 import { Message } from '../simulator'
@@ -112,7 +112,7 @@ export class VisionSimulator extends Simulator {
           {
             cone: {
               axis,
-              gradient: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
+              radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
             },
             measurements: [
               {
