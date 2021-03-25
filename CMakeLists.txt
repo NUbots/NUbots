@@ -38,7 +38,7 @@ option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY)
   set(CMAKE_CXX_CLANG_TIDY clang-tidy)
   set(CMAKE_C_CLANG_TIDY clang-tidy)
-endif(ENABLE_CLANG_TIDY)
+endif()
 
 # Enable address sanitizer
 option(USE_ASAN "Enable address sanitization" OFF)
@@ -46,7 +46,7 @@ if(USE_ASAN)
   add_compile_options(-fsanitize=address -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common)
   add_link_options(-fsanitize=address)
   link_libraries(asan)
-endif(USE_ASAN)
+endif()
 
 # Output the compilation database
 set(CMAKE_EXPORT_COMPILE_COMMANDS
@@ -81,7 +81,7 @@ add_subdirectory(nuclear)
 option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
 if(USE_CUSTOM_CLOCK)
   add_subdirectory(shared/clock)
-endif(USE_CUSTOM_CLOCK)
+endif()
 
 # Enable sending binaries to robots
 include(RobotSend)
@@ -90,4 +90,4 @@ include(RobotSend)
 if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(shared/tests)
-endif(BUILD_TESTS)
+endif()

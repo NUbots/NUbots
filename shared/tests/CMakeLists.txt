@@ -13,4 +13,4 @@ if(test_src)
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMAND ${CMAKE_CURRENT_BINARY_DIR}/TestShared
   )
-endif(test_src)
+endif()

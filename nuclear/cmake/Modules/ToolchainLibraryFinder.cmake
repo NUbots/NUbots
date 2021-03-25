@@ -69,7 +69,7 @@ function(ToolchainLibraryFinder)
         PARENT_SCOPE
     )
     mark_as_advanced(${PACKAGE_NAME}_LIBRARIES)
-  endif(PACKAGE_LIBRARY)
+  endif()
 
   # Find our include path from our named headers
   if(PACKAGE_HEADER)
@@ -93,7 +93,7 @@ function(ToolchainLibraryFinder)
     )
     mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR ${PACKAGE_NAME}_INCLUDE_DIRS)
 
-  endif(PACKAGE_HEADER)
+  endif()
 
   # Find our binary from the named binary files
   if(PACKAGE_BINARY)
@@ -116,7 +116,7 @@ function(ToolchainLibraryFinder)
     )
     mark_as_advanced(${PACKAGE_NAME}_BINARY)
 
-  endif(PACKAGE_BINARY)
+  endif()
 
   # Find our version if we can
   if((PACKAGE_VERSION_FILE AND PACKAGE_HEADER) OR (PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY))
@@ -125,7 +125,7 @@ function(ToolchainLibraryFinder)
     # Read our package version file into a variable
     if(PACKAGE_VERSION_FILE AND PACKAGE_HEADER)
       file(READ "${${PACKAGE_NAME}_INCLUDE_DIR}/${PACKAGE_VERSION_FILE}" full_version_string)
-    endif(PACKAGE_VERSION_FILE AND PACKAGE_HEADER)
+    endif()
 
     # Execute our binary to get a version string
     if(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
@@ -134,7 +134,7 @@ function(ToolchainLibraryFinder)
         ${PACKAGE_VERSION_BINARY_ARGUMENTS}
         OUTPUT_VARIABLE full_version_string
       )
-    endif(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
+    endif()
 
     # Build up our version string
     set(${PACKAGE_NAME}_VERSION "")
@@ -144,7 +144,7 @@ function(ToolchainLibraryFinder)
     endforeach(regex)
     string(REPLACE ";" "." ${PACKAGE_NAME}_VERSION "${${PACKAGE_NAME}_VERSION}")
 
-  endif((PACKAGE_VERSION_FILE AND PACKAGE_HEADER) OR (PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY))
+  endif()
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(

@@ -224,7 +224,7 @@ function(NUCLEAR_MODULE)
         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${test_module_target_name}
       )
 
-    endif(test_src)
-  endif(BUILD_TESTS)
+    endif()
+  endif()
 
 endfunction(NUCLEAR_MODULE)
