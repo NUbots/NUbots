@@ -3,7 +3,7 @@
 import os
 
 import b
-from dockerise import WrapPty, run_on_docker
+from dockerise import WrapPty
 from utility.yarn import find_package_json
 
 
