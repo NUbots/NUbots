@@ -1,4 +1,3 @@
-# Find ALSA for eSpeak
 include(ToolchainLibraryFinder)
 
 # OpenBLAS for armadillo
