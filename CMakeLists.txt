@@ -82,9 +82,6 @@ if(USE_CUSTOM_CLOCK)
   add_subdirectory(shared/clock)
 endif()
 
-# Enable sending binaries to robots
-include(RobotSend)
-
 # Enable testing if we are building tests
 if(BUILD_TESTS)
   enable_testing()
