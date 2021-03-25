@@ -1,5 +1,6 @@
-# Find ALSA for eSpeak
 include(ToolchainLibraryFinder)
+
+# Find ALSA for eSpeak
 find_package(ALSA REQUIRED)
 
 # Find PortAudio for eSpeak
