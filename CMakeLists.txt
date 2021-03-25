@@ -48,12 +48,6 @@ if(USE_ASAN)
   link_libraries(asan)
 endif(USE_ASAN)
 
-# Enable testing if we are building tests
-if(BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(shared/tests)
-endif(BUILD_TESTS)
-
 # Output the compilation database
 set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
@@ -91,3 +85,9 @@ endif(USE_CUSTOM_CLOCK)
 
 # Enable sending binaries to robots
 include(RobotSend)
+
+# Enable testing if we are building tests
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(shared/tests)
+endif(BUILD_TESTS)
