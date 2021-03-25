@@ -115,7 +115,7 @@ foreach(proto ${message_protobufs})
     OUTPUT "${pb}.pb.cc" "${pb}.pb.h" "${py}_pb2.py"
     COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${pb_out} --python_out=${py_out} -I${pb_out}
             -I${builtin_dir} "${pb}.proto"
-    DEPENDS ${binary_depends}
+    DEPENDS ${binary_depends} "${pb}.proto"
     COMMENT "Compiling protocol buffer ${proto}"
   )
 
@@ -127,7 +127,7 @@ foreach(proto ${message_protobufs})
     OUTPUT "${nt}.pb"
     COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --descriptor_set_out="${nt}.pb" -I${message_parent_dir} -I${builtin_dir}
             ${proto}
-    DEPENDS ${source_depends}
+    DEPENDS ${source_depends} ${proto}
     COMMENT "Extracting protocol buffer information from ${proto}"
   )
 
