@@ -1,7 +1,7 @@
 import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
 
-import { message } from '../../../../shared/proto/messages'
+import { message } from '../../../../shared/messages'
 import { Vector3 } from '../../../math/vector3'
 import { DashboardRobotModel } from '../dashboard_robot/model'
 
