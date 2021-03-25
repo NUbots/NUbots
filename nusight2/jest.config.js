@@ -3,7 +3,8 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/'],
   collectCoverageFrom: [
     '**/*.{ts,tsx}',
-    '!src/shared/proto/**',
+    '!src/shared/messages.js',
+    '!src/shared/messages.d.ts',
     '!**/node_modules/**',
     '!**/tests/**',
   ],
