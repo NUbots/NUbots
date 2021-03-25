@@ -20,8 +20,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
 endif()
 
 # Disable armadillo bounds checking in release and min size release builds
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DARMA_NO_DEBUG")
-set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -DARMA_NO_DEBUG")
+list(APPEND CMAKE_CXX_FLAGS_RELEASE "-DARMA_NO_DEBUG")
+list(APPEND CMAKE_CXX_FLAGS_MINSIZEREL "-DARMA_NO_DEBUG")
 
 # Enable address sanitizer
 option(USE_ASAN "Enable address sanitization" OFF)

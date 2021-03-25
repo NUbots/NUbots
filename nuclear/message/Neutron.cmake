@@ -156,11 +156,11 @@ foreach(proto ${message_protobufs})
   )
 
   # Add the generated files to our list
-  set(src ${src} "${pb}.pb.cc" "${pb}.pb.h" "${nt}.cpp" "${nt}.hpp")
+  list(APPEND src "${pb}.pb.cc" "${pb}.pb.h" "${nt}.cpp" "${nt}.hpp")
 
   # If we have pybind11 also add the python bindings
   if(pybind11_FOUND)
-    set(src ${src} "${nt}.py.cpp")
+    list(APPEND src "${nt}.py.cpp")
   endif()
 
   # Add to the respective outputs
