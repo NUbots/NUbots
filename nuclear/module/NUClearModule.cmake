@@ -174,7 +174,7 @@ function(NUCLEAR_MODULE)
 
   if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
     add_library(${module_target_name} SHARED ${sources})
-    set_property(TARGET ${module_target_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+    set_target_properties(${module_target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
   else()
     add_library(${module_target_name} ${NUCLEAR_LINK_TYPE} ${sources})
   endif()
@@ -189,7 +189,7 @@ function(NUCLEAR_MODULE)
   target_link_libraries(${module_target_name} PUBLIC ${MODULE_LIBRARIES})
 
   # Put it in an IDE group for shared
-  set_property(TARGET ${module_target_name} PROPERTY FOLDER ${module_path})
+  set_target_properties(${module_target_name} PROPERTIES FOLDER ${module_path})
 
   # ####################################################################################################################
   # Testing #
@@ -215,7 +215,7 @@ function(NUCLEAR_MODULE)
       add_executable(${test_module_target_name} ${test_src})
       target_link_libraries(${test_module_target_name} ${module_target_name})
 
-      set_property(TARGET ${test_module_target_name} PROPERTY FOLDER "modules/tests")
+      set_target_properties(${test_module_target_name} PROPERTIES FOLDER "modules/tests")
 
       # Add the test
       add_test(

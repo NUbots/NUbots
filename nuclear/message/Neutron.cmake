@@ -140,7 +140,7 @@ foreach(proto ${message_protobufs})
     COMMENT "Building classes for ${proto}"
   )
 
-  # The protobuf descriptions are generated
+  # Prevent Effective C++ and unused parameter error checks being performed on generated files.
   set_source_files_properties(
     "${nt}.pb"
     "${pb}.proto"
@@ -150,9 +150,7 @@ foreach(proto ${message_protobufs})
     "${nt}.cpp"
     "${nt}.py.cpp"
     "${nt}.hpp"
-    PROPERTIES GENERATED TRUE # Prevent Effective C++ and unused parameter error checks being performed on generated
-                              # files.
-               COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
+    PROPERTIES GENERATED TRUE COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
   )
 
   # Add the generated files to our list

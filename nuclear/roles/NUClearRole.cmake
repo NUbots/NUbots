@@ -33,14 +33,14 @@ function(NUCLEAR_ROLE)
   target_link_libraries(${role} NUClear::nuclear)
 
   # Set our output directory to be bin
-  set_property(TARGET ${role} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/")
+  set_target_properties(${role} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/")
 
   # IDE folder
-  set_property(TARGET ${role} PROPERTY FOLDER "roles/")
+  set_target_properties(${role} PROPERTIES FOLDER "roles/")
 
   # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
   # modules are used in the role
-  set_property(TARGET ${role} PROPERTY NUCLEAR_MODULES ${role_modules})
+  set_target_properties(${role} PROPERTIES NUCLEAR_MODULES "${role_modules}")
 
   # * We add to the global cache variable here that contains all of the module we are using
   # * Elsewhere, this is used to include the directories for these in order to build them

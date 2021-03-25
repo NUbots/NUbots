@@ -44,6 +44,6 @@ foreach(host_pair ${KNOWN_HOSTS})
     endif()
 
     # Move our installer to an IDE group
-    set_property(TARGET "${target}" PROPERTY FOLDER "installers")
+    set_target_properties("${target}" PROPERTIES FOLDER "installers")
   endforeach(config)
 endforeach(host_pair)
