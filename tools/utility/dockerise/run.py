@@ -50,19 +50,19 @@ def _setup_internal_image(image, rebuild, clean_volume):
     v_name = "{}_{}_build".format(repository, target)
     v = (
         v_name
-        if subprocess.call(["docker", "volume", "inspect", v_name], stderr=DEVNULL, stdout=DEVNULL) == 0
+        if subprocess.run(["docker", "volume", "inspect", v_name], stderr=DEVNULL, stdout=DEVNULL).returncode == 0
         else None
     )
 
     # If we are cleaning, remove this volume so we can recreate it
     if v is not None and clean_volume:
-        if subprocess.call(["docker", "volume", "rm", v], stderr=DEVNULL, stdout=DEVNULL) != 0:
+        if subprocess.run(["docker", "volume", "rm", v], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
             raise RuntimeError("Docker volume rm returned a non-zero exit")
         v = None
 
     # If we don't have a volume, make one
     if v is None:
-        if subprocess.call(["docker", "volume", "create", v_name], stderr=DEVNULL, stdout=DEVNULL) == 0:
+        if subprocess.run(["docker", "volume", "create", v_name], stderr=DEVNULL, stdout=DEVNULL).returncode == 0:
             v = v_name
         else:
             raise RuntimeError("Docker volume create returned a non-zero exit code")
@@ -114,7 +114,7 @@ def run(func, image):
 
         # Check if we can find the image, and if not try to either build it or pull it
         rebuild = False
-        if subprocess.call(["docker", "image", "inspect", image], stderr=DEVNULL, stdout=DEVNULL) != 0:
+        if subprocess.run(["docker", "image", "inspect", image], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
             if internal_image:
                 print("Could not find the image {}, rebuilding from source".format(image))
                 rebuild = True
