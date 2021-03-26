@@ -8,7 +8,7 @@ import subprocess
 from termcolor import cprint
 
 import b
-from dockerise import run_on_docker
+from utility.dockerise import run_on_docker
 
 
 @run_on_docker
@@ -54,7 +54,7 @@ def run(target, user, config, toolchain, **kwargs):
 
     cprint("Installing binaries to " + target_dir, "blue", attrs=["bold"])
     files = glob.glob(os.path.join(build_dir, "bin", "*"))
-    subprocess.call(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_dir])
+    subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_dir])
 
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
@@ -62,7 +62,7 @@ def run(target, user, config, toolchain, **kwargs):
         # Delete toolchain files on the receiver if they no longer exist in our toolchain
         cprint("Installing toolchain library files", "blue", attrs=["bold"])
 
-        subprocess.call(
+        subprocess.run(
             [
                 "rsync",
                 "-avPl",
@@ -88,7 +88,7 @@ def run(target, user, config, toolchain, **kwargs):
 
         # Run ldconfig on the robot to ensure the system knows that the new libraries are there
         cprint("Running ldconfig on {}".format(target), "blue", attrs=["bold"])
-        subprocess.call(["ssh", "{}@{}".format(user, target), "sudo ldconfig"])
+        subprocess.run(["ssh", "{}@{}".format(user, target), "sudo ldconfig"])
 
     # If there is only a single file then the b script returns this as a string rather than a list
     config_files = b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]
@@ -102,15 +102,15 @@ def run(target, user, config, toolchain, **kwargs):
 
     if config in ["overwrite", "o"]:
         cprint("Overwriting configuration files on target", "blue", attrs=["bold"])
-        subprocess.call(["rsync", "-avPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
+        subprocess.run(["rsync", "-avPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
 
     if config in ["update", "u"]:
         cprint("Updating configuration files that are older on target", "blue", attrs=["bold"])
-        subprocess.call(["rsync", "-avuPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
+        subprocess.run(["rsync", "-avuPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
 
     if config in ["new", "n"]:
         cprint("Adding new configuration files to the target", "blue", attrs=["bold"])
-        subprocess.call(["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e ssh"] + config_files + [target_dir])
+        subprocess.run(["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e ssh"] + config_files + [target_dir])
 
     if config in ["ignore", "i"]:
         cprint("Ignoring configuration changes", "blue", attrs=["bold"])
@@ -119,6 +119,6 @@ def run(target, user, config, toolchain, **kwargs):
     version_file = os.path.join(build_dir, "version.txt")
     with open(version_file, "w") as f:
         os.chdir(b.project_dir)
-        subprocess.call(["git", "log", "-1"], stdout=f)
+        subprocess.run(["git", "log", "-1"], stdout=f)
 
-    subprocess.call(["scp", version_file, target_dir])
+    subprocess.run(["scp", version_file, target_dir])
