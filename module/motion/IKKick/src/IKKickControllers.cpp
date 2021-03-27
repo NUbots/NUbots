@@ -61,9 +61,9 @@ namespace motion {
 
     void KickBalancer::computeStopMotion(const Sensors&) {
         // Play the reverse
-        anim.frames.x().duration = return_duration;
+        anim.frames[0].duration = return_duration;
         std::reverse(anim.frames.begin(), anim.frames.end());
-        anim.frames.x().duration = 0;
+        anim.frames[0].duration = 0;
     }
 
     void Kicker::configure(const Configuration& config) {
@@ -88,8 +88,9 @@ namespace motion {
         // Convert torso to support foot
         Eigen::Affine3d currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Eigen::Affine3d currentKickFoot =
-            (supportFoot == LimbID::LEFT_LEG) ? sensors.Htx[ServoID::L_ANKLE_ROLL] : sensors.Htx[ServoID::R_ANKLE_ROLL];
+        Eigen::Affine3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
+                                              ? Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
+                                              : Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Eigen::Affine3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
@@ -98,7 +99,7 @@ namespace motion {
         Eigen::Vector3d goalFromKickFoot = supportToKickFoot * goalPosition;
 
         // Compute follow through:
-        Eigen::Vector3d ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalize();
+        Eigen::Vector3d ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalized();
         Eigen::Vector3d followThrough  = follow_through * ballToGoalUnit;
         Eigen::Vector3d windUp         = -wind_up * ballToGoalUnit;
 
@@ -121,13 +122,13 @@ namespace motion {
         float liftClipDistance = (liftGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * liftClipDistance > 0) {
             // Clip
-            liftGoal.rows(0, 1) = liftGoal.rows(0, 1) * clippingPlaneY / liftGoal.y();
+            liftGoal.topRows<2>() = liftGoal.topRows<2>() * clippingPlaneY / liftGoal.y();
         }
 
         float kickClipDistance = (kickGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * kickClipDistance > 0) {
             // Clip
-            kickGoal.rows(0, 1) = kickGoal.rows(0, 1) * clippingPlaneY / kickGoal.y();
+            kickGoal.topRows<2>() = kickGoal.topRows<2>() * clippingPlaneY / kickGoal.y();
         }
 
         kick.pose.translation()      = kickGoal;

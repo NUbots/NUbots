@@ -73,12 +73,12 @@ namespace math {
         template <typename Scalar>
         inline Eigen::Transform<Scalar, 3, Eigen::Affine> interpolate(
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& t1,
-            Eigen::Transform<Scalar, 3, Eigen::Affine>& t2,
+            const Eigen::Transform<Scalar, 3, Eigen::Affine>& t2,
             const Scalar& alpha) {
 
             // Create quaternions from the transforms' rotation matrices
-            Eigen::Quaternion t1Rot = Eigen::Quaternion(t1.rotation());
-            Eigen::Quaternion t2Rot = Eigen::Quaternion(t2.rotation());
+            Eigen::Quaternion<Scalar> t1Rot = Eigen::Quaternion<Scalar>(t1.rotation());
+            Eigen::Quaternion<Scalar> t2Rot = Eigen::Quaternion<Scalar>(t2.rotation());
 
             // Extract the translation vectors
             Eigen::Matrix<Scalar, 3, 1> t1Translation = t1.translation();

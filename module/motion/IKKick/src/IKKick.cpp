@@ -118,8 +118,8 @@ namespace motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Eigen::Affine3d leftFoot  = sensors.Htx[ServoID::L_ANKLE_ROLL];
-                Eigen::Affine3d rightFoot = sensors.Htx[ServoID::R_ANKLE_ROLL];
+                Eigen::Affine3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
+                Eigen::Affine3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -203,14 +203,15 @@ namespace motion {
 
                 // Move foot to ball to kick
                 if (kicker.isRunning()) {
-                    kickFootGoal *= kicker.getFootPose(sensors);
+                    kickFootGoal = kickFootGoal * kicker.getFootPose(sensors);
                 }
 
                 // Balance based on the IMU
-
+                Eigen::Affine3f supportFootGoalFloat(supportFootGoal.cast<float>());
                 if (feedback_active) {
-                    feedbackBalancer.balance(kinematicsModel, supportFootGoal, supportFoot, sensors);
+                    feedbackBalancer.balance(kinematicsModel, supportFootGoalFloat, supportFoot, sensors);
                 }
+                supportFootGoal = supportFootGoalFloat.cast<double>();  // yuk
 
                 // Calculate IK and send waypoints
                 std::vector<std::pair<ServoID, float>> joints;

@@ -57,11 +57,13 @@ namespace motion {
         SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
             duration                    = config["duration"].as<float>();
             Eigen::Vector3d pos         = config["pos"].as<Expression>();
-            Eigen::Vector3d orientation = (180.0 / M_PI) * config["orientation"].as<Expression>();
-            pose                        = Eigen::Affine3d::Identity();
-            pose.rotate(Eigen::AngleAxisd(orientation.x(), Vector3d::UnitX()));
-            pose.rotate(Eigen::AngleAxisd(orientation.y(), Vector3d::UnitY()));
-            pose.rotate(Eigen::AngleAxisd(orientation.z(), Vector3d::UnitZ()));
+            Eigen::Vector3d orientation = config["orientation"].as<Expression>();
+            // Convert to degrees
+            orientation = (180.0 / M_PI) * orientation;
+            pose        = Eigen::Affine3d::Identity();
+            pose.rotate(Eigen::AngleAxisd(orientation.x(), Eigen::Vector3d::UnitX()));
+            pose.rotate(Eigen::AngleAxisd(orientation.y(), Eigen::Vector3d::UnitY()));
+            pose.rotate(Eigen::AngleAxisd(orientation.z(), Eigen::Vector3d::UnitZ()));
             pose.translation() = pos;
         };
         // TODO:
@@ -183,8 +185,8 @@ namespace motion {
         Eigen::Affine3d getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL]
-                        : sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]);
+                        ? Eigen::Affine3d(sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL])
+                        : Eigen::Affine3d(sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]));
         }
 
         Eigen::Affine3d getFootPose(const message::input::Sensors& sensors) {
@@ -194,23 +196,24 @@ namespace motion {
                 double elapsedTime =
                     std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count()
                     * 1e-6;
-                float alpha = (anim.currentFrame().duration != 0)
-                                  ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
-                                  : 1;
+                double alpha = (anim.currentFrame().duration != 0)
+                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
+                                   : 1;
 
-                Eigen::Affine3d result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
+                result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
 
                 bool servosAtGoal = true;
-                for (auto& servo : sensors.servo) {
-                    if (int(servo.id) >= 6         // R_HIP_YAW
-                        && int(servo.id) <= 17) {  // L_ANKLE_ROLL
-                        servosAtGoal =
-                            servosAtGoal
-                            && std::fabs(servo.goal_position - servo.present_position) < servo_angle_threshold;
+
+                // Check all the servos between R_HIP_YAW and L_ANKLE_ROLL are within the angle threshold
+                for (int id = utility::input::ServoID::R_HIP_YAW; id <= utility::input::ServoID::L_ANKLE_ROLL; ++id) {
+                    if (std::fabs(sensors.servo[id].goal_position - sensors.servo[id].present_position)
+                        > servo_angle_threshold) {
+                        servosAtGoal = false;
+                        break;
                     }
                 }
 
-                if (alpha >= 1 && servosAtGoal) {
+                if (alpha >= 1.0 && servosAtGoal) {
                     stable = anim.stable();
                     if (!stable) {
                         anim.next();
