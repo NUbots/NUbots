@@ -59,7 +59,7 @@ namespace motion {
         float torque    = 100;
 
         bool feedback_active;
-        utility::motion::Balancer feedbackBalancer;
+        utility::motion::Balancer<double> feedbackBalancer;
 
         KickBalancer balancer;
         Kicker kicker;
