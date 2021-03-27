@@ -118,8 +118,8 @@ namespace motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Eigen::Affine3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                Eigen::Affine3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                const Eigen::Affine3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
+                const Eigen::Affine3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -130,25 +130,25 @@ namespace motion {
                     supportFoot = LimbID::RIGHT_LEG;
                 }
 
-                Eigen::Affine3d torsoPose =
+                const Eigen::Affine3d torsoPose =
                     (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
 
-                Eigen::Affine3d Htg = Eigen::Affine3d(sensors.Hgt).inverse();
+                const Eigen::Affine3d Htg = Eigen::Affine3d(sensors.Hgt).inverse();
 
                 // Create the command target point object so we can transform it
-                Eigen::Vector4d commandTargetPoint(command.target.x(), command.target.y(), command.target.z(), 1);
+                const Eigen::Vector4d commandTargetPoint(command.target.x(), command.target.y(), command.target.z(), 1);
 
                 // Put the ball position from vision into torso coordinates by transforming the command target point
-                Eigen::Vector3d targetTorso = (Htg * commandTargetPoint).head<3>();
+                const Eigen::Vector3d targetTorso = (Htg * commandTargetPoint).head<3>();
 
                 // Put the ball position into support foot coordinates
-                Eigen::Vector3d targetSupportFoot = torsoPose * targetTorso;
+                const Eigen::Vector3d targetSupportFoot = torsoPose * targetTorso;
 
                 // Put the goal from vision into torso coordinates
-                Eigen::Vector3d directionTorso(Htg * command.direction);
+                const Eigen::Vector3d directionTorso(Htg * command.direction);
 
                 // Put the goal into support foot coordinates
-                Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
+                const Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
 
                 Eigen::Vector3d ballPosition = targetSupportFoot;
                 ballPosition.z()             = 0.05;  // TODO: figure out why ball height is unreliable
@@ -172,7 +172,7 @@ namespace motion {
                     kickFoot = LimbID::RIGHT_LEG;
                 }
 
-                int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
+                const int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
 
                 // State checker
                 if (balancer.isStable()) {
@@ -217,8 +217,8 @@ namespace motion {
                 std::vector<std::pair<ServoID, float>> joints;
 
                 // IK
-                auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
-                auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
+                const auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
+                const auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
 
                 // Combine left and right legs
                 joints.insert(joints.end(), kickJoints.begin(), kickJoints.end());
@@ -229,7 +229,7 @@ namespace motion {
                 waypoints->reserve(16);
 
                 // Goal time is by next frame
-                NUClear::clock::time_point time = NUClear::clock::now();
+                const NUClear::clock::time_point time = NUClear::clock::now();
 
                 // Push back each servo command
                 for (auto& joint : joints) {

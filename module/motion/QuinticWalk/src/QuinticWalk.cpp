@@ -192,7 +192,7 @@ namespace motion {
 
     float QuinticWalk::getTimeDelta() {
         // compute time delta depended if we are currently in simulation or reality
-        auto current_time = NUClear::clock::now();
+        const auto current_time = NUClear::clock::now();
         float dt =
             std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
 
@@ -246,15 +246,15 @@ namespace motion {
         Hfs.linear()      = setRPY(foot_axis[0], foot_axis[1], foot_axis[2]);
         Hfs.translation() = foot_pos;
 
-        Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
+        const Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
 
         // Calculate leg joints
-        Eigen::Matrix4d left_foot =
+        const Eigen::Matrix4d left_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hst.matrix().cast<double>() : Hft.matrix().cast<double>();
-        Eigen::Matrix4d right_foot =
+        const Eigen::Matrix4d right_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
 
-        auto joints =
+        const auto joints =
             calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
 
         auto waypoints = motionLegs(joints);

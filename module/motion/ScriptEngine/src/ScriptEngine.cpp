@@ -53,7 +53,7 @@ namespace motion {
 
             for (size_t i = 0; i < command.scripts.size(); i++) {
                 const auto& scriptName = command.scripts[i];
-                auto script            = scripts.find(scriptName);
+                const auto script      = scripts.find(scriptName);
 
                 if (script == std::end(scripts)) {
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
