@@ -105,9 +105,8 @@ namespace localisation {
                 Htw.matrix() = (sensors.Htw);
 
                 for (auto& s : locReset.hypotheses) {
-                    const Eigen::Vector3d rTFf(s.position.x(), s.position.y(), 0);
                     Eigen::Affine3d Hft;
-                    Hft.translation() = rTFf;
+                    Hft.translation() = Eigen::Vector3d(s.position.x(), s.position.y(), 0);
                     // Linear part of transform is `s.heading` radians rotation about Z axis
                     Hft.linear() = Eigen::AngleAxisd(s.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
                     const Eigen::Affine3d Hfw(Hft * Htw);
