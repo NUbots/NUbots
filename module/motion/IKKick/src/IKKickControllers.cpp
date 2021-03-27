@@ -42,10 +42,10 @@ namespace motion {
     }
 
     void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        const Eigen::Affine3d torsoToFoot = getTorsoPose(sensors);
-        const Eigen::Affine3d startPose   = torsoToFoot.inverse();
+        Eigen::Affine3d torsoToFoot = getTorsoPose(sensors);
+        Eigen::Affine3d startPose   = torsoToFoot.inverse();
 
-        const int negativeIfRight  = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
+        int negativeIfRight        = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Eigen::Affine3d finishPose = torsoToFoot;
         finishPose.translation() =
             Eigen::Vector3d(forward_lean,
@@ -83,25 +83,25 @@ namespace motion {
     }
 
     void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        const Eigen::Affine3d startPose = Eigen::Affine3d::Identity();
+        Eigen::Affine3d startPose = Eigen::Affine3d::Identity();
 
         // Convert torso to support foot
-        const Eigen::Affine3d currentTorso = getTorsoPose(sensors);
+        Eigen::Affine3d currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        const Eigen::Affine3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                                    ? Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
-                                                    : Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+        Eigen::Affine3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
+                                              ? Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
+                                              : Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
-        const Eigen::Affine3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
+        Eigen::Affine3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
         // Convert ball position from support foot coordinates to kick foot coordinates
-        const Eigen::Vector3d ballFromKickFoot = supportToKickFoot * ballPosition;
-        const Eigen::Vector3d goalFromKickFoot = supportToKickFoot * goalPosition;
+        Eigen::Vector3d ballFromKickFoot = supportToKickFoot * ballPosition;
+        Eigen::Vector3d goalFromKickFoot = supportToKickFoot * goalPosition;
 
         // Compute follow through:
-        const Eigen::Vector3d ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalized();
-        const Eigen::Vector3d followThrough  = follow_through * ballToGoalUnit;
-        const Eigen::Vector3d windUp         = -wind_up * ballToGoalUnit;
+        Eigen::Vector3d ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalized();
+        Eigen::Vector3d followThrough  = follow_through * ballToGoalUnit;
+        Eigen::Vector3d windUp         = -wind_up * ballToGoalUnit;
 
         // Get kick and lift goals
         Eigen::Vector3d kickGoal = followThrough;
@@ -111,21 +111,21 @@ namespace motion {
         liftGoal.z() = kick_height;
 
         // constrain to prevent leg collision
-        const Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
-        const int signSupportFootPosY        = supportFootPos.y() < 0 ? -1 : 1;
-        const float clippingPlaneY =
+        Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
+        int signSupportFootPosY        = supportFootPos.y() < 0 ? -1 : 1;
+        float clippingPlaneY =
             supportFootPos.y()
             - signSupportFootPosY
                   * (foot_separation_margin
                      + (kinematicsModel.leg.FOOT_WIDTH / 2.0 - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
-        const float liftClipDistance = (liftGoal.y() - clippingPlaneY);
+        float liftClipDistance = (liftGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * liftClipDistance > 0) {
             // Clip
             liftGoal.topRows<2>() = liftGoal.topRows<2>() * clippingPlaneY / liftGoal.y();
         }
 
-        const float kickClipDistance = (kickGoal.y() - clippingPlaneY);
+        float kickClipDistance = (kickGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * kickClipDistance > 0) {
             // Clip
             kickGoal.topRows<2>() = kickGoal.topRows<2>() * clippingPlaneY / kickGoal.y();
@@ -137,7 +137,7 @@ namespace motion {
         kick.duration = (kickGoal - liftGoal).norm() / kick_velocity;
 
         // Robocup code / hacks
-        const auto startFrame               = SixDOFFrame{startPose, 0};
+        auto startFrame                     = SixDOFFrame{startPose, 0};
         auto liftBeforeWindUp               = startFrame;
         liftBeforeWindUp.pose.translation() = Eigen::Vector3d(0, 0, lift_foot.pose.translation().z());
         liftBeforeWindUp.duration           = lift_before_windup_duration;

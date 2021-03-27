@@ -106,10 +106,10 @@ namespace motion {
                 // Get goal vector from angles
                 // Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
                 // The goal angles are for the neck directly, so we have to offset the camera declination again
-                const Eigen::Vector3f goalHeadUnitVector_world =
+                Eigen::Vector3f goalHeadUnitVector_world =
                     sphericalToCartesian(Eigen::Vector3f(1, currentAngles.x(), currentAngles.y()));
                 // Convert to robot space
-                const Eigen::Vector3f headUnitVector =
+                Eigen::Vector3f headUnitVector =
                     goalRobotSpace ? goalHeadUnitVector_world
                                    : Eigen::Affine3d(sensors.Htw).rotation().cast<float>() * goalHeadUnitVector_world;
                 // Compute inverse kinematics for head

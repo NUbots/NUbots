@@ -157,13 +157,13 @@ namespace motion {
             }
         }
 
-        bool isRunning() const {
+        bool isRunning() {
             return stage == MotionStage::RUNNING || stage == MotionStage::STOPPING;
         }
-        bool isStable() const {
+        bool isStable() {
             return stable;
         }
-        bool isFinished() const {
+        bool isFinished() {
             return stage == MotionStage::FINISHED;
         }
         void reset() {
@@ -182,7 +182,7 @@ namespace motion {
             reset();
         }
 
-        Eigen::Affine3d getTorsoPose(const message::input::Sensors& sensors) const {
+        Eigen::Affine3d getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
                         ? Eigen::Affine3d(sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL])
@@ -193,12 +193,12 @@ namespace motion {
             auto result = Eigen::Affine3d::Identity();
             if (stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
 
-                const double elapsedTime =
+                double elapsedTime =
                     std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count()
                     * 1e-6;
-                const double alpha = (anim.currentFrame().duration != 0)
-                                         ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
-                                         : 1;
+                double alpha = (anim.currentFrame().duration != 0)
+                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
+                                   : 1;
 
                 result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
 
@@ -232,7 +232,6 @@ namespace motion {
 
     class KickBalancer : public SixDOFFootController {
     private:
-        // TODO(KHamiltons) Put this in a config file
         // Config
         float stand_height    = 0.18;
         float foot_separation = 0.074;
