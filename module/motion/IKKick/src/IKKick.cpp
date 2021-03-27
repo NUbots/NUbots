@@ -207,9 +207,11 @@ namespace motion {
                 }
 
                 // Balance based on the IMU
+                Eigen::Affine3f supportFootGoalFloat(supportFootGoal.cast<float>());
                 if (feedback_active) {
-                    feedbackBalancer.balance(kinematicsModel, supportFootGoal, supportFoot, sensors);
+                    feedbackBalancer.balance(kinematicsModel, supportFootGoalFloat, supportFoot, sensors);
                 }
+                supportFootGoal = supportFootGoalFloat.cast<double>();  // yuk
 
                 // Calculate IK and send waypoints
                 std::vector<std::pair<ServoID, float>> joints;
