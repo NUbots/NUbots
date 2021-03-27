@@ -91,42 +91,43 @@ namespace motion {
                      const message::input::Sensors& sensors) {
 
             // Goal is based on the support foot rotation.
-            Eigen::AngleAxis<Scalar> goalTorsoOrientation = Eigen::AngleAxis<Scalar>(footToTorso.rotation().inverse());
+            const Eigen::AngleAxis<Scalar> goalTorsoOrientation =
+                Eigen::AngleAxis<Scalar>(footToTorso.rotation().inverse());
 
             //------------------------------------
             // Rotation
             //------------------------------------
 
             // Robot coords in world (:Robot -> World)
-            Eigen::Transform<Scalar, 3, Eigen::Affine> Htw(sensors.Htw);
-            Eigen::AngleAxis<Scalar> orientation = Eigen::AngleAxis<Scalar>(Htw.rotation().inverse());
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Htw(sensors.Htw);
+            const Eigen::AngleAxis<Scalar> orientation = Eigen::AngleAxis<Scalar>(Htw.rotation().inverse());
 
             // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}
-            Scalar orientationYaw = orientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
+            const Scalar orientationYaw = orientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
             // The nested AngleAxis creates a -orientationYaw radians rotation about the Z axis
             // The outside AngleAxis constructs an AngleAxis from the returned Quaternion type of the multiplication
-            Eigen::AngleAxis<Scalar> yawlessOrientation = Eigen::AngleAxis<Scalar>(
+            const Eigen::AngleAxis<Scalar> yawlessOrientation = Eigen::AngleAxis<Scalar>(
                 Eigen::AngleAxis<Scalar>(-orientationYaw, Eigen::Matrix<Scalar, 3, 1>::UnitZ()) * orientation);
 
             // Removes any yaw component
-            Scalar goalTorsoOrientationYaw = goalTorsoOrientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
+            const Scalar goalTorsoOrientationYaw = goalTorsoOrientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
             // Again the nested AngleAxis is a rotation -goalTorsoOrientation radians about the Z axis and the outer one
             // converts from Quaternion type to AngleAxis
-            Eigen::AngleAxis<Scalar> yawlessGoalOrientation = Eigen::AngleAxis<Scalar>(
+            const Eigen::AngleAxis<Scalar> yawlessGoalOrientation = Eigen::AngleAxis<Scalar>(
                 Eigen::AngleAxis<Scalar>(-goalTorsoOrientationYaw, Eigen::Matrix<Scalar, 3, 1>::UnitZ())
                 * goalTorsoOrientation);
 
             // Error orientation maps: Goal -> Current
-            Eigen::AngleAxis<Scalar> errorOrientation =
+            const Eigen::AngleAxis<Scalar> errorOrientation =
                 Eigen::AngleAxis<Scalar>(yawlessOrientation * yawlessGoalOrientation.inverse());
 
             // Our goal position as a quaternions
-            Eigen::Quaternion<Scalar> errorQuaternion(errorOrientation);
+            const Eigen::Quaternion<Scalar> errorQuaternion(errorOrientation);
 
             // Calculate our D error and I error
-            Eigen::Quaternion<Scalar> differential = lastErrorQuaternion.inverse() * errorQuaternion;
+            const Eigen::Quaternion<Scalar> differential = lastErrorQuaternion.inverse() * errorQuaternion;
 
             // TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
             // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
@@ -175,25 +176,25 @@ namespace motion {
 
             // Get error signal
             //.eulerAngles(0, 1, 2) == {roll, pitch, yaw}
-            Scalar pitch_gyro = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2).y();
-            Scalar pitch      = pitch_gyro;  // anklePitchTorque;
-            Scalar roll       = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2).x();
-            Scalar total      = std::fabs(pitch_gyro) + std::fabs(roll);
+            const Scalar pitch_gyro = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2).y();
+            const Scalar pitch      = pitch_gyro;  // anklePitchTorque;
+            const Scalar roll       = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2).x();
+            const Scalar total      = std::fabs(pitch_gyro) + std::fabs(roll);
 
             // Differentiate error signal
-            auto now = NUClear::clock::now();
-            Scalar timeSinceLastMeasurement =
+            const auto now = NUClear::clock::now();
+            const Scalar timeSinceLastMeasurement =
                 std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastBalanceTime).count() * 1e-9;
-            Scalar newdPitch = timeSinceLastMeasurement != 0
-                                   ? (pitch - lastPitch) / timeSinceLastMeasurement
-                                   : 0;  // note that this is not a great computation of the diff
-            Scalar newdRoll  = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
+            const Scalar newdPitch = timeSinceLastMeasurement != 0
+                                         ? (pitch - lastPitch) / timeSinceLastMeasurement
+                                         : 0;  // note that this is not a great computation of the diff
+            const Scalar newdRoll  = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
 
             // Exponential filter for velocity
             dPitch = newdPitch * 0.1 + dPitch * 0.9;
             dRoll  = newdRoll * 0.1 + dRoll * 0.9;
 
-            Scalar dTotal = std::fabs(dPitch) + std::fabs(dRoll);
+            const Scalar dTotal = std::fabs(dPitch) + std::fabs(dRoll);
 
             lastPitch       = pitch;
             lastRoll        = roll;
@@ -205,7 +206,7 @@ namespace motion {
             // sensors.bodyCentreHeight * dPitch));
 
             // Compute torso position adjustment
-            Eigen::Matrix<Scalar, 3, 1> torsoAdjustment_world = Eigen::Matrix<Scalar, 3, 1>(
+            const Eigen::Matrix<Scalar, 3, 1> torsoAdjustment_world = Eigen::Matrix<Scalar, 3, 1>(
                 -translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
                 translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
                 -translationPGainZ * total - translationDGainY * dTotal);
