@@ -1,0 +1,12 @@
+[Unit]
+Description=Purge docker objects when hard drive space exceeds threshold
+
+[Timer]
+OnCalendar=daily
+AccuracySec=1h
+Persistent=true
+Unit=docker_clean.service
+
+[Install]
+WantedBy=docker_clean.service
+
