@@ -100,33 +100,34 @@ namespace motion {
 
             // Robot coords in world (:Robot -> World)
             const Eigen::Transform<Scalar, 3, Eigen::Affine> Htw(sensors.Htw);
-            const Eigen::AngleAxis<Scalar> orientation(Htw.rotation().inverse());
+            const Eigen::AngleAxis<Scalar> orientation = Eigen::AngleAxis<Scalar>(Htw.rotation().inverse());
 
             // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}
-            const Scalar orientationYaw = orientation.toRotationMatrix().eulerAngles(0, 1, 2).z();
+            const Scalar orientationYaw = orientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
             // The nested AngleAxis creates a -orientationYaw radians rotation about the Z axis
             // The outside AngleAxis constructs an AngleAxis from the returned Quaternion type of the multiplication
-            const Eigen::AngleAxis<Scalar> yawlessOrientation(
+            const Eigen::AngleAxis<Scalar> yawlessOrientation = Eigen::AngleAxis<Scalar>(
                 Eigen::AngleAxis<Scalar>(-orientationYaw, Eigen::Matrix<Scalar, 3, 1>::UnitZ()) * orientation);
 
             // Removes any yaw component
-            const Scalar goalTorsoOrientationYaw = goalTorsoOrientation.toRotationMatrix().eulerAngles(0, 1, 2).z();
+            const Scalar goalTorsoOrientationYaw = goalTorsoOrientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
             // Again the nested AngleAxis is a rotation -goalTorsoOrientation radians about the Z axis and the outer one
             // converts from Quaternion type to AngleAxis
-            const Eigen::AngleAxis<Scalar> yawlessGoalOrientation(
+            const Eigen::AngleAxis<Scalar> yawlessGoalOrientation = Eigen::AngleAxis<Scalar>(
                 Eigen::AngleAxis<Scalar>(-goalTorsoOrientationYaw, Eigen::Matrix<Scalar, 3, 1>::UnitZ())
                 * goalTorsoOrientation);
 
             // Error orientation maps: Goal -> Current
-            const Eigen::AngleAxis<Scalar> errorOrientation(yawlessOrientation * yawlessGoalOrientation.inverse());
+            const Eigen::AngleAxis<Scalar> errorOrientation =
+                Eigen::AngleAxis<Scalar>(yawlessOrientation * yawlessGoalOrientation.inverse());
 
             // Our goal position as a quaternions
             const Eigen::Quaternion<Scalar> errorQuaternion(errorOrientation);
 
             // Calculate our D error and I error
-            const Eigen::Quaternion<Scalar> differential(lastErrorQuaternion.inverse() * errorQuaternion);
+            const Eigen::Quaternion<Scalar> differential = lastErrorQuaternion.inverse() * errorQuaternion;
 
             // TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
             // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
@@ -135,10 +136,10 @@ namespace motion {
             // Rotation3D(error).pitch()));
 
             // Apply the PID gains
-            Eigen::AngleAxis<Scalar> ankleRotation(
-                Eigen::Quaternion<Scalar>::Identity().slerp(rotationPGain, errorQuaternion)
-                // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
-                * Eigen::Quaternion<Scalar>::Identity().slerp(rotationDGain, differential));
+            Eigen::AngleAxis<Scalar> ankleRotation =
+                Eigen::AngleAxis<Scalar>(Eigen::Quaternion<Scalar>::Identity().slerp(rotationPGain, errorQuaternion)
+                                         // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
+                                         * Eigen::Quaternion<Scalar>::Identity().slerp(rotationDGain, differential));
 
             // Apply our rotation by scaling the thetas by the rotationScale parameters
             auto hipRotation = ankleRotation;
@@ -150,8 +151,8 @@ namespace motion {
             footToTorso.linear() = ankleRotation.toRotationMatrix() * footToTorso.rotation();
 
             // Get the position of our hip to rotate around
-            Eigen::Transform<Scalar, 3, Eigen::Affine> hip(Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity());
-            hip.translation() = Eigen::Matrix<Scalar, 3, 1>(
+            Eigen::Transform<Scalar, 3, Eigen::Affine> hip = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
+            hip.translation()                              = Eigen::Matrix<Scalar, 3, 1>(
                 model.leg.HIP_OFFSET_X,
                 model.leg.HIP_OFFSET_Y * (leg == utility::input::LimbID::RIGHT_LEG ? -1 : 1),
                 -model.leg.HIP_OFFSET_Z);
@@ -205,7 +206,7 @@ namespace motion {
             // sensors.bodyCentreHeight * dPitch));
 
             // Compute torso position adjustment
-            const Eigen::Matrix<Scalar, 3, 1> torsoAdjustment_world(
+            const Eigen::Matrix<Scalar, 3, 1> torsoAdjustment_world = Eigen::Matrix<Scalar, 3, 1>(
                 -translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
                 translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
                 -translationPGainZ * total - translationDGainY * dTotal);
