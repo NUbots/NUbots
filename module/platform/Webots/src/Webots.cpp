@@ -45,6 +45,10 @@ using message::platform::darwin::DarwinSensors;
 
 using message::platform::webots::ActuatorRequests;
 using message::platform::webots::ConnectRequest;
+using message::platform::webots::MotorPosition;
+using message::platform::webots::MotorTorque;
+using message::platform::webots::MotorVelocity;
+using message::platform::webots::SensorMeasurements;
 
 int Webots::tcpip_connect(const std::string& server_name, const int& port) {
     // Create the socket
@@ -70,7 +74,7 @@ int Webots::tcpip_connect(const std::string& server_name, const int& port) {
     }
 
     // Connect to the ip address
-    if (int error = connect(fd, address, sizeof(address))) {
+    if (int error = connect(fd, (struct sockaddr*) &address, sizeof(address))) {
         close(fd);
         log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name));
         return -1;
@@ -79,7 +83,7 @@ int Webots::tcpip_connect(const std::string& server_name, const int& port) {
     return fd;
 }
 
-Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
+Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
     on<Configuration>("webots.yaml").then([this](const Configuration& cfg) {
         // Use configuration here from file webots.yaml
@@ -94,12 +98,14 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
         // clang-format on
 
-        int fd = tcpip_connect(cfg["port"].as<int>(), cfg["server_address"].as<std::string>());
+        int fd = tcpip_connect(cfg["server_address"].as<std::string>(), cfg["port"].as<int>());
 
         // Tell webots who we are
-        send_connect(fd, cfg["team_id"].as<int>(), cfg["robot_id"].as<int>());
+        int team_id  = cfg["team_id"].as<int>();
+        int robot_id = cfg["robot_id"].as<int>();
+        send_connect(fd, team_id, robot_id);
 
-        on<IO>(fd).then([this]() {
+        on<IO>(fd).then([this, fd]() {
             // Receiving
 
             // Get the size of the message
@@ -117,7 +123,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             }
 
             // Deserialise the message into a neutron
-            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>.deserialise(data);
+            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
 
             // Read each field of msg, translate it to our protobuf and emit the data
             auto sensor_data = std::make_unique<DarwinSensors>();
@@ -148,7 +154,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
                 // Vector3 value
             }
 
-            for (auto& force_6d : msg.force6d) {
+            for (auto& force_6d : msg.force_6d) {
                 // string name
                 // Vector3 value
             }
@@ -159,23 +165,23 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
                 // Convert the incoming image so we can emit it to the PowerPlant.
                 auto compressed_image = std::make_unique<CompressedImage>();
                 compressed_image->timestamp.FromSeconds(msg.time);
-                compressed_image->name          = camera.name;
-                compressed_image->dimensions.x  = camera.width;
-                compressed_image->dimensions.y  = camera.height;
-                compressed_image->format        = camera.quality;  // This is probably wrong, we havent documented :(
-                compressed_image->data          = camera.data;
-                compressed_image->lens.fov      = (float) camera.horizontalFieldOfView;
-                compressed_image->lens.centre.x = (float) camera.centreX;
-                compressed_image->lens.centre.y = (float) camera.centreY;
+                compressed_image->name            = camera.name;
+                compressed_image->dimensions.x()  = camera.width;
+                compressed_image->dimensions.y()  = camera.height;
+                compressed_image->format          = camera.quality;  // This is probably wrong, we havent documented :(
+                compressed_image->data            = camera.data;
+                compressed_image->lens.fov        = (float) camera.horizontalFieldOfView;
+                compressed_image->lens.centre.x() = (float) camera.centerX;
+                compressed_image->lens.centre.y() = (float) camera.centerY;
                 // Radial coefficients
                 // tangential coefficients
                 emit(compressed_image);
             }
         });
 
-        on<Every<1, std::chrono::seconds>>().then([this]() {
+        on<Every<1, std::chrono::seconds>>().then([this, fd]() {
             // Sending
-            std::vector<char> data = NUClear::util::serialise::Serialise<ActingMessage>.serialise(to_send);
+            std::vector<char> data = NUClear::util::serialise::Serialise<ActingMessage>::serialise(to_send);
             uint64_t N             = data.size();
             send(fd, &N, sizeof(N), 0);
             send(fd, data.data(), N, 0);
@@ -188,10 +194,10 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         to_send = ActuatorRequests();
 
         // Store each ServoTarget to send in the next lot
-        for (auto& command : commands) {
-            MotorPosition position_msg to_send.add_motor_position();
-            position_msg.name     = command.id;
-            position_msg.position = command.position;
+        for (auto& command : commands.targets) {
+            MotorPosition position_msg = to_send.add_motor_position();
+            position_msg.name          = command.id;
+            position_msg.position      = command.position;
 
             // TODO(cmurtagh) work out if gain is velocity or force
             MotorVelocity velocity_msg = to_send.add_motor_velocity();
@@ -213,7 +219,7 @@ void Webots::send_connect(int& fd, int& team_id, int& robot_id) {
     connect_request.teamId         = team_id;
     connect_request.playerId       = robot_id;
 
-    std::vector<char> data = NUClear::util::Serialise<ConnectRequest>.serialise(connect_request);
+    std::vector<char> data = NUClear::util::serialise::Serialise<ConnectRequest>::serialise(connect_request);
     uint64_t N             = data.size();
     send(fd, &N, sizeof(N), 0);
     send(fd, data.data(), N, 0);
