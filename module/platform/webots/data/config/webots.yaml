@@ -1,2 +1,10 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
+
+# Connection details
+server_address:
+port:
+
+# Info to tell webots who we are
+team_id:
+robot_id:
