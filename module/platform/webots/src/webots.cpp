@@ -105,7 +105,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         send_connect(fd, cfg["team_id"].as<int>(), cfg["robot_id"].as<int>());
 
         on<IO>(fd).then([this]() {
-            // Receiveing
+            // Receiving
 
             // Get the size of the message
             uint64_t N;
@@ -192,7 +192,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         // Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
         to_send = ActuatorRequests();
 
-        // Store each servotarget to send in the next lot
+        // Store each ServoTarget to send in the next lot
         for (auto& command : commands) {
             MotorPosition position_msg to_send.add_motor_position();
             position_msg.name     = command.id;
