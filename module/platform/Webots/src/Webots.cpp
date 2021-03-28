@@ -30,15 +30,11 @@
 #include "message/platform/webots/messages.hpp"
 
 // Include headers needed for TCP connection
-#ifdef _WIN32
-    #include <winsock.h>
-#else
-    #include <netdb.h>      /* definition of gethostbyname */
-    #include <netinet/in.h> /* definition of struct sockaddr_in */
-    #include <sys/socket.h>
-    #include <sys/time.h>
-    #include <unistd.h> /* definition of close */
-#endif
+#include <netdb.h>      /* definition of gethostbyname */
+#include <netinet/in.h> /* definition of struct sockaddr_in */
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h> /* definition of close */
 
 namespace module::platform {
 
@@ -48,7 +44,7 @@ using message::output::CompressedImage;
 using message::platform::darwin::DarwinSensors;
 
 using message::platform::webots::ActuatorRequests;
-// TODO(cmurtagh) work out namespace of protobuf files from webots
+using message::platform::webots::ConnectRequest;
 
 namespace {
     // Should probs go in shared
