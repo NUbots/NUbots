@@ -2,7 +2,7 @@ import { action } from 'mobx'
 import { runInAction } from 'mobx'
 
 import { UnreachableError } from '../../../shared/base/unreachable_error'
-import { message } from '../../../shared/messages'
+import { message } from '../../../shared/proto/messages'
 import { toSeconds } from '../../../shared/time/timestamp'
 import { fourccToString } from '../../image_decoder/fourcc'
 import { fourcc } from '../../image_decoder/fourcc'

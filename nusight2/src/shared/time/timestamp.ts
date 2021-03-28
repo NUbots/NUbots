@@ -1,4 +1,4 @@
-import { google } from '../messages'
+import { google } from '../proto/messages'
 import Timestamp = google.protobuf.ITimestamp
 
 export function toSeconds(timestamp?: Timestamp | null): number {
