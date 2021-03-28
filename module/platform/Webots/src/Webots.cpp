@@ -17,9 +17,9 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#include "webots.hpp"
+#include "Webots.hpp"
 
-#include <fmt/format>
+#include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
 
