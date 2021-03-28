@@ -22,6 +22,8 @@
 
 #include <nuclear>
 
+#include "message/platform/webots/messages.hpp"
+
 namespace module::platform {
 
 class Webots : public NUClear::Reactor {

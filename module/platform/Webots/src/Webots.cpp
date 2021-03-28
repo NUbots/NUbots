@@ -23,11 +23,11 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/motion/ServoTarget.proto"
-#include "message/output/CompressedImage.proto"
-#include "message/platform/darwin/DarwinSensors.proto"
-#include "message/platform/webots/ConnectRequest.proto"
-#include "message/platform/webots/messages.proto"
+#include "message/motion/ServoTarget.hpp"
+#include "message/output/CompressedImage.hpp"
+#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/webots/ConnectRequest.hpp"
+#include "message/platform/webots/messages.hpp"
 
 // Include headers needed for TCP connection
 #ifdef _WIN32
