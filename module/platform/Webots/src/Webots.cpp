@@ -76,7 +76,7 @@ namespace {
         }
 
         // Connect to the ip address
-        if (int error = connect(fd, address, size(address))) {
+        if (int error = connect(fd, address, sizeof(address))) {
             close(fd);
             log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_address));
             return -1;
