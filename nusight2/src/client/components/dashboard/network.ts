@@ -1,6 +1,6 @@
 import { action } from 'mobx'
 
-import { message } from '../../../shared/messages'
+import { message } from '../../../shared/proto/messages'
 import { toSeconds } from '../../../shared/time/timestamp'
 import { Matrix2 } from '../../math/matrix2'
 import { Matrix3 } from '../../math/matrix3'

@@ -35,4 +35,4 @@ def run(j, args, **kwargs):
         command.insert(1, "-j{}".format(j))
 
     # Return the exit code of ninja
-    exit(subprocess.run(command).returncode)
+    exit(subprocess.call(command))
