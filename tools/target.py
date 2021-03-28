@@ -27,7 +27,7 @@ def run(target, **kwargs):
 
         # Tag the built platform image is the selected image
         tag = "{}:{}".format(defaults.image, target)
-        err = subprocess.call(["docker", "image", "tag", tag, "{}:selected".format(defaults.image)])
+        err = subprocess.run(["docker", "image", "tag", tag, "{}:selected".format(defaults.image)]).returncode
         if err != 0:
             cprint("docker image tag returned exit code {}".format(err), "red", attrs=["bold"])
             exit(err)
