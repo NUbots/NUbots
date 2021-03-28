@@ -38,6 +38,23 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+# Enable all the warnings we can. We need noncall exceptions so we can throw exceptions from signal handlers. This
+# allows us to catch null pointer exceptions. no-int-in-bool-context is to silence a warning from Eigen.
+add_compile_options(-Wall -Wpedantic -Wextra -Wno-int-in-bool-context -fnon-call-exceptions)
+
+# C++17 allows eigen to not need to worry about alignment
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Make sure our binaries can find our libraries both in docker and on the robot
+list(APPEND CMAKE_INSTALL_RPATH /home/nubots/toolchain/)
+list(APPEND CMAKE_INSTALL_RPATH /usr/local/lib)
+
+# Disable armadillo bounds checking in release and min size release builds
+list(APPEND CMAKE_CXX_FLAGS_RELEASE "-DARMA_NO_DEBUG")
+list(APPEND CMAKE_CXX_FLAGS_MINSIZEREL "-DARMA_NO_DEBUG")
+
 # Default not to run the clang-tidy checks
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY)
@@ -58,12 +75,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
     CACHE STRING "Enable/Disable output of compile commands during generation." FORCE
 )
-
-# Enable all warnings that we can
-add_compile_options(-Wall -Wpedantic -Wextra)
-
-# This is needed everywhere so that we can catch segmentation faults
-add_compile_options(-fnon-call-exceptions)
 
 # Make the compiler display colours always (even when we build with ninja)
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
