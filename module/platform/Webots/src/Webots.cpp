@@ -44,8 +44,10 @@ namespace module::platform {
 
 using extension::Configuration;
 using message::motion::ServoTargets;
+using message::output::CompressedImage;
 using message::platform::darwin::DarwinSensors;
-using msessage::output::CompressedImage;
+
+using message::platform::webots::ActuatorRequests;
 // TODO(cmurtagh) work out namespace of protobuf files from webots
 
 namespace {

@@ -33,7 +33,7 @@ private:
     void send_connect(int& fd, int& team_id, int& robot_id);
 
     /// @brief A single message that stores all the data that webots needs from us.
-    ActuatorRequests to_send;
+    message::platform::webots::ActuatorRequests to_send;
 
 public:
     /// @brief Called by the powerplant to build and setup the webots reactor.
