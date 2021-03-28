@@ -76,7 +76,7 @@ int Webots::tcpip_connect(const std::string& server_name, const int& port) {
     // Connect to the ip address
     if (int error = connect(fd, (struct sockaddr*) &address, sizeof(address))) {
         close(fd);
-        log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name));
+        log<NUClear::ERROR>(fmt::format("Cannot connect server: {}. Error code {}", server_name, error));
         return -1;
     }
 
