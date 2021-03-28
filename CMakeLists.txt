@@ -10,6 +10,11 @@ if(POLICY CMP0079)
   cmake_policy(SET CMP0079 NEW)
 endif()
 
+# Enable testing if we are building tests
+if(BUILD_TESTS)
+  enable_testing()
+endif()
+
 # Set on to prefer .a files over .so files for linking
 option(STATIC_LIBRARIES
        "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF
@@ -82,8 +87,7 @@ if(USE_CUSTOM_CLOCK)
   add_subdirectory(shared/clock)
 endif()
 
-# Enable testing if we are building tests
+# Add the shared tests. Must happen after adding NUClear so that this variable is cached
 if(BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(shared/tests)
+  add_subdirectory(${NUCLEAR_SHARED_DIR}/tests)
 endif()
