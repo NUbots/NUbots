@@ -19,6 +19,8 @@
 
 syntax = "proto3";
 
+package message.platform.webots;
+
 // Copy of cyberbotics/webots projects/samples/contests/robocup/controllers/player/messages.proto
 
 message Vector3 {

@@ -19,6 +19,8 @@
 
 syntax = "proto3";
 
+package message.platform.webots;
+
 // The message to send when we connect or want to reconnect to the webots robocup
 // https://cdn.robocup.org/hl/wp/2021/03/v-hsc_simulator_api.pdf
 
