@@ -117,7 +117,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
             // Get the message
             std::vector<char> data(N, 0);
-            if (recv(fd, data.data(), N, 0) != N) {
+            if (uint64_t(recv(fd, data.data(), N, 0)) != N) {
                 log<NUClear::ERROR>("Error: Failed to read message from TCP connection");
                 return;
             }
