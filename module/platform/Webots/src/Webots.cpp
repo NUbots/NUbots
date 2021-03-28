@@ -46,41 +46,38 @@ using message::platform::darwin::DarwinSensors;
 using message::platform::webots::ActuatorRequests;
 using message::platform::webots::ConnectRequest;
 
-namespace {
-    // Should probs go in shared
-    int tcpip_connect(const std::string& server_address, const int& port) {
-        // Create the socket
-        int fd = socket(AF_INET, SOCK_STREAM, 0);
+int Webots::tcpip_connect(const std::string& server_name, const int& port) {
+    // Create the socket
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
 
-        // Store the ip address information that we will connect to
-        sockaddr_in address;
-        memset(&address, 0, sizeof(sockaddr_in));
-        address.sin_family = AF_INET;
-        address.sin_port   = htons(port);
-        hostent* server    = gethostbyname(server_address);
+    // Store the ip address information that we will connect to
+    sockaddr_in address;
+    memset(&address, 0, sizeof(sockaddr_in));
+    address.sin_family = AF_INET;
+    address.sin_port   = htons(port);
+    hostent* server    = gethostbyname(server_name.c_str());
 
-        // Check that dns was successful
-        if (server) {
-            std::memcpy(reinterpret_cast<char*>(&address.sin_addr.s_addr),
-                        reinterpret_cast<char*>(server->h_addr),
-                        server->h_length);
-        }
-        else {
-            close(fd);
-            log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}", server_address));
-            return -1;
-        }
-
-        // Connect to the ip address
-        if (int error = connect(fd, address, sizeof(address))) {
-            close(fd);
-            log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_address));
-            return -1;
-        }
-
-        return fd;
+    // Check that dns was successful
+    if (server) {
+        std::memcpy(reinterpret_cast<char*>(&address.sin_addr.s_addr),
+                    reinterpret_cast<char*>(server->h_addr),
+                    server->h_length);
     }
-}  // namespace
+    else {
+        close(fd);
+        log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}", server_name));
+        return -1;
+    }
+
+    // Connect to the ip address
+    if (int error = connect(fd, address, sizeof(address))) {
+        close(fd);
+        log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name));
+        return -1;
+    }
+
+    return fd;
+}
 
 Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
 
