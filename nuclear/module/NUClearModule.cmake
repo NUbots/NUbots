@@ -188,7 +188,7 @@ function(NUCLEAR_MODULE)
   target_link_libraries(${module_target_name} PUBLIC nuclear::utility nuclear::message nuclear::extension)
   target_link_libraries(${module_target_name} PUBLIC ${MODULE_LIBRARIES})
 
-  # Put it in an IDE group for shared
+  # Put it in an IDE group for the module's directory
   set_target_properties(${module_target_name} PROPERTIES FOLDER ${module_path})
 
   # ####################################################################################################################
