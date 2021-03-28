@@ -23,6 +23,6 @@ syntax = "proto3";
 // https://cdn.robocup.org/hl/wp/2021/03/v-hsc_simulator_api.pdf
 
 message ConnectRequest {
-    int teamId   = 1;
-    int playerId = 2;
+    uint32 teamId   = 1;
+    uint32 playerId = 2;
 }
