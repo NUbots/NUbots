@@ -30,11 +30,13 @@
 #include "message/platform/webots/messages.hpp"
 
 // Include headers needed for TCP connection
+extern "C" {
 #include <netdb.h>      /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
+}
 
 namespace module::platform {
 
