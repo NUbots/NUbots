@@ -258,7 +258,7 @@ namespace motion {
                    0.0, 0.0,  0.0, 1.0;
             // clang-format on
             // Rotate input position from standard robot coords to foot coords
-            Eigen::Vector3d translation = (Tci * target.matrix().block<4, 1>(0, 3)).head<3>();
+            Eigen::Vector3d translation = (Tci * target.matrix().rightCols<1>()).head<3>();
             target                      = Tci * target * Tci.transpose();
             target.translation()        = translation;
 
@@ -271,8 +271,8 @@ namespace motion {
                 target.translation().x() = -target.translation().x();
             }
 
-            Eigen::Vector3d ankleX   = target.matrix().block<3, 1>(0, 0);
-            Eigen::Vector3d ankleY   = target.matrix().block<3, 1>(0, 1);
+            Eigen::Vector3d ankleX   = target.matrix().leftCols<1>().head<3>();
+            Eigen::Vector3d ankleY   = target.matrix().middleCols<1>(1).head<3>();
             Eigen::Vector3d anklePos = target.translation();
 
             Eigen::Vector3d hipOffset(LENGTH_BETWEEN_LEGS * 0.5, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT);
@@ -405,7 +405,7 @@ namespace motion {
                    0.0, 0.0,  0.0, 1.0;
             // clang-format on
             // Rotate input position from standard robot coords to foot coords
-            Eigen::Vector3f translation = (Tci * target.matrix().block<4, 1>(0, 3)).head<3>();
+            Eigen::Vector3f translation = (Tci * target.matrix().rightCols<1>()).head<3>();
             target                      = Tci * target * Tci.transpose();
             target.translation()        = translation;
 
@@ -418,8 +418,8 @@ namespace motion {
                 target.translation().x() = -target.translation().x();
             }
 
-            Eigen::Vector3f ankleX   = target.matrix().block<3, 1>(0, 0);
-            Eigen::Vector3f ankleY   = target.matrix().block<3, 1>(0, 1);
+            Eigen::Vector3f ankleX   = target.matrix().leftCols<1>(0).head<3>();
+            Eigen::Vector3f ankleY   = target.matrix().middleCols<1>(1).head<3>();
             Eigen::Vector3f anklePos = target.translation();
 
             Eigen::Vector3f hipOffset(LENGTH_BETWEEN_LEGS * 0.5, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT);

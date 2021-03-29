@@ -124,7 +124,7 @@ namespace motion {
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 std::vector<std::pair<ServoID, float>> goalAnglesList = calculateHeadJoints(headUnitVector);
-                // Eigen::Vector2f goalAngles = cartesianToSpherical(headUnitVector).block<2, 1>(1,2);
+                // Eigen::Vector2f goalAngles = cartesianToSpherical(headUnitVector).bottomRows<2>();
 
                 // head limits
                 max_yaw   = kinematicsModel.head.MAX_YAW;
