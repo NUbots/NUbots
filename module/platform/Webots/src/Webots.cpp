@@ -222,7 +222,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
 void Webots::send_connect(int& fd, int& team_id, int& robot_id) {
     // TODO(cameron) workout what to do if failes
-    ConnectRequest connect_request = ConnectRequest;
+    ConnectRequest connect_request;
     connect_request.teamId         = team_id;
     connect_request.playerId       = robot_id;
 
