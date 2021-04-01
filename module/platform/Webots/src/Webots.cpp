@@ -203,18 +203,21 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
         // Store each ServoTarget to send in the next lot
         for (auto& command : commands.targets) {
-            MotorPosition position_msg = to_send.add_motor_position();
+			MotorPosition position_msg;
             position_msg.name          = command.id;
             position_msg.position      = command.position;
+			to_send.motor_torque.push_back(position_msg);
 
             // TODO(cmurtagh) work out if gain is velocity or force
-            MotorVelocity velocity_msg = to_send.add_motor_velocity();
+            MotorVelocity velocity_msg;
             velocity_msg.name          = command.id;
             velocity_msg.velocity      = command.gain;
+			to_send.motor_velocity.push_back(velocity_msg);
 
-            MotorTorque torque_msg = to_send.add_motor_torque();
+            MotorTorque torque_msg;
             torque_msg.name        = command.id;
             torque_msg.torque      = command.torque;
+			to_send.motor_torque.push_back(velocity_msg);
 
             // MotorPID ? Do we need to send this?
         }
