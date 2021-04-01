@@ -52,37 +52,42 @@ using message::platform::webots::MotorTorque;
 using message::platform::webots::MotorVelocity;
 using message::platform::webots::SensorMeasurements;
 
-int Webots::tcpip_connect(const std::string& server_name, const int& port) {
-    // Create the socket
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
+int Webots::tcpip_connect(const std::string& server_name, const char& port) {
+	// Hints for the connection type
+	addrinfo hints;
+	memset(&hints, 0, sizeof(addrinfo)); // Defaults on what we do not explicitly set
+	hints.ai_family = AD_UNSPEC; // IPv4 or IPv6
+	hints.ai_socktype = SOCK_STREAM; // TCP
 
     // Store the ip address information that we will connect to
-    sockaddr_in address;
-    memset(&address, 0, sizeof(sockaddr_in));
-    address.sin_family = AF_INET;
-    address.sin_port   = htons(port);
-    hostent* server    = gethostbyname(server_name.c_str());
+    addrinfo *address;
+	if(int error = getaddrinfo(server_name.c_str(), &port, &hints, &address) != 0){
+    	log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error code {}", server_name, error));
+		return -1;
+	}    
 
-    // Check that dns was successful
-    if (server) {
-        std::memcpy(reinterpret_cast<char*>(&address.sin_addr.s_addr),
-                    reinterpret_cast<char*>(server->h_addr),
-                    server->h_length);
-    }
-    else {
-        close(fd);
-        log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}", server_name));
-        return -1;
-    }
+	// Loop through the linked list of potential options for connecting. In order of best to worst.
+	for (addrinfo * addr_ptr; addr_ptr != NULL; addr_ptr = addr_ptr->next){
+		fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
-    // Connect to the ip address
-    if (int error = connect(fd, (struct sockaddr*) &address, sizeof(address))) {
-        close(fd);
-        log<NUClear::ERROR>(fmt::format("Cannot connect server: {}. Error code {}", server_name, error));
-        return -1;
-    }
+		if (fd == -1){
+			// Bad fd
+			continue;
+		}
+		else if(connect(fd, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1){
+			// Connection successful
+			freeaddrinfo(address);
+			return fd;
+		}
+		// Connection was not successful
+		close(fd);
+	}
+	
+	// No connection was successful
+	freeaddrinfo(address);
+    log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name, error));
+    return -1;
 
-    return fd;
 }
 
 Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
