@@ -198,7 +198,9 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
     // Create the message that we are going to send.
     on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
         // Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
-        to_send = ActuatorRequests();
+        to_send.motor_position.clear();
+        to_send.motor_velocity.clear();
+        to_send.motor_torque.clear();
 
         // Store each ServoTarget to send in the next lot
         for (auto& command : commands.targets) {
