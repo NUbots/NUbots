@@ -20,6 +20,7 @@
 #include "Webots.hpp"
 
 #include <fmt/format.h>
+#include <chrono>
 
 #include "extension/Configuration.hpp"
 
@@ -28,6 +29,7 @@
 #include "message/platform/darwin/DarwinSensors.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 // Include headers needed for TCP connection
 extern "C" {
@@ -51,12 +53,15 @@ using message::platform::webots::MotorPosition;
 using message::platform::webots::MotorTorque;
 using message::platform::webots::MotorVelocity;
 using message::platform::webots::SensorMeasurements;
+using message::platform::webots::ConnectRequest;
+using message::support::GlobalConfig;
+
 
 int Webots::tcpip_connect(const std::string& server_name, const char& port) {
 	// Hints for the connection type
 	addrinfo hints;
 	memset(&hints, 0, sizeof(addrinfo)); // Defaults on what we do not explicitly set
-	hints.ai_family = AD_UNSPEC; // IPv4 or IPv6
+	hints.ai_family = AF_UNSPEC; // IPv4 or IPv6
 	hints.ai_socktype = SOCK_STREAM; // TCP
 
     // Store the ip address information that we will connect to
@@ -67,8 +72,8 @@ int Webots::tcpip_connect(const std::string& server_name, const char& port) {
 	}    
 
 	// Loop through the linked list of potential options for connecting. In order of best to worst.
-	for (addrinfo * addr_ptr; addr_ptr != NULL; addr_ptr = addr_ptr->next){
-		fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
+	for (addrinfo * addr_ptr; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next){
+		int fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
 		if (fd == -1){
 			// Bad fd
@@ -85,7 +90,7 @@ int Webots::tcpip_connect(const std::string& server_name, const char& port) {
 	
 	// No connection was successful
 	freeaddrinfo(address);
-    log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name, error));
+    log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name));
     return -1;
 
 }
@@ -107,11 +112,9 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         int fd = tcpip_connect(cfg["server_address"].as<std::string>(), cfg["port"].as<int>());
 
         // Tell webots who we are
-        int team_id  = cfg["team_id"].as<int>();
-        int robot_id = cfg["robot_id"].as<int>();
-        send_connect(fd, team_id, robot_id);
+        send_connect(fd);
 
-        on<IO>(fd).then([this, fd]() {
+        on<IO>(fd, IO::READ | IO::WRITE | IO::ERROR | IO::CLOSE).then([this, fd]() {
             // Receiving
 
             // Get the size of the message
@@ -133,7 +136,9 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
             // Read each field of msg, translate it to our protobuf and emit the data
             auto sensor_data = std::make_unique<DarwinSensors>();
-            sensor_data->timestamp = msg.time;
+			
+
+            sensor_data->timestamp = NUClear::clock::now(); // Not sure if we want this or the timestamp on the received message.
 
             for (auto& position : msg.position_sensor) {
                 // string name
@@ -170,7 +175,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             for (auto& camera : msg.camera) {
                 // Convert the incoming image so we can emit it to the PowerPlant.
                 auto compressed_image = std::make_unique<CompressedImage>();
-                compressed_image->timestamp = msg.time;
+                compressed_image->timestamp = NUClear::clock::now();
                 compressed_image->name            = camera.name;
                 compressed_image->dimensions.x()  = camera.width;
                 compressed_image->dimensions.y()  = camera.height;
@@ -206,7 +211,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 			MotorPosition position_msg;
             position_msg.name          = command.id;
             position_msg.position      = command.position;
-			to_send.motor_torque.push_back(position_msg);
+			to_send.motor_position.push_back(position_msg);
 
             // TODO(cmurtagh) work out if gain is velocity or force
             MotorVelocity velocity_msg;
@@ -217,15 +222,16 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             MotorTorque torque_msg;
             torque_msg.name        = command.id;
             torque_msg.torque      = command.torque;
-			to_send.motor_torque.push_back(velocity_msg);
+			to_send.motor_torque.push_back(torque_msg);
 
             // MotorPID ? Do we need to send this?
         }
     });
 
-	on<Trigger<GlobalConfig>>().then([this](const GlobalConfig& config)){
-		player_details = config; // TODO(cameron) Do we need to copy this?
-	}
+	on<Trigger<GlobalConfig>>().then([this](const GlobalConfig& config){
+		player_details.playerId = config.playerId; // TODO(cameron) Do we need to copy this?
+		player_details.teamId = config.teamId;
+	});
 }
 
 void Webots::send_connect(int& fd) {

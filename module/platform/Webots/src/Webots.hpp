@@ -48,7 +48,7 @@ public:
     /// @param server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
     /// @param port The port number to connect to
     /// @return If the connection was successful, a file descriptor. Else, -1 is returned
-    int tcpip_connect(const std::string& server_name, const int& port);
+    int tcpip_connect(const std::string& server_name, const char& port);
 };
 
 }  // namespace module::platform
