@@ -37,7 +37,7 @@ private:
     /// @brief A single message that stores all the data that webots needs from us.
     message::platform::webots::ActuatorRequests to_send;
 
-	/// @ brief The information we got from Global Config
+    /// @brief The information we got from Global Config
 	message::platform::webots::ConnectRequest player_details;
 	
 public:
