@@ -133,7 +133,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
             // Read each field of msg, translate it to our protobuf and emit the data
             auto sensor_data = std::make_unique<DarwinSensors>();
-            sensor_data.FromSeconds(msg.time);
+            sensor_data->timestamp = msg.time;
 
             for (auto& position : msg.position_sensor) {
                 // string name
@@ -170,7 +170,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             for (auto& camera : msg.camera) {
                 // Convert the incoming image so we can emit it to the PowerPlant.
                 auto compressed_image = std::make_unique<CompressedImage>();
-                compressed_image->timestamp.FromSeconds(msg.time);
+                compressed_image->timestamp = msg.time;
                 compressed_image->name            = camera.name;
                 compressed_image->dimensions.x()  = camera.width;
                 compressed_image->dimensions.y()  = camera.height;
