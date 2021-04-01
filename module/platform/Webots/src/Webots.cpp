@@ -91,7 +91,6 @@ int Webots::tcpip_connect(const std::string& server_name, const char& port) {
 }
 
 Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-
     on<Configuration>("webots.yaml").then([this](const Configuration& cfg) {
         // Use configuration here from file webots.yaml
 
@@ -220,15 +219,15 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // MotorPID ? Do we need to send this?
         }
     });
+
+	on<Trigger<GlobalConfig>>().then([this](const GlobalConfig& config)){
+		player_details = config; // TODO(cameron) Do we need to copy this?
+	}
 }
 
-void Webots::send_connect(int& fd, int& team_id, int& robot_id) {
+void Webots::send_connect(int& fd) {
     // TODO(cameron) workout what to do if failes
-    ConnectRequest connect_request;
-    connect_request.teamId         = team_id;
-    connect_request.playerId       = robot_id;
-
-    std::vector<char> data = NUClear::util::serialise::Serialise<ConnectRequest>::serialise(connect_request);
+    std::vector<char> data = NUClear::util::serialise::Serialise<ConnectRequest>::serialise(player_details);
     uint64_t N             = data.size();
     send(fd, &N, sizeof(N), 0);
     send(fd, data.data(), N, 0);
