@@ -181,9 +181,9 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
                 compressed_image->dimensions.y()  = camera.height;
                 compressed_image->format          = camera.quality;  // This is probably wrong, we havent documented :(
                 compressed_image->data            = camera.data;
-                compressed_image->lens.fov        = (float) camera.horizontalFieldOfView;
-                compressed_image->lens.centre.x() = (float) camera.centerX;
-                compressed_image->lens.centre.y() = (float) camera.centerY;
+                compressed_image->lens.fov        = static_cast<float>(camera.horizontalFieldOfView);
+                compressed_image->lens.centre.x() = static_cast<float>(camera.centerX);
+                compressed_image->lens.centre.y() = static_cast<float>(camera.centerY);
                 // Radial coefficients
                 // tangential coefficients
                 emit(compressed_image);
