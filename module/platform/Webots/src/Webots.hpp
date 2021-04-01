@@ -31,7 +31,7 @@ class Webots : public NUClear::Reactor {
 private:
     /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
     /// want to reconnect.
-	/// @param The socket we want to send our details to.
+    /// @param fd The socket we want to send our details to.
     void send_connect(int& fd);
 
     /// @brief A single message that stores all the data that webots needs from us.
