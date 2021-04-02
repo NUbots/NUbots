@@ -59,7 +59,7 @@ using message::platform::webots::Message;
 using message::support::GlobalConfig;
 
 
-int Webots::tcpip_connect(const std::string& server_name, const char& port) {
+int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
 	// Hints for the connection type
 	addrinfo hints;
 	memset(&hints, 0, sizeof(addrinfo)); // Defaults on what we do not explicitly set
@@ -70,7 +70,7 @@ int Webots::tcpip_connect(const std::string& server_name, const char& port) {
     addrinfo *address;
 	
 	int error;
-	if((error = getaddrinfo(server_name.c_str(), &port, &hints, &address)) != 0){
+	if((error = getaddrinfo(server_name.c_str(), port.c_str(), &hints, &address)) != 0){
     	log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}", server_name, gai_strerror(error), error));
 		return -1;
 	}    
@@ -113,7 +113,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
         // clang-format on
 
-        int fd = tcpip_connect(cfg["server_address"].as<std::string>(), cfg["port"].as<int>());
+        int fd = tcpip_connect(cfg["server_address"].as<std::string>(), cfg["port"].as<std::string>());
 
         // Tell webots who we are
         send_connect(fd);
