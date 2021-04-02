@@ -29,26 +29,26 @@ namespace module::platform {
 
 class Webots : public NUClear::Reactor {
 private:
-    /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
-    /// want to reconnect.
-    /// @param fd The socket we want to send our details to.
-    void send_connect(int& fd);
-
     /// @brief A single message that stores all the data that webots needs from us.
     message::platform::webots::ActuatorRequests to_send;
 
     /// @brief The information we got from Global Config
 	message::platform::webots::ConnectRequest player_details;
-	
-public:
-    /// @brief Called by the powerplant to build and setup the webots reactor.
-    explicit Webots(std::unique_ptr<NUClear::Environment> environment);
+
+	/// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
+    /// want to reconnect.
+    /// @param fd The socket we want to send our details to.
+    void send_connect(int& fd);
 
     /// @brief Establish a TCP connection to the specified server/port
     /// @param server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
     /// @param port The port number to connect to
     /// @return If the connection was successful, a file descriptor. Else, -1 is returned
     int tcpip_connect(const std::string& server_name, const char& port);
+
+public:
+    /// @brief Called by the powerplant to build and setup the webots reactor.
+    explicit Webots(std::unique_ptr<NUClear::Environment> environment);
 };
 
 }  // namespace module::platform

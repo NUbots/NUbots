@@ -234,7 +234,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 	});
 }
 
-void Webots::send_connect(int& fd) {
+void Webots::send_connect(const int& fd) {
     // TODO(cameron) workout what to do if failes
     std::vector<char> data = NUClear::util::serialise::Serialise<ConnectRequest>::serialise(player_details);
     uint64_t N             = data.size();
