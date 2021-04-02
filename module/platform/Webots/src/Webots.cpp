@@ -54,6 +54,8 @@ using message::platform::webots::MotorTorque;
 using message::platform::webots::MotorVelocity;
 using message::platform::webots::SensorMeasurements;
 using message::platform::webots::ConnectRequest;
+using message::platform::webots::Message;
+
 using message::support::GlobalConfig;
 
 
@@ -118,15 +120,17 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // Receiving
 
             // Get the size of the message
-            uint64_t N;
-            if (recv(fd, &N, sizeof(N), 0 != sizeof(N))) {
+            uint32_t Nn;
+            if (recv(fd, &Nn, sizeof(N), 0 != sizeof(N))) {
                 log<NUClear::ERROR>("Failed to read message size from TCP connection");
                 return;
             }
 
+			uint32_t Nh = ntohl(Nn); // Convert from network endian to host endian
+
             // Get the message
-            std::vector<char> data(N, 0);
-            if (uint64_t(recv(fd, data.data(), N, 0)) != N) {
+            std::vector<char> data(Nh, 0);
+            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
                 log<NUClear::ERROR>("Error: Failed to read message from TCP connection");
                 return;
             }
@@ -139,6 +143,8 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 			
 
             sensor_data->timestamp = NUClear::clock::now(); // Not sure if we want this or the timestamp on the received message.
+
+			// Vecotor3 is a neutron of 3 doubles
 
             for (auto& position : msg.position_sensor) {
                 // string name
@@ -175,25 +181,27 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             for (auto& camera : msg.camera) {
                 // Convert the incoming image so we can emit it to the PowerPlant.
                 auto compressed_image = std::make_unique<CompressedImage>();
-                compressed_image->timestamp = NUClear::clock::now();
                 compressed_image->name            = camera.name;
                 compressed_image->dimensions.x()  = camera.width;
                 compressed_image->dimensions.y()  = camera.height;
                 compressed_image->format          = camera.quality;  // This is probably wrong, we havent documented :(
-                compressed_image->data            = camera.data;
-                compressed_image->lens.fov        = static_cast<float>(camera.horizontalFieldOfView);
-                compressed_image->lens.centre.x() = static_cast<float>(camera.centerX);
-                compressed_image->lens.centre.y() = static_cast<float>(camera.centerY);
-                // Radial coefficients
-                // tangential coefficients
+                compressed_image->data            = camera.image;
                 emit(compressed_image);
             }
+
+			// Parse the messages from Webots and log them. Maybe check for certain things.
+			for (auto& message : msg.messages){
+				switch (message.MessageType){
+					case Message::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
+					case Message::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
+				}
+			}
         });
 
         on<Every<1, std::chrono::seconds>>().then([this, fd]() {
             // Sending
             std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
-            uint64_t N             = data.size();
+            uint32_t N             = htonl(data.size());
             send(fd, &N, sizeof(N), 0);
             send(fd, data.data(), N, 0);
         });
@@ -237,7 +245,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 void Webots::send_connect(const int& fd) {
     // TODO(cameron) workout what to do if failes
     std::vector<char> data = NUClear::util::serialise::Serialise<ConnectRequest>::serialise(player_details);
-    uint64_t N             = data.size();
+    uint32_t N             = htonl(data.size());
     send(fd, &N, sizeof(N), 0);
     send(fd, data.data(), N, 0);
 }
