@@ -105,7 +105,12 @@ namespace behaviour {
                     // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
                     // TODO: The heading seems to judder here!!
                     // TODO: use sensors.Htw instead
-                    Eigen::Affine3d Hfw = fieldStateToTransform3D(field.position);
+                    Eigen::Affine2d position = Eigen::Affine2d(field.position);
+                    Eigen::Affine3d Hfw;
+                    Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
+                    Hfw.linear() =
+                        Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(), Eigen::Vector3d::UnitZ())
+                            .toRotationMatrix();
 
                     Eigen::Affine3d Htw(sensors.Htw);
                     Eigen::Vector3d ballPosition =

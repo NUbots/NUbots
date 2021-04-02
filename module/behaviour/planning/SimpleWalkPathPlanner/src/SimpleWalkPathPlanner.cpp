@@ -205,7 +205,14 @@ namespace behaviour {
                     if (useLocalisation) {
 
                         // Transform kick target to torso space
-                        Eigen::Affine3d Hfw = fieldStateToTransform3D(field.position);
+                        Eigen::Affine2d fieldPosition = Eigen::Affine2d(field.position);
+                        Eigen::Affine3d Hfw;
+                        Hfw.translation() =
+                            Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
+                        Hfw.linear() = Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(),
+                                                         Eigen::Vector3d::UnitZ())
+                                           .toRotationMatrix();
+
                         Eigen::Affine3d Htf = Htw * Hfw.inverse();
                         Eigen::Vector3d kickTarget =
                             (Htf * Eigen::Vector4d(kickPlan.target.x(), kickPlan.target.y(), 0.0, 1.0)).head<3>();
