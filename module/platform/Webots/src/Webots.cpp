@@ -68,7 +68,9 @@ int Webots::tcpip_connect(const std::string& server_name, const char& port) {
 
     // Store the ip address information that we will connect to
     addrinfo *address;
-	if(int error = getaddrinfo(server_name.c_str(), &port, &hints, &address) != 0){
+	
+	int error;
+	if((error = getaddrinfo(server_name.c_str(), &port, &hints, &address)) != 0){
     	log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}", server_name, gai_strerror(error), error));
 		return -1;
 	}    
