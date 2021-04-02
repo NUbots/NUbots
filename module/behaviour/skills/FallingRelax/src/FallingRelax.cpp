@@ -44,7 +44,7 @@ namespace behaviour {
 
         using message::input::Sensors;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
         using utility::input::LimbID;
         using utility::input::ServoID;
@@ -129,7 +129,7 @@ namespace behaviour {
         }
 
         void FallingRelax::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
         }
 
     }  // namespace skills

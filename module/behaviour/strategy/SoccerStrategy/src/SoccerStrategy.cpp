@@ -295,9 +295,9 @@ namespace behaviour {
                     currentState = Behaviour::State::WALK_TO_BALL;
                 }
                 else {  // ball has not been seen recently
+                    Eigen::Affine2d position(field.position);
                     if (mode != GameMode::PENALTY_SHOOTOUT
-                        && (Eigen::Vector2d(field.position[0], field.position[1]).norm()
-                            > 1)) {  // a long way away from centre
+                        && (position.translation().norm() > 1)) {  // a long way away from centre
                         // walk to centre of field
                         find({FieldTarget(FieldTarget::Target::BALL)});
                         walkTo(fieldDescription, Eigen::Vector2d::Zero());
@@ -451,10 +451,11 @@ namespace behaviour {
                 0.6;  // TODO: make configurable, only want to change at the last kick to avoid smart goalies
             float xTakeOverBox = maxKickRange;
             size_t error       = 0.05;
-            size_t buffer      = error + 2 * fieldDescription.ball_radius;               // 15cm
-            float yTakeOverBox = fieldDescription.dimensions.goal_width * 0.5 - buffer;  // 90-15 = 75cm
-            float xRobot       = field.position.x();
-            float yRobot       = field.position.y();
+            size_t buffer      = error + 2 * fieldDescription.ball_radius;             // 15cm
+            float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
+            Eigen::Affine2d position(field.position);
+            float xRobot = position.translation().x();
+            float yRobot = position.translation().y();
             Eigen::Vector2d newTarget;
 
             if ((fieldDescription.dimensions.field_length * 0.5) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
@@ -480,7 +481,8 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position.z();
+                Eigen::Affine2d position(field.position);
+                float fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
                 int signBearing     = fieldBearing > 0 ? 1 : -1;
                 float rotationSpeed = -signBearing
                                       * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),

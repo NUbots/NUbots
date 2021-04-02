@@ -57,7 +57,7 @@ namespace behaviour {
         using message::motion::StopCommand;
         using message::motion::WalkCommand;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         using LimbID  = utility::input::LimbID;
@@ -118,13 +118,13 @@ namespace behaviour {
                     followPathReaction.enable();
                     updatePathReaction.enable();
                     // Increase priority?
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {25, 10}}));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {25, 10}}));
                 }
                 else {
                     followPathReaction.disable();
                     updatePathReaction.disable();
                     // Decrease priority?
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {0, 0}}));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
                 }
             });
 

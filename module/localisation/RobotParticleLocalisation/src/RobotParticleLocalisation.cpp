@@ -11,8 +11,7 @@
 
 #include "utility/localisation/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace localisation {
@@ -26,11 +25,8 @@ namespace localisation {
     using VisionGoal  = message::vision::Goal;
     using VisionGoals = message::vision::Goals;
 
-    using utility::localisation::transform3DToFieldState;
-    using utility::math::matrix::Rotation2D;
-    using utility::math::matrix::Transform2D;
-    using utility::math::matrix::Transform3D;
     using utility::nusight::graph;
+    using utility::support::Expression;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -43,21 +39,23 @@ namespace localisation {
             [this]() {
                 /* Perform time update */
                 using namespace std::chrono;
-                auto curr_time        = NUClear::clock::now();
-                double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                const auto curr_time  = NUClear::clock::now();
+                const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
 
-                filter.timeUpdate(seconds);
+                filter.time(seconds);
 
                 // Get filter state and transform
-                arma::vec3 state = filter.get();
-                emit(graph("robot filter state = ", state[0], state[1], state[2]));
+                Eigen::Vector3d state(filter.get());
+                emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
-                auto field = std::make_unique<Field>();
-                field->position =
-                    Eigen::Vector3d(state[RobotModel::kX], state[RobotModel::kY], state[RobotModel::kAngle]);
-                field->covariance = convert(filter.getCovariance());
+                auto field(std::make_unique<Field>());
+                Eigen::Affine2d position(Eigen::Affine2d::Identity());
+                position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
+                position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
+                field->position        = position.matrix();
+                field->covariance      = filter.getCovariance();
 
                 emit(std::make_unique<std::vector<Field>>(1, *field));
                 emit(field);
@@ -69,27 +67,26 @@ namespace localisation {
                 if (!goals.goals.empty()) {
                     /* Perform time update */
                     using namespace std::chrono;
-                    auto curr_time        = NUClear::clock::now();
-                    double seconds        = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                    const auto curr_time  = NUClear::clock::now();
+                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
 
-                    filter.timeUpdate(seconds);
+                    filter.time(seconds);
 
                     for (auto goal : goals.goals) {
 
                         // Check side and team
-                        std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
+                        const Eigen::Vector3d poss = getFieldPosition(goal, fd);
 
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
                                 if (m.position.allFinite() && m.covariance.allFinite()) {
-                                    filter.ambiguousMeasurementUpdate(
-                                        arma::conv_to<arma::vec>::from(convert(m.position)),
-                                        arma::conv_to<arma::mat>::from(convert(m.covariance)),
-                                        poss,
-                                        convert(goals.Hcw),
-                                        m.type,
-                                        fd);
+                                    filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                                   Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                   poss,
+                                                   goals.Hcw,
+                                                   m.type,
+                                                   fd);
                                 }
                                 else {
                                     log("Received non-finite measurements from vision. Discarding ...");
@@ -103,54 +100,68 @@ namespace localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
-                Transform3D Hfw;
-                const Transform3D& Htw = convert(sensors.Htw);
-                std::vector<arma::vec3> states;
-                std::vector<arma::mat33> cov;
+                std::vector<Eigen::Vector3d> states;
+                std::vector<Eigen::Matrix3d> cov;
+
+                Eigen::Affine3d Htw;
+                Htw.matrix() = (sensors.Htw);
 
                 for (auto& s : locReset.hypotheses) {
-                    Transform3D Hft;
-                    arma::vec3 rTFf   = {s.position[0], s.position[1], 0};
-                    Hft.translation() = rTFf;
-                    Hft.rotateZ(s.heading);
-                    Hfw = Hft * Htw;
-                    states.push_back(transform3DToFieldState(Hfw));
+                    Eigen::Affine3d Hft;
+                    Hft.translation() = Eigen::Vector3d(s.position.x(), s.position.y(), 0);
+                    // Linear part of transform is `s.heading` radians rotation about Z axis
+                    Hft.linear() = Eigen::AngleAxisd(s.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                    const Eigen::Affine3d Hfw(Hft * Htw);
 
-                    Rotation2D Hfw_xy     = Hfw.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0})).rotation();
-                    arma::mat22 pos_cov   = Hfw_xy * convert(s.position_cov) * Hfw_xy.t();
-                    arma::mat33 state_cov = arma::eye(3, 3);
-                    state_cov.submat(0, 0, 1, 1) = pos_cov;
-                    state_cov(2, 2)              = s.heading_var;
+                    const Eigen::Affine2d hfw_2d_projection(
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX()));
+
+                    const Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),
+                                                        hfw_2d_projection.translation().y(),
+                                                        Eigen::Rotation2Dd(hfw_2d_projection.rotation()).angle());
+
+                    states.push_back(hfw_state_vec);
+
+                    const Eigen::Rotation2D<double> Hfw_xy(
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX())
+                            .rotation());
+
+                    const Eigen::Rotation2D<double> pos_cov(Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose());
+
+                    Eigen::Matrix<double, 3, 3> state_cov(Eigen::Matrix<double, 3, 3>::Identity());
+                    state_cov.topLeftCorner(2, 2) = pos_cov.matrix();
+                    state_cov(2, 2)               = s.heading_var;
                     cov.push_back(state_cov);
+                    filter.set_state(hfw_state_vec, state_cov, n_particles);
                 }
-                filter.resetAmbiguous(states, cov, n_particles);
             });
 
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
+            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
             filter.model.n_rogues             = config["n_rogues"].as<int>();
-            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
+            filter.model.resetRange           = config["reset_range"].as<Expression>();
             n_particles                       = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();
 
-            arma::vec3 start_state    = config["start_state"].as<arma::vec>();
-            arma::vec3 start_variance = config["start_variance"].as<arma::vec>();
+            Eigen::Vector3d start_state = config["start_state"].as<Expression>();
+            // TODO: This variable is not used. Probably remove it
+            /* Eigen::Vector3d start_variance = config["start_variance"].as<Expression>(); */
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
             ResetRobotHypotheses::Self leftSide;
             // Start on goal line
-            leftSide.position     = Eigen::Vector2d(start_state[0], start_state[1]);
+            leftSide.position     = Eigen::Vector2d(start_state.x(), start_state.y());
             leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            leftSide.heading      = start_state[2];
+            leftSide.heading      = start_state.z();
             leftSide.heading_var  = 0.005;
 
             reset->hypotheses.push_back(leftSide);
             ResetRobotHypotheses::Self rightSide;
             // Start on goal line
-            rightSide.position     = Eigen::Vector2d(start_state[0], -start_state[1]);
+            rightSide.position     = Eigen::Vector2d(start_state.x(), -start_state.y());
             rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            rightSide.heading      = -start_state[2];
+            rightSide.heading      = -start_state.z();
             rightSide.heading_var  = 0.005;
 
             reset->hypotheses.push_back(rightSide);
@@ -158,30 +169,30 @@ namespace localisation {
         });
     }
 
-    std::vector<arma::vec> RobotParticleLocalisation::getPossibleFieldPositions(
-        const VisionGoal& goal,
-        const message::support::FieldDescription& fd) const {
-        std::vector<arma::vec> possibilities;
+    Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
+                                                                const message::support::FieldDescription& fd) const {
+        Eigen::Vector3d position;
 
-        bool left  = (goal.side != VisionGoal::Side::RIGHT);
-        bool right = (goal.side != VisionGoal::Side::LEFT);
-        bool own   = (goal.team != VisionGoal::Team::OPPONENT);
-        bool opp   = (goal.team != VisionGoal::Team::OWN);
+        const bool left  = (goal.side != VisionGoal::Side::RIGHT);
+        const bool right = (goal.side != VisionGoal::Side::LEFT);
+        const bool own   = (goal.team != VisionGoal::Team::OPPONENT);
+        const bool opp   = (goal.team != VisionGoal::Team::OWN);
 
         if (own && left) {
-            possibilities.push_back(arma::vec3({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0}));
+            position = Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
         }
         if (own && right) {
-            possibilities.push_back(arma::vec3({fd.goalpost_own_r[0], fd.goalpost_own_r[1], 0}));
+            position = Eigen::Vector3d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
         }
         if (opp && left) {
-            possibilities.push_back(arma::vec3({fd.goalpost_opp_l[0], fd.goalpost_opp_l[1], 0}));
+            position = Eigen::Vector3d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
         }
         if (opp && right) {
-            possibilities.push_back(arma::vec3({fd.goalpost_opp_r[0], fd.goalpost_opp_r[1], 0}));
+            position = Eigen::Vector3d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
         }
 
-        return possibilities;
+        return position;
     }
+
 }  // namespace localisation
 }  // namespace module

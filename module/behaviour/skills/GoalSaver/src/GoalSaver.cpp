@@ -99,7 +99,7 @@ namespace behaviour {
         }
 
         void GoalSaver::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
         }
 
         int GoalSaver::getDirectionalQuadrant(float x, float y) {

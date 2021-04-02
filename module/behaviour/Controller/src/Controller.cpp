@@ -28,7 +28,7 @@ namespace behaviour {
     using message::motion::ServoTarget;
 
     using utility::behaviour::ActionKill;
-    using utility::behaviour::ActionPriorites;
+    using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
@@ -88,9 +88,9 @@ namespace behaviour {
             selectAction();
         });
 
-        on<Trigger<ActionPriorites>, Sync<Controller>, Priority::HIGH>().then(
+        on<Trigger<ActionPriorities>, Sync<Controller>, Priority::HIGH>().then(
             "Action Priority Update",
-            [this](const ActionPriorites& update) {
+            [this](const ActionPriorities& update) {
                 auto& request = requests[update.id];
 
                 // Find the largest priority

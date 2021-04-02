@@ -4,7 +4,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/FixedWalkCommand.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/ServoTarget.hpp"

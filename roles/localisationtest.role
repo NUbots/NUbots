@@ -2,24 +2,19 @@ nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
   # and without it many roles do not run
   extension::FileWatcher
+  support::SignalCatcher
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   motion::KinematicsConfiguration
-  # Support and Configuration
+  support::configuration::SoccerConfig
+  # Support
   support::configuration::GlobalConfig
   network::NUClearNet
   support::NUsight
-  # Hardware Interface
-  platform::Gazebo
+  # Localisation
+  localisation::RobotParticleLocalisation
+  support::LocalisationSimulator
+  # Sensors
   platform::darwin::SensorFilter
-  # Motion
-  motion::QuinticWalk
-  motion::ScriptEngine
-  # Behaviour
-  behaviour::Controller
-  behaviour::skills::Stand
-  behaviour::skills::Getup
-  behaviour::skills::KickScript
-  behaviour::skills::DirectWalkController
-  behaviour::strategy::KeyboardWalk
+  # platform::darwin::HardwareSimulator
 )
