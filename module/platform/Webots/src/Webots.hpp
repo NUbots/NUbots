@@ -22,8 +22,8 @@
 
 #include <nuclear>
 
-#include "message/platform/webots/messages.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
+#include "message/platform/webots/messages.hpp"
 
 namespace module::platform {
 
@@ -33,9 +33,9 @@ private:
     message::platform::webots::ActuatorRequests to_send;
 
     /// @brief The information we got from Global Config
-	message::platform::webots::ConnectRequest player_details;
+    message::platform::webots::ConnectRequest player_details;
 
-	/// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
+    /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
     /// want to reconnect.
     /// @param fd The socket we want to send our details to.
     void send_connect(const int& fd);

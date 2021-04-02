@@ -19,8 +19,8 @@
 
 #include "Webots.hpp"
 
-#include <fmt/format.h>
 #include <chrono>
+#include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
 
@@ -49,54 +49,55 @@ using message::platform::darwin::DarwinSensors;
 
 using message::platform::webots::ActuatorRequests;
 using message::platform::webots::ConnectRequest;
+using message::platform::webots::Message;
 using message::platform::webots::MotorPosition;
 using message::platform::webots::MotorTorque;
 using message::platform::webots::MotorVelocity;
 using message::platform::webots::SensorMeasurements;
-using message::platform::webots::ConnectRequest;
-using message::platform::webots::Message;
 
 using message::support::GlobalConfig;
 
 
 int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
-	// Hints for the connection type
-	addrinfo hints;
-	memset(&hints, 0, sizeof(addrinfo)); // Defaults on what we do not explicitly set
-	hints.ai_family = AF_UNSPEC; // IPv4 or IPv6
-	hints.ai_socktype = SOCK_STREAM; // TCP
+    // Hints for the connection type
+    addrinfo hints;
+    memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
+    hints.ai_family   = AF_UNSPEC;        // IPv4 or IPv6
+    hints.ai_socktype = SOCK_STREAM;      // TCP
 
     // Store the ip address information that we will connect to
-    addrinfo *address;
-	
-	int error;
-	if((error = getaddrinfo(server_name.c_str(), port.c_str(), &hints, &address)) != 0){
-    	log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}", server_name, gai_strerror(error), error));
-		return -1;
-	}    
+    addrinfo* address;
 
-	// Loop through the linked list of potential options for connecting. In order of best to worst.
-	for (addrinfo * addr_ptr; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next){
-		int fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
+    int error;
+    if ((error = getaddrinfo(server_name.c_str(), port.c_str(), &hints, &address)) != 0) {
+        log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
+                                        server_name,
+                                        gai_strerror(error),
+                                        error));
+        return -1;
+    }
 
-		if (fd == -1){
-			// Bad fd
-			continue;
-		}
-		else if(connect(fd, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1){
-			// Connection successful
-			freeaddrinfo(address);
-			return fd;
-		}
-		// Connection was not successful
-		close(fd);
-	}
-	
-	// No connection was successful
-	freeaddrinfo(address);
+    // Loop through the linked list of potential options for connecting. In order of best to worst.
+    for (addrinfo* addr_ptr; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
+        int fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
+
+        if (fd == -1) {
+            // Bad fd
+            continue;
+        }
+        else if (connect(fd, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
+            // Connection successful
+            freeaddrinfo(address);
+            return fd;
+        }
+        // Connection was not successful
+        close(fd);
+    }
+
+    // No connection was successful
+    freeaddrinfo(address);
     log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name));
     return -1;
-
 }
 
 Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -128,7 +129,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
                 return;
             }
 
-			uint32_t Nh = ntohl(Nn); // Convert from network endian to host endian
+            uint32_t Nh = ntohl(Nn);  // Convert from network endian to host endian
 
             // Get the message
             std::vector<char> data(Nh, 0);
@@ -142,11 +143,12 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
             // Read each field of msg, translate it to our protobuf and emit the data
             auto sensor_data = std::make_unique<DarwinSensors>();
-			
 
-            sensor_data->timestamp = NUClear::clock::now(); // Not sure if we want this or the timestamp on the received message.
 
-			// Vecotor3 is a neutron of 3 doubles
+            sensor_data->timestamp =
+                NUClear::clock::now();  // Not sure if we want this or the timestamp on the received message.
+
+            // Vecotor3 is a neutron of 3 doubles
 
             for (auto& position : msg.position_sensors) {
                 // string name
@@ -182,26 +184,22 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
             for (auto& camera : msg.cameras) {
                 // Convert the incoming image so we can emit it to the PowerPlant.
-                auto compressed_image = std::make_unique<CompressedImage>();
-                compressed_image->name            = camera.name;
-                compressed_image->dimensions.x()  = camera.width;
-                compressed_image->dimensions.y()  = camera.height;
-                compressed_image->format          = camera.quality;  // This is probably wrong, we havent documented :(
-                compressed_image->data            = camera.image;
+                auto compressed_image            = std::make_unique<CompressedImage>();
+                compressed_image->name           = camera.name;
+                compressed_image->dimensions.x() = camera.width;
+                compressed_image->dimensions.y() = camera.height;
+                compressed_image->format         = camera.quality;  // This is probably wrong, we havent documented :(
+                compressed_image->data           = camera.image;
                 emit(compressed_image);
             }
 
-			// Parse the messages from Webots and log them. Maybe check for certain things.
-			for (auto& message : msg.messages){
-				switch (int(message.message_type)){
-					case Message::MessageType::ERROR_MESSAGE:
-						log<NUClear::ERROR>(message.text);
-						break;
-					case Message::MessageType::WARNING_MESSAGE:
-						log<NUClear::WARN>(message.text);
-						break;
-				}
-			}
+            // Parse the messages from Webots and log them. Maybe check for certain things.
+            for (auto& message : msg.messages) {
+                switch (int(message.message_type)) {
+                    case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
+                    case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
+                }
+            }
         });
 
         on<Every<1, std::chrono::seconds>>().then([this, fd]() {
@@ -222,30 +220,30 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
         // Store each ServoTarget to send in the next lot
         for (auto& command : commands.targets) {
-			MotorPosition position_msg;
-            position_msg.name          = command.id;
-            position_msg.position      = command.position;
-			to_send.motor_positions.push_back(position_msg);
+            MotorPosition position_msg;
+            position_msg.name     = command.id;
+            position_msg.position = command.position;
+            to_send.motor_positions.push_back(position_msg);
 
             // TODO(cmurtagh) work out if gain is velocity or force
             MotorVelocity velocity_msg;
-            velocity_msg.name          = command.id;
-            velocity_msg.velocity      = command.gain;
-			to_send.motor_velocities.push_back(velocity_msg);
+            velocity_msg.name     = command.id;
+            velocity_msg.velocity = command.gain;
+            to_send.motor_velocities.push_back(velocity_msg);
 
             MotorTorque torque_msg;
-            torque_msg.name        = command.id;
-            torque_msg.torque      = command.torque;
-			to_send.motor_torques.push_back(torque_msg);
+            torque_msg.name   = command.id;
+            torque_msg.torque = command.torque;
+            to_send.motor_torques.push_back(torque_msg);
 
             // MotorPID ? Do we need to send this?
         }
     });
 
-	on<Trigger<GlobalConfig>>().then([this](const GlobalConfig& config){
-		player_details.playerId = config.playerId; // TODO(cameron) Do we need to copy this?
-		player_details.teamId = config.teamId;
-	});
+    on<Trigger<GlobalConfig>>().then([this](const GlobalConfig& config) {
+        player_details.playerId = config.playerId;  // TODO(cameron) Do we need to copy this?
+        player_details.teamId   = config.teamId;
+    });
 }
 
 void Webots::send_connect(const int& fd) {
