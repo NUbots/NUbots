@@ -121,7 +121,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
             // Get the size of the message
             uint32_t Nn;
-            if (recv(fd, &Nn, sizeof(N), 0 != sizeof(N))) {
+            if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
                 log<NUClear::ERROR>("Failed to read message size from TCP connection");
                 return;
             }
@@ -146,39 +146,39 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
 			// Vecotor3 is a neutron of 3 doubles
 
-            for (auto& position : msg.position_sensor) {
+            for (auto& position : msg.position_sensors) {
                 // string name
                 // double valvue
             }
 
-            for (auto& accelerometer : msg.accelerometer) {
+            for (auto& accelerometer : msg.accelerometers) {
                 // string name
                 // Vector3 value
             }
 
-            for (auto& gyro : msg.gyro) {
+            for (auto& gyro : msg.gyros) {
                 // string name
                 // Vector3 value
             }
 
-            for (auto& bumper : msg.bumper) {
+            for (auto& bumper : msg.bumpers) {
                 // string name
                 // bool value
             }
 
-            for (auto& force_3d : msg.force_3d) {
+            for (auto& force_3d : msg.force3ds) {
                 // string name
                 // Vector3 value
             }
 
-            for (auto& force_6d : msg.force_6d) {
+            for (auto& force_6d : msg.force6ds) {
                 // string name
                 // Vector3 value
             }
 
             emit(sensor_data);
 
-            for (auto& camera : msg.camera) {
+            for (auto& camera : msg.cameras) {
                 // Convert the incoming image so we can emit it to the PowerPlant.
                 auto compressed_image = std::make_unique<CompressedImage>();
                 compressed_image->name            = camera.name;
@@ -191,9 +191,13 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 
 			// Parse the messages from Webots and log them. Maybe check for certain things.
 			for (auto& message : msg.messages){
-				switch (message.MessageType){
-					case Message::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
-					case Message::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
+				switch (int(message.message_type)){
+					case Message::MessageType::ERROR_MESSAGE:
+						log<NUClear::ERROR>(message.text);
+						break;
+					case Message::MessageType::WARNING_MESSAGE:
+						log<NUClear::WARN>(message.text);
+						break;
 				}
 			}
         });
@@ -210,27 +214,27 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
     // Create the message that we are going to send.
     on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
         // Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
-        to_send.motor_position.clear();
-        to_send.motor_velocity.clear();
-        to_send.motor_torque.clear();
+        to_send.motor_positions.clear();
+        to_send.motor_velocities.clear();
+        to_send.motor_torques.clear();
 
         // Store each ServoTarget to send in the next lot
         for (auto& command : commands.targets) {
 			MotorPosition position_msg;
             position_msg.name          = command.id;
             position_msg.position      = command.position;
-			to_send.motor_position.push_back(position_msg);
+			to_send.motor_positions.push_back(position_msg);
 
             // TODO(cmurtagh) work out if gain is velocity or force
             MotorVelocity velocity_msg;
             velocity_msg.name          = command.id;
             velocity_msg.velocity      = command.gain;
-			to_send.motor_velocity.push_back(velocity_msg);
+			to_send.motor_velocities.push_back(velocity_msg);
 
             MotorTorque torque_msg;
             torque_msg.name        = command.id;
             torque_msg.torque      = command.torque;
-			to_send.motor_torque.push_back(torque_msg);
+			to_send.motor_torques.push_back(torque_msg);
 
             // MotorPID ? Do we need to send this?
         }
