@@ -2,9 +2,5 @@
 log_level: DEBUG
 
 # Connection details
-server_address:
-port:
-
-# Info to tell webots who we are
-team_id:
-robot_id:
+server_address: "127.0.0.1"
+port: "10020"
