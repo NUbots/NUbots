@@ -2,8 +2,9 @@
 
 import os
 
-import b
 from dockerise import WrapPty
+
+import b
 from utility.yarn import find_package_json
 
 
