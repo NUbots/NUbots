@@ -299,9 +299,9 @@ namespace behaviour {
                     currentState = Behaviour::State::WALK_TO_BALL;
                 }
                 else {  // ball has not been seen recently
+                    Eigen::Affine2d position(field.position);
                     if (mode != GameMode::PENALTY_SHOOTOUT
-                        && (Eigen::Vector2d(field.position[0], field.position[1]).norm()
-                            > 1)) {  // a long way away from centre
+                        && (position.translation().norm() > 1)) {  // a long way away from centre
                         // walk to centre of field
                         find({FieldTarget(FieldTarget::Target::BALL)});
                         walkTo(fieldDescription, arma::vec2({0, 0}));
@@ -456,8 +456,9 @@ namespace behaviour {
             size_t error       = 0.05;
             size_t buffer      = error + 2 * fieldDescription.ball_radius;             // 15cm
             float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-            float xRobot       = field.position[0];
-            float yRobot       = field.position[1];
+            Eigen::Affine2d position(field.position);
+            float xRobot = position.translation().x();
+            float yRobot = position.translation().y();
             arma::vec2 newTarget;
 
             if ((fieldDescription.dimensions.field_length / 2) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
@@ -483,7 +484,8 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position[2];
+                Eigen::Affine2d position(field.position);
+                float fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
                 int signBearing     = fieldBearing > 0 ? 1 : -1;
                 float rotationSpeed = -signBearing
                                       * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),

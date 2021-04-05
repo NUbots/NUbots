@@ -83,6 +83,15 @@ def build(repository, platform):
         subprocess.run(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
     subprocess.run(["docker", "buildx", "use", builder_name])
 
+    # Get docker host IP from bridge network
+    docker_gateway = (
+        subprocess.check_output(
+            ["docker", "network", "inspect", "bridge", "--format", "{{range .IPAM.Config}}{{.Gateway}}{{end}}"],
+        )
+        .strip()
+        .decode("ascii")
+    )
+
     # Build the image!
     err = pty.spawn(
         [
@@ -99,6 +108,7 @@ def build(repository, platform):
             "--build-arg",
             "user_uid={}".format(os.getuid()),
             "--output=type=docker",
+            "--add-host=host.docker.internal:{}".format(docker_gateway),
             dockerdir,
         ]
     )
