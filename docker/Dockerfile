@@ -11,7 +11,7 @@
 ### the date in the FROM command
 ### Date format is ISO year/month/day
 FROM archlinux:base-20210110.0.13332
-RUN echo "Server=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -284,9 +284,9 @@ RUN install-package \
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
-    cmake-format==0.6.10 \
-    isort==4.3.21 \
-    black==19.10b0
+    cmake-format==0.6.13 \
+    isort==5.7.0 \
+    black==20.8b1
 
 ##############################
 ### SETUP THE USER ACCOUNT ###
