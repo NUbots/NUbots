@@ -1,4 +1,4 @@
-# Sytemd Unit files for purging docker objects
+# Systemd Unit files for purging docker objects
 
 Sets up a systemd timer and service for monitoring hard drive use and removing docker objects (images, containers, volumes, networks) when a usage threshold has been exceeded.
 
@@ -26,4 +26,3 @@ sudo systemctl daemon-reload
 systemctl --user enable docker_clean.timer
 systemctl --user start docker_clean.timer
 ```
-
