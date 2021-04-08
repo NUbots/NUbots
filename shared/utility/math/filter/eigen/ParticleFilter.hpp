@@ -91,7 +91,8 @@ namespace math {
         public:
             ParticleFilter(const StateVec& initial_mean      = StateVec::Zero(),
                            const StateMat& initialCovariance = StateMat::Identity() * 0.1,
-                           const int& number_of_particles    = 100) {
+                           const int& number_of_particles    = 100)
+                : rng(), norm() {
                 set_state(initial_mean, initialCovariance, number_of_particles);
             }
 

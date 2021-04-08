@@ -7,7 +7,7 @@ from functools import partial
 from subprocess import STDOUT, CalledProcessError, check_output
 
 import b
-from dockerise import run_on_docker
+from utility.dockerise import run_on_docker
 from utility.yarn import find_eslint, find_package_json
 
 
