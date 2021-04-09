@@ -78,7 +78,7 @@ int Webots::tcpip_connect(const std::string& server_name, const std::string& por
     }
 
     // Loop through the linked list of potential options for connecting. In order of best to worst.
-    for (addrinfo* addr_ptr; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
+    for (addrinfo* addr_ptr = address; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
         int fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
         if (fd == -1) {
