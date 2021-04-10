@@ -3,6 +3,7 @@ nuclear_role(
   extension::FileWatcher
   support::logging::ConsoleLogHandler
   # Support and Configuration
+  # GlobalConfig must go before Webots
   support::configuration::GlobalConfig
   # Simulator
   platform::Webots
