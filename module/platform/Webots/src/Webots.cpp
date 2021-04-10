@@ -116,7 +116,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         int fd = tcpip_connect(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
 
         // Tell webots who we are
-        send_connect(fd, global_config);
+        send_player_details(fd, global_config);
 
         on<IO>(fd, IO::READ | IO::WRITE | IO::ERROR | IO::CLOSE).then([this, fd]() {
             // Receiving
@@ -182,8 +182,8 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
     });
 }
 
-void Webots::send_connect(const int& fd, const GlobalConfig& player_details) {
-    // TODO(cameron) workout what to do if failes
+void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
+    // TODO(cameron) resend if failes
     std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
     uint32_t N             = htonl(data.size());
     send(fd, &N, sizeof(N), 0);

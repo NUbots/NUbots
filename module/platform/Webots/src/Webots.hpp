@@ -36,7 +36,7 @@ private:
     /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
     /// want to reconnect.
     /// @param fd The socket we want to send our details to.
-    void send_connect(const int& fd, const message::support::GlobalConfig& player_details);
+    void send_player_details(const int& fd, const message::support::GlobalConfig& player_details);
 
     /// @brief Establish a TCP connection to the specified server/port
     /// @param server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
