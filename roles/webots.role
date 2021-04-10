@@ -5,6 +5,8 @@ nuclear_role(
   # Support and Configuration
   # GlobalConfig must go before Webots
   support::configuration::GlobalConfig
-  # Simulator
+  # Image Handling
+  input::ImageDecompressor
+  # Simulator Connection
   platform::Webots
 )

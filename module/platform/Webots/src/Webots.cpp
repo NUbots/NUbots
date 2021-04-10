@@ -24,6 +24,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "utility/vision/fourcc.hpp"
+
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/darwin/DarwinSensors.hpp"
@@ -56,6 +58,7 @@ using message::platform::webots::MotorVelocity;
 using message::platform::webots::SensorMeasurements;
 
 using message::support::GlobalConfig;
+using utility::vision::fourcc;
 
 int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
     // Hints for the connection type
@@ -238,7 +241,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
                 compressed_image->name           = camera.name;
                 compressed_image->dimensions.x() = camera.width;
                 compressed_image->dimensions.y() = camera.height;
-                compressed_image->format         = camera.quality;  // This is probably wrong, we havent documented :(
+                compressed_image->format         = fourcc("JPEG");
                 compressed_image->data           = camera.image;
                 emit(compressed_image);
             }
