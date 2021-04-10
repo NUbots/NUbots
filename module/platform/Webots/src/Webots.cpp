@@ -198,8 +198,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
             auto sensor_data = std::make_unique<DarwinSensors>();
 
 
-            sensor_data->timestamp =
-                NUClear::clock::now();  // Not sure if we want this or the timestamp on the received message.
+            sensor_data->timestamp = sensor_measurements.time;  // Not sure if we want this or the timestamp on the received message.
 
             // Vecotor3 is a neutron of 3 doubles
 
