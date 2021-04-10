@@ -173,7 +173,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         to_send.motor_torques.clear();
 
         // Store each ServoTarget to send in the next lot
-        for (auto& command : commands.targets) {
+        for (const auto& command : commands.targets) {
             MotorPosition position_msg;
             position_msg.name     = command.id;
             position_msg.position = command.position;
@@ -212,32 +212,32 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
 
             // Vector3 is a neutron of 3 doubles
 
-            for (auto& position : sensor_measurements.position_sensors) {
+            for (const auto& position : sensor_measurements.position_sensors) {
                 // string name
                 // double value
             }
 
-            for (auto& accelerometer : sensor_measurements.accelerometers) {
+            for (const auto& accelerometer : sensor_measurements.accelerometers) {
                 // string name
                 // Vector3 value
             }
 
-            for (auto& gyro : sensor_measurements.gyros) {
+            for (const auto& gyro : sensor_measurements.gyros) {
                 // string name
                 // Vector3 value
             }
 
-            for (auto& bumper : sensor_measurements.bumpers) {
+            for (const auto& bumper : sensor_measurements.bumpers) {
                 // string name
                 // bool value
             }
 
-            for (auto& force_3d : sensor_measurements.force3ds) {
+            for (const auto& force_3d : sensor_measurements.force3ds) {
                 // string name
                 // Vector3 value
             }
 
-            for (auto& force_6d : sensor_measurements.force6ds) {
+            for (const auto& force_6d : sensor_measurements.force6ds) {
                 // string name
                 // Vector3 value
             }
