@@ -96,7 +96,7 @@ int Webots::tcpip_connect(const std::string& server_name, const std::string& por
 
     // No connection was successful
     freeaddrinfo(address);
-    log<NUClear::ERROR>(fmt::format("Cannot connect server: {}", server_name));
+    log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_name, port));
     return -1;
 }
 
