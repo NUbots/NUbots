@@ -101,11 +101,11 @@ int Webots::tcpip_connect(const std::string& server_name, const std::string& por
 }
 
 Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-    on<Configuration>("webots.yaml").then([this](const Configuration& cfg) {
+    on<Trigger<Configuration, GlobalConfig>>("webots.yaml").then([this](const Configuration& local_config, const GlobalConfig& global_config) {
         // Use configuration here from file webots.yaml
 
         // clang-format off
-        auto lvl = cfg["log_level"].as<std::string>();
+        auto lvl = local_config["log_level"].as<std::string>();
         if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
         else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
         else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
@@ -114,10 +114,10 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
         // clang-format on
 
-        int fd = tcpip_connect(cfg["server_address"].as<std::string>(), cfg["port"].as<std::string>());
+        int fd = tcpip_connect(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
 
         // Tell webots who we are
-        send_connect(fd);
+        send_connect(fd, global_config);
 
         on<IO>(fd, IO::READ | IO::WRITE | IO::ERROR | IO::CLOSE).then([this, fd]() {
             // Receiving
@@ -134,72 +134,14 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // Get the message
             std::vector<char> data(Nh, 0);
             if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
-                log<NUClear::ERROR>("Error: Failed to read message from TCP connection");
+                log<NUClear::ERROR>("Failed to read message from TCP connection");
                 return;
             }
 
             // Deserialise the message into a neutron
             SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
-
-            // Read each field of msg, translate it to our protobuf and emit the data
-            auto sensor_data = std::make_unique<DarwinSensors>();
-
-
-            sensor_data->timestamp =
-                NUClear::clock::now();  // Not sure if we want this or the timestamp on the received message.
-
-            // Vecotor3 is a neutron of 3 doubles
-
-            for (auto& position : msg.position_sensors) {
-                // string name
-                // double valvue
-            }
-
-            for (auto& accelerometer : msg.accelerometers) {
-                // string name
-                // Vector3 value
-            }
-
-            for (auto& gyro : msg.gyros) {
-                // string name
-                // Vector3 value
-            }
-
-            for (auto& bumper : msg.bumpers) {
-                // string name
-                // bool value
-            }
-
-            for (auto& force_3d : msg.force3ds) {
-                // string name
-                // Vector3 value
-            }
-
-            for (auto& force_6d : msg.force6ds) {
-                // string name
-                // Vector3 value
-            }
-
-            emit(sensor_data);
-
-            for (auto& camera : msg.cameras) {
-                // Convert the incoming image so we can emit it to the PowerPlant.
-                auto compressed_image            = std::make_unique<CompressedImage>();
-                compressed_image->name           = camera.name;
-                compressed_image->dimensions.x() = camera.width;
-                compressed_image->dimensions.y() = camera.height;
-                compressed_image->format         = camera.quality;  // This is probably wrong, we havent documented :(
-                compressed_image->data           = camera.image;
-                emit(compressed_image);
-            }
-
-            // Parse the messages from Webots and log them. Maybe check for certain things.
-            for (auto& message : msg.messages) {
-                switch (int(message.message_type)) {
-                    case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
-                    case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
-                }
-            }
+            
+            translate_and_emit_sensor(msg);
         });
 
         on<Every<1, std::chrono::seconds>>().then([this, fd]() {
@@ -239,11 +181,6 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // MotorPID ? Do we need to send this?
         }
     });
-
-    on<Trigger<GlobalConfig>>().then([this](const GlobalConfig& config) {
-        player_details.playerId = config.playerId;  // TODO(cameron) Do we need to copy this?
-        player_details.teamId   = config.teamId;
-    });
 }
 
 void Webots::send_connect(const int& fd) {
@@ -252,6 +189,68 @@ void Webots::send_connect(const int& fd) {
     uint32_t N             = htonl(data.size());
     send(fd, &N, sizeof(N), 0);
     send(fd, data.data(), N, 0);
+}
+
+void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
+            // Read each field of msg, translate it to our protobuf and emit the data
+            auto sensor_data = std::make_unique<DarwinSensors>();
+
+
+            sensor_data->timestamp =
+                NUClear::clock::now();  // Not sure if we want this or the timestamp on the received message.
+
+            // Vecotor3 is a neutron of 3 doubles
+
+            for (auto& position : sensor_measurements.position_sensors) {
+                // string name
+                // double valvue
+            }
+
+            for (auto& accelerometer : sensor_measurements.accelerometers) {
+                // string name
+                // Vector3 value
+            }
+
+            for (auto& gyro : sensor_measurements.gyros) {
+                // string name
+                // Vector3 value
+            }
+
+            for (auto& bumper : sensor_measurements.bumpers) {
+                // string name
+                // bool value
+            }
+
+            for (auto& force_3d : sensor_measurements.force3ds) {
+                // string name
+                // Vector3 value
+            }
+
+            for (auto& force_6d : sensor_measurements.force6ds) {
+                // string name
+                // Vector3 value
+            }
+
+            emit(sensor_data);
+
+            for (auto& camera : sensor_measurements.cameras) {
+                // Convert the incoming image so we can emit it to the PowerPlant.
+                auto compressed_image            = std::make_unique<CompressedImage>();
+                compressed_image->name           = camera.name;
+                compressed_image->dimensions.x() = camera.width;
+                compressed_image->dimensions.y() = camera.height;
+                compressed_image->format         = camera.quality;  // This is probably wrong, we havent documented :(
+                compressed_image->data           = camera.image;
+                emit(compressed_image);
+            }
+
+            // Parse the messages from Webots and log them. Maybe check for certain things.
+            for (auto& message : sensor_measurements.messages) {
+                switch (int(message.message_type)) {
+                    case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
+                    case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
+                }
+            }
 }
 
 }  // namespace module::platform
