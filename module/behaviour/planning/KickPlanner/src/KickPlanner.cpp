@@ -38,7 +38,6 @@
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
 
 
 namespace module {

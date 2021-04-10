@@ -166,10 +166,12 @@ COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
 # Armadillo
-RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
+COPY usr/local/package/armadillo/armadillo.sh /usr/local/package/armadillo.sh
+COPY usr/local/package/armadillo/config.hpp /usr/local/package/armadillo_config.hpp
+RUN /usr/local/package/armadillo.sh https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
+    /usr/local/package/armadillo_config.hpp \
     -DDETECT_HDF5=OFF \
     -DBUILD_SHARED_LIBS=ON
-COPY usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
 
 # Eigen3
 COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch

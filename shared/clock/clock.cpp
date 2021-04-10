@@ -4,8 +4,10 @@
 
 namespace utility {
 namespace clock {
+
     double custom_rtf                                 = 1.0;  // real time factor
     std::chrono::steady_clock::time_point last_update = std::chrono::steady_clock::now();
+
 }  // namespace clock
 }  // namespace utility
 
@@ -21,4 +23,5 @@ clock::time_point clock::now() {
                               (now - utility::clock::last_update) * utility::clock::custom_rtf));
     return utility::clock::last_update;
 }
+
 }  // namespace NUClear

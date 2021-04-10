@@ -48,7 +48,8 @@ Factory::Factory(const std::string& device, const std::string& driver, const int
         this);
 
     // We use the iHD driver
-    va_status = vaSetDriverName(cctx.va.dpy, const_cast<char*>(driver.c_str()));
+    std::string d = driver;
+    va_status     = vaSetDriverName(cctx.va.dpy, d.data());
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error while setting the driver to use");
     }
