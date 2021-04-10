@@ -198,9 +198,9 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
     // TODO(cameron) resend if failes
     std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
-    uint32_t N             = htonl(data.size());
-    send(fd, &N, sizeof(N), 0);
-    send(fd, data.data(), N, 0);
+    uint32_t Nn             = htonl(data.size());
+    send(fd, &Nn, sizeof(Nn), 0);
+    send(fd, data.data(), Nn, 0);
 }
 
 void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
@@ -210,11 +210,11 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
 
             sensor_data->timestamp = sensor_measurements.time;  // Not sure if we want this or the timestamp on the received message.
 
-            // Vecotor3 is a neutron of 3 doubles
+            // Vector3 is a neutron of 3 doubles
 
             for (auto& position : sensor_measurements.position_sensors) {
                 // string name
-                // double valvue
+                // double value
             }
 
             for (auto& accelerometer : sensor_measurements.accelerometers) {
@@ -244,7 +244,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
 
             emit(sensor_data);
 
-            for (auto& camera : sensor_measurements.cameras) {
+            for (const auto& camera : sensor_measurements.cameras) {
                 // Convert the incoming image so we can emit it to the PowerPlant.
                 auto compressed_image            = std::make_unique<CompressedImage>();
                 compressed_image->name           = camera.name;
@@ -256,7 +256,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
             }
 
             // Parse the messages from Webots and log them. Maybe check for certain things.
-            for (auto& message : sensor_measurements.messages) {
+            for (const auto& message : sensor_measurements.messages) {
                 switch (int(message.message_type)) {
                     case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
                     case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
