@@ -57,7 +57,6 @@ using message::platform::webots::SensorMeasurements;
 
 using message::support::GlobalConfig;
 
-
 int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
     // Hints for the connection type
     addrinfo hints;
@@ -101,7 +100,7 @@ int Webots::tcpip_connect(const std::string& server_name, const std::string& por
 }
 
 Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-    on<Trigger<Configuration, GlobalConfig>>("webots.yaml").then([this](const Configuration& local_config, const GlobalConfig& global_config) {
+    on<Trigger<GlobalConfig>, Configuration>("webots.yaml").then([this](const GlobalConfig& global_config, const Configuration& local_config) {
         // Use configuration here from file webots.yaml
 
         // clang-format off
@@ -183,9 +182,9 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
     });
 }
 
-void Webots::send_connect(const int& fd) {
+void Webots::send_connect(const int& fd, const GlobalConfig& player_details) {
     // TODO(cameron) workout what to do if failes
-    std::vector<char> data = NUClear::util::serialise::Serialise<ConnectRequest>::serialise(player_details);
+    std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
     uint32_t N             = htonl(data.size());
     send(fd, &N, sizeof(N), 0);
     send(fd, data.data(), N, 0);
