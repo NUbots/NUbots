@@ -121,7 +121,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         // Tell webots who we are
         send_player_details(fd, global_config);
 
-        on<IO>(fd, IO::READ | IO::WRITE | IO::ERROR | IO::CLOSE).then([this, fd]() {
+        on<IO>(fd, IO::READ).then([this, fd]() {
             // Receiving
 
             // Get the size of the message
@@ -144,6 +144,8 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
             
             translate_and_emit_sensor(msg);
+
+            emit(std::make_unique<NUClear::message::ServiceWatchdog<Webots>>());
         });
 
         on<Every<1, std::chrono::seconds>>().then([this, fd]() {
@@ -152,6 +154,14 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             uint32_t N             = htonl(data.size());
             send(fd, &N, sizeof(N), 0);
             send(fd, data.data(), N, 0);
+        });
+
+        on<IO>(fd, IO::CLOSE, IO::ERROR).then([this]{
+            // Something went wrong
+        });
+
+        on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this]{
+            // We haven't received any messages lately
         });
     });
 
