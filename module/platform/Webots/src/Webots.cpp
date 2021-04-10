@@ -151,9 +151,9 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         on<Every<1, std::chrono::seconds>>().then([this, fd]() {
             // Sending
             std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
-            uint32_t N             = htonl(data.size());
-            send(fd, &N, sizeof(N), 0);
-            send(fd, data.data(), N, 0);
+            uint32_t Nn             = htonl(data.size());
+            send(fd, &Nn, sizeof(Nn), 0);
+            send(fd, data.data(), Nn, 0);
         });
 
         on<IO>(fd, IO::CLOSE, IO::ERROR).then([this]{
