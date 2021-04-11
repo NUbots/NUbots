@@ -24,14 +24,14 @@
 
 #include "extension/Configuration.hpp"
 
-#include "utility/vision/fourcc.hpp"
-
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/darwin/DarwinSensors.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/GlobalConfig.hpp"
+
+#include "utility/vision/fourcc.hpp"
 
 // Include headers needed for TCP connection
 extern "C" {
@@ -103,10 +103,11 @@ int Webots::tcpip_connect(const std::string& server_name, const std::string& por
 }
 
 Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-    on<Trigger<GlobalConfig>, Configuration>("webots.yaml").then([this](const GlobalConfig& global_config, const Configuration& local_config) {
-        // Use configuration here from file webots.yaml
+    on<Trigger<GlobalConfig>, Configuration>("webots.yaml")
+        .then([this](const GlobalConfig& global_config, const Configuration& local_config) {
+            // Use configuration here from file webots.yaml
 
-        // clang-format off
+            // clang-format off
         auto lvl = local_config["log_level"].as<std::string>();
         if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
         else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
@@ -114,16 +115,17 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
         else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
         else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-        // clang-format on
+            // clang-format on
 
-        on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this]{
-            // We haven't received any messages lately
+            on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
+                // We haven't received any messages lately
+            });
+
+            int fd =
+                tcpip_connect(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
+
+            setup_connection(fd);
         });
-
-        int fd = tcpip_connect(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
-
-        setup_connection(fd);
-    });
 
     // Create the message that we are going to send.
     on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
@@ -156,127 +158,128 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
 }
 
 void Webots::setup_connection(const int& fd) {
-        // Unbind the 
-        read_io.unbind();
-        send_loop.unbind();
-        error_io.unbind();
-        shutdown_handle.unbind();
+    // Unbind the
+    read_io.unbind();
+    send_loop.unbind();
+    error_io.unbind();
+    shutdown_handle.unbind();
 
-        // Tell webots who we are
-        send_player_details(fd, global_config);
+    // Tell webots who we are
+    send_player_details(fd, global_config);
 
-        read_io = on<IO>(fd, IO::READ).then([this, fd]() {
-            // Receiving
+    read_io = on<IO>(fd, IO::READ).then([this, fd]() {
+        // Receiving
 
-            // Get the size of the message
-            uint32_t Nn;
-            if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
-                log<NUClear::ERROR>("Failed to read message size from TCP connection");
-                return;
-            }
+        // Get the size of the message
+        uint32_t Nn;
+        if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
+            log<NUClear::ERROR>("Failed to read message size from TCP connection");
+            return;
+        }
 
-            uint32_t Nh = ntohl(Nn);  // Convert from network endian to host endian
+        uint32_t Nh = ntohl(Nn);  // Convert from network endian to host endian
 
-            // Get the message
-            std::vector<char> data(Nh, 0);
-            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
-                log<NUClear::ERROR>("Failed to read message from TCP connection");
-                return;
-            }
+        // Get the message
+        std::vector<char> data(Nh, 0);
+        if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
+            log<NUClear::ERROR>("Failed to read message from TCP connection");
+            return;
+        }
 
-            // Deserialise the message into a neutron
-            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
-            
-            translate_and_emit_sensor(msg);
+        // Deserialise the message into a neutron
+        SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
 
-            // Service the watchdog
-            emit(std::make_unique<NUClear::message::ServiceWatchdog<Webots>>());
-        });
+        translate_and_emit_sensor(msg);
 
-        send_loop = on<Every<1, std::chrono::seconds>>().then([this, fd]() {
-            // Sending
-            std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
-            uint32_t Nn             = htonl(data.size());
-            send(fd, &Nn, sizeof(Nn), 0);
-            send(fd, data.data(), Nn, 0);
-        });
+        // Service the watchdog
+        emit(std::make_unique<NUClear::message::ServiceWatchdog<Webots>>());
+    });
 
-        error_io = on<IO>(fd, IO::CLOSE, IO::ERROR).then([this](const IO::Event& event){
-            // Something went wrong
-        });
-   
-        shutdown_handle = on<Shutdown>().then([this, fd]{
-            //Disconnect the fd gracefully
-        });
+    send_loop = on<Every<1, std::chrono::seconds>>().then([this, fd]() {
+        // Sending
+        std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
+        uint32_t Nn            = htonl(data.size());
+        send(fd, &Nn, sizeof(Nn), 0);
+        send(fd, data.data(), Nn, 0);
+    });
+
+    error_io = on<IO>(fd, IO::CLOSE, IO::ERROR).then([this](const IO::Event& event) {
+        // Something went wrong
+    });
+
+    shutdown_handle = on<Shutdown>().then([this, fd] {
+        // Disconnect the fd gracefully
+    });
 }
 
 void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
     // TODO(cameron) resend if failes
     std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
-    uint32_t Nn             = htonl(data.size());
+    uint32_t Nn            = htonl(data.size());
     send(fd, &Nn, sizeof(Nn), 0);
     send(fd, data.data(), Nn, 0);
 }
 
 void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
-            // Read each field of msg, translate it to our protobuf and emit the data
-            auto sensor_data = std::make_unique<DarwinSensors>();
+    // Read each field of msg, translate it to our protobuf and emit the data
+    auto sensor_data = std::make_unique<DarwinSensors>();
 
 
-            sensor_data->timestamp = sensor_measurements.time;  // Not sure if we want this or the timestamp on the received message.
+    sensor_data->timestamp =
+        sensor_measurements.time;  // Not sure if we want this or the timestamp on the received message.
 
-            // Vector3 is a neutron of 3 doubles
+    // Vector3 is a neutron of 3 doubles
 
-            for (const auto& position : sensor_measurements.position_sensors) {
-                // string name
-                // double value
-            }
+    for (const auto& position : sensor_measurements.position_sensors) {
+        // string name
+        // double value
+    }
 
-            for (const auto& accelerometer : sensor_measurements.accelerometers) {
-                // string name
-                // Vector3 value
-            }
+    for (const auto& accelerometer : sensor_measurements.accelerometers) {
+        // string name
+        // Vector3 value
+    }
 
-            for (const auto& gyro : sensor_measurements.gyros) {
-                // string name
-                // Vector3 value
-            }
+    for (const auto& gyro : sensor_measurements.gyros) {
+        // string name
+        // Vector3 value
+    }
 
-            for (const auto& bumper : sensor_measurements.bumpers) {
-                // string name
-                // bool value
-            }
+    for (const auto& bumper : sensor_measurements.bumpers) {
+        // string name
+        // bool value
+    }
 
-            for (const auto& force_3d : sensor_measurements.force3ds) {
-                // string name
-                // Vector3 value
-            }
+    for (const auto& force_3d : sensor_measurements.force3ds) {
+        // string name
+        // Vector3 value
+    }
 
-            for (const auto& force_6d : sensor_measurements.force6ds) {
-                // string name
-                // Vector3 value
-            }
+    for (const auto& force_6d : sensor_measurements.force6ds) {
+        // string name
+        // Vector3 value
+    }
 
-            emit(sensor_data);
+    emit(sensor_data);
 
-            for (const auto& camera : sensor_measurements.cameras) {
-                // Convert the incoming image so we can emit it to the PowerPlant.
-                auto compressed_image            = std::make_unique<CompressedImage>();
-                compressed_image->name           = camera.name;
-                compressed_image->dimensions.x() = camera.width;
-                compressed_image->dimensions.y() = camera.height;
-                compressed_image->format         = fourcc("JPEG");
-                compressed_image->data           = camera.image;
-                emit(compressed_image);
-            }
+    for (const auto& camera : sensor_measurements.cameras) {
+        // Convert the incoming image so we can emit it to the PowerPlant.
+        auto compressed_image            = std::make_unique<CompressedImage>();
+        compressed_image->name           = camera.name;
+        compressed_image->dimensions.x() = camera.width;
+        compressed_image->dimensions.y() = camera.height;
+        compressed_image->format         = fourcc("JPEG");
+        compressed_image->data           = camera.image;
+        emit(compressed_image);
+    }
 
-            // Parse the errors and warnings from Webots and log them. Maybe check for certain things.
-            for (const auto& message : sensor_measurements.messages) {
-                switch (int(message.message_type)) {
-                    case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
-                    case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
-                }
-            }
+    // Parse the errors and warnings from Webots and log them. Maybe check for certain things.
+    for (const auto& message : sensor_measurements.messages) {
+        switch (int(message.message_type)) {
+            case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
+            case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
+        }
+    }
 }
 
 }  // namespace module::platform
