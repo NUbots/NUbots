@@ -23,7 +23,7 @@ package message.behaviour;
 import "google/protobuf/timestamp.proto";
 
 message ServoCommand {
-    /// The subsumption which created the command
+    /// The subsumption ID which created the command
     uint64 source = 1;
     /// The time when the command was created
     google.protobuf.Timestamp time = 2;
