@@ -77,8 +77,7 @@ message GameState {
         bool                      our_kick_off     = 6;
         /// Timestamp when the robot thinks the half is due to end
         google.protobuf.Timestamp primary_time = 7;
-        /// A thing in the game controller protocol. E.g. primary time might
-        /// count the half time, but secondary time will count how long in ready, or how long until penalty etc.
+        /// A timestamp used for other times. E.g. how long in ready, or how long until penalty ends
         google.protobuf.Timestamp secondary_time = 8;
         Team                      team           = 9;
         Team                      opponent       = 10;
