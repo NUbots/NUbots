@@ -130,7 +130,7 @@ namespace support {
             on<Configuration, Trigger<CommandLineArguments>, Sync<DataPlayback>>("DataPlayback.yaml")
                 .then([this](const Configuration& config, const CommandLineArguments& args) {
                     // Update which types we will be playing
-                    for (auto& setting : config["messages"].config) {
+                    for (const auto& setting : config["messages"].config) {
                         // Get the name of the type
                         std::string name = setting.first.as<std::string>();
                         // Hash our type to work out our type on the wire

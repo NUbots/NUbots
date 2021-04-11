@@ -1,8 +1,8 @@
 import { action } from 'mobx'
 import * as THREE from 'three'
 
-import { message } from '../../../shared/proto/messages'
-import { Imat4 } from '../../../shared/proto/messages'
+import { message } from '../../../shared/messages'
+import { Imat4 } from '../../../shared/messages'
 import { Quaternion } from '../../math/quaternion'
 import { Vector3 } from '../../math/vector3'
 import { Network } from '../../network/network'
