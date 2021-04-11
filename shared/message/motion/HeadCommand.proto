@@ -38,9 +38,6 @@ message HeadCommand {
     bool robotSpace = 3;
 }
 
-/**
- * Empty message, not implemented
- */
 message HeadMotionUpdate {
     // TODO...
 }

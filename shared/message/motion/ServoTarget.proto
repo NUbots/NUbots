@@ -25,7 +25,8 @@ import "google/protobuf/timestamp.proto";
 message ServoTarget {
     /// When the target was created
     google.protobuf.Timestamp time = 1;
-    uint32                    id   = 2;
+    /// The ID of the servo being controlled
+    uint32 id = 2;
     /// It is a position value of destination. 0 to 4,095 (0xFFF) is available.
     /// The unit is 0.088 [°]. If Goal Position is out of the range, Angle Limit
     /// Error Bit (Bit1) of Status Packet is returned as ‘1’ and Alarm is
