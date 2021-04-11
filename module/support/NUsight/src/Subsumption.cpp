@@ -30,7 +30,7 @@ namespace support {
     using message::behaviour::Subsumption;
 
     using utility::behaviour::ActionKill;
-    using utility::behaviour::ActionPriorites;
+    using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
@@ -91,10 +91,10 @@ namespace support {
             emit<Scope::NETWORK>(subsumption, "nusight", true);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this](const ActionPriorites& action) {
+        handles["subsumption"].push_back(on<Trigger<ActionPriorities>>().then([this](const ActionPriorities& action) {
             auto subsumption = std::make_unique<Subsumption>();
 
-            Subsumption::ActionPriorites actionPriorityChange;
+            Subsumption::ActionPriorities actionPriorityChange;
             actionPriorityChange.id = action.id;
 
             Subsumption::ActionRegister actionRegister = actionRegisters.find(action.id)->second;

@@ -4,7 +4,7 @@ import os
 import subprocess
 
 import b
-from dockerise import run_on_docker
+from utility.dockerise import run_on_docker
 
 
 @run_on_docker
@@ -35,4 +35,4 @@ def run(j, args, **kwargs):
         command.insert(1, "-j{}".format(j))
 
     # Return the exit code of ninja
-    exit(subprocess.call(command))
+    exit(subprocess.run(command).returncode)

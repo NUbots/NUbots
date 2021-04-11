@@ -1,6 +1,6 @@
 # Get our role directories
-set(role_source_dir "${PROJECT_SOURCE_DIR}/roles")
-set(role_binary_dir "${PROJECT_BINARY_DIR}/role")
+set(role_source_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_ROLES_DIR}")
+set(role_binary_dir "${PROJECT_BINARY_DIR}/${NUCLEAR_ROLES_DIR}")
 
 # This gets all of our source files
 file(GLOB rolefiles "${role_source_dir}/*.role")
