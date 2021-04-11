@@ -9,8 +9,7 @@
 
 #include "compressor/CompressorFactory.hpp"
 
-namespace module {
-namespace output {
+namespace module::output {
 
     class ImageCompressor : public NUClear::Reactor {
     private:
@@ -26,9 +25,9 @@ namespace output {
             std::vector<Compressor> compressors;
 
             /// The width height and format so that if these change we can regenerate the compressors
-            uint32_t width;
-            uint32_t height;
-            uint32_t format;
+            uint32_t width{};
+            uint32_t height{};
+            uint32_t format{};
         };
 
     public:
@@ -51,7 +50,6 @@ namespace output {
         int dropped = 0;
     };
 
-}  // namespace output
-}  // namespace module
+}  // namespace module::output
 
 #endif  // MODULE_OUTPUT_IMAGECOMPRESSOR_HPP

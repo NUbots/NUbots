@@ -6,7 +6,7 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-VABufferID slice_parameter(VADisplay dpy, VAContextID context, const bool& monochrome);
+    VABufferID slice_parameter(VADisplay dpy, VAContextID context, const bool& monochrome);
 
 }  // namespace module::output::compressor::vaapi::operation
 
