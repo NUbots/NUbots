@@ -53,9 +53,12 @@ private:
     /// @return If the connection was successful, a file descriptor. Else, -1 is returned
     int tcpip_connect(const std::string& server_name, const std::string& port);
 
-    void setup_connection(const int& fd);
+    void setup_connection(const std::string& server_address, const std::string& port);
 
     void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
+
+    /// @brief The time the connection was opened.
+    NUClear::clock::time_point connect_time;
 
 public:
     /// @brief Called by the powerplant to build and setup the webots reactor.

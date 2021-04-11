@@ -120,11 +120,8 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
                 // We haven't received any messages lately
             });
-
-            int fd =
-                tcpip_connect(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
-
-            setup_connection(fd);
+            
+            setup_connection(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
         });
 
     // Create the message that we are going to send.
@@ -157,15 +154,41 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
     });
 }
 
-void Webots::setup_connection(const int& fd) {
+void Webots::setup_connection(const std::string& server_address, const std::string& port) {
     // Unbind the
     read_io.unbind();
     send_loop.unbind();
     error_io.unbind();
     shutdown_handle.unbind();
 
+    int fd = tcpip_connect(server_address, port);
+            
+    char inital_message[8];
+    int n = recv(fd, inital_message, sizeof(inital_message), 0);
+
+    if(n > 0){
+        if (strncmp(inital_message, "Welcome", sizeof(inital_message)) == 0){
+            //good
+        }
+        else if (strncmp(inital_message, "Refused", sizeof(inital_message)) == 0){
+            log<NUClear::FATAL>(fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
+            // TODO(cameron) Halt and don't retry
+        }
+        else {
+            log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
+            // TODO(cameron) Halt and don't retry
+        }
+    }
+    else {
+        log<NUClear::FATAL>("Connection was closed.");
+    }
+
+    connect_time = NUClear::clock::now();
+
+    log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
+
     // Tell webots who we are
-    send_player_details(fd, global_config);
+    // send_player_details(fd, global_config); Not needed? Set by the port we connect to?
 
     read_io = on<IO>(fd, IO::READ).then([this, fd]() {
         // Receiving
@@ -192,18 +215,22 @@ void Webots::setup_connection(const int& fd) {
         translate_and_emit_sensor(msg);
 
         // Service the watchdog
-        emit(std::make_unique<NUClear::message::ServiceWatchdog<Webots>>());
+        emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
     });
 
     send_loop = on<Every<1, std::chrono::seconds>>().then([this, fd]() {
         // Sending
         std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
         uint32_t Nn            = htonl(data.size());
-        send(fd, &Nn, sizeof(Nn), 0);
-        send(fd, data.data(), Nn, 0);
+        if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)){
+            log<NUClear::ERROR>(fmt::format("Error in sending actuator requests message size, {}", strerror(errno)));
+        }
+        if(send(fd, data.data(), Nn, 0) == Nn){
+            log<NUClear::ERROR>("Error in sending actuator requests message, {}", strerror(errno));
+        }
     });
 
-    error_io = on<IO>(fd, IO::CLOSE, IO::ERROR).then([this](const IO::Event& event) {
+    error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, fd](const IO::Event& event) {
         // Something went wrong
     });
 
@@ -224,9 +251,9 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     // Read each field of msg, translate it to our protobuf and emit the data
     auto sensor_data = std::make_unique<DarwinSensors>();
 
-
-    sensor_data->timestamp =
-        sensor_measurements.time;  // Not sure if we want this or the timestamp on the received message.
+    //TODO(cameron) Work out if it makes sense to combine simulation time with real time.
+    sensor_data->timestamp = NUClear::clock::now();
+        //connect_time + std::chrono::milliseconds(sensor_measurements.time);
 
     // Vector3 is a neutron of 3 doubles
 
