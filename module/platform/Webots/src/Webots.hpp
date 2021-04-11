@@ -33,6 +33,15 @@ private:
     /// @brief A single message that stores all the data that webots needs from us.
     message::platform::webots::ActuatorRequests to_send;
 
+    /// @brief Store a handle to the io reaction so we can unbind it
+    ReactionHandle read_io;
+    /// @brief Store a handle to the every reaction so we can unbind it
+    ReactionHandle send_loop;
+    /// @brief Store a handle to the io error reaction so we can unbind it
+    ReactionHandle error_io;
+    /// @brief Store a handle to the shutdown reaction so we can unbind it
+    ReactionHandle shutdown_handle;
+
     /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when we
     /// want to reconnect.
     /// @param fd The socket we want to send our details to.
@@ -43,6 +52,8 @@ private:
     /// @param port The port number to connect to
     /// @return If the connection was successful, a file descriptor. Else, -1 is returned
     int tcpip_connect(const std::string& server_name, const std::string& port);
+
+    void setup_connection(const int& fd);
 
     void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
 

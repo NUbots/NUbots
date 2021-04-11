@@ -116,53 +116,13 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
         // clang-format on
 
-        int fd = tcpip_connect(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
-
-        // Tell webots who we are
-        send_player_details(fd, global_config);
-
-        on<IO>(fd, IO::READ).then([this, fd]() {
-            // Receiving
-
-            // Get the size of the message
-            uint32_t Nn;
-            if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
-                log<NUClear::ERROR>("Failed to read message size from TCP connection");
-                return;
-            }
-
-            uint32_t Nh = ntohl(Nn);  // Convert from network endian to host endian
-
-            // Get the message
-            std::vector<char> data(Nh, 0);
-            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
-                log<NUClear::ERROR>("Failed to read message from TCP connection");
-                return;
-            }
-
-            // Deserialise the message into a neutron
-            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
-            
-            translate_and_emit_sensor(msg);
-
-            emit(std::make_unique<NUClear::message::ServiceWatchdog<Webots>>());
-        });
-
-        on<Every<1, std::chrono::seconds>>().then([this, fd]() {
-            // Sending
-            std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
-            uint32_t Nn             = htonl(data.size());
-            send(fd, &Nn, sizeof(Nn), 0);
-            send(fd, data.data(), Nn, 0);
-        });
-
-        on<IO>(fd, IO::CLOSE, IO::ERROR).then([this]{
-            // Something went wrong
-        });
-
         on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this]{
             // We haven't received any messages lately
         });
+
+        int fd = tcpip_connect(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
+
+        setup_connection(fd);
     });
 
     // Create the message that we are going to send.
@@ -193,6 +153,61 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // MotorPID ? Do we need to send this?
         }
     });
+}
+
+void Webots::setup_connection(const int& fd) {
+        // Unbind the 
+        read_io.unbind();
+        send_loop.unbind();
+        error_io.unbind();
+        shutdown_handle.unbind();
+
+        // Tell webots who we are
+        send_player_details(fd, global_config);
+
+        read_io = on<IO>(fd, IO::READ).then([this, fd]() {
+            // Receiving
+
+            // Get the size of the message
+            uint32_t Nn;
+            if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
+                log<NUClear::ERROR>("Failed to read message size from TCP connection");
+                return;
+            }
+
+            uint32_t Nh = ntohl(Nn);  // Convert from network endian to host endian
+
+            // Get the message
+            std::vector<char> data(Nh, 0);
+            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
+                log<NUClear::ERROR>("Failed to read message from TCP connection");
+                return;
+            }
+
+            // Deserialise the message into a neutron
+            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
+            
+            translate_and_emit_sensor(msg);
+
+            // Service the watchdog
+            emit(std::make_unique<NUClear::message::ServiceWatchdog<Webots>>());
+        });
+
+        send_loop = on<Every<1, std::chrono::seconds>>().then([this, fd]() {
+            // Sending
+            std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
+            uint32_t Nn             = htonl(data.size());
+            send(fd, &Nn, sizeof(Nn), 0);
+            send(fd, data.data(), Nn, 0);
+        });
+
+        error_io = on<IO>(fd, IO::CLOSE, IO::ERROR).then([this](const IO::Event& event){
+            // Something went wrong
+        });
+   
+        shutdown_handle = on<Shutdown>().then([this, fd]{
+            //Disconnect the fd gracefully
+        });
 }
 
 void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
