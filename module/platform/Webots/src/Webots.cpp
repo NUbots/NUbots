@@ -255,7 +255,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
                 emit(compressed_image);
             }
 
-            // Parse the messages from Webots and log them. Maybe check for certain things.
+            // Parse the errors and warnings from Webots and log them. Maybe check for certain things.
             for (const auto& message : sensor_measurements.messages) {
                 switch (int(message.message_type)) {
                     case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
