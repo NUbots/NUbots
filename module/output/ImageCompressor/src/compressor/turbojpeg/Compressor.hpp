@@ -7,28 +7,28 @@
 
 namespace module::output::compressor::turbojpeg {
 
-    class Compressor : public compressor::Compressor {
-    public:
-        Compressor(const int& quality, const uint32_t& width, const uint32_t& height, const uint32_t& format);
-        Compressor(const Compressor&) = default;
-        Compressor(Compressor&&)      = default;
-        Compressor& operator=(const Compressor&) = default;
-        Compressor& operator=(Compressor&&) = default;
-        virtual ~Compressor();
-        std::vector<uint8_t> compress(const std::vector<uint8_t>& data) override;
+class Compressor : public compressor::Compressor {
+public:
+    Compressor(const int& quality, const uint32_t& width, const uint32_t& height, const uint32_t& format);
+    Compressor(const Compressor&) = default;
+    Compressor(Compressor&&)      = default;
+    Compressor& operator=(const Compressor&) = default;
+    Compressor& operator=(Compressor&&) = default;
+    virtual ~Compressor();
+    std::vector<uint8_t> compress(const std::vector<uint8_t>& data) override;
 
-    private:
-        /// The JPEG quality to compress with
-        int quality;
-        /// The image width
-        uint32_t width;
-        /// The image height
-        uint32_t height;
-        /// The image format
-        uint32_t format;
-        /// The mosaic permutation table if this is a mosaic pattern
-        utility::vision::Mosaic mosaic;
-    };
+private:
+    /// The JPEG quality to compress with
+    int quality;
+    /// The image width
+    uint32_t width;
+    /// The image height
+    uint32_t height;
+    /// The image format
+    uint32_t format;
+    /// The mosaic permutation table if this is a mosaic pattern
+    utility::vision::Mosaic mosaic;
+};
 
 }  // namespace module::output::compressor::turbojpeg
 
