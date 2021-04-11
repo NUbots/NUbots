@@ -23,5 +23,6 @@ package message.support;
 message GlobalConfig {
     /// The robots number in the team. Starts at 1. Should be the same as the robots number (nugus1, nugus2, etc)
     uint32 playerId = 1;
-    uint32 teamId   = 2;
+    /// Unique team number, assigned by the league
+    uint32 teamId = 2;
 }

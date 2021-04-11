@@ -25,7 +25,8 @@ import "Vector.proto";
 /**
  * Information about location and size of field objects and markers.
  * Details about field measurements can be found in 'Law 1 - The Field of Play',
- * in the RoboCup rulebook
+ * in the RoboCup rulebook.
+ * We have these config values mirrored in `SoccerConfig/data/config/`.
  */
 message FieldDescription {
     /// The cross-sectional shape of the goalposts
