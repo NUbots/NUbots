@@ -17,26 +17,24 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "HeadController.h"
+#include "HeadController.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KinematicsModel.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/comparison.h"
-#include "utility/math/coordinates.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/comparison.hpp"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 
 namespace module {
@@ -55,7 +53,6 @@ namespace motion {
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
-    using utility::support::Expression;
 
     // internal only callback messages to start and stop our action
     struct ExecuteHeadController {};

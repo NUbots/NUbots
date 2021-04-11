@@ -17,32 +17,32 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SimpleWalkPathPlanner.h"
+#include "SimpleWalkPathPlanner.hpp"
 
 #include <cmath>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
-#include "message/motion/KickCommand.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/Ball.h"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/Subsumption.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/nusight/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/matrix/Transform2D.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/eigen_armadillo.hpp"
 
 
 namespace module {
@@ -68,7 +68,7 @@ namespace behaviour {
         using utility::math::matrix::Transform3D;
         using utility::nusight::graph;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         using message::motion::DisableWalkEngineCommand;
@@ -131,7 +131,7 @@ namespace behaviour {
                 }}));
 
             on<Trigger<WalkStopped>>().then([this] {
-                emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {0, 0}}));
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
             });
 
             // on<Trigger<std::vector<Ball>>>().then([this]{
@@ -179,7 +179,7 @@ namespace behaviour {
 
 
                         emit(std::make_unique<StopCommand>(subsumptionId));
-                        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
+                        // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
 
                         return;
                     }
@@ -188,7 +188,7 @@ namespace behaviour {
                         std::unique_ptr<WalkCommand> command =
                             std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
                         emit(std::move(command));
-                        emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
+                        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                         return;
                     }
 
@@ -201,9 +201,9 @@ namespace behaviour {
 
                     arma::vec3 rBWw_temp = {ball.position[0], ball.position[1], fieldDescription.ball_radius};
                     rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
-                               Htw.i().x() + Htw.i().translation();                          // In front of the robot
-                    arma::vec3 pos = Htw.transformPoint(rBWw);
-                    position       = pos.rows(0, 1);
+                               Htw.i().x() + Htw.i().translation();          // In front of the robot
+                    arma::vec3 pos       = Htw.transformPoint(rBWw);
+                    position             = pos.rows(0, 1);
 
                     // Hack Planner:
                     float headingChange = 0;
@@ -263,7 +263,7 @@ namespace behaviour {
                     command->command = convert(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
 
                     emit(std::move(command));
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                 });
 
             on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this](const MotionCommand& cmd) {

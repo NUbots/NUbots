@@ -1,4 +1,4 @@
-#include "Factory.h"
+#include "Factory.hpp"
 
 #include <cstring>
 #include <fcntl.h>
@@ -9,12 +9,12 @@
 #include <va/va_drm.h>
 #include <va/va_enc_jpeg.h>
 
-#include "cl/opencl_context_for_display.h"
-#include "cl/opencl_error_category.h"
-#include "operation/create_surface.h"
+#include "cl/opencl_context_for_display.hpp"
+#include "cl/opencl_error_category.hpp"
+#include "operation/create_surface.hpp"
 #include "vaapi_error_category.hpp"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module::output::compressor::vaapi {
 
@@ -48,7 +48,8 @@ Factory::Factory(const std::string& device, const std::string& driver, const int
         this);
 
     // We use the iHD driver
-    va_status = vaSetDriverName(cctx.va.dpy, const_cast<char*>(driver.c_str()));
+    std::string d = driver;
+    va_status     = vaSetDriverName(cctx.va.dpy, d.data());
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error while setting the driver to use");
     }

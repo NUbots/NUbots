@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.19)
 project(NUbots)
 
 # ~~~
@@ -8,6 +8,11 @@ project(NUbots)
 # ~~~
 if(POLICY CMP0079)
   cmake_policy(SET CMP0079 NEW)
+endif()
+
+# Enable testing if we are building tests
+if(BUILD_TESTS)
+  enable_testing()
 endif()
 
 # Set on to prefer .a files over .so files for linking
@@ -20,34 +25,63 @@ if(STATIC_LIBRARIES)
 endif()
 
 # We use additional modules that cmake needs to know about
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
 
-# Include all of the globally shared link libraries
-include(SharedLibraries)
+# Default to do a debug build
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  set(CMAKE_BUILD_TYPE
+      Debug
+      CACHE STRING "Choose the type of build." FORCE
+  )
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
 
-# Include specific compiler options
-include(Compiler)
+# Enable all the warnings we can. We need noncall exceptions so we can throw exceptions from signal handlers. This
+# allows us to catch null pointer exceptions. no-int-in-bool-context is to silence a warning from Eigen.
+add_compile_options(-Wall -Wpedantic -Wextra -Wno-int-in-bool-context -fnon-call-exceptions)
 
-# Set flag so NUClear uses a custom clock implementation
-option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
-if(USE_CUSTOM_CLOCK)
-  add_definitions(-DNUCLEAR_CUSTOM_CLOCK)
-  add_subdirectory(shared/clock)
-endif(USE_CUSTOM_CLOCK)
+# C++17 allows eigen to not need to worry about alignment
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Hide some cmake variables that will never be used
-mark_as_advanced(
-  CMAKE_INSTALL_PREFIX
-  CURSES_CURSES_H_PATH
-  CURSES_FORM_LIBRARY
-  CURSES_HAVE_CURSES_H
-  OMPLAPP_LIBRARY
-  OMPL_CONFIG
-  OMPL_DIR
-  OMPL_INCLUDE_DIRS
-  OMPL_LIBRARIES
-  OMPL_LIBRARY
+# Make sure our binaries can find our libraries both in docker and on the robot
+list(APPEND CMAKE_INSTALL_RPATH /home/nubots/toolchain/)
+list(APPEND CMAKE_INSTALL_RPATH /usr/local/lib)
+
+# Disable armadillo bounds checking in release and min size release builds
+list(APPEND CMAKE_CXX_FLAGS_RELEASE "-DARMA_NO_DEBUG")
+list(APPEND CMAKE_CXX_FLAGS_MINSIZEREL "-DARMA_NO_DEBUG")
+
+# Default not to run the clang-tidy checks
+option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
+if(ENABLE_CLANG_TIDY)
+  set(CMAKE_CXX_CLANG_TIDY clang-tidy)
+  set(CMAKE_C_CLANG_TIDY clang-tidy)
+endif()
+
+# Enable address sanitizer
+option(USE_ASAN "Enable address sanitization" OFF)
+if(USE_ASAN)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common)
+  add_link_options(-fsanitize=address)
+  link_libraries(asan)
+endif()
+
+# Output the compilation database
+set(CMAKE_EXPORT_COMPILE_COMMANDS
+    ON
+    CACHE STRING "Enable/Disable output of compile commands during generation." FORCE
 )
+
+# Make the compiler display colours always (even when we build with ninja)
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
+  add_compile_options(-fdiagnostics-color=always)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang)
+  add_compile_options(-fcolor-diagnostics)
+endif()
 
 # Our banner file for placing at the top of the roles
 set(NUCLEAR_ROLE_BANNER_FILE
@@ -55,22 +89,16 @@ set(NUCLEAR_ROLE_BANNER_FILE
     CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
 
-if(BUILD_TESTS)
-  enable_testing()
-endif(BUILD_TESTS)
-
 # Include the NUClear roles system
 add_subdirectory(nuclear)
 
-# Messages and utilities have a dependency on the custom clock implementation
+# Setting to use the custom clock with an adaptable rate
+option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
 if(USE_CUSTOM_CLOCK)
-  target_link_libraries(${NUCLEAR_UTILITY_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
-  target_link_libraries(${NUCLEAR_MESSAGE_LIBRARIES} $<TARGET_OBJECTS:nubots_clock>)
-endif(USE_CUSTOM_CLOCK)
+  add_subdirectory(shared/clock)
+endif()
 
-# Enable sending binaries to robots
-include(RobotSend)
-
+# Add the shared tests. Must happen after adding NUClear so that this variable is cached
 if(BUILD_TESTS)
-  add_subdirectory(shared/tests)
-endif(BUILD_TESTS)
+  add_subdirectory(${NUCLEAR_SHARED_DIR}/tests)
+endif()

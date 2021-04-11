@@ -17,19 +17,19 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Getup.h"
+#include "Getup.hpp"
 
 #include <cmath>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/GetupCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/GetupCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
 
 namespace module {
 namespace behaviour {
@@ -42,7 +42,7 @@ namespace behaviour {
         using message::motion::ExecuteGetup;
         using message::motion::KillGetup;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
@@ -120,7 +120,7 @@ namespace behaviour {
         }
 
         void Getup::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
         }
 
     }  // namespace skills

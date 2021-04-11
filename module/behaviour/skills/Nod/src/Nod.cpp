@@ -17,18 +17,18 @@
  * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#include "Nod.h"
+#include "Nod.hpp"
 
 #include <nuclear>
 
-#include "extension/Configuration.h"
-#include "extension/Script.h"
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/Nod.h"
+#include "message/behaviour/Nod.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace behaviour {
@@ -42,7 +42,7 @@ namespace behaviour {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
@@ -78,7 +78,7 @@ namespace behaviour {
         }
 
         void Nod::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
         }
     }  // namespace skills
 }  // namespace behaviour

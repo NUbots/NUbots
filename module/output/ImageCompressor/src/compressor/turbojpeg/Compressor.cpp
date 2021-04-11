@@ -1,11 +1,11 @@
-#include "Compressor.h"
+#include "Compressor.hpp"
 
 #include <fmt/format.h>
 #include <turbojpeg.h>
 
-#include "../mosaic.h"
+#include "../mosaic.hpp"
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module {
 namespace output {

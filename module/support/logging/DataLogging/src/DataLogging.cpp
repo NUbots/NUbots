@@ -1,13 +1,13 @@
-#include "DataLogging.h"
+#include "DataLogging.hpp"
 
 #include <fmt/format.h>
 #include <iomanip>
 #include <sstream>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "utility/file/fileutil.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/file/fileutil.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace support {
@@ -98,7 +98,7 @@ namespace support {
 
                         // Rescue any existing recorders that we want to keep
                         std::map<std::string, ReactionHandle> new_handles;
-                        for (auto& setting : cfg["messages"].config) {
+                        for (const auto& setting : cfg["messages"].config) {
                             std::string name = setting.first.as<std::string>();
                             bool enabled     = setting.second.as<bool>();
 
@@ -116,7 +116,7 @@ namespace support {
                         }
 
                         // Add any new recorders that we don't have yet
-                        for (auto& setting : cfg["messages"].config) {
+                        for (const auto& setting : cfg["messages"].config) {
                             std::string name = setting.first.as<std::string>();
                             bool enabled     = setting.second.as<bool>();
 

@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Transform3D.h"
+#include "Transform3D.hpp"
 
 namespace utility {
 namespace math {
