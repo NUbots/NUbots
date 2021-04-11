@@ -1,8 +1,8 @@
 import bounds from 'binary-search-bounds'
 import { action } from 'mobx'
 
-import { BrowserSystemClock } from '../../../client/time/browser_clock'
-import { message } from '../../../shared/proto/messages'
+import { BrowserSystemClock } from '../../time/browser_clock'
+import { message } from '../../../shared/messages'
 import { Clock } from '../../../shared/time/clock'
 import { toSeconds } from '../../../shared/time/timestamp'
 import { Vector2 } from '../../math/vector2'

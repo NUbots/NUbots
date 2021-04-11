@@ -43,7 +43,7 @@ namespace behaviour {
         std::function<void(std::set<ServoID>)> completed;
     };
 
-    struct ActionPriorites {
+    struct ActionPriorities {
         size_t id;
 
         std::vector<float> priorities;

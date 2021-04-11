@@ -42,7 +42,7 @@ namespace behaviour {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
@@ -78,7 +78,7 @@ namespace behaviour {
         }
 
         void Nod::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
         }
     }  // namespace skills
 }  // namespace behaviour
