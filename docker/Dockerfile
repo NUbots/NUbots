@@ -264,6 +264,7 @@ RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases
 
 # Install python libraries
 RUN pip install \
+    xxhash \
     pylint \
     termcolor \
     stringcase \
