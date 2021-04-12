@@ -21,4 +21,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})
 endif()
 
+# Generate the decoders for each of the message types we know
+add_custom_command(
+  OUTPUT "${source_file}"
+  COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
+          "${PROJECT_BINARY_DIR}/nuclear/message/python" "${source_file}"
+  DEPENDS nuclear::message "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
+  COMMENT "Generating DataPlayback system for current messages"
+)
+
 target_compile_features(nuclear_utility PUBLIC cxx_std_17)
