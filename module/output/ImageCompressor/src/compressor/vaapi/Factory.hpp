@@ -10,11 +10,15 @@ namespace module::output::compressor::vaapi {
 class Factory : public CompressorFactory {
 public:
     Factory(const std::string& device, const std::string& driver, const int& quality);
+    Factory(const Factory&) = default;
+    Factory(Factory&&)      = default;
+    Factory& operator=(const Factory&) = default;
+    Factory& operator=(Factory&&) = default;
     virtual ~Factory();
 
-    virtual std::shared_ptr<compressor::Compressor> make_compressor(const uint32_t width,
-                                                                    const uint32_t& height,
-                                                                    const uint32_t& format) override;
+    std::shared_ptr<compressor::Compressor> make_compressor(const uint32_t& width,
+                                                            const uint32_t& height,
+                                                            const uint32_t& format) override;
 
 private:
     /// The file descriptor we opened for the DRM device

@@ -43,8 +43,8 @@ VABufferID picture_parameter(VADisplay dpy,
     }
 
     // Upload to device
-    VABufferID bufferid;
-    VAStatus va_status = vaCreateBuffer(dpy,
+    VABufferID bufferid = 0;
+    VAStatus va_status  = vaCreateBuffer(dpy,
                                         context,
                                         VAEncPictureParameterBufferType,
                                         sizeof(VAEncPictureParameterBufferJPEG),

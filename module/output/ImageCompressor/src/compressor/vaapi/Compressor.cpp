@@ -8,7 +8,6 @@
 #include <va/va_drm.h>
 #include <va/va_enc_jpeg.h>
 
-#include "../mosaic.hpp"
 #include "cl/make_mosaic_kernel.hpp"
 #include "cl/mosaic_to_surface.hpp"
 #include "cl/opencl_error_category.hpp"
@@ -22,17 +21,18 @@
 #include "vaapi_error_category.hpp"
 
 #include "utility/vision/fourcc.hpp"
+#include "utility/vision/mosaic.hpp"
 
 namespace module::output::compressor::vaapi {
 
-Compressor::Compressor(CompressionContext cctx,
+Compressor::Compressor(const CompressionContext& cctx,
                        const uint32_t& width,
                        const uint32_t& height,
                        const uint32_t& format,
                        const int& quality)
-    : cctx(cctx), width(width), height(height), format(format) {
+    : cctx(cctx), surface{}, context{}, encoded{}, buffers{}, width(width), height(height), format(format) {
 
-    VAStatus va_status;
+    VAStatus va_status = 0;
 
     // If we are storing in a YUV400 it is a monochrome image
     bool monochrome = operation::va_render_target_type_from_format(format) == VA_RT_FORMAT_YUV400;
@@ -41,8 +41,8 @@ Compressor::Compressor(CompressionContext cctx,
     surface = operation::create_surface(cctx.va.dpy, width, height, format);
 
     // If we have a mosaic pattern we need to setup OpenCL to do the mosaic permutation
-    if (mosaic::mosaic_size(format) > 0) {
-        cl_int error;
+    if (utility::vision::Mosaic::size(format) > 1) {
+        cl_int error = 0;
 
         // Create a command queue to run the mosaic kernels on
         command_queue = cl::command_queue(
@@ -111,15 +111,11 @@ Compressor::~Compressor() {
     }
     vaDestroySurfaces(cctx.va.dpy, &surface, 1);
     vaDestroyContext(cctx.va.dpy, context);
-    clReleaseCommandQueue(command_queue);
 }
 
-std::vector<uint8_t> Compressor::compress(const std::vector<uint8_t>& data,
-                                          const uint32_t& width,
-                                          const uint32_t& height,
-                                          const uint32_t& format) {
+std::vector<uint8_t> Compressor::compress(const std::vector<uint8_t>& data) {
 
-    if (mosaic::mosaic_size(format) > 0) {
+    if (utility::vision::Mosaic::size(format) > 1) {
         // Use OpenCL to permute the mosaic into the surface
         cl::mosaic_to_surface(cctx.cl, command_queue, mosaic_kernel, cl_image, data, width, height, cl_surface);
     }
@@ -149,14 +145,14 @@ std::vector<uint8_t> Compressor::compress(const std::vector<uint8_t>& data,
     }
 
     // Map the encoded buffer into user space
-    VACodedBufferSegment* encoded_status;
-    va_status = vaMapBuffer(cctx.va.dpy, encoded, reinterpret_cast<void**>(&encoded_status));
+    VACodedBufferSegment* encoded_status = nullptr;
+    va_status                            = vaMapBuffer(cctx.va.dpy, encoded, reinterpret_cast<void**>(&encoded_status));
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error mapping the encoded buffer into user space");
     }
 
     // Copy the data into the output vector
-    const uint8_t* buffer = reinterpret_cast<const uint8_t*>(encoded_status->buf);
+    const auto* buffer = reinterpret_cast<const uint8_t*>(encoded_status->buf);
     std::vector<uint8_t> output(buffer, buffer + encoded_status->size);
 
     // Unmap the buffer back to device space
