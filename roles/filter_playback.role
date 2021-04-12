@@ -10,5 +10,5 @@ nuclear_role(
   network::NUClearNet
   support::logging::DataPlayback
   platform::darwin::SensorFilter
-  support::NUsight
+  output::NetworkForwarder
 )
