@@ -304,7 +304,7 @@ namespace support {
                         auto m = g.detect(image, world.robotPose, sensors, cfg_.vision_error, *fd);
 
                         // Copy across the important bits
-                        goals->camera_id = m.camera_id;
+                        goals->id        = m.id;
                         goals->timestamp = m.timestamp;
                         goals->Hcw       = m.Hcw;
 
