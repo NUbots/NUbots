@@ -17,7 +17,8 @@ endif()
 
 # Set on to prefer .a files over .so files for linking
 option(STATIC_LIBRARIES
-       "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF
+       "Prefer using static .a files rather than .so files. NOTE: This must be enabled from an empty build directory!"
+       OFF
 )
 
 if(STATIC_LIBRARIES)
@@ -26,6 +27,9 @@ endif()
 
 # We use additional modules that cmake needs to know about
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
+
+# If this option is set we are building using continous integration
+option(CI_BUILD "Enable build options for building in the CI server" OFF)
 
 # Default to do a debug build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -38,29 +42,31 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-# Enable all the warnings we can. We need noncall exceptions so we can throw exceptions from signal handlers. This
-# allows us to catch null pointer exceptions. no-int-in-bool-context is to silence a warning from Eigen.
-add_compile_options(-Wall -Wpedantic -Wextra -Wno-int-in-bool-context -fnon-call-exceptions)
-
-# C++17 allows eigen to not need to worry about alignment
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Make sure our binaries can find our libraries both in docker and on the robot
-list(APPEND CMAKE_INSTALL_RPATH /home/nubots/toolchain/)
-list(APPEND CMAKE_INSTALL_RPATH /usr/local/lib)
-
-# Disable armadillo bounds checking in release and min size release builds
-list(APPEND CMAKE_CXX_FLAGS_RELEASE "-DARMA_NO_DEBUG")
-list(APPEND CMAKE_CXX_FLAGS_MINSIZEREL "-DARMA_NO_DEBUG")
-
-# Default not to run the clang-tidy checks
+# Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
-if(ENABLE_CLANG_TIDY)
-  set(CMAKE_CXX_CLANG_TIDY clang-tidy)
-  set(CMAKE_C_CLANG_TIDY clang-tidy)
-endif()
+if(ENABLE_CLANG_TIDY OR CI_BUILD)
+  find_package(PythonInterp 3 REQUIRED)
+  set(CMAKE_CXX_CLANG_TIDY "${PYTHON_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/cmake/scripts/clang-tidy.py"
+                           "${PROJECT_BINARY_DIR}/clang-tidy-fixes" clang-tidy
+  )
+  set(CMAKE_C_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY})
+
+  # Create a target that will apply clang-tidy fixes to the codebase
+  add_custom_target(
+    apply-clang-tidy
+    COMMAND clang-apply-replacements --format --style=file --style-config="${PROJECT_SOURCE_DIR}"
+            --remove-change-desc-files "${PROJECT_BINARY_DIR}/clang-tidy-fixes"
+    COMMENT "Applying fixes from clang-tidy to the codebase."
+  )
+endif(ENABLE_CLANG_TIDY OR CI_BUILD)
+
+# If we are doing a CI build then we want to enable -Werror when compiling warnings are bad. We will also make it fail
+# if clang-tidy has an error
+if(CI_BUILD)
+  add_compile_options(-Werror)
+  set(CMAKE_CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY} -warnings-as-errors=*)
+  set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
+endif(CI_BUILD)
 
 # Enable address sanitizer
 option(USE_ASAN "Enable address sanitization" OFF)
@@ -70,11 +76,25 @@ if(USE_ASAN)
   link_libraries(asan)
 endif()
 
+# Enable testing if we are building tests
+if(BUILD_TESTS)
+  enable_testing()
+endif(BUILD_TESTS)
+
 # Output the compilation database
 set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
     CACHE STRING "Enable/Disable output of compile commands during generation." FORCE
 )
+
+# Enable all warnings that we can
+add_compile_options(-Wall -Wpedantic -Wextra)
+
+# This is needed everywhere so that we can catch segmentation faults
+add_compile_options(-fnon-call-exceptions)
+
+# Make NUClear use the system clock, as we are syncing it with ptp
+add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::system_clock)
 
 # Make the compiler display colours always (even when we build with ninja)
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
