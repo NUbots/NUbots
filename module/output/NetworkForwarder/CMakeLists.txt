@@ -1,4 +1,4 @@
-# Generate our EyeOfHorus handlers for all the message types
+# Generate our handlers for all the message types
 find_package(PythonInterp 3 REQUIRED)
 
 set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/register_handles.cpp")

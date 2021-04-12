@@ -1,5 +1,5 @@
-#ifndef MODULE_SUPPORT_NUSIGHT_HPP
-#define MODULE_SUPPORT_NUSIGHT_HPP
+#ifndef MODULE_OUTPUT_NETWORKFORWARDER_HPP
+#define MODULE_OUTPUT_NETWORKFORWARDER_HPP
 
 #include <map>
 #include <memory>
@@ -22,11 +22,11 @@ namespace id {
     }
 }  // namespace id
 
-class NUsight : public NUClear::Reactor {
+class NetworkForwarder : public NUClear::Reactor {
 
 public:
-    /// @brief Called by the powerplant to build and setup the NUsight reactor.
-    explicit NUsight(std::unique_ptr<NUClear::Environment> environment);
+    /// @brief Called by the powerplant to build and setup the NetworkForwarder reactor.
+    explicit NetworkForwarder(std::unique_ptr<NUClear::Environment> environment);
 
 private:
     struct {
@@ -71,4 +71,4 @@ private:
 
 }  // namespace module::support
 
-#endif  // MODULE_SUPPORT_NUSIGHT_HPP
+#endif  // MODULE_OUTPUT_NETWORKFORWARDER_HPP
