@@ -31,8 +31,8 @@ CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy) {
             auto devices_from_display = reinterpret_cast<clGetDeviceIDsFromVA_APIMediaAdapterINTEL_fn>(
                 clGetExtensionFunctionAddressForPlatform(platform_id, "clGetDeviceIDsFromVA_APIMediaAdapterINTEL"));
             if (devices_from_display != nullptr) {
-                cl_uint n_devices;
-                cl_int err = devices_from_display(platform_id,
+                cl_uint n_devices = 0;
+                cl_int err        = devices_from_display(platform_id,
                                                   CL_VA_API_DISPLAY_INTEL,
                                                   dpy,
                                                   CL_PREFERRED_DEVICES_FOR_VA_API_INTEL,
@@ -53,11 +53,11 @@ CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy) {
                                                nullptr);
 
                     // the properties list that is used to create context
-                    cl_context_properties props[] = {CL_CONTEXT_VA_API_DISPLAY_INTEL,
-                                                     reinterpret_cast<cl_context_properties>(dpy),
-                                                     CL_CONTEXT_INTEROP_USER_SYNC,
-                                                     CL_TRUE,
-                                                     0};
+                    std::array<cl_context_properties, 5> props = {CL_CONTEXT_VA_API_DISPLAY_INTEL,
+                                                                  reinterpret_cast<cl_context_properties>(dpy),
+                                                                  CL_CONTEXT_INTEROP_USER_SYNC,
+                                                                  CL_TRUE,
+                                                                  0};
 
                     // Grab the other functions that we will need
                     auto mem_from_surface = reinterpret_cast<clCreateFromVA_APIMediaSurfaceINTEL_fn>(
@@ -76,7 +76,7 @@ CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy) {
 
                     // create context for the first device only
                     cl::context context =
-                        cl::context(clCreateContext(props, 1, device_ids.data(), nullptr, nullptr, &err),
+                        cl::context(clCreateContext(props.data(), 1, device_ids.data(), nullptr, nullptr, &err),
                                     ::clReleaseContext);
                     if (err != CL_SUCCESS) {
                         throw std::system_error(err,

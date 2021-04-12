@@ -8,10 +8,7 @@ namespace module::output::compressor {
 
 class Compressor {
 public:
-    virtual std::vector<uint8_t> compress(const std::vector<uint8_t>& data,
-                                          const uint32_t& width,
-                                          const uint32_t& height,
-                                          const uint32_t& format) = 0;
+    virtual std::vector<uint8_t> compress(const std::vector<uint8_t>& data) = 0;
 };
 
 }  // namespace module::output::compressor
