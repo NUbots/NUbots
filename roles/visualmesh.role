@@ -9,6 +9,7 @@ nuclear_role(
   # Support
   network::NUClearNet
   output::NetworkForwarder
+  output::Overview
   # support::VirtualCamera
   support::configuration::SoccerConfig
   # Sensors

@@ -12,6 +12,7 @@ nuclear_role(
   platform::darwin::SensorFilter
   input::Camera
   output::NetworkForwarder
+  output::Overview
   output::ImageCompressor
   support::configuration::SoccerConfig
 )

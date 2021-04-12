@@ -11,4 +11,5 @@ nuclear_role(
   platform::darwin::HardwareIO
   platform::darwin::SensorFilter
   output::NetworkForwarder
+  output::Overview
 )

@@ -9,6 +9,7 @@ nuclear_role(
   support::configuration::SoccerConfig
   network::NUClearNet
   output::NetworkForwarder
+  output::Overview
   # Hardware Interface
   platform::darwin::HardwareSimulator
   platform::darwin::SensorFilter
