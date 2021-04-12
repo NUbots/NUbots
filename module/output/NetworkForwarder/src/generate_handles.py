@@ -45,17 +45,17 @@ if __name__ == "__main__":
     # The base of our source file we will be filling in
     source = dedent(
         """\
-        #include "EyeOfHorus.hpp"
+        #include "NetworkForwarder.hpp"
 
         {includes}
 
-        namespace module::support {{
+        namespace module::output {{
 
-            void EyeOfHorus::register_handles() {{
+            void NetworkForwarder::register_handles() {{
         {handles}
             }}
 
-        }}  // namespace module::support
+        }}  // namespace module::output
 
         """
     )

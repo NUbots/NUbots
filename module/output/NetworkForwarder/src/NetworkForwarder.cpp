@@ -1,20 +1,21 @@
-#include "NUsight.hpp"
+#include "NetworkForwarder.hpp"
 
 #include "extension/Configuration.hpp"
 
-namespace module::support {
+namespace module::output {
 
 using extension::Configuration;
 
-NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+NetworkForwarder::NetworkForwarder(std::unique_ptr<NUClear::Environment> environment)
+    : Reactor(std::move(environment)) {
 
     // Register the message forwarding
     register_handles();
 
-    on<Configuration>("NUsight.yaml").then([this](const Configuration& cfg) {
+    on<Configuration>("NetworkForwarder.yaml").then([this](const Configuration& cfg) {
         config.target = cfg["target"].as<std::string>();
 
-        // Update which types we will be forwarding to NUsight
+        // Update which types we will be forwarding
         for (const auto& setting : cfg["messages"].config) {
             // Get the name of the type
             auto name = setting.first.as<std::string>();
@@ -50,10 +51,10 @@ NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment) : Reactor(st
                 }
             }
             else {
-                log<NUClear::WARN>("Eye of Horus does not know about the message type", name);
+                log<NUClear::WARN>("Network Forwarder does not know about the message type", name);
             }
         }
     });
 }
 
-}  // namespace module::support
+}  // namespace module::output
