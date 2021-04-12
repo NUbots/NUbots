@@ -17,24 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "message/input/Sensors.hpp"
+// Uncomment this line when other test files are added
+//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+//#include <catch.hpp>
 
-#include "NUsight.hpp"
-
-#include "utility/support/eigen_armadillo.hpp"
-
-namespace module {
-namespace support {
-
-    using message::input::Sensors;
-
-    void NUsight::provideSensors() {
-
-        // This trigger gets the output from the sensors (unfiltered)
-        handles["sensor_data"].push_back(
-            on<Trigger<Sensors>, Single, Priority::LOW>().then([this](std::shared_ptr<const Sensors> sensors) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(sensors), "nusight", false);
-            }));
-    }
-}  // namespace support
-}  // namespace module
+// Remove this line when test files are added
+int main() {
+    return 0;
+}
