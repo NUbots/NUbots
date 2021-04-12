@@ -2,7 +2,7 @@
 
 #include "extension/Configuration.hpp"
 
-namespace module::support {
+namespace module::output {
 
 using extension::Configuration;
 
@@ -57,4 +57,4 @@ NetworkForwarder::NetworkForwarder(std::unique_ptr<NUClear::Environment> environ
     });
 }
 
-}  // namespace module::support
+}  // namespace module::output

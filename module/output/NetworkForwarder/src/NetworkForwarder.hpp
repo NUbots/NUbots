@@ -7,7 +7,7 @@
 
 #include "utility/type_traits/has_id.hpp"
 
-namespace module::support {
+namespace module::output {
 
 namespace id {
     /// @brief Returns the id field of data or, if id does not exist, 0
@@ -69,6 +69,6 @@ private:
     std::map<std::string, std::shared_ptr<Handle>> handles;
 };
 
-}  // namespace module::support
+}  // namespace module::output
 
 #endif  // MODULE_OUTPUT_NETWORKFORWARDER_HPP
