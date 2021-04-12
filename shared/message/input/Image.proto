@@ -44,7 +44,7 @@ message Image {
     uint32                    format     = 1;
     uvec2                     dimensions = 2;
     bytes                     data       = 3;
-    uint32                    camera_id  = 4;
+    uint32                    id         = 4;
     string                    name       = 5;
     google.protobuf.Timestamp timestamp  = 6;
     mat4                      Hcw        = 7;

@@ -38,8 +38,8 @@ VABufferID huffman_table(VADisplay dpy, VAContextID context, const bool& monochr
         std::memset(params.huffman_table[1].pad, 0, 2);
     }
 
-    VABufferID bufferid;
-    VAStatus va_status = vaCreateBuffer(dpy,
+    VABufferID bufferid = 0;
+    VAStatus va_status  = vaCreateBuffer(dpy,
                                         context,
                                         VAHuffmanTableBufferType,
                                         sizeof(VAHuffmanTableBufferJPEGBaseline),

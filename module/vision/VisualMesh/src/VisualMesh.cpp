@@ -137,8 +137,8 @@ namespace vision {
             auto results = (*classifier)(m, img.data.data(), img.format, Hoc, lens);
 
             // Copy the data into the message
-            auto msg       = std::make_unique<VisualMeshMsg>();
-            msg->camera_id = img.camera_id;
+            auto msg = std::make_unique<VisualMeshMsg>();
+            msg->id  = img.id;
 
             // Get all the rays
             msg->rays.resize(3, results.global_indices.size());
