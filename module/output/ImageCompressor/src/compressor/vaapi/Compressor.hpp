@@ -12,17 +12,18 @@ namespace module::output::compressor::vaapi {
 
 struct Compressor : public compressor::Compressor {
 
-    Compressor(CompressionContext cctx,
+    Compressor(const CompressionContext& cctx,
                const uint32_t& width,
                const uint32_t& height,
                const uint32_t& format,
                const int& quality);
+    Compressor(const Compressor&) = default;
+    Compressor(Compressor&&)      = default;
+    Compressor& operator=(const Compressor&) = default;
+    Compressor& operator=(Compressor&&) = default;
     virtual ~Compressor();
 
-    virtual std::vector<uint8_t> compress(const std::vector<uint8_t>& data,
-                                          const uint32_t& width,
-                                          const uint32_t& height,
-                                          const uint32_t& format) override;
+    std::vector<uint8_t> compress(const std::vector<uint8_t>& data) override;
 
     // Contexts and buffers used for compressing images
     CompressionContext cctx;
