@@ -7,7 +7,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "utility/nbs/Index.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::logging {
