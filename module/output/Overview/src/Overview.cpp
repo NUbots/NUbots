@@ -15,6 +15,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/GlobalConfig.hpp"
+#include "message/support/nusight/Overview.hpp"
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 

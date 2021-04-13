@@ -16,6 +16,7 @@ public:
     explicit Overview(std::unique_ptr<NUClear::Environment> environment);
 
 private:
+    NUClear::clock::time_point last_camera_image;
     NUClear::clock::time_point last_seen_ball;
     NUClear::clock::time_point last_seen_goal;
 };
