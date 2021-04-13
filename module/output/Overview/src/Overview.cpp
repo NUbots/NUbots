@@ -28,13 +28,14 @@ using message::input::GameState;
 using message::input::Image;
 using message::input::Sensors;
 using message::localisation::Field;
+using message::motion::WalkCommand;
 using message::support::GlobalConfig;
-using message::support::nusight::Overview;
 using NUClear::message::CommandLineArguments;
+
 using LocalisationBall = message::localisation::Ball;
 using VisionBalls      = message::vision::Balls;
 using VisionGoals      = message::vision::Goals;
-using message::motion::WalkCommand;
+using OverviewMsg      = message::support::nusight::Overview;
 
 Overview::Overview(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
 
@@ -76,7 +77,7 @@ Overview::Overview(std::unique_ptr<NUClear::Environment> environment) : Reactor(
                      std::shared_ptr<const GameState> game_state,
                      std::shared_ptr<const WalkPath> walk_path,
                      std::shared_ptr<const WalkCommand> walk_command) {
-            auto msg = std::make_unique<Overview>();
+            auto msg = std::make_unique<OverviewMsg>();
 
             // Set properties
             msg->timestamp       = NUClear::clock::now();
