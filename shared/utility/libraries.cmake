@@ -21,13 +21,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})
 endif()
 
-# Generate the decoders for each of the message types we know
+# Create a symlink to recordings so we can access them from build (helpful for docker)
 add_custom_command(
-  OUTPUT "${source_file}"
-  COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
-          "${PROJECT_BINARY_DIR}/nuclear/message/python" "${source_file}"
-  DEPENDS nuclear::message "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_dataplayback.py"
-  COMMENT "Generating DataPlayback system for current messages"
+  OUTPUT "${CMAKE_BINARY_DIR}/recordings"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_SOURCE_DIR}/recordings" "${CMAKE_BINARY_DIR}/recordings"
+  COMMENT "Creating a link to the recordings directory"
 )
+target_sources(nuclear_utility PRIVATE "${CMAKE_BINARY_DIR}/recordings")
 
 target_compile_features(nuclear_utility PUBLIC cxx_std_17)
