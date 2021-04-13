@@ -118,7 +118,7 @@ ImageDecompressor::ImageDecompressor(std::unique_ptr<NUClear::Environment> envir
                 }
             }
         }
-        // We failed to compress this image
+        // We failed to decompress this image
         ++dropped;
     });
 

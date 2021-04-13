@@ -16,7 +16,7 @@ public:
     Factory& operator=(Factory&&) = default;
     virtual ~Factory();
 
-    std::shared_ptr<compressor::Compressor> make_compressor(uint32_t width,
+    std::shared_ptr<compressor::Compressor> make_compressor(const uint32_t& width,
                                                             const uint32_t& height,
                                                             const uint32_t& format) override;
 
