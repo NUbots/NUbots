@@ -15,21 +15,21 @@ namespace module::output::compressor::vaapi::operation {
 void unpack_copy(const uint8_t* const& rgb_begin, const uint8_t* const& rgb_end, uint8_t* rgba_ptr) {
 
     // Cast rgba into a uint32_t
-    uint32_t* rgba = reinterpret_cast<uint32_t*>(rgba_ptr);
+    auto* rgba = reinterpret_cast<uint32_t*>(rgba_ptr);
 
     // Move through 3 bytes at a time, but skip the last element (last 3 bytes) as it is not large
     // enough to do a 4 byte copy without accessing out of bounds memory
-    const uint8_t* rgb;  // Needed after
+    const uint8_t* rgb = nullptr;  // Outside of the for loop as we need the last value it holds
     for (rgb = rgb_begin; rgb < rgb_end - 3; rgb += 3) {
         *(rgba++) = *reinterpret_cast<const uint32_t*>(rgb) | 0xFF000000;
     }
 
     // The rgb array is one byte shorter than the rgba array, so we have to copy the last byte by hand
-    uint8_t* rgba_last = reinterpret_cast<uint8_t*>(rgba);
-    rgba_last[0]       = rgb[0];
-    rgba_last[1]       = rgb[1];
-    rgba_last[2]       = rgb[2];
-    rgba_last[3]       = 0xFF;
+    auto* rgba_last = reinterpret_cast<uint8_t*>(rgba);
+    rgba_last[0]    = rgb[0];
+    rgba_last[1]    = rgb[1];
+    rgba_last[2]    = rgb[2];
+    rgba_last[3]    = 0xFF;
 }
 
 void image_to_buffer(uint8_t* buffer,
@@ -114,7 +114,7 @@ void upload_to_surface(VADisplay dpy,
                        const uint32_t& format,
                        VASurfaceID surface_id) {
 
-    VAStatus va_status;
+    VAStatus va_status = 0;
 
     // Get access to the memory on the device
     VAImage surface_image;
