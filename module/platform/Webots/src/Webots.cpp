@@ -263,6 +263,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     for (const auto& position : sensor_measurements.position_sensors) {
         // string name
         // double value
+        translate_servo_id(position.name, sensor_data.servo).presentPosition = position.value;
     }
 
     for (const auto& accelerometer : sensor_measurements.accelerometers) {
