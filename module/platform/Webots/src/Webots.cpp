@@ -120,7 +120,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
                 // We haven't received any messages lately
             });
-            
+
             setup_connection(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
         });
 
@@ -162,7 +162,7 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
     shutdown_handle.unbind();
 
     int fd = tcpip_connect(server_address, port);
-            
+
     char inital_message[8];
     int n = recv(fd, inital_message, sizeof(inital_message), 0);
 
@@ -260,6 +260,88 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     for (const auto& position : sensor_measurements.position_sensors) {
         // string name
         // double value
+        switch(position){
+            case "right_shoulder_pitch":{
+
+                break;
+            }
+            case "left_shoulder_pitch":{
+
+                break;
+            }
+            case "right_shoulder_roll":{
+
+                break;
+            }
+            case "left_shoulder_roll":{
+
+                break;
+            }
+            case "right_elbow_pitch":{
+
+                break;
+            }
+            case "left_elbow_pitch":{
+
+                break;
+            }
+            case "right_hip_yaw":{
+
+                break;
+            }
+            case "left_hip_yaw":{
+
+                break;
+            }
+            case "right_hip_roll":{
+
+                break;
+            }
+            case "left_hip_roll":{
+
+                break;
+            }
+            case "right_hip_pitch":{
+
+                break;
+            }
+            case "left_hip_pitch":{
+
+                break;
+            }
+            case "right_knee_pitch":{
+
+                break;
+            }
+            case "left_knee_pitch":{
+
+                break;
+            }
+            case "right_ankle_pitch":{
+
+                break;
+            }
+            case "left_ankle_pitch":{
+
+                break;
+            }
+            case "right_ankle_roll":{
+
+                break;
+            }
+            case "left_ankle_roll":{
+
+                break;
+            }
+            case "neck_yaw":{
+
+                break;
+            }
+            case "head_pitch":{
+
+                break;
+            }
+        }
     }
 
     for (const auto& accelerometer : sensor_measurements.accelerometers) {
