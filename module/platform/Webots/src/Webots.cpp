@@ -18,6 +18,7 @@
  */
 
 #include "Webots.hpp"
+#include "utility/input/ServoID.hpp"
 
 #include <chrono>
 #include <fmt/format.h>
@@ -59,6 +60,8 @@ using message::platform::webots::SensorMeasurements;
 
 using message::support::GlobalConfig;
 using utility::vision::fourcc;
+using utility::input::ServoID;
+using utility::platform::darwin::getDarwinServo;
 
 int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
     // Hints for the connection type
@@ -260,88 +263,6 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     for (const auto& position : sensor_measurements.position_sensors) {
         // string name
         // double value
-        switch(position){
-            case "right_shoulder_pitch":{
-
-                break;
-            }
-            case "left_shoulder_pitch":{
-
-                break;
-            }
-            case "right_shoulder_roll":{
-
-                break;
-            }
-            case "left_shoulder_roll":{
-
-                break;
-            }
-            case "right_elbow_pitch":{
-
-                break;
-            }
-            case "left_elbow_pitch":{
-
-                break;
-            }
-            case "right_hip_yaw":{
-
-                break;
-            }
-            case "left_hip_yaw":{
-
-                break;
-            }
-            case "right_hip_roll":{
-
-                break;
-            }
-            case "left_hip_roll":{
-
-                break;
-            }
-            case "right_hip_pitch":{
-
-                break;
-            }
-            case "left_hip_pitch":{
-
-                break;
-            }
-            case "right_knee_pitch":{
-
-                break;
-            }
-            case "left_knee_pitch":{
-
-                break;
-            }
-            case "right_ankle_pitch":{
-
-                break;
-            }
-            case "left_ankle_pitch":{
-
-                break;
-            }
-            case "right_ankle_roll":{
-
-                break;
-            }
-            case "left_ankle_roll":{
-
-                break;
-            }
-            case "neck_yaw":{
-
-                break;
-            }
-            case "head_pitch":{
-
-                break;
-            }
-        }
     }
 
     for (const auto& accelerometer : sensor_measurements.accelerometers) {
@@ -388,6 +309,33 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
             case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
             case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
         }
+    }
+}
+
+DarwinSensors::Servo& translate_servo_id(const std::string& name, const DarwinSensors::Servos& servos) {
+    switch(name){
+        case "right_shoulder_pitch_sensor": return servos.rShoulderPitch;
+        case "left_shoulder_pitch": return servos.lShoulderPitch;
+        case "right_shoulder_roll": return servos.rShoulderRoll;
+        case "left_shoulder_roll": return servos.lShoulderRoll;
+        case "right_elbow_pitch": return servos.rElbow;
+        case "left_elbow_pitch": return servos.lElbow;
+        case "right_hip_yaw": return servos.rHipYaw;
+        case "left_hip_yaw": return servos.lHipYaw;
+        case "right_hip_roll": return servos.rHipRoll;
+        case "left_hip_roll": return servos.lHipRoll;
+        case "right_hip_pitch": return servos.rHipPitch;
+        case "left_hip_pitch": return servos.lHipPitch;
+        case "right_knee_pitch": return servos.rKnee;
+        case "left_knee_pitch": return servos.lKnee;
+        case "right_ankle_pitch": return servos.rAnklePitch;
+        case "left_ankle_pitch": return servos.lAnklePitch;
+        case "right_ankle_roll": return servos.rAnkleRoll;
+        case "left_ankle_roll": return servos.lAnkleRoll;
+        case "neck_yaw": return servos.headPan;
+        case "head_pitch": return servos.headTilt;
+
+        default: throw std::runtime_error("Out of bounds on servo name");
     }
 }
 
