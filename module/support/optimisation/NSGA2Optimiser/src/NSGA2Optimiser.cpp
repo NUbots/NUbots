@@ -2,9 +2,9 @@
 
 #include "extension/Configuration.h"
 
-#include "message/support/optimisation/NSGA2EvaluationRequest.h"
-#include "message/support/optimisation/NSGA2FitnessScores.h"
-#include "message/support/optimisation/NSGA2Terminate.h"
+#include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
+#include "message/support/optimisation/NSGA2FitnessScores.hpp"
+#include "message/support/optimisation/NSGA2Terminate.hpp"
 #include "utility/file/fileutil.h"
 #include "utility/input/ServoID.h"
 
