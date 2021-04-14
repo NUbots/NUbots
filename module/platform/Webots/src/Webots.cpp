@@ -155,7 +155,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // MotorPID, only sending P gain, set I and D to zero
             MotorPID motorpid_msg;
             motorpid_msg.name = command.id;
-            motorpid_msg.PID.X = static_cast<double>(command.gain;
+            motorpid_msg.PID.X = static_cast<double>(command.gain);
             motorpid_msg.PID.Y = 0.0;
             motorpid_msg.PID.Z = 0.0;
             to_send.motor_pids.push_back(motorpid_msg);
