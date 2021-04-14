@@ -152,7 +152,14 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             torque_msg.torque = command.torque;
             to_send.motor_torques.push_back(torque_msg);
 
-            // MotorPID ? Do we need to send this?
+            // MotorPID, only sending P gain, set I and D to zero
+            MotorPID motorpid_msg;
+            motorpid_msg.name = command.id;
+            motorpid_msg.PID.X = static_cast<double>(command.gain;
+            motorpid_msg.PID.Y = 0.0;
+            motorpid_msg.PID.Z = 0.0;
+            to_send.motor_pids.push_back(motorpid_msg);
+
         }
     });
 }
@@ -282,6 +289,8 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
         sensor_data.gyroscope.z = static_cast<float>(gyros.value.Z);
     }
 
+    // Ignore as we don't have physical functionality for this
+    /*
     for (const auto& bumper : sensor_measurements.bumpers) {
         // string name
         // bool value
@@ -296,6 +305,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
         // string name
         // Vector3 value
     }
+    */
 
     emit(sensor_data);
 
@@ -319,6 +329,7 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     }
 }
 
+// Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
 DarwinSensors::Servo& translate_servo_id(const std::string& name, const DarwinSensors::Servos& servos) {
     switch(name){
         case "right_shoulder_pitch_sensor": return servos.rShoulderPitch;
