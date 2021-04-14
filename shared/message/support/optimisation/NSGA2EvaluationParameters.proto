@@ -1,0 +1,81 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message.support.optimisation;
+
+message NSGA2EvaluationParameters {
+
+    float bodyTilt        = 1;
+    float qLArmStartPitch = 2;
+    float qLArmStartRoll  = 3;
+    float qLArmStartElbow = 4;
+    float qLArmEndPitch   = 5;
+    float qLArmEndRoll    = 6;
+    float qLArmEndElbow   = 7;
+    float qRArmStartPitch = 8;
+    float qRArmStartRoll  = 9;
+    float qRArmStartElbow = 10;
+    float qRArmEndPitch   = 11;
+    float qRArmEndRoll    = 12;
+    float qRArmEndElbow   = 13;
+    float footOffset1     = 14;
+    float footOffset2     = 15;
+    float limitmarginY    = 16;
+    float gainArms        = 17;
+    float gainLegs        = 18;
+
+    float stepTime            = 19;
+    float zmpTime             = 20;
+    float hipRollCompensation = 21;
+    float stepHeight          = 22;
+    float stepLimitsminX      = 23;
+    float stepLimitsmaxX      = 24;
+    float stepLimitsminY      = 25;
+    float stepLimitsMaxY      = 26;
+    float stepLimitsminAng    = 27;
+    float stepLimitsmaxAng    = 28;
+
+    float step_height_slow_fraction = 29;
+    float step_height_fast_fraction = 30;
+
+    float velocityLimitsminX   = 31;
+    float velocityLimitsmaxX   = 32;
+    float velocityLimitsminY   = 33;
+    float velocityLimitsmaxY   = 34;
+    float velocityLimitsminAng = 35;
+    float velocityLimitsmaxAng = 36;
+    float velocityHigh         = 37;
+
+    float accelerationLimits1       = 38;
+    float accelerationLimits2       = 39;
+    float accelerationLimits3       = 40;
+    float accelerationLimitsHigh1   = 41;
+    float accelerationLimitsHigh2   = 42;
+    float accelerationLimitsHigh3   = 43;
+    float accelerationTurningFactor = 44;
+
+    float phase1Single = 45;
+    float phase2Single = 46;
+
+    float balanceAmplitude = 47;
+    float balanceWeight    = 48;
+    float balanceOffset    = 49;
+}
