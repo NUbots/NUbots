@@ -277,6 +277,9 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     for (const auto& gyro : sensor_measurements.gyros) {
         // string name
         // Vector3 value
+        sensor_data.gyroscope.x = static_cast<float>(gyros.value.X);
+        sensor_data.gyroscope.y = static_cast<float>(gyros.value.Y);
+        sensor_data.gyroscope.z = static_cast<float>(gyros.value.Z);
     }
 
     for (const auto& bumper : sensor_measurements.bumpers) {
