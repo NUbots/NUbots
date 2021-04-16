@@ -11,6 +11,7 @@ services:
     environment:
       - FLEXO_CACHE_DIRECTORY=/var/cache/flexo/pkg
       - FLEXO_MIRROR_SELECTION_METHOD=predefined
+      # ↓↓↓ UPDATE MIRROR HERE ↓↓↓
       - FLEXO_MIRRORS_PREDEFINED=['https://archive.archlinux.org/repos/2021/01/10/']
       - RUST_BACKTRACE=1
 
