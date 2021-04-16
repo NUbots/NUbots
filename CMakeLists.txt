@@ -76,11 +76,6 @@ if(USE_ASAN)
   link_libraries(asan)
 endif()
 
-# Enable testing if we are building tests
-if(BUILD_TESTS)
-  enable_testing()
-endif(BUILD_TESTS)
-
 # Output the compilation database
 set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
