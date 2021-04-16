@@ -89,7 +89,7 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 add_compile_options(-fnon-call-exceptions)
 
 # Make NUClear use the system clock, as we are syncing it with ptp
-add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::system_clock)
+add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::steady_clock)
 
 # Make the compiler display colours always (even when we build with ninja)
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
