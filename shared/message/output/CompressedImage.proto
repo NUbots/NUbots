@@ -34,11 +34,11 @@ message CompressedImage {
             EQUISOLID   = 3;
         }
         Projection projection = 1;
-        /// Normalised focal length: focal length in pixels / image width
+        /// Normalised focal length, in pixels / image width
         float focal_length = 2;
-        /// The angular diameter that the lens covers (the area that light hits on the sensor). In radians
+        /// Angular diameter that the lens covers (the area that light hits on the sensor), in radians
         float fov = 3;
-        /// Normalised image centre offset: pixels from centre to optical axis / image width
+        /// Normalised image centre offset - the number of pixels from centre to optical axis / image width
         fvec2 centre = 4;
         fvec2 k      = 5;
     }
@@ -55,6 +55,6 @@ message CompressedImage {
     google.protobuf.Timestamp timestamp = 6;
     /// World to camera Affine3D transform
     mat4 Hcw = 7;
-    /// The lens information of the camera which took the image
+    /// Lens information of the camera that took the image
     Lens lens = 8;
 }
