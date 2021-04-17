@@ -24,6 +24,9 @@ package message;
 import "Vector.proto";
 import "Matrix.proto";
 
+/**
+ * Hesse normal form representation of a line. See https://en.wikipedia.org/wiki/Hesse_normal_form
+ */
 message Line {
     fvec3 normal   = 1;
     float distance = 2;

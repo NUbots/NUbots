@@ -37,22 +37,29 @@ message Goal {
         OWN          = 1;
         OPPONENT     = 2;
     }
+    // Normal vectors point inwards towards the centre of the object
     enum MeasurementType {
         UNKNOWN_MEASUREMENT = 0;
-        CENTRE              = 1;
-        LEFT_NORMAL         = 2;
-        RIGHT_NORMAL        = 3;
-        TOP_NORMAL          = 4;
-        BASE_NORMAL         = 5;
+        /// A measurement to the centre of the goal post, both horizontally and vertically
+        CENTRE = 1;
+        /// A measurement to the left middle of the goal post, pointing right
+        LEFT_NORMAL = 2;
+        /// A measurement to the right middle of the goal post, pointing left
+        RIGHT_NORMAL = 3;
+        /// A measurement at the top-centre of the goal post, pointing down the goal post
+        TOP_NORMAL = 4;
+        /// A measurement at the bottom-centre of the goal post, point up the goal post. Opposite of TOP_NORMAL
+        BASE_NORMAL = 5;
     }
     message Measurement {
-        MeasurementType type = 1;
-        // Normal vectors point inwards towards the centre of the object
-        fvec3 position   = 2;
-        fmat3 covariance = 3;
+        MeasurementType type       = 1;
+        fvec3           position   = 2;
+        fmat3           covariance = 3;
     }
     message Post {
-        fvec3 top      = 1;
+        /// Vector pointing to top point of post in camera space
+        fvec3 top = 1;
+        /// Vector pointing to bottom point of post in camera space
         fvec3 bottom   = 2;
         float distance = 3;
     }

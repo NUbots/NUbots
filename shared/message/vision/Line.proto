@@ -28,7 +28,7 @@ import "Vector.proto";
  * Contains line position measurements and information.
  */
 message Line {
-    uint32                    id        = 1;
+    uint32 id = 1;
     /// When the line was spotted
     google.protobuf.Timestamp timestamp = 2;
     ivec2                     start     = 3;

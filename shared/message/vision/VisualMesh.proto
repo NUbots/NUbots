@@ -33,7 +33,7 @@ message VisualMesh {
         int32 segments = 2;
     }
     /// The camera which took the measurements
-    uint32                    id              = 1;
+    uint32 id = 1;
     /// Unit vectors in world space at camera origin. They represent points in the
     /// mesh (vector projected from optical axis through a pixel coordinate and on
     /// to the observation plane). This matrix has shape `3 x N`, where N is the
@@ -41,7 +41,7 @@ message VisualMesh {
     fmat rays = 2;
     /// For a given ray, this provides you with its N neighbours in the mesh. N is
     /// defined during training. For example with the `RING6` graph, this matrix
-    /// has shape `6 x N`
+    /// has shape `6 x N`. The entries are indices into the other matrices in this message
     imat neighbourhood = 3;
     /// For a given ray, this provides you the confidence level that this ray belongs to each of
     /// the classes (ball, goal post, field line, etc.). The ordering of the columns is
