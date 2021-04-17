@@ -2,16 +2,17 @@
 
 #include <fmt/format.h>
 
-#include "../../mosaic.hpp"
 #include "opencl_error_category.hpp"
 
+#include "utility/vision/mosaic.hpp"
+
 namespace module::output::compressor::vaapi::cl {
-std::pair<cl::program, cl::kernel> make_mosaic_kernel(CompressionContext::OpenCLContext context,
+std::pair<cl::program, cl::kernel> make_mosaic_kernel(const CompressionContext::OpenCLContext& context,
                                                       const uint32_t& width,
                                                       const uint32_t& height,
                                                       const uint32_t& format) {
     // Make the OpenCL source
-    int mosaic_size    = mosaic::mosaic_size(format);
+    int mosaic_size    = utility::vision::Mosaic::size(format);
     std::string source = fmt::format(R"(
                     const sampler_t s  = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
                     kernel void
@@ -25,7 +26,7 @@ std::pair<cl::program, cl::kernel> make_mosaic_kernel(CompressionContext::OpenCL
                                      width / mosaic_size,
                                      height / mosaic_size);
 
-    cl_int error;
+    cl_int error     = 0;
     const char* cstr = source.c_str();
     size_t csize     = source.size();
     cl::program program(::clCreateProgramWithSource(context.context, 1, &cstr, &csize, &error), ::clReleaseProgram);
