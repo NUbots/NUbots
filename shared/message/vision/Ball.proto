@@ -48,7 +48,7 @@ message Ball {
     fvec4 colour         = 5;
 }
 message Balls {
-    uint32 camera_id = 1;
+    uint32                    id        = 1;
     /// When the measurements were taken
     google.protobuf.Timestamp timestamp = 2;
     /// Affine3d transform from world space to camera space at the time that the image was taken

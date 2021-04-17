@@ -36,7 +36,7 @@
 #include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 
 namespace module {
@@ -147,7 +147,7 @@ namespace behaviour {
                         SearchType s(search["search_type"].as<std::string>());
                         searches[s] = std::vector<arma::vec2>();
                         for (auto& p : search["points"]) {
-                            searches[s].push_back(p.as<arma::vec2>());
+                            searches[s].push_back(p.as<utility::support::Expression>());
                         }
                     }
                 });

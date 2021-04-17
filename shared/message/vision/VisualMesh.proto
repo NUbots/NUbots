@@ -33,7 +33,7 @@ message VisualMesh {
         int32 segments = 2;
     }
     /// The camera which took the measurements
-    uint32 camera_id = 1;
+    uint32                    id              = 1;
     /// Unit vectors in world space at camera origin. They represent points in the
     /// mesh (vector projected from optical axis through a pixel coordinate and on
     /// to the observation plane). This matrix has shape `3 x N`, where N is the

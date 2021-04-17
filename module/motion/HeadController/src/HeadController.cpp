@@ -35,8 +35,6 @@
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
-#include "utility/support/yaml_expression.hpp"
 
 
 namespace module {
@@ -55,7 +53,6 @@ namespace motion {
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
-    using utility::support::Expression;
 
     // internal only callback messages to start and stop our action
     struct ExecuteHeadController {};

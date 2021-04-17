@@ -46,7 +46,7 @@ namespace behaviour {
         using message::motion::KickFinished;
         using message::motion::KickScriptCommand;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
@@ -156,7 +156,7 @@ namespace behaviour {
         }
 
         void KickScript::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
         }
 
         int KickScript::getDirectionalQuadrant(float x, float y) {

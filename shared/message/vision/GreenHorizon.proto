@@ -29,10 +29,10 @@ import "Vector.proto";
 import "message/vision/VisualMesh.proto";
 
 message GreenHorizon {
-    repeated fvec3 horizon = 1;
+    repeated fvec3            horizon   = 1;
     /// Affine3d transform from world space to camera space
     mat4   Hcw       = 2;
-    uint32 camera_id = 3;
+    uint32                    id        = 3;
     /// The visual mesh that this green horizon was calculated from
     VisualMesh                mesh      = 4 [(pointer) = SHARED];
     google.protobuf.Timestamp timestamp = 5;
