@@ -43,7 +43,7 @@ namespace support {
             on<Every<30, Per<std::chrono::seconds>>, Single>().then("Simulated Images (VCamera)", [this]() {
                 auto msg       = std::make_unique<message::input::Image>();
                 msg->format    = FOURCC::BGGR;
-                msg->camera_id = 0;
+                msg->id        = 0;
                 msg->name      = "VirtualCamera";
                 msg->timestamp = NUClear::clock::now();
                 msg->Hcw       = Hcw;
