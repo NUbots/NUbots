@@ -1,4 +1,4 @@
-#include "VisualMesh.h"
+#include "VisualMesh.hpp"
 
 #include <Eigen/Geometry>
 
@@ -6,14 +6,14 @@
 #include "geometry/Cylinder.hpp"
 #include "geometry/Sphere.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/VisualMesh.h"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/VisualMesh.hpp"
 
-#include "utility/nusight/NUhelpers.h"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/Timer.hpp"
 
 namespace module {
@@ -137,8 +137,8 @@ namespace vision {
             auto results = (*classifier)(m, img.data.data(), img.format, Hoc, lens);
 
             // Copy the data into the message
-            auto msg       = std::make_unique<VisualMeshMsg>();
-            msg->camera_id = img.camera_id;
+            auto msg = std::make_unique<VisualMeshMsg>();
+            msg->id  = img.id;
 
             // Get all the rays
             msg->rays.resize(3, results.global_indices.size());

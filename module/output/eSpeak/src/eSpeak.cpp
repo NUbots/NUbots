@@ -17,11 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "eSpeak.h"
+#include "eSpeak.hpp"
 
 #include <espeak/speak_lib.h>
 
-#include "message/output/Say.h"
+#include "message/output/Say.hpp"
 
 namespace module {
 namespace output {

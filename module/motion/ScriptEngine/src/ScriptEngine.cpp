@@ -17,13 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ScriptEngine.h"
+#include "ScriptEngine.hpp"
 
-#include "extension/Script.h"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
 
-#include "utility/file/fileutil.h"
+#include "utility/file/fileutil.hpp"
 
 namespace module {
 namespace motion {

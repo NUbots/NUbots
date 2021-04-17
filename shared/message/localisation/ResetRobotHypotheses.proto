@@ -24,7 +24,9 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message ResetRobotHypotheses {
+
     message Self {
+        /// Estimate of the robot's {x, y} position in field space
         vec2   position     = 1;
         mat2   position_cov = 2;
         double heading      = 3;

@@ -17,16 +17,16 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "DirectWalkController.h"
+#include "DirectWalkController.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/motion/WalkCommand.h"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
 namespace behaviour {
@@ -43,7 +43,7 @@ namespace behaviour {
         using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
-        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
 
         DirectWalkController::DirectWalkController(std::unique_ptr<NUClear::Environment> environment)
@@ -76,22 +76,22 @@ namespace behaviour {
 
             on<Trigger<MotionCommand>>().then([this](const MotionCommand& command) {
                 if (command.type == MotionCommand::Type::DirectCommand) {
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {26, 11}}));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                     emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
                 }
                 else if (command.type == MotionCommand::Type::StandStill) {
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {26, 11}}));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                     emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
                 }
                 else {
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {0, 0}}));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
                 }
             });
 
             on<Trigger<WalkStopped>>().then([this] {
                 // TODO : Right now, this causes the walk engine to become unaware of positions and negatively impact
                 // servo positions...
-                // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
+                // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 0, 0 }}));
             });
         }
     }  // namespace skills

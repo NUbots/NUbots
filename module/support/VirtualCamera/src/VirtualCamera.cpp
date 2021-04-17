@@ -17,14 +17,14 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "VirtualCamera.h"
+#include "VirtualCamera.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Image.h"
+#include "message/input/Image.hpp"
 
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/Vision.h"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
 
 namespace module {
 namespace support {
@@ -43,7 +43,7 @@ namespace support {
             on<Every<30, Per<std::chrono::seconds>>, Single>().then("Simulated Images (VCamera)", [this]() {
                 auto msg       = std::make_unique<message::input::Image>();
                 msg->format    = FOURCC::BGGR;
-                msg->camera_id = 0;
+                msg->id        = 0;
                 msg->name      = "VirtualCamera";
                 msg->timestamp = NUClear::clock::now();
                 msg->Hcw       = Hcw;

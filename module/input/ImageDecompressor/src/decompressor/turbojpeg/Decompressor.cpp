@@ -1,9 +1,9 @@
-#include "Decompressor.h"
+#include "Decompressor.hpp"
 
 #include <fmt/format.h>
 #include <turbojpeg.h>
 
-#include "utility/vision/fourcc.h"
+#include "utility/vision/fourcc.hpp"
 
 namespace module::input::decompressor::turbojpeg {
 
@@ -30,23 +30,27 @@ uint32_t decompressed_format(const uint32_t& format) {
 }
 
 Decompressor::Decompressor(const uint32_t& width, const uint32_t& height, const uint32_t& format)
-    : width(width), height(height), format(format), output_fourcc(decompressed_format(format)) {
+    : output_fourcc(decompressed_format(format)) {
 
     // If this is a mosaic format, build a mosaic table
-    if (utility::vision::Mosaic::size(output_fourcc) > 0) {
+    if (utility::vision::Mosaic::size(output_fourcc) > 1) {
         mosaic = utility::vision::Mosaic(width, height, output_fourcc);
     }
 }
-Decompressor::~Decompressor() {}
+Decompressor::~Decompressor() = default;
 
 std::pair<std::vector<uint8_t>, int> Decompressor::decompress(const std::vector<uint8_t>& data) {
 
     static thread_local tjhandle decompressor = tjInitDecompress();
 
     // Read the header
-    int width;
-    int height;
-    int subsamp;
+    int width   = 0;
+    int height  = 0;
+    int subsamp = 0;
+
+    // We need to provide the data as a uint8_t* however it is a const uint8_t* here
+    // Our only options are to copy or to const cast :(
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
     tjDecompressHeader2(decompressor, const_cast<uint8_t*>(data.data()), data.size(), &width, &height, &subsamp);
 
     // Work out what we decode as

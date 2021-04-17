@@ -1,4 +1,4 @@
-#include "slice_parameter.h"
+#include "slice_parameter.hpp"
 
 #include "../vaapi_error_category.hpp"
 
@@ -25,8 +25,8 @@ VABufferID slice_parameter(VADisplay dpy, VAContextID context, const bool& monoc
     }
 
     // Upload to device
-    VABufferID bufferid;
-    VAStatus va_status = vaCreateBuffer(dpy,
+    VABufferID bufferid = 0;
+    VAStatus va_status  = vaCreateBuffer(dpy,
                                         context,
                                         VAEncSliceParameterBufferType,
                                         sizeof(VAEncSliceParameterBufferJPEG),

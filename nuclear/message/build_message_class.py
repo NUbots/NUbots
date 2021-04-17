@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import sys
 
-from google.protobuf.descriptor_pb2 import FileDescriptorSet
-
 import generator.File
+from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
 base_file = sys.argv[1]
 
@@ -21,7 +20,7 @@ with open("{}.pb".format(base_file), "rb") as f:
     # Generate the c++ file
     header, impl, python = b.generate_cpp()
 
-    with open("{}.h".format(base_file), "w") as f:
+    with open("{}.hpp".format(base_file), "w") as f:
         f.write(header)
 
     with open("{}.cpp".format(base_file), "w") as f:

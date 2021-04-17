@@ -48,7 +48,7 @@ message CompressedImage {
     /// Number of pixels of {x, y} of the image
     uvec2  dimensions = 2;
     bytes  data       = 3;
-    uint32 camera_id  = 4;
+    uint32                    id         = 4;
     /// Name of the camera that took the image
     string name = 5;
     /// Time when the image was taken

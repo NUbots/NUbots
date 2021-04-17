@@ -17,12 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "message/behaviour/Subsumption.h"
+#include "message/behaviour/Subsumption.hpp"
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
 
 namespace module {
 namespace support {
@@ -30,7 +30,7 @@ namespace support {
     using message::behaviour::Subsumption;
 
     using utility::behaviour::ActionKill;
-    using utility::behaviour::ActionPriorites;
+    using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
@@ -91,10 +91,10 @@ namespace support {
             emit<Scope::NETWORK>(subsumption, "nusight", true);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this](const ActionPriorites& action) {
+        handles["subsumption"].push_back(on<Trigger<ActionPriorities>>().then([this](const ActionPriorities& action) {
             auto subsumption = std::make_unique<Subsumption>();
 
-            Subsumption::ActionPriorites actionPriorityChange;
+            Subsumption::ActionPriorities actionPriorityChange;
             actionPriorityChange.id = action.id;
 
             Subsumption::ActionRegister actionRegister = actionRegisters.find(action.id)->second;
