@@ -44,20 +44,20 @@ namespace support {
         handles["image"].push_back(
             on<Trigger<Image>, Single, Priority::LOW>().then([this](std::shared_ptr<const Image> image) {
                 // If we have never sent an image from this camera, or we
-                if (last_image.count(image->camera_id) == 0
-                    || (NUClear::clock::now() - last_image[image->camera_id] > max_image_duration)) {
+                if (last_image.count(image->id) == 0
+                    || (NUClear::clock::now() - last_image[image->id] > max_image_duration)) {
                     powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-                    last_image[image->camera_id] = NUClear::clock::now();
+                    last_image[image->id] = NUClear::clock::now();
                 }
             }));
 
         handles["compressed_image"].push_back(on<Trigger<CompressedImage>, Single, Priority::LOW>().then(
             [this](std::shared_ptr<const CompressedImage> image) {
                 // If we have never sent an image from this camera, or we
-                if (last_image.count(image->camera_id) == 0
-                    || (NUClear::clock::now() - last_image[image->camera_id] > max_image_duration)) {
+                if (last_image.count(image->id) == 0
+                    || (NUClear::clock::now() - last_image[image->id] > max_image_duration)) {
                     powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-                    last_image[image->camera_id] = NUClear::clock::now();
+                    last_image[image->id] = NUClear::clock::now();
                 }
             }));
 
