@@ -12,12 +12,5 @@ add_custom_command(
   COMMENT "Generating DataPlayback system for current messages"
 )
 
-# Create a symlink to recordings so we can access them from build (helpful for docker)
-add_custom_command(
-  OUTPUT "${CMAKE_BINARY_DIR}/recordings"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_SOURCE_DIR}/recordings" "${CMAKE_BINARY_DIR}/recordings"
-  COMMENT "Creating a link to the recordings directory"
-)
-
 # Build our NUClear module
-nuclear_module(SOURCES "${source_file}" "${CMAKE_BINARY_DIR}/recordings")
+nuclear_module(SOURCES "${source_file}")
