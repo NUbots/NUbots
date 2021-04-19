@@ -20,7 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_HPP
 #define MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "message/behaviour/Behaviour.hpp"
@@ -46,8 +46,8 @@ namespace behaviour {
                     , ball_search_walk_start_speed(0.0f)
                     , ball_search_walk_stop_speed(0.0f)
                     , ball_search_walk_slow_time(0.0f)
-                    , start_position_offensive(arma::fill::zeros)
-                    , start_position_defensive(arma::fill::zeros)
+                    , start_position_offensive(Eigen::Vector2d::Zero())
+                    , start_position_defensive(Eigen::Vector2d::Zero())
                     , is_goalie(false)
                     , goalie_command_timeout(0.0f)
                     , goalie_rotation_speed_factor(0.0f)
@@ -67,8 +67,8 @@ namespace behaviour {
                 float ball_search_walk_stop_speed;
                 float ball_search_walk_slow_time;
 
-                arma::vec2 start_position_offensive;
-                arma::vec2 start_position_defensive;
+                Eigen::Vector2d start_position_offensive;
+                Eigen::Vector2d start_position_defensive;
                 bool is_goalie;
 
                 float goalie_command_timeout;
@@ -110,15 +110,15 @@ namespace behaviour {
             void searchWalk();
             void walkTo(const message::support::FieldDescription& fieldDescription,
                         const message::behaviour::FieldTarget::Target& object);
-            void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
+            void walkTo(const message::support::FieldDescription& fieldDescription, const Eigen::Vector2d& position);
             void find(const std::vector<message::behaviour::FieldTarget>& objects);
             void spinWalk();
             bool pickedUp(const message::input::Sensors& sensors);
             bool penalised();
             bool ballDistance(const message::localisation::Ball& ball);
             void goalieWalk(const message::localisation::Field& field, const message::localisation::Ball& ball);
-            arma::vec2 getKickPlan(const message::localisation::Field& field,
-                                   const message::support::FieldDescription& fieldDescription);
+            Eigen::Vector2d getKickPlan(const message::localisation::Field& field,
+                                        const message::support::FieldDescription& fieldDescription);
             void play(const message::localisation::Field& field,
                       const message::localisation::Ball& ball,
                       const message::support::FieldDescription& fieldDescription,

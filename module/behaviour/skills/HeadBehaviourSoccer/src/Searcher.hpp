@@ -20,7 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_SKILLS_SEARCHER_HPP
 #define MODULES_BEHAVIOUR_SKILLS_SEARCHER_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 
@@ -33,7 +33,7 @@ namespace behaviour {
          *
          * @author Jake Fountain
 
-         Template argument T must be a normed linear space using arma::norm();
+         Template argument T must be a normed linear space using Eigen::norm();
          */
         template <class T>
         class Searcher {
@@ -52,7 +52,7 @@ namespace behaviour {
 
         public:
             Searcher()
-                : points(std::vector<T>(1, arma::zeros<arma::vec>(2)))
+                : points(std::vector<T>(1, Eigen::Vector2d::Zero()))
                 , current(0)
                 , refPoint()
                 , new_goal(false)
@@ -91,11 +91,11 @@ namespace behaviour {
             }
 
             static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b) {
-                return arma::norm(a.second) < arma::norm(b.second);
+                return a.second.norm() < b.second.norm();
             }
 
             static bool comparator(const T& a, const T& b) {
-                return arma::norm(a) < arma::norm(b);
+                return a.norm() < b.norm();
             }
 
             void setSwitchTime(float dt) {
