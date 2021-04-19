@@ -252,7 +252,9 @@ namespace motion {
         Eigen::Matrix4d right_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
 
-        auto joints = calculateLegJoints(kinematicsModel, left_foot, right_foot);
+        auto joints = calculateLegJoints(kinematicsModel,
+                                         Eigen::Affine3f(left_foot.cast<float>()),
+                                         Eigen::Affine3f(right_foot.cast<float>()));
 
         auto waypoints = motionLegs(joints);
 

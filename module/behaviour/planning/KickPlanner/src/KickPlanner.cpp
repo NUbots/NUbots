@@ -65,7 +65,6 @@ namespace behaviour {
         using LimbID = utility::input::LimbID;
         using utility::localisation::fieldStateToTransform3D;
         using utility::math::coordinates::sphericalToCartesian;
-        using utility::motion::kinematics::legPoseValid;
         using utility::nusight::graph;
 
         KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
