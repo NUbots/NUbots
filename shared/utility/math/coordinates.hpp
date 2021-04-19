@@ -52,22 +52,6 @@ namespace math {
 
         template <typename T, typename U = typename T::Scalar>
         inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
-            U distance  = sphericalCoordinates[0];
-            U cos_theta = cos(sphericalCoordinates[1]);
-            U sin_theta = sin(sphericalCoordinates[1]);
-            U cos_phi   = cos(sphericalCoordinates[2]);
-            U sin_phi   = sin(sphericalCoordinates[2]);
-            Eigen::Matrix<U, 3, 1> result;
-
-            result.x() = distance * cos_theta * sin_phi;
-            result.y() = distance * sin_theta * sin_phi;
-            result.z() = distance * cos_phi;
-
-            return result;
-        }
-
-        template <typename T, typename U = typename T::Scalar>
-        inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
             double distance  = sphericalCoordinates.x();
             double cos_theta = std::cos(sphericalCoordinates.y());
             double sin_theta = std::sin(sphericalCoordinates.y());

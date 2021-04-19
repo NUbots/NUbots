@@ -189,7 +189,7 @@ namespace math {
             result.linear() = Eigen::Rotation2Dd(utility::math::angle::vectorToBearing(to - from)).toRotationMatrix();
             return result;
         }
-      
+
     }  // namespace transform
 }  // namespace math
 }  // namespace utility
