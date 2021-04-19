@@ -22,14 +22,6 @@ find_package(PythonInterp 3 REQUIRED)
 # We need Eigen for neutron messages
 find_package(Eigen3 REQUIRED)
 
-# If we have pybind11 we need to generate our final binding class
-if(pybind11_FOUND)
-  find_package(PythonLibsNew 3 REQUIRED)
-
-  include_directories(SYSTEM ${pybind11_INCLUDE_DIRS})
-  include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
-endif()
-
 # Build the builtin protocol buffers as normal
 foreach(proto ${builtin_protobufs})
 
@@ -44,12 +36,8 @@ foreach(proto ${builtin_protobufs})
   )
 
   list(APPEND protobuf_src "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h")
+  list(APPEND python_src "${py_out}/${file_we}_pb2.py")
 
-  # Compile flags prevent Effective C++ and unused parameter error checks being performed on generated files.
-  set_source_files_properties(
-    "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h" "${pb_out}/${file_we}_pb2.py"
-    PROPERTIES GENERATED TRUE COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
-  )
 endforeach(proto ${builtin_protobufs})
 
 # Build the user protocol buffers
@@ -57,7 +45,6 @@ foreach(proto ${message_protobufs})
 
   # Extract the components of the filename that we need
   get_filename_component(file_we ${proto} NAME_WE)
-
   file(RELATIVE_PATH output_path ${message_parent_dir} ${proto})
   get_filename_component(output_path ${output_path} PATH)
   set(pb ${pb_out}/${output_path}/${file_we})
@@ -127,45 +114,36 @@ foreach(proto ${message_protobufs})
     OUTPUT "${nt}.pb"
     COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --descriptor_set_out="${nt}.pb" -I${message_parent_dir} -I${builtin_dir}
             ${proto}
-    DEPENDS ${source_depends} ${proto}
+    DEPENDS ${source_depends} "${proto}"
     COMMENT "Extracting protocol buffer information from ${proto}"
   )
 
-  # Build our outer python binding wrapper class
+  # Build our c++ class from the extracted information
   add_custom_command(
     OUTPUT "${nt}.cpp" "${nt}.py.cpp" "${nt}.hpp"
     COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${nt}"
-    WORKING_DIRECTORY ${nt_out}
+    WORKING_DIRECTORY "${nt_out}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" ${message_class_generator_files} "${nt}.pb"
     COMMENT "Building classes for ${proto}"
   )
 
-  # Prevent Effective C++ and unused parameter error checks being performed on generated files.
-  set_source_files_properties(
-    "${nt}.pb"
-    "${pb}.proto"
-    "${pb}.pb.cc"
-    "${pb}.pb.h"
-    "${py}_pb2.py"
-    "${nt}.cpp"
-    "${nt}.py.cpp"
-    "${nt}.hpp"
-    PROPERTIES GENERATED TRUE COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error"
-  )
-
-  # Add the generated files to our list
-  list(APPEND src "${pb}.pb.cc" "${pb}.pb.h" "${nt}.cpp" "${nt}.hpp")
-
-  # If we have pybind11 also add the python bindings
-  if(pybind11_FOUND)
-    list(APPEND src "${nt}.py.cpp")
-  endif()
-
   # Add to the respective outputs
   list(APPEND protobuf_src "${pb}.pb.cc" "${pb}.pb.h")
   list(APPEND neutron_src "${nt}.cpp" "${nt}.hpp")
+  list(APPEND python_src "${py}_pb2.py")
 
 endforeach(proto ${message_protobufs})
+
+# Build the reflection header
+add_custom_command(
+  OUTPUT "${nt_out}/message/reflection.hpp"
+  COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_reflection.py" "${py_out}"
+          "${nt_out}/message/reflection.hpp"
+  WORKING_DIRECTORY "${nt_out}"
+  DEPENDS ${python_src} "${CMAKE_CURRENT_SOURCE_DIR}/build_message_reflection.py"
+  COMMENT "Building the message reflection header"
+)
+list(APPEND neutron_src "${nt_out}/message/reflection.hpp")
 
 # * Make this library be a system include when it's linked into other libraries
 # * This will prevent clang-tidy from looking at the headers

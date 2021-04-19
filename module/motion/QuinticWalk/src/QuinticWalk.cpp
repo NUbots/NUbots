@@ -11,10 +11,9 @@
 #include "message/support/SaveConfiguration.hpp"
 
 #include "utility/math/comparison.hpp"
-#include "utility/math/euler.h"
+#include "utility/math/euler.hpp"
 #include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
-#include "utility/support/eigen_armadillo.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module {

@@ -137,6 +137,10 @@ namespace math {
             return std::atan2(dirVec(1), dirVec(0));
         }
 
+        inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
+            return std::atan2(dirVec.y(), dirVec.x());
+        }
+
         inline arma::vec2 bearingToUnitVector(double angle) {
             return arma::vec2({std::cos(angle), std::sin(angle)});
         }
