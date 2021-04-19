@@ -400,7 +400,7 @@ namespace input {
                 msg->dimensions = Eigen::Matrix<unsigned int, 2, 1>(width, height);
                 // TODO(trent) use an std::vector here to avoid the copy
                 msg->data.insert(msg->data.end(), buff, buff + buffSize);
-                msg->camera_id = context->camera_id;
+                msg->id        = context->id;
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
 

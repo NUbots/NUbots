@@ -31,7 +31,7 @@ import "message/vision/VisualMesh.proto";
 message GreenHorizon {
     repeated fvec3            horizon   = 1;
     mat4                      Hcw       = 2;
-    uint32                    camera_id = 3;
+    uint32                    id        = 3;
     VisualMesh                mesh      = 4 [(pointer) = SHARED];
     google.protobuf.Timestamp timestamp = 5;
 }

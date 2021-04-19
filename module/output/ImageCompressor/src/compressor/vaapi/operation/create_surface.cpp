@@ -75,7 +75,7 @@ VASurfaceID create_surface(VADisplay dpy, const uint32_t& width, const uint32_t&
 
     // Create Surface for the input picture
     VASurfaceAttrib va_fourcc = va_fourcc_from_format(format);
-    VASurfaceID surface_id;
+    VASurfaceID surface_id    = 0;
     VAStatus va_status =
         vaCreateSurfaces(dpy, va_render_target_type_from_format(format), width, height, &surface_id, 1, &va_fourcc, 1);
     if (va_status != VA_STATUS_SUCCESS) {
