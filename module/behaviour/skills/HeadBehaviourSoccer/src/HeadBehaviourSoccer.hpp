@@ -36,7 +36,6 @@
 #include "message/vision/Goal.hpp"
 
 #include "utility/math/geometry/Quad.hpp"
-#include "utility/math/matrix/Rotation3D.hpp"
 
 namespace module {
 namespace behaviour {
@@ -65,33 +64,35 @@ namespace behaviour {
                                 const message::vision::Balls& fixationObjects,
                                 const bool& search,
                                 const message::input::Sensors& sensors,
-                                const utility::math::matrix::Rotation3D& headToIMUSpace,
+                                const Eigen::Matrix3d& headToIMUSpace,
                                 const message::input::Image::Lens& lens);
             void updateHeadPlan(const message::motion::KinematicsModel& kinematicsModel,
                                 const message::vision::Goals& fixationObjects,
                                 const bool& search,
                                 const message::input::Sensors& sensors,
-                                const utility::math::matrix::Rotation3D& headToIMUSpace,
+                                const Eigen::Matrix3d& headToIMUSpace,
                                 const message::input::Image::Lens& lens);
 
             /*! @brief Converts from camera space direction to IMU space direction
              */
-            arma::vec2 getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
-                                            const arma::vec2& screenAngles,
-                                            utility::math::matrix::Rotation3D headToIMUSpace);
+            Eigen::Vector2d getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
+                                                 const Eigen::Vector2d& screenAngles,
+                                                 const Eigen::Matrix3d& headToIMUSpace);
 
             /*! @brief Gets points which allow for simultaneous search and viewing of key objects
              */
-            std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    message::vision::Balls fixationObjects,
-                                                    message::behaviour::SoccerObjectPriority::SearchType sType,
-                                                    const message::input::Sensors& sensors,
-                                                    const message::input::Image::Lens& lens);
-            std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    message::vision::Goals fixationObjects,
-                                                    message::behaviour::SoccerObjectPriority::SearchType sType,
-                                                    const message::input::Sensors& sensors,
-                                                    const message::input::Image::Lens& lens);
+            std::vector<Eigen::Vector2d> getSearchPoints(
+                const message::motion::KinematicsModel& kinematicsModel,
+                const message::vision::Balls& fixationObjects,
+                const message::behaviour::SoccerObjectPriority::SearchType& sType,
+                const message::input::Sensors& sensors,
+                const message::input::Image::Lens& lens);
+            std::vector<Eigen::Vector2d> getSearchPoints(
+                const message::motion::KinematicsModel& kinematicsModel,
+                const message::vision::Goals& fixationObjects,
+                const message::behaviour::SoccerObjectPriority::SearchType& sType,
+                const message::input::Sensors& sensors,
+                const message::input::Image::Lens& lens);
 
             /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the
              * bounding box of the objects
@@ -101,8 +102,10 @@ namespace behaviour {
 
             /*! @brief Gets a bounding box in screen angular space of a set of vision objects
              */
-            utility::math::geometry::Quad<arma::vec> getScreenAngularBoundingBox(const message::vision::Balls& obs);
-            utility::math::geometry::Quad<arma::vec> getScreenAngularBoundingBox(const message::vision::Goals& obs);
+            utility::math::geometry::Quad<Eigen::Vector2d> getScreenAngularBoundingBox(
+                const message::vision::Balls& obs);
+            utility::math::geometry::Quad<Eigen::Vector2d> getScreenAngularBoundingBox(
+                const message::vision::Goals& obs);
 
             bool orientationHasChanged(const message::input::Sensors& sensors);
 
@@ -115,7 +118,7 @@ namespace behaviour {
 
 
             float replan_angle_threshold;
-            utility::math::matrix::Rotation3D lastPlanOrientation;
+            Eigen::Matrix3d Rtw;
 
             // CONFIG from HeadBehaviourSoccer.yaml
             float pitch_plan_threshold;
@@ -129,10 +132,10 @@ namespace behaviour {
             bool locBallReceived = false;
             message::localisation::Ball lastLocBall;
 
-            std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<arma::vec2>> searches;
+            std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<Eigen::Vector2d>> searches;
 
             // State variables
-            Searcher<arma::vec2> headSearcher;
+            Searcher<Eigen::Vector2d> headSearcher;
 
             int ballPriority = 0;
             int goalPriority = 0;
@@ -142,7 +145,7 @@ namespace behaviour {
             NUClear::clock::time_point lastPlanUpdate;
             NUClear::clock::time_point timeLastObjectSeen;
 
-            arma::vec2 lastCentroid;
+            Eigen::Vector2d lastCentroid;
 
             bool lostAndSearching = false;
             bool lostLastTime     = false;

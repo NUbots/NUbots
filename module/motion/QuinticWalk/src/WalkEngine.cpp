@@ -9,7 +9,7 @@ https://github.com/Rhoban/model/
 #include <nuclear>
 
 #include "utility/math/angle.hpp"
-#include "utility/math/euler.h"
+#include "utility/math/euler.hpp"
 
 namespace module {
 namespace motion {

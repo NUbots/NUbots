@@ -59,9 +59,6 @@ namespace motion {
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Z);
             const float NECK_LENGTH = model.head.NECK_LENGTH;
-            const Eigen::Vector3d NECK_TO_CAMERA(model.head.NECK_TO_CAMERA_X,
-                                                 model.head.NECK_TO_CAMERA_Y,
-                                                 model.head.NECK_TO_CAMERA_Z);
 
             // Translate to base of neck from origin
             runningTransform = runningTransform.translate(NECK_POS);
@@ -335,10 +332,9 @@ namespace motion {
         /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
             @return [x_com, y_com, z_com, total_mass] relative to the torso basis
         */
-        inline Eigen::Vector4d calculateCentreOfMass(
-            const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& Htx,
-            const Eigen::Matrix4d& Hwt) {
+        inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model,
+                                                     const std::array<Eigen::Matrix4d, 20>& Htx,
+                                                     const Eigen::Matrix4d& Hwt) {
 
             // Convenience function to transform particle-space CoM to torso-space CoM
             // Htx - transform from particle space to torso space
@@ -394,9 +390,8 @@ namespace motion {
                      [xy, yy, yz],
                      [xz, yz, zz]]
         */
-        inline Eigen::Matrix3d calculateInertialTensor(
-            const message::motion::KinematicsModel& model,
-            const std::array<Eigen::Matrix<double, 4, 4, Eigen::DontAlign>, 20>& Htx) {
+        inline Eigen::Matrix3d calculateInertialTensor(const message::motion::KinematicsModel& model,
+                                                       const std::array<Eigen::Matrix4d, 20>& Htx) {
 
             // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
             // Htx - transform from particle space to torso space

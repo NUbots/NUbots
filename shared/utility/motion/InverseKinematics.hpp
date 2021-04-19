@@ -44,8 +44,8 @@ namespace utility {
 namespace motion {
     namespace kinematics {
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+        using utility::input::LimbID;
+        using utility::input::ServoID;
 
         /*! @brief Calculates the leg joints for a given input ankle position.
                 The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of
@@ -70,20 +70,32 @@ namespace motion {
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D target,
                                                                   LimbID limb);
+
         std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                    const Eigen::Affine3d& target,
                                                                    const LimbID& limb);
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                  const Eigen::Affine3f& target,
+                                                                  const LimbID& limb);
+
+        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   utility::math::matrix::Transform3D leftTarget,
                                                                   utility::math::matrix::Transform3D rightTarget);
 
+        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                  const Eigen::Affine3f& leftTarget,
+                                                                  const Eigen::Affine3f& rightTarget);
+
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector);
-        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
+
+        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
                                                                           const Eigen::Vector3d& cameraUnitVector);
 
         std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
+
+        std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
 
         arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint,
                                                const utility::math::matrix::Transform3D& camToGround,

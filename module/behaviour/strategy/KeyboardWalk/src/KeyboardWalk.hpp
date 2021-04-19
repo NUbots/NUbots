@@ -20,7 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <mutex>
 #include <ncurses.h>
 #include <nuclear>
@@ -42,14 +42,14 @@ namespace behaviour {
 
         class KeyboardWalk : public NUClear::Reactor {
         private:
-            static constexpr const double DIFF     = 0.01;
-            static constexpr const double ROT_DIFF = 0.10;
+            static constexpr const float DIFF     = 0.01f;
+            static constexpr const float ROT_DIFF = 0.1f;
 
-            static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
+            static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
 
             bool moving = false;
-            arma::vec2 velocity;
-            float rotation = 0;
+            Eigen::Vector2f velocity;
+            float rotation = 0.0f;
 
             float head_yaw   = 0.0f;
             float head_pitch = 0.0f;

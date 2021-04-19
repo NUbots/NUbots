@@ -23,6 +23,7 @@
 #include <csignal>
 #include <cstdio>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
@@ -30,7 +31,6 @@
 
 #include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/math/matrix/Transform2D.hpp"
 
 namespace module {
 namespace behaviour {
@@ -40,11 +40,10 @@ namespace behaviour {
         using message::motion::HeadCommand;
         using message::motion::KickCommand;
         using NUClear::message::LogMessage;
-        using utility::math::matrix::Transform2D;
         using LimbID = utility::input::LimbID;
 
         KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), velocity(arma::fill::zeros) {
+            : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
 
             // Ensure UTF-8 is enabled
             std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -223,28 +222,28 @@ namespace behaviour {
         }
 
         void KeyboardWalk::forward() {
-            velocity[0] += DIFF;
+            velocity.x() += DIFF;
             update_command();
             print_status();
             log<NUClear::INFO>("forward");
         }
 
         void KeyboardWalk::left() {
-            velocity[1] += DIFF;
+            velocity.y() += DIFF;
             update_command();
             print_status();
             log<NUClear::INFO>("left");
         }
 
         void KeyboardWalk::back() {
-            velocity[0] -= DIFF;
+            velocity.x() -= DIFF;
             update_command();
             print_status();
             log<NUClear::INFO>("back");
         }
 
         void KeyboardWalk::right() {
-            velocity[1] -= DIFF;
+            velocity.y() -= DIFF;
             update_command();
             print_status();
             log<NUClear::INFO>("right");
@@ -272,7 +271,7 @@ namespace behaviour {
 
         void KeyboardWalk::kick(LimbID::Value l) {
             message::motion::KickScriptCommand ks;
-            ks.direction    = {0.05, 0, 0};
+            ks.direction    = Eigen::Vector3d(0.05, 0.0, 0.0);
             ks.leg          = l;
             std::string leg = (l == 1) ? "left" : "right";
             emit(std::make_unique<message::motion::KickScriptCommand>(ks));
@@ -320,10 +319,10 @@ namespace behaviour {
         }
 
         void KeyboardWalk::reset() {
-            velocity   = {0, 0};
-            rotation   = 0;
-            head_yaw   = 0;
-            head_pitch = 0;
+            velocity   = Eigen::Vector2f::Zero();
+            rotation   = 0.0f;
+            head_yaw   = 0.0f;
+            head_pitch = 0.0f;
             update_command();
             print_status();
             log<NUClear::INFO>("reset");
@@ -331,8 +330,10 @@ namespace behaviour {
 
         void KeyboardWalk::update_command() {
             if (moving) {
-                emit(std::make_unique<MotionCommand>(
-                    utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
+                Eigen::Affine2d affineParameter;
+                affineParameter.linear()      = Eigen::Rotation2Dd(rotation).toRotationMatrix();
+                affineParameter.translation() = Eigen::Vector2d(velocity.x(), velocity.y());
+                emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
             }
 
             auto head_command        = std::make_unique<HeadCommand>();
@@ -351,12 +352,12 @@ namespace behaviour {
             // Construct the log command message
             std::string message = fmt::format(
                 "Velocity: {:.4f}, {:.4f}\nRotation: {:.4f}\nMoving: {}\nHead Yaw: {:.2f}, Head Pitch: {:.2f}",
-                velocity[0],
-                velocity[1],
+                velocity.x(),
+                velocity.y(),
                 rotation,
                 moving,
-                head_yaw * 180.0 / M_PI,
-                head_pitch * 180.0 / M_PI);
+                head_yaw * 180.0f / float(M_PI),
+                head_pitch * 180.0f / float(M_PI));
 
             // Update the command window
             update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);

@@ -26,7 +26,7 @@ namespace input {
         uint32_t id;
         message::input::Image::Lens lens;
         // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached to
-        Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hpc;
+        Eigen::Affine3d Hpc;
         std::shared_ptr<ArvCamera> camera;
         std::shared_ptr<ArvStream> stream;
 
